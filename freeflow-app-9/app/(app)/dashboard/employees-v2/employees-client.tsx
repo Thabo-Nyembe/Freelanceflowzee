@@ -533,7 +533,7 @@ export default function EmployeesClient() {
     }
   }
 
-  const handleApproveTimeOff = async (request: typeof [][0]) => {
+  const handleApproveTimeOff = async (request: { id: string; employeeName: string }) => {
     const result = await apiPost(`/api/employees/time-off/${request.id}/approve`, {
       status: 'approved'
     }, {
@@ -546,7 +546,7 @@ export default function EmployeesClient() {
     }
   }
 
-  const handleRejectTimeOff = async (request: typeof [][0]) => {
+  const handleRejectTimeOff = async (request: { id: string; employeeName: string }) => {
     const result = await apiPost(`/api/employees/time-off/${request.id}/reject`, {
       status: 'rejected'
     }, {
@@ -928,7 +928,7 @@ export default function EmployeesClient() {
               <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Time Off Requests</CardTitle><Button onClick={() => {
                 const dates = prompt('Enter start date (YYYY-MM-DD):')
                 if (dates) {
-                  toast.success('Time off request submitted' submitted for approval` })
+                  toast.success(`Time off request submitted for approval`)
                 }
               }}><Plus className="h-4 w-4 mr-2" />Request Time Off</Button></CardHeader>
               <CardContent className="p-0 divide-y divide-gray-100 dark:divide-gray-800">
@@ -2295,7 +2295,7 @@ export default function EmployeesClient() {
                 </div>
                 <DialogFooter><Button variant="outline" onClick={() => setShowProfileDialog(false)}>Close</Button><Button onClick={() => {
                   if (selectedEmployee) {
-                    window.location.href = `mailto:${selectedEmployee.email}`
+                    window.location.href = 'mailto:' + selectedEmployee.email
                     toast.success('Opening email client')
                   }
                 }}><Mail className="h-4 w-4 mr-2" />Contact</Button><Button onClick={() => {
@@ -2308,11 +2308,8 @@ export default function EmployeesClient() {
                     } else {
                       // No DB match - suggest adding employee
                       toast.info('Employee not in database')
-                            setShowProfileDialog(false)
-                            setShowAddDialog(true)
-                          }
-                        }
-                      })
+                      setShowProfileDialog(false)
+                      setShowAddDialog(true)
                     }
                   }
                 }}><Edit3 className="h-4 w-4 mr-2" />Edit Profile</Button></DialogFooter>
@@ -2377,7 +2374,7 @@ export default function EmployeesClient() {
                     const keyResultsContainer = document.querySelector('[data-key-results]')
                     if (keyResultsContainer) {
                       const count = keyResultsContainer.children.length
-                      toast.success('Key result added' field added` })
+                      toast.success(`Key result added field added`)
                     } else {
                       toast.success('Key result added')
                     }

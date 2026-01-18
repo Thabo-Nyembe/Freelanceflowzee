@@ -384,8 +384,7 @@ export default function WorkflowsClient() {
       })
 
       if (result.success) {
-        toast.success('Workflow created' has been created successfully`
-        })
+        toast.success(`Workflow created: "${newWorkflowName}" has been created successfully`)
         setShowCreateDialog(false)
         setNewWorkflowName('')
         setNewWorkflowDescription('')
@@ -403,8 +402,7 @@ export default function WorkflowsClient() {
     // Activate workflow - sets status to 'active' and started_at timestamp
     const result = await startWorkflow(workflow.id)
     if (result.success) {
-      toast.success('Workflow activated' is now active and running`
-      })
+      toast.success(`Workflow activated: "${workflow.name}" is now active and running`)
     } else {
       toast.error('Failed to activate workflow')
     }
@@ -414,8 +412,7 @@ export default function WorkflowsClient() {
     // Pause workflow - sets status to 'paused'
     const result = await pauseWorkflow(workflow.id)
     if (result.success) {
-      toast.success('Workflow paused' has been paused`
-      })
+      toast.success(`Workflow paused: "${workflow.name}" has been paused`)
     } else {
       toast.error('Failed to pause workflow')
     }
@@ -425,8 +422,7 @@ export default function WorkflowsClient() {
     // Activate/Resume workflow
     const result = await updateWorkflow(workflow.id, { status: 'active' })
     if (result.success) {
-      toast.success('Workflow activated' is now active`
-      })
+      toast.success(`Workflow activated: "${workflow.name}" is now active`)
     } else {
       toast.error('Failed to activate workflow')
     }
@@ -459,8 +455,7 @@ export default function WorkflowsClient() {
     })
 
     if (result.success) {
-      toast.success('Workflow duplicated' created`
-      })
+      toast.success(`Workflow duplicated: "${workflow.name} (Copy)" created`)
     } else {
       toast.error('Failed to duplicate workflow')
     }
@@ -470,8 +465,7 @@ export default function WorkflowsClient() {
     // Delete workflow (soft delete in Supabase)
     const result = await deleteWorkflow(workflow.id)
     if (result.success) {
-      toast.success('Workflow deleted' has been removed`
-      })
+      toast.success(`Workflow deleted: "${workflow.name}" has been removed`)
       setSelectedWorkflow(null) // Close the dialog if open
     } else {
       toast.error('Failed to delete workflow')
@@ -523,7 +517,7 @@ export default function WorkflowsClient() {
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
 
-      toast.success('Export Complete' workflows exported successfully` })
+      toast.success(`Export Complete: ${exportWorkflows.length} workflows exported successfully`)
       setShowExportDialog(false)
     } catch (error) {
       toast.error('Export Failed')
@@ -561,8 +555,7 @@ export default function WorkflowsClient() {
       if (!response.ok) throw new Error('Test failed')
       const result = await response.json()
 
-      toast.success('Test Completed' test passed successfully${result.message ? `: ${result.message}` : ' with sample data'}`
-      })
+      toast.success(`Test Completed: ${workflow?.name || 'Workflow'} test passed successfully${result.message ? `: ${result.message}` : ' with sample data'}`)
       setShowRunTestDialog(false)
       setSelectedWorkflowsForTest('')
     } catch (error) {

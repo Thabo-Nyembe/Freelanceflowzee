@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useCallback } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -504,7 +506,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
         }
       }
 
-      toast.success('Test suite completed'"`,
+      toast.success('Test suite completed', {
         id: 'run-suite'
       })
       refetch()
@@ -535,8 +537,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
       })
 
       if (result?.success) {
-        toast.success('Test case created'" has been created`
-        })
+        toast.success('Test case created: ' + newTestForm.test_name + ' has been created')
         setShowCreateTest(false)
         setNewTestForm({
           test_name: '',
@@ -567,13 +568,9 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
 
     setIsCreatingRun(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('qa_test_runs')
         .insert({
@@ -588,8 +585,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
 
       if (error) throw error
 
-      toast.success('Test run created'" has been created`
-      })
+      toast.success('Test run created: ' + newRunForm.name + ' has been created')
       setShowCreateRun(false)
       setNewRunForm({
         name: '',
@@ -612,13 +608,9 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
 
     setIsCreatingDefect(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('qa_defects')
         .insert({
@@ -632,8 +624,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
 
       if (error) throw error
 
-      toast.success('Defect reported'" has been created`
-      })
+      toast.success('Defect reported: ' + newDefectForm.title + ' has been created')
       setShowReportDefect(false)
       setNewDefectForm({
         title: '',
@@ -656,13 +647,9 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
 
     setIsCreatingMilestone(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('qa_milestones')
         .insert({
@@ -676,8 +663,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
 
       if (error) throw error
 
-      toast.success('Milestone created'" has been created`
-      })
+      toast.success('Milestone created: ' + newMilestoneForm.name + ' has been created')
       setShowCreateMilestone(false)
       setNewMilestoneForm({
         name: '',
@@ -743,7 +729,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
         for (const tc of failedTests) {
           await executeTest(tc.id)
         }
-        toast.success('Rerun complete' failed tests`,
+        toast.success('Rerun complete: ' + failedTests.length + ' failed tests', {
           id: 'rerun'
         })
         refetch()
@@ -804,7 +790,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
       const failed = stats?.filter(t => t.status === 'failed').length || 0
       const avgPassRate = total > 0 ? stats!.reduce((sum, t) => sum + Number(t.pass_rate || 0), 0) / total : 0
 
-      toast.success('Report generated', Passed: ${passed}, Failed: ${failed}, Pass Rate: ${avgPassRate.toFixed(1)}%`,
+      toast.success('Report generated: Total: ' + total + ', Passed: ' + passed + ', Failed: ' + failed + ', Pass Rate: ' + avgPassRate.toFixed(1) + '%', {
         id: 'report'
       })
     } catch (error: any) {
@@ -828,7 +814,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
         for (const tc of testCases) {
           await executeTest(tc.id)
         }
-        toast.success('All tests completed' tests`,
+        toast.success('All tests completed: ' + testCases.length + ' tests', {
           id: 'run-all'
         })
         refetch()
@@ -2169,7 +2155,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
             <AIInsightsPanel
               insights={mockQAAIInsights}
               title="QA Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">

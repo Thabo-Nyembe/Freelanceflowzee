@@ -1964,7 +1964,7 @@ export default function VideoStudioClient() {
                             size="sm"
                             onClick={() => {
                             window.open(`/dashboard/video-studio-v2/presets/${preset.id}`, '_blank')
-                            toast.info('Opening preset editor' preset settings` })
+                            toast.info('Opening preset editor')
                           }}
                           >
                             Edit
@@ -1977,7 +1977,7 @@ export default function VideoStudioClient() {
                           onClick={() => {
                           const presetName = prompt('Enter preset name:')
                           if (presetName) {
-                            toast.success('Custom preset created' preset is ready to configure` })
+                            toast.success('Custom preset created')
                           }
                         }}
                         >

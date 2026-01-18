@@ -122,13 +122,15 @@ export default function ResourceLibraryClient() {
 
   useEffect(() => {
     const loadResourceLibraryData = async () => {
-      if (!userId) {        setIsLoading(false)
+      if (!userId) {
+        setIsLoading(false)
         return
       }
 
       try {
         setIsLoading(true)
-        setError(null)        // Dynamic import for code splitting
+        setError(null)
+        // Dynamic import for code splitting
         const { getResources, getResourceLibraryStats } = await import('@/lib/resource-library-queries')
 
         // Load resources and stats in parallel
@@ -148,7 +150,8 @@ export default function ResourceLibraryClient() {
           totalAuthors: statsResult.data?.total_authors || 0
         })
 
-        setIsLoading(false)        announce(`Resource library loaded with ${resourcesResult.data?.length || 0} resources`, 'polite')
+        setIsLoading(false)
+        announce(`Resource library loaded with ${resourcesResult.data?.length || 0} resources`, 'polite')
       } catch (err) {
         logger.error('Failed to load resource library data', { error: err, userId })
         setError(err instanceof Error ? err.message : 'Failed to load resource library')
@@ -391,8 +394,7 @@ export default function ResourceLibraryClient() {
 
   // Apply filters handler
   const handleApplyFilters = () => {
-    toast.success('Filters Applied'${filterOptions.showFeaturedOnly ? 'featured ' : ''}resources sorted by ${filterOptions.sortBy}`
-    })
+    toast.success('Filters Applied', { description: (filterOptions.showFeaturedOnly ? 'featured ' : '') + 'resources sorted by ' + filterOptions.sortBy })
     setShowFiltersDialog(false)
   }
 
@@ -414,7 +416,7 @@ export default function ResourceLibraryClient() {
   const handlePreviewResource = (resource: any) => {
     setSelectedResource(resource)
     setShowPreviewDialog(true)
-    toast.info('Preview'"` })
+    toast.info('Preview', { description: 'Viewing ' + resource.title })
   }
 
   // Bookmark toggle handler
@@ -423,10 +425,10 @@ export default function ResourceLibraryClient() {
       const newSet = new Set(prev)
       if (newSet.has(resourceId)) {
         newSet.delete(resourceId)
-        toast.success('Bookmark Removed'" removed from bookmarks` })
+        toast.success('Bookmark Removed', { description: resourceTitle + ' removed from bookmarks' })
       } else {
         newSet.add(resourceId)
-        toast.success('Bookmarked'" added to bookmarks` })
+        toast.success('Bookmarked', { description: resourceTitle + ' added to bookmarks' })
       }
       return newSet
     })
@@ -566,7 +568,7 @@ export default function ResourceLibraryClient() {
     })
     setShowResourceMenuDialog(false)
     setShowNewResourceDialog(true)
-    toast.info('Edit Mode'"` })
+    toast.info('Edit Mode', { description: 'Editing ' + selectedResource.title })
   }
 
   // Duplicate resource handler
@@ -628,7 +630,7 @@ export default function ResourceLibraryClient() {
     input.onchange = (e) => {
       const files = (e.target as HTMLInputElement).files
       if (files && files.length > 0) {
-        toast.success('Files Selected' file(s) ready to upload` })
+        toast.success(`Files Selected`, { description: `${files.length} file(s) ready to upload` })
       }
     }
     input.click()

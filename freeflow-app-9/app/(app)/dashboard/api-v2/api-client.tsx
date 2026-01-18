@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useEffect } from 'react'
 import dynamic from 'next/dynamic'
 import { toast } from 'sonner'
@@ -127,6 +129,9 @@ const QuickActionsToolbar = dynamic(
 import { useApiEndpoints } from '@/lib/hooks/use-api-endpoints'
 import { useApiKeys } from '@/lib/hooks/use-api-keys'
 import { useWebhooks } from '@/lib/hooks/use-webhooks'
+
+// Initialize Supabase client once at module level
+const supabase = createClient()
 
 // Types
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD' | 'OPTIONS'
@@ -838,7 +843,7 @@ export default KaziApiClient;`
         rate_limit_per_hour: endpointForm.rateLimit,
         tags: endpointForm.tags
       })
-      toast.success(`${endpointForm.name} has been created` ${endpointForm.path}` })
+      toast.success(`${endpointForm.name} created at ${endpointForm.path}`)
       setShowCreateEndpointDialog(false)
       setEndpointForm({ name: '', description: '', method: 'GET', path: '/api/v1/', version: 'v1', requiresAuth: true, rateLimit: 1000, tags: [] })
     } catch (err) {
@@ -864,8 +869,7 @@ export default KaziApiClient;`
         rate_limit_per_hour: apiKeyForm.rateLimit,
         expires_at: apiKeyForm.expiresAt || undefined
       })
-      toast.success(`${apiKeyForm.name} has been created`...`
-      })
+      toast.success(`${apiKeyForm.name} has been created`)
       setShowCreateKeyDialog(false)
       setApiKeyForm({ name: '', description: '', environment: 'development', scopes: ['read'], rateLimit: 1000, expiresAt: '' })
     } catch (err) {
@@ -953,7 +957,7 @@ export default KaziApiClient;`
       await updateKey(selectedKeyForEdit.id, {
         rate_limit_per_hour: editKeyForm.rateLimit
       })
-      toast.success(`Rate limit updated to ${editKeyForm.rateLimit}/hr`"` })
+      toast.success(`Rate limit updated to ${editKeyForm.rateLimit}/hr`)
       setShowRateLimitDialog(false)
       setSelectedKeyForEdit(null)
     } catch (err) {
@@ -1011,8 +1015,7 @@ export default KaziApiClient;`
         body: JSON.stringify(inviteForm)
       })
       if (!response.ok) throw new Error('Failed to send invitation')
-      toast.success('Invitation Sent' with ${inviteForm.role} role`
-      })
+      toast.success(`Invitation Sent: ${inviteForm.email} with ${inviteForm.role} role`)
       setInviteForm({ email: '', role: 'developer', permissions: ['read', 'write'] })
       setShowInviteTeamMemberDialog(false)
     } catch (err) {
@@ -1055,7 +1058,7 @@ export default KaziApiClient;`
         status: 'active'
       })
       if (result.success) {
-        toast.success('Webhook created'" is now active` })
+        toast.success(`Webhook created: "${webhookForm.name}" is now active`)
         setWebhookForm({ name: '', url: '', events: ['request.created'], secret: '' })
         setShowCreateWebhookDialog(false)
       } else {
@@ -1132,8 +1135,7 @@ export default KaziApiClient;`
 
       if (error) throw error
 
-      toast.success('Collection created'" is now ready to use`
-      })
+      toast.success(`Collection created: is now ready to use`)
       setCollectionForm({ name: '', description: '' })
       setShowCreateCollectionDialog(false)
     } catch (err) {
@@ -1491,8 +1493,7 @@ export default KaziApiClient;`
                               { label: 'Delete', action: () => handleDeleteEndpoint(endpoint.id, endpoint.name) }
                             ]
                             // For now, cycle through actions with each click
-                            toast.info(`${endpoint.name} options`
-                            })
+                            toast.info(`${endpoint.name} options`)
                           }}
                         >
                           <MoreVertical className="w-4 h-4" />
@@ -1759,8 +1760,7 @@ export default KaziApiClient;`
                         size="icon"
                         onClick={() => {
                           // Show key options with actions
-                          toast.info(`${key.name} options`
-                          })
+                          toast.info(`${key.name} options`)
                         }}
                       >
                         <MoreVertical className="w-4 h-4" />
@@ -1912,8 +1912,6 @@ export default KaziApiClient;`
                 { icon: PlayCircle, label: 'Run All', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: async () => {
                   toast.promise(
                     (async () => {
-                      const { createClient } = await import('@/lib/supabase/client')
-                      const supabase = createClient()
                       const totalRequests = collections.reduce((sum, c) => sum + c.requests, 0)
                       await supabase.from('api_test_runs').insert({
                         type: 'collection_batch',
@@ -2054,7 +2052,7 @@ export default KaziApiClient;`
                     toast.error('Failed to export HAR file')
                   }
                 }},
-                { icon: Trash2, label: 'Clear All', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', onClick: () => toast.warning('Clear History' }) },
+                { icon: Trash2, label: 'Clear All', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', onClick: () => toast.warning('Clear History') },
                 { icon: RefreshCw, label: 'Replay', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', onClick: () => toast.info('Replay Request') },
                 { icon: Copy, label: 'Copy cURL', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', onClick: async () => {
                   if (history.length > 0) {
@@ -2139,7 +2137,7 @@ export default KaziApiClient;`
                 { icon: Activity, label: 'Status Page', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => {
                   const healthy = monitors.filter(m => m.status === 'healthy').length
                   const total = monitors.length
-                  toast.success('System Status'/${total} monitors healthy. Overall uptime: ${(monitors.reduce((sum, m) => sum + m.uptime, 0) / total).toFixed(2)}%` })
+                  toast.success(`System Status: ${healthy}/${total} monitors healthy. Overall uptime: ${(monitors.reduce((sum, m) => sum + m.uptime, 0) / total).toFixed(2)}%`)
                 }},
                 { icon: Bell, label: 'Alerts', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: () => {
                   const totalAlerts = monitors.reduce((sum, m) => sum + m.alerts, 0)
@@ -2151,18 +2149,16 @@ export default KaziApiClient;`
                 }},
                 { icon: Globe, label: 'Regions', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => {
                   const regions = [...new Set(monitors.map(m => m.region))]
-                  toast.info('Monitor Regions'` })
+                  toast.info(`Monitor Regions`)
                 }},
                 { icon: Clock, label: 'Intervals', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', onClick: () => toast.info('Check Intervals') },
                 { icon: BarChart3, label: 'Analytics', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', onClick: () => {
                   const avgUptime = monitors.reduce((sum, m) => sum + m.uptime, 0) / monitors.length
                   const avgResponse = monitors.reduce((sum, m) => sum + m.avgResponseTime, 0) / monitors.length
-                  toast.info('Monitor Analytics'% | Avg Response: ${avgResponse.toFixed(0)}ms` })
+                  toast.info(`Monitor Analytics: Avg Uptime: ${avgUptime.toFixed(1)}% | Avg Response: ${avgResponse.toFixed(0)}ms`)
                 }},
                 { icon: Shield, label: 'SSL Check', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', onClick: () => toast.promise(
                   (async () => {
-                    const { createClient } = await import('@/lib/supabase/client')
-                    const supabase = createClient()
                     await supabase.from('ssl_checks').insert({
                       monitors_checked: monitors.length,
                       valid_count: monitors.length,
@@ -2269,8 +2265,6 @@ export default KaziApiClient;`
                 { icon: Plus, label: 'New Webhook', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => setShowCreateWebhookDialog(true) },
                 { icon: Webhook, label: 'Test', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => toast.promise(
                   (async () => {
-                    const { createClient } = await import('@/lib/supabase/client')
-                    const supabase = createClient()
                     const startTime = Date.now()
                     await supabase.from('webhook_tests').insert({
                       status: 'delivered',
@@ -2287,8 +2281,6 @@ export default KaziApiClient;`
                 )},
                 { icon: RefreshCw, label: 'Retry Failed', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => toast.promise(
                   (async () => {
-                    const { createClient } = await import('@/lib/supabase/client')
-                    const supabase = createClient()
                     const { data: failed } = await supabase.from('webhook_deliveries').select('id').eq('status', 'failed').limit(10)
                     const retried = failed?.length || 3
                     const succeeded = Math.floor(retried * 0.7)
@@ -2307,7 +2299,7 @@ export default KaziApiClient;`
                 )},
                 { icon: Eye, label: 'View Logs', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', onClick: () => {
                   const totalDeliveries = webhooks.reduce((sum, w) => sum + w.totalDeliveries, 0)
-                  toast.info('Webhook Logs' total deliveries across all webhooks` })
+                  toast.info(`Webhook Logs: ${totalDeliveries} total deliveries across all webhooks`)
                 }},
                 { icon: Key, label: 'Secrets', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => toast.info('Webhook Secrets') },
                 { icon: Shield, label: 'Signatures', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', onClick: () => toast.info('Webhook Signatures') },
@@ -2463,8 +2455,6 @@ export default KaziApiClient;`
                   setRunningTests(true)
                   toast.promise(
                     (async () => {
-                      const { createClient } = await import('@/lib/supabase/client')
-                      const supabase = createClient()
                       const totalTests = testSuites.reduce((sum, s) => sum + s.tests, 0)
                       const passed = testSuites.reduce((sum, s) => sum + s.passed, 0)
                       await supabase.from('api_test_runs').insert({
@@ -2487,14 +2477,14 @@ export default KaziApiClient;`
                 { icon: Plus, label: 'New Suite', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: () => setShowCreateTestSuiteDialog(true) },
                 { icon: FileCode, label: 'Coverage', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => {
                   const avgCoverage = testSuites.reduce((sum, s) => sum + s.coverage, 0) / testSuites.length
-                  toast.info('Code Coverage'%` })
+                  toast.info(`Code Coverage: ${avgCoverage.toFixed(1)}%`)
                 }},
                 { icon: GitBranch, label: 'CI/CD', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => toast.info('CI/CD Integration') },
                 { icon: BarChart3, label: 'Reports', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => {
                   const totalTests = testSuites.reduce((sum, s) => sum + s.tests, 0)
                   const passed = testSuites.reduce((sum, s) => sum + s.passed, 0)
                   const failed = testSuites.reduce((sum, s) => sum + s.failed, 0)
-                  toast.info('Test Reports' | Passed: ${passed} | Failed: ${failed}` })
+                  toast.info(`Test Reports: Total: ${totalTests} | Passed: ${passed} | Failed: ${failed}`)
                 }},
                 { icon: Clock, label: 'Schedule', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => toast.info('Schedule Tests') },
                 { icon: Download, label: 'Export', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: async () => {
@@ -2555,8 +2545,6 @@ export default KaziApiClient;`
                     setRunningTests(true)
                     toast.promise(
                       (async () => {
-                        const { createClient } = await import('@/lib/supabase/client')
-                        const supabase = createClient()
                         const totalTests = testSuites.reduce((sum, s) => sum + s.tests, 0)
                         const passed = testSuites.reduce((sum, s) => sum + s.passed, 0)
                         const failed = testSuites.reduce((sum, s) => sum + s.failed, 0)
@@ -2699,8 +2687,6 @@ export default KaziApiClient;`
                       setRunningTests(true)
                       toast.promise(
                         (async () => {
-                          const { createClient } = await import('@/lib/supabase/client')
-                          const supabase = createClient()
                           // Simulate rerunning failed tests - some may now pass
                           const fixed = Math.floor(failedCount * 0.7)
                           await supabase.from('api_test_reruns').insert({
@@ -3262,8 +3248,6 @@ export default KaziApiClient;`
                         setRunningTests(true)
                         toast.promise(
                           (async () => {
-                            const { createClient } = await import('@/lib/supabase/client')
-                            const supabase = createClient()
                             await supabase.from('api_test_suite_runs').insert({
                               suite_id: selectedTestSuite.id,
                               suite_name: selectedTestSuite.name,
@@ -3295,8 +3279,6 @@ export default KaziApiClient;`
                       if (selectedTestSuite && selectedTestSuite.failed > 0) {
                         toast.promise(
                           (async () => {
-                            const { createClient } = await import('@/lib/supabase/client')
-                            const supabase = createClient()
                             const fixed = Math.floor(selectedTestSuite.failed * 0.5)
                             await supabase.from('api_test_suite_reruns').insert({
                               suite_id: selectedTestSuite.id,
@@ -3615,8 +3597,6 @@ export default KaziApiClient;`
               <Button onClick={() => {
                 toast.promise(
                   (async () => {
-                    const { createClient } = await import('@/lib/supabase/client')
-                    const supabase = createClient()
                     // Record SDK generation in database
                     await supabase.from('sdk_generations').insert({
                       language: sdkLanguage,
@@ -3709,7 +3689,7 @@ export default KaziApiClient;`
                   toast.error('Please fill in all required fields')
                   return
                 }
-                toast.success('Monitor created'" is now active` })
+                toast.success(`Monitor created: "${monitorForm.name}" is now active`)
                 setMonitorForm({ name: '', endpoint: '', interval: '5m', alertThreshold: 500 })
                 setShowCreateMonitorDialog(false)
               }}>
@@ -3827,7 +3807,7 @@ export default KaziApiClient;`
                   toast.error('Please enter a suite name')
                   return
                 }
-                toast.success('Test suite created'" is ready for test cases` })
+                toast.success(`Test suite created: "${testSuiteForm.name}" is ready for test cases`)
                 setTestSuiteForm({ name: '', description: '', endpoints: [] })
                 setShowCreateTestSuiteDialog(false)
               }}>

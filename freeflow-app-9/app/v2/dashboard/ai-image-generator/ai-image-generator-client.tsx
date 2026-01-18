@@ -12,10 +12,6 @@ export const dynamic = 'force-dynamic';
 import AIImageGenerator from '@/components/ai/ai-image-generator'
 import { toast } from 'sonner'
 
-export const metadata = {
-  title: 'AI Image Generator | Kazi Platform',
-  description: 'Create stunning images with Nano Banana AI - Google\'s latest image generation technology'
-}
 
 
 // ============================================================================

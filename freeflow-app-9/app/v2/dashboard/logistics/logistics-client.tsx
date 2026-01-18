@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import {
@@ -40,6 +42,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Switch } from '@/components/ui/switch'
+
+// Initialize Supabase client once at module level
+const supabase = createClient()
 
 // Types
 type ShipmentStatus = 'pending' | 'picked_up' | 'in_transit' | 'out_for_delivery' | 'delivered' | 'exception' | 'returned'
@@ -714,8 +719,6 @@ export default function LogisticsClient() {
 
   // Fetch data from Supabase
   const fetchShipments = useCallback(async () => {
-    const { createClient } = await import('@/lib/supabase/client')
-    const supabase = createClient()
     const { data, error } = await supabase
       .from('shipments')
       .select('*')
@@ -730,8 +733,6 @@ export default function LogisticsClient() {
   }, [])
 
   const fetchCarriers = useCallback(async () => {
-    const { createClient } = await import('@/lib/supabase/client')
-    const supabase = createClient()
     const { data, error } = await supabase
       .from('shipping_carriers')
       .select('*')
@@ -745,8 +746,6 @@ export default function LogisticsClient() {
   }, [])
 
   const fetchRoutes = useCallback(async () => {
-    const { createClient } = await import('@/lib/supabase/client')
-    const supabase = createClient()
     const { data, error } = await supabase
       .from('logistics_routes')
       .select('*')
@@ -773,16 +772,12 @@ export default function LogisticsClient() {
   const handleCreateShipment = async () => {
     setIsSaving(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Authentication required')
         return
       }
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('shipments').insert({
         user_id: user.id,
         recipient_name: shipmentForm.recipientName,
@@ -816,8 +811,6 @@ export default function LogisticsClient() {
 
   const handleUpdateShipmentStatus = async (shipmentId: string, newStatus: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('shipments')
         .update({ status: newStatus, updated_at: new Date().toISOString() })
@@ -825,7 +818,7 @@ export default function LogisticsClient() {
 
       if (error) throw error
 
-      toast.success('Status updated'` })
+      toast.success('Status updated')
       await fetchShipments()
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Failed to update status'
@@ -835,8 +828,6 @@ export default function LogisticsClient() {
 
   const handleDeleteShipment = async (shipmentId: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('shipments')
         .update({ deleted_at: new Date().toISOString() })
@@ -854,8 +845,6 @@ export default function LogisticsClient() {
 
   const handleToggleCarrier = async (carrierId: string, active: boolean) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('shipping_carriers')
         .update({ status: active ? 'active' : 'inactive', updated_at: new Date().toISOString() })
@@ -863,7 +852,7 @@ export default function LogisticsClient() {
 
       if (error) throw error
 
-      toast.success('Carrier updated'` })
+      toast.success('Carrier updated')
       await fetchCarriers()
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Failed to update carrier'
@@ -907,7 +896,7 @@ export default function LogisticsClient() {
       s.trackingNumber.toLowerCase().includes(trackingInput.toLowerCase())
     )
     if (found) {
-      toast.success('Package found'` })
+      toast.success('Package found: ' + found.trackingNumber)
       setSelectedShipment(found)
     } else {
       toast.error('Not found')
@@ -917,7 +906,7 @@ export default function LogisticsClient() {
   }
 
   const handleProcessOrder = (orderId: string) => {
-    toast.success('Order processing' is now being processed` })
+    toast.success('Order processing')
   }
 
   const handleRateShopping = () => {
@@ -957,7 +946,7 @@ export default function LogisticsClient() {
 
   const handleSaveCarrierConfig = () => {
     if (selectedCarrier) {
-      toast.success('Carrier configured' settings have been updated` })
+      toast.success('Carrier configured')
     }
     setShowConfigureCarrierDialog(false)
     setSelectedCarrier(null)
@@ -975,7 +964,7 @@ export default function LogisticsClient() {
 
   const handleSaveWarehouse = () => {
     if (selectedWarehouse) {
-      toast.success('Warehouse updated' has been updated` })
+      toast.success('Warehouse updated')
     }
     setShowEditWarehouseDialog(false)
     setSelectedWarehouse(null)
@@ -2321,7 +2310,7 @@ export default function LogisticsClient() {
               <AIInsightsPanel
                 insights={logisticsAIInsights}
                 title="Logistics Intelligence"
-                onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+                onInsightAction={(insight) => toast.info(insight.title)}
               />
             </div>
             <div className="space-y-6">

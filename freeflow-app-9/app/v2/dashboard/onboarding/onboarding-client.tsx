@@ -672,7 +672,7 @@ export default function OnboardingClient() {
       if (error) throw error
 
       setFlows(prev => prev.map(f => f.id === flow.id ? { ...f, status: newStatus } : f))
-      toast.success(`Flow ${newStatus}`" is now ${newStatus}` })
+      toast.success("Flow " + newStatus + " is now " + newStatus)
     } catch (error) {
       console.error('Error updating flow:', error)
       toast.error('Failed to update flow')
@@ -697,7 +697,7 @@ export default function OnboardingClient() {
 
       setFlows(prev => prev.filter(f => f.id !== flow.id))
       setSelectedFlow(null)
-      toast.success('Flow deleted'" has been removed` })
+      toast.success("Flow deleted and has been removed")
     } catch (error) {
       console.error('Error deleting flow:', error)
       toast.error('Failed to delete flow')
@@ -742,7 +742,7 @@ export default function OnboardingClient() {
         updatedAt: data.updated_at
       }
       setFlows(prev => [newFlow, ...prev])
-      toast.success('Flow duplicated'"` })
+      toast.success('Flow duplicated')
     } catch (error) {
       console.error('Error duplicating flow:', error)
       toast.error('Failed to duplicate flow')
@@ -1191,7 +1191,7 @@ export default function OnboardingClient() {
                 { icon: Plus, label: 'Create', color: 'text-green-600 bg-green-100 dark:bg-green-900/30', onClick: handleCreateChecklist },
                 { icon: CheckSquare, label: 'Active', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30', onClick: () => { setChecklistStatusFilter('active'); toast.success('Filter applied') } },
                 { icon: Edit, label: 'Edit', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30', onClick: () => { if (selectedChecklist) setSelectedChecklist(selectedChecklist); else toast.info('Please select a checklist to edit') } },
-                { icon: Copy, label: 'Duplicate', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30', onClick: () => { if (!selectedChecklist) { toast.info('Please select a checklist to duplicate'); return; } const duplicated: Checklist = { ...selectedChecklist, id: Math.random().toString(36).substr(2, 9), name: `${selectedChecklist.name} (Copy)` }; setChecklists(prev => [duplicated, ...prev]); toast.success('Checklist duplicated'"` }) } },
+                { icon: Copy, label: 'Duplicate', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30', onClick: () => { if (!selectedChecklist) { toast.info('Please select a checklist to duplicate'); return; } const duplicated: Checklist = { ...selectedChecklist, id: Math.random().toString(36).substr(2, 9), name: `${selectedChecklist.name} (Copy)` }; setChecklists(prev => [duplicated, ...prev]); toast.success('Checklist duplicated') } },
                 { icon: Users, label: 'Assign', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30', onClick: () => { if (!selectedChecklist) { toast.info('Please select a checklist first'); return; } setShowAssignDialog(true) } },
                 { icon: BarChart3, label: 'Reports', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30', onClick: () => setActiveTab('analytics') },
                 { icon: Download, label: 'Export', color: 'text-pink-600 bg-pink-100 dark:bg-pink-900/30', onClick: handleExportReport },
@@ -1302,9 +1302,9 @@ export default function OnboardingClient() {
             {/* Analytics Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: BarChart3, label: 'Overview', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30', onClick: () => { setStatusFilter('all'); setTypeFilter('all'); toast.success('Overview loaded' flows with ${stats.avgCompletionRate.toFixed(1)}% average completion rate` }) } },
-                { icon: TrendingUp, label: 'Trends', color: 'text-green-600 bg-green-100 dark:bg-green-900/30', onClick: () => { const completionTrend = ((stats.totalCompletions / stats.totalViews) * 100).toFixed(1); setAnalyticsDateRange('30d'); toast.success('Trends view'% completion trend - showing 30-day data` }) } },
-                { icon: PieChart, label: 'Breakdown', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30', onClick: () => { const byType: Record<FlowType, number> = { onboarding: 0, feature_adoption: 0, announcement: 0, survey: 0, checklist: 0 }; flows.forEach(f => byType[f.type]++); const breakdown = Object.entries(byType).filter(([_, count]) => count > 0).map(([type, count]) => `${type}: ${count}`).join(', '); toast.success('Breakdown'` }) } },
+                { icon: BarChart3, label: 'Overview', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30', onClick: () => { setStatusFilter('all'); setTypeFilter('all'); toast.success('Overview loaded') } },
+                { icon: TrendingUp, label: 'Trends', color: 'text-green-600 bg-green-100 dark:bg-green-900/30', onClick: () => { const completionTrend = ((stats.totalCompletions / stats.totalViews) * 100).toFixed(1); setAnalyticsDateRange('30d'); toast.success('Trends view - ' + completionTrend + '% completion trend - showing 30-day data') } },
+                { icon: PieChart, label: 'Breakdown', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30', onClick: () => { const byType: Record<FlowType, number> = { onboarding: 0, feature_adoption: 0, announcement: 0, survey: 0, checklist: 0 }; flows.forEach(f => byType[f.type]++); const breakdown = Object.entries(byType).filter(([_, count]) => count > 0).map(([type, count]) => `${type}: ${count}`).join(', '); toast.success('Breakdown: ' + breakdown) } },
                 { icon: Target, label: 'Goals', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30', onClick: () => setShowGoalsDialog(true) },
                 { icon: Download, label: 'Export', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30', onClick: handleExportReport },
                 { icon: RefreshCw, label: 'Refresh', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30', onClick: () => { setIsLoading(true); window.location.reload() } },
@@ -1454,11 +1454,11 @@ export default function OnboardingClient() {
             {/* Users Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: Users, label: 'All Users', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30', onClick: () => { setUserStatusFilter('all'); toast.success('Filter cleared' users` }) } },
-                { icon: UserCheck, label: 'Completed', color: 'text-green-600 bg-green-100 dark:bg-green-900/30', onClick: () => { setUserStatusFilter('completed'); const completed = users.filter(u => u.flowsCompleted === u.totalFlows).length; toast.success('Filter applied' users who completed all flows` }) } },
-                { icon: Activity, label: 'At Risk', color: 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/30', onClick: () => { setUserStatusFilter('at_risk'); const atRisk = users.filter(u => u.status === 'at_risk').length; toast.warning('Filter applied' at-risk users` }) } },
-                { icon: UserX, label: 'Churned', color: 'text-red-600 bg-red-100 dark:bg-red-900/30', onClick: () => { setUserStatusFilter('churned'); const churned = users.filter(u => u.status === 'churned').length; toast.error('Filter applied' churned users` }) } },
-                { icon: Mail, label: 'Email', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30', onClick: () => { const emailList = filteredUsers.map(u => u.userEmail).join(', '); navigator.clipboard.writeText(emailList); toast.success('Emails copied' email addresses copied to clipboard` }) } },
+                { icon: Users, label: 'All Users', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30', onClick: () => { setUserStatusFilter('all'); toast.success('Filter cleared - showing all users') } },
+                { icon: UserCheck, label: 'Completed', color: 'text-green-600 bg-green-100 dark:bg-green-900/30', onClick: () => { setUserStatusFilter('completed'); const completed = users.filter(u => u.flowsCompleted === u.totalFlows).length; toast.success('Filter applied - ' + completed + ' users who completed all flows') } },
+                { icon: Activity, label: 'At Risk', color: 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/30', onClick: () => { setUserStatusFilter('at_risk'); const atRisk = users.filter(u => u.status === 'at_risk').length; toast.warning('Filter applied - ' + atRisk + ' at-risk users') } },
+                { icon: UserX, label: 'Churned', color: 'text-red-600 bg-red-100 dark:bg-red-900/30', onClick: () => { setUserStatusFilter('churned'); const churned = users.filter(u => u.status === 'churned').length; toast.error('Filter applied - ' + churned + ' churned users') } },
+                { icon: Mail, label: 'Email', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30', onClick: () => { const emailList = filteredUsers.map(u => u.userEmail).join(', '); navigator.clipboard.writeText(emailList); toast.success('Emails copied - ' + filteredUsers.length + ' email addresses copied to clipboard') } },
                 { icon: Download, label: 'Export', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30', onClick: handleExportReport },
                 { icon: Filter, label: 'Filter', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30', onClick: () => setShowFilterDialog(true) },
                 { icon: RefreshCw, label: 'Refresh', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700', onClick: () => { setIsLoading(true); window.location.reload() } },
@@ -1557,7 +1557,7 @@ export default function OnboardingClient() {
                               <Button variant="ghost" size="sm" onClick={() => {
                                   setSelectedUser(user)
                                   setShowUserDetailDialog(true)
-                                  toast.success('User details loaded'` })
+                                  toast.success("User details loaded")
                                 }}>
                                 <Eye className="w-4 h-4" />
                               </Button>
@@ -1889,7 +1889,7 @@ export default function OnboardingClient() {
                           </div>
                           <Button variant={integration.connected ? 'outline' : 'default'} size="sm" onClick={async () => {
                               if (integration.connected) {
-                                toast.info('Integration Settings' settings` })
+                                toast.info('Integration Settings')
                               } else {
                                 toast.loading(`Connecting to ${integration.name}...`, { id: 'connect-integration' })
                                 try {
@@ -2051,7 +2051,7 @@ export default function OnboardingClient() {
             <AIInsightsPanel
               insights={onboardingAIInsights}
               title="Onboarding Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -2177,7 +2177,7 @@ export default function OnboardingClient() {
                     <Copy className="w-4 h-4" />
                     Duplicate
                   </Button>
-                  <Button variant="outline" className="gap-2" onClick={() => { setActiveTab('analytics'); setSelectedFlow(null); toast.success('Analytics view'` }) }}>
+                  <Button variant="outline" className="gap-2" onClick={() => { setActiveTab('analytics'); setSelectedFlow(null); toast.success('Analytics view') }}>
                     <BarChart3 className="w-4 h-4" />
                     View Analytics
                   </Button>
@@ -2252,7 +2252,7 @@ export default function OnboardingClient() {
                             <Badge variant="outline" className="text-xs">Required</Badge>
                           )}
                           <Button variant="ghost" size="sm" onClick={() => {
-                              toast.info('Edit Item'"` })
+                              toast.info("Edit Item")
                             }}>
                             <Edit className="w-4 h-4" />
                           </Button>
@@ -2272,7 +2272,7 @@ export default function OnboardingClient() {
                     <Plus className="w-4 h-4" />
                     Add Item
                   </Button>
-                  <Button variant="outline" className="gap-2" onClick={() => { setActiveTab('analytics'); setSelectedChecklist(null); toast.success('Analytics view'` }) }}>
+                  <Button variant="outline" className="gap-2" onClick={() => { setActiveTab('analytics'); setSelectedChecklist(null); toast.success('Analytics view') }}>
                     <BarChart3 className="w-4 h-4" />
                     View Analytics
                   </Button>
@@ -2320,7 +2320,7 @@ export default function OnboardingClient() {
                 <Button variant="outline" className="flex-1" onClick={() => setShowGoalsDialog(false)}>
                   Cancel
                 </Button>
-                <Button className="flex-1" onClick={() => { setSavedCompletionGoal(completionGoal); setShowGoalsDialog(false); toast.success('Goal saved'%` }) }}>
+                <Button className="flex-1" onClick={() => { setSavedCompletionGoal(completionGoal); setShowGoalsDialog(false); toast.success('Goal saved - ' + completionGoal + '%') }}>
                   Save Goal
                 </Button>
               </div>
@@ -2427,7 +2427,7 @@ export default function OnboardingClient() {
                 <Button variant="outline" className="flex-1" onClick={() => setShowDateRangeDialog(false)}>
                   Cancel
                 </Button>
-                <Button className="flex-1" onClick={() => { setShowDateRangeDialog(false); toast.success('Date range updated'` }) }}>
+                <Button className="flex-1" onClick={() => { setShowDateRangeDialog(false); toast.success('Date range updated') }}>
                   Apply
                 </Button>
               </div>
@@ -2474,7 +2474,7 @@ export default function OnboardingClient() {
                     const segmentName = assignedSegmentId ? segments.find(s => s.id === assignedSegmentId)?.name : 'All Users'
                     setChecklists(prev => prev.map(c => c.id === selectedChecklist.id ? { ...c, segmentId: assignedSegmentId || undefined } : c))
                     setShowAssignDialog(false)
-                    toast.success('Checklist assigned'. Users will see this checklist on their next login` })
+                    toast.success('Checklist assigned to ' + segmentName + '. Users will see this checklist on their next login')
                   } else {
                     toast.error('No checklist selected')
                   }

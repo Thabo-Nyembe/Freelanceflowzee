@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -82,6 +84,9 @@ import {
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { CardDescription } from '@/components/ui/card'
+
+// Initialize Supabase client once at module level
+const supabase = createClient()
 
 // ============================================================================
 // DATABASE TYPE DEFINITIONS
@@ -812,13 +817,9 @@ export default function RegistrationsClient() {
   const fetchRegistrations = useCallback(async () => {
     try {
       setIsLoading(true)
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('event_registrations')
         .select('*')
@@ -865,8 +866,6 @@ export default function RegistrationsClient() {
   const handleCreateRegistration = async () => {
     try {
       setIsSaving(true)
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('You must be logged in to create a registration')
@@ -890,16 +889,13 @@ export default function RegistrationsClient() {
         reminder_sent: false
       }
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('event_registrations')
         .insert(regData)
 
       if (error) throw error
 
-      toast.success('Registration created successfully' has been registered`
-      })
+      toast.success(`Registration created successfully`, { description: `${formData.registrant_name} has been registered` })
       setShowCreateDialog(false)
       setFormData(initialFormData)
       fetchRegistrations()
@@ -917,16 +913,12 @@ export default function RegistrationsClient() {
 
     try {
       setIsSaving(true)
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('You must be logged in to update a registration')
         return
       }
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('event_registrations')
         .update({
@@ -946,8 +938,7 @@ export default function RegistrationsClient() {
 
       if (error) throw error
 
-      toast.success('Registration updated successfully''s registration has been updated`
-      })
+      toast.success(`Registration updated successfully`, { description: `${formData.registrant_name}'s registration has been updated` })
       setShowEditDialog(false)
       setRegistrationToEdit(null)
       setFormData(initialFormData)
@@ -966,16 +957,12 @@ export default function RegistrationsClient() {
 
     try {
       setIsSaving(true)
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('You must be logged in to delete a registration')
         return
       }
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('event_registrations')
         .update({ deleted_at: new Date().toISOString() })
@@ -984,8 +971,7 @@ export default function RegistrationsClient() {
 
       if (error) throw error
 
-      toast.success('Registration deleted''s registration has been removed`
-      })
+      toast.success(`Registration deleted`, { description: `${registrationToDelete.registrant_name}'s registration has been removed` })
       setShowDeleteDialog(false)
       setRegistrationToDelete(null)
       fetchRegistrations()
@@ -1000,13 +986,9 @@ export default function RegistrationsClient() {
   // Check in attendee
   const handleCheckIn = async (registration: DbRegistration) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('event_registrations')
         .update({
@@ -1019,8 +1001,7 @@ export default function RegistrationsClient() {
 
       if (error) throw error
 
-      toast.success('Check-in complete' has been checked in`
-      })
+      toast.success(`Check-in complete`, { description: `${registration.registrant_name} has been checked in` })
       fetchRegistrations()
     } catch (error: any) {
       console.error('Error checking in:', error)
@@ -1031,13 +1012,9 @@ export default function RegistrationsClient() {
   // Confirm registration
   const handleConfirm = async (registration: DbRegistration) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('event_registrations')
         .update({
@@ -1050,8 +1027,7 @@ export default function RegistrationsClient() {
 
       if (error) throw error
 
-      toast.success('Registration confirmed' has been confirmed`
-      })
+      toast.success(`Registration confirmed`, { description: `${registration.registrant_name} has been confirmed` })
       fetchRegistrations()
     } catch (error: any) {
       console.error('Error confirming:', error)
@@ -1062,13 +1038,9 @@ export default function RegistrationsClient() {
   // Cancel registration
   const handleCancel = async (registration: DbRegistration) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('event_registrations')
         .update({
@@ -1080,8 +1052,7 @@ export default function RegistrationsClient() {
 
       if (error) throw error
 
-      toast.info('Registration cancelled''s registration has been cancelled`
-      })
+      toast.info('Registration cancelled')
       fetchRegistrations()
     } catch (error: any) {
       console.error('Error cancelling:', error)
@@ -2321,7 +2292,7 @@ export default function RegistrationsClient() {
             <AIInsightsPanel
               insights={mockRegistrationsAIInsights}
               title="Registration Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -2856,7 +2827,7 @@ export default function RegistrationsClient() {
                   input.accept = '.csv,.xlsx'
                   input.onchange = () => {
                     if (input.files && input.files[0]) {
-                      toast.success('File Selected' ready for import` })
+                      toast.success(`File Selected`, { description: `${input.files[0].name} ready for import` })
                     }
                   }
                   input.click()
@@ -3026,7 +2997,7 @@ export default function RegistrationsClient() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowSendEmailDialog(false)}>Cancel</Button>
             <Button onClick={() => {
-              toast.success('Email Sent'` })
+              toast.success('Email Sent')
               setShowSendEmailDialog(false)
             }}>
               <Send className="w-4 h-4 mr-2" />
@@ -3242,7 +3213,7 @@ export default function RegistrationsClient() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowSendCommunicationDialog(false)}>Cancel</Button>
             <Button onClick={() => {
-              toast.success('Communication Sent' sent to ${stats.total} recipients` })
+              toast.success(`Communication Sent`, { description: `Message sent to ${stats.total} recipients` })
               setShowSendCommunicationDialog(false)
             }}>
               <Send className="w-4 h-4 mr-2" />
@@ -3302,7 +3273,7 @@ export default function RegistrationsClient() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowBulkEmailDialog(false)}>Cancel</Button>
             <Button onClick={() => {
-              toast.success('Bulk Email Sent' registrants` })
+              toast.success(`Bulk Email Sent`, { description: `Email sent to ${stats.total} registrants` })
               setShowBulkEmailDialog(false)
             }}>
               <Mail className="w-4 h-4 mr-2" />
@@ -3352,7 +3323,7 @@ export default function RegistrationsClient() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowSendRemindersDialog(false)}>Cancel</Button>
             <Button onClick={() => {
-              toast.success('Reminders Sent' registrants` })
+              toast.success(`Reminders Sent`, { description: `Reminders sent to ${stats.confirmed} registrants` })
               setShowSendRemindersDialog(false)
             }}>
               <Send className="w-4 h-4 mr-2" />
@@ -3454,7 +3425,7 @@ export default function RegistrationsClient() {
               variant={selectedIntegration?.connected ? 'destructive' : 'default'}
               onClick={() => {
                 toast.success(
-                  selectedIntegration?.connected ? 'Disconnected' : 'Connected' ${selectedIntegration?.connected ? 'disconnected' : 'connected'} successfully` }
+                  selectedIntegration?.connected ? 'Disconnected' : 'Connected'
                 )
                 setShowIntegrationDialog(false)
               }}
@@ -3570,7 +3541,7 @@ export default function RegistrationsClient() {
             <Button
               className="bg-green-600 hover:bg-green-700"
               onClick={() => {
-                toast.success('Check-In Complete' ${selectedRegistration?.attendee.lastName} has been checked in` })
+                toast.success('Check-In Complete')
                 setShowCheckInConfirmDialog(false)
                 setShowRegistrationDialog(false)
               }}
@@ -3696,7 +3667,7 @@ export default function RegistrationsClient() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowBadgesDialog(false)}>Cancel</Button>
             <Button onClick={() => {
-              toast.success('Printing Badges' badges sent to printer` })
+              toast.success(`Printing Badges`, { description: `${stats.total} badges sent to printer` })
               setShowBadgesDialog(false)
             }}>
               <Printer className="w-4 h-4 mr-2" />

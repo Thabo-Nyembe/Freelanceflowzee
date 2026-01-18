@@ -140,8 +140,8 @@ export default function AdminOverviewPage() {
         setActiveWorkflows(workflows)
 
         setIsLoading(false)
-        announce('Admin dashboard loaded successfully', 'polite')        toast.success('Dashboard Loaded' deals, ${stats.totalInvoices} invoices, ${stats.totalLeads} leads`
-        })
+        announce('Admin dashboard loaded successfully', 'polite')
+        toast.success(`Dashboard Loaded: ${stats.totalDeals} deals, ${stats.totalInvoices} invoices, ${stats.totalLeads} leads`)
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load dashboard'
         setError(errorMessage)
@@ -190,7 +190,8 @@ export default function AdminOverviewPage() {
       setActiveCampaigns(campaigns)
       setActiveWorkflows(workflows)
 
-      toast.success('Dashboard Refreshed')      announce('Dashboard refreshed successfully', 'polite')
+      toast.success('Dashboard Refreshed')
+      announce('Dashboard refreshed successfully', 'polite')
     } catch (error) {
       toast.error('Refresh Failed')
       logger.error('Dashboard refresh failed', { error, userId })
@@ -203,7 +204,8 @@ export default function AdminOverviewPage() {
   const handleMarkAlertRead = async (alertId: string) => {
     try {
       const { acknowledgeAlert } = await import('@/lib/admin-overview-queries')
-      await acknowledgeAlert(alertId)      toast.success('Alert Marked as Read')
+      await acknowledgeAlert(alertId)
+    toast.success('Alert Marked as Read')
       announce('Alert acknowledged', 'polite')
 
       // Refresh dashboard data to update alerts list
@@ -218,7 +220,8 @@ export default function AdminOverviewPage() {
   const handleDismissAlert = async (alertId: string) => {
     try {
       const { dismissAlert } = await import('@/lib/admin-overview-queries')
-      await dismissAlert(alertId)      toast.success('Alert Dismissed')
+      await dismissAlert(alertId)
+    toast.success('Alert Dismissed')
       announce('Alert dismissed', 'polite')
 
       // Refresh dashboard data to update alerts list

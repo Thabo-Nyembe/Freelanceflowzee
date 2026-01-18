@@ -1,4 +1,6 @@
 'use client'
+
+import { createClient } from '@/lib/supabase/client'
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { useBookings, type Booking, type BookingType, type BookingStatus, type PaymentStatus } from '@/lib/hooks/use-bookings'
@@ -2496,7 +2498,6 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                   (async () => {
                     try {
                       toast.loading('Blocking time slot...')
-                      const { createClient } = await import('@/lib/supabase/client')
                       const supabase = createClient()
                       const { data: { user } } = await supabase.auth.getUser()
                       if (!user) throw new Error('Not authenticated')

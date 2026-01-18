@@ -197,13 +197,15 @@ export default function OperationsClient() {
   // Load operations data
   useEffect(() => {
     const loadOperations = async () => {
-      if (!userId) {        setIsLoading(false)
+      if (!userId) {
+        setIsLoading(false)
         return
       }
 
       try {
         setIsLoading(true)
-        setError(null)        const { getTeamMembers } = await import('@/lib/admin-overview-queries')
+        setError(null)
+        const { getTeamMembers } = await import('@/lib/admin-overview-queries')
 
         const teamResult = await getTeamMembers(userId)
         setTeamMembers(teamResult.data || [])
@@ -211,8 +213,8 @@ export default function OperationsClient() {
 
         setIsLoading(false)
         announce('Operations data loaded successfully', 'polite')
-        toast.success('Operations loaded' team members loaded`
-        })      } catch (err) {
+        toast.success("Operations loaded: " + (teamResult.data?.length || 0) + " team members loaded")
+      } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load operations'
         setError(errorMessage)
         setIsLoading(false)
@@ -233,7 +235,8 @@ export default function OperationsClient() {
       return
     }
 
-    try {      const newUser = {
+    try {
+      const newUser = {
         email: 'newuser@company.com',
         role: 'member' as UserRole,
         department: 'General'
@@ -247,8 +250,8 @@ export default function OperationsClient() {
         invited_by: userId
       })
 
-      toast.success('Invitation Sent' successfully`
-      })      announce('User invitation sent', 'polite')
+      toast.success("Invitation Sent: " + newUser.email + " successfully")
+      announce('User invitation sent', 'polite')
 
       // Reload team members
       const { getAllUsers } = await import('@/lib/user-management-queries')
@@ -270,7 +273,8 @@ export default function OperationsClient() {
       return
     }
 
-    try {      // Note: Using getUserById and updating profile
+    try {
+      // Note: Using getUserById and updating profile
       // Future: Create updateUser function in user-management-queries
       const { getUserById } = await import('@/lib/user-management-queries')
       const user = await getUserById(targetUserId)
@@ -288,7 +292,8 @@ export default function OperationsClient() {
 
       if (!response.ok) throw new Error('Failed to edit user')
 
-      toast.success('User Updated')      announce('User updated successfully', 'polite')
+      toast.success("User Updated: " + targetUserId)
+      announce('User updated successfully', 'polite')
 
       // Reload team members
       const { getAllUsers } = await import('@/lib/user-management-queries')
@@ -317,11 +322,12 @@ export default function OperationsClient() {
       return
     }
 
-    try {      const { deleteUser: deleteUserQuery } = await import('@/lib/user-management-queries')
+    try {
+      const { deleteUser: deleteUserQuery } = await import('@/lib/user-management-queries')
       await deleteUserQuery(deleteUser.id)
 
-      toast.success('User Deleted' has been permanently removed from the team`
-      })      announce('User deleted successfully', 'polite')
+      toast.success("User Deleted: " + deleteUser.name + " has been permanently removed from the team")
+      announce('User deleted successfully', 'polite')
 
       // Reload team members
       const { getAllUsers } = await import('@/lib/user-management-queries')
@@ -345,11 +351,12 @@ export default function OperationsClient() {
       return
     }
 
-    try {      const { deactivateUser } = await import('@/lib/user-management-queries')
+    try {
+      const { deactivateUser } = await import('@/lib/user-management-queries')
       await deactivateUser(targetUserId)
 
-      toast.success('User Deactivated' has been deactivated and will no longer have access`
-      })      announce('User deactivated successfully', 'polite')
+      toast.success("User Deactivated: " + userName + " has been deactivated and will no longer have access")
+      announce('User deactivated successfully', 'polite')
 
       // Reload team members
       const { getAllUsers } = await import('@/lib/user-management-queries')
@@ -371,11 +378,12 @@ export default function OperationsClient() {
       return
     }
 
-    try {      const { updateUserRole } = await import('@/lib/user-management-queries')
+    try {
+      const { updateUserRole } = await import('@/lib/user-management-queries')
       await updateUserRole(targetUserId, newRole)
 
-      toast.success('Role Changed' has been assigned the ${newRole} role`
-      })      announce(`User role changed to ${newRole}`, 'polite')
+      toast.success("Role Changed: " + userName + " has been assigned the " + newRole + " role")
+      announce("User role changed to " + newRole, 'polite')
 
       // Reload team members
       const { getAllUsers } = await import('@/lib/user-management-queries')
@@ -397,7 +405,8 @@ export default function OperationsClient() {
       return
     }
 
-    try {      // Using team-management-queries for role permissions
+    try {
+      // Using team-management-queries for role permissions
       const { updateRolePermission } = await import('@/lib/team-management-queries')
 
       // Update permissions for the role
@@ -406,8 +415,8 @@ export default function OperationsClient() {
         is_active: true
       })
 
-      toast.success('Permissions Updated' role have been updated successfully`
-      })      announce('Permissions updated successfully', 'polite')
+      toast.success("Permissions Updated: " + roleName + " role have been updated successfully")
+      announce('Permissions updated successfully', 'polite')
 
       // Reload roles (if needed)
       // Note: Future enhancement - add getRoles to reload role data
@@ -429,14 +438,14 @@ export default function OperationsClient() {
 
     const willShow = !showActivityLog
 
-    try {      if (willShow) {
+    try {
+      if (willShow) {
         // Load activity data when opening
         const { getRecentActivity } = await import('@/lib/user-management-queries')
         const activity = await getRecentActivity(50)
         setActivityData(activity || [])
 
-        toast.info('Activity Log' recent activities`
-        })
+        toast.info("Activity Log: " + (activity?.length || 0) + " recent activities")
       } else {
         toast.info('Activity Log')
       }
@@ -459,14 +468,15 @@ export default function OperationsClient() {
       return
     }
 
-    try {      // Use getAllUsers from user-management-queries
+    try {
+      // Use getAllUsers from user-management-queries
       const { getAllUsers } = await import('@/lib/user-management-queries')
       const users = await getAllUsers()
 
       setTeamMembers(users || [])
 
-      toast.success('Operations Refreshed' team members successfully`
-      })      announce('Operations refreshed successfully', 'polite')
+      toast.success("Operations Refreshed: " + (users?.length || 0) + " team members successfully")
+      announce('Operations refreshed successfully', 'polite')
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Refresh failed'
       toast.error('Refresh Failed')
@@ -488,7 +498,8 @@ export default function OperationsClient() {
     }
 
     try {
-      setIsCreatingItem(true)      // For tasks, we can use projects or tasks API
+      setIsCreatingItem(true)
+      // For tasks, we can use projects or tasks API
       if (newItemData.type === 'task') {
         const response = await fetch('/api/tasks', {
           method: 'POST',
@@ -504,11 +515,12 @@ export default function OperationsClient() {
         })
 
         if (!response.ok) {
-          // Fallback: Just show success for demo        }
+          // Fallback: Just show success for demo
+        }
       }
 
-      toast.success('Item Created' "${newItemData.name}" has been created successfully`
-      })      announce(`${newItemData.type} created successfully`, 'polite')
+      toast.success("Item Created: \"" + newItemData.name + "\" has been created successfully")
+      announce(newItemData.type + " created successfully", 'polite')
 
       // Reset form and close dialog
       setNewItemData({ name: '', type: 'task', description: '', priority: 'medium', assignee: '' })
@@ -534,7 +546,8 @@ export default function OperationsClient() {
     }
 
     try {
-      setIsExporting(true)      // Prepare export data based on selections
+      setIsExporting(true)
+      // Prepare export data based on selections
       const dataToExport: any = {
         exportedAt: new Date().toISOString(),
         exportedBy: userId,
@@ -617,8 +630,8 @@ export default function OperationsClient() {
       document.body.removeChild(link)
       URL.revokeObjectURL(url)
 
-      toast.success('Export Complete'`
-      })      announce('Data exported successfully', 'polite')
+      toast.success("Export Complete: " + filename)
+      announce('Data exported successfully', 'polite')
 
       setShowExportDialog(false)
     } catch (error) {
@@ -639,7 +652,8 @@ export default function OperationsClient() {
     }
 
     try {
-      setIsSavingSettings(true)      // Save settings to localStorage and optionally to backend
+      setIsSavingSettings(true)
+      // Save settings to localStorage and optionally to backend
       localStorage.setItem('operations-settings', JSON.stringify(settingsData))
 
       // Try to save to backend if available
@@ -653,10 +667,15 @@ export default function OperationsClient() {
           })
         })
 
-        if (!response.ok) {        }
-      } catch {      }
+        if (!response.ok) {
+          // Settings saved locally only
+        }
+      } catch {
+        // Settings saved locally only
+      }
 
-      toast.success('Settings Saved')      announce('Settings saved successfully', 'polite')
+      toast.success("Settings Saved")
+      announce('Settings saved successfully', 'polite')
 
       setShowSettingsDialog(false)
     } catch (error) {

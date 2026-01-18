@@ -158,8 +158,7 @@ export function BusinessIntelligenceClient() {
       toast.error('Please fill in all required fields')
       return
     }
-    toast.success(`Goal "${goalName}" added successfully` in ${goalCategory}`
-    })
+    toast.success(`Goal "${goalName}" added successfully in ${goalCategory}`)
     setGoalName('')
     setGoalTarget('')
     setGoalCategory('revenue')
@@ -174,8 +173,7 @@ export function BusinessIntelligenceClient() {
 
   // Handle apply filters
   const handleApplyFilters = () => {
-    toast.success('Filters applied', Status: ${filterStatus}`
-    })
+    toast.success(`Filters applied: Status: ${filterStatus}`)
     setShowFilterDialog(false)
   }
 

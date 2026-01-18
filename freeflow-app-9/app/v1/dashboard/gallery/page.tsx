@@ -138,7 +138,8 @@ export default function GalleryPage() {
         a.download = item.name
         a.click()
         window.URL.revokeObjectURL(url)
-      }      return true
+      }
+    return true
     }
 
     toast.promise(downloadPromise(), {
@@ -162,7 +163,8 @@ export default function GalleryPage() {
 
       if (!response.ok) {
         throw new Error('Failed to generate share link')
-      }      return true
+      }
+    return true
     }
 
     toast.promise(sharePromise(), {
@@ -195,7 +197,8 @@ export default function GalleryPage() {
         throw new Error('Failed to delete item')
       }
 
-      setGalleryItems(galleryItems.filter(i => i.id !== itemToDelete.id))      return true
+      setGalleryItems(galleryItems.filter(i => i.id !== itemToDelete.id))
+    return true
     }
 
     toast.promise(deletePromise(), {
@@ -212,7 +215,8 @@ export default function GalleryPage() {
       return
     }
 
-    const itemCount = selectedItems.length    const bulkDownloadPromise = async () => {
+    const itemCount = selectedItems.length
+    const bulkDownloadPromise = async () => {
       const response = await fetch('/api/gallery/bulk-download', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -221,7 +225,8 @@ export default function GalleryPage() {
 
       if (!response.ok) {
         throw new Error('Failed to prepare download')
-      }      setSelectedItems([])
+      }
+      setSelectedItems([])
       return true
     }
 

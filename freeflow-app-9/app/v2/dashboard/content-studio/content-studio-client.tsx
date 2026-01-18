@@ -851,7 +851,7 @@ export default function ContentStudioClient() {
                         <div className="flex items-center gap-3">
                           <div
                             className="w-8 h-8 rounded-lg flex items-center justify-center"
-                            style={{ backgroundColor: `${type.color}20` }}
+                            style={{ backgroundColor: type.color + '20' }}
                           >
                             <FileText className="w-4 h-4" style={{ color: type.color }} />
                           </div>
@@ -1087,7 +1087,7 @@ export default function ContentStudioClient() {
                     <div className="flex items-start justify-between mb-4">
                       <div
                         className="w-12 h-12 rounded-xl flex items-center justify-center"
-                        style={{ backgroundColor: `${type.color}20` }}
+                        style={{ backgroundColor: type.color + '20' }}
                       >
                         <FileText className="w-6 h-6" style={{ color: type.color }} />
                       </div>
@@ -1768,7 +1768,7 @@ export default function ContentStudioClient() {
             <AIInsightsPanel
               insights={mockContentAIInsights}
               title="Content Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -1881,7 +1881,7 @@ export default function ContentStudioClient() {
                   <div className="flex items-center gap-4">
                     <div
                       className="w-16 h-16 rounded-xl flex items-center justify-center"
-                      style={{ backgroundColor: `${selectedContentType.color}20` }}
+                      style={{ backgroundColor: selectedContentType.color + '20' }}
                     >
                       <FileText className="w-8 h-8" style={{ color: selectedContentType.color }} />
                     </div>

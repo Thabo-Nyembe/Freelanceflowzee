@@ -225,11 +225,11 @@ const ScoreCircle = ({ score, size = 'lg', label }: { score: number; size?: 'sm'
           strokeLinecap="round"
           strokeDasharray={circumference}
           strokeDashoffset={offset}
-          className={`transition-all duration-1000 ${getScoreRingColor(score)}`}
+          className={'transition-all duration-1000 ' + getScoreRingColor(score)}
         />
       </svg>
       <div className="absolute inset-0 flex items-center justify-center">
-        <span className={`font-bold ${size === 'lg' ? 'text-3xl' : size === 'md' ? 'text-xl' : 'text-lg'} ${getScoreColor(score)}`}>
+        <span className={'font-bold ' + (size === 'lg' ? 'text-3xl' : size === 'md' ? 'text-xl' : 'text-lg') + ' ' + getScoreColor(score)}>
           {score}
         </span>
       </div>
@@ -357,8 +357,7 @@ export default function PerformanceClient() {
       }
 
       setIsRunning(true)
-      toast.info('Running performance audit...'`
-      })
+      toast.info('Running performance audit...')
 
       // Call performance API to run test
       const apiRes = await fetch('/api/performance', {
@@ -438,7 +437,7 @@ export default function PerformanceClient() {
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `performance-report-${new Date().toISOString().split('T')[0]}.json`
+      a.download = "performance-report-" + new Date().toISOString().split('T')[0] + ".json"
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
@@ -740,22 +739,22 @@ export default function PerformanceClient() {
               <div className="flex items-center gap-1 p-1 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
                 <button
                   onClick={() => setSelectedDevice('mobile')}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all ${
+                  className={"flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all " + (
                     selectedDevice === 'mobile'
                       ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
                       : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
-                  }`}
+                  )}
                 >
                   <Smartphone className="h-4 w-4" />
                   Mobile
                 </button>
                 <button
                   onClick={() => setSelectedDevice('desktop')}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all ${
+                  className={"flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all " + (
                     selectedDevice === 'desktop'
                       ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
                       : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
-                  }`}
+                  )}
                 >
                   <Monitor className="h-4 w-4" />
                   Desktop
@@ -812,11 +811,11 @@ export default function PerformanceClient() {
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Core Web Vitals</h3>
                   <p className="text-sm text-gray-500">Real-world user experience metrics</p>
                 </div>
-                <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                <span className={'px-3 py-1 rounded-full text-sm font-medium ' + (
                   currentTest.vitals.every(v => v.rating === 'good')
                     ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
                     : 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300'
-                }`}>
+                )}>
                   {currentTest.vitals.filter(v => v.rating === 'good').length}/{currentTest.vitals.length} Passed
                 </span>
               </div>
@@ -828,7 +827,7 @@ export default function PerformanceClient() {
                     <p className="text-2xl font-bold text-gray-900 dark:text-white">
                       {vital.value}{vital.unit}
                     </p>
-                    <span className={`inline-block mt-2 px-2 py-0.5 rounded text-xs font-medium ${getVitalColor(vital.rating)}`}>
+                    <span className={'inline-block mt-2 px-2 py-0.5 rounded text-xs font-medium ' + getVitalColor(vital.rating)}>
                       {vital.rating.replace('-', ' ')}
                     </span>
                   </div>
@@ -920,13 +919,13 @@ export default function PerformanceClient() {
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className={`text-2xl font-bold ${
+                        <p className={'text-2xl font-bold ' + (
                           vital.rating === 'good' ? 'text-green-600' :
                           vital.rating === 'needs-improvement' ? 'text-orange-600' : 'text-red-600'
-                        }`}>
+                        )}>
                           {vital.value}{vital.unit}
                         </p>
-                        <span className={`inline-block mt-1 px-2 py-0.5 rounded text-xs font-medium ${getVitalColor(vital.rating)}`}>
+                        <span className={'inline-block mt-1 px-2 py-0.5 rounded text-xs font-medium ' + getVitalColor(vital.rating)}>
                           {vital.rating.replace('-', ' ')}
                         </span>
                       </div>
@@ -934,16 +933,16 @@ export default function PerformanceClient() {
                     {/* Progress Bar */}
                     <div className="relative h-3 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
                       <div
-                        className={`absolute left-0 top-0 h-full rounded-full transition-all ${
+                        className={'absolute left-0 top-0 h-full rounded-full transition-all ' + (
                           vital.rating === 'good' ? 'bg-green-500' :
                           vital.rating === 'needs-improvement' ? 'bg-orange-500' : 'bg-red-500'
-                        }`}
-                        style={{ width: `${Math.min((vital.value / vital.target.needsImprovement) * 100, 100)}%` }}
+                        )}
+                        style={{ width: Math.min((vital.value / vital.target.needsImprovement) * 100, 100) + '%' }}
                       />
                       {/* Threshold markers */}
                       <div
                         className="absolute top-0 h-full w-0.5 bg-green-700"
-                        style={{ left: `${(vital.target.good / vital.target.needsImprovement) * 100}%` }}
+                        style={{ left: ((vital.target.good / vital.target.needsImprovement) * 100) + '%' }}
                       />
                     </div>
                     <div className="flex justify-between mt-2 text-xs text-gray-500">
@@ -965,11 +964,11 @@ export default function PerformanceClient() {
                   <button
                     key={cat}
                     onClick={() => setCategoryFilter(cat)}
-                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                    className={'px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ' + (
                       categoryFilter === cat
                         ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
                         : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
-                    }`}
+                    )}
                   >
                     {cat === 'all' ? 'All' : cat.replace('-', ' ')}
                   </button>
@@ -1031,11 +1030,11 @@ export default function PerformanceClient() {
               {mockBudgets.map(budget => (
                 <div
                   key={budget.id}
-                  className={`bg-white dark:bg-gray-800 rounded-2xl border-2 p-6 ${
+                  className={'bg-white dark:bg-gray-800 rounded-2xl border-2 p-6 ' + (
                     budget.status === 'pass' ? 'border-green-200 dark:border-green-800' :
                     budget.status === 'warning' ? 'border-orange-200 dark:border-orange-800' :
                     'border-red-200 dark:border-red-800'
-                  }`}
+                  )}
                 >
                   <div className="flex items-center justify-between mb-3">
                     <h4 className="font-medium text-gray-900 dark:text-white">{budget.name}</h4>
@@ -1053,9 +1052,9 @@ export default function PerformanceClient() {
                         Target: {budget.target} {budget.unit}
                       </p>
                     </div>
-                    <span className={`text-sm font-medium ${
+                    <span className={'text-sm font-medium ' + (
                       budget.current <= budget.target ? 'text-green-600' : 'text-red-600'
-                    }`}>
+                    )}>
                       {budget.current <= budget.target ? (
                         <span className="flex items-center gap-1">
                           <ArrowDown className="h-4 w-4" />
@@ -1071,11 +1070,11 @@ export default function PerformanceClient() {
                   </div>
                   <div className="h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
                     <div
-                      className={`h-full rounded-full transition-all ${
+                      className={'h-full rounded-full transition-all ' + (
                         budget.status === 'pass' ? 'bg-green-500' :
                         budget.status === 'warning' ? 'bg-orange-500' : 'bg-red-500'
-                      }`}
-                      style={{ width: `${Math.min((budget.current / budget.target) * 100, 100)}%` }}
+                      )}
+                      style={{ width: Math.min((budget.current / budget.target) * 100, 100) + '%' }}
                     />
                   </div>
                 </div>
@@ -1095,12 +1094,12 @@ export default function PerformanceClient() {
                     <div key={i} className="flex-1 flex flex-col items-center gap-2">
                       <div className="w-full relative" style={{ height: '200px' }}>
                         <div
-                          className={`absolute bottom-0 w-full rounded-t-lg transition-all ${
+                          className={'absolute bottom-0 w-full rounded-t-lg transition-all ' + (
                             day.performance >= 90 ? 'bg-gradient-to-t from-green-600 to-green-400' :
                             day.performance >= 50 ? 'bg-gradient-to-t from-orange-600 to-orange-400' :
                             'bg-gradient-to-t from-red-600 to-red-400'
-                          }`}
-                          style={{ height: `${height}%` }}
+                          )}
+                          style={{ height: height + '%' }}
                         />
                       </div>
                       <span className="text-xs text-gray-500">
@@ -1143,7 +1142,7 @@ export default function PerformanceClient() {
                           </span>
                         </td>
                         <td className="py-4">
-                          <span className={`font-semibold ${getScoreColor(test.scores.performance)}`}>
+                          <span className={'font-semibold ' + getScoreColor(test.scores.performance)}>
                             {test.scores.performance}
                           </span>
                         </td>
@@ -1190,11 +1189,11 @@ export default function PerformanceClient() {
                     <button
                       key={item.id}
                       onClick={() => setSettingsTab(item.id)}
-                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all ${
+                      className={'w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all ' + (
                         settingsTab === item.id
                           ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 font-medium'
                           : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
-                      }`}
+                      )}
                     >
                       <item.icon className="w-5 h-5" />
                       {item.label}
@@ -1941,22 +1940,22 @@ export default function PerformanceClient() {
               <div className="flex gap-3">
                 <button
                   onClick={() => setSelectedDevice('mobile')}
-                  className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-xl border-2 transition-colors ${
+                  className={'flex-1 flex items-center justify-center gap-2 p-3 rounded-xl border-2 transition-colors ' + (
                     selectedDevice === 'mobile'
                       ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/30'
                       : 'border-gray-200 dark:border-gray-700'
-                  }`}
+                  )}
                 >
                   <Smartphone className="h-5 w-5" />
                   Mobile
                 </button>
                 <button
                   onClick={() => setSelectedDevice('desktop')}
-                  className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-xl border-2 transition-colors ${
+                  className={'flex-1 flex items-center justify-center gap-2 p-3 rounded-xl border-2 transition-colors ' + (
                     selectedDevice === 'desktop'
                       ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/30'
                       : 'border-gray-200 dark:border-gray-700'
-                  }`}
+                  )}
                 >
                   <Monitor className="h-5 w-5" />
                   Desktop
@@ -2169,11 +2168,11 @@ export default function PerformanceClient() {
                   <div className="flex items-center gap-2">
                     <div className="w-32 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                       <div
-                        className={`h-full rounded-full ${getScoreBg(item.score)}`}
-                        style={{ width: `${item.score}%` }}
+                        className={'h-full rounded-full ' + getScoreBg(item.score)}
+                        style={{ width: item.score + '%' }}
                       />
                     </div>
-                    <span className={`text-sm font-medium ${getScoreColor(item.score)}`}>{item.score}</span>
+                    <span className={'text-sm font-medium ' + getScoreColor(item.score)}>{item.score}</span>
                   </div>
                 </div>
               ))}
@@ -2219,7 +2218,7 @@ export default function PerformanceClient() {
                     <tr>
                       <td className="py-3 text-sm text-gray-600 dark:text-gray-400">Performance</td>
                       {mockPageTests.slice(0, 3).map(test => (
-                        <td key={test.id} className={`py-3 font-medium ${getScoreColor(test.scores.performance)}`}>
+                        <td key={test.id} className={'py-3 font-medium ' + getScoreColor(test.scores.performance)}>
                           {test.scores.performance}
                         </td>
                       ))}
@@ -2227,7 +2226,7 @@ export default function PerformanceClient() {
                     <tr>
                       <td className="py-3 text-sm text-gray-600 dark:text-gray-400">Accessibility</td>
                       {mockPageTests.slice(0, 3).map(test => (
-                        <td key={test.id} className={`py-3 font-medium ${getScoreColor(test.scores.accessibility)}`}>
+                        <td key={test.id} className={'py-3 font-medium ' + getScoreColor(test.scores.accessibility)}>
                           {test.scores.accessibility}
                         </td>
                       ))}
@@ -2371,7 +2370,7 @@ export default function PerformanceClient() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
         <AIInsightsPanel
           insights={mockPerfAIInsights}
-          onAskQuestion={(q) => toast.info('Question Submitted' })}
+          onAskQuestion={(q) => toast.info('Question Submitted')}
         />
         <PredictiveAnalytics predictions={mockPerfPredictions} />
       </div>

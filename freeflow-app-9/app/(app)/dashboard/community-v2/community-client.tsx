@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useCallback, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
 import { useCommunity } from '@/lib/hooks/use-community'
@@ -564,8 +566,6 @@ export default function CommunityClient() {
   // Get current user
   useEffect(() => {
     const getUser = async () => {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (user) setUserId(user.id)
     }
@@ -615,8 +615,6 @@ export default function CommunityClient() {
 
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('community_channels').insert({
         user_id: userId,
         name: channelForm.name.toLowerCase().replace(/\s+/g, '-'),
@@ -631,7 +629,7 @@ export default function CommunityClient() {
 
       if (error) throw error
 
-      toast.success('Channel created' has been created successfully` })
+      toast.success(`${channelForm.name} has been created successfully`)
       setShowCreateChannel(false)
       setChannelForm({ name: '', type: 'text', description: '', isPrivate: false })
     } catch (error: any) {
@@ -653,8 +651,6 @@ export default function CommunityClient() {
       // Generate a unique invite code
       const inviteCode = Math.random().toString(36).substring(2, 10).toUpperCase()
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('community_invites').insert({
         user_id: userId,
         community_id: communities?.[0]?.id,
@@ -685,8 +681,6 @@ export default function CommunityClient() {
 
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('community_mod_actions').insert({
         user_id: userId,
         community_id: communities?.[0]?.id,
@@ -698,14 +692,12 @@ export default function CommunityClient() {
       if (error) throw error
 
       // Update member status
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       await supabase.from('community_members')
         .update({ status: 'banned', banned_at: new Date().toISOString() })
         .eq('user_id', memberId)
         .eq('community_id', communities?.[0]?.id)
 
-      toast.success('Member banned' has been banned from the community` })
+      toast.success('Member banned from the community')
       refreshMembers()
     } catch (error: any) {
       toast.error('Failed to ban member')
@@ -723,8 +715,6 @@ export default function CommunityClient() {
 
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('community_posts')
         .update({ is_pinned: true, pinned_at: new Date().toISOString(), pinned_by: userId })
         .eq('id', messageId)
@@ -754,8 +744,6 @@ export default function CommunityClient() {
 
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('community_events').insert({
         user_id: userId,
         community_id: communities?.[0]?.id,
@@ -771,7 +759,7 @@ export default function CommunityClient() {
 
       if (error) throw error
 
-      toast.success('Event created'" has been scheduled` })
+      toast.success(`Event created: "${eventForm.name}" has been scheduled`)
       setShowCreateEvent(false)
       setEventForm({ name: '', description: '', entityType: 'voice', scheduledStart: '', scheduledEnd: '', location: '' })
       refreshEvents()
@@ -796,8 +784,6 @@ export default function CommunityClient() {
 
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('community_roles').insert({
         user_id: userId,
         community_id: communities?.[0]?.id,
@@ -812,7 +798,7 @@ export default function CommunityClient() {
 
       if (error) throw error
 
-      toast.success('Role created'" role has been created` })
+      toast.success(`Role created: role has been created`)
       setShowCreateRole(false)
       setRoleForm({ name: '', color: '#6b7280', isHoisted: false, isMentionable: false })
     } catch (error: any) {
@@ -833,8 +819,6 @@ export default function CommunityClient() {
 
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('community_posts').insert({
         user_id: userId,
         community_id: communities?.[0]?.id,
@@ -874,14 +858,10 @@ export default function CommunityClient() {
 
       if (existing) {
         // Remove interest
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         await supabase.from('community_event_attendees').delete().eq('id', existing.id)
         toast.success('Interest removed')
       } else {
         // Add interest
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         await supabase.from('community_event_attendees').insert({
           event_id: eventId,
           user_id: userId,
@@ -957,12 +937,8 @@ export default function CommunityClient() {
         .single()
 
       if (existing) {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         await supabase.from('community_post_likes').delete().eq('id', existing.id)
       } else {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         await supabase.from('community_post_likes').insert({
           post_id: postId,
           user_id: userId,
@@ -1010,8 +986,6 @@ export default function CommunityClient() {
       return
     }
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('community_posts')
         .select('*')
@@ -1120,13 +1094,9 @@ export default function CommunityClient() {
         .single()
 
       if (existing) {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         await supabase.from('user_follows').delete().eq('id', existing.id)
         toast.success('Unfollowed user')
       } else {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         await supabase.from('user_follows').insert({
           follower_id: userId,
           following_id: targetUserId
@@ -2231,8 +2201,6 @@ export default function CommunityClient() {
                             setIsSubmitting(true)
                             try {
                               const webhookToken = Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2)
-                              const { createClient } = await import('@/lib/supabase/client')
-                              const supabase = createClient()
                               const { error } = await supabase.from('community_webhooks').insert({
                                 user_id: userId,
                                 community_id: communities?.[0]?.id,
@@ -2347,8 +2315,6 @@ export default function CommunityClient() {
                             }
                             setIsSubmitting(true)
                             try {
-                              const { createClient } = await import('@/lib/supabase/client')
-                              const supabase = createClient()
                               const { data, error } = await supabase.from('community')
                                 .select('*, community_members(*), community_posts(*), community_events(*)')
                                 .eq('id', communities?.[0]?.id)
@@ -2436,8 +2402,6 @@ export default function CommunityClient() {
                               if (!confirm('Are you sure you want to prune inactive members? This action cannot be undone.')) return
                               setIsSubmitting(true)
                               try {
-                                const { createClient } = await import('@/lib/supabase/client')
-                                const supabase = createClient()
                                 const { error } = await supabase.from('community_members')
                                   .update({ status: 'pruned', pruned_at: new Date().toISOString() })
                                   .eq('community_id', communities?.[0]?.id)
@@ -2469,8 +2433,6 @@ export default function CommunityClient() {
                               if (!confirm('Are you sure you want to delete all messages? This action cannot be undone.')) return
                               setIsSubmitting(true)
                               try {
-                                const { createClient } = await import('@/lib/supabase/client')
-                                const supabase = createClient()
                                 const { error } = await supabase.from('community_posts')
                                   .update({ deleted_at: new Date().toISOString() })
                                   .eq('community_id', communities?.[0]?.id)

@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
 import { useAccessLogs, type AccessLog as HookAccessLog } from '@/lib/hooks/use-access-logs'
@@ -79,6 +81,9 @@ import {
 
 import { Switch } from '@/components/ui/switch'
 import { CardDescription } from '@/components/ui/card'
+
+// Initialize Supabase client once at module level
+const supabase = createClient()
 
 // Types
 type LogStatus = 'success' | 'failed' | 'blocked' | 'warning' | 'info'
@@ -599,8 +604,6 @@ export default function AccessLogsClient() {
   // Create access log
   const createAccessLog = useCallback(async (logData: Partial<DbAccessLog>) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('access_logs')
         .insert([{
@@ -651,8 +654,6 @@ export default function AccessLogsClient() {
   // Export logs
   const exportLogs = useCallback(async () => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('access_logs')
         .select('*')
@@ -681,8 +682,6 @@ export default function AccessLogsClient() {
       const thirtyDaysAgo = new Date()
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('access_logs')
         .delete()
@@ -798,7 +797,7 @@ export default function AccessLogsClient() {
 
   const handleFilterByIP = (ip: string) => {
     setSearchQuery(ip)
-    toast.info('Filter applied'` })
+    toast.info(`Filtering by IP: ${ip}`)
   }
 
   const handleBlockIP = (ip: string) => {

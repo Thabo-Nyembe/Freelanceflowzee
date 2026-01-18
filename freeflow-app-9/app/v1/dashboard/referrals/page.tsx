@@ -181,8 +181,7 @@ export default function ReferralsPage() {
           break
       }
 
-      toast.success('Opening share dialog...'`
-      })
+      toast.success(`Opening share dialog for ${platform}...`)
     } catch (error) {
       logger.error('Failed to share referral', { error, platform })
       toast.error('Failed to open share dialog')

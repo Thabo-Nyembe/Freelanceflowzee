@@ -1,5 +1,7 @@
 "use client"
 
+import { createClient } from '@/lib/supabase/client'
+
 import React, { useState, useMemo, useEffect, useCallback } from 'react'
 import dynamic from 'next/dynamic'
 import { toast } from 'sonner'
@@ -63,6 +65,9 @@ import {
 
 // Lazy-loaded Enhanced & Competitive Upgrade Components for code splitting
 import { TabContentSkeleton, ShippingAnalyticsSkeleton } from '@/components/dashboard/lazy'
+
+// Initialize Supabase client once at module level
+const supabase = createClient()
 
 const AIInsightsPanel = dynamic(
   () => import('@/components/ui/competitive-upgrades').then(mod => ({ default: mod.AIInsightsPanel })),
@@ -881,13 +886,9 @@ export default function ShippingClient() {
   // Fetch shipments from Supabase
   const fetchShipments = useCallback(async () => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('shipments')
         .select('*')
@@ -928,16 +929,12 @@ export default function ShippingClient() {
     }
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to create shipments')
         return
       }
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('shipments').insert({
         user_id: user.id,
         recipient_name: formState.recipient_name,
@@ -974,8 +971,6 @@ export default function ShippingClient() {
   // Update shipment status
   const handleUpdateStatus = async (shipmentId: string, newStatus: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('shipments')
         .update({ status: newStatus, updated_at: new Date().toISOString() })
@@ -994,8 +989,6 @@ export default function ShippingClient() {
   // Delete shipment
   const handleDeleteShipment = async (shipmentId: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('shipments')
         .delete()
@@ -1016,15 +1009,12 @@ export default function ShippingClient() {
     try {
       // Update status to label_created if pending
       if (shipment.status === 'pending') {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         await supabase
           .from('shipments')
           .update({ status: 'label_created', updated_at: new Date().toISOString() })
           .eq('tracking_number', shipment.trackingNumber)
       }
-      toast.success('Label ready' is ready to print`
-      })
+      toast.success(`Label ready: "${shipment.trackingNumber}" is ready to print`)
       fetchShipments()
     } catch (error) {
       console.error('Error:', error)
@@ -1036,16 +1026,13 @@ export default function ShippingClient() {
   const handleTrackShipment = async (shipment: Shipment) => {
     try {
       // Add tracking event
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       await supabase.from('shipment_tracking').insert({
         shipment_id: shipment.id,
         status: 'Tracking viewed',
         description: 'Customer viewed tracking information',
         location: shipment.destination.city || 'Unknown',
       })
-      toast.info('Tracking'`
-      })
+      toast.info(`Tracking: viewing shipment ${shipment.id}`)
     } catch (error) {
       console.error('Error:', error)
     }
@@ -1058,8 +1045,6 @@ export default function ShippingClient() {
       return
     }
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
@@ -1073,13 +1058,10 @@ export default function ShippingClient() {
         tracking_number: `BATCH${Date.now()}${orderId}`,
       }))
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('shipments').insert(shipmentsToCreate)
       if (error) throw error
 
-      toast.success('Batch shipment created' orders queued for shipment`
-      })
+      toast.success(`Batch shipment created orders queued for shipment`)
       setSelectedOrders([])
       fetchShipments()
     } catch (error) {
@@ -1091,8 +1073,6 @@ export default function ShippingClient() {
   // Cancel shipment
   const handleCancelShipment = async (trackingNumber: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('shipments')
         .update({ status: 'cancelled', updated_at: new Date().toISOString() })
@@ -1100,8 +1080,7 @@ export default function ShippingClient() {
 
       if (error) throw error
 
-      toast.info('Shipment cancelled' has been cancelled`
-      })
+      toast.info(`Shipment cancelled: "${trackingNumber}" has been cancelled`)
       fetchShipments()
     } catch (error) {
       console.error('Error:', error)
@@ -1112,8 +1091,6 @@ export default function ShippingClient() {
   // Export shipments
   const handleExportShipments = async () => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('shipments')
         .select('*')
@@ -2255,16 +2232,12 @@ export default function ShippingClient() {
                           className="bg-gradient-to-r from-blue-500 to-cyan-600 text-white"
                           onClick={async () => {
                             try {
-                              const { createClient } = await import('@/lib/supabase/client')
-                              const supabase = createClient()
                               const { data: { user } } = await supabase.auth.getUser()
                               if (!user) {
                                 toast.error('Please sign in to save settings')
                                 return
                               }
                               // Save origin address to user settings
-                              const { createClient } = await import('@/lib/supabase/client')
-                              const supabase = createClient()
                               const { error } = await supabase
                                 .from('user_settings')
                                 .upsert({
@@ -2983,10 +2956,10 @@ export default function ShippingClient() {
                         const url = URL.createObjectURL(blob)
                         const a = document.createElement('a')
                         a.href = url
-                        a.download = `shipment-${selectedShipment.id}.json`
+                        a.download = 'shipment-' + selectedShipment.id + '.json'
                         a.click()
                         URL.revokeObjectURL(url)
-                        toast.success('Shipment downloaded' details saved` })
+                        toast.success('Shipment downloaded: details saved')
                       }
                     }}>
                       <Download className="w-4 h-4 mr-2" />
@@ -3026,8 +2999,7 @@ export default function ShippingClient() {
                     fileInput.onchange = async (e) => {
                       const file = (e.target as HTMLInputElement).files?.[0]
                       if (file) {
-                        toast.success('File selected' ready for import`
-                        })
+                        toast.success('File selected: ready for import')
                         // Process file would go here
                       }
                     }
@@ -3373,7 +3345,7 @@ export default function ShippingClient() {
                   o.customer.toLowerCase().includes('search') || o.id.toLowerCase().includes('search')
                 )
                 if (searchResults.length > 0) {
-                  toast.success('Orders found' matching orders` })
+                  toast.success('Orders found: matching orders')
                 } else {
                   toast.info('No orders found')
                 }
@@ -3446,11 +3418,8 @@ export default function ShippingClient() {
 
                     if (shipments && shipments.length > 0) {
                       const shipment = shipments[0]
-                      toast.success('Shipment found' - ${shipment.recipient_name || 'Unknown recipient'}`
-                      })
+                      toast.success('Shipment found - ' + (shipment.recipient_name || 'Unknown recipient'))
                       // Log tracking view
-                      const { createClient } = await import('@/lib/supabase/client')
-                      const supabase = createClient()
                       await supabase.from('shipment_tracking').insert({
                         shipment_id: shipment.id,
                         status: 'Tracking viewed',
@@ -3461,8 +3430,7 @@ export default function ShippingClient() {
                       // Check mock data
                       const mockShipment = mockShipments.find(s => s.trackingNumber === trackingInput.trim())
                       if (mockShipment) {
-                        toast.success('Shipment found' - ${mockShipment.destination.name}`
-                        })
+                        toast.success('Shipment found - ' + mockShipment.destination.name)
                       } else {
                         toast.info('No shipment found')
                       }
@@ -3525,12 +3493,8 @@ export default function ShippingClient() {
               <Button onClick={async () => {
                 toast.loading('Saving alert preferences...', { id: 'save-alerts' })
                 try {
-                  const { createClient } = await import('@/lib/supabase/client')
-                  const supabase = createClient()
                   const { data: { user } } = await supabase.auth.getUser()
                   if (user) {
-                    const { createClient } = await import('@/lib/supabase/client')
-                    const supabase = createClient()
                     await supabase.from('shipping_preferences').upsert({
                       user_id: user.id,
                       alert_preferences: { email: true, sms: false, push: true },
@@ -3708,7 +3672,7 @@ export default function ShippingClient() {
               <Button variant="outline" onClick={() => setShowBatchPrintDialog(false)}>Cancel</Button>
               <Button onClick={() => {
                 window.print()
-                toast.success('Labels sent to printer' labels queued` })
+                toast.success('Labels sent to printer: labels queued')
                 setShowBatchPrintDialog(false)
               }}>Print All</Button>
             </div>
@@ -3737,10 +3701,10 @@ export default function ShippingClient() {
                 const url = URL.createObjectURL(blob)
                 const a = document.createElement('a')
                 a.href = url
-                a.download = `shipping-labels-${new Date().toISOString().split('T')[0]}.json`
+                a.download = 'shipping-labels-' + new Date().toISOString().split('T')[0] + '.json'
                 a.click()
                 URL.revokeObjectURL(url)
-                toast.success('Labels downloaded' labels exported` })
+                toast.success('Labels downloaded: labels exported')
                 setShowDownloadAllLabelsDialog(false)
               }}>Download</Button>
             </div>
@@ -3816,7 +3780,7 @@ export default function ShippingClient() {
               <Button onClick={() => {
                 const foundLabel = mockLabels.find(l => l.trackingNumber.includes('TRK'))
                 if (foundLabel) {
-                  toast.success('Label found' - ${foundLabel.trackingNumber}` })
+                  toast.success('Label found - ' + foundLabel.trackingNumber)
                 } else {
                   toast.info('Label not found')
                 }
@@ -3876,12 +3840,8 @@ export default function ShippingClient() {
               <Button onClick={async () => {
                 toast.loading('Saving label settings...', { id: 'save-label-settings' })
                 try {
-                  const { createClient } = await import('@/lib/supabase/client')
-                  const supabase = createClient()
                   const { data: { user } } = await supabase.auth.getUser()
                   if (user) {
-                    const { createClient } = await import('@/lib/supabase/client')
-                    const supabase = createClient()
                     await supabase.from('shipping_preferences').upsert({
                       user_id: user.id,
                       label_format: '4x6 PDF',
@@ -4010,12 +3970,8 @@ export default function ShippingClient() {
               <Button onClick={async () => {
                 toast.loading('Adding carrier...', { id: 'add-carrier' })
                 try {
-                  const { createClient } = await import('@/lib/supabase/client')
-                  const supabase = createClient()
                   const { data: { user } } = await supabase.auth.getUser()
                   if (user) {
-                    const { createClient } = await import('@/lib/supabase/client')
-                    const supabase = createClient()
                     await supabase.from('carrier_credentials').insert({
                       user_id: user.id,
                       carrier_code: 'NEW',
@@ -4104,8 +4060,7 @@ export default function ShippingClient() {
                     }))
                   ).sort((a, b) => parseFloat(a.rate) - parseFloat(b.rate))
 
-                  toast.success('Rates retrieved' ${rates[0].service} - $${rates[0].rate}`
-                  })
+                  toast.success('Rates retrieved: ' + rates[0].service + ' - $' + rates[0].rate)
                   setShowCompareRatesDialog(false)
                 }}
               >
@@ -4137,12 +4092,8 @@ export default function ShippingClient() {
               <Button onClick={async () => {
                 toast.loading('Saving carrier configuration...', { id: 'save-carrier-config' })
                 try {
-                  const { createClient } = await import('@/lib/supabase/client')
-                  const supabase = createClient()
                   const { data: { user } } = await supabase.auth.getUser()
                   if (user && selectedCarrier) {
-                    const { createClient } = await import('@/lib/supabase/client')
-                    const supabase = createClient()
                     await supabase.from('carrier_credentials').upsert({
                       user_id: user.id,
                       carrier_code: selectedCarrier.code,
@@ -4176,16 +4127,12 @@ export default function ShippingClient() {
                     size="sm"
                     onClick={async () => {
                       try {
-                        const { createClient } = await import('@/lib/supabase/client')
-                        const supabase = createClient()
                         const { data: { user } } = await supabase.auth.getUser()
                         if (!user) {
                           toast.error('Please sign in to update API keys')
                           return
                         }
                         // Save updated API key reference
-                        const { createClient } = await import('@/lib/supabase/client')
-                        const supabase = createClient()
                         const { error } = await supabase
                           .from('carrier_credentials')
                           .upsert({
@@ -4195,8 +4142,7 @@ export default function ShippingClient() {
                           }, { onConflict: 'user_id,carrier_code' })
 
                         if (error) throw error
-                        toast.success('API key updated' credentials have been updated`
-                        })
+                        toast.success('API key updated: credentials have been updated')
                       } catch (error) {
                         console.error('Error updating API key:', error)
                         toast.error('Failed to update API key')
@@ -4236,12 +4182,8 @@ export default function ShippingClient() {
               <Button onClick={async () => {
                 toast.loading('Saving insurance settings...', { id: 'save-insurance' })
                 try {
-                  const { createClient } = await import('@/lib/supabase/client')
-                  const supabase = createClient()
                   const { data: { user } } = await supabase.auth.getUser()
                   if (user) {
-                    const { createClient } = await import('@/lib/supabase/client')
-                    const supabase = createClient()
                     await supabase.from('shipping_preferences').upsert({
                       user_id: user.id,
                       insurance_enabled: true,
@@ -4281,12 +4223,8 @@ export default function ShippingClient() {
               <Button onClick={async () => {
                 toast.loading('Saving international settings...', { id: 'save-intl' })
                 try {
-                  const { createClient } = await import('@/lib/supabase/client')
-                  const supabase = createClient()
                   const { data: { user } } = await supabase.auth.getUser()
                   if (user) {
-                    const { createClient } = await import('@/lib/supabase/client')
-                    const supabase = createClient()
                     await supabase.from('shipping_preferences').upsert({
                       user_id: user.id,
                       international_enabled: true,
@@ -4639,12 +4577,8 @@ export default function ShippingClient() {
               <Button variant="destructive" onClick={async () => {
                 toast.loading('Resetting settings...', { id: 'reset-settings' })
                 try {
-                  const { createClient } = await import('@/lib/supabase/client')
-                  const supabase = createClient()
                   const { data: { user } } = await supabase.auth.getUser()
                   if (user) {
-                    const { createClient } = await import('@/lib/supabase/client')
-                    const supabase = createClient()
                     await supabase.from('shipping_preferences').delete().eq('user_id', user.id)
                   }
                   toast.success('Settings reset to defaults', { id: 'reset-settings' })
@@ -4684,18 +4618,10 @@ export default function ShippingClient() {
                 }
                 toast.loading('Deleting all shipping data...', { id: 'delete-all' })
                 try {
-                  const { createClient } = await import('@/lib/supabase/client')
-                  const supabase = createClient()
                   const { data: { user } } = await supabase.auth.getUser()
                   if (user) {
-                    const { createClient } = await import('@/lib/supabase/client')
-                    const supabase = createClient()
                     await supabase.from('shipments').delete().eq('user_id', user.id)
-                    const { createClient } = await import('@/lib/supabase/client')
-                    const supabase = createClient()
                     await supabase.from('shipping_labels').delete().eq('user_id', user.id)
-                    const { createClient } = await import('@/lib/supabase/client')
-                    const supabase = createClient()
                     await supabase.from('shipment_tracking').delete().eq('user_id', user.id)
                   }
                   setShipments([])

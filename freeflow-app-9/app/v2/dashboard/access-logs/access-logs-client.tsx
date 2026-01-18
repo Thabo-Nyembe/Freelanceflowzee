@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -75,6 +77,9 @@ import {
 
 import { Switch } from '@/components/ui/switch'
 import { CardDescription } from '@/components/ui/card'
+
+// Initialize Supabase client once at module level
+const supabase = createClient()
 
 // Types
 type LogStatus = 'success' | 'failed' | 'blocked' | 'warning' | 'info'
@@ -530,8 +535,6 @@ export default function AccessLogsClient() {
   const fetchLogs = useCallback(async () => {
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('access_logs')
         .select('*')
@@ -611,8 +614,6 @@ export default function AccessLogsClient() {
   // Create access log
   const createAccessLog = useCallback(async (logData: Partial<DbAccessLog>) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('access_logs')
         .insert([{
@@ -654,7 +655,7 @@ export default function AccessLogsClient() {
         is_suspicious: true,
         metadata: { action: 'ip_blocked', blocked_ip: ip }
       })
-      toast.success('IP blocked' has been added to blocklist` })
+      toast.success('IP blocked')
     } catch (err) {
       toast.error('Failed to block IP')
     }
@@ -663,8 +664,6 @@ export default function AccessLogsClient() {
   // Export logs
   const exportLogs = useCallback(async () => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('access_logs')
         .select('*')
@@ -693,8 +692,6 @@ export default function AccessLogsClient() {
       const thirtyDaysAgo = new Date()
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('access_logs')
         .delete()
@@ -831,7 +828,7 @@ export default function AccessLogsClient() {
 
   const handleFilterByIP = (ip: string) => {
     setSearchQuery(ip)
-    toast.info('Filter applied'` })
+    toast.info('Filter applied')
   }
 
   const handleBlockIP = (ip: string) => {
@@ -891,7 +888,7 @@ export default function AccessLogsClient() {
         const url = URL.createObjectURL(blob)
         const a = document.createElement('a')
         a.href = url
-        a.download = `access-logs-${exportDateRange}-${new Date().toISOString().split('T')[0]}.csv`
+        a.download = 'access-logs-' + exportDateRange + '-' + new Date().toISOString().split('T')[0] + '.csv'
         a.click()
         URL.revokeObjectURL(url)
       } else if (exportFormat === 'json') {
@@ -901,7 +898,7 @@ export default function AccessLogsClient() {
         const url = URL.createObjectURL(blob)
         const a = document.createElement('a')
         a.href = url
-        a.download = `access-logs-${exportDateRange}-${new Date().toISOString().split('T')[0]}.json`
+        a.download = 'access-logs-' + exportDateRange + '-' + new Date().toISOString().split('T')[0] + '.json'
         a.click()
         URL.revokeObjectURL(url)
       } else {
@@ -912,13 +909,13 @@ export default function AccessLogsClient() {
         const url = URL.createObjectURL(blob)
         const a = document.createElement('a')
         a.href = url
-        a.download = `access-logs-${exportDateRange}-${new Date().toISOString().split('T')[0]}.json`
+        a.download = 'access-logs-' + exportDateRange + '-' + new Date().toISOString().split('T')[0] + '.json'
         a.click()
         URL.revokeObjectURL(url)
         toast.info('PDF export generated as JSON')
       }
 
-      toast.success('Export completed' of access logs as ${exportFormat.toUpperCase()}` })
+      toast.success('Export completed')
       setShowExportDialog(false)
     } catch (err) {
       console.error('Export error:', err)
@@ -953,7 +950,7 @@ export default function AccessLogsClient() {
         metadata: { scope: auditScope, depth: auditDepth, score, issues, warnings, passed }
       })
 
-      toast.success('Audit completed'/100` })
+      toast.success("Audit completed - Score: " + score + "/100")
     } catch (err) {
       console.error('Audit error:', err)
       toast.error('Audit failed')
@@ -977,8 +974,7 @@ export default function AccessLogsClient() {
         }
       })
 
-      toast.success('Alert configuration saved' with ${alertThreshold}% threshold over ${alertTimeWindow}`
-      })
+      toast.success("Alert configuration saved with " + alertThreshold + "% threshold over " + alertTimeWindow)
       setShowAlertConfigDialog(false)
     } catch (err) {
       console.error('Alert config error:', err)
@@ -1025,7 +1021,7 @@ export default function AccessLogsClient() {
           }
         }
       })
-      toast.success('View saved'" has been saved` })
+      toast.success('View "' + newViewName + '" has been saved')
       setShowSaveViewDialog(false)
       setNewViewName('')
       setNewViewDefault(false)
@@ -1099,7 +1095,7 @@ export default function AccessLogsClient() {
         setActiveTab('settings')
         break
       default:
-        toast.info(`${label} clicked`)
+        toast.info(label + " clicked")
     }
   }
 
@@ -1132,7 +1128,7 @@ export default function AccessLogsClient() {
         toast.success('Link copied')
         break
       default:
-        toast.info(`${label} clicked`)
+        toast.info(label + " clicked")
     }
   }
 
@@ -1192,7 +1188,7 @@ export default function AccessLogsClient() {
         handleRefresh()
         break
       default:
-        toast.info(`${label} clicked`)
+        toast.info(label + " clicked")
     }
   }
 
@@ -1250,8 +1246,8 @@ export default function AccessLogsClient() {
             <Card key={index} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-2">
-                  <stat.icon className={`w-5 h-5 ${stat.color}`} />
-                  <span className={`text-xs font-medium ${stat.change.startsWith('+') ? 'text-green-600' : 'text-red-600'}`}>
+                  <stat.icon className={"w-5 h-5 " + stat.color} />
+                  <span className={"text-xs font-medium " + (stat.change.startsWith('+') ? 'text-green-600' : 'text-red-600')}>
                     {stat.change}
                   </span>
                 </div>
@@ -1347,7 +1343,7 @@ export default function AccessLogsClient() {
                   className="h-auto py-4 flex flex-col gap-2 hover:scale-105 transition-all duration-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm"
                   onClick={() => handleLogsQuickAction(action.label)}
                 >
-                  <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color}`}>
+                  <div className={"p-2 rounded-lg bg-gradient-to-br " + action.color}>
                     <action.icon className="w-4 h-4 text-white" />
                   </div>
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1372,11 +1368,11 @@ export default function AccessLogsClient() {
                         <button
                           key={status}
                           onClick={() => setSelectedStatus(status)}
-                          className={`w-full px-3 py-2 text-sm rounded-lg text-left transition-colors flex items-center justify-between ${
+                          className={"w-full px-3 py-2 text-sm rounded-lg text-left transition-colors flex items-center justify-between " + (
                             selectedStatus === status
                               ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
                               : 'hover:bg-gray-100 dark:hover:bg-gray-700'
-                          }`}
+                          )}
                         >
                           <span>{status === 'all' ? 'All Status' : status.charAt(0).toUpperCase() + status.slice(1)}</span>
                           <span className="text-xs text-gray-400">
@@ -1396,11 +1392,11 @@ export default function AccessLogsClient() {
                         <button
                           key={level}
                           onClick={() => setSelectedLevel(level)}
-                          className={`w-full px-3 py-2 text-sm rounded-lg text-left transition-colors ${
+                          className={"w-full px-3 py-2 text-sm rounded-lg text-left transition-colors " + (
                             selectedLevel === level
                               ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
                               : 'hover:bg-gray-100 dark:hover:bg-gray-700'
-                          }`}
+                          )}
                         >
                           {level === 'all' ? 'All Levels' : level.toUpperCase()}
                         </button>
@@ -1414,11 +1410,11 @@ export default function AccessLogsClient() {
                         <button
                           key={type}
                           onClick={() => setSelectedType(type)}
-                          className={`w-full px-3 py-2 text-sm rounded-lg text-left transition-colors ${
+                          className={"w-full px-3 py-2 text-sm rounded-lg text-left transition-colors " + (
                             selectedType === type
                               ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
                               : 'hover:bg-gray-100 dark:hover:bg-gray-700'
-                          }`}
+                          )}
                         >
                           {type === 'all' ? 'All Types' : type.charAt(0).toUpperCase() + type.slice(1)}
                         </button>
@@ -1461,7 +1457,7 @@ export default function AccessLogsClient() {
                       </Button>
                     </div>
                     <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isLoading} aria-label="Refresh">
-                  <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+                  <RefreshCw className={"w-4 h-4 mr-2 " + (isLoading ? 'animate-spin' : '')} />
                       Refresh
                     </Button>
                   </div>
@@ -1480,23 +1476,23 @@ export default function AccessLogsClient() {
                           onClick={() => openLogDialog(log)}
                         >
                           <div className="flex items-start gap-4">
-                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                            <div className={"w-10 h-10 rounded-lg flex items-center justify-center " + (
                               log.status === 'success' ? 'bg-green-100 text-green-600' :
                               log.status === 'failed' ? 'bg-red-100 text-red-600' :
                               log.status === 'blocked' ? 'bg-orange-100 text-orange-600' :
                               log.status === 'warning' ? 'bg-yellow-100 text-yellow-600' :
                               'bg-blue-100 text-blue-600'
-                            }`}>
+                            )}>
                               <StatusIcon className="w-5 h-5" />
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 mb-1">
-                                <code className={`text-sm font-medium px-2 py-0.5 rounded ${
+                                <code className={"text-sm font-medium px-2 py-0.5 rounded " + (
                                   log.statusCode >= 500 ? 'bg-red-100 text-red-800' :
                                   log.statusCode >= 400 ? 'bg-orange-100 text-orange-800' :
                                   log.statusCode >= 300 ? 'bg-yellow-100 text-yellow-800' :
                                   'bg-green-100 text-green-800'
-                                }`}>{log.statusCode}</code>
+                                )}>{log.statusCode}</code>
                                 <Badge variant="outline" className="text-xs">{log.method}</Badge>
                                 <span className="text-sm font-mono text-gray-700 dark:text-gray-300 truncate">{log.resource}</span>
                                 {log.isSuspicious && (
@@ -1614,7 +1610,7 @@ export default function AccessLogsClient() {
                   className="h-auto py-4 flex flex-col gap-2 hover:scale-105 transition-all duration-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm"
                   onClick={() => handlePatternsQuickAction(action.label)}
                 >
-                  <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color}`}>
+                  <div className={"p-2 rounded-lg bg-gradient-to-br " + action.color}>
                     <action.icon className="w-4 h-4 text-white" />
                   </div>
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1832,7 +1828,7 @@ export default function AccessLogsClient() {
                 { icon: RefreshCw, label: 'Refresh', color: 'text-gray-500' }
               ].map((action, i) => (
                 <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200 bg-white/50 dark:bg-gray-800/50" onClick={() => handleAnalyticsQuickAction(action.label)}>
-                  <action.icon className={`w-5 h-5 ${action.color}`} />
+                  <action.icon className={"w-5 h-5 " + action.color} />
                   <span className="text-xs">{action.label}</span>
                 </Button>
               ))}
@@ -1908,7 +1904,7 @@ export default function AccessLogsClient() {
                     { device: 'Bot', icon: Code, count: 1421, percentage: 3.1, color: 'text-red-500' }
                   ].map(item => (
                     <div key={item.device} className="flex items-center gap-3">
-                      <item.icon className={`w-5 h-5 ${item.color}`} />
+                      <item.icon className={"w-5 h-5 " + item.color} />
                       <div className="flex-1">
                         <div className="flex items-center justify-between text-sm mb-1">
                           <span>{item.device}</span>
@@ -1979,13 +1975,13 @@ export default function AccessLogsClient() {
                         <button
                           key={item.id}
                           onClick={() => setSettingsTab(item.id)}
-                          className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg text-left transition-all ${
+                          className={"w-full flex items-center gap-3 px-3 py-3 rounded-lg text-left transition-all " + (
                             settingsTab === item.id
                               ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border-l-4 border-blue-500'
                               : 'hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
-                          }`}
+                          )}
                         >
-                          <item.icon className={`h-5 w-5 ${settingsTab === item.id ? 'text-blue-600' : 'text-gray-400'}`} />
+                          <item.icon className={"h-5 w-5 " + (settingsTab === item.id ? 'text-blue-600' : 'text-gray-400')} />
                           <div>
                             <p className="font-medium text-sm">{item.label}</p>
                             <p className="text-xs text-gray-500">{item.description}</p>
@@ -2289,7 +2285,7 @@ export default function AccessLogsClient() {
             <AIInsightsPanel
               insights={mockLogsAIInsights}
               title="Access Log Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -2328,23 +2324,23 @@ export default function AccessLogsClient() {
                     {(() => {
                       const StatusIcon = getStatusIcon(selectedLog.status)
                       return (
-                        <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
+                        <div className={'w-12 h-12 rounded-lg flex items-center justify-center ' + (
                           selectedLog.status === 'success' ? 'bg-green-100 text-green-600' :
                           selectedLog.status === 'failed' ? 'bg-red-100 text-red-600' :
                           selectedLog.status === 'blocked' ? 'bg-orange-100 text-orange-600' :
                           'bg-blue-100 text-blue-600'
-                        }`}>
+                        )}>
                           <StatusIcon className="w-6 h-6" />
                         </div>
                       )
                     })()}
                     <div>
                       <DialogTitle className="text-xl flex items-center gap-2">
-                        <code className={`text-lg font-medium px-2 py-0.5 rounded ${
+                        <code className={'text-lg font-medium px-2 py-0.5 rounded ' + (
                           selectedLog.statusCode >= 500 ? 'bg-red-100 text-red-800' :
                           selectedLog.statusCode >= 400 ? 'bg-orange-100 text-orange-800' :
                           'bg-green-100 text-green-800'
-                        }`}>{selectedLog.statusCode}</code>
+                        )}>{selectedLog.statusCode}</code>
                         <Badge variant="outline">{selectedLog.method}</Badge>
                         <Badge className={getStatusColor(selectedLog.status)}>{selectedLog.status}</Badge>
                       </DialogTitle>
@@ -2566,13 +2562,13 @@ export default function AccessLogsClient() {
                   <button
                     key={format.value}
                     onClick={() => setExportFormat(format.value as 'csv' | 'json' | 'pdf')}
-                    className={`p-4 rounded-lg border-2 transition-all text-center ${
+                    className={'p-4 rounded-lg border-2 transition-all text-center ' + (
                       exportFormat === format.value
                         ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
                         : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
-                    }`}
+                    )}
                   >
-                    <format.icon className={`w-6 h-6 mx-auto mb-2 ${exportFormat === format.value ? 'text-blue-500' : 'text-gray-400'}`} />
+                    <format.icon className={'w-6 h-6 mx-auto mb-2 ' + (exportFormat === format.value ? 'text-blue-500' : 'text-gray-400')} />
                     <div className="font-medium text-sm">{format.label}</div>
                     <div className="text-xs text-gray-500">{format.description}</div>
                   </button>
@@ -2593,11 +2589,11 @@ export default function AccessLogsClient() {
                   <button
                     key={range.value}
                     onClick={() => setExportDateRange(range.value)}
-                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                    className={'px-3 py-2 rounded-lg text-sm font-medium transition-all ' + (
                       exportDateRange === range.value
                         ? 'bg-blue-500 text-white'
                         : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600'
-                    }`}
+                    )}
                   >
                     {range.label}
                   </button>
@@ -2673,13 +2669,13 @@ export default function AccessLogsClient() {
                   <button
                     key={scope.value}
                     onClick={() => setAuditScope(scope.value as 'full' | 'security' | 'performance' | 'compliance')}
-                    className={`p-4 rounded-lg border-2 transition-all text-left ${
+                    className={"p-4 rounded-lg border-2 transition-all text-left " + (
                       auditScope === scope.value
                         ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
                         : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
-                    }`}
+                    )}
                   >
-                    <scope.icon className={`w-5 h-5 mb-2 ${auditScope === scope.value ? 'text-green-500' : 'text-gray-400'}`} />
+                    <scope.icon className={"w-5 h-5 mb-2 " + (auditScope === scope.value ? 'text-green-500' : 'text-gray-400')} />
                     <div className="font-medium text-sm">{scope.label}</div>
                     <div className="text-xs text-gray-500">{scope.description}</div>
                   </button>
@@ -2699,14 +2695,14 @@ export default function AccessLogsClient() {
                   <button
                     key={depth.value}
                     onClick={() => setAuditDepth(depth.value as 'quick' | 'standard' | 'deep')}
-                    className={`px-4 py-3 rounded-lg text-center transition-all ${
+                    className={"px-4 py-3 rounded-lg text-center transition-all " + (
                       auditDepth === depth.value
                         ? 'bg-green-500 text-white'
                         : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600'
-                    }`}
+                    )}
                   >
                     <div className="font-medium text-sm">{depth.label}</div>
-                    <div className={`text-xs ${auditDepth === depth.value ? 'text-green-100' : 'text-gray-500'}`}>{depth.time}</div>
+                    <div className={"text-xs " + (auditDepth === depth.value ? 'text-green-100' : 'text-gray-500')}>{depth.time}</div>
                   </button>
                 ))}
               </div>
@@ -2717,10 +2713,10 @@ export default function AccessLogsClient() {
               <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg space-y-4">
                 <div className="flex items-center justify-between">
                   <span className="font-medium">Security Score</span>
-                  <span className={`text-2xl font-bold ${
+                  <span className={"text-2xl font-bold " + (
                     auditResults.score >= 80 ? 'text-green-500' :
                     auditResults.score >= 60 ? 'text-yellow-500' : 'text-red-500'
-                  }`}>{auditResults.score}/100</span>
+                  )}>{auditResults.score}/100</span>
                 </div>
                 <Progress value={auditResults.score} className="h-3" />
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 pt-2">
@@ -2851,11 +2847,11 @@ export default function AccessLogsClient() {
                   <button
                     key={window.value}
                     onClick={() => setAlertTimeWindow(window.value)}
-                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                    className={"px-3 py-2 rounded-lg text-sm font-medium transition-all " + (
                       alertTimeWindow === window.value
                         ? 'bg-orange-500 text-white'
                         : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600'
-                    }`}
+                    )}
                   >
                     {window.label}
                   </button>
@@ -2876,13 +2872,13 @@ export default function AccessLogsClient() {
                   <button
                     key={channel.id}
                     onClick={() => toggleAlertChannel(channel.id)}
-                    className={`w-full flex items-center gap-3 p-3 rounded-lg border-2 transition-all ${
+                    className={"w-full flex items-center gap-3 p-3 rounded-lg border-2 transition-all " + (
                       alertChannels.includes(channel.id)
                         ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20'
                         : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
-                    }`}
+                    )}
                   >
-                    <channel.icon className={`w-5 h-5 ${alertChannels.includes(channel.id) ? 'text-orange-500' : 'text-gray-400'}`} />
+                    <channel.icon className={"w-5 h-5 " + (alertChannels.includes(channel.id) ? 'text-orange-500' : 'text-gray-400')} />
                     <div className="flex-1 text-left">
                       <div className="font-medium text-sm">{channel.label}</div>
                       <div className="text-xs text-gray-500">{channel.description}</div>
@@ -2938,11 +2934,11 @@ export default function AccessLogsClient() {
                   <button
                     key={status}
                     onClick={() => setSelectedStatus(status)}
-                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                    className={"px-3 py-2 rounded-lg text-sm font-medium transition-all " + (
                       selectedStatus === status
                         ? 'bg-purple-500 text-white'
                         : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200'
-                    }`}
+                    )}
                   >
                     {status === 'all' ? 'All' : status.charAt(0).toUpperCase() + status.slice(1)}
                   </button>
@@ -2956,11 +2952,11 @@ export default function AccessLogsClient() {
                   <button
                     key={level}
                     onClick={() => setSelectedLevel(level)}
-                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                    className={"px-3 py-2 rounded-lg text-sm font-medium transition-all " + (
                       selectedLevel === level
                         ? 'bg-purple-500 text-white'
                         : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200'
-                    }`}
+                    )}
                   >
                     {level === 'all' ? 'All' : level.toUpperCase()}
                   </button>
@@ -2974,11 +2970,11 @@ export default function AccessLogsClient() {
                   <button
                     key={type}
                     onClick={() => setSelectedType(type)}
-                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                    className={"px-3 py-2 rounded-lg text-sm font-medium transition-all " + (
                       selectedType === type
                         ? 'bg-purple-500 text-white'
                         : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200'
-                    }`}
+                    )}
                   >
                     {type === 'all' ? 'All' : type.charAt(0).toUpperCase() + type.slice(1)}
                   </button>
@@ -3285,10 +3281,10 @@ export default function AccessLogsClient() {
                     {filteredLogs.slice(0, 5).map((log, idx) => (
                       <div key={log.id} className="flex items-center gap-3">
                         <div className="w-8 text-center text-xs text-gray-400">{idx + 1}</div>
-                        <div className={`w-2 h-2 rounded-full ${
+                        <div className={"w-2 h-2 rounded-full " + (
                           log.status === 'success' ? 'bg-green-500' :
                           log.status === 'failed' ? 'bg-red-500' : 'bg-orange-500'
-                        }`} />
+                        )} />
                         <code className="flex-1 text-sm truncate">{log.resource}</code>
                         <Badge variant="outline" className="text-xs">{log.method}</Badge>
                         <span className="text-xs text-gray-500">{formatDuration(log.duration)}</span>

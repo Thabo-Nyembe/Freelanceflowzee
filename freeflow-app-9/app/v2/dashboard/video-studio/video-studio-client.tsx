@@ -1528,10 +1528,10 @@ export default function VideoStudioClient() {
             <Card key={index} className="border-0 shadow-sm">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-2">
-                  <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${stat.color} flex items-center justify-center`}>
+                  <div className={"w-8 h-8 rounded-lg bg-gradient-to-br " + stat.color + " flex items-center justify-center"}>
                     <stat.icon className="w-4 h-4 text-white" />
                   </div>
-                  <div className={`flex items-center gap-1 text-xs ${stat.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  <div className={"flex items-center gap-1 text-xs " + (stat.change >= 0 ? 'text-green-600' : 'text-red-600')}>
                     {stat.change >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
                     {Math.abs(stat.change)}%
                   </div>
@@ -1621,7 +1621,7 @@ export default function VideoStudioClient() {
                 { icon: Users, label: 'Collaborate', desc: 'Team projects', color: 'from-indigo-500 to-violet-600' }
               ].map((action, idx) => (
                 <button key={idx} onClick={() => handleQuickAction(action.label)} className="flex items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 hover:shadow-lg transition-all text-left">
-                  <div className={`w-10 h-10 bg-gradient-to-br ${action.color} rounded-lg flex items-center justify-center`}>
+                  <div className={"w-10 h-10 bg-gradient-to-br " + action.color + " rounded-lg flex items-center justify-center"}>
                     <action.icon className="w-5 h-5 text-white" />
                   </div>
                   <div>
@@ -1989,11 +1989,7 @@ export default function VideoStudioClient() {
                       {effects.map(effect => (
                         <div
                           key={effect.id}
-                          className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                            effect.enabled
-                              ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
-                              : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
-                          }`}
+                          className={"p-4 rounded-lg border-2 cursor-pointer transition-all " + (effect.enabled ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300')}
                         >
                           <div className="flex items-center justify-between mb-2">
                             <Badge className={getEffectCategoryColor(effect.category)}>
@@ -2334,16 +2330,12 @@ export default function VideoStudioClient() {
                         <button
                           key={item.id}
                           onClick={() => setSettingsTab(item.id)}
-                          className={`w-full flex items-center gap-3 p-3 rounded-lg text-left transition-all ${
-                            settingsTab === item.id
-                              ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
-                              : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
-                          }`}
+                          className={"w-full flex items-center gap-3 p-3 rounded-lg text-left transition-all " + (settingsTab === item.id ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300')}
                         >
                           <item.icon className="w-5 h-5" />
                           <div>
                             <p className="font-medium text-sm">{item.label}</p>
-                            <p className={`text-xs ${settingsTab === item.id ? 'text-white/70' : 'text-gray-500'}`}>{item.desc}</p>
+                            <p className={"text-xs " + (settingsTab === item.id ? 'text-white/70' : 'text-gray-500')}>{item.desc}</p>
                           </div>
                         </button>
                       ))}
@@ -2423,8 +2415,8 @@ export default function VideoStudioClient() {
                               <p className="font-medium text-gray-900 dark:text-white">{option.label}</p>
                               <p className="text-sm text-gray-500">{option.desc}</p>
                             </div>
-                            <div className={`w-12 h-6 rounded-full p-1 cursor-pointer transition-colors ${option.checked ? 'bg-purple-600' : 'bg-gray-300 dark:bg-gray-600'}`}>
-                              <div className={`w-4 h-4 rounded-full bg-white transition-transform ${option.checked ? 'translate-x-6' : ''}`} />
+                            <div className={"w-12 h-6 rounded-full p-1 cursor-pointer transition-colors " + (option.checked ? 'bg-purple-600' : 'bg-gray-300 dark:bg-gray-600')}>
+                              <div className={"w-4 h-4 rounded-full bg-white transition-transform " + (option.checked ? 'translate-x-6' : '')} />
                             </div>
                           </div>
                         ))}
@@ -2450,8 +2442,8 @@ export default function VideoStudioClient() {
                             { label: '9:16 Portrait', icon: Smartphone, ratio: '9:16' as const },
                             { label: '1:1 Square', icon: Square, ratio: '1:1' as const }
                           ].map((preset, idx) => (
-                            <button key={idx} onClick={() => handleAspectRatioSelect(preset.ratio)} className={`p-4 rounded-lg border-2 text-center transition-all ${selectedAspectRatio === preset.ratio ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'}`}>
-                              <preset.icon className={`w-8 h-8 mx-auto mb-2 ${selectedAspectRatio === preset.ratio ? 'text-purple-600' : 'text-gray-400'}`} />
+                            <button key={idx} onClick={() => handleAspectRatioSelect(preset.ratio)} className={"p-4 rounded-lg border-2 text-center transition-all " + (selectedAspectRatio === preset.ratio ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300')}>
+                              <preset.icon className={"w-8 h-8 mx-auto mb-2 " + (selectedAspectRatio === preset.ratio ? 'text-purple-600' : 'text-gray-400')} />
                               <p className="text-sm font-medium">{preset.label}</p>
                             </button>
                           ))}
@@ -2614,8 +2606,8 @@ export default function VideoStudioClient() {
                               <p className="font-medium text-gray-900 dark:text-white">{notif.label}</p>
                               <p className="text-sm text-gray-500">{notif.desc}</p>
                             </div>
-                            <div className={`w-12 h-6 rounded-full p-1 cursor-pointer transition-colors ${notif.checked ? 'bg-purple-600' : 'bg-gray-300 dark:bg-gray-600'}`}>
-                              <div className={`w-4 h-4 rounded-full bg-white transition-transform ${notif.checked ? 'translate-x-6' : ''}`} />
+                            <div className={"w-12 h-6 rounded-full p-1 cursor-pointer transition-colors " + (notif.checked ? 'bg-purple-600' : 'bg-gray-300 dark:bg-gray-600')}>
+                              <div className={"w-4 h-4 rounded-full bg-white transition-transform " + (notif.checked ? 'translate-x-6' : '')} />
                             </div>
                           </div>
                         ))}
@@ -2646,8 +2638,8 @@ export default function VideoStudioClient() {
                               <p className="font-medium text-gray-900 dark:text-white">{feature.label}</p>
                               <p className="text-sm text-gray-500">{feature.desc}</p>
                             </div>
-                            <div className={`w-12 h-6 rounded-full p-1 cursor-pointer transition-colors ${feature.checked ? 'bg-purple-600' : 'bg-gray-300 dark:bg-gray-600'}`}>
-                              <div className={`w-4 h-4 rounded-full bg-white transition-transform ${feature.checked ? 'translate-x-6' : ''}`} />
+                            <div className={"w-12 h-6 rounded-full p-1 cursor-pointer transition-colors " + (feature.checked ? 'bg-purple-600' : 'bg-gray-300 dark:bg-gray-600')}>
+                              <div className={"w-4 h-4 rounded-full bg-white transition-transform " + (feature.checked ? 'translate-x-6' : '')} />
                             </div>
                           </div>
                         ))}
@@ -2718,7 +2710,7 @@ export default function VideoStudioClient() {
             <AIInsightsPanel
               insights={mockVideoStudioAIInsights}
               title="Studio Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -3003,13 +2995,9 @@ export default function VideoStudioClient() {
                     <button
                       key={track.type}
                       onClick={() => setNewTrackType(track.type)}
-                      className={`p-4 rounded-lg border-2 text-center transition-all ${
-                        newTrackType === track.type
-                          ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
-                          : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
-                      }`}
+                      className={"p-4 rounded-lg border-2 text-center transition-all " + (newTrackType === track.type ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300')}
                     >
-                      <track.icon className={`w-6 h-6 mx-auto mb-2 ${newTrackType === track.type ? 'text-purple-600' : 'text-gray-400'}`} />
+                      <track.icon className={"w-6 h-6 mx-auto mb-2 " + (newTrackType === track.type ? 'text-purple-600' : 'text-gray-400')} />
                       <p className="text-sm font-medium">{track.label}</p>
                     </button>
                   ))}
@@ -3791,11 +3779,11 @@ export default function VideoStudioClient() {
                   ].map((folder, idx) => (
                     <button
                       key={idx}
-                      className={`w-full flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-left ${selectedStoragePath === folder.path ? 'bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800' : ''}`}
+                      className={"w-full flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-left " + (selectedStoragePath === folder.path ? 'bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800' : '')}
                       onClick={() => setSelectedStoragePath(folder.path)}
                     >
-                      <folder.icon className={`w-4 h-4 ${selectedStoragePath === folder.path ? 'text-purple-600' : 'text-gray-500'}`} />
-                      <span className={`text-sm ${selectedStoragePath === folder.path ? 'text-purple-700 dark:text-purple-300 font-medium' : 'text-gray-700 dark:text-gray-300'}`}>{folder.name}</span>
+                      <folder.icon className={"w-4 h-4 " + (selectedStoragePath === folder.path ? 'text-purple-600' : 'text-gray-500')} />
+                      <span className={"text-sm " + (selectedStoragePath === folder.path ? 'text-purple-700 dark:text-purple-300 font-medium' : 'text-gray-700 dark:text-gray-300')}>{folder.name}</span>
                     </button>
                   ))}
                 </div>

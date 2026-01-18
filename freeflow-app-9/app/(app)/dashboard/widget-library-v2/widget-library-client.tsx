@@ -348,8 +348,7 @@ export default function WidgetLibraryClient() {
   const handleInstallWidget = async (widget: Widget) => {
     const { success, error } = await installWidget(widget.id)
     if (success) {
-      toast.success('Widget installed'" has been added to your project`
-      })
+      toast.success(`Widget installed has been added to your project`)
     } else {
       toast.error('Installation failed')
     }
@@ -358,8 +357,7 @@ export default function WidgetLibraryClient() {
   const handleUninstallWidget = async (widget: Widget) => {
     const { success, error } = await uninstallWidget(widget.id)
     if (success) {
-      toast.success('Widget uninstalled'" has been removed from your project`
-      })
+      toast.success(`Widget uninstalled has been removed from your project`)
     } else {
       toast.error('Uninstall failed')
     }
@@ -368,9 +366,7 @@ export default function WidgetLibraryClient() {
   const handleToggleBookmark = async (widget: Widget) => {
     const { success, isBookmarked, error } = await toggleBookmark(widget.id)
     if (success) {
-      toast.success(isBookmarked ? 'Added to saved' : 'Removed from saved'" saved to your collection`
-          : `"${widget.name}" removed from saved`
-      })
+      toast.success(isBookmarked ? 'Added to saved' : 'Removed from saved')
     } else {
       toast.error('Action failed')
     }
@@ -400,8 +396,7 @@ export default function WidgetLibraryClient() {
     })
 
     if (data) {
-      toast.success('Widget published'" is now available in the library`
-      })
+      toast.success(`Widget published is now available in the library`)
       setShowPublishDialog(false)
       setNewWidgetForm({
         name: '',
@@ -432,8 +427,7 @@ export default function WidgetLibraryClient() {
     })
 
     if (data) {
-      toast.success('Collection created'" collection is ready`
-      })
+      toast.success(`Collection created collection is ready`)
       setShowCollectionDialog(false)
       setNewCollectionForm({ name: '', description: '' })
     } else {

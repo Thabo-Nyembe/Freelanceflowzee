@@ -268,7 +268,8 @@ export default function AIAssistantPage() {
 
     try {
       // Use real AI instead of mock      const taskType = getTaskTypeFromModel(selectedModel)
-      const response = await chat(currentMessage, taskType)      const assistantMessage: Message = {
+      const response = await chat(currentMessage, taskType)
+    const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         content: response.response,
         type: 'assistant',
@@ -442,7 +443,8 @@ export default function AIAssistantPage() {
             rating: m.rating as 'up' | 'down' | null,
             suggestions: m.suggestions || []
           }))
-          setMessages(transformedMessages)          toast.success(`${title} loaded - ${transformedMessages.length} messages restored`)
+          setMessages(transformedMessages)
+          toast.success(`${title} loaded - ${transformedMessages.length} messages restored`)
         } else {
           toast.success(`${title} - ${conversation?.messageCount || 0} messages loaded`)
         }
@@ -457,7 +459,8 @@ export default function AIAssistantPage() {
   }
 
   const handleDeleteConversation = (conversationId: string) => {
-    const conversation = conversations.find(c => c.id === conversationId)    setConversationToDelete(conversationId)
+    const conversation = conversations.find(c => c.id === conversationId)
+    setConversationToDelete(conversationId)
     setShowDeleteConversationDialog(true)
   }
 
@@ -474,7 +477,8 @@ export default function AIAssistantPage() {
       }
 
       // Update local state
-      setConversations(prev => prev.filter(c => c.id !== conversationToDelete))      return { title: conversation?.title, messageCount: conversation?.messageCount }
+      setConversations(prev => prev.filter(c => c.id !== conversationToDelete))
+    return { title: conversation?.title, messageCount: conversation?.messageCount }
     }
 
     toast.promise(deleteOperation(), {
@@ -488,13 +492,13 @@ export default function AIAssistantPage() {
     setConversationToDelete(null)
   }
 
-  const handleCopyMessage = async (messageId: string, content: string) => {    })
-
+  const handleCopyMessage = async (messageId: string, content: string) => {
     await copyToClipboard(content, `Message copied - ${content.length} characters`)
   }
 
   const handleBookmarkMessage = async (messageId: string) => {
-    const message = messages.find(m => m.id === messageId)    // Save bookmark to API
+    const message = messages.find(m => m.id === messageId)
+    // Save bookmark to API
     try {
       const response = await fetch('/api/bookmarks', {
         method: 'POST',
@@ -595,7 +599,8 @@ export default function AIAssistantPage() {
     if (userId) {
       try {
         const { implementInsight } = await import('@/lib/ai-assistant-queries')
-        await implementInsight(insightId, action)        toast.success(`Action started - ${action} (${insight?.priority} priority)`)
+        await implementInsight(insightId, action)
+        toast.success(`Action started - ${action} (${insight?.priority} priority)`)
       } catch (error: any) {
         logger.error('Failed to track insight implementation', { error: error.message })
         toast.error('Failed to start action')
@@ -621,7 +626,8 @@ export default function AIAssistantPage() {
   }
 
   const handleExportConversation = async (conversationId: string) => {
-    const conversation = conversations.find(c => c.id === conversationId)    try {
+    const conversation = conversations.find(c => c.id === conversationId)
+    try {
       // Try to fetch full conversation from API
       const response = await fetch(`/api/conversations/${conversationId}/export`)
 
@@ -651,7 +657,8 @@ export default function AIAssistantPage() {
   }
 
   const handleShareConversation = async (conversationId: string) => {
-    const conversation = conversations.find(c => c.id === conversationId)    try {
+    const conversation = conversations.find(c => c.id === conversationId)
+    try {
       // Create share link via API
       const response = await fetch(`/api/conversations/${conversationId}/share`, {
         method: 'POST'
@@ -674,7 +681,8 @@ export default function AIAssistantPage() {
   }
 
   const handleVoiceInput = async () => {
-    const newListeningState = !isListening    setIsListening(!isListening)
+    const newListeningState = !isListening
+    setIsListening(!isListening)
 
     if (newListeningState) {
       // Start speech recognition
@@ -847,12 +855,13 @@ export default function AIAssistantPage() {
   }
 
   const handleConfigureAI = () => {
-    const settings = ['Model selection', 'Temperature', 'Context length', 'System prompts']    // Navigate to AI settings page
+    const settings = ['Model selection', 'Temperature', 'Context length', 'System prompts']
+    // Navigate to AI settings page
     router.push('/dashboard/settings-v2')
     toast.success(`Opening AI configuration - Model: ${selectedModel}`)
   }
 
-  const handleSaveChat = () => {    })
+  const handleSaveChat = () => {
 
     const saveOperation = async () => {
       // Create conversation in database
@@ -870,7 +879,8 @@ export default function AIAssistantPage() {
           }))
         })
 
-        if (error) throw new Error(error.message || 'Failed to save conversation')      }
+        if (error) throw new Error(error.message || 'Failed to save conversation')
+      }
       return {
         messageCount: messages.length,
         userMessages: messages.filter(m => m.type === 'user').length,
@@ -886,23 +896,27 @@ export default function AIAssistantPage() {
   }
 
   const handleClearChat = () => {
-    const messageCount = messages.length    setShowClearChatDialog(true)
+    const messageCount = messages.length
+    setShowClearChatDialog(true)
   }
 
   const confirmClearChat = () => {
-    const messageCount = messages.length    setMessages([])
+    const messageCount = messages.length
+    setMessages([])
 
     toast.success(`Chat cleared - ${messageCount} messages removed`)
 
     setShowClearChatDialog(false)
   }
 
-  const handleAttachFile = () => {    const input = document.createElement('input')
+  const handleAttachFile = () => {
+    const input = document.createElement('input')
     input.type = 'file'
     input.accept = '.pdf,.doc,.docx,.txt,.md,.png,.jpg,.jpeg'
     input.onchange = async (e: Event) => {
       const file = (e.target as HTMLInputElement).files?.[0]
-      if (file) {        try {
+      if (file) {
+        try {
           toast.loading(`Uploading ${file.name}...`)
 
           // Create FormData for file upload
@@ -946,7 +960,8 @@ export default function AIAssistantPage() {
   }
 
   const handleInsightDismiss = (insightId: string) => {
-    const insight = aiInsights.find(i => i.id === insightId)    setInsightToDismiss(insightId)
+    const insight = aiInsights.find(i => i.id === insightId)
+    setInsightToDismiss(insightId)
     setShowDismissInsightDialog(true)
   }
 
@@ -963,7 +978,8 @@ export default function AIAssistantPage() {
       }
 
       // Update local state
-      setAiInsights(prev => prev.filter(i => i.id !== insightToDismiss))      return { title: insight?.title, priority: insight?.priority }
+      setAiInsights(prev => prev.filter(i => i.id !== insightToDismiss))
+    return { title: insight?.title, priority: insight?.priority }
     }
 
     toast.promise(dismissOperation(), {
@@ -985,7 +1001,8 @@ export default function AIAssistantPage() {
         const { togglePinConversation } = await import('@/lib/ai-assistant-queries')
         const { error: pinError } = await togglePinConversation(conversationId)
         if (pinError) throw new Error(pinError.message || 'Failed to pin conversation')
-      }      return { title: conversation?.title }
+      }
+    return { title: conversation?.title }
     }
 
     toast.promise(pinOperation(), {
@@ -1008,7 +1025,8 @@ export default function AIAssistantPage() {
       }
 
       // Remove from active conversations list
-      setConversations(prev => prev.filter(c => c.id !== conversationId))      return { title: conversation?.title, messageCount: conversation?.messageCount }
+      setConversations(prev => prev.filter(c => c.id !== conversationId))
+    return { title: conversation?.title, messageCount: conversation?.messageCount }
     }
 
     toast.promise(archiveOperation(), {

@@ -979,13 +979,11 @@ export default function ApiKeysClient() {
   }
 
   const handleRevokeKey = (keyName: string) => {
-    toast.success('Key revoked' has been revoked`
-    })
+    toast.success('Key revoked: ' + keyName + ' has been revoked')
   }
 
   const handleRegenerateKey = (keyName: string) => {
-    toast.success('Key regenerated'`
-    })
+    toast.success('Key regenerated: ' + keyName)
   }
 
   const handleCopyKey = (key: string) => {
@@ -1047,7 +1045,7 @@ export default function ApiKeysClient() {
           ].map((stat, index) => (
             <Card key={index} className="border-0 shadow-sm hover:shadow-md transition-all dark:bg-gray-800">
               <CardContent className="p-4">
-                <div className={`w-10 h-10 rounded-xl bg-gradient-to-r ${stat.color} flex items-center justify-center mb-3`}>
+                <div className={'w-10 h-10 rounded-xl bg-gradient-to-r ' + stat.color + ' flex items-center justify-center mb-3'}>
                   <stat.icon className="w-5 h-5 text-white" />
                 </div>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">{stat.value}</p>
@@ -1109,7 +1107,7 @@ export default function ApiKeysClient() {
                 { icon: Settings, label: 'Settings', color: 'text-gray-600 dark:text-gray-400', action: () => setSettingsDialogOpen(true) }
               ].map((action, i) => (
                 <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200" onClick={action.action}>
-                  <action.icon className={`h-5 w-5 ${action.color}`} />
+                  <action.icon className={'h-5 w-5 ' + action.color} />
                   <span className="text-xs">{action.label}</span>
                 </Button>
               ))}
@@ -1136,7 +1134,7 @@ export default function ApiKeysClient() {
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className={`text-sm font-medium ${log.status_code < 400 ? 'text-green-600' : 'text-red-600'}`}>
+                          <p className={'text-sm font-medium ' + (log.status_code < 400 ? 'text-green-600' : 'text-red-600')}>
                             {log.status_code}
                           </p>
                           <p className="text-xs text-gray-500">{log.response_time_ms}ms</p>
@@ -1251,7 +1249,7 @@ export default function ApiKeysClient() {
                 { icon: History, label: 'History', color: 'text-gray-600 dark:text-gray-400', action: () => setHistoryDialogOpen(true) }
               ].map((action, i) => (
                 <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200" onClick={action.action}>
-                  <action.icon className={`h-5 w-5 ${action.color}`} />
+                  <action.icon className={'h-5 w-5 ' + action.color} />
                   <span className="text-xs">{action.label}</span>
                 </Button>
               ))}
@@ -1542,7 +1540,7 @@ export default function ApiKeysClient() {
                           </td>
                           <td className="px-4 py-3 text-sm font-mono text-gray-900 dark:text-white">{log.endpoint}</td>
                           <td className="px-4 py-3">
-                            <span className={`text-sm font-medium ${log.status_code < 400 ? 'text-green-600' : 'text-red-600'}`}>
+                            <span className={'text-sm font-medium ' + (log.status_code < 400 ? 'text-green-600' : 'text-red-600')}>
                               {log.status_code}
                             </span>
                           </td>
@@ -1608,14 +1606,8 @@ export default function ApiKeysClient() {
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                          webhook.status === 'active' ? 'bg-green-100' :
-                          webhook.status === 'failing' ? 'bg-red-100' : 'bg-gray-100'
-                        }`}>
-                          <Webhook className={`w-5 h-5 ${
-                            webhook.status === 'active' ? 'text-green-600' :
-                            webhook.status === 'failing' ? 'text-red-600' : 'text-gray-600'
-                          }`} />
+                        <div className={'w-10 h-10 rounded-xl flex items-center justify-center ' + (webhook.status === 'active' ? 'bg-green-100' : webhook.status === 'failing' ? 'bg-red-100' : 'bg-gray-100')}>
+                          <Webhook className={'w-5 h-5 ' + (webhook.status === 'active' ? 'text-green-600' : webhook.status === 'failing' ? 'text-red-600' : 'text-gray-600')} />
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
@@ -1820,7 +1812,7 @@ export default function ApiKeysClient() {
             <AIInsightsPanel
               insights={mockApiKeysAIInsights}
               title="API Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -1871,7 +1863,7 @@ export default function ApiKeysClient() {
                     <p className="text-xs text-gray-500 mb-1">API Key</p>
                     <div className="flex items-center gap-2">
                       <code className="text-lg font-mono">{selectedKey.key_prefix}•••••••••{selectedKey.key_code.slice(-4)}</code>
-                      <Button variant="ghost" size="sm" onClick={() => { navigator.clipboard.writeText(`${selectedKey.key_prefix}${selectedKey.key_code}`); toast.success('API key copied to clipboard'); }}>
+                      <Button variant="ghost" size="sm" onClick={() => { navigator.clipboard.writeText(selectedKey.key_prefix + selectedKey.key_code); toast.success('API key copied to clipboard'); }}>
                         <Copy className="w-4 h-4" />
                       </Button>
                     </div>
@@ -1946,7 +1938,7 @@ export default function ApiKeysClient() {
               <div className="space-y-4 p-4">
                 <div className="flex items-center gap-2">
                   <Badge className={getLogLevelColor(selectedLog.log_level)}>{selectedLog.method}</Badge>
-                  <span className={`font-medium ${selectedLog.status_code < 400 ? 'text-green-600' : 'text-red-600'}`}>
+                  <span className={'font-medium ' + (selectedLog.status_code < 400 ? 'text-green-600' : 'text-red-600')}>
                     {selectedLog.status_code}
                   </span>
                 </div>
@@ -2134,7 +2126,7 @@ export default function ApiKeysClient() {
                   Cancel
                 </Button>
                 <Button className="flex-1" onClick={() => {
-                  toast.success('Export started' file will download shortly.` })
+                  toast.success('Export started')
                   setExportDialogOpen(false)
                 }}>
                   Export
@@ -2212,7 +2204,7 @@ export default function ApiKeysClient() {
                     Cancel
                   </Button>
                   <Button className="flex-1" onClick={() => {
-                    toast.success('Key rotated' has been rotated successfully.` })
+                    toast.success('Key rotated')
                     setKeyToRotate(null)
                   }}>
                     Rotate Key
@@ -2249,7 +2241,7 @@ export default function ApiKeysClient() {
                     Cancel
                   </Button>
                   <Button variant="destructive" className="flex-1" onClick={() => {
-                    toast.success('Key revoked' has been permanently revoked.` })
+                    toast.success('Key revoked')
                     setKeyToRevoke(null)
                   }}>
                     Revoke Key
@@ -2284,7 +2276,7 @@ export default function ApiKeysClient() {
                     Close
                   </Button>
                   <Button className="flex-1" onClick={() => {
-                    navigator.clipboard.writeText(`${keyToCopy.key_prefix}${keyToCopy.key_code}`)
+                    navigator.clipboard.writeText(keyToCopy.key_prefix + keyToCopy.key_code)
                     toast.success('Copied to clipboard')
                     setKeyToCopy(null)
                   }}>
@@ -2338,7 +2330,7 @@ export default function ApiKeysClient() {
                   Cancel
                 </Button>
                 <Button className="flex-1" onClick={() => {
-                  toast.success('Expiration set' days.` })
+                  toast.success('Expiration set')
                   setSetExpiryDialogOpen(false)
                 }}>
                   Apply
@@ -2543,7 +2535,7 @@ export default function ApiKeysClient() {
                       <Badge className={getLogLevelColor(log.log_level)}>{log.method}</Badge>
                       <span className="text-sm font-mono">{log.endpoint}</span>
                     </div>
-                    <span className={`text-sm font-medium ${log.status_code < 400 ? 'text-green-600' : 'text-red-600'}`}>
+                    <span className={'text-sm font-medium ' + (log.status_code < 400 ? 'text-green-600' : 'text-red-600')}>
                       {log.status_code}
                     </span>
                   </div>
@@ -2661,16 +2653,8 @@ export default function ApiKeysClient() {
                   { type: 'info', message: 'Mobile app approaching 80% rate limit', time: '1 day ago' },
                   { type: 'success', message: 'Key rotation completed successfully', time: '3 days ago' },
                 ].map((alert, i) => (
-                  <div key={i} className={`p-4 rounded-lg border ${
-                    alert.type === 'warning' ? 'bg-yellow-50 border-yellow-200' :
-                    alert.type === 'info' ? 'bg-blue-50 border-blue-200' :
-                    'bg-green-50 border-green-200'
-                  }`}>
-                    <p className={`font-medium ${
-                      alert.type === 'warning' ? 'text-yellow-800' :
-                      alert.type === 'info' ? 'text-blue-800' :
-                      'text-green-800'
-                    }`}>{alert.message}</p>
+                  <div key={i} className={'p-4 rounded-lg border ' + (alert.type === 'warning' ? 'bg-yellow-50 border-yellow-200' : alert.type === 'info' ? 'bg-blue-50 border-blue-200' : 'bg-green-50 border-green-200')}>
+                    <p className={'font-medium ' + (alert.type === 'warning' ? 'text-yellow-800' : alert.type === 'info' ? 'text-blue-800' : 'text-green-800')}>{alert.message}</p>
                     <p className="text-xs text-gray-500 mt-1">{alert.time}</p>
                   </div>
                 ))}
@@ -2877,10 +2861,7 @@ export default function ApiKeysClient() {
                 </div>
                 <div>
                   <h4 className="font-medium mb-2">2. Configure your application</h4>
-                  <code className="block p-3 bg-gray-100 rounded text-sm whitespace-pre">{`const auth = new Auth({
-  clientId: '${appToManage.client_id}',
-  domain: 'auth.company.com'
-});`}</code>
+                  <code className="block p-3 bg-gray-100 rounded text-sm whitespace-pre">{"const auth = new Auth({\n  clientId: '" + appToManage.client_id + "',\n  domain: 'auth.company.com'\n});"}</code>
                 </div>
                 <div>
                   <h4 className="font-medium mb-2">3. Implement login</h4>

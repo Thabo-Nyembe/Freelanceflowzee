@@ -2002,7 +2002,7 @@ export default function HelpCenterClient() {
                           <p className="text-xs text-muted-foreground">{formatNumber(article.views)} views</p>
                         </div>
                         <Button variant="ghost" size="sm" onClick={() => {
-                          toast.success('Opening Article'"` })
+                          toast.success("Opening Article")
                         }}>
                           <ExternalLink className="w-4 h-4" />
                         </Button>
@@ -2070,7 +2070,7 @@ export default function HelpCenterClient() {
             <AIInsightsPanel
               insights={mockHelpCenterAIInsights}
               title="Help Center Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -2472,7 +2472,7 @@ export default function HelpCenterClient() {
               <Button onClick={() => {
                 const input = document.getElementById('new-tag-input') as HTMLInputElement
                 if (input?.value.trim()) {
-                  toast.success('Tag Added'" has been created` })
+                  toast.success("Tag '" + input.value.trim() + "' has been created")
                   input.value = ''
                 } else {
                   toast.error('Tag Required')
@@ -2557,7 +2557,7 @@ export default function HelpCenterClient() {
                       <p className="text-sm text-muted-foreground">Archived on {new Date(article.updatedAt).toLocaleDateString()}</p>
                     </div>
                     <Button size="sm" variant="outline" onClick={() => {
-                      toast.success(`"${article.title}" has been restored`)
+                      toast.success('"' + article.title + '" has been restored')
                     }}>Restore</Button>
                   </div>
                 ))
@@ -2815,7 +2815,7 @@ export default function HelpCenterClient() {
           {selectedCollectionForView && (
             <div className="space-y-4">
               <div className="flex items-center gap-4">
-                <div className={`w-12 h-12 rounded-xl bg-gradient-to-r ${selectedCollectionForView.color} flex items-center justify-center text-xl`}>
+                <div className={"w-12 h-12 rounded-xl bg-gradient-to-r " + selectedCollectionForView.color + " flex items-center justify-center text-xl"}>
                   {selectedCollectionForView.icon}
                 </div>
                 <div>
@@ -2842,7 +2842,7 @@ export default function HelpCenterClient() {
             <Button variant="outline" onClick={() => setShowCollectionDialog(false)}>Close</Button>
             <Button onClick={() => {
               if (selectedCollectionForView) {
-                toast.success('Editing Collection'"` })
+                toast.success("Editing Collection: " + selectedCollectionForView.name)
                 setShowCollectionDialog(false)
               }
             }}>Edit Collection</Button>
@@ -3164,9 +3164,9 @@ export default function HelpCenterClient() {
             <div>
               <Label>Article Link</Label>
               <div className="flex gap-2">
-                <Input readOnly value={`https://help.freeflowkazi.com/${selectedArticle?.slug}`} />
+                <Input readOnly value={"https://help.freeflowkazi.com/" + (selectedArticle?.slug || "")} />
                 <Button variant="outline" onClick={() => {
-                  navigator.clipboard.writeText(`https://help.freeflowkazi.com/${selectedArticle?.slug}`)
+                  navigator.clipboard.writeText("https://help.freeflowkazi.com/" + (selectedArticle?.slug || ""))
                   toast.success('Link copied!')
                 }}>
                   <Copy className="w-4 h-4" />

@@ -52,13 +52,12 @@ import { toast } from 'sonner'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { useLogger } from '@/hooks/use-logger'
 import { useAccessibility } from '@/hooks/use-accessibility'
-import LiquidGlassCard from '@/components/ui/liquid-glass-card'
-import BorderTrail from '@/components/ui/border-trail'
-import GlowEffect from '@/components/ui/glow-effect'
-import TextShimmer from '@/components/ui/text-shimmer'
-import ErrorEmptyState from '@/components/ui/error-empty-state'
-import CardSkeleton from '@/components/ui/card-skeleton'
-import DashboardSkeleton from '@/components/ui/dashboard-skeleton'
+import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
+import { BorderTrail } from '@/components/ui/border-trail'
+import { GlowEffect } from '@/components/ui/glow-effect'
+import { TextShimmer } from '@/components/ui/text-shimmer'
+import { ErrorEmptyState } from '@/components/ui/empty-state'
+import { CardSkeleton, DashboardSkeleton } from '@/components/ui/loading-skeleton'
 
 interface TimeEntry {
   id: string
@@ -323,8 +322,8 @@ export default function TimeTrackingPage() {
       setTimeEntries((prev) => [newEntry, ...prev])
       setElapsedTime(0)
 
-      toast.success(`Timer Started - ${projectObj?.name} - ${taskObj?.name}`)
-      announce(`Timer started for ${projectObj?.name}`, 'polite')
+      toast.success("Timer Started - " + projectObj?.name + " - " + taskObj?.name)
+      announce("Timer started for " + projectObj?.name, 'polite')
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Failed to start timer')
       announce('Failed to start timer', 'assertive')
@@ -362,10 +361,10 @@ export default function TimeTrackingPage() {
 
       const hours = Math.floor(data.duration / 3600)
       const minutes = Math.floor((data.duration % 3600) / 60)
-      const durationText = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`
+      const durationText = hours > 0 ? hours + "h " + minutes + "m" : minutes + "m"
 
-      toast.success(`Timer Stopped - ${durationText}${data.is_billable ? ` - $${data.total_amount.toFixed(2)}` : ''}`)
-      announce(`Timer stopped. Duration: ${durationText}`, 'polite')
+      toast.success("Timer Stopped - " + durationText + (data.is_billable ? " - $" + data.total_amount.toFixed(2) : ""))
+      announce("Timer stopped. Duration: " + durationText, 'polite')
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Failed to stop timer')
       announce('Failed to stop timer', 'assertive')
@@ -390,7 +389,7 @@ export default function TimeTrackingPage() {
       setActiveTimer(prev => prev ? { ...prev, isPaused: true, isRunning: false, duration: data.duration } : null)
       setElapsedTime(data.duration)
 
-      toast.success(`Timer Paused - ${timerDisplay}`)
+      toast.success("Timer Paused - " + timerDisplay)
       announce('Timer paused', 'polite')
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Failed to pause timer')
@@ -512,7 +511,7 @@ export default function TimeTrackingPage() {
       isRunning: false,
     }
     setTimeEntries((prev) => [...prev, newEntry])
-    toast.success(`Manual Entry Added - ${hours} hour(s)`)
+    toast.success("Manual Entry Added - " + hours + " hour(s)")
     announce('Manual entry added', 'polite')
     setShowManualEntryDialog(false)
     setManualHours('')
@@ -567,7 +566,7 @@ export default function TimeTrackingPage() {
     a.click()
     URL.revokeObjectURL(url)
 
-    toast.success(`Report Exported - ${filename}`)
+    toast.success("Report Exported - " + filename)
   }
 
   const handleFilterByProject = () => {
@@ -586,7 +585,7 @@ export default function TimeTrackingPage() {
       return
     }
 
-    toast.success(`Date Filter Applied - ${filterStartDate} to ${filterEndDate}`)
+    toast.success("Date Filter Applied - " + filterStartDate + " to " + filterEndDate)
     announce('Date filter applied', 'polite')
     setShowDateRangeDialog(false)
     setFilterStartDate('')
@@ -603,18 +602,18 @@ export default function TimeTrackingPage() {
       (e) => e.startTime.toLocaleDateString() === today
     )
     const totalTime = todayEntries.reduce((sum, e) => sum + e.duration, 0)
-    toast.success(`Daily Report - ${today} - ${todayEntries.length} entries, ${formatTime(totalTime)}`)
+    toast.success("Daily Report - " + today + " - " + todayEntries.length + " entries, " + formatTime(totalTime))
   }
 
   const handleGenerateWeeklyReport = () => {
     const totalTime = timeEntries.reduce((sum, e) => sum + e.duration, 0)
-    toast.success(`Weekly Report - ${timeEntries.length} entries, ${formatTime(totalTime)}`)
+    toast.success("Weekly Report - " + timeEntries.length + " entries, " + formatTime(totalTime))
   }
 
   const handleGenerateMonthlyReport = () => {
     const totalTime = timeEntries.reduce((sum, e) => sum + e.duration, 0)
     const avgPerDay = timeEntries.length > 0 ? totalTime / timeEntries.length : 0
-    toast.success(`Monthly Report - ${timeEntries.length} entries, ${formatTime(totalTime)} total, ${formatTime(avgPerDay)} avg`)
+    toast.success("Monthly Report - " + timeEntries.length + " entries, " + formatTime(totalTime) + " total, " + formatTime(avgPerDay) + " avg")
   }
 
   const handleBulkDeleteEntries = () => {
@@ -638,7 +637,7 @@ export default function TimeTrackingPage() {
       }
 
       setTimeEntries([])
-      toast.success(`All Entries Deleted - ${result.deletedCount} entries removed`)
+      toast.success("All Entries Deleted - " + result.deletedCount + " entries removed")
       announce('All time entries deleted', 'polite')
     } catch (error: any) {
       toast.error(error.message || 'Failed to delete entries')
@@ -659,7 +658,7 @@ export default function TimeTrackingPage() {
       return
     }
 
-    toast.success(`Project Added - "${newProjectName.trim()}"`)
+    toast.success("Project Added - \"" + newProjectName.trim() + "\"")
     announce('Project added', 'polite')
     setShowAddProjectDialog(false)
     setNewProjectName('')
@@ -681,7 +680,7 @@ export default function TimeTrackingPage() {
       return
     }
 
-    toast.success(`Project Updated - "${editProjectName.trim()}"`)
+    toast.success("Project Updated - \"" + editProjectName.trim() + "\"")
     announce('Project updated', 'polite')
     setShowEditProjectDialog(false)
     setEditProjectName('')
@@ -705,7 +704,7 @@ export default function TimeTrackingPage() {
     try {
       setSelectedProject('')
       toast.success('Project Deleted - All time entries preserved')
-      announce(`Project ${project?.name} deleted`, 'polite')
+      announce("Project " + project?.name + " deleted", 'polite')
     } finally {
       setIsDeleting(false)
       setShowDeleteProjectDialog(false)
@@ -728,7 +727,7 @@ export default function TimeTrackingPage() {
       return
     }
 
-    toast.success(`Task Added - "${newTaskName.trim()}"`)
+    toast.success("Task Added - \"" + newTaskName.trim() + "\"")
     announce('Task added', 'polite')
     setShowAddTaskDialog(false)
     setNewTaskName('')
@@ -752,7 +751,7 @@ export default function TimeTrackingPage() {
       return
     }
 
-    toast.success(`Task Updated - "${editTaskName.trim()}"`)
+    toast.success("Task Updated - \"" + editTaskName.trim() + "\"")
     announce('Task updated', 'polite')
     setShowEditTaskDialog(false)
     setEditTaskName('')
@@ -778,7 +777,7 @@ export default function TimeTrackingPage() {
     try {
       setSelectedTask('')
       toast.success('Task Deleted - All time entries preserved')
-      announce(`Task ${task?.name} deleted`, 'polite')
+      announce("Task " + task?.name + " deleted", 'polite')
     } finally {
       setIsDeleting(false)
       setShowDeleteTaskDialog(false)
@@ -822,7 +821,7 @@ export default function TimeTrackingPage() {
 
   const handleViewDetailedStats = () => {
     const totalTime = timeEntries.reduce((sum, e) => sum + e.duration, 0)
-    toast.success(`Detailed Statistics - Total: ${formatTime(totalTime)} across ${timeEntries.length} entries`)
+    toast.success("Detailed Statistics - Total: " + formatTime(totalTime) + " across " + timeEntries.length + " entries")
   }
 
   if (isLoading) {
@@ -1247,7 +1246,7 @@ export default function TimeTrackingPage() {
               disabled={isDeleting}
               className="bg-red-600 hover:bg-red-700"
             >
-              {isDeleting ? 'Deleting...' : `Delete All ${timeEntries.length} Entries`}
+              {isDeleting ? 'Deleting...' : "Delete All " + timeEntries.length + " Entries"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -1,4 +1,6 @@
 'use client'
+
+import { createClient } from '@/lib/supabase/client'
 import { useState, useMemo, useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
 import { useBroadcasts, type Broadcast, type BroadcastType, type BroadcastStatus } from '@/lib/hooks/use-broadcasts'
@@ -460,13 +462,9 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
   const fetchBroadcasts = useCallback(async () => {
     try {
       setIsLoading(true)
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('broadcasts')
         .select('*')
@@ -488,16 +486,12 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
   const handleCreateBroadcast = async () => {
     try {
       setIsSaving(true)
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to create broadcasts')
         return
       }
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('broadcasts').insert({
         user_id: user.id,
         title: formData.title,
@@ -531,8 +525,6 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
     if (!editingBroadcast) return
     try {
       setIsSaving(true)
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('broadcasts')
         .update({
@@ -568,8 +560,6 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
   // Delete broadcast
   const handleDeleteBroadcast = async (broadcastId: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('broadcasts')
         .update({ deleted_at: new Date().toISOString() })
@@ -589,8 +579,6 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
   // Send broadcast
   const handleSendBroadcast = async (broadcastId: string, broadcastTitle: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('broadcasts')
         .update({
@@ -602,7 +590,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
 
       if (error) throw error
 
-      toast.success('Sending broadcast'" is being sent...` })
+      toast.success(`Broadcast "${broadcastTitle}" is being sent...`)
       fetchBroadcasts()
       refetch()
     } catch (error) {
@@ -614,8 +602,6 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
   // Schedule broadcast
   const handleScheduleBroadcast = async (broadcastId: string, broadcastTitle: string, scheduledFor: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('broadcasts')
         .update({
@@ -627,7 +613,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
 
       if (error) throw error
 
-      toast.success('Broadcast scheduled'" has been scheduled` })
+      toast.success("Broadcast scheduled: " + broadcastTitle + " has been scheduled")
       fetchBroadcasts()
       refetch()
     } catch (error) {
@@ -639,8 +625,6 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
   // Pause broadcast
   const handlePauseBroadcast = async (broadcastId: string, broadcastTitle: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('broadcasts')
         .update({
@@ -651,7 +635,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
 
       if (error) throw error
 
-      toast.info('Broadcast paused'" delivery paused` })
+      toast.info("Broadcast paused: " + broadcastTitle + " delivery paused")
       fetchBroadcasts()
       refetch()
     } catch (error) {
@@ -664,16 +648,12 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
   const handleDuplicateBroadcast = async (broadcast: Broadcast) => {
     try {
       setIsSaving(true)
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to duplicate broadcasts')
         return
       }
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('broadcasts').insert({
         user_id: user.id,
         title: `Copy of ${broadcast.title}`,
@@ -688,7 +668,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
 
       if (error) throw error
 
-      toast.success('Broadcast duplicated'" created` })
+      toast.success("Broadcast duplicated: Copy of " + broadcast.title + " created")
       fetchBroadcasts()
       refetch()
     } catch (error) {
@@ -2210,7 +2190,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
             <AIInsightsPanel
               insights={broadcastsAIInsights}
               title="Broadcast Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -2463,7 +2443,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                 input.accept = '.csv'
                 input.onchange = (e) => {
                   const file = (e.target as HTMLInputElement).files?.[0]
-                  if (file) toast.success(`Selected: ${file.name}`)
+                  if (file) toast.success("Selected: " + file.name)
                 }
                 input.click()
               }}>Browse Files</Button>

@@ -640,9 +640,7 @@ export default function FAQClient() {
 
       if (error) throw new Error(error)
 
-      toast.success('Article Created'" has been published`
-          : `"${newArticle.title}" saved as draft`
-      })
+      toast.success(publishImmediately ? '"' + newArticle.title + '" has been published' : '"' + newArticle.title + '" saved as draft')
       setShowCreateDialog(false)
       resetForm()
     } catch (error: any) {
@@ -668,7 +666,7 @@ export default function FAQClient() {
     try {
       const { error } = await updateFAQ(article.id, { status: 'published' })
       if (error) throw new Error(error)
-      toast.success('Article Published'" is now public` })
+      toast.success('"' + article.title + '" is now public')
     } catch (error: any) {
       toast.error('Error')
     }
@@ -679,7 +677,7 @@ export default function FAQClient() {
     try {
       const { error } = await updateFAQ(article.id, { status: 'archived' })
       if (error) throw new Error(error)
-      toast.success('Article Archived'" has been archived` })
+      toast.success('"' + article.title + '" has been archived')
       setSelectedArticle(null)
     } catch (error: any) {
       toast.error('Error')
@@ -766,7 +764,7 @@ export default function FAQClient() {
 
       if (error) throw new Error(error)
 
-      toast.success('Article Updated'" has been updated` })
+      toast.success('Article Updated')
       setShowCreateDialog(false)
       resetForm()
     } catch (error: any) {
@@ -922,7 +920,7 @@ export default function FAQClient() {
                 { status: 'featured', count: featuredArticles.length, icon: Star, color: 'amber' }
               ].map((stat, idx) => (
                 <div key={idx} className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 text-center">
-                  <stat.icon className={`w-6 h-6 mx-auto mb-2 text-${stat.color}-500`} />
+                  <stat.icon className={"w-6 h-6 mx-auto mb-2 text-" + (stat.color) + "-500"} />
                   <div className="text-xl font-bold">{stat.count}</div>
                   <div className="text-xs text-gray-500 capitalize">{stat.status}</div>
                 </div>
@@ -959,13 +957,13 @@ export default function FAQClient() {
                 <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
                   <button
                     onClick={() => setViewMode('list')}
-                    className={`p-2 rounded ${viewMode === 'list' ? 'bg-white dark:bg-gray-700 shadow-sm' : ''}`}
+                    className={"p-2 rounded " + (viewMode === 'list' ? 'bg-white dark:bg-gray-700 shadow-sm' : '') + ""}
                   >
                     <List className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => setViewMode('grid')}
-                    className={`p-2 rounded ${viewMode === 'grid' ? 'bg-white dark:bg-gray-700 shadow-sm' : ''}`}
+                    className={"p-2 rounded " + (viewMode === 'grid' ? 'bg-white dark:bg-gray-700 shadow-sm' : '') + ""}
                   >
                     <Grid3X3 className="w-4 h-4" />
                   </button>
@@ -988,14 +986,14 @@ export default function FAQClient() {
                     className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 hover:shadow-md transition-all"
                   >
                     <div className="flex items-start gap-4">
-                      <div className={`w-12 h-12 ${collection?.color || 'bg-gray-500'} rounded-xl flex items-center justify-center text-2xl`}>
+                      <div className={"w-12 h-12 " + (collection?.color || 'bg-gray-500') + " rounded-xl flex items-center justify-center text-2xl"}>
                         {collection?.icon || '📄'}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between mb-2">
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1">
-                              <span className={`px-2 py-0.5 rounded text-xs font-medium ${getStatusColor(article.status)}`}>
+                              <span className={"px-2 py-0.5 rounded text-xs font-medium " + (getStatusColor(article.status)) + ""}>
                                 {article.status}
                               </span>
                               {article.featured && (
@@ -1059,10 +1057,10 @@ export default function FAQClient() {
                     key={article.id}
                     className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-md transition-all"
                   >
-                    <div className={`h-2 ${collection?.color || 'bg-gray-500'}`} />
+                    <div className={"h-2 " + (collection?.color || 'bg-gray-500') + ""} />
                     <div className="p-4">
                       <div className="flex items-center gap-2 mb-2">
-                        <span className={`px-2 py-0.5 rounded text-xs font-medium ${getStatusColor(article.status)}`}>
+                        <span className={"px-2 py-0.5 rounded text-xs font-medium " + (getStatusColor(article.status)) + ""}>
                           {article.status}
                         </span>
                         {article.featured && <Star className="w-4 h-4 text-amber-500" />}
@@ -1133,7 +1131,7 @@ export default function FAQClient() {
                 { icon: Archive, label: 'Archive', desc: 'Archive old content', color: 'bg-gray-500' }
               ].map((action, idx) => (
                 <button key={idx} className="flex items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 hover:shadow-md transition-all text-left">
-                  <div className={`w-10 h-10 ${action.color} rounded-lg flex items-center justify-center`}>
+                  <div className={"w-10 h-10 " + (action.color) + " rounded-lg flex items-center justify-center"}>
                     <action.icon className="w-5 h-5 text-white" />
                   </div>
                   <div>
@@ -1158,7 +1156,7 @@ export default function FAQClient() {
                   className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 hover:shadow-md transition-all cursor-pointer"
                 >
                   <div className="flex items-start justify-between mb-4">
-                    <div className={`w-14 h-14 ${collection.color} rounded-xl flex items-center justify-center text-3xl`}>
+                    <div className={"w-14 h-14 " + (collection.color) + " rounded-xl flex items-center justify-center text-3xl"}>
                       {collection.icon}
                     </div>
                     <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
@@ -1233,7 +1231,7 @@ export default function FAQClient() {
                     <span className="text-xs text-gray-500">{stat.label}</span>
                   </div>
                   <div className="text-xl font-bold">{stat.value}</div>
-                  <div className={`text-xs ${stat.positive ? 'text-green-600' : 'text-red-600'}`}>{stat.change}</div>
+                  <div className={"text-xs " + (stat.positive ? 'text-green-600' : 'text-red-600') + ""}>{stat.change}</div>
                 </div>
               ))}
             </div>
@@ -1321,7 +1319,7 @@ export default function FAQClient() {
                       </div>
                       <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                         <div
-                          className={`h-full rounded-full ${col.color}`}
+                          className={"h-full rounded-full " + (col.color) + ""}
                           style={{ width: `${(col.articleCount / stats.totalArticles) * 100}%` }}
                         />
                       </div>
@@ -1378,7 +1376,7 @@ export default function FAQClient() {
                 <div key={idx} className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-100 dark:border-gray-700">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm text-gray-500">{stat.label}</span>
-                    <stat.icon className={`w-5 h-5 ${stat.color}`} />
+                    <stat.icon className={"w-5 h-5 " + (stat.color) + ""} />
                   </div>
                   <div className="text-2xl font-bold">{stat.value}</div>
                   <p className="text-xs text-gray-500 mt-1">{stat.desc}</p>
@@ -1406,9 +1404,9 @@ export default function FAQClient() {
                           <span>Avg click: #{query.avgClickPosition.toFixed(1)}</span>
                         </div>
                       </div>
-                      <div className={`px-3 py-1 rounded-full text-sm font-medium ${
+                      <div className={"px-3 py-1 rounded-full text-sm font-medium " + (
                         query.resultsFound > 0 ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
-                      }`}>
+                      ) + ""}>
                         {query.resultsFound > 0 ? 'Results Found' : 'No Results'}
                       </div>
                     </div>
@@ -1498,11 +1496,11 @@ export default function FAQClient() {
                       <button
                         key={item.id}
                         onClick={() => setSettingsTab(item.id)}
-                        className={`w-full flex items-center gap-3 p-3 rounded-lg text-left transition-all mb-1 ${
+                        className={"w-full flex items-center gap-3 p-3 rounded-lg text-left transition-all mb-1 " + (
                           settingsTab === item.id
                             ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800'
                             : 'hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300'
-                        }`}
+                        ) + ""}
                       >
                         <item.icon className="w-5 h-5" />
                         <div>
@@ -1577,8 +1575,8 @@ export default function FAQClient() {
                               <p className="font-medium">{option.label}</p>
                               <p className="text-xs text-gray-500">{option.desc}</p>
                             </div>
-                            <div className={`w-12 h-6 rounded-full p-1 cursor-pointer transition-colors ${option.checked ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'}`}>
-                              <div className={`w-4 h-4 rounded-full bg-white transition-transform ${option.checked ? 'translate-x-6' : ''}`} />
+                            <div className={"w-12 h-6 rounded-full p-1 cursor-pointer transition-colors " + (option.checked ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600') + ""}>
+                              <div className={"w-4 h-4 rounded-full bg-white transition-transform " + (option.checked ? 'translate-x-6' : '') + ""} />
                             </div>
                           </div>
                         ))}
@@ -1799,19 +1797,19 @@ export default function FAQClient() {
                         ].map((integration, idx) => (
                           <div key={idx} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
                             <div className="flex items-center gap-3">
-                              <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${integration.connected ? 'bg-blue-100 dark:bg-blue-900/30' : 'bg-gray-200 dark:bg-gray-700'}`}>
-                                <integration.icon className={`w-5 h-5 ${integration.connected ? 'text-blue-600' : 'text-gray-500'}`} />
+                              <div className={"w-10 h-10 rounded-lg flex items-center justify-center " + (integration.connected ? 'bg-blue-100 dark:bg-blue-900/30' : 'bg-gray-200 dark:bg-gray-700') + ""}>
+                                <integration.icon className={"w-5 h-5 " + (integration.connected ? 'text-blue-600' : 'text-gray-500') + ""} />
                               </div>
                               <div>
                                 <p className="font-medium">{integration.name}</p>
                                 <p className="text-xs text-gray-500">{integration.desc}</p>
                               </div>
                             </div>
-                            <button className={`px-4 py-1.5 rounded-lg text-sm font-medium ${
+                            <button className={"px-4 py-1.5 rounded-lg text-sm font-medium " + (
                               integration.connected
                                 ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
                                 : 'bg-blue-600 hover:bg-blue-700 text-white'
-                            }`}>
+                            ) + ""}>
                               {integration.connected ? 'Connected' : 'Connect'}
                             </button>
                           </div>
@@ -1873,8 +1871,8 @@ export default function FAQClient() {
                               <p className="font-medium">{notif.label}</p>
                               <p className="text-xs text-gray-500">{notif.desc}</p>
                             </div>
-                            <div className={`w-12 h-6 rounded-full p-1 cursor-pointer transition-colors ${notif.enabled ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'}`}>
-                              <div className={`w-4 h-4 rounded-full bg-white transition-transform ${notif.enabled ? 'translate-x-6' : ''}`} />
+                            <div className={"w-12 h-6 rounded-full p-1 cursor-pointer transition-colors " + (notif.enabled ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600') + ""}>
+                              <div className={"w-4 h-4 rounded-full bg-white transition-transform " + (notif.enabled ? 'translate-x-6' : '') + ""} />
                             </div>
                           </div>
                         ))}
@@ -1897,8 +1895,8 @@ export default function FAQClient() {
                               <p className="font-medium">{notif.label}</p>
                               <p className="text-xs text-gray-500">{notif.desc}</p>
                             </div>
-                            <div className={`w-12 h-6 rounded-full p-1 cursor-pointer transition-colors ${notif.enabled ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'}`}>
-                              <div className={`w-4 h-4 rounded-full bg-white transition-transform ${notif.enabled ? 'translate-x-6' : ''}`} />
+                            <div className={"w-12 h-6 rounded-full p-1 cursor-pointer transition-colors " + (notif.enabled ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600') + ""}>
+                              <div className={"w-4 h-4 rounded-full bg-white transition-transform " + (notif.enabled ? 'translate-x-6' : '') + ""} />
                             </div>
                           </div>
                         ))}
@@ -1927,8 +1925,8 @@ export default function FAQClient() {
                               <p className="font-medium">{feature.label}</p>
                               <p className="text-xs text-gray-500">{feature.desc}</p>
                             </div>
-                            <div className={`w-12 h-6 rounded-full p-1 cursor-pointer transition-colors ${feature.enabled ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'}`}>
-                              <div className={`w-4 h-4 rounded-full bg-white transition-transform ${feature.enabled ? 'translate-x-6' : ''}`} />
+                            <div className={"w-12 h-6 rounded-full p-1 cursor-pointer transition-colors " + (feature.enabled ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600') + ""}>
+                              <div className={"w-4 h-4 rounded-full bg-white transition-transform " + (feature.enabled ? 'translate-x-6' : '') + ""} />
                             </div>
                           </div>
                         ))}
@@ -2006,7 +2004,7 @@ export default function FAQClient() {
             <AIInsightsPanel
               insights={mockFAQAIInsights}
               title="Knowledge Base Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -2209,7 +2207,7 @@ export default function FAQClient() {
             <ScrollArea className="max-h-[calc(90vh-120px)]">
               <div className="space-y-6 pr-4">
                 <div className="flex items-center gap-4">
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(selectedArticle.status)}`}>
+                  <span className={"px-3 py-1 rounded-full text-sm font-medium " + (getStatusColor(selectedArticle.status)) + ""}>
                     {selectedArticle.status}
                   </span>
                   <div className="flex items-center gap-2 text-sm text-gray-500">

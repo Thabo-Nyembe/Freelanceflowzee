@@ -107,7 +107,7 @@ export function useCreateNotification() {
 /**
  * Mark notification as read
  */
-export function useMarkAsRead() {
+export function useMarkNotificationAsRead() {
   const queryClient = useQueryClient()
 
   return useMutation({

@@ -400,7 +400,7 @@ export default function TimeTrackingClient() {
       setActiveTimerEntryId(null)
       setActiveTimerStartTime(null)
 
-      toast.success('Timer stopped and saved' hours` })
+      toast.success('Timer stopped and saved')
     } catch (error) {
       console.error('Failed to stop timer:', error)
       toast.error('Failed to stop timer')
@@ -583,7 +583,7 @@ export default function TimeTrackingClient() {
       for (const entry of stoppedEntries) {
         await approveEntry(entry.id)
       }
-      toast.success('Timesheet approved' entries approved` })
+      toast.success('Timesheet approved')
     } else {
       toast.info('No entries to approve')
     }
@@ -653,7 +653,7 @@ export default function TimeTrackingClient() {
             <Card key={i} className="border-gray-200 dark:border-gray-700">
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${stat.color} flex items-center justify-center`}><stat.icon className="h-5 w-5 text-white" /></div>
+                  <div className={"w-10 h-10 rounded-lg bg-gradient-to-br " + stat.color + " flex items-center justify-center"}><stat.icon className="h-5 w-5 text-white" /></div>
                   <div>
                     <div className="flex items-center gap-1"><p className="text-xl font-bold text-gray-900 dark:text-white">{stat.value}</p>{stat.trend && <span className="text-xs text-green-600">{stat.trend}</span>}</div>
                     <p className="text-xs text-gray-500 dark:text-gray-400">{stat.label}</p>
@@ -716,7 +716,7 @@ export default function TimeTrackingClient() {
                   variant="ghost"
                   onClick={action.onClick}
                   disabled={(action as any).disabled}
-                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  className={"h-20 flex-col gap-2 " + action.color + " hover:scale-105 transition-all duration-200"}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -842,7 +842,7 @@ export default function TimeTrackingClient() {
                       })
                     }
                     toast.dismiss()
-                    toast.success('Week copied' entries duplicated to this week` })
+                    toast.success('Week copied')
                   } else {
                     toast.info('No entries found from last week to copy')
                   }
@@ -877,7 +877,7 @@ export default function TimeTrackingClient() {
                   key={idx}
                   variant="ghost"
                   onClick={action.onClick}
-                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  className={"h-20 flex-col gap-2 " + action.color + " hover:scale-105 transition-all duration-200"}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -896,16 +896,16 @@ export default function TimeTrackingClient() {
               </CardHeader>
               <CardContent className="p-0 overflow-x-auto">
                 <table className="w-full min-w-[800px]">
-                  <thead><tr className="bg-gray-50 dark:bg-gray-800"><th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase w-48">Project</th>{weekDays.map((day, idx) => <th key={idx} className={`py-3 px-4 text-center ${day.toDateString() === new Date().toDateString() ? 'bg-amber-50 dark:bg-amber-900/20' : ''}`}><div className="text-xs text-gray-500">{day.toLocaleDateString('en-US', { weekday: 'short' })}</div><div className={`text-lg font-bold ${day.toDateString() === new Date().toDateString() ? 'text-amber-600' : ''}`}>{day.getDate()}</div></th>)}<th className="py-3 px-4 text-center text-xs font-medium text-gray-500 uppercase">Total</th></tr></thead>
+                  <thead><tr className="bg-gray-50 dark:bg-gray-800"><th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase w-48">Project</th>{weekDays.map((day, idx) => <th key={idx} className={"py-3 px-4 text-center " + (day.toDateString() === new Date().toDateString() ? "bg-amber-50 dark:bg-amber-900/20" : "")}><div className="text-xs text-gray-500">{day.toLocaleDateString('en-US', { weekday: 'short' })}</div><div className={"text-lg font-bold " + (day.toDateString() === new Date().toDateString() ? "text-amber-600" : "")}>{day.getDate()}</div></th>)}<th className="py-3 px-4 text-center text-xs font-medium text-gray-500 uppercase">Total</th></tr></thead>
                   <tbody>
                     {projects.filter(p => p.status === 'active').slice(0, 4).map(project => (
                       <tr key={project.id} className="border-t dark:border-gray-700">
-                        <td className="py-3 px-4"><div className="flex items-center gap-2"><div className={`w-2 h-2 rounded-full bg-${project.color}-500`}></div><span className="font-medium text-sm">{project.name}</span></div><p className="text-xs text-gray-500">{project.client}</p></td>
-                        {weekDays.map((day, dayIdx) => <td key={dayIdx} className={`py-3 px-4 text-center ${day.toDateString() === new Date().toDateString() ? 'bg-amber-50 dark:bg-amber-900/20' : ''}`}><Input type="text" className="w-16 text-center" placeholder="-" defaultValue={Math.random() > 0.6 ? (Math.random() * 4 + 1).toFixed(1) : ''} /></td>)}
+                        <td className="py-3 px-4"><div className="flex items-center gap-2"><div className={"w-2 h-2 rounded-full bg-" + project.color + "-500"}></div><span className="font-medium text-sm">{project.name}</span></div><p className="text-xs text-gray-500">{project.client}</p></td>
+                        {weekDays.map((day, dayIdx) => <td key={dayIdx} className={"py-3 px-4 text-center " + (day.toDateString() === new Date().toDateString() ? "bg-amber-50 dark:bg-amber-900/20" : "")}><Input type="text" className="w-16 text-center" placeholder="-" defaultValue={Math.random() > 0.6 ? (Math.random() * 4 + 1).toFixed(1) : ''} /></td>)}
                         <td className="py-3 px-4 text-center font-bold">{(Math.random() * 20 + 5).toFixed(1)}h</td>
                       </tr>
                     ))}
-                    <tr className="border-t-2 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 font-bold"><td className="py-3 px-4">Daily Total</td>{weekDays.map((day, dayIdx) => <td key={dayIdx} className={`py-3 px-4 text-center ${day.toDateString() === new Date().toDateString() ? 'bg-amber-50 dark:bg-amber-900/20' : ''}`}>{(Math.random() * 6 + 2).toFixed(1)}h</td>)}<td className="py-3 px-4 text-center text-amber-600">42.5h</td></tr>
+                    <tr className="border-t-2 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 font-bold"><td className="py-3 px-4">Daily Total</td>{weekDays.map((day, dayIdx) => <td key={dayIdx} className={"py-3 px-4 text-center " + (day.toDateString() === new Date().toDateString() ? "bg-amber-50 dark:bg-amber-900/20" : "")}>{(Math.random() * 6 + 2).toFixed(1)}h</td>)}<td className="py-3 px-4 text-center text-amber-600">42.5h</td></tr>
                   </tbody>
                 </table>
               </CardContent>
@@ -931,8 +931,8 @@ export default function TimeTrackingClient() {
                     const isToday = day.toDateString() === new Date().toDateString()
                     const hoursWorked = Math.random() > 0.3 ? (Math.random() * 8 + 2).toFixed(1) : null
                     return (
-                      <div key={i} className={`p-2 min-h-[100px] rounded-lg border ${isCurrentMonth ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-900'} ${isToday ? 'border-amber-500 ring-1 ring-amber-500' : 'border-transparent'} hover:border-amber-300 cursor-pointer`}>
-                        <div className={`text-sm ${isCurrentMonth ? '' : 'text-gray-400'} ${isToday ? 'font-bold text-amber-600' : ''}`}>{day.getDate()}</div>
+                      <div key={i} className={"p-2 min-h-[100px] rounded-lg border " + (isCurrentMonth ? "bg-white dark:bg-gray-800" : "bg-gray-50 dark:bg-gray-900") + " " + (isToday ? "border-amber-500 ring-1 ring-amber-500" : "border-transparent") + " hover:border-amber-300 cursor-pointer"}>
+                        <div className={"text-sm " + (isCurrentMonth ? "" : "text-gray-400") + " " + (isToday ? "font-bold text-amber-600" : "")}>{day.getDate()}</div>
                         {hoursWorked && isCurrentMonth && <div className="mt-2"><div className="text-xs font-bold text-amber-600">{hoursWorked}h</div><Progress value={(parseFloat(hoursWorked) / 8) * 100} className="h-1 mt-1" /></div>}
                       </div>
                     )
@@ -1048,7 +1048,7 @@ export default function TimeTrackingClient() {
                   key={idx}
                   variant="ghost"
                   onClick={action.onClick}
-                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  className={"h-20 flex-col gap-2 " + action.color + " hover:scale-105 transition-all duration-200"}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1079,7 +1079,7 @@ export default function TimeTrackingClient() {
                       const percentage = (project.totalHours / 160) * 100
                       return (
                         <div key={project.id}>
-                          <div className="flex items-center justify-between mb-1"><div className="flex items-center gap-2"><div className={`w-3 h-3 rounded-full bg-${project.color}-500`}></div><span className="text-sm font-medium">{project.name}</span></div><span className="text-sm font-bold">{project.totalHours}h</span></div>
+                          <div className="flex items-center justify-between mb-1"><div className="flex items-center gap-2"><div className={"w-3 h-3 rounded-full bg-" + project.color + "-500"}></div><span className="text-sm font-medium">{project.name}</span></div><span className="text-sm font-bold">{project.totalHours}h</span></div>
                           <Progress value={percentage} className="h-2" />
                         </div>
                       )
@@ -1106,7 +1106,7 @@ export default function TimeTrackingClient() {
                     <div className="flex items-end justify-between h-40 gap-2">
                       {weekDays.map((day, idx) => {
                         const hours = Math.random() * 8 + 2
-                        return <div key={idx} className="flex-1 flex flex-col items-center gap-2"><div className={`w-full rounded-t-lg ${day.toDateString() === new Date().toDateString() ? 'bg-amber-500' : 'bg-amber-200'}`} style={{ height: `${(hours / 10) * 100}%` }}></div><span className="text-xs text-gray-500">{day.toLocaleDateString('en-US', { weekday: 'short' })}</span></div>
+                        return <div key={idx} className="flex-1 flex flex-col items-center gap-2"><div className={"w-full rounded-t-lg " + (day.toDateString() === new Date().toDateString() ? "bg-amber-500" : "bg-amber-200")} style={{ height: ((hours / 10) * 100) + "%" }}></div><span className="text-xs text-gray-500">{day.toLocaleDateString('en-US', { weekday: 'short' })}</span></div>
                       })}
                     </div>
                   </CardContent>
@@ -1166,7 +1166,7 @@ export default function TimeTrackingClient() {
                     <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                       {clients.map(client => (
                         <tr key={client.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                          <td className="px-4 py-4"><div className="flex items-center gap-3"><div className={`w-10 h-10 rounded-lg bg-${client.color}-100 dark:bg-${client.color}-900/30 flex items-center justify-center`}><Building2 className={`h-5 w-5 text-${client.color}-600`} /></div><div><h4 className="font-medium">{client.name}</h4><p className="text-sm text-gray-500">{client.email}</p></div></div></td>
+                          <td className="px-4 py-4"><div className="flex items-center gap-3"><div className={"w-10 h-10 rounded-lg bg-" + client.color + "-100 dark:bg-" + client.color + "-900/30 flex items-center justify-center"}><Building2 className={"h-5 w-5 text-" + client.color + "-600"} /></div><div><h4 className="font-medium">{client.name}</h4><p className="text-sm text-gray-500">{client.email}</p></div></div></td>
                           <td className="px-4 py-4 font-medium">{client.projects}</td>
                           <td className="px-4 py-4"><span className="font-bold text-emerald-600">${client.totalBilled.toLocaleString()}</span></td>
                           <td className="px-4 py-4">{client.outstandingBalance > 0 ? <span className="font-medium text-amber-600">${client.outstandingBalance.toLocaleString()}</span> : <span className="text-gray-400">$0</span>}</td>
@@ -1188,7 +1188,7 @@ export default function TimeTrackingClient() {
                     {tags.map(tag => (
                       <div key={tag.id} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                         <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-2"><div className={`w-3 h-3 rounded-full bg-${tag.color}-500`}></div><span className="font-medium">{tag.name}</span></div>
+                          <div className="flex items-center gap-2"><div className={"w-3 h-3 rounded-full bg-" + tag.color + "-500"}></div><span className="font-medium">{tag.name}</span></div>
                           <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => { setSelectedTag(tag); setShowTagDialog(true) }}><Edit2 className="h-3 w-3" /></Button>
                         </div>
                         <div className="flex items-center justify-between">
@@ -1247,7 +1247,7 @@ export default function TimeTrackingClient() {
                 { icon: Archive, label: 'Archive', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => {
                   const archivedProjects = projects.filter(p => p.status === 'completed' || p.status === 'archived')
                   if (archivedProjects.length > 0) {
-                    toast.info('Archived projects' archived projects found` })
+                    toast.info('Archived projects')
                   } else {
                     toast.info('No archived projects')
                   }
@@ -1272,7 +1272,7 @@ export default function TimeTrackingClient() {
                   key={idx}
                   variant="ghost"
                   onClick={action.onClick}
-                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  className={"h-20 flex-col gap-2 " + action.color + " hover:scale-105 transition-all duration-200"}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1288,7 +1288,7 @@ export default function TimeTrackingClient() {
                   <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                     {projects.map(project => (
                       <tr key={project.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                        <td className="px-4 py-4"><div className="flex items-center gap-2"><div className={`w-3 h-3 rounded-full bg-${project.color}-500`}></div><span className="font-medium">{project.name}</span></div></td>
+                        <td className="px-4 py-4"><div className="flex items-center gap-2"><div className={"w-3 h-3 rounded-full bg-" + project.color + "-500"}></div><span className="font-medium">{project.name}</span></div></td>
                         <td className="px-4 py-4 text-gray-500">{project.client}</td>
                         <td className="px-4 py-4">{project.billable ? `$${project.hourlyRate}/hr` : 'Non-billable'}</td>
                         <td className="px-4 py-4 font-medium">{project.totalHours}h</td>
@@ -1364,7 +1364,7 @@ export default function TimeTrackingClient() {
                   key={idx}
                   variant="ghost"
                   onClick={action.onClick}
-                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  className={"h-20 flex-col gap-2 " + action.color + " hover:scale-105 transition-all duration-200"}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1402,7 +1402,7 @@ export default function TimeTrackingClient() {
                     <div key={member.id} className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <div className="relative">
                         <Avatar className="h-12 w-12"><AvatarFallback className="bg-amber-100 text-amber-700">{member.name.split(' ').map(n => n[0]).join('')}</AvatarFallback></Avatar>
-                        <div className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${member.isOnline ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+                        <div className={"absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white " + (member.isOnline ? "bg-green-500" : "bg-gray-400")}></div>
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-2"><h4 className="font-medium">{member.name}</h4>{member.activeProject && <Badge variant="outline" className="text-xs">{member.activeProject}</Badge>}</div>
@@ -1476,7 +1476,7 @@ export default function TimeTrackingClient() {
                         <div key={member.id}>
                           <div className="flex items-center justify-between mb-2">
                             <div className="flex items-center gap-2"><Avatar className="h-6 w-6"><AvatarFallback className="text-xs bg-amber-100 text-amber-700">{member.name.split(' ').map(n => n[0]).join('')}</AvatarFallback></Avatar><span className="text-sm font-medium">{member.name}</span></div>
-                            <div className="flex items-center gap-2"><span className={`text-sm font-bold ${utilization >= 100 ? 'text-green-600' : utilization >= 80 ? 'text-amber-600' : 'text-red-600'}`}>{utilization.toFixed(0)}%</span>{utilization >= 100 && <CheckCircle className="h-4 w-4 text-green-500" />}</div>
+                            <div className="flex items-center gap-2"><span className={"text-sm font-bold " + (utilization >= 100 ? "text-green-600" : utilization >= 80 ? "text-amber-600" : "text-red-600")}>{utilization.toFixed(0)}%</span>{utilization >= 100 && <CheckCircle className="h-4 w-4 text-green-500" />}</div>
                           </div>
                           <Progress value={Math.min(utilization, 100)} className="h-2" />
                         </div>
@@ -1541,7 +1541,7 @@ export default function TimeTrackingClient() {
                 <Button
                   key={idx}
                   variant="ghost"
-                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  className={"h-20 flex-col gap-2 " + action.color + " hover:scale-105 transition-all duration-200"}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1637,7 +1637,7 @@ export default function TimeTrackingClient() {
                           const subject = encodeURIComponent(`Invoice ${invoice.number} - ${invoice.project}`)
                           const body = encodeURIComponent(`Dear ${invoice.client},\n\nPlease find attached invoice ${invoice.number} for ${invoice.project}.\n\nAmount Due: $${invoice.amount.toLocaleString()}\nDue Date: ${invoice.dueDate}\n\nBest regards`)
                           window.open(`mailto:?subject=${subject}&body=${body}`, '_blank')
-                          toast.success('Email client opened'` })
+                          toast.success('Email client opened')
                         }} title="Send invoice"><Send className="h-4 w-4" /></Button></div></td>
                       </tr>
                     ))}
@@ -1689,7 +1689,7 @@ export default function TimeTrackingClient() {
                   key={idx}
                   variant="ghost"
                   onClick={() => action.id && setSettingsTab(action.id)}
-                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  className={"h-20 flex-col gap-2 " + action.color + " hover:scale-105 transition-all duration-200"}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1714,11 +1714,11 @@ export default function TimeTrackingClient() {
                         <button
                           key={item.id}
                           onClick={() => setSettingsTab(item.id)}
-                          className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all ${
+                          className={"w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all " + (
                             settingsTab === item.id
-                              ? 'bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-lg'
-                              : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
-                          }`}
+                              ? "bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-lg"
+                              : "hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300"
+                          )}
                         >
                           <item.icon className="h-5 w-5" />
                           <span className="font-medium">{item.label}</span>
@@ -2099,7 +2099,7 @@ export default function TimeTrackingClient() {
                         {integrations.map(integration => (
                           <div key={integration.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                             <div className="flex items-center gap-4">
-                              <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${integration.status === 'connected' ? 'bg-green-100 dark:bg-green-900/30' : integration.status === 'error' ? 'bg-red-100 dark:bg-red-900/30' : 'bg-gray-100 dark:bg-gray-700'}`}>
+                              <div className={"w-10 h-10 rounded-lg flex items-center justify-center " + (integration.status === 'connected' ? "bg-green-100 dark:bg-green-900/30" : integration.status === 'error' ? "bg-red-100 dark:bg-red-900/30" : "bg-gray-100 dark:bg-gray-700")}>
                                 {integration.type === 'calendar' && <Calendar className="h-5 w-5" />}
                                 {integration.type === 'project' && <Briefcase className="h-5 w-5" />}
                                 {integration.type === 'accounting' && <Receipt className="h-5 w-5" />}
@@ -2111,7 +2111,7 @@ export default function TimeTrackingClient() {
                             <div className="flex items-center gap-3">
                               <Badge className={getStatusColor(integration.status)}>{integration.status}</Badge>
                               <Button variant="ghost" size="sm" onClick={async () => {
-                                await apiPost(`/api/integrations/${integration.id}/sync`, {}, { loading: `Syncing ${integration.name}...`, success: 'Sync completed', error: 'Sync failed' })
+                                await apiPost('/api/integrations/' + integration.id + '/sync', {}, { loading: 'Syncing ' + integration.name + '...', success: 'Sync completed', error: 'Sync failed' })
                               }}><RefreshCw className="h-4 w-4" /></Button>
                               <Button variant="ghost" size="sm" className="text-red-500" onClick={() => setIntegrationToRemove(integration.id)}><X className="h-4 w-4" /></Button>
                             </div>
@@ -2129,7 +2129,7 @@ export default function TimeTrackingClient() {
                           <div className="flex items-center justify-between mb-3">
                             <div><Label className="text-base">API Key</Label><p className="text-xs text-gray-500">For programmatic access</p></div>
                             <Button size="sm" variant="outline" onClick={async () => {
-                              const newKey = `tt_api_${Math.random().toString(36).substring(2, 15)}${Math.random().toString(36).substring(2, 15)}`
+                              const newKey = "tt_api_" + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
                               setApiKey(newKey)
                               toast.success('API key regenerated')
                             }}><RefreshCw className="h-4 w-4 mr-2" />Regenerate</Button>
@@ -2195,7 +2195,7 @@ export default function TimeTrackingClient() {
                               <div><p className="font-medium">{inv.date}</p><p className="text-sm text-gray-500">Premium Plan</p></div>
                               <div className="flex items-center gap-4"><span className="font-medium">{inv.amt}</span><Badge className="bg-green-100 text-green-700">Paid</Badge><Button variant="ghost" size="sm" onClick={() => {
                                 const invoiceData = { Date: inv.date, Amount: inv.amt, Plan: 'Premium Plan', Status: 'Paid' }
-                                downloadAsJson(invoiceData, `payment-receipt-${inv.date.replace(/, /g, '-').replace(/ /g, '-')}`)
+                                downloadAsJson(invoiceData, "payment-receipt-" + inv.date.replace(/, /g, '-').replace(/ /g, '-'))
                               }}><Download className="h-4 w-4" /></Button></div>
                             </div>
                           ))}
@@ -2236,7 +2236,7 @@ export default function TimeTrackingClient() {
                         <div className="flex gap-2">
                           <Button variant="outline" className="flex-1" onClick={() => {
                             const exportData = { entries: mockTimeEntries, projects: projects, exportDate: new Date().toISOString() }
-                            downloadAsJson(exportData, `time-tracking-export-${new Date().toISOString().split('T')[0]}`)
+                            downloadAsJson(exportData, "time-tracking-export-" + new Date().toISOString().split('T')[0])
                             toast.success('Data exported successfully')
                           }}><Download className="h-4 w-4 mr-2" />Export All</Button>
                           <Button variant="outline" className="flex-1" onClick={() => setShowArchiveProjectsDialog(true)}><Archive className="h-4 w-4 mr-2" />Archive Projects</Button>
@@ -2269,7 +2269,7 @@ export default function TimeTrackingClient() {
             <AIInsightsPanel
               insights={timeTrackingAIInsights}
               title="Time Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -2339,13 +2339,13 @@ export default function TimeTrackingClient() {
 
         {/* Tag Dialog */}
         <Dialog open={showTagDialog} onOpenChange={(open) => { setShowTagDialog(open); if (!open) setSelectedTag(null); }}>
-          <DialogContent><DialogHeader><DialogTitle>{selectedTag ? 'Edit Tag' : 'Create New Tag'}</DialogTitle><DialogDescription>{selectedTag ? `Editing tag: ${selectedTag.name}` : 'Add a tag to categorize time entries'}</DialogDescription></DialogHeader>
+          <DialogContent><DialogHeader><DialogTitle>{selectedTag ? 'Edit Tag' : 'Create New Tag'}</DialogTitle><DialogDescription>{selectedTag ? 'Editing tag: ' + selectedTag.name : 'Add a tag to categorize time entries'}</DialogDescription></DialogHeader>
             <div className="space-y-4 py-4">
               <div><Label>Tag Name</Label><Input placeholder="e.g., development, meeting, review" className="mt-1" defaultValue={selectedTag?.name || ''} /></div>
               <div><Label>Color</Label>
                 <div className="flex gap-2 mt-2">
                   {['red', 'orange', 'amber', 'green', 'blue', 'indigo', 'purple', 'pink'].map(color => (
-                    <button key={color} className={`w-8 h-8 rounded-full bg-${color}-500 hover:ring-2 hover:ring-${color}-300 transition-all ${selectedTag?.color === color ? 'ring-2 ring-offset-2' : ''}`} />
+                    <button key={color} className={"w-8 h-8 rounded-full bg-" + color + "-500 hover:ring-2 hover:ring-" + color + "-300 transition-all " + (selectedTag?.color === color ? "ring-2 ring-offset-2" : "")} />
                   ))}
                 </div>
               </div>
@@ -2356,7 +2356,7 @@ export default function TimeTrackingClient() {
 
         {/* Report Builder Dialog */}
         <Dialog open={showReportDialog} onOpenChange={(open) => { setShowReportDialog(open); if (!open) setSelectedReport(null); }}>
-          <DialogContent className="max-w-xl"><DialogHeader><DialogTitle>{selectedReport ? 'Edit Report' : 'Create New Report'}</DialogTitle><DialogDescription>{selectedReport ? `Editing: ${selectedReport.name}` : 'Build a custom report with your preferred filters'}</DialogDescription></DialogHeader>
+          <DialogContent className="max-w-xl"><DialogHeader><DialogTitle>{selectedReport ? 'Edit Report' : 'Create New Report'}</DialogTitle><DialogDescription>{selectedReport ? 'Editing: ' + selectedReport.name : 'Build a custom report with your preferred filters'}</DialogDescription></DialogHeader>
             <div className="space-y-4 py-4">
               <div><Label>Report Name</Label><Input placeholder="My Custom Report" className="mt-1" defaultValue={selectedReport?.name || ''} /></div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
@@ -2395,7 +2395,7 @@ export default function TimeTrackingClient() {
               <div><Label>Color</Label>
                 <div className="flex gap-2 mt-2">
                   {['red', 'orange', 'amber', 'green', 'blue', 'indigo', 'purple', 'pink'].map(color => (
-                    <button key={color} className={`w-8 h-8 rounded-full bg-${color}-500 hover:ring-2 hover:ring-${color}-300 transition-all`} />
+                    <button key={color} className={"w-8 h-8 rounded-full bg-" + color + "-500 hover:ring-2 hover:ring-" + color + "-300 transition-all"} />
                   ))}
                 </div>
               </div>
@@ -2427,7 +2427,7 @@ export default function TimeTrackingClient() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 {[{name:'Google Calendar', icon:'📅', type:'calendar'},{name:'Asana', icon:'📋', type:'project'},{name:'QuickBooks', icon:'💰', type:'accounting'},{name:'Slack', icon:'💬', type:'communication'},{name:'Salesforce', icon:'☁️', type:'crm'},{name:'Jira', icon:'🎯', type:'project'}].map(app => (
                   <button key={app.name} className="flex items-center gap-3 p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-left" onClick={async () => {
-                    await apiPost('/api/integrations', { name: app.name, type: app.type }, { loading: `Connecting ${app.name}...`, success: `${app.name} connected successfully`, error: 'Connection failed' })
+                    await apiPost('/api/integrations', { name: app.name, type: app.type }, { loading: 'Connecting ' + app.name + '...', success: app.name + ' connected successfully', error: 'Connection failed' })
                     setShowAddIntegrationDialog(false)
                   }}>
                     <span className="text-2xl">{app.icon}</span>
@@ -2446,7 +2446,7 @@ export default function TimeTrackingClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setIntegrationToRemove(null)}>Cancel</Button>
               <Button variant="destructive" onClick={async () => {
-                await apiPost(`/api/integrations/${integrationToRemove}/disconnect`, {}, { loading: 'Disconnecting...', success: 'Integration removed', error: 'Failed to disconnect' })
+                await apiPost('/api/integrations/' + integrationToRemove + '/disconnect', {}, { loading: 'Disconnecting...', success: 'Integration removed', error: 'Failed to disconnect' })
                 setIntegrationToRemove(null)
               }}>Remove</Button>
             </DialogFooter>

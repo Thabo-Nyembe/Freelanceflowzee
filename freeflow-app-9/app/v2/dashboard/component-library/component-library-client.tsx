@@ -436,15 +436,15 @@ export default function ComponentLibraryClient() {
   }
 
   // Handlers
-  const handleCopyCode = (n: string) => toast.success('Copied' code copied` })
-  const handlePreview = (n: string) => toast.info('Preview'...` })
+  const handleCopyCode = (n: string) => toast.success('Copied')
+  const handlePreview = (n: string) => toast.info("Preview: " + n)
   const handleExport = () => toast.success('Exporting')
   const handleCreate = () => toast.info('Create')
   const handleOpenFigma = () => toast.info('Figma')
   const handleOpenGitHub = () => toast.info('GitHub')
-  const handleOpenDocs = (docType: string) => toast.info('Documentation'...` })
-  const handleDownload = (item: string) => toast.success('Download Started'...` })
-  const handleConnect = (toolName: string) => toast.info('Connect'...` })
+  const handleOpenDocs = (docType: string) => toast.info("Documentation: " + docType)
+  const handleDownload = (item: string) => toast.success("Download Started: " + item)
+  const handleConnect = (toolName: string) => toast.info("Connect: " + toolName)
   const handleAddWebhook = () => toast.info('Add Webhook')
   const handleViewApiKey = () => toast.info('API Key')
   const handleCopyApiKey = () => toast.success('Copied')
@@ -452,7 +452,7 @@ export default function ComponentLibraryClient() {
   const handleViewNpm = () => toast.info('NPM')
   const handleClearCache = () => toast.success('Cache Cleared')
   const handleViewAccessLogs = () => toast.info('Access Logs')
-  const handleDangerAction = (action: string) => toast.error('Danger Zone' requires confirmation` })
+  const handleDangerAction = (action: string) => toast.error('Danger Zone')
 
   // Key metrics for header
   const keyMetrics = [
@@ -1785,7 +1785,7 @@ export default function App() {
             <AIInsightsPanel
               insights={mockComponentLibAIInsights}
               title="Component Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -1848,7 +1848,7 @@ export default function App() {
                           </Button>
                         </div>
                       </div>
-                      <div className={`p-12 flex items-center justify-center min-h-[150px] ${darkMode ? 'bg-gray-900' : 'bg-white'}`}>
+                      <div className={'p-12 flex items-center justify-center min-h-[150px] ' + (darkMode ? 'bg-gray-900' : 'bg-white')}>
                         <div className="text-center text-gray-400">
                           <Eye className="h-8 w-8 mx-auto mb-2" />
                           <p className="text-sm">Component preview</p>

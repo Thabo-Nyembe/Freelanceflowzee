@@ -675,8 +675,7 @@ export default function AnnouncementsClient() {
         send_push: newAnnouncement.send_push
       })
 
-      toast.success('Announcement Created'" has been saved as ${newAnnouncement.status}`
-      })
+      toast.success('Announcement Created: has been saved as ' + newAnnouncement.status)
 
       // Reset form and close dialog
       setNewAnnouncement({
@@ -703,8 +702,7 @@ export default function AnnouncementsClient() {
         status: 'published',
         published_at: new Date().toISOString()
       })
-      toast.success('Announcement Published'" is now live`
-      })
+      toast.success('Announcement Published: ' + title + ' is now live')
       setSelectedAnnouncement(null)
     } catch (error) {
       toast.error('Failed to publish announcement')
@@ -717,8 +715,7 @@ export default function AnnouncementsClient() {
         status: 'scheduled',
         scheduled_for: scheduledFor
       })
-      toast.success('Announcement Scheduled'" has been scheduled`
-      })
+      toast.success('Announcement Scheduled: ' + title + ' has been scheduled')
     } catch (error) {
       toast.error('Failed to schedule announcement')
     }
@@ -729,8 +726,7 @@ export default function AnnouncementsClient() {
       await updateAnnouncement(id, {
         status: 'archived'
       })
-      toast.info('Announcement Archived'" moved to archive`
-      })
+      toast.info('Announcement Archived: ' + title + ' moved to archive')
       setSelectedAnnouncement(null)
     } catch (error) {
       toast.error('Failed to archive announcement')
@@ -740,8 +736,7 @@ export default function AnnouncementsClient() {
   const handleDeleteAnnouncement = async (id: string, title: string) => {
     try {
       await deleteAnnouncement(id)
-      toast.success('Announcement Deleted'" has been permanently deleted`
-      })
+      toast.success('Announcement Deleted: ' + title + ' has been permanently deleted')
       setSelectedAnnouncement(null)
     } catch (error) {
       toast.error('Failed to delete announcement')
@@ -753,8 +748,7 @@ export default function AnnouncementsClient() {
       await updateAnnouncement(id, {
         is_pinned: !isPinned
       })
-      toast.success(isPinned ? 'Announcement Unpinned' : 'Announcement Pinned'" is ${isPinned ? 'no longer pinned' : 'now pinned'}`
-      })
+      toast.success((isPinned ? 'Announcement Unpinned' : 'Announcement Pinned') + ': ' + title + ' is ' + (isPinned ? 'no longer pinned' : 'now pinned'))
     } catch (error) {
       toast.error('Failed to update pin status')
     }
@@ -766,8 +760,7 @@ export default function AnnouncementsClient() {
       toast.error('Validation Error')
       return
     }
-    toast.success('Release Added' has been added to the changelog`
-    })
+    toast.success('Release Added: ' + newRelease.version + ' has been added to the changelog')
     setNewRelease({ version: '', title: '', description: '', type: 'feature', changes: [''] })
     setShowAddReleaseDialog(false)
   }
@@ -778,8 +771,7 @@ export default function AnnouncementsClient() {
       toast.error('Validation Error')
       return
     }
-    toast.success('Segment Created'" segment has been created`
-    })
+    toast.success('Segment Created: ' + newSegment.name + ' segment has been created')
     setNewSegment({ name: '', description: '', attribute: 'plan', operator: '=', value: '' })
     setShowCreateSegmentDialog(false)
   }
@@ -787,8 +779,7 @@ export default function AnnouncementsClient() {
   // Handler for editing a segment
   const handleEditSegment = () => {
     if (!selectedSegment) return
-    toast.success('Segment Updated'" has been updated`
-    })
+    toast.success('Segment Updated: ' + selectedSegment.name + ' has been updated')
     setShowEditSegmentDialog(false)
     setSelectedSegment(null)
   }
@@ -796,8 +787,7 @@ export default function AnnouncementsClient() {
   // Handler for sending announcement to segment
   const handleSendToSegment = () => {
     if (!selectedSegment) return
-    toast.success('Announcement Sent' users in "${selectedSegment.name}"`
-    })
+    toast.success('Announcement Sent to ' + selectedSegment.name + ' users')
     setShowSendToSegmentDialog(false)
     setSelectedSegment(null)
   }
@@ -829,8 +819,7 @@ export default function AnnouncementsClient() {
   // Handler for configuring integration
   const handleConfigureIntegration = () => {
     if (!selectedIntegration) return
-    toast.success('Integration Updated' configuration has been saved`
-    })
+    toast.success('Integration Updated: ' + selectedIntegration.name + ' configuration has been saved')
     setShowIntegrationConfigDialog(false)
     setSelectedIntegration(null)
   }
@@ -838,8 +827,7 @@ export default function AnnouncementsClient() {
   // Handler for connecting integration
   const handleConnectIntegration = () => {
     if (!selectedIntegration) return
-    toast.success('Integration Connected' has been connected successfully`
-    })
+    toast.success('Integration Connected: ' + selectedIntegration.name + ' has been connected successfully')
     setShowConnectIntegrationDialog(false)
     setSelectedIntegration(null)
   }
@@ -853,8 +841,7 @@ export default function AnnouncementsClient() {
   // Handler for copying to clipboard
   const handleCopyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text)
-    toast.success('Copied' copied to clipboard`
-    })
+    toast.success('Copied: ' + label + ' copied to clipboard')
   }
 
   // Handler for creating template
@@ -863,8 +850,7 @@ export default function AnnouncementsClient() {
       toast.error('Validation Error')
       return
     }
-    toast.success('Template Created'" template has been created`
-    })
+    toast.success('Template Created: ' + newTemplate.name + ' template has been created')
     setNewTemplate({ name: '', type: 'feature', description: '' })
     setShowNewTemplateDialog(false)
   }
@@ -872,8 +858,7 @@ export default function AnnouncementsClient() {
   // Handler for editing template
   const handleEditTemplate = () => {
     if (!selectedTemplate) return
-    toast.success('Template Updated'" has been updated`
-    })
+    toast.success('Template Updated: ' + selectedTemplate.name + ' has been updated')
     setShowEditTemplateDialog(false)
     setSelectedTemplate(null)
   }
@@ -881,8 +866,7 @@ export default function AnnouncementsClient() {
   // Handler for deleting template
   const handleDeleteTemplate = () => {
     if (!selectedTemplate) return
-    toast.success('Template Deleted'" has been deleted`
-    })
+    toast.success('Template Deleted: ' + selectedTemplate.name + ' has been deleted')
     setShowDeleteTemplateDialog(false)
     setSelectedTemplate(null)
   }
@@ -912,8 +896,7 @@ export default function AnnouncementsClient() {
       for (const ann of publishedAnnouncements) {
         await updateAnnouncement(ann.id, { status: 'archived' })
       }
-      toast.success('All Announcements Archived' announcements have been archived`
-      })
+      toast.success('All Announcements Archived: ' + publishedAnnouncements.length + ' announcements have been archived')
     } catch (error) {
       toast.error('Failed to archive announcements')
     }
@@ -951,8 +934,7 @@ export default function AnnouncementsClient() {
         title: editAnnouncementForm.title,
         content: editAnnouncementForm.content
       })
-      toast.success('Announcement Updated'" has been updated`
-      })
+      toast.success('Announcement Updated: ' + editAnnouncementForm.title + ' has been updated')
       setShowEditAnnouncementDialog(false)
       setSelectedAnnouncement(null)
     } catch (error) {
@@ -1108,12 +1090,12 @@ export default function AnnouncementsClient() {
               {filteredAnnouncements.map(announcement => (
                 <Card
                   key={announcement.id}
-                  className={`cursor-pointer hover:shadow-lg transition-shadow ${announcement.isPinned ? 'border-violet-200 dark:border-violet-800' : ''}`}
+                  className={'cursor-pointer hover:shadow-lg transition-shadow ' + (announcement.isPinned ? 'border-violet-200 dark:border-violet-800' : '')}
                   onClick={() => setSelectedAnnouncement(announcement)}
                 >
                   <CardContent className="p-6">
                     <div className="flex items-start gap-4">
-                      <div className={`p-3 rounded-xl ${typeColors[announcement.type]}`}>
+                      <div className={'p-3 rounded-xl ' + typeColors[announcement.type]}>
                         {typeIcons[announcement.type]}
                       </div>
 
@@ -1163,9 +1145,7 @@ export default function AnnouncementsClient() {
                             {announcement.reactions.map(reaction => (
                               <button
                                 key={reaction.type}
-                                className={`flex items-center gap-1 px-2 py-1 rounded-full text-sm ${
-                                  reaction.hasReacted ? 'bg-violet-100 text-violet-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                }`}
+                                className={'flex items-center gap-1 px-2 py-1 rounded-full text-sm ' + (reaction.hasReacted ? 'bg-violet-100 text-violet-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200')}
                               >
                                 {getReactionIcon(reaction.type)}
                                 {reaction.count}
@@ -1224,7 +1204,7 @@ export default function AnnouncementsClient() {
                   <CardContent className="p-6">
                     <div className="flex items-start gap-4">
                       <div className="relative">
-                        <div className={`p-3 rounded-xl ${typeColors[entry.type]}`}>
+                        <div className={'p-3 rounded-xl ' + typeColors[entry.type]}>
                           {typeIcons[entry.type]}
                         </div>
                         {i < changelog.length - 1 && (
@@ -1427,11 +1407,7 @@ export default function AnnouncementsClient() {
                         <button
                           key={item.id}
                           onClick={() => setSettingsTab(item.id)}
-                          className={`w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors ${
-                            settingsTab === item.id
-                              ? 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400'
-                              : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
-                          }`}
+                          className={'w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors ' + (settingsTab === item.id ? 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400' : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800')}
                         >
                           <item.icon className="h-4 w-4" />
                           {item.label}
@@ -1935,7 +1911,7 @@ export default function AnnouncementsClient() {
                         ].map((integration) => (
                           <div key={integration.name} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                             <div className="flex items-center gap-3">
-                              <integration.icon className={`h-6 w-6 ${integration.color}`} />
+                              <integration.icon className={'h-6 w-6 ' + integration.color} />
                               <div>
                                 <div className="font-medium">{integration.name}</div>
                                 <div className="text-sm text-gray-500">{integration.description}</div>
@@ -2062,7 +2038,7 @@ export default function AnnouncementsClient() {
                         ].map((template) => (
                           <div key={template.name} className="flex items-center justify-between p-4 border rounded-lg">
                             <div className="flex items-center gap-3">
-                              <div className={`p-2 rounded-lg ${typeColors[template.type as AnnouncementType]}`}>
+                              <div className={'p-2 rounded-lg ' + typeColors[template.type as AnnouncementType]}>
                                 {typeIcons[template.type as AnnouncementType]}
                               </div>
                               <div>
@@ -2331,7 +2307,7 @@ export default function AnnouncementsClient() {
             <AIInsightsPanel
               insights={announcementsAIInsights}
               title="Announcements Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -2444,9 +2420,7 @@ export default function AnnouncementsClient() {
                       {selectedAnnouncement.reactions.map(reaction => (
                         <button
                           key={reaction.type}
-                          className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm ${
-                            reaction.hasReacted ? 'bg-violet-100 text-violet-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                          }`}
+                          className={'flex items-center gap-2 px-4 py-2 rounded-full text-sm ' + (reaction.hasReacted ? 'bg-violet-100 text-violet-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200')}
                         >
                           {getReactionIcon(reaction.type)}
                           <span className="capitalize">{reaction.type}</span>

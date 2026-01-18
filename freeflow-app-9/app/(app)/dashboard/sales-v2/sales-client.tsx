@@ -1,4 +1,6 @@
 'use client'
+
+import { createClient } from '@/lib/supabase/client'
 // MIGRATED: Batch #17 - Verified database hook integration (useSalesDeals)
 
 import { useState, useMemo } from 'react'
@@ -685,13 +687,13 @@ export default function SalesClient() {
   }
 
   const handleExportSales = async () => {
-    const exportPromise = new Promise<string>((resolve, reject) => {
+    const exportPromise = new Promise<string>(async (resolve, reject) => {
       try {
         const csvContent = [
           ['Title', 'Company', 'Value', 'Stage', 'Probability', 'Close Date'].join(','),
           ...deals.map(d => [
-            `"${d.title}"`,
-            `"${d.company_name || ''}"`,
+            '"' + d.title + '"',
+            '"' + (d.company_name || '') + '"',
             d.deal_value,
             d.stage,
             d.probability,
@@ -703,13 +705,11 @@ export default function SalesClient() {
         const url = URL.createObjectURL(blob)
         const a = document.createElement('a')
         a.href = url
-        a.download = `sales-export-${new Date().toISOString().split('T')[0]}.csv`
+        a.download = 'sales-export-' + new Date().toISOString().split('T')[0] + '.csv'
         a.click()
         URL.revokeObjectURL(url)
 
         // Log export activity
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         await supabase.from('activity_log').insert({
           action: 'sales_data_exported',
           entity_type: 'deals',
@@ -851,8 +851,6 @@ export default function SalesClient() {
     }
     setIsSubmitting(true)
     const connectPromise = (async () => {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       await supabase.from('crm_integrations').upsert({
         name: 'hubspot',
         email: hubSpotEmail,
@@ -877,8 +875,6 @@ export default function SalesClient() {
   const handleRegenerateApiKey = async () => {
     setIsSubmitting(true)
     const regeneratePromise = (async () => {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const newKey = 'sk_live_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
       await supabase.from('crm_api_keys').update({
         key_value: newKey,
@@ -937,8 +933,6 @@ export default function SalesClient() {
         }
       }
       // Reset all settings to defaults via Supabase
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       await supabase.from('crm_settings').update({
         api_key: 'sk_live_xxxxxxxxxxxx',
         webhook_url: '',
@@ -983,8 +977,6 @@ export default function SalesClient() {
     const quoteNum = selectedQuote.quoteNumber
     const recipientEmail = quoteRecipientEmail
     const sendPromise = (async () => {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       await supabase.from('quote_sends').insert({
         quote_number: quoteNum,
         recipient_email: recipientEmail,

@@ -773,7 +773,7 @@ export default function ResourcesClient() {
           allocated: resource.allocated_hours + 8,
           capacity: resource.capacity_hours
         })
-        toast.success('Resource assigned' assigned to ${projectName}` })
+        toast.success('Resource assigned')
         refetch()
       }
     } catch (error) {
@@ -785,7 +785,7 @@ export default function ResourcesClient() {
   const handleDeleteResource = async (id: string, name: string) => {
     try {
       await deleteResource(id)
-      toast.success('Resource removed' has been removed` })
+      toast.success('Resource removed')
       refetch()
     } catch (error) {
       toast.error('Failed to remove resource')
@@ -802,7 +802,7 @@ export default function ResourcesClient() {
           allocated: hours,
           capacity: resource.capacity_hours
         })
-        toast.success('Capacity updated''s allocation updated` })
+        toast.success('Capacity updated for ' + resourceName)
         refetch()
       }
     } catch (error) {
@@ -816,7 +816,7 @@ export default function ResourcesClient() {
   }
 
   const handleScheduleResource = (resourceName: string) => {
-    toast.info('Schedule Resource'...` })
+    toast.info('Opening scheduler for ' + resourceName)
   }
 
   const handleSyncResources = async () => {
@@ -2081,7 +2081,7 @@ export default function ResourcesClient() {
             <AIInsightsPanel
               insights={mockResourcesAIInsights}
               title="Resource Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">

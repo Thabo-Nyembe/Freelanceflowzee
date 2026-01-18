@@ -869,7 +869,7 @@ export default function PluginsClient() {
         tags: plugin.tags,
         performance_score: plugin.performanceScore
       })
-      toast.success('Plugin Installed'" has been installed successfully!` })
+      toast.success("Plugin Installed: " + plugin.name + " has been installed successfully!")
     } catch (err: any) {
       toast.error('Installation Failed')
     } finally {
@@ -899,7 +899,7 @@ export default function PluginsClient() {
         permissions: [],
         metadata: {}
       })
-      toast.success('Plugin Created'" has been created successfully!` })
+      toast.success('Plugin Created - ' + newPluginForm.name + ' has been created successfully!')
       setShowUploadDialog(false)
       setNewPluginForm({
         name: '',
@@ -920,7 +920,7 @@ export default function PluginsClient() {
   const handleUninstallPlugin = async (pluginId: string, pluginName: string) => {
     try {
       await deletePlugin(pluginId)
-      toast.success('Plugin Uninstalled'" has been removed` })
+      toast.success('Plugin Uninstalled - ' + pluginName + ' has been removed')
     } catch (err: any) {
       toast.error('Uninstall Failed')
     }
@@ -928,13 +928,13 @@ export default function PluginsClient() {
 
   const handleConfigurePlugin = (pluginName: string) => {
     setSettingsTab('general')
-    toast.success(`"${pluginName}" settings opened`)
+    toast.success('"' + pluginName + '" settings opened')
   }
 
   const handleEnablePlugin = async (pluginId: string, pluginName: string) => {
     try {
       await activatePlugin(pluginId)
-      toast.success('Plugin Enabled'" is now active` })
+      toast.success('Plugin Enabled - ' + pluginName + ' is now active')
     } catch (err: any) {
       toast.error('Activation Failed')
     }
@@ -943,7 +943,7 @@ export default function PluginsClient() {
   const handleDisablePlugin = async (pluginId: string, pluginName: string) => {
     try {
       await deactivatePlugin(pluginId)
-      toast.info('Plugin Disabled'" has been deactivated` })
+      toast.info('Plugin Disabled - ' + pluginName + ' has been deactivated')
     } catch (err: any) {
       toast.error('Deactivation Failed')
     }
@@ -952,7 +952,7 @@ export default function PluginsClient() {
   const handleUpdatePlugin = async (pluginId: string, pluginName: string, newVersion: string) => {
     try {
       await updatePluginVersion(pluginId, newVersion)
-      toast.success('Plugin Updated'" has been updated to v${newVersion}` })
+      toast.success("Plugin Updated - " + pluginName + " has been updated to v" + newVersion)
     } catch (err: any) {
       toast.error('Update Failed')
     }
@@ -964,7 +964,7 @@ export default function PluginsClient() {
       toast.info('All Up to Date')
       return
     }
-    toast.info('Updating Plugins' plugin(s)...` })
+    toast.info('Updating Plugins')
     for (const plugin of needsUpdate) {
       try {
         await updatePlugin(plugin.id, { status: 'active' })
@@ -1073,9 +1073,9 @@ export default function PluginsClient() {
       [pluginId]: { isActivated: !currentlyActivated }
     }))
     if (currentlyActivated) {
-      toast.success(`"${pluginName}" has been deactivated`)
+      toast.success('"' + pluginName + '" has been deactivated')
     } else {
-      toast.success(`"${pluginName}" has been activated`)
+      toast.success('"' + pluginName + '" has been activated')
     }
   }, [])
 
@@ -1106,7 +1106,7 @@ export default function PluginsClient() {
       delete newState[pluginId]
       return newState
     })
-    toast.success(`"${pluginName}" has been removed`)
+    toast.success('"' + pluginName + '" has been removed')
     setSelectedPlugin(null)
   }, [])
 
@@ -1118,7 +1118,7 @@ export default function PluginsClient() {
   const handleVisitPluginWebsite = useCallback((plugin: Plugin) => {
     const websiteUrl = `https://plugins.example.com/${plugin.slug}`
     window.open(websiteUrl, '_blank')
-    toast.success(`${plugin.name} website opened in new tab`)
+    toast.success(plugin.name + ' website opened in new tab')
   }, [])
 
   const renderPluginCard = (plugin: Plugin) => (
@@ -1241,7 +1241,7 @@ export default function PluginsClient() {
         <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); handleConfigurePlugin(plugin.name) }}>
           <Settings className="h-4 w-4" />
         </Button>
-        <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600" onClick={async (e) => { e.stopPropagation(); if (confirm(`Are you sure you want to remove "${plugin.name}"?`)) { toast.promise(fetch('/api/plugins', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'uninstall', pluginId: plugin.id, pluginName: plugin.name }) }).then(res => { if (!res.ok) throw new Error('Failed'); return res.json() }), { loading: `Removing ${plugin.name}...`, success: `${plugin.name} removed successfully`, error: 'Failed to remove plugin' }) } }}>
+        <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600" onClick={async (e) => { e.stopPropagation(); if (confirm('Are you sure you want to remove "' + plugin.name + '"?')) { toast.promise(fetch('/api/plugins', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'uninstall', pluginId: plugin.id, pluginName: plugin.name }) }).then(res => { if (!res.ok) throw new Error('Failed'); return res.json() }), { loading: 'Removing ' + plugin.name + '...', success: plugin.name + ' removed successfully', error: 'Failed to remove plugin' }) } }}>
           <Trash2 className="h-4 w-4" />
         </Button>
       </div>
@@ -1471,7 +1471,7 @@ export default function PluginsClient() {
                         toast.info('Filter cleared')
                       } else {
                         setQuickFilterType(action.label)
-                        toast.success(`Showing ${action.label} plugins` plugins` })
+                        toast.success('Showing ' + action.label + ' plugins')
                       }
                     }
                   }}
@@ -1685,7 +1685,7 @@ export default function PluginsClient() {
                       const hasUpdates = needsUpdatePlugins.length > 0
                       if (hasUpdates) {
                         setActiveTab('updates')
-                        toast.warning(`${needsUpdatePlugins.length} plugin(s) need updating`, { description: 'Navigated to Updates tab' })
+                        toast.warning(needsUpdatePlugins.length + ' plugin(s) need updating', { description: 'Navigated to Updates tab' })
                       } else {
                         toast.success('All plugins are up to date!')
                       }
@@ -2381,7 +2381,7 @@ export default function PluginsClient() {
             <AIInsightsPanel
               insights={mockPluginsAIInsights}
               title="Plugin Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -2860,7 +2860,7 @@ export default function PluginsClient() {
                 </Button>
                 <Button className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600" onClick={() => {
                   setShowFilterDialog(false)
-                  toast.success('Filters applied' plugins` })
+                  toast.success('Filters applied')
                 }}>
                   Apply Filters
                 </Button>
@@ -2925,7 +2925,7 @@ export default function PluginsClient() {
                           setLocalPluginState(prev => ({ ...prev, [id]: { isActivated: true } }))
                         }
                       })
-                      toast.success(`Activated ${selectedBulkPlugins.length} plugins`)
+                      toast.success('Activated ' + selectedBulkPlugins.length + ' plugins')
                       setShowBulkActionsDialog(false)
                       setSelectedBulkPlugins([])
                     }}>
@@ -2936,7 +2936,7 @@ export default function PluginsClient() {
                       selectedBulkPlugins.forEach(id => {
                         setLocalPluginState(prev => ({ ...prev, [id]: { isActivated: false } }))
                       })
-                      toast.success(`Deactivated ${selectedBulkPlugins.length} plugins`)
+                      toast.success('Deactivated ' + selectedBulkPlugins.length + ' plugins')
                       setShowBulkActionsDialog(false)
                       setSelectedBulkPlugins([])
                     }}>
@@ -2968,7 +2968,7 @@ export default function PluginsClient() {
                           selectedBulkPlugins.forEach(id => delete newState[id])
                           return newState
                         })
-                        toast.success(`Deleted ${selectedBulkPlugins.length} plugins`)
+                        toast.success('Deleted ' + selectedBulkPlugins.length + ' plugins')
                         setShowBulkActionsDialog(false)
                         setSelectedBulkPlugins([])
                       }
@@ -3239,8 +3239,8 @@ export default function PluginsClient() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                     {['Getting Started', 'Building Your First Plugin', 'Testing Plugins', 'Publishing Guide'].map((guide, i) => (
                       <Button key={i} variant="outline" className="justify-start" onClick={() => {
-                        window.open(`/docs/guides/${guide.toLowerCase().replace(/ /g, '-')}`, '_blank')
-                        toast.success(`Opening ${guide}`)
+                        window.open('/docs/guides/' + guide.toLowerCase().replace(/ /g, '-'), '_blank')
+                        toast.success('Opening ' + guide)
                       }}>
                         <FileText className="h-4 w-4 mr-2" />
                         {guide}

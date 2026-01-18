@@ -1,5 +1,7 @@
 "use client"
 
+import { createClient } from '@/lib/supabase/client'
+
 // MIGRATED: Batch #12 - Removed mock data, using database hooks
 
 import React, { useState, useMemo, useEffect } from 'react'
@@ -1105,7 +1107,7 @@ export default function AICreateClient() {
                       toast.info(`${premiumCount} premium templates available`)
                     } else if (action.label === 'Community') {
                       const communityCount = mockTemplates.filter(t => t.category === 'social').length
-                      toast.info('Community Templates' templates shared by the community` })
+                      toast.info(`${communityCount} community templates shared by the community`)
                     } else if (action.label === 'Saved') {
                       toast.info('No saved templates yet')
                     } else if (action.label === 'Categories') {
@@ -1854,8 +1856,6 @@ export default function AICreateClient() {
                                 toast.loading(`Connecting to ${service.name}...`, { id: 'service-connect' })
                                 ;(async () => {
                                   try {
-                                    const { createClient } = await import('@/lib/supabase/client')
-                                    const supabase = createClient()
                                     const { data: { user } } = await supabase.auth.getUser()
                                     if (!user) throw new Error('Not authenticated')
 
@@ -1988,8 +1988,7 @@ export default function AICreateClient() {
                             </div>
                           </div>
                           <Button variant="outline" size="sm" onClick={() => {
-                            toast.info('Model Settings'
-                            })
+                            toast.info('Opening Model Settings...')
                           }}>Manage</Button>
                         </div>
                       </CardContent>
@@ -2283,8 +2282,6 @@ export default function AICreateClient() {
                     if (importedFile) {
                       toast.promise(
                         (async () => {
-                          const { createClient } = await import('@/lib/supabase/client')
-                          const supabase = createClient()
                           const { data: { user } } = await supabase.auth.getUser()
                           if (!user) throw new Error('Not authenticated')
 
@@ -2393,7 +2390,7 @@ export default function AICreateClient() {
                 <Button
                   disabled={!templateForm.name || !templateForm.prompt}
                   onClick={() => {
-                    toast.success('Template created!'" saved to your templates` })
+                    toast.success(`Template created! "${templateForm.name}" saved to your templates`)
                     setShowTemplateDialog(false)
                     setTemplateForm({ name: '', description: '', prompt: '', style: 'realistic' })
                   }}

@@ -428,7 +428,7 @@ export default function EmailMarketingClient({
       icon: 'chart',
       action: () => {
         setActiveTab('analytics')
-        toast.success('Analytics loaded'%, Click Rate: ${stats.clickRate.toFixed(1)}%` })
+        toast.success(`Analytics loaded: Open Rate: ${stats.openRate.toFixed(1)}%, Click Rate: ${stats.clickRate.toFixed(1)}%`)
       },
       variant: 'default' as const
     },
@@ -438,7 +438,7 @@ export default function EmailMarketingClient({
       icon: 'users',
       action: () => {
         setActiveTab('subscribers')
-        toast.success('Subscriber lists loaded' lists, ${stats.totalLists.toLocaleString()} total subscribers` })
+        toast.success(`Subscriber lists loaded: ${stats.totalLists.toLocaleString()} total subscribers`)
       },
       variant: 'outline' as const
     },
@@ -500,18 +500,15 @@ export default function EmailMarketingClient({
   }
 
   const handleSendCampaign = (campaignName: string) => {
-    toast.success('Sending campaign'" is being sent...`
-    })
+    toast.success(`Sending campaign: is being sent...`)
   }
 
   const handleScheduleCampaign = (campaignName: string) => {
-    toast.success('Campaign scheduled'" has been scheduled`
-    })
+    toast.success(`Campaign scheduled: has been scheduled`)
   }
 
   const handleDuplicateCampaign = (campaignName: string) => {
-    toast.success('Campaign duplicated'" created`
-    })
+    toast.success(`Campaign duplicated: created`)
   }
 
   const handleExportSubscribers = () => {
@@ -796,7 +793,7 @@ export default function EmailMarketingClient({
                       <CardTitle>Recent Subscribers</CardTitle>
                       <Button variant="outline" size="sm" onClick={() => {
                         setShowAllSubscribersDialog(true)
-                        toast.success('All subscribers loaded' subscribers across all lists` })
+                        toast.success(`All subscribers loaded: ${initialSubscribers.length} subscribers across all lists`)
                       }}>View All</Button>
                     </div>
                   </CardHeader>
@@ -1650,7 +1647,7 @@ export default function EmailMarketingClient({
                   <Button variant="outline" onClick={() => setShowAutomationEditorDialog(true)}><Edit className="w-4 h-4 mr-2" />Edit Steps</Button>
                   <Button variant="outline" onClick={() => {
                     setShowAnalyticsDialog(true)
-                    toast.success('Analytics loaded' conversions from "${selectedAutomation.name}"` })
+                    toast.success(`Analytics loaded: conversions from "${selectedAutomation?.name || 'automation'}"`)
                   }}><BarChart3 className="w-4 h-4 mr-2" />View Analytics</Button>
                 </div>
               </div>

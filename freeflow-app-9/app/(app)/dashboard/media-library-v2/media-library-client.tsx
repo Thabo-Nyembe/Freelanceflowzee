@@ -972,13 +972,11 @@ export default function MediaLibraryClient({
     try {
       if (itemToDelete.type === 'file') {
         await fileMutation.remove(itemToDelete.id)
-        toast.success('File deleted'" has been deleted`
-        })
+        toast.success('File deleted')
         refetchFiles()
       } else {
         await folderMutation.remove(itemToDelete.id)
-        toast.success('Folder deleted'" has been deleted`
-        })
+        toast.success('Folder deleted')
         refetchFolders()
       }
       setShowDeleteDialog(false)
@@ -1002,8 +1000,7 @@ export default function MediaLibraryClient({
     setIsSubmitting(true)
     try {
       await fileMutation.update(itemToMove.id, { folder_id: targetFolderId })
-      toast.success('Asset moved'" has been moved`
-      })
+      toast.success(`Asset moved has been moved`)
       setShowMoveDialog(false)
       setItemToMove(null)
       refetchFiles()
@@ -1044,8 +1041,7 @@ export default function MediaLibraryClient({
         access_level: fileForm.access_level,
         is_public: fileForm.is_public,
       })
-      toast.success('Asset updated'" has been updated`
-      })
+      toast.success(`Asset updated has been updated`)
       setShowEditDialog(false)
       setItemToEdit(null)
       setFileForm(defaultFileForm)

@@ -802,7 +802,7 @@ export default function SurveysClient() {
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
 
-      toast.success(`Survey data exported as ${exportFormat.toUpperCase()}`)
+      toast.success("Survey data exported as " + (exportFormat.toUpperCase()))
       setShowExportDialog(false)
   }
 
@@ -812,7 +812,7 @@ export default function SurveysClient() {
       toast.error('Please select a file to import')
       return
     }
-    toast.success(`Successfully imported surveys from ${importFile.name}`)
+    toast.success("Successfully imported surveys from " + (importFile.name))
     setShowImportDialog(false)
     setImportFile(null)
     refetch()
@@ -859,7 +859,7 @@ export default function SurveysClient() {
       toast.error('Please enter a template name')
       return
     }
-    toast.success(`Template "${newTemplateName}" created successfully!`)
+    toast.success("Template '" + newTemplateName + "' created successfully!")
     setShowCreateTemplateDialog(false)
     setNewTemplateName('')
     setNewTemplateDescription('')
@@ -875,12 +875,12 @@ export default function SurveysClient() {
     try {
       const result = await createSurvey({
         title: templateSurveyName.trim(),
-        description: `Created from template: ${selectedTemplate.name}`,
+        description: "Created from template: " + selectedTemplate.name,
         survey_type: 'customer-feedback',
         status: 'draft'
       })
       if (result.success) {
-        toast.success(`Survey created from template "${selectedTemplate.name}"!`)
+        toast.success("Survey created from template '" + selectedTemplate.name + "'!")
         setShowUseTemplateDialog(false)
         setSelectedTemplate(null)
         setTemplateSurveyName('')
@@ -908,11 +908,11 @@ export default function SurveysClient() {
   const handleIntegrationAction = (action: 'connect' | 'disconnect' | 'manage') => {
     if (!selectedIntegration) return
     if (action === 'connect') {
-      toast.success(`Connected to ${selectedIntegration.name}!`)
+      toast.success("Connected to " + (selectedIntegration.name) + "!")
     } else if (action === 'disconnect') {
-      toast.success(`Disconnected from ${selectedIntegration.name}`)
+      toast.success("Disconnected from " + (selectedIntegration.name))
     } else {
-      toast.success(`${selectedIntegration.name} settings updated`)
+      toast.success("" + (selectedIntegration.name) + " settings updated")
     }
     setShowIntegrationDialog(false)
     setSelectedIntegration(null)
@@ -921,7 +921,7 @@ export default function SurveysClient() {
   // Handler: Copy to Clipboard
   const handleCopyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text).then(() => {
-      toast.success(`${label} copied to clipboard!`)
+      toast.success("" + (label) + " copied to clipboard!")
     }).catch(() => {
       toast.error('Failed to copy to clipboard')
     })
@@ -952,7 +952,7 @@ export default function SurveysClient() {
       return
     }
     const emailCount = shareEmails.split(',').filter(e => e.trim()).length
-    toast.success(`Survey shared with ${emailCount} recipient(s)!`)
+    toast.success("Survey shared with " + (emailCount) + " recipient(s)!")
     setShowEmailShareDialog(false)
     setShareEmails('')
     setShareMessage('')
@@ -1225,7 +1225,7 @@ export default function SurveysClient() {
                   key={i}
                   className="flex flex-col items-center gap-2 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:scale-105 transition-all duration-200"
                 >
-                  <div className={`p-3 rounded-xl ${action.color}`}>
+                  <div className={"p-3 rounded-xl " + (action.color)}>
                     <action.icon className="w-5 h-5" />
                   </div>
                   <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{action.label}</span>
@@ -1607,7 +1607,7 @@ export default function SurveysClient() {
                       return (
                         <div key={i} className="flex-1 flex flex-col items-center gap-1">
                           <div
-                            className={`w-full rounded-t ${isToday ? 'bg-emerald-500' : 'bg-teal-500'}`}
+                            className={"w-full rounded-t " + (isToday ? 'bg-emerald-500' : 'bg-teal-500')}
                             style={{ height: `${height}%` }}
                           />
                           <span className="text-[10px] text-muted-foreground">{i + 1}</span>
@@ -1638,7 +1638,7 @@ export default function SurveysClient() {
                           fill="none"
                           stroke="#22c55e"
                           strokeWidth="12"
-                          strokeDasharray={`${2 * Math.PI * 70 * (npsDistribution.promoters / 100)} ${2 * Math.PI * 70}`}
+                          strokeDasharray={String(2 * Math.PI * 70 * (npsDistribution.promoters / 100)) + " " + String(2 * Math.PI * 70)}
                         />
                         <circle
                           cx="80"
@@ -1647,8 +1647,8 @@ export default function SurveysClient() {
                           fill="none"
                           stroke="#eab308"
                           strokeWidth="12"
-                          strokeDasharray={`${2 * Math.PI * 70 * (npsDistribution.passives / 100)} ${2 * Math.PI * 70}`}
-                          strokeDashoffset={`${-2 * Math.PI * 70 * (npsDistribution.promoters / 100)}`}
+                          strokeDasharray={String(2 * Math.PI * 70 * (npsDistribution.passives / 100)) + " " + String(2 * Math.PI * 70)}
+                          strokeDashoffset={String(-2 * Math.PI * 70 * (npsDistribution.promoters / 100))}
                         />
                         <circle
                           cx="80"
@@ -1657,8 +1657,8 @@ export default function SurveysClient() {
                           fill="none"
                           stroke="#ef4444"
                           strokeWidth="12"
-                          strokeDasharray={`${2 * Math.PI * 70 * (npsDistribution.detractors / 100)} ${2 * Math.PI * 70}`}
-                          strokeDashoffset={`${-2 * Math.PI * 70 * ((npsDistribution.promoters + npsDistribution.passives) / 100)}`}
+                          strokeDasharray={String(2 * Math.PI * 70 * (npsDistribution.detractors / 100)) + " " + String(2 * Math.PI * 70)}
+                          strokeDashoffset={String(-2 * Math.PI * 70 * ((npsDistribution.promoters + npsDistribution.passives) / 100))}
                         />
                       </svg>
                       <div className="absolute inset-0 flex flex-col items-center justify-center">
@@ -1811,11 +1811,11 @@ export default function SurveysClient() {
                       <button
                         key={item.id}
                         onClick={() => setSettingsTab(item.id)}
-                        className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
+                        className={"w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors " + (
                           settingsTab === item.id
                             ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
                             : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700'
-                        }`}
+                        )}
                       >
                         <item.icon className="w-4 h-4" />
                         <span className="text-sm font-medium">{item.label}</span>
@@ -2269,7 +2269,7 @@ export default function SurveysClient() {
             <AIInsightsPanel
               insights={mockSurveysAIInsights}
               title="Survey Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -2463,10 +2463,10 @@ export default function SurveysClient() {
                 <div className="flex items-center gap-2">
                   <Input
                     readOnly
-                    value={`https://survey.app/s/${sharingSurvey?.id}`}
+                    value={"https://survey.app/s/" + (sharingSurvey?.id || "")}
                     className="text-sm"
                   />
-                  <Button variant="outline" size="sm" onClick={() => handleCopyToClipboard(`https://survey.app/s/${sharingSurvey?.id}`, 'Survey link')}>
+                  <Button variant="outline" size="sm" onClick={() => handleCopyToClipboard("https://survey.app/s/" + (sharingSurvey?.id || ""), "Survey link")}>
                     <Copy className="w-4 h-4" />
                   </Button>
                 </div>
@@ -2681,7 +2681,7 @@ export default function SurveysClient() {
                       return (
                         <div key={i} className="flex-1 flex flex-col items-center gap-1">
                           <div
-                            className={`w-full rounded-t transition-all ${isToday ? 'bg-emerald-500' : 'bg-emerald-300 dark:bg-emerald-700'}`}
+                            className={"w-full rounded-t transition-all " + (isToday ? 'bg-emerald-500' : 'bg-emerald-300 dark:bg-emerald-700')}
                             style={{ height: `${height}%` }}
                           />
                           <span className="text-[9px] text-muted-foreground">{i + 1}</span>
@@ -2765,11 +2765,11 @@ export default function SurveysClient() {
                     <button
                       key={format}
                       onClick={() => setExportFormat(format)}
-                      className={`p-3 border rounded-lg text-center transition-all ${
+                      className={"p-3 border rounded-lg text-center transition-all " + (
                         exportFormat === format
                           ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700'
                           : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
-                      }`}
+                      )}
                     >
                       <span className="text-sm font-medium uppercase">{format}</span>
                     </button>
@@ -3516,7 +3516,7 @@ export default function SurveysClient() {
               <Button
                 variant="outline"
                 className="w-full"
-                onClick={() => handleCopyToClipboard(`<iframe src="https://survey.app/embed/${sharingSurvey?.id}" width="${embedWidth}" height="${embedHeight}" frameborder="0"></iframe>`, 'Embed code')}
+                onClick={() => handleCopyToClipboard("<iframe src=\"https://survey.app/embed/" + (sharingSurvey?.id || "") + "\" width=\"" + embedWidth + "\" height=\"" + embedHeight + "\" frameborder=\"0\"></iframe>", "Embed code")}
               >
                 <Copy className="w-4 h-4 mr-2" />
                 Copy Embed Code

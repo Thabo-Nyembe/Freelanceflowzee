@@ -1049,13 +1049,11 @@ export default function EmployeesClient() {
   // Handlers (handleExportEmployees is defined above at line 541)
 
   const handleScheduleReview = (employee: Employee) => {
-    toast.success('Review scheduled'`
-    })
+    toast.success(`Review scheduled`, { description: `Performance review has been scheduled` })
   }
 
   const handleApproveTimeOff = (request: typeof mockTimeOffRequests[0]) => {
-    toast.success('Time off approved' has been approved`
-    })
+    toast.success(`Time off approved`, { description: `${request.employeeName}'s time off has been approved` })
   }
 
   const handleSendAnnouncement = () => {
@@ -2503,7 +2501,7 @@ export default function EmployeesClient() {
             <AIInsightsPanel
               insights={employeesAIInsights}
               title="HR Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -2548,7 +2546,7 @@ export default function EmployeesClient() {
                     <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"><p className="text-sm text-gray-500">Hire Date</p><p className="font-medium">{selectedEmployee.hireDate}</p></div>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                    <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg"><p className="text-3xl font-bold text-blue-600">{selectedEmployee.performanceScore > 0 ? `${selectedEmployee.performanceScore}%` : 'N/A'}</p><p className="text-sm text-gray-500">Performance</p></div>
+                    <div className="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg"><p className="text-3xl font-bold text-blue-600">{selectedEmployee.performanceScore > 0 ? selectedEmployee.performanceScore + "%" : "N/A"}</p><p className="text-sm text-gray-500">Performance</p></div>
                     <div className="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg"><p className="text-3xl font-bold text-purple-600">{selectedEmployee.projectsCount}</p><p className="text-sm text-gray-500">Projects</p></div>
                     <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg"><p className="text-3xl font-bold text-green-600">{selectedEmployee.directReports}</p><p className="text-sm text-gray-500">Direct Reports</p></div>
                   </div>
@@ -2597,7 +2595,7 @@ export default function EmployeesClient() {
               <div><Label>Key Results</Label>
                 <div className="space-y-2 mt-2">
                   {keyResultInputs.map((kr, idx) => (
-                    <Input key={idx} placeholder={`Key Result ${idx + 1}`} value={kr} onChange={(e) => setKeyResultInputs(prev => prev.map((v, i) => i === idx ? e.target.value : v))} />
+                    <Input key={idx} placeholder={"Key Result " + (idx + 1)} value={kr} onChange={(e) => setKeyResultInputs(prev => prev.map((v, i) => i === idx ? e.target.value : v))} />
                   ))}
                   <Button variant="outline" size="sm" className="w-full" onClick={() => setKeyResultInputs(prev => [...prev, ''])}><Plus className="h-4 w-4 mr-2" />Add Key Result</Button>
                 </div>

@@ -199,8 +199,7 @@ export default function RealTimeTranslationClient() {
       })
       if (!res.ok) throw new Error('Failed to create translation')
 
-      toast.success('Translation Created'" has been created and queued for translation`
-      })
+      toast.success('Translation Created - ' + newTranslationName + ' has been created and queued for translation')
 
       // Reset form
       setNewTranslationName('')
@@ -220,7 +219,7 @@ export default function RealTimeTranslationClient() {
   const handleExport = async () => {
     setIsExporting(true)
     try {
-      const res = await fetch(`/api/translation?action=export&format=${exportFormat}`)
+      const res = await fetch('/api/translation?action=export&format=' + exportFormat)
       if (!res.ok) throw new Error('Export failed')
 
       if (exportFormat === 'csv') {
@@ -228,13 +227,12 @@ export default function RealTimeTranslationClient() {
         const url = URL.createObjectURL(blob)
         const a = document.createElement('a')
         a.href = url
-        a.download = `translations-${Date.now()}.csv`
+        a.download = 'translations-' + Date.now() + '.csv'
         a.click()
         URL.revokeObjectURL(url)
       }
 
-      toast.success('Export Complete'`
-      })
+      toast.success('Export Complete')
 
       setShowExportDialog(false)
     } catch (error) {
@@ -272,7 +270,7 @@ export default function RealTimeTranslationClient() {
   const handleCopyText = async (text: string, label: string) => {
     try {
       await navigator.clipboard.writeText(text)
-      toast.success('Copied!' copied to clipboard` })
+      toast.success('Copied!')
     } catch (error) {
       toast.error('Failed to copy')
     }
@@ -316,8 +314,7 @@ export default function RealTimeTranslationClient() {
       })
       if (!res.ok) throw new Error('Failed to create session')
 
-      toast.success('Session Created'" is now active and ready for participants`
-      })
+      toast.success('Session Created - ' + newSessionName + ' is now active and ready for participants')
       setNewSessionName('')
       setNewSessionParticipants('')
       setNewSessionLanguages(['en', 'es'])
@@ -430,8 +427,7 @@ export default function RealTimeTranslationClient() {
       })
       if (!res.ok) throw new Error('Failed to save')
 
-      toast.success('Translation Saved'" has been saved to your favorites`
-      })
+      toast.success('Translation Saved - ' + saveTranslationName + ' has been saved to your favorites')
       setSaveTranslationName('')
       setSaveTranslationFolder('default')
       setShowSaveTranslationDialog(false)
@@ -478,7 +474,8 @@ export default function RealTimeTranslationClient() {
 
       try {
         setIsLoading(true)
-        setError(null)        const {
+        setError(null)
+        const {
           getTranslationHistory,
           getLiveSessions,
           getDocumentTranslations,
@@ -498,8 +495,8 @@ export default function RealTimeTranslationClient() {
         setTranslationStats(statsData.data || null)
 
         setIsLoading(false)
-        toast.success('Translation loaded' translations from database`
-        })        announce('Real-time translation loaded successfully', 'polite')
+        toast.success('Translation loaded successfully')
+        announce('Real-time translation loaded successfully', 'polite')
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load translation data'
         setError(errorMessage)
@@ -1514,7 +1511,7 @@ export default function RealTimeTranslationClient() {
                 onClick={() => {
                   setTargetLanguage(lang.code as Language)
                   setShowAllLanguagesDialog(false)
-                  toast.success('Language Selected' set as target language` })
+                  toast.success('Language Selected')
                 }}
               >
                 <span className="text-2xl">{lang.flag}</span>

@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import { useDeployments, Deployment as DBDeployment, useCreateDeployment, useUpdateDeployment, useDeleteDeployment } from '@/lib/hooks/use-deployments'
@@ -38,6 +40,9 @@ import {
 
 import { Textarea } from '@/components/ui/textarea'
 import { Loader2 } from 'lucide-react'
+
+// Initialize Supabase client once at module level
+const supabase = createClient()
 
 // Database types
 interface DbDeployment {
@@ -267,8 +272,6 @@ export default function DeploymentsClient() {
 
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: userData } = await supabase.auth.getUser()
       if (!userData.user) throw new Error('Not authenticated')
 
@@ -559,8 +562,6 @@ export default function DeploymentsClient() {
       const { data: userData } = await supabase.auth.getUser()
       if (!userData.user) throw new Error('Not authenticated')
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('deployments').insert({
         user_id: userData.user.id,
         deployment_name: `Quick Deploy ${new Date().toLocaleDateString()}`,
@@ -575,7 +576,7 @@ export default function DeploymentsClient() {
       })
 
       if (error) throw error
-      toast.success('Quick Deploy Initiated' to ${quickDeployEnvironment}` })
+      toast.success(`Quick Deploy Initiated`, { description: `Deploying to ${quickDeployEnvironment}` })
       setShowQuickDeployDialog(false)
       setQuickDeployBranch('main')
       setQuickDeployEnvironment('staging')
@@ -599,8 +600,6 @@ export default function DeploymentsClient() {
       // Find the deployment to rollback
       const deploymentToRollback = dbDeployments.find(d => d.version === quickRollbackVersion)
       if (deploymentToRollback) {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         const { error } = await supabase
           .from('deployments')
           .update({ status: 'rolled_back' })
@@ -609,7 +608,7 @@ export default function DeploymentsClient() {
         if (error) throw error
       }
 
-      toast.success('Rollback Completed'` })
+      toast.success(`Rollback Completed`, { description: `Rolled back to ${quickRollbackVersion}` })
       setShowQuickRollbackDialog(false)
       setQuickRollbackVersion('')
       fetchDeployments()
@@ -666,15 +665,13 @@ export default function DeploymentsClient() {
   // Promote deployment to production
   const handlePromoteDeployment = async (deployment: DbDeployment) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('deployments')
         .update({ environment: 'production' })
         .eq('id', deployment.id)
 
       if (error) throw error
-      toast.success('Promoted' promoted to production` })
+      toast.success(`Promoted`, { description: `${deployment.version} promoted to production` })
       fetchDeployments()
     } catch (error: any) {
       toast.error('Failed to promote')
@@ -989,8 +986,6 @@ export default function DeploymentsClient() {
                   <Button variant="outline" className="border-white/50 text-white hover:bg-white/10" onClick={async () => {
                     toast.promise(
                       (async () => {
-                        const { createClient } = await import('@/lib/supabase/client')
-                        const supabase = createClient()
                         const { data, error } = await supabase
                           .from('serverless_functions')
                           .select('*')
@@ -1173,8 +1168,6 @@ export default function DeploymentsClient() {
                   <Button variant="outline" className="border-white/50 text-white hover:bg-white/10" onClick={async () => {
                     toast.promise(
                       (async () => {
-                        const { createClient } = await import('@/lib/supabase/client')
-                        const supabase = createClient()
                         const { data, error } = await supabase
                           .from('edge_configs')
                           .select('*')
@@ -1366,11 +1359,11 @@ export default function DeploymentsClient() {
                           }
                         }}><Copy className="h-4 w-4" /></Button>
                         <Button variant="ghost" size="icon" onClick={async () => {
-                          toast.success(`Downloading ${blob.name}...`)
+                          toast.success("Downloading " + blob.name + "...")
                           try {
-                            const response = await fetch(`/api/deployments?action=download-blob&blobId=${blob.id}`)
+                            const response = await fetch("/api/deployments?action=download-blob&blobId=" + blob.id)
                             if (!response.ok) throw new Error('Download failed')
-                            toast.success(`Downloaded ${blob.name} successfully`)
+                            toast.success("Downloaded " + blob.name + " successfully")
                           } catch {
                             toast.error('Failed to download blob')
                           }
@@ -1378,9 +1371,9 @@ export default function DeploymentsClient() {
                         <Button variant="ghost" size="icon" onClick={async () => {
                           toast.success('Deleting blob...')
                           try {
-                            const response = await fetch(`/api/deployments?action=delete-blob&blobId=${blob.id}`, { method: 'DELETE' })
+                            const response = await fetch("/api/deployments?action=delete-blob&blobId=" + blob.id, { method: 'DELETE' })
                             if (!response.ok) throw new Error('Delete failed')
-                            toast.success(`Deleted ${blob.name}`)
+                            toast.success("Deleted " + blob.name)
                           } catch {
                             toast.error('Failed to delete blob')
                           }
@@ -1464,8 +1457,6 @@ export default function DeploymentsClient() {
                     <Button variant="outline" size="sm" onClick={async () => {
                       toast.promise(
                         (async () => {
-                          const { createClient } = await import('@/lib/supabase/client')
-                          const supabase = createClient()
                           const { data, error } = await supabase
                             .from('deployment_logs')
                             .select('*')
@@ -1506,25 +1497,25 @@ export default function DeploymentsClient() {
                 </div>
                 <div className="flex gap-2">
                   <Button variant="ghost" size="sm" className="text-white hover:bg-gray-700" onClick={() => {
-                    const logsText = buildLogs.map(log => `[${log.timestamp}] ${log.level.toUpperCase()} [${log.step}] ${log.message}`).join('\n');
+                    const logsText = buildLogs.map(log => "[" + log.timestamp + "] " + log.level.toUpperCase() + " [" + log.step + "] " + log.message).join('\n');
                     navigator.clipboard.writeText(logsText).then(() => {
-                      toast.success('Logs copied to clipboard' log entries copied` });
+                      toast.success("Logs copied to clipboard", { description: buildLogs.length + " log entries copied" });
                     }).catch(() => {
                       toast.error('Failed to copy logs');
                     });
                   }} title="Copy logs"><Copy className="h-4 w-4" /></Button>
                   <Button variant="ghost" size="sm" className="text-white hover:bg-gray-700" onClick={() => {
-                    const logsText = buildLogs.map(log => `[${log.timestamp}] ${log.level.toUpperCase()} [${log.step}] ${log.message}`).join('\n');
-                    const blob = new Blob([logsText], { type: 'text/plain' });
-                    const url = URL.createObjectURL(blob);
+                    const logsText = buildLogs.map(log => "[" + log.timestamp + "] " + log.level.toUpperCase() + " [" + log.step + "] " + log.message).join('\n');
+                    const logBlob = new Blob([logsText], { type: 'text/plain' });
+                    const url = URL.createObjectURL(logBlob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = `deployment-logs-${new Date().toISOString().split('T')[0]}.txt`;
+                    a.download = "deployment-logs-" + new Date().toISOString().split('T')[0] + ".txt";
                     document.body.appendChild(a);
                     a.click();
                     document.body.removeChild(a);
                     URL.revokeObjectURL(url);
-                    toast.success('Logs downloaded'.txt` });
+                    toast.success('Logs downloaded');
                   }} title="Download logs"><Download className="h-4 w-4" /></Button>
                   <Button variant="ghost" size="sm" className="text-white hover:bg-gray-700" onClick={() => {
                     setBuildLogs([]);
@@ -1869,7 +1860,7 @@ export default function DeploymentsClient() {
                         <Badge className={protection.enabled ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>{protection.enabled ? 'Enabled' : 'Disabled'}</Badge>
                         <Switch checked={protection.enabled} onCheckedChange={(checked) => {
                           setProtectionRules(prev => prev.map(p => p.id === protection.id ? { ...p, enabled: checked } : p))
-                          toast.success(`${protection.name} ${checked ? 'enabled' : 'disabled'}`)
+                          toast.success(protection.name + " " + (checked ? 'enabled' : 'disabled'))
                         }} />
                       </div>
                     </div>
@@ -1886,21 +1877,21 @@ export default function DeploymentsClient() {
                   <div><h4 className="font-medium">Password Protection</h4><p className="text-sm text-gray-500">Require password to access preview deployments</p></div>
                   <Switch checked={settingsState.passwordProtection} onCheckedChange={(checked) => {
                     setSettingsState(prev => ({ ...prev, passwordProtection: checked }))
-                    toast.success(`Password protection ${checked ? 'enabled' : 'disabled'}`)
+                    toast.success("Password protection " + (checked ? 'enabled' : 'disabled'))
                   }} />
                 </div>
                 <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                   <div><h4 className="font-medium">IP Allowlisting</h4><p className="text-sm text-gray-500">Restrict access to specific IP addresses</p></div>
                   <Switch checked={settingsState.ipAllowlisting} onCheckedChange={(checked) => {
                     setSettingsState(prev => ({ ...prev, ipAllowlisting: checked }))
-                    toast.success(`IP allowlisting ${checked ? 'enabled' : 'disabled'}`)
+                    toast.success("IP allowlisting " + (checked ? 'enabled' : 'disabled'))
                   }} />
                 </div>
                 <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                   <div><h4 className="font-medium">Vercel Authentication</h4><p className="text-sm text-gray-500">Require team member login to access</p></div>
                   <Switch checked={settingsState.vercelAuthentication} onCheckedChange={(checked) => {
                     setSettingsState(prev => ({ ...prev, vercelAuthentication: checked }))
-                    toast.success(`Vercel authentication ${checked ? 'enabled' : 'disabled'}`)
+                    toast.success("Vercel authentication " + (checked ? 'enabled' : 'disabled'))
                   }} />
                 </div>
               </CardContent>
@@ -1943,12 +1934,12 @@ export default function DeploymentsClient() {
                     <Card className="border-gray-200 dark:border-gray-700">
                       <CardHeader><CardTitle className="flex items-center gap-2"><Rocket className="h-5 w-5 text-purple-600" />Build & Deploy</CardTitle></CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="flex items-center justify-between"><div><p className="font-medium">Auto-deploy on push</p><p className="text-sm text-gray-500">Deploy when commits are pushed</p></div><Switch checked={settingsState.autoDeployOnPush} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, autoDeployOnPush: checked })); toast.success(`Auto-deploy ${checked ? 'enabled' : 'disabled'}`); }} /></div>
-                        <div className="flex items-center justify-between"><div><p className="font-medium">Preview Deployments</p><p className="text-sm text-gray-500">Create deployments for PRs</p></div><Switch checked={settingsState.previewDeployments} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, previewDeployments: checked })); toast.success(`Preview deployments ${checked ? 'enabled' : 'disabled'}`); }} /></div>
-                        <div className="flex items-center justify-between"><div><p className="font-medium">Build Cache</p><p className="text-sm text-gray-500">Cache dependencies for faster builds</p></div><Switch checked={settingsState.buildCache} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, buildCache: checked })); toast.success(`Build cache ${checked ? 'enabled' : 'disabled'}`); }} /></div>
-                        <div className="flex items-center justify-between"><div><p className="font-medium">Skew Protection</p><p className="text-sm text-gray-500">Ensure asset/code version consistency</p></div><Switch checked={settingsState.skewProtection} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, skewProtection: checked })); toast.success(`Skew protection ${checked ? 'enabled' : 'disabled'}`); }} /></div>
-                        <div className="flex items-center justify-between"><div><p className="font-medium">Serverless Functions</p><p className="text-sm text-gray-500">Enable serverless API routes</p></div><Switch checked={settingsState.serverlessFunctions} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, serverlessFunctions: checked })); toast.success(`Serverless functions ${checked ? 'enabled' : 'disabled'}`); }} /></div>
-                        <div className="flex items-center justify-between"><div><p className="font-medium">Edge Functions</p><p className="text-sm text-gray-500">Enable edge runtime for routes</p></div><Switch checked={settingsState.edgeFunctions} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, edgeFunctions: checked })); toast.success(`Edge functions ${checked ? 'enabled' : 'disabled'}`); }} /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Auto-deploy on push</p><p className="text-sm text-gray-500">Deploy when commits are pushed</p></div><Switch checked={settingsState.autoDeployOnPush} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, autoDeployOnPush: checked })); toast.success("Auto-deploy " + (checked ? 'enabled' : 'disabled')); }} /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Preview Deployments</p><p className="text-sm text-gray-500">Create deployments for PRs</p></div><Switch checked={settingsState.previewDeployments} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, previewDeployments: checked })); toast.success("Preview deployments " + (checked ? 'enabled' : 'disabled')); }} /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Build Cache</p><p className="text-sm text-gray-500">Cache dependencies for faster builds</p></div><Switch checked={settingsState.buildCache} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, buildCache: checked })); toast.success("Build cache " + (checked ? 'enabled' : 'disabled')); }} /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Skew Protection</p><p className="text-sm text-gray-500">Ensure asset/code version consistency</p></div><Switch checked={settingsState.skewProtection} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, skewProtection: checked })); toast.success("Skew protection " + (checked ? 'enabled' : 'disabled')); }} /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Serverless Functions</p><p className="text-sm text-gray-500">Enable serverless API routes</p></div><Switch checked={settingsState.serverlessFunctions} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, serverlessFunctions: checked })); toast.success("Serverless functions " + (checked ? 'enabled' : 'disabled')); }} /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Edge Functions</p><p className="text-sm text-gray-500">Enable edge runtime for routes</p></div><Switch checked={settingsState.edgeFunctions} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, edgeFunctions: checked })); toast.success("Edge functions " + (checked ? 'enabled' : 'disabled')); }} /></div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 pt-4 border-t border-gray-200 dark:border-gray-700">
                           <div><Label>Function Timeout</Label><Select defaultValue="60"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="10">10 seconds</SelectItem><SelectItem value="30">30 seconds</SelectItem><SelectItem value="60">60 seconds</SelectItem><SelectItem value="300">5 minutes</SelectItem></SelectContent></Select></div>
                           <div><Label>Function Memory</Label><Select defaultValue="1024"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="512">512 MB</SelectItem><SelectItem value="1024">1024 MB</SelectItem><SelectItem value="2048">2048 MB</SelectItem><SelectItem value="3008">3008 MB</SelectItem></SelectContent></Select></div>
@@ -1958,10 +1949,10 @@ export default function DeploymentsClient() {
                     <Card className="border-gray-200 dark:border-gray-700">
                       <CardHeader><CardTitle className="flex items-center gap-2"><Bell className="h-5 w-5 text-purple-600" />Notifications</CardTitle></CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="flex items-center justify-between"><div><p className="font-medium">Email Notifications</p><p className="text-sm text-gray-500">Receive deployment status via email</p></div><Switch checked={settingsState.emailNotifications} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, emailNotifications: checked })); toast.success(`Email notifications ${checked ? 'enabled' : 'disabled'}`); }} /></div>
-                        <div className="flex items-center justify-between"><div><p className="font-medium">Failed Deployment Alerts</p><p className="text-sm text-gray-500">Immediate notification on failures</p></div><Switch checked={settingsState.failedDeploymentAlerts} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, failedDeploymentAlerts: checked })); toast.success(`Failed deployment alerts ${checked ? 'enabled' : 'disabled'}`); }} /></div>
-                        <div className="flex items-center justify-between"><div><p className="font-medium">Production Promotion Alerts</p><p className="text-sm text-gray-500">Notify when deployments go to production</p></div><Switch checked={settingsState.productionPromotionAlerts} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, productionPromotionAlerts: checked })); toast.success(`Production promotion alerts ${checked ? 'enabled' : 'disabled'}`); }} /></div>
-                        <div className="flex items-center justify-between"><div><p className="font-medium">Weekly Summary</p><p className="text-sm text-gray-500">Weekly deployment statistics digest</p></div><Switch checked={settingsState.weeklySummary} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, weeklySummary: checked })); toast.success(`Weekly summary ${checked ? 'enabled' : 'disabled'}`); }} /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Email Notifications</p><p className="text-sm text-gray-500">Receive deployment status via email</p></div><Switch checked={settingsState.emailNotifications} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, emailNotifications: checked })); toast.success("Email notifications " + (checked ? 'enabled' : 'disabled')); }} /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Failed Deployment Alerts</p><p className="text-sm text-gray-500">Immediate notification on failures</p></div><Switch checked={settingsState.failedDeploymentAlerts} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, failedDeploymentAlerts: checked })); toast.success("Failed deployment alerts " + (checked ? 'enabled' : 'disabled')); }} /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Production Promotion Alerts</p><p className="text-sm text-gray-500">Notify when deployments go to production</p></div><Switch checked={settingsState.productionPromotionAlerts} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, productionPromotionAlerts: checked })); toast.success("Production promotion alerts " + (checked ? 'enabled' : 'disabled')); }} /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Weekly Summary</p><p className="text-sm text-gray-500">Weekly deployment statistics digest</p></div><Switch checked={settingsState.weeklySummary} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, weeklySummary: checked })); toast.success("Weekly summary " + (checked ? 'enabled' : 'disabled')); }} /></div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 pt-4 border-t border-gray-200 dark:border-gray-700">
                           <div><Label>Notification Email</Label><Input type="email" placeholder="team@company.com" className="mt-1" /></div>
                           <div><Label>Slack Channel</Label><Input placeholder="#deployments" className="mt-1" /></div>
@@ -1971,11 +1962,11 @@ export default function DeploymentsClient() {
                     <Card className="border-gray-200 dark:border-gray-700">
                       <CardHeader><CardTitle className="flex items-center gap-2"><Shield className="h-5 w-5 text-purple-600" />Security</CardTitle></CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="flex items-center justify-between"><div><p className="font-medium">Force HTTPS</p><p className="text-sm text-gray-500">Redirect all HTTP to HTTPS</p></div><Switch checked={settingsState.forceHttps} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, forceHttps: checked })); toast.success(`Force HTTPS ${checked ? 'enabled' : 'disabled'}`); }} /></div>
-                        <div className="flex items-center justify-between"><div><p className="font-medium">HSTS Headers</p><p className="text-sm text-gray-500">Strict Transport Security</p></div><Switch checked={settingsState.hstsHeaders} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, hstsHeaders: checked })); toast.success(`HSTS headers ${checked ? 'enabled' : 'disabled'}`); }} /></div>
-                        <div className="flex items-center justify-between"><div><p className="font-medium">XSS Protection</p><p className="text-sm text-gray-500">Enable X-XSS-Protection header</p></div><Switch checked={settingsState.xssProtection} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, xssProtection: checked })); toast.success(`XSS protection ${checked ? 'enabled' : 'disabled'}`); }} /></div>
-                        <div className="flex items-center justify-between"><div><p className="font-medium">Content Security Policy</p><p className="text-sm text-gray-500">Define allowed content sources</p></div><Switch checked={settingsState.contentSecurityPolicy} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, contentSecurityPolicy: checked })); toast.success(`Content Security Policy ${checked ? 'enabled' : 'disabled'}`); }} /></div>
-                        <div className="flex items-center justify-between"><div><p className="font-medium">IP Allowlist</p><p className="text-sm text-gray-500">Restrict access by IP address</p></div><Switch checked={settingsState.ipAllowlist} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, ipAllowlist: checked })); toast.success(`IP allowlist ${checked ? 'enabled' : 'disabled'}`); }} /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Force HTTPS</p><p className="text-sm text-gray-500">Redirect all HTTP to HTTPS</p></div><Switch checked={settingsState.forceHttps} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, forceHttps: checked })); toast.success("Force HTTPS " + (checked ? 'enabled' : 'disabled')); }} /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">HSTS Headers</p><p className="text-sm text-gray-500">Strict Transport Security</p></div><Switch checked={settingsState.hstsHeaders} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, hstsHeaders: checked })); toast.success("HSTS headers " + (checked ? 'enabled' : 'disabled')); }} /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">XSS Protection</p><p className="text-sm text-gray-500">Enable X-XSS-Protection header</p></div><Switch checked={settingsState.xssProtection} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, xssProtection: checked })); toast.success("XSS protection " + (checked ? 'enabled' : 'disabled')); }} /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Content Security Policy</p><p className="text-sm text-gray-500">Define allowed content sources</p></div><Switch checked={settingsState.contentSecurityPolicy} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, contentSecurityPolicy: checked })); toast.success("Content Security Policy " + (checked ? 'enabled' : 'disabled')); }} /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">IP Allowlist</p><p className="text-sm text-gray-500">Restrict access by IP address</p></div><Switch checked={settingsState.ipAllowlist} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, ipAllowlist: checked })); toast.success("IP allowlist " + (checked ? 'enabled' : 'disabled')); }} /></div>
                         <div><Label>Allowed IPs</Label><Input placeholder="192.168.1.0/24, 10.0.0.0/8" className="mt-1 font-mono" /></div>
                       </CardContent>
                     </Card>
@@ -2015,13 +2006,13 @@ export default function DeploymentsClient() {
                     <Card className="border-gray-200 dark:border-gray-700">
                       <CardHeader><CardTitle className="flex items-center gap-2"><GitCommit className="h-5 w-5 text-purple-600" />Branch Configuration</CardTitle></CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="flex items-center justify-between"><div><p className="font-medium">Auto-deploy Branches</p><p className="text-sm text-gray-500">Automatically deploy all git branches</p></div><Switch checked={settingsState.autoDeployBranches} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, autoDeployBranches: checked })); toast.success(`Auto-deploy branches ${checked ? 'enabled' : 'disabled'}`); }} /></div>
-                        <div className="flex items-center justify-between"><div><p className="font-medium">Production Branch Protection</p><p className="text-sm text-gray-500">Require PR reviews before deploying</p></div><Switch checked={settingsState.productionBranchProtection} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, productionBranchProtection: checked })); toast.success(`Production branch protection ${checked ? 'enabled' : 'disabled'}`); }} /></div>
-                        <div className="flex items-center justify-between"><div><p className="font-medium">Ignored Build Step</p><p className="text-sm text-gray-500">Cancel builds based on changed files</p></div><Switch checked={settingsState.ignoredBuildStep} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, ignoredBuildStep: checked })); toast.success(`Ignored build step ${checked ? 'enabled' : 'disabled'}`); }} /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Auto-deploy Branches</p><p className="text-sm text-gray-500">Automatically deploy all git branches</p></div><Switch checked={settingsState.autoDeployBranches} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, autoDeployBranches: checked })); toast.success("Auto-deploy branches " + (checked ? 'enabled' : 'disabled')); }} /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Production Branch Protection</p><p className="text-sm text-gray-500">Require PR reviews before deploying</p></div><Switch checked={settingsState.productionBranchProtection} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, productionBranchProtection: checked })); toast.success("Production branch protection " + (checked ? 'enabled' : 'disabled')); }} /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Ignored Build Step</p><p className="text-sm text-gray-500">Cancel builds based on changed files</p></div><Switch checked={settingsState.ignoredBuildStep} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, ignoredBuildStep: checked })); toast.success("Ignored build step " + (checked ? 'enabled' : 'disabled')); }} /></div>
                         <div><Label>Ignore Build Pattern</Label><Input placeholder="docs/**, *.md" className="mt-1 font-mono" /></div>
                         <div><Label>Preview Branch Prefix</Label><Input placeholder="preview/, feature/" className="mt-1 font-mono" /></div>
-                        <div className="flex items-center justify-between"><div><p className="font-medium">Enable Git Submodules</p><p className="text-sm text-gray-500">Clone submodules during build</p></div><Switch checked={settingsState.enableGitSubmodules} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, enableGitSubmodules: checked })); toast.success(`Git submodules ${checked ? 'enabled' : 'disabled'}`); }} /></div>
-                        <div className="flex items-center justify-between"><div><p className="font-medium">Git LFS</p><p className="text-sm text-gray-500">Enable Large File Storage support</p></div><Switch checked={settingsState.gitLfs} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, gitLfs: checked })); toast.success(`Git LFS ${checked ? 'enabled' : 'disabled'}`); }} /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Enable Git Submodules</p><p className="text-sm text-gray-500">Clone submodules during build</p></div><Switch checked={settingsState.enableGitSubmodules} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, enableGitSubmodules: checked })); toast.success("Git submodules " + (checked ? 'enabled' : 'disabled')); }} /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Git LFS</p><p className="text-sm text-gray-500">Enable Large File Storage support</p></div><Switch checked={settingsState.gitLfs} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, gitLfs: checked })); toast.success("Git LFS " + (checked ? 'enabled' : 'disabled')); }} /></div>
                       </CardContent>
                     </Card>
                     <Card className="border-gray-200 dark:border-gray-700">
@@ -2073,10 +2064,10 @@ export default function DeploymentsClient() {
                     <Card className="border-gray-200 dark:border-gray-700">
                       <CardHeader><CardTitle className="flex items-center gap-2"><CheckCircle2 className="h-5 w-5 text-purple-600" />Commit Checks</CardTitle></CardHeader>
                       <CardContent className="space-y-4">
-                        <div className="flex items-center justify-between"><div><p className="font-medium">Required Status Checks</p><p className="text-sm text-gray-500">Block merge until checks pass</p></div><Switch checked={settingsState.requiredStatusChecks} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, requiredStatusChecks: checked })); toast.success(`Required status checks ${checked ? 'enabled' : 'disabled'}`); }} /></div>
-                        <div className="flex items-center justify-between"><div><p className="font-medium">Preview Comments</p><p className="text-sm text-gray-500">Comment preview URL on PRs</p></div><Switch checked={settingsState.previewComments} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, previewComments: checked })); toast.success(`Preview comments ${checked ? 'enabled' : 'disabled'}`); }} /></div>
-                        <div className="flex items-center justify-between"><div><p className="font-medium">GitHub Deployments</p><p className="text-sm text-gray-500">Create GitHub deployment events</p></div><Switch checked={settingsState.githubDeployments} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, githubDeployments: checked })); toast.success(`GitHub deployments ${checked ? 'enabled' : 'disabled'}`); }} /></div>
-                        <div className="flex items-center justify-between"><div><p className="font-medium">Commit Statuses</p><p className="text-sm text-gray-500">Report build status to GitHub</p></div><Switch checked={settingsState.commitStatuses} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, commitStatuses: checked })); toast.success(`Commit statuses ${checked ? 'enabled' : 'disabled'}`); }} /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Required Status Checks</p><p className="text-sm text-gray-500">Block merge until checks pass</p></div><Switch checked={settingsState.requiredStatusChecks} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, requiredStatusChecks: checked })); toast.success("Required status checks " + (checked ? 'enabled' : 'disabled')); }} /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Preview Comments</p><p className="text-sm text-gray-500">Comment preview URL on PRs</p></div><Switch checked={settingsState.previewComments} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, previewComments: checked })); toast.success("Preview comments " + (checked ? 'enabled' : 'disabled')); }} /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">GitHub Deployments</p><p className="text-sm text-gray-500">Create GitHub deployment events</p></div><Switch checked={settingsState.githubDeployments} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, githubDeployments: checked })); toast.success("GitHub deployments " + (checked ? 'enabled' : 'disabled')); }} /></div>
+                        <div className="flex items-center justify-between"><div><p className="font-medium">Commit Statuses</p><p className="text-sm text-gray-500">Report build status to GitHub</p></div><Switch checked={settingsState.commitStatuses} onCheckedChange={(checked) => { setSettingsState(prev => ({ ...prev, commitStatuses: checked })); toast.success("Commit statuses " + (checked ? 'enabled' : 'disabled')); }} /></div>
                       </CardContent>
                     </Card>
                   </>
@@ -2117,7 +2108,7 @@ export default function DeploymentsClient() {
                           <div className="flex items-center gap-4">
                             <div className="text-right"><p className="text-sm"><span className={webhook.successRate >= 95 ? 'text-green-600' : 'text-amber-600'}>{webhook.successRate}%</span></p><p className="text-xs text-gray-500">success rate</p></div>
                             <Button variant="ghost" size="icon" onClick={async () => {
-                              toast.success(`Testing webhook ${webhook.name}...`)
+                              toast.success("Testing webhook " + webhook.name + "...")
                               try {
                                 const response = await fetch('/api/deployments', {
                                   method: 'PUT',
@@ -2125,7 +2116,7 @@ export default function DeploymentsClient() {
                                   body: JSON.stringify({ action: 'test-webhook', webhookId: webhook.id })
                                 })
                                 if (!response.ok) throw new Error('Test failed')
-                                toast.success(`Webhook ${webhook.name} tested successfully`)
+                                toast.success("Webhook " + webhook.name + " tested successfully")
                               } catch {
                                 toast.error('Webhook test failed')
                               }
@@ -2133,9 +2124,9 @@ export default function DeploymentsClient() {
                             <Button variant="ghost" size="icon" className="text-red-500" onClick={async () => {
                               toast.success('Deleting webhook...')
                               try {
-                                const response = await fetch(`/api/deployments?action=delete-webhook&webhookId=${webhook.id}`, { method: 'DELETE' })
+                                const response = await fetch("/api/deployments?action=delete-webhook&webhookId=" + webhook.id, { method: 'DELETE' })
                                 if (!response.ok) throw new Error('Delete failed')
-                                toast.success(`Deleted webhook ${webhook.name}`)
+                                toast.success("Deleted webhook " + webhook.name)
                               } catch {
                                 toast.error('Failed to delete webhook')
                               }
@@ -2162,9 +2153,9 @@ export default function DeploymentsClient() {
                             <Button variant="ghost" size="icon" onClick={async () => {
                               toast.success('Loading member options...')
                               try {
-                                const response = await fetch(`/api/deployments?action=get-member-options&memberId=${member.id}`)
+                                const response = await fetch("/api/deployments?action=get-member-options&memberId=" + member.id)
                                 if (!response.ok) throw new Error('Load failed')
-                                toast.success(`Showing options for ${member.name}`)
+                                toast.success("Showing options for " + member.name)
                               } catch {
                                 toast.error('Failed to load options')
                               }
@@ -2187,7 +2178,7 @@ export default function DeploymentsClient() {
                           </div>
                           <Switch checked={plugin.enabled} onCheckedChange={(checked) => {
                             setPlugins(prev => prev.map(p => p.id === plugin.id ? { ...p, enabled: checked } : p))
-                            toast.success(`${plugin.name} ${checked ? 'enabled' : 'disabled'}`)
+                            toast.success(plugin.name + " " + (checked ? 'enabled' : 'disabled'))
                           }} />
                         </div>
                       ))}
@@ -2207,8 +2198,7 @@ export default function DeploymentsClient() {
               title="Deployment Intelligence"
               onInsightAction={(insight) => {
                 if (insight.type === 'warning' && insight.category === 'Resources') {
-                  toast.info('Resource Alert'
-                  })
+                  toast.info('Resource Alert')
                 } else if (insight.type === 'success') {
                   toast.success(insight.title)
                 } else {
@@ -2314,7 +2304,7 @@ export default function DeploymentsClient() {
                   setEnvVars([...envVars, newVar]);
                   setNewEnvKey('');
                   setNewEnvValue('');
-                  toast.success('Variable added' has been added to environment variables` });
+                  toast.success("Variable added", { description: newEnvKey + " has been added to environment variables" });
                 }}><Plus className="h-4 w-4" /></Button>
               </div>
               <ScrollArea className="h-[300px]">
@@ -2331,7 +2321,7 @@ export default function DeploymentsClient() {
                       <Badge variant="outline">{env.environment}</Badge>
                       <Button variant="ghost" size="icon" onClick={() => {
                         setEnvVars(envVars.filter(e => e.id !== env.id));
-                        toast.success('Variable deleted' has been removed` });
+                        toast.success("Variable deleted", { description: env.key + " has been removed" });
                       }} title="Delete variable"><Trash2 className="h-4 w-4 text-red-500" /></Button>
                     </div>
                   ))}
@@ -2348,8 +2338,6 @@ export default function DeploymentsClient() {
 
                   // Save environment variables to database
                   for (const envVar of envVars) {
-                    const { createClient } = await import('@/lib/supabase/client')
-                    const supabase = createClient()
                     await supabase
                       .from('environment_variables')
                       .upsert({
@@ -2363,8 +2351,7 @@ export default function DeploymentsClient() {
                       }, { onConflict: 'id' })
                   }
 
-                  toast.success('Environment variables saved' variables updated successfully`
-                  })
+                  toast.success("Environment variables saved", { description: envVars.length + " variables updated successfully" })
                   setShowEnvDialog(false)
                 } catch (error: any) {
                   toast.error('Failed to save environment variables')
@@ -2393,7 +2380,7 @@ export default function DeploymentsClient() {
                     toast.error('Validation Error');
                     return;
                   }
-                  toast.success('Domain added' has been added. DNS verification pending.` });
+                  toast.success("Domain added", { description: newDomainName + " has been added. DNS verification pending." });
                   setNewDomainName('');
                 }}>Add Domain</Button>
               </div>
@@ -2409,8 +2396,8 @@ export default function DeploymentsClient() {
                       </div>
                       <Badge variant={domain.type === 'production' ? 'default' : 'outline'}>{domain.type}</Badge>
                       <Button variant="ghost" size="icon" onClick={() => {
-                        window.open(`https://${domain.domain}`, '_blank')
-                        toast.success(`Opened ${domain.domain} in new tab`)
+                        window.open("https://" + domain.domain, '_blank')
+                        toast.success("Opened " + domain.domain + " in new tab")
                       }}><ExternalLink className="h-4 w-4" /></Button>
                     </div>
                   ))}
@@ -3136,7 +3123,7 @@ export default function DeploymentsClient() {
                   toast.error('Function name is required');
                   return;
                 }
-                toast.success('Function created' has been deployed` });
+                toast.success(`Function created`, { description: `${newFunctionForm.name} has been deployed` });
                 setNewFunctionForm({ name: '', runtime: 'Node.js 20', region: 'iad1', memory: '256' });
                 setShowNewFunctionDialog(false);
               }}>Create Function</Button>
@@ -3167,7 +3154,7 @@ export default function DeploymentsClient() {
                   toast.error('Config name is required');
                   return;
                 }
-                toast.success('Edge config created' is now available` });
+                toast.success(`Edge config created`, { description: `${newEdgeConfigForm.name} is now available` });
                 setNewEdgeConfigForm({ name: '' });
                 setShowEdgeConfigDialog(false);
               }}>Create Config</Button>
@@ -3249,8 +3236,6 @@ export default function DeploymentsClient() {
                   const { data: userData } = await supabase.auth.getUser()
                   if (!userData.user) throw new Error('Not authenticated')
 
-                  const { createClient } = await import('@/lib/supabase/client')
-                  const supabase = createClient()
                   const { error } = await supabase
                     .from('edge_configs')
                     .update({
@@ -3261,8 +3246,7 @@ export default function DeploymentsClient() {
 
                   if (error) throw error
 
-                  toast.success('Config updated' configuration saved`
-                  })
+                  toast.success(`Config updated`, { description: `${selectedEdgeConfig.name} configuration saved` })
                   setShowEdgeConfigEditDialog(false)
                 } catch (error: any) {
                   toast.error('Failed to update config')
@@ -3296,7 +3280,7 @@ export default function DeploymentsClient() {
                   toast.error('Folder name is required');
                   return;
                 }
-                toast.success('Folder created' has been created` });
+                toast.success(`Folder created`, { description: `${newFolderName} has been created` });
                 setNewFolderName('');
                 setShowNewFolderDialog(false);
               }}>Create Folder</Button>
@@ -3374,8 +3358,6 @@ export default function DeploymentsClient() {
                     let successCount = 0
                     for (const file of uploadedFiles) {
                       const filePath = `${userData.user.id}/uploads/${Date.now()}_${file.name}`
-                      const { createClient } = await import('@/lib/supabase/client')
-                      const supabase = createClient()
                       const { error } = await supabase.storage
                         .from('blob-storage')
                         .upload(filePath, file)
@@ -3383,8 +3365,7 @@ export default function DeploymentsClient() {
                       if (!error) successCount++
                     }
 
-                    toast.success('Files uploaded' of ${uploadedFiles.length} files uploaded successfully`
-                    })
+                    toast.success(`Files uploaded`, { description: `${successCount} of ${uploadedFiles.length} files uploaded successfully` })
                     setUploadedFiles([])
                     setShowUploadDialog(false)
                   } catch (error: any) {
@@ -3625,8 +3606,6 @@ export default function DeploymentsClient() {
                   const { data: userData } = await supabase.auth.getUser()
                   if (!userData.user) throw new Error('Not authenticated')
 
-                  const { createClient } = await import('@/lib/supabase/client')
-                  const supabase = createClient()
                   const { error } = await supabase
                     .from('alert_settings')
                     .upsert({
@@ -3645,10 +3624,7 @@ export default function DeploymentsClient() {
                   if (alertSettings.errorAlerts) enabledAlerts.push('Errors')
                   if (alertSettings.warningAlerts) enabledAlerts.push('Warnings')
                   if (alertSettings.deploymentAlerts) enabledAlerts.push('Deployments')
-
-                  toast.success('Alert settings saved'`
-                      : 'All alerts disabled'
-                  })
+                  toast.success('Alert settings saved - ' + (enabledAlerts.length > 0 ? enabledAlerts.join(', ') : 'All alerts disabled'))
                   setShowAlertsDialog(false)
                 } catch (error: any) {
                   toast.error('Failed to save alert settings')
@@ -3918,7 +3894,7 @@ export default function DeploymentsClient() {
                   toast.error('Rule name is required');
                   return;
                 }
-                toast.success('Protection rule added' is now ${newRuleForm.enabled ? 'active' : 'inactive'}` });
+                toast.success(`Protection rule added`, { description: `${newRuleForm.name} is now ${newRuleForm.enabled ? 'active' : 'inactive'}` });
                 setNewRuleForm({ name: '', type: 'password', enabled: true });
                 setShowAddRuleDialog(false);
               }}>Add Rule</Button>
@@ -3962,7 +3938,7 @@ export default function DeploymentsClient() {
                   toast.error('Hook name is required');
                   return;
                 }
-                toast.success('Deploy hook created' hook is ready` });
+                toast.success(`Deploy hook created`, { description: `${newHookForm.name} hook is ready` });
                 setNewHookForm({ name: '', branch: 'main' });
                 setShowCreateHookDialog(false);
               }}>Create Hook</Button>
@@ -4002,8 +3978,6 @@ export default function DeploymentsClient() {
                           if (!userData.user) throw new Error('Not authenticated')
 
                           // Record plugin installation
-                          const { createClient } = await import('@/lib/supabase/client')
-                          const supabase = createClient()
                           const { error } = await supabase
                             .from('installed_plugins')
                             .insert({
@@ -4084,8 +4058,6 @@ export default function DeploymentsClient() {
                     const { data: userData } = await supabase.auth.getUser()
                     if (!userData.user) throw new Error('Not authenticated')
 
-                    const { createClient } = await import('@/lib/supabase/client')
-                    const supabase = createClient()
                     const { error } = await supabase
                       .from('deployments')
                       .delete()
@@ -4134,16 +4106,12 @@ export default function DeploymentsClient() {
                     if (!userData.user) throw new Error('Not authenticated')
 
                     // Reset environment variables
-                    const { createClient } = await import('@/lib/supabase/client')
-                    const supabase = createClient()
                     await supabase
                       .from('environment_variables')
                       .delete()
                       .eq('user_id', userData.user.id)
 
                     // Reset alert settings
-                    const { createClient } = await import('@/lib/supabase/client')
-                    const supabase = createClient()
                     await supabase
                       .from('alert_settings')
                       .delete()
@@ -4198,8 +4166,6 @@ export default function DeploymentsClient() {
                     const { data: userData } = await supabase.auth.getUser()
                     if (!userData.user) throw new Error('Not authenticated')
 
-                    const { createClient } = await import('@/lib/supabase/client')
-                    const supabase = createClient()
                     const { error } = await supabase
                       .from('project_settings')
                       .upsert({
@@ -4474,7 +4440,7 @@ export default function DeploymentsClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => {
-                toast.success('Metrics exported' metrics exported to CSV` })
+                toast.success(`Metrics exported`, { description: `Function metrics exported to CSV` })
               }}>
                 <Download className="h-4 w-4 mr-2" />Export Metrics
               </Button>
@@ -4611,7 +4577,7 @@ export default function DeploymentsClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowFunctionSettingsDialog(false)}>Cancel</Button>
               <Button onClick={() => {
-                toast.success('Function settings saved' configuration updated` })
+                toast.success(`Function settings saved`, { description: `${selectedFunction?.name} configuration updated` })
                 setShowFunctionSettingsDialog(false)
               }}>
                 Save Changes
@@ -4774,7 +4740,7 @@ export default function DeploymentsClient() {
                     <p className="text-xs text-red-600 dark:text-red-300">This will remove the integration and revoke all permissions</p>
                   </div>
                   <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-100" onClick={() => {
-                    toast.success('Integration disconnected' has been removed` })
+                    toast.success(`Integration disconnected`, { description: `${selectedIntegration?.name} has been removed` })
                     setShowIntegrationSettingsDialog(false)
                   }}>
                     <Trash2 className="h-4 w-4 mr-2" />Disconnect
@@ -4785,7 +4751,7 @@ export default function DeploymentsClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowIntegrationSettingsDialog(false)}>Cancel</Button>
               <Button onClick={() => {
-                toast.success('Integration settings saved' configuration updated` })
+                toast.success(`Integration settings saved`, { description: `${selectedIntegration?.name} configuration updated` })
                 setShowIntegrationSettingsDialog(false)
               }}>
                 Save Changes

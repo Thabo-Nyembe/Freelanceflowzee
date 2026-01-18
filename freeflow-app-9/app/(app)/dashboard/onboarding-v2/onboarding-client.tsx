@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -555,8 +557,6 @@ export default function OnboardingClient() {
   useEffect(() => {
     const fetchUserAndData = async () => {
       try {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) return
         setUserId(user.id)
@@ -678,8 +678,6 @@ export default function OnboardingClient() {
     }
     setIsSaving(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase.from('onboarding_flows').insert({
         user_id: userId,
         name: flowForm.name || 'New Flow',
@@ -729,8 +727,6 @@ export default function OnboardingClient() {
     if (!userId) return
     setIsSaving(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('onboarding_flows')
         .update({ status: newStatus, updated_at: new Date().toISOString() })
@@ -753,8 +749,6 @@ export default function OnboardingClient() {
     if (!userId) return
     setIsSaving(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('onboarding_flows')
         .delete()
@@ -778,8 +772,6 @@ export default function OnboardingClient() {
     if (!userId) return
     setIsSaving(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase.from('onboarding_flows').insert({
         user_id: userId,
         name: `${flow.name} (Copy)`,
@@ -823,8 +815,6 @@ export default function OnboardingClient() {
     if (!userId) return
     setIsSaving(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase.from('onboarding_checklists').insert({
         user_id: userId,
         name: 'New Checklist',
@@ -863,8 +853,6 @@ export default function OnboardingClient() {
     if (!userId) return
     setIsSaving(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase.from('user_segments').insert({
         user_id: userId,
         name: 'New Segment',
@@ -1302,8 +1290,6 @@ export default function OnboardingClient() {
                   if (selectedChecklist && userId) {
                     toast.promise(
                       (async () => {
-                        const { createClient } = await import('@/lib/supabase/client')
-                        const supabase = createClient()
                         const { data, error } = await supabase.from('onboarding_checklists').insert({
                           user_id: userId,
                           name: `${selectedChecklist.name} (Copy)`,

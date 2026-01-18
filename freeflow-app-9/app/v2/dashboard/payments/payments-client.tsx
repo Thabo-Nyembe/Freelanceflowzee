@@ -270,8 +270,7 @@ const getPaymentsQuickActions = (
         document.body.removeChild(link)
         window.URL.revokeObjectURL(url)
 
-        toast.success('Payment data exported' payment records to CSV`
-        })
+        toast.success("Payment data exported to CSV")
       } catch (error) {
         toast.error('Failed to export payment data')
       }
@@ -402,8 +401,8 @@ export default function PaymentsClient() {
         transactionId: data.transactionId || `TXN-${Date.now()}`
       }
 
-      setPaymentHistory([newPayment, ...paymentHistory])      toast.success('Payment recorded!' payment for "${newPaymentData.milestone}" has been recorded`
-      })
+      setPaymentHistory([newPayment, ...paymentHistory])
+      toast.success("Payment recorded for " + newPaymentData.milestone)
 
       // Reset form and close dialog
       setNewPaymentData({ milestone: '', amount: '', type: 'hold', notes: '' })
@@ -415,7 +414,8 @@ export default function PaymentsClient() {
   }
 
   // Handle Process Refund
-  const handleProcessRefund = (payment: PaymentHistory) => {    setRefundPayment(payment)
+  const handleProcessRefund = (payment: PaymentHistory) => {
+    setRefundPayment(payment)
     setRefundData({
       amount: payment.amount.toString(),
       reason: '',
@@ -473,8 +473,8 @@ export default function PaymentsClient() {
         transactionId: data.transactionId || `REF-${Date.now()}`
       }
 
-      setPaymentHistory([refundRecord, ...paymentHistory])      toast.success('Refund processed!' has been refunded successfully`
-      })
+      setPaymentHistory([refundRecord, ...paymentHistory])
+      toast.success("Refund processed successfully")
 
       setShowRefundDialog(false)
       setRefundPayment(null)
@@ -487,7 +487,8 @@ export default function PaymentsClient() {
 
   // Handle Export Payments
   const handleExportPayments = async () => {
-    try {      // Filter payments based on date range
+    try {
+      // Filter payments based on date range
       let filteredPayments = [...paymentHistory]
       const now = new Date()
 
@@ -582,8 +583,8 @@ export default function PaymentsClient() {
         link.click()
         document.body.removeChild(link)
         window.URL.revokeObjectURL(url)
-      }      toast.success('Export completed!' payment records exported as ${exportOptions.format.toUpperCase()}`
-      })
+      }
+      toast.success("Export completed as " + exportOptions.format.toUpperCase())
 
       setShowExportDialog(false)
     } catch (error: any) {
@@ -594,7 +595,8 @@ export default function PaymentsClient() {
 
   // Handle Save Payment Settings
   const handleSavePaymentSettings = async () => {
-    try {      const response = await fetch('/api/payments/settings', {
+    try {
+      const response = await fetch('/api/payments/settings', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -605,7 +607,8 @@ export default function PaymentsClient() {
 
       if (!response.ok) {
         throw new Error('Failed to save settings')
-      }      toast.success('Settings saved!')
+      }
+      toast.success('Settings saved!')
 
       setShowSettingsDialog(false)
     } catch (error: any) {
@@ -617,7 +620,8 @@ export default function PaymentsClient() {
   // Handle Refresh Payments
   const handleRefreshPayments = async () => {
     try {
-      setIsLoading(true)      // Fetch payments data from API
+      setIsLoading(true)
+      // Fetch payments data from API
       const res = await fetch('/api/invoices?type=payments')
       if (!res.ok) throw new Error('Failed to fetch payments')
       const data = await res.json()
@@ -672,8 +676,8 @@ export default function PaymentsClient() {
   })
 
   // Handle View Transaction Details
-  const handleViewTransactionDetails = (payment: PaymentHistory) => {    toast.info(`Transaction: ${payment.transactionId}` of ${formatCurrency(payment.amount)} on ${new Date(payment.date).toLocaleDateString()}`
-    })
+  const handleViewTransactionDetails = (payment: PaymentHistory) => {
+    toast.info("Transaction: " + payment.transactionId + " of " + formatCurrency(payment.amount) + " on " + new Date(payment.date).toLocaleDateString())
   }
 
   // Load Payments Data
@@ -690,7 +694,8 @@ export default function PaymentsClient() {
         setMilestones(MILESTONES)
         setPaymentHistory(PAYMENT_HISTORY)
         setIsLoading(false)
-        announce('Payments loaded successfully', 'polite')      } catch (err) {
+        announce('Payments loaded successfully', 'polite')
+      } catch (err) {
         const errorMsg = err instanceof Error ? err.message : 'Failed to load payments'
         setError(errorMsg)
         setIsLoading(false)
@@ -714,7 +719,8 @@ export default function PaymentsClient() {
   }
 
   // Handle Release Payment
-  const handleReleasePayment = (milestone: Milestone) => {    setReleaseMilestone(milestone)
+  const handleReleasePayment = (milestone: Milestone) => {
+    setReleaseMilestone(milestone)
     setReleaseConfirmation('')
     setShowReleaseDialog(true)
   }
@@ -756,8 +762,8 @@ export default function PaymentsClient() {
             }
             : m
         )
-      )      toast.success('Payment released!' has been transferred to the freelancer`
-      })
+      )
+      toast.success("Payment released and transferred to the freelancer")
       announce('Payment released successfully', 'polite')
       setShowReleaseDialog(false)
       setReleaseMilestone(null)
@@ -769,7 +775,8 @@ export default function PaymentsClient() {
   }
 
   // Handle Dispute Payment
-  const handleDisputePayment = (milestone: Milestone) => {    setDisputeMilestone(milestone)
+  const handleDisputePayment = (milestone: Milestone) => {
+    setDisputeMilestone(milestone)
     setDisputeReason('')
     setShowDisputeDialog(true)
   }
@@ -804,7 +811,8 @@ export default function PaymentsClient() {
         milestones.map((m) =>
           m.id === disputeMilestone.id ? { ...m, status: 'disputed' } : m
         )
-      )      toast.success('Dispute submitted')
+      )
+      toast.success('Dispute submitted')
       announce('Dispute submitted successfully', 'polite')
       setShowDisputeDialog(false)
       setDisputeMilestone(null)
@@ -816,14 +824,16 @@ export default function PaymentsClient() {
   }
 
   // Handle Download Receipt
-  const handleDownloadReceipt = async (payment: PaymentHistory) => {    try {
+  const handleDownloadReceipt = async (payment: PaymentHistory) => {
+    try {
       const response = await fetch(`/api/payments/${payment.id}/receipt`, {
         method: 'GET'
       })
 
       if (!response.ok) {
         throw new Error('Failed to generate receipt')
-      }      const blob = await response.blob()
+      }
+      const blob = await response.blob()
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
@@ -833,8 +843,7 @@ export default function PaymentsClient() {
       window.URL.revokeObjectURL(url)
       document.body.removeChild(a)
 
-      toast.success('Receipt downloaded' saved to downloads`
-      })
+      toast.success("Receipt downloaded and saved")
     } catch (error: any) {
       logger.error('Failed to download receipt', { error, paymentId: payment.id })
       toast.error('Failed to download receipt')

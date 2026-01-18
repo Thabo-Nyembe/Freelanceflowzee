@@ -32,7 +32,8 @@ export default function CommunityPage() {
 
       try {
         setIsLoading(true)
-        setError(null)        setIsLoading(false)
+        setError(null)
+        setIsLoading(false)
         announce('Community hub loaded successfully', 'polite')
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load community hub'

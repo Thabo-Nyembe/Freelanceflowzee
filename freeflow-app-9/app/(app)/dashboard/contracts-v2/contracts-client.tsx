@@ -390,8 +390,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
         ...contractData,
       }
       await createContract(newContract)
-      toast.success('Contract Created'" has been created successfully.`
-      })
+      toast.success('Contract has been created successfully')
       setShowNewContract(false)
     } catch (err) {
       toast.error('Failed to create contract')
@@ -405,8 +404,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
         signed_date: new Date().toISOString(),
         effective_date: new Date().toISOString()
       })
-      toast.success('Contract Signed'" has been signed and is now active.`
-      })
+      toast.success(`Contract Signed: "${contractName}" has been signed and is now active.`)
     } catch (err) {
       toast.error('Failed to sign contract')
     }
@@ -417,8 +415,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
       await updateContract(contractId, {
         status: 'pending-signature' as const
       })
-      toast.success('Sent for Signature'" has been sent to recipients for signature.`
-      })
+      toast.success(`Sent for Signature: "${contractName}" has been sent to recipients for signature.`)
     } catch (err) {
       toast.error('Failed to send contract')
     }
@@ -430,8 +427,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
         status: 'terminated' as const,
         termination_date: new Date().toISOString()
       })
-      toast.success('Contract Terminated'" has been terminated.`
-      })
+      toast.success(`Contract Terminated: has been terminated.`)
     } catch (err) {
       toast.error('Failed to terminate contract')
     }
@@ -468,8 +464,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
         status: 'renewed' as const,
         renewal_date: new Date().toISOString()
       })
-      toast.success('Contract Renewed'" has been created.`
-      })
+      toast.success(`Contract Renewed: has been created.`)
     } catch (err) {
       toast.error('Failed to renew contract')
     }
@@ -478,8 +473,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
   const handleDeleteContract = async (contractId: string, contractName: string) => {
     try {
       await deleteContract(contractId)
-      toast.success('Contract Deleted'" has been permanently deleted.`
-      })
+      toast.success(`Contract Deleted: has been permanently deleted.`)
     } catch (err) {
       toast.error('Failed to delete contract')
     }
@@ -490,8 +484,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
       await updateContract(contractId, {
         status: 'completed' as const
       })
-      toast.success('Contract Archived'" has been moved to archive.`
-      })
+      toast.success(`Contract "${contractName}" has been moved to archive.`)
     } catch (err) {
       toast.error('Failed to archive contract')
     }
@@ -556,7 +549,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
         version: 1,
       }
       await createContract(newEnvelope)
-      toast.success('Envelope duplicated'" has been duplicated as a new draft.` })
+      toast.success(`Envelope "${envelope.name}" has been duplicated as a new draft.`)
     } catch (err) {
       toast.error('Failed to duplicate envelope')
     }
@@ -605,7 +598,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
         version: 1,
       }
       await createContract(newContract)
-      toast.success('Contract created from template'" template.` })
+      toast.success(`Contract created from "${template.name}" template.`)
       setShowNewContract(false)
     } catch (err) {
       toast.error('Failed to use template')
@@ -712,8 +705,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
     // Filter envelopes by folder and switch to envelopes tab
     setSelectedFolder(folder.id)
     setActiveTab('envelopes')
-    toast.success(`Viewing folder: ${folder.name}` envelopes in this folder`
-    })
+    toast.success(`Viewing folder: ${folder.name} - envelopes in this folder`)
   }
 
   // Handler for creating a new folder

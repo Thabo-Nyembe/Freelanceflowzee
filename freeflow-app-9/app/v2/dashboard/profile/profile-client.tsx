@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import { useAuth } from '@/lib/hooks/use-auth'
@@ -42,6 +44,9 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Switch } from '@/components/ui/switch'
+
+// Initialize Supabase client once at module level
+const supabase = createClient()
 
 // Types
 type SkillLevel = 'beginner' | 'intermediate' | 'advanced' | 'expert'
@@ -840,8 +845,6 @@ export default function ProfileClient() {
 
     setSaving(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('user_profiles')
         .update({
@@ -874,8 +877,6 @@ export default function ProfileClient() {
     if (!user?.id) return
 
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('skills').insert({
         user_id: user.id,
         name: skillName,
@@ -887,7 +888,7 @@ export default function ProfileClient() {
 
       if (error) throw error
 
-      toast.success('Skill added' has been added to your profile` })
+      toast.success('Skill added')
       fetchProfileData()
     } catch (error: any) {
       if (error.code === '23505') {
@@ -901,8 +902,6 @@ export default function ProfileClient() {
   // Delete skill
   const handleDeleteSkill = async (skillId: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('skills').delete().eq('id', skillId)
       if (error) throw error
 
@@ -918,8 +917,6 @@ export default function ProfileClient() {
     if (!user?.id) return
 
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('experience').insert({
         user_id: user.id,
         company: exp.company || '',
@@ -944,8 +941,6 @@ export default function ProfileClient() {
   // Delete experience
   const handleDeleteExperience = async (expId: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('experience').delete().eq('id', expId)
       if (error) throw error
 
@@ -962,8 +957,6 @@ export default function ProfileClient() {
 
     setSaving(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('profile_settings')
         .update({ ...updates, updated_at: new Date().toISOString() })
@@ -1141,11 +1134,11 @@ export default function ProfileClient() {
               <Card key={index} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <div className={`p-2 rounded-lg bg-gradient-to-br ${stat.gradient}`}>
+                    <div className={"p-2 rounded-lg bg-gradient-to-br " + stat.gradient}>
                       <stat.icon className="w-4 h-4 text-white" />
                     </div>
                     {stat.change !== null && (
-                      <div className={`flex items-center gap-1 text-xs ${stat.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      <div className={"flex items-center gap-1 text-xs " + (stat.change >= 0 ? "text-green-600" : "text-red-600")}>
                         {stat.change >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
                         {Math.abs(stat.change)}%
                       </div>
@@ -1338,7 +1331,7 @@ export default function ProfileClient() {
                     className="h-auto py-4 flex flex-col gap-2 hover:scale-105 transition-all duration-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm"
                     onClick={action.onClick}
                   >
-                    <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color}`}>
+                    <div className={"p-2 rounded-lg bg-gradient-to-br " + action.color}>
                       <action.icon className="w-4 h-4 text-white" />
                     </div>
                     <span className="text-xs font-medium">{action.label}</span>
@@ -1511,7 +1504,7 @@ export default function ProfileClient() {
                     className="h-auto py-4 flex flex-col gap-2 hover:scale-105 transition-all duration-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm"
                     onClick={action.action}
                   >
-                    <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color}`}>
+                    <div className={"p-2 rounded-lg bg-gradient-to-br " + action.color}>
                       <action.icon className="w-4 h-4 text-white" />
                     </div>
                     <span className="text-xs font-medium">{action.label}</span>
@@ -1682,7 +1675,7 @@ export default function ProfileClient() {
                     className="h-auto py-4 flex flex-col gap-2 hover:scale-105 transition-all duration-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm"
                     onClick={action.action}
                   >
-                    <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color}`}>
+                    <div className={"p-2 rounded-lg bg-gradient-to-br " + action.color}>
                       <action.icon className="w-4 h-4 text-white" />
                     </div>
                     <span className="text-xs font-medium">{action.label}</span>
@@ -1823,7 +1816,7 @@ export default function ProfileClient() {
                     className="h-auto py-4 flex flex-col gap-2 hover:scale-105 transition-all duration-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm"
                     onClick={action.action}
                   >
-                    <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color}`}>
+                    <div className={"p-2 rounded-lg bg-gradient-to-br " + action.color}>
                       <action.icon className="w-4 h-4 text-white" />
                     </div>
                     <span className="text-xs font-medium">{action.label}</span>
@@ -1925,7 +1918,7 @@ export default function ProfileClient() {
                     className="h-auto py-4 flex flex-col gap-2 hover:scale-105 transition-all duration-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm"
                     onClick={action.action}
                   >
-                    <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color}`}>
+                    <div className={"p-2 rounded-lg bg-gradient-to-br " + action.color}>
                       <action.icon className="w-4 h-4 text-white" />
                     </div>
                     <span className="text-xs font-medium">{action.label}</span>
@@ -2019,7 +2012,7 @@ export default function ProfileClient() {
                     className="h-auto py-4 flex flex-col gap-2 hover:scale-105 transition-all duration-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm"
                     onClick={action.action}
                   >
-                    <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color}`}>
+                    <div className={"p-2 rounded-lg bg-gradient-to-br " + action.color}>
                       <action.icon className="w-4 h-4 text-white" />
                     </div>
                     <span className="text-xs font-medium">{action.label}</span>
@@ -2064,7 +2057,7 @@ export default function ProfileClient() {
                                 }).then(res => { if (!res.ok) throw new Error('Failed'); return res.json() }),
                                 { loading: job.isSaved ? 'Removing from saved...' : 'Saving job...', success: job.isSaved ? 'Job removed from saved' : 'Job saved successfully', error: 'Failed to save job' }
                               )
-                            }}><Bookmark className={`w-4 h-4 ${job.isSaved ? 'fill-current text-blue-600' : ''}`} /></Button>
+                            }}><Bookmark className={"w-4 h-4 " + (job.isSaved ? "fill-current text-blue-600" : "")} /></Button>
                             <Button size="sm" onClick={() => setShowJobApplyDialog(job)}>Apply</Button>
                           </div>
                         </div>
@@ -2131,7 +2124,7 @@ export default function ProfileClient() {
                     className="h-auto py-4 flex flex-col gap-2 hover:scale-105 transition-all duration-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm"
                     onClick={action.action}
                   >
-                    <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color}`}>
+                    <div className={"p-2 rounded-lg bg-gradient-to-br " + action.color}>
                       <action.icon className="w-4 h-4 text-white" />
                     </div>
                     <span className="text-xs font-medium">{action.label}</span>
@@ -2232,13 +2225,13 @@ export default function ProfileClient() {
                           <button
                             key={item.id}
                             onClick={() => setSettingsTab(item.id)}
-                            className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg text-left transition-all ${
-                              settingsTab === item.id
+                            className={"w-full flex items-center gap-3 px-3 py-3 rounded-lg text-left transition-all " +
+                              (settingsTab === item.id
                                 ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border-l-4 border-blue-500'
-                                : 'hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
-                            }`}
+                                : 'hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300')
+                            }
                           >
-                            <item.icon className={`h-5 w-5 ${settingsTab === item.id ? 'text-blue-600' : 'text-gray-400'}`} />
+                            <item.icon className={"h-5 w-5 " + (settingsTab === item.id ? "text-blue-600" : "text-gray-400")} />
                             <div>
                               <p className="font-medium text-sm">{item.label}</p>
                               <p className="text-xs text-gray-500">{item.description}</p>
@@ -2713,7 +2706,7 @@ export default function ProfileClient() {
               <AIInsightsPanel
                 insights={mockProfileAIInsights}
                 title="Profile Intelligence"
-                onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+                onInsightAction={(insight) => toast.info(insight.title)}
               />
             </div>
             <div className="space-y-6">
@@ -2906,7 +2899,7 @@ export default function ProfileClient() {
                 <Button
                   className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
                   onClick={() => {
-                    toast.success('CV Generated' CV is ready for download` })
+                    toast.success('CV Generated')
                     setShowDownloadCVDialog(false)
                   }}
                 >
@@ -3105,7 +3098,7 @@ export default function ProfileClient() {
                   className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
                   disabled={!quizSelectedSkill}
                   onClick={() => {
-                    toast.success('Assessment Started' assessment!` })
+                    toast.success('Assessment Started')
                     setShowSkillQuizDialog(false)
                     setQuizSelectedSkill('')
                   }}
@@ -3127,9 +3120,9 @@ export default function ProfileClient() {
                 {mockSkills.map((skill) => (
                   <div
                     key={skill.id}
-                    className={`flex items-center justify-between p-3 rounded-lg cursor-pointer transition-colors ${
-                      skill.isPinned ? 'bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200' : 'bg-gray-50 dark:bg-gray-800 hover:bg-gray-100'
-                    }`}
+                    className={"flex items-center justify-between p-3 rounded-lg cursor-pointer transition-colors " +
+                      (skill.isPinned ? 'bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200' : 'bg-gray-50 dark:bg-gray-800 hover:bg-gray-100')
+                    }
                   >
                     <div className="flex items-center gap-3">
                       <Zap className="w-4 h-4 text-blue-600" />
@@ -3226,11 +3219,11 @@ export default function ProfileClient() {
                     variant="outline"
                     className="h-auto py-4 flex flex-col gap-2"
                     onClick={() => {
-                      toast.success(`${badge.name} badge added`)
+                      toast.success(badge.name + " badge added")
                       setShowAddBadgeDialog(false)
                     }}
                   >
-                    <div className={`p-2 rounded-lg bg-gradient-to-br ${badge.color}`}>
+                    <div className={"p-2 rounded-lg bg-gradient-to-br " + badge.color}>
                       <badge.icon className="w-5 h-5 text-white" />
                     </div>
                     <span className="text-sm font-medium">{badge.name}</span>
@@ -3288,7 +3281,7 @@ export default function ProfileClient() {
                 <Button
                   className="bg-gradient-to-r from-orange-500 to-red-500 text-white"
                   onClick={() => {
-                    toast.success('Skill goal set' in ${skillGoalData.skill}` })
+                    toast.success('Skill goal set')
                     setSkillGoalData({ skill: '', targetLevel: 'advanced', deadline: '' })
                     setShowSkillGoalsDialog(false)
                   }}
@@ -3687,7 +3680,7 @@ export default function ProfileClient() {
                 <Button
                   className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
                   onClick={() => {
-                    toast.success('Post scheduled' at ${schedulePostData.scheduledTime}` })
+                    toast.success('Post scheduled')
                     setSchedulePostData({ content: '', scheduledDate: '', scheduledTime: '' })
                     setShowSchedulePostDialog(false)
                   }}
@@ -3739,7 +3732,7 @@ export default function ProfileClient() {
                 <Button
                   className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
                   onClick={() => {
-                    toast.success('Application submitted'` })
+                    toast.success('Application submitted')
                     setShowJobApplyDialog(null)
                   }}
                 >
@@ -3768,7 +3761,7 @@ export default function ProfileClient() {
                 <Button
                   className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
                   onClick={() => {
-                    toast.success('Skill endorsed'` })
+                    toast.success('Skill endorsed')
                     setShowEndorseSkillDialog(null)
                   }}
                 >

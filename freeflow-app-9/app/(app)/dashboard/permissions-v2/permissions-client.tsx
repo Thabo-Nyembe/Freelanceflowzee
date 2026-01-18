@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -453,13 +455,9 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
     }
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('roles').insert({
         user_id: user.id,
         role_name: newRole.role_name,
@@ -477,7 +475,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
         priority: 1
       })
       if (error) throw error
-      toast.success('Role Created' has been created` })
+      toast.success(`Role Created: "${newRole.display_name}" has been created`)
       setShowCreateRole(false)
       setNewRole({ role_name: '', display_name: '', description: '', role_level: 'standard', permissions: [] })
       refetchRoles?.()
@@ -500,17 +498,15 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
 
       const currentPermissions = roleData?.permissions || []
       if (currentPermissions.includes(permission)) {
-        toast.info('Already assigned' is already assigned to ${roleName}` })
+        toast.info(`Already assigned: "${permission}" is already assigned to ${roleName}`)
         return
       }
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('roles').update({
         permissions: [...currentPermissions, permission]
       }).eq('id', roleId)
       if (error) throw error
-      toast.success('Permission assigned' added to ${roleName}` })
+      toast.success(`Permission assigned: "${permission}" added to ${roleName}`)
       refetchRoles?.()
     } catch (err: any) {
       toast.error('Error assigning permission')
@@ -532,13 +528,11 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
       const currentPermissions = roleData?.permissions || []
       const updatedPermissions = currentPermissions.filter((p: string) => p !== permission)
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('roles').update({
         permissions: updatedPermissions
       }).eq('id', roleId)
       if (error) throw error
-      toast.success('Permission revoked' removed from ${roleName}` })
+      toast.success(`Permission revoked: "${permission}" removed from ${roleName}`)
       refetchRoles?.()
     } catch (err: any) {
       toast.error('Error revoking permission')
@@ -550,13 +544,11 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
   const handleDeleteRole = async (roleId: string, roleName: string) => {
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('roles').update({
         deleted_at: new Date().toISOString()
       }).eq('id', roleId)
       if (error) throw error
-      toast.success('Role deleted' has been deleted` })
+      toast.success(`Role deleted: "${roleName}" has been deleted`)
       setSelectedRole(null)
       refetchRoles?.()
     } catch (err: any) {
@@ -569,8 +561,6 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
   const handleExportPermissions = async () => {
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase.from('roles').select('*').is('deleted_at', null)
       if (error) throw error
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
@@ -599,8 +589,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
       const unusedRoles = roles?.filter(r => r.current_users === 0) || []
       const expiredAssignments = assignments?.filter(a => a.valid_until && new Date(a.valid_until) < new Date()) || []
 
-      toast.success('Audit complete' unused roles and ${expiredAssignments.length} expired assignments`
-      })
+      toast.success(`Audit complete: unused roles and ${expiredAssignments.length} expired assignments`)
     } catch (err: any) {
       toast.error('Audit failed')
     } finally {
@@ -616,12 +605,10 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
     setIsLoading(true)
     try {
       // Note: User creation typically involves auth - this creates a profile entry
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
-      toast.success('User invited'` })
+      toast.success(`User ${newUser.email} has been invited`)
       setShowCreateUser(false)
       setNewUser({ email: '', firstName: '', lastName: '', department: '', title: '', roles: [], groups: [] })
     } catch (err: any) {
@@ -638,13 +625,11 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
     }
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
       // Groups would need their own table - showing pattern
-      toast.success('Group created' has been created` })
+      toast.success(`Group created: "${newGroup.name}" has been created`)
       setShowCreateGroup(false)
       setNewGroup({ name: '', description: '', type: 'custom' })
     } catch (err: any) {
@@ -657,13 +642,9 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
   const handleAssignUserToRole = async (userId: string, roleId: string) => {
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('role_assignments').insert({
         user_id: user.id,
         role_id: roleId,
@@ -707,8 +688,6 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
     if (!confirm('Are you sure you want to regenerate the SCIM token? This will invalidate the current token.')) return
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const newToken = crypto.randomUUID()
       const { error } = await supabase.from('scim_tokens').upsert({
         id: 'default',
@@ -728,8 +707,6 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
     if (!confirm('Are you sure you want to reset ALL permissions to defaults? This action cannot be undone.')) return
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('roles').update({ permissions: [] }).neq('role_type', 'system')
       if (error) throw error
       toast.success('Permissions reset')
@@ -745,8 +722,6 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
     if (!confirm('Are you sure you want to revoke ALL user sessions? All users will need to re-authenticate.')) return
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('user_sessions').delete().neq('id', '00000000-0000-0000-0000-000000000000')
       if (error) throw error
       toast.success('Sessions revoked', { description: 'All active user sessions have been invalidated' })
@@ -761,8 +736,6 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
     if (!confirm('Are you sure you want to delete ALL API keys? This will immediately revoke all API access.')) return
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('api_keys').update({ revoked_at: new Date().toISOString() }).is('revoked_at', null)
       if (error) throw error
       toast.success('API keys deleted', { description: 'All API keys have been revoked' })
@@ -797,11 +770,9 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
   const handleSendPasswordReset = async (email: string) => {
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.auth.resetPasswordForEmail(email)
       if (error) throw error
-      toast.success('Password reset sent'` })
+      toast.success(`Password reset sent to ${email}`)
     } catch (err: any) {
       toast.error('Failed to send reset')
     } finally {
@@ -813,8 +784,6 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
     if (!confirm(`Are you sure you want to lock ${userName}'s account?`)) return
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('users').update({ status: 'locked', locked_at: new Date().toISOString() }).eq('id', userId)
       if (error) throw error
       toast.success('Account locked', { description: `${userName}'s account has been locked` })
@@ -835,9 +804,10 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
       ([key, value]) => value !== 'all' && value !== ''
     ).length
 
-    toast.success('Filters applied' filter(s) applied to user list`
+    toast.success(activeFilterCount > 0
+        ? activeFilterCount + ' filter(s) applied to user list'
         : 'All filters cleared'
-    })
+    )
     setShowAdvancedFilters(false)
   }
 
@@ -849,8 +819,6 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
     }
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('policies').insert({
         name: newPolicy.name,
         description: newPolicy.description,
@@ -874,8 +842,6 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
   const handleAddApplication = async (appName: string) => {
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('applications').insert({
         name: appName,
         status: 'active',
@@ -911,8 +877,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
     // Add the new mapping to saved mappings
     setSavedAttributeMappings(prev => [...prev, { ...newMapping }])
 
-    toast.success('Mapping added' -> ${newMapping.target} mapping created (${savedAttributeMappings.length + 1} total)`
-    })
+    toast.success('Mapping added: ' + newMapping.source + ' -> ' + newMapping.target + ' (' + (savedAttributeMappings.length + 1) + ' total)')
     setShowAttributeMapping(false)
     setNewMapping({ source: '', target: '', required: false })
   }
@@ -925,8 +890,6 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
     }
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('webhooks').insert({
         url: newWebhook.url,
         events: newWebhook.events,
@@ -948,8 +911,6 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
   const handleConfigureDirectory = async (directoryName: string, action: 'connect' | 'configure') => {
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       if (action === 'connect') {
         const { error } = await supabase.from('directories').insert({
           name: directoryName,
@@ -975,8 +936,6 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
   const handleConfigureHRSystem = async (systemName: string, action: 'connect' | 'configure') => {
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       if (action === 'connect') {
         const { error } = await supabase.from('hr_integrations').insert({
           name: systemName,
@@ -1003,8 +962,6 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
     if (!editingUser) return
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('users').update({
         first_name: editingUser.firstName,
         last_name: editingUser.lastName,
@@ -1029,8 +986,6 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
     if (!selectedGroup) return
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const memberships = userIds.map(userId => ({
         group_id: selectedGroup.id,
         user_id: userId,
@@ -1052,8 +1007,6 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
     if (!editingGroup) return
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('groups').update({
         name: editingGroup.name,
         description: editingGroup.description,
@@ -1076,8 +1029,6 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
     if (!selectedRole) return
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const assignments = userIds.map(userId => ({
         role_id: selectedRole.id,
         user_id: userId,
@@ -1099,8 +1050,6 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
     if (!editingRole) return
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('roles').update({
         name: editingRole.name,
         display_name: editingRole.displayName,
@@ -1135,8 +1084,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
         // For security warnings, navigate to relevant tab or trigger review
         if (insight.category === 'Security') {
           setActiveTab('audit')
-          toast.warning('Security Review Required': ${insight.description}. Opening audit logs for investigation.`
-          })
+          toast.warning(`Security Review Required: ${insight.description}. Opening audit logs for investigation.`)
         } else {
           toast.warning('Action Required')
         }
@@ -1146,8 +1094,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
         // For optimization recommendations, guide user to relevant settings
         if (insight.category === 'Optimization') {
           setActiveTab('roles')
-          toast.info('Review Recommended': Opening roles tab for permission review.`
-          })
+          toast.info(`Review Recommended: Opening roles tab for permission review.`)
         } else {
           toast.info('Insight Noted')
         }
@@ -1155,8 +1102,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
 
       case 'success':
         // For success items, mark as acknowledged
-        toast.success('Compliance Verified' has been acknowledged and logged.`
-        })
+        toast.success(`Compliance Verified: "${insight.title}" has been acknowledged and logged.`)
         break
     }
 

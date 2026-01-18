@@ -998,7 +998,7 @@ export default function BackupsClient() {
             <Card key={i} className="border-gray-200 dark:border-gray-700">
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${stat.color} flex items-center justify-center`}>
+                  <div className={"w-10 h-10 rounded-lg bg-gradient-to-br " + stat.color + " flex items-center justify-center"}>
                     <stat.icon className="h-5 w-5 text-white" />
                   </div>
                   <div>
@@ -1007,7 +1007,7 @@ export default function BackupsClient() {
                   </div>
                 </div>
                 {stat.change && (
-                  <p className={`text-xs mt-2 ${stat.change.startsWith('+') ? 'text-green-600' : stat.change.startsWith('-') ? 'text-red-600' : 'text-gray-500'}`}>
+                  <p className={"text-xs mt-2 " + (stat.change.startsWith('+') ? "text-green-600" : stat.change.startsWith('-') ? "text-red-600" : "text-gray-500")}>
                     {stat.change} this week
                   </p>
                 )}
@@ -1094,7 +1094,7 @@ export default function BackupsClient() {
                 <Button
                   key={idx}
                   variant="ghost"
-                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  className={"h-20 flex-col gap-2 " + action.color + " hover:scale-105 transition-all duration-200"}
                   onClick={action.action}
                 >
                   <action.icon className="w-5 h-5" />
@@ -1120,12 +1120,12 @@ export default function BackupsClient() {
                         className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
                         onClick={() => setSelectedJob(job)}
                       >
-                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                        <div className={"w-10 h-10 rounded-lg flex items-center justify-center " + (
                           job.status === 'completed' ? 'bg-green-100 dark:bg-green-900' :
                           job.status === 'running' ? 'bg-blue-100 dark:bg-blue-900' :
                           job.status === 'failed' ? 'bg-red-100 dark:bg-red-900' :
                           'bg-gray-100 dark:bg-gray-800'
-                        }`}>
+                        )}>
                           {job.status === 'running' ? (
                             <RotateCw className="h-5 w-5 text-blue-600 animate-spin" />
                           ) : job.status === 'completed' ? (
@@ -1168,9 +1168,9 @@ export default function BackupsClient() {
                 <CardContent className="space-y-4">
                   {mockComplianceReports.slice(0, 4).map(report => (
                     <div key={report.id} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700" onClick={() => setSelectedCompliance(report)}>
-                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                      <div className={"w-10 h-10 rounded-lg flex items-center justify-center " + (
                         report.status === 'compliant' ? 'bg-green-100' : report.status === 'non-compliant' ? 'bg-red-100' : 'bg-amber-100'
-                      }`}>
+                      )}>
                         {report.status === 'compliant' ? (
                           <ShieldCheck className="h-5 w-5 text-green-600" />
                         ) : report.status === 'non-compliant' ? (
@@ -1303,12 +1303,12 @@ export default function BackupsClient() {
                 <div className="divide-y divide-gray-100 dark:divide-gray-800">
                   {filteredJobs.map(job => (
                     <div key={job.id} className="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => setSelectedJob(job)}>
-                      <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
+                      <div className={"w-12 h-12 rounded-lg flex items-center justify-center " + (
                         job.status === 'completed' ? 'bg-green-100' : job.status === 'running' ? 'bg-blue-100' : job.status === 'failed' ? 'bg-red-100' : 'bg-gray-100'
-                      }`}>
-                        <Database className={`h-6 w-6 ${
+                      )}>
+                        <Database className={"h-6 w-6 " + (
                           job.status === 'completed' ? 'text-green-600' : job.status === 'running' ? 'text-blue-600' : job.status === 'failed' ? 'text-red-600' : 'text-gray-600'
-                        }`} />
+                        )} />
                       </div>
                       <div className="flex-1">
                         <h4 className="font-medium text-gray-900 dark:text-white">{job.name}</h4>
@@ -1441,7 +1441,7 @@ export default function BackupsClient() {
                 <Button
                   key={idx}
                   variant="ghost"
-                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  className={"h-20 flex-col gap-2 " + action.color + " hover:scale-105 transition-all duration-200"}
                   onClick={action.action}
                 >
                   <action.icon className="w-5 h-5" />
@@ -1456,7 +1456,7 @@ export default function BackupsClient() {
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-3">
-                        <div className={`w-12 h-12 rounded-lg ${vault.locked ? 'bg-amber-100 dark:bg-amber-900' : 'bg-blue-100 dark:bg-blue-900'} flex items-center justify-center`}>
+                        <div className={"w-12 h-12 rounded-lg " + (vault.locked ? "bg-amber-100 dark:bg-amber-900" : "bg-blue-100 dark:bg-blue-900") + " flex items-center justify-center"}>
                           {vault.locked ? <Lock className="h-6 w-6 text-amber-600" /> : <FolderLock className="h-6 w-6 text-blue-600" />}
                         </div>
                         <div>
@@ -1513,12 +1513,12 @@ export default function BackupsClient() {
                   <div className="divide-y divide-gray-100 dark:divide-gray-800">
                     {mockComplianceReports.map(report => (
                       <div key={report.id} className="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => setSelectedCompliance(report)}>
-                        <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
+                        <div className={"w-12 h-12 rounded-lg flex items-center justify-center " + (
                           report.status === 'compliant' ? 'bg-green-100' : report.status === 'non-compliant' ? 'bg-red-100' : 'bg-amber-100'
-                        }`}>
-                          <Scale className={`h-6 w-6 ${
+                        )}>
+                          <Scale className={"h-6 w-6 " + (
                             report.status === 'compliant' ? 'text-green-600' : report.status === 'non-compliant' ? 'text-red-600' : 'text-amber-600'
-                          }`} />
+                          )} />
                         </div>
                         <div className="flex-1">
                           <h4 className="font-medium text-gray-900 dark:text-white">{report.name}</h4>
@@ -1696,7 +1696,7 @@ export default function BackupsClient() {
                 <Button
                   key={idx}
                   variant="ghost"
-                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  className={"h-20 flex-col gap-2 " + action.color + " hover:scale-105 transition-all duration-200"}
                   onClick={action.action}
                 >
                   <action.icon className="w-5 h-5" />
@@ -1722,11 +1722,11 @@ export default function BackupsClient() {
                         <button
                           key={item.id}
                           onClick={() => setSettingsTab(item.id)}
-                          className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all ${
+                          className={"w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all " + (
                             settingsTab === item.id
                               ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg'
                               : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
-                          }`}
+                          )}
                         >
                           <item.icon className="h-5 w-5" />
                           <span className="font-medium">{item.label}</span>
@@ -1975,7 +1975,7 @@ export default function BackupsClient() {
             <AIInsightsPanel
               insights={mockBackupsAIInsights}
               title="Backup Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -2065,7 +2065,7 @@ export default function BackupsClient() {
                 <div className="space-y-6">
                   <DialogHeader>
                     <div className="flex items-center gap-4">
-                      <div className={`w-12 h-12 rounded-lg ${selectedVault.locked ? 'bg-amber-100' : 'bg-blue-100'} flex items-center justify-center`}>
+                      <div className={"w-12 h-12 rounded-lg " + (selectedVault.locked ? "bg-amber-100" : "bg-blue-100") + " flex items-center justify-center"}>
                         {selectedVault.locked ? <Lock className="h-6 w-6 text-amber-600" /> : <FolderLock className="h-6 w-6 text-blue-600" />}
                       </div>
                       <div>
@@ -2110,8 +2110,8 @@ export default function BackupsClient() {
                 <div className="space-y-6">
                   <DialogHeader>
                     <div className="flex items-center gap-4">
-                      <div className={`w-12 h-12 rounded-lg ${selectedCompliance.status === 'compliant' ? 'bg-green-100' : 'bg-red-100'} flex items-center justify-center`}>
-                        <Scale className={`h-6 w-6 ${selectedCompliance.status === 'compliant' ? 'text-green-600' : 'text-red-600'}`} />
+                      <div className={"w-12 h-12 rounded-lg " + (selectedCompliance.status === 'compliant' ? "bg-green-100" : "bg-red-100") + " flex items-center justify-center"}>
+                        <Scale className={"h-6 w-6 " + (selectedCompliance.status === 'compliant' ? "text-green-600" : "text-red-600")} />
                       </div>
                       <div>
                         <DialogTitle>{selectedCompliance.name}</DialogTitle>

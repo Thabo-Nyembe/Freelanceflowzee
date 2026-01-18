@@ -1953,7 +1953,7 @@ export default function AudioStudioClient({ initialTracks, initialStats }: Audio
             <AIInsightsPanel
               insights={mockAudioAIInsights}
               title="Audio Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">

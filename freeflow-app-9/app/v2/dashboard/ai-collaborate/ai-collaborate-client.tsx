@@ -328,8 +328,8 @@ export default function AiCollaborateClient() {
 
       if (!response.ok) {
         throw new Error('Failed to generate AI options')
-      }      toast.success('AI designs generated!' new design options created based on your preferences`
-      })
+      }
+      toast.success('AI designs generated! New design options created based on your preferences')
     } catch (error: any) {
       logger.error('Failed to generate AI options', { error })
       toast.error('Failed to generate designs')
@@ -343,7 +343,8 @@ export default function AiCollaborateClient() {
   // ============================================================================
 
   const handleSelectOption = useCallback(async (optionId: number) => {
-    try {      const response = await fetch('/api/client-zone/ai/select', {
+    try {
+      const response = await fetch('/api/client-zone/ai/select', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -369,7 +370,8 @@ export default function AiCollaborateClient() {
         setSelectedOptions(selectedOptions.filter(id => id !== optionId))
       } else {
         setSelectedOptions([...selectedOptions, optionId])
-      }      toast.success('Option selected!')
+      }
+      toast.success('Option selected!')
     } catch (error: any) {
       logger.error('Failed to select option', { error, optionId })
       toast.error('Failed to select option')
@@ -381,7 +383,8 @@ export default function AiCollaborateClient() {
   // ============================================================================
 
   const handleRateOption = useCallback(async (optionId: number, rating: number) => {
-    try {      const response = await fetch('/api/client-zone/ai/rate', {
+    try {
+      const response = await fetch('/api/client-zone/ai/rate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -429,7 +432,8 @@ export default function AiCollaborateClient() {
       if (selectedOptions.length === 0) {
         toast.error('Please select at least one design')
         return
-      }      const response = await fetch('/api/client-zone/ai/download', {
+      }
+      const response = await fetch('/api/client-zone/ai/download', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -442,8 +446,7 @@ export default function AiCollaborateClient() {
         throw new Error('Failed to download designs')
       }
 
-      toast.success('Downloads starting!' design(s) downloading`
-      })
+      toast.success('Downloads starting! ' + selectedOptions.length + ' design(s) downloading')
     } catch (error: any) {
       logger.error('Failed to download selection', { error })
       toast.error('Failed to download designs')
@@ -459,7 +462,8 @@ export default function AiCollaborateClient() {
       if (selectedOptions.length === 0) {
         toast.error('Please select at least one design')
         return
-      }      const response = await fetch('/api/client-zone/ai/share', {
+      }
+      const response = await fetch('/api/client-zone/ai/share', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -490,7 +494,8 @@ export default function AiCollaborateClient() {
     }
 
     try {
-      setIsSubmitting(true)      const response = await fetch('/api/client-zone/ai/sessions', {
+      setIsSubmitting(true)
+      const response = await fetch('/api/client-zone/ai/sessions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -504,8 +509,8 @@ export default function AiCollaborateClient() {
 
       if (!response.ok) {
         throw new Error('Failed to create session')
-      }      toast.success('Session created!'" is ready for collaboration`
-      })
+      }
+      toast.success('Session created! "' + newSessionName + '" is ready for collaboration')
 
       setNewSessionName('')
       setNewSessionDescription('')
@@ -536,7 +541,8 @@ export default function AiCollaborateClient() {
     }
 
     try {
-      setIsSubmitting(true)      const response = await fetch('/api/client-zone/ai/invite', {
+      setIsSubmitting(true)
+      const response = await fetch('/api/client-zone/ai/invite', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -550,8 +556,8 @@ export default function AiCollaborateClient() {
 
       if (!response.ok) {
         throw new Error('Failed to send invitation')
-      }      toast.success('Invitation sent!' has been invited as ${inviteRole}`
-      })
+      }
+      toast.success('Invitation sent! ' + inviteEmail + ' has been invited as ' + inviteRole)
 
       setInviteEmail('')
       setInviteRole('viewer')
@@ -579,14 +585,16 @@ export default function AiCollaborateClient() {
   const handleCopyShareLink = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(shareLink)
-      toast.success('Link copied to clipboard!')    } catch (error) {
+      toast.success('Link copied to clipboard!')
+    } catch (error) {
       toast.error('Failed to copy link')
     }
   }, [shareLink])
 
   const handleShareViaEmail = useCallback(async () => {
     try {
-      setIsSubmitting(true)      const response = await fetch('/api/client-zone/ai/share-email', {
+      setIsSubmitting(true)
+      const response = await fetch('/api/client-zone/ai/share-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -619,7 +627,8 @@ export default function AiCollaborateClient() {
 
   const handleSaveSettings = useCallback(async () => {
     try {
-      setIsSubmitting(true)      const response = await fetch('/api/client-zone/ai/settings', {
+      setIsSubmitting(true)
+      const response = await fetch('/api/client-zone/ai/settings', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -631,7 +640,8 @@ export default function AiCollaborateClient() {
 
       if (!response.ok) {
         throw new Error('Failed to save settings')
-      }      toast.success('Settings saved!')
+      }
+      toast.success('Settings saved!')
 
       setSettingsDialogOpen(false)
       announce('AI settings saved', 'polite')
@@ -660,7 +670,8 @@ export default function AiCollaborateClient() {
 
   const handleDeleteAllSelections = useCallback(async () => {
     try {
-      setIsSubmitting(true)      const response = await fetch('/api/client-zone/ai/selections', {
+      setIsSubmitting(true)
+      const response = await fetch('/api/client-zone/ai/selections', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -674,7 +685,8 @@ export default function AiCollaborateClient() {
       }
 
       setSelectedOptions([])
-      setOptions(options.map(opt => ({ ...opt, selected: false })))      toast.success('Selections cleared!')
+      setOptions(options.map(opt => ({ ...opt, selected: false })))
+      toast.success('Selections cleared!')
 
       setConfirmDeleteDialogOpen(false)
       announce('All selections cleared', 'polite')
@@ -692,7 +704,8 @@ export default function AiCollaborateClient() {
 
   const handleRegenerateOptions = useCallback(async () => {
     try {
-      setIsGenerating(true)      const response = await fetch('/api/client-zone/ai/regenerate', {
+      setIsGenerating(true)
+      const response = await fetch('/api/client-zone/ai/regenerate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -705,7 +718,8 @@ export default function AiCollaborateClient() {
 
       if (!response.ok) {
         throw new Error('Failed to regenerate options')
-      }      toast.success('Options regenerated!')
+      }
+      toast.success('Options regenerated!')
 
       announce('AI options regenerated', 'polite')
     } catch (error: any) {

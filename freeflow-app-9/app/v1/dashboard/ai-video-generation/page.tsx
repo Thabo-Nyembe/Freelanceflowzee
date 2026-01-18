@@ -621,7 +621,8 @@ export default function AIVideoGenerationPage() {
         }
       }
 
-      dispatch({ type: 'ADD_VIDEO', video: newVideo })      toast.success(`Video generated successfully! ${newVideo.title.substring(0, 40)}... - ${formatDuration(duration)} - ${formatFileSize(fileSize)} - ${genQuality.toUpperCase()} - ${genModel}`)
+      dispatch({ type: 'ADD_VIDEO', video: newVideo })
+    toast.success(`Video generated successfully! ${newVideo.title.substring(0, 40)}... - ${formatDuration(duration)} - ${formatFileSize(fileSize)} - ${genQuality.toUpperCase()} - ${genModel}`)
       announce('Video generated successfully')
 
       // Reset form
@@ -683,7 +684,8 @@ export default function AIVideoGenerationPage() {
         updatedAt: new Date().toISOString()
       }
 
-      dispatch({ type: 'UPDATE_VIDEO', video: updatedVideo })      toast.success(`Video updated successfully! ${updatedVideo.title} - ${formatDuration(updatedVideo.duration)} - ${updatedVideo.quality.toUpperCase()} - Tags: ${updatedVideo.tags.join(', ')}`)
+      dispatch({ type: 'UPDATE_VIDEO', video: updatedVideo })
+    toast.success(`Video updated successfully! ${updatedVideo.title} - ${formatDuration(updatedVideo.duration)} - ${updatedVideo.quality.toUpperCase()} - Tags: ${updatedVideo.tags.join(', ')}`)
       announce('Video updated successfully')
       setShowEditModal(false)
 
@@ -694,7 +696,8 @@ export default function AIVideoGenerationPage() {
   }
 
   const handleDeleteVideo = async (videoId: string) => {
-    const video = state.videos.find(v => v.id === videoId)    if (!userId) {
+    const video = state.videos.find(v => v.id === videoId)
+    if (!userId) {
       toast.error('Please log in to delete videos')
       return
     }
@@ -709,7 +712,8 @@ export default function AIVideoGenerationPage() {
         throw new Error(deleteError.message || 'Failed to delete video')
       }
 
-      dispatch({ type: 'DELETE_VIDEO', videoId })      toast.success(`Video deleted successfully! ${video?.title} - ${formatFileSize(video?.fileSize || 0)} removed from library`)
+      dispatch({ type: 'DELETE_VIDEO', videoId })
+    toast.success(`Video deleted successfully! ${video?.title} - ${formatFileSize(video?.fileSize || 0)} removed from library`)
       announce('Video deleted successfully')
       setShowViewModal(false)
 
@@ -733,24 +737,28 @@ export default function AIVideoGenerationPage() {
 
   const handleToggleLike = async (videoId: string) => {
     const video = state.videos.find(v => v.id === videoId)
-    const isLiked = video?.likes && video.likes > 0    dispatch({ type: 'TOGGLE_LIKE', videoId })
+    const isLiked = video?.likes && video.likes > 0
+    dispatch({ type: 'TOGGLE_LIKE', videoId })
 
     // Persist like status in database
     if (userId && video) {
       const { updateGeneratedVideo } = await import('@/lib/ai-video-queries')
       const newLikes = isLiked ? Math.max(0, video.likes - 1) : video.likes + 1
-      await updateGeneratedVideo(videoId, { likes: newLikes })    }
+      await updateGeneratedVideo(videoId, { likes: newLikes })
+    }
 
     toast.success(isLiked ? `Removed from liked videos - ${video?.title}` : `Added to liked videos - ${video?.title} - ${(video?.likes || 0) + 1} likes`)
   }
 
   const handleTogglePublic = async (videoId: string) => {
-    const video = state.videos.find(v => v.id === videoId)    dispatch({ type: 'TOGGLE_PUBLIC', videoId })
+    const video = state.videos.find(v => v.id === videoId)
+    dispatch({ type: 'TOGGLE_PUBLIC', videoId })
 
     // Persist public status in database
     if (userId && video) {
       const { updateGeneratedVideo } = await import('@/lib/ai-video-queries')
-      await updateGeneratedVideo(videoId, { is_public: !video.isPublic })    }
+      await updateGeneratedVideo(videoId, { is_public: !video.isPublic })
+    }
 
     toast.success(`Visibility updated! ${video?.title} - ${video?.isPublic ? 'Now private - Only you can view' : 'Now public - Anyone with link can view'}`)
   }

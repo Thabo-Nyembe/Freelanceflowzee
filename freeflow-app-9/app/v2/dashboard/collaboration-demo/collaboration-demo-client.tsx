@@ -380,11 +380,13 @@ Try moving your cursor around to see it synchronized across all connected users!
   }, [])
 
   const handleStartVideoCall = () => {
-    setShowVideoCall(true)    toast.success('Starting video call...')
+    setShowVideoCall(true)
+    toast.success('Starting video call...')
   }
 
   const handleEndVideoCall = () => {
-    setShowVideoCall(false)    toast.info('Video call ended')
+    setShowVideoCall(false)
+    toast.info('Video call ended')
   }
 
   // Video call fullscreen mode

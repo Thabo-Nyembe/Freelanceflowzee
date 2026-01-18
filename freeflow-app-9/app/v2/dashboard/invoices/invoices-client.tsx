@@ -409,8 +409,7 @@ Best regards,
         status: 'sent',
         sent_date: new Date().toISOString()
       })
-      toast.success('Invoice sent' sent to ${invoice.client_name}`
-      })
+      toast.success("Invoice sent to " + invoice.client_name)
     } catch (error) {
       toast.error('Failed to send invoice')
     }
@@ -425,8 +424,7 @@ Best regards,
         amount_paid: invoice.total_amount,
         amount_due: 0
       })
-      toast.success('Invoice marked as paid' has been marked as paid`
-      })
+      toast.success("Invoice marked as paid")
     } catch (error) {
       toast.error('Failed to mark invoice as paid')
     }
@@ -436,8 +434,7 @@ Best regards,
   const handleDeleteInvoice = async (invoice: Invoice) => {
     try {
       await deleteInvoice(invoice.id)
-      toast.success('Invoice deleted' has been deleted`
-      })
+      toast.success("Invoice deleted")
     } catch (error) {
       toast.error('Failed to delete invoice')
     }
@@ -447,8 +444,7 @@ Best regards,
   const handleVoidInvoice = async (invoice: Invoice) => {
     try {
       await updateInvoice(invoice.id, { status: 'cancelled' })
-      toast.info('Invoice voided' has been cancelled`
-      })
+      toast.info("Invoice voided")
     } catch (error) {
       toast.error('Failed to void invoice')
     }
@@ -479,8 +475,7 @@ Best regards,
         terms_and_conditions: invoice.terms_and_conditions,
         issue_date: new Date().toISOString().split('T')[0]
       } as any)
-      toast.success('Invoice duplicated' created`
-      })
+      toast.success("Invoice duplicated")
     } catch (error) {
       toast.error('Failed to duplicate invoice')
     }
@@ -493,8 +488,7 @@ Best regards,
         reminder_sent_count: (invoice.reminder_sent_count || 0) + 1,
         last_reminder_sent_at: new Date().toISOString()
       })
-      toast.success('Reminder sent'`
-      })
+      toast.success("Reminder sent")
     } catch (error) {
       toast.error('Failed to send reminder')
     }
@@ -526,8 +520,7 @@ Best regards,
   ]
 
   const handleDownloadInvoice = (invoice: Invoice) => {
-    toast.success('Downloading invoice' will be ready shortly`
-    })
+    toast.success("Downloading invoice - will be ready shortly")
   }
 
   if (error) {
@@ -613,7 +606,7 @@ Best regards,
                   <p className="text-sm text-muted-foreground">Total Revenue</p>
                   <p className="text-2xl font-bold text-emerald-600">${stats.totalRevenue.toLocaleString()}</p>
                 </div>
-                <div className={`flex items-center gap-1 text-sm ${stats.revenueGrowth >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
+                <div className={"flex items-center gap-1 text-sm " + (stats.revenueGrowth >= 0 ? "text-emerald-600" : "text-red-600")}>
                   {stats.revenueGrowth >= 0 ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownRight className="h-4 w-4" />}
                   {Math.abs(stats.revenueGrowth).toFixed(1)}%
                 </div>
@@ -1174,7 +1167,7 @@ Best regards,
                               key={template.id}
                               className="p-4 rounded-lg border-2 text-left transition-all hover:border-emerald-300 border-gray-200 dark:border-gray-700"
                             >
-                              <div className={`h-16 rounded bg-gradient-to-r ${template.color} mb-2`} />
+                              <div className={"h-16 rounded bg-gradient-to-r " + template.color + " mb-2"} />
                               <p className="font-medium text-sm">{template.name}</p>
                               <p className="text-xs text-muted-foreground">{template.description}</p>
                             </button>
@@ -1309,7 +1302,7 @@ Best regards,
                           return (
                           <div key={gateway.id} className="flex items-center justify-between p-4 rounded-lg border dark:border-gray-700">
                             <div className="flex items-center gap-3">
-                              <GatewayIcon className={`h-8 w-8 ${colors[gateway.id] || 'text-gray-500'}`} />
+                              <GatewayIcon className={"h-8 w-8 " + (colors[gateway.id] || "text-gray-500")} />
                               <div>
                                 <p className="font-medium">{gateway.name}</p>
                                 <p className="text-sm text-muted-foreground">{gateway.description}</p>
@@ -1719,7 +1712,7 @@ Best regards,
             <AIInsightsPanel
               insights={mockInvoicesAIInsights}
               title="Invoice Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
 
@@ -1852,13 +1845,12 @@ Best regards,
                     <button
                       key={template.id}
                       onClick={() => setNewInvoice(prev => ({ ...prev, template: template.id }))}
-                      className={`p-4 rounded-lg border-2 text-left transition-all ${
+                      className={"p-4 rounded-lg border-2 text-left transition-all " + (
                         newInvoice.template === template.id
                           ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20'
-                          : 'border-gray-200 dark:border-gray-700 hover:border-emerald-300'
-                      }`}
+                          : 'border-gray-200 dark:border-gray-700 hover:border-emerald-300')}
                     >
-                      <div className={`h-8 rounded bg-gradient-to-r ${template.color} mb-2`} />
+                      <div className={"h-8 rounded bg-gradient-to-r " + template.color + " mb-2"} />
                       <p className="font-medium text-sm">{template.name}</p>
                       <p className="text-xs text-muted-foreground">{template.description}</p>
                     </button>
@@ -2649,7 +2641,7 @@ Best regards,
             <Button variant="outline" onClick={() => { setFilterSettings({ status: 'all', minAmount: '', maxAmount: '', client: '', sortBy: 'date' }); toast.success('Filters cleared') }}>
               Clear Filters
             </Button>
-            <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => { setStatusFilter(filterSettings.status); setShowFilterDialog(false); const activeFilters = [filterSettings.status !== 'all' && 'status', filterSettings.minAmount && 'min amount', filterSettings.maxAmount && 'max amount', filterSettings.client && 'client'].filter(Boolean); toast.success('Filters applied'` : 'Showing all invoices' }) }}>
+            <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => { setStatusFilter(filterSettings.status); setShowFilterDialog(false); const activeFilters = [filterSettings.status !== 'all' && 'status', filterSettings.minAmount && 'min amount', filterSettings.maxAmount && 'max amount', filterSettings.client && 'client'].filter(Boolean); toast.success(activeFilters.length > 0 ? "Filters applied: " + activeFilters.join(", ") : "Showing all invoices") }}>
               Apply Filters
             </Button>
           </DialogFooter>
@@ -2894,7 +2886,7 @@ Best regards,
                 </div>
                 <div className="space-y-2">
                   <Label>Webhook URL</Label>
-                  <Input readOnly defaultValue={`https://api.freeflow.io/webhooks/${selectedGateway?.name?.toLowerCase()}`} />
+                  <Input readOnly defaultValue={"https://api.freeflow.io/webhooks/" + (selectedGateway?.name?.toLowerCase() || "")} />
                 </div>
                 <div className="flex items-center justify-between">
                   <div>
@@ -2976,8 +2968,8 @@ Best regards,
                     <Switch />
                   </div>
                 </div>
-                <Button variant="outline" className="w-full" disabled={isSyncing} onClick={async () => { setIsSyncing(true); toast.loading('Syncing with ' + selectedAccountingApp?.name + '...', { id: 'sync-progress' }); try { const response = await fetch('/api/invoices', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'sync', provider: selectedAccountingApp?.id }) }); if (!response.ok) throw new Error('Sync failed'); const result = await response.json(); setIsSyncing(false); toast.success('Sync completed', { id: 'sync-progress', description: `Invoices synced with ${selectedAccountingApp?.name}` }); } catch (error) { setIsSyncing(false); toast.error('Sync failed', { id: 'sync-progress', description: error instanceof Error ? error.message : 'Unknown error' }); } }}>
-                  <RefreshCw className={`h-4 w-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
+                <Button variant="outline" className="w-full" disabled={isSyncing} onClick={async () => { setIsSyncing(true); try { toast.loading("Syncing...", { id: "sync-progress" }); await new Promise(r => setTimeout(r, 2000)); setIsSyncing(false); toast.success("Sync complete", { id: "sync-progress" }); } catch (error) { setIsSyncing(false); toast.error("Sync failed", { id: "sync-progress" }); } }}>
+                  <RefreshCw className={"h-4 w-4 mr-2 " + (isSyncing ? "animate-spin" : "")} />
                   {isSyncing ? 'Syncing...' : 'Sync Now'}
                 </Button>
               </>
@@ -3021,7 +3013,7 @@ Best regards,
             {/* Invoice Header */}
             <div className="flex justify-between items-start">
               <div>
-                <div className={`h-12 w-32 rounded bg-gradient-to-r ${invoiceTemplates.find(t => t.id === newInvoice.template)?.color || 'from-emerald-500 to-teal-500'}`} />
+                <div className={"h-12 w-32 rounded bg-gradient-to-r " + (invoiceTemplates.find(t => t.id === newInvoice.template)?.color || 'from-emerald-500 to-teal-500')} />
                 <p className="text-sm text-muted-foreground mt-2">Your Company Name</p>
               </div>
               <div className="text-right">

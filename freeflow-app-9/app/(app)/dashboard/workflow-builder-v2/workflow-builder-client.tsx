@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import React, { useState, useMemo, useCallback } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -49,6 +51,9 @@ import {
 } from '@/components/ui/competitive-upgrades-extended'
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+
+// Initialize Supabase client once at module level
+const supabase = createClient()
 
 // ============== N8N-LEVEL WORKFLOW INTERFACES ==============
 
@@ -3190,8 +3195,6 @@ export default function WorkflowBuilderClient() {
             <Button variant="outline" onClick={() => setShowShareTemplateDialog(false)}>Cancel</Button>
             <Button className="bg-violet-600 hover:bg-violet-700" onClick={() => toast.promise(
               (async () => {
-                const { createClient } = await import('@/lib/supabase/client')
-                const supabase = createClient()
                 const { data: { user } } = await supabase.auth.getUser()
                 if (!user) throw new Error('Not authenticated')
 
@@ -3265,8 +3268,6 @@ export default function WorkflowBuilderClient() {
             <Button variant="outline" onClick={() => setShowShareCredentialsDialog(false)}>Cancel</Button>
             <Button className="bg-stone-600 hover:bg-stone-700" onClick={() => toast.promise(
               (async () => {
-                const { createClient } = await import('@/lib/supabase/client')
-                const supabase = createClient()
                 const { data: { user } } = await supabase.auth.getUser()
                 if (!user) throw new Error('Not authenticated')
 

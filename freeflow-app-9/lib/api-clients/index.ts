@@ -270,7 +270,7 @@ export {
   useNotifications,
   useNotification,
   useCreateNotification,
-  useMarkAsRead,
+  useMarkNotificationAsRead,
   useMarkAllAsRead,
   useArchiveNotification,
   useTogglePin,

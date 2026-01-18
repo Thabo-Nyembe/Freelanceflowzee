@@ -2155,7 +2155,7 @@ export default function PollsClient() {
             <AIInsightsPanel
               insights={mockPollsAIInsights}
               title="Survey Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info("Insight: " + insight.title)}
             />
           </div>
           <div className="space-y-6">

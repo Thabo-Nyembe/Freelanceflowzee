@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 export const dynamic = 'force-dynamic';
 
 import { useState, useEffect, useCallback } from 'react'
@@ -211,7 +213,8 @@ export default function TeamManagementPage() {
             ? Math.min(85 + Math.floor(overviewResult.data.average_rating * 3), 100)
             : 94
         }
-        setTeamStats(stats)        setIsLoading(false)
+        setTeamStats(stats)
+        setIsLoading(false)
         toast.success(`Team management loaded: ${members.length} members`)
         announce('Team management loaded successfully', 'polite')
       } catch (err) {
@@ -273,7 +276,8 @@ export default function TeamManagementPage() {
       }
 
       setTeamMembers(prev => [newTeamMember, ...prev])
-      toast.success(`${data.name} added to team successfully`)      announce(`${data.name} added to team`, 'polite')
+      toast.success(`${data.name} added to team successfully`)
+      announce(`${data.name} added to team`, 'polite')
 
       // Reset form
       setNewMember({
@@ -306,7 +310,6 @@ export default function TeamManagementPage() {
     if (!memberToRemove) return
 
     try {
-      setIsRemoving(true)      const { createClient } = await import('@/lib/supabase/client')
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
@@ -323,7 +326,8 @@ export default function TeamManagementPage() {
       }
 
       setTeamMembers(prev => prev.filter(m => m.id !== memberToRemove.id))
-      toast.success(`${memberToRemove.name} removed from team`)      announce(`${memberToRemove.name} removed from team`, 'polite')
+      toast.success(`${memberToRemove.name} removed from team`)
+      announce(`${memberToRemove.name} removed from team`, 'polite')
     } catch (err) {
       logger.error('Failed to delete team member', { error: err })
       toast.error('Failed to remove team member')
@@ -353,7 +357,8 @@ export default function TeamManagementPage() {
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
-      URL.revokeObjectURL(url)      toast.success('Team data exported successfully')
+      URL.revokeObjectURL(url)
+    toast.success('Team data exported successfully')
       announce('Team data exported successfully', 'polite')
     } catch (err) {
       logger.error('Failed to export team data', { error: err })

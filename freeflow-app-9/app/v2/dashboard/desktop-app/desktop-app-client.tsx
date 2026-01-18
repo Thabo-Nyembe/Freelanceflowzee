@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -545,8 +547,6 @@ export default function DesktopAppClient() {
   // Fetch projects and builds from Supabase
   const fetchData = useCallback(async () => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
@@ -701,8 +701,6 @@ export default function DesktopAppClient() {
   const handleNewBuildSubmit = async () => {
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to start builds')
@@ -716,8 +714,6 @@ export default function DesktopAppClient() {
       }
 
       const buildNumber = `${Date.now()}`
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('desktop_builds').insert({
         user_id: user.id,
         project_id: project.id,
@@ -732,8 +728,7 @@ export default function DesktopAppClient() {
 
       if (error) throw error
 
-      toast.success('Build started' for ${newBuildConfig.platform} (${newBuildConfig.channel}) initiated`
-      })
+      toast.success("Build started - build for " + newBuildConfig.platform + " (" + newBuildConfig.channel + ") initiated")
       setShowNewBuildDialog(false)
       setNewBuildConfig({
         platform: 'all',
@@ -760,8 +755,6 @@ export default function DesktopAppClient() {
 
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to deploy updates')
@@ -782,8 +775,6 @@ export default function DesktopAppClient() {
         for (const platform of selectedPlatforms) {
           const project = dbProjects[0]
           if (project) {
-            const { createClient } = await import('@/lib/supabase/client')
-            const supabase = createClient()
             await supabase.from('desktop_builds').insert({
               user_id: user.id,
               project_id: project.id,
@@ -805,9 +796,7 @@ export default function DesktopAppClient() {
         .map(([p]) => p)
         .join(', ')
 
-      toast.success('Update deployed' deployed to ${deployConfig.channel} channel for ${platformList}${deployConfig.isCritical ? ' (Critical)' : ''}`
-      })
-      setShowDeployUpdateDialog(false)
+      toast.success('Update deployed - Version ' + deployConfig.version + ' deployed to ' + deployConfig.channel + ' channel for ' + platformList + (deployConfig.isCritical ? ' (Critical)' : ''))
       setDeployConfig({
         version: '',
         channel: 'stable',
@@ -833,16 +822,12 @@ export default function DesktopAppClient() {
 
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to create projects')
         return
       }
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('desktop_projects').insert({
         user_id: user.id,
         project_name: formState.project_name,
@@ -871,8 +856,6 @@ export default function DesktopAppClient() {
   // Start a new build
   const handleStartBuild = async (projectId?: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to start builds')
@@ -890,8 +873,6 @@ export default function DesktopAppClient() {
       }
 
       const buildNumber = `${Date.now()}`
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('desktop_builds').insert({
         user_id: user.id,
         project_id: project.id,
@@ -906,7 +887,7 @@ export default function DesktopAppClient() {
 
       if (error) throw error
 
-      toast.success('Build started' initiated` })
+      toast.success('Build started')
       fetchData()
     } catch (error) {
       console.error('Error starting build:', error)
@@ -917,8 +898,6 @@ export default function DesktopAppClient() {
   // Cancel a build
   const handleCancelBuild = async (buildId: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('desktop_builds')
         .update({
@@ -943,8 +922,6 @@ export default function DesktopAppClient() {
       const build = dbBuilds.find(b => b.id === buildId)
       if (!build) return
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('desktop_builds')
         .update({
@@ -957,7 +934,7 @@ export default function DesktopAppClient() {
 
       if (error) throw error
 
-      toast.info('Retrying build' restarted` })
+      toast.info('Retrying build')
       fetchData()
     } catch (error) {
       console.error('Error retrying build:', error)
@@ -968,8 +945,6 @@ export default function DesktopAppClient() {
   // Delete a build
   const handleDeleteBuild = async (buildId: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('desktop_builds')
         .delete()
@@ -988,8 +963,6 @@ export default function DesktopAppClient() {
   // Archive a project
   const handleArchiveProject = async (projectId: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('desktop_projects')
         .update({ is_archived: true })
@@ -1007,15 +980,12 @@ export default function DesktopAppClient() {
 
   // Download build (mock with toast for actual file download)
   const handleDownloadBuild = (buildVersion: string, platform: string) => {
-    toast.success('Downloading build' for ${platform} download starting...`
-    })
+    toast.success('Downloading build ' + buildVersion + ' for ' + platform + ' download starting...')
   }
 
   // Publish release (update build status)
   const handlePublishRelease = async (buildId: string, buildVersion: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('desktop_builds')
         .update({
@@ -1027,7 +997,7 @@ export default function DesktopAppClient() {
 
       if (error) throw error
 
-      toast.success('Release published' is now live` })
+      toast.success('Release published')
       fetchData()
     } catch (error) {
       console.error('Error publishing release:', error)
@@ -1116,8 +1086,7 @@ export default function DesktopAppClient() {
       windows: 'Windows EV Certificate',
       gpg: 'GPG Key'
     }
-    toast.success('Certificate added' has been configured successfully`
-    })
+    toast.success("Certificate added and has been configured successfully")
     setShowAddCertificateDialog(false)
   }
 
@@ -1147,8 +1116,7 @@ export default function DesktopAppClient() {
 
   // Save CI/CD configuration
   const handleSaveCICDConfig = (provider: string) => {
-    toast.success('CI/CD configured' has been connected successfully`
-    })
+    toast.success("CI/CD has been configured and connected successfully")
     setShowCICDDialog(false)
   }
 
@@ -2699,7 +2667,7 @@ export default function DesktopAppClient() {
             <AIInsightsPanel
               insights={mockDesktopAppAIInsights}
               title="Desktop App Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">

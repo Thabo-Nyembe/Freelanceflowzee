@@ -4,6 +4,8 @@
 
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useCallback, useMemo, useRef } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -67,6 +69,9 @@ import {
 // MIGRATED: Batch #12 - Removed mock data adapters
 
 import { useChat, type ChatMessage, type RoomType } from '@/lib/hooks/use-chat'
+
+// Initialize Supabase client once at module level
+const supabase = createClient()
 
 // ============================================================================
 // TYPES - INTERCOM LEVEL CHAT SYSTEM
@@ -263,8 +268,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
         message_type: 'text',
         status: 'sent'
       })
-      toast.success('Message Sent'`
-      })
+      toast.success(`Message Sent: to ${selectedConversation?.customer_name || 'customer'}`)
       setNewMessage('')
     } catch (err) {
       toast.error('Failed to send message')
@@ -318,8 +322,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
           : conv
       ))
       setSelectedConversation(prev => prev ? { ...prev, assignee: member } : null)
-      toast.success('Conversation Assigned'`
-      })
+      toast.success(`Conversation Assigned: to ${member.name}`)
       setShowAssignDialog(false)
     } catch (err) {
       toast.error('Failed to assign conversation')
@@ -2066,8 +2069,6 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                         </Button>
                         <Button variant="ghost" size="icon" onClick={async () => {
                           if (confirm(`Delete quick reply "${reply.name}"? This action cannot be undone.`)) {
-                            const { createClient } = await import('@/lib/supabase/client')
-                            const supabase = createClient()
                             const { error } = await supabase.from('saved_replies').delete().eq('id', reply.id)
                             if (error) {
                               toast.error('Failed to delete reply')
@@ -2174,8 +2175,6 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
             <Button className="bg-cyan-600 hover:bg-cyan-700" onClick={async () => {
               setIsSaving(true)
               try {
-                const { createClient } = await import('@/lib/supabase/client')
-                const supabase = createClient()
                 const { error } = await supabase.from('chat_settings').upsert({
                   id: 'default',
                   settings: { /* settings data from form */ },
@@ -2212,8 +2211,6 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
             <Button className="bg-cyan-600" onClick={async () => {
               setIsSaving(true)
               try {
-                const { createClient } = await import('@/lib/supabase/client')
-                const supabase = createClient()
                 const { error } = await supabase.from('saved_replies').insert({
                   name: 'New Quick Reply',
                   content: '',
@@ -2299,8 +2296,6 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
               }
               setIsSaving(true)
               try {
-                const { createClient } = await import('@/lib/supabase/client')
-                const supabase = createClient()
                 const { error } = await supabase.from('team_invitations').insert({
                   email: inviteEmail,
                   role: inviteRole,

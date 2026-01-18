@@ -201,8 +201,8 @@ export default function ShadcnShowcaseClient() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'export-data', format: 'json' })
       })
-      if (!res.ok) throw new Error('Failed')      toast.success('Item created successfully'" has been added to your collection`
-      })
+      if (!res.ok) throw new Error('Failed')
+      toast.success('Item "' + newItemName + '" has been added to your collection')
       setNewItemDialogOpen(false)
       setNewItemName('')
       setNewItemType('')
@@ -230,8 +230,8 @@ export default function ShadcnShowcaseClient() {
         includeMetadata,
         timestamp: new Date().toISOString(),
         records: exportScope === 'all' ? 150 : 50
-      }      toast.success('Export completed' records as ${exportFormat.toUpperCase()}`
-      })
+      }
+      toast.success('Export completed: ' + exportData.records + ' records as ' + exportFormat.toUpperCase())
       setExportDialogOpen(false)
     } catch (err) {
       toast.error('Export failed')
@@ -259,7 +259,8 @@ export default function ShadcnShowcaseClient() {
         darkModeEnabled,
         autoSaveEnabled,
         refreshInterval
-      }      toast.success('Settings saved')
+      }
+      toast.success('Settings saved')
       setSettingsDialogOpen(false)
     } catch (err) {
       toast.error('Failed to save settings')
@@ -302,10 +303,10 @@ export default function ShadcnShowcaseClient() {
 
   const handleFormSubmit = (data: any) => {
     const fieldCount = Object.keys(data).length
-    const filledFields = Object.values(data).filter(v => v !== '' && v !== null && v !== undefined).length    const fieldsWithValues = Object.entries(data).filter(([_, v]) => v !== '' && v !== null && v !== undefined)
+    const filledFields = Object.values(data).filter(v => v !== '' && v !== null && v !== undefined).length
+    const fieldsWithValues = Object.entries(data).filter(([_, v]) => v !== '' && v !== null && v !== undefined)
 
-    toast.success('Form submitted successfully'/${fieldCount} fields completed - ${fieldsWithValues.map(([k]) => k).join(', ')}`
-    })
+    toast.success('Form submitted: ' + filledFields + '/' + fieldCount + ' fields completed')
   }
 
   const simulateLoading = () => {

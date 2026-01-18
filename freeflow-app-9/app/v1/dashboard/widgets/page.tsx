@@ -280,8 +280,7 @@ export default function WidgetsPage() {
         dispatch({ type: 'SET_WIDGETS', widgets })
 
         setIsLoading(false)
-        toast.success('Widgets loaded' widgets configured`
-        })
+        toast.success(`Widgets loaded - ${widgets.length} widgets configured`)
         announce('Widgets loaded successfully', 'polite')      } catch (err) {
         logger.error('Widgets load error', {
           error: err instanceof Error ? err.message : 'Unknown error',
@@ -457,7 +456,8 @@ export default function WidgetsPage() {
       dispatch({ type: 'ADD_WIDGET', widget: newWidget })
       setIsCreateModalOpen(false)
       setWidgetName('')
-      setWidgetDescription('')      toast.success(`Widget created - ${newWidget.name} - ${newWidget.type} - ${newWidget.category} - ${newWidget.size} size - Visible on dashboard`)
+      setWidgetDescription('')
+    toast.success(`Widget created - ${newWidget.name} - ${newWidget.type} - ${newWidget.category} - ${newWidget.size} size - Visible on dashboard`)
     } catch (error) {
       logger.error('Widget creation error', {
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -472,7 +472,8 @@ export default function WidgetsPage() {
   const handleDeleteWidget = async () => {
     if (!state.selectedWidget || !userId) return
 
-    const widgetToDelete = state.selectedWidget    try {
+    const widgetToDelete = state.selectedWidget
+    try {
       setIsSaving(true)
 
       // Dynamic import for code splitting
@@ -481,7 +482,8 @@ export default function WidgetsPage() {
       await deleteWidget(widgetToDelete.id)
 
       dispatch({ type: 'DELETE_WIDGET', widgetId: widgetToDelete.id })
-      setIsDeleteModalOpen(false)      toast.success(`Widget deleted - ${widgetToDelete.name} - ${widgetToDelete.type} - ${widgetToDelete.category} - Usage: ${widgetToDelete.usageCount} times`)
+      setIsDeleteModalOpen(false)
+      toast.success(`Widget deleted - ${widgetToDelete.name} - ${widgetToDelete.type} - ${widgetToDelete.category} - Usage: ${widgetToDelete.usageCount} times`)
       announce('Widget deleted successfully', 'polite')
     } catch (error: any) {
       logger.error('Widget deletion error', {
@@ -510,7 +512,8 @@ export default function WidgetsPage() {
     }
 
     const selectedWidgetsData = state.widgets.filter(w => state.selectedWidgets.includes(w.id))
-    const widgetNames = selectedWidgetsData.map(w => w.name)    try {
+    const widgetNames = selectedWidgetsData.map(w => w.name)
+    try {
       setIsSaving(true)
 
       // Dynamic import for code splitting
@@ -527,7 +530,8 @@ export default function WidgetsPage() {
       })
 
       const deletedCount = state.selectedWidgets.length
-      dispatch({ type: 'CLEAR_SELECTED_WIDGETS' })      toast.success(`Deleted ${deletedCount} widget(s) - Removed: ${widgetNames.slice(0, 3).join(', ')}${widgetNames.length > 3 ? ` +${widgetNames.length - 3} more` : ''}`)
+      dispatch({ type: 'CLEAR_SELECTED_WIDGETS' })
+      toast.success(`Deleted ${deletedCount} widget(s) - Removed: ${widgetNames.slice(0, 3).join(', ')}${widgetNames.length > 3 ? ` +${widgetNames.length - 3} more` : ''}`)
       announce(`${deletedCount} widgets deleted successfully`, 'polite')
     } catch (error: any) {
       logger.error('Bulk delete error', {
@@ -543,7 +547,8 @@ export default function WidgetsPage() {
     }
   }
 
-  const handleExportConfig = () => {    const config = {
+  const handleExportConfig = () => {
+    const config = {
       widgets: state.widgets,
       exportedAt: new Date().toISOString(),
       version: '1.0'
@@ -559,7 +564,8 @@ export default function WidgetsPage() {
     a.click()
     URL.revokeObjectURL(url)
 
-    const fileSizeKB = (blob.size / 1024).toFixed(1)    toast.success(`Configuration exported - ${fileName} - ${fileSizeKB} KB - ${state.widgets.length} widgets - JSON format`)
+    const fileSizeKB = (blob.size / 1024).toFixed(1)
+    toast.success(`Configuration exported - ${fileName} - ${fileSizeKB} KB - ${state.widgets.length} widgets - JSON format`)
   }
 
   // ============================================================================

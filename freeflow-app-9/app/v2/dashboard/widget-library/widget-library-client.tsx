@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
+import { cn } from '@/lib/utils'
 import {
   Package,
   Plus,
@@ -368,8 +369,7 @@ export default function WidgetLibraryClient() {
   const handleInstallWidget = async (widget: Widget) => {
     const { success, error } = await installWidget(widget.id)
     if (success) {
-      toast.success('Widget installed'" has been added to your project`
-      })
+      toast.success("Widget " + widget.name + " has been added to your project")
     } else {
       toast.error('Installation failed')
     }
@@ -378,8 +378,7 @@ export default function WidgetLibraryClient() {
   const handleUninstallWidget = async (widget: Widget) => {
     const { success, error } = await uninstallWidget(widget.id)
     if (success) {
-      toast.success('Widget uninstalled'" has been removed from your project`
-      })
+      toast.success("Widget " + widget.name + " has been removed from your project")
     } else {
       toast.error('Uninstall failed')
     }
@@ -388,9 +387,7 @@ export default function WidgetLibraryClient() {
   const handleToggleBookmark = async (widget: Widget) => {
     const { success, isBookmarked, error } = await toggleBookmark(widget.id)
     if (success) {
-      toast.success(isBookmarked ? 'Added to saved' : 'Removed from saved'" saved to your collection`
-          : `"${widget.name}" removed from saved`
-      })
+      toast.success(isBookmarked ? "Widget " + widget.name + " saved to your collection" : "Widget " + widget.name + " removed from saved")
     } else {
       toast.error('Action failed')
     }
@@ -420,8 +417,7 @@ export default function WidgetLibraryClient() {
     })
 
     if (data) {
-      toast.success('Widget published'" is now available in the library`
-      })
+      toast.success("Widget " + newWidgetForm.name + " is now available in the library")
       setShowPublishDialog(false)
       setNewWidgetForm({
         name: '',
@@ -452,8 +448,7 @@ export default function WidgetLibraryClient() {
     })
 
     if (data) {
-      toast.success('Collection created'" collection is ready`
-      })
+      toast.success("Collection " + newCollectionForm.name + " is ready")
       setShowCollectionDialog(false)
       setNewCollectionForm({ name: '', description: '' })
     } else {
@@ -758,7 +753,7 @@ export default function WidgetLibraryClient() {
                       <CardContent className="p-5">
                         <div className="flex items-start justify-between mb-3">
                           <div className="flex items-center gap-3">
-                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${getCategoryColor(widget.category)}`}>
+                            <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center", getCategoryColor(widget.category))}>
                               <CategoryIcon className="w-5 h-5" />
                             </div>
                             <div>
@@ -863,7 +858,7 @@ export default function WidgetLibraryClient() {
                     <Card key={widget.id} className="bg-white dark:bg-gray-800 border-0 shadow-sm hover:shadow-md transition-all">
                       <CardContent className="p-4">
                         <div className="flex items-center gap-4">
-                          <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${getCategoryColor(widget.category)}`}>
+                          <div className={cn("w-12 h-12 rounded-lg flex items-center justify-center", getCategoryColor(widget.category))}>
                             <CategoryIcon className="w-6 h-6" />
                           </div>
                           <div className="flex-1 min-w-0">
@@ -1087,7 +1082,7 @@ export default function WidgetLibraryClient() {
                   <Card key={widget.id} className="bg-white dark:bg-gray-800 border-0 shadow-sm">
                     <CardContent className="p-5">
                       <div className="flex items-start gap-3 mb-3">
-                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${getCategoryColor(widget.category)}`}>
+                        <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center", getCategoryColor(widget.category))}>
                           <CategoryIcon className="w-5 h-5" />
                         </div>
                         <div className="flex-1">
@@ -1154,11 +1149,7 @@ export default function WidgetLibraryClient() {
                         <button
                           key={tab.id}
                           onClick={() => setSettingsTab(tab.id)}
-                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
-                            settingsTab === tab.id
-                              ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300'
-                              : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
-                          }`}
+                          className={cn("w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors", settingsTab === tab.id ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300' : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300')}
                         >
                           {tab.icon}
                           <span className="font-medium">{tab.label}</span>
@@ -1265,7 +1256,7 @@ export default function WidgetLibraryClient() {
                           return (
                             <div key={widget.id} className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-600 transition-colors">
                               <div className="flex items-center gap-4">
-                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${getCategoryColor(widget.category)}`}>
+                                <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center", getCategoryColor(widget.category))}>
                                   <CategoryIcon className="w-6 h-6" />
                                 </div>
                                 <div>
@@ -1493,7 +1484,7 @@ export default function WidgetLibraryClient() {
             <AIInsightsPanel
               insights={mockWidgetLibAIInsights}
               title="Widget Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -1530,7 +1521,7 @@ export default function WidgetLibraryClient() {
           {selectedWidget && (
             <div className="space-y-6">
               <div className="flex items-start gap-4">
-                <div className={`w-16 h-16 rounded-xl flex items-center justify-center ${getCategoryColor(selectedWidget.category)}`}>
+                <div className={cn("w-16 h-16 rounded-xl flex items-center justify-center", getCategoryColor(selectedWidget.category))}>
                   {(() => {
                     const Icon = getCategoryIcon(selectedWidget.category)
                     return <Icon className="w-8 h-8" />

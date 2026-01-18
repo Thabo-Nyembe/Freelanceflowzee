@@ -360,6 +360,7 @@ const mockArticles_OLD: Article[] = [
     versions: []
   }
 ]
+*/
 
 // MIGRATED: Batch #10 - Removed mock data, using database hooks
 const mockSearchQueries: SearchQuery[] = []
@@ -581,9 +582,10 @@ export default function FAQClient() {
 
       if (error) throw new Error(error)
 
-      toast.success('Article Created'" has been published`
-          : `"${newArticle.title}" saved as draft`
-      })
+      toast.success(newArticle.status === 'published'
+          ? `Article Created: "${newArticle.title}" has been published`
+          : `Article Created: "${newArticle.title}" saved as draft`
+      )
       setShowCreateDialog(false)
       resetForm()
     } catch (error: any) {
@@ -609,7 +611,7 @@ export default function FAQClient() {
     try {
       const { error } = await updateFAQ(article.id, { status: 'published' })
       if (error) throw new Error(error)
-      toast.success('Article Published'" is now public` })
+      toast.success(`Article Published: "${article.title}" is now public`)
     } catch (error: any) {
       toast.error('Error')
     }
@@ -620,7 +622,7 @@ export default function FAQClient() {
     try {
       const { error } = await updateFAQ(article.id, { status: 'archived' })
       if (error) throw new Error(error)
-      toast.success('Article Archived'" has been archived` })
+      toast.success(`Article Archived: "${article.title}" has been archived`)
       setSelectedArticle(null)
     } catch (error: any) {
       toast.error('Error')
@@ -707,7 +709,7 @@ export default function FAQClient() {
 
       if (error) throw new Error(error)
 
-      toast.success('Article Updated'" has been updated` })
+      toast.success(`Article Updated: "${newArticle.title}" has been updated`)
       setShowCreateDialog(false)
       resetForm()
     } catch (error: any) {
@@ -753,7 +755,7 @@ export default function FAQClient() {
           ? { ...col, ...newCollection, updatedAt: new Date().toISOString() }
           : col
       ))
-      toast.success('Collection Updated'" has been updated` })
+      toast.success(`Collection Updated: "${newCollection.name}" has been updated`)
     } else {
       // Create new collection
       const newCol: Collection = {
@@ -770,7 +772,7 @@ export default function FAQClient() {
         updatedAt: new Date().toISOString()
       }
       setCollectionsOrder(prev => [...prev, newCol])
-      toast.success('Collection Created'" has been created` })
+      toast.success(`Collection Created: "${newCol.name}" has been created`)
     }
     setShowCollectionDialog(false)
   }, [newCollection, editingCollection, collectionsOrder.length])
@@ -877,7 +879,6 @@ export default function FAQClient() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50/30 to-purple-50/40 dark:bg-none dark:bg-gray-900">
-      {/* Premium Header */}
       <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white">
         <div className="max-w-[1800px] mx-auto px-6 py-8">
           <div className="flex items-center justify-between mb-6">
@@ -914,7 +915,6 @@ export default function FAQClient() {
             </div>
           </div>
 
-          {/* Quick Stats */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
             {[
               { label: 'Total Articles', value: stats.totalArticles, icon: FileText, change: '+5 this week' },
@@ -937,7 +937,6 @@ export default function FAQClient() {
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="max-w-[1800px] mx-auto px-6 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <div className="flex items-center justify-between mb-6">
@@ -978,9 +977,7 @@ export default function FAQClient() {
             </div>
           </div>
 
-          {/* Articles Tab */}
           <TabsContent value="articles" className="space-y-6">
-            {/* Articles Overview Banner */}
             <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-xl p-6 text-white">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
@@ -1013,7 +1010,6 @@ export default function FAQClient() {
               </div>
             </div>
 
-            {/* Quick Stats */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
               {[
                 { status: 'published', count: articles.filter(a => a.status === 'published').length, icon: CheckCircle2, color: 'green' },
@@ -1030,7 +1026,6 @@ export default function FAQClient() {
               ))}
             </div>
 
-            {/* Filters */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <select
@@ -1074,7 +1069,6 @@ export default function FAQClient() {
               </div>
             </div>
 
-            {/* Articles List */}
             <div className={viewMode === 'grid'
               ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'
               : 'space-y-3'
@@ -1194,9 +1188,7 @@ export default function FAQClient() {
             )}
           </TabsContent>
 
-          {/* Collections Tab */}
           <TabsContent value="collections" className="space-y-6">
-            {/* Collections Overview Banner */}
             <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 rounded-xl p-6 text-white">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
@@ -1225,7 +1217,6 @@ export default function FAQClient() {
               </div>
             </div>
 
-            {/* Quick Actions */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               <button onClick={handleOpenAddCollection} className="flex items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 hover:shadow-md transition-all text-left">
                 <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
@@ -1324,9 +1315,7 @@ export default function FAQClient() {
             </div>
           </TabsContent>
 
-          {/* Analytics Tab */}
           <TabsContent value="analytics" className="space-y-6">
-            {/* Analytics Overview Banner */}
             <div className="bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 rounded-xl p-6 text-white">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
@@ -1359,7 +1348,6 @@ export default function FAQClient() {
               </div>
             </div>
 
-            {/* Analytics Quick Stats */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
               {[
                 { label: 'Views Today', value: '2.4K', change: '+12%', positive: true, icon: Eye },
@@ -1474,9 +1462,7 @@ export default function FAQClient() {
             </div>
           </TabsContent>
 
-          {/* Search Insights Tab */}
           <TabsContent value="search-insights" className="space-y-6">
-            {/* Search Insights Overview Banner */}
             <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 rounded-xl p-6 text-white">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
@@ -1509,7 +1495,6 @@ export default function FAQClient() {
               </div>
             </div>
 
-            {/* Search Performance Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {[
                 { label: 'Zero Results', value: '8%', desc: 'Queries with no matches', icon: AlertCircle, color: 'text-red-500' },
@@ -1597,9 +1582,9 @@ export default function FAQClient() {
             </div>
           </TabsContent>
 
-          {/* Settings Tab - Comprehensive 6 Sub-tab Version */}
+          
           <TabsContent value="settings" className="space-y-6">
-            {/* Settings Overview Banner */}
+            
             <div className="bg-gradient-to-r from-slate-600 via-gray-600 to-zinc-600 rounded-xl p-6 text-white">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
@@ -1630,9 +1615,9 @@ export default function FAQClient() {
               </div>
             </div>
 
-            {/* Settings Sidebar Navigation */}
+            
             <div className="grid grid-cols-12 gap-6">
-              {/* Sidebar */}
+              
               <div className="col-span-3">
                 <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden sticky top-6">
                   <div className="p-4 border-b border-gray-100 dark:border-gray-700">
@@ -1667,9 +1652,9 @@ export default function FAQClient() {
                 </div>
               </div>
 
-              {/* Settings Content */}
+              
               <div className="col-span-9 space-y-6">
-                {/* General Settings */}
+                
                 {settingsTab === 'general' && (
                   <>
                     <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-6">
@@ -1769,7 +1754,7 @@ export default function FAQClient() {
                   </>
                 )}
 
-                {/* Branding Settings */}
+                
                 {settingsTab === 'branding' && (
                   <>
                     <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-6">
@@ -1850,7 +1835,7 @@ export default function FAQClient() {
                       </h3>
                       <textarea
                         rows={6}
-                        placeholder="/* Add your custom CSS here */"
+                        placeholder="Add your custom CSS here..."
                         className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 font-mono text-sm"
                       />
                       <p className="text-xs text-gray-500 mt-2">Add custom CSS to further customize your help center appearance</p>
@@ -1858,7 +1843,7 @@ export default function FAQClient() {
                   </>
                 )}
 
-                {/* Languages Settings */}
+                
                 {settingsTab === 'languages' && (
                   <>
                     <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-6">
@@ -1890,7 +1875,7 @@ export default function FAQClient() {
                           languageDialog.querySelector('#cancel-btn')?.addEventListener('click', () => { languageDialog.close(); languageDialog.remove() })
                           languageDialog.querySelector('#add-btn')?.addEventListener('click', () => {
                             const select = languageDialog.querySelector('#language-select') as HTMLSelectElement
-                            toast.success('Language added' is now available` })
+                            toast.success(`Language added: ${select.value} is now available`)
                             languageDialog.close()
                             languageDialog.remove()
                           })
@@ -1933,7 +1918,7 @@ export default function FAQClient() {
                                 <Edit className="w-4 h-4 text-gray-500" />
                               </button>
                               {lang !== helpCenterSettings.defaultLanguage && (
-                                <button onClick={() => { if (confirm(`Remove ${lang === 'es' ? 'Spanish' : lang === 'fr' ? 'French' : 'German'}? This will delete all translations.`)) { toast.success('Language Removed' has been removed` }) } }} className="p-2 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg">
+                                <button onClick={() => { if (confirm(`Remove ${lang === 'es' ? 'Spanish' : lang === 'fr' ? 'French' : 'German'}? This will delete all translations.`)) { toast.success(`Language Removed: ${lang} has been removed`) } }} className="p-2 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg">
                                   <Trash2 className="w-4 h-4 text-red-500" />
                                 </button>
                               )}
@@ -1972,7 +1957,7 @@ export default function FAQClient() {
                   </>
                 )}
 
-                {/* Integrations Settings */}
+                
                 {settingsTab === 'integrations' && (
                   <>
                     <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-6">
@@ -2054,7 +2039,7 @@ export default function FAQClient() {
                   </>
                 )}
 
-                {/* Notifications Settings */}
+                
                 {settingsTab === 'notifications' && (
                   <>
                     <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-6">
@@ -2109,7 +2094,7 @@ export default function FAQClient() {
                   </>
                 )}
 
-                {/* Advanced Settings */}
+                
                 {settingsTab === 'advanced' && (
                   <>
                     <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-6">
@@ -2221,7 +2206,7 @@ export default function FAQClient() {
           </TabsContent>
         </Tabs>
 
-        {/* Enhanced Competitive Upgrade Components */}
+        
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
@@ -2255,7 +2240,7 @@ export default function FAQClient() {
         </div>
       </div>
 
-      {/* Create/Edit Article Dialog */}
+      
       <Dialog open={showCreateDialog} onOpenChange={(open) => {
         setShowCreateDialog(open)
         if (!open) resetForm()
@@ -2385,7 +2370,7 @@ export default function FAQClient() {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation Dialog */}
+      
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent>
           <DialogHeader>
@@ -2418,7 +2403,7 @@ export default function FAQClient() {
         </DialogContent>
       </Dialog>
 
-      {/* Article Detail Dialog */}
+      
       <Dialog open={!!selectedArticle} onOpenChange={() => setSelectedArticle(null)}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
           <DialogHeader>
@@ -2496,7 +2481,7 @@ export default function FAQClient() {
                   </button>
                 </div>
 
-                {/* Article Actions */}
+                
                 <div className="flex items-center justify-end gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
                   <button
                     onClick={() => handleEditArticle(selectedArticle)}
@@ -2539,7 +2524,7 @@ export default function FAQClient() {
         </DialogContent>
       </Dialog>
 
-      {/* Collection Create/Edit Dialog */}
+      
       <Dialog open={showCollectionDialog} onOpenChange={(open) => {
         setShowCollectionDialog(open)
         if (!open) {
@@ -2651,7 +2636,7 @@ export default function FAQClient() {
         </DialogContent>
       </Dialog>
 
-      {/* Import Dialog */}
+      
       <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
         <DialogContent className="max-w-lg">
           <DialogHeader>

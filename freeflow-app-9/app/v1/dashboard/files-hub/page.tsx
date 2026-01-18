@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 // MIGRATED: Batch #24 - Verified database hook integration
 
 export const dynamic = 'force-dynamic';
@@ -103,6 +105,9 @@ import {
   getFileTypeColor
 } from '@/lib/files-hub-utils'
 
+// Initialize Supabase client once at module level
+const supabase = createClient()
+
 // ============================================================================
 // REDUCER
 // ============================================================================
@@ -123,7 +128,8 @@ function filesHubReducer(state: FilesHubState, action: FilesHubAction): FilesHub
       }
 
     case 'DELETE_FILE':
-      const deletedFile = state.files.find(f => f.id === action.fileId)      return {
+      const deletedFile = state.files.find(f => f.id === action.fileId)
+    return {
         ...state,
         files: state.files.filter(f => f.id !== action.fileId),
         selectedFile: state.selectedFile?.id === action.fileId ? null : state.selectedFile
@@ -162,7 +168,8 @@ function filesHubReducer(state: FilesHubState, action: FilesHubAction): FilesHub
     case 'CLEAR_SELECTED_FILES':      return { ...state, selectedFiles: [] }
 
     case 'TOGGLE_STAR':
-      const starredFile = state.files.find(f => f.id === action.fileId)      return {
+      const starredFile = state.files.find(f => f.id === action.fileId)
+    return {
         ...state,
         files: state.files.map(f =>
           f.id === action.fileId ? { ...f, starred: !f.starred } : f
@@ -403,9 +410,8 @@ export default function FilesHubPage() {
     const failedFiles: string[] = []
     const files = Array.from(uploadFiles)
 
-    // Create supabase client for storage operations
-    const { createClient } = await import('@/lib/supabase/client')
-    const supabase = createClient()    for (const file of files) {
+    // Using module-level supabase client
+    for (const file of files) {
       try {
         // 1. Validate file size (50MB limit)
         const MAX_FILE_SIZE = 50 * 1024 * 1024 // 50MB
@@ -419,7 +425,9 @@ export default function FilesHubPage() {
         const fileExt = file.name.split('.').pop() || 'bin'
         const timestamp = Date.now()
         const randomId = Math.random().toString(36).substring(7)
-        const storagePath = `${userId}/${timestamp}-${randomId}.${fileExt}`        // 3. Upload to Supabase Storage
+        const storagePath = `${userId}/${timestamp}-${randomId}.${fileExt}`
+
+        // 3. Upload to Supabase Storage
         const { data: uploadData, error: uploadError } = await supabase
           .storage
           .from('user-files')
@@ -557,8 +565,6 @@ export default function FilesHubPage() {
 
     try {
       // Create supabase client
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
 
       // 1. Get file details from database to get storage_path
       const { data: fileData, error: fetchError } = await supabase
@@ -629,7 +635,8 @@ export default function FilesHubPage() {
 
     const filesToDelete = state.files.filter(f => state.selectedFiles.includes(f.id))
     const fileNames = filesToDelete.map(f => f.name)
-    const totalSize = filesToDelete.reduce((sum, f) => sum + f.size, 0)    try {
+    const totalSize = filesToDelete.reduce((sum, f) => sum + f.size, 0)
+    try {
       setIsSaving(true)
 
       // Dynamic import
@@ -643,7 +650,8 @@ export default function FilesHubPage() {
         dispatch({ type: 'DELETE_FILE', fileId })
       })
 
-      dispatch({ type: 'CLEAR_SELECTED_FILES' })      toast.success(`${filesToDelete.length} files deleted - ${Math.round(totalSize / 1024)}KB removed`)
+      dispatch({ type: 'CLEAR_SELECTED_FILES' })
+      toast.success(`${filesToDelete.length} files deleted - ${Math.round(totalSize / 1024)}KB removed`)
     } catch (error: any) {
       logger.error('Bulk delete failed', {
         error: error.message,
@@ -669,8 +677,6 @@ export default function FilesHubPage() {
 
     try {
       // Create supabase client
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
 
       // 1. Get file details from database to get storage_path
       const { data: fileData, error: fetchError } = await supabase
@@ -764,7 +770,8 @@ export default function FilesHubPage() {
       return
     }
 
-    const emails = shareEmails.split(',').map(e => e.trim()).filter(e => e)    try {
+    const emails = shareEmails.split(',').map(e => e.trim()).filter(e => e)
+    try {
       setIsSaving(true)
 
       // Dynamic import for code splitting
@@ -788,7 +795,8 @@ export default function FilesHubPage() {
 
       dispatch({ type: 'UPDATE_FILE', file: updatedFile })
       setIsShareModalOpen(false)
-      setShareEmails('')      toast.success(`File shared: ${state.selectedFile.name} - ${emails.length} recipient(s)`)
+      setShareEmails('')
+    toast.success(`File shared: ${state.selectedFile.name} - ${emails.length} recipient(s)`)
       announce('File shared successfully', 'polite')
     } catch (error: any) {
       logger.error('File share failed', {
@@ -833,7 +841,8 @@ export default function FilesHubPage() {
       const updatedFile = { ...state.selectedFile, folder: moveToFolder }
       dispatch({ type: 'UPDATE_FILE', file: updatedFile })
       setIsMoveModalOpen(false)
-      setMoveToFolder('')      toast.success(`File moved: ${state.selectedFile.name} - ${previousFolder} to ${moveToFolder}`)
+      setMoveToFolder('')
+    toast.success(`File moved: ${state.selectedFile.name} - ${previousFolder} to ${moveToFolder}`)
       announce('File moved successfully', 'polite')
     } catch (error: any) {
       logger.error('File move failed', {
@@ -857,7 +866,8 @@ export default function FilesHubPage() {
       return
     }
 
-    const newStarred = !file.starred    try {
+    const newStarred = !file.starred
+    try {
       // Dynamic import
       const { toggleFileStar } = await import('@/lib/files-hub-queries')
 

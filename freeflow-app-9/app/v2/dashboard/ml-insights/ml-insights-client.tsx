@@ -309,7 +309,9 @@ function generateMockInsights(): MLInsight[] {
       potentialRevenue: Math.floor(Math.random() * 500000) + 10000,
       priority: Math.floor(Math.random() * 10) + 1
     }
-  })  return insights
+  })
+
+  return insights
 }
 
 // ============================================================================
@@ -497,7 +499,8 @@ export default function MlInsightsClient() {
 
         // If no insights in database, use mock data
         const insightsToUse = (insights && insights.length > 0) ? insights : generateMockInsights()
-        dispatch({ type: 'SET_INSIGHTS', insights: insightsToUse as MLInsight[] })        announce(`${insightsToUse.length} ML insights loaded successfully`, 'polite')
+        dispatch({ type: 'SET_INSIGHTS', insights: insightsToUse as MLInsight[] })
+        announce(`${insightsToUse.length} ML insights loaded successfully`, 'polite')
 
         setIsLoading(false)
       } catch (err) {
@@ -632,7 +635,9 @@ export default function MlInsightsClient() {
       const result = await response.json()
 
       if (result.success) {
-        dispatch({ type: 'ADD_INSIGHT', insight: result.insight })        toast.success('ML insight created' - ${result.insight.type} - ${result.insight.category} - ${result.insight.confidence} confidence - ${result.insight.impact} impact`
+        dispatch({ type: 'ADD_INSIGHT', insight: result.insight })
+        toast.success('ML insight created', {
+          description: result.insight.type + ' - ' + result.insight.category + ' - ' + result.insight.confidence + ' confidence - ' + result.insight.impact + ' impact'
         })
 
         setShowCreateModal(false)
@@ -653,15 +658,19 @@ export default function MlInsightsClient() {
     }
   }
 
-  const handleViewInsight = (insight: MLInsight) => {    dispatch({ type: 'SELECT_INSIGHT', insight })
+  const handleViewInsight = (insight: MLInsight) => {
+    dispatch({ type: 'SELECT_INSIGHT', insight })
     setShowViewModal(true)
 
-    toast.info('View ML Insight' - ${insight.type} - ${insight.confidence} confidence - ${(insight.metrics.accuracy * 100).toFixed(1)}% accuracy - ${insight.affectedUsers || 0} users affected`
+    toast.info('View ML Insight', {
+      description: insight.type + ' - ' + insight.confidence + ' confidence - ' + (insight.metrics.accuracy * 100).toFixed(1) + '% accuracy - ' + (insight.affectedUsers || 0) + ' users affected'
     })
   }
 
   const handleDeleteInsight = async (insightId: string) => {
-    const insight = state.insights.find(i => i.id === insightId)    try {
+    const insight = state.insights.find(i => i.id === insightId)
+
+    try {
       setIsSaving(true)
 
       const response = await fetch('/api/ml-insights', {
@@ -676,7 +685,9 @@ export default function MlInsightsClient() {
       const result = await response.json()
 
       if (result.success) {
-        dispatch({ type: 'DELETE_INSIGHT', insightId })        toast.success('ML insight deleted' - ${insight?.type} - ${insight?.category} - Removed from dashboard`
+        dispatch({ type: 'DELETE_INSIGHT', insightId })
+        toast.success('ML insight deleted', {
+          description: (insight?.type || '') + ' - ' + (insight?.category || '') + ' - Removed from dashboard'
         })
 
         setShowDeleteModal(false)
@@ -697,7 +708,9 @@ export default function MlInsightsClient() {
 
   const handleBulkDelete = async () => {
     const selectedInsightsData = state.insights.filter(i => state.selectedInsights.includes(i.id))
-    const totalAffectedUsers = selectedInsightsData.reduce((sum, i) => sum + (i.affectedUsers || 0), 0)    try {
+    const totalAffectedUsers = selectedInsightsData.reduce((sum, i) => sum + (i.affectedUsers || 0), 0)
+
+    try {
       setIsSaving(true)
 
       const response = await fetch('/api/ml-insights', {
@@ -714,7 +727,8 @@ export default function MlInsightsClient() {
       if (result.success) {
         state.selectedInsights.forEach(id => {
           dispatch({ type: 'DELETE_INSIGHT', insightId: id })
-        })        toast.success(`Deleted ${result.deletedCount} insight(s)`, {
+        })
+        toast.success(`Deleted ${result.deletedCount} insight(s)`, {
           description: `${result.deletedCount} ML insights - ${totalAffectedUsers.toLocaleString()} total users affected - Removed from dashboard`
         })
 
@@ -734,9 +748,12 @@ export default function MlInsightsClient() {
   }
 
   const handleRetrainModel = async (insightId: string) => {
-    const insight = state.insights.find(i => i.id === insightId)    try {
+    const insight = state.insights.find(i => i.id === insightId)
+
+    try {
       dispatch({ type: 'RETRAIN_MODEL', insightId })
-      toast.info('Model retraining started...' - v${insight?.modelVersion} - This may take a few moments`
+      toast.info('Model retraining started...', {
+        description: (insight?.modelName || '') + ' - v' + (insight?.modelVersion || '') + ' - This may take a few moments'
       })
 
       const response = await fetch('/api/ml-insights', {
@@ -761,7 +778,10 @@ export default function MlInsightsClient() {
             updatedAt: result.insight.updatedAt
           }
           dispatch({ type: 'UPDATE_INSIGHT', insight: updatedInsight })
-        }        toast.success('Model retrained successfully' - v${result.insight.modelVersion} - Accuracy: ${(result.metrics.accuracy * 100).toFixed(1)}% - F1: ${(result.metrics.f1Score * 100).toFixed(1)}%`
+        }
+
+        toast.success('Model retrained successfully', {
+          description: result.insight.modelName + ' - v' + result.insight.modelVersion + ' - Accuracy: ' + (result.metrics.accuracy * 100).toFixed(1) + '% - F1: ' + (result.metrics.f1Score * 100).toFixed(1) + '%'
         })
       } else {
         throw new Error(result.error || 'Retrain failed')
@@ -776,7 +796,8 @@ export default function MlInsightsClient() {
     }
   }
 
-  const handleSaveSettings = async () => {    try {
+  const handleSaveSettings = async () => {
+    try {
       setIsSaving(true)
 
       // Save settings via API
@@ -785,7 +806,12 @@ export default function MlInsightsClient() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'update', section: 'ml-insights', settings: { autoRefreshEnabled, refreshInterval, notificationsEnabled, criticalAlertsOnly, defaultConfidenceThreshold, modelAutoRetrain } })
       })
-      if (!res.ok) throw new Error('Failed to save settings')      toast.success('Settings saved'min` : 'Off'} | Notifications: ${notificationsEnabled ? (criticalAlertsOnly ? 'Critical only' : 'All') : 'Off'} | Confidence threshold: ${defaultConfidenceThreshold} | Auto-retrain: ${modelAutoRetrain ? 'On' : 'Off'}`
+      if (!res.ok) throw new Error('Failed to save settings')
+
+      const refreshText = autoRefreshEnabled ? 'Every ' + refreshInterval + 'min' : 'Off'
+      const notifText = notificationsEnabled ? (criticalAlertsOnly ? 'Critical only' : 'All') : 'Off'
+      toast.success('Settings saved', {
+        description: 'Refresh: ' + refreshText + ' | Notifications: ' + notifText + ' | Confidence threshold: ' + defaultConfidenceThreshold + ' | Auto-retrain: ' + (modelAutoRetrain ? 'On' : 'Off')
       })
 
       setShowSettingsModal(false)
@@ -801,7 +827,9 @@ export default function MlInsightsClient() {
 
   const handleExport = async () => {
     const totalUsers = filteredAndSortedInsights.reduce((sum, i) => sum + (i.affectedUsers || 0), 0)
-    const avgAccuracy = filteredAndSortedInsights.reduce((sum, i) => sum + i.metrics.accuracy, 0) / filteredAndSortedInsights.length    try {
+    const avgAccuracy = filteredAndSortedInsights.reduce((sum, i) => sum + i.metrics.accuracy, 0) / filteredAndSortedInsights.length
+
+    try {
       setIsSaving(true)
 
       const response = await fetch('/api/ml-insights', {
@@ -822,9 +850,11 @@ export default function MlInsightsClient() {
         const url = URL.createObjectURL(dataBlob)
         const link = document.createElement('a')
         link.href = url
-        link.download = `ml-insights-${new Date().toISOString().split('T')[0]}.${exportFormat}`
+        link.download = 'ml-insights-' + new Date().toISOString().split('T')[0] + '.' + exportFormat
         link.click()
-        URL.revokeObjectURL(url)        toast.success(`Exported ${result.insightCount} insights` - ${Math.round(dataBlob.size / 1024)}KB - ${totalUsers.toLocaleString()} users affected - ${(avgAccuracy * 100).toFixed(1)}% avg accuracy - ${link.download}`
+        URL.revokeObjectURL(url)
+        toast.success('Exported ' + result.insightCount + ' insights', {
+          description: Math.round(dataBlob.size / 1024) + 'KB - ' + totalUsers.toLocaleString() + ' users affected - ' + (avgAccuracy * 100).toFixed(1) + '% avg accuracy - ' + link.download
         })
 
         setShowExportModal(false)

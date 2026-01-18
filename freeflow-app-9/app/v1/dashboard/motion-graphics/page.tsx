@@ -92,7 +92,8 @@ export default function MotionGraphicsPage() {
 
       try {
         setIsLoading(true)
-        setError(null)        const { getMotionProjects, getMotionStats } = await import('@/lib/motion-graphics-queries')
+        setError(null)
+        const { getMotionProjects, getMotionStats } = await import('@/lib/motion-graphics-queries')
 
         const [projectsResult, statsResult] = await Promise.all([
           getMotionProjects(userId),
@@ -103,8 +104,8 @@ export default function MotionGraphicsPage() {
         setMotionStats(statsResult.data || null)
 
         setIsLoading(false)
-        toast.success('Motion graphics loaded' projects from database`
-        })        announce('Motion graphics studio loaded successfully', 'polite')
+        toast.success(`Motion graphics loaded: ${projectsResult.data?.length || 0} projects from database`)
+        announce('Motion graphics studio loaded successfully', 'polite')
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load motion graphics studio'
         setError(errorMessage)
@@ -156,8 +157,7 @@ export default function MotionGraphicsPage() {
       a.click()
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
-      toast.success('Download started' project file is downloading`
-      })
+      toast.success(`Download started: ${project.name} project file is downloading`)
     } catch (error) {
       toast.error('Failed to download')
     }
@@ -179,8 +179,7 @@ export default function MotionGraphicsPage() {
       if (!res.ok) throw new Error('Failed to duplicate')
       const newProject = await res.json()
       setMotionProjects(prev => [...prev, newProject])
-      toast.success('Project duplicated' (Copy)`
-      })
+      toast.success(`Project duplicated: ${project.name} (Copy)`)
     } catch (error) {
       // Fallback: add locally if API not available
       const duplicatedProject = {
@@ -190,8 +189,7 @@ export default function MotionGraphicsPage() {
         createdAt: new Date().toISOString()
       }
       setMotionProjects(prev => [...prev, duplicatedProject])
-      toast.success('Project duplicated locally' (Copy)`
-      })
+      toast.success(`Project duplicated locally: ${project.name} (Copy)`)
     }
   }
 
@@ -207,8 +205,7 @@ export default function MotionGraphicsPage() {
   const handleRotateCanvas = () => {
     const newRotation = (canvasRotation + 90) % 360
     setCanvasRotation(newRotation)
-    toast.success('Rotation applied' degrees`
-    })
+    toast.success(`Rotation applied: ${newRotation} degrees`)
   }
 
   // Real handler: Toggle canvas maximize
@@ -226,8 +223,7 @@ export default function MotionGraphicsPage() {
       locked: false
     }
     setLayers(prev => [...prev, newLayer])
-    toast.success('New layer added'`
-    })
+    toast.success(`New layer added - ${newLayer.name}`)
   }
 
   // Real handler: Toggle layer visibility
@@ -237,8 +233,7 @@ export default function MotionGraphicsPage() {
     ))
     const layer = layers.find(l => l.id === layerId)
     const newState = layer ? !layer.visible : true
-    toast.success(`Layer ${newState ? 'shown' : 'hidden'}` is now ${newState ? 'visible' : 'hidden'}`
-    })
+    toast.success(`Layer ${newState ? 'shown' : 'hidden'}`)
   }
 
   // Real handler: Toggle layer lock
@@ -248,24 +243,21 @@ export default function MotionGraphicsPage() {
     ))
     const layer = layers.find(l => l.id === layerId)
     const newState = layer ? !layer.locked : true
-    toast.success(`Layer ${newState ? 'locked' : 'unlocked'}` is now ${newState ? 'locked' : 'editable'}`
-    })
+    toast.success(`Layer ${newState ? 'locked' : 'unlocked'}`)
   }
 
   // Real handler: Skip to previous frame
   const handleSkipBack = () => {
     const newTime = Math.max(0, currentTime - 5)
     setCurrentTime(newTime)
-    toast.success('Skipped backward'`
-    })
+    toast.success(`Skipped backward to ${newTime}s`)
   }
 
   // Real handler: Skip to next frame
   const handleSkipForward = () => {
     const newTime = Math.min(100, currentTime + 5)
     setCurrentTime(newTime)
-    toast.success('Skipped forward'`
-    })
+    toast.success(`Skipped forward to ${newTime}s`)
   }
 
   if (isLoading) {

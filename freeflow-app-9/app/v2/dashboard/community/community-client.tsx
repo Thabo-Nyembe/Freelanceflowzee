@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useCallback, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
 import { useCommunity } from '@/lib/hooks/use-community'
@@ -571,8 +573,6 @@ export default function CommunityClient() {
   // Get current user
   useEffect(() => {
     const getUser = async () => {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (user) setUserId(user.id)
     }
@@ -622,8 +622,6 @@ export default function CommunityClient() {
 
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('community_channels').insert({
         user_id: userId,
         name: channelForm.name.toLowerCase().replace(/\s+/g, '-'),
@@ -638,7 +636,7 @@ export default function CommunityClient() {
 
       if (error) throw error
 
-      toast.success('Channel created' has been created successfully` })
+      toast.success('Channel created')
       setShowCreateChannel(false)
       setChannelForm({ name: '', type: 'text', description: '', isPrivate: false })
     } catch (error: any) {
@@ -660,8 +658,6 @@ export default function CommunityClient() {
       // Generate a unique invite code
       const inviteCode = Math.random().toString(36).substring(2, 10).toUpperCase()
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('community_invites').insert({
         user_id: userId,
         community_id: communities?.[0]?.id,
@@ -692,8 +688,6 @@ export default function CommunityClient() {
 
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('community_mod_actions').insert({
         user_id: userId,
         community_id: communities?.[0]?.id,
@@ -705,14 +699,12 @@ export default function CommunityClient() {
       if (error) throw error
 
       // Update member status
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       await supabase.from('community_members')
         .update({ status: 'banned', banned_at: new Date().toISOString() })
         .eq('user_id', memberId)
         .eq('community_id', communities?.[0]?.id)
 
-      toast.success('Member banned' has been banned from the community` })
+      toast.success('Member banned')
       refreshMembers()
     } catch (error: any) {
       toast.error('Failed to ban member')
@@ -730,8 +722,6 @@ export default function CommunityClient() {
 
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('community_posts')
         .update({ is_pinned: true, pinned_at: new Date().toISOString(), pinned_by: userId })
         .eq('id', messageId)
@@ -761,8 +751,6 @@ export default function CommunityClient() {
 
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('community_events').insert({
         user_id: userId,
         community_id: communities?.[0]?.id,
@@ -778,7 +766,7 @@ export default function CommunityClient() {
 
       if (error) throw error
 
-      toast.success('Event created'" has been scheduled` })
+      toast.success("Event created - has been scheduled")
       setShowCreateEvent(false)
       setEventForm({ name: '', description: '', entityType: 'voice', scheduledStart: '', scheduledEnd: '', location: '' })
       refreshEvents()
@@ -803,8 +791,6 @@ export default function CommunityClient() {
 
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('community_roles').insert({
         user_id: userId,
         community_id: communities?.[0]?.id,
@@ -819,7 +805,7 @@ export default function CommunityClient() {
 
       if (error) throw error
 
-      toast.success('Role created'" role has been created` })
+      toast.success("Role created - role has been created")
       setShowCreateRole(false)
       setRoleForm({ name: '', color: '#6b7280', isHoisted: false, isMentionable: false })
     } catch (error: any) {
@@ -895,14 +881,10 @@ export default function CommunityClient() {
 
       if (existing) {
         // Remove interest
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         await supabase.from('community_event_attendees').delete().eq('id', existing.id)
         toast.success('Interest removed')
       } else {
         // Add interest
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         await supabase.from('community_event_attendees').insert({
           event_id: eventId,
           user_id: userId,
@@ -992,8 +974,6 @@ export default function CommunityClient() {
     if (!showPinnedMessages) {
       // Load pinned messages from Supabase
       try {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         const { data, error } = await supabase
           .from('community_posts')
           .select('*')
@@ -1002,7 +982,7 @@ export default function CommunityClient() {
           .order('pinned_at', { ascending: false })
 
         if (error) throw error
-        toast.success('Pinned messages loaded' pinned messages` })
+        toast.success('Pinned messages loaded')
       } catch {
         toast.success('Pinned messages panel opened')
       }
@@ -1029,7 +1009,7 @@ export default function CommunityClient() {
   // Handle Reply Mode
   const handleReplyToMessage = (message: Message) => {
     setReplyingTo(message)
-    toast.success('Reply mode activated'` })
+    toast.success("Reply mode activated")
   }
 
   // Handle Message Options
@@ -1060,7 +1040,7 @@ export default function CommunityClient() {
     input.onchange = async (e) => {
       const files = (e.target as HTMLInputElement).files
       if (files && files.length > 0) {
-        toast.success('Images selected' image(s) ready to upload` })
+        toast.success('Images selected')
       }
     }
     input.click()
@@ -1080,7 +1060,7 @@ export default function CommunityClient() {
       return
     }
 
-    toast.success('Sending request...'` })
+    toast.success("Sending request...")
 
     try {
       const response = await fetch('/api/community', {
@@ -1099,7 +1079,7 @@ export default function CommunityClient() {
         throw new Error(result.error || 'Failed to send connection request')
       }
 
-      toast.success('Connection request sent!'` })
+      toast.success("Connection request sent!")
       if (result.nextSteps && result.nextSteps.length > 0) {
         toast.info('Next steps')
       }
@@ -1115,7 +1095,7 @@ export default function CommunityClient() {
       return
     }
 
-    toast.success('Following...'` })
+    toast.success("Following...")
 
     try {
       const response = await fetch('/api/community', {
@@ -1134,9 +1114,9 @@ export default function CommunityClient() {
         throw new Error(result.error || 'Failed to follow member')
       }
 
-      toast.success('Following!'` })
+      toast.success("Following!")
       if (result.achievement) {
-        toast.success(result.achievement.message` })
+        toast.success(result.achievement.message)
       }
     } catch (error: any) {
       toast.error('Failed to follow')
@@ -1167,7 +1147,7 @@ export default function CommunityClient() {
         throw new Error(result.error || 'Failed to unfollow member')
       }
 
-      toast.success('Unfollowed'` })
+      toast.success("Unfollowed")
     } catch (error: any) {
       toast.error('Failed to unfollow')
     }
@@ -1180,7 +1160,7 @@ export default function CommunityClient() {
       return
     }
 
-    toast.success('Adding reaction...' reaction` })
+    toast.success('Adding reaction...')
 
     try {
       const response = await fetch('/api/community', {
@@ -1200,7 +1180,7 @@ export default function CommunityClient() {
         throw new Error(result.error || 'Failed to add reaction')
       }
 
-      toast.success('Reaction added!' added to post` })
+      toast.success('Reaction added!')
       refreshPosts()
     } catch (error: any) {
       toast.error('Failed to add reaction')
@@ -1235,7 +1215,7 @@ export default function CommunityClient() {
 
       toast.success('Post liked!')
       if (result.achievement) {
-        toast.success(result.achievement.message` })
+        toast.success(result.achievement.message)
       }
       refreshPosts()
     } catch (error: any) {
@@ -1404,7 +1384,7 @@ export default function CommunityClient() {
 
       toast.success('Report submitted')
       if (result.caseNumber) {
-        toast.info('Case number'` })
+        toast.info("Case number: " + result.caseNumber)
       }
     } catch (error: any) {
       toast.error('Failed to submit report')
@@ -2547,8 +2527,6 @@ export default function CommunityClient() {
                             setIsSubmitting(true)
                             try {
                               const webhookToken = Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2)
-                              const { createClient } = await import('@/lib/supabase/client')
-                              const supabase = createClient()
                               const { error } = await supabase.from('community_webhooks').insert({
                                 user_id: userId,
                                 community_id: communities?.[0]?.id,
@@ -2663,8 +2641,6 @@ export default function CommunityClient() {
                             }
                             setIsSubmitting(true)
                             try {
-                              const { createClient } = await import('@/lib/supabase/client')
-                              const supabase = createClient()
                               const { data, error } = await supabase.from('community')
                                 .select('*, community_members(*), community_posts(*), community_events(*)')
                                 .eq('id', communities?.[0]?.id)
@@ -2752,8 +2728,6 @@ export default function CommunityClient() {
                               if (!confirm('Are you sure you want to prune inactive members? This action cannot be undone.')) return
                               setIsSubmitting(true)
                               try {
-                                const { createClient } = await import('@/lib/supabase/client')
-                                const supabase = createClient()
                                 const { error } = await supabase.from('community_members')
                                   .update({ status: 'pruned', pruned_at: new Date().toISOString() })
                                   .eq('community_id', communities?.[0]?.id)
@@ -2785,8 +2759,6 @@ export default function CommunityClient() {
                               if (!confirm('Are you sure you want to delete all messages? This action cannot be undone.')) return
                               setIsSubmitting(true)
                               try {
-                                const { createClient } = await import('@/lib/supabase/client')
-                                const supabase = createClient()
                                 const { error } = await supabase.from('community_posts')
                                   .update({ deleted_at: new Date().toISOString() })
                                   .eq('community_id', communities?.[0]?.id)
@@ -2836,7 +2808,7 @@ export default function CommunityClient() {
             <AIInsightsPanel
               insights={communityAIInsights}
               title="Community Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -3138,8 +3110,6 @@ export default function CommunityClient() {
                       }
                       setIsSubmitting(true)
                       try {
-                        const { createClient } = await import('@/lib/supabase/client')
-                        const supabase = createClient()
                         const { error } = await supabase.from('community_bots').insert({
                           user_id: userId,
                           community_id: communities?.[0]?.id,
@@ -3148,7 +3118,7 @@ export default function CommunityClient() {
                           is_enabled: true
                         })
                         if (error) throw error
-                        toast.success('Bot added' has been added to your community` })
+                        toast.success('Bot added')
                         setShowBotStoreDialog(false)
                       } catch (error: any) {
                         toast.error('Failed to add bot')
@@ -3224,8 +3194,6 @@ export default function CommunityClient() {
                 }
                 setIsSubmitting(true)
                 try {
-                  const { createClient } = await import('@/lib/supabase/client')
-                  const supabase = createClient()
                   const { error } = await supabase.from('direct_messages').insert({
                     sender_id: userId,
                     receiver_id: dmRecipient.id,
@@ -3233,7 +3201,7 @@ export default function CommunityClient() {
                     is_read: false
                   })
                   if (error) throw error
-                  toast.success('Message sent' has been delivered` })
+                  toast.success('Message sent')
                   setShowDirectMessageDialog(false)
                   setDmMessage('')
                   setDmRecipient(null)
@@ -3321,13 +3289,11 @@ export default function CommunityClient() {
                 if (!userId || !selectedRoleForSettings) return
                 setIsSubmitting(true)
                 try {
-                  const { createClient } = await import('@/lib/supabase/client')
-                  const supabase = createClient()
                   const { error } = await supabase.from('community_roles')
                     .update({ updated_at: new Date().toISOString() })
                     .eq('id', selectedRoleForSettings.id)
                   if (error) throw error
-                  toast.success('Role updated' settings have been saved` })
+                  toast.success('Role updated')
                   setShowRoleSettingsDialog(false)
                   setSelectedRoleForSettings(null)
                 } catch (error: any) {
@@ -3413,8 +3379,6 @@ export default function CommunityClient() {
                 if (!userId || !selectedMessageForOptions) return
                 setIsSubmitting(true)
                 try {
-                  const { createClient } = await import('@/lib/supabase/client')
-                  const supabase = createClient()
                   const { error } = await supabase.from('community_posts')
                     .update({ deleted_at: new Date().toISOString() })
                     .eq('id', selectedMessageForOptions)

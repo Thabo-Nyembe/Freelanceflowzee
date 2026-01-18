@@ -142,6 +142,9 @@ const QuickActionsToolbar = dynamic(
 // Mock data imports removed - replaced with database hooks
 import { companyInfo } from '@/lib/mock-data/adapters'
 
+// Initialize Supabase client once at module level
+const supabase = createClient()
+
 // Type definitions
 interface AnalyticsMetric {
   id: string
@@ -230,7 +233,6 @@ const mockQuickActions: any[] = []
 
 export default function AnalyticsClient() {
   // Initialize Supabase client
-  const supabase = createClient()
   const { getUserId } = useAuthUserId()
   const [userId, setUserId] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState('overview')
@@ -1391,8 +1393,6 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
       case 'edit':
         toast.promise(
           (async () => {
-            const { createClient } = await import('@/lib/supabase/client')
-            const supabase = createClient()
             await supabase.from('analytics_metric_edits').insert({
               metric_id: metric.id,
               metric_name: metric.name,
@@ -1448,8 +1448,6 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
         if (!confirm(`Remove "${metric.name}" from tracking? This will delete all historical data.`)) return
         toast.promise(
           (async () => {
-            const { createClient } = await import('@/lib/supabase/client')
-            const supabase = createClient()
             await supabase.from('analytics_metrics').delete().eq('id', metric.id)
             await supabase.from('analytics_metric_history').delete().eq('metric_id', metric.id)
             return metric.name
@@ -1474,8 +1472,6 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
     }
     toast.promise(
       (async () => {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         // Store the AI question and generate a response
         const { data } = await supabase.from('ai_analytics_questions').insert({
           question,
@@ -3720,8 +3716,6 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
                           <Button variant="outline" onClick={() => {
                             toast.promise(
                               (async () => {
-                                const { createClient } = await import('@/lib/supabase/client')
-                                const supabase = createClient()
                                 // Fetch all analytics data
                                 const [metricsRes, eventsRes, goalsRes] = await Promise.all([
                                   supabase.from('analytics_metrics').select('*').limit(1000),
@@ -3797,8 +3791,6 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
                             <p className="text-sm text-gray-500">Define event structure</p>
                           </div>
                           <Button variant="outline" size="sm" onClick={async () => {
-                            const { createClient } = await import('@/lib/supabase/client')
-                            const supabase = createClient()
                             await supabase.from('analytics_activity').insert({
                               user_id: userId,
                               action: 'event_schema_opened',
@@ -3859,8 +3851,6 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
                             }
                             toast.promise(
                               (async () => {
-                                const { createClient } = await import('@/lib/supabase/client')
-                                const supabase = createClient()
                                 await supabase.from('analytics_metrics').delete().neq('id', '')
                                 await supabase.from('analytics_events').delete().neq('id', '')
                                 await supabase.from('analytics_goals').delete().neq('id', '')
@@ -3887,8 +3877,6 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
                             if (!confirm('Delete tracking code from all sites? This will stop all data collection.')) return
                             toast.promise(
                               (async () => {
-                                const { createClient } = await import('@/lib/supabase/client')
-                                const supabase = createClient()
                                 await supabase.from('analytics_tracking_codes').delete().eq('user_id', userId)
                                 await supabase.from('analytics_activity').insert({
                                   user_id: userId,
@@ -3913,8 +3901,6 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
                             if (!confirm('Revoke ALL API keys? Any applications using these keys will stop working immediately.')) return
                             toast.promise(
                               (async () => {
-                                const { createClient } = await import('@/lib/supabase/client')
-                                const supabase = createClient()
                                 await supabase.from('analytics_api_keys').update({
                                   is_active: false,
                                   revoked_at: new Date().toISOString()

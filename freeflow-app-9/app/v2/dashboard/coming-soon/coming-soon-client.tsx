@@ -104,8 +104,7 @@ export default function ComingSoonClient() {
       })
       if (!response.ok) throw new Error('Failed to create item')
 
-      toast.success('Item Created' "${newItemName}" has been created successfully`
-      })
+      toast.success('Item Created: "' + newItemName + '" has been created successfully')
 
       // Reset form and close dialog
       setNewItemName('')
@@ -138,8 +137,7 @@ export default function ComingSoonClient() {
         }
       }
 
-      toast.success('Export Complete'${exportIncludeAttachments ? ' with attachments' : ''}`
-      })
+      toast.success('Export Complete' + (exportIncludeAttachments ? ' with attachments' : ''))
 
       setShowExportDialog(false)
     } catch (err) {

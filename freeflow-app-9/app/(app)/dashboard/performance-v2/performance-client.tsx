@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import { useAuthUserId } from '@/lib/hooks/use-auth-user-id'
@@ -70,6 +72,9 @@ import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+
+// Initialize Supabase client once at module level
+const supabase = createClient()
 
 // Types
 type DeviceType = 'mobile' | 'desktop'
@@ -325,8 +330,7 @@ export default function PerformanceClient() {
       }
 
       setIsRunning(true)
-      toast.info('Running performance audit...'`
-      })
+      toast.info('Running performance audit...')
 
       // Call performance audit API
       const auditResponse = await fetch('/api/performance/audit', {
@@ -336,8 +340,6 @@ export default function PerformanceClient() {
       }).catch(() => null) // Continue even if API fails
 
       // Store performance metric in Supabase
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('performance_metrics')
         .insert({
@@ -432,8 +434,6 @@ export default function PerformanceClient() {
       }
 
       // Create scheduled test record in Supabase
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('performance_alerts')
         .insert({
@@ -478,8 +478,6 @@ export default function PerformanceClient() {
         return
       }
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('performance_benchmarks')
         .insert({
@@ -509,8 +507,6 @@ export default function PerformanceClient() {
   // Delete performance budget
   const handleDeleteBudget = async (budgetId: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('performance_benchmarks')
         .update({ is_active: false, updated_at: new Date().toISOString() })
@@ -528,8 +524,6 @@ export default function PerformanceClient() {
   // Resolve performance alert
   const handleResolveAlert = async (alertId: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('performance_alerts')
         .update({
@@ -557,8 +551,6 @@ export default function PerformanceClient() {
         return
       }
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('performance_metrics')
         .delete()
@@ -582,8 +574,6 @@ export default function PerformanceClient() {
         return
       }
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('performance_benchmarks')
         .update({ is_active: false, updated_at: new Date().toISOString() })
@@ -1529,7 +1519,7 @@ export default function PerformanceClient() {
                         <Button variant="outline" className="w-full" onClick={() => {
                           const webhookUrl = prompt('Enter webhook URL:', 'https://api.example.com/webhook')
                           if (webhookUrl && webhookUrl.trim()) {
-                            toast.success('Webhook added'...` })
+                            toast.success(`Webhook added: ${webhookUrl.substring(0, 30)}...`)
                           }
                         }}>
                           <Plus className="w-4 h-4 mr-2" />

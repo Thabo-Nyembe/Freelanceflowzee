@@ -561,8 +561,7 @@ export default function TemplatesClient() {
         template_data: {},
         configuration: {}
       })
-      toast.success('Template created'" has been created successfully`
-      })
+      toast.success("Template created: " + newTemplateName + " has been created successfully")
       setNewTemplateName('')
       setNewTemplateDescription('')
       setNewTemplateCategory('social_media')
@@ -580,8 +579,7 @@ export default function TemplatesClient() {
         userName: undefined,
         department: undefined
       })
-      toast.success('Using template'"...`
-      })
+      toast.success("Using template: " + template.name + "...")
       refetch()
     } catch (error) {
       toast.error('Failed to use template')
@@ -605,8 +603,7 @@ export default function TemplatesClient() {
         template_data: {},
         configuration: {}
       })
-      toast.success('Template duplicated'" created`
-      })
+      toast.success("Template duplicated: " + template.name + " (Copy) created")
       refetch()
     } catch (error) {
       toast.error('Failed to duplicate template')
@@ -616,8 +613,7 @@ export default function TemplatesClient() {
   const handleDeleteTemplate = useCallback(async (template: Template) => {
     try {
       await deleteTemplate(template.id)
-      toast.success('Template deleted'" has been deleted`
-      })
+      toast.success("Template deleted: " + template.name + " has been deleted")
       setSelectedTemplate(null)
       refetch()
     } catch (error) {
@@ -628,8 +624,7 @@ export default function TemplatesClient() {
   const handleDownloadTemplate = useCallback(async (template: Template) => {
     try {
       await downloadTemplate(template.id)
-      toast.success('Downloading template'" download started`
-      })
+      toast.success("Downloading template: " + template.name + " download started")
       refetch()
     } catch (error) {
       toast.error('Failed to download template')
@@ -637,8 +632,7 @@ export default function TemplatesClient() {
   }, [downloadTemplate, refetch])
 
   const handleFavoriteTemplate = (templateName: string) => {
-    toast.success('Added to favorites'" saved to favorites`
-    })
+    toast.success("Added to favorites: " + templateName + " saved to favorites")
   }
 
   return (
@@ -1953,7 +1947,7 @@ export default function TemplatesClient() {
             <AIInsightsPanel
               insights={mockTemplatesAIInsights}
               title="Template Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -2106,7 +2100,7 @@ export default function TemplatesClient() {
                     className={selectedTemplate.isFavorite ? 'text-pink-600' : ''}
                     onClick={() => handleFavoriteTemplate(selectedTemplate.name)}
                   >
-                    <Heart className={`w-4 h-4 ${selectedTemplate.isFavorite ? 'fill-current' : ''}`} />
+                    <Heart className={"w-4 h-4 " + (selectedTemplate.isFavorite ? "fill-current" : "")} />
                   </Button>
                   <Button
                     variant="outline"

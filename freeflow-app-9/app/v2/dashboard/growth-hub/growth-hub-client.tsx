@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import { useAuthUserId } from '@/lib/hooks/use-auth-user-id'
@@ -683,8 +685,6 @@ export default function GrowthHubClient() {
     }
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('growth_experiments').insert({
         user_id: userId,
         name: experimentForm.name,
@@ -696,7 +696,7 @@ export default function GrowthHubClient() {
         variants: JSON.stringify([{ id: 'control', name: 'Control', allocation: 50 }, { id: 'variant-a', name: 'Variant A', allocation: 50 }])
       })
       if (error) throw error
-      toast.success('Experiment created'" is ready to configure` })
+      toast.success("Experiment created - " + experimentForm.name + " is ready to configure")
       setExperimentForm({ name: '', description: '', hypothesis: '', type: 'a/b', targetMetric: '' })
       setShowCreateExperimentModal(false)
       refreshExperiments()
@@ -708,11 +708,9 @@ export default function GrowthHubClient() {
   const handleStartExperiment = async (expId: string, expName: string) => {
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('growth_experiments').update({ status: 'running', started_at: new Date().toISOString() }).eq('id', expId)
       if (error) throw error
-      toast.success('Experiment started'" is now running` })
+      toast.success("Experiment started - " + expName + " is now running")
       refreshExperiments()
     } catch (err: any) {
       toast.error('Failed to start experiment')
@@ -722,11 +720,9 @@ export default function GrowthHubClient() {
   const handleStopExperiment = async (expId: string, expName: string) => {
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('growth_experiments').update({ status: 'paused' }).eq('id', expId)
       if (error) throw error
-      toast.info('Experiment stopped'" has been paused` })
+      toast.info("Experiment stopped - " + expName + " has been paused")
       refreshExperiments()
     } catch (err: any) {
       toast.error('Failed to stop experiment')
@@ -736,11 +732,9 @@ export default function GrowthHubClient() {
   const handleDeleteExperiment = async (expId: string, expName: string) => {
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('growth_experiments').delete().eq('id', expId)
       if (error) throw error
-      toast.success('Experiment deleted'" has been removed` })
+      toast.success("Experiment deleted - " + expName + " has been removed")
       setSelectedExperiment(null)
       refreshExperiments()
     } catch (err: any) {
@@ -749,7 +743,7 @@ export default function GrowthHubClient() {
   }
 
   const handleExportResults = async (expName: string) => {
-    toast.success('Exporting results'" will be downloaded` })
+    toast.success("Exporting results - " + expName + " will be downloaded")
     // Export logic can be expanded
   }
 
@@ -760,8 +754,6 @@ export default function GrowthHubClient() {
     }
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('conversion_funnels').insert({
         name: funnelForm.name,
         description: funnelForm.description,
@@ -769,7 +761,7 @@ export default function GrowthHubClient() {
         is_active: true
       })
       if (error) throw error
-      toast.success('Funnel created'" is ready to track` })
+      toast.success("Funnel created - " + funnelForm.name + " is ready to track")
       setFunnelForm({ name: '', description: '', steps: [] })
       setShowCreateFunnelModal(false)
       refreshFunnels()
@@ -781,11 +773,9 @@ export default function GrowthHubClient() {
   const handleDeleteFunnel = async (funnelId: string, funnelName: string) => {
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('conversion_funnels').delete().eq('id', funnelId)
       if (error) throw error
-      toast.success('Funnel deleted'" has been removed` })
+      toast.success("Funnel deleted - " + funnelName + " has been removed")
       setSelectedFunnel(null)
       refreshFunnels()
     } catch (err: any) {
@@ -800,8 +790,6 @@ export default function GrowthHubClient() {
     }
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('cohorts').insert({
         name: cohortForm.name,
         description: cohortForm.description,
@@ -811,7 +799,7 @@ export default function GrowthHubClient() {
         metadata: JSON.stringify({ definition: cohortForm.definition })
       })
       if (error) throw error
-      toast.success('Cohort created'" is ready for analysis` })
+      toast.success("Cohort created - " + cohortForm.name + " is ready for analysis")
       setCohortForm({ name: '', description: '', type: 'behavioral', definition: '' })
       setShowCreateCohortModal(false)
       refreshCohorts()
@@ -823,11 +811,9 @@ export default function GrowthHubClient() {
   const handleDeleteCohort = async (cohortId: string, cohortName: string) => {
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('cohorts').delete().eq('id', cohortId)
       if (error) throw error
-      toast.success('Cohort deleted'" has been removed` })
+      toast.success("Cohort deleted - " + cohortName + " has been removed")
       setSelectedCohort(null)
       refreshCohorts()
     } catch (err: any) {
@@ -836,7 +822,7 @@ export default function GrowthHubClient() {
   }
 
   const handleSaveSettings = async (section: string) => {
-    toast.success('Settings saved' settings have been updated` })
+    toast.success('Settings saved')
   }
 
   // Export report handler
@@ -882,8 +868,7 @@ export default function GrowthHubClient() {
         URL.revokeObjectURL(url)
       }
 
-      toast.success('Report exported successfully' exported as ${formatLabels[exportReportForm.format]}`
-      })
+      toast.success("Report exported successfully as " + formatLabels[exportReportForm.format])
       setShowExportReportDialog(false)
       setExportReportForm({ reportType: 'conversion', format: 'csv', dateRange: 'last30', includeCharts: true })
     } catch (err: any) {
@@ -913,8 +898,7 @@ export default function GrowthHubClient() {
       })
       if (!res.ok) throw new Error('Failed to create dashboard')
 
-      toast.success('Dashboard created'" has been created with ${dashboardForm.widgets.length || 0} widgets`
-      })
+      toast.success("Dashboard created - " + dashboardForm.name + " has been created with " + (dashboardForm.widgets.length || 0) + " widgets")
       setShowCreateDashboardDialog(false)
       setDashboardForm({ name: '', description: '', widgets: [] })
     } catch (err: any) {
@@ -932,8 +916,6 @@ export default function GrowthHubClient() {
     }
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('conversion_goals').insert({
         name: goalForm.name,
         target_event: goalForm.metric,
@@ -943,8 +925,7 @@ export default function GrowthHubClient() {
         is_active: true
       })
       if (error) throw error
-      toast.success('Goal created'" goal has been set with target: ${goalForm.targetValue || 'TBD'}`
-      })
+      toast.success("Goal created - " + goalForm.name + " goal has been set with target: " + (goalForm.targetValue || "TBD"))
       setShowGoalDialog(false)
       setGoalForm({ name: '', metric: '', targetValue: '', targetDate: '' })
       refreshGoals()
@@ -976,8 +957,7 @@ export default function GrowthHubClient() {
       })
       if (!res.ok) throw new Error('Failed to create path analysis')
 
-      toast.success('Path analysis created'" is now tracking user journeys from ${pathAnalysisForm.startEvent}`
-      })
+      toast.success("Path analysis created - " + pathAnalysisForm.name + " is now tracking user journeys from " + pathAnalysisForm.startEvent)
       setShowPathAnalysisDialog(false)
       setPathAnalysisForm({ name: '', startEvent: '', endEvent: '', maxSteps: '10' })
     } catch (err: any) {
@@ -989,8 +969,7 @@ export default function GrowthHubClient() {
 
   // Apply filter handler
   const handleApplyFilter = () => {
-    toast.success('Filters applied'${filterForm.owner ? ` by ${filterForm.owner}` : ''}`
-    })
+    toast.success("Filters applied" + (filterForm.owner ? " by " + filterForm.owner : ""))
     setShowFilterDialog(false)
   }
 
@@ -1009,8 +988,7 @@ export default function GrowthHubClient() {
       })
       if (!res.ok) throw new Error('Configuration failed')
 
-      toast.success('Integration configured' settings have been updated`
-      })
+      toast.success("Integration configured - settings have been updated")
       setShowConfigureIntegrationDialog(false)
       setSelectedIntegration(null)
     } catch (err: any) {
@@ -2160,7 +2138,7 @@ export default function GrowthHubClient() {
             <AIInsightsPanel
               insights={mockGrowthAIInsights}
               title="Growth Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">

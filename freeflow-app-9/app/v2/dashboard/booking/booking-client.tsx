@@ -183,8 +183,8 @@ export default function BookingClient() {
           notes: bookingNotes
         })
       })
-      if (!res.ok) throw new Error('Failed to create booking')      toast.success('Booking created successfully' scheduled for ${bookingDate} at ${bookingTime}`
-      })
+      if (!res.ok) throw new Error('Failed to create booking')
+      toast.success(`Booking created successfully, scheduled for ${bookingDate} at ${bookingTime}`)
 
       setShowNewBookingDialog(false)
       // Reset form
@@ -205,7 +205,8 @@ export default function BookingClient() {
     }
   }
 
-  const handleBookingSettings = () => {    setShowSettingsDialog(true)
+  const handleBookingSettings = () => {
+    setShowSettingsDialog(true)
     announce('Booking settings dialog opened', 'polite')
   }
 
@@ -224,7 +225,8 @@ export default function BookingClient() {
           workingHours: `${workingHoursStart}-${workingHoursEnd}`
         })
       })
-      if (!res.ok) throw new Error('Failed to save settings')      toast.success('Booking settings saved successfully')
+      if (!res.ok) throw new Error('Failed to save settings')
+      toast.success('Booking settings saved successfully')
       setShowSettingsDialog(false)
       announce('Settings saved successfully', 'polite')
     } catch (err) {
@@ -287,8 +289,8 @@ export default function BookingClient() {
       a.href = url
       a.download = fileName
       a.click()
-      URL.revokeObjectURL(url)      toast.success('Report generated and downloaded' - ${reportData.totalBookings} bookings analyzed`
-      })
+      URL.revokeObjectURL(url)
+      toast.success("Report generated and downloaded - " + reportData.totalBookings + " bookings analyzed")
 
       setShowReportsDialog(false)
       announce('Report downloaded successfully', 'polite')
@@ -343,8 +345,8 @@ export default function BookingClient() {
       a.href = url
       a.download = fileName
       a.click()
-      URL.revokeObjectURL(url)      toast.success('Export completed' downloaded successfully`
-      })
+      URL.revokeObjectURL(url)
+      toast.success("Export completed - " + fileName + " downloaded successfully")
 
       setShowExportDialog(false)
       announce('Export completed successfully', 'polite')

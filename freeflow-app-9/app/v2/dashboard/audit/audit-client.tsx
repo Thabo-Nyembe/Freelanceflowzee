@@ -645,7 +645,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
           clearInterval(interval)
           setIsRunningAudit(false)
           setShowRunAuditDialog(false)
-          toast.success('Audit Complete' completed successfully` })
+          toast.success('Audit Complete')
           return 100
         }
         return prev + 10
@@ -684,7 +684,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
 
   const handleConfirmSchedule = () => {
     setShowScheduleDialog(false)
-    toast.success('Schedule Created' at ${scheduleTime}` })
+    toast.success('Schedule Created')
   }
 
   const handleResolveIssue = (id: string) => {
@@ -695,7 +695,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
 
   const handleConfirmResolveIssue = () => {
     setShowResolveIssueDialog(false)
-    toast.success('Issue Resolved' has been marked as resolved` })
+    toast.success('Issue Resolved')
     setIssueToResolve('')
     setResolutionNotes('')
   }
@@ -853,7 +853,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
         setActiveTab('compliance')
         break
       default:
-        toast.info(label action initiated` })
+        toast.info(`${label} action initiated`)
     }
   }
 
@@ -869,7 +869,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
       return
     }
     setShowCreateReportDialog(false)
-    toast.success('Report Created'" has been created` })
+    toast.success(`Report "${reportName}" has been created`)
     setReportName('')
     setReportDescription('')
   }
@@ -941,7 +941,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
   const handleConfirmIntegration = () => {
     setShowIntegrationDialog(false)
     const action = selectedIntegration?.status === 'connected' ? 'configured' : 'connected'
-    toast.success(`Integration ${action}` has been ${action}` })
+    toast.success(`Integration has been ${action}`)
     setSelectedIntegration(null)
   }
 
@@ -1048,7 +1048,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
 
   const handleConfirmAcknowledgeAlert = () => {
     setShowAcknowledgeAlertDialog(false)
-    toast.success('Alert Acknowledged'" has been acknowledged` })
+    toast.success(`Alert "${selectedAlert?.name}" has been acknowledged`)
     setSelectedAlert(null)
     setAcknowledgeNotes('')
   }
@@ -1060,7 +1060,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
 
   const handleConfirmSuppressAlert = () => {
     setShowSuppressAlertDialog(false)
-    toast.success('Alert Suppressed'` })
+    toast.success('Alert has been suppressed')
     setSelectedAlert(null)
   }
 
@@ -1070,7 +1070,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
 
   const handleConfirmDeleteAlert = () => {
     setShowDeleteAlertDialog(false)
-    toast.success('Alert Deleted'" has been removed` })
+    toast.success(`Alert "${selectedAlert?.name}" has been removed`)
     setSelectedAlert(null)
   }
 
@@ -2534,7 +2534,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
             <AIInsightsPanel
               insights={mockAuditAIInsights}
               title="Audit Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(`${insight.title} action initiated`)}
             />
           </div>
           <div className="space-y-6">
@@ -3497,7 +3497,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
                   className="flex-1 bg-blue-600 hover:bg-blue-700"
                   onClick={() => {
                     setShowDuplicateDialog(false)
-                    toast.success('Duplicated'" has been created` })
+                    toast.success('Item has been duplicated')
                   }}
                 >
                   Duplicate
@@ -3576,7 +3576,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
                       return
                     }
                     setShowEmailReportDialog(false)
-                    toast.success('Email Sent' recipient(s)` })
+                    toast.success('Email Sent')
                   }}
                 >
                   Send Email
@@ -3641,7 +3641,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
                   className="flex-1 bg-amber-600 hover:bg-amber-700"
                   onClick={() => {
                     setShowArchiveDialog(false)
-                    toast.success('Archived'" has been moved to archive` })
+                    toast.success('Item has been moved to archive')
                   }}
                 >
                   Archive Item

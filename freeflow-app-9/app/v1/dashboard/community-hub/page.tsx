@@ -1267,7 +1267,6 @@ export default function CommunityHubPage() {
   // All community data now comes directly from database
 
   useEffect(() => {
-  useEffect(() => {
     const loadData = async () => {
       if (!userId) {
         logger.info('Waiting for user authentication')

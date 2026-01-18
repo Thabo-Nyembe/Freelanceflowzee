@@ -591,8 +591,7 @@ export default function ExtensionsClient() {
   const handleBrowseApply = () => {
     setCategoryFilter(browseCategory)
     setBrowseDialogOpen(false)
-    toast.success('Filters applied' sorted by ${browseSortBy}`
-    })
+    toast.success('Filters applied, sorted by ' + browseSortBy)
   }
 
   // Check updates handlers
@@ -604,7 +603,7 @@ export default function ExtensionsClient() {
       hasUpdate: Math.random() > 0.5
     }))
     setUpdateResults(results)
-    toast.success('Update check complete' updates available` })
+    toast.success('Update check complete')
   }
 
   const handleInstallUpdates = () => {
@@ -763,17 +762,16 @@ export default function ExtensionsClient() {
 
   // Remove single extension handler
   const handleRemoveExtension = () => {
-    toast.success(`${selectedExtension?.name} has been removed`)
+    toast.success((selectedExtension?.name || 'Extension') + ' has been removed')
     setRemoveExtensionDialogOpen(false)
     setSelectedExtension(null)
   }
 
   // Share extension handler
   const handleShareExtension = (method: string) => {
-    const extensionUrl = `https://extensions.freeflow.app/${selectedExtension?.id || ''}`
+    const extensionUrl = 'https://extensions.freeflow.app/' + (selectedExtension?.id || '')
     navigator.clipboard.writeText(extensionUrl)
-    toast.success('Link copied'`
-    })
+    toast.success('Link copied')
     setShareExtensionDialogOpen(false)
   }
 
@@ -797,7 +795,7 @@ export default function ExtensionsClient() {
 
   const confirmDeleteExtension = () => {
     if (extensionToDelete) {
-      toast.success(`${extensionToDelete.name} has been removed`)
+      toast.success((extensionToDelete.name || 'Extension') + ' has been removed')
     }
     setConfirmDeleteDialogOpen(false)
     setExtensionToDelete(null)
@@ -2006,7 +2004,7 @@ export default function ExtensionsClient() {
             <AIInsightsPanel
               insights={mockExtensionsAIInsights}
               title="Extensions Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">

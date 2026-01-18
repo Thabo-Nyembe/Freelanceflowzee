@@ -1,6 +1,8 @@
 // Training V2 - Docebo Level Learning Management System
 // Comprehensive LMS with courses, learning paths, certifications, and gamification
 'use client'
+
+import { createClient } from '@/lib/supabase/client'
 // MIGRATED: Batch #18 - Verified database hook integration
 // Hooks used: useTrainingPrograms, useTrainingMutations
 
@@ -643,7 +645,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
       })
 
       if (result.success) {
-        toast.success('Course Created'" has been created successfully` })
+        toast.success(`Course Created has been created successfully`)
         setShowCreateCourseDialog(false)
         setCourseForm(defaultCourseForm)
         refetch()
@@ -675,7 +677,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
       })
 
       if (result.success) {
-        toast.success('Course Updated'" has been updated successfully` })
+        toast.success(`Course Updated has been updated successfully`)
         setShowEditCourseDialog(false)
         setCourseToEdit(null)
         setCourseForm(defaultCourseForm)
@@ -695,7 +697,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
       const result = await deleteProgram(courseToDelete.id)
 
       if (result.success) {
-        toast.success('Course Deleted'" has been deleted` })
+        toast.success(`Course Deleted has been deleted`)
         setShowDeleteCourseDialog(false)
         setCourseToDelete(null)
         refetch()
@@ -721,8 +723,6 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
 
     try {
       // For the mock courses, we'll create a direct enrollment
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Not authenticated')
@@ -730,8 +730,6 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
       }
 
       // Insert enrollment directly
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('training_enrollments')
         .insert({
@@ -747,7 +745,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
         return
       }
 
-      toast.success('Enrolled Successfully'"` })
+      toast.success(`Enrolled Successfully`)
       setShowEnrollDialog(false)
       setCourseToEnroll(null)
       setEnrollmentForm(defaultEnrollmentForm)
@@ -761,8 +759,6 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
     try {
       toast.loading(`Loading "${lessonName}"...`)
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
       if (user && courseId) {
@@ -815,8 +811,6 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
 
   const handleBookmarkCourse = useCallback(async (course: Course) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Not authenticated')
@@ -828,9 +822,9 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
       if (!bookmarks.includes(course.id)) {
         bookmarks.push(course.id)
         localStorage.setItem('course_bookmarks', JSON.stringify(bookmarks))
-        toast.success('Course Bookmarked'" saved to your learning path` })
+        toast.success(`Course Bookmarked saved to your learning path`)
       } else {
-        toast.info('Already Bookmarked'" is already in your bookmarks` })
+        toast.info(`Already Bookmarked is already in your bookmarks`)
       }
     } catch (error) {
       toast.error('Error')
@@ -877,7 +871,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
 
   const handleConfirmStartPath = useCallback(() => {
     if (selectedLearningPath) {
-      toast.success('Learning Path Started'"` })
+      toast.success(`Learning Path Started`)
       setShowLearningPathDialog(false)
       setSelectedLearningPath(null)
     }
@@ -906,7 +900,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
   }, [])
 
   const handleSaveIntegrationConfig = useCallback(() => {
-    toast.success('Integration Updated' settings have been saved` })
+    toast.success(`Integration Updated settings have been saved`)
     setShowConfigureIntegrationDialog(false)
     setSelectedIntegration(null)
   }, [selectedIntegration])
@@ -918,7 +912,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
   }, [])
 
   const handleConfirmConnect = useCallback(() => {
-    toast.success('Integration Connected' has been connected successfully` })
+    toast.success(`Integration Connected has been connected successfully`)
     setShowConnectIntegrationDialog(false)
     setSelectedIntegration(null)
   }, [selectedIntegration])
@@ -956,7 +950,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
       toast.error('Error')
       return
     }
-    toast.success('Webhook Added' has been created` })
+    toast.success(`Webhook Added has been created`)
     setShowAddWebhookDialog(false)
     setWebhookUrl('')
     setWebhookEvents('')
@@ -983,8 +977,6 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
     try {
       toast.loading('Preparing your learning data export...')
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
@@ -1044,8 +1036,6 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
     try {
       toast.loading('Importing transcript...')
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
@@ -1122,9 +1112,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
 
   const handleConfirmContinueLearning = useCallback(() => {
     if (selectedEnrollment) {
-      toast.success(
-        selectedEnrollment.status === 'completed' ? 'Reviewing Course' : 'Continuing Course'"...` }
-      )
+      toast.success(selectedEnrollment.status === 'completed' ? 'Reviewing Course' : 'Continuing Course')
       setShowContinueLearningDialog(false)
       setSelectedEnrollment(null)
     }

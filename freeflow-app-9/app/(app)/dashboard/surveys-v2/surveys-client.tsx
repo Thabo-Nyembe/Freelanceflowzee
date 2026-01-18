@@ -745,9 +745,7 @@ export default function SurveysClient() {
         body: formData
       })
       if (!response.ok) throw new Error('Import failed')
-      toast.success('Survey imported successfully!'`
-          : `Connected to ${importSource} and imported surveys`
-      })
+      toast.success(importSource === 'file' ? 'Survey imported successfully!' : `Connected to ${importSource} and imported surveys`)
       setShowImportDialog(false)
       setImportFile(null)
       setImportSource('file')
@@ -777,8 +775,7 @@ export default function SurveysClient() {
         })
       })
       if (!response.ok) throw new Error('Failed to create template')
-      toast.success('Template created successfully!'" is now available in templates`
-      })
+      toast.success(`Template created successfully! "${templateName}" is now available in templates`)
       setShowTemplateDialog(false)
       setTemplateName('')
       setTemplateDescription('')
@@ -806,8 +803,7 @@ export default function SurveysClient() {
         status: 'draft'
       })
       if (result.success) {
-        toast.success('Survey created from template!'" with ${selectedTemplate.questions} questions`
-        })
+        toast.success(`Survey created from template! "${templateSurveyTitle}" with ${selectedTemplate.questions} questions`)
         setShowUseTemplateDialog(false)
         setSelectedTemplate(null)
         setTemplateSurveyTitle('')
@@ -840,12 +836,11 @@ export default function SurveysClient() {
       const url = URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
-      link.download = `survey-export.${exportFormat}`
+      link.download = 'survey-export.' + exportFormat
       link.click()
       URL.revokeObjectURL(url)
-      const dateRangeLabel = exportDateRange === 'all' ? 'all time' : `last ${exportDateRange}`
-      toast.success('Data exported successfully!' responses (${dateRangeLabel}) as ${exportFormat.toUpperCase()}`
-      })
+      const dateRangeLabel = exportDateRange === 'all' ? 'all time' : 'last ' + exportDateRange
+      toast.success('Data exported successfully! responses (' + dateRangeLabel + ') as ' + exportFormat.toUpperCase())
       setShowExportDialog(false)
     } catch (err) {
       toast.error('Failed to export data')
@@ -874,8 +869,7 @@ export default function SurveysClient() {
       })
       if (!response.ok) throw new Error('Failed to send emails')
       const recipientCount = emailRecipients.split(',').filter(e => e.trim()).length
-      toast.success('Emails sent successfully!' recipient(s)`
-      })
+      toast.success('Emails sent successfully! ' + recipientCount + ' recipient(s)')
       setShowDistributeDialog(false)
       setEmailRecipients('')
       setEmailSubject('')
@@ -1419,7 +1413,7 @@ export default function SurveysClient() {
                           onClick={(e) => {
                             e.stopPropagation()
                             setSelectedSurvey(survey)
-                            toast.success('Survey editor opened'"` })
+                            toast.success(`Survey editor opened`)
                           }}
                         >
                           <Edit className="w-4 h-4" />
@@ -2508,7 +2502,7 @@ export default function SurveysClient() {
                   <Button
                     className="flex-1"
                     onClick={() => {
-                      toast.success('Survey editor opened'"` })
+                      toast.success(`Survey editor opened`)
                     }}
                   >
                     <Edit className="w-4 h-4 mr-2" />
@@ -3126,8 +3120,7 @@ export default function SurveysClient() {
               </Button>
               <Button
                 onClick={() => {
-                  toast.success('Results exported!'`
-                  })
+                  toast.success(`Results exported!`)
                   setShowResultsDialog(false)
                 }}
                 className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white"
@@ -3548,8 +3541,7 @@ export default function SurveysClient() {
               </Button>
               <Button
                 onClick={() => {
-                  toast.success('Automation created!'`
-                  })
+                  toast.success(`Automation created!`)
                   setShowAutomationsDialog(false)
                 }}
                 className="bg-gradient-to-r from-red-500 to-pink-600 text-white"

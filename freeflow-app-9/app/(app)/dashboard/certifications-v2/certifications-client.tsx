@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useCallback } from 'react'
 import { toast } from 'sonner'
 import { shareContent, downloadAsJson, copyToClipboard, apiPost, apiDelete } from '@/lib/button-handlers'
@@ -836,7 +838,6 @@ export default function CertificationsClient() {
     }
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
       const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
@@ -861,7 +862,7 @@ export default function CertificationsClient() {
         certificate_number: certForm.certificate_number || undefined,
         notes: certForm.notes || undefined
       })
-      toast.success('Certification created'" has been added` })
+      toast.success(`${certForm.name} has been added`)
       setShowCreateDialog(false)
       resetForm()
     } catch (error: any) {
@@ -896,7 +897,7 @@ export default function CertificationsClient() {
         certificate_number: certForm.certificate_number || undefined,
         notes: certForm.notes || undefined
       })
-      toast.success('Certification updated'" has been updated` })
+      toast.success(`Certification updated: "${certForm.name}" has been updated`)
       setShowEditDialog(false)
       setCertToEdit(null)
       resetForm()
@@ -912,7 +913,7 @@ export default function CertificationsClient() {
     setIsSubmitting(true)
     try {
       await deleteCertification(certToDelete.id)
-      toast.success('Certification deleted'" has been removed` })
+      toast.success(`Certification deleted: "${certToDelete.title}" has been removed`)
       setShowDeleteDialog(false)
       setCertToDelete(null)
     } catch (error: any) {

@@ -546,8 +546,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
 
   const handleApplyFilters = () => {
     setShowFilterDialog(false)
-    toast.success('Filters applied', Source: ${sourceFilter}, Time: ${timeRange}`
-    })
+    toast.success(`Filters applied: Source: ${sourceFilter}, Time: ${timeRange}`)
   }
 
   const handleOpenDateRangeDialog = () => {
@@ -556,8 +555,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
 
   const handleApplyDateRange = () => {
     if (dateRangeStart && dateRangeEnd) {
-      toast.success('Date range applied' to ${dateRangeEnd}`
-      })
+      toast.success(`Date range applied: ${dateRangeStart} to ${dateRangeEnd}`)
     } else {
       toast.error('Please select both start and end dates')
       return

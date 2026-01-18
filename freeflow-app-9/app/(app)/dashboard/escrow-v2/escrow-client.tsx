@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
 import {
@@ -57,6 +59,9 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useEscrow, type EscrowDeposit } from '@/lib/hooks/use-escrow'
 import { downloadAsCsv } from '@/lib/button-handlers'
+
+// Initialize Supabase client once at module level
+const supabase = createClient()
 
 // Types
 type TransactionType = 'payment' | 'payout' | 'transfer' | 'refund' | 'fee'
@@ -386,9 +391,6 @@ export default function EscrowClient() {
 
     setIsSubmitting(true)
     try {
-      const supabase = createClient()
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
       if (!user) {
@@ -409,8 +411,7 @@ export default function EscrowClient() {
         metadata: { description: newEscrowForm.description }
       })
 
-      toast.success('Escrow created successfully'"`
-      })
+      toast.success('Escrow created successfully')
       setShowNewEscrowDialog(false)
       resetNewEscrowForm()
     } catch (error: any) {
@@ -446,8 +447,7 @@ export default function EscrowClient() {
     setIsSubmitting(true)
     try {
       await releaseFunds(selectedEscrowDeposit.id, amount)
-      toast.success('Funds released successfully' for "${selectedEscrowDeposit.project_title}"`
-      })
+      toast.success(`Funds released successfully for "${selectedEscrowDeposit.project_title}"`)
       setShowReleaseDialog(false)
       resetReleaseForm()
       setSelectedEscrowDeposit(null)
@@ -516,8 +516,7 @@ export default function EscrowClient() {
     setIsSubmitting(true)
     try {
       await updateDeposit(deposit.id, { status: 'cancelled' })
-      toast.success('Escrow cancelled'" has been cancelled`
-      })
+      toast.success(`Escrow cancelled: "${deposit.title}" has been cancelled`)
     } catch (error: any) {
       toast.error('Failed to cancel escrow')
     } finally {
@@ -534,8 +533,7 @@ export default function EscrowClient() {
     setIsSubmitting(true)
     try {
       await deleteDeposit(deposit.id)
-      toast.success('Escrow deleted'" has been deleted`
-      })
+      toast.success(`Escrow deleted: "${deposit.title}" has been deleted`)
     } catch (error: any) {
       toast.error('Failed to delete escrow')
     } finally {
@@ -553,9 +551,6 @@ export default function EscrowClient() {
     try {
       // In a real app, this would call a payouts API
       // For now, we'll simulate the payout creation
-      const supabase = createClient()
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
       if (!user) {
@@ -564,8 +559,6 @@ export default function EscrowClient() {
       }
 
       // Create a transaction record for the payout
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('escrow_transactions')
         .insert({
@@ -580,8 +573,7 @@ export default function EscrowClient() {
 
       if (error) throw error
 
-      toast.success('Payout created' of ${formatCurrency(parseFloat(payoutForm.amount))} initiated`
-      })
+      toast.success(`Payout created of ${formatCurrency(parseFloat(payoutForm.amount))} initiated`)
       setShowCreatePayout(false)
       resetPayoutForm()
     } catch (error: any) {
@@ -601,9 +593,6 @@ export default function EscrowClient() {
     try {
       // In a real app, this would send an invitation email
       // For now, we'll simulate the invitation
-      const supabase = createClient()
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
       if (!user) {
@@ -614,8 +603,7 @@ export default function EscrowClient() {
       // You could store the invitation in a table here
       // For now we just show success
 
-      toast.success('Invitation sent'`
-      })
+      toast.success(`Invitation sent to ${inviteForm.email}`)
       setShowInviteAccount(false)
       resetInviteForm()
     } catch (error: any) {

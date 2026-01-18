@@ -12,10 +12,6 @@ export const dynamic = 'force-dynamic';
 import AIMusicStudio from '@/components/ai/ai-music-studio'
 import { toast } from 'sonner'
 
-export const metadata = {
-  title: 'AI Music Studio | Kazi Platform',
-  description: 'Create original music with Suno AI - Professional AI-powered music generation'
-}
 
 
 // ============================================================================

@@ -860,14 +860,7 @@ export default function CollaborationClient() {
     return result.success
   }
 
-  // Memoized send message handler
-  const handleSendCurrentMessage = useCallback(async () => {
-    const channelId = selectedChannel?.id || 'c1'
-    const success = await handleSendMessage(channelId, messageInput)
-    if (success) {
-      setMessageInput('')
-    }
-  }, [selectedChannel, messageInput])
+  // Note: handleSendCurrentMessage is already defined above with proper API integration
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:bg-none dark:bg-gray-900 p-6">

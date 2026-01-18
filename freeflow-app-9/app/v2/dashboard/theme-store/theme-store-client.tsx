@@ -366,7 +366,7 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
     const themeToActivate = mockThemes.find(t => t.name === n)
     if (themeToActivate) {
       // Update theme status in state
-      toast.success('Activated'" is now active` })
+      toast.success("Theme " + n + " is now active")
     }
   }
 

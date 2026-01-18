@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import React, { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -456,8 +458,7 @@ export default function ThirdPartyIntegrationsClient() {
     }
 
     const selectedApp = mockApps.find(a => a.id === newIntegrationApp)
-    toast.success('Integration Connected' has been successfully connected using ${newIntegrationAuthType === 'api_key' ? 'API Key' : newIntegrationAuthType === 'basic' ? 'Basic Auth' : 'OAuth'}`
-    })
+    toast.success(`Integration Connected has been successfully connected using ${newIntegrationAuthType === 'api_key' ? 'API Key' : newIntegrationAuthType === 'basic' ? 'Basic Auth' : 'OAuth'}`)
 
     // Reset form
     setNewIntegrationApp('')
@@ -479,8 +480,6 @@ export default function ThirdPartyIntegrationsClient() {
     setTestConnectionMessage('Testing connection...')
 
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
@@ -613,28 +612,23 @@ export default function ThirdPartyIntegrationsClient() {
 
   // Handlers
   const handleConnectIntegration = (integrationName: string) => {
-    toast.info('Connecting integration'...`
-    })
+    toast.info(`Connecting ${integrationName}...`)
   }
 
   const handleDisconnectIntegration = (integrationName: string) => {
-    toast.success('Integration disconnected' has been removed`
-    })
+    toast.success(`Integration disconnected has been removed`)
   }
 
   const handleRefreshIntegration = (integrationName: string) => {
-    toast.info('Refreshing integration' data...`
-    })
+    toast.info(`Refreshing integration data...`)
   }
 
   const handleConfigureIntegration = (integrationName: string) => {
-    toast.info('Opening configuration' settings`
-    })
+    toast.info(`Opening configuration settings`)
   }
 
   const handleViewLogs = (integrationName: string) => {
-    toast.info('Loading logs' activity logs`
-    })
+    toast.info(`Loading logs activity logs`)
   }
 
   // Create Zap handler
@@ -645,8 +639,7 @@ export default function ThirdPartyIntegrationsClient() {
     }
     const triggerApp = mockApps.find(a => a.id === newZapTriggerApp)
     const actionApp = mockApps.find(a => a.id === newZapActionApp)
-    toast.success('Zap Created': ${triggerApp?.name} → ${actionApp?.name}`
-    })
+    toast.success(`Zap Created: ${triggerApp?.name} → ${actionApp?.name}`)
     setNewZapName('')
     setNewZapDescription('')
     setNewZapTriggerApp('')
@@ -658,30 +651,26 @@ export default function ThirdPartyIntegrationsClient() {
   const handleToggleZapStatus = (zap: Zap, e: React.MouseEvent) => {
     e.stopPropagation()
     const newStatus = zap.status === 'active' ? 'paused' : 'active'
-    toast.success(`Zap ${newStatus === 'active' ? 'Activated' : 'Paused'}` is now ${newStatus}`
-    })
+    toast.success(`Zap ${newStatus === 'active' ? 'Activated' : 'Paused'}: "${zap.name}" is now ${newStatus}`)
   }
 
   // Edit zap handler
   const handleEditZap = (zap: Zap, e: React.MouseEvent) => {
     e.stopPropagation()
     setSelectedZap(zap)
-    toast.info('Edit Mode'`
-    })
+    toast.info(`Edit Mode: Editing "${zap.name}"`)
   }
 
   // Apply zap filters handler
   const handleApplyZapFilters = () => {
-    toast.success('Filters Applied' zaps${filterZapApp ? ` for ${mockApps.find(a => a.id === filterZapApp)?.name}` : ''}`
-    })
+    toast.success(`Filters Applied: Showing ${filterZapStatus || 'all'} zaps${filterZapApp ? ` for ${mockApps.find(a => a.id === filterZapApp)?.name}` : ''}`)
     setShowFilterZapsDialog(false)
   }
 
   // Manage app handler
   const handleSaveAppSettings = () => {
     if (showManageAppDialog) {
-      toast.success('Settings Saved' settings updated`
-      })
+      toast.success(`Settings Saved: "${showManageAppDialog}" settings updated`)
     }
     setShowManageAppDialog(null)
   }
@@ -689,8 +678,7 @@ export default function ThirdPartyIntegrationsClient() {
   // Connect app handler
   const handleConnectApp = () => {
     if (showConnectAppDialog) {
-      toast.success('App Connected' has been connected`
-      })
+      toast.success(`App Connected has been connected`)
     }
     setShowConnectAppDialog(null)
   }
@@ -700,8 +688,6 @@ export default function ThirdPartyIntegrationsClient() {
     e.stopPropagation()
     const toastId = toast.loading(`Syncing ${conn.app.name} data...`)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
@@ -734,8 +720,7 @@ export default function ThirdPartyIntegrationsClient() {
 
   // History filter handler
   const handleApplyHistoryFilters = () => {
-    toast.success('Filters Applied' logs for the last ${historyDateRange}`
-    })
+    toast.success('Filters Applied: logs for the last ' + historyDateRange)
     setShowHistoryFilterDialog(false)
   }
 
@@ -743,8 +728,6 @@ export default function ThirdPartyIntegrationsClient() {
   const handleRefreshHistory = async () => {
     const toastId = toast.loading('Refreshing logs...')
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
@@ -775,8 +758,7 @@ export default function ThirdPartyIntegrationsClient() {
   // Regenerate API key handler
   const handleRegenerateApiKey = () => {
     const keyType = showRegenerateApiKeyDialog
-    toast.success('API Key Regenerated' API key has been regenerated. Please update your applications.`
-    })
+    toast.success('API Key Regenerated: API key has been regenerated. Please update your applications.')
     setShowRegenerateApiKeyDialog(null)
   }
 
@@ -785,8 +767,6 @@ export default function ThirdPartyIntegrationsClient() {
     if (showWebhookTestDialog) {
       const toastId = toast.loading(`Testing ${showWebhookTestDialog.name}...`)
       try {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) throw new Error('Not authenticated')
 
@@ -824,8 +804,7 @@ export default function ThirdPartyIntegrationsClient() {
   // Webhook edit handler
   const handleSaveWebhook = () => {
     if (showWebhookEditDialog) {
-      toast.success('Webhook Updated' configuration saved`
-      })
+      toast.success('Webhook Updated: configuration saved')
     }
     setShowWebhookEditDialog(null)
   }
@@ -836,8 +815,7 @@ export default function ThirdPartyIntegrationsClient() {
       toast.error('Please fill in all required fields')
       return
     }
-    toast.success('Webhook Created' has been configured`
-    })
+    toast.success(`Webhook Created has been configured`)
     setNewWebhookName('')
     setNewWebhookUrl('')
     setNewWebhookEvents([])
@@ -850,8 +828,7 @@ export default function ThirdPartyIntegrationsClient() {
       toast.error('Please provide an integration name')
       return
     }
-    toast.success('Custom Integration Created' is ready for development`
-    })
+    toast.success(`Custom Integration Created is ready for development`)
     setCustomIntegrationName('')
     setCustomIntegrationDescription('')
     setCustomIntegrationAuthType('api_key')
@@ -862,8 +839,6 @@ export default function ThirdPartyIntegrationsClient() {
   const handleExportData = async () => {
     const toastId = toast.loading('Preparing export...')
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
@@ -907,16 +882,14 @@ export default function ThirdPartyIntegrationsClient() {
       toast.error('Please select a target environment')
       return
     }
-    toast.success('Configuration Cloned'`
-    })
+    toast.success(`Configuration Cloned to ${cloneTarget}`)
     setCloneTarget('')
     setShowCloneConfigDialog(false)
   }
 
   // Pause all zaps handler
   const handlePauseAllZaps = () => {
-    toast.success('All Zaps Paused' active zaps have been paused`
-    })
+    toast.success(`All Zaps Paused: active zaps have been paused`)
     setShowPauseAllDialog(false)
   }
 
@@ -937,8 +910,6 @@ export default function ThirdPartyIntegrationsClient() {
     if (selectedConnection) {
       const toastId = toast.loading(`Syncing ${selectedConnection.app.name}...`)
       try {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) throw new Error('Not authenticated')
 
@@ -967,16 +938,14 @@ export default function ThirdPartyIntegrationsClient() {
   // Reauthorize connection handler
   const handleReauthorize = () => {
     if (selectedConnection) {
-      toast.info('Reauthorizing' for authorization...`
-      })
+      toast.info(`Reauthorizing for authorization...`)
     }
   }
 
   // Disconnect connection handler
   const handleDisconnect = () => {
     if (selectedConnection) {
-      toast.success('Disconnected' has been disconnected`
-      })
+      toast.success(`Disconnected has been disconnected`)
       setSelectedConnection(null)
     }
   }
@@ -985,16 +954,14 @@ export default function ThirdPartyIntegrationsClient() {
   const handleToggleSelectedZapStatus = () => {
     if (selectedZap) {
       const newStatus = selectedZap.status === 'active' ? 'paused' : 'active'
-      toast.success(`Zap ${newStatus === 'active' ? 'Activated' : 'Paused'}` is now ${newStatus}`
-      })
+      toast.success(`Zap ${newStatus === 'active' ? 'Activated' : 'Paused'}: "${selectedZap.name}" is now ${newStatus}`)
     }
   }
 
   // Edit selected zap handler
   const handleEditSelectedZap = () => {
     if (selectedZap) {
-      toast.info('Edit Mode'`
-      })
+      toast.info(`Edit Mode: Editing "${selectedZap.name}"`)
     }
   }
 
@@ -1004,8 +971,7 @@ export default function ThirdPartyIntegrationsClient() {
       setActiveTab('history')
       setLogsFilterZapId(selectedZap.id)
       setSelectedZap(null)
-      toast.info('Filtered History'`
-      })
+      toast.info(`Filtered History: Showing logs for "${selectedZap.name}"`)
     }
   }
 

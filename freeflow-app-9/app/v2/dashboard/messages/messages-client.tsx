@@ -383,15 +383,15 @@ export default function MessagesClient() {
   }
 
   const formatFileSize = (bytes: number) => {
-    if (bytes >= 1e6) return `${(bytes / 1e6).toFixed(1)} MB`
-    if (bytes >= 1e3) return `${(bytes / 1e3).toFixed(1)} KB`
-    return `${bytes} B`
+    if (bytes >= 1e6) return `") + ((bytes / 1e6).toFixed(1)} MB`
+    if (bytes >= 1e3) return `") + ((bytes / 1e3).toFixed(1)} KB`
+    return `") + (bytes} B`
   }
 
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
     const secs = seconds % 60
-    return `${mins}:${secs.toString().padStart(2, '0')}`
+    return `") + (mins}:") + (secs.toString().padStart(2, '0')}`
   }
 
   const statCards = [
@@ -537,7 +537,7 @@ export default function MessagesClient() {
       connected_at: new Date().toISOString()
     }))
 
-    toast.success(`${type === 'video' ? 'Video' : 'Audio'} call started with ${contactName}`, {
+    toast.success(`") + (type === 'video' ? 'Video' : 'Audio'} call started with ") + (contactName}`, {
       id: 'call',
       description: type === 'video' ? 'Connecting to video stream...' : 'Connecting to audio...',
       action: {
@@ -549,8 +549,7 @@ export default function MessagesClient() {
 
   const handleEndCall = () => {
     if (activeCallChannel) {
-      toast.info('Call ended' has ended`
-      })
+      toast.info(`Call ended`, { description: `Call with ") + (activeCallChannel} has ended` })
       sessionStorage.removeItem('active_call')
       setActiveCallChannel(null)
       setCallType(null)
@@ -573,7 +572,7 @@ export default function MessagesClient() {
       // Store in session
       sessionStorage.setItem('muted_channels', JSON.stringify(Array.from(newMutedChannels)))
 
-      toast.success(`${channelName} unmuted`, {
+      toast.success(`") + (channelName} unmuted`, {
         id: 'mute',
         description: 'You will now receive notifications from this channel',
         action: {
@@ -589,7 +588,7 @@ export default function MessagesClient() {
       // Store in session
       sessionStorage.setItem('muted_channels', JSON.stringify(Array.from(newMutedChannels)))
 
-      toast.success(`${channelName} muted`, {
+      toast.success(`") + (channelName} muted`, {
         id: 'mute',
         description: 'You will not receive notifications from this channel',
         action: {
@@ -610,7 +609,7 @@ export default function MessagesClient() {
       return
     }
     const emailList = inviteEmails.split(',').map(e => e.trim()).filter(e => e)
-    toast.success('Invitations sent' team member(s)` })
+    toast.success(`Invitations sent`, { description: `Invited ") + (emailList.length} team member(s)` })
     setInviteEmails('')
     setInviteMessage('')
     setShowInviteDialog(false)
@@ -643,7 +642,7 @@ export default function MessagesClient() {
       toast.error('Trigger required')
       return
     }
-    toast.success('Workflow created'" workflow has been created and activated` })
+    toast.success('Workflow created')
     setWorkflowName('')
     setWorkflowTrigger('')
     setWorkflowAction('')
@@ -667,20 +666,9 @@ export default function MessagesClient() {
     }))
 
     if (allPinned.length === 0) {
-      toast.info('No pinned messages'`
-          : 'No pinned messages found'
-      })
+      toast.info('No pinned messages')
     } else {
-      toast.success(`${allPinned.length} pinned message${allPinned.length === 1 ? '' : 's'} found``
-          : 'Viewing all pinned messages',
-        action: {
-          label: 'Clear Filter',
-          onClick: () => {
-            sessionStorage.removeItem('pinned_messages_view')
-            toast.info('Pinned filter cleared')
-          }
-        }
-      })
+      toast.success(allPinned.length + ' pinned message' + (allPinned.length === 1 ? '' : 's') + ' found')
     }
   }
 
@@ -695,11 +683,10 @@ export default function MessagesClient() {
       setArchivedChannels(newArchivedChannels)
 
       // Update session storage
-      sessionStorage.removeItem(`channel_${channelName}_archived`)
+      sessionStorage.removeItem(`channel_") + (channelName}_archived`)
       sessionStorage.setItem('archived_channels', JSON.stringify(Array.from(newArchivedChannels)))
 
-      toast.success(`#${channelName} restored`
-      })
+      toast.success('#' + channelName + ' restored')
     } else {
       // Archive the channel
       const newArchivedChannels = new Set(archivedChannels)
@@ -707,7 +694,7 @@ export default function MessagesClient() {
       setArchivedChannels(newArchivedChannels)
 
       // Store archive data with timestamp
-      sessionStorage.setItem(`channel_${channelName}_archived`, JSON.stringify({
+      sessionStorage.setItem(`channel_") + (channelName}_archived`, JSON.stringify({
         archived_at: new Date().toISOString(),
         archived_by: 'current_user',
         visible: false
@@ -719,8 +706,7 @@ export default function MessagesClient() {
         setSelectedChannel(null)
       }
 
-      toast.success(`#${channelName} archived`
-      })
+      toast.success('#' + channelName + ' archived')
     }
   }
 
@@ -730,7 +716,7 @@ export default function MessagesClient() {
       date: callDate,
       loaded_at: new Date().toISOString()
     }))
-    toast.success(`Call scheduled for ${callDate}`)
+    toast.success(`Call scheduled for ") + (callDate}`)
   }
 
   const handleUploadFile = () => {
@@ -748,7 +734,7 @@ export default function MessagesClient() {
       toast.error('No files selected')
       return
     }
-    toast.success('Files uploaded' file(s) uploaded successfully` })
+    toast.success(`Files uploaded`, { description: `") + (selectedFiles.length} file(s) uploaded successfully` })
     setSelectedFiles([])
     setShowFileUploadDialog(false)
   }
@@ -765,7 +751,7 @@ export default function MessagesClient() {
     link.click()
     window.URL.revokeObjectURL(url)
     document.body.removeChild(link)
-    toast.success(`${fileName} downloaded successfully`)
+    toast.success(`") + (fileName} downloaded successfully`)
   }
 
   const handleManageActiveSessions = () => {
@@ -773,7 +759,7 @@ export default function MessagesClient() {
   }
 
   const handleRevokeSession = (sessionId: number) => {
-    toast.success('Session revoked' has been terminated` })
+    toast.success(`Session revoked`, { description: `Session ") + (sessionId} has been terminated` })
   }
 
   const handleRevokeAllSessions = () => {
@@ -795,12 +781,11 @@ export default function MessagesClient() {
   }
 
   const handleToggleWorkflow = (workflowId: number, workflowName: string, currentStatus: boolean) => {
-    toast.success(currentStatus ? 'Workflow disabled' : 'Workflow enabled'" has been ${currentStatus ? 'disabled' : 'enabled'}`
-    })
+    toast.success(currentStatus ? 'Workflow disabled' : 'Workflow enabled')
   }
 
   const handleDeleteWorkflow = (workflowId: number, workflowName: string) => {
-    toast.success('Workflow deleted'" has been removed` })
+    toast.success('Workflow deleted')
   }
 
   const handleExportData = () => {
@@ -817,19 +802,19 @@ export default function MessagesClient() {
     }
     const dataStr = exportFormat === 'json'
       ? JSON.stringify(exportData, null, 2)
-      : `Messages,Channels,Format,DateRange,ExportedAt\n${exportData.messages},${exportData.channels},${exportData.format},${exportData.dateRange},${exportData.exported_at}`
+      : `Messages,Channels,Format,DateRange,ExportedAt\n") + (exportData.messages},") + (exportData.channels},") + (exportData.format},") + (exportData.dateRange},") + (exportData.exported_at}`
     const mimeType = exportFormat === 'json' ? 'application/json' : 'text/csv'
     const dataBlob = new Blob([dataStr], { type: mimeType })
     const url = window.URL.createObjectURL(dataBlob)
     const link = document.createElement('a')
     link.href = url
-    link.download = `messages-export-${Date.now()}.${exportFormat}`
+    link.download = `messages-export-") + (Date.now()}.") + (exportFormat}`
     link.style.display = 'none'
     document.body.appendChild(link)
     link.click()
     window.URL.revokeObjectURL(url)
     document.body.removeChild(link)
-    toast.success('Export complete' file` })
+    toast.success(`Export complete`, { description: `Downloaded ") + (exportFormat.toUpperCase()} file` })
     setShowExportDialog(false)
   }
 
@@ -905,8 +890,7 @@ export default function MessagesClient() {
       setChannelFilter('all')
     }
 
-    toast.success('Filters applied' messages${filterDateRange !== 'all' ? ` from ${filterDateRange}` : ''}`
-    })
+    toast.success('Filters applied', { description: 'Showing ' + filterType + ' messages' + (filterDateRange !== 'all' ? ' from ' + filterDateRange : '') })
     setShowFilterDialog(false)
   }
 
@@ -927,18 +911,16 @@ export default function MessagesClient() {
       const reactionName = reactionType.replace('thumbsup', 'thumbs up').replace('plus1', '+1')
 
       // Store reaction state in sessionStorage
-      const reactionKey = `reaction_${messageId}_${reactionType}`
+      const reactionKey = `reaction_") + (messageId}_") + (reactionType}`
       const currentState = sessionStorage.getItem(reactionKey)
       const newState = currentState === 'reacted' ? null : 'reacted'
 
       if (newState) {
         sessionStorage.setItem(reactionKey, newState)
-        toast.success('Reaction added' to the message`
-        })
+        toast.success(`Reaction added`, { description: `Added ") + (reactionName} to the message` })
       } else {
         sessionStorage.removeItem(reactionKey)
-        toast.info('Reaction removed' reaction`
-        })
+        toast.info(`Reaction removed`, { description: `Removed ") + (reactionName} reaction` })
       }
 
       // If we have Supabase messages, try to update reaction count
@@ -959,8 +941,7 @@ export default function MessagesClient() {
     localStorage.setItem('messages_sidebar_theme_color', color)
     // Apply as CSS custom property for immediate visual feedback
     document.documentElement.style.setProperty('--sidebar-theme-color', color)
-    toast.success('Theme color updated'`
-    })
+    toast.success('Theme color updated')
   }
 
   const handleMarkAllAsRead = async () => {
@@ -978,7 +959,7 @@ export default function MessagesClient() {
           status: 'read' as const
         })
       }
-      toast.success('All messages marked as read' messages updated` })
+      toast.success(`All messages marked as read`, { description: `") + (unreadMessages.length} messages updated` })
     } catch (error) {
       toast.error('Failed to mark all as read')
     }
@@ -994,7 +975,7 @@ export default function MessagesClient() {
     try {
       await createMessage({
         body: originalMessage.body,
-        subject: originalMessage.subject ? `Fwd: ${originalMessage.subject}` : null,
+        subject: originalMessage.subject ? `Fwd: ") + (originalMessage.subject}` : null,
         recipient_id: newRecipientId,
         sender_id: currentUser.id,
         message_type: 'direct' as const,
@@ -1030,7 +1011,7 @@ export default function MessagesClient() {
     try {
       await createMessage({
         body: replyBodyText,
-        subject: parentMessage.subject ? `Re: ${parentMessage.subject}` : null,
+        subject: parentMessage.subject ? `Re: ") + (parentMessage.subject}` : null,
         recipient_id: parentMessage.sender_id,
         sender_id: currentUser.id,
         parent_message_id: parentMessageId,
@@ -1127,7 +1108,7 @@ export default function MessagesClient() {
   // Browse channels handler
   const handleBrowseChannels = () => {
     setChannelFilter('all')
-    toast.success('Browsing Channels' channels` })
+    toast.success(`Browsing Channels`, { description: `Showing ") + (mockChannels.length} channels` })
   }
 
   // View archived channels handler
@@ -1136,7 +1117,8 @@ export default function MessagesClient() {
     if (archivedList.length === 0) {
       toast.info('No Archived Channels')
     } else {
-      toast.success('Archived Channels' archived channel(s): ${archivedList.join(', ')}`,
+      toast.success(`Archived Channels`, {
+        description: `") + (archivedList.length} archived channel(s): ") + (archivedList.join(', ')}`,
         action: {
           label: 'Restore All',
           onClick: () => {
@@ -1159,7 +1141,7 @@ export default function MessagesClient() {
       toast.info('No Saved Messages')
     } else {
       setShowSavedMessages(true)
-      toast.success(`${totalSaved} Saved Messages`)
+      toast.success(`") + (totalSaved} Saved Messages`)
     }
   }
 
@@ -1167,7 +1149,7 @@ export default function MessagesClient() {
   const handleFilterFilesByType = (type: 'all' | 'images' | 'videos' | 'documents' | 'code') => {
     setFileTypeFilter(type)
     const typeLabels = { all: 'all files', images: 'image files', videos: 'video files', documents: 'document files', code: 'code files' }
-    toast.success(`Filtering ${typeLabels[type]}` only` })
+    toast.success(`Filtering ") + (typeLabels[type]}`, { description: `Showing ") + (typeLabels[type]} only` })
   }
 
   // Filter threads
@@ -1177,14 +1159,14 @@ export default function MessagesClient() {
     const count = filter === 'unread' ? mockThreads.filter(t => t.isUnread).length :
                   filter === 'following' ? mockThreads.filter(t => t.isFollowing).length :
                   mockThreads.length
-    toast.success(`Showing ${filterLabels[filter]}` thread(s)` })
+    toast.success(`Showing ") + (filterLabels[filter]}`, { description: `") + (count} thread(s)` })
   }
 
   // Filter mentions
   const handleFilterMentions = (filter: 'all' | 'unread' | 'reactions' | 'starred') => {
     setMentionFilter(filter)
     const filterLabels = { all: 'all mentions', unread: 'unread mentions', reactions: 'messages with reactions', starred: 'starred mentions' }
-    toast.success(`Showing ${filterLabels[filter]}`)
+    toast.success(`Showing ") + (filterLabels[filter]}`)
   }
 
   // Schedule call handler
@@ -1199,7 +1181,7 @@ export default function MessagesClient() {
       return
     }
 
-    const scheduledDateTime = new Date(`${scheduleCallDate}T${scheduleCallTime}`)
+    const scheduledDateTime = new Date(`") + (scheduleCallDate}T") + (scheduleCallTime}`)
     const callData = {
       type: scheduleCallType,
       scheduled_at: scheduledDateTime.toISOString(),
@@ -1212,8 +1194,7 @@ export default function MessagesClient() {
     existingCalls.push(callData)
     sessionStorage.setItem('scheduled_calls', JSON.stringify(existingCalls))
 
-    toast.success('Call Scheduled' call scheduled for ${scheduledDateTime.toLocaleString()}`
-    })
+    toast.success(`Call Scheduled`, { description: `") + (scheduleCallType} call scheduled for ") + (scheduledDateTime.toLocaleString()}` })
 
     setShowScheduleCallDialog(false)
     setScheduleCallDate('')
@@ -1229,7 +1210,7 @@ export default function MessagesClient() {
       channel: selectedChannel?.name || 'Quick Huddle'
     }
     sessionStorage.setItem('active_huddle', JSON.stringify(huddleData))
-    toast.success('Huddle Started'`,
+    toast.success('Huddle Started', {
       action: {
         label: 'End Huddle',
         onClick: () => {
@@ -1274,20 +1255,19 @@ export default function MessagesClient() {
     if (recordings.length === 0) {
       toast.info('No Recordings')
     } else {
-      toast.success(`${recordings.length} Recording(s)`, { description: 'Showing your call recordings' })
+      toast.success(recordings.length + " Recording(s)", { description: 'Showing your call recordings' })
     }
   }
 
   // View call history handler
   const handleViewCallHistory = () => {
     const completedCalls = mockCalls.filter(c => c.status === 'ended' || c.status === 'missed')
-    toast.success('Call History' calls in history. ${mockCalls.filter(c => c.status === 'missed').length} missed.` })
+    toast.success("Call History", { description: completedCalls.length + " calls in history. " + mockCalls.filter(c => c.status === 'missed').length + " missed." })
   }
 
   // Open call settings handler
   const handleOpenCallSettings = () => {
-    toast.info('Call Settings'
-    })
+    toast.info('Call Settings')
   }
 
   // Open channel settings handler
@@ -1296,7 +1276,8 @@ export default function MessagesClient() {
       toast.info('Select a Channel')
       return
     }
-    toast.success(`#${selectedChannel.name} Settings`, Type: ${selectedChannel.type}`,
+    toast.success("#" + selectedChannel.name + " Settings", {
+      description: "Type: " + selectedChannel.type,
       action: {
         label: 'Open Settings Tab',
         onClick: () => setSettingsTab('general')
@@ -1317,9 +1298,7 @@ export default function MessagesClient() {
 
   // AI Insight action handler
   const handleAIInsightAction = (insight: { id: string; title: string; description: string }) => {
-    toast.success(`AI Insight: ${insight.title}`)
-      }
-    })
+    toast.success("AI Insight: " + insight.title)
   }
 
   return (
@@ -1374,11 +1353,11 @@ export default function MessagesClient() {
             <Card key={index} className="border-0 shadow-sm">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-2">
-                  <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${stat.gradient} flex items-center justify-center`}>
+                  <div className={"w-8 h-8 rounded-lg bg-gradient-to-br " + stat.gradient + " flex items-center justify-center"}>
                     <stat.icon className="w-4 h-4 text-white" />
                   </div>
                   {stat.change !== 0 && (
-                    <div className={`flex items-center gap-1 text-xs ${stat.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    <div className={"flex items-center gap-1 text-xs " + (stat.change >= 0 ? 'text-green-600' : 'text-red-600')}>
                       {stat.change >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
                       {Math.abs(stat.change)}%
                     </div>
@@ -1460,7 +1439,7 @@ export default function MessagesClient() {
                 { icon: Plus, label: 'New Channel', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => handleCreateChannel() },
                 { icon: Hash, label: 'Browse', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => handleBrowseChannels() },
                 { icon: UserPlus, label: 'Invite', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => handleInvitePeople() },
-                { icon: Star, label: 'Starred', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => { setChannelFilter('starred'); toast.success('Starred Channels' starred channels` }) } },
+                { icon: Star, label: 'Starred', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => { setChannelFilter('starred'); toast.success('Starred Channels', { description: 'Showing ' + mockChannels.filter(c => c.isStarred).length + ' starred channels' }) } },
                 { icon: Bot, label: 'Apps', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', action: () => handleOpenMarketplace() },
                 { icon: Workflow, label: 'Workflows', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', action: () => handleCreateWorkflow() },
                 { icon: Archive, label: 'Archive', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => handleViewArchivedChannels() },
@@ -1469,7 +1448,7 @@ export default function MessagesClient() {
                 <Button
                   key={idx}
                   variant="ghost"
-                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  className={"h-20 flex-col gap-2 " + action.color + " hover:scale-105 transition-all duration-200"}
                   onClick={action.action}
                 >
                   <action.icon className="w-5 h-5" />
@@ -1564,7 +1543,7 @@ export default function MessagesClient() {
                             <Avatar>
                               <AvatarFallback>{channel.name.charAt(0)}</AvatarFallback>
                             </Avatar>
-                            <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white ${getStatusColor(channel.members[0]?.status || 'offline')}`} />
+                            <div className={"absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white " + getStatusColor(channel.members[0]?.status || 'offline')} />
                           </div>
                           <div>
                             <p className="font-medium">{channel.name}</p>
@@ -1633,7 +1612,7 @@ export default function MessagesClient() {
                           <Avatar className="w-8 h-8">
                             <AvatarFallback>{user.displayName.charAt(0)}</AvatarFallback>
                           </Avatar>
-                          <div className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white ${getStatusColor(user.status)}`} />
+                          <div className={"absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white " + getStatusColor(user.status)} />
                         </div>
                         <div>
                           <p className="text-sm font-medium">{user.displayName}</p>
@@ -1676,7 +1655,7 @@ export default function MessagesClient() {
             {/* Messages Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'New DM', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => { setSelectedChannel(directMessages[0] || null); toast.success('New Direct Message'` : 'No contacts available' }) } },
+                { icon: Plus, label: 'New DM', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => { setSelectedChannel(directMessages[0] || null); toast.success(directMessages[0] ? 'New Direct Message' : 'No contacts available') } },
                 { icon: Send, label: 'Compose', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => { setMessageInput(''); document.querySelector<HTMLInputElement>('input[placeholder*="Message"]')?.focus(); toast.success('Compose Message') } },
                 { icon: Reply, label: 'Reply All', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', action: () => { if (channelMessages.length > 0) { handleOpenReplyDialog(channelMessages[0].id) } else { toast.info('No Messages') } } },
                 { icon: Forward, label: 'Forward', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => { if (channelMessages.length > 0) { handleOpenForwardDialog(channelMessages[0].id) } else { toast.info('No Messages') } } },
@@ -1688,7 +1667,7 @@ export default function MessagesClient() {
                 <Button
                   key={idx}
                   variant="ghost"
-                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  className={"h-20 flex-col gap-2 " + action.color + " hover:scale-105 transition-all duration-200"}
                   onClick={action.action}
                 >
                   <action.icon className="w-5 h-5" />
@@ -1706,7 +1685,7 @@ export default function MessagesClient() {
                   <ScrollArea className="h-[500px]">
                     <div className="space-y-2">
                       {mockChannels.map(channel => (
-                        <div key={channel.id} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer ${selectedChannel?.id === channel.id ? 'bg-purple-100 dark:bg-purple-900/30' : 'hover:bg-gray-50 dark:hover:bg-gray-800'}`} onClick={() => setSelectedChannel(channel)}>
+                        <div key={channel.id} className={"flex items-center gap-3 p-2 rounded-lg cursor-pointer " + (selectedChannel?.id === channel.id ? 'bg-purple-100 dark:bg-purple-900/30' : 'hover:bg-gray-50 dark:hover:bg-gray-800')} onClick={() => setSelectedChannel(channel)}>
                           {channel.type === 'direct' ? (
                             <Avatar className="w-8 h-8">
                               <AvatarFallback>{channel.name.charAt(0)}</AvatarFallback>
@@ -1717,7 +1696,7 @@ export default function MessagesClient() {
                             </div>
                           )}
                           <div className="flex-1 min-w-0">
-                            <p className="font-medium text-sm truncate">{channel.type === 'direct' ? channel.name : `#${channel.name}`}</p>
+                            <p className="font-medium text-sm truncate">{channel.type === 'direct' ? channel.name : '#' + channel.name}</p>
                             <p className="text-xs text-gray-500 truncate">{formatTime(channel.lastActivity)}</p>
                           </div>
                           {channel.unreadCount > 0 && (
@@ -1738,7 +1717,7 @@ export default function MessagesClient() {
                         <div className="flex items-center gap-3">
                           {selectedChannel.type === 'direct' ? <Avatar><AvatarFallback>{selectedChannel.name.charAt(0)}</AvatarFallback></Avatar> : <Hash className="w-5 h-5" />}
                           <div>
-                            <CardTitle>{selectedChannel.type === 'direct' ? selectedChannel.name : `#${selectedChannel.name}`}</CardTitle>
+                            <CardTitle>{selectedChannel.type === 'direct' ? selectedChannel.name : '#' + selectedChannel.name}</CardTitle>
                             <CardDescription>{selectedChannel.memberCount} members</CardDescription>
                           </div>
                         </div>
@@ -1786,7 +1765,7 @@ export default function MessagesClient() {
                     </ScrollArea>
                     <div className="p-4 border-t">
                       <div className="flex gap-2">
-                        <Input placeholder={`Message #${selectedChannel.name}`} value={messageInput} onChange={(e) => setMessageInput(e.target.value)} className="flex-1" onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()} />
+                        <Input placeholder={"Message #" + selectedChannel.name} value={messageInput} onChange={(e) => setMessageInput(e.target.value)} className="flex-1" onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()} />
                         <Button onClick={handleSendMessage} disabled={mutating || !messageInput.trim()}>
                           <Send className="w-4 h-4" />
                         </Button>
@@ -1837,7 +1816,7 @@ export default function MessagesClient() {
                 { icon: MessageCircle, label: 'All Threads', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => handleFilterThreads('all') },
                 { icon: Star, label: 'Following', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', action: () => handleFilterThreads('following') },
                 { icon: Inbox, label: 'Unread', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => handleFilterThreads('unread') },
-                { icon: Reply, label: 'My Replies', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => { setThreadFilter('all'); toast.success('My Replies' threads with your replies` }) } },
+                { icon: Reply, label: 'My Replies', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => { setThreadFilter('all'); toast.success('My Replies') } },
                 { icon: AtSign, label: 'Mentions', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => handleFilterThreads('mentions') },
                 { icon: Archive, label: 'Archived', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', action: () => handleFilterThreads('archived') },
                 { icon: Search, label: 'Search', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => { document.querySelector<HTMLInputElement>('input[placeholder*="Search"]')?.focus(); toast.success('Search Threads') } },
@@ -1846,7 +1825,7 @@ export default function MessagesClient() {
                 <Button
                   key={idx}
                   variant="ghost"
-                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  className={"h-20 flex-col gap-2 " + action.color + " hover:scale-105 transition-all duration-200"}
                   onClick={action.action}
                 >
                   <action.icon className="w-5 h-5" />
@@ -1936,7 +1915,7 @@ export default function MessagesClient() {
                 <Button
                   key={idx}
                   variant="ghost"
-                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  className={"h-20 flex-col gap-2 " + action.color + " hover:scale-105 transition-all duration-200"}
                   onClick={action.action}
                 >
                   <action.icon className="w-5 h-5" />
@@ -1967,7 +1946,7 @@ export default function MessagesClient() {
                           </div>
                           <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white" onClick={() => {
                             setActiveCall(call)
-                            toast.success('Joining call'` })
+                            toast.success('Joining call')
                           }}>
                             Join
                           </Button>
@@ -2083,7 +2062,7 @@ export default function MessagesClient() {
                 <Button
                   key={idx}
                   variant="ghost"
-                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  className={"h-20 flex-col gap-2 " + action.color + " hover:scale-105 transition-all duration-200"}
                   onClick={action.action}
                 >
                   <action.icon className="w-5 h-5" />
@@ -2181,7 +2160,7 @@ export default function MessagesClient() {
                 <Button
                   key={idx}
                   variant="ghost"
-                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  className={"h-20 flex-col gap-2 " + action.color + " hover:scale-105 transition-all duration-200"}
                   onClick={action.action}
                 >
                   <action.icon className="w-5 h-5" />
@@ -2198,7 +2177,7 @@ export default function MessagesClient() {
               <CardContent>
                 <div className="space-y-4">
                   {mockMentions.map(mention => (
-                    <div key={mention.id} className={`p-4 border rounded-lg ${mention.isRead ? '' : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200'}`}>
+                    <div key={mention.id} className={"p-4 border rounded-lg " + (mention.isRead ? '' : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200')}>
                       <div className="flex items-start gap-3">
                         <Avatar>
                           <AvatarFallback>{mention.message.author.displayName.charAt(0)}</AvatarFallback>
@@ -2215,7 +2194,7 @@ export default function MessagesClient() {
                         </div>
                         <Button variant="ghost" size="icon" onClick={() => {
                           toast.info('Reply')
-                          setMessageInput(`@${mention.message.author.name} `)
+                          setMessageInput('@' + mention.message.author.name + ' ')
                         }}>
                           <Reply className="w-4 h-4" />
                         </Button>
@@ -2250,7 +2229,7 @@ export default function MessagesClient() {
                         m.body?.toLowerCase().includes(searchQuery.toLowerCase()) ||
                         m.subject?.toLowerCase().includes(searchQuery.toLowerCase())
                       ) || []
-                      toast.success(`Search complete` matching messages` })
+                      toast.success('Search complete', { description: results.length + ' matching messages' })
                     }}>Search</Button>
                   </div>
 
@@ -2292,11 +2271,11 @@ export default function MessagesClient() {
                         <button
                           key={item.id}
                           onClick={() => setSettingsTab(item.id)}
-                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
+                          className={"w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors " + (
                             settingsTab === item.id
                               ? 'bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400'
                               : 'hover:bg-gray-100 dark:hover:bg-gray-700/50 text-gray-600 dark:text-gray-400'
-                          }`}
+                          )}
                         >
                           <item.icon className="w-4 h-4" />
                           <span className="text-sm font-medium">{item.label}</span>
@@ -2562,7 +2541,7 @@ export default function MessagesClient() {
                             {['#4a154b', '#1264a3', '#2eb67d', '#e01e5a', '#36c5f0', '#ecb22e'].map(color => (
                               <button
                                 key={color}
-                                className={`w-8 h-8 rounded-full border-2 shadow-sm hover:scale-110 transition-transform ${sidebarThemeColor === color ? 'border-gray-900 dark:border-white ring-2 ring-offset-2 ring-gray-400' : 'border-white'}`}
+                                className={"w-8 h-8 rounded-full border-2 shadow-sm hover:scale-110 transition-transform " + (sidebarThemeColor === color ? 'border-gray-900 dark:border-white ring-2 ring-offset-2 ring-gray-400' : 'border-white')}
                                 style={{ backgroundColor: color }}
                                 onClick={() => handleSetSidebarThemeColor(color)}
                               />
@@ -3143,7 +3122,7 @@ export default function MessagesClient() {
             </Button>
             <Button onClick={handleUploadSelectedFiles} className="bg-green-600 hover:bg-green-700">
               <Upload className="w-4 h-4 mr-2" />
-              Upload {selectedFiles.length > 0 ? `(${selectedFiles.length})` : ''}
+              Upload {selectedFiles.length > 0 ? '(' + selectedFiles.length + ')' : ''}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -3168,10 +3147,10 @@ export default function MessagesClient() {
                 { id: 2, device: 'Safari - iPad', location: 'San Francisco, CA', lastActive: '1 hour ago', current: false },
                 { id: 3, device: 'Chrome - Windows PC', location: 'New York, NY', lastActive: '3 hours ago', current: false },
               ].map((session) => (
-                <div key={session.id} className={`flex items-center justify-between p-3 rounded-lg ${session.current ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800' : 'bg-gray-50 dark:bg-gray-800'}`}>
+                <div key={session.id} className={"flex items-center justify-between p-3 rounded-lg " + (session.current ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800' : 'bg-gray-50 dark:bg-gray-800')}>
                   <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${session.current ? 'bg-green-100 dark:bg-green-800' : 'bg-gray-200 dark:bg-gray-700'}`}>
-                      <HardDrive className={`w-5 h-5 ${session.current ? 'text-green-600' : 'text-gray-500'}`} />
+                    <div className={"w-10 h-10 rounded-full flex items-center justify-center " + (session.current ? 'bg-green-100 dark:bg-green-800' : 'bg-gray-200 dark:bg-gray-700')}>
+                      <HardDrive className={"w-5 h-5 " + (session.current ? 'text-green-600' : 'text-gray-500')} />
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
@@ -3235,8 +3214,8 @@ export default function MessagesClient() {
               ].map((workflow) => (
                 <div key={workflow.id} className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-800">
                   <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${workflow.active ? 'bg-indigo-100 dark:bg-indigo-900/30' : 'bg-gray-200 dark:bg-gray-700'}`}>
-                      <Workflow className={`w-5 h-5 ${workflow.active ? 'text-indigo-600' : 'text-gray-500'}`} />
+                    <div className={"w-10 h-10 rounded-lg flex items-center justify-center " + (workflow.active ? 'bg-indigo-100 dark:bg-indigo-900/30' : 'bg-gray-200 dark:bg-gray-700')}>
+                      <Workflow className={"w-5 h-5 " + (workflow.active ? 'text-indigo-600' : 'text-gray-500')} />
                     </div>
                     <div>
                       <p className="font-medium">{workflow.name}</p>
@@ -3393,7 +3372,7 @@ export default function MessagesClient() {
                   <SelectItem value="all">All Channels</SelectItem>
                   {mockChannels.map(channel => (
                     <SelectItem key={channel.id} value={channel.id}>
-                      {channel.type === 'direct' ? channel.name : `#${channel.name}`}
+                      {channel.type === 'direct' ? channel.name : '#' + channel.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -3404,7 +3383,7 @@ export default function MessagesClient() {
               <span className="text-sm text-purple-700 dark:text-purple-400">
                 {filterType === 'all' && filterDateRange === 'all' && filterChannel === 'all'
                   ? 'No filters applied - showing all messages'
-                  : `Filtering: ${filterType !== 'all' ? filterType : ''}${filterDateRange !== 'all' ? ` from ${filterDateRange}` : ''}${filterChannel !== 'all' ? ` in selected channel` : ''}`
+                  : 'Filtering: ' + (filterType !== 'all' ? filterType : '') + (filterDateRange !== 'all' ? ' from ' + filterDateRange : '') + (filterChannel !== 'all' ? ' in selected channel' : '')
                 }
               </span>
             </div>

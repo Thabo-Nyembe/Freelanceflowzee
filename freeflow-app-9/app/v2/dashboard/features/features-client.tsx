@@ -633,7 +633,7 @@ export default function FeaturesClient() {
     setFeatures(prev => [newFeature, ...prev])
     setNewFeatureDialogOpen(false)
     setNewFeatureForm({ name: '', key: '', description: '', category: 'AI & ML', priority: 'medium', team: '', platforms: [] })
-    toast.success('Feature created successfully' has been added to the backlog` })
+    toast.success('Feature created successfully')
   }
 
   const handleToggleFlag = () => {
@@ -647,7 +647,7 @@ export default function FeaturesClient() {
         : f
     ))
     setToggleFlagDialogOpen(false)
-    toast.success(`Feature flag ${toggleFlagForm.enabled ? 'enabled' : 'disabled'}`)
+    toast.success('Feature flag ' + (toggleFlagForm.enabled ? 'enabled' : 'disabled'))
   }
 
   const handleStartRollout = () => {
@@ -671,7 +671,7 @@ export default function FeaturesClient() {
         : f
     ))
     setRolloutDialogOpen(false)
-    toast.success('Rollout started'% of users` })
+    toast.success("Rollout started for " + rolloutForm.percentage + "% of users")
   }
 
   const handleCreateABTest = () => {
@@ -694,7 +694,7 @@ export default function FeaturesClient() {
         : f
     ))
     setAbTestDialogOpen(false)
-    toast.success('A/B Test created' is now running` })
+    toast.success('A/B Test created')
   }
 
   const handleCreateSegment = () => {
@@ -704,7 +704,7 @@ export default function FeaturesClient() {
     }
     // In a real app, this would create a segment in the backend
     setSegmentDialogOpen(false)
-    toast.success('Segment created' segment is now active` })
+    toast.success('Segment created')
     setSegmentForm({ name: '', description: '', attribute: '', operator: '=', value: '' })
   }
 
@@ -730,14 +730,14 @@ export default function FeaturesClient() {
     URL.revokeObjectURL(url)
 
     setExportDialogOpen(false)
-    toast.success('Export completed' features exported` })
+    toast.success('Export completed')
   }
 
   const handleMoveFeature = (featureId: string, newStatus: FeatureStatus) => {
     setFeatures(prev => prev.map(f =>
       f.id === featureId ? { ...f, status: newStatus, updatedAt: new Date().toISOString().split('T')[0] } : f
     ))
-    toast.success('Feature moved'` })
+    toast.success("Feature moved to " + newStatus)
   }
 
   return (
@@ -884,7 +884,7 @@ export default function FeaturesClient() {
                   onClick={action.action}
                   className="flex flex-col items-center gap-2 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:scale-105 transition-all group"
                 >
-                  <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color} text-white group-hover:scale-110 transition-transform`}>
+                  <div className={"p-2 rounded-lg bg-gradient-to-br " + (action.color) + " text-white group-hover:scale-110 transition-transform"}>
                     <action.icon className="h-5 w-5" />
                   </div>
                   <span className="text-xs font-medium text-gray-600 dark:text-gray-400">{action.label}</span>
@@ -1443,11 +1443,11 @@ export default function FeaturesClient() {
                         <button
                           key={item.id}
                           onClick={() => setSettingsTab(item.id)}
-                          className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-all ${
+                          className={"w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-all " + (
                             settingsTab === item.id
                               ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400'
                               : 'hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400'
-                          }`}
+                          ) + ""}
                         >
                           <item.icon className="w-5 h-5" />
                           <div className="text-left">
@@ -1842,7 +1842,7 @@ export default function FeaturesClient() {
             <AIInsightsPanel
               insights={mockFeaturesAIInsights}
               title="Feature Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -2215,11 +2215,11 @@ export default function FeaturesClient() {
                   <button
                     key={platform}
                     type="button"
-                    className={`px-3 py-1 rounded-lg border ${
+                    className={"px-3 py-1 rounded-lg border " + (
                       newFeatureForm.platforms.includes(platform)
                         ? 'bg-indigo-100 border-indigo-300 text-indigo-700'
                         : 'border-gray-200 dark:border-gray-700'
-                    }`}
+                    ) + ""}
                     onClick={() => setNewFeatureForm(prev => ({
                       ...prev,
                       platforms: prev.platforms.includes(platform)
@@ -2270,13 +2270,13 @@ export default function FeaturesClient() {
               </div>
               <button
                 onClick={() => setToggleFlagForm(prev => ({ ...prev, enabled: !prev.enabled }))}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                className={"relative inline-flex h-6 w-11 items-center rounded-full transition-colors " + (
                   toggleFlagForm.enabled ? 'bg-green-600' : 'bg-gray-300'
-                }`}
+                ) + ""}
               >
-                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                <span className={"inline-block h-4 w-4 transform rounded-full bg-white transition-transform " + (
                   toggleFlagForm.enabled ? 'translate-x-6' : 'translate-x-1'
-                }`} />
+                ) + ""} />
               </button>
             </div>
             {toggleFlagForm.selectedFeatureId && (
@@ -2359,11 +2359,11 @@ export default function FeaturesClient() {
                   <button
                     key={seg.id}
                     type="button"
-                    className={`px-3 py-1 rounded-lg border text-sm ${
+                    className={"px-3 py-1 rounded-lg border text-sm " + (
                       rolloutForm.segments.includes(seg.name)
                         ? 'bg-blue-100 border-blue-300 text-blue-700'
                         : 'border-gray-200 dark:border-gray-700'
-                    }`}
+                    ) + ""}
                     onClick={() => setRolloutForm(prev => ({
                       ...prev,
                       segments: prev.segments.includes(seg.name)
@@ -2460,11 +2460,11 @@ export default function FeaturesClient() {
                   <button
                     key={metric}
                     type="button"
-                    className={`px-3 py-1 rounded-lg border text-sm ${
+                    className={"px-3 py-1 rounded-lg border text-sm " + (
                       abTestForm.metrics.includes(metric)
                         ? 'bg-orange-100 border-orange-300 text-orange-700'
                         : 'border-gray-200 dark:border-gray-700'
-                    }`}
+                    ) + ""}
                     onClick={() => setAbTestForm(prev => ({
                       ...prev,
                       metrics: prev.metrics.includes(metric)
@@ -2641,11 +2641,11 @@ export default function FeaturesClient() {
                     key={f.id}
                     type="button"
                     disabled={!compareSelection.includes(f.id) && compareSelection.length >= 3}
-                    className={`px-3 py-1 rounded-lg border text-sm ${
+                    className={"px-3 py-1 rounded-lg border text-sm " + (
                       compareSelection.includes(f.id)
                         ? 'bg-pink-100 border-pink-300 text-pink-700'
                         : 'border-gray-200 dark:border-gray-700 disabled:opacity-50'
-                    }`}
+                    ) + ""}
                     onClick={() => setCompareSelection(prev =>
                       prev.includes(f.id) ? prev.filter(id => id !== f.id) : [...prev, f.id]
                     )}

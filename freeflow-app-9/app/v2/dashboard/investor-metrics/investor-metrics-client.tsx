@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -266,8 +268,6 @@ export default function InvestorMetricsClient() {
   const handleCreateMetric = async () => {
     setLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Not authenticated')
@@ -507,15 +507,13 @@ export default function InvestorMetricsClient() {
 
   const handleSetAlert = async (metric: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Not authenticated')
         return
       }
       // Could save alert to database here
-      toast.success('Alert set' changes` })
+      toast.success('Alert set')
     } catch (error: any) {
       toast.error('Failed to set alert')
     }
@@ -558,8 +556,7 @@ export default function InvestorMetricsClient() {
         })
       }
 
-      toast.success('Metrics updated successfully' from ${updateMetricsForm.refreshSource}`
-      })
+      toast.success("Metrics updated successfully from " + updateMetricsForm.refreshSource)
       setShowUpdateMetricsDialog(false)
     } catch (error: any) {
       toast.error('Failed to update metrics')
@@ -612,8 +609,7 @@ export default function InvestorMetricsClient() {
         investorReportForm.recipientType === 'investors' ? investors.length :
         investorReportForm.customRecipients.split(',').filter(e => e.trim()).length
 
-      toast.success('Investor report generated' report ready for ${recipientCount} recipient(s)`
-      })
+      toast.success("Investor report generated: report ready for " + recipientCount + " recipient(s)")
       setShowInvestorReportDialog(false)
     } catch (error: any) {
       toast.error('Failed to generate report')
@@ -692,8 +688,7 @@ export default function InvestorMetricsClient() {
         URL.revokeObjectURL(url)
       }
 
-      toast.success('Data exported successfully' in ${exportDataForm.format.toUpperCase()} format`
-      })
+      toast.success("Data exported successfully in " + exportDataForm.format.toUpperCase() + " format")
       setShowExportDataDialog(false)
     } catch (error: any) {
       toast.error('Failed to export data')
@@ -883,7 +878,7 @@ export default function InvestorMetricsClient() {
                   { icon: Settings, label: 'Settings', color: 'text-gray-600 dark:text-gray-400', action: () => setActiveTab('settings') }
                 ].map((action, i) => (
                   <Button key={i} variant="outline" onClick={action.action} className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200">
-                    <action.icon className={`h-5 w-5 ${action.color}`} />
+                    <action.icon className={"h-5 w-5 " + action.color} />
                     <span className="text-xs">{action.label}</span>
                   </Button>
                 ))}
@@ -2088,7 +2083,7 @@ export default function InvestorMetricsClient() {
               <AIInsightsPanel
                 insights={investorMetricsAIInsights}
                 title="Investor Intelligence"
-                onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+                onInsightAction={(insight) => toast.info(insight.title)}
               />
             </div>
             <div className="space-y-6">

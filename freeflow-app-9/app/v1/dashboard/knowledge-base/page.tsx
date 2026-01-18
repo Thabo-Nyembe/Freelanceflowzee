@@ -78,9 +78,9 @@ export default function ClientKnowledgeBase() {
 
   // HANDLERS
   const handleVideoClick = async (video: VideoTutorial) => {
-    try {      // Show loading toast and open video
-      toast.info('Opening video tutorial' - ${video.duration}`
-      })
+    try {
+      // Show loading toast and open video
+      toast.info(`Opening video tutorial: ${video.title} - ${video.duration}`)
 
       // Open video in new tab or modal
       if (video.url.startsWith('http')) {
@@ -145,8 +145,7 @@ export default function ClientKnowledgeBase() {
       }
 
       // Open article detail view
-      toast.info(`Opening: ${article.title}` min read`
-      })
+      toast.info(`Opening: ${article.title} - ${article.read_time || 5} min read`)
 
       // Navigate to article page
       window.location.href = `/dashboard/client-zone/knowledge-base/article/${article.id}`
@@ -160,7 +159,8 @@ export default function ClientKnowledgeBase() {
     try {
       const { createFeatureLogger } = await import('@/lib/logger')
       const logger = createFeatureLogger('knowledge-base')
-      const { toast } = await import('sonner')      const { submitArticleFeedback } = await import('@/lib/knowledge-base-queries')
+      const { toast } = await import('sonner')
+    const { submitArticleFeedback } = await import('@/lib/knowledge-base-queries')
       // await submitArticleFeedback(articleId, userId, 'helpful')
 
       toast.success('Thank you for your feedback!')
@@ -176,7 +176,8 @@ export default function ClientKnowledgeBase() {
   const handleSearchArticles = async (query: string) => {
     try {
       const { createFeatureLogger } = await import('@/lib/logger')
-      const logger = createFeatureLogger('knowledge-base')      const { searchArticles } = await import('@/lib/knowledge-base-queries')
+      const logger = createFeatureLogger('knowledge-base')
+    const { searchArticles } = await import('@/lib/knowledge-base-queries')
       // const results = await searchArticles(query, userId)
 
       // Update search results

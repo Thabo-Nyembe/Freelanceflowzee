@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -76,6 +78,9 @@ import {
 
 import { useHelpArticles, useHelpCategories, useHelpDocs, useHelpFeedback } from '@/lib/hooks/use-help-extended'
 import { useAuthUserId } from '@/lib/hooks/use-auth-helpers'
+
+// Initialize Supabase client once at module level
+const supabase = createClient()
 
 // ============================================================================
 // TYPE DEFINITIONS - Intercom Guide Level Knowledge Base
@@ -985,8 +990,6 @@ export default function HelpCenterClient() {
     }
 
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
 
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
@@ -1010,7 +1013,7 @@ export default function HelpCenterClient() {
       if (error) throw error
 
       setShowCreateArticleDialog(false)
-      toast.success(`Article "${newArticleTitle}" created as draft`)
+      toast.success('Article "' + newArticleTitle + '" created as draft')
       refreshArticles()  // Refresh data from database
     } catch (error) {
       console.error('Error creating article:', error)
@@ -1037,7 +1040,7 @@ export default function HelpCenterClient() {
       }),
       {
         loading: 'Publishing article...',
-        success: `"${articleTitle}" is now live!`,
+        success: "\"" + articleTitle + "\" is now live!",
         error: 'Failed to publish article'
       }
     )
@@ -1058,8 +1061,6 @@ export default function HelpCenterClient() {
     }
 
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
 
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
@@ -1080,7 +1081,7 @@ export default function HelpCenterClient() {
       if (error) throw error
 
       setShowCreateCategoryDialog(false)
-      toast.success(`Category "${newCategoryName}" created successfully`)
+      toast.success('Category "' + newCategoryName + '" created successfully')
       refreshCategories()  // Refresh data from database
     } catch (error) {
       console.error('Error creating category:', error)
@@ -1102,7 +1103,7 @@ export default function HelpCenterClient() {
         article.excerpt.toLowerCase().includes(searchQuery.toLowerCase()) ||
         article.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
       )
-      toast.success(`Found ${results.length} articles matching "${searchQuery}"`)
+      toast.success('Found ' + results.length + ' articles matching "' + searchQuery + '"')
     } finally {
       setIsSearching(false)
     }
@@ -1135,7 +1136,7 @@ export default function HelpCenterClient() {
           }),
           {
             loading: 'Importing articles...',
-            success: `Imported from ${file.name}`,
+            success: "Imported from " + file.name,
             error: 'Import failed'
           }
         )
@@ -1160,13 +1161,13 @@ export default function HelpCenterClient() {
     }
     setAllTags(prev => [...prev, newTagName.toLowerCase()])
     setNewTagName('')
-    toast.success(`Tag "${newTagName}" added`)
+    toast.success('Tag "' + newTagName + '" added')
   }
 
   // Delete tag handler
   const handleDeleteTag = async (tag: string) => {
     setAllTags(prev => prev.filter(t => t !== tag))
-    toast.success(`Tag "${tag}" deleted`)
+    toast.success('Tag "' + tag + '" deleted')
   }
 
   const handleTranslate = async () => {
@@ -1208,14 +1209,14 @@ export default function HelpCenterClient() {
       (a.status === 'draft' && new Date(a.updatedAt) < new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)) ||
       (a.status === 'published' && a.views < 100)
     )
-    toast.success(`Found ${needsCleanup.length} articles that may need attention`)
+    toast.success('Found ' + needsCleanup.length + ' articles that may need attention')
   }
 
   const handleViewCollection = async (collectionName: string) => {
     // Filter articles by collection
     const collection = collections.find(c => c.name === collectionName)
     if (collection) {
-      toast.success(`Viewing collection: ${collectionName} (${collection.articleIds.length} articles)`)
+      toast.success('Viewing collection: ' + collectionName + ' (' + collection.articleIds.length + ' articles)')
     }
   }
 
@@ -1235,8 +1236,6 @@ export default function HelpCenterClient() {
     }
 
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
 
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
@@ -1255,7 +1254,7 @@ export default function HelpCenterClient() {
       if (error) throw error
 
       setShowNewCollectionDialog(false)
-      toast.success(`Collection "${newCollectionName}" created successfully`)
+      toast.success('Collection "' + newCollectionName + '" created successfully')
       refreshCollections()  // Refresh data from database
     } catch (error) {
       console.error('Error creating collection:', error)
@@ -1267,35 +1266,35 @@ export default function HelpCenterClient() {
   const handleAllFeedback = async () => {
     setFeedbackFilter('all')
     setActiveTab('feedback')
-    toast.success(`Showing all ${feedback.length} feedback items`)
+    toast.success("Showing all " + feedback.length + " feedback items")
   }
 
   const handlePositiveFeedback = async () => {
     setFeedbackFilter('helpful')
     setActiveTab('feedback')
     const count = feedback.filter(f => f.type === 'helpful').length
-    toast.success(`Showing ${count} positive feedback items`)
+    toast.success("Showing " + count + " positive feedback items")
   }
 
   const handleNegativeFeedback = async () => {
     setFeedbackFilter('not_helpful')
     setActiveTab('feedback')
     const count = feedback.filter(f => f.type === 'not_helpful').length
-    toast.success(`Showing ${count} negative feedback items`)
+    toast.success("Showing " + count + " negative feedback items")
   }
 
   const handleIncorrectFeedback = async () => {
     setFeedbackFilter('incorrect')
     setActiveTab('feedback')
     const count = feedback.filter(f => f.type === 'incorrect').length
-    toast.success(`Showing ${count} incorrect reports`)
+    toast.success("Showing " + count + " incorrect reports")
   }
 
   const handleNeedsUpdate = async () => {
     setFeedbackFilter('needs_update')
     setActiveTab('feedback')
     const count = feedback.filter(f => f.type === 'needs_update').length
-    toast.success(`Showing ${count} update requests`)
+    toast.success("Showing " + count + " update requests")
   }
 
   // Export handler - real file download
@@ -1311,7 +1310,7 @@ export default function HelpCenterClient() {
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `help-center-export-${new Date().toISOString().split('T')[0]}.json`
+    a.download = "help-center-export-" + new Date().toISOString().split('T')[0] + ".json"
     a.click()
     URL.revokeObjectURL(url)
     toast.success('Help center data exported successfully')
@@ -1337,7 +1336,7 @@ export default function HelpCenterClient() {
   const handleFollowUp = async () => {
     // Filter feedback with comments that need follow-up
     const needsFollowUp = feedback.filter(f => f.comment && f.userEmail)
-    toast.success(`${needsFollowUp.length} feedback items need follow-up`)
+    toast.success(needsFollowUp.length + " feedback items need follow-up")
   }
 
   const handleOverview = async () => {
@@ -1368,7 +1367,7 @@ export default function HelpCenterClient() {
   const handleGaps = async () => {
     // Analyze searches without results
     const gapQueries = analytics.topSearchQueries.filter(q => !q.hasResults)
-    toast.success(`Found ${gapQueries.length} content gaps - consider creating articles for: ${gapQueries.map(q => q.query).join(', ')}`)
+    toast.success("Found " + gapQueries.length + " content gaps - consider creating articles for: " + gapQueries.map(q => q.query).join(', '))
   }
 
   const handleSchedule = async () => {
@@ -1402,7 +1401,7 @@ export default function HelpCenterClient() {
           : a
       ))
       setShowScheduleDialog(false)
-      toast.success(`"${article.title}" scheduled for ${scheduledDateTime.toLocaleString()}`)
+      toast.success("\"" + article.title + "\" scheduled for " + scheduledDateTime.toLocaleString())
     }
   }
 
@@ -1410,8 +1409,8 @@ export default function HelpCenterClient() {
   const handleViewArticleExternal = async (articleTitle: string) => {
     const article = articles.find(a => a.title === articleTitle)
     if (article) {
-      window.open(`/help/${article.slug}`, '_blank')
-      toast.success(`Opened "${articleTitle}" in new tab`)
+      window.open("/help/" + article.slug, '_blank')
+      toast.success("Opened \"" + articleTitle + "\" in new tab")
     }
   }
 
@@ -1419,7 +1418,7 @@ export default function HelpCenterClient() {
     const article = articles.find(a => a.title === articleTitle)
     if (article) {
       setSelectedArticle(article)
-      toast.success(`Editing "${articleTitle}"`)
+      toast.success("Editing \"" + articleTitle + "\"")
       // In production: navigate to editor or open edit dialog
     }
   }
@@ -1427,8 +1426,8 @@ export default function HelpCenterClient() {
   const handleViewLive = async (articleTitle: string) => {
     const article = articles.find(a => a.title === articleTitle)
     if (article) {
-      window.open(`/help/${article.slug}`, '_blank')
-      toast.success(`Viewing live preview of "${articleTitle}"`)
+      window.open("/help/" + article.slug, '_blank')
+      toast.success("Viewing live preview of \"" + articleTitle + "\"")
     }
   }
 
@@ -1441,9 +1440,9 @@ export default function HelpCenterClient() {
 
     const duplicatedArticle: Article = {
       ...article,
-      id: `art-${Date.now()}`,
-      title: `${article.title} (Copy)`,
-      slug: `${article.slug}-copy`,
+      id: "art-" + Date.now(),
+      title: article.title + " (Copy)",
+      slug: article.slug + "-copy",
       status: 'draft',
       views: 0,
       helpfulCount: 0,
@@ -1455,7 +1454,7 @@ export default function HelpCenterClient() {
     }
 
     setArticles(prev => [...prev, duplicatedArticle])
-    toast.success(`"${articleTitle}" has been duplicated`)
+    toast.success("\"" + articleTitle + "\" has been duplicated")
   }
 
   const handleShare = async (articleTitle: string) => {
@@ -1465,14 +1464,14 @@ export default function HelpCenterClient() {
       return
     }
 
-    const shareUrl = `${window.location.origin}/help/${article.slug}`
+    const shareUrl = window.location.origin + "/help/" + article.slug
 
     try {
       await navigator.clipboard.writeText(shareUrl)
-      toast.success(`Link copied to clipboard: ${shareUrl}`)
+      toast.success("Link copied to clipboard: " + shareUrl)
     } catch {
       // Fallback for older browsers
-      toast.info(`Share link: ${shareUrl}`)
+      toast.info("Share link: " + shareUrl)
     }
   }
 
@@ -1504,7 +1503,7 @@ export default function HelpCenterClient() {
       }),
       {
         loading: 'Archiving article...',
-        success: `"${articleTitle}" has been archived`,
+        success: "\"" + articleTitle + "\" has been archived",
         error: 'Failed to archive (updated locally)'
       }
     )
@@ -1542,12 +1541,12 @@ export default function HelpCenterClient() {
     ))
     setShowEditCategoryDialog(false)
     setSelectedCategoryForEdit(null)
-    toast.success(`Category "${newCategoryName}" updated successfully`)
+    toast.success("Category \"" + newCategoryName + "\" updated successfully")
   }
 
   // Copy article link handler
   const handleCopyArticleLink = async (article: Article) => {
-    const url = `${window.location.origin}/help/${article.slug}`
+    const url = window.location.origin + "/help/" + article.slug
     try {
       await navigator.clipboard.writeText(url)
       toast.success('Article link copied to clipboard!')
@@ -1609,7 +1608,7 @@ export default function HelpCenterClient() {
         if (!res.ok) throw new Error('Failed to submit feedback')
         // Add to local feedback
         const newFeedback: Feedback = {
-          id: `fb-${Date.now()}`,
+          id: "fb-" + Date.now(),
           articleId,
           type,
           comment,
@@ -1620,7 +1619,7 @@ export default function HelpCenterClient() {
       }).catch(() => {
         // Fallback: add locally
         const newFeedback: Feedback = {
-          id: `fb-${Date.now()}`,
+          id: "fb-" + Date.now(),
           articleId,
           type,
           comment,
@@ -1640,7 +1639,7 @@ export default function HelpCenterClient() {
   const handleContactSupport = async () => {
     const subject = encodeURIComponent('Help Center Support Request')
     const body = encodeURIComponent('Please describe your issue:\n\n')
-    window.location.href = `mailto:support@freeflowkazi.com?subject=${subject}&body=${body}`
+    window.location.href = "mailto:support@freeflowkazi.com?subject=" + subject + "&body=" + body
     toast.success('Opening email client...')
   }
 
@@ -1837,7 +1836,7 @@ export default function HelpCenterClient() {
                 { icon: Settings, label: 'Settings', color: 'text-indigo-600 dark:text-indigo-400', handler: handleSettings }
               ].map((action, i) => (
                 <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200" onClick={action.handler}>
-                  <action.icon className={`h-5 w-5 ${action.color}`} />
+                  <action.icon className={"h-5 w-5 " + action.color} />
                   <span className="text-xs">{action.label}</span>
                 </Button>
               ))}
@@ -2033,7 +2032,7 @@ export default function HelpCenterClient() {
                 { icon: Settings, label: 'Settings', color: 'text-gray-600 dark:text-gray-400', handler: handleSettings }
               ].map((action, i) => (
                 <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200" onClick={action.handler}>
-                  <action.icon className={`h-5 w-5 ${action.color}`} />
+                  <action.icon className={"h-5 w-5 " + action.color} />
                   <span className="text-xs">{action.label}</span>
                 </Button>
               ))}
@@ -2045,7 +2044,7 @@ export default function HelpCenterClient() {
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-3">
-                        <div className={`w-12 h-12 rounded-xl bg-gradient-to-r ${category.color} flex items-center justify-center text-2xl`}>
+                        <div className={"w-12 h-12 rounded-xl bg-gradient-to-r " + category.color + " flex items-center justify-center text-2xl"}>
                           {category.icon}
                         </div>
                         <div>
@@ -2136,7 +2135,7 @@ export default function HelpCenterClient() {
               {collections.map((collection) => (
                 <Card key={collection.id} className="hover:shadow-lg transition-shadow dark:bg-gray-800/50">
                   <CardContent className="p-6">
-                    <div className={`w-14 h-14 rounded-xl bg-gradient-to-r ${collection.color} flex items-center justify-center text-2xl mb-4`}>
+                    <div className={"w-14 h-14 rounded-xl bg-gradient-to-r " + collection.color + " flex items-center justify-center text-2xl mb-4"}>
                       {collection.icon}
                     </div>
                     <h3 className="font-semibold mb-2">{collection.name}</h3>
@@ -2213,7 +2212,7 @@ export default function HelpCenterClient() {
                 { icon: Settings, label: 'Settings', color: 'text-gray-600 dark:text-gray-400', handler: handleSettings }
               ].map((action, i) => (
                 <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200" onClick={action.handler}>
-                  <action.icon className={`h-5 w-5 ${action.color}`} />
+                  <action.icon className={"h-5 w-5 " + action.color} />
                   <span className="text-xs">{action.label}</span>
                 </Button>
               ))}
@@ -2389,7 +2388,7 @@ export default function HelpCenterClient() {
                 { icon: Calendar, label: 'Schedule', color: 'text-pink-600 dark:text-pink-400', handler: handleSchedule }
               ].map((action, i) => (
                 <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200" onClick={action.handler}>
-                  <action.icon className={`h-5 w-5 ${action.color}`} />
+                  <action.icon className={"h-5 w-5 " + action.color} />
                   <span className="text-xs">{action.label}</span>
                 </Button>
               ))}
@@ -3053,8 +3052,6 @@ export default function HelpCenterClient() {
             <Button onClick={async () => {
               toast.loading('Initiating translation queue...', { id: 'translate-queue' })
               try {
-                const { createClient } = await import('@/lib/supabase/client')
-                const supabase = createClient()
                 const { data: { user } } = await supabase.auth.getUser()
                 if (!user) throw new Error('Not authenticated')
 
@@ -3106,8 +3103,6 @@ export default function HelpCenterClient() {
             <Button onClick={async () => {
               toast.loading('Creating subcategory...', { id: 'create-subcategory' })
               try {
-                const { createClient } = await import('@/lib/supabase/client')
-                const supabase = createClient()
                 const { data: { user } } = await supabase.auth.getUser()
                 if (!user) throw new Error('Not authenticated')
 
@@ -3163,8 +3158,6 @@ export default function HelpCenterClient() {
             <Button onClick={async () => {
               toast.loading('Saving order...', { id: 'save-order' })
               try {
-                const { createClient } = await import('@/lib/supabase/client')
-                const supabase = createClient()
                 const { data: { user } } = await supabase.auth.getUser()
                 if (!user) throw new Error('Not authenticated')
 

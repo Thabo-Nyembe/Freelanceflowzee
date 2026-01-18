@@ -922,7 +922,7 @@ export default function RecruitmentClient() {
         benefits: [],
         configuration: {}
       })
-      toast.success('Job Posted' has been created successfully` })
+      toast.success('Job Posted')
       setShowPostJobDialog(false)
       refetchJobs()
     } catch (error) {
@@ -965,7 +965,7 @@ export default function RecruitmentClient() {
       recruiter: job.recruiter || ''
     })
     setShowEditJobDialog(true)
-    toast.info('Editing Job'` })
+    toast.info('Editing Job')
   }
 
   const handleUpdateJob = async () => {
@@ -988,7 +988,7 @@ export default function RecruitmentClient() {
           recruiter: newJobForm.recruiter || null
         }
       })
-      toast.success('Job Updated' has been updated` })
+      toast.success('Job Updated')
       setShowEditJobDialog(false)
       setEditingJob(null)
       refetchJobs()
@@ -1000,7 +1000,7 @@ export default function RecruitmentClient() {
   const handleDeleteJob = async (jobId: string, jobTitle: string) => {
     try {
       await deleteJob(jobId)
-      toast.success('Job Deleted' has been removed` })
+      toast.success('Job Deleted')
       refetchJobs()
     } catch (error) {
       toast.error('Error')
@@ -1018,7 +1018,7 @@ export default function RecruitmentClient() {
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `recruitment-report-${new Date().toISOString().split('T')[0]}.json`
+    a.download = 'recruitment-report-' + new Date().toISOString().split('T')[0] + '.json'
     a.click()
     URL.revokeObjectURL(url)
     toast.success('Report Exported')
@@ -1063,7 +1063,7 @@ export default function RecruitmentClient() {
         interviewer_notes: [],
         configuration: {}
       })
-      toast.success('Candidate Added' has been added to the pipeline` })
+      toast.success('Candidate Added')
       setShowAddCandidateDialog(false)
       refetchApplications()
       refetchJobs()
@@ -1086,7 +1086,7 @@ export default function RecruitmentClient() {
 
     try {
       await advanceStage({ id: applicationId, newStage: nextStage })
-      toast.success('Stage Advanced' has been moved to ${nextStage}` })
+      toast.success('Stage Advanced')
       refetchApplications()
       refetchJobs()
     } catch (error) {
@@ -1103,7 +1103,7 @@ export default function RecruitmentClient() {
           stage: 'Rejected'
         }
       })
-      toast.success('Candidate Rejected' has been rejected` })
+      toast.success('Candidate Rejected')
       refetchApplications()
     } catch (error) {
       toast.error('Error')
@@ -2011,7 +2011,7 @@ export default function RecruitmentClient() {
               <AIInsightsPanel
                 insights={recruitmentAIInsights}
                 title="Recruitment Intelligence"
-                onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+                onInsightAction={(insight) => toast.info(insight.title)}
               />
             </div>
             <div className="space-y-6">

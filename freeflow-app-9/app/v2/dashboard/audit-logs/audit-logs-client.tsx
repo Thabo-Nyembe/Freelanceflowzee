@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -719,13 +721,9 @@ export default function AuditLogsClient() {
   const fetchAuditLogs = useCallback(async () => {
     try {
       setIsLoading(true)
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('audit_logs')
         .select('*')
@@ -746,13 +744,9 @@ export default function AuditLogsClient() {
   // Fetch alert rules from database
   const fetchAlertRules = useCallback(async () => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('audit_alert_rules')
         .select('*')
@@ -771,16 +765,12 @@ export default function AuditLogsClient() {
   // Create audit log entry
   const createAuditLog = async (logData: Partial<DbAuditLog>) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in')
         return
       }
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('audit_logs').insert({
         user_id: user.id,
         log_type: logData.log_type || 'system',
@@ -810,16 +800,12 @@ export default function AuditLogsClient() {
   const handleCreateAlertRule = async () => {
     try {
       setIsSaving(true)
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to create alert rules')
         return
       }
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('audit_alert_rules').insert({
         user_id: user.id,
         rule_name: ruleFormData.rule_name,
@@ -851,8 +837,6 @@ export default function AuditLogsClient() {
     if (!editingRule) return
     try {
       setIsSaving(true)
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('audit_alert_rules')
         .update({
@@ -885,8 +869,6 @@ export default function AuditLogsClient() {
   // Delete alert rule
   const handleDeleteAlertRule = async (ruleId: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('audit_alert_rules')
         .update({ deleted_at: new Date().toISOString() })
@@ -905,8 +887,6 @@ export default function AuditLogsClient() {
   // Toggle alert rule status
   const handleToggleRuleStatus = async (ruleId: string, isActive: boolean) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('audit_alert_rules')
         .update({ is_active: isActive, updated_at: new Date().toISOString() })
@@ -953,13 +933,9 @@ export default function AuditLogsClient() {
   // Export audit logs
   const handleExportAuditLogs = async () => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('audit_logs')
         .select('*')
@@ -1111,8 +1087,7 @@ export default function AuditLogsClient() {
       description: `Investigating log ${logId}`,
       status: 'success'
     })
-    toast.info('Investigation started'...`
-    })
+    toast.info('Investigation started')
   }
 
   const handleMarkResolved = async (alertId: string) => {
@@ -1122,8 +1097,7 @@ export default function AuditLogsClient() {
       description: `Resolved alert ${alertId}`,
       status: 'success'
     })
-    toast.success('Alert resolved' has been marked as resolved`
-    })
+    toast.success('Alert resolved')
   }
 
   const handleGenerateReport = async () => {
@@ -1442,7 +1416,7 @@ export default function AuditLogsClient() {
                     />
                     <Button className="bg-indigo-600" onClick={() => {
                       if (searchQuery) {
-                        toast.success('Search executed'` })
+                        toast.success('Search executed')
                         setActiveTab('events')
                       } else {
                         toast.error('Please enter a search query')
@@ -2268,7 +2242,7 @@ export default function AuditLogsClient() {
             <AIInsightsPanel
               insights={mockAuditAIInsights}
               title="Audit Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -2377,7 +2351,7 @@ export default function AuditLogsClient() {
                     <Button variant="outline" className="flex-1" onClick={() => {
                       if (selectedLog) {
                         navigator.clipboard.writeText(selectedLog.id)
-                        toast.success('Copied to clipboard'` })
+                        toast.success('Copied to clipboard')
                       }
                     }}>
                       <Copy className="w-4 h-4 mr-2" />
@@ -3016,7 +2990,7 @@ export default function AuditLogsClient() {
               <Button onClick={() => {
                 const report = mockComplianceReports.find(r => r.id === showComplianceReportDialog)
                 setShowComplianceReportDialog(null)
-                toast.success('Downloading report' compliance report will be downloaded` })
+                toast.success('Downloading report')
               }}>
                 <Download className="w-4 h-4 mr-2" />
                 Download
@@ -3081,7 +3055,7 @@ export default function AuditLogsClient() {
               </Button>
               <Button onClick={() => {
                 setShowSIEMDialog(null)
-                toast.success('Integration saved' integration has been configured` })
+                toast.success('Integration saved')
               }}>
                 Save Configuration
               </Button>

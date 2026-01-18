@@ -481,8 +481,7 @@ export default function AnnouncementsClient() {
         send_push: newAnnouncement.send_push
       })
 
-      toast.success('Announcement Created'" has been saved as ${newAnnouncement.status}`
-      })
+      toast.success(`Announcement created and saved as ${newAnnouncement.status}`)
 
       // Reset form and close dialog
       setNewAnnouncement({
@@ -509,8 +508,7 @@ export default function AnnouncementsClient() {
         status: 'published',
         published_at: new Date().toISOString()
       })
-      toast.success('Announcement Published'" is now live`
-      })
+      toast.success(`Announcement Published: "${title}" is now live`)
       setSelectedAnnouncement(null)
     } catch (error) {
       toast.error('Failed to publish announcement')
@@ -523,8 +521,7 @@ export default function AnnouncementsClient() {
         status: 'scheduled',
         scheduled_for: scheduledFor
       })
-      toast.success('Announcement Scheduled'" has been scheduled`
-      })
+      toast.success(`Announcement Scheduled: "${title}" has been scheduled`)
     } catch (error) {
       toast.error('Failed to schedule announcement')
     }
@@ -535,8 +532,7 @@ export default function AnnouncementsClient() {
       await updateAnnouncement(id, {
         status: 'archived'
       })
-      toast.info('Announcement Archived'" moved to archive`
-      })
+      toast.info(`Announcement Archived: "${title}" moved to archive`)
       setSelectedAnnouncement(null)
     } catch (error) {
       toast.error('Failed to archive announcement')
@@ -546,8 +542,7 @@ export default function AnnouncementsClient() {
   const handleDeleteAnnouncement = async (id: string, title: string) => {
     try {
       await deleteAnnouncement(id)
-      toast.success('Announcement Deleted'" has been permanently deleted`
-      })
+      toast.success(`Announcement Deleted: "${title}" has been permanently deleted`)
       setSelectedAnnouncement(null)
     } catch (error) {
       toast.error('Failed to delete announcement')
@@ -559,8 +554,7 @@ export default function AnnouncementsClient() {
       await updateAnnouncement(id, {
         is_pinned: !isPinned
       })
-      toast.success(isPinned ? 'Announcement Unpinned' : 'Announcement Pinned'" is ${isPinned ? 'no longer pinned' : 'now pinned'}`
-      })
+      toast.success(isPinned ? `Announcement Unpinned: "${title}" is no longer pinned` : `Announcement Pinned: "${title}" is now pinned`)
     } catch (error) {
       toast.error('Failed to update pin status')
     }
@@ -572,8 +566,7 @@ export default function AnnouncementsClient() {
       toast.error('Validation Error')
       return
     }
-    toast.success('Release Added' has been added to the changelog`
-    })
+    toast.success(`Release Added: ${newRelease.version} has been added to the changelog`)
     setNewRelease({ version: '', title: '', description: '', type: 'feature', changes: [''] })
     setShowAddReleaseDialog(false)
   }
@@ -584,8 +577,7 @@ export default function AnnouncementsClient() {
       toast.error('Validation Error')
       return
     }
-    toast.success('Segment Created'" segment has been created`
-    })
+    toast.success(`Segment Created: "${newSegment.name}" segment has been created`)
     setNewSegment({ name: '', description: '', attribute: '', operator: '=', value: '' })
     setShowCreateSegmentDialog(false)
   }
@@ -593,8 +585,7 @@ export default function AnnouncementsClient() {
   // Handler for Edit Segment
   const handleEditSegment = () => {
     if (!selectedSegment) return
-    toast.success('Segment Updated'" segment has been updated`
-    })
+    toast.success(`Segment Updated: "${selectedSegment.name}" segment has been updated`)
     setShowEditSegmentDialog(false)
     setSelectedSegment(null)
   }
@@ -602,8 +593,7 @@ export default function AnnouncementsClient() {
   // Handler for Send to Segment
   const handleSendToSegment = () => {
     if (!selectedSegment) return
-    toast.success('Announcement Sent' users in "${selectedSegment.name}"`
-    })
+    toast.success(`Announcement Sent to ${selectedSegment.count} users in "${selectedSegment.name}"`)
     setShowSendToSegmentDialog(false)
     setSelectedSegment(null)
   }
@@ -620,8 +610,7 @@ export default function AnnouncementsClient() {
       toast.error('Validation Error')
       return
     }
-    toast.success('Webhook Added' events`
-    })
+    toast.success(`Webhook Added: listening to ${newWebhook.events.length} events`)
     setNewWebhook({ url: '', events: ['published'] })
     setShowAddWebhookDialog(false)
   }
@@ -636,8 +625,7 @@ export default function AnnouncementsClient() {
   // Handler for Configure Integration
   const handleConfigureIntegration = () => {
     if (!selectedIntegration) return
-    toast.success('Integration Updated' configuration has been saved`
-    })
+    toast.success(`Integration Updated: ${selectedIntegration.name} configuration has been saved`)
     setShowConfigureIntegrationDialog(false)
     setSelectedIntegration(null)
   }
@@ -645,8 +633,7 @@ export default function AnnouncementsClient() {
   // Handler for Connect Integration
   const handleConnectIntegration = () => {
     if (!selectedIntegration) return
-    toast.success('Integration Connected' has been successfully connected`
-    })
+    toast.success(`Integration Connected: ${selectedIntegration.name} has been successfully connected`)
     setShowConnectIntegrationDialog(false)
     setSelectedIntegration(null)
   }
@@ -660,8 +647,7 @@ export default function AnnouncementsClient() {
   // Handler for Copy to Clipboard
   const handleCopyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text)
-    toast.success('Copied to Clipboard' has been copied to your clipboard`
-    })
+    toast.success(`Copied to Clipboard: ${label} has been copied to your clipboard`)
   }
 
   // Handler for New Template
@@ -670,8 +656,7 @@ export default function AnnouncementsClient() {
       toast.error('Validation Error')
       return
     }
-    toast.success('Template Created'" template has been created`
-    })
+    toast.success(`Template Created: "${newTemplate.name}" template has been created`)
     setNewTemplate({ name: '', type: 'feature', description: '', content: '' })
     setShowNewTemplateDialog(false)
   }
@@ -679,8 +664,7 @@ export default function AnnouncementsClient() {
   // Handler for Edit Template
   const handleEditTemplate = () => {
     if (!selectedTemplate) return
-    toast.success('Template Updated'" template has been updated`
-    })
+    toast.success(`Template Updated: "${selectedTemplate.name}" template has been updated`)
     setShowEditTemplateDialog(false)
     setSelectedTemplate(null)
   }
@@ -688,8 +672,7 @@ export default function AnnouncementsClient() {
   // Handler for Delete Template
   const handleDeleteTemplate = () => {
     if (!selectedTemplate) return
-    toast.success('Template Deleted'" template has been deleted`
-    })
+    toast.success(`Template Deleted: "${selectedTemplate.name}" template has been deleted`)
     setShowDeleteTemplateDialog(false)
     setSelectedTemplate(null)
   }
@@ -719,8 +702,7 @@ export default function AnnouncementsClient() {
       for (const ann of publishedAnnouncements) {
         await updateAnnouncement(ann.id, { status: 'archived' })
       }
-      toast.success('All Announcements Archived' announcements have been moved to archive`
-      })
+      toast.success(`All Announcements Archived: ${publishedAnnouncements.length} announcements have been moved to archive`)
     } catch (error) {
       toast.error('Failed to archive announcements')
     }
@@ -758,8 +740,7 @@ export default function AnnouncementsClient() {
         title: editingAnnouncement.title,
         content: editingAnnouncement.content
       })
-      toast.success('Announcement Updated'" has been updated`
-      })
+      toast.success(`Announcement Updated: has been updated`)
       setShowEditAnnouncementDialog(false)
       setSelectedAnnouncement(null)
     } catch (error) {

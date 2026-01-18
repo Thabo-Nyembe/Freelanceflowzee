@@ -699,8 +699,6 @@ export default function MilestonesClient() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('milestones')
         .select('*')
@@ -738,12 +736,10 @@ export default function MilestonesClient() {
         return
       }
 
-      const milestoneCode = `MS-${Date.now().toString(36).toUpperCase()}`
+      const milestoneCode = "MS-" + Date.now().toString(36).toUpperCase()
       const dueDate = formState.due_date ? new Date(formState.due_date) : null
       const daysRemaining = dueDate ? Math.ceil((dueDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : 0
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('milestones').insert({
         user_id: user.id,
         milestone_code: milestoneCode,
@@ -797,7 +793,7 @@ export default function MilestonesClient() {
 
       if (error) throw error
 
-      toast.success(`Milestone marked as ${newStatus.replace('_', ' ')}`)
+      toast.success('Milestone marked as ' + newStatus.replace('_', ' '))
       fetchMilestones()
     } catch (error) {
       console.error('Error updating status:', error)
@@ -2000,7 +1996,7 @@ export default function MilestonesClient() {
             <AIInsightsPanel
               insights={mockMilestonesAIInsights}
               title="Milestone Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">

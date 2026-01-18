@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -74,6 +76,9 @@ import {
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { CardDescription } from '@/components/ui/card'
+
+// Initialize Supabase client once at module level
+const supabase = createClient()
 
 // Types
 type SpaceType = 'team' | 'personal' | 'project' | 'documentation' | 'archive'
@@ -730,13 +735,9 @@ export default function KnowledgeBaseClient() {
   const fetchData = useCallback(async () => {
     try {
       setLoading(true)
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('knowledge_base')
         .select('*')
@@ -857,14 +858,10 @@ export default function KnowledgeBaseClient() {
     }
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
       const slug = newPageTitle.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('knowledge_base').insert({
         user_id: user.id,
         article_title: newPageTitle.trim(),
@@ -891,8 +888,6 @@ export default function KnowledgeBaseClient() {
 
   const handleDeletePage = async (pageId: string, pageTitle: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('knowledge_base')
         .update({ deleted_at: new Date().toISOString() })
@@ -909,8 +904,6 @@ export default function KnowledgeBaseClient() {
 
   const handlePublishPage = async (pageId: string, pageTitle: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('knowledge_base')
         .update({ status: 'published', is_published: true, published_at: new Date().toISOString() })
@@ -926,8 +919,6 @@ export default function KnowledgeBaseClient() {
 
   const handleBookmark = async (page: Page) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('knowledge_base')
         .update({ is_featured: !page.isBookmarked })

@@ -138,7 +138,8 @@ export default function CustomReportsClient() {
 
       try {
         setIsLoading(true)
-        setError(null)        const { getReportTemplates, getCustomReports, getCustomReportsStats } = await import('@/lib/custom-reports-queries')
+        setError(null)
+        const { getReportTemplates, getCustomReports, getCustomReportsStats } = await import('@/lib/custom-reports-queries')
 
         const [templatesResult, reportsResult, statsResult] = await Promise.all([
           getReportTemplates({ is_public: true }),
@@ -151,8 +152,8 @@ export default function CustomReportsClient() {
         setReportsStats(statsResult.data || null)
 
         setIsLoading(false)
-        toast.success('Reports loaded' templates, ${reportsResult.data?.length || 0} custom reports`
-        })        announce('Report builder loaded successfully', 'polite')
+        toast.success("Reports loaded: " + (templatesResult.data?.length || 0) + " templates, " + (reportsResult.data?.length || 0) + " custom reports")
+        announce('Report builder loaded successfully', 'polite')
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load report builder'
         setError(errorMessage)
@@ -659,8 +660,7 @@ export default function CustomReportsClient() {
                         className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
                         size="lg"
                         onClick={() => {
-                          toast.success('Download Started' as ${exportFormat.toUpperCase()}`
-                          })
+                          toast.success("Download Started as " + exportFormat.toUpperCase())
                         }}
                       >
                         <Download className="w-5 h-5 mr-2" />

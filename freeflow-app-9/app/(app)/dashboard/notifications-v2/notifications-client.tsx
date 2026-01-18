@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
@@ -456,7 +458,7 @@ export default function NotificationsClient() {
         category: 'campaign',
         data: { segment: campaignForm.segment, campaign_name: campaignForm.name }
       })
-      toast.success('Campaign sent'" delivered successfully` })
+      toast.success(`Campaign sent: "${campaignForm.name}" delivered successfully`)
       setShowCreateCampaign(false)
       setCampaignForm({ name: '', channel: '', segment: '', title: '', message: '', scheduled: false })
     } catch (err) {
@@ -477,7 +479,7 @@ export default function NotificationsClient() {
         channel: (notification.channel || 'in_app') as NotificationChannelV2,
         category: notification.category || 'general'
       })
-      toast.success('Notification sent'" delivered successfully` })
+      toast.success(`Notification sent: delivered successfully`)
     } catch (err) {
       toast.error('Failed to send notification')
     } finally {
@@ -882,8 +884,6 @@ export default function NotificationsClient() {
                       <Button variant="ghost" size="icon" onClick={async () => {
                         toast.loading('Duplicating segment...', { id: 'dup-segment' })
                         try {
-                          const { createClient } = await import('@/lib/supabase/client')
-                          const supabase = createClient()
                           const duplicatedSegment: Segment = {
                             ...segment,
                             id: `s${Date.now()}`,
@@ -907,7 +907,7 @@ export default function NotificationsClient() {
                       {!segment.isDefault && (
                         <Button variant="ghost" size="icon" className="text-red-600" onClick={() => {
                           if (confirm(`Delete segment "${segment.name}"?`)) {
-                            toast.success('Segment Deleted'" has been removed` })
+                            toast.success(`Segment "${segment.name}" has been removed`)
                           }
                         }}>
                           <Trash2 className="h-4 w-4" />
@@ -954,29 +954,27 @@ export default function NotificationsClient() {
                         <Button variant="default" size="sm" className="flex-1" onClick={() => {
                           setCampaignForm(prev => ({ ...prev, title: template.title, message: template.message }))
                           setShowCreateCampaign(true)
-                          toast.success('Template Selected'" for new campaign` })
+                          toast.success(`Template "${template.name}" selected for new campaign`)
                         }}>
                           <Send className="h-4 w-4 mr-1" />Use Template
                         </Button>
                         <Button variant="outline" size="sm" onClick={() => {
                           setSelectedTemplate({ name: template.name, type: template.channel })
                           setShowEditTemplateDialog(true)
-                          toast.info('Opening editor...'"` })
+                          toast.info(`Opening editor for "${template.name}"...`)
                         }}>
                           <Edit className="h-4 w-4" />
                         </Button>
                         <Button variant="ghost" size="icon" onClick={() => {
                           setPreviewTemplate(template)
                           setShowPreviewTemplateDialog(true)
-                          toast.info('Loading preview...'"` })
+                          toast.info(`Loading preview for "${template.name}"...`)
                         }}>
                           <Eye className="h-4 w-4" />
                         </Button>
                         <Button variant="ghost" size="icon" onClick={async () => {
                           toast.loading('Duplicating template...', { id: 'dup-template' })
                           try {
-                            const { createClient } = await import('@/lib/supabase/client')
-                            const supabase = createClient()
                             const duplicatedTemplate: Template = {
                               ...template,
                               id: `t${Date.now()}`,
@@ -999,7 +997,7 @@ export default function NotificationsClient() {
                         {!template.isDefault && (
                           <Button variant="ghost" size="icon" className="text-red-600" onClick={() => {
                             if (confirm(`Delete template "${template.name}"?`)) {
-                              toast.success('Template Deleted'" has been removed` })
+                              toast.success(`Template "${template.name}" has been removed`)
                             }
                           }}>
                             <Trash2 className="h-4 w-4" />
@@ -1063,15 +1061,13 @@ export default function NotificationsClient() {
                         <Button variant="ghost" size="icon" onClick={() => {
                           setSelectedAutomation({ name: automation.name })
                           setShowEditAutomationDialog(true)
-                          toast.info('Opening workflow editor...'"` })
+                          toast.info(`Opening workflow editor for "${automation.name}"...`)
                         }}>
                           <Edit className="h-4 w-4" />
                         </Button>
                         <Button variant="ghost" size="icon" onClick={async () => {
                           toast.loading('Duplicating automation...', { id: 'dup-automation' })
                           try {
-                            const { createClient } = await import('@/lib/supabase/client')
-                            const supabase = createClient()
                             const duplicatedAutomation: Automation = {
                               ...automation,
                               id: `a${Date.now()}`,
@@ -1095,7 +1091,7 @@ export default function NotificationsClient() {
                         </Button>
                         <Button variant="ghost" size="icon" className="text-red-600" onClick={() => {
                           if (confirm(`Delete automation "${automation.name}"?`)) {
-                            toast.success('Automation Deleted'" has been removed` })
+                            toast.success(`Automation "${automation.name}" has been removed`)
                           }
                         }}>
                           <Trash2 className="h-4 w-4" />
@@ -1116,15 +1112,13 @@ export default function NotificationsClient() {
                       <Button variant="outline" size="sm" onClick={() => {
                         setSelectedAutomationForAnalytics(automation)
                         setShowAutomationAnalyticsDialog(true)
-                        toast.info('Loading analytics...'"` })
+                        toast.info(`Loading analytics for "${automation.name}"...`)
                       }}>
                         <BarChart3 className="h-4 w-4 mr-1" />Analytics
                       </Button>
                       <Button variant="outline" size="sm" onClick={async () => {
                         toast.loading('Sending test trigger...', { id: 'test-automation' })
                         try {
-                          const { createClient } = await import('@/lib/supabase/client')
-                          const supabase = createClient()
                           await supabase.from('automation_test_runs').insert({
                             automation_id: automation.id,
                             automation_name: automation.name,
@@ -1141,7 +1135,7 @@ export default function NotificationsClient() {
                       <Button variant="outline" size="sm" onClick={() => {
                         setSelectedAutomationForHistory(automation)
                         setShowAutomationHistoryDialog(true)
-                        toast.info('Loading history...'"` })
+                        toast.info(`Loading history for "${automation.name}"...`)
                       }}>
                         <RefreshCw className="h-4 w-4 mr-1" />History
                       </Button>
@@ -1175,8 +1169,6 @@ export default function NotificationsClient() {
                             if (confirm(`Are you sure you want to stop the A/B test "${test.name}"? This action cannot be undone.`)) {
                               toast.loading('Stopping test...', { id: 'stop-test' })
                               try {
-                                const { createClient } = await import('@/lib/supabase/client')
-                                const supabase = createClient()
                                 await supabase.from('ab_tests').update({
                                   status: 'completed',
                                   end_date: new Date().toISOString()
@@ -1196,15 +1188,13 @@ export default function NotificationsClient() {
                         <Button variant="ghost" size="icon" onClick={() => {
                           setSelectedTestForDetails(test)
                           setShowTestDetailsDialog(true)
-                          toast.info('Loading details...'"` })
+                          toast.info(`Loading details for "${test.name}"...`)
                         }}>
                           <BarChart3 className="h-4 w-4" />
                         </Button>
                         <Button variant="ghost" size="icon" onClick={async () => {
                           toast.loading('Duplicating test...', { id: 'dup-test' })
                           try {
-                            const { createClient } = await import('@/lib/supabase/client')
-                            const supabase = createClient()
                             const duplicatedTest: ABTest = {
                               ...test,
                               id: `ab${Date.now()}`,
@@ -1234,7 +1224,7 @@ export default function NotificationsClient() {
                         </Button>
                         <Button variant="ghost" size="icon" className="text-red-600" onClick={() => {
                           if (confirm(`Delete A/B test "${test.name}"?`)) {
-                            toast.success('Test Deleted'" has been removed` })
+                            toast.success(`Test "${test.name}" has been removed`)
                           }
                         }}>
                           <Trash2 className="h-4 w-4" />
@@ -1263,7 +1253,7 @@ export default function NotificationsClient() {
                                     ? { ...t, winner: variant.id, status: 'completed' as const, endDate: new Date().toISOString() }
                                     : t
                                 ))
-                                toast.success('Winner Selected'" declared as winner for "${test.name}"` })
+                                toast.success(`"${variant.name}" declared as winner for "${test.name}"`)
                               }}>
                                 Declare Winner
                               </Button>
@@ -1286,7 +1276,7 @@ export default function NotificationsClient() {
                           if (winningVariant) {
                             setCampaignForm(prev => ({ ...prev, title: winningVariant.title, message: winningVariant.message }))
                             setShowCreateCampaign(true)
-                            toast.success('Apply Winner'" for new campaign` })
+                            toast.success(`Applying winning variant for new campaign`)
                           }
                         }}>
                           <Send className="h-4 w-4 mr-1" />Apply Winner to Campaign
@@ -1306,7 +1296,7 @@ export default function NotificationsClient() {
                           a.download = `ab-test-${test.name.toLowerCase().replace(/\s+/g, '-')}-results.csv`
                           a.click()
                           URL.revokeObjectURL(url)
-                          toast.success('Export Results'" downloaded as CSV` })
+                          toast.success(`A/B test results downloaded as CSV`)
                         }}>
                           <Download className="h-4 w-4 mr-1" />Export Results
                         </Button>
@@ -1347,8 +1337,6 @@ export default function NotificationsClient() {
                         <Button variant="ghost" size="icon" onClick={async () => {
                           toast.loading('Sending test payload...', { id: 'test-webhook' })
                           try {
-                            const { createClient } = await import('@/lib/supabase/client')
-                            const supabase = createClient()
                             await supabase.from('webhook_test_logs').insert({
                               webhook_id: webhook.id,
                               webhook_name: webhook.name,
@@ -1366,13 +1354,13 @@ export default function NotificationsClient() {
                         <Button variant="ghost" size="icon" onClick={() => {
                           setSelectedWebhookForLogs(webhook)
                           setShowWebhookLogsDialog(true)
-                          toast.info('Loading logs...'"` })
+                          toast.info(`Loading logs for "${webhook.name}"...`)
                         }}>
                           <Eye className="h-4 w-4" />
                         </Button>
                         <Button variant="ghost" size="icon" onClick={() => {
                           setShowWebhookDialog(true)
-                          toast.success('Edit Webhook'"` })
+                          toast.success(`Opening webhook "${webhook.name}" for editing`)
                         }}>
                           <Edit className="h-4 w-4" />
                         </Button>
@@ -1380,8 +1368,6 @@ export default function NotificationsClient() {
                           <Button variant="ghost" size="icon" onClick={async () => {
                             toast.loading('Retrying failed deliveries...', { id: 'retry-webhook' })
                             try {
-                              const { createClient } = await import('@/lib/supabase/client')
-                              const supabase = createClient()
                               await supabase.from('webhooks').update({
                                 status: 'active',
                                 last_delivery: new Date().toISOString(),
@@ -1400,7 +1386,7 @@ export default function NotificationsClient() {
                         )}
                         <Button variant="ghost" size="icon" className="text-red-600" onClick={() => {
                           if (confirm(`Delete webhook "${webhook.name}"?`)) {
-                            toast.success('Webhook Deleted'" has been removed` })
+                            toast.success(`Webhook "${webhook.name}" has been removed`)
                           }
                         }}>
                           <Trash2 className="h-4 w-4" />
@@ -3029,15 +3015,15 @@ export default function NotificationsClient() {
                 <div className="flex flex-wrap gap-2">
                   <Badge variant="outline" className="cursor-pointer text-xs" onClick={() => {
                     navigator.clipboard.writeText('{{name}}')
-                    toast.info('Variable copied'} copied to clipboard' })
+                    toast.info('Variable copied to clipboard')
                   }}>{`{{name}}`}</Badge>
                   <Badge variant="outline" className="cursor-pointer text-xs" onClick={() => {
                     navigator.clipboard.writeText('{{email}}')
-                    toast.info('Variable copied'} copied to clipboard' })
+                    toast.info('Variable copied to clipboard')
                   }}>{`{{email}}`}</Badge>
                   <Badge variant="outline" className="cursor-pointer text-xs" onClick={() => {
                     navigator.clipboard.writeText('{{app_name}}')
-                    toast.info('Variable copied'} copied to clipboard' })
+                    toast.info('Variable copied to clipboard')
                   }}>{`{{app_name}}`}</Badge>
                 </div>
               </div>
@@ -3309,7 +3295,7 @@ export default function NotificationsClient() {
                     toast.error('Please enter a value for the rule')
                     return
                   }
-                  toast.success('Rule added' ${operator} "${value}"` })
+                  toast.success('Rule added: ' + operator + ' "' + value + '"')
                   if (valueInput) valueInput.value = ''
                 }}>
                   <Plus className="h-4 w-4 mr-1" />Add Rule
@@ -3322,8 +3308,7 @@ export default function NotificationsClient() {
                 setSelectedSegment(null)
               }}>Cancel</Button>
               <Button onClick={() => {
-                toast.success(selectedSegment ? 'Segment updated' : 'Segment created'" has been updated` : 'New segment has been created'
-                })
+                toast.success(selectedSegment ? 'Segment updated: has been updated' : 'Segment created: New segment has been created')
                 setShowSegmentDialog(false)
                 setSelectedSegment(null)
               }}>
@@ -3359,10 +3344,10 @@ export default function NotificationsClient() {
                   const url = URL.createObjectURL(blob)
                   const a = document.createElement('a')
                   a.href = url
-                  a.download = `segment-${selectedSegment?.name?.toLowerCase().replace(/\s+/g, '-') || 'users'}-export.csv`
+                  a.download = 'segment-' + (selectedSegment?.name?.toLowerCase().replace(/\s+/g, '-') || 'users') + '-export.csv'
                   a.click()
                   URL.revokeObjectURL(url)
-                  toast.success('Users exported to CSV' users exported` })
+                  toast.success('Users exported to CSV')
                 }}>
                   <Download className="h-4 w-4 mr-2" />Export
                 </Button>
@@ -3700,8 +3685,6 @@ export default function NotificationsClient() {
               <Button variant="outline" onClick={async () => {
                 toast.loading('Retrying failed deliveries...', { id: 'retry-all' })
                 try {
-                  const { createClient } = await import('@/lib/supabase/client')
-                  const supabase = createClient()
                   if (selectedWebhookForLogs) {
                     await supabase.from('webhook_delivery_retries').insert({
                       webhook_id: selectedWebhookForLogs.id,

@@ -485,7 +485,7 @@ export default function ProjectsHubClient() {
       toast.error('Please enter a milestone title')
       return
     }
-    toast.success('Milestone created'" added to roadmap` })
+    toast.success("Milestone created: " + milestoneForm.title + " added to roadmap")
     setShowMilestoneDialog(false)
     setMilestoneForm({ title: '', quarter: '', status: 'planned' })
   }
@@ -500,7 +500,7 @@ export default function ProjectsHubClient() {
       toast.error('Please enter a title')
       return
     }
-    toast.success('Backlog item created'" added to backlog` })
+    toast.success("Backlog item created: " + backlogItemForm.title + " added to backlog")
     setShowBacklogItemDialog(false)
     setBacklogItemForm({ title: '', description: '', priority: 'medium', points: 1, type: 'task' })
   }
@@ -510,7 +510,7 @@ export default function ProjectsHubClient() {
       toast.error('Please enter a report name')
       return
     }
-    toast.success('Report created'" report is ready` })
+    toast.success("Report created: " + reportForm.name + " report is ready")
     setShowReportDialog(false)
     setReportForm({ name: '', type: 'burndown', description: '' })
   }
@@ -520,7 +520,7 @@ export default function ProjectsHubClient() {
       toast.error('Please fill in all fields')
       return
     }
-    toast.success('Automation created'" is now active` })
+    toast.success("Automation created: " + automationForm.name + " is now active")
     setShowAutomationDialog(false)
     setAutomationForm({ name: '', trigger: '', action: '' })
   }
@@ -532,7 +532,7 @@ export default function ProjectsHubClient() {
 
   const handleConfirmUseTemplate = () => {
     if (selectedTemplate) {
-      toast.success('Template applied'"` })
+      toast.success("Template applied: " + selectedTemplate.name)
       setShowTemplateUseDialog(false)
       setSelectedTemplate(null)
     }
@@ -565,7 +565,7 @@ export default function ProjectsHubClient() {
 
   const handleSaveIntegrationConfig = () => {
     if (selectedIntegration) {
-      toast.success('Integration updated' configuration saved` })
+      toast.success('Integration updated')
       setShowIntegrationConfigDialog(false)
       setSelectedIntegration(null)
     }
@@ -594,7 +594,7 @@ export default function ProjectsHubClient() {
       toast.error('Please enter a field name')
       return
     }
-    toast.success('Custom field created'" field added` })
+    toast.success("Custom field created: " + customFieldForm.name + " field added")
     setShowCustomFieldDialog(false)
     setCustomFieldForm({ name: '', type: 'text', required: false, appliesTo: [] })
   }
@@ -614,7 +614,7 @@ export default function ProjectsHubClient() {
       toast.error('Please enter a status name')
       return
     }
-    toast.success('Status added'" status added to workflow` })
+    toast.success("Status added: " + statusForm.name + " status added to workflow")
     setShowStatusDialog(false)
     setStatusForm({ name: '' })
   }
@@ -640,7 +640,7 @@ export default function ProjectsHubClient() {
     input.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0]
       if (file) {
-        toast.success('Data imported' processed successfully` })
+        toast.success('Data imported')
       }
     }
     input.click()
@@ -684,7 +684,7 @@ export default function ProjectsHubClient() {
       toast.error('Please enter time amount')
       return
     }
-    toast.success('Time logged' hours logged` })
+    toast.success('Time logged')
     setShowLogTimeDialog(false)
     setLogTimeAmount('')
   }
@@ -696,7 +696,7 @@ export default function ProjectsHubClient() {
     input.onchange = (e) => {
       const files = (e.target as HTMLInputElement).files
       if (files && files.length > 0) {
-        toast.success('Attachment added' file(s) uploaded` })
+        toast.success('Attachment added')
         setShowAttachmentDialog(false)
       }
     }
@@ -704,7 +704,7 @@ export default function ProjectsHubClient() {
   }
 
   const handleLinkIssue = (issueKey: string) => {
-    toast.success('Issue linked'` })
+    toast.success("Issue linked: " + issueKey)
     setShowLinkIssueDialog(false)
   }
 
@@ -715,14 +715,14 @@ export default function ProjectsHubClient() {
 
   const handleSaveIssueEdit = () => {
     if (selectedIssue) {
-      toast.success('Issue updated' has been updated` })
+      toast.success('Issue updated')
       setShowEditIssueDialog(false)
     }
   }
 
   const handleMoveToInProgress = () => {
     if (selectedIssue) {
-      toast.success('Issue moved' moved to In Progress` })
+      toast.success('Issue moved')
       setShowIssueDialog(false)
     }
   }
@@ -1541,7 +1541,7 @@ export default function ProjectsHubClient() {
                                 <Button variant="ghost" size="sm" onClick={async () => {
                                     if (confirm('Are you sure you want to delete this webhook?')) {
                                       toast.promise(
-                                        fetch(`/api/projects/webhooks/${webhook.id}`, { method: 'DELETE' }),
+                                        fetch('/api/projects/webhooks/' + webhook.id, { method: 'DELETE' }),
                                         { loading: 'Deleting webhook...', success: 'Webhook removed successfully', error: 'Failed to delete webhook' }
                                       )
                                     }
@@ -1710,14 +1710,14 @@ export default function ProjectsHubClient() {
                             <div className="flex items-center gap-3">
                               {field.required && <Badge variant="outline">Required</Badge>}
                               <Button variant="ghost" size="sm" onClick={() => {
-                                toast.info('Edit Field'` })
+                                toast.info('Edit Field: ' + field.name)
                               }}>
                                 <Edit className="h-4 w-4" />
                               </Button>
                               <Button variant="ghost" size="sm" onClick={async () => {
                                 if (confirm('Are you sure you want to delete this custom field?')) {
                                   toast.promise(
-                                    fetch(`/api/projects/fields/${field.id}`, { method: 'DELETE' }),
+                                    fetch('/api/projects/fields/' + field.id, { method: 'DELETE' }),
                                     { loading: 'Deleting field...', success: 'Custom field removed', error: 'Failed to delete field' }
                                   )
                                 }
@@ -2664,7 +2664,7 @@ export default function ProjectsHubClient() {
               </div>
               <Button variant="outline" className="w-full" onClick={async () => {
                 toast.promise(
-                  fetch(`/api/integrations/${selectedIntegration?.id}/sync`, { method: 'POST' }),
+                  fetch('/api/integrations/' + selectedIntegration?.id + '/sync', { method: 'POST' }),
                   { loading: 'Syncing...', success: 'Sync completed successfully', error: 'Sync failed' }
                 )
               }}>
@@ -2676,7 +2676,7 @@ export default function ProjectsHubClient() {
               <Button variant="outline" className="text-red-600" onClick={async () => {
                 if (confirm('Are you sure you want to disconnect this integration?')) {
                   toast.promise(
-                    fetch(`/api/integrations/${selectedIntegration?.id}`, { method: 'DELETE' }),
+                    fetch('/api/integrations/' + selectedIntegration?.id, { method: 'DELETE' }),
                     { loading: 'Disconnecting...', success: 'Integration disconnected', error: 'Failed to disconnect' }
                   )
                   setShowIntegrationConfigDialog(false)

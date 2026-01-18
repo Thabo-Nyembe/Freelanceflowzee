@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import { downloadAsJson, copyToClipboard } from '@/lib/button-handlers'
@@ -629,13 +631,9 @@ export default function CiCdClient() {
   // Fetch pipelines from Supabase
   const fetchPipelines = useCallback(async () => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('ci_cd')
         .select('*')
@@ -666,16 +664,12 @@ export default function CiCdClient() {
 
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to create pipelines')
         return
       }
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('ci_cd').insert({
         user_id: user.id,
         pipeline_name: formState.pipeline_name,
@@ -709,8 +703,6 @@ export default function CiCdClient() {
   // Trigger/Run pipeline
   const handleTriggerPipeline = async (pipelineId: string, pipelineName: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('ci_cd')
         .update({
@@ -736,8 +728,6 @@ export default function CiCdClient() {
   // Update pipeline status
   const handleUpdateStatus = async (pipelineId: string, newStatus: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('ci_cd')
         .update({
@@ -760,8 +750,6 @@ export default function CiCdClient() {
   // Delete pipeline
   const handleDeletePipeline = async (pipelineId: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('ci_cd')
         .update({ deleted_at: new Date().toISOString() })

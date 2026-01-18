@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useRef, useEffect } from 'react'
 import { toast } from 'sonner'
 import {
@@ -72,6 +74,9 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { useConversations, useMessagingMutations } from '@/lib/hooks/use-messaging'
+
+// Initialize Supabase client once at module level
+const supabase = createClient()
 
 // ============================================================================
 // TYPE DEFINITIONS - Slack/Discord Level
@@ -390,8 +395,6 @@ export default function MessagingClient() {
   // Get current user on mount
   useEffect(() => {
     const getCurrentUser = async () => {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         setCurrentUserId(user.id)
@@ -599,8 +602,7 @@ export default function MessagingClient() {
       })
 
       if (result) {
-        toast.success('Channel created' has been created successfully`
-        })
+        toast.success(`Channel created: "${newChannelName}" has been created successfully`)
         setShowNewChannel(false)
         setNewChannelName('')
         setNewChannelDescription('')
@@ -662,8 +664,7 @@ export default function MessagingClient() {
         })
       }
 
-      toast.success('Reaction updated' reaction updated`
-      })
+      toast.success(`Reaction updated: ${emoji} reaction added`)
     } catch (error) {
       toast.error('Failed to add reaction')
     }
@@ -677,8 +678,6 @@ export default function MessagingClient() {
 
     setIsSearching(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('direct_messages')
         .select('*')
@@ -727,8 +726,7 @@ export default function MessagingClient() {
       }))
 
       setSearchResults(results)
-      toast.success('Search complete' matching messages`
-      })
+      toast.success(`Search complete: ${results.length} matching messages`)
     } catch (error) {
       toast.error('Search failed')
     } finally {
@@ -865,8 +863,7 @@ export default function MessagingClient() {
         refetchConversations()
       }
 
-      toast.success('Left channel'`
-      })
+      toast.success(`Left channel: ${selectedChannel?.name}`)
       setShowChannelSettings(false)
       setSelectedChannel(null)
     } catch (error) {

@@ -161,7 +161,8 @@ export default function CollaborationPage() {
         setWorkspaceFiles(filesResult.data || [])
 
         setIsLoading(false)
-        toast.success(`Collaboration loaded - ${channelsResult.data?.length || 0} channels, ${teamsResult.data?.length || 0} teams, ${meetingsResult.data?.length || 0} meetings`)        announce('Collaboration data loaded successfully', 'polite')
+        toast.success(`Collaboration loaded - ${channelsResult.data?.length || 0} channels, ${teamsResult.data?.length || 0} teams, ${meetingsResult.data?.length || 0} meetings`)
+        announce('Collaboration data loaded successfully', 'polite')
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load collaboration data'
         setError(errorMessage)
@@ -270,7 +271,8 @@ export default function CollaborationPage() {
       mediaRecorder.onstop = () => {
         const blob = new Blob(chunks, { type: 'audio/webm' })
         stream.getTracks().forEach(track => track.stop())
-        // Could upload the blob here      }
+        // Could upload the blob here
+      }
       mediaRecorder.start()
       setIsRecording(true)
       toast.success('Recording voice note - Click again to stop')
@@ -280,7 +282,8 @@ export default function CollaborationPage() {
     }
   }
 
-  const handleShareScreen = async () => {    try {
+  const handleShareScreen = async () => {
+    try {
       const stream = await navigator.mediaDevices.getDisplayMedia({ video: true })
       stream.getVideoTracks()[0].onended = () => {
         toast.info('Screen sharing stopped')
@@ -3555,7 +3558,8 @@ export default function CollaborationPage() {
                       className={`p-2 text-xl rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${selectedEmoji === emoji ? 'bg-blue-100 dark:bg-blue-900' : ''}`}
                       onClick={() => {
                         setSelectedEmoji(emoji)
-                        toast.success(`Emoji selected: ${emoji}`)                        announce(`Emoji ${emoji} selected`, 'polite')
+                        toast.success(`Emoji selected: ${emoji}`)
+                        announce(`Emoji ${emoji} selected`, 'polite')
                       }}
                     >
                       {emoji}

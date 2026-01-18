@@ -451,7 +451,8 @@ export default function BrowserExtensionPage() {
           if (error) throw error        }
 
         dispatch({ type: 'SET_INSTALLED', isInstalled: true })
-        setShowInstallModal(false)        announce('Extension installed', 'polite')
+        setShowInstallModal(false)
+        announce('Extension installed', 'polite')
         return state.currentBrowser
       })(),
       {
@@ -473,11 +474,13 @@ export default function BrowserExtensionPage() {
     if (!capture) {
       logger.warn('Capture deletion failed', { reason: 'Capture not found', captureId })
       return
-    }    setDeleteCapture({ id: captureId, title: capture.title, fileSize: capture.fileSize, type: capture.type })
+    }
+    setDeleteCapture({ id: captureId, title: capture.title, fileSize: capture.fileSize, type: capture.type })
   }
 
   const handleConfirmDeleteCapture = async () => {
-    if (!deleteCapture || !userId) return    const captureToDelete = deleteCapture
+    if (!deleteCapture || !userId) return
+    const captureToDelete = deleteCapture
     setDeleteCapture(null)
 
     toast.promise(
@@ -493,7 +496,8 @@ export default function BrowserExtensionPage() {
 
         dispatch({ type: 'DELETE_CAPTURE', captureId: captureToDelete.id })
 
-        const fileSizeMB = (captureToDelete.fileSize / (1024 * 1024)).toFixed(1)        announce('Capture deleted', 'polite')
+        const fileSizeMB = (captureToDelete.fileSize / (1024 * 1024)).toFixed(1)
+        announce('Capture deleted', 'polite')
         return { title: captureToDelete.title, type: captureToDelete.type, fileSizeMB }
       })(),
       {
@@ -506,7 +510,8 @@ export default function BrowserExtensionPage() {
 
   const handleToggleFeature = async (featureId: string) => {
     const feature = state.features.find(f => f.id === featureId)
-    if (!feature) return    const newState = !feature.enabled
+    if (!feature) return
+    const newState = !feature.enabled
 
     toast.promise(
       (async () => {

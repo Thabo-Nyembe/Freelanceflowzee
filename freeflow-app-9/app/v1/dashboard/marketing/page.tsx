@@ -125,7 +125,8 @@ export default function MarketingPage() {
 
       try {
         setIsLoading(true)
-        setError(null)        const { getLeads, getCampaigns } = await import('@/lib/admin-marketing-queries')
+        setError(null)
+        const { getLeads, getCampaigns } = await import('@/lib/admin-marketing-queries')
 
         const [leadsResult, campaignsResult] = await Promise.all([
           getLeads(userId),
@@ -137,8 +138,8 @@ export default function MarketingPage() {
 
         setIsLoading(false)
         announce('Marketing data loaded successfully', 'polite')
-        toast.success('Marketing loaded' leads, ${campaignsResult?.length || 0} campaigns`
-        })      } catch (err) {
+        toast.success(`Marketing loaded - ${leadsResult?.length || 0} leads, ${campaignsResult?.length || 0} campaigns`)
+      } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load marketing'
         setError(errorMessage)
         setIsLoading(false)
@@ -169,7 +170,8 @@ export default function MarketingPage() {
 
     toast.promise(
       (async () => {        const { createLead, getLeads } = await import('@/lib/admin-marketing-queries')
-        const result = await createLead(userId, leadData)        announce('Lead added successfully', 'polite')
+        const result = await createLead(userId, leadData)
+        announce('Lead added successfully', 'polite')
         const leadsResult = await getLeads(userId)
         setLeads(leadsResult.data || [])
         return result
@@ -196,7 +198,8 @@ export default function MarketingPage() {
 
     toast.promise(
       (async () => {        const { updateLead, getLeads } = await import('@/lib/admin-marketing-queries')
-        await updateLead(leadId, { score_value: 90, score: 'hot' })        announce('Lead updated successfully', 'polite')
+        await updateLead(leadId, { score_value: 90, score: 'hot' })
+        announce('Lead updated successfully', 'polite')
         const leadsResult = await getLeads(userId)
         setLeads(leadsResult || [])
       })(),
@@ -232,7 +235,8 @@ export default function MarketingPage() {
 
     toast.promise(
       (async () => {        const { deleteLead: deleteLeadQuery, getLeads } = await import('@/lib/admin-marketing-queries')
-        await deleteLeadQuery(leadId)        announce('Lead deleted successfully', 'polite')
+        await deleteLeadQuery(leadId)
+        announce('Lead deleted successfully', 'polite')
         const leadsResult = await getLeads(userId)
         setLeads(leadsResult.data || [])
       })(),
@@ -259,7 +263,8 @@ export default function MarketingPage() {
 
     toast.promise(
       (async () => {        const { updateLeadStatus, getLeads } = await import('@/lib/admin-marketing-queries')
-        await updateLeadStatus(leadId, 'qualified')        announce('Lead qualified successfully', 'polite')
+        await updateLeadStatus(leadId, 'qualified')
+        announce('Lead qualified successfully', 'polite')
         const leadsResult = await getLeads(userId)
         setLeads(leadsResult || [])
       })(),
@@ -287,7 +292,8 @@ export default function MarketingPage() {
       (async () => {        // Update lead status to converted
         // NOTE: Future integration with CRM deals system will create actual deal record
         const { updateLeadStatus, getLeads } = await import('@/lib/admin-marketing-queries')
-        await updateLeadStatus(leadId, 'won')        announce('Lead converted to deal', 'polite')
+        await updateLeadStatus(leadId, 'won')
+        announce('Lead converted to deal', 'polite')
         const leadsResult = await getLeads(userId)
         setLeads(leadsResult || [])
       })(),
@@ -317,7 +323,8 @@ export default function MarketingPage() {
           body: JSON.stringify({ format: 'csv', status: leadsTab })
         })
         if (!response.ok) throw new Error('Failed to export leads')
-        const result = await response.json()        announce('Leads exported successfully', 'polite')
+        const result = await response.json()
+        announce('Leads exported successfully', 'polite')
         return result
       })(),
       {
@@ -351,7 +358,8 @@ export default function MarketingPage() {
 
     toast.promise(
       (async () => {        const { createCampaign, getCampaigns } = await import('@/lib/admin-marketing-queries')
-        const result = await createCampaign(userId, campaignData)        announce('Campaign created successfully', 'polite')
+        const result = await createCampaign(userId, campaignData)
+        announce('Campaign created successfully', 'polite')
         const campaignsResult = await getCampaigns(userId)
         setCampaigns(campaignsResult.data || [])
         return result
@@ -378,7 +386,8 @@ export default function MarketingPage() {
 
     toast.promise(
       (async () => {        const { updateCampaign, getCampaigns } = await import('@/lib/admin-marketing-queries')
-        await updateCampaign(campaignId, { budget: 15000 })        announce('Campaign updated successfully', 'polite')
+        await updateCampaign(campaignId, { budget: 15000 })
+        announce('Campaign updated successfully', 'polite')
         const campaignsResult = await getCampaigns(userId)
         setCampaigns(campaignsResult || [])
       })(),
@@ -414,7 +423,8 @@ export default function MarketingPage() {
 
     toast.promise(
       (async () => {        const { deleteCampaign: deleteCampaignQuery, getCampaigns } = await import('@/lib/admin-marketing-queries')
-        await deleteCampaignQuery(campaignId)        announce('Campaign deleted successfully', 'polite')
+        await deleteCampaignQuery(campaignId)
+        announce('Campaign deleted successfully', 'polite')
         const campaignsResult = await getCampaigns(userId)
         setCampaigns(campaignsResult.data || [])
       })(),
@@ -441,7 +451,8 @@ export default function MarketingPage() {
 
     toast.promise(
       (async () => {        const { updateCampaignStatus, getCampaigns } = await import('@/lib/admin-marketing-queries')
-        await updateCampaignStatus(campaignId, 'active')        announce('Campaign sent successfully', 'polite')
+        await updateCampaignStatus(campaignId, 'active')
+        announce('Campaign sent successfully', 'polite')
         const campaignsResult = await getCampaigns(userId)
         setCampaigns(campaignsResult || [])
       })(),
@@ -467,7 +478,8 @@ export default function MarketingPage() {
 
     toast.promise(
       (async () => {        const { updateCampaignStatus, getCampaigns } = await import('@/lib/admin-marketing-queries')
-        await updateCampaignStatus(campaignId, 'scheduled')        announce('Campaign scheduled successfully', 'polite')
+        await updateCampaignStatus(campaignId, 'scheduled')
+        announce('Campaign scheduled successfully', 'polite')
         const campaignsResult = await getCampaigns(userId)
         setCampaigns(campaignsResult || [])
       })(),
@@ -487,7 +499,7 @@ export default function MarketingPage() {
   // Button 12: View Campaign Analytics
   const handleViewCampaignAnalytics = (campaign: Campaign) => {    setSelectedCampaign(campaign)
     setShowCampaignModal(true)
-    toast.success('Campaign Analytics'"` })
+    toast.success(`Campaign Analytics - ${campaign.name}`)
     announce('Campaign analytics opened', 'polite')
   }
 
@@ -502,7 +514,8 @@ export default function MarketingPage() {
           body: JSON.stringify({ variants: ['A', 'B'], splitRatio: 50 })
         })
         if (!response.ok) throw new Error('Failed to create A/B test')
-        const result = await response.json()        announce('A/B test created successfully', 'polite')
+        const result = await response.json()
+        announce('A/B test created successfully', 'polite')
         return result
       })(),
       {
@@ -540,7 +553,8 @@ export default function MarketingPage() {
           target_audience: originalCampaign.targetAudience ? [String(originalCampaign.targetAudience)] : undefined,
           channels: originalCampaign.channels,
           tags: originalCampaign.tags
-        })        announce('Campaign duplicated successfully', 'polite')
+        })
+        announce('Campaign duplicated successfully', 'polite')
         const campaignsResult = await getCampaigns(userId)
         setCampaigns(campaignsResult || [])
       })(),
@@ -571,7 +585,8 @@ export default function MarketingPage() {
           getCampaigns(userId)
         ])
         setLeads(leadsResult || [])
-        setCampaigns(campaignsResult || [])        announce('Marketing refreshed successfully', 'polite')
+        setCampaigns(campaignsResult || [])
+        announce('Marketing refreshed successfully', 'polite')
         return { leadsCount: leadsResult?.length || 0, campaignsCount: campaignsResult?.length || 0 }
       })(),
       {

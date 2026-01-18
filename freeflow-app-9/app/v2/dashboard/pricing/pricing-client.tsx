@@ -1,5 +1,7 @@
 "use client"
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import { usePricingPlans, PricingPlan as DBPricingPlan, PricingPlanInput } from '@/lib/hooks/use-pricing-plans'
@@ -582,13 +584,9 @@ export default function PricingClient({
   // Fetch coupons from Supabase
   const fetchCoupons = useCallback(async () => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('booking_coupons')
         .select('*')
@@ -737,16 +735,12 @@ export default function PricingClient({
     }
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to create coupons')
         return
       }
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('booking_coupons').insert({
         user_id: user.id,
         code: couponForm.code.toUpperCase(),
@@ -776,8 +770,6 @@ export default function PricingClient({
   // CRUD: Toggle Coupon Active Status
   const handleToggleCoupon = async (couponId: string, isActive: boolean) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('booking_coupons')
         .update({ is_active: !isActive })
@@ -795,8 +787,6 @@ export default function PricingClient({
   // CRUD: Delete Coupon
   const handleDeleteCoupon = async (couponId: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('booking_coupons')
         .delete()
@@ -2150,7 +2140,7 @@ export default function PricingClient({
             <AIInsightsPanel
               insights={mockPricingAIInsights}
               title="Pricing Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info("Insight: " + insight.title)}
             />
           </div>
           <div className="space-y-6">

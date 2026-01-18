@@ -310,7 +310,8 @@ export default function APlusShowcasePage() {
 
         // Note: In production, this would fetch from /api/components
         const mockComponents = generateMockComponents()
-        dispatch({ type: 'SET_COMPONENTS', components: mockComponents })        setIsLoading(false)
+        dispatch({ type: 'SET_COMPONENTS', components: mockComponents })
+        setIsLoading(false)
         announce('Components loaded successfully', 'polite')
       } catch (err) {
         logger.error('Failed to load components', {
@@ -416,8 +417,8 @@ export default function APlusShowcasePage() {
   const handleCopyCode = async (code: string, componentName: string) => {    try {
       await navigator.clipboard.writeText(code)
       const lines = code.split('\n').length
-      const chars = code.length      toast.success('Code copied to clipboard' - ${lines} lines - ${chars} characters - Ready to paste`
-      })
+      const chars = code.length
+      toast.success(`Code copied to clipboard - ${lines} lines - ${chars} characters`)
       announce('Code copied to clipboard', 'polite')
     } catch (err) {
       logger.error('Failed to copy code', { componentName, error: err instanceof Error ? err.message : String(err) })
@@ -443,8 +444,8 @@ export default function APlusShowcasePage() {
     dispatch({ type: 'UPDATE_COMPONENT', component: updatedComponent })
 
     const fileSizeKB = (blob.size / 1024).toFixed(1)
-    const newDownloadCount = (updatedComponent.downloads / 1000).toFixed(1)    toast.success(`${component.name} downloaded` - ${fileSizeKB} KB - ${component.category} - ${component.difficulty} - ${newDownloadCount}k total downloads`
-    })
+    const newDownloadCount = (updatedComponent.downloads / 1000).toFixed(1)
+    toast.success(`${component.name} downloaded - ${fileSizeKB} KB - ${component.category}`)
     announce(`Downloaded ${component.name}`, 'polite')
   }
 
@@ -452,22 +453,23 @@ export default function APlusShowcasePage() {
     const component = state.components.find(c => c.id === componentId)
 
     if (component) {
-      const newState = !component.isFavorite      dispatch({ type: 'TOGGLE_FAVORITE', componentId })
+      const newState = !component.isFavorite
+      dispatch({ type: 'TOGGLE_FAVORITE', componentId })
 
       const popularityK = (component.popularity / 1000).toFixed(1)
 
-      toast.success(component.isFavorite ? 'Removed from favorites' : 'Added to favorites' - ${component.category} - ${component.difficulty} - ${popularityK}k popularity`
-      })
+      toast.success(component.isFavorite ? 'Removed from favorites' : `Added to favorites - ${component.category}`)
     }
   }
 
-  const handleShareComponent = async (component: ComponentShowcase) => {    const shareUrl = `https://kazi.com/components/${component.id}`
+  const handleShareComponent = async (component: ComponentShowcase) => {
+    const shareUrl = `https://kazi.com/components/${component.id}`
 
     try {
-      await navigator.clipboard.writeText(shareUrl)      const downloadsK = (component.downloads / 1000).toFixed(1)
+      await navigator.clipboard.writeText(shareUrl)
+      const downloadsK = (component.downloads / 1000).toFixed(1)
 
-      toast.success('Share link copied to clipboard' - ${component.category} - ${component.difficulty} - ${downloadsK}k downloads - Share with your team`
-      })
+      toast.success(`Share link copied to clipboard - ${component.category}`)
       announce('Share link copied', 'polite')
     } catch (err) {
       logger.error('Failed to copy share link', {

@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 // MIGRATED: Batch #18 - Verified database hook integration
 // Hooks used: useUserManagement, useState, useMemo
 
@@ -36,6 +38,9 @@ import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useUserManagement, type ManagedUser, type UserRole, type UserStatus } from '@/lib/hooks/use-user-management'
+
+// Initialize Supabase client once at module level
+const supabase = createClient()
 
 interface Role {
   id: string
@@ -267,8 +272,6 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
     }
     setInviting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
@@ -298,8 +301,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
         metadata: { sendWelcomeEmail: inviteForm.sendWelcomeEmail }
       } as any)
 
-      toast.success('User invited successfully!'`
-      })
+      toast.success(`User invited successfully!`)
       setShowInviteModal(false)
       setInviteForm({ email: '', role: 'user', full_name: '', sendWelcomeEmail: true })
       refetch()
@@ -314,8 +316,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
     setSuspendingUser(user.id)
     try {
       await updateUser({ id: user.id, status: 'suspended' as UserStatus })
-      toast.success('User suspended'" has been suspended`
-      })
+      toast.success(`User suspended has been suspended`)
       refetch()
     } catch (error: any) {
       toast.error('Failed to suspend user')
@@ -328,8 +329,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
     setSuspendingUser(user.id)
     try {
       await updateUser({ id: user.id, status: 'active' as UserStatus })
-      toast.success('User activated'" has been activated`
-      })
+      toast.success(`User activated has been activated`)
       refetch()
     } catch (error: any) {
       toast.error('Failed to activate user')
@@ -345,8 +345,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
     setDeletingUser(user.id)
     try {
       await deleteUser(user.id)
-      toast.success('User deleted'" has been removed`
-      })
+      toast.success(`User deleted has been removed`)
       setShowUserModal(false)
       setSelectedUser(null)
       refetch()
@@ -363,8 +362,6 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
       if (!authUser) throw new Error('Not authenticated')
 
       // Log the password reset request
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       await supabase.from('audit_logs').insert({
         user_id: authUser.id,
         action: 'password_reset_requested',
@@ -379,8 +376,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
         password_changed_at: new Date().toISOString()
       } as any)
 
-      toast.success('Password reset sent'`
-      })
+      toast.success(`Password reset sent`)
     } catch (error: any) {
       toast.error('Failed to send password reset')
     }
@@ -389,8 +385,6 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
   const handleExportUsers = async () => {
     setExporting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
@@ -435,8 +429,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
     setUpdatingRole(user.id)
     try {
       await updateUser({ id: user.id, role: newRole })
-      toast.success('Role assigned' role assigned to ${user.full_name || user.email}`
-      })
+      toast.success(`Role assigned role assigned to ${user.full_name || user.email}`)
       refetch()
     } catch (error: any) {
       toast.error('Failed to assign role')
@@ -453,8 +446,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
       for (const userId of selectedUsers) {
         await updateUser({ id: userId, status: 'suspended' as UserStatus })
       }
-      toast.success('Users suspended' users have been suspended`
-      })
+      toast.success(`Users suspended users have been suspended`)
       setSelectedUsers([])
       refetch()
     } catch (error: any) {
@@ -470,8 +462,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
       for (const userId of selectedUsers) {
         await deleteUser(userId)
       }
-      toast.success('Users deleted' users have been deleted`
-      })
+      toast.success(`Users deleted users have been deleted`)
       setSelectedUsers([])
       refetch()
     } catch (error: any) {
@@ -486,13 +477,9 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
     }
     setCreatingRole(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('user_roles').insert({
         user_id: user.id,
         name: roleForm.name,
@@ -503,8 +490,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
 
       if (error) throw error
 
-      toast.success('Role created'" role has been created`
-      })
+      toast.success(`Role created role has been created`)
       setShowRoleModal(false)
       setRoleForm({ name: '', description: '', permissions: [] })
     } catch (error: any) {
@@ -1026,10 +1012,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                   <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Authentication Connections</h2>
                   <p className="text-sm text-gray-600 dark:text-gray-400">Manage SSO, social logins, and identity providers</p>
                 </div>
-                <Button className="gap-2" onClick={() => {
-                  toast.info('Connection wizard'
-                  })
-                }}>
+                <Button className="gap-2" onClick={() => toast.info('Connection wizard')}>
                   <Plus className="w-4 h-4" />
                   Add Connection
                 </Button>
@@ -1087,8 +1070,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                             }, null, 2))
                             toast.success(`${conn.name} configuration copied`)
                           } catch {
-                            toast.info(`Configure ${conn.name}` | Status: ${conn.status}`
-                            })
+                            toast.info(`Configure ${conn.name}`)
                           }
                         }}>Configure</Button>
                       </div>
@@ -1174,8 +1156,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                             }, null, 2))
                             toast.success(`${policy.name} settings copied`)
                           } catch {
-                            toast.info(`${policy.name} Settings` | ${policy.enabled ? 'Enabled' : 'Disabled'}`
-                            })
+                            toast.info(`${policy.name} Settings`)
                           }
                         }}>
                           <Settings className="w-4 h-4" />
@@ -1230,8 +1211,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                       a.download = `audit-logs-${new Date().toISOString().split('T')[0]}.csv`
                       a.click()
                       window.URL.revokeObjectURL(url)
-                      toast.success('Audit logs exported' log entries exported to CSV`
-                      })
+                      toast.success(`Audit logs exported: ${auditLogs.length} log entries exported to CSV`)
                     } catch (error) {
                       toast.error('Failed to export logs')
                     }
@@ -1683,9 +1663,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                           <Input placeholder="https://cdn.freeflow.com/email-logo.png" />
                         </div>
                         <Button variant="outline" className="w-full" onClick={() => {
-                          toast.info('Email Template Editor'
-                            }
-                          })
+                          toast.info('Email Template Editor')
                         }}>
                           <Edit className="w-4 h-4 mr-2" />
                           Edit Email Templates
@@ -1829,12 +1807,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                         <p className="text-sm text-gray-500">APIs protected by Auth0</p>
                       </div>
                       <Button className="ml-auto gap-2" onClick={() => {
-                        toast.info('Register New API' catch {
-                                toast.error('Failed to copy guide')
-                              }
-                            }
-                          }
-                        })
+                        toast.info('Register New API')
                       }}>
                         <Plus className="w-4 h-4" />
                         Register API
@@ -1868,8 +1841,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                                 }, null, 2))
                                 toast.success(`${api.name} configuration copied`)
                               } catch {
-                                toast.info(`${api.name}``
-                                })
+                                toast.info(api.name + ' configuration copied')
                               }
                             }}>Configure</Button>
                           </div>
@@ -2209,9 +2181,9 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                     <div className="flex gap-2">
                       <Button size="sm" variant="outline" onClick={() => {
                         if (selectedUser.email) {
-                          window.location.href = `mailto:${selectedUser.email}`
-                          toast.success('Opening email client'`
-                          })
+                          const emailUrl = 'mailto:' + selectedUser.email
+                          window.location.href = emailUrl
+                          toast.success('Opening email client for ' + selectedUser.email)
                         } else {
                           toast.error('No email address available')
                         }
@@ -2299,7 +2271,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                       <div className="space-y-3">
                         <div className="flex items-center justify-between p-3 border rounded-lg dark:border-gray-700">
                           <div className="flex items-center gap-3">
-                            <Smartphone className={`w-5 h-5 ${selectedUser.two_factor_enabled ? 'text-green-600' : 'text-gray-400'}`} />
+                            <Smartphone className={'w-5 h-5 ' + (selectedUser.two_factor_enabled ? 'text-green-600' : 'text-gray-400')} />
                             <div>
                               <p className="font-medium">Multi-Factor Authentication</p>
                               <p className="text-sm text-gray-500">
@@ -2318,7 +2290,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                               <p className="font-medium">Password</p>
                               <p className="text-sm text-gray-500">
                                 {selectedUser.password_changed_at
-                                  ? `Last changed ${new Date(selectedUser.password_changed_at).toLocaleDateString()}`
+                                  ? 'Last changed ' + new Date(selectedUser.password_changed_at).toLocaleDateString()
                                   : 'Never changed'}
                               </p>
                             </div>
@@ -2334,18 +2306,18 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                             </div>
                           </div>
                           <Button size="sm" variant="outline" onClick={async () => {
-                            if (!confirm(`Revoke all sessions for ${selectedUser.full_name || selectedUser.email}? They will need to sign in again.`)) {
+                            if (!confirm('Revoke all sessions for ' + (selectedUser.full_name || selectedUser.email) + '? They will need to sign in again.')) {
                               return
                             }
                             try {
                               toast.loading('Revoking sessions...')
-                              const response = await fetch(`/api/admin/users/${selectedUser.id}/sessions`, {
+                              const sessionUrl = '/api/admin/users/' + selectedUser.id + '/sessions'
+                              const response = await fetch(sessionUrl, {
                                 method: 'DELETE'
                               })
                               if (!response.ok) throw new Error('Failed to revoke sessions')
                               toast.dismiss()
-                              toast.success('All sessions revoked!' will need to sign in again`
-                              })
+                              toast.success('All sessions revoked! ' + (selectedUser.full_name || selectedUser.email) + ' will need to sign in again')
                             } catch {
                               toast.dismiss()
                               toast.error('Failed to revoke sessions')

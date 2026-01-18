@@ -526,8 +526,6 @@ export default function OverviewClient() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('dashboard_metrics')
         .select('*')
@@ -549,8 +547,6 @@ export default function OverviewClient() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('dashboard_stats')
         .select('*')
@@ -572,8 +568,6 @@ export default function OverviewClient() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('dashboard_notifications')
         .select('*')
@@ -674,8 +668,6 @@ export default function OverviewClient() {
         return
       }
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('user_preferences')
         .upsert({
@@ -721,8 +713,6 @@ export default function OverviewClient() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('dashboard_metrics')
         .delete()
@@ -745,8 +735,6 @@ export default function OverviewClient() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('dashboard_stats')
         .delete()
@@ -787,12 +775,12 @@ export default function OverviewClient() {
 
   // Acknowledge alert (placeholder - can be connected to alerts table)
   const handleAcknowledgeAlert = (alertTitle: string) => {
-    toast.success('Alert acknowledged'" has been acknowledged` })
+    toast.success("Alert " + alertTitle + " has been acknowledged")
   }
 
   // View details (placeholder)
   const handleViewDetails = (section: string) => {
-    toast.info('View Details' details...` })
+    toast.info("Viewing " + section + " details...")
   }
 
   // Show loading spinner during initial load
@@ -2354,7 +2342,7 @@ export default function OverviewClient() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
           <AIInsightsPanel
             insights={mockAIInsights}
-            onAskQuestion={(q) => toast.info('Question Submitted' })}
+            onAskQuestion={(q) => toast.info("Question Submitted: " + q)}
           />
           <PredictiveAnalytics predictions={mockOverviewPredictions} />
         </div>

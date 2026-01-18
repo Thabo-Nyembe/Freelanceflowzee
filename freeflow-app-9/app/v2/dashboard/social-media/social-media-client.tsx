@@ -542,7 +542,7 @@ export default function SocialMediaClient() {
   // Handlers
   const handleCreatePost = () => setShowCreatePostDialog(true)
   const handleSchedulePost = (n: string) => setShowScheduleDialog(true)
-  const handlePublishPost = (n: string) => toast.success('Published'" is live` })
+  const handlePublishPost = (n: string) => toast.success('Published: ' + n + ' is live')
   const handleConnectAccount = (p: string) => setShowConnectAccountDialog(true)
   const handleExportAnalytics = () => setShowExportDialog(true)
   const handleGenerateCaption = () => {
@@ -1902,7 +1902,7 @@ export default function SocialMediaClient() {
             <AIInsightsPanel
               insights={mockSocialMediaAIInsights}
               title="Social Media Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">

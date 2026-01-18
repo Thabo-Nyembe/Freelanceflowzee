@@ -126,7 +126,7 @@ const logger = createFeatureLogger('ClientZone')
 const FloatingParticle = ({ delay = 0, color = 'blue' }: { delay?: number; color?: string }) => {
   return (
     <motion.div
-      className={`absolute w-2 h-2 bg-${color}-400 rounded-full opacity-30`}
+      className={"absolute w-2 h-2 bg-" + color + "-400 rounded-full opacity-30"}
       animate={{
         y: [0, -30, 0],
         x: [0, 15, -15, 0],
@@ -527,8 +527,10 @@ export default function ClientZoneClient() {
     if (!newItemName.trim()) {
       toast.error('Please enter a name for the item')
       return
-    }    toast.success(`${newItemType.charAt(0).toUpperCase() + newItemType.slice(1)} created successfully!`, {
-      description: `"${newItemName}" has been added to your ${newItemType === 'project' ? 'projects' : newItemType === 'task' ? 'tasks' : 'notes'}`
+    }
+
+    toast.success(newItemType.charAt(0).toUpperCase() + newItemType.slice(1) + " created successfully!", {
+      description: "\"" + newItemName + "\" has been added to your " + (newItemType === 'project' ? 'projects' : newItemType === 'task' ? 'tasks' : 'notes')
     })
 
     setShowNewItemDialog(false)
@@ -542,15 +544,17 @@ export default function ClientZoneClient() {
   }
 
   // Handler: Export Data
-  const handleExportData = () => {    toast.success('Export completed!' file is ready for download`
-    })
+  const handleExportData = () => {
+    toast.success('Export completed! Your file is ready for download')
 
     // In production, this would trigger a file download
-    const filename = `client-zone-export-${exportDateRange}-${new Date().toISOString().split('T')[0]}.${exportFormat}`    setShowExportDialog(false)
+    const filename = `client-zone-export-${exportDateRange}-${new Date().toISOString().split('T')[0]}.${exportFormat}`
+    setShowExportDialog(false)
   }
 
   // Handler: Save Settings
-  const handleSaveSettings = () => {    toast.success('Settings saved!')
+  const handleSaveSettings = () => {
+    toast.success('Settings saved!')
 
     setShowSettingsDialog(false)
   }
@@ -572,8 +576,8 @@ export default function ClientZoneClient() {
     if (!reminderDate) {
       toast.error('Please select a date for the reminder')
       return
-    }    toast.success('Reminder created!'`
-    })
+    }
+    toast.success('Reminder created!')
 
     setShowRemindersDialog(false)
     setReminderDate('')
@@ -653,7 +657,8 @@ export default function ClientZoneClient() {
         deliverable_id: revisionProjectId,
         project_id: revisionProjectId,
         notes: revisionFeedback
-      })      toast.success('Revision request submitted!')
+      })
+      toast.success('Revision request submitted!')
 
       // Reload dashboard data
       const data = await getClientZoneDashboard()
@@ -673,9 +678,11 @@ export default function ClientZoneClient() {
   // HANDLER 4: APPROVE DELIVERABLE
   // ============================================================================
 
-  const handleApproveDeliverable = async (deliverableId: string) => {    try {
+  const handleApproveDeliverable = async (deliverableId: string) => {
+    try {
       // Use database query instead of API endpoint
-      await approveDeliverable(deliverableId)      toast.success('Deliverable approved!')
+      await approveDeliverable(deliverableId)
+      toast.success('Deliverable approved!')
 
       // Reload dashboard data
       const data = await getClientZoneDashboard()
@@ -697,7 +704,8 @@ export default function ClientZoneClient() {
     if (!project) {
       toast.error('Project not found')
       return
-    }    const downloadPromise = (async () => {
+    }
+    const downloadPromise = (async () => {
       // Get project files
       const projectFiles = await getProjectFiles(projectId)
 
@@ -799,7 +807,8 @@ export default function ClientZoneClient() {
         rating: 5,
         feedback_text: newFeedback,
         would_recommend: true
-      })      toast.success('Feedback submitted!')
+      })
+      toast.success('Feedback submitted!')
       setNewFeedback('')
 
       // Reload dashboard
@@ -831,29 +840,31 @@ export default function ClientZoneClient() {
     setInvoices(dashData.pendingInvoices)
     setDashboardData(dashData)
 
-    toast.success(`Payment of ${formatCurrency(amount)} for ${invoiceNumber} completed!`)
+    toast.success("Payment of " + formatCurrency(amount) + " for " + invoiceNumber + " completed!")
   }
 
   // ============================================================================
   // HANDLER 9: SCHEDULE MEETING
   // ============================================================================
 
-  const handleScheduleMeeting = () => {    toast.success('Opening calendar...')
+  const handleScheduleMeeting = () => {
+    toast.success('Opening calendar...')
   }
 
   // ============================================================================
   // HANDLER 10: VIEW INVOICE DETAILS
   // ============================================================================
 
-  const handleViewInvoiceDetails = (invoiceNumber: string) => {    toast.success('Loading invoice details...'`
-    })
+  const handleViewInvoiceDetails = (invoiceNumber: string) => {
+    toast.success('Loading invoice details...')
   }
 
   // ============================================================================
   // HANDLER 11: CLIENT ONBOARDING
   // ============================================================================
 
-  const handleClientOnboarding = useCallback(() => {    toast.success('Client onboarding started!')
+  const handleClientOnboarding = useCallback(() => {
+    toast.success('Client onboarding started!')
   }, [userId, projects])
 
   // ============================================================================
@@ -952,7 +963,8 @@ export default function ClientZoneClient() {
       const { disputeInvoice } = await import('@/lib/client-zone-queries')
       const { data, error } = await disputeInvoice(disputeInvoiceNumber, disputeReason)
 
-      if (error) throw error      toast.success('Dispute submitted')
+      if (error) throw error
+      toast.success('Dispute submitted')
       announce('Invoice dispute submitted successfully', 'polite')
 
       // Reload dashboard data
@@ -1080,7 +1092,8 @@ export default function ClientZoneClient() {
       return
     }
 
-    setIsSubmittingClient(true)    const createPromise = createClientProject({
+    setIsSubmittingClient(true)
+    const createPromise = createClientProject({
       client_id: userId || '',
       name: clientFormData.name,
       description: clientFormData.description || undefined,
@@ -1117,7 +1130,8 @@ export default function ClientZoneClient() {
       return
     }
 
-    setIsSubmittingClient(true)    const updatePromise = updateClientProject(editingClientId, {
+    setIsSubmittingClient(true)
+    const updatePromise = updateClientProject(editingClientId, {
       name: clientFormData.name,
       description: clientFormData.description || null,
       budget: clientFormData.budget ? parseFloat(clientFormData.budget) : 0,
@@ -1151,7 +1165,8 @@ export default function ClientZoneClient() {
   const handleDeleteClient = async () => {
     if (!editingClientId) return
 
-    setIsDeletingClient(true)    const deletePromise = deleteClientProject(editingClientId)
+    setIsDeletingClient(true)
+    const deletePromise = deleteClientProject(editingClientId)
 
     toast.promise(deletePromise, {
       loading: 'Deleting project...',
@@ -1194,10 +1209,12 @@ export default function ClientZoneClient() {
     if (!query.trim()) {
       setFilteredClients([])
       return
-    }    try {
+    }
+
+    try {
       const results = await searchClientZone(query)
       setFilteredClients(results.projects)
-      toast.success(`Found ${results.projects.length} matching projects`)
+      toast.success("Found " + results.projects.length + " matching projects")
     } catch (error: any) {
       logger.error('Search failed', { error, userId })
       toast.error('Search failed')
@@ -1208,7 +1225,8 @@ export default function ClientZoneClient() {
   // HANDLER: FILTER CLIENTS BY STATUS
   // ============================================================================
   const handleFilterByStatus = useCallback(async (status: string) => {
-    setClientStatusFilter(status)    try {
+    setClientStatusFilter(status)
+    try {
       if (status === 'all') {
         const dashData = await getClientZoneDashboard()
         setProjects(dashData.recentProjects)
@@ -1323,8 +1341,8 @@ export default function ClientZoneClient() {
     if (!deliverableProject) {
       toast.error('Please select a project')
       return
-    }    toast.success('Deliverable uploaded successfully!'" has been added to the project`
-    })
+    }
+    toast.success("Deliverable uploaded successfully! " + deliverableTitle + " has been added to the project")
     setShowUploadDeliverableDialog(false)
     setDeliverableTitle('')
     setDeliverableProject('')
@@ -1407,8 +1425,8 @@ export default function ClientZoneClient() {
     if (aiReviewSelection === null) {
       toast.error('Please select a design option')
       return
-    }    toast.success('Design approved!' has been selected and approved`
-    })
+    }
+    toast.success("Design approved! Option " + (aiReviewSelection + 1) + " has been selected and approved")
     setShowAIReviewDialog(false)
     setAiReviewSelection(null)
     setAiReviewFeedback('')
@@ -1457,8 +1475,8 @@ export default function ClientZoneClient() {
   // ============================================================================
   // HANDLER 35: EXPORT DATA (Settings)
   // ============================================================================
-  const handleExportDataSettings = () => {    toast.success('Data export ready!' data has been exported`
-    })
+  const handleExportDataSettings = () => {
+    toast.success("Data export ready! Your data has been exported")
     setShowDataExportDialog(false)
   }
 
@@ -1545,7 +1563,8 @@ export default function ClientZoneClient() {
                     <button
                       onClick={() => {
                         setUserRole('client')
-                        setShowRoleSwitcher(false)                        announce('Switched to client perspective')
+                        setShowRoleSwitcher(false)
+                        announce('Switched to client perspective')
                         toast.success('Viewing as Client')
                       }}
                       className={`w-full text-left px-3 py-2 rounded-md transition-colors ${
@@ -1565,7 +1584,8 @@ export default function ClientZoneClient() {
                     <button
                       onClick={() => {
                         setUserRole('freelancer')
-                        setShowRoleSwitcher(false)                        announce('Switched to freelancer perspective')
+                        setShowRoleSwitcher(false)
+                        announce('Switched to freelancer perspective')
                         toast.success('Viewing as Freelancer')
                       }}
                       className={`w-full text-left px-3 py-2 rounded-md transition-colors ${
@@ -1754,7 +1774,7 @@ export default function ClientZoneClient() {
                                 <p className="text-xs text-gray-500">{client.projects} project(s)</p>
                               </div>
                             </div>
-                            <Badge variant="outline" className={`bg-${client.color}-100 text-${client.color}-700 border-${client.color}-300`}>
+                            <Badge variant="outline" className={"bg-" + client.color + "-100 text-" + client.color + "-700 border-" + client.color + "-300"}>
                               {client.status}
                             </Badge>
                           </div>

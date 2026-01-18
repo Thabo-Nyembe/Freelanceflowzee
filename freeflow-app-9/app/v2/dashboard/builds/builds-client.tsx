@@ -906,18 +906,15 @@ export default function BuildsClient() {
   }
 
   const handleCancelBuild = (build: Build) => {
-    toast.success('Build cancelled' has been cancelled`
-    })
+    toast.success(`Build cancelled: ${build.name} has been cancelled`)
   }
 
   const handleRetryBuild = (build: Build) => {
-    toast.info('Retrying build'`
-    })
+    toast.info(`Retrying build: ${build.name}`)
   }
 
   const handleDownloadArtifact = (artifactName: string) => {
-    toast.success('Download started'`
-    })
+    toast.success(`Download started: ${artifactName}`)
   }
 
   return (
@@ -2223,7 +2220,7 @@ export default function BuildsClient() {
                     <span className="font-mono text-sm">{branch}</span>
                   </div>
                   <Button size="sm" variant="outline" onClick={() => {
-                    toast.info('Branch selected'` })
+                    toast.info(`Branch selected: ${branch}`)
                     setShowBranchesDialog(false)
                   }}>
                     Select
@@ -2259,7 +2256,7 @@ export default function BuildsClient() {
                     <p className="text-xs text-gray-500">Build #{artifact.build_number} - {formatBytes(artifact.size_bytes)}</p>
                   </div>
                   <Button size="sm" variant="outline" onClick={() => {
-                    toast.success('Download started'...` })
+                    toast.success(`Downloading ${artifact.name}...`)
                   }}>
                     <Download className="w-4 h-4" />
                   </Button>

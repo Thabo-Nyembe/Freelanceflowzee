@@ -321,14 +321,12 @@ export default function ReportingClient() {
   }
 
   const handleShareDashboard = (dashboard: any) => {
-    toast.success('Share link copied'" share link copied to clipboard`
-    })
-    navigator.clipboard.writeText(`${window.location.origin}/shared/dashboard/${dashboard.id}`)
+    toast.success('Share link copied')
+    navigator.clipboard.writeText(window.location.origin + '/shared/dashboard/' + dashboard.id)
   }
 
   const handleExportDashboard = (dashboard: any) => {
-    toast.success('Export started'" is being exported as PDF`
-    })
+    toast.success('Export started')
   }
 
   // Handlers - Worksheet
@@ -1648,7 +1646,7 @@ export default function ReportingClient() {
             <AIInsightsPanel
               insights={mockReportingAIInsights}
               title="Reporting Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">

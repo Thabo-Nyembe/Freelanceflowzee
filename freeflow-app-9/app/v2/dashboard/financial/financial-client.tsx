@@ -286,11 +286,10 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
         currency: 'USD',
         is_taxable: false,
         account_code: newAccountForm.code,
-        record_number: `ACC-${newAccountForm.code}`
+        record_number: "ACC-" + newAccountForm.code
       } as any)
 
-      toast.success('Account created successfully!'" has been added to your chart of accounts.`
-      })
+      toast.success('Account created successfully!')
       setShowNewAccountDialog(false)
       setNewAccountForm({
         accountType: 'asset',
@@ -335,7 +334,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `financial-report-${new Date().toISOString().split('T')[0]}.csv`
+      a.download = "financial-report-" + new Date().toISOString().split('T')[0] + ".csv"
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
@@ -358,7 +357,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
 
   const handleReconcileAccount = async (account: typeof mockAccounts[0]) => {
     setIsProcessing(true)
-    toast.loading(`Reconciling "${account.name}"...`, { id: 'reconcile' })
+    toast.loading("Reconciling \"" + account.name + "\"...", { id: 'reconcile' })
 
     try {
       // Find matching records for this account and update their status
@@ -374,7 +373,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
 
       toast.success('Reconciliation complete!', {
         id: 'reconcile',
-        description: `Account "${account.name}" has been reconciled. ${matchingRecords.length} transactions reviewed.`
+        description: "Account \"" + account.name + "\" has been reconciled. " + matchingRecords.length + " transactions reviewed."
       })
       refetch()
     } catch (error) {
@@ -390,7 +389,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
 
   const handleGenerateReport = async (reportType: string) => {
     setIsProcessing(true)
-    toast.loading(`Generating ${reportType} report...`, { id: 'report' })
+    toast.loading("Generating " + reportType + " report...", { id: 'report' })
 
     try {
       // Filter records based on report type
@@ -407,7 +406,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
 
       // Generate PDF-ready data
       const reportContent = {
-        title: `${reportType} Report`,
+        title: reportType + " Report",
         generatedAt: new Date().toISOString(),
         period: selectedPeriod,
         totalRecords: reportData.length,
@@ -423,13 +422,13 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `${reportType.toLowerCase().replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.json`
+      a.download = reportType.toLowerCase().replace(/\s+/g, '-') + "-" + new Date().toISOString().split('T')[0] + ".json"
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
       window.URL.revokeObjectURL(url)
 
-      toast.success(`${reportType} report generated!`, {
+      toast.success(reportType + " report generated!", {
         id: 'report',
         description: 'Report has been downloaded.'
       })
@@ -456,13 +455,11 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
           status: 'approved' as FinancialStatus,
           approved_at: new Date().toISOString()
         })
-        toast.success('Transaction approved!'" has been approved.`
-        })
+        toast.success('Transaction approved!')
         refetch()
       } else {
         // Mock transaction - just show toast
-        toast.success('Transaction approved!'" has been approved.`
-        })
+        toast.success('Transaction approved!')
       }
     } catch (error) {
       toast.error('Failed to approve transaction')
@@ -487,8 +484,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
   }
 
   const handleSyncBankAccount = (accountId: string, accountName: string) => {
-    toast.success('Sync complete!' has been synchronized.`
-    })
+    toast.success(accountName + ' has been synchronized.')
     refetch()
   }
 
@@ -500,9 +496,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
   ) => {
     const newValue = !currentValue
     setter(newValue)
-    toast.success(`${settingName} ${newValue ? 'enabled' : 'disabled'}` is now active.`
-        : `${settingName} has been turned off.`
-    })
+    toast.success(settingName + (newValue ? ' enabled' : ' disabled'))
   }
 
   // Export config handler
@@ -548,7 +542,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `financial-config-${new Date().toISOString().split('T')[0]}.json`
+      a.download = "financial-config-" + new Date().toISOString().split('T')[0] + ".json"
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
@@ -775,7 +769,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                       <div key={transaction.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
-                            <div className={`p-2 rounded-lg ${transaction.type === 'income' ? 'bg-green-100 dark:bg-green-900/30' : 'bg-red-100 dark:bg-red-900/30'}`}>
+                            <div className={"p-2 rounded-lg " + (transaction.type === 'income' ? 'bg-green-100 dark:bg-green-900/30' : 'bg-red-100 dark:bg-red-900/30') + ""}>
                               {transaction.type === 'income' ? (
                                 <ArrowDown className="w-4 h-4 text-green-600" />
                               ) : (
@@ -788,14 +782,14 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                             </div>
                           </div>
                           <div className="text-right">
-                            <p className={`font-semibold ${transaction.amount > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            <p className={"font-semibold " + (transaction.amount > 0 ? 'text-green-600' : 'text-red-600') + ""}>
                               {transaction.amount > 0 ? '+' : ''}{formatCurrency(transaction.amount)}
                             </p>
-                            <span className={`text-xs px-2 py-0.5 rounded-full ${
+                            <span className={"text-xs px-2 py-0.5 rounded-full " + (
                               transaction.status === 'reconciled' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' :
                               transaction.status === 'cleared' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' :
                               'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300'
-                            }`}>
+                            ) + ""}>
                               {transaction.status}
                             </span>
                           </div>
@@ -838,8 +832,8 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                           </div>
                           <div className="relative h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                             <div
-                              className={`absolute inset-y-0 left-0 rounded-full ${isOverBudget ? 'bg-red-500' : 'bg-emerald-500'}`}
-                              style={{ width: `${Math.min(percentage, 100)}%` }}
+                              className={"absolute inset-y-0 left-0 rounded-full " + (isOverBudget ? 'bg-red-500' : 'bg-emerald-500')}
+                              style={{ width: Math.min(percentage, 100) + "%" }}
                             />
                           </div>
                           <div className="flex items-center justify-between text-xs">
@@ -881,11 +875,11 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                   <div key={account.id} className="p-6">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-3">
-                        <div className={`p-2 rounded-lg ${
+                        <div className={"p-2 rounded-lg " + (
                           account.type === 'checking' ? 'bg-blue-100 dark:bg-blue-900/30' :
                           account.type === 'savings' ? 'bg-green-100 dark:bg-green-900/30' :
                           'bg-purple-100 dark:bg-purple-900/30'
-                        }`}>
+                        ) + ""}>
                           {account.type === 'credit' ? (
                             <CreditCard className="w-5 h-5 text-purple-600" />
                           ) : (
@@ -901,7 +895,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                         <AlertCircle className="w-5 h-5 text-yellow-500" />
                       )}
                     </div>
-                    <p className={`text-2xl font-bold ${account.balance < 0 ? 'text-red-600' : 'text-gray-900 dark:text-white'}`}>
+                    <p className={"text-2xl font-bold " + (account.balance < 0 ? 'text-red-600' : 'text-gray-900 dark:text-white') + ""}>
                       {formatCurrency(account.balance)}
                     </p>
                     <p className="text-xs text-gray-500 mt-2">
@@ -1151,7 +1145,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                     {Object.entries(cashFlowData?.operating || {}).map(([name, amount]) => (
                       <div key={name} className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700">
                         <span className="text-gray-700 dark:text-gray-300">{name}</span>
-                        <span className={`font-medium ${amount >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        <span className={"font-medium " + (amount >= 0 ? 'text-green-600' : 'text-red-600') + ""}>
                           {amount >= 0 ? '' : '('}{formatCurrency(Math.abs(amount))}{amount < 0 && ')'}
                         </span>
                       </div>
@@ -1170,7 +1164,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                     {Object.entries(cashFlowData?.investing || {}).map(([name, amount]) => (
                       <div key={name} className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700">
                         <span className="text-gray-700 dark:text-gray-300">{name}</span>
-                        <span className={`font-medium ${amount >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        <span className={"font-medium " + (amount >= 0 ? 'text-green-600' : 'text-red-600') + ""}>
                           {amount >= 0 ? '' : '('}{formatCurrency(Math.abs(amount))}{amount < 0 && ')'}
                         </span>
                       </div>
@@ -1189,7 +1183,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                     {Object.entries(cashFlowData?.financing || {}).map(([name, amount]) => (
                       <div key={name} className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700">
                         <span className="text-gray-700 dark:text-gray-300">{name}</span>
-                        <span className={`font-medium ${amount >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        <span className={"font-medium " + (amount >= 0 ? 'text-green-600' : 'text-red-600') + ""}>
                           {amount >= 0 ? '' : '('}{formatCurrency(Math.abs(amount))}{amount < 0 && ')'}
                         </span>
                       </div>
@@ -1441,11 +1435,11 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
               {mockBankAccounts.map((account) => (
                 <div key={account.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
                   <div className="flex items-center justify-between mb-4">
-                    <div className={`p-3 rounded-xl ${
+                    <div className={"p-3 rounded-xl " + (
                       account.type === 'checking' ? 'bg-blue-100 dark:bg-blue-900/30' :
                       account.type === 'savings' ? 'bg-green-100 dark:bg-green-900/30' :
                       'bg-purple-100 dark:bg-purple-900/30'
-                    }`}>
+                    ) + ""}>
                       {account.type === 'credit' ? (
                         <CreditCard className="w-6 h-6 text-purple-600" />
                       ) : (
@@ -1475,7 +1469,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                   </div>
                   <h3 className="font-semibold text-gray-900 dark:text-white">{account.name}</h3>
                   <p className="text-sm text-gray-500 mt-1">{account.institution} • {account.accountNumber}</p>
-                  <p className={`text-3xl font-bold mt-4 ${account.balance < 0 ? 'text-red-600' : 'text-gray-900 dark:text-white'}`}>
+                  <p className={"text-3xl font-bold mt-4 " + (account.balance < 0 ? 'text-red-600' : 'text-gray-900 dark:text-white') + ""}>
                     {formatCurrency(account.balance)}
                   </p>
                   <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
@@ -1487,7 +1481,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                       disabled={isProcessing}
                       className="flex items-center gap-1 text-sm text-emerald-600 hover:text-emerald-700 font-medium disabled:opacity-50"
                     >
-                      <RefreshCw className={`w-3 h-3 ${isProcessing ? 'animate-spin' : ''}`} />
+                      <RefreshCw className={"w-3 h-3 " + (isProcessing ? 'animate-spin' : '') + ""} />
                       Sync
                     </button>
                   </div>
@@ -1552,11 +1546,11 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{transaction.category}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{transaction.account}</td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
+                          <span className={"inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium " + (
                             transaction.status === 'reconciled' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' :
                             transaction.status === 'cleared' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' :
                             'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300'
-                          }`}>
+                          ) + ""}>
                             {transaction.status === 'reconciled' && <CheckCircle className="w-3 h-3" />}
                             {transaction.status === 'cleared' && <CheckCircle className="w-3 h-3" />}
                             {transaction.status === 'pending' && <Clock className="w-3 h-3" />}
@@ -1564,7 +1558,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right">
-                          <span className={`text-sm font-semibold ${transaction.amount > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          <span className={"text-sm font-semibold " + (transaction.amount > 0 ? 'text-green-600' : 'text-red-600') + ""}>
                             {transaction.amount > 0 ? '+' : ''}{formatCurrency(transaction.amount)}
                           </span>
                         </td>
@@ -1643,11 +1637,11 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                       <button
                         key={item.id}
                         onClick={() => setSettingsTab(item.id)}
-                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+                        className={"w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all " + (
                           settingsTab === item.id
                             ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400'
                             : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50'
-                        }`}
+                        ) + ""}
                       >
                         <item.icon className="h-5 w-5" />
                         <div className="text-left">
@@ -1801,10 +1795,10 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                             <p className="text-sm text-gray-500">Automatically categorize transactions using AI</p>
                           </div>
                           <button
-                            className={`relative inline-flex h-6 w-11 items-center rounded-full ${aiCategorizationEnabled ? 'bg-emerald-600' : 'bg-gray-200 dark:bg-gray-700'}`}
+                            className={"relative inline-flex h-6 w-11 items-center rounded-full " + (aiCategorizationEnabled ? 'bg-emerald-600' : 'bg-gray-200 dark:bg-gray-700') + ""}
                             onClick={() => handleToggleSetting('AI Categorization', aiCategorizationEnabled, setAiCategorizationEnabled)}
                           >
-                            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${aiCategorizationEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
+                            <span className={"inline-block h-4 w-4 transform rounded-full bg-white transition " + (aiCategorizationEnabled ? 'translate-x-6' : 'translate-x-1') + ""} />
                           </button>
                         </div>
                         <div className="flex items-center justify-between">
@@ -1813,10 +1807,10 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                             <p className="text-sm text-gray-500">Improve AI based on manual corrections</p>
                           </div>
                           <button
-                            className={`relative inline-flex h-6 w-11 items-center rounded-full ${learnFromCorrectionsEnabled ? 'bg-emerald-600' : 'bg-gray-200 dark:bg-gray-700'}`}
+                            className={"relative inline-flex h-6 w-11 items-center rounded-full " + (learnFromCorrectionsEnabled ? 'bg-emerald-600' : 'bg-gray-200 dark:bg-gray-700') + ""}
                             onClick={() => handleToggleSetting('Learn from Corrections', learnFromCorrectionsEnabled, setLearnFromCorrectionsEnabled)}
                           >
-                            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${learnFromCorrectionsEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
+                            <span className={"inline-block h-4 w-4 transform rounded-full bg-white transition " + (learnFromCorrectionsEnabled ? 'translate-x-6' : 'translate-x-1') + ""} />
                           </button>
                         </div>
                       </div>
@@ -1895,10 +1889,10 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                             <p className="text-sm text-gray-500">Email monthly financial summary</p>
                           </div>
                           <button
-                            className={`relative inline-flex h-6 w-11 items-center rounded-full ${monthlySummaryEnabled ? 'bg-emerald-600' : 'bg-gray-200 dark:bg-gray-700'}`}
+                            className={"relative inline-flex h-6 w-11 items-center rounded-full " + (monthlySummaryEnabled ? 'bg-emerald-600' : 'bg-gray-200 dark:bg-gray-700') + ""}
                             onClick={() => handleToggleSetting('Monthly Summary', monthlySummaryEnabled, setMonthlySummaryEnabled)}
                           >
-                            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${monthlySummaryEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
+                            <span className={"inline-block h-4 w-4 transform rounded-full bg-white transition " + (monthlySummaryEnabled ? 'translate-x-6' : 'translate-x-1') + ""} />
                           </button>
                         </div>
                         <div className="flex items-center justify-between">
@@ -1907,10 +1901,10 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                             <p className="text-sm text-gray-500">Generate quarterly statements</p>
                           </div>
                           <button
-                            className={`relative inline-flex h-6 w-11 items-center rounded-full ${quarterlyReportsEnabled ? 'bg-emerald-600' : 'bg-gray-200 dark:bg-gray-700'}`}
+                            className={"relative inline-flex h-6 w-11 items-center rounded-full " + (quarterlyReportsEnabled ? 'bg-emerald-600' : 'bg-gray-200 dark:bg-gray-700') + ""}
                             onClick={() => handleToggleSetting('Quarterly Reports', quarterlyReportsEnabled, setQuarterlyReportsEnabled)}
                           >
-                            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${quarterlyReportsEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
+                            <span className={"inline-block h-4 w-4 transform rounded-full bg-white transition " + (quarterlyReportsEnabled ? 'translate-x-6' : 'translate-x-1') + ""} />
                           </button>
                         </div>
                         <div className="flex items-center justify-between">
@@ -1919,10 +1913,10 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                             <p className="text-sm text-gray-500">Prepare year-end tax documents</p>
                           </div>
                           <button
-                            className={`relative inline-flex h-6 w-11 items-center rounded-full ${annualTaxPackageEnabled ? 'bg-emerald-600' : 'bg-gray-200 dark:bg-gray-700'}`}
+                            className={"relative inline-flex h-6 w-11 items-center rounded-full " + (annualTaxPackageEnabled ? 'bg-emerald-600' : 'bg-gray-200 dark:bg-gray-700') + ""}
                             onClick={() => handleToggleSetting('Annual Tax Package', annualTaxPackageEnabled, setAnnualTaxPackageEnabled)}
                           >
-                            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${annualTaxPackageEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
+                            <span className={"inline-block h-4 w-4 transform rounded-full bg-white transition " + (annualTaxPackageEnabled ? 'translate-x-6' : 'translate-x-1') + ""} />
                           </button>
                         </div>
                       </div>
@@ -2044,10 +2038,10 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                           <div className="flex items-center gap-3">
                             <input type="text" defaultValue="$1,000" className="w-24 px-3 py-1 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-sm" />
                             <button
-                              className={`relative inline-flex h-6 w-11 items-center rounded-full ${largeTransactionAlertsEnabled ? 'bg-emerald-600' : 'bg-gray-200 dark:bg-gray-700'}`}
+                              className={"relative inline-flex h-6 w-11 items-center rounded-full " + (largeTransactionAlertsEnabled ? 'bg-emerald-600' : 'bg-gray-200 dark:bg-gray-700') + ""}
                               onClick={() => handleToggleSetting('Large Transaction Alerts', largeTransactionAlertsEnabled, setLargeTransactionAlertsEnabled)}
                             >
-                              <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${largeTransactionAlertsEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
+                              <span className={"inline-block h-4 w-4 transform rounded-full bg-white transition " + (largeTransactionAlertsEnabled ? 'translate-x-6' : 'translate-x-1') + ""} />
                             </button>
                           </div>
                         </div>
@@ -2059,10 +2053,10 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                           <div className="flex items-center gap-3">
                             <input type="text" defaultValue="$5,000" className="w-24 px-3 py-1 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-sm" />
                             <button
-                              className={`relative inline-flex h-6 w-11 items-center rounded-full ${lowBalanceAlertEnabled ? 'bg-emerald-600' : 'bg-gray-200 dark:bg-gray-700'}`}
+                              className={"relative inline-flex h-6 w-11 items-center rounded-full " + (lowBalanceAlertEnabled ? 'bg-emerald-600' : 'bg-gray-200 dark:bg-gray-700') + ""}
                               onClick={() => handleToggleSetting('Low Balance Alert', lowBalanceAlertEnabled, setLowBalanceAlertEnabled)}
                             >
-                              <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${lowBalanceAlertEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
+                              <span className={"inline-block h-4 w-4 transform rounded-full bg-white transition " + (lowBalanceAlertEnabled ? 'translate-x-6' : 'translate-x-1') + ""} />
                             </button>
                           </div>
                         </div>
@@ -2072,10 +2066,10 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                             <p className="text-sm text-gray-500">Alert for potential duplicate entries</p>
                           </div>
                           <button
-                            className={`relative inline-flex h-6 w-11 items-center rounded-full ${duplicateTransactionWarningEnabled ? 'bg-emerald-600' : 'bg-gray-200 dark:bg-gray-700'}`}
+                            className={"relative inline-flex h-6 w-11 items-center rounded-full " + (duplicateTransactionWarningEnabled ? 'bg-emerald-600' : 'bg-gray-200 dark:bg-gray-700') + ""}
                             onClick={() => handleToggleSetting('Duplicate Transaction Warning', duplicateTransactionWarningEnabled, setDuplicateTransactionWarningEnabled)}
                           >
-                            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${duplicateTransactionWarningEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
+                            <span className={"inline-block h-4 w-4 transform rounded-full bg-white transition " + (duplicateTransactionWarningEnabled ? 'translate-x-6' : 'translate-x-1') + ""} />
                           </button>
                         </div>
                       </div>
@@ -2089,10 +2083,10 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                             <p className="text-sm text-gray-500">Receive weekly financial overview</p>
                           </div>
                           <button
-                            className={`relative inline-flex h-6 w-11 items-center rounded-full ${weeklySummaryEmailEnabled ? 'bg-emerald-600' : 'bg-gray-200 dark:bg-gray-700'}`}
+                            className={"relative inline-flex h-6 w-11 items-center rounded-full " + (weeklySummaryEmailEnabled ? 'bg-emerald-600' : 'bg-gray-200 dark:bg-gray-700') + ""}
                             onClick={() => handleToggleSetting('Weekly Summary Email', weeklySummaryEmailEnabled, setWeeklySummaryEmailEnabled)}
                           >
-                            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${weeklySummaryEmailEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
+                            <span className={"inline-block h-4 w-4 transform rounded-full bg-white transition " + (weeklySummaryEmailEnabled ? 'translate-x-6' : 'translate-x-1') + ""} />
                           </button>
                         </div>
                         <div className="flex items-center justify-between">
@@ -2101,10 +2095,10 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                             <p className="text-sm text-gray-500">Alert when budget exceeds threshold</p>
                           </div>
                           <button
-                            className={`relative inline-flex h-6 w-11 items-center rounded-full ${budgetVarianceAlertsEnabled ? 'bg-emerald-600' : 'bg-gray-200 dark:bg-gray-700'}`}
+                            className={"relative inline-flex h-6 w-11 items-center rounded-full " + (budgetVarianceAlertsEnabled ? 'bg-emerald-600' : 'bg-gray-200 dark:bg-gray-700') + ""}
                             onClick={() => handleToggleSetting('Budget Variance Alerts', budgetVarianceAlertsEnabled, setBudgetVarianceAlertsEnabled)}
                           >
-                            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${budgetVarianceAlertsEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
+                            <span className={"inline-block h-4 w-4 transform rounded-full bg-white transition " + (budgetVarianceAlertsEnabled ? 'translate-x-6' : 'translate-x-1') + ""} />
                           </button>
                         </div>
                         <div className="flex items-center justify-between">
@@ -2113,10 +2107,10 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                             <p className="text-sm text-gray-500">Remind about upcoming due dates</p>
                           </div>
                           <button
-                            className={`relative inline-flex h-6 w-11 items-center rounded-full ${invoiceDueRemindersEnabled ? 'bg-emerald-600' : 'bg-gray-200 dark:bg-gray-700'}`}
+                            className={"relative inline-flex h-6 w-11 items-center rounded-full " + (invoiceDueRemindersEnabled ? 'bg-emerald-600' : 'bg-gray-200 dark:bg-gray-700') + ""}
                             onClick={() => handleToggleSetting('Invoice Due Reminders', invoiceDueRemindersEnabled, setInvoiceDueRemindersEnabled)}
                           >
-                            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${invoiceDueRemindersEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
+                            <span className={"inline-block h-4 w-4 transform rounded-full bg-white transition " + (invoiceDueRemindersEnabled ? 'translate-x-6' : 'translate-x-1') + ""} />
                           </button>
                         </div>
                       </div>
@@ -2136,10 +2130,10 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                             <p className="text-sm text-gray-500">Backup financial data daily</p>
                           </div>
                           <button
-                            className={`relative inline-flex h-6 w-11 items-center rounded-full ${automaticBackupsEnabled ? 'bg-emerald-600' : 'bg-gray-200 dark:bg-gray-700'}`}
+                            className={"relative inline-flex h-6 w-11 items-center rounded-full " + (automaticBackupsEnabled ? 'bg-emerald-600' : 'bg-gray-200 dark:bg-gray-700') + ""}
                             onClick={() => handleToggleSetting('Automatic Backups', automaticBackupsEnabled, setAutomaticBackupsEnabled)}
                           >
-                            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${automaticBackupsEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
+                            <span className={"inline-block h-4 w-4 transform rounded-full bg-white transition " + (automaticBackupsEnabled ? 'translate-x-6' : 'translate-x-1') + ""} />
                           </button>
                         </div>
                         <div className="flex items-center justify-between">
@@ -2159,10 +2153,10 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                             <p className="text-sm text-gray-500">Log all changes to financial records</p>
                           </div>
                           <button
-                            className={`relative inline-flex h-6 w-11 items-center rounded-full ${auditTrailEnabled ? 'bg-emerald-600' : 'bg-gray-200 dark:bg-gray-700'}`}
+                            className={"relative inline-flex h-6 w-11 items-center rounded-full " + (auditTrailEnabled ? 'bg-emerald-600' : 'bg-gray-200 dark:bg-gray-700') + ""}
                             onClick={() => handleToggleSetting('Audit Trail', auditTrailEnabled, setAuditTrailEnabled)}
                           >
-                            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${auditTrailEnabled ? 'translate-x-6' : 'translate-x-1'}`} />
+                            <span className={"inline-block h-4 w-4 transform rounded-full bg-white transition " + (auditTrailEnabled ? 'translate-x-6' : 'translate-x-1') + ""} />
                           </button>
                         </div>
                       </div>
@@ -2237,8 +2231,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                           <Button
                             variant="outline"
                             className="border-red-300 text-red-600 hover:bg-red-50"
-                            onClick={() => toast.warning('Close Fiscal Year?'
-                            })}
+                            onClick={() => toast.warning('Close Fiscal Year?')}
                           >
                             Close Year
                           </Button>
@@ -2442,7 +2435,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
           <AIInsightsPanel
             insights={mockAIInsights}
-            onAskQuestion={(q) => toast.info('Question Submitted' })}
+            onAskQuestion={(q) => toast.info('Question Submitted')}
           />
           <PredictiveAnalytics predictions={mockFinancialPredictions} />
         </div>
@@ -2465,7 +2458,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
             <DialogHeader>
               <DialogTitle>Bank Account Options</DialogTitle>
               <DialogDescription>
-                {selectedBankAccount ? `Manage "${selectedBankAccount.name}" account settings` : 'Manage account settings'}
+                {selectedBankAccount ? ("Manage \"" + selectedBankAccount.name + "\" account settings") : 'Manage account settings'}
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
@@ -2508,7 +2501,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                     </button>
                     <button
                       onClick={() => {
-                        toast.success('Viewing transactions'` })
+                        toast.success('Viewing transactions')
                         setShowBankAccountOptionsDialog(false)
                         setActiveTab('banking')
                       }}
@@ -2519,7 +2512,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                     </button>
                     <button
                       onClick={() => {
-                        toast.success(`Transactions for ${selectedBankAccount.name} exported!`)
+                        toast.success("Transactions for " + selectedBankAccount.name + " exported!")
                         setShowBankAccountOptionsDialog(false)
                       }}
                       className="w-full flex items-center gap-3 p-3 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
@@ -2530,10 +2523,10 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                     <div className="border-t border-gray-200 dark:border-gray-700 my-2" />
                     <button
                       onClick={async () => {
-                        if (confirm(`Disconnect ${selectedBankAccount?.name}? You will no longer receive automatic transaction syncing.`)) {
+                        if (confirm("Disconnect " + selectedBankAccount?.name + "? You will no longer receive automatic transaction syncing.")) {
                           toast.promise(
-                            fetch(`/api/banking/accounts/${selectedBankAccount?.id}`, { method: 'DELETE' }),
-                            { loading: 'Disconnecting account...', success: `${selectedBankAccount?.name} has been disconnected`, error: 'Failed to disconnect account' }
+                            fetch("/api/banking/accounts/" + selectedBankAccount?.id, { method: 'DELETE' }),
+                            { loading: 'Disconnecting account...', success: selectedBankAccount?.name + " has been disconnected", error: 'Failed to disconnect account' }
                           )
                           setShowBankAccountOptionsDialog(false)
                         }

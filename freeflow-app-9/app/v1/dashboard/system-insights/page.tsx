@@ -54,7 +54,8 @@ export default function SystemInsightsPage() {
 
         if (error) throw error
 
-        setSystemMetrics(data)        announce('System insights loaded', 'polite')
+        setSystemMetrics(data)
+        announce('System insights loaded', 'polite')
       } catch (err) {
         logger.error('Failed to load system metrics', { error: err, userId })
       }
@@ -72,8 +73,7 @@ export default function SystemInsightsPage() {
       if (!res.ok) throw new Error('Health check failed')
 
       const data = await res.json()
-      toast.success('Operation Completed Successfully' checks passed, ${duration}s`
-      })
+      toast.success(`Operation Completed Successfully: ${data.checks || 'All'} checks passed, ${duration}s`)
     } catch (error) {
       toast.error('Operation Failed')
     }
@@ -89,17 +89,15 @@ export default function SystemInsightsPage() {
       category: 'error-toast'
     })
 
-    toast.error('Operation Failed'`,
-      icon: <XCircle className="h-5 w-5" />
-    })
+    toast.error(`Operation Failed: Error ID ${errorId}`)
   }
 
   // Demo: Copy Toast with Character Count - Real clipboard operation
   const showCopyToast = async () => {
-    const content = 'const greeting = "Hello, World!";'    try {
+    const content = 'const greeting = "Hello, World!";'
+    try {
       await navigator.clipboard.writeText(content)
-      toast.success('Code Copied' characters copied to clipboard`
-      })
+      toast.success(`Code Copied: ${content.length} characters copied to clipboard`)
     } catch (error) {
       toast.error('Failed to copy')
     }
@@ -117,7 +115,8 @@ export default function SystemInsightsPage() {
         toastNotifications: 1247,
         eventsLogged: 8392
       }
-    }    try {
+    }
+    try {
       const jsonStr = JSON.stringify(projectData, null, 2)
       const blob = new Blob([jsonStr], { type: 'application/json' })
       const url = URL.createObjectURL(blob)
@@ -129,8 +128,7 @@ export default function SystemInsightsPage() {
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
 
-      toast.success('File Downloaded', ${(blob.size / 1024).toFixed(1)} KB`
-      })
+      toast.success(`File Downloaded: ${fileName}, ${(blob.size / 1024).toFixed(1)} KB`)
     } catch (error) {
       toast.error('Download Failed')
     }
@@ -139,7 +137,8 @@ export default function SystemInsightsPage() {
   // Demo: Progress Toast - Real API call with loading state
   const showProgressToast = async () => {
     setLoading(true)
-    const startTime = Date.now()    try {
+    const startTime = Date.now()
+    try {
       // Simulate video analysis with real API call
       const res = await fetch('/api/analytics/summary', { method: 'GET' })
       const duration = ((Date.now() - startTime) / 1000).toFixed(1)
@@ -147,8 +146,7 @@ export default function SystemInsightsPage() {
       if (!res.ok) throw new Error('Processing failed')
 
       const data = await res.json()
-      toast.success('Processing Complete' metrics retrieved, ${duration}s`
-      })
+      toast.success(`Processing Complete: ${data.metrics || 'All'} metrics retrieved, ${duration}s`)
     } catch (error) {
       toast.error('Processing Failed')
     } finally {
@@ -163,7 +161,12 @@ export default function SystemInsightsPage() {
     const itemsToDelete = ['item-1', 'item-2', 'item-3']    // Actually update state
     setDeletedItems(prev => [...prev, ...itemsToDelete])
 
-    toast.success(`${itemsToDelete.length} Items Deleted` items restored` })
+    toast.success(`${itemsToDelete.length} Items Deleted`, {
+      action: {
+        label: 'Undo',
+        onClick: () => {
+          setDeletedItems(prev => prev.filter(item => !itemsToDelete.includes(item)))
+          toast.success(`${itemsToDelete.length} items restored`)
         }
       }
     })
@@ -420,8 +423,7 @@ export default function SystemInsightsPage() {
   contentLength: 245
 });
 
-toast.success('Code Copied' characters copied\`
-});`}</pre>
+toast.success(\`Code Copied: \${content.length} characters copied\`);`}</pre>
                 </div>
               </div>
 

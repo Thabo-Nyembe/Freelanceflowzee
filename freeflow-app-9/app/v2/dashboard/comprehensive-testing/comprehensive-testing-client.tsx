@@ -428,7 +428,7 @@ export default function ComprehensiveTestingClient() {
     }
 
     setTests(prev => [...prev, newTest])
-    toast.success('Test Item Created' has been added to the test suite` })
+    toast.success('Test Item Created')
 
     // Reset form
     setNewItemName('')
@@ -479,7 +479,7 @@ export default function ComprehensiveTestingClient() {
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
 
-    toast.success('Export Complete' test results exported as ${exportFormat.toUpperCase()}` })
+    toast.success('Export Complete')
     setShowExportDialog(false)
   }
 

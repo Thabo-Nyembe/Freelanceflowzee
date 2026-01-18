@@ -581,7 +581,7 @@ export default function AlertsClient() {
         status: 'active',
         triggered_at: new Date().toISOString()
       })
-      toast.success('Alert Created'" has been created` })
+      toast.success('Alert Created', { description: newAlertForm.title + ' has been created' })
       setShowCreateDialog(false)
       setNewAlertForm({
         title: '',
@@ -627,7 +627,7 @@ export default function AlertsClient() {
   const handleMuteAlert = async (alertId: string, alertName: string) => {
     try {
       await snoozeAlert(alertId, 60) // 60 minutes
-      toast.info('Alert Snoozed'" snoozed for 1 hour` })
+      toast.info('Alert Snoozed', { description: alertName + ' snoozed for 1 hour' })
     } catch (err) {
       toast.error('Failed to Snooze')
     }
@@ -1006,7 +1006,7 @@ export default function AlertsClient() {
                             const phoneNumber = schedule.currentOnCall.phone.replace(/\D/g, '')
                             if (phoneNumber) {
                               window.location.href = `tel:${phoneNumber}`
-                              toast.success('Call Initiated'` })
+                              toast.success('Call Initiated')
                             } else {
                               toast.error('No Phone Number')
                             }
@@ -1017,7 +1017,7 @@ export default function AlertsClient() {
                           <Button size="sm" variant="outline" onClick={() => {
                             if (schedule.currentOnCall.email) {
                               window.location.href = `mailto:${schedule.currentOnCall.email}`
-                              toast.success('Email Client Opened'` })
+                              toast.success('Email Client Opened')
                             } else {
                               toast.error('No Email Address')
                             }
@@ -1102,7 +1102,7 @@ export default function AlertsClient() {
                       </div>
 
                       <Button variant="ghost" size="icon" onClick={() => {
-                        toast.info('Settings' settings loaded` })
+                        toast.info('Settings')
                       }}>
                         <Settings className="h-4 w-4" />
                       </Button>
@@ -1145,7 +1145,7 @@ export default function AlertsClient() {
                     <div className="mt-4 pt-4 border-t flex items-center justify-between">
                       <span className="text-sm text-gray-500">{policy.services} services using this policy</span>
                       <Button variant="outline" size="sm" onClick={() => {
-                        toast.info('Policy Editor'" escalation policy` })
+                        toast.info('Policy Editor', { description: 'Opening ' + policy.name + ' escalation policy' })
                       }}>
                         <Edit className="h-4 w-4 mr-2" />
                         Edit
@@ -1205,11 +1205,10 @@ export default function AlertsClient() {
                       <div className="flex items-center gap-2">
                         <Switch checked={integration.status === 'active'} onCheckedChange={(checked) => {
                           const action = checked ? 'enabled' : 'disabled'
-                          toast.success(checked ? 'Integration Enabled' : 'Integration Disabled' has been ${action}`
-                          })
+                          toast.success(checked ? 'Integration Enabled' : 'Integration Disabled', { description: integration.name + ' has been ' + action })
                         }} />
                         <Button variant="ghost" size="icon" onClick={() => {
-                          toast.info('Settings' settings ready` })
+                          toast.info('Settings')
                         }}>
                           <Settings className="h-4 w-4" />
                         </Button>
@@ -1452,14 +1451,13 @@ export default function AlertsClient() {
                             </div>
                             <div className="flex items-center gap-3">
                               <Button variant="ghost" size="sm" onClick={() => {
-                                toast.info('Settings' configuration ready` })
+                                toast.info('Settings')
                               }}>
                                 <Edit className="h-4 w-4" />
                               </Button>
                               <Switch defaultChecked={channel.enabled} onCheckedChange={(checked) => {
                                 const action = checked ? 'enabled' : 'disabled'
-                                toast.success(`${channel.name} ${action}``
-                                })
+                                toast.success(channel.name + ' ' + action)
                               }} />
                             </div>
                           </div>
@@ -1584,12 +1582,12 @@ export default function AlertsClient() {
                             </div>
                             <div className="flex items-center gap-2">
                               <Button variant="ghost" size="sm" onClick={() => {
-                                toast.info('Settings' escalation settings` })
+                                toast.info('Settings')
                               }}>
                                 <Edit className="h-4 w-4" />
                               </Button>
                               <Button variant="ghost" size="sm" className="text-red-600" onClick={() => {
-                                toast.success('Tier Removed' has been removed from escalation` })
+                                toast.success('Tier Removed')
                               }}>
                                 <Trash2 className="h-4 w-4" />
                               </Button>
@@ -1626,7 +1624,7 @@ export default function AlertsClient() {
                             <div className="flex items-center gap-3">
                               <Badge variant="outline">{schedule.rotation}</Badge>
                               <Button variant="ghost" size="sm" onClick={() => {
-                                toast.info('Schedule Editor' rotation` })
+                                toast.info('Schedule Editor')
                               }}>
                                 <Edit className="h-4 w-4" />
                               </Button>
@@ -1814,7 +1812,7 @@ export default function AlertsClient() {
                               </div>
                               <div className="flex items-center gap-2">
                                 <Button variant="ghost" size="sm" onClick={() => {
-                                  toast.info('Edit Webhook'` })
+                                  toast.info('Edit Webhook')
                                 }}>
                                   <Edit className="h-4 w-4" />
                                 </Button>
@@ -1870,14 +1868,13 @@ export default function AlertsClient() {
                             </div>
                             <div className="flex items-center gap-3">
                               <Button variant="ghost" size="sm" onClick={() => {
-                                toast.info('Edit Rule'` })
+                                toast.info('Edit Rule')
                               }}>
                                 <Edit className="h-4 w-4" />
                               </Button>
                               <Switch defaultChecked={rule.enabled} onCheckedChange={(checked) => {
                                 const action = checked ? 'enabled' : 'disabled'
-                                toast.success(checked ? 'Rule Enabled' : 'Rule Disabled'" has been ${action}`
-                                })
+                                toast.success(checked ? 'Rule Enabled' : 'Rule Disabled', { description: rule.name + ' has been ' + action })
                               }} />
                             </div>
                           </div>
@@ -1909,7 +1906,7 @@ export default function AlertsClient() {
                               <p className="text-sm text-gray-500">{route.team} • {route.schedule}</p>
                             </div>
                             <Button variant="ghost" size="sm" onClick={() => {
-                              toast.info('Edit Routing'` })
+                              toast.info('Edit Routing')
                             }}>
                               <Edit className="h-4 w-4" />
                             </Button>
@@ -2170,7 +2167,7 @@ export default function AlertsClient() {
             <AIInsightsPanel
               insights={mockAlertsAIInsights}
               title="Alert Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -2756,7 +2753,7 @@ export default function AlertsClient() {
               <Button variant="outline" onClick={() => setShowMonitoringIntegrationDialog(false)}>Cancel</Button>
               {selectedMonitoringIntegration?.status === 'connected' ? (
                 <Button className="bg-emerald-600 hover:bg-emerald-700" onClick={() => {
-                  toast.success('Integration Updated' settings have been saved` })
+                  toast.success('Integration Updated')
                   setShowMonitoringIntegrationDialog(false)
                 }}>
                   <CheckCircle2 className="h-4 w-4 mr-2" />
@@ -2764,7 +2761,7 @@ export default function AlertsClient() {
                 </Button>
               ) : (
                 <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
-                  toast.success('Integration Connected' has been connected successfully` })
+                  toast.success('Integration Connected')
                   setShowMonitoringIntegrationDialog(false)
                 }}>
                   <Link2 className="h-4 w-4 mr-2" />
@@ -2864,7 +2861,7 @@ export default function AlertsClient() {
               <Button variant="outline" onClick={() => setShowTicketingIntegrationDialog(false)}>Cancel</Button>
               {selectedTicketingIntegration?.status === 'connected' ? (
                 <Button className="bg-emerald-600 hover:bg-emerald-700" onClick={() => {
-                  toast.success('Integration Updated' settings have been saved` })
+                  toast.success('Integration Updated')
                   setShowTicketingIntegrationDialog(false)
                 }}>
                   <CheckCircle2 className="h-4 w-4 mr-2" />
@@ -2872,7 +2869,7 @@ export default function AlertsClient() {
                 </Button>
               ) : (
                 <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
-                  toast.success('Integration Connected' has been connected successfully` })
+                  toast.success('Integration Connected')
                   setShowTicketingIntegrationDialog(false)
                 }}>
                   <Link2 className="h-4 w-4 mr-2" />

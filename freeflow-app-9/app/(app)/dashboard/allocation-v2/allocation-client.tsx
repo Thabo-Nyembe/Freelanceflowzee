@@ -821,7 +821,7 @@ export default function AllocationClient() {
         billable_rate: formData.billable_rate,
         notes: formData.notes,
       })
-      toast.success('Allocation Created' allocated to ${formData.project_name}` })
+      toast.success(`${formData.employee_name} allocated to ${formData.project_name}`)
       setShowCreateDialog(false)
       setFormData(initialFormState)
       refetch()
@@ -864,7 +864,7 @@ export default function AllocationClient() {
   const handleDeleteAllocation = async (id: string, resourceName: string) => {
     try {
       await deleteAllocation(id)
-      toast.success('Allocation Deleted''s allocation removed` })
+      toast.success(`Allocation Deleted: ${resourceName}'s allocation removed`)
       setSelectedAllocation(null)
       refetch()
     } catch (error: any) {
@@ -875,7 +875,7 @@ export default function AllocationClient() {
   const handleApproveAllocation = async (id: string, resourceName: string) => {
     try {
       await activateAllocation(id)
-      toast.success('Allocation Approved''s allocation is now active` })
+      toast.success(`Allocation Approved: ${resourceName}'s allocation is now active`)
       refetch()
     } catch (error: any) {
       toast.error('Failed to approve allocation')
@@ -885,7 +885,7 @@ export default function AllocationClient() {
   const handleCompleteAllocation = async (id: string, resourceName: string) => {
     try {
       await completeAllocation(id)
-      toast.success('Allocation Completed''s allocation marked complete` })
+      toast.success(`Allocation Completed: ${resourceName}'s allocation marked complete`)
       refetch()
     } catch (error: any) {
       toast.error('Failed to complete allocation')
@@ -895,7 +895,7 @@ export default function AllocationClient() {
   const handleCancelAllocation = async (id: string, resourceName: string) => {
     try {
       await cancelAllocation(id)
-      toast.info('Allocation Cancelled''s allocation was cancelled` })
+      toast.info(`Allocation Cancelled: ${resourceName}'s allocation was cancelled`)
       refetch()
     } catch (error: any) {
       toast.error('Failed to cancel allocation')
@@ -2537,7 +2537,7 @@ export default function AllocationClient() {
               <Button
                 onClick={() => {
                   if (timeEntryData.hours > 0 && timeEntryData.date) {
-                    toast.success('Time Entry Logged' hours recorded for ${timeEntryData.date}` })
+                    toast.success(`Time Entry Logged: ${timeEntryData.hours} hours recorded for ${timeEntryData.date}`)
                     setTimeEntryData({ hours: 0, description: '', date: '' })
                     setShowTimeEntryDialog(false)
                   } else {
@@ -2668,8 +2668,7 @@ export default function AllocationClient() {
               <Button
                 onClick={async () => {
                   if (formData.resource_name && transferData.targetProject) {
-                    toast.success('Allocation Transferred' moved to ${transferData.targetProject}`
-                    })
+                    toast.success(`Allocation Transferred: moved to ${transferData.targetProject}`)
                     setTransferData({ targetProject: '', notes: '' })
                     setFormData(initialFormState)
                     setShowTransferDialog(false)

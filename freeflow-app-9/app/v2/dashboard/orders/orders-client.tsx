@@ -725,9 +725,8 @@ export default function OrdersClient() {
       return
     }
 
-    const orderNumber = `ORD-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`
-    toast.success('Order Created Successfully' has been created for ${newOrderForm.customerName}`
-    })
+    const orderNumber = "ORD-" + new Date().getFullYear() + "-" + Math.floor(1000 + Math.random() * 9000)
+    toast.success("Order " + orderNumber + " has been created for " + newOrderForm.customerName)
 
     setNewOrderForm({
       customerName: '',
@@ -758,12 +757,10 @@ export default function OrdersClient() {
       return
     }
 
-    toast.success('Bulk Shipment Processed' orders shipped via ${bulkShipForm.carrier} (${bulkShipForm.shippingSpeed})`
-    })
+    toast.success("Bulk Shipment Processed - orders shipped via " + bulkShipForm.carrier + " (" + bulkShipForm.shippingSpeed + ")")
 
     if (bulkShipForm.notifyCustomers) {
-      toast.info('Customer Notifications' customers`
-      })
+      toast.info("Customer Notifications sent")
     }
 
     setBulkShipForm({
@@ -806,12 +803,10 @@ export default function OrdersClient() {
       return
     }
 
-    toast.success('Order Fulfilled' fulfilled with tracking: ${fulfillForm.trackingNumber}`
-    })
+    toast.success('Order Fulfilled with tracking: ' + fulfillForm.trackingNumber)
 
     if (fulfillForm.notifyCustomer) {
-      toast.info('Customer Notified'`
-      })
+      toast.info('Customer Notified')
     }
 
     setFulfillForm({
@@ -1961,7 +1956,7 @@ export default function OrdersClient() {
             <AIInsightsPanel
               insights={mockOrdersAIInsights}
               title="Order Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">

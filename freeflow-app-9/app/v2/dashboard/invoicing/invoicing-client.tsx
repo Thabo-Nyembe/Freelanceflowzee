@@ -471,15 +471,13 @@ export default function InvoicingClient() {
 
   const handleVoidInvoice = () => {
     if (!selectedInvoice) return
-    toast.success('Invoice voided' has been voided`
-    })
+    toast.success("Invoice voided")
     setShowInvoiceDialog(false)
   }
 
   const handleRecordPayment = () => {
     if (!selectedInvoice) return
-    toast.success('Payment recorded'`
-    })
+    toast.success("Payment recorded")
   }
 
   return (
@@ -672,7 +670,7 @@ export default function InvoicingClient() {
                 <Button
                   key={idx}
                   variant="ghost"
-                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  className={"h-20 flex-col gap-2 " + action.color + " hover:scale-105 transition-all duration-200"}
                   onClick={action.action}
                 >
                   <action.icon className="w-5 h-5" />
@@ -836,7 +834,7 @@ export default function InvoicingClient() {
                 <Button
                   key={idx}
                   variant="ghost"
-                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  className={"h-20 flex-col gap-2 " + action.color + " hover:scale-105 transition-all duration-200"}
                   onClick={action.action}
                 >
                   <action.icon className="w-5 h-5" />
@@ -947,7 +945,7 @@ export default function InvoicingClient() {
                 <Button
                   key={idx}
                   variant="ghost"
-                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  className={"h-20 flex-col gap-2 " + action.color + " hover:scale-105 transition-all duration-200"}
                   onClick={action.action}
                 >
                   <action.icon className="w-5 h-5" />
@@ -1071,7 +1069,7 @@ export default function InvoicingClient() {
                 <Button
                   key={idx}
                   variant="ghost"
-                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  className={"h-20 flex-col gap-2 " + action.color + " hover:scale-105 transition-all duration-200"}
                   onClick={action.action}
                 >
                   <action.icon className="w-5 h-5" />
@@ -1161,7 +1159,7 @@ export default function InvoicingClient() {
                 <Button
                   key={idx}
                   variant="ghost"
-                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  className={"h-20 flex-col gap-2 " + action.color + " hover:scale-105 transition-all duration-200"}
                   onClick={action.action}
                 >
                   <action.icon className="w-5 h-5" />
@@ -1325,11 +1323,11 @@ export default function InvoicingClient() {
                         <button
                           key={item.id}
                           onClick={() => setSettingsTab(item.id)}
-                          className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all ${
+                          className={"w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all " + (
                             settingsTab === item.id
                               ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg'
                               : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
-                          }`}
+                          )}
                         >
                           <item.icon className="h-5 w-5" />
                           <span className="font-medium">{item.label}</span>
@@ -1618,7 +1616,7 @@ export default function InvoicingClient() {
             <AIInsightsPanel
               insights={mockInvoicingAIInsights}
               title="Invoicing Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">

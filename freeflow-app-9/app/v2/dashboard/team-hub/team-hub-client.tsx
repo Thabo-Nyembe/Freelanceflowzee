@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import { useTeamHub } from '@/hooks/use-team-hub'
@@ -529,8 +531,6 @@ export default function TeamHubClient() {
     }
     try {
       setIsSaving(true)
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to add team members')
@@ -567,15 +567,13 @@ export default function TeamHubClient() {
   // Update member status
   const handleUpdateMemberStatus = async (memberId: string, newStatus: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('team_members')
         .update({ status: newStatus, updated_at: new Date().toISOString() })
         .eq('id', memberId)
 
       if (error) throw error
-      toast.success(`Status updated to ${newStatus}`)
+      toast.success("Status updated to " + (newStatus))
       refreshTeams()
     } catch (error) {
       console.error('Error updating status:', error)
@@ -586,8 +584,6 @@ export default function TeamHubClient() {
   // Delete team member
   const handleDeleteMember = async (memberId: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('team_members')
         .delete()
@@ -770,8 +766,7 @@ export default function TeamHubClient() {
 
   // Handlers
   const handleSendMessage = (channelName: string) => {
-    toast.success('Message sent'`
-    })
+    toast.success("Message sent to #" + channelName)
   }
 
   const handleInviteMember = () => {
@@ -784,8 +779,7 @@ export default function TeamHubClient() {
 
   // Handle Email All
   const handleEmailAll = () => {
-    toast.success('Email ready' team members`
-    })
+    toast.success("Email ready to send to " + members.length + " team members")
   }
 
   // Handle Approve
@@ -800,7 +794,7 @@ export default function TeamHubClient() {
       if (pendingApprovals.length === 0) {
         toast.success('Approval queue is empty')
       } else {
-        toast.success(`Found ${pendingApprovals.length} pending approvals`)
+        toast.success("Found " + (pendingApprovals.length) + " pending approvals")
       }
     } catch (error) {
       toast.error('Failed to check approvals')
@@ -816,8 +810,7 @@ export default function TeamHubClient() {
   // Handle Admins
   const handleAdmins = () => {
     const adminCount = members.filter(m => m.role === 'admin' || m.role === 'owner').length
-    toast.success('Admin settings loaded' admin(s) in your workspace`
-    })
+    toast.success("Admin settings loaded - " + (members.filter(m => m.role === 'Admin' || m.role === 'Owner').length) + " admin(s) in your workspace")
   }
 
   // Handle Export
@@ -855,8 +848,7 @@ export default function TeamHubClient() {
       URL.revokeObjectURL(url)
 
       toast.dismiss('export-toast')
-      toast.success('Team data exported' members and ${channels.length} channels`
-      })
+      toast.success("Team data exported: " + members.length + " members and " + channels.length + " channels")
     } catch (error) {
       toast.error('Failed to export team data')
     }
@@ -893,8 +885,7 @@ export default function TeamHubClient() {
       toast.error('Channel name is required')
       return
     }
-    toast.success('Channel created' has been created successfully`
-    })
+    toast.success("Channel created: #" + channelForm.name + " has been created successfully")
     setShowCreateChannelDialog(false)
     setChannelForm({ name: '', type: 'public', description: '', topic: '' })
   }
@@ -906,23 +897,20 @@ export default function TeamHubClient() {
       return
     }
     const channel = channels.find(c => c.id === huddleForm.channelId)
-    toast.success('Huddle started'`
-    })
+    toast.success("Huddle started")
     setShowStartHuddleDialog(false)
     setHuddleForm({ channelId: '', participants: [] })
   }
 
   // Handle Join Huddle
   const handleJoinHuddle = (huddle: Huddle) => {
-    toast.success('Joining huddle'...`
-    })
+    toast.success("Joining huddle: " + huddleId + "...")
   }
 
   // Handle Add App
   const handleAddApp = (appId: string) => {
     const app = apps.find(a => a.id === appId)
-    toast.success('App installed' has been added to your workspace`
-    })
+    toast.success("App installed: " + app.name + " has been added to your workspace")
   }
 
   // Handle Create Workflow
@@ -931,8 +919,7 @@ export default function TeamHubClient() {
       toast.error('Workflow name is required')
       return
     }
-    toast.success('Workflow created' has been created successfully`
-    })
+    toast.success("Workflow created: " + workflowForm.name + " has been created successfully")
     setShowCreateWorkflowDialog(false)
     setWorkflowForm({ name: '', description: '', trigger: 'channel_message' })
   }
@@ -941,8 +928,7 @@ export default function TeamHubClient() {
   const handleToggleWorkflow = (workflowId: string, enabled: boolean) => {
     setWorkflowToggles(prev => ({ ...prev, [workflowId]: enabled }))
     const workflow = workflows.find(w => w.id === workflowId)
-    toast.success(enabled ? 'Workflow enabled' : 'Workflow disabled' is now ${enabled ? 'active' : 'inactive'}`
-    })
+    toast.success((enabled ? "Workflow enabled: " : "Workflow disabled: ") + (workflow?.name || workflowId) + " is now " + (enabled ? "active" : "inactive"))
   }
 
   // Handle Save Settings
@@ -953,11 +939,9 @@ export default function TeamHubClient() {
   // Handle Integration Action
   const handleIntegrationAction = (integration: {name: string, status: string}) => {
     if (integration.status === 'connected') {
-      toast.success('Integration configured' settings have been updated`
-      })
+      toast.success("Integration configured: " + selectedIntegration.name + " settings have been updated")
     } else {
-      toast.success('Integration connected' has been connected to your workspace`
-      })
+      toast.success("Integration connected: " + selectedIntegration.name + " has been connected to your workspace")
     }
     setShowIntegrationDialog(false)
     setSelectedIntegration(null)
@@ -1057,8 +1041,7 @@ export default function TeamHubClient() {
       toast.error('Please enter a message')
       return
     }
-    toast.success('Message sent'`
-    })
+    toast.success("Message sent")
     setShowMessageMemberDialog(false)
     setMessageMemberTarget(null)
     setMessageForm({ content: '' })
@@ -1066,35 +1049,30 @@ export default function TeamHubClient() {
 
   // Handle Huddle Member
   const handleHuddleMember = (member: TeamMember) => {
-    toast.success('Huddle invitation sent' to a huddle...`
-    })
+    toast.success("Huddle invitation sent: Inviting " + (messageMemberTarget?.name || "member") + " to a huddle...")
     setShowHuddleMemberDialog(false)
     setMessageMemberTarget(null)
   }
 
   // Handle Open Channel
   const handleOpenChannel = (channel: Channel) => {
-    toast.success('Channel opened'`
-    })
+    toast.success("Channel opened: #" + (channel?.name || "channel"))
     setSelectedChannel(null)
   }
 
   // Handle Star Channel
   const handleStarChannel = (channel: Channel) => {
-    toast.success(channel.isStarred ? 'Channel unstarred' : 'Channel starred' has been ${channel.isStarred ? 'removed from' : 'added to'} your starred channels`
-    })
+    toast.success((channel.isStarred ? "Channel unstarred: #" : "Channel starred: #") + channel.name + " has been " + (channel.isStarred ? "removed from" : "added to") + " your starred channels")
   }
 
   // Handle Channel Settings
   const handleChannelSettings = (channel: Channel) => {
-    toast.success('Channel settings opened'`
-    })
+    toast.success("Channel settings opened: #" + channel.name)
   }
 
   // Handle Member Profile More Options
   const handleMemberProfileMore = (member: TeamMember) => {
-    toast.success('More options'`
-    })
+    toast.success("More options for #" + channel.name)
   }
 
   // Combined stats from mock + db
@@ -1138,7 +1116,7 @@ export default function TeamHubClient() {
             <Card key={index} className="border-0 shadow-sm">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-2">
-                  <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${stat.color} flex items-center justify-center`}>
+                  <div className={"w-8 h-8 rounded-lg bg-gradient-to-br " + (stat.color) + " flex items-center justify-center"}>
                     <stat.icon className="w-4 h-4 text-white" />
                   </div>
                 </div>
@@ -1233,7 +1211,7 @@ export default function TeamHubClient() {
                   className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200"
                   onClick={action.onClick}
                 >
-                  <div className={`w-8 h-8 rounded-lg ${action.color} flex items-center justify-center`}>
+                  <div className={"w-8 h-8 rounded-lg " + (action.color) + " flex items-center justify-center"}>
                     <action.icon className="w-4 h-4 text-white" />
                   </div>
                   <span className="text-xs">{action.label}</span>
@@ -1257,7 +1235,7 @@ export default function TeamHubClient() {
                 </Button>
                 {(['online', 'away', 'dnd', 'in-meeting', 'offline'] as MemberStatus[]).map(status => (
                   <Button key={status} variant={statusFilter === status ? 'default' : 'outline'} size="sm" onClick={() => setStatusFilter(status)}>
-                    <span className={`w-2 h-2 rounded-full mr-2 ${getStatusColor(status)}`} />
+                    <span className={"w-2 h-2 rounded-full mr-2 " + (getStatusColor(status))} />
                     {getStatusLabel(status)} ({members.filter(m => m.status === status).length})
                   </Button>
                 ))}
@@ -1274,7 +1252,7 @@ export default function TeamHubClient() {
                           <AvatarImage src={member.avatar} alt="User avatar" />
                           <AvatarFallback>{member.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                         </Avatar>
-                        <div className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white dark:border-gray-900 ${getStatusColor(member.status)}`} />
+                        <div className={"absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white dark:border-gray-900 " + (getStatusColor(member.status))} />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
@@ -1330,7 +1308,7 @@ export default function TeamHubClient() {
                               {member.name.split(' ').map(n => n[0]).join('')}
                             </AvatarFallback>
                           </Avatar>
-                          <div className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white dark:border-gray-900 ${member.status === 'online' ? 'bg-green-500' : member.status === 'busy' ? 'bg-red-500' : 'bg-gray-400'}`} />
+                          <div className={"absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white dark:border-gray-900 " + (member.status === 'online' ? 'bg-green-500' : member.status === 'busy' ? 'bg-red-500' : 'bg-gray-400')} />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
@@ -1639,7 +1617,7 @@ export default function TeamHubClient() {
                     <div className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-800 rounded mb-4">
                       {huddle.participants.slice(0, 3).map((p, i) => (
                         <div key={i} className="flex items-center gap-1">
-                          <span className={`w-2 h-2 rounded-full ${p.isSpeaking ? 'bg-green-500 animate-pulse' : 'bg-gray-300'}`} />
+                          <span className={"w-2 h-2 rounded-full " + (p.isSpeaking ? 'bg-green-500 animate-pulse' : 'bg-gray-300')} />
                           <span className="text-xs">{p.name.split(' ')[0]}</span>
                           {p.isMuted && <VolumeX className="w-3 h-3 text-gray-400" />}
                         </div>
@@ -1763,8 +1741,8 @@ export default function TeamHubClient() {
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${(workflowToggles[workflow.id] ?? workflow.isEnabled) ? 'bg-green-100' : 'bg-gray-100'}`}>
-                          <Workflow className={`w-5 h-5 ${(workflowToggles[workflow.id] ?? workflow.isEnabled) ? 'text-green-600' : 'text-gray-500'}`} />
+                        <div className={"w-10 h-10 rounded-lg flex items-center justify-center " + ((workflowToggles[workflow.id] ?? workflow.isEnabled) ? 'bg-green-100' : 'bg-gray-100')}>
+                          <Workflow className={"w-5 h-5 " + ((workflowToggles[workflow.id] ?? workflow.isEnabled) ? 'text-green-600' : 'text-gray-500')} />
                         </div>
                         <div>
                           <h4 className="font-semibold">{workflow.name}</h4>
@@ -1846,11 +1824,11 @@ export default function TeamHubClient() {
                         <button
                           key={item.id}
                           onClick={() => setSettingsTab(item.id)}
-                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
+                          className={"w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors " + (
                             settingsTab === item.id
                               ? 'bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
                               : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800'
-                          }`}
+                          )}
                         >
                           <item.icon className="w-4 h-4" />
                           <span className="text-sm font-medium">{item.label}</span>
@@ -2249,7 +2227,7 @@ export default function TeamHubClient() {
                         <AvatarImage src={selectedMember.avatar} alt="User avatar" />
                         <AvatarFallback>{selectedMember.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                       </Avatar>
-                      <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white ${getStatusColor(selectedMember.status)}`} />
+                      <div className={"absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white " + (getStatusColor(selectedMember.status))} />
                     </div>
                     <div>
                       <h3 className="text-lg font-semibold">{selectedMember.name}</h3>
@@ -2445,7 +2423,7 @@ export default function TeamHubClient() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
           <AIInsightsPanel
             insights={teamHubAIInsights}
-            onAskQuestion={(q) => toast.info('Question Submitted' })}
+            onAskQuestion={(q) => toast.info("Question Submitted: " + q)}
           />
           <PredictiveAnalytics predictions={teamHubPredictions} />
         </div>
@@ -3030,7 +3008,7 @@ export default function TeamHubClient() {
                   <div>
                     <p className="font-medium">{messageMemberTarget.name}</p>
                     <div className="flex items-center gap-1 text-xs">
-                      <span className={`w-2 h-2 rounded-full ${getStatusColor(messageMemberTarget.status)}`} />
+                      <span className={"w-2 h-2 rounded-full " + (getStatusColor(messageMemberTarget.status))} />
                       <span className="text-gray-500">{getStatusLabel(messageMemberTarget.status)}</span>
                     </div>
                   </div>

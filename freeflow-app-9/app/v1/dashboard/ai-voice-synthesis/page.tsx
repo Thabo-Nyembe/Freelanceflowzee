@@ -219,7 +219,8 @@ export default function AIVoiceSynthesisPage() {
           total_characters: characterCount,
           total_duration: estimatedDuration,
           total_cost: estimatedCost
-        })        announce('Voice synthesis completed', 'polite')
+        })
+        announce('Voice synthesis completed', 'polite')
         return { synthesis, fileSize }
       } else {
         // Fallback for non-authenticated users - still call API but don't save

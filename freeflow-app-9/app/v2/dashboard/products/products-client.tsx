@@ -442,8 +442,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
   }
 
   const handleArchiveProduct = (product: StripeProduct) => {
-    toast.success('Product archived' has been archived`
-    })
+    toast.success("Product archived: " + product.name + " has been archived")
   }
 
   const getStatusColor = (status: ProductStatus) => {
@@ -1779,7 +1778,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
             <AIInsightsPanel
               insights={mockProductsAIInsights}
               title="Product Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info("Insight: " + insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -1980,8 +1979,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                   <Button variant="outline" className="flex-1" onClick={() => {
                     if (selectedCoupon) {
                       navigator.clipboard.writeText(selectedCoupon.name)
-                      toast.success('Coupon code copied!' has been copied to clipboard`
-                      })
+                      toast.success("Coupon code copied! " + selectedCoupon.name + " has been copied to clipboard")
                     }
                   }}>
                     <Copy className="w-4 h-4 mr-2" />
@@ -2075,8 +2073,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                 className="flex-1 bg-violet-600 hover:bg-violet-700"
                 disabled={!quickProductName || !quickProductPrice}
                 onClick={() => {
-                  toast.success('Product created successfully' has been created as a draft`
-                  })
+                  toast.success("Product created successfully: " + quickProductName + " has been created as a draft")
                   setShowQuickNewProduct(false)
                   setQuickProductName('')
                   setQuickProductDescription('')
@@ -2198,8 +2195,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                 disabled={!quickPricingProduct || !quickNewPrice}
                 onClick={() => {
                   const productName = mockProducts.find(p => p.id === quickPricingProduct)?.name
-                  toast.success('Pricing updated successfully' price of $${quickNewPrice} set for ${productName}`
-                  })
+                  toast.success("Pricing updated successfully: price of $" + quickNewPrice + " set for " + productName)
                   setShowQuickUpdatePricing(false)
                   setQuickPricingProduct('')
                   setQuickNewPrice('')
@@ -2369,8 +2365,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                 Cancel
               </Button>
               <Button className="bg-violet-600 hover:bg-violet-700" onClick={() => {
-                toast.success('Export started'...`
-                })
+                toast.success("Export started...")
                 setShowExportDialog(false)
               }}>
                 <Download className="w-4 h-4 mr-2" />
@@ -2423,8 +2418,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                 Cancel
               </Button>
               <Button className="bg-violet-600 hover:bg-violet-700" disabled={!importFile} onClick={() => {
-                toast.success('Import started'...`
-                })
+                toast.success("Import started...")
                 setShowImportDialog(false)
                 setImportFile(null)
               }}>
@@ -2498,8 +2492,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                 Cancel
               </Button>
               <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
-                toast.success('Tax rate created' (${newTaxRate.percentage}%) has been created`
-                })
+                toast.success("Tax rate created: " + newTaxRate.displayName + " (" + newTaxRate.percentage + "%) has been created")
                 setShowAddTaxRateDialog(false)
                 setNewTaxRate({ displayName: '', description: '', percentage: '', country: '', inclusive: false })
               }}>
@@ -2569,8 +2562,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                 Cancel
               </Button>
               <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
-                toast.success('Tax rate updated' has been updated`
-                })
+                toast.success("Tax rate updated: " + newTaxRate.displayName + " has been updated")
                 setShowEditTaxRateDialog(false)
               }}>
                 Save Changes
@@ -2629,8 +2621,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                 Cancel
               </Button>
               <Button className="bg-green-600 hover:bg-green-700" onClick={() => {
-                toast.success('Price updated' price updated to $${editedPrice.unitAmount}`
-                })
+                toast.success("Price updated: price updated to $" + editedPrice.unitAmount)
                 setShowEditPriceDialog(false)
               }}>
                 Save Changes
@@ -2737,8 +2728,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                 Cancel
               </Button>
               <Button className="bg-violet-600 hover:bg-violet-700" onClick={() => {
-                toast.success('Product updated' has been updated`
-                })
+                toast.success("Product updated: " + editedProduct.name + " has been updated")
                 setShowEditProductDialog(false)
               }}>
                 Save Changes
@@ -2814,8 +2804,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                 Cancel
               </Button>
               <Button variant="destructive" onClick={() => {
-                toast.success('Product archived' has been archived`
-                })
+                toast.success("Product archived: " + (selectedProduct?.name || selectedActionProduct?.name) + " has been archived")
                 setShowArchiveProductDialog(false)
                 setSelectedProduct(null)
               }}>
@@ -2850,8 +2839,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                 Cancel
               </Button>
               <Button variant="destructive" onClick={() => {
-                toast.success('Coupon deleted' has been deleted`
-                })
+                toast.success("Coupon deleted: " + selectedCoupon?.name + " has been deleted")
                 setShowDeleteCouponDialog(false)
                 setSelectedCoupon(null)
               }}>
@@ -2908,8 +2896,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                 Cancel
               </Button>
               <Button className="bg-orange-600 hover:bg-orange-700" onClick={() => {
-                toast.success('Coupon updated' has been updated`
-                })
+                toast.success("Coupon updated: " + editedCoupon.name + " has been updated")
                 setShowEditCouponDialog(false)
               }}>
                 Save Changes
@@ -2941,9 +2928,9 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                     <div className="flex items-center gap-2">
                       <Badge variant="outline">$9.99</Badge>
                       <Button variant="ghost" size="sm" onClick={() => {
-                        const newRate = prompt(`Edit shipping rate for ${zone}:`, '$9.99')
+                        const newRate = prompt("Edit shipping rate for " + zone + ":", "$9.99")
                         if (newRate && newRate.trim()) {
-                          toast.success(`Updated ${zone} rate`` })
+                          toast.success("Updated " + zone + " rate")
                         }
                       }}>
                         <Edit className="w-4 h-4" />

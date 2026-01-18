@@ -427,7 +427,9 @@ const generateMockTemplates = (): VideoTemplate[] => {
       premium: false,
       category: 'Education'
     }
-  ]  return templates
+  ]
+
+  return templates
 }
 
 // ============================================================================
@@ -584,7 +586,8 @@ export default function AiVideoGenerationClient() {
       label: 'Export',
       icon: 'Download',
       shortcut: 'E',
-      action: () => {        setSelectedExportVideos([])
+      action: () => {
+        setSelectedExportVideos([])
         setShowExportDialog(true)
       }
     },
@@ -593,13 +596,15 @@ export default function AiVideoGenerationClient() {
       label: 'Settings',
       icon: 'Settings',
       shortcut: 'S',
-      action: () => {        setShowSettingsDialog(true)
+      action: () => {
+        setShowSettingsDialog(true)
       }
     },
   ]
 
   // Export handler
-  const handleExportVideos = async () => {    if (selectedExportVideos.length === 0) {
+  const handleExportVideos = async () => {
+    if (selectedExportVideos.length === 0) {
       toast.error('Please select at least one video to export')
       return
     }
@@ -622,8 +627,9 @@ export default function AiVideoGenerationClient() {
       }
 
       const exportedVideos = state.videos.filter(v => selectedExportVideos.includes(v.id))
-      const totalSize = exportedVideos.reduce((sum, v) => sum + v.fileSize, 0)      toast.success('Videos exported successfully!' videos (${formatFileSize(totalSize)}) exported as ${exportFormat.toUpperCase()}`
-      })
+      const totalSize = exportedVideos.reduce((sum, v) => sum + v.fileSize, 0)
+
+      toast.success(`Videos exported successfully! ${selectedExportVideos.length} videos (${formatFileSize(totalSize)}) exported as ${exportFormat.toUpperCase()}`)
       announce('Videos exported successfully')
 
       setShowExportDialog(false)
@@ -638,14 +644,15 @@ export default function AiVideoGenerationClient() {
   }
 
   // Settings save handler
-  const handleSaveSettings = async () => {    try {
+  const handleSaveSettings = async () => {
+    try {
       // Save settings to database if user is logged in
       if (userId) {
         const { getOrCreateGenerationSettings } = await import('@/lib/ai-video-queries')
-        // Settings would be saved here in a real implementation      }
+        // Settings would be saved here in a real implementation
+      }
 
-      toast.success('Settings saved successfully!', Quality: ${defaultVideoQuality.toUpperCase()}`
-      })
+      toast.success(`Settings saved successfully! Quality: ${defaultVideoQuality.toUpperCase()}`)
       announce('Settings saved successfully')
       setShowSettingsDialog(false)
 
@@ -658,11 +665,13 @@ export default function AiVideoGenerationClient() {
   // Initialize data from Supabase
   useEffect(() => {
     const loadAIVideoData = async () => {
-      if (!userId) {        dispatch({ type: 'SET_LOADING', isLoading: false })
+      if (!userId) {
+        dispatch({ type: 'SET_LOADING', isLoading: false })
         return
       }
 
-      try {        // Load videos, templates, and settings
+      try {
+        // Load videos, templates, and settings
         const [videosResult, templatesResult, settingsResult] = await Promise.all([
           getGeneratedVideos(userId),
           getVideoTemplates(),
@@ -713,8 +722,9 @@ export default function AiVideoGenerationClient() {
             price: t.price
           }))
           dispatch({ type: 'SET_TEMPLATES', templates: uiTemplates })
-        }        toast.success('AI Video Generation loaded' videos • ${templatesResult.data?.length || 0} templates`
-        })
+        }
+
+        toast.success(`AI Video Generation loaded: ${videosResult.data?.length || 0} videos, ${templatesResult.data?.length || 0} templates`)
         announce('AI Video Generation loaded successfully', 'polite')
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load AI Video data'
@@ -812,7 +822,8 @@ export default function AiVideoGenerationClient() {
   // HANDLER FUNCTIONS
   // ============================================================================
 
-  const handleGenerate = async () => {    if (!genPrompt.trim()) {
+  const handleGenerate = async () => {
+    if (!genPrompt.trim()) {
       logger.warn('Prompt is empty')
       toast.error('Please enter a video prompt')
       announce('Please enter a video prompt')
@@ -888,8 +899,9 @@ export default function AiVideoGenerationClient() {
         }
       }
 
-      dispatch({ type: 'ADD_VIDEO', video: newVideo })      toast.success('Video generated successfully!'... - ${formatDuration(duration)} - ${formatFileSize(fileSize)} - ${genQuality.toUpperCase()} - ${genModel}`
-      })
+      dispatch({ type: 'ADD_VIDEO', video: newVideo })
+
+      toast.success(`Video generated successfully! ${formatDuration(duration)} - ${formatFileSize(fileSize)} - ${genQuality.toUpperCase()} - ${genModel}`)
       announce('Video generated successfully')
 
       // Reset form
@@ -913,17 +925,20 @@ export default function AiVideoGenerationClient() {
     }
   }
 
-  const handleViewVideo = async (video: GeneratedVideo) => {    dispatch({ type: 'SELECT_VIDEO', video })
+  const handleViewVideo = async (video: GeneratedVideo) => {
+    dispatch({ type: 'SELECT_VIDEO', video })
     dispatch({ type: 'INCREMENT_VIEW', videoId: video.id })
     setShowViewModal(true)
 
     // Track view count in database
     if (userId) {
       const { incrementVideoViews } = await import('@/lib/ai-video-queries')
-      await incrementVideoViews(video.id)    }
+      await incrementVideoViews(video.id)
+    }
   }
 
-  const handleEditVideo = (video: GeneratedVideo) => {    dispatch({ type: 'SELECT_VIDEO', video })
+  const handleEditVideo = (video: GeneratedVideo) => {
+    dispatch({ type: 'SELECT_VIDEO', video })
     setEditTitle(video.title)
     setEditTags(video.tags.join(', '))
     setShowEditModal(true)
@@ -934,7 +949,9 @@ export default function AiVideoGenerationClient() {
       logger.warn('Invalid update data', { hasVideo: !!state.selectedVideo, hasTitle: !!editTitle.trim() })
       toast.error('Please enter a valid title')
       return
-    }    try {
+    }
+
+    try {
       // Update video in database
       if (userId) {
         const { updateGeneratedVideo } = await import('@/lib/ai-video-queries')
@@ -942,7 +959,8 @@ export default function AiVideoGenerationClient() {
           title: editTitle,
           tags: editTags.split(',').map(t => t.trim()).filter(t => t)
         })
-        if (error) throw new Error(error.message || 'Failed to update video')      }
+        if (error) throw new Error(error.message || 'Failed to update video')
+      }
 
       const updatedVideo: GeneratedVideo = {
         ...state.selectedVideo,
@@ -951,8 +969,9 @@ export default function AiVideoGenerationClient() {
         updatedAt: new Date().toISOString()
       }
 
-      dispatch({ type: 'UPDATE_VIDEO', video: updatedVideo })      toast.success('Video updated successfully!' - ${formatDuration(updatedVideo.duration)} - ${updatedVideo.quality.toUpperCase()} - Tags: ${updatedVideo.tags.join(', ')}`
-      })
+      dispatch({ type: 'UPDATE_VIDEO', video: updatedVideo })
+
+      toast.success(`Video updated successfully! ${formatDuration(updatedVideo.duration)} - ${updatedVideo.quality.toUpperCase()} - Tags: ${updatedVideo.tags.join(', ')}`)
       announce('Video updated successfully')
       setShowEditModal(false)
 
@@ -963,7 +982,9 @@ export default function AiVideoGenerationClient() {
   }
 
   const handleDeleteVideo = async (videoId: string) => {
-    const video = state.videos.find(v => v.id === videoId)    if (!userId) {
+    const video = state.videos.find(v => v.id === videoId)
+
+    if (!userId) {
       toast.error('Please log in to delete videos')
       return
     }
@@ -978,8 +999,9 @@ export default function AiVideoGenerationClient() {
         throw new Error(deleteError.message || 'Failed to delete video')
       }
 
-      dispatch({ type: 'DELETE_VIDEO', videoId })      toast.success('Video deleted successfully!' - ${formatFileSize(video?.fileSize || 0)} removed from library`
-      })
+      dispatch({ type: 'DELETE_VIDEO', videoId })
+
+      toast.success(`Video deleted successfully! ${formatFileSize(video?.fileSize || 0)} removed from library`)
       announce('Video deleted successfully')
       setShowViewModal(false)
 
@@ -990,42 +1012,47 @@ export default function AiVideoGenerationClient() {
     }
   }
 
-  const handleDownload = async (video: GeneratedVideo) => {    dispatch({ type: 'INCREMENT_DOWNLOAD', videoId: video.id })
+  const handleDownload = async (video: GeneratedVideo) => {
+    dispatch({ type: 'INCREMENT_DOWNLOAD', videoId: video.id })
 
     // Track download count in database
     if (userId) {
       const { updateGeneratedVideo } = await import('@/lib/ai-video-queries')
-      await updateGeneratedVideo(video.id, { downloads: video.downloads + 1 })    }
+      await updateGeneratedVideo(video.id, { downloads: video.downloads + 1 })
+    }
 
-    toast.success('Download started!' - ${formatDuration(video.duration)} - ${formatFileSize(video.fileSize)} - ${video.quality.toUpperCase()}`
-    })
+    toast.success(`Download started! ${formatDuration(video.duration)} - ${formatFileSize(video.fileSize)} - ${video.quality.toUpperCase()}`)
     announce(`Downloading ${video.title}`)
   }
 
   const handleToggleLike = async (videoId: string) => {
     const video = state.videos.find(v => v.id === videoId)
-    const isLiked = video?.likes && video.likes > 0    dispatch({ type: 'TOGGLE_LIKE', videoId })
+    const isLiked = video?.likes && video.likes > 0
+
+    dispatch({ type: 'TOGGLE_LIKE', videoId })
 
     // Persist like status in database
     if (userId && video) {
       const { updateGeneratedVideo } = await import('@/lib/ai-video-queries')
       const newLikes = isLiked ? Math.max(0, video.likes - 1) : video.likes + 1
-      await updateGeneratedVideo(videoId, { likes: newLikes })    }
+      await updateGeneratedVideo(videoId, { likes: newLikes })
+    }
 
-    toast.success(isLiked ? 'Removed from liked videos' : 'Added to liked videos' - ${video?.likes || 0} likes`
-    })
+    toast.success(isLiked ? `Removed from liked videos - ${video?.likes || 0} likes` : `Added to liked videos - ${video?.likes || 0} likes`)
   }
 
   const handleTogglePublic = async (videoId: string) => {
-    const video = state.videos.find(v => v.id === videoId)    dispatch({ type: 'TOGGLE_PUBLIC', videoId })
+    const video = state.videos.find(v => v.id === videoId)
+
+    dispatch({ type: 'TOGGLE_PUBLIC', videoId })
 
     // Persist public status in database
     if (userId && video) {
       const { updateGeneratedVideo } = await import('@/lib/ai-video-queries')
-      await updateGeneratedVideo(videoId, { is_public: !video.isPublic })    }
+      await updateGeneratedVideo(videoId, { is_public: !video.isPublic })
+    }
 
-    toast.success('Visibility updated!' - ${video?.isPublic ? 'Now private - Only you can view' : 'Now public - Anyone with link can view'}`
-    })
+    toast.success(`Visibility updated! ${video?.isPublic ? 'Now private - Only you can view' : 'Now public - Anyone with link can view'}`)
   }
 
   // ============================================================================

@@ -1,5 +1,7 @@
 "use client"
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -94,6 +96,9 @@ import {
 
 
 import { Switch } from '@/components/ui/switch'
+
+// Initialize Supabase client once at module level
+const supabase = createClient()
 
 // Types
 type AnimationStatus = 'draft' | 'rendering' | 'ready' | 'failed' | 'queued' | 'archived'
@@ -404,13 +409,9 @@ export default function MotionGraphicsClient({
   // Fetch projects from Supabase
   const fetchProjects = useCallback(async () => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('motion_projects')
         .select('*')
@@ -430,13 +431,9 @@ export default function MotionGraphicsClient({
   // Fetch exports from Supabase
   const fetchExports = useCallback(async () => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('motion_exports')
         .select('*')
@@ -464,16 +461,12 @@ export default function MotionGraphicsClient({
 
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to create projects')
         return
       }
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('motion_projects').insert({
         user_id: user.id,
         name: formState.name,
@@ -504,16 +497,12 @@ export default function MotionGraphicsClient({
   // Render/Export animation handler
   const handleRenderAnimation = async (projectId: string, projectName: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to render')
         return
       }
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('motion_exports').insert({
         project_id: projectId,
         user_id: user.id,
@@ -524,8 +513,7 @@ export default function MotionGraphicsClient({
 
       if (error) throw error
 
-      toast.info('Rendering started'" added to render queue`
-      })
+      toast.info(`Rendering started: "${project.name}" added to render queue`)
       fetchExports()
     } catch (error) {
       console.error('Error starting render:', error)
@@ -536,16 +524,12 @@ export default function MotionGraphicsClient({
   // Export/Download animation handler
   const handleExportAnimation = async (projectId: string, projectName: string, format: string = 'mp4') => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to export')
         return
       }
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('motion_exports').insert({
         project_id: projectId,
         user_id: user.id,
@@ -556,8 +540,7 @@ export default function MotionGraphicsClient({
 
       if (error) throw error
 
-      toast.success('Export started'" will be ready shortly`
-      })
+      toast.success(`Export started will be ready shortly`)
       fetchExports()
     } catch (error) {
       console.error('Error exporting:', error)
@@ -568,8 +551,6 @@ export default function MotionGraphicsClient({
   // Duplicate project handler
   const handleDuplicateAnimation = async (projectId: string, projectName: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to duplicate')
@@ -582,8 +563,6 @@ export default function MotionGraphicsClient({
         return
       }
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('motion_projects').insert({
         user_id: user.id,
         name: `${original.name} (Copy)`,
@@ -599,8 +578,7 @@ export default function MotionGraphicsClient({
 
       if (error) throw error
 
-      toast.success('Project duplicated'" created`
-      })
+      toast.success(`Project duplicated created`)
       fetchProjects()
     } catch (error) {
       console.error('Error duplicating:', error)
@@ -611,8 +589,6 @@ export default function MotionGraphicsClient({
   // Update project handler
   const handleUpdateProject = async (projectId: string, updates: Partial<DbProject>) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('motion_projects')
         .update({ ...updates, updated_at: new Date().toISOString() })
@@ -631,8 +607,6 @@ export default function MotionGraphicsClient({
   // Delete project handler
   const handleDeleteProject = async (projectId: string, projectName: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('motion_projects')
         .delete()
@@ -640,8 +614,7 @@ export default function MotionGraphicsClient({
 
       if (error) throw error
 
-      toast.success('Project deleted'" has been removed`
-      })
+      toast.success(`Project deleted has been removed`)
       fetchProjects()
     } catch (error) {
       console.error('Error deleting project:', error)
@@ -652,8 +625,6 @@ export default function MotionGraphicsClient({
   // Update export status handler
   const handleUpdateExportStatus = async (exportId: string, status: DbExport['status']) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('motion_exports')
         .update({ status, updated_at: new Date().toISOString() })

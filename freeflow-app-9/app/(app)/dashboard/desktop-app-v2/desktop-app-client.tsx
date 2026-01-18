@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -56,6 +58,9 @@ import {
 
 // MIGRATED: Batch #13 - Removed mock data, using database hooks
 import { useDesktopApps } from '@/lib/hooks/use-desktop-apps'
+
+// Initialize Supabase client once at module level
+const supabase = createClient()
 
 
 // Types
@@ -300,8 +305,6 @@ export default function DesktopAppClient() {
   // Fetch projects and builds from Supabase
   const fetchData = useCallback(async () => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
@@ -436,16 +439,12 @@ export default function DesktopAppClient() {
 
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to create projects')
         return
       }
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('desktop_projects').insert({
         user_id: user.id,
         project_name: formState.project_name,
@@ -474,8 +473,6 @@ export default function DesktopAppClient() {
   // Start a new build
   const handleStartBuild = async (projectId?: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to start builds')
@@ -493,8 +490,6 @@ export default function DesktopAppClient() {
       }
 
       const buildNumber = `${Date.now()}`
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('desktop_builds').insert({
         user_id: user.id,
         project_id: project.id,
@@ -509,7 +504,7 @@ export default function DesktopAppClient() {
 
       if (error) throw error
 
-      toast.success('Build started' initiated` })
+      toast.success('Build initiated')
       fetchData()
     } catch (error) {
       console.error('Error starting build:', error)
@@ -520,8 +515,6 @@ export default function DesktopAppClient() {
   // Cancel a build
   const handleCancelBuild = async (buildId: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('desktop_builds')
         .update({
@@ -546,8 +539,6 @@ export default function DesktopAppClient() {
       const build = dbBuilds.find(b => b.id === buildId)
       if (!build) return
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('desktop_builds')
         .update({
@@ -560,7 +551,7 @@ export default function DesktopAppClient() {
 
       if (error) throw error
 
-      toast.info('Retrying build' restarted` })
+      toast.info('Retrying build: Build restarted')
       fetchData()
     } catch (error) {
       console.error('Error retrying build:', error)
@@ -571,8 +562,6 @@ export default function DesktopAppClient() {
   // Delete a build
   const handleDeleteBuild = async (buildId: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('desktop_builds')
         .delete()
@@ -591,8 +580,6 @@ export default function DesktopAppClient() {
   // Archive a project
   const handleArchiveProject = async (projectId: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('desktop_projects')
         .update({ is_archived: true })
@@ -718,8 +705,6 @@ export default function DesktopAppClient() {
   // Deploy update handler - deploys to production
   const handleDeployUpdate = async () => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to deploy updates')
@@ -734,8 +719,6 @@ export default function DesktopAppClient() {
         return
       }
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('desktop_builds')
         .update({
@@ -746,8 +729,7 @@ export default function DesktopAppClient() {
 
       if (error) throw error
 
-      toast.success('Update deployed to production' is now live`
-      })
+      toast.success(`Update deployed to production is now live`)
       fetchData()
     } catch (error) {
       console.error('Error deploying update:', error)
@@ -758,8 +740,6 @@ export default function DesktopAppClient() {
   // Publish release (update build status)
   const handlePublishRelease = async (buildId: string, buildVersion: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('desktop_builds')
         .update({
@@ -771,7 +751,7 @@ export default function DesktopAppClient() {
 
       if (error) throw error
 
-      toast.success('Release published' is now live` })
+      toast.success(`Release published is now live`)
       fetchData()
     } catch (error) {
       console.error('Error publishing release:', error)
@@ -781,8 +761,7 @@ export default function DesktopAppClient() {
 
   // View certificate details
   const handleViewCertificate = (cert: Certificate) => {
-    toast.info(`Certificate: ${cert.name}`, expires ${new Date(cert.expiresAt).toLocaleDateString()}`
-    })
+    toast.info(`Certificate: ${cert.name}, expires ${new Date(cert.expiresAt).toLocaleDateString()}`)
   }
 
   // Renew certificate handler
@@ -826,8 +805,6 @@ export default function DesktopAppClient() {
     setCheckingUpdates(true)
     setShowCheckUpdatesDialog(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
 
       // Fetch latest version from app_versions table
       const { data: latestVersion, error } = await supabase
@@ -861,8 +838,6 @@ export default function DesktopAppClient() {
     toast.loading(`Preparing ${platform} download...`)
 
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
       // Fetch download info from database
@@ -995,8 +970,6 @@ export default function DesktopAppClient() {
     toast.loading('Submitting app for notarization...')
 
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
@@ -1039,8 +1012,6 @@ export default function DesktopAppClient() {
     toast.loading('Deploying to production...')
 
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
@@ -1118,8 +1089,7 @@ Date: ${new Date().toISOString().split('T')[0]}
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
 
-    toast.success('Release notes generated' downloaded`
-    })
+    toast.success(`Release notes generated: downloaded`)
     setShowReleaseNotesDialog(false)
   }
 
@@ -1598,8 +1568,7 @@ Date: ${new Date().toISOString().split('T')[0]}
                       variant="outline"
                       size="sm"
                       onClick={() => {
-                        toast.info(`Viewing release ${release.version}``
-                        })
+                        toast.info('Viewing release ' + release.version)
                       }}
                     >
                       <Eye className="w-4 h-4 mr-2" />
@@ -1673,8 +1642,7 @@ Date: ${new Date().toISOString().split('T')[0]}
                           variant="outline"
                           size="sm"
                           onClick={() => {
-                            toast.success(`Assigned to ${crash.assignee || 'you'}` assigned`
-                            })
+                            toast.success('Assigned to ' + (crash.assignee || 'you'))
                           }}
                         >
                           Assign
@@ -1683,8 +1651,7 @@ Date: ${new Date().toISOString().split('T')[0]}
                           variant="outline"
                           size="sm"
                           onClick={() => {
-                            toast.success('Status updated to Investigating' marked as investigating`
-                            })
+                            toast.success('Crash "' + crash.errorType + '" marked as investigating')
                           }}
                         >
                           Investigate
@@ -1708,7 +1675,7 @@ Date: ${new Date().toISOString().split('T')[0]}
                             const url = URL.createObjectURL(blob)
                             const a = document.createElement('a')
                             a.href = url
-                            a.download = `crash-report-${crash.id}.json`
+                            a.download = 'crash-report-' + crash.id + '.json'
                             document.body.appendChild(a)
                             a.click()
                             document.body.removeChild(a)
@@ -1724,8 +1691,8 @@ Date: ${new Date().toISOString().split('T')[0]}
                             variant="outline"
                             size="sm"
                             onClick={() => {
-                              window.open(`https://github.com/issues/${crash.linkedIssue}`, '_blank')
-                              toast.info(`Opening issue ${crash.linkedIssue}`)
+                              window.open('https://github.com/issues/' + crash.linkedIssue, '_blank')
+                              toast.info('Opening issue ' + crash.linkedIssue)
                             }}
                           >
                             <ExternalLink className="w-4 h-4 mr-1" />
@@ -1736,8 +1703,7 @@ Date: ${new Date().toISOString().split('T')[0]}
                             variant="outline"
                             size="sm"
                             onClick={() => {
-                              toast.success('GitHub issue created'`
-                              })
+                              toast.success('GitHub issue created for crash "' + crash.errorType + '"')
                             }}
                           >
                             Create Issue
@@ -2033,11 +1999,7 @@ Date: ${new Date().toISOString().split('T')[0]}
                   <button
                     key={item.id}
                     onClick={() => setSettingsTab(item.id)}
-                    className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-left transition-colors ${
-                      settingsTab === item.id
-                        ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
-                        : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400'
-                    }`}
+                    className={'w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-left transition-colors ' + (settingsTab === item.id ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400')}
                   >
                     <item.icon className="w-4 h-4" />
                     {item.label}
@@ -2346,7 +2308,7 @@ Date: ${new Date().toISOString().split('T')[0]}
                         ].map((channel, i) => (
                           <div key={channel.name} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                             <div className="flex items-center gap-3">
-                              <div className={`w-3 h-3 rounded-full ${i === 0 ? 'bg-green-500' : i === 1 ? 'bg-yellow-500' : i === 2 ? 'bg-orange-500' : 'bg-red-500'}`} />
+                              <div className={'w-3 h-3 rounded-full ' + (i === 0 ? 'bg-green-500' : i === 1 ? 'bg-yellow-500' : i === 2 ? 'bg-orange-500' : 'bg-red-500')} />
                               <div>
                                 <p className="font-medium">{channel.name}</p>
                                 <p className="text-xs text-gray-500">{channel.desc}</p>
@@ -2889,7 +2851,7 @@ Date: ${new Date().toISOString().split('T')[0]}
               {(['windows', 'macos', 'linux'] as Platform[]).map((platform) => (
                 <Card
                   key={platform}
-                  className={`cursor-pointer transition-all hover:shadow-md ${selectedPlatformDownload === platform ? 'ring-2 ring-blue-500' : ''}`}
+                  className={'cursor-pointer transition-all hover:shadow-md ' + (selectedPlatformDownload === platform ? 'ring-2 ring-blue-500' : '')}
                   onClick={() => setSelectedPlatformDownload(platform)}
                 >
                   <CardContent className="p-6 text-center">
@@ -2926,7 +2888,7 @@ Date: ${new Date().toISOString().split('T')[0]}
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <RefreshCw className={`w-5 h-5 ${checkingUpdates ? 'animate-spin' : ''}`} />
+              <RefreshCw className={'w-5 h-5 ' + (checkingUpdates ? 'animate-spin' : '')} />
               Check for Updates
             </DialogTitle>
           </DialogHeader>

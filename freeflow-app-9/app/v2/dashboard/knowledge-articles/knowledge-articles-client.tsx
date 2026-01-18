@@ -656,7 +656,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
     setNewArticleLevel('beginner')
     setNewArticleSpaceId('')
     setNewArticleLabels('')
-    toast.success('Article created'" has been created as a draft` })
+    toast.success("Article created as a draft")
   }
 
   // Handler for using a template
@@ -664,7 +664,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
     setNewArticleType(template.type)
     setShowTemplatesDialog(false)
     setShowNewArticleDialog(true)
-    toast.success('Template applied'" template` })
+    toast.success("Template applied")
   }
 
   // Computed values
@@ -776,7 +776,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
       toast.error('Key required')
       return
     }
-    toast.success('Space created'" has been created successfully` })
+    toast.success("Space created successfully")
     setShowCreateSpaceDialog(false)
     setNewSpaceName('')
     setNewSpaceKey('')
@@ -790,7 +790,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
       toast.error('Name required')
       return
     }
-    toast.success('Template created'" template has been created` })
+    toast.success("Template created")
     setShowCreateTemplateDialog(false)
     setNewTemplateName('')
     setNewTemplateDescription('')
@@ -810,7 +810,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
           ? { ...a, title: editArticleTitle, excerpt: editArticleExcerpt, content: editArticleContent, updatedAt: new Date().toISOString() }
           : a
       ))
-      toast.success('Article updated'" has been updated` })
+      toast.success("Article updated")
     }
     setShowEditArticleDialog(false)
   }
@@ -821,7 +821,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
       setArticles(prev => prev.map(a =>
         a.id === selectedArticle.id ? { ...a, status: 'archived' as ArticleStatus, updatedAt: new Date().toISOString() } : a
       ))
-      toast.success('Article archived'" has been archived` })
+      toast.success("Article archived")
     }
     setShowArchiveArticleDialog(false)
     setShowArticleDialog(false)
@@ -831,7 +831,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
   const handleDeleteArticle = () => {
     if (selectedArticle) {
       setArticles(prev => prev.filter(a => a.id !== selectedArticle.id))
-      toast.success('Article deleted'" has been deleted` })
+      toast.success("Article deleted")
     }
     setShowDeleteArticleDialog(false)
     setShowArticleDialog(false)
@@ -1023,7 +1023,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
           {statCards.map((stat, index) => (
             <Card key={index} className="p-4">
               <div className="flex items-center justify-between mb-2">
-                <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${stat.color} flex items-center justify-center`}>
+                <div className={"w-8 h-8 rounded-lg bg-gradient-to-br " + stat.color + " flex items-center justify-center"}>
                   <stat.icon className="w-4 h-4 text-white" />
                 </div>
                 {stat.change && <span className="text-xs text-green-500 font-medium">{stat.change}</span>}
@@ -1122,7 +1122,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                   className="h-auto py-4 flex flex-col gap-2 hover:scale-105 transition-all duration-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm"
                   onClick={quickActionHandlers[action.label]}
                 >
-                  <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color}`}>
+                  <div className={"p-2 rounded-lg bg-gradient-to-br " + action.color}>
                     <action.icon className="w-4 h-4 text-white" />
                   </div>
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1320,7 +1320,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                             className="h-8 w-8 p-0"
                             onClick={(e) => { e.stopPropagation(); toggleArticleStar(article.id) }}
                           >
-                            <Star className={`w-4 h-4 ${article.isStarred ? 'text-yellow-500 fill-yellow-500' : ''}`} />
+                            <Star className={"w-4 h-4 " + (article.isStarred ? 'text-yellow-500 fill-yellow-500' : '')} />
                           </Button>
                         </div>
                       </div>
@@ -1387,7 +1387,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                   className="h-auto py-4 flex flex-col gap-2 hover:scale-105 transition-all duration-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm"
                   onClick={quickActionHandlers[action.label]}
                 >
-                  <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color}`}>
+                  <div className={"p-2 rounded-lg bg-gradient-to-br " + action.color}>
                     <action.icon className="w-4 h-4 text-white" />
                   </div>
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1500,7 +1500,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                   className="h-auto py-4 flex flex-col gap-2 hover:scale-105 transition-all duration-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm"
                   onClick={quickActionHandlers[action.label]}
                 >
-                  <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color}`}>
+                  <div className={"p-2 rounded-lg bg-gradient-to-br " + action.color}>
                     <action.icon className="w-4 h-4 text-white" />
                   </div>
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1609,7 +1609,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                     </div>
                   </div>
 
-                  <Button className="w-full" onClick={() => { setActiveTab('articles'); toast.success('Search applied'"` }) }}>
+                  <Button className="w-full" onClick={() => { setActiveTab('articles'); toast.success("Search applied") }}>
                     <Search className="w-4 h-4 mr-2" /> Search
                   </Button>
                 </div>
@@ -1778,13 +1778,13 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                         <button
                           key={item.id}
                           onClick={() => setSettingsTab(item.id)}
-                          className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg text-left transition-all ${
+                          className={"w-full flex items-center gap-3 px-3 py-3 rounded-lg text-left transition-all " + (
                             settingsTab === item.id
                               ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border-l-4 border-blue-500'
                               : 'hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
-                          }`}
+                          )}
                         >
-                          <item.icon className={`h-5 w-5 ${settingsTab === item.id ? 'text-blue-600' : 'text-gray-400'}`} />
+                          <item.icon className={"h-5 w-5 " + (settingsTab === item.id ? "text-blue-600" : "text-gray-400")} />
                           <div>
                             <p className="font-medium text-sm">{item.label}</p>
                             <p className="text-xs text-gray-500">{item.description}</p>
@@ -2117,7 +2117,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
             <AIInsightsPanel
               insights={mockKnowledgeArticlesAIInsights}
               title="Knowledge Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -2433,9 +2433,9 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                 {templates.map(template => (
                   <Card
                     key={template.id}
-                    className={`p-4 cursor-pointer transition-all hover:shadow-md ${
-                      selectedTemplateId === template.id ? 'ring-2 ring-purple-500' : ''
-                    }`}
+                    className={"p-4 cursor-pointer transition-all hover:shadow-md " + (
+                      selectedTemplateId === template.id ? "ring-2 ring-purple-500" : ""
+                    )}
                     onClick={() => setSelectedTemplateId(template.id)}
                   >
                     <div className="flex items-start justify-between mb-3">
@@ -2858,7 +2858,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                 <div className="flex items-center gap-2 mt-1">
                   <Input
                     readOnly
-                    value={`https://docs.company.com/${selectedArticle?.slug || ''}`}
+                    value={"https://docs.company.com/" + (selectedArticle?.slug || "")}
                     className="flex-1"
                   />
                   <Button variant="outline" onClick={handleCopyArticleLink}>
@@ -2961,7 +2961,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
               <div className="space-y-3">
                 {articles.flatMap(article =>
                   article.versions.map(version => (
-                    <div key={`${article.id}-${version.id}`} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div key={article.id + "-" + version.id} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <div className="flex items-center justify-between mb-2">
                         <p className="font-medium">{article.title}</p>
                         <Badge variant="outline">v{version.version}</Badge>
@@ -3220,7 +3220,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                         size="sm"
                         onClick={() => {
                           setArticles(prev => prev.map(a => a.id === article.id ? { ...a, status: 'draft' as ArticleStatus } : a))
-                          toast.success('Article restored'" has been restored` })
+                          toast.success("Article restored")
                         }}
                       >
                         Restore
@@ -3373,7 +3373,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                         createdBy: mockAuthors[0]
                       }
                       setTemplates(prev => [...prev, duplicatedTemplate])
-                      toast.success('Template duplicated'" has been created` })
+                      toast.success("Template duplicated")
                       setShowDuplicateDialog(false)
                     }}
                   >
@@ -3408,11 +3408,11 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                   {['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'].map(color => (
                     <div
                       key={color}
-                      className={`w-8 h-8 rounded-full cursor-pointer border-2 transition-all ${selectedTemplateColor === color ? 'border-gray-800 dark:border-white scale-110' : 'border-transparent hover:border-gray-400'}`}
+                      className={"w-8 h-8 rounded-full cursor-pointer border-2 transition-all " + (selectedTemplateColor === color ? "border-gray-800 dark:border-white scale-110" : "border-transparent hover:border-gray-400")}
                       style={{ backgroundColor: color }}
                       onClick={() => {
                         setSelectedTemplateColor(color)
-                        toast.success(`Primary color updated to ${color}`)
+                        toast.success("Primary color updated to " + color)
                       }}
                     />
                   ))}
@@ -3446,8 +3446,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
               <Button variant="outline" onClick={() => setShowCustomizeDialog(false)}>Cancel</Button>
               <Button onClick={() => {
                   // Save customization settings (in a real app, this would persist to backend)
-                  toast.success('Customizations saved', Font: ${selectedTemplateFont}, Dark mode: ${templateDarkModeEnabled ? 'enabled' : 'disabled'}`
-                  })
+                  toast.success("Customizations saved - Font: " + selectedTemplateFont + ", Dark mode: " + (templateDarkModeEnabled ? "enabled" : "disabled"))
                   setShowCustomizeDialog(false)
                 }}>
                 Save Changes
@@ -3735,7 +3734,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                       }
                       return sorted
                     })
-                    toast.success('Sort applied'` })
+                    toast.success("Sort applied")
                     setShowSortDialog(false)
                   }}
                 >

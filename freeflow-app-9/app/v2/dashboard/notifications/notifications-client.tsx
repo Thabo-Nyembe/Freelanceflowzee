@@ -436,7 +436,7 @@ export default function NotificationsClient() {
         send_in_app: true,
         metadata: { channel: campaignForm.channel, segment: campaignForm.segment, campaign_name: campaignForm.name }
       })
-      toast.success('Campaign sent'" delivered successfully` })
+      toast.success("Campaign sent and delivered successfully")
       setShowCreateCampaign(false)
       setCampaignForm({ name: '', channel: '', segment: '', title: '', message: '', scheduled: false })
     } catch (err) {
@@ -458,7 +458,7 @@ export default function NotificationsClient() {
         is_read: false,
         send_in_app: true
       })
-      toast.success('Notification sent'" delivered successfully` })
+      toast.success("Notification sent and delivered successfully")
     } catch (err) {
       toast.error('Failed to send notification')
     } finally {
@@ -490,7 +490,7 @@ export default function NotificationsClient() {
       if (dbNotif) {
         await updateNotification(dbNotif.id, { metadata: { ...dbNotif.metadata, starred: !notification.isStarred } })
       }
-      toast.success('Star updated' starred` })
+      toast.success('Star updated')
     } catch (err) {
       toast.error('Failed to update star')
     } finally {
@@ -537,7 +537,7 @@ export default function NotificationsClient() {
 
   const handleToggleAutomation = (automation: (typeof mockAutomations)[0]) => {
     const newStatus = automation.status === 'active' ? 'paused' : 'active'
-    toast.success(`Automation ${newStatus}`" is now ${newStatus}` })
+    toast.success("Automation " + newStatus + " is now " + newStatus)
   }
 
   const handleExportNotifications = async () => {
@@ -2286,7 +2286,7 @@ export default function NotificationsClient() {
             <AIInsightsPanel
               insights={notificationsAIInsights}
               title="Notification Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">

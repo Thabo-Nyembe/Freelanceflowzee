@@ -768,7 +768,7 @@ export default function CodeRepositoryClient() {
     setRepositories(prev => prev.map(r =>
       r.id === repo.id ? { ...r, forks: r.forks + 1 } : r
     ))
-    toast.success('Repository forked!' has been forked to your account` })
+    toast.success('Repository forked!')
   }
 
   const handleWatchRepository = (repo: Repository) => {
@@ -819,7 +819,7 @@ export default function CodeRepositoryClient() {
   }
 
   const handleCherryPick = (commit: Commit) => {
-    toast.success('Cherry-pick successful!' applied to current branch` })
+    toast.success('Cherry-pick successful!')
   }
 
   const handleCompare = () => {
@@ -1094,7 +1094,7 @@ export default function CodeRepositoryClient() {
                         size="icon"
                         onClick={() => {
                           setSelectedRepo(repo)
-                          toast.info('Opening repository' opened in new tab` })
+                          toast.info('Opening repository')
                           window.open(`https://github.com/freeflow/${repo.name}`, '_blank')
                         }}
                       >
@@ -1342,7 +1342,7 @@ export default function CodeRepositoryClient() {
                             setPullRequests(pullRequests.map(p =>
                               p.id === pr.id ? { ...p, status: 'open' as const } : p
                             ))
-                            toast.success('Ready for review!' is now open for review` })
+                            toast.success('Ready for review!')
                           }}
                         >
                           Ready for Review

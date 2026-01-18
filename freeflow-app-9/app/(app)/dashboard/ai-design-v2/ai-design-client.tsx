@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import { useAIDesigns, AIDesign as DBAIDesign } from '@/lib/hooks/use-ai-designs'
@@ -323,8 +325,6 @@ export default function AIDesignClient() {
     setIsGenerating(true)
 
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Authentication required')
@@ -370,8 +370,6 @@ export default function AIDesignClient() {
   const handleToggleFavorite = async (gen: Generation) => {
     try {
       const newFavorite = !gen.isFavorite
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('ai_design_projects')
         .update({ parameters: { ...gen, is_favorite: newFavorite } })
@@ -391,8 +389,6 @@ export default function AIDesignClient() {
   // Delete generation
   const handleDeleteGeneration = async (id: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('ai_design_projects')
         .delete()
@@ -411,8 +407,6 @@ export default function AIDesignClient() {
   // Download handler
   const handleDownloadDesign = async (gen: Generation) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('ai_design_projects')
         .update({
@@ -449,8 +443,6 @@ export default function AIDesignClient() {
   // Create collection
   const handleCreateCollection = async (name: string, description: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 

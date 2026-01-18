@@ -660,15 +660,13 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
   // Handlers
   const handleSendProposal = () => {
     if (!selectedRenewal) return
-    toast.success('Proposal sent successfully'`
-    })
+    toast.success('Proposal sent successfully')
     setIsRenewalDialogOpen(false)
   }
 
   const handleScheduleMeeting = () => {
     if (!selectedRenewal) return
-    toast.success('Meeting scheduled'`
-    })
+    toast.success('Meeting scheduled')
   }
 
   const handleExport = () => {
@@ -680,18 +678,15 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
   }
 
   const handleContactEmail = (email: string, name: string) => {
-    toast.success('Opening email'`
-    })
+    toast.success('Opening email')
   }
 
   const handleContactPhone = (phone: string, name: string) => {
-    toast.success('Initiating call'`
-    })
+    toast.success('Initiating call')
   }
 
   const handleProcessRenewal = (contractName: string) => {
-    toast.success('Processing renewal'" renewal is being processed`
-    })
+    toast.success('Processing renewal', { description: contractName + ' renewal is being processed' })
   }
 
   const handleExportRenewals = () => {
@@ -1811,7 +1806,7 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
             <AIInsightsPanel
               insights={mockRenewalsAIInsights}
               title="Renewal Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">

@@ -602,8 +602,7 @@ export default function ARCollaborationPage() {
       setSessionIsLocked(false)
       setShowCreateSessionModal(false)
 
-      toast.success('AR session created' - ${getEnvironmentName(sessionEnvironment)} - ${maxParticipants} max participants - ${enabledFeatures.length} features enabled - ${sessionIsLocked ? 'Locked' : 'Open'}`
-      })
+      toast.success(`AR session created - ${sessionName} - ${getEnvironmentName(sessionEnvironment)} - ${maxParticipants} max participants`)
       announce('AR session created', 'polite')
     } catch (error: any) {
       logger.error('Session creation failed', { error: error.message, name: sessionName, userId })
@@ -651,8 +650,8 @@ export default function ARCollaborationPage() {
         latency: Math.floor(Math.random() * 100) + 20
       }
 
-      dispatch({ type: 'JOIN_SESSION', sessionId: session.id, participant: newParticipant })      toast.success(`Joined ${session.name}` - ${getDeviceName(newParticipant.device)} - Latency: ${newParticipant.latency}ms - ${session.currentParticipants + 1}/${session.maxParticipants} participants`
-      })
+      dispatch({ type: 'JOIN_SESSION', sessionId: session.id, participant: newParticipant })
+      toast.success(`Joined ${session.name} - ${getDeviceName(newParticipant.device)} - Latency: ${newParticipant.latency}ms`)
       announce(`Joined ${session.name}`, 'polite')
     } catch (error) {
       logger.error('Join session failed', { error, sessionId: session.id })
@@ -671,7 +670,8 @@ export default function ARCollaborationPage() {
   }
 
   const handleConfirmDeleteSession = async () => {
-    if (!deleteSession || !userId) return    try {
+    if (!deleteSession || !userId) return
+    try {
       // Dynamic import for code splitting
       const { deleteSession: deleteSessionFromDB } = await import('@/lib/ar-collaboration-queries')
 
@@ -681,8 +681,8 @@ export default function ARCollaborationPage() {
         throw new Error(deleteError.message || 'Failed to delete session')
       }
 
-      dispatch({ type: 'DELETE_SESSION', sessionId: deleteSession.id })      toast.success('Session deleted' - ${getEnvironmentName(deleteSession.environment)}`
-      })
+      dispatch({ type: 'DELETE_SESSION', sessionId: deleteSession.id })
+      toast.success(`Session deleted - ${getEnvironmentName(deleteSession.environment)}`)
       announce('Session deleted', 'polite')
     } catch (error: any) {
       logger.error('Failed to delete session', {
@@ -711,8 +711,8 @@ export default function ARCollaborationPage() {
       }
     }
 
-    dispatch({ type: 'TOGGLE_RECORDING', sessionId })    toast.success(session.isRecording ? 'Recording stopped' : 'Recording started' - ${getEnvironmentName(session.environment)}`
-    })
+    dispatch({ type: 'TOGGLE_RECORDING', sessionId })
+    toast.success(session.isRecording ? 'Recording stopped' : `Recording started - ${getEnvironmentName(session.environment)}`)
     announce(session.isRecording ? 'Recording stopped' : 'Recording started', 'polite')
   }
 
@@ -730,8 +730,8 @@ export default function ARCollaborationPage() {
       }
     }
 
-    dispatch({ type: 'TOGGLE_LOCK', sessionId })    toast.success(session.isLocked ? 'Session unlocked' : 'Session locked' - ${session.isLocked ? 'Anyone can join' : 'Requires password'}`
-    })
+    dispatch({ type: 'TOGGLE_LOCK', sessionId })
+    toast.success(session.isLocked ? 'Session unlocked' : 'Session locked')
     announce(session.isLocked ? 'Session unlocked' : 'Session locked', 'polite')
   }
 

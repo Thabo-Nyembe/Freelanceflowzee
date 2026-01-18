@@ -1,4 +1,6 @@
 'use client'
+
+import { createClient } from '@/lib/supabase/client'
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { useForms, type Form, type FormStatus, type FormType } from '@/lib/hooks/use-forms'
@@ -375,8 +377,6 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
     }
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
@@ -411,7 +411,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
         metadata: {},
         send_confirmation_email: false
       })
-      toast.success('Form Created'" has been created` })
+      toast.success("Form Created - " + newFormTitle + " has been created")
       setNewFormTitle('')
       setNewFormDescription('')
       setShowCreateDialog(false)
@@ -425,7 +425,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
   const handlePublishForm = async (form: Form) => {
     try {
       await updateForm(form.id, { status: 'active' as FormStatus })
-      toast.success('Form Published'" is now live` })
+      toast.success("Form Published - " + form.title + " is now live")
     } catch (err: any) {
       toast.error('Error')
     }
@@ -433,14 +433,12 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
 
   const handleDuplicateForm = async (form: Form) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
       const { id, created_at, updated_at, deleted_at, ...rest } = form
       await createForm({ ...rest, user_id: user.id, title: `${form.title} (Copy)`, status: 'draft' as FormStatus })
-      toast.success('Form Duplicated'" created` })
+      toast.success("Form Duplicated - " + form.title + " copy created")
     } catch (err: any) {
       toast.error('Error')
     }
@@ -449,7 +447,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
   const handleDeleteForm = async (form: Form) => {
     try {
       await deleteForm(form.id)
-      toast.success('Form Deleted'" has been deleted` })
+      toast.success("Form Deleted - form has been deleted")
       setSelectedForm(null)
     } catch (err: any) {
       toast.error('Error')
@@ -457,7 +455,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
   }
 
   const handleExportResponses = (formTitle: string) => {
-    toast.success('Exporting Responses'" will be downloaded` })
+    toast.success("Exporting Responses - " + formTitle + " will be downloaded")
   }
 
   const handleExportData = async () => {
@@ -502,7 +500,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
 
-      toast.success('Export Complete'` })
+      toast.success('Export Complete')
       setShowExportDialog(false)
     } catch (err: any) {
       toast.error('Export Failed')
@@ -519,9 +517,9 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
   ]
 
   const handleShareForm = async (form: Form) => {
-    const shareUrl = `${window.location.origin}/forms/${form.id}`
+    const shareUrl = window.location.origin + "/forms/" + form.id
     await navigator.clipboard.writeText(shareUrl)
-    toast.success('Link Copied'" copied to clipboard` })
+    toast.success("Link Copied - copied to clipboard")
   }
 
   const handleCopyApiKey = async () => {
@@ -565,7 +563,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
         })
       })
       if (!response.ok) throw new Error('Failed to add webhook')
-      toast.success('Webhook Added' has been configured` })
+      toast.success('Webhook Added')
       setNewWebhookUrl('')
       setNewWebhookEvents(['submission.created'])
       setShowWebhookDialog(false)
@@ -587,7 +585,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
         body: JSON.stringify({ action: 'verify_domain', domain: customDomain })
       })
       if (!response.ok) throw new Error('Verification failed')
-      toast.success('Domain Verified' has been verified and configured` })
+      toast.success('Domain Verified')
       setShowVerifyDomainDialog(false)
     } catch (err) {
       toast.error('Verification Failed')
@@ -645,10 +643,10 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
         })
       })
       if (!response.ok) throw new Error('Connection failed')
-      toast.success('Integration Connected' has been connected successfully` })
+      toast.success('Integration Connected')
       setShowIntegrationDialog(false)
     } catch (err) {
-      toast.error('Error'` })
+      toast.error('Error')
     }
   }
 
@@ -662,7 +660,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `forms-backup-${new Date().toISOString().split('T')[0]}.json`
+      a.download = "forms-backup-" + new Date().toISOString().split('T')[0] + ".json"
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
@@ -677,7 +675,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
     try {
       const text = await file.text()
       const data = JSON.parse(text)
-      toast.success('Import Complete' forms imported successfully` })
+      toast.success('Import Complete')
       setShowImportDialog(false)
     } catch (err) {
       toast.error('Import Failed')
@@ -690,7 +688,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
   }
 
   const handleCopyShareLink = async () => {
-    const shareUrl = `https://freeflow.io/form/${selectedForm?.id || 'abc123'}`
+    const shareUrl = "https://freeflow.io/form/" + (selectedForm?.id || 'abc123')
     await navigator.clipboard.writeText(shareUrl)
     toast.success('Link Copied')
   }
@@ -699,7 +697,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
     if (!selectedForm) return
     try {
       await updateForm(selectedForm.id, { is_public: !selectedForm.is_public })
-      toast.success('Visibility Updated'` })
+      toast.success('Visibility Updated')
     } catch (err) {
       toast.error('Error')
     }
@@ -712,7 +710,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
     input.onchange = async (e) => {
       const file = (e.target as HTMLInputElement).files?.[0]
       if (file) {
-        toast.success('Logo Uploaded' has been uploaded` })
+        toast.success('Logo Uploaded')
       }
     }
     input.click()
@@ -728,11 +726,11 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
           body: JSON.stringify({ action: 'apply_theme', themeId: theme.id })
         })
         if (!response.ok) throw new Error('Failed to save theme')
-        toast.success('Theme Applied'" is now your default theme for new forms` })
+        toast.success("Theme Applied - " + theme.name + " is now your default theme for new forms")
       } else if (context === 'form' && selectedForm) {
         // Apply theme to selected form
         await updateForm(selectedForm.id, { theme: theme.id })
-        toast.success('Theme Updated'" applied to "${selectedForm.title}"` })
+        toast.success("Theme Updated - " + theme.name + " applied to " + selectedForm.title)
         setShowThemesDialog(false)
       }
     } catch (err) {
@@ -748,7 +746,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
     }
     const url = docUrls[docTitle] || 'https://docs.freeflow.io/forms'
     window.open(url, '_blank')
-    toast.info('Opening Documentation' in a new tab` })
+    toast.info('Opening Documentation')
   }
 
   const handleGenerateQRCode = () => {
@@ -756,7 +754,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
   }
 
   const handleCopyQRCode = async () => {
-    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(`https://freeflow.io/form/${selectedForm?.id || 'abc123'}`)}`
+    const qrCodeUrl = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" + encodeURIComponent("https://freeflow.io/form/" + (selectedForm?.id || 'abc123'))
     try {
       const response = await fetch(qrCodeUrl)
       const blob = await response.blob()
@@ -772,10 +770,10 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
   }
 
   const handleDownloadQRCode = async () => {
-    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(`https://freeflow.io/form/${selectedForm?.id || 'abc123'}`)}`
+    const qrCodeUrl = "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=" + encodeURIComponent("https://freeflow.io/form/" + (selectedForm?.id || 'abc123'))
     const a = document.createElement('a')
     a.href = qrCodeUrl
-    a.download = `qr-code-${selectedForm?.title?.replace(/\s+/g, '-').toLowerCase() || 'form'}.png`
+    a.download = "qr-code-" + (selectedForm?.title?.replace(/\s+/g, '-').toLowerCase() || 'form') + ".png"
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
@@ -797,7 +795,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
         body: JSON.stringify({ action: 'delete_webhook', formId: selectedForm?.id })
       })
       if (!response.ok) throw new Error('Delete failed')
-      toast.success('Webhook Deleted' has been removed` })
+      toast.success('Webhook Deleted')
       setShowWebhookOptionsDialog(false)
       setSelectedWebhook(null)
     } catch (err) {
@@ -821,10 +819,10 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
         })
       })
       if (!response.ok) throw new Error('Disconnect failed')
-      toast.success('Integration Disconnected' has been disconnected` })
+      toast.success('Integration Disconnected')
       setShowIntegrationDialog(false)
     } catch (err) {
-      toast.error('Error'` })
+      toast.error('Error')
     } finally {
       setIsDisconnectingIntegration(false)
     }
@@ -843,7 +841,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
         { time: '45 min ago', method: 'DELETE', endpoint: '/api/responses/xyz789', status: 204, duration: '78ms' },
       ]
       const csvContent = 'Time,Method,Endpoint,Status,Duration\n' +
-        logs.map(log => `${log.time},${log.method},${log.endpoint},${log.status},${log.duration}`).join('\n')
+        logs.map(log => log.time + "," + log.method + "," + log.endpoint + "," + log.status + "," + log.duration).join('\n')
       const blob = new Blob([csvContent], { type: 'text/csv' })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
@@ -909,7 +907,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                     <ScrollArea className="h-[500px]">
                       <div className="grid grid-cols-2 md:grid-cols-3 gap-4 py-4 pr-4">
                         {formTemplates.map(template => (
-                          <Card key={template.id} className="cursor-pointer hover:shadow-md transition-shadow overflow-hidden relative" onClick={() => { if (template.isPremium) { toast.info('Pro Template'" is a Pro template. Upgrade to access it.` }); } else { toast.success('Template Selected'" template` }); setShowTemplatesDialog(false); } }}>
+                          <Card key={template.id} className="cursor-pointer hover:shadow-md transition-shadow overflow-hidden relative" onClick={() => { if (template.isPremium) { toast.info("Pro Template - " + template.name + " is a Pro template. Upgrade to access it."); } else { toast.success("Template Selected - " + template.name + " template"); setShowTemplatesDialog(false); } }}>
                             {template.isPremium && (
                               <Badge className="absolute top-2 right-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 z-10">
                                 <Star className="h-3 w-3 mr-1" /> Pro
@@ -1257,10 +1255,10 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                     <div className="h-24 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 relative">
                       <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/30">
                         <div className="flex items-center gap-2">
-                          <button className="p-2 bg-white rounded-lg text-gray-800 hover:bg-gray-100" onClick={(e) => { e.stopPropagation(); toast.info('Preview Form'"` }); }}>
+                          <button className="p-2 bg-white rounded-lg text-gray-800 hover:bg-gray-100" onClick={(e) => { e.stopPropagation(); toast.info('Preview Form'); }}>
                             <Eye className="h-4 w-4" />
                           </button>
-                          <button className="p-2 bg-white rounded-lg text-gray-800 hover:bg-gray-100" onClick={(e) => { e.stopPropagation(); toast.info('Edit Form'"` }); }}>
+                          <button className="p-2 bg-white rounded-lg text-gray-800 hover:bg-gray-100" onClick={(e) => { e.stopPropagation(); toast.info('Edit Form'); }}>
                             <Edit3 className="h-4 w-4" />
                           </button>
                           <button className="p-2 bg-white rounded-lg text-gray-800 hover:bg-gray-100" onClick={(e) => { e.stopPropagation(); setSelectedForm(form); setShowAnalyticsDialog(true); }}>
@@ -2316,7 +2314,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
             <AIInsightsPanel
               insights={mockFormsAIInsights}
               title="Forms Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -2399,7 +2397,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
             <ScrollArea className="h-[400px]">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 py-4 pr-4">
                 {questionTypes.map(type => (
-                  <button key={type.id} className="p-4 border rounded-lg hover:border-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors text-left relative" onClick={() => { if (type.isPremium) { toast.info('Pro Feature' is a Pro feature. Upgrade to use it.` }); } else { toast.success('Question Added' question added to form` }); setShowQuestionTypesDialog(false); } }}>
+                  <button key={type.id} className="p-4 border rounded-lg hover:border-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors text-left relative" onClick={() => { if (type.isPremium) { toast.info('Pro Feature'); } else { toast.success('Question Added'); setShowQuestionTypesDialog(false); } }}>
                     {type.isPremium && (
                       <Badge className="absolute top-1 right-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 text-xs">
                         Pro

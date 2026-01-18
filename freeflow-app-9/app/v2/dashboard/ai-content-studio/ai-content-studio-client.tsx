@@ -154,7 +154,8 @@ export default function AiContentStudioClient() {
         })
       })
       if (!res.ok) throw new Error('Failed to create content')
-      toast.success(`New ${newContentType.replace('-', ' ')} "${newContentTitle}" created successfully`)      setShowNewContentDialog(false)
+      toast.success(`New ${newContentType.replace('-', ' ')} "${newContentTitle}" created successfully`)
+      setShowNewContentDialog(false)
       setNewContentTitle('')
       setNewContentDescription('')
     } catch {
@@ -193,7 +194,8 @@ export default function AiContentStudioClient() {
         document.body.removeChild(a)
         URL.revokeObjectURL(url)
       }
-      toast.success(`Content exported as ${exportFormat.toUpperCase()} successfully`)      setShowExportDialog(false)
+      toast.success(`Content exported as ${exportFormat.toUpperCase()} successfully`)
+      setShowExportDialog(false)
     } catch {
       toast.error('Failed to export content')
     } finally {
@@ -218,7 +220,8 @@ export default function AiContentStudioClient() {
       })
       if (!res.ok) throw new Error('Failed to save settings')
       localStorage.setItem('aiContentStudioSettings', JSON.stringify(settings))
-      toast.success('AI Content Studio settings saved successfully')      setShowSettingsDialog(false)
+      toast.success('AI Content Studio settings saved successfully')
+      setShowSettingsDialog(false)
     } catch {
       toast.error('Failed to save settings')
     } finally {
@@ -249,7 +252,8 @@ export default function AiContentStudioClient() {
         })
       })
       if (!res.ok) throw new Error('Failed to share')
-      toast.success(`Content shared with ${shareEmail} successfully`)      setShowShareDialog(false)
+      toast.success(`Content shared with ${shareEmail} successfully`)
+      setShowShareDialog(false)
       setShareEmail('')
       setShareMessage('')
     } catch {
@@ -279,7 +283,8 @@ export default function AiContentStudioClient() {
       })
       if (!res.ok) throw new Error('Failed to schedule')
       const scheduledDateTime = new Date(`${scheduleDate}T${scheduleTime}`)
-      toast.success(`Content scheduled for ${scheduledDateTime.toLocaleString()} on ${schedulePlatform}`)      setShowScheduleDialog(false)
+      toast.success(`Content scheduled for ${scheduledDateTime.toLocaleString()} on ${schedulePlatform}`)
+      setShowScheduleDialog(false)
       setScheduleDate('')
       setScheduleTime('')
     } catch {
@@ -316,7 +321,8 @@ export default function AiContentStudioClient() {
         createdAt: new Date().toISOString()
       })
       localStorage.setItem('aiContentTemplates', JSON.stringify(templates))
-      toast.success(`Template "${templateName}" saved successfully`)      setShowTemplateDialog(false)
+      toast.success(`Template "${templateName}" saved successfully`)
+      setShowTemplateDialog(false)
       setTemplateName('')
     } catch {
       toast.error('Failed to save template')
@@ -327,37 +333,45 @@ export default function AiContentStudioClient() {
 
   // Handler for loading history item
   const handleLoadHistoryItem = (item: typeof contentHistory[0]) => {
-    toast.success(`Loading "${item.title}" from history`)    setShowHistoryDialog(false)
+    toast.success(`Loading "${item.title}" from history`)
+    setShowHistoryDialog(false)
   }
 
   // Handler for deleting history item
   const handleDeleteHistoryItem = (item: typeof contentHistory[0]) => {
-    toast.success(`"${item.title}" removed from history`)  }
+    toast.success(`"${item.title}" removed from history`)
+  }
 
   // Handler for viewing analytics
   const handleViewAnalytics = () => {
-    setShowAnalyticsDialog(true)  }
+    setShowAnalyticsDialog(true)
+  }
 
   // Handler for quick generate
   const handleQuickGenerate = () => {
-    toast.success('Quick generate started - AI is creating content')  }
+    toast.success('Quick generate started - AI is creating content')
+  }
 
   // Handler for toggling favorite
   const handleToggleFavorite = (itemId: string, isFavorite: boolean) => {
-    toast.success(isFavorite ? 'Added to favorites' : 'Removed from favorites')  }
+    toast.success(isFavorite ? 'Added to favorites' : 'Removed from favorites')
+  }
 
   // Handler for filtering content
   const handleFilterContent = (filterType: string) => {
-    toast.info(`Filtering by: ${filterType}`)  }
+    toast.info(`Filtering by: ${filterType}`)
+  }
 
   // Handler for searching content
   const handleSearchContent = (query: string) => {
     if (query.trim()) {
-      toast.info(`Searching for: ${query}`)    }
+      toast.info(`Searching for: ${query}`)
+    }
   }
 
   useEffect(() => {
-    if (userId) {      announce('AI Content Studio loaded', 'polite')
+    if (userId) {
+      announce('AI Content Studio loaded', 'polite')
     }
   }, [userId, announce])
 

@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
 import {
@@ -72,6 +74,9 @@ import { Progress } from '@/components/ui/progress'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
+
+// Initialize Supabase client once at module level
+const supabase = createClient()
 
 // ============================================================================
 // TYPE DEFINITIONS - Typeform Level
@@ -397,13 +402,9 @@ export default function PollsClient() {
   const fetchPolls = useCallback(async () => {
     try {
       setIsLoading(true)
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('polls')
         .select('*')
@@ -428,16 +429,12 @@ export default function PollsClient() {
     }
     try {
       setIsSaving(true)
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to create polls')
         return
       }
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('polls').insert({
         user_id: user.id,
         question: formData.question,
@@ -467,8 +464,6 @@ export default function PollsClient() {
   // Update poll status
   const handleUpdatePollStatus = async (pollId: string, newStatus: PollStatus) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('polls')
         .update({ status: newStatus, updated_at: new Date().toISOString() })
@@ -488,8 +483,6 @@ export default function PollsClient() {
   const handleDeletePoll = async (pollId: string) => {
     toast.promise(
       (async () => {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         const { error } = await supabase
           .from('polls')
           .delete()
@@ -511,13 +504,9 @@ export default function PollsClient() {
     setIsSaving(true)
     toast.promise(
       (async () => {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) throw new Error('Please sign in to duplicate polls')
 
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         const { error } = await supabase.from('polls').insert({
           user_id: user.id,
           question: `${poll.question} (Copy)`,
@@ -635,15 +624,7 @@ export default function PollsClient() {
     }
   }
 
-  const handleShareForm = async (pollId: string) => {
-    const url = `${window.location.origin}/polls/${pollId}`
-    try {
-      await navigator.clipboard.writeText(url)
-      toast.success('Poll share link copied to clipboard')
-    } catch {
-      toast.error('Failed to copy link')
-    }
-  }
+  // Note: handleShareForm is defined below with Web Share API support
 
   // Handle form preview
   const handlePreviewForm = (form: Form) => {
@@ -677,6 +658,28 @@ export default function PollsClient() {
       }
     } catch (err) {
       // User cancelled share or clipboard failed
+      if ((err as Error).name !== 'AbortError') {
+        toast.error('Failed to share poll')
+      }
+    }
+  }
+
+  // Handle share for database poll objects (different from Form type)
+  const handleSharePoll = async (poll: { id: string; question: string; description?: string }) => {
+    const url = `${window.location.origin}/polls/${poll.id}`
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: poll.question,
+          text: poll.description || '',
+          url: url
+        })
+        toast.success('Poll shared successfully')
+      } else {
+        await navigator.clipboard.writeText(url)
+        toast.success('Poll link copied to clipboard')
+      }
+    } catch (err) {
       if ((err as Error).name !== 'AbortError') {
         toast.error('Failed to share poll')
       }
@@ -1163,7 +1166,7 @@ export default function PollsClient() {
                           )}
                         </div>
                         <div className="flex items-center gap-1">
-                          <Button size="icon" variant="ghost" onClick={() => handleShareForm(poll.id)}>
+                          <Button size="icon" variant="ghost" onClick={() => handleSharePoll(poll)}>
                             <Share2 className="w-4 h-4" />
                           </Button>
                           <Button size="icon" variant="ghost" onClick={() => handleDuplicatePollDb(poll)}>

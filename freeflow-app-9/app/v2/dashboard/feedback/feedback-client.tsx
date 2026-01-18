@@ -2,6 +2,8 @@
 // Comprehensive customer feedback portal with voting, roadmap, and insights
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import { useAuth } from '@/lib/hooks/use-auth'
@@ -537,8 +539,6 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
 
     setLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('feedback')
         .select('*')
@@ -573,8 +573,6 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
 
     setSaving(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('feedback').insert({
         user_id: user.id,
         title: formData.title,
@@ -609,8 +607,6 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
     }
 
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('feedback')
         .update({ upvotes_count: currentVotes + 1, updated_at: new Date().toISOString() })
@@ -629,8 +625,6 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
   // Delete feedback
   const handleDeleteFeedback = async (feedbackId: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('feedback').delete().eq('id', feedbackId)
       if (error) throw error
 
@@ -645,8 +639,6 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
   // Update feedback status
   const handleUpdateStatus = async (feedbackId: string, newStatus: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('feedback')
         .update({ status: newStatus, updated_at: new Date().toISOString() })
@@ -665,8 +657,6 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
   // Export feedback
   const handleExportFeedback = async () => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('feedback')
         .select('*')
@@ -701,8 +691,6 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
     }
     setSaving(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('feedback').insert({
         user_id: user.id,
         title: newIdeaForm.title,
@@ -734,8 +722,6 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
     }
     setSaving(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('feedback')
         .update({
@@ -781,16 +767,12 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
         const combinedVotes = (primary?.upvotes_count || 0) + (duplicate?.upvotes_count || 0)
 
         // Update primary with combined votes
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         await supabase
           .from('feedback')
           .update({ upvotes_count: combinedVotes, updated_at: new Date().toISOString() })
           .eq('id', mergeForm.primaryId)
 
         // Mark duplicate as merged/declined
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         await supabase
           .from('feedback')
           .update({ status: 'declined', admin_response: `Merged into feedback #${mergeForm.primaryId}`, updated_at: new Date().toISOString() })
@@ -826,8 +808,6 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
 
       const updatedDescription = `${existing?.description || ''}\n\n---\nComment: ${commentForm.text}`
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('feedback')
         .update({ description: updatedDescription, updated_at: new Date().toISOString() })
@@ -909,7 +889,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
   // Legacy handlers for mock data compatibility
   const handleVote = (idea: Idea) => {
     // For mock ideas, just show toast - real DB items use handleVoteFeedback
-    toast.success('Vote recorded'"` })
+    toast.success("Vote recorded for " + idea.title)
   }
 
   return (
@@ -1140,7 +1120,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-2 mb-2">
                             <div className="flex items-center gap-2">
-                              <CategoryIcon className={`w-4 h-4 ${getPriorityColor(idea.priority)}`} />
+                              <CategoryIcon className={"w-4 h-4 " + (getPriorityColor(idea.priority)) + ""} />
                               <Badge className={getStatusColor(idea.status)}>{idea.status.replace('_', ' ')}</Badge>
                               {idea.adminResponse && (
                                 <Badge variant="outline" className="text-green-600 border-green-200">
@@ -1201,12 +1181,12 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
               {(['now', 'next', 'later', 'shipped'] as const).map(status => (
                 <div key={status} className="space-y-3">
                   <div className="flex items-center gap-2 mb-4">
-                    <div className={`w-3 h-3 rounded-full ${
+                    <div className={"w-3 h-3 rounded-full " + (
                       status === 'now' ? 'bg-green-500' :
                       status === 'next' ? 'bg-blue-500' :
                       status === 'later' ? 'bg-purple-500' :
                       'bg-gray-500'
-                    }`} />
+                    ) + ""} />
                     <h3 className="font-semibold capitalize text-gray-900 dark:text-white">{status}</h3>
                     <Badge variant="secondary">{mockRoadmap.filter(r => r.status === status).length}</Badge>
                   </div>
@@ -1273,11 +1253,11 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                         <div key={response.id} className="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
                           <div className="flex items-center justify-between mb-2">
                             <div className="flex items-center gap-2">
-                              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                              <div className={"w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold " + (
                                 response.score >= 9 ? 'bg-green-100 text-green-700' :
                                 response.score >= 7 ? 'bg-yellow-100 text-yellow-700' :
                                 'bg-red-100 text-red-700'
-                              }`}>
+                              ) + ""}>
                                 {response.score}
                               </div>
                               <Badge className={getNPSColor(response.category)}>{response.category}</Badge>
@@ -1320,7 +1300,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                 <Card key={segment.id} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm">
                   <CardContent className="p-4">
                     <div className="flex items-center gap-3 mb-3">
-                      <div className={`w-3 h-3 rounded-full bg-${segment.color}-500`} />
+                      <div className={"w-3 h-3 rounded-full bg-" + (segment.color) + "-500"} />
                       <h4 className="font-semibold text-gray-900 dark:text-white">{segment.name}</h4>
                     </div>
                     <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{segment.description}</p>
@@ -1382,7 +1362,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                           <span className="font-medium capitalize">{trend.term}</span>
                           <Badge variant="secondary">{trend.count}</Badge>
                         </div>
-                        <span className={`text-sm ${trend.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        <span className={"text-sm " + (trend.change >= 0 ? 'text-green-600' : 'text-red-600') + ""}>
                           {trend.change >= 0 ? '+' : ''}{trend.change}%
                         </span>
                       </div>
@@ -1563,7 +1543,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                           ].map((item) => (
                             <div key={item.status} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
                               <div className="flex items-center gap-3">
-                                <div className={`w-3 h-3 rounded-full bg-${item.color}-500`} />
+                                <div className={"w-3 h-3 rounded-full bg-" + (item.color) + "-500"} />
                                 <span className="font-medium">{item.status}</span>
                               </div>
                               <Button variant="ghost" size="sm" onClick={() => { setSelectedStatusForConfigure(item.status); setShowConfigureStatusDialog(true) }}>Configure</Button>
@@ -2217,7 +2197,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
             <AIInsightsPanel
               insights={mockFeedbackAIInsights}
               title="Feedback Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -3261,7 +3241,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                   <div className="flex gap-2 pt-4">
                     <Button variant="outline" onClick={() => {
                       if (!confirm(`Are you sure you want to disconnect ${selectedIntegration?.name}?`)) return
-                      toast.success(`${selectedIntegration?.name} disconnected`)
+                      toast.success((selectedIntegration?.name || 'Integration') + ' disconnected')
                       setShowIntegrationConfigDialog(false)
                     }} className="flex-1 text-red-600">
                       Disconnect
@@ -3294,7 +3274,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                       Cancel
                     </Button>
                     <Button onClick={() => {
-                      toast.success(`${selectedIntegration?.name} connected successfully`)
+                      toast.success((selectedIntegration?.name || 'Integration') + ' connected successfully')
                       setShowIntegrationConfigDialog(false)
                     }} className="flex-1">
                       <Link2 className="w-4 h-4 mr-2" />
@@ -3331,7 +3311,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                   Cancel
                 </Button>
                 <Button variant="destructive" onClick={() => {
-                  toast.success('All votes have been reset' ideas` })
+                  toast.success('All votes have been reset')
                   setShowResetVotesDialog(false)
                 }} className="flex-1">
                   Reset All Votes
@@ -3365,7 +3345,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                   Cancel
                 </Button>
                 <Button variant="destructive" onClick={() => {
-                  toast.success('All ideas have been archived' ideas` })
+                  toast.success('All ideas have been archived')
                   setShowArchiveAllDialog(false)
                 }} className="flex-1">
                   Archive All Ideas

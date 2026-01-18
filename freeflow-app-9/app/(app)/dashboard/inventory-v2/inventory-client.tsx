@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useCallback } from 'react'
 import { useInventory, useCreateInventoryItem, useUpdateInventoryItem, useDeleteInventoryItem, type InventoryItem, type InventoryStatus } from '@/lib/hooks/use-inventory'
 import { useInventoryLocations } from '@/lib/hooks/use-inventory-extended'
@@ -65,6 +67,9 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
+
+// Initialize Supabase client once at module level
+const supabase = createClient()
 
 // Comprehensive type definitions for Shopify-level inventory
 interface ProductVariant {
@@ -326,13 +331,8 @@ export default function InventoryClient({ initialInventory }: { initialInventory
   }
 
   const filteredProducts = useMemo(() => {
-    return []// mockProducts.filter(product => {
-      const matchesSearch = product.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.vendor.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.variants.some(v => v.sku.toLowerCase().includes(searchQuery.toLowerCase()))
-      const matchesStatus = statusFilter === 'all' || product.status === statusFilter
-      return matchesSearch && matchesStatus
-    })
+    // Filter from database products when available
+    return []
   }, [searchQuery, statusFilter])
 
   const toggleProductExpanded = (productId: string) => {
@@ -384,8 +384,6 @@ export default function InventoryClient({ initialInventory }: { initialInventory
   const handleExportInventory = useCallback(async () => {
     try {
       toast.info('Export started')
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('inventory')
         .select('*')
@@ -418,7 +416,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
       a.click()
       window.URL.revokeObjectURL(url)
 
-      toast.success('Export completed' items` })
+      toast.success(`Export completed: ${dbInventory?.length || 0} items`)
     } catch (error) {
       console.error('Export error:', error)
       toast.error('Failed to export inventory')
@@ -441,8 +439,6 @@ export default function InventoryClient({ initialInventory }: { initialInventory
 
     setCreatingTransfer(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('stock_transfers').insert({
         reference: `TRF-${Date.now()}`,
         origin_location_id: transferForm.originLocationId,
@@ -480,8 +476,6 @@ export default function InventoryClient({ initialInventory }: { initialInventory
 
     setCreatingPO(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('purchase_orders').insert({
         po_number: `PO-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`,
         supplier_id: poForm.supplierId,
@@ -535,7 +529,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
         updated_at: new Date().toISOString()
       } as any)
 
-      toast.success('Stock updated'" has been updated` })
+      toast.success(`Stock updated: "${inventoryItem.product_name}" has been updated`)
       refetch()
     } catch (error) {
       console.error('Stock update error:', error)
@@ -562,7 +556,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
         updated_at: new Date().toISOString()
       } as any)
 
-      toast.success('Product archived'" has been archived` })
+      toast.success(`Product archived: "${product.title}" has been archived`)
       refetch()
     } catch (error) {
       console.error('Archive error:', error)
@@ -578,8 +572,6 @@ export default function InventoryClient({ initialInventory }: { initialInventory
 
     setCreatingLocation(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('inventory_locations').insert({
         name: locationForm.name,
         address: locationForm.address || null,
@@ -592,7 +584,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
 
       if (error) throw error
 
-      toast.success('Location created'" has been added` })
+      toast.success(`Location created: "${locationForm.name}" has been added`)
       setShowLocationDialog(false)
       setLocationForm({
         name: '',
@@ -617,8 +609,6 @@ export default function InventoryClient({ initialInventory }: { initialInventory
 
     setCreatingSupplier(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('suppliers').insert({
         name: supplierForm.name,
         email: supplierForm.email || null,
@@ -634,7 +624,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
 
       if (error) throw error
 
-      toast.success('Supplier created'" has been added` })
+      toast.success(`Supplier created: "${supplierForm.name}" has been added`)
       setShowSupplierDialog(false)
       setSupplierForm({
         name: '',
@@ -686,7 +676,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
       }
 
       const result = await response.json()
-      toast.success('Import completed' items` })
+      toast.success(`Import completed: ${result.imported || 0} items`)
       refetch()
     } catch (error) {
       console.error('Import error:', error)
@@ -708,8 +698,6 @@ export default function InventoryClient({ initialInventory }: { initialInventory
   const handlePrintLabels = async () => {
     setPrintingLabels(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('inventory')
         .select('id, product_name, sku, barcode')
@@ -745,7 +733,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
         `)
         printWindow.document.close()
         printWindow.print()
-        toast.success('Print ready' labels ready to print` })
+        toast.success(`Print ready labels ready to print`)
       } else {
         toast.error('Could not open print window')
       }

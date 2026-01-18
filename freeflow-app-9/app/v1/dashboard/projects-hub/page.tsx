@@ -498,7 +498,8 @@ export default function ProjectsOverviewPage() {
         p.id === selectedProject.id ? updatedUIProject : p
       ))
 
-      toast.success(`Project "${data.name}" updated! Budget: $${data.budget.toLocaleString()} • Priority: ${data.priority}`)      setShowEditModal(false)
+      toast.success(`Project "${data.name}" updated! Budget: $${data.budget.toLocaleString()} • Priority: ${data.priority}`)
+      setShowEditModal(false)
       setSelectedProject(null)
 
       announce(`Project ${data.name} updated successfully`, 'polite')
@@ -533,7 +534,8 @@ export default function ProjectsOverviewPage() {
       // Remove from local state
       setProjects(projects.filter(p => p.id !== selectedProject.id))
 
-      toast.success(`Project "${selectedProject.title}" deleted. Project has been permanently removed.`)      setShowDeleteDialog(false)
+      toast.success(`Project "${selectedProject.title}" deleted. Project has been permanently removed.`)
+      setShowDeleteDialog(false)
       setSelectedProject(null)
 
       announce(`Project ${selectedProject.title} deleted`, 'polite')
@@ -589,7 +591,8 @@ export default function ProjectsOverviewPage() {
         attachments: [],
         category: createdProject.category,
         tags: []
-      }      setProjects([...projects, uiProject])
+      }
+      setProjects([...projects, uiProject])
       setIsCreateModalOpen(false)
       setNewProject({
         title: '',
@@ -616,7 +619,8 @@ export default function ProjectsOverviewPage() {
   }
 
   const handleUpdateProjectStatus = async (projectId: string, newStatus: string) => {
-    const project = projects.find(p => p.id === projectId)    try {
+    const project = projects.find(p => p.id === projectId)
+    try {
       // Import projects queries utility
       const { updateProjectStatus } = await import('@/lib/projects-hub-queries')
 

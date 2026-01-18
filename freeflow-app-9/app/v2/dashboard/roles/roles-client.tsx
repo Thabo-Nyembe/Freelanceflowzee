@@ -681,7 +681,7 @@ export default function RolesClient() {
       })
       setEditDialogOpen(true)
     } else {
-      toast.info('Edit Role'" (mock data)` })
+      toast.info('Edit Role', { description: 'Editing mock data' })
     }
   }
 
@@ -2196,7 +2196,7 @@ export default function RolesClient() {
               <AIInsightsPanel
                 insights={mockRolesAIInsights}
                 title="Role Intelligence"
-                onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+                onInsightAction={(insight) => toast.info(insight.title)}
               />
             </div>
             <div className="space-y-6">
@@ -2618,7 +2618,7 @@ export default function RolesClient() {
             </Button>
             <Button
               onClick={() => {
-                toast.success('Role Assigned'" role` })
+                toast.success('Role Assigned', { description: 'User has been assigned the selected role' })
                 setShowAssignRoleDialog(false)
               }}
               className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white"

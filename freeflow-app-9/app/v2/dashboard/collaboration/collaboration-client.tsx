@@ -557,13 +557,11 @@ export default function CollaborationClient() {
   }
 
   const handleInviteMember = (email: string) => {
-    toast.success('Invitation sent'`
-    })
+    toast.success('Invitation sent to ' + email)
   }
 
   const handleShareFile = (fileName: string) => {
-    toast.success('File shared' shared with team`
-    })
+    toast.success('File "' + fileName + '" shared with team')
   }
 
   const handleStartMeeting = () => {
@@ -571,8 +569,7 @@ export default function CollaborationClient() {
   }
 
   const handleLeaveProject = (projectName: string) => {
-    toast.info('Left project'`
-    })
+    toast.info('Left project: ' + projectName)
   }
 
   return (
@@ -1604,8 +1601,7 @@ export default function CollaborationClient() {
                                 style={{ backgroundColor: color }}
                                 onClick={() => {
                                   setSelectedWorkspaceColor(color);
-                                  toast.success('Workspace color updated'`
-                                  });
+                                  toast.success('Workspace color updated')
                                 }}
                               />
                             ))}
@@ -1872,8 +1868,7 @@ export default function CollaborationClient() {
                               style={{ backgroundColor: color }}
                               onClick={() => {
                                 setSelectedAccentColor(color);
-                                toast.success('Accent color updated'`
-                                });
+                                toast.success('Accent color updated')
                               }}
                             />
                           ))}
@@ -1920,7 +1915,7 @@ export default function CollaborationClient() {
             <AIInsightsPanel
               insights={mockCollabAIInsights}
               title="Collaboration Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">

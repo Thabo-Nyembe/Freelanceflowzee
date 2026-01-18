@@ -513,19 +513,19 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
     toast.success('Tutorial editor ready!')
   }
   const handlePublishTutorial = (n: string) => {
-    toast.success(`Tutorial "${n}" published successfully!`)
+    toast.success("Tutorial \"" + n + "\" published successfully!")
   }
   const handleStartTutorial = (n: string) => {
-    toast.success(`Starting "${n}"`)
+    toast.success("Starting \"" + n + "\"")
   }
   const handleCompleteTutorial = (n: string) => {
-    toast.success(`Congratulations! You completed "${n}"`)
+    toast.success("Congratulations! You completed \"" + n + "\"")
   }
   const handleMyList = () => {
     toast.success('My List')
   }
   const handleQuickAction = (actionLabel: string) => {
-    toast.success(actionLabel...` })
+    toast.success(actionLabel)
   }
   const handleMarkAllRead = () => {
     toast.success('All notifications marked as read')
@@ -537,19 +537,19 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
     input.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0]
       if (file) {
-        toast.success('Photo selected'...` })
+        toast.success('Photo selected')
       }
     }
     input.click()
   }
   const handleUpgradePlan = (planName: string) => {
-    toast.success('Upgrade initiated'...` })
+    toast.success('Upgrade initiated')
   }
   const handleAddPaymentMethod = () => {
     toast.info('Opening payment form')
   }
   const handleConnectService = (serviceName: string) => {
-    toast.success(`${serviceName} connected successfully!`)
+    toast.success(serviceName + " connected successfully!")
   }
   const handleCopyApiKey = () => {
     navigator.clipboard.writeText('learn_xxxxxxxxxxxxxxxx').then(() => {
@@ -582,7 +582,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
     }
   }
   const handleEnrollCourse = (courseName: string) => {
-    toast.success(`You're now enrolled in "${courseName}"!`)
+    toast.success("You're now enrolled in \"" + courseName + "\"!")
   }
   const handleCreateGoal = () => {
     toast.success('Goal created')
@@ -1777,7 +1777,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
             <AIInsightsPanel
               insights={mockTutorialsAIInsights}
               title="Learning Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">

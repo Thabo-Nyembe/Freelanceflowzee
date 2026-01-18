@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useEffect } from 'react'
 import { useExpenses, useCreateExpense, useUpdateExpense, useDeleteExpense } from '@/lib/hooks/use-expenses'
 import { toast } from 'sonner'
@@ -575,8 +577,6 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
     const amount = mileageForm.distance * 0.67 // IRS rate
     toast.promise(
       (async () => {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         const { error } = await supabase.from('mileage_trips').insert({
           origin: mileageForm.origin,
           destination: mileageForm.destination,
@@ -607,8 +607,6 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
     const total = days * dailyRate
     toast.promise(
       (async () => {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         const { error } = await supabase.from('per_diem_requests').insert({
           location: perDiemForm.location,
           start_date: perDiemForm.startDate,
@@ -646,8 +644,6 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
   const handleSaveCardConnection = () => {
     toast.promise(
       (async () => {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         const { error } = await supabase.from('corporate_cards').insert({
           card_type: 'corporate',
           status: 'connected',
@@ -688,8 +684,6 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
     } else {
       toast.promise(
         (async () => {
-          const { createClient } = await import('@/lib/supabase/client')
-          const supabase = createClient()
           const { error } = await supabase.from('integrations').update({
             settings: { configured: true },
             updated_at: new Date().toISOString()
@@ -715,8 +709,6 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
     }
     toast.promise(
       (async () => {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         const { error } = await supabase.from('webhooks').insert({
           url: webhookUrl,
           service: 'expenses',
@@ -744,8 +736,6 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
   const handleRegenerateApiKey = () => {
     toast.promise(
       (async () => {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         const newKey = `exp_sk_live_${crypto.randomUUID().replace(/-/g, '')}`
         const { error } = await supabase.from('api_keys').upsert({
           id: 'expenses-api',
@@ -768,8 +758,6 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
     if (!confirm('Are you sure you want to reset all expense policies to defaults?')) return
     toast.promise(
       (async () => {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         const { error } = await supabase.from('expense_policies').delete().neq('id', '')
         if (error) throw error
         setShowResetPoliciesDialog(false)
@@ -787,8 +775,6 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
     if (!confirm(`Are you sure you want to delete ${draftCount} draft reports?`)) return
     toast.promise(
       (async () => {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         const { error } = await supabase.from('expense_reports').delete().eq('status', 'draft')
         if (error) throw error
         setShowDeleteDraftsDialog(false)
@@ -805,8 +791,6 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
   const handleExportAllData = () => {
     toast.promise(
       (async () => {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         const { data: expenseReports } = await supabase.from('expense_reports').select('*')
         const { data: expensePolicies } = await supabase.from('expense_policies').select('*')
         const { data: mileageTrips } = await supabase.from('mileage_trips').select('*')
@@ -823,17 +807,16 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
             autoApproveThreshold: 50
           }
         }
-          const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
-          const url = URL.createObjectURL(blob)
-          const link = document.createElement('a')
-          link.href = url
-          link.download = `expenses-full-export-${new Date().toISOString().split('T')[0]}.json`
-          document.body.appendChild(link)
-          link.click()
-          document.body.removeChild(link)
-          resolve({ size: `${(blob.size / 1024).toFixed(1)} KB` })
-        }, 2000)
-      }),
+        const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = `expenses-full-export-${new Date().toISOString().split('T')[0]}.json`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        return { size: `${(blob.size / 1024).toFixed(1)} KB` }
+      })(),
       {
         loading: 'Preparing full data export...',
         success: (data) => `Export complete! File size: ${data.size}`,

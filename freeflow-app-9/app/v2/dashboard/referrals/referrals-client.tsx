@@ -156,7 +156,7 @@ const referralsQuickActions = [
         const url = window.URL.createObjectURL(blob)
         const a = document.createElement('a')
         a.href = url
-        a.download = `referrals-export-${new Date().toISOString().split('T')[0]}.json`
+        a.download = "referrals-export-" + new Date().toISOString().split('T')[0] + ".json"
         document.body.appendChild(a)
         a.click()
         window.URL.revokeObjectURL(url)
@@ -346,7 +346,8 @@ export default function ReferralsClient() {
         if (!response.ok) throw new Error('Failed to load referral data')
 
         setIsLoading(false)
-        announce('Referral system loaded successfully', 'polite')      } catch (err) {
+        announce('Referral system loaded successfully', 'polite')
+      } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load referral data')
         setIsLoading(false)
         announce('Error loading referral system', 'assertive')
@@ -364,7 +365,8 @@ export default function ReferralsClient() {
   const handleCopyReferralCode = () => {
     try {
       navigator.clipboard.writeText(referralCode)
-      setCopiedToClipboard(true)      toast.success('Referral code copied!')
+      setCopiedToClipboard(true)
+      toast.success('Referral code copied!')
 
       setTimeout(() => {
         setCopiedToClipboard(false)
@@ -381,7 +383,8 @@ export default function ReferralsClient() {
 
   const handleCopyReferralLink = () => {
     try {
-      navigator.clipboard.writeText(referralLink)      toast.success('Referral link copied!')
+      navigator.clipboard.writeText(referralLink)
+      toast.success('Referral link copied!')
     } catch (error) {
       logger.error('Failed to copy referral link', { error })
       toast.error('Failed to copy link')
@@ -394,29 +397,29 @@ export default function ReferralsClient() {
 
   const handleShareReferral = async (platform: 'email' | 'whatsapp' | 'twitter' | 'linkedin') => {
     try {
-      const shareMessage = `Check out KAZI - amazing project management platform! Use my referral code ${referralCode} and get exclusive benefits. ${referralLink}`      let shareUrl = ''
+      const shareMessage = "Check out KAZI - amazing project management platform! Use my referral code " + referralCode + " and get exclusive benefits. " + referralLink
+      let shareUrl = ''
 
       switch (platform) {
         case 'email':
-          shareUrl = `mailto:?subject=Join KAZI - Premium Project Management&body=${encodeURIComponent(shareMessage)}`
+          shareUrl = "mailto:?subject=Join KAZI - Premium Project Management&body=" + encodeURIComponent(shareMessage)
           window.location.href = shareUrl
           break
         case 'whatsapp':
-          shareUrl = `https://wa.me/?text=${encodeURIComponent(shareMessage)}`
+          shareUrl = "https://wa.me/?text=" + encodeURIComponent(shareMessage)
           window.open(shareUrl, '_blank')
           break
         case 'twitter':
-          shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareMessage)}`
+          shareUrl = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(shareMessage)
           window.open(shareUrl, '_blank')
           break
         case 'linkedin':
-          shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(referralLink)}`
+          shareUrl = "https://www.linkedin.com/sharing/share-offsite/?url=" + encodeURIComponent(referralLink)
           window.open(shareUrl, '_blank')
           break
       }
 
-      toast.success('Opening share dialog...'`
-      })
+      toast.success('Opening share dialog...')
     } catch (error) {
       logger.error('Failed to share referral', { error, platform })
       toast.error('Failed to open share dialog')
@@ -428,7 +431,8 @@ export default function ReferralsClient() {
   // ============================================================================
 
   const handleViewReferralDetails = (referralId: number) => {
-    const referral = referrals.find(r => r.id === referralId)    toast.info(`Loading details for ${referral?.name}...`)
+    const referral = referrals.find(r => r.id === referralId)
+    toast.info("Loading details for " + (referral?.name || "referral") + "...")
   }
 
   // ============================================================================
@@ -437,7 +441,8 @@ export default function ReferralsClient() {
 
   const handleClaimReward = async (rewardId: number) => {
     try {
-      const reward = rewards.find(r => r.id === rewardId)      const response = await fetch('/api/loyalty/claim-reward', {
+      const reward = rewards.find(r => r.id === rewardId)
+      const response = await fetch('/api/loyalty/claim-reward', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -453,8 +458,8 @@ export default function ReferralsClient() {
 
       const result = await response.json()
 
-      if (result.success) {        toast.success('Reward claimed!' loyalty points`
-        })
+      if (result.success) {
+        toast.success('Reward claimed! ' + (reward?.points || 0) + ' loyalty points')
 
         // Update local state
         setLoyaltyPoints(prev => prev + (reward?.points || 0))
@@ -472,10 +477,10 @@ export default function ReferralsClient() {
   const handleRedeemPoints = async (points: number) => {
     try {
       if (loyaltyPoints < points) {
-        toast.error('Insufficient points' more points`
-        })
+        toast.error('Insufficient points. Need ' + (points - loyaltyPoints) + ' more points')
         return
-      }      const response = await fetch('/api/loyalty/redeem-points', {
+      }
+      const response = await fetch('/api/loyalty/redeem-points', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -492,8 +497,8 @@ export default function ReferralsClient() {
 
       const result = await response.json()
 
-      if (result.success) {        toast.success('Points redeemed!' points converted to account credit`
-        })
+      if (result.success) {
+        toast.success('Points redeemed! ' + points + ' points converted to account credit')
 
         setLoyaltyPoints(prev => prev - points)
       }
@@ -514,7 +519,8 @@ export default function ReferralsClient() {
         return
       }
 
-      setIsProcessing(true)      // Call API to create referral
+      setIsProcessing(true)
+      // Call API to create referral
       const response = await fetch('/api/referrals', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -530,7 +536,7 @@ export default function ReferralsClient() {
         id: referrals.length + 1,
         name: newReferralData.company || newReferralData.name,
         email: newReferralData.email,
-        avatar: `/avatars/new-${referrals.length + 1}.jpg`,
+        avatar: "/avatars/new-" + (referrals.length + 1) + ".jpg",
         referralDate: new Date().toISOString().split('T')[0],
         status: 'pending',
         projectsCompleted: 0,
@@ -542,8 +548,8 @@ export default function ReferralsClient() {
       setIsCreateReferralDialogOpen(false)
       setIsProcessing(false)
 
-      toast.success('Referral created!'`
-      })    } catch (error: any) {
+      toast.success('Referral created!')
+    } catch (error: any) {
       setIsProcessing(false)
       logger.error('Failed to create referral', { error })
       toast.error('Failed to create referral')
@@ -562,12 +568,12 @@ export default function ReferralsClient() {
       }
 
       if (payoutAmount > totalCommission) {
-        toast.error('Insufficient balance'`
-        })
+        toast.error('Insufficient balance')
         return
       }
 
-      setIsProcessing(true)      // Call API to request payout
+      setIsProcessing(true)
+      // Call API to request payout
       const response = await fetch('/api/referrals', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -584,8 +590,8 @@ export default function ReferralsClient() {
       setIsPayoutDialogOpen(false)
       setIsProcessing(false)
 
-      toast.success('Payout requested!' will be sent to your ${payoutMethod} within 3-5 business days`
-      })    } catch (error: any) {
+      toast.success('Payout requested! $' + payoutAmount + ' will be sent to your ' + payoutMethod + ' within 3-5 business days')
+    } catch (error: any) {
       setIsProcessing(false)
       logger.error('Failed to request payout', { error })
       toast.error('Failed to request payout')
@@ -598,7 +604,8 @@ export default function ReferralsClient() {
 
   const handleSaveSettings = async () => {
     try {
-      setIsProcessing(true)      // Call API to save settings
+      setIsProcessing(true)
+      // Call API to save settings
       const response = await fetch('/api/referrals', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -612,7 +619,8 @@ export default function ReferralsClient() {
       setIsSettingsDialogOpen(false)
       setIsProcessing(false)
 
-      toast.success('Settings saved!')    } catch (error: any) {
+      toast.success('Settings saved!')
+    } catch (error: any) {
       setIsProcessing(false)
       logger.error('Failed to save settings', { error })
       toast.error('Failed to save settings')
@@ -625,7 +633,8 @@ export default function ReferralsClient() {
 
   const handleOpenReferralDetails = (referral: Referral) => {
     setSelectedReferral(referral)
-    setIsReferralDetailsDialogOpen(true)  }
+    setIsReferralDetailsDialogOpen(true)
+  }
 
   // ============================================================================
   // HANDLER 11: SEND REMINDER TO REFERRAL
@@ -633,7 +642,8 @@ export default function ReferralsClient() {
 
   const handleSendReminder = async (referralId: number) => {
     try {
-      const referral = referrals.find(r => r.id === referralId)      // Call API to send reminder
+      const referral = referrals.find(r => r.id === referralId)
+      // Call API to send reminder
       const response = await fetch('/api/referrals', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -645,8 +655,8 @@ export default function ReferralsClient() {
       })
       if (!response.ok) throw new Error('Failed to send reminder')
 
-      toast.success('Reminder sent!'`
-      })    } catch (error: any) {
+      toast.success('Reminder sent!')
+    } catch (error: any) {
       logger.error('Failed to send reminder', { error, referralId })
       toast.error('Failed to send reminder')
     }
@@ -657,14 +667,15 @@ export default function ReferralsClient() {
   // ============================================================================
 
   const handleExportReferralData = async (format: 'csv' | 'pdf') => {
-    try {      toast.promise(
-        fetch(`/api/referrals?action=export&format=${format}`).then(async res => {
+    try {
+      toast.promise(
+        fetch("/api/referrals?action=export&format=" + format).then(async res => {
           if (!res.ok) throw new Error('Export failed')
           const blob = await res.blob()
           const url = window.URL.createObjectURL(blob)
           const a = document.createElement('a')
           a.href = url
-          a.download = `referrals-export-${new Date().toISOString().split('T')[0]}.${format}`
+          a.download = "referrals-export-" + new Date().toISOString().split('T')[0] + "." + format
           document.body.appendChild(a)
           a.click()
           window.URL.revokeObjectURL(url)
@@ -672,11 +683,12 @@ export default function ReferralsClient() {
           return 'Export complete'
         }),
         {
-          loading: `Generating ${format.toUpperCase()} export...`,
-          success: `Referral data exported as ${format.toUpperCase()}`,
+          loading: "Generating " + format.toUpperCase() + " export...",
+          success: "Referral data exported as " + format.toUpperCase(),
           error: 'Failed to export data'
         }
-      )    } catch (error: any) {
+      )
+    } catch (error: any) {
       logger.error('Failed to export referral data', { error, format })
       toast.error('Failed to export data')
     }
@@ -687,7 +699,8 @@ export default function ReferralsClient() {
   // ============================================================================
 
   const handleRefreshData = async () => {
-    try {      toast.promise(
+    try {
+      toast.promise(
         fetch('/api/referrals?action=refresh').then(res => {
           if (!res.ok) throw new Error('Refresh failed')
           return res.json()
@@ -697,7 +710,8 @@ export default function ReferralsClient() {
           success: 'Referral data refreshed',
           error: 'Failed to refresh data'
         }
-      )    } catch (error: any) {
+      )
+    } catch (error: any) {
       logger.error('Failed to refresh data', { error })
       toast.error('Failed to refresh data')
     }

@@ -130,13 +130,15 @@ export default function AnalyticsAdvancedClient() {
 
   useEffect(() => {
     const loadAdvancedAnalyticsData = async () => {
-      if (!userId) {        setIsLoading(false)
+      if (!userId) {
+        setIsLoading(false)
         return
       }
 
       try {
         setIsLoading(true)
-        setError(null)        // Dynamic import for code splitting
+        setError(null)
+        // Dynamic import for code splitting
         const {
           getAnalyticsMetrics,
           getRevenueChart,
@@ -185,8 +187,8 @@ export default function AnalyticsAdvancedClient() {
         setAnalyticsStats(statsResult.data || null)
 
         setIsLoading(false)
-        announce('Advanced analytics loaded successfully', 'polite')        toast.success('Analytics loaded' metrics analyzed`
-        })
+        announce('Advanced analytics loaded successfully', 'polite')
+        toast.success('Analytics loaded: metrics analyzed')
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load advanced analytics'
         logger.error('Failed to load analytics data', { error: errorMessage, userId })
@@ -228,7 +230,7 @@ export default function AnalyticsAdvancedClient() {
                 <div className="text-2xl">{metric.icon}</div>
               </div>
               <div className="flex items-center gap-2">
-                <span className={`text-sm font-medium ${getTrendColor(metric.trend)}`}>
+                <span className={'text-sm font-medium ' + getTrendColor(metric.trend)}>
                   {metric.trend === 'up' ? '↗' : metric.trend === 'down' ? '↘' : '→'}
                   {formatChange(metric.change, metric.unit)}
                 </span>
@@ -307,7 +309,7 @@ export default function AnalyticsAdvancedClient() {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="font-semibold">{insight.title}</span>
-                    <span className={`text-xs px-2 py-0.5 rounded ${getInsightColor(insight.impact)}`}>
+                    <span className={'text-xs px-2 py-0.5 rounded ' + getInsightColor(insight.impact)}>
                       {insight.impact}
                     </span>
                   </div>
@@ -576,7 +578,7 @@ export default function AnalyticsAdvancedClient() {
                     <div>
                       <h3 className="text-lg font-semibold mb-1">{insight.title}</h3>
                       <div className="flex items-center gap-2">
-                        <span className={`text-xs px-2 py-1 rounded ${getInsightColor(insight.impact)}`}>
+                        <span className={'text-xs px-2 py-1 rounded ' + getInsightColor(insight.impact)}>
                           {insight.impact} impact
                         </span>
                         <span className="text-xs text-muted-foreground">
@@ -666,7 +668,7 @@ export default function AnalyticsAdvancedClient() {
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
                     <h3 className="text-lg font-semibold">{goal.name}</h3>
-                    <span className={`text-sm font-semibold ${getGoalStatusColor(goal.status)}`}>
+                    <span className={'text-sm font-semibold ' + getGoalStatusColor(goal.status)}>
                       {goal.status}
                     </span>
                   </div>
@@ -701,7 +703,7 @@ export default function AnalyticsAdvancedClient() {
                     initial={{ width: 0 }}
                     animate={{ width: `${goal.progress}%` }}
                     transition={{ duration: 0.5 }}
-                    className={`h-full rounded-full ${
+                    className={'h-full rounded-full ' + (
                       goal.status === 'on-track'
                         ? 'bg-gradient-to-r from-green-500 to-emerald-400'
                         : goal.status === 'at-risk'
@@ -709,7 +711,7 @@ export default function AnalyticsAdvancedClient() {
                         : goal.status === 'completed'
                         ? 'bg-gradient-to-r from-blue-500 to-purple-400'
                         : 'bg-gradient-to-r from-red-500 to-pink-400'
-                    }`}
+                    )}
                   />
                 </div>
               </div>
@@ -812,11 +814,11 @@ export default function AnalyticsAdvancedClient() {
                   <button
                     key={mode.id}
                     onClick={() => setViewMode(mode.id as ViewMode)}
-                    className={`flex-1 px-4 py-3 rounded-lg font-medium transition-all ${
+                    className={'flex-1 px-4 py-3 rounded-lg font-medium transition-all ' + (
                       viewMode === mode.id
                         ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg'
                         : 'hover:bg-muted/50'
-                    }`}
+                    )}
                   >
                     <span className="mr-2">{mode.icon}</span>
                     {mode.label}
@@ -875,8 +877,7 @@ export default function AnalyticsAdvancedClient() {
               Cancel
             </Button>
             <Button onClick={() => {
-              toast.success('Analytics item created'" has been added to your dashboard`
-              })
+              toast.success('Analytics item created: ' + newItemName + ' has been added to your dashboard')
               setNewItemName('')
               setShowNewItemDialog(false)
             }}>
@@ -949,8 +950,7 @@ export default function AnalyticsAdvancedClient() {
               Cancel
             </Button>
             <Button onClick={() => {
-              toast.success('Export started'`
-              })
+              toast.success('Export started')
               setShowExportDialog(false)
             }}>
               Export Data
@@ -1108,8 +1108,7 @@ export default function AnalyticsAdvancedClient() {
               Cancel
             </Button>
             <Button onClick={() => {
-              toast.success('Goal created'" has been added with target ${newGoalTarget || '0'}`
-              })
+              toast.success('Goal created: ' + newGoalName + ' has been added with target ' + (newGoalTarget || '0'))
               setNewGoalName('')
               setNewGoalTarget('')
               setShowNewGoalDialog(false)

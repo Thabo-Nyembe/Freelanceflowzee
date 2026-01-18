@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
 import { apiPost, downloadAsJson } from '@/lib/button-handlers'
@@ -82,6 +84,9 @@ import { Slider } from '@/components/ui/slider'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+
+// Initialize Supabase client once at module level
+const supabase = createClient()
 
 // Types
 type ModelStatus = 'draft' | 'published' | 'rendering' | 'archived'
@@ -588,8 +593,7 @@ export default function ThreeDModelingClient() {
 
   // Handlers
   const handleExportModel = (format: string) => {
-    toast.success('Exporting model'`
-    })
+    toast.success(`Exporting model as ${format}`)
   }
 
   const handleSaveProject = () => {
@@ -2202,8 +2206,6 @@ export default function ThreeDModelingClient() {
               <Button onClick={async () => {
                 toast.loading('Saving path...', { id: 'temp-path' })
                 try {
-                  const { createClient } = await import('@/lib/supabase/client')
-                  const supabase = createClient()
                   const { data: { user } } = await supabase.auth.getUser()
                   if (!user) throw new Error('Not authenticated')
 
@@ -2248,8 +2250,6 @@ export default function ThreeDModelingClient() {
               <Button onClick={async () => {
                 toast.loading('Saving path...', { id: 'assets-path' })
                 try {
-                  const { createClient } = await import('@/lib/supabase/client')
-                  const supabase = createClient()
                   const { data: { user } } = await supabase.auth.getUser()
                   if (!user) throw new Error('Not authenticated')
 

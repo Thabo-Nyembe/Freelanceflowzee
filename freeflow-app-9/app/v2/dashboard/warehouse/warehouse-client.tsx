@@ -881,8 +881,7 @@ export default function WarehouseClient() {
     input.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0]
       if (file) {
-        toast.success('File selected'`
-        })
+        toast.success('File selected')
       }
     }
     input.click()
@@ -2288,7 +2287,7 @@ export default function WarehouseClient() {
             <AIInsightsPanel
               insights={mockWarehouseAIInsights}
               title="Warehouse Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -3046,8 +3045,7 @@ export default function WarehouseClient() {
               className="text-center font-mono text-lg"
               onKeyPress={(e) => {
                 if (e.key === 'Enter') {
-                  toast.success('Barcode scanned'`
-                  })
+                  toast.success('Barcode scanned')
                 }
               }}
             />

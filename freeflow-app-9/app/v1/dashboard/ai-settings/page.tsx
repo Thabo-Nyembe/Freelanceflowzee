@@ -403,7 +403,8 @@ export default function AISettingsPage() {
       // Update provider status to disconnected
       setProviders(prev => prev.map(p =>
         p.id === providerToDelete ? { ...p, status: 'disconnected' as const } : p
-      ))      toast.success(`Provider Disconnected: ${provider?.name} API key removed securely`)
+      ))
+    toast.success(`Provider Disconnected: ${provider?.name} API key removed securely`)
     } catch (error) {
       logger.error('Failed to delete provider API key', { error, providerId: providerToDelete })
       toast.error('Delete Failed')
@@ -457,7 +458,8 @@ export default function AISettingsPage() {
         await updateAIBudget(userId, budgetAmount)
       }
 
-      setMonthlyBudget(budgetAmount)      toast.success(`Budget Set: Monthly limit $${budgetAmount}/month - Alerts at 80% usage`)
+      setMonthlyBudget(budgetAmount)
+    toast.success(`Budget Set: Monthly limit $${budgetAmount}/month - Alerts at 80% usage`)
       announce('Budget set successfully', 'polite')
     } catch (error) {
       logger.error('Failed to save budget', { error })
@@ -485,7 +487,8 @@ export default function AISettingsPage() {
         await updateAIRateLimits(userId, perMinute, perHour)
       }
 
-      setRateLimits(newLimits)      toast.success(`Rate Limiting Configured: ${newLimits.perMinute}/min • ${newLimits.perHour}/hr - Requests will be throttled`)
+      setRateLimits(newLimits)
+    toast.success(`Rate Limiting Configured: ${newLimits.perMinute}/min • ${newLimits.perHour}/hr - Requests will be throttled`)
       announce('Rate limiting configured successfully', 'polite')
     } catch (error) {
       logger.error('Failed to save rate limits', { error })
@@ -498,11 +501,13 @@ export default function AISettingsPage() {
   }
 
   const handleConfigureSecurity = () => {
-    const securityFeatures = ['API Key Encryption', 'Role-Based Access', 'Audit Logging', 'IP Whitelisting']    toast.success(`Security Settings: ${securityFeatures.length} security features available - Encryption, Access Controls, Audit Logs`)
+    const securityFeatures = ['API Key Encryption', 'Role-Based Access', 'Audit Logging', 'IP Whitelisting']
+    toast.success(`Security Settings: ${securityFeatures.length} security features available - Encryption, Access Controls, Audit Logs`)
   }
 
   const handleTestAllConnections = async () => {
-    const providersWithKeys = providers.filter(p => apiKeys[p.id])    toast.loading('Testing all connections...')
+    const providersWithKeys = providers.filter(p => apiKeys[p.id])
+    toast.loading('Testing all connections...')
 
     for (const provider of providersWithKeys) {
       await testConnection(provider.id)
@@ -546,7 +551,8 @@ export default function AISettingsPage() {
       // Update provider status
       setProviders(prev => prev.map(p =>
         p.id === providerToRotate ? { ...p, status: 'disconnected' as const } : p
-      ))      toast.success(`Key Rotation Ready: ${provider?.name} old key removed - Please enter new key and test connection`)
+      ))
+    toast.success(`Key Rotation Ready: ${provider?.name} old key removed - Please enter new key and test connection`)
     } catch (error) {
       logger.error('Failed to rotate API key', { error, providerId: providerToRotate })
       toast.error('Rotation Failed')
@@ -600,7 +606,8 @@ export default function AISettingsPage() {
       return
     }
 
-    const events = ['model.complete', 'model.error', 'quota.warning', 'quota.exceeded']    toast.success(`Webhook Configured: ${events.length} events will notify ${webhookUrl.trim().slice(0, 30)}...`)
+    const events = ['model.complete', 'model.error', 'quota.warning', 'quota.exceeded']
+    toast.success(`Webhook Configured: ${events.length} events will notify ${webhookUrl.trim().slice(0, 30)}...`)
     announce('Webhook configured successfully', 'polite')
     setShowWebhookDialog(false)
     setWebhookUrl('')
@@ -641,7 +648,8 @@ export default function AISettingsPage() {
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
-    URL.revokeObjectURL(url)    toast.success(`Backup Created: ${Object.keys(apiKeys).length} keys, ${features.length} features - ${Math.round(blob.size / 1024)}KB`)
+    URL.revokeObjectURL(url)
+    toast.success(`Backup Created: ${Object.keys(apiKeys).length} keys, ${features.length} features - ${Math.round(blob.size / 1024)}KB`)
   }
 
   const handleRestoreSettings = () => {
@@ -655,7 +663,8 @@ export default function AISettingsPage() {
   const confirmClearCache = () => {
     // Clear cached responses from localStorage
     const cacheKeys = Object.keys(localStorage).filter(k => k.startsWith('kazi-ai-cache-'))
-    cacheKeys.forEach(key => localStorage.removeItem(key))    toast.success(`Cache Cleared: ${cacheKeys.length} cached responses removed`)
+    cacheKeys.forEach(key => localStorage.removeItem(key))
+    toast.success(`Cache Cleared: ${cacheKeys.length} cached responses removed`)
 
     setShowClearCacheDialog(false)
   }
@@ -668,7 +677,8 @@ export default function AISettingsPage() {
 
   const confirmConfigureRetry = () => {
     const maxRetries = parseInt(newMaxRetries) || 3
-    const timeout = parseInt(newTimeout) || 30    toast.success(`Retry Configuration Set: Max ${maxRetries} retries • ${timeout}s timeout • Exponential backoff`)
+    const timeout = parseInt(newTimeout) || 30
+    toast.success(`Retry Configuration Set: Max ${maxRetries} retries • ${timeout}s timeout • Exponential backoff`)
     announce('Retry configuration set successfully', 'polite')
     setShowRetryDialog(false)
     setNewMaxRetries('')
@@ -676,7 +686,8 @@ export default function AISettingsPage() {
   }
 
   const handleEnableAnalytics = () => {
-    const analyticsTypes = ['Usage Patterns', 'Performance Metrics', 'Cost Analysis', 'Error Tracking']    toast.success(`Analytics Enabled: ${analyticsTypes.length} analytics types - Usage, Performance, Cost, Errors`)
+    const analyticsTypes = ['Usage Patterns', 'Performance Metrics', 'Cost Analysis', 'Error Tracking']
+    toast.success(`Analytics Enabled: ${analyticsTypes.length} analytics types - Usage, Performance, Cost, Errors`)
   }
 
   const handleConfigureFallback = () => {
@@ -730,7 +741,8 @@ export default function AISettingsPage() {
         }
 
         setIsPageLoading(false)
-        toast.success(`AI settings loaded: ${providersResult.data?.length || AI_PROVIDERS.length} providers configured`)        announce('AI settings loaded successfully', 'polite')
+        toast.success(`AI settings loaded: ${providersResult.data?.length || AI_PROVIDERS.length} providers configured`)
+        announce('AI settings loaded successfully', 'polite')
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load AI settings'
         setError(errorMessage)
@@ -795,15 +807,15 @@ export default function AISettingsPage() {
         error
       })
 
-      toast.error('Save Failed' API key to database`
-      })
+      toast.error(`Save Failed: Unable to save ${provider?.name} API key to database`)
     }
   }
 
   const testConnection = async (providerId: string) => {
     if (!apiKeys[providerId]) return
 
-    const provider = providers.find(p => p.id === providerId)    setIsTestingConnection(providerId)
+    const provider = providers.find(p => p.id === providerId)
+    setIsTestingConnection(providerId)
     setProviders(prev => prev.map(p =>
       p.id === providerId
         ? { ...p, status: 'testing' }
@@ -878,7 +890,8 @@ export default function AISettingsPage() {
     setIsSaving(true)
 
     const keysCount = Object.keys(apiKeys).length
-    const enabledFeatures = features.filter(f => f.enabled).length    try {
+    const enabledFeatures = features.filter(f => f.enabled).length
+    try {
       // Save to backend API
       const response = await fetch('/api/ai/settings', {
         method: 'POST',
@@ -898,7 +911,8 @@ export default function AISettingsPage() {
         })
       })
 
-      if (response.ok) {        toast.success(`Settings Saved: ${keysCount} API keys • ${enabledFeatures} features enabled`)
+      if (response.ok) {
+        toast.success(`Settings Saved: ${keysCount} API keys • ${enabledFeatures} features enabled`)
       } else {
         throw new Error('Failed to save settings')
       }

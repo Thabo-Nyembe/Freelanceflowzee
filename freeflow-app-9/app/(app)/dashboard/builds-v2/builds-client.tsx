@@ -219,7 +219,8 @@ interface Runner {
 // ============================================================================
 
 // MIGRATED: Batch #12 - Removed mock data, using database hooks
-const mockBuilds = []
+const mockBuilds: any[] = [
+  {
     id: '1',
     build_number: 847,
     workflow_name: 'CI Pipeline',
@@ -463,7 +464,8 @@ const mockBuilds = []
 ]
 
 // MIGRATED: Batch #12 - Removed mock data, using database hooks
-const mockWorkflows = []
+const mockWorkflows = [
+  {
     id: 'w1',
     name: 'CI Pipeline',
     file_path: '.github/workflows/ci.yml',
@@ -562,7 +564,8 @@ const mockWorkflows = []
 ]
 
 // MIGRATED: Batch #12 - Removed mock data, using database hooks
-const mockEnvironments = []
+const mockEnvironments = [
+  {
     id: 'e1',
     name: 'production',
     type: 'production',
@@ -629,7 +632,7 @@ const mockEnvironments = []
 ]
 
 // MIGRATED: Batch #12 - Removed mock data, using database hooks
-const mockArtifacts = []
+const mockArtifacts = [
   { id: 'a2', name: 'test-results.xml', type: 'report', build_id: '1', build_number: 847, workflow_name: 'CI Pipeline', size_bytes: 234567, download_count: 5, expires_at: '2024-01-22T10:00:00Z', created_at: '2024-01-15T10:07:42Z', is_expired: false },
   { id: 'a3', name: 'coverage-report.html', type: 'coverage', build_id: '1', build_number: 847, workflow_name: 'CI Pipeline', size_bytes: 1234567, download_count: 8, expires_at: '2024-01-22T10:00:00Z', created_at: '2024-01-15T10:07:42Z', is_expired: false },
   { id: 'a4', name: 'docker-image.tar', type: 'docker', build_id: '2', build_number: 846, workflow_name: 'Deploy Production', size_bytes: 234567890, download_count: 2, expires_at: '2024-01-22T09:45:00Z', created_at: '2024-01-15T09:48:54Z', is_expired: false },
@@ -638,7 +641,7 @@ const mockArtifacts = []
 ]
 
 // MIGRATED: Batch #12 - Removed mock data, using database hooks
-const mockRunners = []
+const mockRunners = [
   { id: 'r2', name: 'macos-latest', type: 'hosted', os: 'macos', status: 'online', labels: ['macos-latest', 'arm64', 'macos'], current_job: null, total_jobs_run: 2345, total_minutes: 45678, last_active_at: '2024-01-15T09:45:00Z', version: '2.311.0', architecture: 'arm64' },
   { id: 'r3', name: 'windows-latest', type: 'hosted', os: 'windows', status: 'online', labels: ['windows-latest', 'x64', 'windows'], current_job: null, total_jobs_run: 1234, total_minutes: 23456, last_active_at: '2024-01-15T08:30:00Z', version: '2.311.0', architecture: 'x64' },
   { id: 'r4', name: 'self-hosted-gpu', type: 'self-hosted', os: 'ubuntu', status: 'online', labels: ['self-hosted', 'gpu', 'cuda'], current_job: null, total_jobs_run: 567, total_minutes: 12345, last_active_at: '2024-01-15T07:00:00Z', version: '2.311.0', architecture: 'x64', ip_address: '10.0.1.100' },

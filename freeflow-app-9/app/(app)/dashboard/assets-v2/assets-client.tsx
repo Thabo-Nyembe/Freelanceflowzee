@@ -827,7 +827,7 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
         download_count: 0,
         license_type: assetForm.license_type,
       })
-      toast.success('Asset created'" has been added` })
+      toast.success(`${assetForm.name} has been added`)
       setShowCreateAssetDialog(false)
       setAssetForm(defaultAssetForm)
     } catch (error) {
@@ -852,7 +852,7 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
         total_size: 0,
         sort_order: 0,
       })
-      toast.success('Collection created'" has been created` })
+      toast.success(`Collection created: "${collectionForm.name}" has been created`)
       setShowCreateCollectionDialog(false)
       setCollectionForm(defaultCollectionForm)
     } catch (error) {
@@ -873,10 +873,10 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
     try {
       if (itemToDelete.type === 'asset') {
         await assetMutation.remove(itemToDelete.id)
-        toast.success('Asset deleted'" has been deleted` })
+        toast.success('Asset deleted')
       } else {
         await collectionMutation.remove(itemToDelete.id)
-        toast.success('Collection deleted'" has been deleted` })
+        toast.success('Collection deleted')
       }
       setShowDeleteDialog(false)
       setItemToDelete(null)
@@ -917,7 +917,7 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
         is_public: assetForm.is_public,
         license_type: assetForm.license_type,
       })
-      toast.success('Asset updated'" has been updated` })
+      toast.success(`Asset updated: has been updated`)
       setShowEditDialog(false)
       setItemToEdit(null)
       setAssetForm(defaultAssetForm)
@@ -932,7 +932,7 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
     if (!selectedAsset) return
     try {
       await navigator.clipboard.writeText(`${window.location.origin}/assets/${selectedAsset.id}`)
-      toast.success('Share link copied' copied to clipboard` })
+      toast.success(`Share link copied to clipboard`)
     } catch {
       toast.error('Failed to copy link')
     }
@@ -1053,7 +1053,7 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
     try {
       const shareUrls = selectedAssets.map(a => `${window.location.origin}/assets/${a.id}`).join('\n')
       await navigator.clipboard.writeText(shareUrls)
-      toast.success('Share links copied' asset links copied to clipboard` })
+      toast.success(`Share links copied: asset links copied to clipboard`)
     } catch {
       toast.error('Failed to copy share links')
     }
@@ -1131,7 +1131,7 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
         if (selectedCount === 0) {
           toast.info('Bulk Edit')
         } else {
-          toast.info('Bulk Edit' assets selected. Opening bulk edit panel...` })
+          toast.info(`Bulk Edit: assets selected. Opening bulk edit panel...`)
           // In a real implementation, this would open a bulk edit dialog
         }
       },

@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -711,13 +713,9 @@ export default function AuditLogsClient() {
   const fetchAuditLogs = useCallback(async () => {
     try {
       setIsLoading(true)
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('audit_logs')
         .select('*')
@@ -738,13 +736,9 @@ export default function AuditLogsClient() {
   // Fetch alert rules from database
   const fetchAlertRules = useCallback(async () => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('audit_alert_rules')
         .select('*')
@@ -763,16 +757,12 @@ export default function AuditLogsClient() {
   // Create audit log entry
   const createAuditLog = async (logData: Partial<DbAuditLog>) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in')
         return
       }
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('audit_logs').insert({
         user_id: user.id,
         log_type: logData.log_type || 'system',
@@ -802,16 +792,12 @@ export default function AuditLogsClient() {
   const handleCreateAlertRule = async () => {
     try {
       setIsSaving(true)
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to create alert rules')
         return
       }
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('audit_alert_rules').insert({
         user_id: user.id,
         rule_name: ruleFormData.rule_name,
@@ -843,8 +829,6 @@ export default function AuditLogsClient() {
     if (!editingRule) return
     try {
       setIsSaving(true)
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('audit_alert_rules')
         .update({
@@ -877,8 +861,6 @@ export default function AuditLogsClient() {
   // Delete alert rule
   const handleDeleteAlertRule = async (ruleId: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('audit_alert_rules')
         .update({ deleted_at: new Date().toISOString() })
@@ -897,8 +879,6 @@ export default function AuditLogsClient() {
   // Toggle alert rule status
   const handleToggleRuleStatus = async (ruleId: string, isActive: boolean) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('audit_alert_rules')
         .update({ is_active: isActive, updated_at: new Date().toISOString() })
@@ -945,13 +925,9 @@ export default function AuditLogsClient() {
   // Export audit logs
   const handleExportAuditLogs = async () => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('audit_logs')
         .select('*')
@@ -1160,8 +1136,6 @@ export default function AuditLogsClient() {
   // Handle saved queries button
   const handleSavedQueries = async () => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase.from('saved_queries').select('*').eq('type', 'audit_log')
       if (error) throw error
       toast.success('Saved queries loaded', { description: `${data?.length || 0} queries available` })
@@ -1291,8 +1265,6 @@ export default function AuditLogsClient() {
   const handleClearDebugLogs = async () => {
     if (!confirm('Are you sure you want to clear all debug logs? This action cannot be undone.')) return
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('audit_logs').delete().eq('log_type', 'debug')
       if (error) throw error
       await createAuditLog({
@@ -1311,8 +1283,6 @@ export default function AuditLogsClient() {
   const handleResetConfiguration = async () => {
     if (!confirm('Are you sure you want to reset all audit log settings to defaults?')) return
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('audit_log_settings').update({ settings: {} }).is('deleted_at', null)
       if (error) throw error
       await createAuditLog({

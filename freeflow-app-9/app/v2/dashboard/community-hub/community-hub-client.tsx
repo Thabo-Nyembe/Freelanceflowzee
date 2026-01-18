@@ -925,7 +925,8 @@ export default function CommunityHubClient() {
 
   // Handlers
   const handleLikePost = async (id: string) => {
-    const post = state.posts.find(p => p.id === id)    try {
+    const post = state.posts.find(p => p.id === id)
+    try {
       const response = await fetch('/api/community', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -942,13 +943,12 @@ export default function CommunityHubClient() {
 
       const result = await response.json()
 
-      if (result.success) {        // Show achievement for Social Butterfly (+5 points, 10% chance)
+      if (result.success) {
+        // Show achievement for Social Butterfly (+5 points, 10% chance)
         if (result.achievement) {
-          toast.success(`${result.message} ${result.achievement.message} +${result.achievement.points} points!` post - ${(post?.likes || 0) + 1} likes - Badge: ${result.achievement.badge}`
-          })
+          toast.success(result.message + ' ' + result.achievement.message + ' +' + result.achievement.points + ' points! Badge: ' + result.achievement.badge)
         } else {
-          toast.success(result.message post - ${(post?.likes || 0) + 1} likes - ${post?.comments || 0} comments`
-          })
+          toast.success(result.message + ' - ' + ((post?.likes || 0) + 1) + ' likes - ' + (post?.comments || 0) + ' comments')
         }
       }
     } catch (error: any) {
@@ -960,12 +960,13 @@ export default function CommunityHubClient() {
     }
   }
   const handleCommentOnPost = (id: string) => {
-    const post = state.posts.find(p => p.id === id)    toast.info('Add comment' post - ${post?.comments || 0} comments - ${post?.likes || 0} likes`
-    })
+    const post = state.posts.find(p => p.id === id)
+    toast.info('Add comment - ' + (post?.comments || 0) + ' comments - ' + (post?.likes || 0) + ' likes')
   }
 
   const handleSharePost = async (id: string) => {
-    const post = state.posts.find(p => p.id === id)    try {
+    const post = state.posts.find(p => p.id === id)
+    try {
       const response = await fetch('/api/community', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -982,8 +983,8 @@ export default function CommunityHubClient() {
 
       const result = await response.json()
 
-      if (result.success) {        toast.success(result.message post - ${(post?.shares || 0) + 1} shares - Link: ${result.shareUrl || 'Generated'}`
-        })
+      if (result.success) {
+        toast.success(result.message + ' - ' + ((post?.shares || 0) + 1) + ' shares - Link: ' + (result.shareUrl || 'Generated'))
       }
     } catch (error: any) {
       logger.error('Failed to share post', {
@@ -995,7 +996,8 @@ export default function CommunityHubClient() {
   }
 
   const handleBookmarkPost = async (id: string) => {
-    const post = state.posts.find(p => p.id === id)    try {
+    const post = state.posts.find(p => p.id === id)
+    try {
       const response = await fetch('/api/community', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1012,8 +1014,8 @@ export default function CommunityHubClient() {
 
       const result = await response.json()
 
-      if (result.success) {        toast.success(result.message post - ${(post?.bookmarks || 0) + 1} bookmarks - ${result.tip || 'Saved for later'}`
-        })
+      if (result.success) {
+        toast.success(result.message + ' - ' + ((post?.bookmarks || 0) + 1) + ' bookmarks - ' + (result.tip || 'Saved for later'))
       }
     } catch (error: any) {
       logger.error('Failed to bookmark post', {
@@ -1024,7 +1026,8 @@ export default function CommunityHubClient() {
     }
   }
   const handleFollowMember = async (id: string) => {
-    const member = state.members.find(m => m.id === id)    try {
+    const member = state.members.find(m => m.id === id)
+    try {
       const response = await fetch('/api/community', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1041,13 +1044,12 @@ export default function CommunityHubClient() {
 
       const result = await response.json()
 
-      if (result.success) {        // Show achievement for Networker (+10 points, 20% chance)
+      if (result.success) {
+        // Show achievement for Networker (+10 points, 20% chance)
         if (result.achievement) {
-          toast.success(`${result.message} ${result.achievement.message} +${result.achievement.points} points!` - ${member?.title} - ${(member?.followers || 0) + 1} followers - Badge: ${result.achievement.badge}`
-          })
+          toast.success(result.message + ' ' + result.achievement.message + ' +' + result.achievement.points + ' points! - ' + (member?.title || '') + ' - ' + ((member?.followers || 0) + 1) + ' followers - Badge: ' + result.achievement.badge)
         } else {
-          toast.success(result.message - ${member?.title} - ${(member?.followers || 0) + 1} followers - ${member?.category}`
-          })
+          toast.success(result.message + ' - ' + (member?.title || '') + ' - ' + ((member?.followers || 0) + 1) + ' followers - ' + (member?.category || ''))
         }
       }
     } catch (error: any) {
@@ -1060,12 +1062,13 @@ export default function CommunityHubClient() {
   }
 
   const handleUnfollowMember = (id: string) => {
-    const member = state.members.find(m => m.id === id)    toast.success('Unfollowed' - ${member?.title} - ${(member?.followers || 0) - 1} followers remaining`
-    })
+    const member = state.members.find(m => m.id === id)
+    toast.success('Unfollowed - ' + (member?.title || '') + ' - ' + ((member?.followers || 0) - 1) + ' followers remaining')
   }
 
   const handleConnectWithMember = async (id: string) => {
-    const member = state.members.find(m => m.id === id)    try {
+    const member = state.members.find(m => m.id === id)
+    try {
       const response = await fetch('/api/community', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1082,19 +1085,16 @@ export default function CommunityHubClient() {
 
       const result = await response.json()
 
-      if (result.success) {        })
-
+      if (result.success) {
         // Show next steps if available
         if (result.nextSteps && result.nextSteps.length > 0) {
           logger.debug('Connection next steps', {
             steps: result.nextSteps
           })
 
-          toast.success(result.message - ${member?.title} - Next: ${result.nextSteps.slice(0, 2).join(', ')}`
-          })
+          toast.success(result.message + ' - ' + (member?.title || '') + ' - Next: ' + result.nextSteps.slice(0, 2).join(', '))
         } else {
-          toast.success(result.message - ${member?.title} - ${member?.category} - Now connected`
-          })
+          toast.success(result.message + ' - ' + (member?.title || '') + ' - ' + (member?.category || '') + ' - Now connected')
         }
       }
     } catch (error: any) {
@@ -1106,54 +1106,60 @@ export default function CommunityHubClient() {
     }
   }
   const handleMessageMember = (id: string) => {
-    const member = state.members.find(m => m.id === id)    toast.info('Opening chat...' - ${member?.title} - ${member?.isOnline ? 'Online' : `Last seen: ${member?.lastSeen}`}`
-    })
+    const member = state.members.find(m => m.id === id)
+    toast.info('Opening chat... - ' + (member?.title || '') + ' - ' + (member?.isOnline ? 'Online' : 'Last seen: ' + (member?.lastSeen || '')))
   }
 
   const handleJoinEvent = async (id: string) => {
-    const event = state.events.find(e => e.id === id)    // RSVP to event in database
+    const event = state.events.find(e => e.id === id)
+    // RSVP to event in database
     if (userId) {
       try {
         const { rsvpEvent } = await import('@/lib/community-hub-queries')
-        await rsvpEvent(id, userId, 'attending')      } catch (error: any) {
+        await rsvpEvent(id, userId, 'attending')
+      } catch (error: any) {
         logger.error('Failed to record event RSVP', { error: error.message })
       }
     }
 
-    toast.success('Registered for event!' - ${event?.date} - ${event?.location} - ${(event?.attendees?.length || 0) + 1} attendees`
-    })
+    toast.success('Registered for event! - ' + (event?.date || '') + ' - ' + (event?.location || '') + ' - ' + ((event?.attendees?.length || 0) + 1) + ' attendees')
   }
 
-  const handleCreateEvent = () => {    toast.info('Create community event')
+  const handleCreateEvent = () => {
+    toast.info('Create community event')
   }
 
   const handleJoinGroup = async (id: string) => {
-    const group = state.groups.find(g => g.id === id)    // Join group in database
+    const group = state.groups.find(g => g.id === id)
+    // Join group in database
     if (userId) {
       try {
         const { joinGroup } = await import('@/lib/community-hub-queries')
-        await joinGroup(id, userId)      } catch (error: any) {
+        await joinGroup(id, userId)
+      } catch (error: any) {
         logger.error('Failed to record group join', { error: error.message })
       }
     }
 
-    toast.success('Joined group!' - ${group?.category} - ${(group?.members?.length || 0) + 1} members - ${group?.posts} posts`
-    })
+    toast.success('Joined group! - ' + (group?.category || '') + ' - ' + ((group?.members?.length || 0) + 1) + ' members - ' + (group?.posts || 0) + ' posts')
   }
 
-  const handleCreateGroup = () => {    toast.info('Create new group')
+  const handleCreateGroup = () => {
+    toast.info('Create new group')
   }
 
-  const handlePostJob = () => {    toast.info('Post job opportunity')
+  const handlePostJob = () => {
+    toast.info('Post job opportunity')
   }
 
   const handleApplyToJob = (id: string) => {
     const post = state.posts.find(p => p.id === id)
-    const job = post?.job    toast.success('Application submitted!' - ${job?.currency}${job?.budget} - Deadline: ${job?.deadline} - ${(job?.applicants || 0) + 1} applicants`
-    })
+    const job = post?.job
+    toast.success('Application submitted! - ' + (job?.currency || '$') + (job?.budget || 0) + ' - Deadline: ' + (job?.deadline || '') + ' - ' + ((job?.applicants || 0) + 1) + ' applicants')
   }
 
-  const handleSearchMembers = (query: string) => {    const results = state.members.filter(m =>
+  const handleSearchMembers = (query: string) => {
+    const results = state.members.filter(m =>
       m.name.toLowerCase().includes(query.toLowerCase()) ||
       m.title.toLowerCase().includes(query.toLowerCase()) ||
       m.skills.some(s => s.toLowerCase().includes(query.toLowerCase()))
@@ -1164,31 +1170,32 @@ export default function CommunityHubClient() {
       resultCount: results.length
     })
 
-    toast.info(`Searching: ${query}` members found - ${results.filter(m => m.isOnline).length} online`
-    })
+    toast.info('Searching: ' + query + ' - ' + results.length + ' members found - ' + results.filter(m => m.isOnline).length + ' online')
   }
-  const handleFilterBySkill = (skill: string) => {    const matchingMembers = state.members.filter(m => m.skills.includes(skill))
+
+  const handleFilterBySkill = (skill: string) => {
+    const matchingMembers = state.members.filter(m => m.skills.includes(skill))
 
     logger.debug('Skill filter results', {
       skill,
       resultCount: matchingMembers.length
     })
 
-    toast.info(`Filter by: ${skill}` members - ${matchingMembers.filter(m => m.availability === 'available').length} available`
-    })
+    toast.info('Filter by: ' + skill + ' - ' + matchingMembers.length + ' members - ' + matchingMembers.filter(m => m.availability === 'available').length + ' available')
   }
 
   const handleViewProfile = (id: string) => {
-    const member = state.members.find(m => m.id === id)    toast.info('Viewing profile' - ${member?.title} - ${member?.rating}★ rating - ${member?.totalProjects} projects completed`
-    })
+    const member = state.members.find(m => m.id === id)
+    toast.info('Viewing profile - ' + (member?.title || '') + ' - ' + (member?.rating || 0) + ' rating - ' + (member?.totalProjects || 0) + ' projects completed')
   }
 
-  const handleEditProfile = () => {    toast.info('Edit your profile')
+  const handleEditProfile = () => {
+    toast.info('Edit your profile')
   }
 
   const handleSendEndorsement = (id: string) => {
-    const member = state.members.find(m => m.id === id)    toast.success('Endorsement sent!' - ${member?.title} - ${(member?.endorsements || 0) + 1} endorsements - ${member?.rating}★ rating`
-    })
+    const member = state.members.find(m => m.id === id)
+    toast.success('Endorsement sent! - ' + (member?.title || '') + ' - ' + ((member?.endorsements || 0) + 1) + ' endorsements - ' + (member?.rating || 0) + ' rating')
   }
 
   const handleReportContent = (id: string) => {
@@ -1212,8 +1219,8 @@ export default function CommunityHubClient() {
   }
 
   const handleConfirmBlockUser = () => {
-    if (!blockUser) return    toast.success('User blocked' - Blocked successfully - You can unblock from Settings`
-    })
+    if (!blockUser) return
+    toast.success('User blocked: ' + blockUser.name + ' - Blocked successfully - You can unblock from Settings')
     setBlockUser(null)
   }
 
@@ -1863,9 +1870,9 @@ export default function CommunityHubClient() {
         dispatch({ type: 'SET_EVENTS', payload: transformedEvents.length > 0 ? transformedEvents : memoizedMockEvents })
         dispatch({ type: 'SET_GROUPS', payload: transformedGroups.length > 0 ? transformedGroups : memoizedMockGroups })
         dispatch({ type: 'SET_CURRENT_USER', payload: currentUser })
-        dispatch({ type: 'SET_LOADING', payload: false })        if (transformedMembers.length > 0 || transformedPosts.length > 0 || transformedEvents.length > 0 || transformedGroups.length > 0) {
-          toast.success('Community Hub loaded' members • ${transformedPosts.length} posts • ${transformedEvents.length} events • ${transformedGroups.length} groups`
-          })
+        dispatch({ type: 'SET_LOADING', payload: false })
+        if (transformedMembers.length > 0 || transformedPosts.length > 0 || transformedEvents.length > 0 || transformedGroups.length > 0) {
+          toast.success('Community Hub loaded - ' + transformedMembers.length + ' members - ' + transformedPosts.length + ' posts - ' + transformedEvents.length + ' events - ' + transformedGroups.length + ' groups')
           announce('Community Hub loaded successfully', 'polite')
         }
       } catch (error: any) {

@@ -305,7 +305,8 @@ export default function AICodeCompletionPage() {
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
-      URL.revokeObjectURL(url)      toast.success(`Code downloaded: ${filename}`)
+      URL.revokeObjectURL(url)
+    toast.success(`Code downloaded: ${filename}`)
     } catch (err) {
       toast.error('Download failed')
     }
@@ -318,7 +319,8 @@ export default function AICodeCompletionPage() {
     try {
       if (navigator.clipboard) {
         navigator.clipboard.writeText(shareUrl)
-      }      toast.success(`Share link copied - ${code.length} characters shared`)
+      }
+    toast.success(`Share link copied - ${code.length} characters shared`)
     } catch (err) {
       toast.error('Failed to generate share link')
     }
@@ -375,7 +377,8 @@ export default function AICodeCompletionPage() {
             createdAt: data?.created_at || new Date().toISOString()
           }
 
-          setSnippets([...snippets, newSnippet])          announce('Snippet saved successfully', 'polite')
+          setSnippets([...snippets, newSnippet])
+          announce('Snippet saved successfully', 'polite')
           resolve({ name: trimmedName, total: snippets.length + 1 })
         } catch (error) {
           logger.error('Exception saving snippet', { error })
@@ -433,7 +436,7 @@ export default function AICodeCompletionPage() {
           body: JSON.stringify({ code, language: selectedLanguage })
         })
         const data = response.ok ? await response.json() : null
-        const applied = data?.optimizationsApplied ?? Math.floor(Math.random() * 3) + 1        })
+        const applied = data?.optimizationsApplied ?? Math.floor(Math.random() * 3) + 1
         return { applied, codeLength: code.length }
       })(),
       {
@@ -458,7 +461,8 @@ export default function AICodeCompletionPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ code, language: selectedLanguage })
         })
-        const data = response.ok ? await response.json() : null        return { improvements: data?.improvements?.length ?? improvements.length }
+        const data = response.ok ? await response.json() : null
+        return { improvements: data?.improvements?.length ?? improvements.length }
       })(),
       {
         loading: 'Refactoring code...',
@@ -482,7 +486,8 @@ export default function AICodeCompletionPage() {
           body: JSON.stringify({ code, language: selectedLanguage, type: 'comments' })
         })
         const data = response.ok ? await response.json() : null
-        const count = data?.commentCount ?? commentCount        return { commentCount: count }
+        const count = data?.commentCount ?? commentCount
+        return { commentCount: count }
       })(),
       {
         loading: 'Adding documentation...',
@@ -506,7 +511,8 @@ export default function AICodeCompletionPage() {
           body: JSON.stringify({ code, language: selectedLanguage })
         })
         const data = response.ok ? await response.json() : null
-        const types = data?.docTypes ?? docTypes        return { docTypes: types }
+        const types = data?.docTypes ?? docTypes
+        return { docTypes: types }
       })(),
       {
         loading: 'Generating documentation...',
@@ -530,7 +536,8 @@ export default function AICodeCompletionPage() {
           body: JSON.stringify({ code, language: selectedLanguage })
         })
         const data = response.ok ? await response.json() : null
-        const count = data?.rulesApplied ?? rulesApplied.length        return { rulesApplied: count }
+        const count = data?.rulesApplied ?? rulesApplied.length
+        return { rulesApplied: count }
       })(),
       {
         loading: 'Formatting code...',
@@ -553,7 +560,8 @@ export default function AICodeCompletionPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ code, language: selectedLanguage })
         })
-        const data = response.ok ? await response.json() : checks        return data
+        const data = response.ok ? await response.json() : checks
+        return data
       })(),
       {
         loading: 'Validating code...',
@@ -579,7 +587,8 @@ export default function AICodeCompletionPage() {
         })
         const data = response.ok ? await response.json() : null
         const count = data?.testCount ?? testCount
-        const coverage = data?.coveragePercent ?? coveragePercent        return { testCount: count, coveragePercent: coverage }
+        const coverage = data?.coveragePercent ?? coveragePercent
+        return { testCount: count, coveragePercent: coverage }
       })(),
       {
         loading: 'Generating tests...',
@@ -614,7 +623,8 @@ export default function AICodeCompletionPage() {
           body: JSON.stringify({ code: codeInput, bugs, language: selectedLanguage })
         })
         if (response.ok) await response.json()
-        setBugs([])        return { bugsFixed }
+        setBugs([])
+        return { bugsFixed }
       })(),
       {
         loading: 'Auto-fixing bugs...',
@@ -638,7 +648,8 @@ export default function AICodeCompletionPage() {
           body: JSON.stringify({ code, language: selectedLanguage })
         })
         const data = response.ok ? await response.json() : null
-        const score = data?.score ?? Math.floor(Math.random() * 20) + 80        return { score, categories: reviewCategories.length }
+        const score = data?.score ?? Math.floor(Math.random() * 20) + 80
+        return { score, categories: reviewCategories.length }
       })(),
       {
         loading: 'Reviewing code...',
@@ -662,7 +673,8 @@ export default function AICodeCompletionPage() {
           body: JSON.stringify({ code, language: selectedLanguage })
         })
         const data = response.ok ? await response.json() : null
-        const issuesFound = data?.issuesFound ?? Math.floor(Math.random() * 2)        return { issuesFound, scanned: vulnerabilities.length }
+        const issuesFound = data?.issuesFound ?? Math.floor(Math.random() * 2)
+        return { issuesFound, scanned: vulnerabilities.length }
       })(),
       {
         loading: 'Scanning for vulnerabilities...',
@@ -686,7 +698,8 @@ export default function AICodeCompletionPage() {
         const data = response.ok ? await response.json() : null
         const timeComplexity = data?.timeComplexity ?? 'O(n log n)'
         const spaceComplexity = data?.spaceComplexity ?? 'O(n)'
-        const bottlenecks = data?.bottlenecks ?? Math.floor(Math.random() * 3)        return { timeComplexity, spaceComplexity, bottlenecks }
+        const bottlenecks = data?.bottlenecks ?? Math.floor(Math.random() * 3)
+        return { timeComplexity, spaceComplexity, bottlenecks }
       })(),
       {
         loading: 'Analyzing performance...',
@@ -712,7 +725,8 @@ export default function AICodeCompletionPage() {
         })
         const data = response.ok ? await response.json() : null
         const interfaces = data?.interfacesAdded ?? interfacesAdded
-        const types = data?.typesAdded ?? typesAdded        return { interfacesAdded: interfaces, typesAdded: types }
+        const types = data?.typesAdded ?? typesAdded
+        return { interfacesAdded: interfaces, typesAdded: types }
       })(),
       {
         loading: 'Adding type definitions...',
@@ -733,7 +747,8 @@ export default function AICodeCompletionPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ code, language: selectedLanguage, format })
         })
-        const data = response.ok ? await response.json() : null        return { format, codeLength: code.length, url: data?.url }
+        const data = response.ok ? await response.json() : null
+        return { format, codeLength: code.length, url: data?.url }
       })(),
       {
         loading: `Exporting as ${format.toUpperCase()}...`,
@@ -810,7 +825,8 @@ export default function AICodeCompletionPage() {
         })
         const data = response.ok ? await response.json() : null
         const additions = data?.additions ?? Math.floor(Math.random() * 20) + 5
-        const deletions = data?.deletions ?? Math.floor(Math.random() * 15) + 3        return { additions, deletions }
+        const deletions = data?.deletions ?? Math.floor(Math.random() * 15) + 3
+        return { additions, deletions }
       })(),
       {
         loading: 'Generating diff...',
@@ -857,7 +873,8 @@ export default function AICodeCompletionPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ code, language: selectedLanguage })
         })
-        const data = response.ok ? await response.json() : null        return { lines: data?.lines ?? lines, functions: data?.functions ?? functions, patterns: data?.patterns?.length ?? patterns.length }
+        const data = response.ok ? await response.json() : null
+        return { lines: data?.lines ?? lines, functions: data?.functions ?? functions, patterns: data?.patterns?.length ?? patterns.length }
       })(),
       {
         loading: 'Analyzing code...',

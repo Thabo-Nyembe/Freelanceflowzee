@@ -236,7 +236,8 @@ export default function ValueDashboardClient() {
         await new Promise(resolve => requestAnimationFrame(resolve))
 
         setIsLoading(false)
-        announce('Value dashboard loaded successfully', 'polite')      } catch (err) {
+        announce('Value dashboard loaded successfully', 'polite')
+      } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load value dashboard')
         setIsLoading(false)
         announce('Error loading value dashboard', 'assertive')
@@ -253,7 +254,8 @@ export default function ValueDashboardClient() {
 
   const handleExportReport = async () => {
     try {
-      setIsExporting(true)      const response = await fetch('/api/reports/export-roi', {
+      setIsExporting(true)
+      const response = await fetch('/api/reports/export-roi', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -271,7 +273,8 @@ export default function ValueDashboardClient() {
 
       const result = await response.json()
 
-      if (result.success) {        toast.success('Report exported successfully!')
+      if (result.success) {
+        toast.success('Report exported successfully!')
 
         // Create download link
         const downloadUrl = URL.createObjectURL(
@@ -295,7 +298,8 @@ export default function ValueDashboardClient() {
   // HANDLER 2: VIEW DETAILED METRICS
   // ============================================================================
 
-  const handleViewDetailedMetrics = (metricLabel: string) => {    toast.info(`Loading detailed metrics for ${metricLabel}...`)
+  const handleViewDetailedMetrics = (metricLabel: string) => {
+    toast.info("Loading detailed metrics for " + metricLabel + "...")
   }
 
   // ============================================================================
@@ -308,8 +312,8 @@ export default function ValueDashboardClient() {
       return
     }
 
-    try {      toast.success('Dashboard shared successfully!' with ${sharePermission} access`
-      })
+    try {
+      toast.success("Dashboard shared successfully! with " + sharePermission + " access")
 
       setShareEmail('')
       setShowShareDialog(false)
@@ -325,7 +329,8 @@ export default function ValueDashboardClient() {
 
   const handleExportWithFormat = async () => {
     try {
-      setIsExporting(true)      // Call export API
+      setIsExporting(true)
+      // Call export API
       const res = await fetch('/api/dashboard', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -360,7 +365,7 @@ export default function ValueDashboardClient() {
         URL.revokeObjectURL(url)
       }
 
-      toast.success(`${selectedExportFormat.toUpperCase()} export completed!`, {
+      toast.success(selectedExportFormat.toUpperCase() + ' export completed!', {
         description: 'Your file has been downloaded'
       })
 
@@ -377,7 +382,8 @@ export default function ValueDashboardClient() {
   // HANDLER 5: SAVE SETTINGS
   // ============================================================================
 
-  const handleSaveSettings = () => {    toast.success('Settings saved successfully!')
+  const handleSaveSettings = () => {
+    toast.success('Settings saved successfully!')
 
     setShowSettingsDialog(false)
   }
@@ -386,7 +392,8 @@ export default function ValueDashboardClient() {
   // HANDLER 6: CUSTOMIZE DASHBOARD
   // ============================================================================
 
-  const handleCustomizeDashboard = () => {    toast.success('Dashboard customized!')
+  const handleCustomizeDashboard = () => {
+    toast.success('Dashboard customized!')
 
     setShowCustomizeDialog(false)
   }
@@ -395,7 +402,8 @@ export default function ValueDashboardClient() {
   // HANDLER 7: CONFIGURE WIDGETS
   // ============================================================================
 
-  const handleConfigureWidgets = () => {    toast.success('Widgets configured!')
+  const handleConfigureWidgets = () => {
+    toast.success('Widgets configured!')
 
     setShowConfigureWidgetsDialog(false)
   }
@@ -433,7 +441,7 @@ export default function ValueDashboardClient() {
     const currentIndex = currencies.indexOf(selectedCurrency)
     const nextCurrency = currencies[(currentIndex + 1) % currencies.length]
     setSelectedCurrency(nextCurrency)
-    toast.success(`Currency changed to ${nextCurrency}`)
+    toast.success('Currency changed to ' + nextCurrency)
   }
 
   // ============================================================================
@@ -445,7 +453,7 @@ export default function ValueDashboardClient() {
     const currentIndex = styles.indexOf(chartStyle)
     const nextStyle = styles[(currentIndex + 1) % styles.length]
     setChartStyle(nextStyle)
-    toast.success(`Chart style changed to ${nextStyle}`)
+    toast.success('Chart style changed to ' + nextStyle)
   }
 
   // ============================================================================
@@ -468,8 +476,8 @@ export default function ValueDashboardClient() {
       color: 'blue'
     }
 
-    setRoiMetrics(prev => [...prev, newMetric])    toast.success('Metric created successfully!' has been added to your dashboard`
-    })
+    setRoiMetrics(prev => [...prev, newMetric])
+    toast.success("Metric created successfully! " + newMetricName + " has been added to your dashboard")
 
     setNewMetricName('')
     setNewMetricValue('')
@@ -587,7 +595,7 @@ export default function ValueDashboardClient() {
                     key={period}
                     variant={selectedPeriod === period ? 'default' : 'outline'}
                     onClick={() => {
-                      setSelectedPeriod(period)                      toast.info(`Viewing ${period === 'all' ? 'all time' : period} data`)
+                      setSelectedPeriod(period); toast.info('Viewing ' + (period === 'all' ? 'all time' : period) + ' data')
                     }}
                   >
                     {period === '3m' ? '3 Months' : period === '6m' ? '6 Months' : period === '12m' ? '12 Months' : 'All Time'}

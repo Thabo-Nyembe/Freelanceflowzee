@@ -148,10 +148,10 @@ export default function ShadcnShowcasePage() {
 
   const handleFormSubmit = (data: any) => {
     const fieldCount = Object.keys(data).length
-    const filledFields = Object.values(data).filter(v => v !== '' && v !== null && v !== undefined).length    const fieldsWithValues = Object.entries(data).filter(([_, v]) => v !== '' && v !== null && v !== undefined)
+    const filledFields = Object.values(data).filter(v => v !== '' && v !== null && v !== undefined).length
+    const fieldsWithValues = Object.entries(data).filter(([_, v]) => v !== '' && v !== null && v !== undefined)
 
-    toast.success('Form submitted successfully'/${fieldCount} fields completed - ${fieldsWithValues.map(([k]) => k).join(', ')}`
-    })
+    toast.success(`Form submitted successfully - ${filledFields}/${fieldCount} fields completed`)
   }
 
   const simulateLoading = () => {

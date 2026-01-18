@@ -174,13 +174,16 @@ export default function AiVoiceSynthesisClient() {
 
   useEffect(() => {
     const loadAIVoiceSynthesisData = async () => {
-      if (!userId) {        setIsPageLoading(false)
+      if (!userId) {
+        setIsPageLoading(false)
         return
       }
 
       try {
         setIsPageLoading(true)
-        setError(null)        // Parallel data loading - 4 simultaneous queries
+        setError(null)
+
+        // Parallel data loading - 4 simultaneous queries
         const [voicesResult, synthesesResult, projectsResult, statsResult] = await Promise.all([
           getVoices({ is_public: true }),
           getVoiceSyntheses(userId),
@@ -221,8 +224,9 @@ export default function AiVoiceSynthesisClient() {
         }
         if (statsResult.data) {
           setStats(statsResult.data)
-        }        toast.success('AI Voice Synthesis loaded' voices • ${synthesesResult.data?.length || 0} syntheses • ${projectsResult.data?.length || 0} projects`
-        })
+        }
+
+        toast.success(`AI Voice Synthesis loaded: ${voicesResult.data?.length || 0} voices, ${synthesesResult.data?.length || 0} syntheses, ${projectsResult.data?.length || 0} projects`)
 
         setIsPageLoading(false)
         announce('AI voice synthesis loaded successfully', 'polite')
@@ -247,8 +251,8 @@ export default function AiVoiceSynthesisClient() {
   const estimatedDuration = estimateDuration(characterCount, speed[0])
   const estimatedCost = calculateCost(characterCount, selectedVoice?.isPremium || false)
 
-  const handleSynthesize = async () => {    toast.info('Synthesizing voice...' - ${characterCount} characters - ${estimatedDuration}s - ${audioFormat.toUpperCase()} ${audioQuality}`
-    })
+  const handleSynthesize = async () => {
+    toast.info(`Synthesizing voice... ${characterCount} characters - ${estimatedDuration}s - ${audioFormat.toUpperCase()} ${audioQuality}`)
 
     setIsSynthesizing(true)
 
@@ -292,8 +296,8 @@ export default function AiVoiceSynthesisClient() {
           total_cost: estimatedCost
         })
 
-        setIsSynthesizing(false)        toast.success('Voice synthesized successfully' - ${characterCount} chars - ${estimatedDuration}s - ${fileSize}KB ${audioFormat.toUpperCase()} - $${estimatedCost.toFixed(4)} - Ready to download`
-        })
+        setIsSynthesizing(false)
+        toast.success(`Voice synthesized successfully - ${characterCount} chars - ${estimatedDuration}s - ${fileSize}KB ${audioFormat.toUpperCase()} - $${estimatedCost.toFixed(4)} - Ready to download`)
         announce('Voice synthesis completed', 'polite')
       } catch (err) {
         setIsSynthesizing(false)
@@ -303,8 +307,7 @@ export default function AiVoiceSynthesisClient() {
     } else {
       // Fallback for non-authenticated users
       setIsSynthesizing(false)
-      toast.success('Voice synthesized successfully' - ${characterCount} chars - ${estimatedDuration}s - ${fileSize}KB ${audioFormat.toUpperCase()} - $${estimatedCost.toFixed(4)} - Ready to download`
-      })
+      toast.success(`Voice synthesized successfully - ${characterCount} chars - ${estimatedDuration}s - ${fileSize}KB ${audioFormat.toUpperCase()} - $${estimatedCost.toFixed(4)} - Ready to download`)
     }
   }
 
@@ -321,7 +324,8 @@ export default function AiVoiceSynthesisClient() {
     setVolume([80])
     setAudioFormat('mp3')
     setAudioQuality('high')
-    toast.success('Settings reset to defaults')  }
+    toast.success('Settings reset to defaults')
+  }
 
   // Preview synthesized audio
   const handlePreviewAudio = () => {
@@ -336,10 +340,11 @@ export default function AiVoiceSynthesisClient() {
 
     setIsPlaying(!isPlaying)
     if (!isPlaying) {
-      toast.info('Playing audio preview...' - ${text.substring(0, 50)}...`
-      })    } else {
+      toast.info(`Playing audio preview... ${text.substring(0, 50)}...`)
+    } else {
       setIsPlaying(false)
-      toast.info('Audio preview paused')    }
+      toast.info('Audio preview paused')
+    }
   }
 
   // Preview voice sample
@@ -351,15 +356,16 @@ export default function AiVoiceSynthesisClient() {
     }
 
     setPlayingVoiceId(voice.id)
-    toast.info(`Playing voice sample: ${voice.displayName}` - ${voice.gender}`
-    })  }
+    toast.info(`Playing voice sample: ${voice.displayName} - ${voice.gender}`)
+  }
 
   // Create new voice
   const handleCreateVoice = () => {
     if (!newVoiceName.trim()) {
       toast.error('Please enter a voice name')
       return
-    }    toast.success(`Voice "${newVoiceName}" created successfully`)
+    }
+    toast.success(`Voice "${newVoiceName}" created successfully`)
     setCreateVoiceDialogOpen(false)
     setNewVoiceName('')
     setNewVoiceDescription('')
@@ -375,19 +381,22 @@ export default function AiVoiceSynthesisClient() {
     if (!cloneVoiceName.trim()) {
       toast.error('Please enter a name for the cloned voice')
       return
-    }    toast.success(`Voice "${cloneVoiceName}" cloned from audio sample`)
+    }
+    toast.success(`Voice "${cloneVoiceName}" cloned from audio sample`)
     setCloneVoiceDialogOpen(false)
     setCloneVoiceFile(null)
     setCloneVoiceName('')
   }
 
   // Export audio
-  const handleExportAudio = () => {    toast.success(`Audio exported as ${exportFormat.toUpperCase()} successfully`)
+  const handleExportAudio = () => {
+    toast.success(`Audio exported as ${exportFormat.toUpperCase()} successfully`)
     setExportAudioDialogOpen(false)
   }
 
   // Save settings
-  const handleSaveSettings = () => {    toast.success('Settings saved successfully')
+  const handleSaveSettings = () => {
+    toast.success('Settings saved successfully')
     setSettingsDialogOpen(false)
   }
 
@@ -396,7 +405,8 @@ export default function AiVoiceSynthesisClient() {
     if (!newProjectName.trim()) {
       toast.error('Please enter a project name')
       return
-    }    toast.success(`Project "${newProjectName}" created successfully`)
+    }
+    toast.success(`Project "${newProjectName}" created successfully`)
     setNewProjectDialogOpen(false)
     setNewProjectName('')
     setNewProjectDescription('')
@@ -411,10 +421,12 @@ export default function AiVoiceSynthesisClient() {
     }
 
     setPlayingProjectId(projectId)
-    toast.info(`Playing: ${projectName}`)  }
+    toast.info(`Playing: ${projectName}`)
+  }
 
   // Download project
-  const handleDownloadProject = (projectId: number, projectName: string) => {    toast.success(`${projectName} downloaded successfully`)
+  const handleDownloadProject = (projectId: number, projectName: string) => {
+    toast.success(`${projectName} downloaded successfully`)
   }
 
   // Share project
@@ -427,7 +439,8 @@ export default function AiVoiceSynthesisClient() {
   const handleCopyShareLink = () => {
     const shareLink = `https://freeflow.app/voice-projects/${selectedProjectForShare?.id}`
     navigator.clipboard.writeText(shareLink)
-    toast.success('Share link copied to clipboard')    setShareDialogOpen(false)
+    toast.success('Share link copied to clipboard')
+    setShareDialogOpen(false)
   }
 
   if (isPageLoading) {

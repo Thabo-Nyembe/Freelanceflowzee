@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import React, { useState, useCallback, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
 import { useAuthUserId } from '@/lib/hooks/use-auth-user-id'
@@ -311,8 +313,6 @@ export default function LogsClient() {
   const fetchSystemLogs = useCallback(async () => {
     if (!userId) return
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('system_logs')
         .select('*')
@@ -330,8 +330,6 @@ export default function LogsClient() {
   // Fetch access logs
   const fetchAccessLogs = useCallback(async () => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('access_logs')
         .select('*')
@@ -347,8 +345,6 @@ export default function LogsClient() {
   // Fetch activity logs
   const fetchActivityLogs = useCallback(async () => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('activity_logs')
         .select('*')
@@ -424,8 +420,6 @@ export default function LogsClient() {
     }
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('system_logs')
         .insert({
@@ -452,15 +446,13 @@ export default function LogsClient() {
     if (!userId) return
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('system_logs')
         .update({ is_archived: true, archived_at: new Date().toISOString() })
         .in('id', logIds)
         .eq('user_id', userId)
       if (error) throw error
-      toast.success('Logs archived' logs have been archived` })
+      toast.success(`${logIds.length} logs have been archived`)
       fetchSystemLogs()
     } catch (err: any) {
       toast.error('Error archiving logs')
@@ -496,8 +488,6 @@ export default function LogsClient() {
     if (!userId) return
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('system_logs')
         .update({ deleted_at: new Date().toISOString() })
@@ -526,8 +516,7 @@ export default function LogsClient() {
     setIsLoading(true)
     try {
       // For now, show success toast - in production this would save to a log_alerts table
-      toast.success('Alert created'" has been configured with query: ${alertForm.query}`
-      })
+      toast.success(`Alert created: has been configured with query: ${alertForm.query}`)
       setAlertForm({
         name: '',
         query: '',
@@ -558,8 +547,7 @@ export default function LogsClient() {
     }
     setIsLoading(true)
     try {
-      toast.success('Stream created'" is now active`
-      })
+      toast.success(`Stream created: "${streamForm.name}" is now active`)
       setStreamForm({ name: '', query: '', color: 'blue' })
       setShowStreamDialog(false)
     } catch (err: any) {
@@ -581,8 +569,7 @@ export default function LogsClient() {
     }
     setIsLoading(true)
     try {
-      toast.success('Pipeline created'" has been configured`
-      })
+      toast.success(`Pipeline created: "${pipelineForm.name}" has been configured`)
       setPipelineForm({ name: '', filter: '', sample_rate: 100, processors: [] })
       setShowPipelineDialog(false)
     } catch (err: any) {
@@ -604,8 +591,7 @@ export default function LogsClient() {
     }
     setIsLoading(true)
     try {
-      toast.success('Archive configured'" to ${archiveForm.destination} has been set up`
-      })
+      toast.success(`Archive configured: "${archiveForm.name}" to ${archiveForm.destination} has been set up`)
       setArchiveForm({
         name: '',
         destination: 'S3',
@@ -635,8 +621,7 @@ export default function LogsClient() {
     }
     setIsLoading(true)
     try {
-      toast.success('Sensitive data rule created'" will ${sensitiveRuleForm.action} matching data`
-      })
+      toast.success(`Sensitive data rule created: "${sensitiveRuleForm.name}" will ${sensitiveRuleForm.action} matching data`)
       setSensitiveRuleForm({ name: '', pattern: '', type: 'custom', action: 'redact' })
       setShowSensitiveDialog(false)
     } catch (err: any) {
@@ -654,8 +639,7 @@ export default function LogsClient() {
     }
     setIsLoading(true)
     try {
-      toast.success('View saved'" has been saved${savedViewForm.is_shared ? ' and shared' : ''}`
-      })
+      toast.success(`View saved has been saved${savedViewForm.is_shared ? ' and shared' : ''}`)
       setSavedViewForm({ name: '', query: '', is_default: false, is_shared: false })
       setShowSaveViewDialog(false)
     } catch (err: any) {
@@ -677,8 +661,6 @@ export default function LogsClient() {
   const handleAcknowledgeAlert = async (alertId: string, alertName: string) => {
     toast.promise(
       (async () => {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         const { error } = await supabase
           .from('log_alerts')
           .update({ acknowledged: true, acknowledged_at: new Date().toISOString() })
@@ -698,8 +680,6 @@ export default function LogsClient() {
   const handleToggleStreamLive = async (streamId: string, streamName: string, currentLive: boolean) => {
     toast.promise(
       (async () => {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         const { error } = await supabase
           .from('log_streams')
           .update({ is_live: !currentLive, updated_at: new Date().toISOString() })
@@ -719,8 +699,6 @@ export default function LogsClient() {
   const handleRehydrateArchive = async (archiveName: string) => {
     toast.promise(
       (async () => {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         const { error } = await supabase
           .from('log_archive_jobs')
           .insert({
@@ -1343,8 +1321,6 @@ export default function LogsClient() {
                                     // Create issue from log - Supabase insert
                                     toast.promise(
                                       (async () => {
-                                        const { createClient } = await import('@/lib/supabase/client')
-                                        const supabase = createClient()
                                         const issueId = `ISSUE-${Date.now()}`
                                         const { error } = await supabase.from('issues').insert({
                                           id: issueId,
@@ -1450,8 +1426,6 @@ export default function LogsClient() {
                   onClick={async () => {
                     toast.promise(
                       (async () => {
-                        const { createClient } = await import('@/lib/supabase/client')
-                        const supabase = createClient()
                         // Log the analysis request and trigger pattern detection
                         const { error } = await supabase.from('log_pattern_analysis_jobs').insert({
                           status: 'pending',
@@ -2185,8 +2159,6 @@ export default function LogsClient() {
                                   if (!confirm('Are you sure you want to regenerate the API key? This will invalidate the current key.')) return
                                   toast.promise(
                                     (async () => {
-                                      const { createClient } = await import('@/lib/supabase/client')
-                                      const supabase = createClient()
                                       const newKey = 'log_api_' + Math.random().toString(36).substring(2, 18)
                                       const { error } = await supabase.from('log_api_keys').update({
                                         key_value: newKey,
@@ -2213,8 +2185,6 @@ export default function LogsClient() {
                           onClick={async () => {
                             toast.promise(
                               (async () => {
-                                const { createClient } = await import('@/lib/supabase/client')
-                                const supabase = createClient()
                                 const newKey = 'log_api_' + Math.random().toString(36).substring(2, 18)
                                 const { error } = await supabase.from('log_api_keys').insert({
                                   key_value: newKey,
@@ -2391,8 +2361,6 @@ export default function LogsClient() {
                               if (!confirm('Are you sure you want to reset all pipelines? This action cannot be undone.')) return
                               toast.promise(
                                 (async () => {
-                                  const { createClient } = await import('@/lib/supabase/client')
-                                  const supabase = createClient()
                                   const { error } = await supabase
                                     .from('log_pipelines')
                                     .delete()
@@ -2951,8 +2919,6 @@ export default function LogsClient() {
             <Button onClick={async () => {
               toast.promise(
                 (async () => {
-                  const { createClient } = await import('@/lib/supabase/client')
-                  const supabase = createClient()
                   const { error } = await supabase.from('log_forwarders').insert({
                     name: 'New Forwarder',
                     type: 'splunk', // Default type, would come from form in real implementation

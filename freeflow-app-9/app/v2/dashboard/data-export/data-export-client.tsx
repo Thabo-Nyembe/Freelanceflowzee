@@ -591,8 +591,7 @@ export default function DataExportClient() {
 
       setIsSyncing(false)
       setSyncProgress(100)
-      toast.success('All syncs completed successfully' pipelines synced`
-      })
+      toast.success("All syncs completed successfully - " + totalPipelines + " pipelines synced")
       setShowRunAllSyncsDialog(false)
       setSyncProgress(0)
     } catch (error: any) {
@@ -3311,7 +3310,7 @@ export default function DataExportClient() {
             <AIInsightsPanel
               insights={dataExportAIInsights}
               title="Data Pipeline Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">

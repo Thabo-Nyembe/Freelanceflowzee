@@ -541,7 +541,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
       return
     }
     setShowNewTicketDialog(false)
-    toast.success(`Ticket created successfully for ${newTicketForm.customerEmail}`)
+    toast.success("Ticket created successfully for " + (newTicketForm.customerEmail))
     setNewTicketForm({ subject: '', description: '', priority: 'medium', type: 'question', customerEmail: '', tags: '' })
   }
 
@@ -559,7 +559,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
     const agent = mockAgents.find(a => a.id === selectedAgent)
     setShowAssignTicketDialog(false)
     setCurrentActionTicketId(null)
-    toast.success(`Ticket assigned to ${agent?.name} successfully`)
+    toast.success("Ticket assigned to " + (agent?.name) + " successfully")
   }
 
   const handleResolveTicket = (id: string) => {
@@ -582,7 +582,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
 
   const handleSubmitExport = () => {
     setShowExportDialog(false)
-    toast.success(`Tickets exported successfully as ${exportFormat.toUpperCase()}`)
+    toast.success("Tickets exported successfully as " + (exportFormat.toUpperCase()))
   }
 
   const handleOpenLiveChat = () => {
@@ -635,7 +635,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
       return
     }
     setShowForwardDialog(false)
-    toast.success(`Ticket forwarded to ${forwardEmail} successfully`)
+    toast.success("Ticket forwarded to " + (forwardEmail) + " successfully")
     setForwardEmail('')
     setForwardMessage('')
   }
@@ -879,7 +879,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                 return (
                   <Card
                     key={ticket.id}
-                    className={`bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm hover:shadow-md transition-all cursor-pointer ${ticket.slaBreached ? 'border-l-4 border-l-red-500' : ''}`}
+                    className={"bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm hover:shadow-md transition-all cursor-pointer " + (ticket.slaBreached ? 'border-l-4 border-l-red-500' : '')}
                     onClick={() => setSelectedTicket(ticket)}
                   >
                     <CardContent className="p-4">
@@ -914,7 +914,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                               <Clock className="w-3 h-3" />
                               {formatRelativeTime(ticket.createdAt)}
                             </span>
-                            <span className={`flex items-center gap-1 ${timeInfo.isOverdue ? 'text-red-600' : timeInfo.urgent ? 'text-orange-600' : ''}`}>
+                            <span className={"flex items-center gap-1 " + (timeInfo.isOverdue ? 'text-red-600' : timeInfo.urgent ? 'text-orange-600' : '')}>
                               <Timer className="w-3 h-3" />
                               {timeInfo.text}
                             </span>
@@ -983,11 +983,11 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                         <Avatar className="w-12 h-12">
                           <AvatarFallback>{agent.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                         </Avatar>
-                        <div className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${
+                        <div className={"absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white " + (
                           agent.status === 'online' ? 'bg-green-500' :
                           agent.status === 'busy' ? 'bg-yellow-500' :
                           'bg-gray-400'
-                        }`} />
+                        )} />
                       </div>
                       <div>
                         <h4 className="font-semibold text-gray-900 dark:text-white">{agent.name}</h4>
@@ -1197,11 +1197,11 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                         <button
                           key={item.id}
                           onClick={() => setSettingsTab(item.id)}
-                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
+                          className={"w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors " + (
                             settingsTab === item.id
                               ? 'bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-400'
                               : 'hover:bg-gray-100 dark:hover:bg-gray-700/50 text-gray-600 dark:text-gray-400'
-                          }`}
+                          )}
                         >
                           <item.icon className="w-4 h-4" />
                           <span className="text-sm font-medium">{item.label}</span>
@@ -1899,7 +1899,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
             <AIInsightsPanel
               insights={mockSupportAIInsights}
               title="Support Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -2117,11 +2117,11 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                   <div
                     key={agent.id}
                     onClick={() => setSelectedAgent(agent.id)}
-                    className={`p-3 rounded-lg border cursor-pointer transition-colors ${
+                    className={"p-3 rounded-lg border cursor-pointer transition-colors " + (
                       selectedAgent === agent.id
-                        ? 'border-teal-500 bg-teal-50 dark:bg-teal-900/20'
-                        : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800'
-                    }`}
+                        ? "border-teal-500 bg-teal-50 dark:bg-teal-900/20"
+                        : "border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800"
+                    )}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
@@ -2133,10 +2133,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                           <div className="text-xs text-gray-500">{agent.openTickets} open tickets</div>
                         </div>
                       </div>
-                      <div className={`w-2 h-2 rounded-full ${
-                        agent.status === 'online' ? 'bg-green-500' :
-                        agent.status === 'busy' ? 'bg-yellow-500' : 'bg-gray-400'
-                      }`} />
+                      <div className={"w-2 h-2 rounded-full " + (agent.status === "online" ? "bg-green-500" : agent.status === "busy" ? "bg-yellow-500" : "bg-gray-400")} />
                     </div>
                   </div>
                 ))}
@@ -2651,7 +2648,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                       <ScrollArea className="h-[300px]">
                         <div className="space-y-4">
                           {selectedTicket.replies.map(reply => (
-                            <div key={reply.id} className={`flex gap-3 ${reply.isPublic ? '' : 'bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg'}`}>
+                            <div key={reply.id} className={"flex gap-3 " + (reply.isPublic ? '' : 'bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg')}>
                               <Avatar className="w-8 h-8">
                                 <AvatarFallback className="text-xs">
                                   {'name' in reply.author ? reply.author.name.split(' ').map((n: string) => n[0]).join('') : '?'}
@@ -2687,7 +2684,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                         />
                         <Button className="bg-gradient-to-r from-teal-500 to-cyan-600 text-white" onClick={() => {
                           if (selectedTicket && replyContent.trim()) {
-                            toast.success(`Reply sent successfully for ticket #${selectedTicket.code}`)
+                            toast.success("Reply sent successfully for ticket #" + selectedTicket.code)
                             setReplyContent('')
                           } else if (!replyContent.trim()) {
                             toast.error('Empty Reply')

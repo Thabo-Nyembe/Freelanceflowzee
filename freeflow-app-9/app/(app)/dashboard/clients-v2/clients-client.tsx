@@ -1109,8 +1109,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
   const handleCallClient = (client: Client) => {
     if (client.primaryContact.phone) {
       window.location.href = `tel:${client.primaryContact.phone}`
-      toast.success('Initiating call'`
-      })
+      toast.success(`Initiating call to ${client.primaryContact.phone}`)
     } else {
       toast.error('No phone number available')
     }
@@ -1708,7 +1707,6 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                         </div>
                     </CardContent>
                   </Card>
-                )
                 )
               })}
               </div>
@@ -2513,13 +2511,11 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
               onInsightAction={(insight) => {
                 // Handle insight actions based on type
                 if (insight.type === 'warning') {
-                  toast.warning(`Action needed: ${insight.title}`
-                  })
+                  toast.warning(`Action needed: ${insight.title}`)
                 } else if (insight.type === 'success') {
                   toast.success(insight.title)
                 } else {
-                  toast.info(insight.title
-                  })
+                  toast.info(insight.title)
                 }
               }}
             />

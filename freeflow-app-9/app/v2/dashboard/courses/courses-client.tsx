@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from '@/components/ui/dialog'
@@ -746,7 +748,7 @@ export default function CoursesClient() {
     }
 
     setIsSubmitting(true)
-    toast.success('Creating course...'"` })
+    toast.info("Creating course - " + courseForm.course_name + "...")
 
     try {
       const response = await fetch('/api/courses', {
@@ -785,8 +787,7 @@ export default function CoursesClient() {
         throw new Error(data.error || 'Failed to create course')
       }
 
-      toast.success('Course created successfully'"`
-      })
+      toast.success("Course created successfully - " + courseForm.course_name)
       setShowCreateCourseDialog(false)
       resetCourseForm()
       refreshCourses()
@@ -834,7 +835,7 @@ export default function CoursesClient() {
     }
 
     setIsSubmitting(true)
-    toast.success('Updating course...'"` })
+    toast.info("Updating course - " + courseForm.course_name + "...")
 
     try {
       const response = await fetch('/api/courses', {
@@ -874,8 +875,7 @@ export default function CoursesClient() {
         throw new Error(data.error || 'Failed to update course')
       }
 
-      toast.success('Course updated successfully'"`
-      })
+      toast.success("Course updated successfully - " + courseForm.course_name)
       setShowEditCourseDialog(false)
       resetCourseForm()
       setSelectedCourse(null)
@@ -891,7 +891,7 @@ export default function CoursesClient() {
     if (!courseToDelete) return
 
     setIsSubmitting(true)
-    toast.success('Deleting course...'"` })
+    toast.info("Deleting course...")
 
     try {
       const response = await fetch(`/api/courses?id=${courseToDelete.id}`, {
@@ -904,8 +904,7 @@ export default function CoursesClient() {
         throw new Error(data.error || 'Failed to delete course')
       }
 
-      toast.success('Course deleted'"`
-      })
+      toast.success("Course deleted successfully")
       setShowDeleteCourseDialog(false)
       setCourseToDelete(null)
       refreshCourses()
@@ -923,7 +922,7 @@ export default function CoursesClient() {
 
   const handlePublishCourse = async (course: Course) => {
     setIsSubmitting(true)
-    toast.success('Publishing course...'" live` })
+    toast.info("Publishing course - " + course.title + "...")
 
     try {
       const response = await fetch('/api/courses', {
@@ -943,8 +942,7 @@ export default function CoursesClient() {
         throw new Error(data.error || 'Failed to publish course')
       }
 
-      toast.success('Course published'" is now live`
-      })
+      toast.success("Course published - " + course.title + " is now live")
       refreshCourses()
     } catch (error: any) {
       toast.error('Failed to publish course')
@@ -955,7 +953,7 @@ export default function CoursesClient() {
 
   const handleArchiveCourse = async (course: Course) => {
     setIsSubmitting(true)
-    toast.success('Archiving course...'"` })
+    toast.info("Archiving course - " + course.title + "...")
 
     try {
       const response = await fetch('/api/courses', {
@@ -974,8 +972,7 @@ export default function CoursesClient() {
         throw new Error(data.error || 'Failed to archive course')
       }
 
-      toast.success('Course archived'" has been archived`
-      })
+      toast.success("Course archived - " + course.title + " has been archived")
       refreshCourses()
     } catch (error: any) {
       toast.error('Failed to archive course')
@@ -987,7 +984,6 @@ export default function CoursesClient() {
   const handleEnrollCourse = async (course: Course) => {
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client'); const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
       if (!user) {
@@ -1006,8 +1002,7 @@ export default function CoursesClient() {
 
       if (error) throw error
 
-      toast.success('Enrolled!'"`
-      })
+      toast.success("Enrolled! You are now enrolled in " + course.title)
       refreshCourses()
     } catch (error: any) {
       toast.error('Failed to enroll')
@@ -1018,7 +1013,6 @@ export default function CoursesClient() {
 
   const handleStartLesson = async (lecture: Lecture) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client'); const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
       if (!user) {
@@ -1034,8 +1028,7 @@ export default function CoursesClient() {
         started_at: new Date().toISOString()
       })
 
-      toast.info('Starting lesson'"...`
-      })
+      toast.info("Starting lesson - " + lecture.title + "...")
     } catch (error: any) {
       toast.error('Failed to start lesson')
     }
@@ -1044,7 +1037,6 @@ export default function CoursesClient() {
   const handleCompleteCourse = async (course: Course) => {
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client'); const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
       if (!user) {
@@ -1072,7 +1064,6 @@ export default function CoursesClient() {
 
   const handleDownloadCertificate = async (course: Course) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client'); const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
       if (!user) {
@@ -1095,7 +1086,6 @@ export default function CoursesClient() {
 
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client'); const supabase = createClient()
 
       const { error } = await supabase.from('course_modules').insert({
         course_id: selectedCourse.id,
@@ -1106,8 +1096,7 @@ export default function CoursesClient() {
 
       if (error) throw error
 
-      toast.success('Section added'" to the course`
-      })
+      toast.success("Section added - " + sectionForm.title + " to the course")
       setShowAddSectionDialog(false)
       resetSectionForm()
       refreshCourses()
@@ -1126,7 +1115,6 @@ export default function CoursesClient() {
 
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client'); const supabase = createClient()
 
       const { error } = await supabase.from('course_lessons').insert({
         module_id: sectionId,
@@ -1139,8 +1127,7 @@ export default function CoursesClient() {
 
       if (error) throw error
 
-      toast.success('Lecture added'" to the section`
-      })
+      toast.success("Lecture added - " + lectureForm.title + " to the section")
       setShowAddLectureDialog(false)
       resetLectureForm()
       refreshCourses()
@@ -1154,7 +1141,6 @@ export default function CoursesClient() {
   const handleRespondToReview = async (reviewId: string, response: string) => {
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client'); const supabase = createClient()
 
       const { error } = await supabase
         .from('course_reviews')
@@ -1463,7 +1449,7 @@ export default function CoursesClient() {
                             if (course.status === 'draft') {
                               handlePublishCourse(course)
                             } else {
-                              toast.info('Opening preview...'"` })
+                              toast.info('Opening preview...')
                             }
                           }}
                           disabled={isSubmitting}
@@ -2457,7 +2443,7 @@ export default function CoursesClient() {
             <AIInsightsPanel
               insights={mockCoursesAIInsights}
               title="Course Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">

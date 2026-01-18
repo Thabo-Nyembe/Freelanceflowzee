@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useCallback } from 'react'
 import { toast } from 'sonner'
+import { cn } from '@/lib/utils'
 import { useWebhooks, Webhook, WebhookEventType } from '@/lib/hooks/use-webhooks'
 import {
   Webhook as WebhookIcon,
@@ -543,7 +544,7 @@ export default function WebhooksClient({
           custom_headers: formData.custom_headers
         })
         if (result.success) {
-          toast.success('Webhook updated'" has been updated` })
+          toast.success("Webhook " + formData.name + " has been updated")
           setShowEndpointDialog(false)
         } else {
           toast.error('Update failed')
@@ -562,7 +563,7 @@ export default function WebhooksClient({
           status: 'active'
         })
         if (result.success) {
-          toast.success('Webhook created'" has been created` })
+          toast.success("Webhook " + formData.name + " has been created")
           setShowEndpointDialog(false)
         } else {
           toast.error('Creation failed')
@@ -576,7 +577,7 @@ export default function WebhooksClient({
   const handleDeleteWebhook = async (id: string, name: string) => {
     const result = await deleteWebhook(id)
     if (result.success) {
-      toast.success('Webhook deleted'" has been deleted` })
+      toast.success("Webhook " + name + " has been deleted")
     } else {
       toast.error('Delete failed')
     }
@@ -586,7 +587,7 @@ export default function WebhooksClient({
     const newStatus = currentStatus === 'active' ? 'paused' : 'active'
     const result = await toggleStatus(id, newStatus as 'active' | 'paused')
     if (result.success) {
-      toast.success('Status updated'` })
+      toast.success("Status updated to " + newStatus)
     } else {
       toast.error('Status update failed')
     }
@@ -796,12 +797,7 @@ export default function WebhooksClient({
                     <button
                       key={status}
                       onClick={() => setStatusFilter(status)}
-                      className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5 ${
-                        statusFilter === status
-                          ? status === 'all' ? 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white'
-                            : getStatusColor(status)
-                          : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
-                      }`}
+                      className={cn("px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5", statusFilter === status ? (status === 'all' ? 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white' : getStatusColor(status)) : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700')}
                     >
                       {status !== 'all' && getStatusIcon(status)}
                       {status === 'all' ? 'All' : status.charAt(0).toUpperCase() + status.slice(1)}
@@ -832,11 +828,7 @@ export default function WebhooksClient({
                   <div className="p-5">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-start gap-4">
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                          webhook.status === 'active' ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400' :
-                          webhook.status === 'paused' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400' :
-                          'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
-                        }`}>
+                        <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center", webhook.status === 'active' ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400' : webhook.status === 'paused' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400' : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400')}>
                           <WebhookIcon className="w-6 h-6" />
                         </div>
                         <div>
@@ -844,7 +836,7 @@ export default function WebhooksClient({
                             <h3 className="font-semibold text-gray-900 dark:text-white">{webhook.name}</h3>
                             <button
                               onClick={() => handleToggleStatus(webhook.id, webhook.status)}
-                              className={`px-2 py-0.5 rounded-full text-xs font-medium flex items-center gap-1 cursor-pointer hover:opacity-80 ${getStatusColor(webhook.status)}`}
+                              className={cn("px-2 py-0.5 rounded-full text-xs font-medium flex items-center gap-1 cursor-pointer hover:opacity-80", getStatusColor(webhook.status))}
                               title="Click to toggle status"
                             >
                               {getStatusIcon(webhook.status)}
@@ -928,7 +920,7 @@ export default function WebhooksClient({
                       </div>
                       <div>
                         <div className="text-gray-500 dark:text-gray-400 text-xs">Success Rate</div>
-                        <div className={`font-semibold ${webhook.success_rate >= 99 ? 'text-green-600 dark:text-green-400' : webhook.success_rate >= 95 ? 'text-yellow-600 dark:text-yellow-400' : 'text-red-600 dark:text-red-400'}`}>
+                        <div className={cn("font-semibold", webhook.success_rate >= 99 ? 'text-green-600 dark:text-green-400' : webhook.success_rate >= 95 ? 'text-yellow-600 dark:text-yellow-400' : 'text-red-600 dark:text-red-400')}>
                           {webhook.success_rate.toFixed(1)}%
                         </div>
                       </div>
@@ -1081,14 +1073,14 @@ export default function WebhooksClient({
                         </code>
                       </td>
                       <td className="py-3 px-4">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1 w-fit ${getStatusColor(log.status)}`}>
+                        <span className={cn("px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1 w-fit", getStatusColor(log.status))}>
                           {getStatusIcon(log.status)}
                           {log.status}
                         </span>
                       </td>
                       <td className="py-3 px-4 text-right">
                         {log.statusCode ? (
-                          <span className={`font-mono text-sm ${log.statusCode >= 200 && log.statusCode < 300 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                          <span className={cn("font-mono text-sm", log.statusCode >= 200 && log.statusCode < 300 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400')}>
                             {log.statusCode}
                           </span>
                         ) : (
@@ -1141,11 +1133,7 @@ export default function WebhooksClient({
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">{integration.description}</p>
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-gray-500 dark:text-gray-400">{integration.category}</span>
-                    <button className={`px-3 py-1 rounded-lg text-sm font-medium ${
-                      integration.installed
-                        ? 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
-                        : 'bg-emerald-600 text-white hover:bg-emerald-700'
-                    }`}>
+                    <button className={cn("px-3 py-1 rounded-lg text-sm font-medium", integration.installed ? 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' : 'bg-emerald-600 text-white hover:bg-emerald-700')}>
                       {integration.installed ? 'Configure' : 'Install'}
                     </button>
                   </div>
@@ -1202,11 +1190,7 @@ export default function WebhooksClient({
                         <button
                           key={item.id}
                           onClick={() => setSettingsTab(item.id)}
-                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
-                            settingsTab === item.id
-                              ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400'
-                              : 'hover:bg-gray-100 dark:hover:bg-gray-700/50 text-gray-600 dark:text-gray-400'
-                          }`}
+                          className={cn("w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors", settingsTab === item.id ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400' : 'hover:bg-gray-100 dark:hover:bg-gray-700/50 text-gray-600 dark:text-gray-400')}
                         >
                           <item.icon className="w-4 h-4" />
                           <span className="text-sm font-medium">{item.label}</span>
@@ -1859,7 +1843,7 @@ export default function WebhooksClient({
             <AIInsightsPanel
               insights={mockWebhooksAIInsights}
               title="Webhooks Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -2010,11 +1994,7 @@ export default function WebhooksClient({
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-3">
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                selectedLog?.status === 'success' ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400' :
-                selectedLog?.status === 'failed' ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400' :
-                'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400'
-              }`}>
+              <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center", selectedLog?.status === 'success' ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400' : selectedLog?.status === 'failed' ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400' : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400')}>
                 {selectedLog && getStatusIcon(selectedLog.status)}
               </div>
               Delivery Details
@@ -2026,7 +2006,7 @@ export default function WebhooksClient({
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                   <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
                     <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Status Code</div>
-                    <div className={`text-xl font-bold ${selectedLog.statusCode && selectedLog.statusCode < 300 ? 'text-green-600' : 'text-red-600'}`}>
+                    <div className={cn("text-xl font-bold", selectedLog.statusCode && selectedLog.statusCode < 300 ? 'text-green-600' : 'text-red-600')}>
                       {selectedLog.statusCode || 'N/A'}
                     </div>
                   </div>

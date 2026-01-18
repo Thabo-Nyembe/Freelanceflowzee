@@ -100,7 +100,8 @@ export default function EmailMarketingPage() {
         setTemplates(templatesResult.data || [])
 
         setIsLoading(false)
-        toast.success(`Email marketing loaded: ${campaignsResult.data?.length || 0} campaigns, ${subscribersResult.data?.length || 0} subscribers, ${templatesResult.data?.length || 0} templates`)        announce('Email marketing data loaded successfully', 'polite')
+        toast.success(`Email marketing loaded: ${campaignsResult.data?.length || 0} campaigns, ${subscribersResult.data?.length || 0} subscribers, ${templatesResult.data?.length || 0} templates`)
+        announce('Email marketing data loaded successfully', 'polite')
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load email marketing data'
         setError(errorMessage)
@@ -135,7 +136,8 @@ export default function EmailMarketingPage() {
     try {
       const { createFeatureLogger } = await import('@/lib/logger')
       const logger = createFeatureLogger('email-marketing')
-      const { toast } = await import('sonner')      const { sendCampaign } = await import('@/lib/email-marketing-queries')
+      const { toast } = await import('sonner')
+    const { sendCampaign } = await import('@/lib/email-marketing-queries')
 
       const sendPromise = sendCampaign(campaign.id).then(result => {
         if (result.error) {
@@ -185,7 +187,8 @@ export default function EmailMarketingPage() {
     try {
       const { createFeatureLogger } = await import('@/lib/logger')
       const logger = createFeatureLogger('email-marketing')
-      const { toast } = await import('sonner')      const { createEmailCampaign } = await import('@/lib/email-marketing-queries')
+      const { toast } = await import('sonner')
+    const { createEmailCampaign } = await import('@/lib/email-marketing-queries')
 
       const newCampaignName = `${campaign.name} (Copy)`
 
@@ -215,7 +218,8 @@ export default function EmailMarketingPage() {
         logger.error('Failed to duplicate campaign', { error })
         toast.error('Failed to duplicate campaign')
         return
-      }      toast.success(`Campaign duplicated: ${newCampaignName}`)
+      }
+    toast.success(`Campaign duplicated: ${newCampaignName}`)
 
       // Add to local state
       setCampaigns(prev => [data, ...prev])
@@ -416,7 +420,8 @@ export default function EmailMarketingPage() {
         toast.error('Failed to create template')
         announce('Failed to create template', 'assertive')
         return
-      }      toast.success('Template created - Start customizing your new template')
+      }
+    toast.success('Template created - Start customizing your new template')
       announce('Template created successfully', 'polite')
 
       // Reload templates

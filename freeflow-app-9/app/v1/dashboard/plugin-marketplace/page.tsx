@@ -336,7 +336,8 @@ function generateMockPlugins(): Plugin[] {
         'v1.0.0: Initial release'
       ]
     }
-  })  return plugins
+  })
+  return plugins
 }
 
 // ============================================================================
@@ -454,7 +455,8 @@ export default function PluginMarketplacePage() {
         preInstalled.forEach(install => {
           const plugin = pluginsToUse.find(p => p.id === install.pluginId)!
           dispatch({ type: 'INSTALL_PLUGIN', plugin: plugin as Plugin })
-        })        setIsLoading(false)
+        })
+        setIsLoading(false)
         announce(`${pluginsToUse.length} plugins loaded successfully`, 'polite')
       } catch (err) {
         logger.error('Failed to load plugins', {
@@ -565,16 +567,14 @@ export default function PluginMarketplacePage() {
 
     if (isInstalled) {
       logger.warn('Plugin installation failed', { reason: 'Already installed', pluginId: plugin.id })
-      toast.error('Plugin is already installed' is already active in your workspace`
-      })
+      toast.error(`Plugin is already installed - ${plugin.name} is already active`)
       return
     }
 
     const fileSizeMB = (plugin.fileSize / (1024 * 1024)).toFixed(1)
     const price = formatPrice(plugin)
 
-    toast.info(`Installing ${plugin.name}...` plugin - ${plugin.version} - ${fileSizeMB} MB - Setting up dependencies`
-    })
+    toast.info(`Installing ${plugin.name}... - ${plugin.version} - ${fileSizeMB} MB`)
 
     try {
       if (userId) {
@@ -592,8 +592,8 @@ export default function PluginMarketplacePage() {
 
       dispatch({ type: 'INSTALL_PLUGIN', plugin })
 
-      const installsK = (plugin.installCount / 1000).toFixed(1)      toast.success(`${plugin.name} installed` - ${plugin.version} - ${price} - ${plugin.rating}⭐ (${installsK}k installs) - Active and ready to use`
-      })
+      const installsK = (plugin.installCount / 1000).toFixed(1)
+      toast.success(`${plugin.name} installed - ${plugin.version} - ${price} - ${plugin.rating}⭐ (${installsK}k installs) - Active and ready to use`)
       announce(`${plugin.name} installed`, 'polite')
     } catch (error: any) {
       logger.error('Failed to install plugin', { error: error.message, pluginId: plugin.id })
@@ -601,7 +601,8 @@ export default function PluginMarketplacePage() {
     }
   }
 
-  const handleUninstallPlugin = (pluginId: string) => {    const plugin = state.plugins.find(p => p.id === pluginId)
+  const handleUninstallPlugin = (pluginId: string) => {
+    const plugin = state.plugins.find(p => p.id === pluginId)
     const installedPlugin = state.installedPlugins.find(p => p.pluginId === pluginId)
 
     if (!plugin) {
@@ -620,7 +621,8 @@ export default function PluginMarketplacePage() {
   }
 
   const handleConfirmUninstallPlugin = async () => {
-    if (!uninstallPlugin) return    try {
+    if (!uninstallPlugin) return
+    try {
       if (userId) {
         const { deleteInstallationByPluginId } = await import('@/lib/plugin-marketplace-queries')
         const { error: deleteError } = await deleteInstallationByPluginId(userId, uninstallPlugin.id)
@@ -632,8 +634,7 @@ export default function PluginMarketplacePage() {
       const fileSizeMB = (uninstallPlugin.fileSize / (1024 * 1024)).toFixed(1)
       const installedDate = uninstallPlugin.installedAt ? new Date(uninstallPlugin.installedAt).toLocaleDateString() : 'Unknown'
 
-      toast.success(`${uninstallPlugin.name} uninstalled` plugin - ${uninstallPlugin.version} - ${fileSizeMB} MB freed - Installed since ${installedDate}`
-      })
+      toast.success(`${uninstallPlugin.name} uninstalled - ${uninstallPlugin.version} - ${fileSizeMB} MB freed - Installed since ${installedDate}`)
       announce('Plugin uninstalled', 'polite')
     } catch (error: any) {
       logger.error('Failed to uninstall plugin', { error: error.message, pluginId: uninstallPlugin.id })
@@ -652,15 +653,15 @@ export default function PluginMarketplacePage() {
       if (userId && installed.id) {
         try {
           const { updateInstallation } = await import('@/lib/plugin-marketplace-queries')
-          await updateInstallation(installed.id, { is_active: newState })        } catch (error: any) {
+          await updateInstallation(installed.id, { is_active: newState })
+        } catch (error: any) {
           logger.error('Failed to persist plugin active state', { error: error.message })
         }
       }
 
       dispatch({ type: 'TOGGLE_PLUGIN_ACTIVE', pluginId })
 
-      toast.success(`${plugin.name} ${installed.isActive ? 'deactivated' : 'activated'}` plugin - ${plugin.version} - ${newState ? 'Now running' : 'Stopped'} - ${plugin.rating}⭐`
-      })
+      toast.success(`${plugin.name} ${installed.isActive ? 'deactivated' : 'activated'} - ${plugin.version} - ${newState ? 'Now running' : 'Stopped'} - ${plugin.rating}⭐`)
     }
   }
 

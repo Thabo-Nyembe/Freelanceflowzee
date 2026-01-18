@@ -1,4 +1,6 @@
 'use client'
+
+import { createClient } from '@/lib/supabase/client'
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { downloadAsCsv, apiPost } from '@/lib/button-handlers'
@@ -254,8 +256,6 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
   const handleBalanceWorkload = async () => {
     toast.loading('Balancing workload...')
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       // Get all allocations and rebalance based on capacity
       const { data: allocations } = await supabase.from('allocations').select('*')
       const { data: members } = await supabase.from('team_members').select('id, max_hours_per_day')
@@ -292,8 +292,6 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
     }
     toast.loading('Creating allocation...')
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('allocations').insert({
         member_id: newAllocation.memberId,
         project_id: newAllocation.projectId,
@@ -320,8 +318,6 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
     }
     toast.loading('Adding team member...')
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('team_members').insert({
         name: newTeamMember.name,
         email: newTeamMember.email,
@@ -348,8 +344,6 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
     }
     toast.loading('Creating project...')
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('projects').insert({
         title: newProject.name,
         client_name: newProject.client,
@@ -396,8 +390,6 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
     }
     toast.loading('Adding department...')
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('departments').insert({
         name: newDepartment,
         created_at: new Date().toISOString()
@@ -416,8 +408,6 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
   const handleRegenerateApiKey = async () => {
     toast.loading('Regenerating API key...')
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const newApiKey = `cap_${crypto.randomUUID().replace(/-/g, '')}`
       const { error } = await supabase.from('api_keys').upsert({
         id: 'capacity-api',
@@ -439,8 +429,6 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
     if (!confirm('Are you sure you want to clear all allocations? This cannot be undone.')) return
     toast.loading('Clearing allocations...')
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('allocations').delete().neq('id', '')
       if (error) throw error
       toast.dismiss()
@@ -460,8 +448,6 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
     }
     toast.loading('Resetting data...')
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       // Clear all capacity-related data
       await supabase.from('allocations').delete().neq('id', '')
       await supabase.from('capacity_settings').delete().neq('id', '')
@@ -578,8 +564,6 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
     }
     toast.loading('Saving department settings...')
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('departments').update({
         name: departmentSettings.name,
         is_active: departmentSettings.isActive,
@@ -614,8 +598,6 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
     }
     toast.loading('Saving status configuration...')
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('allocation_statuses').upsert({
         name: statusSettings.name,
         color: statusSettings.color,
@@ -639,8 +621,6 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
     }
     toast.loading('Importing data...')
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const fileContent = await importFile.text()
       let data: any
       if (importFile.name.endsWith('.json')) {

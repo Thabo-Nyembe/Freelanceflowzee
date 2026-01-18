@@ -286,7 +286,8 @@ export default function TeamHubPage() {
     if (!userId) {
       toast.error('Authentication required')
       return
-    }    setAddMemberForm({ name: '', email: '', role: 'Team Member', department: 'development' })
+    }
+    setAddMemberForm({ name: '', email: '', role: 'Team Member', department: 'development' })
     setShowAddMemberDialog(true)
   }, [userId, teamMembers, departments])
 
@@ -341,8 +342,8 @@ export default function TeamHubPage() {
         currentProjects: []
       }
 
-      setTeamMembers(prev => [...prev, transformedMember])      toast.success('Team Member Added' added as ${memberRole} in ${memberDept}`
-      })
+      setTeamMembers(prev => [...prev, transformedMember])
+      toast.success(`Team Member Added: ${memberName} added as ${memberRole} in ${memberDept}`)
       announce(`${memberName} added to team`, 'polite')
       setShowAddMemberDialog(false)
     } catch (error) {
@@ -373,8 +374,8 @@ export default function TeamHubPage() {
         throw new Error(error?.message || 'Failed to delete team member')
       }
 
-      setTeamMembers(prev => prev.filter(m => m.id !== removeMember.id))      toast.success('Team Member Removed' has been removed from the team`
-      })
+      setTeamMembers(prev => prev.filter(m => m.id !== removeMember.id))
+      toast.success(`Team Member Removed: ${removeMember.name} has been removed from the team`)
       announce(`${removeMember.name} removed from team`, 'polite')
     } catch (error) {
       logger.error('Failed to remove team member', { error, memberId: removeMember.id })
@@ -421,8 +422,8 @@ export default function TeamHubPage() {
 
       setTeamMembers(prev => prev.map(m =>
         m.id === updateRoleMember.id ? { ...m, role: newRoleValue } : m
-      ))      toast.success('Role Updated''s role changed to ${newRoleValue}`
-      })
+      ))
+      toast.success(`Role Updated: ${updateRoleMember.name}'s role changed to ${newRoleValue}`)
       announce(`${updateRoleMember.name} role updated to ${newRoleValue}`, 'polite')
       setShowUpdateRoleDialog(false)
       setUpdateRoleMember(null)
@@ -474,8 +475,8 @@ export default function TeamHubPage() {
           projects: m.projects + 1,
           currentProjects: [...m.currentProjects, taskNameValue]
         } : m
-      ))      toast.success('Task Assigned'" assigned to ${assignTaskMember.name}`
-      })
+      ))
+      toast.success(`Task Assigned: "${taskNameValue}" assigned to ${assignTaskMember.name}`)
       announce(`Task assigned to ${assignTaskMember.name}`, 'polite')
       setShowAssignTaskDialog(false)
       setAssignTaskMember(null)
@@ -559,8 +560,7 @@ export default function TeamHubPage() {
         })
       }
 
-      toast.success('Export Complete' - ${teamMembers.length} members, ${departments.length} departments`
-      })
+      toast.success(`Export Complete: ${format.toUpperCase()} - ${teamMembers.length} members, ${departments.length} departments`)
     } catch (error) {
       logger.error('Team data export failed', { error, format })
       toast.error('Export Failed')
@@ -568,65 +568,78 @@ export default function TeamHubPage() {
   }, [teamMembers, teamStats, departments])
 
   // Handler 1: Team Performance Metrics
-  const handleTeamPerformance = useCallback(() => {    setShowPerformanceDialog(true)
+  const handleTeamPerformance = useCallback(() => {
+    setShowPerformanceDialog(true)
   }, [teamStats])
 
   // Handler 2: Team Goals Management
-  const handleTeamGoals = useCallback(() => {    setShowGoalsDialog(true)
+  const handleTeamGoals = useCallback(() => {
+    setShowGoalsDialog(true)
   }, [teamStats])
 
   // Handler 3: Team Milestones Tracking
-  const handleTeamMilestones = useCallback(() => {    setShowMilestonesDialog(true)
+  const handleTeamMilestones = useCallback(() => {
+    setShowMilestonesDialog(true)
   }, [teamStats])
 
   // Handler 4: Team Budget Management
-  const handleTeamBudget = useCallback(() => {    setShowBudgetDialog(true)
+  const handleTeamBudget = useCallback(() => {
+    setShowBudgetDialog(true)
   }, [departments, teamStats])
 
   // Handler 5: Team Resources Allocation
-  const handleTeamResources = useCallback(() => {    setShowResourcesDialog(true)
+  const handleTeamResources = useCallback(() => {
+    setShowResourcesDialog(true)
   }, [teamStats])
 
   // Handler 6: Team Training & Development
-  const handleTeamTraining = useCallback(() => {    setShowTrainingDialog(true)
+  const handleTeamTraining = useCallback(() => {
+    setShowTrainingDialog(true)
   }, [teamStats, departments])
 
   // Handler 7: Team Feedback Collection
-  const handleTeamFeedback = useCallback(() => {    })
+  const handleTeamFeedback = useCallback(() => {
     setShowFeedbackDialog(true)
   }, [teamStats])
 
   // Handler 8: Team Recognition & Awards
-  const handleTeamRecognition = useCallback(() => {    })
+  const handleTeamRecognition = useCallback(() => {
     setShowRecognitionDialog(true)
   }, [teamStats])
 
   // Handler 9: Team Onboarding Process
-  const handleTeamOnboarding = useCallback(() => {    setShowOnboardingDialog(true)
+  const handleTeamOnboarding = useCallback(() => {
+    setShowOnboardingDialog(true)
   }, [teamStats, departments])
 
   // Handler 10: Team Offboarding Process
-  const handleTeamOffboarding = useCallback(() => {    setShowOffboardingDialog(true)
+  const handleTeamOffboarding = useCallback(() => {
+    setShowOffboardingDialog(true)
   }, [teamStats])
 
   // Handler 11: Team Directory Access
-  const handleTeamDirectory = useCallback(() => {    setShowDirectoryDialog(true)
+  const handleTeamDirectory = useCallback(() => {
+    setShowDirectoryDialog(true)
   }, [teamStats, departments])
 
   // Handler 12: Team Calendar View
-  const handleTeamCalendar = useCallback(() => {    setShowCalendarDialog(true)
+  const handleTeamCalendar = useCallback(() => {
+    setShowCalendarDialog(true)
   }, [teamStats])
 
   // Handler 13: Team Files Management
-  const handleTeamFiles = useCallback(() => {    setShowFilesDialog(true)
+  const handleTeamFiles = useCallback(() => {
+    setShowFilesDialog(true)
   }, [teamStats, departments])
 
   // Handler 14: Team Projects Overview
-  const handleTeamProjects = useCallback(() => {    setShowProjectsDialog(true)
+  const handleTeamProjects = useCallback(() => {
+    setShowProjectsDialog(true)
   }, [teamStats])
 
   // Handler 15: Team Tasks Assignment
-  const handleTeamTasks = useCallback(() => {    setShowTasksDialog(true)
+  const handleTeamTasks = useCallback(() => {
+    setShowTasksDialog(true)
   }, [teamStats])
 
   // Save handlers for dialogs - WIRED TO DATABASE
@@ -650,7 +663,8 @@ export default function TeamHubPage() {
 
       if (error || !data) {
         throw new Error(error?.message || 'Failed to create goal')
-      }      toast.success('Goal Created'" has been added to team goals` })
+      }
+      toast.success(`Goal Created: "${newGoal.title}" has been added to team goals`)
       announce(`Goal "${newGoal.title}" created`, 'polite')
       setNewGoal({ title: '', target: '', deadline: '' })
       setShowGoalsDialog(false)
@@ -680,7 +694,8 @@ export default function TeamHubPage() {
 
       if (error || !data) {
         throw new Error(error?.message || 'Failed to create milestone')
-      }      toast.success('Milestone Created'" has been added` })
+      }
+      toast.success(`Milestone Created: "${newMilestone.title}" has been added`)
       announce(`Milestone "${newMilestone.title}" created`, 'polite')
       setNewMilestone({ title: '', project: '', date: '' })
       setShowMilestonesDialog(false)
@@ -719,7 +734,8 @@ export default function TeamHubPage() {
         m.id === feedbackForm.memberId
           ? { ...m, rating: feedbackForm.rating }
           : m
-      ))      toast.success('Feedback Submitted'` })
+      ))
+      toast.success(`Feedback Submitted: Rating ${feedbackForm.rating}/5 for ${member?.name}`)
       announce(`Feedback submitted for ${member?.name}`, 'polite')
       setFeedbackForm({ memberId: '', rating: 5, comments: '' })
       setShowFeedbackDialog(false)
@@ -751,7 +767,8 @@ export default function TeamHubPage() {
 
       if (error || !data) {
         throw new Error(error?.message || 'Failed to give recognition')
-      }      toast.success('Recognition Sent' award given to ${member?.name}` })
+      }
+      toast.success(`Recognition Sent: ${recognitionForm.award} award given to ${member?.name}`)
       announce(`${recognitionForm.award} awarded to ${member?.name}`, 'polite')
       setRecognitionForm({ memberId: '', award: '', reason: '' })
       setShowRecognitionDialog(false)
@@ -791,7 +808,8 @@ export default function TeamHubPage() {
         m.id === taskForm.memberId
           ? { ...m, projects: m.projects + 1 }
           : m
-      ))      toast.success('Task Assigned'" assigned to ${member?.name}` })
+      ))
+      toast.success(`Task Assigned: "${taskForm.title}" assigned to ${member?.name}`)
       announce(`Task "${taskForm.title}" assigned to ${member?.name}`, 'polite')
       setTaskForm({ memberId: '', title: '', priority: 'medium', dueDate: '' })
       setShowTasksDialog(false)

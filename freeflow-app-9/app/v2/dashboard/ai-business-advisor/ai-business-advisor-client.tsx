@@ -135,7 +135,8 @@ export default function AiBusinessAdvisorClient() {
       toast.error('Please enter an item name')
       return
     }
-    toast.success(`Created new ${newItemData.type}: "${newItemData.name}"`)    setNewItemData({ name: '', type: 'insight', description: '', priority: 'medium' })
+    toast.success('Created new ' + newItemData.type + ': "' + newItemData.name + '"')
+    setNewItemData({ name: '', type: 'insight', description: '', priority: 'medium' })
     setNewItemDialogOpen(false)
   }
 
@@ -162,12 +163,14 @@ export default function AiBusinessAdvisorClient() {
         success: `AI insights exported as ${exportData.format.toUpperCase()}`,
         error: 'Export failed'
       }
-    )    setExportDialogOpen(false)
+    )
+    setExportDialogOpen(false)
   }
 
   // Handle settings save
   const handleSaveSettings = () => {
-    toast.success('AI Advisor settings saved')    setSettingsDialogOpen(false)
+    toast.success('AI Advisor settings saved')
+    setSettingsDialogOpen(false)
   }
 
   // Handle opportunity actions
@@ -191,10 +194,12 @@ export default function AiBusinessAdvisorClient() {
         success: `Implementation plan created for "${title}"`,
         error: 'Failed to create plan'
       }
-    )  }
+    )
+  }
 
   const handleBookmarkOpportunity = (title: string) => {
-    toast.success(`Bookmarked: "${title}"`)  }
+    toast.success('Bookmarked: "' + title + '"')
+  }
 
   // Handle risk actions
   const handleViewRisk = (risk: {title: string; severity: string; action: string}) => {
@@ -203,10 +208,12 @@ export default function AiBusinessAdvisorClient() {
   }
 
   const handleAcknowledgeRisk = (title: string) => {
-    toast.success(`Risk acknowledged: "${title}"`)  }
+    toast.success('Risk acknowledged: "' + title + '"')
+  }
 
   const handleSetRiskAlert = (title: string) => {
-    toast.success(`Alert set for: "${title}"`)  }
+    toast.success('Alert set for: "' + title + '"')
+  }
 
   // Handle share insight
   const handleShareInsight = () => {
@@ -228,7 +235,8 @@ export default function AiBusinessAdvisorClient() {
         success: `Insight shared with ${shareData.email}`,
         error: 'Failed to share insight'
       }
-    )    setShareData({ email: '', message: '', includeAnalysis: true })
+    )
+    setShareData({ email: '', message: '', includeAnalysis: true })
     setShareInsightDialogOpen(false)
   }
 
@@ -248,7 +256,8 @@ export default function AiBusinessAdvisorClient() {
         success: 'AI Business Report generated successfully',
         error: 'Report generation failed'
       }
-    )    setGenerateReportDialogOpen(false)
+    )
+    setGenerateReportDialogOpen(false)
   }
 
   // Handle refresh insights
@@ -264,14 +273,17 @@ export default function AiBusinessAdvisorClient() {
         success: 'Insights updated with latest data',
         error: 'Failed to refresh insights'
       }
-    )  }
+    )
+  }
 
   // Handle metric card click
   const handleMetricClick = (metricLabel: string) => {
-    toast.info(`Viewing detailed analytics for: ${metricLabel}`)  }
+    toast.info('Viewing detailed analytics for: ' + metricLabel)
+  }
 
   useEffect(() => {
-    if (userId) {      announce('AI Business Advisor loaded', 'polite')
+    if (userId) {
+      announce('AI Business Advisor loaded', 'polite')
     }
   }, [userId, announce])
 

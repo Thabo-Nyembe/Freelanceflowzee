@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -761,13 +763,9 @@ export default function PayrollClient() {
   // Fetch payroll runs from Supabase
   const fetchPayrollRuns = useCallback(async () => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('payroll_runs')
         .select('*')
@@ -802,16 +800,12 @@ export default function PayrollClient() {
 
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to create payroll runs')
         return
       }
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('payroll_runs').insert({
         user_id: user.id,
         run_code: generateRunCode(),
@@ -850,8 +844,6 @@ export default function PayrollClient() {
 
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('payroll_runs')
         .update({
@@ -884,8 +876,6 @@ export default function PayrollClient() {
   // Delete payroll run (soft delete)
   const handleDeletePayrollRun = async (id: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('payroll_runs')
         .update({ deleted_at: new Date().toISOString() })
@@ -919,11 +909,7 @@ export default function PayrollClient() {
   // Approve payroll run
   const handleApprovePayrollRunDb = async (id: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('payroll_runs')
         .update({
@@ -948,8 +934,6 @@ export default function PayrollClient() {
   const handleProcessPayrollRunDb = async (id: string) => {
     try {
       const run = dbPayrollRuns.find(r => r.id === id)
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('payroll_runs')
         .update({
@@ -1073,8 +1057,7 @@ export default function PayrollClient() {
       }
 
       const analytics = data.analytics
-      toast.success('Payroll analytics loaded' | ${analytics.pay_runs_completed} completed runs`
-      })
+      toast.success(`Payroll analytics loaded: ${analytics.pay_runs_completed} completed runs`)
     } catch (error) {
       console.error('Error loading analytics:', error)
       toast.error('Failed to load analytics')

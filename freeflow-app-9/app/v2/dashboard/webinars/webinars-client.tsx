@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
+import { cn } from '@/lib/utils'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -509,7 +510,7 @@ export default function WebinarsClient() {
       w.id === webinarId ? { ...w, status: 'live' as WebinarStatus } : w
     ))
     setIsLive(true)
-    toast.success('Webinar Started'" is now live` })
+    toast.success("Webinar Started! " + webinarTitle + " is now live")
   }
 
   const handleEndWebinar = (webinarId: string, webinarTitle: string) => {
@@ -517,7 +518,7 @@ export default function WebinarsClient() {
       w.id === webinarId ? { ...w, status: 'ended' as WebinarStatus } : w
     ))
     setIsLive(false)
-    toast.info('Webinar Ended'" has ended` })
+    toast.info("Webinar Ended! " + webinarTitle + " has ended")
   }
 
   const handleRegister = (webinarId: string) => {
@@ -544,7 +545,7 @@ export default function WebinarsClient() {
     link.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent('Name,Email,Status\n' + csvContent)
     link.download = 'attendees.csv'
     link.click()
-    toast.success('Exported' attendees exported to CSV` })
+    toast.success('Exported')
   }
 
   const handleViewRecording = (recording: Recording) => {
@@ -562,7 +563,7 @@ export default function WebinarsClient() {
     setRegistrations(prev => prev.map(r =>
       r.status === 'pending' ? { ...r, status: 'approved' as RegistrationStatus } : r
     ))
-    toast.success('Registrations Approved' registration(s) approved` })
+    toast.success('Registrations Approved')
   }
 
   const handleDeclineRegistrations = () => {
@@ -570,7 +571,7 @@ export default function WebinarsClient() {
     setRegistrations(prev => prev.map(r =>
       r.status === 'pending' ? { ...r, status: 'declined' as RegistrationStatus } : r
     ))
-    toast.info('Registrations Declined' registration(s) declined` })
+    toast.info('Registrations Declined')
   }
 
   // Quick Actions for toolbar (defined inside component to access state)
@@ -608,7 +609,7 @@ export default function WebinarsClient() {
           <div className="flex items-center gap-3">
             <Button variant="outline" className="gap-2" onClick={() => {
               setShowCalendarDialog(true)
-              toast.info('Calendar View' scheduled events` })
+              toast.info('Calendar View')
             }}>
               <Calendar className="w-4 h-4" />
               View Calendar
@@ -791,7 +792,7 @@ export default function WebinarsClient() {
                   className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200"
                   onClick={action.action}
                 >
-                  <div className={`w-8 h-8 rounded-lg ${action.color} flex items-center justify-center`}>
+                  <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", action.color)}>
                     <action.icon className="w-4 h-4 text-white" />
                   </div>
                   <span className="text-xs">{action.label}</span>
@@ -1008,7 +1009,7 @@ export default function WebinarsClient() {
                 { icon: Filter, label: 'Filter', color: 'bg-pink-500', action: () => setShowFilterDialog(true) },
                 { icon: RefreshCw, label: 'Refresh', color: 'bg-gray-500', action: () => {
                   setRegistrations([...mockRegistrations])
-                  toast.success('Registrations Refreshed' total registrations` })
+                  toast.success('Registrations Refreshed')
                 }}
               ].map((action, idx) => (
                 <Button
@@ -1017,7 +1018,7 @@ export default function WebinarsClient() {
                   className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200"
                   onClick={action.action}
                 >
-                  <div className={`w-8 h-8 rounded-lg ${action.color} flex items-center justify-center`}>
+                  <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", action.color)}>
                     <action.icon className="w-4 h-4 text-white" />
                   </div>
                   <span className="text-xs">{action.label}</span>
@@ -1096,7 +1097,7 @@ export default function WebinarsClient() {
                             <div className="flex items-center gap-2">
                               <Button variant="ghost" size="sm" onClick={() => {
                                 navigator.clipboard.writeText(reg.email)
-                                toast.success('Email Copied' copied to clipboard` })
+                                toast.success('Email Copied')
                               }}>
                                 <Mail className="w-4 h-4" />
                               </Button>
@@ -1106,7 +1107,7 @@ export default function WebinarsClient() {
                                     setRegistrations(prev => prev.map(r =>
                                       r.id === reg.id ? { ...r, status: 'approved' as RegistrationStatus } : r
                                     ))
-                                    toast.success('Registration Approved' has been approved` })
+                                    toast.success('Registration Approved')
                                   }}>
                                     <UserCheck className="w-4 h-4" />
                                   </Button>
@@ -1114,7 +1115,7 @@ export default function WebinarsClient() {
                                     setRegistrations(prev => prev.map(r =>
                                       r.id === reg.id ? { ...r, status: 'declined' as RegistrationStatus } : r
                                     ))
-                                    toast.info('Registration Declined' has been declined` })
+                                    toast.info('Registration Declined')
                                   }}>
                                     <UserX className="w-4 h-4" />
                                   </Button>
@@ -1122,7 +1123,7 @@ export default function WebinarsClient() {
                               )}
                               <Button variant="ghost" size="sm" onClick={() => {
                                 setRegistrations(prev => prev.filter(r => r.id !== reg.id))
-                                toast.success('Registration Removed' has been removed` })
+                                toast.success('Registration Removed')
                               }}>
                                 <Trash2 className="w-4 h-4" />
                               </Button>
@@ -1179,24 +1180,24 @@ export default function WebinarsClient() {
                     totalAttendees: stats.totalAttendees,
                     avgAttendance: stats.avgAttendanceRate
                   }
-                  toast.success('Report Generated' webinars analyzed` })
+                  toast.success('Report Generated')
                 }},
                 { icon: TrendingUp, label: 'Trends', color: 'bg-green-500', action: () => {
                   const trend = Math.round((Math.random() * 20) - 5)
-                  toast.success('Trend Analysis' ${Math.abs(trend)}% this month` })
+                  toast.success('Trend Analysis')
                 }},
                 { icon: PieChart, label: 'Breakdown', color: 'bg-purple-500', action: () => {
                   const types = webinars.reduce((acc, w) => { acc[w.type] = (acc[w.type] || 0) + 1; return acc }, {} as Record<string, number>)
-                  toast.success('Category Breakdown' webinar types analyzed` })
+                  toast.success('Category Breakdown')
                 }},
                 { icon: Users, label: 'Attendees', color: 'bg-orange-500', action: () => setActiveTab('registrations') },
                 { icon: MessageSquare, label: 'Q&A Stats', color: 'bg-pink-500', action: () => {
                   const answered = mockQA.filter(q => q.status === 'answered').length
-                  toast.success('Q&A Statistics'/${mockQA.length} questions answered` })
+                  toast.success("Q&A Statistics: " + mockQA.filter(q => q.status === 'answered').length + "/" + mockQA.length + " questions answered")
                 }},
                 { icon: ListChecks, label: 'Polls', color: 'bg-indigo-500', action: () => {
                   const totalVotes = mockPolls.reduce((sum, p) => sum + p.options.reduce((s, o) => s + o.votes, 0), 0)
-                  toast.success('Poll Results' total votes across ${mockPolls.length} polls` })
+                  toast.success('Poll Results')
                 }},
                 { icon: Download, label: 'Export', color: 'bg-teal-500', action: () => {
                   const csvData = `Webinar,Registered,Attended,Rate\n${webinars.map(w => `${w.title},${w.registeredCount},${w.attendedCount},${w.registeredCount > 0 ? ((w.attendedCount/w.registeredCount)*100).toFixed(1) : 0}%`).join('\n')}`
@@ -1214,7 +1215,7 @@ export default function WebinarsClient() {
                   className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200"
                   onClick={action.action}
                 >
-                  <div className={`w-8 h-8 rounded-lg ${action.color} flex items-center justify-center`}>
+                  <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", action.color)}>
                     <action.icon className="w-4 h-4 text-white" />
                   </div>
                   <span className="text-xs">{action.label}</span>
@@ -1394,7 +1395,7 @@ export default function WebinarsClient() {
                   const readyRecordings = recordings.filter(r => r.status === 'ready')
                   if (readyRecordings.length > 0) {
                     const totalSize = readyRecordings.reduce((s, r) => s + r.size, 0)
-                    toast.success('Download Started' of recordings` })
+                    toast.success('Download Started')
                   } else {
                     toast.info('No Downloads Available')
                   }
@@ -1435,7 +1436,7 @@ export default function WebinarsClient() {
                   className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200"
                   onClick={action.action}
                 >
-                  <div className={`w-8 h-8 rounded-lg ${action.color} flex items-center justify-center`}>
+                  <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", action.color)}>
                     <action.icon className="w-4 h-4 text-white" />
                   </div>
                   <span className="text-xs">{action.label}</span>
@@ -1464,11 +1465,7 @@ export default function WebinarsClient() {
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
-                        <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
-                          recording.type === 'video' ? 'bg-purple-100 text-purple-600' :
-                          recording.type === 'audio' ? 'bg-blue-100 text-blue-600' :
-                          'bg-gray-100 text-gray-600'
-                        }`}>
+                        <div className={cn("w-12 h-12 rounded-lg flex items-center justify-center", recording.type === 'video' ? 'bg-purple-100 text-purple-600' : recording.type === 'audio' ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600')}>
                           {recording.type === 'video' ? <Video className="w-6 h-6" /> :
                            recording.type === 'audio' ? <Headphones className="w-6 h-6" /> :
                            <FileText className="w-6 h-6" />}
@@ -1507,7 +1504,7 @@ export default function WebinarsClient() {
                                   link.href = recording.url
                                   link.download = `${recording.webinarTitle}.${recording.type === 'video' ? 'mp4' : recording.type === 'audio' ? 'mp3' : 'txt'}`
                                   link.click()
-                                  toast.success('Download Started'"` })
+                                  toast.success("Download Started: " + recording.webinarTitle)
                                 }
                               }}>
                                 <Download className="w-4 h-4" />
@@ -1595,7 +1592,7 @@ export default function WebinarsClient() {
                   if (selectedTemplate) {
                     const newTemplate = { ...selectedTemplate, id: `t${Date.now()}`, name: `${selectedTemplate.name} (Copy)` }
                     setTemplates(prev => [...prev, newTemplate])
-                    toast.success('Template Duplicated' created` })
+                    toast.success('Template Duplicated')
                   } else {
                     toast.info('Select Template')
                   }
@@ -1630,7 +1627,7 @@ export default function WebinarsClient() {
                   className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200"
                   onClick={action.action}
                 >
-                  <div className={`w-8 h-8 rounded-lg ${action.color} flex items-center justify-center`}>
+                  <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", action.color)}>
                     <action.icon className="w-4 h-4 text-white" />
                   </div>
                   <span className="text-xs">{action.label}</span>
@@ -1653,18 +1650,13 @@ export default function WebinarsClient() {
               {templates.map((template) => (
                 <Card
                   key={template.id}
-                  className={`cursor-pointer transition-all ${selectedTemplate?.id === template.id ? 'ring-2 ring-purple-500' : ''}`}
+                  className={cn("cursor-pointer transition-all", selectedTemplate?.id === template.id && "ring-2 ring-purple-500")}
                   onClick={() => setSelectedTemplate(template)}
                 >
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
-                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                          template.type === 'confirmation' ? 'bg-green-100 text-green-600' :
-                          template.type === 'reminder' ? 'bg-blue-100 text-blue-600' :
-                          template.type === 'follow_up' ? 'bg-purple-100 text-purple-600' :
-                          'bg-red-100 text-red-600'
-                        }`}>
+                        <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center", template.type === 'confirmation' ? 'bg-green-100 text-green-600' : template.type === 'reminder' ? 'bg-blue-100 text-blue-600' : template.type === 'follow_up' ? 'bg-purple-100 text-purple-600' : 'bg-red-100 text-red-600')}>
                           <Mail className="w-5 h-5" />
                         </div>
                         <div>
@@ -1691,8 +1683,7 @@ export default function WebinarsClient() {
                               setTemplates(prev => prev.map(t =>
                                 t.id === template.id ? { ...t, enabled: checked } : t
                               ))
-                              toast.success(checked ? 'Template Enabled' : 'Template Disabled' is now ${checked ? 'active' : 'inactive'}`
-                              })
+                              toast.success(checked ? "Template Enabled - " + template.name + " is now active" : "Template Disabled - " + template.name + " is now inactive")
                             }}
                             onClick={(e) => e.stopPropagation()}
                           />
@@ -1747,11 +1738,7 @@ export default function WebinarsClient() {
                         <button
                           key={item.id}
                           onClick={() => setSettingsTab(item.id)}
-                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
-                            settingsTab === item.id
-                              ? 'bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
-                              : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800'
-                          }`}
+                          className={cn("w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors", settingsTab === item.id ? 'bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300' : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800')}
                         >
                           <item.icon className="w-4 h-4" />
                           <span className="text-sm font-medium">{item.label}</span>
@@ -1992,9 +1979,9 @@ export default function WebinarsClient() {
                             </div>
                             <Button variant="outline" size="sm" onClick={() => {
                               if (integration.status === 'connected') {
-                                toast.info('Configure Integration' configuration...` })
+                                toast.info('Configure Integration')
                               } else {
-                                toast.success('Connecting...'` })
+                                toast.success("Connecting...")
                               }
                             }}>
                               {integration.status === 'connected' ? 'Configure' : 'Connect'}
@@ -2241,7 +2228,7 @@ export default function WebinarsClient() {
             <AIInsightsPanel
               insights={mockWebinarsAIInsights}
               title="Webinar Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info("Insight: " + insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -2439,7 +2426,7 @@ export default function WebinarsClient() {
                     View Registrations
                   </Button>
                   <Button variant="outline" className="gap-2" onClick={() => {
-                    const shareUrl = `${window.location.origin}/webinars/${selectedWebinar.id}`
+                    const shareUrl = window.location.origin + "/webinars/" + selectedWebinar.id
                     navigator.clipboard.writeText(shareUrl)
                     toast.success('Link Copied')
                   }}>

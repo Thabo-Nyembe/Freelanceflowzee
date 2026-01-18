@@ -83,7 +83,8 @@ export default function ResourceLibraryPage() {
           totalAuthors: statsResult.data?.total_authors || 0
         })
 
-        setIsLoading(false)        announce(`Resource library loaded with ${resourcesResult.data?.length || 0} resources`, 'polite')
+        setIsLoading(false)
+        announce(`Resource library loaded with ${resourcesResult.data?.length || 0} resources`, 'polite')
       } catch (err) {
         logger.error('Failed to load resource library data', { error: err, userId })
         setError(err instanceof Error ? err.message : 'Failed to load resource library')

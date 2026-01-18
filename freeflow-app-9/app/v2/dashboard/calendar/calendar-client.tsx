@@ -455,7 +455,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
   const handleDeleteEvent = async (event: CalendarEvent) => {
     try {
       await deleteEvent({ id: event.id } as any)
-      toast.success('Event deleted'" removed` })
+      toast.success('Event deleted')
       setSelectedEvent(null)
       refetch()
     } catch (err) {
@@ -1897,7 +1897,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
             <AIInsightsPanel
               insights={calendarAIInsights}
               title="Calendar Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(`Action: ${insight.title}`)}
             />
           </div>
           <div className="space-y-6">

@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import {
@@ -325,13 +327,9 @@ export default function TestingClient() {
   // Fetch tests from Supabase
   const fetchTests = useCallback(async () => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('feature_tests')
         .select('*')
@@ -360,16 +358,12 @@ export default function TestingClient() {
 
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to create tests')
         return
       }
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('feature_tests').insert({
         name: formState.name,
         path: formState.file_path || `tests/${formState.suite_name.toLowerCase()}/${formState.name.toLowerCase().replace(/\s+/g, '-')}.spec.ts`,
@@ -400,12 +394,8 @@ export default function TestingClient() {
   // Run/trigger test
   const handleRunTest = async (testId: string, testName: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('test_runs').insert({
         test_id: testId,
         user_id: user?.id,
@@ -445,8 +435,6 @@ export default function TestingClient() {
   // Update test status
   const handleUpdateTestStatus = async (testId: string, newStatus: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('feature_tests')
         .update({
@@ -468,8 +456,6 @@ export default function TestingClient() {
   // Delete test
   const handleDeleteTest = async (testId: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('feature_tests')
         .delete()
@@ -488,8 +474,6 @@ export default function TestingClient() {
   // Export results
   const handleExportResults = async () => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('test_runs')
         .select('*, feature_tests(*)')
@@ -520,8 +504,7 @@ export default function TestingClient() {
       setIsRunning(false)
       setShowRunDialog(false)
       if (res.ok) {
-        toast.success('Test run completed' tests executed`
-        })
+        toast.success('Test run completed - all tests executed')
       } else {
         toast.error('Test run failed')
       }
@@ -572,8 +555,6 @@ export default function TestingClient() {
   // Rerun failed tests
   const handleRerunFailed = async () => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('feature_tests')
         .select('id, name')
@@ -1405,6 +1386,9 @@ export default function TestingClient() {
 {`# playwright.config.ts
 import { defineConfig, devices } from '@playwright/test';
 
+// Initialize Supabase client once at module level
+const supabase = createClient()
+
 export default defineConfig({
   testDir: './tests',
   fullyParallel: true,
@@ -1811,7 +1795,7 @@ export default defineConfig({
                         <Button variant="outline" className="w-full" onClick={() => {
                           const varName = prompt('Enter variable name:', 'NEW_VAR')
                           if (varName && varName.trim()) {
-                            toast.success('Variable added' has been added to your environment` })
+                            toast.success(`Variable added: ${varName} has been added to your environment`)
                           }
                         }}>
                           <Plus className="h-4 w-4 mr-2" />
@@ -2399,8 +2383,6 @@ export default defineConfig({
             <Button onClick={async () => {
               setIsSubmitting(true)
               try {
-                const { createClient } = await import('@/lib/supabase/client')
-                const supabase = createClient()
                 const { error } = await supabase.from('testing_integrations').insert({
                   type: 'github',
                   status: 'connected',
@@ -2450,8 +2432,6 @@ export default defineConfig({
                     } else {
                       toast.promise(
                         (async () => {
-                          const { createClient } = await import('@/lib/supabase/client')
-                          const supabase = createClient()
                           const { data: { user } } = await supabase.auth.getUser()
                           if (!user) throw new Error('Not authenticated')
 

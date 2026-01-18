@@ -205,7 +205,8 @@ export default function AdvancedMicroFeaturesClient() {
       return
     }
 
-    setIsSubmitting(true)    try {
+    setIsSubmitting(true)
+    try {
       // Call API to create item
       const response = await fetch('/api/micro-features/items', {
         method: 'POST',
@@ -214,8 +215,7 @@ export default function AdvancedMicroFeaturesClient() {
       })
       if (!response.ok) throw new Error('Failed to create item')
 
-      toast.success('Item created successfully'" has been added as a ${newItemForm.type}`
-      })
+      toast.success(`Item created successfully - "${newItemForm.name}" has been added as a ${newItemForm.type}`)
 
       setNewItemDialogOpen(false)
       setNewItemForm({
@@ -236,7 +236,8 @@ export default function AdvancedMicroFeaturesClient() {
 
   // Handler for exporting data
   const handleExportData = useCallback(async () => {
-    setIsSubmitting(true)    try {
+    setIsSubmitting(true)
+    try {
       // Call API to export data
       const response = await fetch('/api/micro-features/export', {
         method: 'POST',
@@ -258,8 +259,7 @@ export default function AdvancedMicroFeaturesClient() {
         }
       }
 
-      toast.success('Export completed'.${exportForm.format} has been downloaded`
-      })
+      toast.success(`Export completed - ${exportForm.format} has been downloaded`)
 
       setExportDialogOpen(false)
       setExportForm({
@@ -279,7 +279,8 @@ export default function AdvancedMicroFeaturesClient() {
 
   // Handler for saving settings
   const handleSaveSettings = useCallback(async () => {
-    setIsSubmitting(true)    try {
+    setIsSubmitting(true)
+    try {
       // Call API to save settings
       const response = await fetch('/api/micro-features/settings', {
         method: 'PUT',

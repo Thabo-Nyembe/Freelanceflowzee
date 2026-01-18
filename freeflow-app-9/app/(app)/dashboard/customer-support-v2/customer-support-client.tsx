@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import dynamic from 'next/dynamic'
 import { toast } from 'sonner'
@@ -27,6 +29,9 @@ import {
 
 // Lazy-loaded Competitive Upgrade Components for code splitting
 import { TabContentSkeleton } from '@/components/dashboard/lazy'
+
+// Initialize Supabase client once at module level
+const supabase = createClient()
 
 const AIInsightsPanel = dynamic(
   () => import('@/components/ui/competitive-upgrades').then(mod => ({ default: mod.AIInsightsPanel })),
@@ -308,8 +313,6 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
   const fetchTickets = useCallback(async () => {
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('support_tickets')
         .select('*')
@@ -414,16 +417,12 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
 
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to create tickets')
         return
       }
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('support_tickets').insert({
         user_id: user.id,
         subject: ticketForm.subject,
@@ -454,8 +453,6 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
   // Assign agent to ticket
   const handleAssignAgent = async (ticketId: string, agentId: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('support_tickets')
         .update({
@@ -479,12 +476,8 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
   // Resolve ticket
   const handleResolveTicket = async (ticketId: string, notes?: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('support_tickets')
         .update({
@@ -510,8 +503,6 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
   // Escalate ticket
   const handleEscalateTicket = async (ticketId: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('support_tickets')
         .update({
@@ -535,12 +526,8 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
   // Send reply to ticket
   const handleSendTicketReply = async (ticketId: string, message: string, isInternal: boolean) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('support_ticket_replies').insert({
         ticket_id: ticketId,
         message: message,
@@ -553,8 +540,6 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
       if (error) throw error
 
       // Update first response time if not set
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       await supabase
         .from('support_tickets')
         .update({
@@ -576,8 +561,6 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
   // Delete ticket
   const handleDeleteTicket = async (ticketId: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('support_tickets')
         .update({ deleted_at: new Date().toISOString() })
@@ -597,8 +580,6 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
   // Export tickets
   const handleExportTickets = async () => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('support_tickets')
         .select('*')
@@ -631,8 +612,6 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
   const handleAIQuestion = async (question: string) => {
     try {
       toast.loading('Analyzing with AI...')
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
       // Call AI API for insights
@@ -4094,8 +4073,6 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             <Button onClick={async () => {
               toast.loading('Saving webhook...', { id: 'save-webhook' })
               try {
-                const { createClient } = await import('@/lib/supabase/client')
-                const supabase = createClient()
                 const { data: { user } } = await supabase.auth.getUser()
                 if (!user) throw new Error('Not authenticated')
 
@@ -4165,7 +4142,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                 toast.error('Please enter a team name');
                 return;
               }
-              toast.success('Team created' team is now active` });
+              toast.success(`Team created: "${newTeamName}" team is now active`);
               setShowCreateTeamDialog(false);
               setNewTeamName('');
             }}>Create Team</Button>
@@ -4219,7 +4196,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                 toast.error('Please enter a segment name');
                 return;
               }
-              toast.success('Segment created' segment is now active` });
+              toast.success(`Segment created: ${newSegmentName} segment is now active`);
               setShowCreateSegmentDialog(false);
               setNewSegmentName('');
             }}>Create Segment</Button>
@@ -4388,8 +4365,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                 return;
               }
               const swapAgent = agents.find(a => a.id === shiftSwapForm.swapWith);
-              toast.success('Shift swap request sent' will be notified`
-              });
+              toast.success(`Shift swap request sent: ${swapAgent?.name || 'Agent'} will be notified`);
               setShowShiftSwapDialog(false);
               setShiftSwapForm({ date: '', swapWith: '' });
             }}>Send Request</Button>
@@ -4543,7 +4519,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
             </div>
             <div className="flex gap-2">
               <Button variant="outline" className="flex-1" onClick={() => {
-                toast.success('Email campaign started' customers` });
+                toast.success(`Email campaign started: sending to customers`);
               }}>Email Segment</Button>
               <Button variant="outline" className="flex-1" onClick={() => {
                 toast.success('Exporting segment data');

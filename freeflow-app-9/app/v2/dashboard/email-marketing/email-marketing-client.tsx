@@ -765,8 +765,7 @@ const mockEmailQuickActions = [
       if (!response.ok) throw new Error('Failed to load lists')
       const result = await response.json()
       const count = result.data?.length || 0
-      toast.success('Subscriber lists loaded' subscribers found`
-      })
+      toast.success("Subscriber lists loaded - " + count + " subscribers found")
     } catch (error) {
       toast.error('Failed to load lists')
     }
@@ -869,18 +868,15 @@ export default function EmailMarketingClient({
 
   // Handlers
   const handleSendCampaign = (campaignName: string) => {
-    toast.success('Sending campaign'" is being sent...`
-    })
+    toast.success("Sending campaign - " + campaignName + " is being sent...")
   }
 
   const handleScheduleCampaign = (campaignName: string) => {
-    toast.success('Campaign scheduled'" has been scheduled`
-    })
+    toast.success("Campaign scheduled - " + campaignName + " has been scheduled")
   }
 
   const handleDuplicateCampaign = (campaignName: string) => {
-    toast.success('Campaign duplicated'" created`
-    })
+    toast.success("Campaign duplicated - " + campaignName + " (copy) created")
   }
 
   const handleExportSubscribers = () => {
@@ -1706,7 +1702,7 @@ export default function EmailMarketingClient({
             <AIInsightsPanel
               insights={mockEmailAIInsights}
               title="Email Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={activeEmailAIEnabled ? (insight) => toast.info('Insight: ' + insight.title) : undefined}
             />
           </div>
           <div className="space-y-6">
@@ -1966,13 +1962,11 @@ export default function EmailMarketingClient({
                 <div className="flex gap-3">
                   {selectedAutomation.status === 'active' ? (
                     <Button variant="outline" onClick={() => {
-                      toast.success('Automation paused'" has been paused`
-                      })
+                      toast.success("Automation paused - " + selectedAutomation.name + " has been paused")
                     }}><Pause className="w-4 h-4 mr-2" />Pause Automation</Button>
                   ) : (
                     <Button className="bg-gradient-to-r from-green-500 to-emerald-600" onClick={() => {
-                      toast.success('Automation activated'" is now active`
-                      })
+                      toast.success("Automation activated - " + selectedAutomation.name + " is now active")
                     }}><Play className="w-4 h-4 mr-2" />Activate</Button>
                   )}
                   <Button variant="outline" onClick={() => setEditAutomationDialogOpen(true)}><Edit className="w-4 h-4 mr-2" />Edit Steps</Button>
@@ -2064,7 +2058,7 @@ export default function EmailMarketingClient({
                 }} className="flex-1">Cancel</Button>
                 <Button onClick={() => {
                   if (newCampaignName && newCampaignSubject) {
-                    toast.success('Campaign created'" has been created as a draft` })
+                    toast.success("Campaign created - " + newCampaignName + " has been created as a draft")
                     setCreateCampaignDialogOpen(false)
                     setNewCampaignName('')
                     setNewCampaignSubject('')
@@ -2111,7 +2105,7 @@ export default function EmailMarketingClient({
                 }} className="flex-1">Cancel</Button>
                 <Button onClick={() => {
                   if (newListName) {
-                    toast.success('List created'" has been created` })
+                    toast.success("List created - " + newListName + " has been created")
                     setCreateListDialogOpen(false)
                     setNewListName('')
                     setNewListDescription('')
@@ -2217,7 +2211,7 @@ export default function EmailMarketingClient({
                 }} className="flex-1">Cancel</Button>
                 <Button onClick={() => {
                   if (newSegmentName) {
-                    toast.success('Segment created'" has been created` })
+                    toast.success("Segment created - " + newSegmentName + " has been created")
                     setCreateSegmentDialogOpen(false)
                     setNewSegmentName('')
                   } else {
@@ -2277,7 +2271,7 @@ export default function EmailMarketingClient({
                 }} className="flex-1">Cancel</Button>
                 <Button onClick={() => {
                   if (newAutomationName) {
-                    toast.success('Automation created'" has been created. Add steps to complete setup.` })
+                    toast.success("Automation created - " + newAutomationName + " has been created. Add steps to complete setup.")
                     setCreateAutomationDialogOpen(false)
                     setNewAutomationName('')
                   } else {
@@ -2333,7 +2327,7 @@ export default function EmailMarketingClient({
                 }} className="flex-1">Cancel</Button>
                 <Button onClick={() => {
                   if (newTemplateName) {
-                    toast.success('Template created'" has been created. Opening editor...` })
+                    toast.success("Template created - " + newTemplateName + " has been created. Opening editor...")
                     setCreateTemplateDialogOpen(false)
                     setNewTemplateName('')
                   } else {
@@ -2754,13 +2748,13 @@ export default function EmailMarketingClient({
                   </div>
                   <div className="flex gap-3 pt-4">
                     <Button variant="outline" onClick={() => {
-                      toast.success('Syncing...'` })
+                      toast.success('Syncing...')
                     }} className="flex-1">
                       <RefreshCw className="w-4 h-4 mr-2" />
                       Sync Now
                     </Button>
                     <Button variant="destructive" onClick={() => {
-                      toast.success('Disconnected' has been disconnected` })
+                      toast.success('Disconnected')
                       setIntegrationDialogOpen(false)
                     }} className="flex-1">Disconnect</Button>
                   </div>
@@ -2775,7 +2769,7 @@ export default function EmailMarketingClient({
                   <div className="flex gap-3 pt-4">
                     <Button variant="outline" onClick={() => setIntegrationDialogOpen(false)} className="flex-1">Cancel</Button>
                     <Button onClick={() => {
-                      toast.success('Connected' has been connected successfully` })
+                      toast.success('Connected')
                       setIntegrationDialogOpen(false)
                     }} className="flex-1">Connect {selectedIntegration}</Button>
                   </div>

@@ -724,15 +724,13 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
   // Handlers
   const handleSendProposal = () => {
     if (!selectedRenewal) return
-    toast.success('Proposal sent successfully'`
-    })
+    toast.success(`Proposal sent successfully to ${selectedRenewal.customerName}`)
     setIsRenewalDialogOpen(false)
   }
 
   const handleScheduleMeeting = () => {
     if (!selectedRenewal) return
-    toast.success('Meeting scheduled'`
-    })
+    toast.success(`Meeting scheduled with ${selectedRenewal.customerName}`)
   }
 
   const handleExport = () => {
@@ -744,18 +742,15 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
   }
 
   const handleContactEmail = (email: string, name: string) => {
-    toast.success('Opening email'`
-    })
+    toast.success(`Opening email for ${name}`)
   }
 
   const handleContactPhone = (phone: string, name: string) => {
-    toast.success('Initiating call'`
-    })
+    toast.success(`Initiating call to ${name}`)
   }
 
   const handleProcessRenewal = (contractName: string) => {
-    toast.success('Processing renewal'" renewal is being processed`
-    })
+    toast.success(`Processing renewal: "${contractName}" renewal is being processed`)
   }
 
   const handleExportRenewals = () => {
@@ -778,8 +773,7 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
 
   const handleSaveEditRenewal = () => {
     if (!selectedRenewal) return
-    toast.success('Renewal updated' renewal has been updated successfully`
-    })
+    toast.success(`Renewal updated: ${selectedRenewal.customerName} renewal has been updated successfully`)
     setIsEditRenewalDialogOpen(false)
     setSelectedRenewal(null)
   }
@@ -906,8 +900,7 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
     const activeFilters = Object.entries(filterCriteria).filter(([_, v]) =>
       typeof v === 'string' ? v !== 'all' : (v.start || v.end)
     ).length
-    toast.success('Filters applied' filter${activeFilters !== 1 ? 's' : ''} active`
-    })
+    toast.success(`Filters applied: ${activeFilters} filter${activeFilters !== 1 ? 's' : ''} active`)
     setIsFiltersDialogOpen(false)
   }
 
@@ -1012,8 +1005,7 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
   }
 
   const handleUsePlaybook = (playbook: Playbook) => {
-    toast.success(`Starting ${playbook.name}` steps to complete`
-    })
+    toast.success(`Starting ${playbook.name}: steps to complete`)
   }
 
   const handleManageIntegration = (integrationName: string, isConnected: boolean) => {

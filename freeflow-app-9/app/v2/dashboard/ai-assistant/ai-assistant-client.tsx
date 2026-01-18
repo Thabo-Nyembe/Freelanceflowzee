@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useRef, useEffect, useMemo } from 'react'
 import { toast } from 'sonner'
 import {
@@ -67,6 +69,9 @@ import { useAIAssistant } from '@/lib/hooks/use-ai-assistant'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
+
+// Initialize Supabase client once at module level
+const supabase = createClient()
 
 // Types
 type ModelType = 'gpt-4o' | 'gpt-4-turbo' | 'gpt-3.5-turbo' | 'claude-3-opus' | 'claude-3-sonnet' | 'claude-3-haiku'
@@ -481,8 +486,7 @@ export default function AIAssistantClient() {
     try {
       await hookToggleStar(id)
       const conv = conversations.find(c => c.id === id)
-      toast.success(conv?.is_starred ? 'Removed from starred' : 'Added to starred'`
-      })
+      toast.success(conv?.is_starred ? 'Removed from starred' : 'Added to starred')
     } catch (err) {
       console.error('Error toggling star:', err)
       toast.error('Failed to update conversation')
@@ -506,8 +510,7 @@ export default function AIAssistantClient() {
     try {
       await toggleArchive(id)
       const conv = conversations.find(c => c.id === id)
-      toast.success(conv?.is_archived ? 'Conversation restored' : 'Conversation archived'`
-      })
+      toast.success(conv?.is_archived ? 'Conversation restored' : 'Conversation archived')
     } catch (err) {
       console.error('Error archiving conversation:', err)
       toast.error('Failed to archive conversation')
@@ -530,8 +533,6 @@ export default function AIAssistantClient() {
     }
 
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
@@ -579,8 +580,7 @@ export default function AIAssistantClient() {
         tools: []
       })
 
-      toast.success('Assistant created' has been created successfully`
-      })
+      toast.success('Assistant created - ' + newAssistant.name + ' has been created successfully')
     } catch (err) {
       console.error('Error creating assistant:', err)
       toast.error('Failed to create assistant')
@@ -595,8 +595,6 @@ export default function AIAssistantClient() {
     }
 
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
@@ -640,8 +638,7 @@ export default function AIAssistantClient() {
         variables: []
       })
 
-      toast.success('Prompt template created' has been saved to your library`
-      })
+      toast.success('Prompt template created - ' + newPrompt.name + ' has been saved to your library')
     } catch (err) {
       console.error('Error creating prompt:', err)
       toast.error('Failed to create prompt')
@@ -654,8 +651,6 @@ export default function AIAssistantClient() {
     if (!file) return
 
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
@@ -701,8 +696,7 @@ export default function AIAssistantClient() {
 
       setFiles(prev => [newFile, ...prev])
 
-      toast.success('File uploaded' is being processed`
-      })
+      toast.success('File uploaded - ' + file.name + ' is being processed')
 
       // Call API to process file
       try {
@@ -722,8 +716,7 @@ export default function AIAssistantClient() {
           setFiles(prev => prev.map(f =>
             f.id === newFile.id ? { ...f, status: 'ready', chunks: processedData.chunks } : f
           ))
-          toast.success('File ready' has been processed and is ready to use`
-          })
+          toast.success('File ready - ' + file.name + ' has been processed and is ready to use')
         } else {
           throw new Error('File processing failed')
         }
@@ -743,8 +736,6 @@ export default function AIAssistantClient() {
   // Handle file delete - Supabase operation
   const handleDeleteFile = async (fileId: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('ai_knowledge_files')
         .delete()
@@ -801,8 +792,6 @@ export default function AIAssistantClient() {
 
     try {
       // Delete all messages for this conversation
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('ai_messages')
         .delete()
@@ -901,8 +890,7 @@ export default function AIAssistantClient() {
   const handleAttachFile = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
-      toast.success('File attached' is ready to send with your message`
-      })
+      toast.success('File attached - ' + file.name + ' is ready to send with your message')
       setShowAttachFileDialog(false)
     }
   }
@@ -911,8 +899,7 @@ export default function AIAssistantClient() {
   const handleAttachImage = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
-      toast.success('Image attached' is ready to send with your message`
-      })
+      toast.success('Image attached - ' + file.name + ' is ready to send with your message')
       setShowAttachImageDialog(false)
     }
   }
@@ -939,8 +926,7 @@ export default function AIAssistantClient() {
       const { data } = await response.json()
 
       setInputMessage(prev => prev + (prev ? ' ' : '') + data.text)
-      toast.success('Voice input captured'% confidence`
-      })
+      toast.success('Voice input captured - ' + data.confidence + '% confidence')
       setShowVoiceInputDialog(false)
     } catch (err) {
       console.error('Error transcribing voice:', err)
@@ -950,8 +936,7 @@ export default function AIAssistantClient() {
 
   // Handle file download from Files tab
   const handleDownloadFile = (file: KnowledgeFile) => {
-    toast.success('Download started'...`
-    })
+    toast.success('Download started - ' + file.name)
     // In production, this would trigger actual file download
   }
 
@@ -1987,7 +1972,7 @@ export default function AIAssistantClient() {
             <AIInsightsPanel
               insights={mockAIAssistantAIInsights}
               title="AI Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info('Insight action: ' + insight.title)}
             />
           </div>
           <div className="space-y-6">

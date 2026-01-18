@@ -894,7 +894,7 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
     }
     setTasks(prev => [...prev, newTask])
     setShowAddTaskDialog(false)
-    toast.success('Task created'" has been added` })
+    toast.success('Task created')
   }
 
   const submitScheduleMeeting = () => {
@@ -922,7 +922,7 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
     }
     setTasks(prev => [...prev, meetingTask])
     setShowScheduleMeetingDialog(false)
-    toast.success('Meeting scheduled' on ${meetingDate} at ${meetingTime}` })
+    toast.success('Meeting scheduled')
   }
 
   const submitReminder = () => {
@@ -948,7 +948,7 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
     }
     setTasks(prev => [...prev, reminderTask])
     setShowReminderDialog(false)
-    toast.success('Reminder set' at ${reminderTime}` })
+    toast.success('Reminder set')
   }
 
   const submitNewSection = () => {
@@ -971,7 +971,7 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
           ? { ...p, sections: [...p.sections, newSection] }
           : p
       ))
-      toast.success('Section created'" has been added` })
+      toast.success('Section created')
       setNewSectionName('')
     } else {
       toast.error('No project selected for section')
@@ -991,7 +991,7 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
       taskCount: 0
     }
     setLabels(prev => [...prev, newLabel])
-    toast.success('Label created' has been created` })
+    toast.success('Label created')
     setNewLabelName('')
     setNewLabelColor('#6366F1')
     setShowAddLabelDialog(false)
@@ -1015,7 +1015,7 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
       createdAt: new Date().toISOString()
     }
     setProjects(prev => [...prev, newProject])
-    toast.success('Project created'" has been created` })
+    toast.success('Project created')
     setNewProjectName('')
     setNewProjectColor('#10B981')
     setNewProjectDescription('')
@@ -1049,7 +1049,7 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
       ))
       setSelectedTask(prev => prev ? { ...prev, projectId: moveTargetProject, projectName: targetProject?.name, projectColor: targetProject?.color } : null)
       setShowMoveTaskDialog(false)
-      toast.success('Task moved'` })
+      toast.success('Task moved')
     }
   }
 
@@ -1066,7 +1066,7 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
       }
       setTasks(prev => [...prev, duplicatedTask])
       setShowDuplicateTaskDialog(false)
-      toast.success('Task duplicated'" has been created` })
+      toast.success('Task duplicated')
     }
   }
 
@@ -1099,7 +1099,7 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
     setTimerMode('focus')
     setTimerActive(true)
     setShowFocusSessionDialog(false)
-    toast.success('Focus session started' minute focus session active` })
+    toast.success('Focus session started')
   }
 
   const handlePostComment = () => {
@@ -2112,7 +2112,7 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
             <AIInsightsPanel
               insights={mockMyDayAIInsights}
               title="Daily Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">

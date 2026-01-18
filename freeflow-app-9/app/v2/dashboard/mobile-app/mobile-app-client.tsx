@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import { useAuthUserId } from '@/lib/hooks/use-auth-user-id'
@@ -324,8 +326,6 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
     }
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('mobile_app_builds').insert({
         user_id: userId,
         version: buildForm.version,
@@ -337,7 +337,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
         min_os_version: buildForm.platform === 'ios' ? 'iOS 15.0' : 'Android 10'
       })
       if (error) throw error
-      toast.success('Build created' is being processed` })
+      toast.success(`Build created`, { description: `Version ${buildForm.version} is being processed` })
       setBuildForm({ version: '', buildNumber: '', platform: 'ios', releaseType: 'beta' })
       setShowCreateBuildModal(false)
     } catch (err: any) {
@@ -348,22 +348,18 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
   const handleSubmitToStore = async (buildId: string, platform: string) => {
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('mobile_app_builds').update({ status: 'submitted', submitted_at: new Date().toISOString() }).eq('id', buildId)
       if (error) throw error
-      toast.success('Submitted to store' for review` })
+      toast.success(`Submitted to store`, { description: `Build submitted for review` })
     } catch (err: any) {
       toast.error('Submission failed')
     } finally { setIsLoading(false) }
   }
 
   const handleDownloadBuild = async (buildId: string, buildVersion: string) => {
-    toast.success('Downloading build' download starting...` })
+    toast.success(`Downloading build`, { description: `Version ${buildVersion} download starting...` })
     // Log download event
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       await supabase.from('mobile_app_downloads').insert({ build_id: buildId, user_id: userId, downloaded_at: new Date().toISOString() })
     } catch { /* ignore logging errors */ }
   }
@@ -371,11 +367,9 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
   const handleDeleteBuild = async (buildId: string, buildVersion: string) => {
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('mobile_app_builds').delete().eq('id', buildId)
       if (error) throw error
-      toast.success('Build deleted' has been removed` })
+      toast.success(`Build deleted`, { description: `Version ${buildVersion} has been removed` })
       setSelectedBuild(null)
       setShowBuildDialog(false)
     } catch (err: any) {
@@ -390,8 +384,6 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
     }
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('mobile_app_review_responses').insert({
         review_id: selectedReview.id,
         user_id: userId,
@@ -399,7 +391,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
         responded_at: new Date().toISOString()
       })
       if (error) throw error
-      toast.success('Reply sent'` })
+      toast.success(`Reply sent`, { description: `Response posted successfully` })
       setResponseText('')
       setShowReviewDialog(false)
     } catch (err: any) {
@@ -410,8 +402,6 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
   const handleReportReview = async (reviewId: string) => {
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('mobile_app_review_reports').insert({
         review_id: reviewId,
         user_id: userId,
@@ -432,8 +422,6 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
     }
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('mobile_app_push_campaigns').insert({
         user_id: userId,
         title: campaignForm.title,
@@ -443,7 +431,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
         status: 'draft'
       })
       if (error) throw error
-      toast.success('Campaign created'" is ready to schedule` })
+      toast.success(`Campaign created`, { description: `"${campaignForm.title}" is ready to schedule` })
       setCampaignForm({ title: '', message: '', platform: 'all', targetAudience: '' })
       setShowCreateCampaignModal(false)
     } catch (err: any) {
@@ -454,11 +442,9 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
   const handleSendCampaign = async (campaignId: string, campaignTitle: string) => {
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('mobile_app_push_campaigns').update({ status: 'sent', sent_at: new Date().toISOString() }).eq('id', campaignId)
       if (error) throw error
-      toast.success('Campaign sent'" has been sent` })
+      toast.success(`Campaign sent`, { description: `"${campaignTitle}" has been sent` })
     } catch (err: any) {
       toast.error('Send failed')
     } finally { setIsLoading(false) }
@@ -467,11 +453,9 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
   const handleDeleteCampaign = async (campaignId: string, campaignTitle: string) => {
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('mobile_app_push_campaigns').delete().eq('id', campaignId)
       if (error) throw error
-      toast.success('Campaign deleted'" has been removed` })
+      toast.success(`Campaign deleted`, { description: `"${campaignTitle}" has been removed` })
     } catch (err: any) {
       toast.error('Delete failed')
     } finally { setIsLoading(false) }
@@ -484,8 +468,6 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
     }
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('mobile_app_iaps').insert({
         user_id: userId,
         product_id: iapForm.productId,
@@ -495,7 +477,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
         status: 'pending'
       })
       if (error) throw error
-      toast.success('Product created'" is pending approval` })
+      toast.success(`Product created`, { description: `"${iapForm.name}" is pending approval` })
       setIapForm({ productId: '', name: '', type: 'subscription', price: '' })
       setShowCreateIapModal(false)
     } catch (err: any) {
@@ -506,11 +488,9 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
   const handleDeleteIap = async (iapId: string, iapName: string) => {
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('mobile_app_iaps').delete().eq('id', iapId)
       if (error) throw error
-      toast.success('Product deleted'" has been removed` })
+      toast.success(`Product deleted`, { description: `"${iapName}" has been removed` })
     } catch (err: any) {
       toast.error('Delete failed')
     } finally { setIsLoading(false) }
@@ -519,15 +499,13 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
   const handleSaveSettings = async (section: string) => {
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('mobile_app_settings').upsert({
         user_id: userId,
         section,
         updated_at: new Date().toISOString()
       }, { onConflict: 'user_id,section' })
       if (error) throw error
-      toast.success('Settings saved' settings have been updated` })
+      toast.success(`Settings saved`, { description: `${section} settings have been updated` })
     } catch (err: any) {
       toast.error('Save failed')
     } finally { setIsLoading(false) }
@@ -556,8 +534,6 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
     }
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('mobile_app_push_campaigns').update({
         title: campaignForm.title,
         message: campaignForm.message,
@@ -565,7 +541,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
         target_audience: campaignForm.targetAudience
       }).eq('id', selectedCampaign.id)
       if (error) throw error
-      toast.success('Campaign updated'" has been saved` })
+      toast.success('Campaign updated', { description: campaignForm.title + ' has been saved' })
       setShowEditCampaignDialog(false)
       setSelectedCampaign(null)
     } catch (err: any) {
@@ -592,8 +568,6 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
     }
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('mobile_app_iaps').update({
         product_id: iapForm.productId,
         name: iapForm.name,
@@ -601,7 +575,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
         price: iapForm.price
       }).eq('id', selectedIap.id)
       if (error) throw error
-      toast.success('Product updated'" has been saved` })
+      toast.success('Product updated', { description: iapForm.name + ' has been saved' })
       setShowEditIapDialog(false)
       setSelectedIap(null)
     } catch (err: any) {
@@ -633,8 +607,6 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
     setIsLoading(true)
     try {
       const newKey = `asc_${Math.random().toString(36).slice(2)}${Math.random().toString(36).slice(2)}`
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('mobile_app_settings').upsert({
         user_id: userId,
         section: 'api_key',
@@ -695,8 +667,6 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
     if (!selectedCiCd) return
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('mobile_app_cicd_integrations').upsert({
         user_id: userId,
         provider: selectedCiCd.name,
@@ -720,8 +690,6 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
     }
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('mobile_app_tester_groups').insert({
         user_id: userId,
         name: groupName,
@@ -730,7 +698,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
         created_at: new Date().toISOString()
       })
       if (error) throw error
-      toast.success('Group created'" is ready for testers` })
+      toast.success('Group created', { description: groupName + ' is ready for testers' })
       setShowCreateTesterGroupDialog(false)
     } catch (err: any) {
       toast.error('Failed to create group')
@@ -793,8 +761,6 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
   const handleRemoveFromStore = async () => {
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('mobile_app_settings').upsert({
         user_id: userId,
         section: 'store_availability',
@@ -813,8 +779,6 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
   const handleDeleteApp = async () => {
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('mobile_apps').delete().eq('user_id', userId)
       if (error) throw error
       toast.success('App deleted')
@@ -835,14 +799,12 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
     if (!selectedBuild) return
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('mobile_app_builds').update({
         status: 'released',
         released_at: new Date().toISOString()
       }).eq('id', selectedBuild.id)
       if (error) throw error
-      toast.success('Released!' is now live on ${selectedBuild.platform === 'ios' ? 'App Store' : 'Play Store'}` })
+      toast.success(`Released!`, { description: `Version ${selectedBuild.version} is now live on ${selectedBuild.platform === 'ios' ? 'App Store' : 'Play Store'}` })
       setShowBuildDialog(false)
     } catch (err: any) {
       toast.error('Release failed')
@@ -868,8 +830,6 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
     }
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('mobile_app_settings').upsert({
         user_id: userId,
         section: 'app_name',
@@ -877,7 +837,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
         updated_at: new Date().toISOString()
       }, { onConflict: 'user_id,section' })
       if (error) throw error
-      toast.success('App name updated'"` })
+      toast.success('App name updated', { description: 'Name changed to ' + newName })
       setShowEditAppNameDialog(false)
     } catch (err: any) {
       toast.error('Update failed')
@@ -2338,7 +2298,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
             <AIInsightsPanel
               insights={mockMobileAppAIInsights}
               title="Mobile App Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -2840,7 +2800,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                 input.onchange = (e) => {
                   const file = (e.target as HTMLInputElement).files?.[0]
                   if (file) {
-                    toast.success(`Selected: ${file.name}`)
+                    toast.success('Selected: ' + file.name)
                   }
                 }
                 input.click()

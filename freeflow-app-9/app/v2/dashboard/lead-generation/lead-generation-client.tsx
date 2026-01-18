@@ -802,8 +802,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
     try {
       const result = await createLead(newLeadForm)
       if (result) {
-        toast.success('Lead Created'" has been added successfully`
-        })
+        toast.success("Lead created successfully")
         setIsAddLeadDialogOpen(false)
         resetNewLeadForm()
       } else {
@@ -838,8 +837,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
       const mailtoUrl = `mailto:${selectedLead.email}?subject=${encodeURIComponent(emailForm.subject)}&body=${encodeURIComponent(emailForm.body)}`
       window.open(mailtoUrl, '_blank')
 
-      toast.success('Email Sent' ${selectedLead.lastName}`
-      })
+      toast.success("Email sent to " + selectedLead.firstName + " " + selectedLead.lastName)
       setIsEmailDialogOpen(false)
       setEmailForm({ subject: '', body: '' })
     } catch (error) {
@@ -854,8 +852,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
     if (!selectedLead) return
     const result = await contactLead(selectedLead.id)
     if (result) {
-      toast.success('Call logged' ${selectedLead.lastName}`
-      })
+      toast.success("Call logged for " + selectedLead.firstName + " " + selectedLead.lastName)
     } else {
       toast.error('Error')
     }
@@ -871,8 +868,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
     try {
       const result = await qualifyLead(leadId)
       if (result) {
-        toast.success('Lead Qualified'" has been qualified`
-        })
+        toast.success("Lead qualified")
       } else {
         toast.error('Error')
       }
@@ -888,8 +884,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
     try {
       const result = await convertLead(leadId)
       if (result) {
-        toast.success('Lead Converted'" has been marked as converted`
-        })
+        toast.success("Lead converted")
       } else {
         toast.error('Error')
       }
@@ -927,8 +922,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
   const handleUpdateLeadScore = async (leadId: string, newScore: number) => {
     const result = await updateScore(leadId, newScore)
     if (result) {
-      toast.success('Score Updated'`
-      })
+      toast.success('Score Updated')
     } else {
       toast.error('Error')
     }
@@ -953,8 +947,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
       })
 
       if (result) {
-        toast.success('Lead Assigned' ${selectedLead.lastName} assigned to ${assignee?.name}`
-        })
+        toast.success("Lead " + selectedLead.firstName + " " + selectedLead.lastName + " assigned to " + (assignee?.name || "team member"))
         setIsAssignDialogOpen(false)
         setSelectedAssignee('')
       } else {
@@ -1003,8 +996,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
     a.click()
     URL.revokeObjectURL(url)
 
-    toast.success('Export Complete' leads to CSV`
-    })
+    toast.success("Export complete - " + leads.length + " leads to CSV")
   }
 
   const handleEmailBlast = () => {
@@ -1100,8 +1092,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
       const result = await updateLead(selectedLead.id, { notes: newNotes })
 
       if (result) {
-        toast.success('Note Added' ${selectedLead.lastName}`
-        })
+        toast.success("Note added to " + selectedLead.firstName + " " + selectedLead.lastName)
         setIsNoteDialogOpen(false)
         setNoteContent('')
       } else {
@@ -1150,8 +1141,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
     a.click()
     URL.revokeObjectURL(url)
 
-    toast.success('Export Complete' activities to CSV`
-    })
+    toast.success("Export complete - activities to CSV")
   }
 
   // Quick Actions Handlers - Campaigns Tab
@@ -1184,8 +1174,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
   }
 
   const handleViewCampaign = (campaignName: string) => {
-    toast.info('View Campaign'" campaign details...`
-    })
+    toast.info("Opening " + campaignName + " campaign details...")
   }
 
   const handleCreateCampaign = () => {
@@ -1233,8 +1222,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
         if (result) successCount++
       }
 
-      toast.success('Scores Recalculated' leads`
-      })
+      toast.success("Scores recalculated for " + successCount + " leads")
     } catch (error) {
       toast.error('Error')
     } finally {
@@ -1263,8 +1251,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
   const handleLeadEmail = (lead: Lead) => {
     if (lead.email) {
       window.open(`mailto:${lead.email}`, '_blank')
-      toast.success('Email Client Opened' ${lead.lastName}`
-      })
+      toast.success("Email client opened for " + lead.firstName + " " + lead.lastName)
     } else {
       toast.error('No Email')
     }
@@ -1276,8 +1263,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
       // Mark as contacted
       const result = await contactLead(lead.id)
       if (result) {
-        toast.success('Call Initiated' ${lead.lastName} and logging activity`
-        })
+        toast.success("Call initiated for " + lead.firstName + " " + lead.lastName + " and logging activity")
       }
     } else {
       toast.error('No Phone')
@@ -1291,8 +1277,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
 
   // Integration Handlers
   const handleConnect = (integrationName: string) => {
-    toast.info('Connect Integration'...`
-    })
+    toast.info("Connecting " + integrationName + "...")
   }
 
   // Data Management Handlers
@@ -1371,8 +1356,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
       })
 
       if (result) {
-        toast.success('Lead Updated'" has been updated successfully`
-        })
+        toast.success("Lead updated successfully")
         setIsEditLeadDialogOpen(false)
         setIsLeadDialogOpen(false)
       } else {
@@ -1409,8 +1393,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
       const result = await updateLead(selectedLead.id, { status: hookStatus })
 
       if (result) {
-        toast.success('Status Updated'`
-        })
+        toast.success('Status Updated')
         setIsStatusDialogOpen(false)
       } else {
         toast.error('Error')
@@ -1443,8 +1426,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
           const newScore = Math.min(100, selectedLead.score + 10)
           const result = await updateScore(selectedLead.id, newScore)
           if (result) {
-            toast.success('Lead Score Updated'`
-            })
+            toast.success('Lead Score Updated')
           } else {
             toast.error('Failed to Update Score')
           }
@@ -3300,8 +3282,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
                         }
 
                         if (successCount > 0) {
-                          toast.success('Import Complete' leads${errorCount > 0 ? `, ${errorCount} failed` : ''}`
-                          })
+                          toast.success("Import complete - " + successCount + " leads" + (errorCount > 0 ? ", " + errorCount + " failed" : ""))
                         } else if (errorCount > 0) {
                           toast.error('Import Failed')
                         } else {

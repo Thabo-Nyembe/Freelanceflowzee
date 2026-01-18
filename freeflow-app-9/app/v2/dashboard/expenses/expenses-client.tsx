@@ -383,8 +383,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
         status: 'approved',
         approved_at: new Date().toISOString()
       } as any)
-      toast.success('Expense approved'" has been approved`
-      })
+      toast.success('Expense "' + title + '" has been approved')
       setShowReportDialog(false)
       refetch()
     } catch (error) {
@@ -399,8 +398,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
         id: expenseId,
         status: 'rejected'
       } as any)
-      toast.success('Expense rejected'" has been rejected`
-      })
+      toast.success('Expense "' + title + '" has been rejected')
       setShowReportDialog(false)
       refetch()
     } catch (error) {
@@ -417,8 +415,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
         reimbursed_at: new Date().toISOString(),
         reimbursed: true
       } as any)
-      toast.success('Expense reimbursed'" has been marked as reimbursed`
-      })
+      toast.success('Expense "' + title + '" has been marked as reimbursed')
       setShowReportDialog(false)
       refetch()
     } catch (error) {
@@ -430,8 +427,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
   const handleDeleteExpense = async (expenseId: string, title: string) => {
     try {
       await deleteExpense({ id: expenseId } as any)
-      toast.success('Expense deleted'" has been deleted`
-      })
+      toast.success('Expense "' + title + '" has been deleted')
       setShowReportDialog(false)
       refetch()
     } catch (error) {
@@ -468,8 +464,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
         status: 'pending',
         submitted_at: new Date().toISOString()
       } as any)
-      toast.success('Report submitted'" submitted for approval`
-      })
+      toast.success('Report "' + title + '" submitted for approval')
       refetch()
     } catch (error) {
       console.error('Failed to submit report:', error)
@@ -543,8 +538,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
       }
 
       const data = await response.json()
-      toast.success('Expense report generated' report for ${reportDateRange.start} to ${reportDateRange.end}`
-      })
+      toast.success("Expense report generated for " + reportDateRange.start + " to " + reportDateRange.end)
       setReportDateRange({ start: '', end: '' })
       setShowGenerateReportDialog(false)
     } catch (error) {
@@ -585,8 +579,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
         throw new Error(errorData.message || 'Failed to add mileage entry')
       }
 
-      toast.success('Mileage entry added' miles - $${reimbursement.toFixed(2)} reimbursement`
-      })
+      toast.success(mileageForm.distance + " miles - $" + reimbursement.toFixed(2) + " reimbursement")
       setMileageForm({
         origin: '',
         destination: '',
@@ -635,8 +628,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
         throw new Error(errorData.message || 'Failed to submit per diem request')
       }
 
-      toast.success('Per diem request submitted' days in ${perDiemForm.location} - $${totalAmount} total`
-      })
+      toast.success(days + " days in " + perDiemForm.location + " - $" + totalAmount + " total")
       setPerDiemForm({
         location: '',
         startDate: '',
@@ -675,8 +667,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
         throw new Error(errorData.message || 'Failed to link card')
       }
 
-      toast.success('Card linked successfully' ending in ${linkCardForm.lastFour} connected`
-      })
+      toast.success("Card ending in " + linkCardForm.lastFour + " connected")
       setLinkCardForm({
         cardType: 'visa',
         lastFour: '',
@@ -724,11 +715,11 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
           {/* Stats */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
             {[
-              { label: 'Total Expenses', value: `$${(stats.totalExpenses / 1000).toFixed(1)}K`, icon: DollarSign, trend: '+12.5%' },
-              { label: 'Pending Approval', value: `$${(stats.pendingApproval / 1000).toFixed(1)}K`, icon: Clock, count: stats.pendingCount },
-              { label: 'Approved', value: `$${(stats.approved / 1000).toFixed(1)}K`, icon: CheckCircle, trend: '+8.3%' },
-              { label: 'Reimbursed', value: `$${(stats.reimbursed / 1000).toFixed(1)}K`, icon: Banknote, trend: '+15.2%' },
-              { label: 'Avg Processing', value: `${stats.avgProcessingTime} days`, icon: TrendingUp, trend: '-0.5 days' },
+              { label: 'Total Expenses', value: "$" + (stats.totalExpenses / 1000).toFixed(1) + "K", icon: DollarSign, trend: '+12.5%' },
+              { label: 'Pending Approval', value: "$" + (stats.pendingApproval / 1000).toFixed(1) + "K", icon: Clock, count: stats.pendingCount },
+              { label: 'Approved', value: "$" + (stats.approved / 1000).toFixed(1) + "K", icon: CheckCircle, trend: '+8.3%' },
+              { label: 'Reimbursed', value: "$" + (stats.reimbursed / 1000).toFixed(1) + "K", icon: Banknote, trend: '+15.2%' },
+              { label: 'Avg Processing', value: stats.avgProcessingTime + " days", icon: TrendingUp, trend: '-0.5 days' },
               { label: 'Policy Compliance', value: '94%', icon: Shield, trend: '+2.1%' }
             ].map((stat, i) => (
               <div key={i} className="bg-white/10 backdrop-blur rounded-xl p-4">
@@ -907,7 +898,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
                       { label: 'Link Card Transaction', icon: CreditCard, color: 'text-orange-600', onClick: () => setShowLinkCardDialog(true) },
                     ].map((action, i) => (
                       <button key={i} onClick={action.onClick} className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 text-left">
-                        <action.icon className={`h-5 w-5 ${action.color}`} />
+                        <action.icon className={"h-5 w-5 " + action.color} />
                         <span className="text-sm">{action.label}</span>
                       </button>
                     ))}
@@ -1251,7 +1242,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
                 <Card key={policy.id}>
                   <CardContent className="pt-6">
                     <div className="flex items-start gap-4 mb-4">
-                      <div className={`p-3 rounded-lg ${getCategoryColor(policy.category)}`}>
+                      <div className={"p-3 rounded-lg " + getCategoryColor(policy.category)}>
                         {(() => {
                           const Icon = getCategoryIcon(policy.category)
                           return <Icon className="h-5 w-5" />
@@ -2078,7 +2069,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
             <AIInsightsPanel
               insights={mockExpensesAIInsights}
               title="Expense Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -2159,7 +2150,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
                         const Icon = getCategoryIcon(item.category)
                         return (
                           <div key={item.id} className="flex items-center gap-4 p-3 border rounded-lg">
-                            <div className={`p-2 rounded-lg ${getCategoryColor(item.category)}`}>
+                            <div className={"p-2 rounded-lg " + getCategoryColor(item.category)}>
                               <Icon className="h-4 w-4" />
                             </div>
                             <div className="flex-1">

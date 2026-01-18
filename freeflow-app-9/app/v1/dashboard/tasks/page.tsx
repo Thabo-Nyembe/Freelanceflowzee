@@ -80,10 +80,23 @@ import {
   useCreateTask,
   useUpdateTask,
   useDeleteTask,
-  useUpdateTaskStatus,
   useAssignTask,
   useTaskStats
 } from '@/lib/api-clients'
+
+// Alias useUpdateTask as useUpdateTaskStatus for status-specific updates
+const useUpdateTaskStatus = () => {
+  const updateTask = useUpdateTask()
+  return {
+    ...updateTask,
+    mutate: ({ taskId, status }: { taskId: string; status: string }) => {
+      updateTask.mutate({ id: taskId, updates: { status } })
+    },
+    mutateAsync: async ({ taskId, status }: { taskId: string; status: string }) => {
+      return updateTask.mutateAsync({ id: taskId, updates: { status } })
+    }
+  }
+}
 
 const logger = createFeatureLogger('TasksPage')
 
@@ -513,7 +526,7 @@ export default function TasksPageMigrated() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-2">
                             <h3 className="font-semibold text-gray-900">{task.title}</h3>
-                            <Badge className={`${getStatusColor(task.status)} border`}>
+                            <Badge className={getStatusColor(task.status) + " border"}>
                               {getStatusIcon(task.status)}
                               <span className="ml-1 capitalize">{task.status.replace('_', ' ')}</span>
                             </Badge>

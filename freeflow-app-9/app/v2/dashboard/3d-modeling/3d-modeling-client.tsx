@@ -394,8 +394,7 @@ export default function ThreeDModelingClient() {
   }
 
   const handleExportModel = (format: string) => {
-    toast.success('Exporting model'`
-    })
+    toast.success('Exporting model')
   }
 
   const handleSaveProject = () => {
@@ -423,8 +422,7 @@ export default function ThreeDModelingClient() {
       return nodes.map(node => {
         if (node.id === nodeId) {
           const newVisible = !node.visible
-          toast.info(newVisible ? 'Object Visible' : 'Object Hidden' is now ${newVisible ? 'visible' : 'hidden'}`
-          })
+          toast.info(nodeName + ' is now ' + (newVisible ? 'visible' : 'hidden'))
           return { ...node, visible: newVisible }
         }
         if (node.children && node.children.length > 0) {
@@ -707,7 +705,7 @@ export default function ThreeDModelingClient() {
                           </Button>
                           <Button size="sm" className="gap-1" onClick={() => {
                             setActiveTab('viewport')
-                            toast.success('Opening model'...` })
+                            toast.success('Opening model...')
                           }}>
                             <Play className="w-3 h-3" />
                             Open
@@ -863,11 +861,11 @@ export default function ThreeDModelingClient() {
                         <Button
                           variant="secondary"
                           size="sm"
-                          title={`Zoom In (${zoomLevel}%)`}
+                          title={'Zoom In (' + zoomLevel + '%)'}
                           onClick={() => {
                             const newZoom = Math.min(zoomLevel + 10, 200)
                             setZoomLevel(newZoom)
-                            toast.info('Zoom'%` })
+                            toast.info('Zoom: ' + newZoom + '%')
                           }}
                         >
                           <ZoomIn className="w-4 h-4" />
@@ -875,11 +873,11 @@ export default function ThreeDModelingClient() {
                         <Button
                           variant="secondary"
                           size="sm"
-                          title={`Zoom Out (${zoomLevel}%)`}
+                          title={'Zoom Out (' + zoomLevel + '%)'}
                           onClick={() => {
                             const newZoom = Math.max(zoomLevel - 10, 10)
                             setZoomLevel(newZoom)
-                            toast.info('Zoom'%` })
+                            toast.info('Zoom: ' + newZoom + '%')
                           }}
                         >
                           <ZoomOut className="w-4 h-4" />
@@ -1103,7 +1101,7 @@ export default function ThreeDModelingClient() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className={`font-medium capitalize ${getRenderStatusColor(job.status)}`}>
+                        <p className={'font-medium capitalize ' + getRenderStatusColor(job.status)}>
                           {job.status}
                         </p>
                         <p className="text-sm text-gray-500">
@@ -1169,11 +1167,11 @@ export default function ThreeDModelingClient() {
                         <button
                           key={item.id}
                           onClick={() => setSettingsTab(item.id)}
-                          className={`w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors ${
+                          className={'w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors ' + (
                             settingsTab === item.id
                               ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
                               : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700'
-                          }`}
+                          )}
                         >
                           <item.icon className="h-4 w-4" />
                           {item.label}
@@ -1795,7 +1793,7 @@ export default function ThreeDModelingClient() {
             <AIInsightsPanel
               insights={mock3DAIInsights}
               title="3D Modeling Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -1867,7 +1865,7 @@ export default function ThreeDModelingClient() {
                 <Button className="flex-1 gap-2" onClick={() => {
                   setSelectedModel(null)
                   setActiveTab('viewport')
-                  toast.success('Opening model in editor'...` })
+                  toast.success('Opening model in editor')
                 }}>
                   <Play className="w-4 h-4" />
                   Open in Editor
@@ -2432,7 +2430,7 @@ export default function ThreeDModelingClient() {
                 </Button>
                 <Button className="flex-1 gap-2" onClick={() => {
                   // File download functionality
-                  toast.success('Download started' render...` })
+                  toast.success('Download started', { description: 'Downloading ' + (downloadRenderJob?.name || 'render') + '...' })
                   setDownloadRenderJob(null)
                 }}>
                   <Download className="w-4 h-4" />
@@ -2477,7 +2475,7 @@ export default function ThreeDModelingClient() {
                   </div>
                   <Button size="sm" variant="outline" onClick={() => {
                     // Plugin marketplace installation
-                    toast.success('Plugin installed' has been installed` })
+                    toast.success('Plugin installed', { description: plugin.name + ' has been installed' })
                   }}>
                     Install
                   </Button>
@@ -2508,7 +2506,7 @@ export default function ThreeDModelingClient() {
                   </div>
                   <Button size="sm" onClick={() => {
                     // Plugin local installation
-                    toast.success('Plugin installed' has been installed from file` })
+                    toast.success('Plugin installed', { description: selectedFile.name + ' has been installed from file' })
                     setSelectedFile(null)
                   }}>
                     Install
@@ -2962,7 +2960,7 @@ export default function ThreeDModelingClient() {
                 </Button>
                 <Button className="flex-1 gap-2" onClick={() => {
                   // Update scene node properties
-                  toast.success('Node properties updated' has been modified` })
+                  toast.success('Node properties updated', { description: (selectedSceneNode?.name || 'Node') + ' has been modified' })
                   setShowSceneNodePropertiesDialog(false)
                 }}>
                   <CheckCircle2 className="w-4 h-4" />
@@ -3027,9 +3025,7 @@ export default function ThreeDModelingClient() {
                   ].map((file) => (
                     <button
                       key={file.name}
-                      className={`w-full flex items-center gap-3 p-3 hover:bg-blue-50 dark:hover:bg-blue-900/20 text-left border-b dark:border-gray-700 last:border-b-0 ${
-                        selectedFile?.name === file.name ? 'bg-blue-100 dark:bg-blue-900/30' : ''
-                      }`}
+                      className={'w-full flex items-center gap-3 p-3 hover:bg-blue-50 dark:hover:bg-blue-900/20 text-left border-b dark:border-gray-700 last:border-b-0 ' + (selectedFile?.name === file.name ? 'bg-blue-100 dark:bg-blue-900/30' : '')}
                       onClick={() => setSelectedFile(file)}
                     >
                       <Box className="w-5 h-5 text-slate-500" />
@@ -3054,9 +3050,7 @@ export default function ThreeDModelingClient() {
                   ].map((file) => (
                     <button
                       key={file.name}
-                      className={`w-full flex items-center gap-3 p-3 hover:bg-green-50 dark:hover:bg-green-900/20 text-left border-b dark:border-gray-700 last:border-b-0 ${
-                        selectedFile?.name === file.name ? 'bg-green-100 dark:bg-green-900/30' : ''
-                      }`}
+                      className={'w-full flex items-center gap-3 p-3 hover:bg-green-50 dark:hover:bg-green-900/20 text-left border-b dark:border-gray-700 last:border-b-0 ' + (selectedFile?.name === file.name ? 'bg-green-100 dark:bg-green-900/30' : '')}
                       onClick={() => setSelectedFile(file)}
                     >
                       <Image className="w-5 h-5 text-green-500"  loading="lazy"/>
@@ -3080,9 +3074,7 @@ export default function ThreeDModelingClient() {
                   ].map((file) => (
                     <button
                       key={file.name}
-                      className={`w-full flex items-center gap-3 p-3 hover:bg-purple-50 dark:hover:bg-purple-900/20 text-left border-b dark:border-gray-700 last:border-b-0 ${
-                        selectedFile?.name === file.name ? 'bg-purple-100 dark:bg-purple-900/30' : ''
-                      }`}
+                      className={'w-full flex items-center gap-3 p-3 hover:bg-purple-50 dark:hover:bg-purple-900/20 text-left border-b dark:border-gray-700 last:border-b-0 ' + (selectedFile?.name === file.name ? 'bg-purple-100 dark:bg-purple-900/30' : '')}
                       onClick={() => setSelectedFile(file)}
                     >
                       <Package className="w-5 h-5 text-purple-500" />
@@ -3126,10 +3118,7 @@ export default function ThreeDModelingClient() {
                 onClick={() => {
                   if (selectedFile) {
                     // File selection callback
-                    toast.success('File selected' ready for ${
-                      fileBrowserMode === 'import-model' ? 'import' :
-                      fileBrowserMode === 'upload-texture' ? 'upload' : 'installation'
-                    }` })
+                    toast.success('File selected', { description: selectedFile.name + ' ready for ' + (fileBrowserMode === 'import-model' ? 'import' : fileBrowserMode === 'upload-texture' ? 'upload' : 'installation') })
                     setShowFileBrowserDialog(false)
                   }
                 }}

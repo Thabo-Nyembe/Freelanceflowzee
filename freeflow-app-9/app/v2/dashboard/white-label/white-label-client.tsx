@@ -177,7 +177,7 @@ export default function WhiteLabelClient() {
     setWhiteLabelItems(prev => [newItem, ...prev])
     setNewItemForm({ name: '', type: 'color-scheme', description: '' })
     setShowNewItemDialog(false)
-    toast.success('Item Created' has been created successfully` })
+    toast.success('Item Created')
     announce(`Created new ${newItem.type}: ${newItem.name}`, 'polite')
   }
 

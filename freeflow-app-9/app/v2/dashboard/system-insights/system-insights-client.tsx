@@ -1,4 +1,6 @@
 'use client'
+
+import { createClient } from '@/lib/supabase/client'
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
@@ -370,8 +372,6 @@ export default function SystemInsightsClient() {
   // Fetch alerts from Supabase
   const fetchAlerts = useCallback(async () => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
@@ -391,8 +391,6 @@ export default function SystemInsightsClient() {
   // Fetch settings from Supabase
   const fetchSettings = useCallback(async () => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
@@ -486,12 +484,12 @@ export default function SystemInsightsClient() {
   // Key metrics for header cards
   const keyMetrics = [
     { label: 'Firing Alerts', value: stats.firingAlerts, icon: AlertTriangle, gradient: 'from-red-500 to-red-600', positive: stats.firingAlerts === 0 },
-    { label: 'Healthy Services', value: `${stats.healthyServices}/${stats.totalServices}`, icon: CheckCircle, gradient: 'from-emerald-500 to-emerald-600', positive: true },
-    { label: 'Avg Uptime', value: `${stats.avgUptime}%`, icon: Activity, gradient: 'from-blue-500 to-blue-600', positive: true },
+    { label: 'Healthy Services', value: stats.healthyServices + '/' + stats.totalServices, icon: CheckCircle, gradient: 'from-emerald-500 to-emerald-600', positive: true },
+    { label: 'Avg Uptime', value: stats.avgUptime + '%', icon: Activity, gradient: 'from-blue-500 to-blue-600', positive: true },
     { label: 'Total RPS', value: stats.totalRps.toLocaleString(), icon: Zap, gradient: 'from-purple-500 to-purple-600', positive: true },
-    { label: 'CPU Usage', value: `${mockMetrics[0].value}%`, icon: Cpu, gradient: 'from-indigo-500 to-indigo-600', positive: mockMetrics[0].status === 'normal' },
-    { label: 'Memory', value: `${mockMetrics[1].value}%`, icon: Server, gradient: 'from-amber-500 to-amber-600', positive: mockMetrics[1].status === 'normal' },
-    { label: 'Hosts', value: `${stats.healthyHosts}/${stats.totalHosts}`, icon: Box, gradient: 'from-cyan-500 to-cyan-600', positive: true },
+    { label: 'CPU Usage', value: mockMetrics[0].value + '%', icon: Cpu, gradient: 'from-indigo-500 to-indigo-600', positive: mockMetrics[0].status === 'normal' },
+    { label: 'Memory', value: mockMetrics[1].value + '%', icon: Server, gradient: 'from-amber-500 to-amber-600', positive: mockMetrics[1].status === 'normal' },
+    { label: 'Hosts', value: stats.healthyHosts + '/' + stats.totalHosts, icon: Box, gradient: 'from-cyan-500 to-cyan-600', positive: true },
     { label: 'Apdex', value: stats.avgApdex, icon: TrendingUp, gradient: 'from-pink-500 to-pink-600', positive: parseFloat(stats.avgApdex) >= 0.9 }
   ]
 
@@ -511,13 +509,9 @@ export default function SystemInsightsClient() {
     }
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('system_alerts').insert({
         user_id: user.id,
         name: alertForm.name,
@@ -548,15 +542,13 @@ export default function SystemInsightsClient() {
       const updateData: Partial<DbSystemAlert> = { status: newStatus }
       if (newStatus === 'resolved') updateData.resolved_at = new Date().toISOString()
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('system_alerts')
         .update(updateData)
         .eq('id', alertId)
 
       if (error) throw error
-      toast.success(`Alert ${newStatus}`)
+      toast.success("Alert " + (newStatus))
       await fetchAlerts()
     } catch (error) {
       console.error('Error updating alert:', error)
@@ -566,8 +558,6 @@ export default function SystemInsightsClient() {
 
   const handleDeleteAlert = async (alertId: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('system_alerts').delete().eq('id', alertId)
       if (error) throw error
       toast.success('Alert deleted')
@@ -581,8 +571,6 @@ export default function SystemInsightsClient() {
   const handleSaveSettings = async () => {
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
@@ -593,16 +581,12 @@ export default function SystemInsightsClient() {
       }
 
       if (dbSettings) {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         const { error } = await supabase
           .from('system_settings')
           .update(settingsData)
           .eq('id', dbSettings.id)
         if (error) throw error
       } else {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         const { error } = await supabase.from('system_settings').insert(settingsData)
         if (error) throw error
       }
@@ -620,14 +604,10 @@ export default function SystemInsightsClient() {
   const handleExportReport = async () => {
     toast.info('Preparing export...')
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
       // Log export activity
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       await supabase.from('activity_logs').insert({
         user_id: user.id,
         action: 'export_report',
@@ -644,13 +624,9 @@ export default function SystemInsightsClient() {
 
   const handleClearAllAlerts = async () => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('system_alerts')
         .delete()
@@ -666,11 +642,11 @@ export default function SystemInsightsClient() {
   }
 
   const handleRestartService = (serviceName: string) => {
-    toast.info('Restarting service' is restarting...` })
+    toast.info('Restarting service')
   }
 
   const handleScaleService = (serviceName: string) => {
-    toast.info('Scaling service'` })
+    toast.info('Scaling service')
   }
 
   return (
@@ -718,7 +694,7 @@ export default function SystemInsightsClient() {
                   onClick={handleRefreshMetrics}
                   disabled={loading}
                 >
-                  <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                  <RefreshCw className={"h-4 w-4" + (loading ? " animate-spin" : "")} />
                 </Button>
               </div>
             </div>
@@ -728,7 +704,7 @@ export default function SystemInsightsClient() {
               {keyMetrics.map((metric, idx) => (
                 <div key={idx} className="bg-white/10 backdrop-blur-sm rounded-xl p-4 hover:bg-white/20 transition-all cursor-pointer">
                   <div className="flex items-center justify-between mb-2">
-                    <div className={`p-2 rounded-lg bg-gradient-to-br ${metric.gradient}`}>
+                    <div className={"p-2 rounded-lg bg-gradient-to-br " + metric.gradient}>
                       <metric.icon className="h-4 w-4 text-white" />
                     </div>
                     {typeof metric.value === 'number' && metric.value > 0 && !metric.positive ? (
@@ -797,18 +773,18 @@ export default function SystemInsightsClient() {
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
                     {mockServices.map(service => (
-                      <div key={service.id} className={`p-3 rounded-lg border ${
+                      <div key={service.id} className={"p-3 rounded-lg border " + (
                         service.status === 'healthy' ? 'border-emerald-200 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-900/20' :
                         service.status === 'degraded' ? 'border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/20' :
                         'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20'
-                      }`}>
+                      )}>
                         <div className="flex items-center justify-between mb-1">
                           <span className="text-sm font-medium">{service.name}</span>
-                          <span className={`w-2 h-2 rounded-full ${
+                          <span className={"w-2 h-2 rounded-full " + (
                             service.status === 'healthy' ? 'bg-emerald-500' :
                             service.status === 'degraded' ? 'bg-amber-500' :
                             'bg-red-500'
-                          } animate-pulse`} />
+                          ) + " animate-pulse"} />
                         </div>
                         <div className="text-xs text-gray-500">{service.latency}ms • {service.apdex} apdex</div>
                       </div>
@@ -829,10 +805,10 @@ export default function SystemInsightsClient() {
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {mockAlerts.filter(a => a.status === 'firing').slice(0, 4).map(alert => (
-                    <div key={alert.id} className={`p-3 rounded-lg border ${
+                    <div key={alert.id} className={"p-3 rounded-lg border " + (
                       alert.severity === 'critical' ? 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20' :
                       'border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/20'
-                    }`}>
+                    )}>
                       <div className="flex items-center justify-between mb-1">
                         <span className="font-medium">{alert.name}</span>
                         <Badge className={getSeverityColor(alert.severity)}>{alert.severity}</Badge>
@@ -859,16 +835,16 @@ export default function SystemInsightsClient() {
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     {mockMetrics.slice(0, 4).map(metric => (
-                      <div key={metric.id} className={`p-4 rounded-lg ${
+                      <div key={metric.id} className={"p-4 rounded-lg " + (
                         metric.status === 'critical' ? 'bg-red-50 dark:bg-red-900/20' :
                         metric.status === 'warning' ? 'bg-amber-50 dark:bg-amber-900/20' :
                         'bg-gray-50 dark:bg-gray-800'
-                      }`}>
+                      )}>
                         <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">{metric.name}</div>
                         <div className="text-2xl font-bold">{metric.value}{metric.unit}</div>
-                        <div className={`text-sm mt-1 flex items-center gap-1 ${
+                        <div className={"text-sm mt-1 flex items-center gap-1 " + (
                           metric.trend === 'up' ? 'text-red-600' : metric.trend === 'down' ? 'text-emerald-600' : 'text-gray-500'
-                        }`}>
+                        )}>
                           {metric.trend === 'up' ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
                           {Math.abs(metric.changePercent)}%
                         </div>
@@ -887,7 +863,7 @@ export default function SystemInsightsClient() {
                     {mockLogs.slice(0, 5).map(log => (
                       <div key={log.id} className="flex items-start gap-2 p-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded">
                         <span className="text-gray-400 text-xs">{new Date(log.timestamp).toLocaleTimeString()}</span>
-                        <Badge className={`${getLogLevelColor(log.level)} text-xs`}>{log.level}</Badge>
+                        <Badge className={"" + (getLogLevelColor(log.level)) + " text-xs"}>{log.level}</Badge>
                         <span className="text-blue-600 dark:text-blue-400">[{log.service}]</span>
                         <span className="text-gray-700 dark:text-gray-300 truncate flex-1">{log.message}</span>
                       </div>
@@ -912,7 +888,7 @@ export default function SystemInsightsClient() {
                       {metric.value}<span className="text-lg text-gray-500">{metric.unit}</span>
                     </div>
                     <div className="flex items-center gap-2 mb-3">
-                      <span className={`text-sm flex items-center ${metric.trend === 'up' ? 'text-red-600' : 'text-emerald-600'}`}>
+                      <span className={"text-sm flex items-center " + (metric.trend === 'up' ? 'text-red-600' : 'text-emerald-600')}>
                         {metric.trend === 'up' ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
                         {metric.change > 0 ? '+' : ''}{metric.change}{metric.unit}
                       </span>
@@ -921,12 +897,12 @@ export default function SystemInsightsClient() {
                       {metric.sparkline.map((val, idx) => (
                         <div
                           key={idx}
-                          className={`flex-1 rounded-t ${
+                          className={"flex-1 rounded-t " + (
                             val >= metric.thresholds.critical ? 'bg-red-500' :
                             val >= metric.thresholds.warning ? 'bg-amber-500' :
                             'bg-blue-500'
-                          }`}
-                          style={{ height: `${(val / Math.max(...metric.sparkline)) * 100}%` }}
+                          )}
+                          style={{ height: ((val / Math.max(...metric.sparkline)) * 100) + '%' }}
                         />
                       ))}
                     </div>
@@ -1147,7 +1123,7 @@ export default function SystemInsightsClient() {
                     {mockLogs.filter(log => logLevel === 'all' || log.level === logLevel).map(log => (
                       <div key={log.id} className="flex items-start gap-3 hover:bg-gray-800 p-2 rounded">
                         <span className="text-gray-500 text-xs whitespace-nowrap">{new Date(log.timestamp).toLocaleString()}</span>
-                        <Badge className={`${getLogLevelColor(log.level)} text-xs uppercase`}>{log.level}</Badge>
+                        <Badge className={"" + (getLogLevelColor(log.level)) + " text-xs uppercase"}>{log.level}</Badge>
                         <span className="text-cyan-400">[{log.service}]</span>
                         <span className="text-purple-400">@{log.host}</span>
                         <span className="text-gray-300 flex-1">{log.message}</span>
@@ -1198,7 +1174,7 @@ export default function SystemInsightsClient() {
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-4">
-                        <span className={`w-3 h-3 rounded-full ${trace.status === 'ok' ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                        <span className={"w-3 h-3 rounded-full " + (trace.status === 'ok' ? 'bg-emerald-500' : 'bg-red-500')} />
                         <div>
                           <h3 className="font-semibold">{trace.name}</h3>
                           <div className="text-sm text-gray-500 font-mono">{trace.traceId}</div>
@@ -1213,12 +1189,12 @@ export default function SystemInsightsClient() {
                       {trace.spans.map((span) => (
                         <div
                           key={span.id}
-                          className={`absolute h-6 top-1 rounded ${span.status === 'ok' ? 'bg-blue-500' : 'bg-red-500'}`}
+                          className={"absolute h-6 top-1 rounded " + (span.status === 'ok' ? 'bg-blue-500' : 'bg-red-500')}
                           style={{
-                            left: `${(span.startTime / trace.duration) * 100}%`,
-                            width: `${Math.max((span.duration / trace.duration) * 100, 2)}%`
+                            left: ((span.startTime / trace.duration) * 100) + "%",
+                            width: (Math.max((span.duration / trace.duration) * 100, 2)) + "%"
                           }}
-                          title={`${span.name} - ${span.duration}ms`}
+                          title={span.name + " - " + span.duration + "ms"}
                         />
                       ))}
                     </div>
@@ -1260,7 +1236,7 @@ export default function SystemInsightsClient() {
                       </div>
                       <div>
                         <div className="text-xs text-gray-500">Error Rate</div>
-                        <div className={`text-lg font-semibold ${service.errorRate > 0.5 ? 'text-red-600' : 'text-emerald-600'}`}>
+                        <div className={"text-lg font-semibold " + (service.errorRate > 0.5 ? 'text-red-600' : 'text-emerald-600')}>
                           {service.errorRate}%
                         </div>
                       </div>
@@ -1277,7 +1253,7 @@ export default function SystemInsightsClient() {
                       <span className="text-sm text-gray-500">Apdex</span>
                       <div className="flex items-center gap-2">
                         <Progress value={service.apdex * 100} className="w-24 h-2" />
-                        <span className={`font-semibold ${service.apdex >= 0.9 ? 'text-emerald-600' : service.apdex >= 0.7 ? 'text-amber-600' : 'text-red-600'}`}>
+                        <span className={"font-semibold " + (service.apdex >= 0.9 ? 'text-emerald-600' : service.apdex >= 0.7 ? 'text-amber-600' : 'text-red-600')}>
                           {service.apdex}
                         </span>
                       </div>
@@ -1320,21 +1296,21 @@ export default function SystemInsightsClient() {
                           <span className="text-gray-500">CPU</span>
                           <span className={host.cpu > 80 ? 'text-red-600' : ''}>{host.cpu}%</span>
                         </div>
-                        <Progress value={host.cpu} className={`h-2 ${host.cpu > 80 ? '[&>div]:bg-red-500' : ''}`} />
+                        <Progress value={host.cpu} className={"h-2 " + (host.cpu > 80 ? '[&>div]:bg-red-500' : '')} />
                       </div>
                       <div>
                         <div className="flex items-center justify-between text-sm mb-1">
                           <span className="text-gray-500">Memory</span>
                           <span className={host.memory > 85 ? 'text-red-600' : ''}>{host.memory}%</span>
                         </div>
-                        <Progress value={host.memory} className={`h-2 ${host.memory > 85 ? '[&>div]:bg-red-500' : ''}`} />
+                        <Progress value={host.memory} className={"h-2 " + (host.memory > 85 ? '[&>div]:bg-red-500' : '')} />
                       </div>
                       <div>
                         <div className="flex items-center justify-between text-sm mb-1">
                           <span className="text-gray-500">Disk</span>
                           <span className={host.disk > 80 ? 'text-amber-600' : ''}>{host.disk}%</span>
                         </div>
-                        <Progress value={host.disk} className={`h-2 ${host.disk > 80 ? '[&>div]:bg-amber-500' : ''}`} />
+                        <Progress value={host.disk} className={"h-2 " + (host.disk > 80 ? '[&>div]:bg-amber-500' : '')} />
                       </div>
                       <div className="flex items-center justify-between text-sm pt-2 border-t">
                         <span className="text-gray-500">Network</span>
@@ -1374,11 +1350,11 @@ export default function SystemInsightsClient() {
                         <button
                           key={item.id}
                           onClick={() => setSettingsTab(item.id)}
-                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
+                          className={"w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors " + (
                             settingsTab === item.id
                               ? 'bg-slate-600 text-white'
                               : 'hover:bg-gray-100 dark:hover:bg-gray-800'
-                          }`}
+                          )}
                         >
                           <item.icon className="h-4 w-4" />
                           <span className="text-sm font-medium">{item.label}</span>
@@ -1804,8 +1780,8 @@ export default function SystemInsightsClient() {
                         ].map((channel, idx) => (
                           <div key={idx} className="flex items-center justify-between py-3 border-b last:border-0">
                             <div className="flex items-center gap-3">
-                              <div className={`p-2 rounded-lg ${channel.enabled ? 'bg-emerald-100 dark:bg-emerald-900/40' : 'bg-gray-100 dark:bg-gray-800'}`}>
-                                <channel.icon className={`h-4 w-4 ${channel.enabled ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-400'}`} />
+                              <div className={"p-2 rounded-lg " + (channel.enabled ? 'bg-emerald-100 dark:bg-emerald-900/40' : 'bg-gray-100 dark:bg-gray-800')}>
+                                <channel.icon className={"h-4 w-4 " + (channel.enabled ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-400')} />
                               </div>
                               <div>
                                 <p className="font-medium">{channel.name}</p>
@@ -2123,8 +2099,8 @@ export default function SystemInsightsClient() {
                         ].map((provider, idx) => (
                           <div key={idx} className="flex items-center justify-between py-3 px-4 border rounded-lg">
                             <div className="flex items-center gap-3">
-                              <div className={`p-2 rounded-lg ${provider.status === 'connected' ? 'bg-emerald-100 dark:bg-emerald-900/40' : 'bg-gray-100 dark:bg-gray-800'}`}>
-                                <Server className={`h-4 w-4 ${provider.status === 'connected' ? 'text-emerald-600' : 'text-gray-400'}`} />
+                              <div className={"p-2 rounded-lg " + (provider.status === 'connected' ? 'bg-emerald-100 dark:bg-emerald-900/40' : 'bg-gray-100 dark:bg-gray-800')}>
+                                <Server className={"h-4 w-4 " + (provider.status === 'connected' ? 'text-emerald-600' : 'text-gray-400')} />
                               </div>
                               <div>
                                 <p className="font-medium">{provider.name}</p>
@@ -2158,8 +2134,8 @@ export default function SystemInsightsClient() {
                         ].map((platform, idx) => (
                           <div key={idx} className="flex items-center justify-between py-3 px-4 border rounded-lg">
                             <div className="flex items-center gap-3">
-                              <div className={`p-2 rounded-lg ${platform.status === 'connected' ? 'bg-blue-100 dark:bg-blue-900/40' : 'bg-gray-100 dark:bg-gray-800'}`}>
-                                <Box className={`h-4 w-4 ${platform.status === 'connected' ? 'text-blue-600' : 'text-gray-400'}`} />
+                              <div className={"p-2 rounded-lg " + (platform.status === 'connected' ? 'bg-blue-100 dark:bg-blue-900/40' : 'bg-gray-100 dark:bg-gray-800')}>
+                                <Box className={"h-4 w-4 " + (platform.status === 'connected' ? 'text-blue-600' : 'text-gray-400')} />
                               </div>
                               <div>
                                 <p className="font-medium">{platform.name}</p>
@@ -2506,7 +2482,7 @@ docker run -d --name kazi-agent \\
             <AIInsightsPanel
               insights={mockSystemInsightsAIInsights}
               title="System Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -2707,7 +2683,7 @@ docker run -d --name kazi-agent \\
                 {mockLogs.map(log => (
                   <div key={log.id} className="flex gap-2 py-1 hover:bg-gray-800">
                     <span className="text-gray-500">{new Date(log.timestamp).toLocaleTimeString()}</span>
-                    <Badge className={`${getLogLevelColor(log.level)} text-xs`}>{log.level}</Badge>
+                    <Badge className={"" + (getLogLevelColor(log.level)) + " text-xs"}>{log.level}</Badge>
                     <span className="text-cyan-400">[{log.service}]</span>
                     <span className="text-gray-300">{log.message}</span>
                   </div>
@@ -2781,11 +2757,11 @@ docker run -d --name kazi-agent \\
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 {mockMetrics.slice(0, 4).map(metric => (
-                  <div key={metric.id} className={`p-4 rounded-lg border ${
+                  <div key={metric.id} className={"p-4 rounded-lg border " + (
                     metric.status === 'critical' ? 'border-red-300 bg-red-50 dark:border-red-700 dark:bg-red-900/20' :
                     metric.status === 'warning' ? 'border-amber-300 bg-amber-50 dark:border-amber-700 dark:bg-amber-900/20' :
                     'border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800'
-                  }`}>
+                  )}>
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm text-gray-600 dark:text-gray-400">{metric.name}</span>
                       <Badge className={getStatusColor(metric.status)}>{metric.status}</Badge>
@@ -2795,12 +2771,12 @@ docker run -d --name kazi-agent \\
                       {metric.sparkline.map((val, idx) => (
                         <div
                           key={idx}
-                          className={`flex-1 rounded-t ${
+                          className={"flex-1 rounded-t " + (
                             val >= metric.thresholds.critical ? 'bg-red-500' :
                             val >= metric.thresholds.warning ? 'bg-amber-500' :
                             'bg-blue-500'
-                          }`}
-                          style={{ height: `${(val / Math.max(...metric.sparkline)) * 100}%` }}
+                          )}
+                          style={{ height: ((val / Math.max(...metric.sparkline)) * 100) + '%' }}
                         />
                       ))}
                     </div>
@@ -2986,7 +2962,7 @@ docker run -d --name kazi-agent \\
                   Cancel
                 </Button>
                 <Button className="flex-1" onClick={() => {
-                  toast.success('Channel Added' has been configured` })
+                  toast.success('Channel Added')
                   setNotificationChannelForm({ name: '', type: 'email', config: '' })
                   setShowAddNotificationChannelDialog(false)
                 }}>
@@ -3092,7 +3068,7 @@ docker run -d --name kazi-agent \\
                   Cancel
                 </Button>
                 <Button className="flex-1" onClick={() => {
-                  toast.success('Tier Added' has been added to the escalation policy` })
+                  toast.success('Tier Added')
                   setEscalationTierForm({ tier: '', team: '', delay: '15', channels: [] })
                   setShowAddEscalationTierDialog(false)
                 }}>
@@ -3175,7 +3151,7 @@ docker run -d --name kazi-agent \\
                   Cancel
                 </Button>
                 <Button className="flex-1" onClick={() => {
-                  toast.success(selectedCloudProvider?.status === 'connected' ? 'Settings Saved' : 'Provider Connected' configuration updated` })
+                  toast.success(selectedCloudProvider?.status === 'connected' ? 'Settings Saved' : 'Provider Connected')
                   setShowCloudProviderDialog(false)
                 }}>
                   {selectedCloudProvider?.status === 'connected' ? 'Save Settings' : 'Connect'}
@@ -3245,7 +3221,7 @@ docker run -d --name kazi-agent \\
                   Cancel
                 </Button>
                 <Button className="flex-1" onClick={() => {
-                  toast.success(selectedContainerPlatform?.status === 'connected' ? 'Settings Saved' : 'Platform Connected' configuration updated` })
+                  toast.success(selectedContainerPlatform?.status === 'connected' ? 'Settings Saved' : 'Platform Connected')
                   setShowContainerPlatformDialog(false)
                 }}>
                   {selectedContainerPlatform?.status === 'connected' ? 'Save Settings' : 'Connect'}
@@ -3279,10 +3255,13 @@ require('@kazi/apm-node').start({
 
 # In your app:
 import kazi_apm
+
+// Initialize Supabase client once at module level
+const supabase = createClient()
 kazi_apm.init(
   service_name='my-service',
   api_key='KAZI-XXXXX'
-)` : `// See documentation for ${selectedAPMAgent?.language}`}</pre>
+)` : ('// See documentation for ' + (selectedAPMAgent?.language || ''))}</pre>
                 </div>
               </div>
               <div className="flex gap-2 pt-4">
@@ -3364,7 +3343,7 @@ kazi_apm.init(
                   Cancel
                 </Button>
                 <Button variant="destructive" className="flex-1" onClick={() => {
-                  toast.success('Webhook Deleted' has been removed` })
+                  toast.success('Webhook Deleted')
                   setShowDeleteWebhookDialog(false)
                 }}>
                   Delete Webhook
@@ -3412,7 +3391,7 @@ kazi_apm.init(
                   Cancel
                 </Button>
                 <Button className="flex-1" onClick={() => {
-                  toast.success('Webhook Added' has been configured` })
+                  toast.success('Webhook Added')
                   setWebhookForm({ name: '', url: '', events: ['alerts'] })
                   setShowAddWebhookDialog(false)
                 }}>
@@ -3528,7 +3507,7 @@ kazi_apm.init(
                   Cancel
                 </Button>
                 <Button className="flex-1" onClick={() => {
-                  toast.success('API Key Generated' has been created` })
+                  toast.success('API Key Generated')
                   setNewAPIKeyForm({ name: '', permissions: 'read' })
                   setShowGenerateNewKeyDialog(false)
                 }}>
@@ -3554,7 +3533,7 @@ kazi_apm.init(
                   Cancel
                 </Button>
                 <Button variant="destructive" className="flex-1" onClick={() => {
-                  toast.success('API Key Deleted' has been removed` })
+                  toast.success('API Key Deleted')
                   setShowDeleteAPIKeyDialog(false)
                 }}>
                   Delete Key

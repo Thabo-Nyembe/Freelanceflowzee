@@ -938,8 +938,8 @@ export default function MarketingClient() {
 
   // Handlers
   const handleCreateCampaign = () => toast.info('Create')
-  const handleLaunchCampaign = (n: string) => toast.success('Launched'" is live` })
-  const handlePauseCampaign = (n: string) => toast.info('Paused'" paused` })
+  const handleLaunchCampaign = (n: string) => toast.success(n + ' is live')
+  const handlePauseCampaign = (n: string) => toast.info(n + ' paused')
   const handleExportAnalytics = () => toast.success('Exporting')
   const handleAddLead = () => {
     toast.info('Add Lead')
@@ -954,13 +954,13 @@ export default function MarketingClient() {
     toast.info('Create Workflow')
   }
   const handleSendEmail = (leadName: string) => {
-    toast.info('Send Email'...` })
+    toast.info('Send Email to ' + leadName + '...')
   }
   const handleLogCall = (leadName: string) => {
-    toast.info('Log Call'...` })
+    toast.info('Log Call for ' + leadName + '...')
   }
   const handleScheduleMeeting = (leadName: string) => {
-    toast.info('Schedule Meeting'...` })
+    toast.info('Schedule Meeting with ' + leadName + '...')
   }
   const handleQuickAction = (label: string) => {
     toast.success(`${label} opened`)
@@ -1899,10 +1899,10 @@ export default function MarketingClient() {
             <div className="mt-6">
               <ActivityFeed
                 activities={mockActivities}
-                onMarkRead={(id) => toast.success('Marked as read' marked as read` })}
+                onMarkRead={(id) => toast.success('Marked as read')}
                 onMarkAllRead={() => toast.success('All marked as read')}
-                onPin={(id) => toast.success('Activity pinned' has been pinned` })}
-                onArchive={(id) => toast.success('Activity archived' moved to archive` })}
+                onPin={(id) => toast.success('Activity pinned')}
+                onArchive={(id) => toast.success('Activity archived')}
               />
             </div>
           </TabsContent>

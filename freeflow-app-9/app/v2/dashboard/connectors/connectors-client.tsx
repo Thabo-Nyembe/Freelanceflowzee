@@ -1893,7 +1893,7 @@ export default function ConnectorsClient() {
             <AIInsightsPanel
               insights={mockConnectorsAIInsights}
               title="Integration Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -1973,8 +1973,8 @@ export default function ConnectorsClient() {
                   <div className="flex gap-3">
                     <Button className="flex-1 bg-orange-600 hover:bg-orange-700" onClick={() => {
                       toast.promise(
-                        fetch(`/api/connectors/zaps/${encodeURIComponent(selectedZap.id)}`).then(res => res.json()),
-                        { loading: `Loading "${selectedZap.name}" for editing...`, success: `"${selectedZap.name}" ready to edit`, error: 'Failed to load zap' }
+                        fetch("/api/connectors/zaps/" + encodeURIComponent(selectedZap.id)).then(res => res.json()),
+                        { loading: "Loading \"" + selectedZap.name + "\" for editing...", success: "\"" + selectedZap.name + "\" ready to edit", error: 'Failed to load zap' }
                       )
                     }}>
                       <Edit className="w-4 h-4 mr-2" />
@@ -1984,8 +1984,8 @@ export default function ConnectorsClient() {
                       setSelectedZap(null)
                       setActiveTab('history')
                       toast.promise(
-                        fetch(`/api/connectors/zaps/${encodeURIComponent(selectedZap.id)}/history`).then(res => res.json()),
-                        { loading: `Loading history for "${selectedZap.name}"...`, success: `History loaded for "${selectedZap.name}"`, error: 'Failed to load history' }
+                        fetch("/api/connectors/zaps/" + encodeURIComponent(selectedZap.id) + "/history").then(res => res.json()),
+                        { loading: "Loading history for \"" + selectedZap.name + "\"...", success: "History loaded for \"" + selectedZap.name + "\"", error: 'Failed to load history' }
                       )
                     }}>
                       <History className="w-4 h-4 mr-2" />

@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import React, { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 
@@ -624,8 +626,6 @@ export default function TeamHubClient() {
   const fetchMembers = useCallback(async () => {
     try {
       setIsLoading(true)
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
@@ -653,8 +653,6 @@ export default function TeamHubClient() {
     }
     try {
       setIsSaving(true)
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to add team members')
@@ -691,8 +689,6 @@ export default function TeamHubClient() {
   // Update member status
   const handleUpdateMemberStatus = async (memberId: string, newStatus: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('team_members')
         .update({ status: newStatus, updated_at: new Date().toISOString() })
@@ -710,8 +706,6 @@ export default function TeamHubClient() {
   // Delete team member
   const handleDeleteMember = async (memberId: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('team_members')
         .delete()

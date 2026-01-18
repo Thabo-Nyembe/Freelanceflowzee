@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import { useSecurity, SecuritySettings } from '@/lib/hooks/use-security'
@@ -624,7 +626,6 @@ export default function SecurityClient() {
 
     try {
       // Log security scan event
-      const { createClient } = await import('@/lib/supabase/client'); const supabase = createClient(); const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         await supabase.from('security_audit_logs').insert({
           user_id: user.id,
@@ -679,7 +680,6 @@ export default function SecurityClient() {
     toast.info('Rotating keys...')
 
     try {
-      const { createClient } = await import('@/lib/supabase/client'); const supabase = createClient(); const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         await supabase.from('security_audit_logs').insert({
           user_id: user.id,
@@ -700,7 +700,6 @@ export default function SecurityClient() {
     toast.info('Exporting report')
 
     try {
-      const { createClient } = await import('@/lib/supabase/client'); const supabase = createClient(); const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         await supabase.from('security_audit_logs').insert({
           user_id: user.id,
@@ -720,7 +719,7 @@ export default function SecurityClient() {
     try {
       const result = await blockIPFromEvent(eventId)
       if (result.success) {
-        toast.success('Threat blocked' has been blocked` })
+        toast.success('Threat blocked')
       } else {
         toast.error('Failed to block threat')
       }
@@ -853,7 +852,6 @@ export default function SecurityClient() {
     if (!selectedItem) return
     setIsSaving(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client'); const supabase = createClient(); const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         await supabase.from('security_audit_logs').insert({
           user_id: user.id,
@@ -862,7 +860,7 @@ export default function SecurityClient() {
           additional_data: { item_id: selectedItem.id, deleted_at: new Date().toISOString() }
         })
       }
-      toast.success('Item deleted' has been removed from your vault` })
+      toast.success('Item deleted')
       setShowDeleteConfirmDialog(false)
       setSelectedItem(null)
     } catch (err) {
@@ -877,7 +875,6 @@ export default function SecurityClient() {
     if (!selectedItem) return
     setIsSaving(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client'); const supabase = createClient(); const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         await supabase.from('security_audit_logs').insert({
           user_id: user.id,
@@ -886,7 +883,7 @@ export default function SecurityClient() {
           additional_data: { item_id: selectedItem.id, shared_with: email, expires_in: expiresIn }
         })
       }
-      toast.success('Item shared'` })
+      toast.success('Item shared')
       setShowShareItemDialog(false)
     } catch (err) {
       toast.error('Share failed')
@@ -915,7 +912,6 @@ export default function SecurityClient() {
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
 
-      const { createClient } = await import('@/lib/supabase/client'); const supabase = createClient(); const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         await supabase.from('security_audit_logs').insert({
           user_id: user.id,
@@ -939,7 +935,6 @@ export default function SecurityClient() {
     try {
       const text = await file.text()
       const data = JSON.parse(text)
-      const { createClient } = await import('@/lib/supabase/client'); const supabase = createClient(); const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         await supabase.from('security_audit_logs').insert({
           user_id: user.id,
@@ -948,7 +943,7 @@ export default function SecurityClient() {
           additional_data: { items_count: data.items?.length || 0, imported_at: new Date().toISOString() }
         })
       }
-      toast.success('Import complete' items imported to vault` })
+      toast.success('Import complete')
       setShowImportVaultDialog(false)
     } catch (err) {
       toast.error('Import failed')
@@ -962,7 +957,6 @@ export default function SecurityClient() {
     if (!selectedKey) return
     setIsSaving(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client'); const supabase = createClient(); const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         await supabase.from('security_audit_logs').insert({
           user_id: user.id,
@@ -971,7 +965,7 @@ export default function SecurityClient() {
           additional_data: { key_id: selectedKey.id, revoked_at: new Date().toISOString() }
         })
       }
-      toast.success('Key revoked' has been permanently revoked` })
+      toast.success('Key revoked')
       setShowRevokeKeyDialog(false)
       setSelectedKey(null)
     } catch (err) {
@@ -985,7 +979,6 @@ export default function SecurityClient() {
   const handleAddDevice = useCallback(async (deviceName: string) => {
     setIsSaving(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client'); const supabase = createClient(); const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         await supabase.from('security_audit_logs').insert({
           user_id: user.id,
@@ -1008,7 +1001,6 @@ export default function SecurityClient() {
     if (!selectedItem) return
     setIsSaving(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client'); const supabase = createClient(); const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         await supabase.from('security_audit_logs').insert({
           user_id: user.id,
@@ -1017,7 +1009,7 @@ export default function SecurityClient() {
           additional_data: { item_id: selectedItem.id, updated_at: new Date().toISOString() }
         })
       }
-      toast.success('Item updated' has been saved` })
+      toast.success('Item updated')
       setShowEditItemDialog(false)
     } catch (err) {
       toast.error('Update failed')
@@ -2134,7 +2126,7 @@ export default function SecurityClient() {
             <AIInsightsPanel
               insights={mockSecurityAIInsights}
               title="Security Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">

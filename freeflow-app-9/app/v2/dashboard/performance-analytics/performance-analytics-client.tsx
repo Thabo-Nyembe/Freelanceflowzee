@@ -452,8 +452,7 @@ export default function PerformanceAnalyticsClient() {
       toast.error('Validation Error')
       return
     }
-    toast.success('Alert Created'" has been configured`
-    })
+    toast.success("Alert Created: " + newAlertForm.name + " has been configured")
     setShowNewAlertDialog(false)
     setNewAlertForm({
       name: '',
@@ -505,8 +504,7 @@ export default function PerformanceAnalyticsClient() {
       toast.error('Validation Error')
       return
     }
-    toast.success('SLO Created'" with ${newSLOForm.target}% target has been created`
-    })
+    toast.success("SLO Created: " + newSLOForm.name + " with " + newSLOForm.target + "% target has been created")
     setShowNewSLODialog(false)
     setNewSLOForm({
       name: '',
@@ -523,8 +521,7 @@ export default function PerformanceAnalyticsClient() {
   }
 
   const handleLogsFilter = () => {
-    toast.success('Logs Filtered' logs`
-    })
+    toast.success("Logs Filtered")
     setShowLogsDialog(false)
   }
 
@@ -1889,7 +1886,7 @@ export default function PerformanceAnalyticsClient() {
             <AIInsightsPanel
               insights={mockPerfAnalyticsAIInsights}
               title="Performance Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">

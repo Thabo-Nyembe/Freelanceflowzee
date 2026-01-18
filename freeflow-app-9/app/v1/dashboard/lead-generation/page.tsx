@@ -48,7 +48,8 @@ export default function LeadGenerationPage() {
 
       try {
         setIsLoading(true)
-        setError(null)        const {
+        setError(null)
+        const {
           getLeads,
           getLeadForms,
           getLandingPages,
@@ -71,8 +72,8 @@ export default function LeadGenerationPage() {
         setLeadStats(statsResult.data || null)
 
         setIsLoading(false)
-        toast.success('Lead generation loaded' leads, ${formsResult.data?.length || 0} forms from database`
-        })        announce('Lead generation dashboard loaded successfully', 'polite')
+        toast.success(`Lead generation loaded - ${leadsResult.data?.length || 0} leads, ${formsResult.data?.length || 0} forms`)
+        announce('Lead generation dashboard loaded successfully', 'polite')
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load lead generation data'
         setError(errorMessage)

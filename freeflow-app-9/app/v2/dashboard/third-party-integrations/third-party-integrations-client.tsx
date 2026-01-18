@@ -481,8 +481,7 @@ export default function ThirdPartyIntegrationsClient() {
       toast.error('Please fill in all required fields')
       return
     }
-    toast.success('Integration added successfully' has been connected to your account`
-    })
+    toast.success("Integration " + newIntegration.name + " has been connected to your account")
     setShowAddIntegrationDialog(false)
     setNewIntegration({ name: '', apiKey: '', webhookUrl: '', category: 'crm' })
   }
@@ -517,8 +516,7 @@ export default function ThirdPartyIntegrationsClient() {
 
   const handleConfirmDisconnect = () => {
     setConnections(prev => prev.filter(c => c.app.name !== selectedIntegrationForAction))
-    toast.success('Integration disconnected' has been removed from your account`
-    })
+    toast.success('Integration disconnected')
     setShowDisconnectConfirmDialog(false)
     setSelectedIntegrationForAction('')
   }
@@ -533,8 +531,7 @@ export default function ThirdPartyIntegrationsClient() {
         body: JSON.stringify({ action: 'sync', integration: selectedIntegrationForAction })
       })
       if (!res.ok) throw new Error('Sync failed')
-      toast.success('Sync completed' data has been refreshed`
-      })
+      toast.success('Sync completed')
     } catch {
       toast.error('Sync failed')
     }
@@ -543,8 +540,7 @@ export default function ThirdPartyIntegrationsClient() {
   }
 
   const handleSaveConfig = () => {
-    toast.success('Configuration saved' have been updated`
-    })
+    toast.success("Configuration saved - Settings have been updated")
     setShowConfigureDialog(false)
     setSelectedIntegrationForAction('')
   }
@@ -573,23 +569,20 @@ export default function ThirdPartyIntegrationsClient() {
       toast.error('Please fill in all required fields')
       return
     }
-    toast.success('Zap created successfully' has been created and is ready to activate`
-    })
+    toast.success("Zap has been created and is ready to activate")
     setShowCreateZapDialog(false)
     setNewZap({ name: '', description: '', triggerApp: '', actionApp: '' })
   }
 
   const handleApplyFilters = () => {
-    toast.success('Filters applied' items from the last ${filterOptions.dateRange} days`
-    })
+    toast.success("Filters applied for the last " + filterOptions.dateRange + " days")
     setShowFilterZapsDialog(false)
     setShowFilterHistoryDialog(false)
   }
 
   const handleToggleZapStatus = (zap: Zap) => {
     const newStatus = zap.status === 'active' ? 'paused' : 'active'
-    toast.success(`Zap ${newStatus === 'active' ? 'activated' : 'paused'}` is now ${newStatus}`
-    })
+    toast.success("Zap " + (newStatus === 'active' ? 'activated' : 'paused') + " - now " + newStatus)
   }
 
   const handleEditZapSubmit = () => {
@@ -598,8 +591,7 @@ export default function ThirdPartyIntegrationsClient() {
   }
 
   const handleManageAppSubmit = () => {
-    toast.success('App settings updated' configuration has been saved`
-    })
+    toast.success("App settings updated and configuration has been saved")
     setShowManageAppDialog(false)
     setSelectedAppForAction(null)
   }
@@ -610,8 +602,7 @@ export default function ThirdPartyIntegrationsClient() {
   }
 
   const handleConnectAppSubmit = () => {
-    toast.success('App connected' has been connected to your account`
-    })
+    toast.success("App has been connected to your account")
     setShowConnectAppDialog(false)
     setSelectedAppForAction(null)
   }
@@ -1922,7 +1913,7 @@ export default function ThirdPartyIntegrationsClient() {
             <AIInsightsPanel
               insights={mockIntegrationsAIInsights}
               title="Integration Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -2405,8 +2396,7 @@ export default function ThirdPartyIntegrationsClient() {
                 variant="outline"
                 className="w-full justify-start gap-3 h-auto py-3"
                 onClick={() => {
-                  toast.success('OAuth flow initiated' authorization page...`
-                  })
+                  toast.success("OAuth flow initiated - opening authorization page...")
                   setShowConnectIntegrationDialog(false)
                 }}
               >
@@ -3112,8 +3102,7 @@ export default function ThirdPartyIntegrationsClient() {
                   variant="outline"
                   className="w-full justify-start gap-3 h-auto py-3"
                   onClick={() => {
-                    toast.success('OAuth flow initiated' authorization page...`
-                    })
+                    toast.success("OAuth flow initiated - opening authorization page...")
                     setShowConnectAppDialog(false)
                   }}
                 >

@@ -321,12 +321,7 @@ export default function RolesClient() {
   // Grouped permissions by category
   const permissionsByCategory = useMemo(() => {
     const grouped: Record<string, Permission[]> = {}
-    [].forEach(perm => {
-      if (!grouped[perm.category]) {
-        grouped[perm.category] = []
-      }
-      grouped[perm.category].push(perm)
-    })
+    // Permissions will be fetched from database
     return grouped
   }, [])
 

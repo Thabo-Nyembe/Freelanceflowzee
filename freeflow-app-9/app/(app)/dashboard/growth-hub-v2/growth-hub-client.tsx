@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import { useAuthUserId } from '@/lib/hooks/use-auth-user-id'
@@ -657,8 +659,6 @@ export default function GrowthHubClient() {
     }
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('growth_experiments').insert({
         user_id: userId,
         name: experimentForm.name,
@@ -670,7 +670,7 @@ export default function GrowthHubClient() {
         variants: JSON.stringify([{ id: 'control', name: 'Control', allocation: 50 }, { id: 'variant-a', name: 'Variant A', allocation: 50 }])
       })
       if (error) throw error
-      toast.success('Experiment created'" is ready to configure` })
+      toast.success(`Experiment created: "${experimentForm.name}" is ready to configure`)
       setExperimentForm({ name: '', description: '', hypothesis: '', type: 'a/b', targetMetric: '' })
       setShowCreateExperimentModal(false)
       refreshExperiments()
@@ -682,11 +682,9 @@ export default function GrowthHubClient() {
   const handleStartExperiment = async (expId: string, expName: string) => {
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('growth_experiments').update({ status: 'running', started_at: new Date().toISOString() }).eq('id', expId)
       if (error) throw error
-      toast.success('Experiment started'" is now running` })
+      toast.success(`Experiment started: is now running`)
       refreshExperiments()
     } catch (err: any) {
       toast.error('Failed to start experiment')
@@ -696,11 +694,9 @@ export default function GrowthHubClient() {
   const handleStopExperiment = async (expId: string, expName: string) => {
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('growth_experiments').update({ status: 'paused' }).eq('id', expId)
       if (error) throw error
-      toast.info('Experiment stopped'" has been paused` })
+      toast.info(`Experiment stopped: has been paused`)
       refreshExperiments()
     } catch (err: any) {
       toast.error('Failed to stop experiment')
@@ -710,11 +706,9 @@ export default function GrowthHubClient() {
   const handleDeleteExperiment = async (expId: string, expName: string) => {
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('growth_experiments').delete().eq('id', expId)
       if (error) throw error
-      toast.success('Experiment deleted'" has been removed` })
+      toast.success(`Experiment deleted: has been removed`)
       setSelectedExperiment(null)
       refreshExperiments()
     } catch (err: any) {
@@ -773,8 +767,6 @@ export default function GrowthHubClient() {
     }
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('conversion_funnels').insert({
         name: funnelForm.name,
         description: funnelForm.description,
@@ -782,7 +774,7 @@ export default function GrowthHubClient() {
         is_active: true
       })
       if (error) throw error
-      toast.success('Funnel created'" is ready to track` })
+      toast.success(`Funnel "${funnelForm.name}" is ready to track`)
       setFunnelForm({ name: '', description: '', steps: [] })
       setShowCreateFunnelModal(false)
       refreshFunnels()
@@ -794,11 +786,9 @@ export default function GrowthHubClient() {
   const handleDeleteFunnel = async (funnelId: string, funnelName: string) => {
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('conversion_funnels').delete().eq('id', funnelId)
       if (error) throw error
-      toast.success('Funnel deleted'" has been removed` })
+      toast.success(`Funnel "${funnelName}" has been removed`)
       setSelectedFunnel(null)
       refreshFunnels()
     } catch (err: any) {
@@ -813,8 +803,6 @@ export default function GrowthHubClient() {
     }
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('cohorts').insert({
         name: cohortForm.name,
         description: cohortForm.description,
@@ -824,7 +812,7 @@ export default function GrowthHubClient() {
         metadata: JSON.stringify({ definition: cohortForm.definition })
       })
       if (error) throw error
-      toast.success('Cohort created'" is ready for analysis` })
+      toast.success(`Cohort "${cohortForm.name}" is ready for analysis`)
       setCohortForm({ name: '', description: '', type: 'behavioral', definition: '' })
       setShowCreateCohortModal(false)
       refreshCohorts()
@@ -836,11 +824,9 @@ export default function GrowthHubClient() {
   const handleDeleteCohort = async (cohortId: string, cohortName: string) => {
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('cohorts').delete().eq('id', cohortId)
       if (error) throw error
-      toast.success('Cohort deleted'" has been removed` })
+      toast.success(`Cohort "${cohortName}" has been removed`)
       setSelectedCohort(null)
       refreshCohorts()
     } catch (err: any) {
@@ -855,8 +841,6 @@ export default function GrowthHubClient() {
       const currentSettings = localStorage.getItem(settingsKey)
 
       // Save settings to database
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('user_settings')
         .upsert({
@@ -1038,8 +1022,6 @@ export default function GrowthHubClient() {
                 { icon: BarChart3, label: 'Reports', color: 'text-green-500', action: async () => {
                   toast.loading('Generating reports...')
                   try {
-                    const { createClient } = await import('@/lib/supabase/client')
-                    const supabase = createClient()
                     const { data, error } = await supabase.from('growth_metrics').select('*').limit(100)
                     if (error) throw error
                     const reportData = data || mockFunnels.map(f => ({ name: f.name, conversion: f.totalConversion, users: f.totalUsers }))
@@ -1605,8 +1587,6 @@ export default function GrowthHubClient() {
               <Button className="gap-2" onClick={async () => {
                 toast.loading('Creating path analysis...')
                 try {
-                  const { createClient } = await import('@/lib/supabase/client')
-                  const supabase = createClient()
                   const { error } = await supabase.from('user_paths').insert({
                     name: 'New Path Analysis',
                     start_event: 'page_view',
@@ -1881,8 +1861,6 @@ export default function GrowthHubClient() {
                             <Button variant="outline" size="sm" onClick={async () => {
                             toast.loading('Loading integration settings...')
                             try {
-                              const { createClient } = await import('@/lib/supabase/client')
-                              const supabase = createClient()
                               const { data, error } = await supabase.from('integrations').select('*').eq('name', integration.name).single()
                               toast.dismiss()
                               if (data) {
@@ -2068,8 +2046,6 @@ export default function GrowthHubClient() {
                               settingsKeys.forEach(key => localStorage.removeItem(key))
                               // Reset user settings in database
                               if (userId) {
-                                const { createClient } = await import('@/lib/supabase/client')
-                                const supabase = createClient()
                                 await supabase.from('user_settings').delete().eq('user_id', userId).ilike('setting_key', 'growth_hub_%')
                               }
                               toast.dismiss()

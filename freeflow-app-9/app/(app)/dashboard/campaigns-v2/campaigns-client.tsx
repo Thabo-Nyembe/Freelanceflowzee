@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import React, { useState, useMemo } from 'react'
 import { useCampaigns, type CampaignType as CampaignTypeDB, type CampaignStatus as CampaignStatusDB } from '@/lib/hooks/use-campaigns'
 import { toast } from 'sonner'
@@ -1033,11 +1035,11 @@ export default function CampaignsClient() {
                       </div>
                       <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
                         <p className="text-sm text-indigo-100">Total Enrolled</p>
-                        <p className="text-xl font-bold">{formatNumber(0) => sum + a.stats.enrolled, 0))}</p>
+                        <p className="text-xl font-bold">{formatNumber(0)}</p>
                       </div>
                       <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
                         <p className="text-sm text-indigo-100">Revenue Generated</p>
-                        <p className="text-xl font-bold">${formatNumber(0) => sum + a.stats.revenue, 0))}</p>
+                        <p className="text-xl font-bold">${formatNumber(0)}</p>
                       </div>
                     </div>
                   </div>
@@ -1253,7 +1255,7 @@ export default function CampaignsClient() {
                       </div>
                       <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
                         <p className="text-sm text-violet-100">Segments</p>
-                        <p className="text-xl font-bold">{0 => sum + a.segments.length, 0)}</p>
+                        <p className="text-xl font-bold">{audienceLists.reduce((sum, a) => sum + a.segments.length, 0)}</p>
                       </div>
                     </div>
                   </div>
@@ -2503,7 +2505,7 @@ export default function CampaignsClient() {
                 <p className="text-sm text-gray-500">Audiences</p>
               </div>
               <div className="p-4 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg text-center">
-                <p className="text-2xl font-bold text-blue-600">{0 => sum + a.segments.length, 0)}</p>
+                <p className="text-2xl font-bold text-blue-600">{audienceLists.reduce((sum, a) => sum + a.segments.length, 0)}</p>
                 <p className="text-sm text-gray-500">Segments</p>
               </div>
             </div>
@@ -2596,8 +2598,6 @@ export default function CampaignsClient() {
               }
               try {
                 toast.loading('Creating automation...')
-                const { createClient } = await import('@/lib/supabase/client')
-                const supabase = createClient()
                 const { data: { user } } = await supabase.auth.getUser()
                 if (!user) throw new Error('Not authenticated')
 
@@ -2662,8 +2662,6 @@ export default function CampaignsClient() {
               }
               try {
                 toast.loading('AI is generating your template...')
-                const { createClient } = await import('@/lib/supabase/client')
-                const supabase = createClient()
                 const { data: { user } } = await supabase.auth.getUser()
                 if (!user) throw new Error('Not authenticated')
 
@@ -2721,8 +2719,6 @@ export default function CampaignsClient() {
                 <Button key={crm} variant="outline" className="flex-col h-auto py-4" onClick={async () => {
                   try {
                     toast.loading(`Connecting to ${crm}...`)
-                    const { createClient } = await import('@/lib/supabase/client')
-                    const supabase = createClient()
                     const { data: { user } } = await supabase.auth.getUser()
                     if (!user) throw new Error('Not authenticated')
 
@@ -2751,8 +2747,6 @@ export default function CampaignsClient() {
             <Button onClick={async () => {
               try {
                 toast.loading('Importing subscribers...')
-                const { createClient } = await import('@/lib/supabase/client')
-                const supabase = createClient()
                 const { data: { user } } = await supabase.auth.getUser()
                 if (!user) throw new Error('Not authenticated')
 

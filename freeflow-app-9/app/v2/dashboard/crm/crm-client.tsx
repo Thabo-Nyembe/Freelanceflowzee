@@ -3700,8 +3700,7 @@ export default function CrmClient() {
                     activity_date: new Date().toISOString(),
                     completed: true
                   })
-                  toast.success('Email sent'`
-                  })
+                  toast.success('Email sent')
                 }
                 setShowContactEmailDialog(false)
               }}>

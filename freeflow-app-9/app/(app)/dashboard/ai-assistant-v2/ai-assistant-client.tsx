@@ -1,6 +1,8 @@
 // MIGRATED: Batch #12 - Removed mock data, using database hooks
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import React, { useState, useRef, useEffect, useMemo } from 'react'
 import { toast } from 'sonner'
 import {
@@ -68,6 +70,9 @@ import { useAIAssistant } from '@/lib/hooks/use-ai-assistant'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
+
+// Initialize Supabase client once at module level
+const supabase = createClient()
 
 // Types
 type ModelType = 'gpt-4o' | 'gpt-4-turbo' | 'gpt-3.5-turbo' | 'claude-3-opus' | 'claude-3-sonnet' | 'claude-3-haiku'
@@ -461,8 +466,7 @@ export default function AIAssistantClient() {
     try {
       await hookToggleStar(id)
       const conv = conversations.find(c => c.id === id)
-      toast.success(conv?.is_starred ? 'Removed from starred' : 'Added to starred'`
-      })
+      toast.success(conv?.is_starred ? 'Removed from starred' : 'Added to starred')
     } catch (err) {
       console.error('Error toggling star:', err)
       toast.error('Failed to update conversation')
@@ -486,8 +490,7 @@ export default function AIAssistantClient() {
     try {
       await toggleArchive(id)
       const conv = conversations.find(c => c.id === id)
-      toast.success(conv?.is_archived ? 'Conversation restored' : 'Conversation archived'`
-      })
+      toast.success(conv?.is_archived ? 'Conversation restored' : 'Conversation archived')
     } catch (err) {
       console.error('Error archiving conversation:', err)
       toast.error('Failed to archive conversation')
@@ -499,8 +502,7 @@ export default function AIAssistantClient() {
     setInputMessage(prompt.prompt)
     setActiveTab('chat')
     inputRef.current?.focus()
-    toast.success('Prompt loaded!'" template ready to use`
-    })
+    toast.success('Prompt loaded! Template ready to use')
     // Increment usage count locally
     setPrompts(prev => prev.map(p =>
       p.id === prompt.id ? { ...p, usageCount: p.usageCount + 1 } : p
@@ -515,8 +517,6 @@ export default function AIAssistantClient() {
     }
 
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
@@ -564,8 +564,7 @@ export default function AIAssistantClient() {
         tools: []
       })
 
-      toast.success('Assistant created' has been created successfully`
-      })
+      toast.success('Assistant created: ' + assistantForm.name + ' has been created successfully')
     } catch (err) {
       console.error('Error creating assistant:', err)
       toast.error('Failed to create assistant')
@@ -580,8 +579,6 @@ export default function AIAssistantClient() {
     }
 
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
@@ -625,8 +622,7 @@ export default function AIAssistantClient() {
         variables: []
       })
 
-      toast.success('Prompt template created' has been saved to your library`
-      })
+      toast.success('Prompt template created has been saved to your library')
     } catch (err) {
       console.error('Error creating prompt:', err)
       toast.error('Failed to create prompt')
@@ -639,8 +635,6 @@ export default function AIAssistantClient() {
     if (!file) return
 
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
@@ -654,7 +648,7 @@ export default function AIAssistantClient() {
       // Upload to Supabase Storage
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('ai-knowledge-files')
-        .upload(`${user.id}/${Date.now()}-${file.name}`, file)
+        .upload(user.id + '/' + Date.now() + '-' + file.name, file)
 
       if (uploadError) throw uploadError
 
@@ -686,8 +680,7 @@ export default function AIAssistantClient() {
 
       setFiles(prev => [newFile, ...prev])
 
-      toast.success('File uploaded' is being processed`
-      })
+      toast.success('File uploaded is being processed')
 
       // Process file via API
       fetch('/api/ai/knowledge/process', {
@@ -698,8 +691,7 @@ export default function AIAssistantClient() {
         setFiles(prev => prev.map(f =>
           f.id === newFile.id ? { ...f, status: 'ready', chunks: processedData?.chunks || Math.floor(file.size / 1000) } : f
         ))
-        toast.success('File ready' has been processed and is ready to use`
-        })
+        toast.success('File ready: has been processed and is ready to use')
       }).catch(() => {
         setFiles(prev => prev.map(f =>
           f.id === newFile.id ? { ...f, status: 'error' } : f
@@ -714,8 +706,6 @@ export default function AIAssistantClient() {
   // Handle file delete - Supabase operation
   const handleDeleteFile = async (fileId: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('ai_knowledge_files')
         .delete()
@@ -753,7 +743,7 @@ export default function AIAssistantClient() {
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `chat-export-${activeConversation.id}.json`
+      a.download = 'chat-export-' + activeConversation.id + '.json'
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
@@ -772,8 +762,6 @@ export default function AIAssistantClient() {
 
     try {
       // Delete all messages for this conversation
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('ai_messages')
         .delete()
@@ -947,13 +935,11 @@ export default function AIAssistantClient() {
                               setSelectedModel(model.id)
                               setShowModelSelector(false)
                             }}
-                            className={`w-full flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
-                              selectedModel === model.id ? 'bg-violet-50 dark:bg-violet-900/30' : ''
-                            }`}
+                            className={'w-full flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ' + (selectedModel === model.id ? 'bg-violet-50 dark:bg-violet-900/30' : '')}
                           >
                             <div className="flex items-center gap-3">
-                              <div className={`p-2 rounded-lg ${model.provider === 'OpenAI' ? 'bg-emerald-100 dark:bg-emerald-900/30' : 'bg-amber-100 dark:bg-amber-900/30'}`}>
-                                <Brain className={`h-4 w-4 ${model.provider === 'OpenAI' ? 'text-emerald-600' : 'text-amber-600'}`} />
+                              <div className={'p-2 rounded-lg ' + (model.provider === 'OpenAI' ? 'bg-emerald-100 dark:bg-emerald-900/30' : 'bg-amber-100 dark:bg-amber-900/30')}>
+                                <Brain className={'h-4 w-4 ' + (model.provider === 'OpenAI' ? 'text-emerald-600' : 'text-amber-600')} />
                               </div>
                               <div className="text-left">
                                 <p className="font-medium text-gray-900 dark:text-white">{model.name}</p>
@@ -974,11 +960,7 @@ export default function AIAssistantClient() {
                     <button
                       key={mode}
                       onClick={() => setSelectedMode(mode as ConversationMode)}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all ${
-                        selectedMode === mode
-                          ? 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300'
-                          : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
-                      }`}
+                      className={'flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all ' + (selectedMode === mode ? 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700')}
                     >
                       {config.icon}
                       <span className="text-sm font-medium">{config.label}</span>
@@ -1030,11 +1012,7 @@ export default function AIAssistantClient() {
                             <button
                               key={conv.id}
                               onClick={() => setActiveConversation(conv)}
-                              className={`w-full flex items-center gap-2 p-2 rounded-lg text-left transition-colors ${
-                                activeConversation?.id === conv.id
-                                  ? 'bg-violet-50 dark:bg-violet-900/30'
-                                  : 'hover:bg-gray-50 dark:hover:bg-gray-700'
-                              }`}
+                              className={'w-full flex items-center gap-2 p-2 rounded-lg text-left transition-colors ' + (activeConversation?.id === conv.id ? 'bg-violet-50 dark:bg-violet-900/30' : 'hover:bg-gray-50 dark:hover:bg-gray-700')}
                             >
                               <Star className="h-4 w-4 text-yellow-500 flex-shrink-0" />
                               <span className="text-sm font-medium truncate text-gray-900 dark:text-white">
@@ -1066,11 +1044,7 @@ export default function AIAssistantClient() {
                             <button
                               key={conv.id}
                               onClick={() => setActiveConversation(conv)}
-                              className={`w-full p-3 rounded-xl text-left transition-all group ${
-                                activeConversation?.id === conv.id
-                                  ? 'bg-violet-50 dark:bg-violet-900/30 border border-violet-200 dark:border-violet-800'
-                                  : 'hover:bg-gray-50 dark:hover:bg-gray-700 border border-transparent'
-                              }`}
+                              className={'w-full p-3 rounded-xl text-left transition-all group ' + (activeConversation?.id === conv.id ? 'bg-violet-50 dark:bg-violet-900/30 border border-violet-200 dark:border-violet-800' : 'hover:bg-gray-50 dark:hover:bg-gray-700 border border-transparent')}
                             >
                               <div className="flex items-start justify-between mb-1">
                                 <span className="font-medium text-gray-900 dark:text-white truncate flex-1">
@@ -1100,7 +1074,7 @@ export default function AIAssistantClient() {
                                 </div>
                               </div>
                               <div className="flex items-center gap-2 text-xs text-gray-500">
-                                <span className={`px-2 py-0.5 rounded-full ${getModeColor(conv.mode)}`}>
+                                <span className={'px-2 py-0.5 rounded-full ' + getModeColor(conv.mode)}>
                                   {conv.mode}
                                 </span>
                                 <span>{conv.message_count} msgs</span>
@@ -1134,10 +1108,10 @@ export default function AIAssistantClient() {
                       <div className="flex items-center gap-2 text-xs text-gray-500">
                         {activeConversation && (
                           <>
-                            <span className={`px-2 py-0.5 rounded-full ${getModeColor(activeConversation.mode)}`}>
+                            <span className={'px-2 py-0.5 rounded-full ' + getModeColor(activeConversation.mode)}>
                               {activeConversation.mode}
                             </span>
-                            <span className={`px-2 py-0.5 rounded-full ${getModelColor(activeConversation.model)}`}>
+                            <span className={'px-2 py-0.5 rounded-full ' + getModelColor(activeConversation.model)}>
                               {models.find(m => m.id === activeConversation.model)?.name || activeConversation.model}
                             </span>
                             <span>{activeConversation.message_count} messages</span>
@@ -1217,14 +1191,9 @@ export default function AIAssistantClient() {
                         {messages.map(message => (
                           <div
                             key={message.id}
-                            className={`flex gap-4 ${message.role === 'user' ? 'flex-row-reverse' : ''}`}
+                            className={'flex gap-4 ' + (message.role === 'user' ? 'flex-row-reverse' : '')}
                           >
-                            {/* Avatar */}
-                            <div className={`flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center ${
-                              message.role === 'user'
-                                ? 'bg-violet-600 text-white'
-                                : 'bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900/30 dark:to-purple-900/30'
-                            }`}>
+                            <div className={'flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center ' + (message.role === 'user' ? 'bg-violet-600 text-white' : 'bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900/30 dark:to-purple-900/30')}>
                               {message.role === 'user' ? (
                                 <Users className="h-5 w-5" />
                               ) : (
@@ -1232,20 +1201,14 @@ export default function AIAssistantClient() {
                               )}
                             </div>
 
-                            {/* Message Content */}
-                            <div className={`flex-1 max-w-[80%] ${message.role === 'user' ? 'text-right' : ''}`}>
-                              <div className={`inline-block p-4 rounded-2xl ${
-                                message.role === 'user'
-                                  ? 'bg-violet-600 text-white'
-                                  : 'bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white'
-                              }`}>
+                            <div className={'flex-1 max-w-[80%] ' + (message.role === 'user' ? 'text-right' : '')}>
+                              <div className={'inline-block p-4 rounded-2xl ' + (message.role === 'user' ? 'bg-violet-600 text-white' : 'bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white')}>
                                 <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap">
                                   {message.content}
                                 </div>
                               </div>
 
-                              {/* Message Actions */}
-                              <div className={`flex items-center gap-2 mt-2 ${message.role === 'user' ? 'justify-end' : ''}`}>
+                              <div className={'flex items-center gap-2 mt-2 ' + (message.role === 'user' ? 'justify-end' : '')}>
                                 <span className="text-xs text-gray-400">
                                   {formatDate(message.created_at)}
                                 </span>
@@ -1457,7 +1420,7 @@ export default function AIAssistantClient() {
                   >
                     <div className="flex items-start justify-between mb-4">
                       <div className="text-4xl">{assistant.icon}</div>
-                      <span className={`px-2 py-1 rounded-full text-xs ${getModelColor(assistant.model)}`}>
+                      <span className={'px-2 py-1 rounded-full text-xs ' + getModelColor(assistant.model)}>
                         {models.find(m => m.id === assistant.model)?.name}
                       </span>
                     </div>
@@ -1561,7 +1524,7 @@ export default function AIAssistantClient() {
                           key={v}
                           className="px-2 py-1 bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 rounded text-xs"
                         >
-                          {`{{${v}}}`}
+                          {'{{' + v + '}}'}
                         </span>
                       ))}
                     </div>
@@ -1639,13 +1602,7 @@ export default function AIAssistantClient() {
                           {file.chunks}
                         </td>
                         <td className="px-6 py-4">
-                          <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs ${
-                            file.status === 'ready'
-                              ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
-                              : file.status === 'processing'
-                              ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300'
-                              : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'
-                          }`}>
+                          <span className={'inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs ' + (file.status === 'ready' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' : file.status === 'processing' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300')}>
                             {file.status === 'processing' && <Loader2 className="h-3 w-3 animate-spin" />}
                             {file.status === 'ready' && <CheckCircle className="h-3 w-3" />}
                             {file.status === 'error' && <AlertCircle className="h-3 w-3" />}
@@ -1703,10 +1660,8 @@ export default function AIAssistantClient() {
                 </div>
                 <div className="w-full h-4 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
                   <div
-                    className={`h-full rounded-full transition-all ${
-                      quotaPercentage > 80 ? 'bg-red-500' : quotaPercentage > 50 ? 'bg-yellow-500' : 'bg-violet-600'
-                    }`}
-                    style={{ width: `${quotaPercentage}%` }}
+                    className={'h-full rounded-full transition-all ' + (quotaPercentage > 80 ? 'bg-red-500' : quotaPercentage > 50 ? 'bg-yellow-500' : 'bg-violet-600')}
+                    style={{ width: quotaPercentage + '%' }}
                   />
                 </div>
                 <p className="text-sm text-gray-500 mt-2">
@@ -1774,7 +1729,7 @@ export default function AIAssistantClient() {
                         <div className="w-full relative" style={{ height: '200px' }}>
                           <div
                             className="absolute bottom-0 w-full bg-gradient-to-t from-violet-600 to-violet-400 rounded-t-lg transition-all hover:from-violet-500 hover:to-violet-300"
-                            style={{ height: `${height}%` }}
+                            style={{ height: height + '%' }}
                           />
                         </div>
                         <span className="text-xs text-gray-500">
@@ -1806,7 +1761,7 @@ export default function AIAssistantClient() {
                       <div className="flex-1 h-3 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
                         <div
                           className="h-full bg-violet-600 rounded-full"
-                          style={{ width: `${item.percentage}%` }}
+                          style={{ width: item.percentage + '%' }}
                         />
                       </div>
                       <div className="w-24 text-right text-sm text-gray-500">
@@ -1954,11 +1909,7 @@ export default function AIAssistantClient() {
                             : [...prev.tools, tool]
                         }))
                       }}
-                      className={`px-3 py-1.5 border rounded-lg text-sm transition-colors ${
-                        assistantForm.tools.includes(tool)
-                          ? 'border-violet-500 bg-violet-50 dark:bg-violet-900/30 text-violet-700'
-                          : 'border-gray-200 dark:border-gray-700 hover:border-violet-500'
-                      }`}
+                      className={'px-3 py-1.5 border rounded-lg text-sm transition-colors ' + (assistantForm.tools.includes(tool) ? 'border-violet-500 bg-violet-50 dark:bg-violet-900/30 text-violet-700' : 'border-gray-200 dark:border-gray-700 hover:border-violet-500')}
                     >
                       {tool}
                     </button>

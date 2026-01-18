@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -287,8 +289,6 @@ export default function ContentClient() {
     async function fetchAssets() {
       setAssetsLoading(true)
       try {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) return
 
@@ -340,13 +340,9 @@ export default function ContentClient() {
     async function fetchWebhooks() {
       setWebhooksLoading(true)
       try {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) return
 
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         const { data, error } = await supabase
           .from('webhooks')
           .select('*')
@@ -517,8 +513,7 @@ export default function ContentClient() {
       })
 
       if (result) {
-        toast.success('Content created successfully'" has been created as a ${contentForm.status}`
-        })
+        toast.success(`${contentForm.title} has been created as a ${contentForm.status}`)
         setContentForm(defaultContentForm)
         setIsCreateDialogOpen(false)
         refetchContent()
@@ -555,8 +550,7 @@ export default function ContentClient() {
       }, selectedEntry.id)
 
       if (result) {
-        toast.success('Content updated successfully'" has been updated`
-        })
+        toast.success(`Content updated successfully: "${contentForm.title}" has been updated`)
         setContentForm(defaultContentForm)
         setSelectedEntry(null)
         setIsEditDialogOpen(false)
@@ -577,8 +571,7 @@ export default function ContentClient() {
       const result = await deleteContent(selectedEntry.id)
 
       if (result) {
-        toast.success('Content deleted'" has been moved to trash`
-        })
+        toast.success(`Content deleted: "${selectedEntry.title}" has been moved to trash`)
         setSelectedEntry(null)
         setIsDeleteDialogOpen(false)
         refetchContent()
@@ -600,8 +593,7 @@ export default function ContentClient() {
       }, entry.id)
 
       if (result) {
-        toast.success('Content published'" is now live`
-        })
+        toast.success(`Content published: is now live`)
         refetchContent()
       }
     } catch (error) {
@@ -621,8 +613,7 @@ export default function ContentClient() {
       }, entry.id)
 
       if (result) {
-        toast.success('Content scheduled'" will be published on ${new Date(scheduledDate).toLocaleDateString()}`
-        })
+        toast.success(`Content scheduled: will be published on ${new Date(scheduledDate).toLocaleDateString()}`)
         refetchContent()
       }
     } catch (error) {
@@ -641,8 +632,7 @@ export default function ContentClient() {
       }, entry.id)
 
       if (result) {
-        toast.info('Content archived'" has been archived`
-        })
+        toast.info(`Content archived: has been archived`)
         refetchContent()
       }
     } catch (error) {
@@ -685,8 +675,7 @@ export default function ContentClient() {
       })
 
       if (result) {
-        toast.success('Content duplicated'"`
-        })
+        toast.success(`Content duplicated`)
         refetchContent()
       }
     } catch (error) {
@@ -712,8 +701,6 @@ export default function ContentClient() {
     }
 
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
@@ -782,13 +769,9 @@ export default function ContentClient() {
 
   const handleDeleteAsset = async (asset: Asset) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('assets')
         .update({ deleted_at: new Date().toISOString() })
@@ -797,8 +780,7 @@ export default function ContentClient() {
 
       if (error) throw error
 
-      toast.success('Asset deleted'" has been removed`
-      })
+      toast.success(`Asset deleted: has been removed`)
 
       setAssets(prev => prev.filter(a => a.id !== asset.id))
       setSelectedAsset(null)
@@ -816,13 +798,9 @@ export default function ContentClient() {
 
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('webhooks')
         .insert({
@@ -840,8 +818,7 @@ export default function ContentClient() {
 
       if (error) throw error
 
-      toast.success('Webhook created'" is now active`
-      })
+      toast.success(`Webhook created: is now active`)
 
       setWebhooks(prev => [{
         id: data.id,
@@ -867,13 +844,9 @@ export default function ContentClient() {
 
   const handleToggleWebhook = async (webhook: WebhookConfig) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('webhooks')
         .update({ is_active: !webhook.isActive })

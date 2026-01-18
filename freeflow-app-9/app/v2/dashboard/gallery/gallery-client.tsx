@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
 import {
@@ -66,6 +68,9 @@ import { Progress } from '@/components/ui/progress'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+
+// Initialize Supabase client once at module level
+const supabase = createClient()
 
 // Types
 type Orientation = 'all' | 'landscape' | 'portrait' | 'square'
@@ -254,7 +259,7 @@ export default function GalleryClient() {
 
   const handleCopyLink = () => {
     if (selectedPhoto) {
-      navigator.clipboard.writeText(`https://gallery.app/photo/${selectedPhoto.id}`)
+      navigator.clipboard.writeText("https://gallery.app/photo/" + selectedPhoto.id)
       setCopiedLink(true)
       setTimeout(() => setCopiedLink(false), 2000)
     }
@@ -268,8 +273,8 @@ export default function GalleryClient() {
   }
 
   const formatNumber = (num: number) => {
-    if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`
-    if (num >= 1000) return `${(num / 1000).toFixed(1)}K`
+    if (num >= 1000000) return (num / 1000000).toFixed(1) + "M"
+    if (num >= 1000) return (num / 1000).toFixed(1) + "K"
     return num.toString()
   }
 
@@ -282,8 +287,6 @@ export default function GalleryClient() {
 
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Authentication required')
@@ -306,7 +309,7 @@ export default function GalleryClient() {
         metadata: {}
       })
 
-      toast.success('Photo uploaded'" has been uploaded successfully` })
+      toast.success("Photo uploaded - " + uploadForm.title + " has been uploaded successfully")
       setShowUploadDialog(false)
       setUploadForm({ title: '', description: '', tags: '', file_url: '', file_type: 'image', is_public: true })
     } catch (error: any) {
@@ -324,8 +327,6 @@ export default function GalleryClient() {
 
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Authentication required')
@@ -339,7 +340,7 @@ export default function GalleryClient() {
         is_public: collectionForm.is_public
       })
 
-      toast.success('Collection created'" has been created` })
+      toast.success("Collection created - " + collectionForm.name + " has been created")
       setShowCreateCollection(false)
       setCollectionForm({ name: '', description: '', is_public: true })
     } catch (error: any) {
@@ -352,7 +353,7 @@ export default function GalleryClient() {
   const handleDeleteCollection = async (collection: GalleryCollection) => {
     try {
       await deleteCollection(collection.id)
-      toast.success('Collection deleted'" has been deleted` })
+      toast.success("Collection deleted - " + collection.name + " has been deleted")
     } catch (error: any) {
       toast.error('Delete failed')
     }
@@ -402,7 +403,7 @@ export default function GalleryClient() {
 
   const handleDownloadPhoto = async (photo: Photo | GalleryItem) => {
     const title = 'title' in photo ? photo.title : ''
-    toast.success('Download started'"...` })
+    toast.success("Download started for " + title)
 
     // Track download for gallery items
     if ('download_count' in photo && photo.id) {
@@ -418,7 +419,7 @@ export default function GalleryClient() {
 
   const handleSharePhoto = async (photo: Photo | GalleryItem) => {
     const photoId = photo.id
-    const url = `${window.location.origin}/gallery/${photoId}`
+    const url = window.location.origin + "/gallery/" + photoId
     try {
       await navigator.clipboard.writeText(url)
       toast.success('Link copied')
@@ -430,7 +431,7 @@ export default function GalleryClient() {
   const handleDeleteGalleryItem = async (item: GalleryItem) => {
     try {
       await deleteGalleryItem(item.id)
-      toast.success('Photo deleted'" has been deleted` })
+      toast.success("Photo deleted - " + item.title + " has been deleted")
       setSelectedGalleryItem(null)
     } catch (error: any) {
       toast.error('Delete failed')
@@ -452,8 +453,8 @@ export default function GalleryClient() {
         body: JSON.stringify({
           action: 'create-album',
           data: {
-            name: `Following ${selectedPhotographer.name}`,
-            description: `Photos from ${selectedPhotographer.name}`,
+            name: "Following " + selectedPhotographer.name,
+            description: "Photos from " + selectedPhotographer.name,
           }
         })
       })
@@ -461,7 +462,7 @@ export default function GalleryClient() {
       if (!response.ok || !result.success) {
         throw new Error(result.error || 'Failed to follow photographer')
       }
-      toast.success('Following'` })
+      toast.success('Following')
       setShowFollowDialog(false)
       setSelectedPhotographer(null)
     } catch (error: any) {
@@ -492,7 +493,7 @@ export default function GalleryClient() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           configId: 'gallery-api',
-          keyValue: `kazi-gallery-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          keyValue: "kazi-gallery-" + Date.now() + "-" + Math.random().toString(36).substr(2, 9),
           nickname: 'Gallery API Key',
           environment: 'production'
         })
@@ -526,17 +527,17 @@ export default function GalleryClient() {
         body: JSON.stringify({
           action,
           integrationId: selectedService.name.toLowerCase().replace(/\s+/g, '_'),
-          apiKey: action === 'connect' ? `${selectedService.name.toLowerCase()}_demo_key` : undefined
+          apiKey: action === 'connect' ? selectedService.name.toLowerCase() + "_demo_key" : undefined
         })
       })
       const result = await response.json()
       if (!response.ok || !result.success) {
-        throw new Error(result.error || `Failed to ${action} service`)
+        throw new Error(result.error || "Failed to " + action + " service")
       }
       if (selectedService.isConnected) {
-        toast.success('Disconnected' has been disconnected` })
+        toast.success('Disconnected')
       } else {
-        toast.success('Connected' has been connected successfully` })
+        toast.success('Connected')
       }
       setShowConnectServiceDialog(false)
       setSelectedService(null)
@@ -611,8 +612,7 @@ export default function GalleryClient() {
       if (!response.ok || !result.success) {
         throw new Error(result.error || 'Failed to request data export')
       }
-      toast.success('Export requested' export (${exportResolution} resolution) is being prepared. You will be notified when it is ready.`
-      })
+      toast.success("Export requested: " + exportResolution + " resolution export is being prepared. You will be notified when it is ready.")
       setShowDataExportDialog(false)
     } catch (error: any) {
       toast.error('Export failed')
@@ -728,7 +728,7 @@ export default function GalleryClient() {
 
   const handleShareViaLink = async () => {
     try {
-      await navigator.clipboard.writeText(`${window.location.origin}/gallery/shared/my-gallery`)
+      await navigator.clipboard.writeText(window.location.origin + "/gallery/shared/my-gallery")
       toast.success('Link copied')
     } catch (error) {
       toast.error('Copy failed')
@@ -737,13 +737,13 @@ export default function GalleryClient() {
 
   const handleShareViaEmail = () => {
     const subject = encodeURIComponent('Check out my gallery')
-    const body = encodeURIComponent(`Check out my photo gallery: ${window.location.origin}/gallery/shared/my-gallery`)
-    window.open(`mailto:?subject=${subject}&body=${body}`, '_blank')
+    const body = encodeURIComponent("Check out my photo gallery: " + window.location.origin + "/gallery/shared/my-gallery")
+    window.open("mailto:?subject=" + subject + "&body=" + body, '_blank')
     toast.success('Email client opened')
   }
 
   const handleShareViaEmbed = async () => {
-    const embedCode = `<iframe src="${window.location.origin}/gallery/embed/my-gallery" width="600" height="400" frameborder="0"></iframe>`
+    const embedCode = '<iframe src="' + window.location.origin + '/gallery/embed/my-gallery" width="600" height="400" frameborder="0"></iframe>'
     try {
       await navigator.clipboard.writeText(embedCode)
       toast.success('Embed code copied')
@@ -838,11 +838,11 @@ export default function GalleryClient() {
           </div>
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className={`flex items-center gap-2 px-4 py-3 rounded-xl border transition-colors ${
+            className={"flex items-center gap-2 px-4 py-3 rounded-xl border transition-colors " + (
               showFilters
                 ? 'border-amber-500 bg-amber-50 dark:bg-amber-900/30 text-amber-600'
                 : 'border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
-            }`}
+            )}
           >
             <Filter className="w-5 h-5" />
             Filters
@@ -850,13 +850,13 @@ export default function GalleryClient() {
           <div className="flex items-center border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
             <button
               onClick={() => setViewMode('masonry')}
-              className={`p-3 ${viewMode === 'masonry' ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-600' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
+              className={"p-3 " + (viewMode === 'masonry' ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-600' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700')}
             >
               <LayoutGrid className="w-5 h-5" />
             </button>
             <button
               onClick={() => setViewMode('grid')}
-              className={`p-3 ${viewMode === 'grid' ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-600' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
+              className={"p-3 " + (viewMode === 'grid' ? 'bg-amber-50 dark:bg-amber-900/30 text-amber-600' : 'text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700')}
             >
               <Grid3X3 className="w-5 h-5" />
             </button>
@@ -874,11 +874,11 @@ export default function GalleryClient() {
                     <button
                       key={o}
                       onClick={() => setOrientation(o)}
-                      className={`px-3 py-1.5 rounded-lg text-sm capitalize ${
+                      className={"px-3 py-1.5 rounded-lg text-sm capitalize " + (
                         orientation === o
                           ? 'bg-amber-500 text-white'
                           : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                      }`}
+                      )}
                     >
                       {o}
                     </button>
@@ -892,11 +892,11 @@ export default function GalleryClient() {
                     <button
                       key={c}
                       onClick={() => setColor(c)}
-                      className={`px-3 py-1.5 rounded-lg text-sm capitalize ${
+                      className={"px-3 py-1.5 rounded-lg text-sm capitalize " + (
                         color === c
                           ? 'bg-amber-500 text-white'
                           : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                      }`}
+                      )}
                     >
                       {c.replace('_', ' ')}
                     </button>
@@ -953,7 +953,7 @@ export default function GalleryClient() {
                     <div
                       className="w-full"
                       style={{
-                        paddingBottom: `${(photo.height / photo.width) * 100}%`,
+                        paddingBottom: ((photo.height / photo.width) * 100) + "%",
                         backgroundColor: photo.color
                       }}
                     >
@@ -993,7 +993,7 @@ export default function GalleryClient() {
                               }}
                               className="flex items-center gap-1 px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-lg text-white text-sm hover:bg-white/30"
                             >
-                              <Heart className={`w-4 h-4 ${(photo.isLiked || likedItems.has(photo.id)) ? 'fill-red-500 text-red-500' : ''}`} />
+                              <Heart className={"w-4 h-4 " + ((photo.isLiked || likedItems.has(photo.id)) ? 'fill-red-500 text-red-500' : '')} />
                               {formatNumber(photo.likes + (likedItems.has(photo.id) && !photo.isLiked ? 1 : 0))}
                             </button>
                           </div>
@@ -1282,11 +1282,11 @@ export default function GalleryClient() {
                         <button
                           key={item.id}
                           onClick={() => setSettingsTab(item.id)}
-                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
+                          className={"w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors " + (
                             settingsTab === item.id
                               ? 'bg-amber-500 text-white'
                               : 'hover:bg-gray-100 dark:hover:bg-gray-800'
-                          }`}
+                          )}
                         >
                           <item.icon className="h-4 w-4" />
                           <span className="text-sm font-medium">{item.label}</span>
@@ -1718,8 +1718,8 @@ export default function GalleryClient() {
                         ].map((service, idx) => (
                           <div key={idx} className="flex items-center justify-between py-3 px-4 border rounded-lg">
                             <div className="flex items-center gap-3">
-                              <div className={`p-2 rounded-lg ${service.status === 'connected' ? 'bg-emerald-100 dark:bg-emerald-900/40' : 'bg-gray-100 dark:bg-gray-800'}`}>
-                                <Globe className={`h-4 w-4 ${service.status === 'connected' ? 'text-emerald-600' : 'text-gray-400'}`} />
+                              <div className={"p-2 rounded-lg " + (service.status === 'connected' ? 'bg-emerald-100 dark:bg-emerald-900/40' : 'bg-gray-100 dark:bg-gray-800')}>
+                                <Globe className={"h-4 w-4 " + (service.status === 'connected' ? 'text-emerald-600' : 'text-gray-400')} />
                               </div>
                               <div>
                                 <p className="font-medium">{service.name}</p>
@@ -1918,7 +1918,7 @@ export default function GalleryClient() {
             <AIInsightsPanel
               insights={mockGalleryAIInsights}
               title="Gallery Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -1955,7 +1955,7 @@ export default function GalleryClient() {
                   className="w-full rounded-xl overflow-hidden"
                   style={{
                     backgroundColor: selectedPhoto.color,
-                    aspectRatio: `${selectedPhoto.width}/${selectedPhoto.height}`,
+                    aspectRatio: selectedPhoto.width + "/" + selectedPhoto.height,
                     maxHeight: '400px'
                   }}
                 >
@@ -2108,14 +2108,14 @@ export default function GalleryClient() {
                         onClick={() => handleToggleLike(selectedPhoto.id)}
                         className="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-700"
                       >
-                        <Heart className={`w-4 h-4 ${(selectedPhoto.isLiked || likedItems.has(selectedPhoto.id)) ? 'fill-red-500 text-red-500' : ''}`} />
+                        <Heart className={"w-4 h-4 " + ((selectedPhoto.isLiked || likedItems.has(selectedPhoto.id)) ? 'fill-red-500 text-red-500' : '')} />
                         {(selectedPhoto.isLiked || likedItems.has(selectedPhoto.id)) ? 'Liked' : 'Like'}
                       </button>
                       <button
                         onClick={() => handleToggleSave(selectedPhoto.id)}
                         className="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-700"
                       >
-                        <Bookmark className={`w-4 h-4 ${(selectedPhoto.isSaved || savedItems.has(selectedPhoto.id)) ? 'fill-amber-500 text-amber-500' : ''}`} />
+                        <Bookmark className={"w-4 h-4 " + ((selectedPhoto.isSaved || savedItems.has(selectedPhoto.id)) ? 'fill-amber-500 text-amber-500' : '')} />
                         {(selectedPhoto.isSaved || savedItems.has(selectedPhoto.id)) ? 'Saved' : 'Save'}
                       </button>
                       <button
@@ -2355,7 +2355,7 @@ export default function GalleryClient() {
                   <div className="flex items-center gap-2">
                     <input
                       type="text"
-                      value={`${typeof window !== 'undefined' ? window.location.origin : ''}/gallery/shared/my-gallery`}
+                      value={(typeof window !== 'undefined' ? window.location.origin : '') + "/gallery/shared/my-gallery"}
                       readOnly
                       className="flex-1 px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 font-mono text-sm"
                     />
@@ -2363,7 +2363,7 @@ export default function GalleryClient() {
                       variant="outline"
                       size="sm"
                       onClick={() => {
-                        navigator.clipboard.writeText(`${window.location.origin}/gallery/shared/my-gallery`)
+                        navigator.clipboard.writeText(window.location.origin + "/gallery/shared/my-gallery")
                         toast.success('Link copied')
                       }}
                     >
@@ -2735,11 +2735,11 @@ export default function GalleryClient() {
                   <button
                     onClick={handleConfirmServiceAction}
                     disabled={isSubmitting}
-                    className={`flex-1 px-4 py-2 rounded-lg disabled:opacity-50 flex items-center justify-center gap-2 ${
+                    className={"flex-1 px-4 py-2 rounded-lg disabled:opacity-50 flex items-center justify-center gap-2 " + (
                       selectedService.isConnected
                         ? 'bg-red-600 text-white hover:bg-red-700'
                         : 'bg-amber-500 text-white hover:bg-amber-600'
-                    }`}
+                    )}
                   >
                     {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
                     {isSubmitting
@@ -2895,7 +2895,7 @@ export default function GalleryClient() {
                       {Array.from({ length: 49 }).map((_, i) => (
                         <div
                           key={i}
-                          className={`w-4 h-4 ${Math.random() > 0.5 ? 'bg-gray-900 dark:bg-white' : 'bg-transparent'}`}
+                          className={"w-4 h-4 " + (Math.random() > 0.5 ? 'bg-gray-900 dark:bg-white' : 'bg-transparent')}
                         />
                       ))}
                     </div>

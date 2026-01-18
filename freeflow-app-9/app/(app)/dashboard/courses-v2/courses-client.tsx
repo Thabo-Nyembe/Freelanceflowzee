@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from '@/components/ui/dialog'
@@ -782,8 +784,6 @@ export default function CoursesClient() {
 
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
       if (!user) {
@@ -1010,9 +1010,6 @@ export default function CoursesClient() {
   const handleEnrollCourse = async (course: Course) => {
     setIsSubmitting(true)
     try {
-      const supabase = createClient()
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
       if (!user) {
@@ -1021,8 +1018,6 @@ export default function CoursesClient() {
       }
 
       // Create enrollment in course_enrollments table
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('course_enrollments').insert({
         user_id: user.id,
         course_id: course.id,
@@ -1044,8 +1039,6 @@ export default function CoursesClient() {
 
   const handleStartLesson = async (lecture: Lecture) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
       if (!user) {
@@ -1070,8 +1063,6 @@ export default function CoursesClient() {
   const handleCompleteCourse = async (course: Course) => {
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
       if (!user) {
@@ -1099,9 +1090,6 @@ export default function CoursesClient() {
 
   const handleDownloadCertificate = async (course: Course) => {
     try {
-      const supabase = createClient()
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
       if (!user) {
@@ -1124,10 +1112,7 @@ export default function CoursesClient() {
 
     setIsSubmitting(true)
     try {
-      const supabase = createClient()
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('course_modules').insert({
         course_id: selectedCourse.id,
         title: sectionForm.title,
@@ -1156,8 +1141,6 @@ export default function CoursesClient() {
 
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('course_lessons').insert({
         module_id: sectionId,
         title: lectureForm.title,
@@ -1183,8 +1166,6 @@ export default function CoursesClient() {
   const handleRespondToReview = async (reviewId: string, response: string) => {
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('course_reviews')
         .update({
@@ -1494,8 +1475,6 @@ export default function CoursesClient() {
                             } else {
                               toast.promise(
                                 (async () => {
-                                  const { createClient } = await import('@/lib/supabase/client')
-                                  const supabase = createClient()
                                   const { data: { user } } = await supabase.auth.getUser()
                                   if (!user) throw new Error('Not authenticated')
 

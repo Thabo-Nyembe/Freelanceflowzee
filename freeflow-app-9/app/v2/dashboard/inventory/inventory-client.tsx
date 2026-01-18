@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useCallback } from 'react'
 import { useInventory, useCreateInventoryItem, useUpdateInventoryItem, useDeleteInventoryItem, type InventoryItem, type InventoryStatus } from '@/lib/hooks/use-inventory'
 import { useInventoryLocations } from '@/lib/hooks/use-inventory-extended'
@@ -66,6 +68,9 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
+
+// Initialize Supabase client once at module level
+const supabase = createClient()
 
 // Comprehensive type definitions for Shopify-level inventory
 interface ProductVariant {
@@ -600,7 +605,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
       a.click()
       window.URL.revokeObjectURL(url)
 
-      toast.success('Export completed' items` })
+      toast.success('Export completed')
     } catch (error) {
       console.error('Export error:', error)
       toast.error('Failed to export inventory')
@@ -623,8 +628,6 @@ export default function InventoryClient({ initialInventory }: { initialInventory
 
     setCreatingTransfer(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('stock_transfers').insert({
         reference: `TRF-${Date.now()}`,
         origin_location_id: transferForm.originLocationId,
@@ -662,8 +665,6 @@ export default function InventoryClient({ initialInventory }: { initialInventory
 
     setCreatingPO(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('purchase_orders').insert({
         po_number: `PO-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`,
         supplier_id: poForm.supplierId,
@@ -717,7 +718,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
         updated_at: new Date().toISOString()
       } as any)
 
-      toast.success('Stock updated'" has been updated` })
+      toast.success("Stock updated: " + product.title + " has been updated")
       refetch()
     } catch (error) {
       console.error('Stock update error:', error)
@@ -744,7 +745,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
         updated_at: new Date().toISOString()
       } as any)
 
-      toast.success('Product archived'" has been archived` })
+      toast.success("Product archived: " + product.title + " has been archived")
       refetch()
     } catch (error) {
       console.error('Archive error:', error)
@@ -760,8 +761,6 @@ export default function InventoryClient({ initialInventory }: { initialInventory
 
     setCreatingLocation(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('inventory_locations').insert({
         name: locationForm.name,
         address: locationForm.address || null,
@@ -774,7 +773,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
 
       if (error) throw error
 
-      toast.success('Location created'" has been added` })
+      toast.success("Location created: " + locationForm.name + " has been added")
       setShowLocationDialog(false)
       setLocationForm({
         name: '',
@@ -799,8 +798,6 @@ export default function InventoryClient({ initialInventory }: { initialInventory
 
     setCreatingSupplier(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('suppliers').insert({
         name: supplierForm.name,
         email: supplierForm.email || null,
@@ -816,7 +813,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
 
       if (error) throw error
 
-      toast.success('Supplier created'" has been added` })
+      toast.success("Supplier created: " + supplierForm.name + " has been added")
       setShowSupplierDialog(false)
       setSupplierForm({
         name: '',
@@ -1018,19 +1015,19 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setStatusFilter('all')}
-                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${statusFilter === 'all' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'}`}
+                    className={"px-3 py-1.5 rounded-lg text-sm font-medium transition-colors " + (statusFilter === 'all' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700')}
                   >
                     All
                   </button>
                   <button
                     onClick={() => setStatusFilter('active')}
-                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${statusFilter === 'active' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'}`}
+                    className={"px-3 py-1.5 rounded-lg text-sm font-medium transition-colors " + (statusFilter === 'active' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700')}
                   >
                     Active
                   </button>
                   <button
                     onClick={() => setStatusFilter('draft')}
-                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${statusFilter === 'draft' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'}`}
+                    className={"px-3 py-1.5 rounded-lg text-sm font-medium transition-colors " + (statusFilter === 'draft' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700')}
                   >
                     Draft
                   </button>
@@ -1197,12 +1194,12 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                 ].map((activity, idx) => (
                   <div key={idx} className="flex-shrink-0 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg min-w-[200px]">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                      <span className={"px-2 py-0.5 rounded-full text-xs font-medium " + (
                         activity.type === 'in' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
                         activity.type === 'out' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
                         activity.type === 'transfer' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
                         'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
-                      }`}>
+                      )}>
                         {activity.action}
                       </span>
                       <span className="text-xs text-gray-500">{activity.time}</span>
@@ -1257,7 +1254,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                             </div>
                           </td>
                           <td className="py-3 px-4">
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(product.status)}`}>
+                            <span className={"px-2 py-1 rounded-full text-xs font-medium " + getStatusColor(product.status)}>
                               {product.status.charAt(0).toUpperCase() + product.status.slice(1)}
                             </span>
                           </td>
@@ -1304,10 +1301,10 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                                       {[variant.option1, variant.option2, variant.option3].filter(Boolean).join(' / ') || 'Default'}
                                     </div>
                                     <div className="text-gray-600 dark:text-gray-400 font-mono">{variant.sku}</div>
-                                    <div className={`text-right font-medium ${stockStatus.color}`}>{variant.quantity}</div>
+                                    <div className={"text-right font-medium " + stockStatus.color}>{variant.quantity}</div>
                                     <div className="text-right text-gray-900 dark:text-white">${variant.price.toFixed(2)}</div>
                                     <div className="text-center">
-                                      <span className={`px-2 py-0.5 rounded-full text-xs ${stockStatus.bg} ${stockStatus.color}`}>
+                                      <span className={"px-2 py-0.5 rounded-full text-xs " + stockStatus.bg + " " + stockStatus.color}>
                                         {stockStatus.label}
                                       </span>
                                     </div>
@@ -1344,12 +1341,12 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                   <div key={location.id} className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-3">
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                        <div className={"w-12 h-12 rounded-xl flex items-center justify-center " + (
                           location.type === 'warehouse' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' :
                           location.type === 'store' ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400' :
                           location.type === 'fulfillment' ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400' :
                           'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400'
-                        }`}>
+                        )}>
                           <LocationIcon className="w-6 h-6" />
                         </div>
                         <div>
@@ -1420,7 +1417,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                         {transfer.items.reduce((sum, item) => sum + item.quantity, 0)} units
                       </td>
                       <td className="py-3 px-4">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(transfer.status)}`}>
+                        <span className={"px-2 py-1 rounded-full text-xs font-medium " + getStatusColor(transfer.status)}>
                           {transfer.status.replace('_', ' ').charAt(0).toUpperCase() + transfer.status.replace('_', ' ').slice(1)}
                         </span>
                       </td>
@@ -1476,7 +1473,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                         ${po.total.toLocaleString()}
                       </td>
                       <td className="py-3 px-4">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(po.status)}`}>
+                        <span className={"px-2 py-1 rounded-full text-xs font-medium " + getStatusColor(po.status)}>
                           {po.status.charAt(0).toUpperCase() + po.status.slice(1)}
                         </span>
                       </td>
@@ -1586,11 +1583,11 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                         {new Date(adj.adjustedAt).toLocaleString()}
                       </td>
                       <td className="py-3 px-4">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        <span className={"px-2 py-1 rounded-full text-xs font-medium " + (
                           adj.type === 'increase' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
                           adj.type === 'decrease' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
                           'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                        }`}>
+                        )}>
                           {adj.type.charAt(0).toUpperCase() + adj.type.slice(1)}
                         </span>
                       </td>
@@ -1600,7 +1597,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                       </td>
                       <td className="py-3 px-4 text-gray-600 dark:text-gray-400">{adj.locationName}</td>
                       <td className="py-3 px-4 text-right">
-                        <span className={`font-medium ${adj.quantityAfter > adj.quantityBefore ? 'text-green-600' : 'text-red-600'}`}>
+                        <span className={"font-medium " + (adj.quantityAfter > adj.quantityBefore ? 'text-green-600' : 'text-red-600')}>
                           {adj.quantityAfter > adj.quantityBefore ? '+' : ''}{adj.quantityAfter - adj.quantityBefore}
                         </span>
                         <div className="text-xs text-gray-500 dark:text-gray-400">
@@ -1635,11 +1632,11 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                       <button
                         key={item.id}
                         onClick={() => setSettingsTab(item.id)}
-                        className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-left transition-colors ${
+                        className={"w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-left transition-colors " + (
                           settingsTab === item.id
                             ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
                             : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400'
-                        }`}
+                        )}
                       >
                         <item.icon className="w-4 h-4" />
                         {item.label}
@@ -1708,11 +1705,11 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                         ].map((method) => (
                           <button
                             key={method.name}
-                            className={`p-4 rounded-lg border-2 text-left ${
+                            className={"p-4 rounded-lg border-2 text-left " + (
                               method.active
                                 ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
                                 : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
-                            }`}
+                            )}
                           >
                             <p className="font-semibold text-gray-900 dark:text-white">{method.name}</p>
                             <p className="text-sm text-gray-500">{method.desc}</p>
@@ -1750,9 +1747,9 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                               </div>
                             </div>
                             <div className="flex items-center gap-4">
-                              <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                              <span className={"px-3 py-1 rounded-full text-xs font-medium " + (
                                 loc.isActive ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-600'
-                              }`}>
+                              )}>
                                 {loc.isActive ? 'Active' : 'Inactive'}
                               </span>
                               <button className="p-2 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg">
@@ -2053,7 +2050,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
             <AIInsightsPanel
               insights={mockInventoryAIInsights}
               title="Inventory Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
 

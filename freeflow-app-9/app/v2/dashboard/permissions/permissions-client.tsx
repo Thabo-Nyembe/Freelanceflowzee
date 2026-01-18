@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -446,7 +448,6 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
     }
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client'); const supabase = createClient(); const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
       const { error } = await supabase.from('roles').insert({
@@ -466,7 +467,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
         priority: 1
       })
       if (error) throw error
-      toast.success('Role Created' has been created` })
+      toast.success(`Role Created`, { description: `${newRole.display_name} has been created` })
       setShowCreateRole(false)
       setNewRole({ role_name: '', display_name: '', description: '', role_level: 'standard', permissions: [] })
       refetchRoles?.()
@@ -480,8 +481,6 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
   const handleAssignPermission = async (roleId: string, roleName: string, permission: string) => {
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: roleData, error: fetchError } = await supabase
         .from('roles')
         .select('permissions')
@@ -491,7 +490,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
 
       const currentPermissions = roleData?.permissions || []
       if (currentPermissions.includes(permission)) {
-        toast.info('Already assigned' is already assigned to ${roleName}` })
+        toast.info(`Already assigned`, { description: `${permission} is already assigned to ${roleName}` })
         return
       }
 
@@ -499,7 +498,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
         permissions: [...currentPermissions, permission]
       }).eq('id', roleId)
       if (error) throw error
-      toast.success('Permission assigned' added to ${roleName}` })
+      toast.success(`Permission assigned`, { description: `${permission} added to ${roleName}` })
       refetchRoles?.()
     } catch (err: any) {
       toast.error('Error assigning permission')
@@ -511,8 +510,6 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
   const handleRevokePermission = async (roleId: string, roleName: string, permission: string) => {
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: roleData, error: fetchError } = await supabase
         .from('roles')
         .select('permissions')
@@ -527,7 +524,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
         permissions: updatedPermissions
       }).eq('id', roleId)
       if (error) throw error
-      toast.success('Permission revoked' removed from ${roleName}` })
+      toast.success(`Permission revoked`, { description: `${permission} removed from ${roleName}` })
       refetchRoles?.()
     } catch (err: any) {
       toast.error('Error revoking permission')
@@ -543,7 +540,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
         deleted_at: new Date().toISOString()
       }).eq('id', roleId)
       if (error) throw error
-      toast.success('Role deleted' has been deleted` })
+      toast.success(`Role deleted`, { description: `${roleName} has been deleted` })
       setSelectedRole(null)
       refetchRoles?.()
     } catch (err: any) {
@@ -556,8 +553,6 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
   const handleExportPermissions = async () => {
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase.from('roles').select('*').is('deleted_at', null)
       if (error) throw error
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
@@ -578,8 +573,6 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
   const handleAuditPermissions = async () => {
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: roles, error: rolesError } = await supabase.from('roles').select('*').is('deleted_at', null)
       if (rolesError) throw rolesError
       const { data: assignments, error: assignError } = await supabase.from('role_assignments').select('*').is('deleted_at', null)
@@ -588,8 +581,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
       const unusedRoles = roles?.filter(r => r.current_users === 0) || []
       const expiredAssignments = assignments?.filter(a => a.valid_until && new Date(a.valid_until) < new Date()) || []
 
-      toast.success('Audit complete' unused roles and ${expiredAssignments.length} expired assignments`
-      })
+      toast.success(`Audit complete`, { description: `Found ${unusedRoles.length} unused roles and ${expiredAssignments.length} expired assignments` })
     } catch (err: any) {
       toast.error('Audit failed')
     } finally {
@@ -605,10 +597,9 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
     setIsLoading(true)
     try {
       // Note: User creation typically involves auth - this creates a profile entry
-      const { createClient } = await import('@/lib/supabase/client'); const supabase = createClient(); const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
-      toast.success('User invited'` })
+      toast.success(`User invited`, { description: `Invitation sent to ${newUser.email}` })
       setShowCreateUser(false)
       setNewUser({ email: '', firstName: '', lastName: '', department: '', title: '', roles: [], groups: [] })
     } catch (err: any) {
@@ -625,11 +616,10 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
     }
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client'); const supabase = createClient(); const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
       // Groups would need their own table - showing pattern
-      toast.success('Group created' has been created` })
+      toast.success(`Group created`, { description: `${newGroup.name} has been created` })
       setShowCreateGroup(false)
       setNewGroup({ name: '', description: '', type: 'custom' })
     } catch (err: any) {
@@ -642,7 +632,6 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
   const handleAssignUserToRole = async (userId: string, roleId: string) => {
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client'); const supabase = createClient(); const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
       const { error } = await supabase.from('role_assignments').insert({
@@ -2539,7 +2528,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                 Reset Password
               </Button>
               <Button variant="outline" className="w-full justify-start gap-2" onClick={() => {
-                toast.success('Session revoked' have been revoked` })
+                toast.success(`Session revoked`, { description: `${selectedUser?.firstName}'s sessions have been revoked` })
                 setShowUserOptionsDialog(false)
               }}>
                 <LockKeyhole className="w-4 h-4" />
@@ -2617,7 +2606,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                   toast.error('Validation Error')
                   return
                 }
-                toast.success('Policy created' has been created successfully` })
+                toast.success(`Policy created`, { description: `${newPolicy.name} has been created successfully` })
                 setNewPolicy({ name: '', description: '', type: 'sign_on', priority: 1 })
                 setShowCreatePolicyDialog(false)
               }}>
@@ -2674,7 +2663,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                   toast.error('Validation Error')
                   return
                 }
-                toast.success('Application added' has been added successfully` })
+                toast.success(`Application added`, { description: `${newApplication.name} has been added successfully` })
                 setNewApplication({ name: '', type: 'saml', ssoEnabled: true })
                 setShowAddApplicationDialog(false)
               }}>
@@ -2729,7 +2718,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                 a.download = filename
                 a.click()
                 URL.revokeObjectURL(url)
-                toast.success('Export complete'` })
+                toast.success(`Export complete`, { description: `Logs exported as ${filename}` })
                 setShowExportLogsDialog(false)
               }}>
                 Export Logs
@@ -2851,7 +2840,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                   toast.error('Validation Error')
                   return
                 }
-                toast.success('Mapping added' -> ${newMapping.target}` })
+                toast.success(`Mapping added`, { description: `${newMapping.source} -> ${newMapping.target}` })
                 setNewMapping({ source: '', target: '', required: false })
                 setShowAddMappingDialog(false)
               }}>
@@ -2888,7 +2877,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                 Rotate Key
               </Button>
               <Button variant="outline" className="w-full justify-start gap-2 text-red-600 hover:bg-red-50" onClick={() => {
-                toast.success('API key revoked' has been revoked` })
+                toast.success(`API key revoked`, { description: `${selectedAPIKey?.name} has been revoked` })
                 setShowAPIKeyOptionsDialog(false)
               }}>
                 <AlertTriangle className="w-4 h-4" />
@@ -3030,7 +3019,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
               </Button>
               {selectedDirectoryIntegration?.status !== 'connected' && (
                 <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
-                  toast.success('Connected' has been connected` })
+                  toast.success(`Connected`, { description: `${selectedDirectoryIntegration?.name} has been connected` })
                   setShowDirectoryConfigDialog(false)
                 }}>
                   Connect
@@ -3103,7 +3092,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
               </Button>
               {!selectedHRIntegration?.connected && (
                 <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
-                  toast.success('Connected' has been connected` })
+                  toast.success(`Connected`, { description: `${selectedHRIntegration?.name} has been connected` })
                   setShowHRIntegrationDialog(false)
                 }}>
                   Connect
@@ -3315,7 +3304,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowEditUserDialog(false)}>Cancel</Button>
               <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
-                toast.success('User updated' has been updated` })
+                toast.success(`User updated`, { description: `${selectedUser?.displayName} has been updated` })
                 setShowEditUserDialog(false)
               }}>
                 Save Changes
@@ -3351,7 +3340,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowResetPasswordDialog(false)}>Cancel</Button>
               <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
-                toast.success('Reset email sent'` })
+                toast.success(`Reset email sent`, { description: `Password reset email sent to ${selectedUser?.email}` })
                 setShowResetPasswordDialog(false)
               }}>
                 Send Reset Email
@@ -3384,7 +3373,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowLockAccountDialog(false)}>Cancel</Button>
               <Button className="bg-orange-600 hover:bg-orange-700" onClick={() => {
-                toast.success('Account locked' has been suspended` })
+                toast.success(`Account locked`, { description: `${selectedUser?.displayName || selectedUserForOptions?.displayName} has been suspended` })
                 setShowLockAccountDialog(false)
               }}>
                 Lock Account
@@ -3423,7 +3412,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
                       </div>
                     </div>
                     <Button variant="outline" size="sm" onClick={() => {
-                      toast.success('Member added' has been added to ${selectedGroup?.name}` })
+                      toast.success(`Member added`, { description: `${user.displayName} has been added to ${selectedGroup?.name}` })
                     }}>Add</Button>
                   </div>
                 ))}
@@ -3470,7 +3459,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowEditGroupDialog(false)}>Cancel</Button>
               <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
-                toast.success('Group updated' has been updated` })
+                toast.success(`Group updated`, { description: `${selectedGroup?.name} has been updated` })
                 setShowEditGroupDialog(false)
               }}>
                 Save Changes
@@ -3564,7 +3553,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowEditRoleDialog(false)}>Cancel</Button>
               <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
-                toast.success('Role updated' has been updated` })
+                toast.success(`Role updated`, { description: `${selectedRole?.displayName} has been updated` })
                 setShowEditRoleDialog(false)
               }}>
                 Save Changes

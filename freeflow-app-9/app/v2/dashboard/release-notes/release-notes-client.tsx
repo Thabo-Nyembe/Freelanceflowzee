@@ -630,7 +630,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
       if (editingReleaseNote) {
         const result = await updateReleaseNote(editingReleaseNote.id, releaseData)
         if (result.success) {
-          toast.success('Release Note Updated' has been updated successfully` })
+          toast.success('Release Note Updated')
           setShowCreateModal(false)
           resetForm()
         } else {
@@ -639,7 +639,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
       } else {
         const result = await createReleaseNote(releaseData)
         if (result.success) {
-          toast.success('Release Note Created' has been created successfully` })
+          toast.success('Release Note Created')
           setShowCreateModal(false)
           resetForm()
         } else {
@@ -659,7 +659,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
     try {
       const result = await publishReleaseNote(noteId)
       if (result.success) {
-        toast.success('Published' is now live` })
+        toast.success('Published')
       } else {
         toast.error('Publish Failed')
       }
@@ -676,7 +676,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
     try {
       const result = await archiveReleaseNote(noteId)
       if (result.success) {
-        toast.success('Archived' has been archived` })
+        toast.success('Archived')
       } else {
         toast.error('Archive Failed')
       }
@@ -733,7 +733,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
   const handleShareReleaseNote = (noteVersion: string) => {
     const shareUrl = `${window.location.origin}/releases/${noteVersion}`
     navigator.clipboard.writeText(shareUrl)
-    toast.success('Link Copied' copied to clipboard` })
+    toast.success('Link Copied')
   }
 
   // Subscribe to notifications
@@ -2089,7 +2089,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
             <AIInsightsPanel
               insights={mockReleaseNotesAIInsights}
               title="Release Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -2349,7 +2349,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                     {selectedRelease.downloadUrl && (
                       <Button size="sm" className="bg-orange-600" onClick={() => {
                         window.open(selectedRelease.downloadUrl, '_blank')
-                        toast.success('Download Started'` })
+                        toast.success('Download Started')
                       }}>
                         <Download className="w-4 h-4 mr-1" />
                         Download
@@ -2897,7 +2897,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
               Cancel
             </Button>
             <Button className="bg-orange-600 hover:bg-orange-700" onClick={() => {
-              toast.success('Feature Flag Updated' settings saved` })
+              toast.success('Feature Flag Updated')
               setShowFeatureFlagDialog(false)
             }}>
               Save Changes
@@ -3014,7 +3014,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
               Cancel
             </Button>
             <Button className="bg-orange-600 hover:bg-orange-700" onClick={() => {
-              toast.success('Service Connected' has been connected successfully` })
+              toast.success('Service Connected')
               setShowConnectServiceDialog(false)
             }}>
               Connect {selectedService}

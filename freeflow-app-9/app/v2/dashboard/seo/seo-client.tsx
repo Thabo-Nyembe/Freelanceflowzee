@@ -505,13 +505,13 @@ export default function SEOClient({ initialKeywords, initialBacklinks }: SEOClie
 
   // Handlers
   const handleRunAnalysis = () => toast.info('Analyzing')
-  const handleOptimize = (n: string) => toast.info('Optimizing'"...` })
+  const handleOptimize = (n: string) => toast.info('Optimizing ' + n + '...')
   const handleGenerateSitemap = () => toast.success('Generated')
   const handleExportReport = () => toast.success('Exporting')
 
   // Toast handlers for unconnected buttons
   const handleOptimizePage = (pageName: string) => {
-    toast.info('Optimizing'"...` })
+    toast.info('Optimizing ' + pageName + '...')
   }
   const handleAddKeywords = () => {
     toast.info('Add Keywords')
@@ -526,7 +526,7 @@ export default function SEOClient({ initialKeywords, initialBacklinks }: SEOClie
     toast.info('Add Competitor')
   }
   const handleAnalyzeCompetitor = (domain: string) => {
-    toast.info('Analyzing Competitor'...` })
+    toast.info('Analyzing Competitor ' + domain + '...')
   }
   const handleCreateContent = () => {
     toast.info('Create Content')
@@ -535,10 +535,10 @@ export default function SEOClient({ initialKeywords, initialBacklinks }: SEOClie
     toast.info('Running Audit')
   }
   const handleSaveSettings = (section: string) => {
-    toast.success('Settings Saved' settings have been saved` })
+    toast.success('Settings Saved')
   }
   const handleExportData = (type: string) => {
-    toast.success('Export Started' export will be downloaded shortly` })
+    toast.success('Export Started')
   }
   const handleRecrawlSite = () => {
     toast.info('Re-crawling Site')
@@ -562,13 +562,13 @@ export default function SEOClient({ initialKeywords, initialBacklinks }: SEOClie
     toast.info('View SERP')
   }
   const handleImplementInsight = (title: string) => {
-    toast.info('Implementing'"...` })
+    toast.info('Implementing ' + title + '...')
   }
   const handleConnectIntegration = (name: string) => {
-    toast.info('Connecting'...` })
+    toast.info('Connecting ' + name + '...')
   }
   const handleConfigureIntegration = (name: string) => {
-    toast.info('Configure' configuration...` })
+    toast.info('Configure')
   }
 
   return (
@@ -1822,7 +1822,7 @@ export default function SEOClient({ initialKeywords, initialBacklinks }: SEOClie
             <AIInsightsPanel
               insights={mockSEOAIInsights}
               title="SEO Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">

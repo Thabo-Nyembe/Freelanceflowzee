@@ -462,8 +462,7 @@ export default function StockClient() {
     }
     const product = products.find(p => p.id === addStockForm.productId)
     const warehouse = warehouses.find(w => w.id === addStockForm.warehouseId)
-    toast.success('Stock Added Successfully' units of ${product?.name || 'product'} to ${warehouse?.name || 'warehouse'}`
-    })
+    toast.success("Stock Added Successfully: " + addStockForm.quantity + " units of " + (product?.name || 'product') + " to " + (warehouse?.name || 'warehouse'))
     setAddStockForm({ productId: '', warehouseId: '', quantity: '', batchNumber: '', notes: '' })
     setShowAddStockDialog(false)
   }
@@ -481,8 +480,7 @@ export default function StockClient() {
     const product = products.find(p => p.id === transferForm.productId)
     const fromWarehouse = warehouses.find(w => w.id === transferForm.fromWarehouseId)
     const toWarehouse = warehouses.find(w => w.id === transferForm.toWarehouseId)
-    toast.success('Transfer Initiated' units of ${product?.name || 'product'} from ${fromWarehouse?.name || 'source'} to ${toWarehouse?.name || 'destination'}`
-    })
+    toast.success("Transfer Initiated: " + (transferForm.quantity) + " units of " + (product?.name || 'product') + " from " + (fromWarehouse?.name || 'source') + " to " + (toWarehouse?.name || 'destination'))
     setTransferForm({ productId: '', fromWarehouseId: '', toWarehouseId: '', quantity: '', notes: '' })
     setShowTransferDialog(false)
   }
@@ -494,8 +492,7 @@ export default function StockClient() {
       return
     }
     const warehouse = warehouses.find(w => w.id === countForm.warehouseId)
-    toast.success('Stock Count Scheduled' count scheduled for ${warehouse?.name || 'warehouse'} on ${countForm.scheduledDate}`
-    })
+    toast.success("Stock Count Scheduled - count scheduled for " + (warehouse?.name || "warehouse") + " on " + countForm.scheduledDate)
     setCountForm({ warehouseId: '', countType: 'cycle', scheduledDate: '', assignedTo: '' })
     setShowCountDialog(false)
   }
@@ -556,8 +553,7 @@ export default function StockClient() {
   }
 
   const handleAcknowledgeAlert = (alert: Alert) => {
-    toast.success('Alert acknowledged' acknowledged`
-    })
+    toast.success("Alert acknowledged")
   }
 
   return (
@@ -1547,7 +1543,7 @@ export default function StockClient() {
             <AIInsightsPanel
               insights={mockStockAIInsights}
               title="Inventory Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -2181,7 +2177,7 @@ export default function StockClient() {
                   a.download = `${report.name.toLowerCase().replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.json`
                   a.click()
                   URL.revokeObjectURL(url)
-                  toast.success('Report generated' report has been downloaded` })
+                  toast.success('Report generated')
                   setShowReportsDialog(false)
                 }}
               >
@@ -2236,7 +2232,7 @@ export default function StockClient() {
                   input.onchange = (e) => {
                     const file = (e.target as HTMLInputElement).files?.[0]
                     if (file) {
-                      toast.success('Import complete' imported successfully` })
+                      toast.success('Import complete')
                       setShowImportDialog(false)
                     }
                   }
@@ -2736,7 +2732,7 @@ export default function StockClient() {
                   <Button variant="ghost" size="sm" onClick={() => {
                     const newName = prompt('Edit zone name:', zone)
                     if (newName && newName.trim()) {
-                      toast.success('Zone updated' renamed to ${newName.trim()}` })
+                      toast.success('Zone updated')
                     }
                   }}><Edit className="w-4 h-4" /></Button>
                 </div>
@@ -2793,7 +2789,7 @@ export default function StockClient() {
               <Button onClick={() => {
                   const binCode = prompt('Enter bin code (e.g., D-01-1):')
                   if (binCode) {
-                    toast.success('Bin added' created successfully` })
+                    toast.success('Bin added')
                   }
                 }}>
                 <Plus className="w-4 h-4 mr-2" />
@@ -2916,7 +2912,7 @@ export default function StockClient() {
               <Button onClick={async () => {
                   const staffName = prompt('Enter staff member name:')
                   if (staffName) {
-                    toast.success('Staff member added' added to warehouse` })
+                    toast.success('Staff member added')
                   }
                 }}>
                 <Plus className="w-4 h-4 mr-2" />
@@ -3253,7 +3249,7 @@ export default function StockClient() {
                   a.download = `${report.name.toLowerCase().replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.json`
                   a.click()
                   URL.revokeObjectURL(url)
-                  toast.success('Report generated' downloaded` })
+                  toast.success('Report generated')
                   setShowCountReportsDialog(false)
                 }}
               >
@@ -3624,7 +3620,7 @@ export default function StockClient() {
                   a.download = `${report.name.toLowerCase().replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.json`
                   a.click()
                   URL.revokeObjectURL(url)
-                  toast.success('Report generated' downloaded` })
+                  toast.success('Report generated')
                   setShowAlertReportsDialog(false)
                 }}
               >
@@ -3927,7 +3923,7 @@ export default function StockClient() {
                   a.download = `${report.name.toLowerCase().replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.json`
                   a.click()
                   URL.revokeObjectURL(url)
-                  toast.success('Report generated' downloaded` })
+                  toast.success('Report generated')
                   setShowAnalyticsReportsDialog(false)
                 }}
               >
@@ -4226,7 +4222,7 @@ export default function StockClient() {
               <DialogFooter>
                 <Button variant="outline" onClick={() => setShowAddStockToProductDialog(false)}>Cancel</Button>
                 <Button className="bg-green-600 hover:bg-green-700" onClick={() => {
-                    toast.success('Stock added'` })
+                    toast.success("Stock added")
                     setShowAddStockToProductDialog(false)
                   }}>
                   Add Stock
@@ -4278,7 +4274,7 @@ export default function StockClient() {
               <DialogFooter>
                 <Button variant="outline" onClick={() => setShowTransferProductDialog(false)}>Cancel</Button>
                 <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
-                    toast.success('Transfer initiated'` })
+                    toast.success("Transfer initiated")
                     setShowTransferProductDialog(false)
                   }}>
                   Transfer

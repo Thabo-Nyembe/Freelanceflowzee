@@ -444,7 +444,8 @@ export default function CVPortfolioPage() {
             description: ed.description || ''
           }))
           setEducation(mappedEducation)
-        }        const completeness = calculateCompleteness()        })
+        }
+        const completeness = calculateCompleteness()
 
         setIsLoading(false)
         announce('CV portfolio loaded successfully', 'polite')
@@ -517,7 +518,8 @@ export default function CVPortfolioPage() {
 
       setProjects(prev => [...prev, newProject])
 
-      const newCompleteness = calculateCompleteness()      return { title, completeness: newCompleteness }
+      const newCompleteness = calculateCompleteness()
+    return { title, completeness: newCompleteness }
     }
 
     try {
@@ -585,7 +587,8 @@ export default function CVPortfolioPage() {
               link: link || p.link
             }
           : p
-      ))      return { title }
+      ))
+    return { title }
     }
 
     try {
@@ -628,7 +631,8 @@ export default function CVPortfolioPage() {
 
       setProjects(prev => prev.filter(p => p.id !== projectToDelete))
 
-      const newCompleteness = calculateCompleteness()      toast.success(`Project Deleted! "${project.title}" removed from portfolio`)
+      const newCompleteness = calculateCompleteness()
+    toast.success(`Project Deleted! "${project.title}" removed from portfolio`)
       announce(`Project ${project.title} deleted`, 'polite')
     } catch (error: any) {
       logger.error('Failed to delete project', { error: error.message, projectId: projectToDelete })
@@ -696,7 +700,8 @@ export default function CVPortfolioPage() {
 
       setSkills(prev => [...prev, newSkill])
 
-      const newCompleteness = calculateCompleteness()      setShowAddSkillDialog(false)
+      const newCompleteness = calculateCompleteness()
+      setShowAddSkillDialog(false)
       toast.success(`Skill Added! ${name} (${proficiency}/5 stars) - ${skills.length + 1} skills total`)
       announce(`Skill ${name} added`, 'polite')
     } catch (error: any) {
@@ -718,7 +723,8 @@ export default function CVPortfolioPage() {
 
       setSkills(prev => prev.map(s =>
         s.id === skillId ? { ...s, proficiency: newProficiency } : s
-      ))      toast.success(`Skill Updated! ${skill.name}: ${newProficiency}/5 stars`)
+      ))
+    toast.success(`Skill Updated! ${skill.name}: ${newProficiency}/5 stars`)
     } catch (error: any) {
       logger.error('Failed to update skill', { error: error.message, skillId })
       toast.error('Failed to update skill')
@@ -749,7 +755,8 @@ export default function CVPortfolioPage() {
 
       setSkills(prev => prev.filter(s => s.id !== skillToRemove))
 
-      const newCompleteness = calculateCompleteness()      toast.success(`Skill Removed! ${skill.name} deleted (${skills.length - 1} skills remaining)`)
+      const newCompleteness = calculateCompleteness()
+    toast.success(`Skill Removed! ${skill.name} deleted (${skills.length - 1} skills remaining)`)
       announce(`Skill ${skill.name} removed`, 'polite')
     } catch (error: any) {
       logger.error('Failed to remove skill', { error: error.message, skillId: skillToRemove })
@@ -836,7 +843,8 @@ export default function CVPortfolioPage() {
 
       setExperience(prev => [...prev, newExperience])
 
-      const newCompleteness = calculateCompleteness()      return { position, company, completeness: newCompleteness }
+      const newCompleteness = calculateCompleteness()
+    return { position, company, completeness: newCompleteness }
     }
 
     try {
@@ -904,7 +912,8 @@ export default function CVPortfolioPage() {
               description
             }
           : e
-      ))      return { position, company }
+      ))
+    return { position, company }
     }
 
     try {
@@ -948,7 +957,8 @@ export default function CVPortfolioPage() {
       setExperience(prev => prev.filter(e => e.id !== experienceToDelete))
 
       const newCompleteness = calculateCompleteness()
-      const newYears = calculateYearsOfExperience()      toast.success(`Experience Deleted! ${exp.position} at ${exp.company} removed`)
+      const newYears = calculateYearsOfExperience()
+    toast.success(`Experience Deleted! ${exp.position} at ${exp.company} removed`)
       announce(`Experience at ${exp.company} deleted`, 'polite')
     } catch (error: any) {
       logger.error('Failed to delete experience', { error: error.message, experienceId: experienceToDelete })
@@ -1029,7 +1039,8 @@ export default function CVPortfolioPage() {
 
       setEducation(prev => [...prev, newEducation])
 
-      const newCompleteness = calculateCompleteness()      return { degree, institution }
+      const newCompleteness = calculateCompleteness()
+    return { degree, institution }
     }
 
     try {
@@ -1085,7 +1096,8 @@ export default function CVPortfolioPage() {
         e.id === editingEducation.id
           ? { ...e, institution, degree }
           : e
-      ))      return { degree, institution }
+      ))
+    return { degree, institution }
     }
 
     try {
@@ -1128,7 +1140,8 @@ export default function CVPortfolioPage() {
 
       setEducation(prev => prev.filter(e => e.id !== educationToDelete))
 
-      const newCompleteness = calculateCompleteness()      toast.success(`Education Deleted! ${edu.degree} removed from CV`)
+      const newCompleteness = calculateCompleteness()
+    toast.success(`Education Deleted! ${edu.degree} removed from CV`)
       announce(`Education ${edu.degree} deleted`, 'polite')
     } catch (error: any) {
       logger.error('Failed to delete education', { error: error.message, educationId: educationToDelete })
@@ -1179,7 +1192,8 @@ export default function CVPortfolioPage() {
 
     setAchievements(prev => [...prev, newAchievement])
 
-    const newCompleteness = calculateCompleteness()    setShowAddAchievementDialog(false)
+    const newCompleteness = calculateCompleteness()
+    setShowAddAchievementDialog(false)
     toast.success(`Achievement Added! ${title} - ${issuer}`)
   }
 
@@ -1209,7 +1223,8 @@ export default function CVPortfolioPage() {
       a.id === editingAchievement.id
         ? { ...a, title, issuer }
         : a
-    ))    setShowEditAchievementDialog(false)
+    ))
+    setShowEditAchievementDialog(false)
     setEditingAchievement(null)
     toast.success(`Achievement Updated! ${title} - ${issuer}`)
   }
@@ -1238,7 +1253,8 @@ export default function CVPortfolioPage() {
 
       setAchievements(prev => prev.filter(a => a.id !== achievementToDelete))
 
-      const newCompleteness = calculateCompleteness()      toast.success(`Achievement Deleted! ${achievement.title} removed`)
+      const newCompleteness = calculateCompleteness()
+    toast.success(`Achievement Deleted! ${achievement.title} removed`)
       announce(`Achievement ${achievement.title} deleted`, 'polite')
     } catch (error: any) {
       logger.error('Failed to delete achievement', { error: error.message, achievementId: achievementToDelete })
@@ -1258,7 +1274,8 @@ export default function CVPortfolioPage() {
 
     setCvSections(prev => prev.map(s =>
       s.id === sectionId ? { ...s, visible: !s.visible } : s
-    ))    toast.success(`Section Updated! ${section.name} ${!section.visible ? 'shown' : 'hidden'}`)
+    ))
+    toast.success(`Section Updated! ${section.name} ${!section.visible ? 'shown' : 'hidden'}`)
   }
 
   const handleMoveSectionUp = (sectionId: string) => {
@@ -1275,7 +1292,8 @@ export default function CVPortfolioPage() {
       section.order = idx + 1
     })
 
-    setCvSections(newSections)    toast.success(`Section Reordered! ${temp.name} moved up`)
+    setCvSections(newSections)
+    toast.success(`Section Reordered! ${temp.name} moved up`)
   }
 
   const handleMoveSectionDown = (sectionId: string) => {
@@ -1292,14 +1310,16 @@ export default function CVPortfolioPage() {
       section.order = idx + 1
     })
 
-    setCvSections(newSections)    toast.success(`Section Reordered! ${temp.name} moved down`)
+    setCvSections(newSections)
+    toast.success(`Section Reordered! ${temp.name} moved down`)
   }
 
   const handleChangeTemplate = (templateId: string) => {
     const template = templates.find(t => t.id === templateId)
     if (!template) return
 
-    setSelectedTemplate(templateId)    toast.success(`Template Changed! Now using ${template.name} template`)
+    setSelectedTemplate(templateId)
+    toast.success(`Template Changed! Now using ${template.name} template`)
   }
 
   // ==================== EXPORT/SHARE HANDLERS ====================
@@ -1407,7 +1427,8 @@ Generated on ${new Date().toLocaleDateString()} | CV Completeness: ${completenes
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
-      URL.revokeObjectURL(url)      return { format, fileName, completeness: completenessScore }
+      URL.revokeObjectURL(url)
+    return { format, fileName, completeness: completenessScore }
     }
 
     try {
@@ -1447,7 +1468,8 @@ Generated on ${new Date().toLocaleDateString()} | CV Completeness: ${completenes
         if (data.sections) setCvSections(data.sections)
         if (data.template) setSelectedTemplate(data.template)
 
-        const newCompleteness = calculateCompleteness()        toast.success(`CV Imported! Data loaded from ${file.name} (${newCompleteness}% complete)`)
+        const newCompleteness = calculateCompleteness()
+        toast.success(`CV Imported! Data loaded from ${file.name} (${newCompleteness}% complete)`)
       } catch (error: any) {
         logger.error('Failed to import CV', {
           error: error.message,
@@ -1476,7 +1498,8 @@ Generated on ${new Date().toLocaleDateString()} | CV Completeness: ${completenes
 
       if (navigator.clipboard) {
         await navigator.clipboard.writeText(shareUrl)
-      }      toast.success('Share Link Generated! Link copied to clipboard. Valid for 30 days.')
+      }
+    toast.success('Share Link Generated! Link copied to clipboard. Valid for 30 days.')
     } catch (error: any) {
       logger.error('Failed to generate share link', {
         error: error.message
@@ -1496,12 +1519,14 @@ Generated on ${new Date().toLocaleDateString()} | CV Completeness: ${completenes
     const summary = `${profileData.title || 'Professional'} with ${yearsOfExperience}+ years of experience specializing in ${skillsText}. Proven track record of ${projects.length} successful projects and ${experience.length} professional roles. Expert in delivering innovative solutions with focus on quality and user experience.`
 
     // Update local state (profile bio is saved when portfolio settings are updated)
-    setProfileData(prev => ({ ...prev, bio: summary }))    toast.dismiss()
+    setProfileData(prev => ({ ...prev, bio: summary }))
+    toast.dismiss()
     toast.success(`Summary Generated! ${summary.split(' ').length} words - Review and edit as needed`)
   }
 
   const handleTogglePreview = () => {
-    setPreviewMode(!previewMode)    toast.success(previewMode ? 'Edit Mode - You can now edit your CV' : 'Preview Mode - Viewing CV as it will appear')
+    setPreviewMode(!previewMode)
+    toast.success(previewMode ? 'Edit Mode - You can now edit your CV' : 'Preview Mode - Viewing CV as it will appear')
   }
 
   // ==================== ADDITIONAL FEATURE HANDLERS ====================
@@ -1524,7 +1549,8 @@ Generated on ${new Date().toLocaleDateString()} | CV Completeness: ${completenes
       sortedProjects[currentIndex] = temp
     }
 
-    setProjects(sortedProjects)    toast.success(`Project Reordered! ${project.title} moved ${direction}`)
+    setProjects(sortedProjects)
+    toast.success(`Project Reordered! ${project.title} moved ${direction}`)
   }
 
   // Toggle Featured Project
@@ -1536,7 +1562,8 @@ Generated on ${new Date().toLocaleDateString()} | CV Completeness: ${completenes
     const newStatus = project.status === 'Live' ? 'Featured' : 'Live'
     setProjects(prev => prev.map(p =>
       p.id === projectId ? { ...p, status: newStatus } : p
-    ))    toast.success(project.status === 'Live'
+    ))
+    toast.success(project.status === 'Live'
       ? `Featured! ${project.title} marked as featured`
       : `Unfeatured! ${project.title} removed from featured`)
   }
@@ -1586,7 +1613,8 @@ Generated on ${new Date().toLocaleDateString()} | CV Completeness: ${completenes
         // Update the project with the new image
         setProjects(prev => prev.map(p =>
           p.id === projectId ? { ...p, image: imageUrl } : p
-        ))        return { fileName: file.name }
+        ))
+        return { fileName: file.name }
       }
 
       try {
@@ -1618,7 +1646,8 @@ Generated on ${new Date().toLocaleDateString()} | CV Completeness: ${completenes
       dateAdded: new Date().toISOString()
     }
 
-    setProjects(prev => [...prev, duplicated])    toast.success(`Project Duplicated! Copy of "${project.title}" created`)
+    setProjects(prev => [...prev, duplicated])
+    toast.success(`Project Duplicated! Copy of "${project.title}" created`)
   }
 
   // Bulk Actions
@@ -1644,7 +1673,8 @@ Generated on ${new Date().toLocaleDateString()} | CV Completeness: ${completenes
         }
       }
 
-      setProjects(prev => prev.filter(p => !projectsToDelete.includes(p.id)))      toast.success(`Projects Deleted! ${projectsToDelete.length} projects removed`)
+      setProjects(prev => prev.filter(p => !projectsToDelete.includes(p.id)))
+    toast.success(`Projects Deleted! ${projectsToDelete.length} projects removed`)
       announce(`${projectsToDelete.length} projects deleted`, 'polite')
     } catch (error: any) {
       logger.error('Failed to bulk delete projects', { error: error.message, projectIds: projectsToDelete })
@@ -1660,12 +1690,14 @@ Generated on ${new Date().toLocaleDateString()} | CV Completeness: ${completenes
     // Update all specified projects to Featured status
     setProjects(prev => prev.map(p =>
       projectIds.includes(p.id) ? { ...p, status: 'Featured' } : p
-    ))    toast.success(`Projects Featured! ${projectIds.length} projects marked as featured`)
+    ))
+    toast.success(`Projects Featured! ${projectIds.length} projects marked as featured`)
   }
 
   // View Public Portfolio
   const handleViewPublicPortfolio = () => {
-    const publicUrl = `${window.location.origin}/public/portfolio/${profileData.name.toLowerCase().replace(/\s/g, '-')}`    window.open(publicUrl, '_blank')
+    const publicUrl = `${window.location.origin}/public/portfolio/${profileData.name.toLowerCase().replace(/\s/g, '-')}`
+    window.open(publicUrl, '_blank')
     toast.success('Public Portfolio opened in new tab')
   }
 
@@ -1699,7 +1731,8 @@ Generated on ${new Date().toLocaleDateString()} | CV Completeness: ${completenes
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
-    URL.revokeObjectURL(url)    toast.success(`Analytics Downloaded! ${a.download}`)
+    URL.revokeObjectURL(url)
+    toast.success(`Analytics Downloaded! ${a.download}`)
   }
 
   // Copy Portfolio Link
@@ -1707,7 +1740,8 @@ Generated on ${new Date().toLocaleDateString()} | CV Completeness: ${completenes
     const publicUrl = `${window.location.origin}/public/portfolio/${profileData.name.toLowerCase().replace(/\s/g, '-')}`
 
     try {
-      await navigator.clipboard.writeText(publicUrl)      toast.success('Link Copied! Portfolio link copied to clipboard')
+      await navigator.clipboard.writeText(publicUrl)
+    toast.success('Link Copied! Portfolio link copied to clipboard')
     } catch (error: any) {
       logger.error('Failed to copy link', {
         error: error.message
@@ -1723,11 +1757,13 @@ Generated on ${new Date().toLocaleDateString()} | CV Completeness: ${completenes
     const sectionId = type === 'projects' ? 'projects' : type
     setCvSections(prev => prev.map(s =>
       s.id === sectionId ? { ...s, visible: !s.visible } : s
-    ))    toast.success(`Visibility Updated! ${type} section visibility toggled`)
+    ))
+    toast.success(`Visibility Updated! ${type} section visibility toggled`)
   }
 
   // Send Test Email
-  const handleSendTestEmail = async () => {    toast.loading('Sending test email...')
+  const handleSendTestEmail = async () => {
+    toast.loading('Sending test email...')
 
     try {
       // Create a mailto link as fallback for test email
@@ -1784,7 +1820,8 @@ Generated on ${new Date().toLocaleDateString()} | CV Completeness: ${completenes
         email,
         phone,
         website
-      }))      return { name }
+      }))
+    return { name }
     }
 
     try {
@@ -1815,7 +1852,8 @@ Generated on ${new Date().toLocaleDateString()} | CV Completeness: ${completenes
       const avatarUrl = URL.createObjectURL(file)
 
       // Update the profile with the new avatar
-      setProfileData(prev => ({ ...prev, avatar: avatarUrl }))      toast.success(`Avatar Uploaded! ${file.name}`)
+      setProfileData(prev => ({ ...prev, avatar: avatarUrl }))
+    toast.success(`Avatar Uploaded! ${file.name}`)
     }
 
     input.click()
@@ -1836,11 +1874,13 @@ Generated on ${new Date().toLocaleDateString()} | CV Completeness: ${completenes
     const wordCount = newBio.split(' ').length
     const charCount = newBio.length
 
-    setProfileData(prev => ({ ...prev, bio: newBio }))    setShowUpdateBioDialog(false)
+    setProfileData(prev => ({ ...prev, bio: newBio }))
+    setShowUpdateBioDialog(false)
     toast.success(`Bio Updated! ${wordCount} words, ${charCount} characters`)
   }
 
-  const handlePrintCV = () => {    // Open print dialog
+  const handlePrintCV = () => {
+    // Open print dialog
     window.print()
     toast.success('Print dialog opened')
   }

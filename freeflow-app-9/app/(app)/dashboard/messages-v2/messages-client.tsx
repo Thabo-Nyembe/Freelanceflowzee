@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useCallback } from 'react'
 import { toast } from 'sonner'
 import { useMessages } from '@/lib/hooks/use-messages'
@@ -3826,7 +3828,6 @@ export default function MessagesClient() {
                 if (uploadedFiles.length > 0) {
                   try {
                     toast.loading('Uploading files...')
-                    const { createClient } = await import('@/lib/supabase/client')
                     const supabase = createClient()
                     const { data: { user } } = await supabase.auth.getUser()
                     if (!user) throw new Error('Not authenticated')

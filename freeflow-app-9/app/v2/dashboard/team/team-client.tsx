@@ -202,7 +202,7 @@ export default function TeamClient() {
             email: m.email,
             phone: m.phone || '+1 (555) 000-0000',
             location: m.location || 'Remote',
-            avatar: m.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${m.name}`,
+            avatar: m.avatar || ('https://api.dicebear.com/7.x/avataaars/svg?seed=' + m.name),
             status: m.status || 'offline',
             joinDate: m.start_date || m.created_at?.split('T')[0] || new Date().toISOString().split('T')[0],
             projects: m.projects_count || 0,
@@ -213,8 +213,10 @@ export default function TeamClient() {
             workHours: '9:00 AM - 6:00 PM',
             timezone: m.timezone || 'UTC'
           }))
-          setTeamMembers(mappedMembers)        } else {
-          // Keep demo data for users without team members        }
+          setTeamMembers(mappedMembers)
+        } else {
+          // Keep demo data for users without team members
+        }
 
         setIsLoading(false)
         announce('Team dashboard loaded successfully', 'polite')
@@ -315,8 +317,8 @@ export default function TeamClient() {
         timezone: 'UTC'
       }
 
-      setTeamMembers([...teamMembers, newMember])      toast.success('Invitation Sent!' as ${inviteRole} - Total team: ${teamMembers.length + 1} members`
-      })
+      setTeamMembers([...teamMembers, newMember])
+      toast.success("Invitation Sent! Invited as " + inviteRole + " - Total team: " + (teamMembers.length + 1) + " members")
 
       setShowInviteDialog(false)
     } catch (error) {
@@ -327,8 +329,8 @@ export default function TeamClient() {
 
   const handleViewMember = (id: number) => {
     const member = teamMembers.find(m => m.id === id)
-    if (!member) return    toast.info(`${member.name} Profile` • ${member.projects} projects • ${member.completedTasks} tasks • ${member.rating}⭐`
-    })
+    if (!member) return
+    toast.info(member.name + " Profile - " + member.projects + " projects - " + member.completedTasks + " tasks - " + member.rating + " stars")
   }
 
   const handleEditMember = (id: number) => {
@@ -384,8 +386,8 @@ export default function TeamClient() {
               location: editMemberLocation
             }
           : m
-      ))      toast.success('Member Updated''s details have been updated`
-      })
+      ))
+      toast.success("Member Updated - details have been saved")
 
       setShowEditMemberDialog(false)
       setEditMemberId(null)
@@ -432,8 +434,8 @@ export default function TeamClient() {
 
       // Update local state
       const updatedMembers = teamMembers.filter(m => m.id !== memberToRemove)
-      setTeamMembers(updatedMembers)      toast.success('Member Removed' removed from team - ${updatedMembers.length} members remaining`
-      })
+      setTeamMembers(updatedMembers)
+      toast.success("Member Removed - " + updatedMembers.length + " members remaining")
       announce(`${member.name} removed from team`, 'polite')
     } catch (error) {
       logger.error('Failed to remove team member', { error, memberId: memberToRemove })
@@ -483,8 +485,8 @@ export default function TeamClient() {
       // Update local state on success
       setTeamMembers(teamMembers.map(m =>
         m.id === changeRoleMemberId ? { ...m, role: newRole } : m
-      ))      toast.success('Role Updated' role changed from ${previousRole} to ${newRole}`
-      })
+      ))
+      toast.success("Role Updated - changed from " + previousRole + " to " + newRole)
 
       setShowChangeRoleDialog(false)
       setChangeRoleMemberId(null)
@@ -524,8 +526,8 @@ export default function TeamClient() {
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
         throw new Error(errorData.error || 'Failed to update permissions')
-      }      toast.success('Permissions Updated' now has ${selectedPermission} permissions`
-      })
+      }
+      toast.success("Permissions Updated - " + member.name + " now has " + selectedPermission + " permissions")
 
       setShowPermissionsDialog(false)
       setPermissionsMemberId(null)
@@ -567,8 +569,8 @@ export default function TeamClient() {
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}))
         throw new Error(errorData.error || 'Failed to send message')
-      }      toast.success('Message Sent'`
-      })
+      }
+      toast.success("Message Sent - message delivered to " + member.name)
 
       setShowMessageDialog(false)
       setMessageMemberId(null)
@@ -581,8 +583,8 @@ export default function TeamClient() {
 
   const handleViewActivity = (id: number) => {
     const member = teamMembers.find(m => m.id === id)
-    if (!member) return    toast.info(`${member.name} Activity` tasks completed • ${member.projects} active projects • ${member.rating}⭐ rating`
-    })
+    if (!member) return
+    toast.info(member.name + " Activity - " + member.completedTasks + " tasks completed - " + member.projects + " active projects - " + member.rating + " stars")
   }
 
   const handleAssignProject = (id: number) => {
@@ -623,8 +625,8 @@ export default function TeamClient() {
       // Update local state on success
       setTeamMembers(teamMembers.map(m =>
         m.id === assignProjectMemberId ? { ...m, projects: m.projects + 1 } : m
-      ))      toast.success('Project Assigned' assigned to ${member.name} - Total: ${member.projects + 1} projects`
-      })
+      ))
+      toast.success("Project Assigned - " + projectName + " assigned to " + member.name + " - Total: " + (member.projects + 1) + " projects")
 
       setShowAssignProjectDialog(false)
       setAssignProjectMemberId(null)
@@ -637,8 +639,8 @@ export default function TeamClient() {
 
   const handleViewProjects = (id: number) => {
     const member = teamMembers.find(m => m.id === id)
-    if (!member) return    toast.info(`${member.name}'s Projects` active projects • ${member.completedTasks} tasks completed`
-    })
+    if (!member) return
+    toast.info(member.name + " Projects - " + member.projects + " active projects - " + member.completedTasks + " tasks completed")
   }
 
   const handleTeamAnalytics = () => {
@@ -647,11 +649,12 @@ export default function TeamClient() {
       online: teamMembers.filter(m => m.status === 'online').length,
       projects: teamMembers.reduce((sum, m) => sum + m.projects, 0),
       tasks: teamMembers.reduce((sum, m) => sum + m.completedTasks, 0)
-    }    toast.info('Team Analytics' members • ${stats.online} online • ${stats.projects} projects • ${stats.tasks} tasks`
-    })
+    }
+    toast.info("Team Analytics - " + stats.totalMembers + " members - " + stats.online + " online - " + stats.projects + " projects - " + stats.tasks + " tasks")
   }
 
-  const handleTeamSettings = () => {    toast.info('Team Settings')
+  const handleTeamSettings = () => {
+    toast.info("Team Settings")
   }
 
   const handleExportTeam = () => {
@@ -677,8 +680,8 @@ export default function TeamClient() {
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
-    URL.revokeObjectURL(url)    toast.success('Team Data Exported' members exported - ${Math.round(blob.size / 1024)}KB`
-    })
+    URL.revokeObjectURL(url)
+    toast.success("Team Data Exported - " + teamMembers.length + " members exported - " + Math.round(blob.size / 1024) + "KB")
   }
 
   const handleBulkInvite = () => {
@@ -725,8 +728,8 @@ export default function TeamClient() {
 
       if (successCount === 0) {
         throw new Error('Failed to send any invitations')
-      }      toast.success('Bulk Invitations Sent' of ${emailList.length} invitation emails sent`
-      })
+      }
+      toast.success("Bulk Invitations Sent - " + successCount + " of " + emailList.length + " invitation emails sent")
 
       setShowBulkInviteDialog(false)
       setBulkEmails('')
@@ -737,35 +740,35 @@ export default function TeamClient() {
   }
 
   const handleTeamChat = () => {
-    const onlineMembers = teamMembers.filter(m => m.status === 'online').length    toast.info('Team Chat'/${teamMembers.length} members online`
-    })
+    const onlineMembers = teamMembers.filter(m => m.status === 'online').length
+    toast.info("Team Chat - " + onlineMembers + "/" + teamMembers.length + " members online")
   }
 
   const handleScheduleMeeting = () => {
-    const availableMembers = teamMembers.filter(m => m.status === 'online' || m.status === 'away').length    toast.info('Schedule Meeting'/${teamMembers.length} members available`
-    })
+    const availableMembers = teamMembers.filter(m => m.status === 'online' || m.status === 'away').length
+    toast.info("Schedule Meeting - " + availableMembers + "/" + teamMembers.length + " members available")
   }
 
-  const handleViewCalendar = () => {    toast.info('Team Calendar' team members`
-    })
+  const handleViewCalendar = () => {
+    toast.info("Team Calendar - " + teamMembers.length + " team members")
   }
 
   const handlePerformanceReview = (id: number) => {
     const member = teamMembers.find(m => m.id === id)
-    if (!member) return    toast.info(`Review ${member.name}`⭐ • ${member.completedTasks} tasks completed`
-    })
+    if (!member) return
+    toast.info("Review " + member.name + " - " + member.rating + " stars - " + member.completedTasks + " tasks completed")
   }
 
   const handleTimeTracking = (id: number) => {
     const member = teamMembers.find(m => m.id === id)
     if (!member) return
 
-    const hoursWorked = Math.floor(Math.random() * 40) + 120    toast.info(`${member.name} Time Tracking` hours this month • ${member.workHours}`
-    })
+    const hoursWorked = Math.floor(Math.random() * 40) + 120
+    toast.info(member.name + " Time Tracking - " + hoursWorked + " hours this month - " + member.workHours)
   }
 
-  const handleFilter = (filter: string) => {    toast.success('Filter Applied'`
-    })
+  const handleFilter = (filter: string) => {
+    toast.success("Filter Applied - " + filter)
   }
 
   // Build quick actions with real handlers
@@ -1196,21 +1199,19 @@ export default function TeamClient() {
                       Chat
                     </Button>
                     <Button size="sm" variant="outline" onClick={() => {
-                      toast.info('Email Composer'`
-                      })
-                      window.open(`mailto:${member.email}`, '_blank')
+                      toast.info("Email Composer - opening email to " + member.email)
+                      window.open("mailto:" + member.email, '_blank')
                     }}>
                       <Mail className="h-4 w-4" />
                     </Button>
                     <Button size="sm" variant="outline" onClick={() => {
-                      toast.info('Phone Call' at ${member.phone}`
-                      })
-                      window.open(`tel:${member.phone}`, '_blank')
+                      toast.info("Phone Call - calling " + member.name + " at " + member.phone)
+                      window.open("tel:" + member.phone, '_blank')
                     }}>
                       <Phone className="h-4 w-4" />
                     </Button>
-                    <Button size="sm" variant="outline" onClick={() => {                      toast.info('Video Call'`
-                      })
+                    <Button size="sm" variant="outline" onClick={() => {
+                      toast.info("Video Call - starting call with " + member.name)
                     }}>
                       <Video className="h-4 w-4" />
                     </Button>

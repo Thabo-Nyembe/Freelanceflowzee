@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useCallback, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
 import { useAuthUserId } from '@/lib/hooks/use-auth-user-id'
@@ -534,8 +536,6 @@ export default function HelpDocsClient() {
     }
     try {
       setIsSaving(true)
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
       const { error } = await supabase.from('help_articles').insert({
@@ -573,8 +573,6 @@ export default function HelpDocsClient() {
     if (!editingArticle) return
     try {
       setIsSaving(true)
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
 
       const { error } = await supabase
         .from('help_articles')
@@ -610,8 +608,6 @@ export default function HelpDocsClient() {
   // Delete article
   const handleDeleteArticle = async (articleId: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
 
       const { error } = await supabase
         .from('help_articles')
@@ -631,8 +627,6 @@ export default function HelpDocsClient() {
   // Update article status
   const handleUpdateStatus = async (articleId: string, newStatus: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
 
       const { error } = await supabase
         .from('help_articles')
@@ -659,8 +653,6 @@ export default function HelpDocsClient() {
       const article = dbArticles.find(a => a.id === articleId)
       if (!article) return
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
 
       const { error } = await supabase
         .from('help_articles')
@@ -686,8 +678,6 @@ export default function HelpDocsClient() {
       const article = dbArticles.find(a => a.id === articleId)
       if (!article) return
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
 
       await supabase
         .from('help_articles')
@@ -734,8 +724,7 @@ export default function HelpDocsClient() {
   }
 
   const handleBookmarkArticle = (articleTitle: string) => {
-    toast.success('Article bookmarked'" saved to bookmarks`
-    })
+    toast.success("Article bookmarked: " + articleTitle + " saved to bookmarks")
   }
 
   // Handle sending chat message
@@ -2261,7 +2250,7 @@ export default function HelpDocsClient() {
             <AIInsightsPanel
               insights={mockHelpDocsAIInsights}
               title="Help Center Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -2679,7 +2668,7 @@ export default function HelpDocsClient() {
                           size="sm"
                           className="bg-green-600 hover:bg-green-700"
                           onClick={() => {
-                            toast.success(`Article "${article.title}" approved and published`)
+                            toast.success('Article "' + article.title + '" approved and published')
                           }}
                         >
                           <Check className="w-4 h-4 mr-1" />
@@ -2689,7 +2678,7 @@ export default function HelpDocsClient() {
                           variant="destructive"
                           size="sm"
                           onClick={() => {
-                            toast.success(`Article "${article.title}" sent back for revision`)
+                            toast.success('Article "' + article.title + '" sent back for revision')
                           }}
                         >
                           <X className="w-4 h-4 mr-1" />
@@ -2980,7 +2969,7 @@ export default function HelpDocsClient() {
                     const file = e.target.files?.[0]
                     if (file) {
                       setVideoUploadData(prev => ({ ...prev, file }))
-                      toast.info(`Selected: ${file.name}`)
+                      toast.info("Selected: " + file.name)
                     }
                   }}
                 />

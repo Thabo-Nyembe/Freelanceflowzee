@@ -236,7 +236,8 @@ export default function VoiceCollaborationPage() {  const announce = useAnnounce
 
       try {
         dispatch({ type: 'SET_LOADING', isLoading: true })
-        dispatch({ type: 'SET_ERROR', error: null })        const { getVoiceRooms, getVoiceRecordings } = await import('@/lib/voice-collaboration-queries')
+        dispatch({ type: 'SET_ERROR', error: null })
+        const { getVoiceRooms, getVoiceRecordings } = await import('@/lib/voice-collaboration-queries')
 
         const [roomsResult, recordingsResult] = await Promise.all([
           getVoiceRooms(userId),
@@ -299,7 +300,8 @@ export default function VoiceCollaborationPage() {  const announce = useAnnounce
         dispatch({ type: 'SET_ROOMS', rooms: mappedRooms })
         dispatch({ type: 'SET_RECORDINGS', recordings: mappedRecordings })
 
-        toast.success(`Voice collaboration loaded - ${mappedRooms.length} rooms, ${mappedRecordings.length} recordings from database`)        announce('Voice collaboration page loaded', 'polite')
+        toast.success(`Voice collaboration loaded - ${mappedRooms.length} rooms, ${mappedRecordings.length} recordings from database`)
+        announce('Voice collaboration page loaded', 'polite')
       } catch (error: any) {
         const errorMessage = error instanceof Error ? error.message : 'Failed to load voice collaboration data'
         logger.error('Failed to load voice collaboration data', { error: errorMessage, userId })
@@ -490,8 +492,7 @@ export default function VoiceCollaborationPage() {  const announce = useAnnounce
         roomName: room.name,
         capacity: room.capacity
       })
-      toast.error('Room is full' - ${room.currentParticipants}/${room.capacity} participants`
-      })
+      toast.error(`Room is full - ${room.currentParticipants}/${room.capacity} participants`)
       announce('Room is full', 'assertive')
       return
     }
@@ -501,8 +502,7 @@ export default function VoiceCollaborationPage() {  const announce = useAnnounce
         roomId: room.id,
         roomName: room.name
       })
-      toast.error('Room is locked' requires a password to join`
-      })
+      toast.error(`Room is locked - ${room.name} requires a password to join`)
       announce('Room is locked', 'assertive')
       return
     }
@@ -538,7 +538,8 @@ export default function VoiceCollaborationPage() {  const announce = useAnnounce
 
       dispatch({ type: 'JOIN_ROOM', roomId: room.id, participant: newParticipant })
 
-      const newParticipantCount = room.currentParticipants + 1      toast.success(`Joined call - ${room.name} - ${newParticipant.role} - ${newParticipantCount}/${room.capacity} participants`)
+      const newParticipantCount = room.currentParticipants + 1
+      toast.success(`Joined call - ${room.name} - ${newParticipant.role} - ${newParticipantCount}/${room.capacity} participants`)
       announce(`Joined ${room.name}`, 'polite')
     } catch (error: any) {
       logger.error('Join room failed', {
@@ -562,7 +563,8 @@ export default function VoiceCollaborationPage() {  const announce = useAnnounce
   }
 
   const handleConfirmDeleteRoom = async () => {
-    if (!deleteRoom || !userId) return    try {
+    if (!deleteRoom || !userId) return
+    try {
       // Dynamic import for code splitting
       const { deleteVoiceRoom } = await import('@/lib/voice-collaboration-queries')
 
@@ -573,7 +575,8 @@ export default function VoiceCollaborationPage() {  const announce = useAnnounce
       }
 
       dispatch({ type: 'DELETE_ROOM', roomId: deleteRoom.id })
-      setShowViewRoomModal(false)      toast.success(`Room deleted - ${deleteRoom.name} - ${deleteRoom.type} room removed`)
+      setShowViewRoomModal(false)
+    toast.success(`Room deleted - ${deleteRoom.name} - ${deleteRoom.type} room removed`)
       announce('Room deleted', 'polite')
     } catch (error: any) {
       logger.error('Failed to delete room', {

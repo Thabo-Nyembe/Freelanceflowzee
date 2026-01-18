@@ -2,6 +2,8 @@
 // Comprehensive LMS with courses, learning paths, certifications, and gamification
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useCallback } from 'react'
 import { toast } from 'sonner'
 import { useTrainingPrograms, useTrainingMutations, TrainingProgram } from '@/lib/hooks/use-training'
@@ -649,7 +651,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
       })
 
       if (result.success) {
-        toast.success('Course Created'" has been created successfully` })
+        toast.success('Course Created')
         setShowCreateCourseDialog(false)
         setCourseForm(defaultCourseForm)
         refetch()
@@ -681,7 +683,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
       })
 
       if (result.success) {
-        toast.success('Course Updated'" has been updated successfully` })
+        toast.success('Course Updated')
         setShowEditCourseDialog(false)
         setCourseToEdit(null)
         setCourseForm(defaultCourseForm)
@@ -701,7 +703,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
       const result = await deleteProgram(courseToDelete.id)
 
       if (result.success) {
-        toast.success('Course Deleted'" has been deleted` })
+        toast.success('Course Deleted')
         setShowDeleteCourseDialog(false)
         setCourseToDelete(null)
         refetch()
@@ -727,8 +729,6 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
 
     try {
       // For the mock courses, we'll create a direct enrollment
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Not authenticated')
@@ -736,8 +736,6 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
       }
 
       // Insert enrollment directly
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('training_enrollments')
         .insert({
@@ -753,7 +751,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
         return
       }
 
-      toast.success('Enrolled Successfully'"` })
+      toast.success('Enrolled Successfully')
       setShowEnrollDialog(false)
       setCourseToEnroll(null)
       setEnrollmentForm(defaultEnrollmentForm)
@@ -775,8 +773,6 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
 
   const handleBookmarkCourse = useCallback(async (course: Course) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Not authenticated')
@@ -788,9 +784,9 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
       if (!bookmarks.includes(course.id)) {
         bookmarks.push(course.id)
         localStorage.setItem('course_bookmarks', JSON.stringify(bookmarks))
-        toast.success('Course Bookmarked'" saved to your learning path` })
+        toast.success("Course bookmarked and saved to your learning path")
       } else {
-        toast.info('Already Bookmarked'" is already in your bookmarks` })
+        toast.info("This course is already in your bookmarks")
       }
     } catch (error) {
       toast.error('Error')
@@ -2351,7 +2347,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
             <AIInsightsPanel
               insights={trainingAIInsights}
               title="Training Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -2885,7 +2881,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
               <Button
                 className="bg-emerald-600 hover:bg-emerald-700"
                 onClick={() => {
-                  toast.success('Lesson Started'"` })
+                  toast.success('Lesson Started')
                   setShowStartLessonDialog(false)
                 }}
               >
@@ -2953,7 +2949,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
                   onClick={() => {
                     if (currentCertificate?.url) {
                       window.open(currentCertificate.url, '_blank')
-                      toast.success('Downloading Certificate'" is downloading` })
+                      toast.success('Certificate is downloading')
                     }
                     setShowDownloadCertificateDialog(false)
                   }}
@@ -3067,7 +3063,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
               <Button
                 className="bg-emerald-600 hover:bg-emerald-700"
                 onClick={() => {
-                  toast.success('Course Opened'"` })
+                  toast.success('Course Opened')
                   setShowContinueLearningDialog(false)
                 }}
               >
@@ -3126,7 +3122,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
               <Button
                 className="bg-emerald-600 hover:bg-emerald-700"
                 onClick={() => {
-                  toast.success('Learning Path Started'"` })
+                  toast.success('Learning Path Started')
                   setShowStartPathDialog(false)
                 }}
               >
@@ -3182,7 +3178,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
               <Button
                 className="bg-yellow-600 hover:bg-yellow-700"
                 onClick={() => {
-                  toast.success('Starting Certification Path'"` })
+                  toast.success('Starting Certification Path')
                   setShowViewRequirementsDialog(false)
                 }}
               >
@@ -3304,7 +3300,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
                 variant="outline"
                 className="text-red-600 border-red-300"
                 onClick={() => {
-                  toast.success('Disconnected' has been disconnected` })
+                  toast.success('Disconnected')
                   setShowConfigureIntegrationDialog(false)
                 }}
               >
@@ -3313,7 +3309,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
               <Button
                 className="bg-emerald-600 hover:bg-emerald-700"
                 onClick={() => {
-                  toast.success('Settings Saved' settings updated` })
+                  toast.success('Settings Saved')
                   setShowConfigureIntegrationDialog(false)
                 }}
               >
@@ -3366,7 +3362,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
               <Button
                 className="bg-emerald-600 hover:bg-emerald-700"
                 onClick={() => {
-                  toast.success('Connecting...'` })
+                  toast.success('Connecting...')
                   setShowConnectIntegrationDialog(false)
                 }}
               >

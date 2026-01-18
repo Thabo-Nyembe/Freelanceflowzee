@@ -773,8 +773,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
     a.download = `clients-export-${new Date().toISOString().split('T')[0]}.csv`
     a.click()
     URL.revokeObjectURL(url)
-    toast.success('Export completed' clients to CSV`
-    })
+    toast.success('Export completed - clients exported to CSV')
   }
 
   const handleCreateDeal = (client: typeof mockClients[0]) => {
@@ -824,8 +823,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
     // Open email client with pre-filled recipient
     if (client.primaryContact.email) {
       window.open(`mailto:${client.primaryContact.email}?subject=Hello from FreeFlow`)
-      toast.success('Opening email client'`
-      })
+      toast.success('Opening email client')
     } else {
       toast.error('No email available')
     }
@@ -895,8 +893,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
   const handleCallClient = (client: typeof mockClients[0]) => {
     if (client.primaryContact.phone) {
       window.open(`tel:${client.primaryContact.phone}`)
-      toast.success('Initiating call'`
-      })
+      toast.success('Initiating call')
     } else {
       toast.error('No phone number available')
     }
@@ -2160,7 +2157,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
             <AIInsightsPanel
               insights={mockClientsAIInsights}
               title="Client Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">

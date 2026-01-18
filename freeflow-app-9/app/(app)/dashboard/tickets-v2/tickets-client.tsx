@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 // MIGRATED: Batch #18 - Verified database hook integration
 // Hooks: useTickets, useTicketMutations, useTicketMessageMutations
 
@@ -813,8 +815,6 @@ export default function TicketsClient() {
 
   const handleFullReport = async () => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: tickets } = await supabase.from('tickets').select('*').order('created_at', { ascending: false })
       const report = {
         generated_at: new Date().toISOString(),
@@ -888,8 +888,6 @@ export default function TicketsClient() {
   const handleSaveGeneralSettings = async () => {
     toast.promise(
       (async () => {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         const { error } = await supabase.from('ticket_settings').upsert({
           id: 'general',
           category: 'general',
@@ -909,8 +907,6 @@ export default function TicketsClient() {
   const handleSaveSLASettings = async () => {
     toast.promise(
       (async () => {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         const { error } = await supabase.from('ticket_settings').upsert({
           id: 'sla',
           category: 'sla',
@@ -930,8 +926,6 @@ export default function TicketsClient() {
   const handleSaveRoutingSettings = async () => {
     toast.promise(
       (async () => {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         const { error } = await supabase.from('ticket_settings').upsert({
           id: 'routing',
           category: 'routing',
@@ -951,8 +945,6 @@ export default function TicketsClient() {
   const handleSaveNotificationSettings = async () => {
     toast.promise(
       (async () => {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         const { error } = await supabase.from('ticket_settings').upsert({
           id: 'notifications',
           category: 'notifications',
@@ -972,8 +964,6 @@ export default function TicketsClient() {
   const handleSaveAdvancedSettings = async () => {
     toast.promise(
       (async () => {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         const { error } = await supabase.from('ticket_settings').upsert({
           id: 'advanced',
           category: 'advanced',
@@ -993,8 +983,6 @@ export default function TicketsClient() {
   const handleExportAllTickets = async () => {
     toast.promise(
       (async () => {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         const { data: allTickets, error } = await supabase
           .from('tickets')
           .select('*')
@@ -1022,8 +1010,6 @@ export default function TicketsClient() {
   const handleExportAnalytics = async () => {
     toast.promise(
       (async () => {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         const { data: ticketData } = await supabase.from('tickets').select('status, priority, created_at')
         const analytics = {
           generated_at: new Date().toISOString(),
@@ -1053,8 +1039,6 @@ export default function TicketsClient() {
     }
     toast.promise(
       (async () => {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         const { error } = await supabase
           .from('tickets')
           .delete()

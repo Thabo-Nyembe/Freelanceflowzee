@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useEffect, useRef } from 'react'
 import { toast } from 'sonner'
 import {
@@ -70,6 +72,9 @@ import { Progress } from '@/components/ui/progress'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+
+// Initialize Supabase client once at module level
+const supabase = createClient()
 
 // Types
 type Orientation = 'all' | 'landscape' | 'portrait' | 'square'
@@ -297,8 +302,6 @@ export default function GalleryClient() {
 
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Authentication required')
@@ -321,7 +324,7 @@ export default function GalleryClient() {
         metadata: {}
       })
 
-      toast.success('Photo uploaded'" has been uploaded successfully` })
+      toast.success(`Photo uploaded: "${uploadForm.title}" has been uploaded successfully`)
       setShowUploadDialog(false)
       setUploadForm({ title: '', description: '', tags: '', file_url: '', file_type: 'image', is_public: true })
     } catch (error: any) {
@@ -339,8 +342,6 @@ export default function GalleryClient() {
 
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Authentication required')
@@ -354,7 +355,7 @@ export default function GalleryClient() {
         is_public: collectionForm.is_public
       })
 
-      toast.success('Collection created'" has been created` })
+      toast.success(`Collection created: "${collectionForm.name}" has been created`)
       setShowCreateCollection(false)
       setCollectionForm({ name: '', description: '', is_public: true })
     } catch (error: any) {
@@ -371,7 +372,7 @@ export default function GalleryClient() {
 
     try {
       await deleteCollection(collection.id)
-      toast.success('Collection deleted'" has been deleted` })
+      toast.success(`Collection deleted: "${collection.name}" has been deleted`)
     } catch (error: any) {
       toast.error('Delete failed')
     }
@@ -493,7 +494,7 @@ export default function GalleryClient() {
 
     try {
       await deleteGalleryItem(item.id)
-      toast.success('Photo deleted'" has been deleted` })
+      toast.success(`Photo deleted: "${item.title || 'Photo'}" has been deleted`)
       setSelectedGalleryItem(null)
     } catch (error: any) {
       toast.error('Delete failed')
@@ -512,7 +513,7 @@ export default function GalleryClient() {
         throw new Error('Failed to follow photographer')
       }
 
-      toast.success('Following'` })
+      toast.success(`Following ${photographerName}`)
     } catch (error: any) {
       toast.error('Failed to follow')
     }
@@ -537,8 +538,6 @@ export default function GalleryClient() {
 
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Authentication required')

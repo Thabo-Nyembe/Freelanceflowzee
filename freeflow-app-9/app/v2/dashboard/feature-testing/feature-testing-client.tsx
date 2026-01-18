@@ -558,7 +558,7 @@ export default function FeatureTestingClient() {
     }
 
     setTests(prev => [...prev, newTest])
-    toast.success('Test Created'" to ${newTestCategory}` })
+    toast.success("Test created and added to " + newTestCategory)
 
     // Reset form
     setNewTestName('')
@@ -664,7 +664,7 @@ export default function FeatureTestingClient() {
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
 
-    toast.success('Export Complete' test results as ${exportFormat.toUpperCase()}` })
+    toast.success("Exported test results as " + exportFormat.toUpperCase())
     setShowExportDialog(false)
   }, [tests, testResults, groupedTests, exportFormat, includePassedTests, includeFailedTests, includeWarningTests, includePendingTests])
 
@@ -680,8 +680,7 @@ export default function FeatureTestingClient() {
     }
 
     localStorage.setItem('featureTestingSettings', JSON.stringify(settings))
-    toast.success('Settings Saved'ms, Parallel: ${parallelTests ? 'Yes' : 'No'}, Notifications: ${notifyOnComplete ? 'On' : 'Off'}`
-    })
+    toast.success("Settings saved - Timeout: " + testTimeout + "ms, Parallel: " + (parallelTests ? "Yes" : "No") + ", Notifications: " + (notifyOnComplete ? "On" : "Off"))
     setShowSettingsDialog(false)
   }, [autoRunTests, testTimeout, parallelTests, notifyOnComplete, verboseLogging])
 

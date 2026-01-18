@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
 import {
@@ -56,6 +58,9 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useEscrow, type EscrowDeposit } from '@/lib/hooks/use-escrow'
+
+// Initialize Supabase client once at module level
+const supabase = createClient()
 
 // Types
 type TransactionType = 'payment' | 'payout' | 'transfer' | 'refund' | 'fee'
@@ -723,9 +728,6 @@ export default function EscrowClient() {
 
     setIsSubmitting(true)
     try {
-      const supabase = createClient()
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
       if (!user) {
@@ -746,8 +748,7 @@ export default function EscrowClient() {
         metadata: { description: newEscrowForm.description }
       })
 
-      toast.success('Escrow created successfully'"`
-      })
+      toast.success('Escrow created successfully')
       setShowNewEscrowDialog(false)
       resetNewEscrowForm()
     } catch (error: any) {
@@ -783,8 +784,7 @@ export default function EscrowClient() {
     setIsSubmitting(true)
     try {
       await releaseFunds(selectedEscrowDeposit.id, amount)
-      toast.success('Funds released successfully' for "${selectedEscrowDeposit.project_title}"`
-      })
+      toast.success('Funds released successfully for "' + selectedEscrowDeposit.project_title + '"')
       setShowReleaseDialog(false)
       resetReleaseForm()
       setSelectedEscrowDeposit(null)
@@ -853,8 +853,7 @@ export default function EscrowClient() {
     setIsSubmitting(true)
     try {
       await updateDeposit(deposit.id, { status: 'cancelled' })
-      toast.success('Escrow cancelled'" has been cancelled`
-      })
+      toast.success('Escrow has been cancelled')
     } catch (error: any) {
       toast.error('Failed to cancel escrow')
     } finally {
@@ -871,8 +870,7 @@ export default function EscrowClient() {
     setIsSubmitting(true)
     try {
       await deleteDeposit(deposit.id)
-      toast.success('Escrow deleted'" has been deleted`
-      })
+      toast.success('Escrow has been deleted')
     } catch (error: any) {
       toast.error('Failed to delete escrow')
     } finally {
@@ -890,9 +888,6 @@ export default function EscrowClient() {
     try {
       // In a real app, this would call a payouts API
       // For now, we'll simulate the payout creation
-      const supabase = createClient()
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
       if (!user) {
@@ -901,8 +896,6 @@ export default function EscrowClient() {
       }
 
       // Create a transaction record for the payout
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('escrow_transactions')
         .insert({
@@ -917,8 +910,7 @@ export default function EscrowClient() {
 
       if (error) throw error
 
-      toast.success('Payout created' of ${formatCurrency(parseFloat(payoutForm.amount))} initiated`
-      })
+      toast.success('Payout of ' + formatCurrency(parseFloat(payoutForm.amount)) + ' initiated')
       setShowCreatePayout(false)
       resetPayoutForm()
     } catch (error: any) {
@@ -938,9 +930,6 @@ export default function EscrowClient() {
     try {
       // In a real app, this would send an invitation email
       // For now, we'll simulate the invitation
-      const supabase = createClient()
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
       if (!user) {
@@ -951,8 +940,7 @@ export default function EscrowClient() {
       // You could store the invitation in a table here
       // For now we just show success
 
-      toast.success('Invitation sent'`
-      })
+      toast.success('Invitation sent')
       setShowInviteAccount(false)
       resetInviteForm()
     } catch (error: any) {
@@ -1009,9 +997,6 @@ export default function EscrowClient() {
 
     setIsSubmitting(true)
     try {
-      const supabase = createClient()
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
       if (!user) {
@@ -1020,8 +1005,6 @@ export default function EscrowClient() {
       }
 
       // Create a transaction record for the transfer
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('escrow_transactions')
         .insert({
@@ -1039,8 +1022,7 @@ export default function EscrowClient() {
 
       if (error) throw error
 
-      toast.success('Transfer initiated successfully' transfer is being processed`
-      })
+      toast.success('Transfer initiated successfully and is being processed')
       setShowNewTransferDialog(false)
       resetTransferForm()
     } catch (error: unknown) {
@@ -1063,7 +1045,7 @@ export default function EscrowClient() {
       })
       if (!res.ok) throw new Error('Failed to regenerate API key')
       const data = await res.json()
-      const newKey = data.key || `ek_live_${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 15)}`
+      const newKey = data.key || ("ek_live_" + Date.now().toString(36) + "_" + Math.random().toString(36).substring(2, 15))
       setApiKey(newKey)
       toast.success('API key regenerated successfully')
       setShowRegenerateApiKeyDialog(false)
@@ -1082,12 +1064,12 @@ export default function EscrowClient() {
       // Create CSV content based on export form
       let csvContent = ''
       const timestamp = new Date().toISOString().split('T')[0]
-      let filename = `escrow-export-${timestamp}`
+      let filename = "escrow-export-" + timestamp
 
       if (exportForm.dataType === 'all' || exportForm.dataType === 'transactions') {
         csvContent += 'Transaction ID,Type,Amount,Fee,Net,Status,Customer,Date\n'
         mockTransactions.forEach(txn => {
-          csvContent += `${txn.id},${txn.type},${txn.amount},${txn.fee},${txn.net},${txn.status},${txn.customer || 'Platform'},${txn.createdAt}\n`
+          csvContent += txn.id + "," + txn.type + "," + txn.amount + "," + txn.fee + "," + txn.net + "," + txn.status + "," + (txn.customer || 'Platform') + "," + txn.createdAt + "\n"
         })
         filename += '-transactions'
       }
@@ -1096,7 +1078,7 @@ export default function EscrowClient() {
         if (csvContent) csvContent += '\n\n'
         csvContent += 'Account ID,Business Name,Email,Country,Status,Available Balance,Total Volume\n'
         mockConnectedAccounts.forEach(acc => {
-          csvContent += `${acc.id},${acc.businessName},${acc.email},${acc.country},${acc.status},${acc.balance.available},${acc.totalVolume}\n`
+          csvContent += acc.id + "," + acc.businessName + "," + acc.email + "," + acc.country + "," + acc.status + "," + acc.balance.available + "," + acc.totalVolume + "\n"
         })
         filename += '-accounts'
       }
@@ -1105,7 +1087,7 @@ export default function EscrowClient() {
         if (csvContent) csvContent += '\n\n'
         csvContent += 'Payout ID,Amount,Method,Status,Destination,Arrival Date\n'
         mockPayouts.forEach(po => {
-          csvContent += `${po.id},${po.amount},${po.method},${po.status},${po.destination},${po.arrivalDate}\n`
+          csvContent += po.id + "," + po.amount + "," + po.method + "," + po.status + "," + po.destination + "," + po.arrivalDate + "\n"
         })
         filename += '-payouts'
       }
@@ -1114,12 +1096,11 @@ export default function EscrowClient() {
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
       const link = document.createElement('a')
       link.href = URL.createObjectURL(blob)
-      link.download = `${filename}.csv`
+      link.download = filename + ".csv"
       link.click()
       URL.revokeObjectURL(link.href)
 
-      toast.success('Data exported successfully'.csv`
-      })
+      toast.success('Data exported successfully')
       setShowExportDataDialog(false)
       resetExportForm()
     } catch (error: unknown) {
@@ -1147,8 +1128,7 @@ export default function EscrowClient() {
       })
       if (!res.ok) throw new Error('Failed to submit response')
 
-      toast.success('Dispute response submitted' has been submitted for review`
-      })
+      toast.success('Dispute response has been submitted for review')
       setShowDisputeResponseDialog(false)
       resetDisputeResponseForm()
       setSelectedDisputeForResponse(null)
@@ -1171,7 +1151,7 @@ export default function EscrowClient() {
     try {
       const timestamp = new Date().toISOString().split('T')[0]
       let content = ''
-      const filename = `escrow-${reportForm.reportType}-report-${timestamp}`
+      const filename = "escrow-" + reportForm.reportType + "-report-" + timestamp
 
       // Generate report content based on type
       switch (reportForm.reportType) {
@@ -1179,33 +1159,33 @@ export default function EscrowClient() {
           content = 'Transaction Summary Report\n\n'
           content += 'Transaction ID,Type,Amount,Fee,Net,Status,Customer,Date\n'
           mockTransactions.forEach(txn => {
-            content += `${txn.id},${txn.type},${txn.amount},${txn.fee},${txn.net},${txn.status},${txn.customer || 'Platform'},${txn.createdAt}\n`
+            content += txn.id + "," + txn.type + "," + txn.amount + "," + txn.fee + "," + txn.net + "," + txn.status + "," + (txn.customer || 'Platform') + "," + txn.createdAt + "\n"
           })
           break
         case 'payouts':
           content = 'Payout Report\n\n'
           content += 'Payout ID,Amount,Method,Status,Destination,Arrival Date\n'
           mockPayouts.forEach(po => {
-            content += `${po.id},${po.amount},${po.method},${po.status},${po.destination},${po.arrivalDate}\n`
+            content += po.id + "," + po.amount + "," + po.method + "," + po.status + "," + po.destination + "," + po.arrivalDate + "\n"
           })
           break
         case 'disputes':
           content = 'Dispute Analysis Report\n\n'
           content += 'Dispute ID,Amount,Status,Reason,Customer,Due By\n'
           mockDisputes.forEach(d => {
-            content += `${d.id},${d.amount},${d.status},${d.reason},${d.customer},${d.dueBy}\n`
+            content += d.id + "," + d.amount + "," + d.status + "," + d.reason + "," + d.customer + "," + d.dueBy + "\n"
           })
           break
         case 'fees':
           content = 'Fee Summary Report\n\n'
           content += 'Total Fees Collected,Average Fee %,Fee Waivers,Net Fees MTD\n'
-          content += `$8432.50,2.8%,$245.00,$8187.50\n`
+          content += "$8432.50,2.8%,$245.00,$8187.50\n"
           break
         case 'accounts':
           content = 'Connected Accounts Report\n\n'
           content += 'Account ID,Business Name,Email,Country,Status,Available Balance,Total Volume\n'
           mockConnectedAccounts.forEach(acc => {
-            content += `${acc.id},${acc.businessName},${acc.email},${acc.country},${acc.status},${acc.balance.available},${acc.totalVolume}\n`
+            content += acc.id + "," + acc.businessName + "," + acc.email + "," + acc.country + "," + acc.status + "," + acc.balance.available + "," + acc.totalVolume + "\n"
           })
           break
         default:
@@ -1215,15 +1195,15 @@ export default function EscrowClient() {
       // Create and download the file
       const mimeType = format === 'csv' ? 'text/csv' : 'application/octet-stream'
       const extension = format === 'excel' ? 'xlsx' : format
-      const blob = new Blob([content], { type: `${mimeType};charset=utf-8;` })
+      const blob = new Blob([content], { type: mimeType + ";charset=utf-8;" })
       const link = document.createElement('a')
       link.href = URL.createObjectURL(blob)
-      link.download = `${filename}.${extension}`
+      link.download = filename + "." + extension
       link.click()
       URL.revokeObjectURL(link.href)
 
-      toast.success(`${format.toUpperCase()} report downloaded`, {
-        description: `${reportForm.reportType} report for ${reportForm.dateRange} has been downloaded`
+      toast.success(format.toUpperCase() + " report downloaded", {
+        description: reportForm.reportType + " report for " + reportForm.dateRange + " has been downloaded"
       })
       setShowReportsDialog(false)
       resetReportForm()
@@ -1330,7 +1310,7 @@ export default function EscrowClient() {
               disabled={isLoading}
               className="px-3 py-1.5 text-sm bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 rounded-lg hover:bg-emerald-200 dark:hover:bg-emerald-900/50 flex items-center gap-2 disabled:opacity-50"
             >
-              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={"w-4 h-4 " + (isLoading ? 'animate-spin' : '')} />
               {isLoading ? 'Syncing...' : 'Sync Now'}
             </button>
           </div>
@@ -1378,7 +1358,7 @@ export default function EscrowClient() {
                         onClick={() => setSelectedTransaction(txn)}
                       >
                         <div className="flex items-center gap-3">
-                          <div className={`p-2 rounded-lg ${getTransactionColor(txn.type)}`}>
+                          <div className={"p-2 rounded-lg " + getTransactionColor(txn.type)}>
                             <Icon className="w-4 h-4" />
                           </div>
                           <div>
@@ -1389,10 +1369,10 @@ export default function EscrowClient() {
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className={`font-semibold ${txn.amount >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          <p className={"font-semibold " + (txn.amount >= 0 ? 'text-green-600' : 'text-red-600')}>
                             {txn.amount >= 0 ? '+' : ''}{formatCurrency(txn.amount)}
                           </p>
-                          <span className={`text-xs px-2 py-0.5 rounded ${getStatusColor(txn.status)}`}>
+                          <span className={"text-xs px-2 py-0.5 rounded " + getStatusColor(txn.status)}>
                             {txn.status}
                           </span>
                         </div>
@@ -1501,7 +1481,7 @@ export default function EscrowClient() {
                         <div className="flex-1 bg-gray-100 dark:bg-gray-700 rounded-full h-3">
                           <div
                             className="bg-gradient-to-r from-emerald-500 to-emerald-400 h-3 rounded-full"
-                            style={{ width: `${values[idx]}%` }}
+                            style={{ width: values[idx] + "%" }}
                           />
                         </div>
                         <span className="text-sm font-medium text-gray-900 dark:text-white w-20 text-right">{amounts[idx]}</span>
@@ -1548,11 +1528,11 @@ export default function EscrowClient() {
                             <p className="text-xs text-gray-500">{check.detail}</p>
                           </div>
                         </div>
-                        <span className={`text-xs px-2 py-1 rounded-full ${
+                        <span className={"text-xs px-2 py-1 rounded-full " + (
                           check.status === 'pass'
                             ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
                             : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
-                        }`}>
+                        )}>
                           {check.status}
                         </span>
                       </div>
@@ -1610,19 +1590,19 @@ export default function EscrowClient() {
                         <div className="flex items-center gap-3">
                           <div className="flex-1 bg-gray-200 dark:bg-gray-600 rounded-full h-2">
                             <div
-                              className={`h-2 rounded-full ${
+                              className={"h-2 rounded-full " + (
                                 item.status === 'in_dispute' ? 'bg-red-500' :
                                 item.status === 'pending_release' ? 'bg-yellow-500' : 'bg-emerald-500'
-                              }`}
-                              style={{ width: `${item.progress}%` }}
+                              )}
+                              style={{ width: item.progress + "%" }}
                             />
                           </div>
                           <span className="text-xs text-gray-500">{item.milestone}</span>
-                          <span className={`text-xs px-2 py-0.5 rounded-full ${
+                          <span className={"text-xs px-2 py-0.5 rounded-full " + (
                             item.status === 'in_dispute' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
                             item.status === 'pending_release' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
                             'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                          }`}>
+                          )}>
                             {item.status.replace('_', ' ')}
                           </span>
                         </div>
@@ -1652,11 +1632,11 @@ export default function EscrowClient() {
                   <button
                     key={type}
                     onClick={() => setTransactionFilter(type)}
-                    className={`px-3 py-1.5 rounded-lg text-sm capitalize ${
+                    className={"px-3 py-1.5 rounded-lg text-sm capitalize " + (
                       transactionFilter === type
                         ? 'bg-emerald-500 text-white'
                         : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
-                    }`}
+                    )}
                   >
                     {type}
                   </button>
@@ -1684,7 +1664,7 @@ export default function EscrowClient() {
                       <tr key={txn.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
-                            <div className={`p-2 rounded-lg ${getTransactionColor(txn.type)}`}>
+                            <div className={"p-2 rounded-lg " + getTransactionColor(txn.type)}>
                               <Icon className="w-4 h-4" />
                             </div>
                             <div>
@@ -1696,7 +1676,7 @@ export default function EscrowClient() {
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          <span className={`font-mono ${txn.amount >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          <span className={"font-mono " + (txn.amount >= 0 ? 'text-green-600' : 'text-red-600')}>
                             {txn.amount >= 0 ? '+' : ''}{formatCurrency(txn.amount)}
                           </span>
                         </td>
@@ -1707,7 +1687,7 @@ export default function EscrowClient() {
                           {formatCurrency(txn.net)}
                         </td>
                         <td className="px-6 py-4">
-                          <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(txn.status)}`}>
+                          <span className={"px-2 py-1 rounded text-xs font-medium " + getStatusColor(txn.status)}>
                             {txn.status}
                           </span>
                         </td>
@@ -1768,11 +1748,11 @@ export default function EscrowClient() {
                         {formatCurrency(payout.amount)}
                       </td>
                       <td className="px-6 py-4">
-                        <span className={`px-2 py-1 rounded text-xs ${
+                        <span className={"px-2 py-1 rounded text-xs " + (
                           payout.method === 'instant'
                             ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
                             : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
-                        }`}>
+                        )}>
                           {payout.method === 'instant' && <Zap className="w-3 h-3 inline mr-1" />}
                           {payout.method}
                         </span>
@@ -1781,7 +1761,7 @@ export default function EscrowClient() {
                         {payout.destination}
                       </td>
                       <td className="px-6 py-4">
-                        <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(payout.status)}`}>
+                        <span className={"px-2 py-1 rounded text-xs font-medium " + getStatusColor(payout.status)}>
                           {payout.status.replace('_', ' ')}
                         </span>
                       </td>
@@ -1829,7 +1809,7 @@ export default function EscrowClient() {
                         <p className="text-sm text-gray-500 dark:text-gray-400">{account.email}</p>
                       </div>
                     </div>
-                    <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${getStatusColor(account.status)}`}>
+                    <span className={"px-2.5 py-1 rounded-full text-xs font-medium " + getStatusColor(account.status)}>
                       {account.status}
                     </span>
                   </div>
@@ -1917,7 +1897,7 @@ export default function EscrowClient() {
                         </span>
                       </td>
                       <td className="px-6 py-4">
-                        <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(dispute.status)}`}>
+                        <span className={"px-2 py-1 rounded text-xs font-medium " + getStatusColor(dispute.status)}>
                           {dispute.status.replace(/_/g, ' ')}
                         </span>
                       </td>
@@ -1927,11 +1907,11 @@ export default function EscrowClient() {
                       <td className="px-6 py-4 text-right">
                         <button
                           onClick={() => setSelectedDispute(dispute)}
-                          className={`px-3 py-1.5 rounded-lg text-sm ${
+                          className={"px-3 py-1.5 rounded-lg text-sm " + (
                             dispute.status === 'needs_response'
                               ? 'bg-orange-500 text-white hover:bg-orange-600'
                               : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
-                          }`}
+                          )}
                         >
                           {dispute.status === 'needs_response' ? 'Respond' : 'View'}
                         </button>
@@ -1962,11 +1942,11 @@ export default function EscrowClient() {
                       <button
                         key={item.id}
                         onClick={() => setSettingsTab(item.id)}
-                        className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-left transition-colors ${
+                        className={"w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-left transition-colors " + (
                           settingsTab === item.id
                             ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300'
                             : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400'
-                        }`}
+                        )}
                       >
                         <item.icon className="w-4 h-4" />
                         {item.label}
@@ -2120,8 +2100,8 @@ export default function EscrowClient() {
                               <method.icon className="w-5 h-5 text-emerald-600" />
                               <span className="font-medium text-gray-900 dark:text-white">{method.name}</span>
                             </div>
-                            <div className={`relative inline-flex h-6 w-11 items-center rounded-full ${method.enabled ? 'bg-emerald-600' : 'bg-gray-300 dark:bg-gray-600'}`}>
-                              <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${method.enabled ? 'translate-x-6' : 'translate-x-1'}`} />
+                            <div className={"relative inline-flex h-6 w-11 items-center rounded-full " + (method.enabled ? 'bg-emerald-600' : 'bg-gray-300 dark:bg-gray-600')}>
+                              <span className={"inline-block h-4 w-4 transform rounded-full bg-white transition " + (method.enabled ? 'translate-x-6' : 'translate-x-1')} />
                             </div>
                           </div>
                         ))}
@@ -2182,8 +2162,8 @@ export default function EscrowClient() {
                               <p className="font-medium text-gray-900 dark:text-white">{req.name}</p>
                               {req.required && <span className="text-xs text-red-500">Required</span>}
                             </div>
-                            <div className={`relative inline-flex h-6 w-11 items-center rounded-full ${req.enabled ? 'bg-emerald-600' : 'bg-gray-300 dark:bg-gray-600'}`}>
-                              <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition ${req.enabled ? 'translate-x-6' : 'translate-x-1'}`} />
+                            <div className={"relative inline-flex h-6 w-11 items-center rounded-full " + (req.enabled ? 'bg-emerald-600' : 'bg-gray-300 dark:bg-gray-600')}>
+                              <span className={"inline-block h-4 w-4 transform rounded-full bg-white transition " + (req.enabled ? 'translate-x-6' : 'translate-x-1')} />
                             </div>
                           </div>
                         ))}
@@ -2411,8 +2391,6 @@ export default function EscrowClient() {
                         <button
                           onClick={() => {
                             toast.warning('Are you sure?')
-                              }
-                            })
                           }}
                           className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
                         >
@@ -2433,7 +2411,7 @@ export default function EscrowClient() {
             <AIInsightsPanel
               insights={mockEscrowAIInsights}
               title="Escrow Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -2469,7 +2447,7 @@ export default function EscrowClient() {
             {selectedTransaction && (
               <div className="space-y-4">
                 <div className="flex items-center gap-3 p-4 bg-gray-50 dark:bg-gray-900 rounded-xl">
-                  <div className={`p-3 rounded-lg ${getTransactionColor(selectedTransaction.type)}`}>
+                  <div className={"p-3 rounded-lg " + getTransactionColor(selectedTransaction.type)}>
                     {(() => {
                       const Icon = getTransactionIcon(selectedTransaction.type)
                       return <Icon className="w-6 h-6" />
@@ -2504,7 +2482,7 @@ export default function EscrowClient() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 text-sm">
                     <div>
                       <p className="text-gray-500 dark:text-gray-400">Status</p>
-                      <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(selectedTransaction.status)}`}>
+                      <span className={"px-2 py-1 rounded text-xs font-medium " + getStatusColor(selectedTransaction.status)}>
                         {selectedTransaction.status}
                       </span>
                     </div>
@@ -2571,11 +2549,11 @@ export default function EscrowClient() {
                   <button
                     type="button"
                     onClick={() => setPayoutForm(prev => ({ ...prev, method: 'standard' }))}
-                    className={`flex-1 p-3 border-2 rounded-lg transition-colors ${
+                    className={"flex-1 p-3 border-2 rounded-lg transition-colors " + (
                       payoutForm.method === 'standard'
                         ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20'
                         : 'border-gray-200 dark:border-gray-700 hover:border-emerald-500'
-                    }`}
+                    )}
                   >
                     <p className="font-medium text-gray-900 dark:text-white">Standard</p>
                     <p className="text-xs text-gray-500 dark:text-gray-400">2-3 business days</p>
@@ -2583,11 +2561,11 @@ export default function EscrowClient() {
                   <button
                     type="button"
                     onClick={() => setPayoutForm(prev => ({ ...prev, method: 'instant' }))}
-                    className={`flex-1 p-3 border-2 rounded-lg transition-colors ${
+                    className={"flex-1 p-3 border-2 rounded-lg transition-colors " + (
                       payoutForm.method === 'instant'
                         ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
                         : 'border-gray-200 dark:border-gray-700 hover:border-purple-500'
-                    }`}
+                    )}
                   >
                     <div className="flex items-center gap-1 justify-center">
                       <Zap className="w-4 h-4 text-purple-500" />
@@ -2661,11 +2639,11 @@ export default function EscrowClient() {
                   <button
                     type="button"
                     onClick={() => setInviteForm(prev => ({ ...prev, accountType: 'individual' }))}
-                    className={`flex-1 p-3 border-2 rounded-lg text-left transition-colors ${
+                    className={"flex-1 p-3 border-2 rounded-lg text-left transition-colors " + (
                       inviteForm.accountType === 'individual'
                         ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20'
                         : 'border-gray-200 dark:border-gray-700 hover:border-emerald-500'
-                    }`}
+                    )}
                   >
                     <Users className="w-5 h-5 text-emerald-600 mb-1" />
                     <p className="font-medium text-gray-900 dark:text-white">Individual</p>
@@ -2674,11 +2652,11 @@ export default function EscrowClient() {
                   <button
                     type="button"
                     onClick={() => setInviteForm(prev => ({ ...prev, accountType: 'company' }))}
-                    className={`flex-1 p-3 border-2 rounded-lg text-left transition-colors ${
+                    className={"flex-1 p-3 border-2 rounded-lg text-left transition-colors " + (
                       inviteForm.accountType === 'company'
                         ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20'
                         : 'border-gray-200 dark:border-gray-700 hover:border-emerald-500'
-                    }`}
+                    )}
                   >
                     <Building className="w-5 h-5 text-emerald-600 mb-1" />
                     <p className="font-medium text-gray-900 dark:text-white">Company</p>
@@ -2888,7 +2866,7 @@ export default function EscrowClient() {
             <DialogHeader>
               <DialogTitle>Release Funds</DialogTitle>
               <DialogDescription>
-                {selectedEscrowDeposit && `Release funds for "${selectedEscrowDeposit.project_title}"`}
+                {selectedEscrowDeposit && ("Release funds for \"" + selectedEscrowDeposit.project_title + "\"")}
               </DialogDescription>
             </DialogHeader>
             {selectedEscrowDeposit && (
@@ -2971,7 +2949,7 @@ export default function EscrowClient() {
             <DialogHeader>
               <DialogTitle>Open Dispute</DialogTitle>
               <DialogDescription>
-                {selectedEscrowDeposit && `File a dispute for "${selectedEscrowDeposit.project_title}"`}
+                {selectedEscrowDeposit && ("File a dispute for \"" + selectedEscrowDeposit.project_title + "\"")}
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
@@ -3158,7 +3136,7 @@ export default function EscrowClient() {
               {mockPayouts.map(payout => (
                 <div key={payout.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                   <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-lg ${payout.method === 'instant' ? 'bg-purple-100 dark:bg-purple-900/30' : 'bg-emerald-100 dark:bg-emerald-900/30'}`}>
+                    <div className={"p-2 rounded-lg " + (payout.method === 'instant' ? 'bg-purple-100 dark:bg-purple-900/30' : 'bg-emerald-100 dark:bg-emerald-900/30')}>
                       {payout.method === 'instant' ? <Zap className="w-4 h-4 text-purple-600" /> : <Banknote className="w-4 h-4 text-emerald-600" />}
                     </div>
                     <div>
@@ -3168,7 +3146,7 @@ export default function EscrowClient() {
                   </div>
                   <div className="text-right">
                     <p className="font-semibold text-gray-900 dark:text-white">{formatCurrency(payout.amount)}</p>
-                    <span className={`text-xs px-2 py-0.5 rounded ${getStatusColor(payout.status)}`}>
+                    <span className={"text-xs px-2 py-0.5 rounded " + getStatusColor(payout.status)}>
                       {payout.status}
                     </span>
                   </div>
@@ -3203,7 +3181,7 @@ export default function EscrowClient() {
                 <div key={dispute.id} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
-                      <span className={`px-2 py-0.5 rounded text-xs font-medium ${getStatusColor(dispute.status)}`}>
+                      <span className={"px-2 py-0.5 rounded text-xs font-medium " + getStatusColor(dispute.status)}>
                         {dispute.status.replace('_', ' ')}
                       </span>
                       <span className="text-sm text-gray-500">{dispute.id}</span>
@@ -3297,7 +3275,7 @@ export default function EscrowClient() {
                 <div className="flex gap-2 mt-1">
                   <Button
                     variant="outline"
-                    className={`flex-1 ${reportForm.format === 'csv' ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20' : ''}`}
+                    className={"flex-1 " + (reportForm.format === 'csv' ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20' : '')}
                     onClick={() => handleGenerateReport('csv')}
                     disabled={isSubmitting || !reportForm.reportType || !reportForm.dateRange}
                   >
@@ -3306,7 +3284,7 @@ export default function EscrowClient() {
                   </Button>
                   <Button
                     variant="outline"
-                    className={`flex-1 ${reportForm.format === 'pdf' ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20' : ''}`}
+                    className={"flex-1 " + (reportForm.format === 'pdf' ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20' : '')}
                     onClick={() => handleGenerateReport('pdf')}
                     disabled={isSubmitting || !reportForm.reportType || !reportForm.dateRange}
                   >
@@ -3315,7 +3293,7 @@ export default function EscrowClient() {
                   </Button>
                   <Button
                     variant="outline"
-                    className={`flex-1 ${reportForm.format === 'excel' ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20' : ''}`}
+                    className={"flex-1 " + (reportForm.format === 'excel' ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20' : '')}
                     onClick={() => handleGenerateReport('excel')}
                     disabled={isSubmitting || !reportForm.reportType || !reportForm.dateRange}
                   >
@@ -3468,7 +3446,7 @@ export default function EscrowClient() {
                 Respond to Dispute
               </DialogTitle>
               <DialogDescription>
-                {selectedDisputeForResponse && `Dispute ${selectedDisputeForResponse.id} - ${formatCurrency(selectedDisputeForResponse.amount)}`}
+                {selectedDisputeForResponse && ("Dispute " + selectedDisputeForResponse.id + " - " + formatCurrency(selectedDisputeForResponse.amount))}
               </DialogDescription>
             </DialogHeader>
             {selectedDisputeForResponse && (

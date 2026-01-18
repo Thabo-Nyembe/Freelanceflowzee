@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useCallback } from 'react'
 import { toast } from 'sonner'
 import {
@@ -68,6 +70,9 @@ import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Progress } from '@/components/ui/progress'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+
+// Initialize Supabase client once at module level
+const supabase = createClient()
 
 // Types
 interface ServiceHealth {
@@ -541,8 +546,6 @@ export default function PerformanceAnalyticsClient() {
 
       // Also try the RPC call if available
       try {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         const { data: { user } } = await supabase.auth.getUser()
         if (user) {
           await supabase.rpc('refresh_performance_metrics', { p_user_id: user.id })
@@ -568,8 +571,6 @@ export default function PerformanceAnalyticsClient() {
   const handleConfirmExport = async () => {
     setIsExporting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 

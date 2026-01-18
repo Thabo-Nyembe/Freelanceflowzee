@@ -489,7 +489,7 @@ export default function IntegrationsClient() {
   const handleDeleteIntegration = async (app: Integration) => {
     const result = await deleteIntegration(app.id)
     if (result) {
-      toast.success('Integration removed' has been removed` })
+      toast.success('Integration removed')
       setSelectedApp(null)
     }
   }
@@ -556,7 +556,7 @@ export default function IntegrationsClient() {
   const handleDeleteZap = async (zap: WorkflowType) => {
     const result = await deleteWorkflow(zap.id)
     if (result.success) {
-      toast.success('Zap deleted' has been removed` })
+      toast.success('Zap deleted')
       setSelectedZap(null)
     }
   }
@@ -622,7 +622,7 @@ export default function IntegrationsClient() {
   const handleDeleteWebhook = async (webhook: WebhookType) => {
     const result = await deleteWebhook(webhook.id)
     if (result.success) {
-      toast.success('Webhook deleted' has been removed` })
+      toast.success('Webhook deleted')
       setSelectedWebhook(null)
     }
   }
@@ -686,7 +686,7 @@ export default function IntegrationsClient() {
     a.click()
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
-    toast.success('Zaps exported successfully' zaps exported` })
+    toast.success('Zaps exported successfully')
   }
 
   const handleEditZap = (zap: WorkflowType) => {
@@ -744,7 +744,7 @@ export default function IntegrationsClient() {
     a.click()
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
-    toast.success('Integrations exported successfully' integrations exported` })
+    toast.success('Integrations exported successfully')
   }
 
   // Task Action Handlers
@@ -842,7 +842,7 @@ export default function IntegrationsClient() {
     a.click()
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
-    toast.success('Task history exported' tasks exported` })
+    toast.success('Task history exported')
   }
 
   // Webhook Action Handlers
@@ -923,7 +923,7 @@ export default function IntegrationsClient() {
     a.click()
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
-    toast.success('Webhooks exported successfully' webhooks exported` })
+    toast.success('Webhooks exported successfully')
   }
 
   const handleRevealWebhookSecret = async (webhook: WebhookType) => {
@@ -1101,7 +1101,7 @@ export default function IntegrationsClient() {
 
   // AI Insight Handler
   const handleAiInsightAction = (insight: { id: string; type: string; title: string }) => {
-    toast.info(`Acting on: ${insight.title}``,
+    toast.info("Acting on: " + insight.title, {
       action: {
         label: 'View Details',
         onClick: () => setActiveTab('analytics')
@@ -1164,7 +1164,7 @@ export default function IntegrationsClient() {
           </div>
           <div className="flex items-center gap-3">
             <Button variant="outline" size="sm" onClick={() => { fetchIntegrations(); fetchWorkflows(); fetchWebhooks() }} disabled={isLoading}>
-              <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={"w-4 h-4 mr-2 " + (isLoading ? "animate-spin" : "")} />
               Refresh
             </Button>
             <Button variant="outline" size="sm" onClick={() => setActiveTab('tasks')}>
@@ -1349,7 +1349,7 @@ export default function IntegrationsClient() {
                 <Button
                   key={idx}
                   variant="ghost"
-                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  className={"h-20 flex-col gap-2 " + action.color + " hover:scale-105 transition-all duration-200"}
                   onClick={action.onClick}
                 >
                   <action.icon className="w-5 h-5" />
@@ -1520,7 +1520,7 @@ export default function IntegrationsClient() {
                 <Button
                   key={idx}
                   variant="ghost"
-                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  className={"h-20 flex-col gap-2 " + action.color + " hover:scale-105 transition-all duration-200"}
                   onClick={action.onClick}
                 >
                   <action.icon className="w-5 h-5" />
@@ -1657,7 +1657,7 @@ export default function IntegrationsClient() {
                 <Button
                   key={idx}
                   variant="ghost"
-                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  className={"h-20 flex-col gap-2 " + action.color + " hover:scale-105 transition-all duration-200"}
                   onClick={action.onClick}
                 >
                   <action.icon className="w-5 h-5" />
@@ -1713,12 +1713,12 @@ export default function IntegrationsClient() {
                         <div className="flex items-center gap-1 mt-2 ml-7">
                           {task.steps.map((step, idx) => (
                             <div key={step.stepId} className="flex items-center gap-1">
-                              <div className={`w-6 h-6 rounded flex items-center justify-center ${
+                              <div className={"w-6 h-6 rounded flex items-center justify-center " + (
                                 step.status === 'success' ? 'bg-green-100 dark:bg-green-900/30' :
                                 step.status === 'failed' ? 'bg-red-100 dark:bg-red-900/30' :
                                 step.status === 'running' ? 'bg-blue-100 dark:bg-blue-900/30' :
                                 'bg-gray-100 dark:bg-gray-700'
-                              }`}>
+                              )}>
                                 {step.status === 'success' && <CheckCircle className="w-3 h-3 text-green-600" />}
                                 {step.status === 'failed' && <XCircle className="w-3 h-3 text-red-600" />}
                                 {step.status === 'running' && <Loader2 className="w-3 h-3 text-blue-600 animate-spin" />}
@@ -1779,7 +1779,7 @@ export default function IntegrationsClient() {
                 <Button
                   key={idx}
                   variant="ghost"
-                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  className={"h-20 flex-col gap-2 " + action.color + " hover:scale-105 transition-all duration-200"}
                   onClick={action.onClick}
                 >
                   <action.icon className="w-5 h-5" />
@@ -1819,8 +1819,8 @@ export default function IntegrationsClient() {
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <div className={`p-2 rounded-lg ${webhook.status === 'active' ? 'bg-green-100 dark:bg-green-900/30' : 'bg-gray-100 dark:bg-gray-700'}`}>
-                            <Webhook className={`w-5 h-5 ${webhook.status === 'active' ? 'text-green-600' : 'text-gray-500'}`} />
+                          <div className={"p-2 rounded-lg " + (webhook.status === 'active' ? 'bg-green-100 dark:bg-green-900/30' : 'bg-gray-100 dark:bg-gray-700')}>
+                            <Webhook className={"w-5 h-5 " + (webhook.status === 'active' ? 'text-green-600' : 'text-gray-500')} />
                           </div>
                           <div>
                             <div className="flex items-center gap-2">
@@ -1908,7 +1908,7 @@ export default function IntegrationsClient() {
                 { icon: BarChart3, label: 'Dashboard', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => setActiveTab('analytics') },
                 { icon: TrendingUp, label: 'Trends', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400', onClick: () => toast.info('Analyzing trends...') },
                 { icon: Activity, label: 'Real-time', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => toast.info('Real-time monitoring active') },
-                { icon: PieChart, label: 'Usage', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => toast.info(`Usage: ${Math.round((usageStats.tasksUsed / usageStats.tasksLimit) * 100)}% of monthly quota`) },
+                { icon: PieChart, label: 'Usage', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => toast.info("Usage: " + Math.round((usageStats.tasksUsed / usageStats.tasksLimit) * 100) + "% of monthly quota") },
                 { icon: AlertCircle, label: 'Errors', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => handleFetchErrorReports() },
                 { icon: FileText, label: 'Reports', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => handleGenerateReports() },
                 { icon: Download, label: 'Export', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', onClick: () => handleExportAnalytics() },
@@ -1917,7 +1917,7 @@ export default function IntegrationsClient() {
                 <Button
                   key={idx}
                   variant="ghost"
-                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  className={"h-20 flex-col gap-2 " + action.color + " hover:scale-105 transition-all duration-200"}
                   onClick={action.onClick}
                 >
                   <action.icon className="w-5 h-5" />
@@ -1942,7 +1942,7 @@ export default function IntegrationsClient() {
                       return (
                         <div key={i} className="flex-1 flex flex-col items-center gap-1">
                           <div
-                            className={`w-full rounded-t ${isToday ? 'bg-orange-500' : 'bg-blue-500'}`}
+                            className={"w-full rounded-t " + (isToday ? 'bg-orange-500' : 'bg-blue-500')}
                             style={{ height: `${height}%` }}
                           />
                           <span className="text-[10px] text-muted-foreground">{i + 1}</span>
@@ -3031,7 +3031,7 @@ export default function IntegrationsClient() {
                         toast.error('Please enter a phone number')
                         return
                       }
-                      toast.success('SMS backup enabled'` })
+                      toast.success('SMS backup enabled')
                       setShowSmsBackupInput(false)
                     }}>
                       Verify
@@ -3077,7 +3077,7 @@ export default function IntegrationsClient() {
                     <code className="text-sm font-mono">{ip}</code>
                     <Button size="sm" variant="ghost" onClick={() => {
                       setIpAllowlist(prev => prev.filter((_, i) => i !== idx))
-                      toast.success(`IP ${ip} removed from allowlist`)
+                      toast.success("IP " + ip + " removed from allowlist")
                     }}>
                       <Trash2 className="w-4 h-4 text-red-500" />
                     </Button>
@@ -3100,7 +3100,7 @@ export default function IntegrationsClient() {
                     return
                   }
                   setIpAllowlist(prev => [...prev, newIpAddress])
-                  toast.success(`IP ${newIpAddress} added to allowlist`)
+                  toast.success("IP " + newIpAddress + " added to allowlist")
                   setNewIpAddress('')
                 }}>
                   <Plus className="w-4 h-4" />
@@ -3187,10 +3187,10 @@ export default function IntegrationsClient() {
                     </div>
                     <Button size="sm" variant="ghost" onClick={() => {
                       const link = document.createElement('a')
-                      link.href = `/invoices/${bill.invoice}.pdf`
-                      link.download = `${bill.invoice}.pdf`
+                      link.href = "/invoices/" + bill.invoice + ".pdf"
+                      link.download = bill.invoice + ".pdf"
                       link.click()
-                      toast.success(`Downloading ${bill.invoice}...`)
+                      toast.success("Downloading " + bill.invoice + "...")
                     }}>
                       <Download className="w-4 h-4" />
                     </Button>
@@ -3220,7 +3220,7 @@ export default function IntegrationsClient() {
                 { name: 'Professional', price: '$49', tasks: '50,000', zaps: '20', features: ['All integrations', 'Priority support', '90-day history', 'API access'], current: true },
                 { name: 'Enterprise', price: '$199', tasks: 'Unlimited', zaps: 'Unlimited', features: ['Custom integrations', 'Dedicated support', 'Unlimited history', 'SSO', 'SLA'], current: false },
               ].map((plan, idx) => (
-                <Card key={idx} className={`relative ${plan.current ? 'border-orange-500 border-2' : ''}`}>
+                <Card key={idx} className={"relative " + (plan.current ? "border-orange-500 border-2" : "")}>
                   {plan.current && (
                     <Badge className="absolute -top-2 left-1/2 -translate-x-1/2 bg-orange-500">Current Plan</Badge>
                   )}
@@ -3241,7 +3241,7 @@ export default function IntegrationsClient() {
                         </li>
                       ))}
                     </ul>
-                    <Button className={`w-full ${plan.current ? '' : 'bg-gradient-to-r from-orange-500 to-red-600'}`} variant={plan.current ? 'outline' : 'default'} disabled={plan.current} onClick={() => handlePlanUpgrade(plan.name)}>
+                    <Button className={"w-full " + (plan.current ? "" : "bg-gradient-to-r from-orange-500 to-red-600")} variant={plan.current ? 'outline' : 'default'} disabled={plan.current} onClick={() => handlePlanUpgrade(plan.name)}>
                       {plan.current ? 'Current Plan' : 'Upgrade'}
                     </Button>
                   </CardContent>

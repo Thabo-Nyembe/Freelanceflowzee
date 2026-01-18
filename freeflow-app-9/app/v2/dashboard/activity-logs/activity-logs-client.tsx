@@ -521,8 +521,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
   }
 
   const handleSettingsAction = (action: string) => {
-    toast.info(`${action} settings` configuration`
-    })
+    toast.info(`${action} settings configuration`)
     // Navigate to appropriate settings tab
     if (action === 'General') setSettingsTab('general')
     else if (action === 'Alerts') setSettingsTab('alerts')
@@ -1783,7 +1782,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
             <AIInsightsPanel
               insights={mockLogsAIInsights}
               title="Logs Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -1818,7 +1817,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
             <DialogTitle className="flex items-center gap-3">
               {selectedLog && (
                 <>
-                  <span className={`px-2 py-1 rounded text-xs font-medium ${getLevelColor(selectedLog.level)}`}>
+                  <span className={'px-2 py-1 rounded text-xs font-medium ' + getLevelColor(selectedLog.level)}>
                     {selectedLog.level.toUpperCase()}
                   </span>
                   <span className="font-mono text-sm">{selectedLog.service}</span>

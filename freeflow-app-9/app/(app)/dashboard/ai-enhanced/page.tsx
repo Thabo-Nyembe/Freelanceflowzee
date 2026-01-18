@@ -418,7 +418,6 @@ export default function AIEnhancedPage() {
         setIsLoading(true)
         setError(null)
 
-        const supabase = createClient()
         const { data: { user }, error: authError } = await supabase.auth.getUser()
 
         if (authError || !user) {
@@ -588,7 +587,6 @@ export default function AIEnhancedPage() {
     try {
       setIsSaving(true)
 
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
       if (!user) {

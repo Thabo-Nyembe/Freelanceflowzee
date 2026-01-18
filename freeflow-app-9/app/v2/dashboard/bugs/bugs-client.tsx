@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -645,13 +647,9 @@ export default function BugsClient() {
   const fetchBugs = useCallback(async () => {
     try {
       setIsLoading(true)
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('bugs')
         .select('*')
@@ -673,16 +671,12 @@ export default function BugsClient() {
   const handleCreateBug = async () => {
     try {
       setIsSaving(true)
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to create bugs')
         return
       }
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('bugs').insert({
         user_id: user.id,
         bug_code: generateBugCode(),
@@ -721,8 +715,6 @@ export default function BugsClient() {
     if (!editingBug) return
     try {
       setIsSaving(true)
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('bugs')
         .update({
@@ -761,8 +753,6 @@ export default function BugsClient() {
   // Delete bug
   const handleDeleteBug = async (bugId: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('bugs')
         .update({ deleted_at: new Date().toISOString() })
@@ -781,8 +771,6 @@ export default function BugsClient() {
   // Update bug status
   const handleUpdateStatus = async (bugId: string, newStatus: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('bugs')
         .update({
@@ -794,7 +782,7 @@ export default function BugsClient() {
 
       if (error) throw error
 
-      toast.success(`Bug status updated to ${newStatus}`)
+      toast.success("Bug status updated to " + newStatus)
       fetchBugs()
     } catch (error) {
       console.error('Error updating status:', error)
@@ -856,7 +844,7 @@ export default function BugsClient() {
         })
       })
       if (!res.ok) throw new Error('Test execution failed')
-      toast.success(`${testConfig.testType} tests completed successfully! ${testConfig.coverage ? 'Coverage report generated.' : ''}`)
+      toast.success(testConfig.testType + " tests completed successfully! " + (testConfig.coverage ? 'Coverage report generated.' : ''))
       setShowRunTestsDialog(false)
       setTestConfig({ testType: 'unit', coverage: true, verbose: false, selectedModules: [] })
     } catch (error) {
@@ -890,7 +878,7 @@ export default function BugsClient() {
         a.click()
         URL.revokeObjectURL(url)
       }
-      toast.success(`Bug report exported as ${exportConfig.format.toUpperCase()}`)
+      toast.success("Bug report exported as " + exportConfig.format.toUpperCase())
       setShowExportReportDialog(false)
     } catch (error) {
       toast.error('Failed to export report')
@@ -928,7 +916,7 @@ export default function BugsClient() {
       })
       if (!res.ok) throw new Error('Import failed')
       const { imported } = await res.json()
-      toast.success(`Successfully imported ${imported} bugs from ${importFile.name}`)
+      toast.success("Successfully imported " + imported + " bugs from " + importFile.name)
       setShowImportBugsDialog(false)
       setImportFile(null)
       fetchBugs()
@@ -956,7 +944,7 @@ export default function BugsClient() {
         })
       })
       if (!res.ok) throw new Error('Link failed')
-      toast.success(`PR linked to bug ${linkPRConfig.bugId}`)
+      toast.success("PR linked to bug " + linkPRConfig.bugId)
       setShowLinkPRsDialog(false)
       setLinkPRConfig({ prUrl: '', bugId: '', linkType: 'fixes' })
     } catch (error) {
@@ -983,7 +971,7 @@ export default function BugsClient() {
       toast.error('Label name is required')
       return
     }
-    toast.success(`Label "${newLabelData.name}" updated successfully`)
+    toast.success("Label \"" + newLabelData.name + "\" updated successfully")
     setShowEditLabelDialog(false)
     setEditingLabel(null)
     setNewLabelData({ name: '', color: '#3b82f6' })
@@ -995,7 +983,7 @@ export default function BugsClient() {
       toast.error('Label name is required')
       return
     }
-    toast.success(`Label "${newLabelData.name}" created successfully`)
+    toast.success("Label \"" + newLabelData.name + "\" created successfully")
     setShowAddLabelDialog(false)
     setNewLabelData({ name: '', color: '#3b82f6' })
   }
@@ -1060,7 +1048,7 @@ export default function BugsClient() {
       await handleUpdateStatus(dbBug.id, 'in_progress')
       setSelectedBug(null)
     } else {
-      toast.success(`Bug ${bug.key} moved to In Progress`)
+      toast.success("Bug " + bug.key + " moved to In Progress")
       setSelectedBug(null)
     }
   }
@@ -1085,7 +1073,7 @@ export default function BugsClient() {
 
   // View all sprint bugs handler
   const handleViewAllSprintBugs = (sprintName: string, bugCount: number) => {
-    toast.info(`Viewing all ${bugCount} bugs in ${sprintName}`)
+    toast.info("Viewing all " + bugCount + " bugs in " + sprintName)
     setStatusFilter('all')
     setActiveTab('list')
   }
@@ -2285,7 +2273,7 @@ export default function BugsClient() {
             <AIInsightsPanel
               insights={mockBugsAIInsights}
               title="Bug Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info("Action: " + insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -3467,7 +3455,7 @@ export default function BugsClient() {
                     body: JSON.stringify({ action: 'disconnect_integration', integrationName: selectedIntegration })
                   })
                   if (!res.ok) throw new Error('Disconnect failed')
-                  toast.success(`${selectedIntegration} disconnected`, { id: 'disconnect-integration' })
+                  toast.success(selectedIntegration + " disconnected", { id: 'disconnect-integration' })
                   setShowConfigureIntegrationDialog(false)
                 } catch { toast.error('Failed to disconnect', { id: 'disconnect-integration' }) }
               }}>
@@ -3482,7 +3470,7 @@ export default function BugsClient() {
                     body: JSON.stringify({ action: 'configure_integration', integrationName: selectedIntegration, config: {}, connected: true })
                   })
                   if (!res.ok) throw new Error('Save failed')
-                  toast.success(`${selectedIntegration} settings saved`, { id: 'save-integration' })
+                  toast.success(selectedIntegration + " settings saved", { id: 'save-integration' })
                   setShowConfigureIntegrationDialog(false)
                 } catch { toast.error('Failed to save settings', { id: 'save-integration' }) }
               }}>

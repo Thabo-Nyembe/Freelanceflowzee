@@ -1,4 +1,6 @@
 'use client'
+
+import { createClient } from '@/lib/supabase/client'
 // MIGRATED: Batch #17 - Verified database hook integration
 // Hooks: useSecurity
 
@@ -615,12 +617,8 @@ export default function SecurityClient() {
 
     try {
       // Log security scan event
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         await supabase.from('security_audit_logs').insert({
           user_id: user.id,
           event_type: 'settings_changed',
@@ -674,12 +672,8 @@ export default function SecurityClient() {
     toast.info('Rotating keys...')
 
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         await supabase.from('security_audit_logs').insert({
           user_id: user.id,
           event_type: 'settings_changed',
@@ -699,12 +693,8 @@ export default function SecurityClient() {
     toast.info('Exporting report')
 
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         await supabase.from('security_audit_logs').insert({
           user_id: user.id,
           event_type: 'settings_changed',
@@ -723,7 +713,7 @@ export default function SecurityClient() {
     try {
       const result = await blockIPFromEvent(eventId)
       if (result.success) {
-        toast.success('Threat blocked' has been blocked` })
+        toast.success(`Threat blocked: Event "${eventId}" has been blocked`)
       } else {
         toast.error('Failed to block threat')
       }
@@ -802,8 +792,6 @@ export default function SecurityClient() {
     const deletionRequest = async () => {
       setIsSaving(true)
       try {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) throw new Error('User not authenticated')
 
@@ -820,8 +808,6 @@ export default function SecurityClient() {
         }
 
         // Log the deletion request
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         await supabase.from('security_audit_logs').insert({
           user_id: user.id,
           event_type: 'settings_changed',
@@ -846,8 +832,6 @@ export default function SecurityClient() {
   const handleAddPassword = useCallback(async () => {
     setIsSaving(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('User not authenticated')
 
@@ -866,8 +850,6 @@ export default function SecurityClient() {
         throw new Error(error.message || 'Failed to add password')
       }
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       await supabase.from('security_audit_logs').insert({
         user_id: user.id,
         event_type: 'vault_item_created',
@@ -912,8 +894,6 @@ export default function SecurityClient() {
   const handleExportVault = useCallback(async () => {
     setIsSaving(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('User not authenticated')
 
@@ -940,8 +920,6 @@ export default function SecurityClient() {
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       await supabase.from('security_audit_logs').insert({
         user_id: user.id,
         event_type: 'vault_exported',
@@ -973,8 +951,6 @@ export default function SecurityClient() {
   const handleExportAuditLog = useCallback(async () => {
     setIsSaving(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('User not authenticated')
 

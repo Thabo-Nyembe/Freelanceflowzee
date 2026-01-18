@@ -1,4 +1,6 @@
 'use client'
+
+import { createClient } from '@/lib/supabase/client'
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
@@ -371,13 +373,9 @@ export default function SystemInsightsClient() {
   // Fetch alerts from Supabase
   const fetchAlerts = useCallback(async () => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('system_alerts')
         .select('*')
@@ -394,13 +392,9 @@ export default function SystemInsightsClient() {
   // Fetch settings from Supabase
   const fetchSettings = useCallback(async () => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('system_settings')
         .select('*')
@@ -520,13 +514,9 @@ export default function SystemInsightsClient() {
     }
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('system_alerts').insert({
         user_id: user.id,
         name: alertForm.name,
@@ -557,8 +547,6 @@ export default function SystemInsightsClient() {
       const updateData: Partial<DbSystemAlert> = { status: newStatus }
       if (newStatus === 'resolved') updateData.resolved_at = new Date().toISOString()
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('system_alerts')
         .update(updateData)
@@ -575,8 +563,6 @@ export default function SystemInsightsClient() {
 
   const handleDeleteAlert = async (alertId: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('system_alerts').delete().eq('id', alertId)
       if (error) throw error
       toast.success('Alert deleted')
@@ -590,8 +576,6 @@ export default function SystemInsightsClient() {
   const handleSaveSettings = async () => {
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
@@ -602,16 +586,12 @@ export default function SystemInsightsClient() {
       }
 
       if (dbSettings) {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         const { error } = await supabase
           .from('system_settings')
           .update(settingsData)
           .eq('id', dbSettings.id)
         if (error) throw error
       } else {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         const { error } = await supabase.from('system_settings').insert(settingsData)
         if (error) throw error
       }
@@ -628,14 +608,10 @@ export default function SystemInsightsClient() {
 
   const handleExportReport = async () => {
     const exportPromise = async () => {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
       // Log export activity
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       await supabase.from('activity_logs').insert({
         user_id: user.id,
         action: 'export_report',
@@ -653,13 +629,9 @@ export default function SystemInsightsClient() {
 
   const handleClearAllAlerts = async () => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('system_alerts')
         .delete()

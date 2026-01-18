@@ -151,8 +151,7 @@ export default function AdminPage() {
       })
       sessionStorage.clear()
       const freedMB = ((freedBytes / 1024 / 1024) || 0.1).toFixed(1)
-      toast.success('Cache Cleared'MB`
-      })
+      toast.success(`Cache Cleared: ${freedMB}MB freed`)
       announce('Cache cleared successfully', 'polite')
     } catch (error) {
       toast.error('Failed to clear cache')
@@ -182,8 +181,7 @@ export default function AdminPage() {
       a.click()
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
-      toast.success('Backup Created'.json (${(blob.size / 1024).toFixed(1)} KB)`
-      })
+      toast.success(`Backup Created: backup_${timestamp}.json (${(blob.size / 1024).toFixed(1)} KB)`)
       announce('Backup created successfully', 'polite')
     } catch (error) {
       toast.error('Failed to create backup')
@@ -228,8 +226,7 @@ export default function AdminPage() {
       const responseTime = Math.round(endTime - startTime)
       const allPassed = Object.values(checks).every(Boolean)
       if (allPassed) {
-        toast.success('Health Check Passed'ms`
-        })
+        toast.success(`Health Check Passed: All systems operational (${responseTime}ms)`)
       } else {
         toast.warning('Health Check Warning')
       }

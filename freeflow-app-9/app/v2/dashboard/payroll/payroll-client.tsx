@@ -2202,7 +2202,7 @@ export default function PayrollClient() {
             <AIInsightsPanel
               insights={payrollAIInsights}
               title="Payroll Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -3007,7 +3007,7 @@ export default function PayrollClient() {
                     const federalTax = Math.round(Math.random() * 5000 + 8000)
                     const stateTax = Math.round(Math.random() * 2000 + 3000)
                     const totalTax = federalTax + stateTax
-                    toast.success(`Tax Calculation Complete` | State: $${stateTax.toLocaleString()} | Total: $${totalTax.toLocaleString()}`,
+                    toast.success("Tax Calculation Complete - Federal: $" + federalTax.toLocaleString() + " | State: $" + stateTax.toLocaleString() + " | Total: $" + totalTax.toLocaleString(), {
                       duration: 8000
                     })
                     setShowCalculateTaxDialog(false)
@@ -3773,8 +3773,7 @@ export default function PayrollClient() {
                 <Button variant="outline" className="flex-1" onClick={() => setShowApproveTimeDialog(false)}>Cancel</Button>
                 <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => {
                     if (selectedTimeEntry) {
-                      toast.success(`Time entry approved for ${selectedTimeEntry.employeeName}` hours approved`
-                      })
+                      toast.success("Time entry approved for " + selectedTimeEntry.employeeName + " - hours approved")
                     } else {
                       toast.success('All pending time entries approved')
                     }

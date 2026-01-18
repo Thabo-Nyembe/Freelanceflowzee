@@ -374,7 +374,8 @@ export default function FilesClient() {
 
   const handleDownloadFile = useCallback(async (file: ExtendedFile) => {
     toast.promise(
-      (async () => {        // Real API call to get file blob
+      (async () => {
+        // Real API call to get file blob
         const response = await fetch(`/api/files/${file.id}/download`, {
           method: 'GET',
           headers: {
@@ -403,7 +404,9 @@ export default function FilesClient() {
 
         // Cleanup
         document.body.removeChild(link)
-        window.URL.revokeObjectURL(blobUrl)        // Update download count
+        window.URL.revokeObjectURL(blobUrl)
+
+        // Update download count
         setFiles(prevFiles => prevFiles.map(f =>
           f.id === file.id
             ? { ...f, downloads: (f.downloads || 0) + 1 }
@@ -436,9 +439,12 @@ export default function FilesClient() {
 
       if (!uploadedFiles || uploadedFiles.length === 0) return
 
-      setIsUploading(true)      for (const file of Array.from(uploadedFiles)) {
+      setIsUploading(true)
+
+      for (const file of Array.from(uploadedFiles)) {
         toast.promise(
-          (async () => {            // Create FormData for real file upload
+          (async () => {
+            // Create FormData for real file upload
             const formData = new FormData()
             formData.append('file', file)
             formData.append('fileName', file.name)
@@ -455,7 +461,9 @@ export default function FilesClient() {
               throw new Error(errorData.error || 'Failed to upload file')
             }
 
-            const result = await response.json()            // Add file to list with response data
+            const result = await response.json()
+
+            // Add file to list with response data
             const newFile: ExtendedFile = {
               id: result.id || Date.now(),
               name: file.name,
@@ -497,11 +505,13 @@ export default function FilesClient() {
     // Confirm deletion with user
     const confirmed = window.confirm(`Are you sure you want to delete "${fileName}"? This action cannot be undone.`)
 
-    if (!confirmed) {      return
+    if (!confirmed) {
+      return
     }
 
     toast.promise(
-      (async () => {        // Real DELETE request to API
+      (async () => {
+        // Real DELETE request to API
         const response = await fetch(`/api/files/${fileId}`, {
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' }
@@ -510,7 +520,9 @@ export default function FilesClient() {
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}))
           throw new Error(errorData.error || 'Failed to delete file')
-        }        // Remove file from state
+        }
+
+        // Remove file from state
         setFiles(prevFiles => prevFiles.filter(f => f.id !== fileId))
         setSelectedFile(null)
 
@@ -529,14 +541,18 @@ export default function FilesClient() {
   // ============================================================================
 
   const handleShareFile = useCallback(async (file: ExtendedFile) => {
-    const shareUrl = `${window.location.origin}/files/${file.id}`    // Try Web Share API first (available on mobile and some desktop browsers)
+    const shareUrl = `${window.location.origin}/files/${file.id}`
+
+    // Try Web Share API first (available on mobile and some desktop browsers)
     if (navigator.share) {
       try {
         await navigator.share({
           title: file.name,
           text: `Check out this file: ${file.name}`,
           url: shareUrl
-        })        // Update shared status
+        })
+
+        // Update shared status
         setFiles(prevFiles => prevFiles.map(f =>
           f.id === file.id ? { ...f, shared: true } : f
         ))
@@ -545,8 +561,10 @@ export default function FilesClient() {
         return
       } catch (shareError: any) {
         // User cancelled or share failed, fall back to clipboard
-        if (shareError.name === 'AbortError') {          return
-        }      }
+        if (shareError.name === 'AbortError') {
+          return
+        }
+      }
     }
 
     // Fallback: Copy link to clipboard
@@ -556,7 +574,8 @@ export default function FilesClient() {
       // Update shared status
       setFiles(prevFiles => prevFiles.map(f =>
         f.id === file.id ? { ...f, shared: true } : f
-      ))      toast.success('Share link copied!')
+      ))
+      toast.success('Share link copied!')
     } catch (clipboardError: any) {
       logger.error('Failed to copy share link', { error: clipboardError, fileId: file.id })
       toast.error('Failed to share file')
@@ -569,7 +588,8 @@ export default function FilesClient() {
 
   const handleViewFile = useCallback(async (file: ExtendedFile) => {
     toast.promise(
-      (async () => {        // Fetch file preview URL from API
+      (async () => {
+        // Fetch file preview URL from API
         const response = await fetch(`/api/files/${file.id}/preview`, {
           method: 'GET'
         })
@@ -594,7 +614,9 @@ export default function FilesClient() {
         } else {
           // Fallback: open file directly
           window.open(`/api/files/${file.id}/download`, '_blank', 'noopener,noreferrer')
-        }        return file.name
+        }
+
+        return file.name
       })(),
       {
         loading: `Loading preview for ${file.name}...`,
@@ -611,7 +633,8 @@ export default function FilesClient() {
   const handleCopyLink = useCallback(async (file: ExtendedFile) => {
     try {
       const link = `${window.location.origin}/files/${file.id}/${encodeURIComponent(file.name)}`
-      await navigator.clipboard.writeText(link)      toast.success('Link copied to clipboard!')
+      await navigator.clipboard.writeText(link)
+      toast.success('Link copied to clipboard!')
     } catch (error: any) {
       logger.error('Failed to copy link', { error })
       toast.error('Failed to copy link')
@@ -630,7 +653,8 @@ export default function FilesClient() {
     }
 
     toast.promise(
-      (async () => {        const response = await fetch(`/api/files/${file.id}`, {
+      (async () => {
+        const response = await fetch(`/api/files/${file.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name: newName })
@@ -639,7 +663,9 @@ export default function FilesClient() {
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}))
           throw new Error(errorData.error || 'Failed to rename file')
-        }        // Update file in state
+        }
+
+        // Update file in state
         setFiles(prevFiles => prevFiles.map(f =>
           f.id === file.id ? { ...f, name: newName } : f
         ))
@@ -671,7 +697,8 @@ export default function FilesClient() {
     }
 
     toast.promise(
-      (async () => {        const response = await fetch(`/api/files/${file.id}/move`, {
+      (async () => {
+        const response = await fetch(`/api/files/${file.id}/move`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ destination: newProject })
@@ -680,7 +707,9 @@ export default function FilesClient() {
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}))
           throw new Error(errorData.error || 'Failed to move file')
-        }        // Update file in state
+        }
+
+        // Update file in state
         setFiles(prevFiles => prevFiles.map(f =>
           f.id === file.id ? { ...f, project: newProject } : f
         ))
@@ -706,7 +735,8 @@ export default function FilesClient() {
 
   const handleExportFiles = useCallback(async () => {
     toast.promise(
-      (async () => {        // Request bulk export from API
+      (async () => {
+        // Request bulk export from API
         const response = await fetch('/api/files/export', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -734,7 +764,8 @@ export default function FilesClient() {
 
         // Cleanup
         document.body.removeChild(link)
-        window.URL.revokeObjectURL(blobUrl)        return filteredFiles.length
+        window.URL.revokeObjectURL(blobUrl)
+        return filteredFiles.length
       })(),
       {
         loading: `Exporting ${filteredFiles.length} files...`,
@@ -764,7 +795,8 @@ export default function FilesClient() {
   }, [])
 
   const handleSecureFileDownload = useCallback(async (file: FileItem) => {
-    try {      const response = await fetch(`/api/files/delivery/${file.id}/download`)
+    try {
+      const response = await fetch(`/api/files/delivery/${file.id}/download`)
       const data = await response.json()
 
       if (data.success && data.downloadUrl) {
@@ -803,7 +835,8 @@ export default function FilesClient() {
 
     setActionLoading(true)
     toast.promise(
-      (async () => {        const response = await fetch('/api/folders', {
+      (async () => {
+        const response = await fetch('/api/folders', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -817,7 +850,8 @@ export default function FilesClient() {
           throw new Error(errorData.error || 'Failed to create folder')
         }
 
-        const result = await response.json()        setShowCreateFolderDialog(false)
+        const result = await response.json()
+        setShowCreateFolderDialog(false)
         setNewFolderName('')
         return newFolderName
       })(),
@@ -847,7 +881,8 @@ export default function FilesClient() {
 
     setActionLoading(true)
     toast.promise(
-      (async () => {        const response = await fetch(`/api/files/${selectedFile.id}`, {
+      (async () => {
+        const response = await fetch(`/api/files/${selectedFile.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name: renameValue })
@@ -856,7 +891,9 @@ export default function FilesClient() {
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}))
           throw new Error(errorData.error || 'Failed to rename file')
-        }        // Update file in state
+        }
+
+        // Update file in state
         setFiles(prevFiles => prevFiles.map(f =>
           f.id === selectedFile.id ? { ...f, name: renameValue } : f
         ))
@@ -887,7 +924,8 @@ export default function FilesClient() {
 
     setActionLoading(true)
     toast.promise(
-      (async () => {        const response = await fetch(`/api/files/${selectedFile.id}`, {
+      (async () => {
+        const response = await fetch(`/api/files/${selectedFile.id}`, {
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' }
         })
@@ -895,7 +933,9 @@ export default function FilesClient() {
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}))
           throw new Error(errorData.error || 'Failed to delete file')
-        }        // Remove file from state
+        }
+
+        // Remove file from state
         setFiles(prevFiles => prevFiles.filter(f => f.id !== selectedFile.id))
         setShowDeleteDialog(false)
         setSelectedFile(null)
@@ -938,7 +978,8 @@ export default function FilesClient() {
 
     setActionLoading(true)
     toast.promise(
-      (async () => {        const response = await fetch(`/api/files/${selectedFile.id}/share`, {
+      (async () => {
+        const response = await fetch(`/api/files/${selectedFile.id}/share`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -950,7 +991,9 @@ export default function FilesClient() {
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}))
           throw new Error(errorData.error || 'Failed to share file')
-        }        // Update shared status and sharedWith
+        }
+
+        // Update shared status and sharedWith
         setFiles(prevFiles => prevFiles.map(f =>
           f.id === selectedFile.id
             ? {
@@ -992,7 +1035,8 @@ export default function FilesClient() {
 
     setActionLoading(true)
     toast.promise(
-      (async () => {        const response = await fetch(`/api/files/${selectedFile.id}/move`, {
+      (async () => {
+        const response = await fetch(`/api/files/${selectedFile.id}/move`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ destination: moveDestination })
@@ -1001,7 +1045,9 @@ export default function FilesClient() {
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}))
           throw new Error(errorData.error || 'Failed to move file')
-        }        // Update file in state
+        }
+
+        // Update file in state
         setFiles(prevFiles => prevFiles.map(f =>
           f.id === selectedFile.id ? { ...f, project: moveDestination } : f
         ))
@@ -1026,7 +1072,8 @@ export default function FilesClient() {
     const isStarred = starredFiles.includes(file.id)
 
     toast.promise(
-      (async () => {        const response = await fetch(`/api/files/${file.id}/star`, {
+      (async () => {
+        const response = await fetch(`/api/files/${file.id}/star`, {
           method: isStarred ? 'DELETE' : 'POST',
           headers: { 'Content-Type': 'application/json' }
         })
@@ -1059,7 +1106,8 @@ export default function FilesClient() {
 
   const handleArchiveFile = useCallback(async (file: ExtendedFile) => {
     toast.promise(
-      (async () => {        const response = await fetch(`/api/files/${file.id}/archive`, {
+      (async () => {
+        const response = await fetch(`/api/files/${file.id}/archive`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' }
         })
@@ -1067,7 +1115,9 @@ export default function FilesClient() {
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}))
           throw new Error(errorData.error || 'Failed to archive file')
-        }        // Remove from active list (archived files typically go to a separate view)
+        }
+
+        // Remove from active list (archived files typically go to a separate view)
         setFiles(prevFiles => prevFiles.filter(f => f.id !== file.id))
         setSelectedFile(null)
 
@@ -1087,7 +1137,8 @@ export default function FilesClient() {
 
   const handleDuplicateFile = useCallback(async (file: ExtendedFile) => {
     toast.promise(
-      (async () => {        const response = await fetch(`/api/files/${file.id}/duplicate`, {
+      (async () => {
+        const response = await fetch(`/api/files/${file.id}/duplicate`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' }
         })
@@ -1097,7 +1148,9 @@ export default function FilesClient() {
           throw new Error(errorData.error || 'Failed to duplicate file')
         }
 
-        const result = await response.json()        // Add duplicated file to list
+        const result = await response.json()
+
+        // Add duplicated file to list
         const duplicatedFile: ExtendedFile = {
           ...file,
           id: result.id || Date.now(),
@@ -1127,7 +1180,8 @@ export default function FilesClient() {
   const handleRefreshFiles = useCallback(async () => {
     setIsLoading(true)
     toast.promise(
-      (async () => {        const response = await fetch('/api/files', {
+      (async () => {
+        const response = await fetch('/api/files', {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' }
         })
@@ -1141,7 +1195,9 @@ export default function FilesClient() {
 
         if (result.files) {
           setFiles(result.files)
-        }        return result.files?.length || 0
+        }
+
+        return result.files?.length || 0
       })(),
       {
         loading: 'Refreshing files...',

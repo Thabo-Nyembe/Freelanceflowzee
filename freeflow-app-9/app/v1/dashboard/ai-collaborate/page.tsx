@@ -130,8 +130,8 @@ export default function AICollaboratePage() {
 
       if (!response.ok) {
         throw new Error('Failed to generate AI options')
-      }      toast.success('AI designs generated!' new design options created based on your preferences`
-      })
+      }
+      toast.success('AI designs generated! New design options created based on your preferences')
     } catch (error: any) {
       logger.error('Failed to generate AI options', { error })
       toast.error('Failed to generate designs')
@@ -171,7 +171,8 @@ export default function AICollaboratePage() {
         setSelectedOptions(selectedOptions.filter(id => id !== optionId))
       } else {
         setSelectedOptions([...selectedOptions, optionId])
-      }      toast.success('Option selected!')
+      }
+    toast.success('Option selected!')
     } catch (error: any) {
       logger.error('Failed to select option', { error, optionId })
       toast.error('Failed to select option')
@@ -231,7 +232,8 @@ export default function AICollaboratePage() {
       if (selectedOptions.length === 0) {
         toast.error('Please select at least one design')
         return
-      }      const response = await fetch('/api/client-zone/ai/download', {
+      }
+    const response = await fetch('/api/client-zone/ai/download', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -244,8 +246,7 @@ export default function AICollaboratePage() {
         throw new Error('Failed to download designs')
       }
 
-      toast.success('Downloads starting!' design(s) downloading`
-      })
+      toast.success(`Downloads starting! ${selectedOptions.length} design(s) downloading`)
     } catch (error: any) {
       logger.error('Failed to download selection', { error })
       toast.error('Failed to download designs')
@@ -261,7 +262,8 @@ export default function AICollaboratePage() {
       if (selectedOptions.length === 0) {
         toast.error('Please select at least one design')
         return
-      }      const response = await fetch('/api/client-zone/ai/share', {
+      }
+    const response = await fetch('/api/client-zone/ai/share', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

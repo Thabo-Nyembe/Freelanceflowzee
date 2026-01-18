@@ -368,7 +368,7 @@ export default function WebhooksClient({
           custom_headers: formData.custom_headers
         })
         if (result.success) {
-          toast.success('Webhook updated'" has been updated` })
+          toast.success(`Webhook updated: "${formData.name}" has been updated`)
           setShowEndpointDialog(false)
         } else {
           toast.error('Update failed')
@@ -387,7 +387,7 @@ export default function WebhooksClient({
           status: 'active'
         })
         if (result.success) {
-          toast.success('Webhook created'" has been created` })
+          toast.success(`Webhook created: "${formData.name}" has been created`)
           setShowEndpointDialog(false)
         } else {
           toast.error('Creation failed')
@@ -401,7 +401,7 @@ export default function WebhooksClient({
   const handleDeleteWebhook = async (id: string, name: string) => {
     const result = await deleteWebhook(id)
     if (result.success) {
-      toast.success('Webhook deleted'" has been deleted` })
+      toast.success(`Webhook deleted: "${name}" has been deleted`)
     } else {
       toast.error('Delete failed')
     }
@@ -411,7 +411,7 @@ export default function WebhooksClient({
     const newStatus = currentStatus === 'active' ? 'paused' : 'active'
     const result = await toggleStatus(id, newStatus as 'active' | 'paused')
     if (result.success) {
-      toast.success('Status updated'` })
+      toast.success(`Status updated: now ${newStatus}`)
     } else {
       toast.error('Status update failed')
     }
@@ -486,7 +486,7 @@ export default function WebhooksClient({
     if (!webhookToDelete) return
     const result = await deleteWebhook(webhookToDelete.id)
     if (result.success) {
-      toast.success('Webhook deleted'" has been permanently deleted` })
+      toast.success(`Webhook deleted: "${webhookToDelete.name}" has been permanently deleted`)
     } else {
       toast.error('Delete failed')
     }

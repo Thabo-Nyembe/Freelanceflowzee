@@ -2398,7 +2398,7 @@ export default function EventsClient() {
               <AIInsightsPanel
                 insights={eventsAIInsights}
                 title="Event Intelligence"
-                onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+                onInsightAction={(insight) => toast.info(insight.title)}
               />
             </div>
             <div className="space-y-6">
@@ -2512,7 +2512,7 @@ export default function EventsClient() {
                   <Eye className="w-4 h-4 mr-2" />
                   Preview
                 </Button>
-                <Button variant="outline" className="flex-1" onClick={() => { if (selectedEvent) { setDuplicateName(`${selectedEvent.title} (Copy)`); setShowDuplicateDialog(true); } }}>
+                <Button variant="outline" className="flex-1" onClick={() => { if (selectedEvent) { setDuplicateName(selectedEvent.title + " (Copy)"); setShowDuplicateDialog(true); } }}>
                   <Copy className="w-4 h-4 mr-2" />
                   Duplicate
                 </Button>
@@ -2999,7 +2999,7 @@ export default function EventsClient() {
               className="bg-gradient-to-r from-purple-500 to-pink-600"
               onClick={() => {
                 if (checkInCode.trim()) {
-                  toast.success(`Attendee "${checkInCode}" checked in successfully!`)
+                  toast.success('Attendee "' + checkInCode + '" checked in successfully!')
                   setCheckInCode('')
                   setShowCheckInDialog(false)
                 } else {

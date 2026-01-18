@@ -492,8 +492,7 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
         release_date: new Date().toISOString(),
       })
       if (result) {
-        toast.success('Release Created' has been created successfully`
-        })
+        toast.success(`${changelogForm.title} has been created successfully`)
         setIsCreateDialogOpen(false)
         setChangelogForm(defaultChangelogForm)
         refetch()
@@ -512,8 +511,7 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
     try {
       const result = await updateChange(changelogForm, editingChangelog.id)
       if (result) {
-        toast.success('Release Updated' has been updated`
-        })
+        toast.success(`Release Updated: ${changelogForm.version} has been updated`)
         setIsEditDialogOpen(false)
         setEditingChangelog(null)
         setChangelogForm(defaultChangelogForm)
@@ -533,8 +531,7 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
     try {
       const result = await deleteChange(deletingChangelog.id)
       if (result) {
-        toast.success('Release Deleted' has been removed`
-        })
+        toast.success(`Release Deleted: "${deletingChangelog.title}" has been removed`)
         setIsDeleteDialogOpen(false)
         setDeletingChangelog(null)
         refetch()
@@ -555,8 +552,7 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
         last_published_at: new Date().toISOString(),
       }, entry.id)
       if (result) {
-        toast.success('Release Published' is now live`
-        })
+        toast.success(`Release Published: "${entry.title}" is now live`)
         refetch()
       }
     } catch (err) {
@@ -574,8 +570,7 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
         scheduled_for: scheduledDate,
       }, entry.id)
       if (result) {
-        toast.success('Release Scheduled' scheduled for ${new Date(scheduledDate).toLocaleDateString()}`
-        })
+        toast.success(`Release Scheduled: "${entry.title}" scheduled for ${new Date(scheduledDate).toLocaleDateString()}`)
         refetch()
       }
     } catch (err) {
@@ -592,8 +587,7 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
         release_status: 'archived',
       }, entry.id)
       if (result) {
-        toast.success('Release Archived' has been archived`
-        })
+        toast.success(`Release Archived: "${entry.title}" has been archived`)
         refetch()
       }
     } catch (err) {

@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import {
@@ -481,14 +483,14 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
       await createTransaction({
         type: 'expense',
         category: 'Refund',
-        description: `Refund for ${selectedPayment.id} - ${refundForm.reason}`,
+        description: `Refund for ") + (selectedPayment.id} - ") + (refundForm.reason}`,
         amount: refundAmount / 100,
         currency: selectedPayment.currency,
         transaction_date: new Date().toISOString(),
         client_name: selectedPayment.customer.name,
-        notes: `Original payment: ${selectedPayment.id}, Reason: ${refundForm.reason}`
+        notes: `Original payment: ") + (selectedPayment.id}, Reason: ") + (refundForm.reason}`
       })
-      toast.success(`Refund issued for ${formatCurrency(refundAmount)}`)
+      toast.success("Refund issued for " + formatCurrency(refundAmount))
       setShowRefundDialog(false)
       setRefundForm({ amount: '', reason: 'requested_by_customer' })
     } catch (error) {
@@ -515,7 +517,7 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
         currency: 'USD',
         transaction_date: new Date().toISOString(),
         client_name: customer.name,
-        notes: `Due: ${invoiceForm.dueDate}, Email sent: ${invoiceForm.sendEmail}`
+        notes: `Due: ") + (invoiceForm.dueDate}, Email sent: ") + (invoiceForm.sendEmail}`
       })
       toast.success('Invoice created successfully!')
       setShowInvoiceDialog(false)
@@ -534,7 +536,6 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
     }
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
       const supabase = createClient()
       const { error } = await supabase.from('clients').insert({
         name: customerForm.name,
@@ -563,7 +564,7 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `transactions-${new Date().toISOString().split('T')[0]}.csv`
+      a.download = `transactions-") + (new Date().toISOString().split('T')[0]}.csv`
       a.click()
       toast.success('Export completed')
     } catch (error) {
@@ -587,7 +588,7 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
     setIsSubmitting(true)
     try {
       await deleteTransaction(transactionId)
-      toast.success('Transaction voided' has been voided` })
+      toast.success('Transaction voided')
     } catch (error) {
       toast.error('Failed to void transaction')
     } finally {
@@ -611,9 +612,9 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
         currency: newPaymentForm.currency,
         transaction_date: new Date().toISOString(),
         client_name: newPaymentForm.customerName,
-        notes: `Customer email: ${newPaymentForm.customerEmail}, Payment method: ${newPaymentForm.paymentMethod}`
+        notes: `Customer email: ") + (newPaymentForm.customerEmail}, Payment method: ") + (newPaymentForm.paymentMethod}`
       })
-      toast.success('Payment created successfully!' to ${newPaymentForm.customerName}` })
+      toast.success('Payment created successfully!')
       setShowNewPaymentDialog(false)
       setNewPaymentForm({ customerName: '', customerEmail: '', amount: '', description: '', paymentMethod: 'card', currency: 'USD' })
     } catch (error) {
@@ -635,14 +636,14 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
       await createTransaction({
         type: 'expense',
         category: 'Refund',
-        description: `Refund for ${quickRefundForm.paymentId} - ${quickRefundForm.reason}`,
+        description: `Refund for ") + (quickRefundForm.paymentId} - ") + (quickRefundForm.reason}`,
         amount: refundAmount,
         currency: 'USD',
         transaction_date: new Date().toISOString(),
         client_name: payment?.customer.name || 'Unknown Customer',
-        notes: `Original payment: ${quickRefundForm.paymentId}, Reason: ${quickRefundForm.reason}`
+        notes: 'Original payment: ' + quickRefundForm.paymentId + ', Reason: ' + quickRefundForm.reason
       })
-      toast.success('Refund issued successfully!'` })
+      toast.success('Refund issued successfully!')
       setShowQuickRefundDialog(false)
       setQuickRefundForm({ paymentId: '', amount: '', reason: 'requested_by_customer' })
     } catch (error) {
@@ -680,11 +681,11 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `transactions-report-${new Date().toISOString().split('T')[0]}.${exportOptions.format}`
+      a.download = 'transactions-report-' + new Date().toISOString().split('T')[0] + '.' + exportOptions.format
       a.click()
       URL.revokeObjectURL(url)
 
-      toast.success('Report exported successfully!' transactions` })
+      toast.success('Report exported successfully!')
       setShowExportDialog(false)
     } catch (error) {
       toast.error('Failed to export report')
@@ -909,7 +910,7 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
                   key={i}
                   className="flex flex-col items-center gap-2 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:scale-105 transition-all duration-200"
                 >
-                  <div className={`p-3 rounded-xl ${action.color}`}>
+                  <div className={"p-3 rounded-xl " + action.color}>
                     <action.icon className="w-5 h-5" />
                   </div>
                   <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{action.label}</span>
@@ -932,7 +933,7 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
                       <div key={payment.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer" onClick={() => { setSelectedPayment(payment); setShowPaymentDialog(true); }}>
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
-                            <div className={`p-2 rounded-lg ${payment.status === 'succeeded' ? 'bg-green-100 dark:bg-green-900/30' : payment.status === 'failed' ? 'bg-red-100 dark:bg-red-900/30' : 'bg-yellow-100 dark:bg-yellow-900/30'}`}>
+                            <div className={"p-2 rounded-lg " + (payment.status === 'succeeded' ? 'bg-green-100 dark:bg-green-900/30' : payment.status === 'failed' ? 'bg-red-100 dark:bg-red-900/30' : 'bg-yellow-100 dark:bg-yellow-900/30')}>
                               {payment.status === 'succeeded' ? <CheckCircle className="w-4 h-4 text-green-600" /> :
                                payment.status === 'failed' ? <XCircle className="w-4 h-4 text-red-600" /> :
                                <Clock className="w-4 h-4 text-yellow-600" />}
@@ -967,7 +968,7 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
                       <div key={payout.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
-                            <div className={`p-2 rounded-lg ${payout.status === 'paid' ? 'bg-green-100 dark:bg-green-900/30' : payout.status === 'in_transit' ? 'bg-blue-100 dark:bg-blue-900/30' : 'bg-yellow-100 dark:bg-yellow-900/30'}`}>
+                            <div className={"p-2 rounded-lg " + (payout.status === 'paid' ? 'bg-green-100 dark:bg-green-900/30' : payout.status === 'in_transit' ? 'bg-blue-100 dark:bg-blue-900/30' : 'bg-yellow-100 dark:bg-yellow-900/30')}>
                               {payout.status === 'paid' ? <CheckCircle className="w-4 h-4 text-green-600" /> :
                                payout.status === 'in_transit' ? <Send className="w-4 h-4 text-blue-600" /> :
                                <Clock className="w-4 h-4 text-yellow-600" />}
@@ -979,7 +980,7 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
                           </div>
                           <div className="text-right">
                             <p className="font-semibold text-gray-900 dark:text-white">{formatCurrency(payout.amount)}</p>
-                            <span className={`text-xs px-2 py-0.5 rounded-full ${statusColors[payout.status]}`}>
+                            <span className={"text-xs px-2 py-0.5 rounded-full " + statusColors[payout.status]}>
                               {payout.status === 'in_transit' ? 'In Transit' : payout.status}
                             </span>
                           </div>
@@ -1098,16 +1099,16 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
                     {mockBalanceTransactions.map((txn) => (
                       <tr key={txn.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                         <td className="px-6 py-4">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${balanceTypeColors[txn.type]} bg-opacity-20`}>
+                          <span className={"px-2 py-1 rounded-full text-xs font-medium capitalize " + balanceTypeColors[txn.type] + " bg-opacity-20"}>
                             {txn.type}
                           </span>
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-900 dark:text-white">{txn.description}</td>
-                        <td className={`px-6 py-4 text-sm font-medium text-right ${txn.amount >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        <td className={"px-6 py-4 text-sm font-medium text-right " + (txn.amount >= 0 ? 'text-green-600' : 'text-red-600')}>
                           {txn.amount >= 0 ? '+' : ''}{formatCurrency(txn.amount)}
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-500 text-right">{formatCurrency(txn.fee)}</td>
-                        <td className={`px-6 py-4 text-sm font-semibold text-right ${txn.net >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        <td className={"px-6 py-4 text-sm font-semibold text-right " + (txn.net >= 0 ? 'text-green-600' : 'text-red-600')}>
                           {txn.net >= 0 ? '+' : ''}{formatCurrency(txn.net)}
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-500">{formatShortDate(txn.availableOn)}</td>
@@ -1162,7 +1163,7 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
                         </td>
                         <td className="px-6 py-4 text-sm font-semibold text-gray-900 dark:text-white">{formatCurrency(invoice.amount)}</td>
                         <td className="px-6 py-4">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[invoice.status]}`}>
+                          <span className={"px-2 py-1 rounded-full text-xs font-medium " + statusColors[invoice.status]}>
                             {invoice.status}
                           </span>
                         </td>
@@ -1348,7 +1349,7 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[payment.status]}`}>
+                          <span className={"px-2 py-1 rounded-full text-xs font-medium " + statusColors[payment.status]}>
                             {payment.status.replace('_', ' ')}
                           </span>
                           {payment.refunded && (
@@ -1365,15 +1366,15 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
                           <div className="flex items-center gap-2">
                             <CreditCard className="w-4 h-4 text-gray-400" />
                             <span className="text-sm text-gray-700 dark:text-gray-300">
-                              {payment.paymentMethod.brand ? `${payment.paymentMethod.brand.charAt(0).toUpperCase() + payment.paymentMethod.brand.slice(1)} ` : ''}
+                              {payment.paymentMethod.brand ? (payment.paymentMethod.brand.charAt(0).toUpperCase() + payment.paymentMethod.brand.slice(1) + ' ') : ''}
                               ••••{payment.paymentMethod.last4}
                             </span>
                           </div>
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-2">
-                            <div className={`w-2 h-2 rounded-full ${payment.riskScore < 20 ? 'bg-green-500' : payment.riskScore < 50 ? 'bg-yellow-500' : 'bg-red-500'}`} />
-                            <span className={`text-sm font-medium ${getRiskColor(payment.riskScore)}`}>
+                            <div className={"w-2 h-2 rounded-full " + (payment.riskScore < 20 ? 'bg-green-500' : payment.riskScore < 50 ? 'bg-yellow-500' : 'bg-red-500')} />
+                            <span className={"text-sm font-medium " + getRiskColor(payment.riskScore)}>
                               {payment.riskScore}
                             </span>
                           </div>
@@ -1436,7 +1437,7 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
                         <td className="px-6 py-4 text-sm font-mono text-gray-500">{refund.paymentId}</td>
                         <td className="px-6 py-4 text-sm font-semibold text-gray-900 dark:text-white">{formatCurrency(refund.amount)}</td>
                         <td className="px-6 py-4">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[refund.status]}`}>
+                          <span className={"px-2 py-1 rounded-full text-xs font-medium " + statusColors[refund.status]}>
                             {refund.status}
                           </span>
                         </td>
@@ -1483,7 +1484,7 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
                         <td className="px-6 py-4 text-sm font-mono text-gray-500">{dispute.paymentId}</td>
                         <td className="px-6 py-4 text-sm font-semibold text-red-600">{formatCurrency(dispute.amount)}</td>
                         <td className="px-6 py-4">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[dispute.status]}`}>
+                          <span className={"px-2 py-1 rounded-full text-xs font-medium " + statusColors[dispute.status]}>
                             {dispute.status.replace('_', ' ')}
                           </span>
                         </td>
@@ -1544,7 +1545,7 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
                         <td className="px-6 py-4 text-sm font-mono text-gray-900 dark:text-white">{payout.id}</td>
                         <td className="px-6 py-4 text-sm font-semibold text-gray-900 dark:text-white">{formatCurrency(payout.amount)}</td>
                         <td className="px-6 py-4">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[payout.status]}`}>
+                          <span className={"px-2 py-1 rounded-full text-xs font-medium " + statusColors[payout.status]}>
                             {payout.status === 'in_transit' ? 'In Transit' : payout.status}
                           </span>
                         </td>
@@ -1555,7 +1556,7 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${payout.automatic ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' : 'bg-gray-100 text-gray-700'}`}>
+                          <span className={"px-2 py-1 rounded-full text-xs font-medium " + (payout.automatic ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' : 'bg-gray-100 text-gray-700')}>
                             {payout.automatic ? 'Automatic' : 'Manual'}
                           </span>
                         </td>
@@ -1587,11 +1588,11 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
                       <button
                         key={item.id}
                         onClick={() => setSettingsTab(item.id)}
-                        className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
+                        className={"w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors " + (
                           settingsTab === item.id
                             ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
                             : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700'
-                        }`}
+                        )}
                       >
                         <item.icon className="w-4 h-4" />
                         <span className="text-sm font-medium">{item.label}</span>
@@ -1807,11 +1808,11 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
                                 <p className="text-sm text-gray-500">{integration.desc}</p>
                               </div>
                             </div>
-                            <button className={`px-4 py-1.5 rounded-lg text-sm font-medium ${
+                            <button className={"px-4 py-1.5 rounded-lg text-sm font-medium " + (
                               integration.status === 'connected'
                                 ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
                                 : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 hover:bg-emerald-100 hover:text-emerald-700'
-                            }`}>
+                            )}>
                               {integration.status === 'connected' ? 'Connected' : 'Connect'}
                             </button>
                           </div>
@@ -2036,7 +2037,7 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
             <AIInsightsPanel
               insights={mockTransactionsAIInsights}
               title="Transaction Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -2079,7 +2080,7 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
                     <p className="text-sm text-gray-500">Amount</p>
                     <p className="text-3xl font-bold text-gray-900 dark:text-white">{formatCurrency(selectedPayment.amount)}</p>
                   </div>
-                  <span className={`px-3 py-1.5 rounded-full text-sm font-medium ${statusColors[selectedPayment.status]}`}>
+                  <span className={"px-3 py-1.5 rounded-full text-sm font-medium " + statusColors[selectedPayment.status]}>
                     {selectedPayment.status.replace('_', ' ')}
                   </span>
                 </div>
@@ -2106,7 +2107,7 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
                   </div>
                   <div>
                     <p className="text-xs text-gray-500 uppercase">Risk Score</p>
-                    <p className={`text-sm font-medium ${getRiskColor(selectedPayment.riskScore)}`}>{selectedPayment.riskScore}</p>
+                    <p className={"text-sm font-medium " + getRiskColor(selectedPayment.riskScore)}>{selectedPayment.riskScore}</p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-500 uppercase">Created</p>

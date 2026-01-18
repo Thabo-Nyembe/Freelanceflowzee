@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -1091,8 +1093,6 @@ export default function RecruitmentClient() {
   const handleScheduleInterview = async (candidateName: string) => {
     toast.promise(
       (async () => {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         await supabase.from('activity_log').insert({
           action: 'interview_scheduled',
           entity_type: 'candidate',
@@ -1139,8 +1139,6 @@ export default function RecruitmentClient() {
   const handleViewOffer = async (candidateName: string) => {
     toast.promise(
       (async () => {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         const { data } = await supabase.from('job_offers')
           .select('*')
           .eq('candidate_name', candidateName)
@@ -1158,8 +1156,6 @@ export default function RecruitmentClient() {
   const handleEditOffer = async (candidateName: string) => {
     toast.promise(
       (async () => {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         await supabase.from('activity_log').insert({
           action: 'offer_edit_started',
           entity_type: 'job_offer',
@@ -1179,8 +1175,6 @@ export default function RecruitmentClient() {
   const handleSendOffer = async (candidateName: string) => {
     toast.promise(
       (async () => {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         await supabase.from('job_offers').update({
           status: 'sent',
           sent_at: new Date().toISOString()
@@ -1198,8 +1192,6 @@ export default function RecruitmentClient() {
   const handleFilterTalentPool = async () => {
     toast.promise(
       (async () => {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         const { data } = await supabase.from('recruitment_filter_presets')
           .select('*')
           .order('name')
@@ -1216,8 +1208,6 @@ export default function RecruitmentClient() {
   const handleImportCandidates = async () => {
     toast.promise(
       (async () => {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         await supabase.from('activity_log').insert({
           action: 'import_dialog_opened',
           entity_type: 'candidates',
@@ -1244,8 +1234,6 @@ export default function RecruitmentClient() {
   const handleMatchJobs = async (candidateName: string) => {
     toast.promise(
       (async () => {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         const { data: candidate } = await supabase.from('candidates')
           .select('skills')
           .eq('name', candidateName)
@@ -1516,8 +1504,6 @@ export default function RecruitmentClient() {
                             e.stopPropagation()
                             toast.loading('Opening job editor...', { id: 'job-edit' })
                             try {
-                              const { createClient } = await import('@/lib/supabase/client')
-                              const supabase = createClient()
                               await supabase.from('activity_log').insert({
                                 action: 'job_edit_started',
                                 entity_type: 'job_posting',

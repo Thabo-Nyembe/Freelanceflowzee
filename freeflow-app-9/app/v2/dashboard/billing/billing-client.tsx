@@ -1,4 +1,6 @@
 'use client'
+
+import { createClient } from '@/lib/supabase/client'
 import { useState, useMemo, useCallback } from 'react'
 import {
   CreditCard, Receipt, DollarSign, Users, Plus, BarChart3, Settings, RefreshCw, Download, AlertCircle, AlertTriangle, Clock, Trash2, Edit, Eye,
@@ -559,8 +561,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
         cancel_at_period_end: true,
         canceled_at: new Date().toISOString()
       })
-      toast.success('Subscription cancelled' has been cancelled`
-      })
+      toast.success("Subscription cancelled", { description: subscription.plan_name + " has been cancelled" })
       setSelectedSubscription(null)
     } catch (error) {
       console.error('Failed to cancel subscription:', error)
@@ -579,8 +580,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
         reason: 'requested_by_customer',
         notes: `Refund for transaction ${transaction.transaction_id}`
       })
-      toast.success('Refund initiated' has been initiated`
-      })
+      toast.success("Refund initiated", { description: "$" + transaction.amount + " refund has been initiated" })
     } catch (error) {
       console.error('Failed to initiate refund:', error)
       toast.error('Failed to initiate refund')
@@ -589,7 +589,6 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
 
   const handleExportBilling = useCallback(async () => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
       const supabase = createClient()
       const { data: billingData, error } = await supabase
         .from('billing')
@@ -615,8 +614,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
         window.URL.revokeObjectURL(url)
         document.body.removeChild(a)
 
-        toast.success('Export completed' billing records`
-        })
+        toast.success("Export completed", { description: billingData.length + " billing records" })
       } else {
         toast.info('No data to export')
       }
@@ -632,8 +630,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
         status: 'processing',
         last_retry_at: new Date().toISOString()
       })
-      toast.info('Retrying payment'`
-      })
+      toast.info("Retrying payment", { description: "Processing payment for " + invoice.invoice_number })
       // Call billing API to retry payment
       const response = await fetch('/api/billing-settings', {
         method: 'POST',
@@ -649,8 +646,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
           status: 'paid',
           paid_at: new Date().toISOString()
         })
-        toast.success('Payment successful' has been paid`
-        })
+        toast.success("Payment successful", { description: invoice.invoice_number + " has been paid" })
       } else {
         await updateInvoice(invoice.id, {
           status: 'open',
@@ -706,8 +702,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
         last_reminder_sent: new Date().toISOString(),
         reminder_count: (invoice as any).reminder_count ? (invoice as any).reminder_count + 1 : 1
       })
-      toast.success('Reminder sent'`
-      })
+      toast.success("Reminder sent", { description: "Payment reminder sent to " + invoice.client_email })
     } catch (error) {
       console.error('Failed to send reminder:', error)
       toast.error('Failed to send reminder')
@@ -720,8 +715,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
         status: 'paused',
         paused_at: new Date().toISOString()
       })
-      toast.success('Subscription paused' has been paused`
-      })
+      toast.success("Subscription paused", { description: subscription.plan_name + " has been paused" })
     } catch (error) {
       console.error('Failed to pause subscription:', error)
       toast.error('Failed to pause subscription')
@@ -734,8 +728,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
         status: 'active',
         paused_at: null
       })
-      toast.success('Subscription resumed' has been resumed`
-      })
+      toast.success("Subscription resumed", { description: subscription.plan_name + " has been resumed" })
     } catch (error) {
       console.error('Failed to resume subscription:', error)
       toast.error('Failed to resume subscription')
@@ -2240,7 +2233,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
             <AIInsightsPanel
               insights={mockBillingAIInsights}
               title="Billing Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -2540,7 +2533,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
             <Button variant="outline" onClick={() => setShowRefundDialog(false)}>Cancel</Button>
             <Button
               onClick={() => {
-                toast.success(`Refund of $${refundForm.amount} initiated for ${refundForm.transactionId}`)
+                toast.success("Refund of $" + refundForm.amount + " initiated for " + refundForm.transactionId)
                 setShowRefundDialog(false)
                 setRefundForm({ transactionId: '', amount: '', reason: 'requested_by_customer' })
               }}
@@ -2805,7 +2798,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowConnectIntegrationDialog(false)}>Cancel</Button>
             <Button onClick={async () => {
-              toast.loading(`Connecting to ${selectedIntegration}...`, { id: 'connect-int' })
+              toast.loading("Connecting to " + selectedIntegration + "...", { id: 'connect-int' })
               try {
                 const response = await fetch('/api/billing-settings', {
                   method: 'POST',
@@ -2813,7 +2806,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                   body: JSON.stringify({ action: 'connect_integration', integration: selectedIntegration })
                 })
                 if (!response.ok) throw new Error('Failed to connect')
-                toast.success(`${selectedIntegration} connected successfully`, { id: 'connect-int' })
+                toast.success(selectedIntegration + " connected successfully", { id: 'connect-int' })
                 setShowConnectIntegrationDialog(false)
               } catch { toast.error('Failed to connect', { id: 'connect-int' }) }
             }}>

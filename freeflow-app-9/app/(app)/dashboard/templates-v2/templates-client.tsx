@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 // MIGRATED: Batch #18 - Verified database hook integration
 // Hooks used: useTemplates, useTemplateMutations
 
@@ -582,8 +584,7 @@ export default function TemplatesClient() {
         template_data: {},
         configuration: {}
       })
-      toast.success('Template created'" has been created successfully`
-      })
+      toast.success(`Template created: has been created successfully`)
       setNewTemplateName('')
       setNewTemplateDescription('')
       setNewTemplateCategory('social_media')
@@ -601,8 +602,7 @@ export default function TemplatesClient() {
         userName: undefined,
         department: undefined
       })
-      toast.success('Using template'"...`
-      })
+      toast.success(`Using template: "${template.name}"...`)
       refetch()
     } catch (error) {
       toast.error('Failed to use template')
@@ -626,8 +626,7 @@ export default function TemplatesClient() {
         template_data: {},
         configuration: {}
       })
-      toast.success('Template duplicated'" created`
-      })
+      toast.success(`Template duplicated: "${template.name} (Copy)" created`)
       refetch()
     } catch (error) {
       toast.error('Failed to duplicate template')
@@ -637,8 +636,7 @@ export default function TemplatesClient() {
   const handleDeleteTemplate = useCallback(async (template: Template) => {
     try {
       await deleteTemplate(template.id)
-      toast.success('Template deleted'" has been deleted`
-      })
+      toast.success(`Template deleted: "${template.name}" has been deleted`)
       setSelectedTemplate(null)
       refetch()
     } catch (error) {
@@ -649,8 +647,7 @@ export default function TemplatesClient() {
   const handleDownloadTemplate = useCallback(async (template: Template) => {
     try {
       await downloadTemplate(template.id)
-      toast.success('Downloading template'" download started`
-      })
+      toast.success(`Downloading template: "${template.name}" download started`)
       refetch()
     } catch (error) {
       toast.error('Failed to download template')
@@ -658,8 +655,7 @@ export default function TemplatesClient() {
   }, [downloadTemplate, refetch])
 
   const handleFavoriteTemplate = (templateName: string) => {
-    toast.success('Added to favorites'" saved to favorites`
-    })
+    toast.success(`Added to favorites: "${templateName}" saved to favorites`)
   }
 
   return (
@@ -955,8 +951,7 @@ export default function TemplatesClient() {
                       <Button size="sm" variant="secondary" className="gap-1" onClick={(e) => {
                         e.stopPropagation()
                         setSelectedTemplate(template)
-                        toast.success('Opening template preview'"`
-                        })
+                        toast.success(`Opening template preview: "${template.name}"`)
                       }}>
                         <Eye className="w-4 h-4" />
                         Preview
@@ -1161,7 +1156,7 @@ export default function TemplatesClient() {
                       isPublic: false
                     }
                     setLocalCollections([...localCollections, newCollection])
-                    toast.success('New collection created!'" added` })
+                    toast.success(`New collection created! "${newCollection.name}" added`)
                   }}>
                     <FolderPlus className="h-4 w-4 mr-2" />
                     New
@@ -1203,7 +1198,7 @@ export default function TemplatesClient() {
                   isPublic: false
                 }
                 setLocalCollections([...localCollections, newCollection])
-                toast.success('New collection created successfully!'" added to your collections` })
+                toast.success(`New collection created successfully! "${newCollection.name}" added to your collections`)
               }}>
                 <FolderPlus className="w-4 h-4" />
                 New Collection
@@ -1276,7 +1271,7 @@ export default function TemplatesClient() {
                           createdAt: new Date().toISOString().split('T')[0]
                         }
                         setLocalBrandAssets([...localBrandAssets, newAsset])
-                        toast.success('Brand asset uploaded!'" added to brand kit` })
+                        toast.success(`Brand asset uploaded! "${newAsset.name}" added to brand kit`)
                       }
                     }
                     input.click()
@@ -1325,7 +1320,7 @@ export default function TemplatesClient() {
                       createdAt: new Date().toISOString().split('T')[0]
                     }
                     setLocalBrandAssets([...localBrandAssets, newAsset])
-                    toast.success('Brand asset uploaded!'" added to brand kit` })
+                    toast.success(`Brand asset uploaded! "${newAsset.name}" added to brand kit`)
                   }
                 }
                 input.click()
@@ -1381,7 +1376,7 @@ export default function TemplatesClient() {
                           createdAt: new Date().toISOString().split('T')[0]
                         }
                         setLocalBrandAssets([...localBrandAssets, newAsset])
-                        toast.success('Logo uploaded!'" added to logos` })
+                        toast.success(`Logo uploaded! "${newAsset.name}" added to logos`)
                       }
                     }
                     input.click()
@@ -1435,7 +1430,7 @@ export default function TemplatesClient() {
                         createdAt: new Date().toISOString().split('T')[0]
                       }
                       setLocalBrandAssets([...localBrandAssets, newAsset])
-                      toast.success('Brand color added!' added to brand colors` })
+                      toast.success(`Brand color added: "${colorValue}" added to brand colors`)
                     }
                     input.click()
                   }}>
@@ -1489,7 +1484,7 @@ export default function TemplatesClient() {
                         createdAt: new Date().toISOString().split('T')[0]
                       }
                       setLocalBrandAssets([...localBrandAssets, newAsset])
-                      toast.success('Brand font added!'" added to brand fonts` })
+                      toast.success(`Brand font added! "${fontName}" added to brand fonts`)
                     }
                   }}>
                     <Plus className="w-4 h-4" />
@@ -2659,7 +2654,7 @@ export default function TemplatesClient() {
                 if (folderName && folderName.trim()) {
                   setFolders([...folders, folderName.trim()])
                   setSelectedFolder(folderName.trim().toLowerCase().replace(/\s+/g, '-'))
-                  toast.success('New folder created successfully!'" added to folders` })
+                  toast.success(`New folder created successfully! "${folderName}" added to folders`)
                 }
               }}>
                 <FolderPlus className="w-4 h-4" />
@@ -2743,7 +2738,6 @@ export default function TemplatesClient() {
                 const newName = duplicateTemplateName.trim() || `${originalTemplate?.name} (Copy)`
                 toast.promise(
                   (async () => {
-                    const { createClient } = await import('@/lib/supabase/client')
                     const supabase = createClient()
                     const { data: { user } } = await supabase.auth.getUser()
                     if (!user) throw new Error('Not authenticated')

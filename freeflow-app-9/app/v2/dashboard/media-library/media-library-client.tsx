@@ -767,8 +767,7 @@ export default function MediaLibraryClient({
   const handleDownloadAsset = (asset: MediaAsset) => {
     if (asset.originalUrl) {
       window.open(asset.originalUrl, '_blank')
-      toast.success('Download started'"...`
-      })
+      toast.success('Download started')
       // Increment download count
       fileMutation.update(asset.id, { download_count: (asset.downloadCount || 0) + 1 })
     } else {
@@ -793,13 +792,11 @@ export default function MediaLibraryClient({
     try {
       if (itemToDelete.type === 'file') {
         await fileMutation.remove(itemToDelete.id)
-        toast.success('File deleted'" has been deleted`
-        })
+        toast.success('File deleted')
         refetchFiles()
       } else {
         await folderMutation.remove(itemToDelete.id)
-        toast.success('Folder deleted'" has been deleted`
-        })
+        toast.success('Folder deleted')
         refetchFolders()
       }
       setShowDeleteDialog(false)
@@ -823,8 +820,7 @@ export default function MediaLibraryClient({
     setIsSubmitting(true)
     try {
       await fileMutation.update(itemToMove.id, { folder_id: targetFolderId })
-      toast.success('Asset moved'" has been moved`
-      })
+      toast.success('Asset moved')
       setShowMoveDialog(false)
       setItemToMove(null)
       refetchFiles()
@@ -865,8 +861,7 @@ export default function MediaLibraryClient({
         access_level: fileForm.access_level,
         is_public: fileForm.is_public,
       })
-      toast.success('Asset updated'" has been updated`
-      })
+      toast.success('Asset updated')
       setShowEditDialog(false)
       setItemToEdit(null)
       setFileForm(defaultFileForm)
@@ -2080,7 +2075,7 @@ export default function MediaLibraryClient({
             <AIInsightsPanel
               insights={mockMediaAIInsights}
               title="Media Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -2122,7 +2117,7 @@ export default function MediaLibraryClient({
             <ScrollArea className="max-h-[60vh]">
               {selectedAsset && (
                 <div className="space-y-6 p-4">
-                  <div className={`aspect-video rounded-xl bg-gradient-to-br ${getFileTypeColor(selectedAsset.fileType)} flex items-center justify-center`}>
+                  <div className={"aspect-video rounded-xl bg-gradient-to-br " + getFileTypeColor(selectedAsset.fileType) + " flex items-center justify-center"}>
                     <div className="text-white text-center">
                       {getFileTypeIcon(selectedAsset.fileType)}
                       <p className="mt-2 text-sm opacity-80">Asset Preview</p>

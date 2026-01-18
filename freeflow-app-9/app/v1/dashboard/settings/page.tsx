@@ -151,7 +151,8 @@ export default function SettingsPage() {
   // ============================================================================
 
   const handleSaveSettings = async () => {
-    setIsSaving(true)    const savePromise = new Promise(async (resolve, reject) => {
+    setIsSaving(true)
+    const savePromise = new Promise(async (resolve, reject) => {
       try {
         const response = await fetch('/api/user/update-settings', {
           method: 'POST',
@@ -230,7 +231,8 @@ export default function SettingsPage() {
   // ============================================================================
 
   const handleExportData = async (format: 'json' | 'csv') => {
-    setIsExporting(true)    const exportPromise = new Promise(async (resolve, reject) => {
+    setIsExporting(true)
+    const exportPromise = new Promise(async (resolve, reject) => {
       try {
         const response = await fetch('/api/user/export-data', {
           method: 'POST',

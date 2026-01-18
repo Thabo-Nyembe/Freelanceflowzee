@@ -135,6 +135,18 @@ interface AIDesignStats {
   favoriteCount: number
 }
 
+// Color class mappings for Tailwind (dynamic classes don't work with Tailwind purge)
+const colorClasses: Record<string, { text: string; bg: string; bgDark: string }> = {
+  blue: { text: 'text-blue-500', bg: 'bg-blue-100', bgDark: 'dark:bg-blue-900/30' },
+  purple: { text: 'text-purple-500', bg: 'bg-purple-100', bgDark: 'dark:bg-purple-900/30' },
+  pink: { text: 'text-pink-500', bg: 'bg-pink-100', bgDark: 'dark:bg-pink-900/30' },
+  indigo: { text: 'text-indigo-500', bg: 'bg-indigo-100', bgDark: 'dark:bg-indigo-900/30' },
+  amber: { text: 'text-amber-500', bg: 'bg-amber-100', bgDark: 'dark:bg-amber-900/30' },
+  green: { text: 'text-green-500', bg: 'bg-green-100', bgDark: 'dark:bg-green-900/30' },
+  red: { text: 'text-red-500', bg: 'bg-red-100', bgDark: 'dark:bg-red-900/30' },
+  fuchsia: { text: 'text-fuchsia-500', bg: 'bg-fuchsia-100', bgDark: 'dark:bg-fuchsia-900/30' },
+}
+
 // Mock data
 const mockGenerations: Generation[] = [
   {
@@ -1285,7 +1297,7 @@ export default function AIDesignClient() {
               ].map((stat, idx) => (
                 <Card key={idx} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
                   <CardContent className="p-3 text-center">
-                    <stat.icon className={`w-6 h-6 mx-auto mb-1 text-${stat.color}-500`} />
+                    <stat.icon className={`w-6 h-6 mx-auto mb-1 ${colorClasses[stat.color]?.text || 'text-gray-500'}`} />
                     <div className="font-bold text-lg">{stat.count}</div>
                     <div className="text-xs text-gray-500 capitalize">{stat.style.replace('_', ' ')}</div>
                   </CardContent>
@@ -1418,8 +1430,8 @@ export default function AIDesignClient() {
               ].map((cat, idx) => (
                 <Card key={idx} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm cursor-pointer hover:shadow-lg transition-all">
                   <CardContent className="p-4 text-center">
-                    <div className={`w-12 h-12 rounded-xl bg-${cat.color}-100 dark:bg-${cat.color}-900/30 flex items-center justify-center mx-auto mb-2`}>
-                      <cat.icon className={`w-6 h-6 text-${cat.color}-500`} />
+                    <div className={`w-12 h-12 rounded-xl ${colorClasses[cat.color]?.bg || 'bg-gray-100'} ${colorClasses[cat.color]?.bgDark || 'dark:bg-gray-900/30'} flex items-center justify-center mx-auto mb-2`}>
+                      <cat.icon className={`w-6 h-6 ${colorClasses[cat.color]?.text || 'text-gray-500'}`} />
                     </div>
                     <div className="font-medium">{cat.label}</div>
                     <div className="text-xs text-gray-500">{styleTemplates.filter(t => t.style === cat.style).length} styles</div>
@@ -2030,7 +2042,7 @@ export default function AIDesignClient() {
             <AIInsightsPanel
               insights={mockAIDesignInsights}
               title="AI Design Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(`Insight selected: ${insight.title}`)}
             />
           </div>
           <div className="space-y-6">

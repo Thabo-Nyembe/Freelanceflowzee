@@ -539,8 +539,7 @@ export default function CryptoPaymentsPage() {
       setCustomerEmail('')
       setShowCreatePaymentModal(false)
 
-      toast.success('Payment created' - ${formatUSD(paymentAmount)} - ${network} network - Fee: ${formatUSD(fee)} - Expires in 30m - ${requiredConfirmations} confirmations required`
-      })
+      toast.success(`Payment created - ${formatUSD(paymentAmount)} - ${network} network`)
       announce('Payment created', 'polite')
     } catch (error) {
       logger.error('Payment creation failed', { error, amount: paymentAmount, currency: paymentCurrency })
@@ -589,8 +588,8 @@ export default function CryptoPaymentsPage() {
         updatedAt: new Date().toISOString()
       }
 
-      dispatch({ type: 'UPDATE_TRANSACTION', transaction: updatedTransaction })      toast.success('Transaction cancelled' - ${formatCryptoAmount(cancelTransaction.amount, cancelTransaction.currency)} - ${cancelTransaction.description}`
-      })
+      dispatch({ type: 'UPDATE_TRANSACTION', transaction: updatedTransaction })
+      toast.success(`Transaction cancelled - ${formatCryptoAmount(cancelTransaction.amount, cancelTransaction.currency)}`)
       announce('Transaction cancelled', 'polite')
     } catch (error: any) {
       logger.error('Failed to cancel transaction', { error: error.message })
@@ -633,8 +632,8 @@ export default function CryptoPaymentsPage() {
         updatedAt: new Date().toISOString()
       }
 
-      dispatch({ type: 'UPDATE_TRANSACTION', transaction: updatedTransaction })      toast.success('Transaction refunded' - ${formatUSD(refundTransaction.usdAmount)} - Refunded to ${refundTransaction.metadata.customerEmail || 'customer'}`
-      })
+      dispatch({ type: 'UPDATE_TRANSACTION', transaction: updatedTransaction })
+      toast.success(`Transaction refunded - ${formatUSD(refundTransaction.usdAmount)}`)
       announce('Transaction refunded', 'polite')
     } catch (error: any) {
       logger.error('Failed to refund transaction', { error: error.message })
@@ -646,8 +645,7 @@ export default function CryptoPaymentsPage() {
 
   const handleCopyAddress = (address: string) => {    navigator.clipboard.writeText(address)
 
-    toast.success('Address copied'... - Ready to paste`
-    })
+    toast.success(`Address copied - ${address.substring(0, 10)}...`)
     announce('Address copied', 'polite')
   }
 

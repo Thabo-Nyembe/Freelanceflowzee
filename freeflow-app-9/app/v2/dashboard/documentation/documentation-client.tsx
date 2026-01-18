@@ -585,18 +585,15 @@ export default function DocumentationClient() {
   }
 
   const handleEditPage = (pageTitle: string) => {
-    toast.info('Edit Page'" for editing...`
-    })
+    toast.info("Edit Page - Opening " + pageTitle + " for editing...")
   }
 
   const handlePublishPage = (pageTitle: string) => {
-    toast.success('Page Published'" is now live`
-    })
+    toast.success("Page Published - " + pageTitle + " is now live")
   }
 
   const handleTranslatePage = (pageTitle: string) => {
-    toast.info('Translate Page'"...`
-    })
+    toast.info("Translate Page - Translating " + pageTitle + "...")
   }
 
   const handleExportDocs = () => {
@@ -650,8 +647,7 @@ export default function DocumentationClient() {
   }
 
   const handleEditChangelog = (changelogTitle: string) => {
-    toast.info('Edit Changelog'" for editing...`
-    })
+    toast.info("Edit Changelog - Opening " + changelogTitle + " for editing...")
   }
 
   const handleAddLanguage = () => {
@@ -659,8 +655,7 @@ export default function DocumentationClient() {
   }
 
   const handleManageLocale = (localeName: string) => {
-    toast.info('Manage Locale'...`
-    })
+    toast.info("Manage Locale - Managing " + localeName + "...")
   }
 
   const handleExportReport = () => {
@@ -672,8 +667,7 @@ export default function DocumentationClient() {
   }
 
   const handleConfigureIntegration = (integrationName: string) => {
-    toast.info('Configure Integration'...`
-    })
+    toast.info("Configure Integration - Configuring " + integrationName + "...")
   }
 
   const handleAddIntegration = () => {
@@ -693,13 +687,11 @@ export default function DocumentationClient() {
   }
 
   const handleViewVersion = (versionNumber: number) => {
-    toast.info('View Version'...`
-    })
+    toast.info("View Version - Viewing version " + versionNumber + "...")
   }
 
   const handleRestoreVersion = (versionNumber: number) => {
-    toast.success('Restore Version'...`
-    })
+    toast.success("Restore Version - Restoring version " + versionNumber + "...")
   }
 
   const handleCreateSpaceSubmit = () => {
@@ -729,8 +721,7 @@ export default function DocumentationClient() {
     setQuickSearchQuery('')
     setQuickSearchResults([])
     setActiveTab('pages')
-    toast.success('Page Selected'"`
-    })
+    toast.success('Page Selected - ' + page.title)
   }
 
   // Export PDF Handler
@@ -753,8 +744,7 @@ export default function DocumentationClient() {
     setIsExporting(false)
     setShowExportPdfDialog(false)
 
-    toast.success('Export Complete' pages as ${exportPdfOptions.format.toUpperCase()}`
-    })
+    toast.success('Export Complete - Exported ' + pagesToExport.length + ' pages as ' + exportPdfOptions.format.toUpperCase())
 
     // Reset selection
     setSelectedPagesForExport([])
@@ -2194,7 +2184,7 @@ export default function DocumentationClient() {
             <AIInsightsPanel
               insights={mockDocsAIInsights}
               title="Documentation Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">

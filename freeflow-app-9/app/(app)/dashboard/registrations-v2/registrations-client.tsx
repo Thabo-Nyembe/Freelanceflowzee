@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import { copyToClipboard, downloadAsCsv, downloadAsJson, printContent } from '@/lib/button-handlers'
@@ -83,6 +85,9 @@ import {
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { CardDescription } from '@/components/ui/card'
+
+// Initialize Supabase client once at module level
+const supabase = createClient()
 
 // ============================================================================
 // DATABASE TYPE DEFINITIONS
@@ -777,7 +782,7 @@ const mockRegistrationsQuickActionsBase = [
     input.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0]
       if (file) {
-        toast.success('File selected' ready for import. API integration required.` })
+        toast.success(`File selected: ready for import. API integration required.`)
       }
     }
     input.click()
@@ -842,13 +847,9 @@ export default function RegistrationsClient() {
   const fetchRegistrations = useCallback(async () => {
     try {
       setIsLoading(true)
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('event_registrations')
         .select('*')
@@ -895,8 +896,6 @@ export default function RegistrationsClient() {
   const handleCreateRegistration = async () => {
     try {
       setIsSaving(true)
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('You must be logged in to create a registration')
@@ -920,16 +919,13 @@ export default function RegistrationsClient() {
         reminder_sent: false
       }
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('event_registrations')
         .insert(regData)
 
       if (error) throw error
 
-      toast.success('Registration created successfully' has been registered`
-      })
+      toast.success(`Registration created successfully has been registered`)
       setShowCreateDialog(false)
       setFormData(initialFormData)
       fetchRegistrations()
@@ -947,16 +943,12 @@ export default function RegistrationsClient() {
 
     try {
       setIsSaving(true)
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('You must be logged in to update a registration')
         return
       }
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('event_registrations')
         .update({
@@ -976,8 +968,7 @@ export default function RegistrationsClient() {
 
       if (error) throw error
 
-      toast.success('Registration updated successfully''s registration has been updated`
-      })
+      toast.success(`Registration updated successfully`)
       setShowEditDialog(false)
       setRegistrationToEdit(null)
       setFormData(initialFormData)
@@ -996,16 +987,12 @@ export default function RegistrationsClient() {
 
     try {
       setIsSaving(true)
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('You must be logged in to delete a registration')
         return
       }
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('event_registrations')
         .update({ deleted_at: new Date().toISOString() })
@@ -1014,8 +1001,7 @@ export default function RegistrationsClient() {
 
       if (error) throw error
 
-      toast.success('Registration deleted''s registration has been removed`
-      })
+      toast.success(`Registration deleted successfully`)
       setShowDeleteDialog(false)
       setRegistrationToDelete(null)
       fetchRegistrations()
@@ -1031,8 +1017,6 @@ export default function RegistrationsClient() {
   const handleCreateEvent = async () => {
     try {
       setIsSaving(true)
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('You must be logged in to create an event')
@@ -1059,16 +1043,13 @@ export default function RegistrationsClient() {
         status: 'draft'
       }
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('events')
         .insert(eventData)
 
       if (error) throw error
 
-      toast.success('Event created successfully' has been created`
-      })
+      toast.success(`Event created successfully has been created`)
       setShowNewEventDialog(false)
       setEventFormData(initialEventFormData)
     } catch (error: any) {
@@ -1088,13 +1069,9 @@ export default function RegistrationsClient() {
   // Check in attendee
   const handleCheckIn = async (registration: DbRegistration) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('event_registrations')
         .update({
@@ -1107,8 +1084,7 @@ export default function RegistrationsClient() {
 
       if (error) throw error
 
-      toast.success('Check-in complete' has been checked in`
-      })
+      toast.success(`Check-in complete has been checked in`)
       fetchRegistrations()
     } catch (error: any) {
       console.error('Error checking in:', error)
@@ -1119,13 +1095,9 @@ export default function RegistrationsClient() {
   // Confirm registration
   const handleConfirm = async (registration: DbRegistration) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('event_registrations')
         .update({
@@ -1138,8 +1110,7 @@ export default function RegistrationsClient() {
 
       if (error) throw error
 
-      toast.success('Registration confirmed' has been confirmed`
-      })
+      toast.success(`Registration confirmed has been confirmed`)
       fetchRegistrations()
     } catch (error: any) {
       console.error('Error confirming:', error)
@@ -1150,13 +1121,9 @@ export default function RegistrationsClient() {
   // Cancel registration
   const handleCancel = async (registration: DbRegistration) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('event_registrations')
         .update({
@@ -1168,8 +1135,7 @@ export default function RegistrationsClient() {
 
       if (error) throw error
 
-      toast.info('Registration cancelled''s registration has been cancelled`
-      })
+      toast.info(`Registration cancelled successfully`)
       fetchRegistrations()
     } catch (error: any) {
       console.error('Error cancelling:', error)
@@ -2602,16 +2568,13 @@ export default function RegistrationsClient() {
                   {selectedRegistration.status === 'confirmed' && (
                     <Button className="flex-1 bg-green-600 hover:bg-green-700" onClick={async () => {
                       try {
-                        const { createClient } = await import('@/lib/supabase/client')
-                        const supabase = createClient()
                         const { data: { user } } = await supabase.auth.getUser()
                         if (!user) {
                           toast.error('Authentication required')
                           return
                         }
                         // For demo data, just show success
-                        toast.success('Attendee checked in' ${selectedRegistration.attendee.lastName} checked in at ${new Date().toLocaleTimeString()}`
-                        })
+                        toast.success('Attendee checked in: ' + selectedRegistration.attendee.firstName + ' ' + selectedRegistration.attendee.lastName + ' checked in at ' + new Date().toLocaleTimeString())
                         setShowRegistrationDialog(false)
                       } catch (error) {
                         toast.error('Check-in failed')
@@ -3057,7 +3020,7 @@ export default function RegistrationsClient() {
                 toast.error('Please fill in template name and subject')
                 return
               }
-              toast.success('Template created'" is now available for use` })
+              toast.success(`Template "${templateForm.name}" created and is now available for use`)
               setTemplateForm({ name: '', subject: '', body: '' })
               setShowTemplateEditorDialog(false)
             }}>

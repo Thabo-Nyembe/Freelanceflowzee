@@ -597,8 +597,7 @@ export default function MessagingClient() {
       })
 
       if (result) {
-        toast.success('Channel created' has been created successfully`
-        })
+        toast.success('Channel created')
         setShowNewChannel(false)
         setNewChannelName('')
         setNewChannelDescription('')
@@ -660,8 +659,7 @@ export default function MessagingClient() {
         })
       }
 
-      toast.success('Reaction updated' reaction updated`
-      })
+      toast.success('Reaction updated')
     } catch (error) {
       toast.error('Failed to add reaction')
     }
@@ -725,8 +723,7 @@ export default function MessagingClient() {
       }))
 
       setSearchResults(results)
-      toast.success('Search complete' matching messages`
-      })
+      toast.success('Search complete')
     } catch (error) {
       toast.error('Search failed')
     } finally {
@@ -863,8 +860,7 @@ export default function MessagingClient() {
         refetchConversations()
       }
 
-      toast.success('Left channel'`
-      })
+      toast.success('Left channel')
       setShowChannelSettings(false)
       setSelectedChannel(null)
     } catch (error) {
@@ -2159,7 +2155,7 @@ export default function MessagingClient() {
           <AIInsightsPanel
             insights={messagingAIInsights}
             title="Messaging Intelligence"
-            onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+            onInsightAction={(insight) => toast.info(insight.title)}
           />
         </div>
         <div className="space-y-6">

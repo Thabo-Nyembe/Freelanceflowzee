@@ -676,8 +676,6 @@ export default function MotionGraphicsClient({
         return
       }
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('motion_projects').insert({
         user_id: user.id,
         name: formState.name,
@@ -716,8 +714,6 @@ export default function MotionGraphicsClient({
         return
       }
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('motion_exports').insert({
         project_id: projectId,
         user_id: user.id,
@@ -728,8 +724,7 @@ export default function MotionGraphicsClient({
 
       if (error) throw error
 
-      toast.info('Rendering started'" added to render queue`
-      })
+      toast.info('Rendering started')
       fetchExports()
     } catch (error) {
       console.error('Error starting render:', error)
@@ -748,8 +743,6 @@ export default function MotionGraphicsClient({
         return
       }
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('motion_exports').insert({
         project_id: projectId,
         user_id: user.id,
@@ -760,8 +753,7 @@ export default function MotionGraphicsClient({
 
       if (error) throw error
 
-      toast.success('Export started'" will be ready shortly`
-      })
+      toast.success('Export started')
       fetchExports()
     } catch (error) {
       console.error('Error exporting:', error)
@@ -786,11 +778,9 @@ export default function MotionGraphicsClient({
         return
       }
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('motion_projects').insert({
         user_id: user.id,
-        name: `${original.name} (Copy)`,
+        name: original.name + ' (Copy)',
         description: original.description,
         width: original.width,
         height: original.height,
@@ -803,8 +793,7 @@ export default function MotionGraphicsClient({
 
       if (error) throw error
 
-      toast.success('Project duplicated'" created`
-      })
+      toast.success('Project duplicated')
       fetchProjects()
     } catch (error) {
       console.error('Error duplicating:', error)
@@ -844,8 +833,7 @@ export default function MotionGraphicsClient({
 
       if (error) throw error
 
-      toast.success('Project deleted'" has been removed`
-      })
+      toast.success('Project deleted')
       fetchProjects()
     } catch (error) {
       console.error('Error deleting project:', error)
@@ -865,7 +853,7 @@ export default function MotionGraphicsClient({
 
       if (error) throw error
 
-      toast.success(`Export ${status}`)
+      toast.success('Export ' + status)
       fetchExports()
     } catch (error) {
       console.error('Error updating export:', error)
@@ -875,8 +863,7 @@ export default function MotionGraphicsClient({
 
   // Apply preset handler
   const handleApplyPreset = (presetName: string) => {
-    toast.success('Preset applied'" effect applied to timeline`
-    })
+    toast.success('Preset applied')
   }
 
   // Timeline control handlers
@@ -914,7 +901,7 @@ export default function MotionGraphicsClient({
       l.id === layerId ? { ...l, visible: !l.visible } : l
     ))
     const layer = layers.find(l => l.id === layerId)
-    toast.info(layer?.visible ? `${layer.name} hidden` : `${layer?.name} visible`)
+    toast.info(layer?.visible ? layer.name + ' hidden' : (layer?.name || '') + ' visible')
   }
 
   const handleToggleLayerLock = (layerId: string) => {
@@ -922,12 +909,12 @@ export default function MotionGraphicsClient({
       l.id === layerId ? { ...l, locked: !l.locked } : l
     ))
     const layer = layers.find(l => l.id === layerId)
-    toast.info(layer?.locked ? `${layer.name} unlocked` : `${layer?.name} locked`)
+    toast.info(layer?.locked ? layer.name + ' unlocked' : (layer?.name || '') + ' locked')
   }
 
   // Effect handlers
   const handleApplyEffect = (effectName: string) => {
-    toast.success(`${effectName} applied`)
+    toast.success(effectName + ' applied')
   }
 
   // Render queue handlers
@@ -940,8 +927,7 @@ export default function MotionGraphicsClient({
   }
 
   const handleDownloadRender = (job: RenderJob) => {
-    toast.success('Download started'`
-    })
+    toast.success('Download started')
   }
 
   const handleDeleteRenderJob = (jobId: string) => {
@@ -1182,7 +1168,7 @@ export default function MotionGraphicsClient({
                           <Button size="icon" variant="secondary" className="w-12 h-12 rounded-full" onClick={(e) => {
                             e.stopPropagation()
                             setSelectedAnimation(animation)
-                            toast.info('Preview'` })
+                            toast.info('Preview')
                           }}>
                             <Play className="w-6 h-6" />
                           </Button>
@@ -2247,7 +2233,7 @@ export default function MotionGraphicsClient({
             <AIInsightsPanel
               insights={mockMotionGraphicsAIInsights}
               title="Motion Graphics Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">

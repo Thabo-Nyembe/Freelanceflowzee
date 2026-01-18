@@ -521,48 +521,39 @@ export default function AddOnsClient() {
 
   // Handlers
   const handleInstallAddOn = (addOnName: string) => {
-    toast.success('Installing add-on'" is being installed...`
-    })
+    toast.success(`Installing add-on - "${addOnName}" is being installed...`)
   }
 
   const handleUninstallAddOn = (addOnName: string) => {
-    toast.info('Uninstalling add-on'"...`
-    })
+    toast.info(`Uninstalling add-on - "${addOnName}"...`)
   }
 
   const handleUpdateAddOn = (addOnName: string) => {
-    toast.info('Updating add-on'" to latest version...`
-    })
+    toast.info(`Updating add-on - "${addOnName}" to latest version...`)
   }
 
   const handleViewAddOnDetails = (addOnName: string) => {
-    toast.info('Loading details'" details...`
-    })
+    toast.info(`Loading details - "${addOnName}" details...`)
   }
 
   const handlePurchaseAddOn = (addOnName: string) => {
-    toast.info('Purchase'"...`
-    })
+    toast.info(`Purchase - "${addOnName}"...`)
   }
 
   const handleConfigureAddOn = (addOnName: string) => {
-    toast.info('Opening settings'"...`
-    })
+    toast.info(`Opening settings - "${addOnName}"...`)
   }
 
   const handleDisableAddOn = (addOnName: string) => {
-    toast.warning('Add-on disabled'" has been disabled.`
-    })
+    toast.warning(`Add-on disabled - "${addOnName}" has been disabled.`)
   }
 
   const handleEnableAddOn = (addOnName: string) => {
-    toast.success('Add-on enabled'" is now active.`
-    })
+    toast.success(`Add-on enabled - "${addOnName}" is now active.`)
   }
 
   const handleLearnMore = (addOnName: string) => {
-    toast.info('Opening documentation'" documentation...`
-    })
+    toast.info(`Opening documentation - "${addOnName}" documentation...`)
   }
 
   const handleCheckUpdates = () => {
@@ -1832,7 +1823,7 @@ export default function AddOnsClient() {
             <AIInsightsPanel
               insights={mockAddOnsAIInsights}
               title="Add-On Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -2590,8 +2581,7 @@ export default function AddOnsClient() {
                 </Button>
                 <Button onClick={() => {
                   setShowFiltersDialog(false)
-                  toast.success('Filters applied' add-ons`
-                  })
+                  toast.success('Filters applied to add-ons')
                 }}>
                   Apply Filters
                 </Button>
@@ -2658,8 +2648,7 @@ export default function AddOnsClient() {
                 </Button>
                 <Button onClick={() => {
                   setShowAdvancedSearchDialog(false)
-                  toast.success('Search applied' add-ons`
-                  })
+                  toast.success('Search applied to add-ons')
                 }}>
                   <Search className="w-4 h-4 mr-2" />
                   Search

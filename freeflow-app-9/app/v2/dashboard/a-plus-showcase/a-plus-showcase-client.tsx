@@ -274,7 +274,8 @@ function generateMockComponents(): ComponentShowcase[] {
       version: `${Math.floor(Math.random() * 3) + 1}.${Math.floor(Math.random() * 10)}.${Math.floor(Math.random() * 10)}`,
       dependencies: ['react', 'typescript', 'tailwindcss'].slice(0, Math.floor(Math.random() * 3) + 1)
     }
-  })  return components
+  })
+  return components
 }
 
 // ============================================================================
@@ -424,7 +425,8 @@ export default function APlusShowcaseClient() {
 
         // Note: In production, this would fetch from /api/components
         const mockComponents = generateMockComponents()
-        dispatch({ type: 'SET_COMPONENTS', components: mockComponents })        setIsLoading(false)
+        dispatch({ type: 'SET_COMPONENTS', components: mockComponents })
+        setIsLoading(false)
         announce('Components loaded successfully', 'polite')
       } catch (err) {
         logger.error('Failed to load components', {
@@ -523,15 +525,17 @@ export default function APlusShowcaseClient() {
   // ============================================================================
   // ============================================================================
 
-  const handleViewComponent = (component: ComponentShowcase) => {    dispatch({ type: 'SELECT_COMPONENT', component })
+  const handleViewComponent = (component: ComponentShowcase) => {
+    dispatch({ type: 'SELECT_COMPONENT', component })
     setShowViewModal(true)
   }
 
-  const handleCopyCode = async (code: string, componentName: string) => {    try {
+  const handleCopyCode = async (code: string, componentName: string) => {
+    try {
       await navigator.clipboard.writeText(code)
       const lines = code.split('\n').length
-      const chars = code.length      toast.success('Code copied to clipboard' - ${lines} lines - ${chars} characters - Ready to paste`
-      })
+      const chars = code.length
+      toast.success(`Code copied to clipboard - ${lines} lines - ${chars} characters - Ready to paste`)
       announce('Code copied to clipboard', 'polite')
     } catch (err) {
       logger.error('Failed to copy code', { componentName, error: err instanceof Error ? err.message : String(err) })
@@ -539,7 +543,8 @@ export default function APlusShowcaseClient() {
     }
   }
 
-  const handleDownloadComponent = (component: ComponentShowcase) => {    // Generate real file download
+  const handleDownloadComponent = (component: ComponentShowcase) => {
+    // Generate real file download
     const fileName = `${component.name.replace(/\s+/g, '-').toLowerCase()}-${component.version}.${component.language === 'typescript' || component.language === 'tsx' ? 'tsx' : 'jsx'}`
     const blob = new Blob([component.code], { type: 'text/plain' })
     const url = URL.createObjectURL(blob)
@@ -557,8 +562,8 @@ export default function APlusShowcaseClient() {
     dispatch({ type: 'UPDATE_COMPONENT', component: updatedComponent })
 
     const fileSizeKB = (blob.size / 1024).toFixed(1)
-    const newDownloadCount = (updatedComponent.downloads / 1000).toFixed(1)    toast.success(`${component.name} downloaded` - ${fileSizeKB} KB - ${component.category} - ${component.difficulty} - ${newDownloadCount}k total downloads`
-    })
+    const newDownloadCount = (updatedComponent.downloads / 1000).toFixed(1)
+    toast.success(`${component.name} downloaded - ${fileSizeKB} KB - ${component.category} - ${component.difficulty} - ${newDownloadCount}k total downloads`)
     announce(`Downloaded ${component.name}`, 'polite')
   }
 
@@ -566,22 +571,23 @@ export default function APlusShowcaseClient() {
     const component = state.components.find(c => c.id === componentId)
 
     if (component) {
-      const newState = !component.isFavorite      dispatch({ type: 'TOGGLE_FAVORITE', componentId })
+      const newState = !component.isFavorite
+      dispatch({ type: 'TOGGLE_FAVORITE', componentId })
 
       const popularityK = (component.popularity / 1000).toFixed(1)
 
-      toast.success(component.isFavorite ? 'Removed from favorites' : 'Added to favorites' - ${component.category} - ${component.difficulty} - ${popularityK}k popularity`
-      })
+      toast.success(component.isFavorite ? `Removed from favorites - ${component.category} - ${component.difficulty} - ${popularityK}k popularity` : `Added to favorites - ${component.category} - ${component.difficulty} - ${popularityK}k popularity`)
     }
   }
 
-  const handleShareComponent = async (component: ComponentShowcase) => {    const shareUrl = `https://kazi.com/components/${component.id}`
+  const handleShareComponent = async (component: ComponentShowcase) => {
+    const shareUrl = `https://kazi.com/components/${component.id}`
 
     try {
-      await navigator.clipboard.writeText(shareUrl)      const downloadsK = (component.downloads / 1000).toFixed(1)
+      await navigator.clipboard.writeText(shareUrl)
+      const downloadsK = (component.downloads / 1000).toFixed(1)
 
-      toast.success('Share link copied to clipboard' - ${component.category} - ${component.difficulty} - ${downloadsK}k downloads - Share with your team`
-      })
+      toast.success(`Share link copied to clipboard - ${component.category} - ${component.difficulty} - ${downloadsK}k downloads - Share with your team`)
       announce('Share link copied', 'polite')
     } catch (err) {
       logger.error('Failed to copy share link', {
@@ -623,8 +629,8 @@ export default function APlusShowcaseClient() {
       dependencies: ['react', 'typescript']
     }
 
-    dispatch({ type: 'ADD_COMPONENT', component: newComponent })    toast.success('Component created successfully' has been added to the ${selectedCategory} category`
-    })
+    dispatch({ type: 'ADD_COMPONENT', component: newComponent })
+    toast.success(`Component created successfully - ${newComponent.name} has been added to the ${selectedCategory} category`)
 
     // Reset form
     setComponentName('')
@@ -679,8 +685,8 @@ export default function APlusShowcaseClient() {
     a.href = url
     a.download = fileName
     a.click()
-    URL.revokeObjectURL(url)    toast.success('Export completed' components exported as ${exportFormat.toUpperCase()}`
-    })
+    URL.revokeObjectURL(url)
+    toast.success(`Export completed - ${state.components.length} components exported as ${exportFormat.toUpperCase()}`)
 
     setShowExportDialog(false)
     announce('Export completed', 'polite')
@@ -688,8 +694,8 @@ export default function APlusShowcaseClient() {
 
   const handleSaveSettings = () => {
     // Apply view mode setting
-    dispatch({ type: 'SET_VIEW_MODE', viewMode: settingsViewMode })    toast.success('Settings saved', Auto-save: ${settingsAutoSave ? 'On' : 'Off'}, Notifications: ${settingsNotifications ? 'On' : 'Off'}`
-    })
+    dispatch({ type: 'SET_VIEW_MODE', viewMode: settingsViewMode })
+    toast.success(`Settings saved - Auto-save: ${settingsAutoSave ? 'On' : 'Off'}, Notifications: ${settingsNotifications ? 'On' : 'Off'}`)
 
     setShowSettingsDialog(false)
     announce('Settings saved', 'polite')

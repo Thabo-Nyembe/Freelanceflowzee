@@ -408,8 +408,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
         ...contractData,
       }
       await createContract(newContract)
-      toast.success('Contract Created'" has been created successfully.`
-      })
+      toast.success("Contract Created - " + newContract.title + " has been created successfully.")
       setShowNewContract(false)
     } catch (err) {
       toast.error('Failed to create contract')
@@ -423,8 +422,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
         signed_date: new Date().toISOString(),
         effective_date: new Date().toISOString()
       })
-      toast.success('Contract Signed'" has been signed and is now active.`
-      })
+      toast.success("Contract Signed - " + contractName + " has been signed and is now active.")
     } catch (err) {
       toast.error('Failed to sign contract')
     }
@@ -435,8 +433,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
       await updateContract(contractId, {
         status: 'pending-signature' as const
       })
-      toast.success('Sent for Signature'" has been sent to recipients for signature.`
-      })
+      toast.success("Sent for Signature - " + contractName + " has been sent to recipients for signature.")
     } catch (err) {
       toast.error('Failed to send contract')
     }
@@ -448,8 +445,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
         status: 'terminated' as const,
         termination_date: new Date().toISOString()
       })
-      toast.success('Contract Terminated'" has been terminated.`
-      })
+      toast.success("Contract Terminated - " + contractName + " has been terminated.")
     } catch (err) {
       toast.error('Failed to terminate contract')
     }
@@ -486,8 +482,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
         status: 'renewed' as const,
         renewal_date: new Date().toISOString()
       })
-      toast.success('Contract Renewed'" has been created.`
-      })
+      toast.success("Contract Renewed - " + contract.title + " (Renewed) has been created.")
     } catch (err) {
       toast.error('Failed to renew contract')
     }
@@ -496,8 +491,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
   const handleDeleteContract = async (contractId: string, contractName: string) => {
     try {
       await deleteContract(contractId)
-      toast.success('Contract Deleted'" has been permanently deleted.`
-      })
+      toast.success("Contract Deleted - " + contractName + " has been permanently deleted.")
     } catch (err) {
       toast.error('Failed to delete contract')
     }
@@ -508,16 +502,14 @@ export default function ContractsClient({ initialContracts }: { initialContracts
       await updateContract(contractId, {
         status: 'completed' as const
       })
-      toast.success('Contract Archived'" has been moved to archive.`
-      })
+      toast.success("Contract Archived - " + contractName + " has been moved to archive.")
     } catch (err) {
       toast.error('Failed to archive contract')
     }
   }
 
   const handleDownloadContract = (contractName: string) => {
-    toast.success('Downloading contract'" will be downloaded`
-    })
+    toast.success("Downloading contract - " + contractName + " will be downloaded")
   }
 
   if (error) return <div className="p-8 min-h-screen bg-gray-900"><div className="bg-red-900/20 border border-red-800 text-red-400 px-4 py-3 rounded">Error: {error.message}</div></div>
@@ -653,8 +645,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                         </div>
                         <Button variant="ghost" size="sm" onClick={(e) => {
                           e.stopPropagation()
-                          toast.success('Reminder Sent'"`
-                          })
+                          toast.success("Reminder Sent - Notification sent to recipients")
                         }}>
                           <RefreshCw className="h-4 w-4 mr-1" />
                           Remind
@@ -1987,7 +1978,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
             <AIInsightsPanel
               insights={mockContractsAIInsights}
               title="Contract Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -2046,8 +2037,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                     <FileText className="h-16 w-16 text-gray-400 mx-auto mb-4" />
                     <p className="text-gray-600 dark:text-gray-400">Document Preview</p>
                     <Button className="mt-4" variant="outline" onClick={() => {
-                      toast.success('Opening Document'" in viewer`
-                      })
+                      toast.success("Opening Document in viewer")
                     }}>
                       <Eye className="h-4 w-4 mr-2" />
                       Open Document
@@ -2057,8 +2047,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <Button variant="outline" className="flex flex-col items-center gap-2 h-auto py-4" onClick={() => {
-                    toast.success('Sending envelope'" will be sent to recipients`
-                    })
+                    toast.success("Sending envelope - will be sent to recipients")
                   }}>
                     <Send className="h-5 w-5 text-purple-600" />
                     <span>Send</span>
@@ -2100,7 +2089,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                       <div className="flex justify-between text-sm">
                         <span className="text-gray-600 dark:text-gray-400">Value</span>
                         <span className="text-gray-900 dark:text-white">
-                          {selectedEnvelope?.total_value ? `$${selectedEnvelope.total_value.toLocaleString()}` : 'N/A'}
+                          {selectedEnvelope?.total_value ? ('$' + selectedEnvelope.total_value.toLocaleString()) : 'N/A'}
                         </span>
                       </div>
                     </div>
@@ -2165,8 +2154,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                       </div>
                     )}
                     <Button variant="ghost" size="icon" onClick={() => {
-                      toast.success('Reminder Sent'`
-                      })
+                      toast.success('Reminder Sent')
                     }}>
                       <RefreshCw className="h-4 w-4" />
                     </Button>
@@ -2195,8 +2183,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                       <p className="text-xs text-gray-500">fields signed</p>
                     </div>
                     <Button variant="outline" size="sm" onClick={() => {
-                      toast.success('Opening Document'" in viewer`
-                      })
+                      toast.success("Opening Document in viewer")
                     }}>
                       <Eye className="h-4 w-4 mr-1" />
                       View

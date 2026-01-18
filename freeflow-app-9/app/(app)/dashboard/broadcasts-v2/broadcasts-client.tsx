@@ -1,4 +1,6 @@
 'use client'
+
+import { createClient } from '@/lib/supabase/client'
 import { useState, useMemo, useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
 import { useBroadcasts, type Broadcast, type BroadcastType, type BroadcastStatus } from '@/lib/hooks/use-broadcasts'
@@ -474,13 +476,9 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
   const fetchBroadcasts = useCallback(async () => {
     try {
       setIsLoading(true)
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('broadcasts')
         .select('*')
@@ -502,16 +500,12 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
   const handleCreateBroadcast = async () => {
     try {
       setIsSaving(true)
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to create broadcasts')
         return
       }
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('broadcasts').insert({
         user_id: user.id,
         title: formData.title,
@@ -545,8 +539,6 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
     if (!editingBroadcast) return
     try {
       setIsSaving(true)
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('broadcasts')
         .update({
@@ -582,8 +574,6 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
   // Delete broadcast
   const handleDeleteBroadcast = async (broadcastId: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('broadcasts')
         .update({ deleted_at: new Date().toISOString() })
@@ -603,8 +593,6 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
   // Send broadcast
   const _handleSendBroadcast = async (broadcastId: string, broadcastTitle: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('broadcasts')
         .update({
@@ -616,7 +604,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
 
       if (error) throw error
 
-      toast.success('Sending broadcast'" is being sent...` })
+      toast.success('Broadcast is being sent...')
       fetchBroadcasts()
       refetch()
     } catch (error) {
@@ -628,8 +616,6 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
   // Schedule broadcast
   const handleScheduleBroadcast = async (broadcastId: string, broadcastTitle: string, scheduledFor: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('broadcasts')
         .update({
@@ -641,7 +627,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
 
       if (error) throw error
 
-      toast.success('Broadcast scheduled'" has been scheduled` })
+      toast.success(`Broadcast scheduled: "${broadcastTitle}" has been scheduled`)
       fetchBroadcasts()
       refetch()
     } catch (error) {
@@ -653,8 +639,6 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
   // Pause broadcast
   const _handlePauseBroadcast = async (broadcastId: string, broadcastTitle: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('broadcasts')
         .update({
@@ -665,7 +649,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
 
       if (error) throw error
 
-      toast.info('Broadcast paused'" delivery paused` })
+      toast.info(`Broadcast paused: delivery paused`)
       fetchBroadcasts()
       refetch()
     } catch (error) {
@@ -678,16 +662,12 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
   const _handleDuplicateBroadcast = async (broadcast: Broadcast) => {
     try {
       setIsSaving(true)
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to duplicate broadcasts')
         return
       }
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('broadcasts').insert({
         user_id: user.id,
         title: `Copy of ${broadcast.title}`,
@@ -702,7 +682,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
 
       if (error) throw error
 
-      toast.success('Broadcast duplicated'" created` })
+      toast.success(`Broadcast duplicated created`)
       fetchBroadcasts()
       refetch()
     } catch (error) {
@@ -1414,7 +1394,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                           variant="outline"
                           size="sm"
                           onClick={() => {
-                            toast.info('Opening automation editor'"` })
+                            toast.info(`Opening automation editor`)
                           }}
                         >
                           Edit
@@ -1424,7 +1404,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                           size="sm"
                           onClick={() => {
                             const action = automation.status === 'active' ? 'paused' : 'activated'
-                            toast.success(`Automation ${action}` is now ${action}` })
+                            toast.success(`Automation ${action} is now ${action}`)
                           }}
                         >
                           {automation.status === 'active' ? 'Pause' : 'Activate'}
@@ -1433,7 +1413,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                           variant="outline"
                           size="sm"
                           onClick={() => {
-                            toast.success('Automation duplicated'" created` })
+                            toast.success(`Automation duplicated: copy created`)
                           }}
                         >
                           Duplicate
@@ -1517,7 +1497,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                     variant="outline"
                     size="sm"
                     onClick={() => {
-                      toast.info('Opening series editor'"` })
+                      toast.info(`Opening series editor for "${series.name}"`)
                     }}
                   >
                     Edit Steps
@@ -1527,7 +1507,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                     size="sm"
                     onClick={() => {
                       const action = series.status === 'active' ? 'paused' : 'activated'
-                      toast.success(`Series ${action}` is now ${action}` })
+                      toast.success(`Series "${series.name}" is now ${action}`)
                     }}
                   >
                     {series.status === 'active' ? 'Pause' : 'Activate'}
@@ -1536,7 +1516,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                     variant="outline"
                     size="sm"
                     onClick={() => {
-                      toast.info('Opening enrollment settings'"` })
+                      toast.info(`Opening enrollment settings for "${series.name}"`)
                     }}
                   >
                     Enrollment Settings
@@ -1553,7 +1533,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                 <div
                   key={template.id}
                   onClick={() => {
-                    toast.info('Opening template preview'"` })
+                    toast.info(`Opening template preview for "${template.name}"`)
                   }}
                   className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 cursor-pointer hover:shadow-md transition-all"
                 >
@@ -2831,7 +2811,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                   const file = e.target.files?.[0]
                   if (file) {
                     setImportedFile(file)
-                    toast.success('File selected' (${(file.size / 1024).toFixed(1)} KB)` })
+                    toast.success(`File selected: ${(file.size / 1024).toFixed(1)} KB`)
                   }
                 }}
               />
@@ -3165,7 +3145,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                   size="sm"
                   onClick={() => {
                     setSegmentConditions([...segmentConditions, { field: '', operator: 'equals', value: '' }])
-                    toast.success('Condition added' conditions total` })
+                    toast.success(`Condition added: ${segmentConditions.length + 1} conditions total`)
                   }}
                 >
                   + Add Condition
@@ -3255,7 +3235,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                   size="sm"
                   onClick={() => {
                     setEventProperties([...eventProperties, { name: '', type: 'string' }])
-                    toast.success('Property added' properties total` })
+                    toast.success(`Property added: ${eventProperties.length + 1} properties total`)
                   }}
                 >
                   + Add Property

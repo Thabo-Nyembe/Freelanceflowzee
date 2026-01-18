@@ -138,16 +138,18 @@ export default function ProjectsClient() {
   const fetchProjects = async () => {
     try {
       setIsLoading(true)
-      setError(null)      const response = await fetch('/api/client-zone/projects', {
+      setError(null)
+      const response = await fetch('/api/client-zone/projects', {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' }
       })
 
-      if (!response.ok) throw new Error(`Failed to fetch projects: ${response.statusText}`)
+      if (!response.ok) throw new Error('Failed to fetch projects: ' + response.statusText)
 
       const data = await response.json()
       if (data.success) {
-        setProjects(data.projects || [])      } else {
+        setProjects(data.projects || [])
+      } else {
         throw new Error(data.error || 'Failed to load projects')
       }
     } catch (err: any) {
@@ -192,7 +194,8 @@ export default function ProjectsClient() {
   // ============================================================================
 
   const handleRequestRevision = (projectId: number) => {
-    const project = projects.find(p => p.id === projectId)    setRevisionProjectId(projectId)
+    const project = projects.find(p => p.id === projectId)
+    setRevisionProjectId(projectId)
     setRevisionModalOpen(true)
     setRevisionNotes('')
   }
@@ -207,7 +210,8 @@ export default function ProjectsClient() {
     const actionKey = `revision-${revisionProjectId}`
 
     try {
-      setActionLoading(prev => ({ ...prev, [actionKey]: true }))      const response = await fetch('/api/client-zone/projects/revision', {
+      setActionLoading(prev => ({ ...prev, [actionKey]: true }))
+      const response = await fetch('/api/client-zone/projects/revision', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ projectId: revisionProjectId, revisionNotes, timestamp: new Date().toISOString() })
@@ -217,7 +221,7 @@ export default function ProjectsClient() {
 
       const result = await response.json()
       if (result.success) {
-        toast.success(`Revision submitted for "${project?.name}"`)
+        toast.success('Revision submitted for "' + project?.name + '"')
         setRevisionModalOpen(false)
         setRevisionProjectId(null)
         setRevisionNotes('')
@@ -239,7 +243,8 @@ export default function ProjectsClient() {
     if (!project) return
 
     try {
-      setActionLoading(prev => ({ ...prev, [actionKey]: true }))      const response = await fetch('/api/client-zone/projects/approve', {
+      setActionLoading(prev => ({ ...prev, [actionKey]: true }))
+      const response = await fetch('/api/client-zone/projects/approve', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ projectId, timestamp: new Date().toISOString() })
@@ -249,7 +254,7 @@ export default function ProjectsClient() {
 
       const result = await response.json()
       if (result.success) {
-        toast.success(`"${project.name}" approved!`)
+        toast.success('"' + project.name + '" approved!')
         await fetchProjects()
       } else {
         throw new Error(result.error || 'Failed to approve')
@@ -269,7 +274,7 @@ export default function ProjectsClient() {
 
     try {
       setActionLoading(prev => ({ ...prev, [actionKey]: true }))
-      toast.info(`Preparing download for "${project.name}"...`)
+      toast.info('Preparing download for "' + project.name + '"...')
 
       const response = await fetch('/api/client-zone/projects/download', {
         method: 'POST',
@@ -289,7 +294,7 @@ export default function ProjectsClient() {
       document.body.removeChild(a)
       window.URL.revokeObjectURL(url)
 
-      toast.success(`Files downloaded for "${project.name}"`)
+      toast.success('Files downloaded for "' + project.name + '"')
     } catch (err: any) {
       toast.error('Download failed')
     } finally {
@@ -329,7 +334,7 @@ export default function ProjectsClient() {
 
       const result = await response.json()
       if (result.success) {
-        toast.success('Project created successfully'" has been created` })
+        toast.success('Project created successfully - ' + newProjectName.trim() + ' has been created')
         setShowCreateModal(false)
         setNewProjectName('')
         setNewProjectDescription('')
@@ -356,7 +361,8 @@ export default function ProjectsClient() {
 
     const actionKey = `delete-${projectId}`
     try {
-      setActionLoading(prev => ({ ...prev, [actionKey]: true }))      const response = await fetch(`/api/projects?id=${projectId}&permanent=true`, {
+      setActionLoading(prev => ({ ...prev, [actionKey]: true }))
+      const response = await fetch('/api/projects?id=' + projectId + '&permanent=true', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' }
       })
@@ -368,7 +374,7 @@ export default function ProjectsClient() {
 
       const result = await response.json()
       if (result.success) {
-        toast.success('Project deleted'" has been permanently deleted` })
+        toast.success('Project deleted - ' + project.name + ' has been permanently deleted')
         await fetchProjects()
       } else {
         throw new Error(result.error || 'Failed to delete project')
@@ -385,9 +391,10 @@ export default function ProjectsClient() {
     const project = projects.find(p => p.id === projectId)
     if (!project) return
 
-    const actionKey = `archive-${projectId}`
+    const actionKey = 'archive-' + projectId
     try {
-      setActionLoading(prev => ({ ...prev, [actionKey]: true }))      const response = await fetch('/api/projects', {
+      setActionLoading(prev => ({ ...prev, [actionKey]: true }))
+      const response = await fetch('/api/projects', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: projectId, status: 'archived' })
@@ -400,7 +407,7 @@ export default function ProjectsClient() {
 
       const result = await response.json()
       if (result.success) {
-        toast.success('Project archived'" has been archived` })
+        toast.success('Project archived - ' + project.name + ' has been archived')
         await fetchProjects()
       } else {
         throw new Error(result.error || 'Failed to archive project')
@@ -451,13 +458,14 @@ export default function ProjectsClient() {
     const project = projects.find(p => p.id === projectId)
     if (!project) return
 
-    const actionKey = `duplicate-${projectId}`
+    const actionKey = 'duplicate-' + projectId
     try {
-      setActionLoading(prev => ({ ...prev, [actionKey]: true }))      const response = await fetch('/api/projects', {
+      setActionLoading(prev => ({ ...prev, [actionKey]: true }))
+      const response = await fetch('/api/projects', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: `${project.name} (Copy)`,
+          name: project.name + ' (Copy)',
           description: project.description,
           budget: project.budget,
           status: 'planning',
@@ -472,7 +480,7 @@ export default function ProjectsClient() {
 
       const result = await response.json()
       if (result.success) {
-        toast.success('Project duplicated'" has been duplicated` })
+        toast.success('Project duplicated - ' + project.name + ' has been duplicated')
         await fetchProjects()
       } else {
         throw new Error(result.error || 'Failed to duplicate project')
@@ -511,7 +519,8 @@ export default function ProjectsClient() {
   }
 
   const handleOpenShareDialog = (projectId: number) => {
-    const project = projects.find(p => p.id === projectId)    setShareProjectId(projectId)
+    const project = projects.find(p => p.id === projectId)
+    setShareProjectId(projectId)
     setShareEmail('')
     setSharePermission('view')
     setShareDialogOpen(true)
@@ -523,13 +532,14 @@ export default function ProjectsClient() {
     const project = projects.find(p => p.id === shareProjectId)
     if (!project) return
 
-    const actionKey = `share-${shareProjectId}`
+    const actionKey = 'share-' + shareProjectId
 
     // If email is provided, share via email
     if (shareEmail.trim()) {
       try {
         setActionLoading(prev => ({ ...prev, [actionKey]: true }))
-        toast.success('Sharing project...')        // Call API to share project
+        toast.success('Sharing project...')
+        // Call API to share project
         const response = await fetch('/api/projects', {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
@@ -555,8 +565,7 @@ export default function ProjectsClient() {
 
         const result = await response.json()
         if (result.success) {
-          toast.success('Project shared!' with ${sharePermission} access`
-          })
+          toast.success('Project shared! Shared with ' + sharePermission + ' access')
           setShareDialogOpen(false)
           setShareEmail('')
           setSharePermission('view')

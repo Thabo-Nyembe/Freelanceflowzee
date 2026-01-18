@@ -778,7 +778,7 @@ export default function ComplianceClient() {
       toast.error('Please fill in required fields')
       return
     }
-    toast.success('Control created successfully' has been added` })
+    toast.success('Control created successfully')
     setShowNewControlDialog(false)
     setNewControlForm({ controlId: '', name: '', description: '', framework: 'SOC 2', category: 'Access Control', riskLevel: 'medium', owner: '' })
   }
@@ -788,7 +788,7 @@ export default function ComplianceClient() {
       toast.error('Please fill in required fields')
       return
     }
-    toast.success('Framework added successfully' is now active` })
+    toast.success('Framework added successfully')
     setShowNewFrameworkDialog(false)
     setNewFrameworkForm({ name: '', shortName: '', description: '', version: '' })
   }
@@ -798,7 +798,7 @@ export default function ComplianceClient() {
       toast.error('Please fill in required fields')
       return
     }
-    toast.success('Risk registered' added to risk register` })
+    toast.success('Risk registered')
     setShowNewRiskDialog(false)
     setNewRiskForm({ name: '', description: '', category: 'operational', likelihood: 'possible', impact: 'moderate', owner: '' })
   }
@@ -808,7 +808,7 @@ export default function ComplianceClient() {
       toast.error('Please fill in required fields')
       return
     }
-    toast.success('Audit scheduled' has been scheduled` })
+    toast.success('Audit scheduled')
     setShowNewAuditDialog(false)
     setNewAuditForm({ name: '', type: 'internal', framework: 'SOC 2', startDate: '', endDate: '', auditor: '' })
   }
@@ -818,7 +818,7 @@ export default function ComplianceClient() {
       toast.error('Please fill in required fields')
       return
     }
-    toast.success('Policy created' is now in draft status` })
+    toast.success('Policy created')
     setShowNewPolicyDialog(false)
     setNewPolicyForm({ name: '', version: '1.0', category: 'Security', owner: '', content: '' })
   }
@@ -886,7 +886,7 @@ export default function ComplianceClient() {
     if (actionMap[actionLabel]) {
       actionMap[actionLabel]()
     } else {
-      toast.info(actionLabel feature accessed.` })
+      toast.info(actionLabel + " feature accessed.")
     }
   }
 
@@ -2921,7 +2921,7 @@ export default function ComplianceClient() {
                 }))
                 setRemediationPlans(prev => [...prev, ...newPlans])
                 setShowGapAnalysisDialog(false)
-                toast.success('Gap remediation plan created' remediation items added` })
+                toast.success('Gap remediation plan created')
               }}>
                 Create Remediation Plan
               </Button>
@@ -2991,7 +2991,7 @@ export default function ComplianceClient() {
                 })
                 setShowFilterDialog(false)
                 const filterCount = [filterFormStatus, filterFormRiskLevel, filterFormFramework].filter(f => f !== 'all').length
-                toast.success('Filters applied' filter(s) active` : 'Showing all controls' })
+                toast.success('Filters applied')
               }}>Apply Filters</Button>
             </div>
           </div>
@@ -3131,7 +3131,7 @@ export default function ComplianceClient() {
                 setMitigationFormActions('')
                 setMitigationFormTargetDate('')
                 setMitigationFormAssignedTo('')
-                toast.success('Mitigation plan saved'` })
+                toast.success("Mitigation plan saved")
               }}>Save Plan</Button>
             </div>
           </div>
@@ -3277,7 +3277,7 @@ export default function ComplianceClient() {
                   [assignFormAudit]: assignFormMembers
                 }))
                 setShowAssignDialog(false)
-                toast.success('Team members assigned' member(s) assigned as ${assignFormRole}` })
+                toast.success('Team members assigned')
                 // Reset form
                 setAssignFormMembers([])
                 setAssignFormRole('reviewer')
@@ -3393,7 +3393,7 @@ export default function ComplianceClient() {
                 }
                 setAttestationsSent(prev => [...prev, newAttestation])
                 setShowAttestationDialog(false)
-                toast.success('Attestation request sent' employees` })
+                toast.success('Attestation request sent')
                 // Reset form
                 setAttestationFormPolicy('pol1')
                 setAttestationFormRecipients('all')
@@ -3490,7 +3490,7 @@ export default function ComplianceClient() {
                 setShowDistributeDialog(false)
                 const audienceCounts: Record<string, number> = { all: 250, managers: 35, engineering: 45 }
                 const count = audienceCounts[distributeFormAudience] || 250
-                toast.success('Policy distributed' employees via ${channels.join(', ')}` })
+                toast.success('Policy distributed')
                 // Reset form
                 setDistributeFormPolicy('pol1')
                 setDistributeFormChannels({ email: true, slack: true, portal: true })
@@ -3727,7 +3727,7 @@ export default function ComplianceClient() {
                 email: orgFormEmail
               })
               setShowEditOrganizationDialog(false)
-              toast.success('Organization details updated' saved successfully` })
+              toast.success('Organization details updated')
             }}>
               Save Changes
             </Button>
@@ -3826,7 +3826,7 @@ export default function ComplianceClient() {
                     syncLogs: serviceFormSyncLogs
                   }
                 }))
-                toast.success(`${selectedService.name} settings saved`` })
+                toast.success(selectedService.name + " settings saved")
               }
               setShowServiceConfigDialog(false)
             }}>
@@ -4021,7 +4021,7 @@ export default function ComplianceClient() {
                     reviewFrequency: policySettingsReviewFrequency
                   }
                 }))
-                toast.success('Policy settings saved' updated` })
+                toast.success('Policy settings saved')
               }
               setShowPolicySettingsDialog(false)
             }}>

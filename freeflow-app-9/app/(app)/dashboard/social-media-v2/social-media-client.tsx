@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import React, { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -843,8 +845,6 @@ export default function SocialMediaClient() {
     }
     try {
       toast.loading('Sending invitation...')
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
@@ -875,8 +875,6 @@ export default function SocialMediaClient() {
   const handleConnectIntegration = async (integrationName: string) => {
     try {
       toast.loading(`Connecting ${integrationName}...`)
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 

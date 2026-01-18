@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { useCreateCoupon, useCoupons } from '@/lib/hooks/use-coupon-extended'
 import { toast } from 'sonner'
@@ -345,12 +347,8 @@ export default function MarketplaceClient() {
   // Fetch webhooks from Supabase
   const fetchWebhooks = useCallback(async () => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase.from('webhooks').select('*').eq('user_id', user.id).order('created_at', { ascending: false })
       if (error) throw error
       setDbWebhooks(data || [])
@@ -362,12 +360,8 @@ export default function MarketplaceClient() {
   // Fetch API keys from Supabase
   const fetchApiKeys = useCallback(async () => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase.from('api_keys').select('*').eq('user_id', user.id).order('created_at', { ascending: false })
       if (error) throw error
       setDbApiKeys(data || [])
@@ -379,8 +373,6 @@ export default function MarketplaceClient() {
   // Fetch marketplace apps from Supabase
   const fetchMarketplaceApps = useCallback(async () => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase.from('marketplace_apps').select('*').eq('status', 'published').order('total_downloads', { ascending: false })
       if (error) throw error
       setDbApps(data || [])
@@ -441,16 +433,12 @@ export default function MarketplaceClient() {
     }
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { toast.error('Please sign in'); return }
       const keyPrefix = 'mk_' + Math.random().toString(36).substring(2, 8)
       const keyHash = 'hashed_' + Math.random().toString(36).substring(2, 20)
       const expiresAt = apiKeyForm.expiration === 'never' ? null : new Date(Date.now() + parseInt(apiKeyForm.expiration) * 24 * 60 * 60 * 1000).toISOString()
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('api_keys').insert({
         user_id: user.id, name: apiKeyForm.name, key_prefix: keyPrefix, key_hash: keyHash,
         scopes: apiKeyForm.permissions, expires_at: expiresAt, is_active: true
@@ -469,8 +457,6 @@ export default function MarketplaceClient() {
   // Delete API key handler
   const handleDeleteApiKey = async (id: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('api_keys').delete().eq('id', id)
       if (error) throw error
       toast.promise(Promise.resolve(), { loading: 'Deleting API key...', success: 'API key deleted', error: 'Failed to delete API key' })
@@ -488,13 +474,9 @@ export default function MarketplaceClient() {
     }
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { toast.error('Please sign in'); return }
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('webhooks').insert({
         user_id: user.id, name: `Webhook ${webhookForm.url.split('/').pop()}`,
         url: webhookForm.url, secret: webhookForm.secret || null, events: webhookForm.events, is_active: true
@@ -513,8 +495,6 @@ export default function MarketplaceClient() {
   // Delete webhook handler
   const handleDeleteWebhook = async (id: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('webhooks').delete().eq('id', id)
       if (error) throw error
       toast.promise(Promise.resolve(), { loading: 'Deleting webhook...', success: 'Webhook deleted', error: 'Failed to delete webhook' })

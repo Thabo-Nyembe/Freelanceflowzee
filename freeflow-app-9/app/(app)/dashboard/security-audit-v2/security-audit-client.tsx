@@ -262,8 +262,7 @@ export default function SecurityAuditClient() {
   }
 
   const handleResolveVulnerability = (vuln: Vulnerability) => {
-    toast.success('Marked as resolved'" has been marked as resolved`
-    })
+    toast.success(`Marked as resolved: "${vuln.title}" has been marked as resolved`)
   }
 
   const handleExportAudit = () => {
@@ -271,8 +270,7 @@ export default function SecurityAuditClient() {
   }
 
   const handleCreateTicket = (vuln: Vulnerability) => {
-    toast.success('Ticket created'"`
-    })
+    toast.success(`Ticket created for "${vuln.title}"`)
   }
 
   return (
@@ -2022,28 +2020,28 @@ export default function SecurityAuditClient() {
                 <Button variant="outline" className="w-full justify-start" onClick={() => {
                   setShowAssetMenuDialog(false)
                   setActiveTab('vulnerabilities')
-                  toast.success('Filtering vulnerabilities'` })
+                  toast.success('Filtering vulnerabilities')
                 }}>
                   <Bug className="h-4 w-4 mr-2" />
                   View Vulnerabilities
                 </Button>
                 <Button variant="outline" className="w-full justify-start" onClick={() => {
                   setShowAssetMenuDialog(false)
-                  toast.info('Asset details'` })
+                  toast.info('Asset details')
                 }}>
                   <FileText className="h-4 w-4 mr-2" />
                   View Details
                 </Button>
                 <Button variant="outline" className="w-full justify-start" onClick={() => {
                   setShowAssetMenuDialog(false)
-                  toast.success('Edit mode'` })
+                  toast.success('Edit mode')
                 }}>
                   <Settings className="h-4 w-4 mr-2" />
                   Edit Asset
                 </Button>
                 <Button variant="outline" className="w-full justify-start text-red-600 hover:text-red-700" onClick={() => {
                   setShowAssetMenuDialog(false)
-                  toast.error('Asset removed' has been removed` })
+                  toast.error('Asset removed')
                 }}>
                   <AlertTriangle className="h-4 w-4 mr-2" />
                   Remove Asset

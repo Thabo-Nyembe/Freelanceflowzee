@@ -1,4 +1,6 @@
 'use client'
+
+import { createClient } from '@/lib/supabase/client'
 import { useState, useMemo, useCallback, useRef } from 'react'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
@@ -40,6 +42,9 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Progress } from '@/components/ui/progress'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Switch } from '@/components/ui/switch'
+
+// Initialize Supabase client once at module level
+const supabase = createClient()
 
 type ToolType = 'select' | 'hand' | 'rectangle' | 'ellipse' | 'line' | 'text' | 'sticky' | 'pen' | 'frame' | 'comment' | 'image' | 'component'
 
@@ -422,7 +427,7 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
 
       const result = await createCanvas(canvasData)
       if (result) {
-        toast.success('Canvas created'" has been created successfully` })
+        toast.success(`${newCanvasForm.canvas_name} has been created successfully`)
         setShowNewBoard(false)
         setNewCanvasForm({ canvas_name: '', description: '', canvas_type: 'whiteboard' })
         refetch()
@@ -454,8 +459,6 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
 
   const handleDeleteCanvas = useCallback(async (canvasId: string, canvasName: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Not authenticated')
@@ -470,7 +473,7 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
 
       if (deleteError) throw deleteError
 
-      toast.success('Canvas deleted'" has been deleted` })
+      toast.success(`Canvas deleted: "${selectedBoard.name}" has been deleted`)
       setSelectedBoard(null)
       refetch()
     } catch (err) {
@@ -485,8 +488,6 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
     }
 
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Not authenticated')
@@ -555,8 +556,6 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
 
     setIsInviting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Not authenticated')
@@ -574,7 +573,7 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
 
       if (inviteError) throw inviteError
 
-      toast.success('Invitation sent'` })
+      toast.success(`Invitation sent`)
       setInviteEmail('')
     } catch (err) {
       toast.error('Invitation failed')
@@ -638,9 +637,7 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
 
   const handleMemberOptions = useCallback((memberName: string) => {
     // Show member options via toast with action
-    toast.info(`Options for ${memberName}`'s profile`)
-      }
-    })
+    toast.info(`Options for ${memberName}'s profile`)
   }, [])
 
   const handleUseTemplate = useCallback(async (template: DesignTemplate) => {
@@ -678,7 +675,7 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
 
       const result = await createCanvas(canvasData)
       if (result) {
-        toast.success('Canvas created from template'" template applied successfully` })
+        toast.success(`Canvas created from template template applied successfully`)
         refetch()
         setActiveTab('boards')
       } else {
@@ -738,7 +735,7 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
         setNewCanvasForm(prev => ({ ...prev, canvas_name: file.name.replace(/\.[^.]+$/, '') }))
         setShowNewBoard(true)
       } else {
-        toast.error('Unsupported file type'` })
+        toast.error(`Unsupported file type`)
       }
     }
     // Reset input

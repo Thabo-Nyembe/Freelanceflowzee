@@ -699,7 +699,7 @@ export default function LearningClient() {
   const handleStartCourse = async (course: any) => {
     try {
       await updateProgress({ course_id: course.id, progress: 0, lessons_completed: 0, last_accessed_at: new Date().toISOString() })
-      toast.success('Course started'` })
+      toast.success('Course started')
     } catch (err) {
       toast.error('Failed to start course')
     }
@@ -708,7 +708,7 @@ export default function LearningClient() {
   const handleResumeCourse = async (course: any) => {
     try {
       await updateProgress({ course_id: course.id, last_accessed_at: new Date().toISOString() })
-      toast.success('Resuming course'` })
+      toast.success('Resuming course')
     } catch (err) {
       toast.error('Failed to resume course')
     }
@@ -725,14 +725,14 @@ export default function LearningClient() {
   const handleEnrollCourse = async (courseId: string, courseName: string) => {
     try {
       await updateProgress({ course_id: courseId, progress: 0, lessons_completed: 0, last_accessed_at: new Date().toISOString() })
-      toast.success('Enrolled'"` })
+      toast.success('Enrolled in ' + courseName)
     } catch (err) {
       toast.error('Failed to enroll in course')
     }
   }
 
   const handleBookmarkLesson = async (lessonId: string, lessonName: string) => {
-    toast.success('Lesson bookmarked'" saved to bookmarks` })
+    toast.success(lessonName + ' saved to bookmarks')
   }
 
   const handleCreatePath = async () => {
@@ -752,7 +752,7 @@ export default function LearningClient() {
         enrolled_count: 0,
         status: 'draft'
       })
-      toast.success('Learning path created'" has been created` })
+      toast.success('Learning path "' + newPathForm.title + '" has been created')
       setShowCreatePathModal(false)
       setNewPathForm({ title: '', description: '', level: 'beginner', estimated_weeks: 4 })
     } catch (err) {
@@ -763,7 +763,7 @@ export default function LearningClient() {
   const handleDeletePath = async (pathId: string, pathTitle: string) => {
     try {
       await deletePath(pathId)
-      toast.success('Learning path deleted'" has been removed` })
+      toast.success('Learning path "' + pathTitle + '" has been removed')
     } catch (err) {
       toast.error('Failed to delete learning path')
     }
@@ -781,7 +781,7 @@ export default function LearningClient() {
         is_public: newCollectionForm.is_public,
         likes: 0
       })
-      toast.success('Collection created'" has been created` })
+      toast.success('Collection "' + newCollectionForm.name + '" has been created')
       setShowCreateCollectionModal(false)
       setNewCollectionForm({ name: '', description: '', is_public: false })
     } catch (err) {
@@ -792,7 +792,7 @@ export default function LearningClient() {
   const handleDeleteCollection = async (collectionId: string, collectionName: string) => {
     try {
       await deleteCollection(collectionId)
-      toast.success('Collection deleted'" has been removed` })
+      toast.success('Collection "' + collectionName + '" has been removed')
     } catch (err) {
       toast.error('Failed to delete collection')
     }
@@ -2047,7 +2047,7 @@ export default function LearningClient() {
             <AIInsightsPanel
               insights={mockLearningAIInsights}
               title="Learning Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">

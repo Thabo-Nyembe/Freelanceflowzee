@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useCallback, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
 import { Card } from '@/components/ui/card'
@@ -33,6 +35,9 @@ import {
 
 // MIGRATED: Batch #13 - Removed mock data, using database hooks
 import { useDataExports } from '@/lib/hooks/use-data-exports'
+
+// Initialize Supabase client once at module level
+const supabase = createClient()
 
 // AWS DataPipeline/Fivetran level interfaces
 interface DataSource {
@@ -267,13 +272,9 @@ export default function DataExportClient() {
       return
     }
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('data_exports').insert({
         user_id: user.id,
         export_name: formData.export_name,
@@ -294,8 +295,6 @@ export default function DataExportClient() {
 
   const handleRunExport = async (exportId: string, exportName: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('data_exports')
         .update({ status: 'in_progress', started_at: new Date().toISOString() })
@@ -311,8 +310,6 @@ export default function DataExportClient() {
   const handleScheduleExport = async (exportId: string, exportName: string) => {
     try {
       const scheduledAt = new Date(Date.now() + 3600000).toISOString() // 1 hour from now
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('data_exports')
         .update({ status: 'scheduled', scheduled_at: scheduledAt })
@@ -327,8 +324,6 @@ export default function DataExportClient() {
 
   const handleDownloadExport = async (exportId: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('data_exports')
         .select('download_url, export_name')
@@ -346,8 +341,6 @@ export default function DataExportClient() {
 
   const handleDeleteExport = async (exportId: string, exportName: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('data_exports')
         .update({ deleted_at: new Date().toISOString() })
@@ -362,8 +355,6 @@ export default function DataExportClient() {
 
   const handleCancelExport = async (exportId: string, exportName: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('data_exports')
         .update({ status: 'cancelled' })
@@ -793,8 +784,6 @@ export default function DataExportClient() {
                           onClick={async () => {
                             toast.loading(`Connecting to ${source.name}...`, { id: 'add-source' })
                             try {
-                              const { createClient } = await import('@/lib/supabase/client')
-                              const supabase = createClient()
                               await supabase.from('data_sources').insert({
                                 type: source.type,
                                 name: source.name,
@@ -1214,8 +1203,6 @@ export default function DataExportClient() {
                     <Button className="w-full" onClick={async () => {
                       toast.loading('Creating transformation...', { id: 'create-transform' })
                       try {
-                        const { createClient } = await import('@/lib/supabase/client')
-                        const supabase = createClient()
                         await supabase.from('data_transformations').insert({
                           name: 'New Transformation',
                           type: 'filter',
@@ -1605,8 +1592,6 @@ export default function DataExportClient() {
                           onClick={async () => {
                             toast.loading(`Configuring ${dest.name}...`, { id: 'add-dest' })
                             try {
-                              const { createClient } = await import('@/lib/supabase/client')
-                              const supabase = createClient()
                               await supabase.from('data_destinations').insert({
                                 type: dest.type,
                                 name: dest.name,
@@ -2323,8 +2308,6 @@ export default function DataExportClient() {
               <Button className="w-full" onClick={async () => {
                 toast.loading('Saving mapping configuration...', { id: 'save-mapping' })
                 try {
-                  const { createClient } = await import('@/lib/supabase/client')
-                  const supabase = createClient()
                   await supabase.from('data_mappings').upsert({
                     id: 'default-mapping',
                     config: {},
@@ -2380,8 +2363,6 @@ export default function DataExportClient() {
               <Button className="w-full" onClick={async () => {
                 toast.loading('Testing connection...', { id: 'test-dest' })
                 try {
-                  const { createClient } = await import('@/lib/supabase/client')
-                  const supabase = createClient()
                   await supabase.from('connection_tests').insert({
                     destination_id: selectedDestination.id,
                     status: 'success',
@@ -2430,8 +2411,6 @@ export default function DataExportClient() {
             <Button className="w-full" onClick={async () => {
               toast.loading('Saving IP allowlist...', { id: 'save-ip' })
               try {
-                const { createClient } = await import('@/lib/supabase/client')
-                const supabase = createClient()
                 await supabase.from('ip_allowlists').upsert({
                   id: 'data-export-allowlist',
                   ips: ipAllowlist.filter(ip => ip.trim()),
@@ -2499,8 +2478,6 @@ export default function DataExportClient() {
               <Button className="flex-1" onClick={async () => {
                 toast.loading('Saving webhook configuration...', { id: 'save-webhook' })
                 try {
-                  const { createClient } = await import('@/lib/supabase/client')
-                  const supabase = createClient()
                   await supabase.from('webhooks').upsert({
                     id: 'data-export-webhook',
                     url: webhookUrl,
@@ -2548,8 +2525,6 @@ export default function DataExportClient() {
                     <Button variant="outline" size="sm" onClick={async () => {
                       toast.loading(`Restoring ${archive.name}...`, { id: 'restore' })
                       try {
-                        const { createClient } = await import('@/lib/supabase/client')
-                        const supabase = createClient()
                         await supabase.from('data_archives').update({
                           status: 'restored',
                           restored_at: new Date().toISOString()
@@ -2579,8 +2554,6 @@ export default function DataExportClient() {
                       if (!confirm(`Delete ${archive.name}? This cannot be undone.`)) return
                       toast.loading('Deleting archive...', { id: 'delete-archive' })
                       try {
-                        const { createClient } = await import('@/lib/supabase/client')
-                        const supabase = createClient()
                         await supabase.from('data_archives').delete().eq('name', archive.name)
                         toast.success('Archive deleted', { id: 'delete-archive', description: `${archive.size} freed` })
                       } catch (err) {

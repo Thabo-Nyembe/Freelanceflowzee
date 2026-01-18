@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useRef } from 'react'
 import { toast } from 'sonner'
 import { useCloudStorage } from '@/lib/hooks/use-cloud-storage'
@@ -371,8 +373,6 @@ export default function CloudStorageClient() {
     setUploadProgress(0)
 
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Authentication Required', { description: 'Please sign in to upload files' })
@@ -553,16 +553,12 @@ export default function CloudStorageClient() {
       }
 
       // Get download URL from Supabase Storage
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Authentication Required', { description: 'Please sign in to download files' })
         return
       }
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase.storage
         .from('cloud-storage')
         .download(file.path)
@@ -606,8 +602,6 @@ export default function CloudStorageClient() {
 
         // Also delete from storage if not a folder
         if (!fileToDelete.isFolder) {
-          const { createClient } = await import('@/lib/supabase/client')
-          const supabase = createClient()
           await supabase.storage
             .from('cloud-storage')
             .remove([dbFile.file_path])
@@ -656,8 +650,6 @@ export default function CloudStorageClient() {
   // Copy file
   const handleCopy = async (file: CloudFile) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Authentication Required', { description: 'Please sign in' })

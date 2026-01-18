@@ -645,7 +645,7 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
 
   // Dialog-based Handlers
   const handleShareRoadmap = () => {
-    setShareUrl(`https://roadmap.yourcompany.com/public/${Date.now().toString(36)}`)
+    setShareUrl('https://roadmap.yourcompany.com/public/' + Date.now().toString(36))
     setIsShareDialogOpen(true)
   }
 
@@ -676,7 +676,7 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
 
   const handleShareFeature = () => {
     if (!selectedFeature) return
-    setShareUrl(`https://roadmap.yourcompany.com/feature/${selectedFeature.id}`)
+    setShareUrl('https://roadmap.yourcompany.com/feature/' + selectedFeature.id)
     setIsShareDialogOpen(true)
   }
 
@@ -783,7 +783,7 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
       toast.error('Validation Error')
       return
     }
-    toast.success('Feature Created'" has been added to the roadmap` })
+    toast.success('Feature "' + newFeatureForm.title + '" has been added to the roadmap')
     setIsNewFeatureDialogOpen(false)
   }
 
@@ -792,7 +792,7 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
       toast.error('Validation Error')
       return
     }
-    toast.success('Release Created' "${newReleaseForm.name}" has been scheduled` })
+    toast.success('Release Created')
     setIsNewReleaseDialogOpen(false)
   }
 
@@ -801,7 +801,7 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
       toast.error('Validation Error')
       return
     }
-    toast.success('Idea Submitted'" has been submitted for review` })
+    toast.success('Idea "' + newIdeaForm.title + '" has been submitted for review')
     setIsSubmitIdeaDialogOpen(false)
   }
 
@@ -810,7 +810,7 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
       toast.error('Validation Error')
       return
     }
-    toast.success('OKR Created'" has been set for ${newOKRForm.quarter}` })
+    toast.success('OKR "' + newOKRForm.title + '" has been set for ' + newOKRForm.quarter)
     setIsSetOKRDialogOpen(false)
   }
 
@@ -819,13 +819,13 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
       toast.error('Validation Error')
       return
     }
-    toast.success('Comment Posted'" has been posted` })
+    toast.success('Comment has been posted')
     setIsCommentDialogOpen(false)
     setCommentText('')
   }
 
   const submitVote = () => {
-    toast.success('Vote Recorded'"` })
+    toast.success('Vote Recorded')
     setIsVoteDialogOpen(false)
   }
 
@@ -835,7 +835,7 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
   }
 
   const exportRoadmap = () => {
-    toast.success('Export Started'` })
+    toast.success('Export Started')
     setIsExportDialogOpen(false)
   }
 
@@ -1100,7 +1100,7 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
                   onClick={action.handler}
                   className="flex flex-col items-center gap-2 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:scale-105 transition-all duration-200"
                 >
-                  <div className={`p-3 rounded-xl ${action.color}`}>
+                  <div className={"p-3 rounded-xl " + action.color}>
                     <action.icon className="w-5 h-5" />
                   </div>
                   <span className="text-xs font-medium text-gray-700 dark:text-gray-300">{action.label}</span>
@@ -1129,7 +1129,7 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
                           size="sm"
                           onClick={() => setSelectedQuarter(q)}
                         >
-                          {q === 'all' ? 'All' : `${q} 2025`}
+                          {q === 'all' ? 'All' : q + ' 2025'}
                         </Button>
                       ))}
                     </div>
@@ -1643,11 +1643,11 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
                       <button
                         key={item.id}
                         onClick={() => setSettingsTab(item.id)}
-                        className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
+                        className={'w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ' + (
                           settingsTab === item.id
                             ? 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300'
                             : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700'
-                        }`}
+                        )}
                       >
                         <item.icon className="w-4 h-4" />
                         <span className="text-sm font-medium">{item.label}</span>
@@ -2067,7 +2067,7 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
                       </div>
                       <div className="p-3 rounded-lg border">
                         <p className="text-xs text-muted-foreground">Impact</p>
-                        <p className={`font-medium capitalize ${getImpactColor(selectedFeature.impact)}`}>
+                        <p className={'font-medium capitalize ' + getImpactColor(selectedFeature.impact)}>
                           {selectedFeature.impact}
                         </p>
                       </div>
@@ -2424,7 +2424,7 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
                   {newOKRForm.keyResults.map((kr, idx) => (
                     <Input
                       key={idx}
-                      placeholder={`Key Result ${idx + 1}`}
+                      placeholder={'Key Result ' + (idx + 1)}
                       value={kr}
                       onChange={(e) => {
                         const updated = [...newOKRForm.keyResults]
@@ -2962,11 +2962,11 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
             </DialogHeader>
             {selectedInsight && (
               <div className="space-y-4 py-4">
-                <div className={`p-4 rounded-lg ${
+                <div className={'p-4 rounded-lg ' + (
                   selectedInsight.type === 'success' ? 'bg-green-50 dark:bg-green-900/20 border-green-200' :
                   selectedInsight.type === 'warning' ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-200' :
                   'bg-blue-50 dark:bg-blue-900/20 border-blue-200'
-                } border`}>
+                ) + ' border'}>
                   <h4 className="font-semibold">{selectedInsight.title}</h4>
                   <p className="text-sm text-muted-foreground mt-1">{selectedInsight.description}</p>
                   <Badge variant="outline" className="mt-2">{selectedInsight.category}</Badge>
@@ -2995,7 +2995,7 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
               <Button variant="outline" onClick={() => setIsInsightDialogOpen(false)}>Cancel</Button>
               <Button
                 onClick={() => {
-                  toast.success('Action Completed'" has been processed` })
+                  toast.success('Action Completed')
                   setIsInsightDialogOpen(false)
                 }}
                 className="bg-gradient-to-r from-blue-500 to-indigo-600"

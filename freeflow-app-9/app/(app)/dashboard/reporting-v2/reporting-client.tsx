@@ -290,14 +290,12 @@ export default function ReportingClient() {
   }
 
   const handleShareDashboard = (dashboard: any) => {
-    toast.success('Share link copied'" share link copied to clipboard`
-    })
+    toast.success(`Share link copied: "${dashboard.name}" share link copied to clipboard`)
     navigator.clipboard.writeText(`${window.location.origin}/shared/dashboard/${dashboard.id}`)
   }
 
   const handleExportDashboard = (dashboard: any) => {
-    toast.success('Export started'" is being exported as PDF`
-    })
+    toast.success(`Export started: "${dashboard.name}" is being exported as PDF`)
   }
 
   // Handlers - Worksheet

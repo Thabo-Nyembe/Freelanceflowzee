@@ -1,4 +1,6 @@
 'use client'
+
+import { createClient } from '@/lib/supabase/client'
 import React, { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { useForms, type Form, type FormStatus, type FormType } from '@/lib/hooks/use-forms'
@@ -346,8 +348,6 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
     }
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
@@ -382,7 +382,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
         metadata: {},
         send_confirmation_email: false
       })
-      toast.success('Form Created'" has been created` })
+      toast.success(`Form Created: "${newFormTitle}" has been created`)
       setNewFormTitle('')
       setNewFormDescription('')
       setShowCreateDialog(false)
@@ -396,7 +396,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
   const handlePublishForm = async (form: Form) => {
     try {
       await updateForm(form.id, { status: 'active' as FormStatus })
-      toast.success('Form Published'" is now live` })
+      toast.success(`Form Published: is now live`)
     } catch (err: any) {
       toast.error('Error')
     }
@@ -404,14 +404,12 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
 
   const handleDuplicateForm = async (form: Form) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
       const { id, created_at, updated_at, deleted_at, ...rest } = form
       await createForm({ ...rest, user_id: user.id, title: `${form.title} (Copy)`, status: 'draft' as FormStatus })
-      toast.success('Form Duplicated'" created` })
+      toast.success(`Form Duplicated: created`)
     } catch (err: any) {
       toast.error('Error')
     }
@@ -420,7 +418,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
   const handleDeleteForm = async (form: Form) => {
     try {
       await deleteForm(form.id)
-      toast.success('Form Deleted'" has been deleted` })
+      toast.success(`Form Deleted: has been deleted`)
       setSelectedForm(null)
     } catch (err: any) {
       toast.error('Error')

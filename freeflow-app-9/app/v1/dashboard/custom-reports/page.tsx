@@ -76,7 +76,8 @@ export default function CustomReportBuilderPage() {
 
       try {
         setIsLoading(true)
-        setError(null)        const { getReportTemplates, getCustomReports, getCustomReportsStats } = await import('@/lib/custom-reports-queries')
+        setError(null)
+        const { getReportTemplates, getCustomReports, getCustomReportsStats } = await import('@/lib/custom-reports-queries')
 
         const [templatesResult, reportsResult, statsResult] = await Promise.all([
           getReportTemplates({ is_public: true }),
@@ -89,8 +90,8 @@ export default function CustomReportBuilderPage() {
         setReportsStats(statsResult.data || null)
 
         setIsLoading(false)
-        toast.success('Reports loaded' templates, ${reportsResult.data?.length || 0} custom reports`
-        })        announce('Report builder loaded successfully', 'polite')
+        toast.success(`Reports loaded: ${templatesResult.data?.length || 0} templates, ${reportsResult.data?.length || 0} custom reports`)
+        announce('Report builder loaded successfully', 'polite')
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load report builder'
         setError(errorMessage)

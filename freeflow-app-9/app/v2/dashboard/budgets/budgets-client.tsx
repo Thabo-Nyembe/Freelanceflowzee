@@ -2272,7 +2272,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
             <AIInsightsPanel
               insights={mockBudgetsAIInsights}
               title="Budget Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -2308,7 +2308,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
               </DialogHeader>
               <div className="space-y-4 py-4">
                 <div className="flex items-center gap-4">
-                  <div className={`p-3 rounded-lg ${selectedTransaction.type === 'inflow' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600'}`}>
+                  <div className={"p-3 rounded-lg " + (selectedTransaction.type === 'inflow' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600')}>
                     {selectedTransaction.type === 'inflow' ? <ArrowDownRight className="h-6 w-6" /> : <ArrowUpRight className="h-6 w-6" />}
                   </div>
                   <div>
@@ -2319,7 +2319,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                     <p className="text-sm text-gray-500">Amount</p>
-                    <p className={`font-semibold ${selectedTransaction.type === 'inflow' ? 'text-green-600' : ''}`}>
+                    <p className={"font-semibold " + (selectedTransaction.type === 'inflow' ? "text-green-600" : "")}>
                       {selectedTransaction.type === 'inflow' ? '+' : '-'}{formatCurrency(selectedTransaction.amount)}
                     </p>
                   </div>
@@ -3062,7 +3062,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                   mockTransactions.filter(t => t.recurring).map(tx => (
                     <div key={tx.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <div className="flex items-center gap-3">
-                        <div className={`p-2 rounded-lg ${tx.type === 'inflow' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600'}`}>
+                        <div className={"p-2 rounded-lg " + (tx.type === 'inflow' ? "bg-green-100 text-green-600" : "bg-gray-100 text-gray-600")}>
                           <Repeat className="h-4 w-4" />
                         </div>
                         <div>

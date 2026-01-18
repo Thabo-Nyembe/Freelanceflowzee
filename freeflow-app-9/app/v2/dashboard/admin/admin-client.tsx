@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useCallback } from 'react'
 import { toast } from 'sonner'
 import {
@@ -64,6 +66,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useAdminSettings, type AdminSetting } from '@/lib/hooks/use-admin-settings'
+
+// Initialize Supabase client once at module level
+const supabase = createClient()
 
 // Types
 type JobStatus = 'running' | 'completed' | 'failed' | 'scheduled' | 'paused'
@@ -314,8 +319,6 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
     const flag = featureFlags.find(f => f.id === flagId)
     if (!flag) return
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('feature_flags')
         .update({ enabled: !flag.enabled, updated_at: new Date().toISOString() })
@@ -324,7 +327,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
       setFeatureFlags(prev => prev.map(f =>
         f.id === flagId ? { ...f, enabled: !f.enabled, updatedAt: new Date().toISOString() } : f
       ))
-      toast.success(`Flag ${!flag.enabled ? 'enabled' : 'disabled'}`)
+      toast.success('Flag ' + (!flag.enabled ? 'enabled' : 'disabled'))
     } catch (err) {
       toast.error('Failed to toggle flag')
     }
@@ -424,11 +427,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
     }
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('admin_users').insert({
         name: newUserForm.name,
         email: newUserForm.email,
@@ -439,7 +438,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
         created_by: user?.id
       })
       if (error) throw error
-      toast.success('User created' has been added` })
+      toast.success('User created')
       setShowNewUserDialog(false)
       setNewUserForm({ name: '', email: '', role: 'viewer', requireMfa: false })
     } catch (err) {
@@ -476,7 +475,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
         validation_rules: {},
         metadata: {}
       })
-      toast.success('Setting created' has been added` })
+      toast.success('Setting created')
       setShowNewSettingDialog(false)
       setNewSettingForm({ settingName: '', settingKey: '', category: 'API', valueType: 'string', value: '', isEncrypted: false, isRequired: false })
       refetch()
@@ -493,7 +492,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
     setIsLoading(true)
     try {
       await updateSetting(selectedSetting.id, selectedSetting)
-      toast.success('Setting updated' has been updated` })
+      toast.success('Setting updated')
       setShowEditSettingDialog(false)
       setSelectedSetting(null)
       refetch()
@@ -506,11 +505,11 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
 
   // Delete Admin Setting
   const handleDeleteSetting = useCallback(async (setting: AdminSetting) => {
-    if (!confirm(`Delete setting "${setting.setting_name}"?`)) return
+    if (!confirm('Delete setting "' + setting.setting_name + '"?')) return
     setIsLoading(true)
     try {
       await deleteSetting(setting.id)
-      toast.success('Setting deleted' has been removed` })
+      toast.success('Setting deleted')
       refetch()
     } catch (err) {
       toast.error('Failed to delete setting')
@@ -527,11 +526,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
     }
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('feature_flags').insert({
         name: newFlagForm.name,
         key: newFlagForm.key,
@@ -542,7 +537,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
         created_by: user?.id
       })
       if (error) throw error
-      toast.success('Feature flag created' has been added` })
+      toast.success('Feature flag created')
       setShowNewFlagDialog(false)
       setNewFlagForm({ name: '', key: '', description: '', environment: 'development', rolloutPercentage: 0, enabled: false })
     } catch (err) {
@@ -560,11 +555,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
     }
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('scheduled_jobs').insert({
         name: newJobForm.name,
         description: newJobForm.description,
@@ -575,7 +566,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
         created_by: user?.id
       })
       if (error) throw error
-      toast.success('Job created' has been scheduled` })
+      toast.success('Job created')
       setShowNewJobDialog(false)
       setNewJobForm({ name: '', description: '', type: 'cron', schedule: '', command: '' })
     } catch (err) {
@@ -589,15 +580,13 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
   const handleExportLogs = useCallback(async () => {
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase.from('audit_logs').select('*').order('created_at', { ascending: false }).limit(1000)
       if (error) throw error
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `audit-logs-${new Date().toISOString().split('T')[0]}.json`
+      a.download = 'audit-logs-' + new Date().toISOString().split('T')[0] + '.json'
       a.click()
       URL.revokeObjectURL(url)
       toast.success('Logs exported')
@@ -691,7 +680,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
 
   // Refresh resource handler
   const handleRefreshResource = useCallback(async (resource: SystemResource) => {
-    toast.info(`Checking ${resource.name}...`)
+    toast.info('Checking ' + resource.name + '...')
     try {
       const res = await fetch('/api/admin/operations', {
         method: 'POST',
@@ -700,9 +689,9 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
       })
       if (!res.ok) throw new Error('Failed')
       const data = await res.json()
-      toast.success(`${resource.name} is healthy`ms` })
+      toast.success(resource.name + ' is healthy - ' + (data.responseTime || 0) + 'ms')
     } catch {
-      toast.error(`Failed to check ${resource.name}`)
+      toast.error('Failed to check ' + resource.name)
     }
   }, [])
 
@@ -714,12 +703,12 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
 
   // Export table data handler
   const handleExportTable = useCallback((table: DatabaseTable) => {
-    toast.success('Export started' data...` })
+    toast.success('Export started')
   }, [])
 
   // Stop job handler
   const handleStopJob = useCallback(async (job: ScheduledJob) => {
-    toast.info(`Stopping ${job.name}...`)
+    toast.info('Stopping ' + job.name + '...')
     try {
       const res = await fetch('/api/admin/operations', {
         method: 'POST',
@@ -727,15 +716,15 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
         body: JSON.stringify({ action: 'stop_job', jobId: job.id, jobName: job.name })
       })
       if (!res.ok) throw new Error('Failed')
-      toast.success(`${job.name} stopped`)
+      toast.success(job.name + ' stopped')
     } catch {
-      toast.error(`Failed to stop ${job.name}`)
+      toast.error('Failed to stop ' + job.name)
     }
   }, [])
 
   // Run job handler
   const handleRunJob = useCallback(async (job: ScheduledJob) => {
-    toast.info(`Starting ${job.name}...`)
+    toast.info('Starting ' + job.name + '...')
     try {
       const res = await fetch('/api/admin/operations', {
         method: 'POST',
@@ -743,9 +732,9 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
         body: JSON.stringify({ action: 'run_job', jobId: job.id, jobName: job.name })
       })
       if (!res.ok) throw new Error('Failed')
-      toast.success(`${job.name} started`)
+      toast.success(job.name + ' started')
     } catch {
-      toast.error(`Failed to start ${job.name}`)
+      toast.error('Failed to start ' + job.name)
     }
   }, [])
 
@@ -775,14 +764,12 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
 
   // Delete flag handler
   const handleDeleteFlag = useCallback(async (flag: FeatureFlag) => {
-    if (!confirm(`Delete feature flag "${flag.name}"?`)) return
+    if (!confirm('Delete feature flag "' + flag.name + '"?')) return
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('feature_flags').delete().eq('id', flag.id)
       if (error) throw error
       setFeatureFlags(prev => prev.filter(f => f.id !== flag.id))
-      toast.success('Flag deleted' has been removed` })
+      toast.success('Flag deleted')
     } catch (err) {
       toast.error('Failed to delete flag')
     }
@@ -790,8 +777,8 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
 
   // Rollback deployment handler
   const handleRollback = useCallback(async (deploy: Deployment) => {
-    if (!confirm(`Rollback to ${deploy.version}?`)) return
-    toast.info(`Rolling back to ${deploy.version}...`)
+    if (!confirm('Rollback to ' + deploy.version + '?')) return
+    toast.info('Rolling back to ' + deploy.version + '...')
     try {
       const res = await fetch('/api/admin/operations', {
         method: 'POST',
@@ -799,7 +786,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
         body: JSON.stringify({ action: 'rollback', deployId: deploy.id, version: deploy.version })
       })
       if (!res.ok) throw new Error('Failed')
-      toast.success('Rollback initiated'` })
+      toast.success('Rollback initiated')
     } catch {
       toast.error('Rollback failed')
     }
@@ -818,7 +805,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `query-results-${new Date().toISOString().split('T')[0]}.json`
+    a.download = 'query-results-' + new Date().toISOString().split('T')[0] + '.json'
     a.click()
     URL.revokeObjectURL(url)
     toast.success('Results exported')
@@ -1054,7 +1041,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
                 <div key={metric.name} className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
                   <p className="text-xs text-gray-500 mb-1">{metric.name}</p>
                   <div className="flex items-end gap-1">
-                    <span className={`text-2xl font-bold ${metric.status === 'good' ? 'text-gray-900 dark:text-white' : metric.status === 'warning' ? 'text-yellow-600' : 'text-red-600'}`}>
+                    <span className={'text-2xl font-bold ' + (metric.status === 'good' ? 'text-gray-900 dark:text-white' : metric.status === 'warning' ? 'text-yellow-600' : 'text-red-600')}>
                       {metric.value}
                     </span>
                     <span className="text-xs text-gray-500 mb-1">{metric.unit}</span>
@@ -1088,11 +1075,11 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
                     {auditLogs.slice(0, 5).map((log) => (
                       <div key={log.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                         <div className="flex items-start gap-3">
-                          <div className={`p-2 rounded-lg ${
+                          <div className={'p-2 rounded-lg ' + (
                             log.severity === 'critical' ? 'bg-red-100 dark:bg-red-900/30' :
                             log.severity === 'warning' ? 'bg-yellow-100 dark:bg-yellow-900/30' :
                             'bg-blue-100 dark:bg-blue-900/30'
-                          }`}>
+                          )}>
                             {log.severity === 'critical' ? <AlertTriangle className="w-4 h-4 text-red-600" /> :
                              log.severity === 'warning' ? <AlertTriangle className="w-4 h-4 text-yellow-600" /> :
                              <Activity className="w-4 h-4 text-blue-600" />}
@@ -1114,7 +1101,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
                 <div className="p-6 border-b border-gray-100 dark:border-gray-700">
                   <div className="flex items-center justify-between">
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Service Status</h3>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${overallHealth === 100 ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                    <span className={'px-2 py-1 rounded-full text-xs font-medium ' + (overallHealth === 100 ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700')}>
                       {overallHealth === 100 ? 'All Systems Operational' : 'Partial Outage'}
                     </span>
                   </div>
@@ -1125,11 +1112,11 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
                       <div key={resource.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
-                            <div className={`p-2 rounded-lg ${
+                            <div className={'p-2 rounded-lg ' + (
                               resource.status === 'healthy' ? 'bg-green-100 dark:bg-green-900/30' :
                               resource.status === 'warning' ? 'bg-yellow-100 dark:bg-yellow-900/30' :
                               'bg-red-100 dark:bg-red-900/30'
-                            }`}>
+                            )}>
                               {getResourceIcon(resource.type)}
                             </div>
                             <div>
@@ -1138,7 +1125,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
                             </div>
                           </div>
                           <div className="text-right">
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[resource.status]}`}>
+                            <span className={'px-2 py-1 rounded-full text-xs font-medium ' + statusColors[resource.status]}>
                               {resource.status}
                             </span>
                             <p className="text-xs text-gray-500 mt-1">{resource.uptime}% uptime</p>
@@ -1240,12 +1227,12 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${roleColors[user.role]}`}>
+                          <span className={'px-2 py-1 rounded-full text-xs font-medium ' + roleColors[user.role]}>
                             {user.role.replace('_', ' ')}
                           </span>
                         </td>
                         <td className="px-6 py-4">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[user.status]}`}>
+                          <span className={'px-2 py-1 rounded-full text-xs font-medium ' + statusColors[user.status]}>
                             {user.status}
                           </span>
                         </td>
@@ -1304,14 +1291,14 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
               {resources.map((resource) => (
                 <div key={resource.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
                   <div className="flex items-center justify-between mb-4">
-                    <div className={`p-3 rounded-xl ${
+                    <div className={'p-3 rounded-xl ' + (
                       resource.status === 'healthy' ? 'bg-green-100 dark:bg-green-900/30' :
                       resource.status === 'warning' ? 'bg-yellow-100 dark:bg-yellow-900/30' :
                       'bg-red-100 dark:bg-red-900/30'
-                    }`}>
+                    )}>
                       {getResourceIcon(resource.type)}
                     </div>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[resource.status]}`}>
+                    <span className={'px-2 py-1 rounded-full text-xs font-medium ' + statusColors[resource.status]}>
                       {resource.status}
                     </span>
                   </div>
@@ -1387,7 +1374,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
-                          <span className={`px-2 py-0.5 rounded text-xs font-medium ${setting.status === 'active' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'}`}>
+                          <span className={'px-2 py-0.5 rounded text-xs font-medium ' + (setting.status === 'active' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300')}>
                             {setting.status}
                           </span>
                           <span className="px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
@@ -1503,11 +1490,11 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center gap-2">
-                            <span className={`w-2 h-2 rounded-full ${
+                            <span className={'w-2 h-2 rounded-full ' + (
                               log.severity === 'critical' ? 'bg-red-500' :
                               log.severity === 'warning' ? 'bg-yellow-500' :
                               'bg-blue-500'
-                            }`} />
+                            )} />
                             <span className="text-sm font-medium text-gray-900 dark:text-white font-mono">{log.action}</span>
                           </div>
                         </td>
@@ -1567,9 +1554,9 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
                       <button
                         key={table.name}
                         onClick={() => setSelectedTable(table)}
-                        className={`w-full p-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors ${
+                        className={'w-full p-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors ' + (
                           selectedTable?.name === table.name ? 'bg-slate-50 dark:bg-slate-900/30' : ''
-                        }`}
+                        )}
                       >
                         <div className="flex items-center gap-2">
                           <Table className="w-4 h-4 text-gray-400" />
@@ -1591,7 +1578,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
                 <div className="p-4 border-b border-gray-100 dark:border-gray-700">
                   <div className="flex items-center justify-between">
                     <h3 className="font-semibold text-gray-900 dark:text-white">
-                      {selectedTable ? `${selectedTable.schema}.${selectedTable.name}` : 'Select a table'}
+                      {selectedTable ? selectedTable.schema + '.' + selectedTable.name : 'Select a table'}
                     </h3>
                     {selectedTable && (
                       <div className="flex items-center gap-2">
@@ -1691,12 +1678,12 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
                   <div key={job.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
-                        <div className={`p-2 rounded-lg ${
+                        <div className={'p-2 rounded-lg ' + (
                           job.status === 'running' ? 'bg-blue-100 dark:bg-blue-900/30' :
                           job.status === 'completed' ? 'bg-green-100 dark:bg-green-900/30' :
                           job.status === 'failed' ? 'bg-red-100 dark:bg-red-900/30' :
                           'bg-gray-100 dark:bg-gray-700'
-                        }`}>
+                        )}>
                           {job.type === 'cron' && <Clock className="w-5 h-5 text-gray-600" />}
                           {job.type === 'webhook' && <Webhook className="w-5 h-5 text-gray-600" />}
                           {job.type === 'manual' && <PlayCircle className="w-5 h-5 text-gray-600" />}
@@ -1704,7 +1691,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
                         <div>
                           <div className="flex items-center gap-2">
                             <h4 className="font-medium text-gray-900 dark:text-white">{job.name}</h4>
-                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${jobStatusColors[job.status]}`}>
+                            <span className={'px-2 py-0.5 rounded-full text-xs font-medium ' + jobStatusColors[job.status]}>
                               {job.status}
                             </span>
                           </div>
@@ -1828,7 +1815,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
                         <div>
                           <div className="flex items-center gap-2">
                             <h4 className="font-medium text-gray-900 dark:text-white">{flag.name}</h4>
-                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${envColors[flag.environment]}`}>
+                            <span className={'px-2 py-0.5 rounded-full text-xs font-medium ' + envColors[flag.environment]}>
                               {flag.environment}
                             </span>
                           </div>
@@ -1929,26 +1916,26 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
                   <div key={deploy.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
-                        <div className={`p-2 rounded-lg ${
+                        <div className={'p-2 rounded-lg ' + (
                           deploy.status === 'success' ? 'bg-green-100 dark:bg-green-900/30' :
                           deploy.status === 'failed' ? 'bg-red-100 dark:bg-red-900/30' :
                           deploy.status === 'in_progress' ? 'bg-blue-100 dark:bg-blue-900/30' :
                           'bg-gray-100 dark:bg-gray-700'
-                        }`}>
-                          <Rocket className={`w-5 h-5 ${
+                        )}>
+                          <Rocket className={'w-5 h-5 ' + (
                             deploy.status === 'success' ? 'text-green-600' :
                             deploy.status === 'failed' ? 'text-red-600' :
                             deploy.status === 'in_progress' ? 'text-blue-600' :
                             'text-gray-600'
-                          }`} />
+                          )} />
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
                             <h4 className="font-medium text-gray-900 dark:text-white">{deploy.version}</h4>
-                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${envColors[deploy.environment]}`}>
+                            <span className={'px-2 py-0.5 rounded-full text-xs font-medium ' + envColors[deploy.environment]}>
                               {deploy.environment}
                             </span>
-                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${deploymentStatusColors[deploy.status]}`}>
+                            <span className={'px-2 py-0.5 rounded-full text-xs font-medium ' + deploymentStatusColors[deploy.status]}>
                               {deploy.status.replace('_', ' ')}
                             </span>
                           </div>
@@ -1969,7 +1956,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
                       <div className="flex items-center gap-4">
                         <div className="text-right">
                           <p className="text-sm font-medium text-gray-900 dark:text-white">
-                            {deploy.duration > 0 ? `${Math.floor(deploy.duration / 60)}m ${deploy.duration % 60}s` : 'In progress...'}
+                            {deploy.duration > 0 ? Math.floor(deploy.duration / 60) + 'm ' + (deploy.duration % 60) + 's' : 'In progress...'}
                           </p>
                           <p className="text-xs text-gray-500">{formatDate(deploy.deployedAt)}</p>
                         </div>
@@ -2006,7 +1993,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
             <AIInsightsPanel
               insights={[]}
               title="Admin Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -3079,22 +3066,13 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
             </DialogHeader>
             <div className="py-4">
               <div className="bg-gray-900 rounded-lg p-4 font-mono text-sm text-green-400">
-                <pre>{`CREATE TABLE ${selectedTable?.schema}.${selectedTable?.name} (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  -- Additional columns...
-);
-
--- Indexes
-CREATE INDEX idx_${selectedTable?.name}_created_at
-  ON ${selectedTable?.schema}.${selectedTable?.name}(created_at);`}</pre>
+                <pre>{'CREATE TABLE ' + selectedTable?.schema + '.' + selectedTable?.name + ' (\n  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),\n  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),\n  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),\n  -- Additional columns...\n);\n\n-- Indexes\nCREATE INDEX idx_' + selectedTable?.name + '_created_at\n  ON ' + selectedTable?.schema + '.' + selectedTable?.name + '(created_at);'}</pre>
               </div>
             </div>
             <DialogFooter>
               <button
                 onClick={() => {
-                  navigator.clipboard.writeText(`SELECT * FROM ${selectedTable?.schema}.${selectedTable?.name} LIMIT 100;`)
+                  navigator.clipboard.writeText('SELECT * FROM ' + selectedTable?.schema + '.' + selectedTable?.name + ' LIMIT 100;')
                   toast.success('Query copied to clipboard')
                 }}
                 className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg flex items-center gap-2"
@@ -3125,11 +3103,11 @@ CREATE INDEX idx_${selectedTable?.name}_created_at
                   {auditLogs.map((log) => (
                     <div key={log.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                       <div className="flex items-start gap-3">
-                        <div className={`p-2 rounded-lg ${
+                        <div className={'p-2 rounded-lg ' + (
                           log.severity === 'critical' ? 'bg-red-100 dark:bg-red-900/30' :
                           log.severity === 'warning' ? 'bg-yellow-100 dark:bg-yellow-900/30' :
                           'bg-blue-100 dark:bg-blue-900/30'
-                        }`}>
+                        )}>
                           {log.severity === 'critical' ? <AlertTriangle className="w-4 h-4 text-red-600" /> :
                            log.severity === 'warning' ? <AlertTriangle className="w-4 h-4 text-yellow-600" /> :
                            <Activity className="w-4 h-4 text-blue-600" />}
@@ -3139,11 +3117,11 @@ CREATE INDEX idx_${selectedTable?.name}_created_at
                           <p className="text-xs text-gray-500 mt-1">{log.details}</p>
                           <p className="text-xs text-gray-400 mt-1">{log.actor} - {formatDate(log.timestamp)}</p>
                         </div>
-                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                        <span className={'px-2 py-0.5 rounded-full text-xs font-medium ' + (
                           log.severity === 'critical' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' :
                           log.severity === 'warning' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300' :
                           'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300'
-                        }`}>
+                        )}>
                           {log.severity}
                         </span>
                       </div>

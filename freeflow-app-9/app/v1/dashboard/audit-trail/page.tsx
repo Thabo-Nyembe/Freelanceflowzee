@@ -97,7 +97,8 @@ export default function AuditTrailPage() {
         setCriticalEvents(critical)
         setComplianceReports(reports)
 
-        setIsLoading(false)        announce('Audit trail loaded successfully', 'polite')
+        setIsLoading(false)
+        announce('Audit trail loaded successfully', 'polite')
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load audit trail data'
         logger.error('Failed to load audit trail data', { error: err, userId })
@@ -153,7 +154,8 @@ export default function AuditTrailPage() {
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
 
-      toast.success('Audit logs exported successfully')      announce('Audit logs exported successfully', 'polite')
+      toast.success('Audit logs exported successfully')
+      announce('Audit logs exported successfully', 'polite')
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to export logs'
       logger.error('Failed to export logs', { error: err, userId })

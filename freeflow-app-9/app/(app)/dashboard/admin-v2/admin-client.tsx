@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useCallback } from 'react'
 import { toast } from 'sonner'
 import {
@@ -64,6 +66,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useAdminSettings, type AdminSetting } from '@/lib/hooks/use-admin-settings'
+
+// Initialize Supabase client once at module level
+const supabase = createClient()
 
 // Types
 type JobStatus = 'running' | 'completed' | 'failed' | 'scheduled' | 'paused'
@@ -388,8 +393,6 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
     const flag = featureFlags.find(f => f.id === flagId)
     if (!flag) return
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('feature_flags')
         .update({ enabled: !flag.enabled, updated_at: new Date().toISOString() })
@@ -498,11 +501,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
     }
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('admin_users').insert({
         name: newUserForm.name,
         email: newUserForm.email,
@@ -513,7 +512,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
         created_by: user?.id
       })
       if (error) throw error
-      toast.success('User created' has been added` })
+      toast.success(`${newUserForm.name} has been added`)
       setShowNewUserDialog(false)
       setNewUserForm({ name: '', email: '', role: 'viewer', requireMfa: false })
     } catch (err) {
@@ -550,7 +549,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
         validation_rules: {},
         metadata: {}
       })
-      toast.success('Setting created' has been added` })
+      toast.success(`Setting created: ${newSettingForm.settingName} has been added`)
       setShowNewSettingDialog(false)
       setNewSettingForm({ settingName: '', settingKey: '', category: 'API', valueType: 'string', value: '', isEncrypted: false, isRequired: false })
       refetch()
@@ -567,7 +566,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
     setIsLoading(true)
     try {
       await updateSetting(selectedSetting.id, selectedSetting)
-      toast.success('Setting updated' has been updated` })
+      toast.success(`Setting updated: ${selectedSetting.settingName} has been updated`)
       setShowEditSettingDialog(false)
       setSelectedSetting(null)
       refetch()
@@ -584,7 +583,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
     setIsLoading(true)
     try {
       await deleteSetting(setting.id)
-      toast.success('Setting deleted' has been removed` })
+      toast.success(`Setting deleted: ${setting.setting_name} has been removed`)
       refetch()
     } catch (err) {
       toast.error('Failed to delete setting')
@@ -601,11 +600,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
     }
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('feature_flags').insert({
         name: newFlagForm.name,
         key: newFlagForm.key,
@@ -616,7 +611,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
         created_by: user?.id
       })
       if (error) throw error
-      toast.success('Feature flag created' has been added` })
+      toast.success(`Feature flag created: "${newFlagForm.name}" has been added`)
       setShowNewFlagDialog(false)
       setNewFlagForm({ name: '', key: '', description: '', environment: 'development', rolloutPercentage: 0, enabled: false })
     } catch (err) {
@@ -634,11 +629,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
     }
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('scheduled_jobs').insert({
         name: newJobForm.name,
         description: newJobForm.description,
@@ -649,7 +640,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
         created_by: user?.id
       })
       if (error) throw error
-      toast.success('Job created' has been scheduled` })
+      toast.success(`Job created has been scheduled`)
       setShowNewJobDialog(false)
       setNewJobForm({ name: '', description: '', type: 'cron', schedule: '', command: '' })
     } catch (err) {
@@ -663,8 +654,6 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
   const handleExportLogs = useCallback(async () => {
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase.from('audit_logs').select('*').order('created_at', { ascending: false }).limit(1000)
       if (error) throw error
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })

@@ -352,7 +352,8 @@ export default function MicroFeaturesShowcaseClient() {
           success: `Ran ${selectedAnimationType} animation with ${animationDuration}ms duration using ${animationEasing} easing`,
           error: 'Failed to run animation demo'
         }
-      )      setShowAnimationDemoDialog(false)
+      )
+      setShowAnimationDemoDialog(false)
     } catch {
       // Error handled by toast.promise
     }
@@ -379,7 +380,8 @@ export default function MicroFeaturesShowcaseClient() {
           success: `Demonstrated ${selectedButtonStyle} button style with ${buttonColor} color (${buttonSize} size)`,
           error: 'Failed to run button demo'
         }
-      )      setShowButtonDemoDialog(false)
+      )
+      setShowButtonDemoDialog(false)
     } catch {
       // Error handled by toast.promise
     }
@@ -406,7 +408,8 @@ export default function MicroFeaturesShowcaseClient() {
           success: `Tooltip displayed at ${tooltipPosition} position with ${tooltipTrigger} trigger`,
           error: 'Failed to run tooltip demo'
         }
-      )      setShowTooltipDemoDialog(false)
+      )
+      setShowTooltipDemoDialog(false)
     } catch {
       // Error handled by toast.promise
     }
@@ -440,7 +443,8 @@ export default function MicroFeaturesShowcaseClient() {
           success: `"${configName}" saved with ${configGlobalAnimations ? 'animations enabled' : 'animations disabled'}`,
           error: 'Failed to save configuration'
         }
-      )      setShowConfigureDialog(false)
+      )
+      setShowConfigureDialog(false)
     } catch {
       // Error handled by toast.promise
     }
@@ -481,7 +485,8 @@ export default function MicroFeaturesShowcaseClient() {
           success: `${enabledFeatures.length} features enabled: ${enabledFeatures.slice(0, 3).join(', ')}${enabledFeatures.length > 3 ? '...' : ''}`,
           error: 'Failed to update feature toggles'
         }
-      )      setShowFeatureToggleDialog(false)
+      )
+      setShowFeatureToggleDialog(false)
     } catch {
       // Error handled by toast.promise
     }
@@ -489,19 +494,23 @@ export default function MicroFeaturesShowcaseClient() {
 
   // Handler for magnetic button click
   const handleMagneticButtonClick = useCallback(() => {
-    toast.success('Magnetic Button Activated')  }, [])
+    toast.success('Magnetic Button Activated')
+  }, [])
 
   // Handler for ripple button click
   const handleRippleButtonClick = useCallback(() => {
-    toast.success('Ripple Effect Triggered')  }, [])
+    toast.success('Ripple Effect Triggered')
+  }, [])
 
   // Handler for neon button click
   const handleNeonButtonClick = useCallback(() => {
-    toast.success('Neon Glow Activated')  }, [])
+    toast.success('Neon Glow Activated')
+  }, [])
 
   // Handler for tooltip button click
   const handleTooltipButtonClick = useCallback(() => {
-    toast.info('Tooltip Interaction')  }, [])
+    toast.info('Tooltip Interaction')
+  }, [])
 
   // Quick actions with real dialog functionality
   const microFeaturesShowcaseQuickActions = useMemo(() => [
@@ -511,7 +520,8 @@ export default function MicroFeaturesShowcaseClient() {
   ], [])
 
   React.useEffect(() => {
-    if (userId) {      announce('Micro features showcase loaded', 'polite')
+    if (userId) {
+      announce('Micro features showcase loaded', 'polite')
     }
   }, [userId, announce])
 
@@ -555,13 +565,13 @@ export default function MicroFeaturesShowcaseClient() {
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleDemoAction = useCallback((feature: string) => {
-    startTransition(() => {      const featureType = feature.toLowerCase().includes('animation') ? 'Animation' :
+    startTransition(() => {
+      const featureType = feature.toLowerCase().includes('animation') ? 'Animation' :
                          feature.toLowerCase().includes('button') ? 'Button' :
                          feature.toLowerCase().includes('tooltip') ? 'Tooltip' :
                          feature.toLowerCase().includes('form') ? 'Form' : 'Component'
 
-      toast.success(`Demo: ${feature}` feature demonstration activated - Micro features showcase - Interactive preview enabled`
-      })
+      toast.success('Demo: ' + feature + ' - ' + featureType + ' demonstration activated')
     })
   }, [])
 
@@ -748,8 +758,7 @@ export default function MicroFeaturesShowcaseClient() {
                     variant="outline"
                     onClick={() => {
                       setFeatureContextualTooltips(!featureContextualTooltips)
-                      toast.success(featureContextualTooltips ? 'Tooltips Disabled' : 'Tooltips Enabled'`
-                      })
+                      toast.success(featureContextualTooltips ? 'Tooltips Disabled' : 'Tooltips Enabled')
                     }}
                   >
                     {featureContextualTooltips ? 'Disable Tooltips' : 'Enable Tooltips'}

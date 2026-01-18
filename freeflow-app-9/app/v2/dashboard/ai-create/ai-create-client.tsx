@@ -379,8 +379,7 @@ export default function AICreateClient() {
   }
 
   const handleRetryGeneration = (gen: Generation) => {
-    toast.info('Retrying generation'...`
-    })
+    toast.info(`Retrying generation for ${gen.prompt.slice(0, 30)}...`)
   }
 
   const handleDeleteGeneration = (gen: Generation) => {
@@ -394,11 +393,9 @@ export default function AICreateClient() {
 
   const handleConnectService = (serviceName: string, connected: boolean) => {
     if (connected) {
-      toast.success(`${serviceName} disconnected` integration has been removed`
-      })
+      toast.success(`${serviceName} disconnected - integration has been removed`)
     } else {
-      toast.success(`${serviceName} connected` integration is now active`
-      })
+      toast.success(`${serviceName} connected - integration is now active`)
     }
   }
 
@@ -1737,7 +1734,7 @@ export default function AICreateClient() {
             <AIInsightsPanel
               insights={mockAICreateInsights}
               title="AI Creation Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(`Insight selected: ${insight.title}`)}
             />
           </div>
           <div className="space-y-6">
@@ -1971,7 +1968,7 @@ export default function AICreateClient() {
                       onClick={() => {
                         setGeneratorSettings(prev => ({ ...prev, style: template.style, quality: template.quality || prev.quality }))
                         setNewCreationPrompt(template.prompt || '')
-                        toast.success('Template loaded'" template applied to generator` })
+                        toast.success('Template loaded - template applied to generator')
                         setShowTemplateDialog(false)
                       }}
                     >

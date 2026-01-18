@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -608,10 +610,10 @@ export default function BugsClient() {
   const handleLabelFilterToggle = (labelId: string, labelName: string) => {
     setSelectedLabelFilters(prev => {
       if (prev.includes(labelId)) {
-        toast.info('Label Filter Removed'" filter` })
+        toast.info(`Removed "${labelName}" filter`)
         return prev.filter(id => id !== labelId)
       } else {
-        toast.info('Label Filter Applied'"` })
+        toast.info(`Applied "${labelName}" filter`)
         return [...prev, labelId]
       }
     })
@@ -639,7 +641,7 @@ export default function BugsClient() {
       const failed = results.failed ?? Math.floor(Math.random() * 5)
       const skipped = results.skipped ?? Math.floor(Math.random() * 10)
       setTestResults({ passed, failed, skipped })
-      toast.success('Test Suite Complete' passed, ${failed} failed, ${skipped} skipped` })
+      toast.success(`Test Suite Complete: ${passed} passed, ${failed} failed, ${skipped} skipped`)
     } catch (error) {
       toast.error('Failed to run tests')
     } finally {
@@ -666,7 +668,7 @@ export default function BugsClient() {
       link.click()
       URL.revokeObjectURL(url)
       setShowExportReportDialog(false)
-      toast.success('Report Exported'` })
+      toast.success(`Report Exported: bug-report.${exportFormat}`)
     } catch (error) {
       toast.error('Failed to export report')
     } finally {
@@ -681,8 +683,6 @@ export default function BugsClient() {
       // Find the matching DB bug if exists
       const dbBug = bugs.find(b => b.bug_code === bugToAssign.key)
       if (dbBug) {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         const { error } = await supabase
           .from('bugs')
           .update({
@@ -693,7 +693,7 @@ export default function BugsClient() {
         if (error) throw error
         fetchBugs()
       }
-      toast.success('Bug Assigned' assigned to ${selectedAssignee}` })
+      toast.success(`Bug Assigned: assigned to ${selectedAssignee}`)
       setShowAssignDialog(false)
       setBugToAssign(null)
       setSelectedAssignee('')
@@ -711,7 +711,7 @@ export default function BugsClient() {
       if (dbBug) {
         await handleUpdateStatus(dbBug.id, selectedNewStatus)
       } else {
-        toast.success('Status Changed' status changed to ${selectedNewStatus}` })
+        toast.success(`Status Changed: status changed to ${selectedNewStatus}`)
       }
       setShowStatusDialog(false)
       setBugToChangeStatus(null)
@@ -741,7 +741,7 @@ export default function BugsClient() {
       const result = await response.json()
       setShowImportDialog(false)
       setImportFile(null)
-      toast.success('Bugs Imported' from ${importFile.name}` })
+      toast.success(`Bugs Imported: from ${importFile.name}`)
       fetchBugs() // Refresh bug list
     } catch (error) {
       toast.error('Failed to import bugs')
@@ -778,7 +778,7 @@ export default function BugsClient() {
       toast.error('Please enter a label name')
       return
     }
-    toast.success('Label Created'" has been created` })
+    toast.success(`Label Created: ${newLabelName} has been created`)
     setShowAddLabelDialog(false)
     setNewLabelName('')
     setNewLabelColor('#3b82f6')
@@ -795,7 +795,7 @@ export default function BugsClient() {
   // Handler for archiving bugs
   const handleArchiveBugs = () => {
     const closedCount = allBugs.filter(b => b.status === 'closed').length
-    toast.success('Bugs Archived' closed bugs have been archived` })
+    toast.success(`Bugs Archived: ${closedCount} closed bugs have been archived`)
     setShowArchiveDialog(false)
   }
 
@@ -829,7 +829,7 @@ export default function BugsClient() {
         setShowHistoryDialog(true)
         break
       default:
-        toast.info(action action triggered` })
+        toast.info(`${action} action triggered`)
     }
   }
 
@@ -882,13 +882,9 @@ export default function BugsClient() {
   const fetchBugs = useCallback(async () => {
     try {
       setIsLoading(true)
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('bugs')
         .select('*')
@@ -910,16 +906,12 @@ export default function BugsClient() {
   const handleCreateBug = async () => {
     try {
       setIsSaving(true)
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to create bugs')
         return
       }
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('bugs').insert({
         user_id: user.id,
         bug_code: generateBugCode(),
@@ -958,8 +950,6 @@ export default function BugsClient() {
     if (!editingBug) return
     try {
       setIsSaving(true)
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('bugs')
         .update({
@@ -998,8 +988,6 @@ export default function BugsClient() {
   // Delete bug
   const handleDeleteBug = async (bugId: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('bugs')
         .update({ deleted_at: new Date().toISOString() })
@@ -1018,8 +1006,6 @@ export default function BugsClient() {
   // Update bug status
   const handleUpdateStatus = async (bugId: string, newStatus: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('bugs')
         .update({
@@ -1979,7 +1965,7 @@ export default function BugsClient() {
                             </div>
                             <Button variant="ghost" size="sm" onClick={() => {
                               window.open(`/dashboard/bugs-v2/labels/${label.id}`, '_blank')
-                              toast.info('Label Editor'...` })
+                              toast.info(`Label Editor: editing ${label.name}`)
                             }}>
                               <Edit className="w-4 h-4" />
                             </Button>
@@ -2136,9 +2122,9 @@ export default function BugsClient() {
                               className="w-full"
                               onClick={() => {
                                 if (integration.status === 'Connected') {
-                                  toast.info('Configure Integration' configuration...` })
+                                  toast.info(`Configure Integration: opening ${integration.name} configuration...`)
                                 } else {
-                                  toast.success('Connecting...'` })
+                                  toast.success(`Connecting to ${integration.name}...`)
                                 }
                               }}
                             >
@@ -2268,8 +2254,6 @@ export default function BugsClient() {
                             if (confirm('Delete all test/demo bugs? This cannot be undone.')) {
                               toast.loading('Deleting test data...', { id: 'delete-test-data' });
                               try {
-                                const { createClient } = await import('@/lib/supabase/client')
-                                const supabase = createClient()
                                 const { data: { user } } = await supabase.auth.getUser()
                                 if (!user) {
                                   toast.error('Please sign in', { id: 'delete-test-data' })
@@ -2281,8 +2265,6 @@ export default function BugsClient() {
                                   b.title.toLowerCase().includes('demo')
                                 )
                                 for (const bug of testBugs) {
-                                  const { createClient } = await import('@/lib/supabase/client')
-                                  const supabase = createClient()
                                   await supabase
                                     .from('bugs')
                                     .update({ deleted_at: new Date().toISOString() })
@@ -2306,16 +2288,12 @@ export default function BugsClient() {
                             if (confirm('Reset project and delete all bugs? This cannot be undone.')) {
                               toast.loading('Resetting project...', { id: 'project-reset' });
                               try {
-                                const { createClient } = await import('@/lib/supabase/client')
-                                const supabase = createClient()
                                 const { data: { user } } = await supabase.auth.getUser()
                                 if (!user) {
                                   toast.error('Please sign in', { id: 'project-reset' })
                                   return
                                 }
                                 // Soft delete all bugs for this user
-                                const { createClient } = await import('@/lib/supabase/client')
-                                const supabase = createClient()
                                 const { error } = await supabase
                                   .from('bugs')
                                   .update({ deleted_at: new Date().toISOString() })
@@ -3179,7 +3157,7 @@ export default function BugsClient() {
               </div>
               <div className="grid gap-2">
                 <Label>Assignee</Label>
-                <Select onValueChange={(v) => toast.info('Filter Applied'` })}>
+                <Select onValueChange={(v) => toast.info(`Filter Applied: filtering by ${v}`)}>
                   <SelectTrigger>
                     <SelectValue placeholder="Any assignee" />
                   </SelectTrigger>
@@ -3599,11 +3577,11 @@ export default function BugsClient() {
                   className="flex-1"
                   onChange={(e) => {
                     if (e.target.value) {
-                      toast.info('Searching...'"` })
+                      toast.info(`Searching for: ${e.target.value}`)
                     }
                   }}
                 />
-                <Select onValueChange={(v) => toast.info('Filter Applied' activities` })}>
+                <Select onValueChange={(v) => toast.info(`Filter Applied: showing ${v} activities`)}>
                   <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="All activities" />
                   </SelectTrigger>
@@ -3637,7 +3615,7 @@ export default function BugsClient() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => toast.info('Activity Details' ${activity.action} on ${activity.bug}` })}
+                        onClick={() => toast.info(`Activity Details: ${activity.action} on ${activity.bug}`)}
                       >
                         <Eye className="w-4 h-4" />
                       </Button>
@@ -3668,7 +3646,7 @@ export default function BugsClient() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => toast.info('Activity Details' ${activity.action} on ${activity.bug}` })}
+                        onClick={() => toast.info(`Activity Details: ${activity.action} on ${activity.bug}`)}
                       >
                         <Eye className="w-4 h-4" />
                       </Button>

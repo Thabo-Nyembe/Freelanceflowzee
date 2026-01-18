@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -227,8 +229,6 @@ export default function SettingsClient() {
   useEffect(() => {
     const fetchUserAndSettings = async () => {
       try {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) return
         setUserId(user.id)
@@ -385,8 +385,6 @@ export default function SettingsClient() {
     if (!userId) return
     setIsSaving(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('user_settings')
         .upsert({
@@ -416,8 +414,6 @@ export default function SettingsClient() {
     setIsSaving(true)
     try {
       for (const notif of notifications) {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         await supabase
           .from('notification_preferences')
           .upsert({
@@ -444,8 +440,6 @@ export default function SettingsClient() {
     if (!userId) return
     setIsSaving(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('user_settings')
         .upsert({
@@ -469,8 +463,6 @@ export default function SettingsClient() {
     setTheme(newTheme)
     if (!userId) return
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       await supabase
         .from('user_settings')
         .upsert({
@@ -478,7 +470,7 @@ export default function SettingsClient() {
           theme: newTheme,
           updated_at: new Date().toISOString()
         }, { onConflict: 'user_id' })
-      toast.success('Theme updated'` })
+      toast.success('Theme updated')
     } catch (error: any) {
       toast.error('Error')
     }
@@ -501,8 +493,6 @@ export default function SettingsClient() {
 
     setIsSaving(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.auth.updateUser({ password: newPassword })
       if (error) throw error
       toast.success('Password changed')
@@ -527,8 +517,6 @@ export default function SettingsClient() {
     ))
 
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       await supabase
         .from('integrations')
         .upsert({
@@ -540,9 +528,7 @@ export default function SettingsClient() {
           updated_at: new Date().toISOString()
         }, { onConflict: 'id' })
 
-      toast.success(
-        newStatus === 'connected' ? 'Connected' : 'Disconnected' ${newStatus === 'connected' ? 'connected' : 'disconnected'} successfully` }
-      )
+      toast.success(newStatus === 'connected' ? 'Connected successfully' : 'Disconnected successfully')
     } catch (error: any) {
       toast.error('Error')
     }
@@ -554,14 +540,12 @@ export default function SettingsClient() {
     setSessions(prev => prev.filter(s => s.id !== session.id))
 
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       await supabase
         .from('user_sessions')
         .delete()
         .eq('id', session.id)
 
-      toast.success('Session revoked' has been terminated` })
+      toast.success('Session revoked')
     } catch (error: any) {
       toast.error('Error')
     }
@@ -667,7 +651,7 @@ export default function SettingsClient() {
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
 
-    toast.success('Invoice downloaded' has been downloaded` })
+    toast.success('Invoice downloaded')
   }
 
   // Handle avatar upload
@@ -708,8 +692,6 @@ export default function SettingsClient() {
 
     if (userId) {
       try {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         await supabase
           .from('integrations')
           .update({ last_sync_at: new Date().toISOString() })
@@ -719,7 +701,7 @@ export default function SettingsClient() {
       }
     }
 
-    toast.success('Synced' has been synced` })
+    toast.success('Synced')
   }
 
   // Open upgrade dialog / redirect
@@ -744,11 +726,9 @@ export default function SettingsClient() {
     }
 
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.auth.resend({ type: 'signup', email: profile.email })
       if (error) throw error
-      toast.success('Verification email sent' for the verification link` })
+      toast.success('Verification email sent')
     } catch (error: any) {
       toast.error('Error')
     }
@@ -762,7 +742,7 @@ export default function SettingsClient() {
         const securityTab = document.querySelector('[value="security"]') as HTMLElement
         if (securityTab) {
           securityTab.click()
-          toast.success('Security settings opened'` })
+          toast.success('Security settings opened')
         }
         break
       case 'Usage':

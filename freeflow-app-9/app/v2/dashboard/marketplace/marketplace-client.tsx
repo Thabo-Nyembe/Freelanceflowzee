@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { useCreateCoupon, useCoupons } from '@/lib/hooks/use-coupon-extended'
 import { toast } from 'sonner'
@@ -433,12 +435,8 @@ export default function MarketplaceClient() {
   // Fetch webhooks from Supabase
   const fetchWebhooks = useCallback(async () => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase.from('webhooks').select('*').eq('user_id', user.id).order('created_at', { ascending: false })
       if (error) throw error
       setDbWebhooks(data || [])
@@ -450,12 +448,8 @@ export default function MarketplaceClient() {
   // Fetch API keys from Supabase
   const fetchApiKeys = useCallback(async () => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase.from('api_keys').select('*').eq('user_id', user.id).order('created_at', { ascending: false })
       if (error) throw error
       setDbApiKeys(data || [])
@@ -467,8 +461,6 @@ export default function MarketplaceClient() {
   // Fetch marketplace apps from Supabase
   const fetchMarketplaceApps = useCallback(async () => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase.from('marketplace_apps').select('*').eq('status', 'published').order('total_downloads', { ascending: false })
       if (error) throw error
       setDbApps(data || [])
@@ -529,22 +521,18 @@ export default function MarketplaceClient() {
     }
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { toast.error('Please sign in'); return }
       const keyPrefix = 'mk_' + Math.random().toString(36).substring(2, 8)
       const keyHash = 'hashed_' + Math.random().toString(36).substring(2, 20)
       const expiresAt = apiKeyForm.expiration === 'never' ? null : new Date(Date.now() + parseInt(apiKeyForm.expiration) * 24 * 60 * 60 * 1000).toISOString()
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('api_keys').insert({
         user_id: user.id, name: apiKeyForm.name, key_prefix: keyPrefix, key_hash: keyHash,
         scopes: apiKeyForm.permissions, expires_at: expiresAt, is_active: true
       })
       if (error) throw error
-      toast.success('API key created!'...` })
+      toast.success('API key created!')
       setShowAPIKeyDialog(false)
       setApiKeyForm({ name: '', permissions: ['read'], expiration: 'never' })
       fetchApiKeys()
@@ -557,8 +545,6 @@ export default function MarketplaceClient() {
   // Delete API key handler
   const handleDeleteApiKey = async (id: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('api_keys').delete().eq('id', id)
       if (error) throw error
       toast.success('API key deleted')
@@ -576,13 +562,9 @@ export default function MarketplaceClient() {
     }
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { toast.error('Please sign in'); return }
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('webhooks').insert({
         user_id: user.id, name: `Webhook ${webhookForm.url.split('/').pop()}`,
         url: webhookForm.url, secret: webhookForm.secret || null, events: webhookForm.events, is_active: true
@@ -601,8 +583,6 @@ export default function MarketplaceClient() {
   // Delete webhook handler
   const handleDeleteWebhook = async (id: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('webhooks').delete().eq('id', id)
       if (error) throw error
       toast.success('Webhook deleted')
@@ -717,14 +697,12 @@ export default function MarketplaceClient() {
 
   // Handlers
   const handleAddToWishlist = (product: Product) => {
-    toast.success('Added to wishlist'" added to your wishlist`
-    })
+    toast.success(product.name + ' added to your wishlist')
     setWishlist(prev => [...prev, product.id])
   }
 
   const handleRemoveFromWishlist = (product: Product) => {
-    toast.success('Removed from wishlist'" removed from your wishlist`
-    })
+    toast.success(product.name + ' removed from your wishlist')
     setWishlist(prev => prev.filter(id => id !== product.id))
   }
 
@@ -747,20 +725,17 @@ export default function MarketplaceClient() {
     setCart(prev => {
       const isAlreadyInCart = prev.some(p => p.id === product.id)
       if (isAlreadyInCart) {
-        toast.info('Already in cart'" is already in your cart`
-        })
+        toast.info(product.name + ' is already in your cart')
         return prev
       }
-      toast.success('Added to cart'" has been added to your cart`
-      })
+      toast.success(product.name + ' has been added to your cart')
       return [...prev, product]
     })
   }
 
   const handleRemoveFromCart = (product: Product) => {
     setCart(prev => prev.filter(p => p.id !== product.id))
-    toast.success('Removed from cart'" has been removed from your cart`
-    })
+    toast.success(product.name + ' has been removed from your cart')
   }
 
   // Quick actions defined inside component to access state setters
@@ -885,7 +860,7 @@ export default function MarketplaceClient() {
                 <Button variant="ghost" size="sm" onClick={() => {
                   setCurrentPage(1)
                   setSelectedCategory('all')
-                  toast.success('All apps loaded' marketplace apps` })
+                  toast.success('All apps loaded')
                 }}>View All</Button>
               </CardHeader>
               <CardContent>
@@ -1505,7 +1480,7 @@ export default function MarketplaceClient() {
                   </div>
                   <div className="flex gap-2">
                     <Button variant="outline" size="sm" onClick={() => {
-                      toast.success('Orders refreshed' orders loaded` })
+                      toast.success('Orders refreshed')
                     }}><RefreshCw className="h-4 w-4" /></Button>
                     <Button variant="outline" size="sm" onClick={() => setShowFiltersDialog(true)}><Filter className="h-4 w-4 mr-1" />Filters</Button>
                   </div>
@@ -2083,7 +2058,7 @@ export default function MarketplaceClient() {
             <AIInsightsPanel
               insights={mockMarketplaceAIInsights}
               title="Marketplace Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -2365,7 +2340,7 @@ export default function MarketplaceClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowCheckoutDialog(false)}>Cancel</Button>
               <Button onClick={() => {
-                toast.success('Purchase completed successfully!'` })
+                toast.success('Purchase completed successfully!')
                 setShowCheckoutDialog(false)
                 setCheckoutProduct(null)
               }} className="bg-gradient-to-r from-violet-600 to-purple-600"><CreditCard className="h-4 w-4 mr-2" />Complete Purchase</Button>
@@ -2402,7 +2377,7 @@ export default function MarketplaceClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowContactDialog(false)}>Cancel</Button>
               <Button onClick={() => {
-                toast.success('Message sent!'` })
+                toast.success('Message sent!')
                 setShowContactDialog(false)
                 setContactProduct(null)
               }} className="bg-gradient-to-r from-violet-600 to-purple-600"><Send className="h-4 w-4 mr-2" />Send Message</Button>
@@ -2488,7 +2463,7 @@ export default function MarketplaceClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowInstallDialog(false)}>Cancel</Button>
               <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => {
-                toast.success('App installed successfully!' is now ready to use` })
+                toast.success('App installed successfully!')
                 setShowInstallDialog(false)
                 setInstallProduct(null)
               }}>
@@ -2755,7 +2730,7 @@ export default function MarketplaceClient() {
               <Button variant="outline" onClick={() => setShowRespondAllDialog(false)}>Cancel</Button>
               <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => {
                 const unreviewedCount = mockReviews.filter(r => !r.response).length
-                toast.success('Responses sent!' reviews` })
+                toast.success('Responses sent!')
                 setShowRespondAllDialog(false)
               }}>
                 <MessageSquare className="h-4 w-4 mr-2" />Send Responses
@@ -2808,7 +2783,7 @@ export default function MarketplaceClient() {
                 a.download = `orders-export-${new Date().toISOString().split('T')[0]}.json`
                 a.click()
                 URL.revokeObjectURL(url)
-                toast.success('Export complete' orders` })
+                toast.success('Export complete')
                 setShowExportOrdersDialog(false)
               }}>
                 <Download className="h-4 w-4 mr-2" />Export
@@ -3017,7 +2992,7 @@ export default function MarketplaceClient() {
               <Button variant="outline" onClick={() => setShowProcessOrdersDialog(false)}>Cancel</Button>
               <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => {
                 const pendingCount = mockOrders.filter(o => o.status === 'pending').length
-                toast.success('Orders processed!' orders completed, confirmations sent` })
+                toast.success('Orders processed!')
                 setShowProcessOrdersDialog(false)
               }}>
                 <RefreshCw className="h-4 w-4 mr-2" />Process Orders
@@ -3062,7 +3037,7 @@ export default function MarketplaceClient() {
               <Button variant="outline" onClick={() => setShowGenerateInvoicesDialog(false)}>Cancel</Button>
               <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => {
                 const invoiceCount = mockOrders.filter(o => o.status === 'completed').length
-                toast.success('Invoices generated!' invoices and sent to customers` })
+                toast.success('Invoices generated!')
                 setShowGenerateInvoicesDialog(false)
               }}>
                 <FileText className="h-4 w-4 mr-2" />Generate
@@ -3100,7 +3075,7 @@ export default function MarketplaceClient() {
               <Button variant="outline" onClick={() => setShowProcessPayoutsDialog(false)}>Cancel</Button>
               <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => {
                 const payoutAmount = (mockOrders.reduce((sum, o) => sum + o.amount, 0) * 0.85).toFixed(2)
-                toast.success('Payouts processed!' sent to ${mockVendors.length} vendors` })
+                toast.success('Payouts processed!')
                 setShowProcessPayoutsDialog(false)
               }}>
                 <DollarSign className="h-4 w-4 mr-2" />Process Payouts
@@ -3148,7 +3123,7 @@ export default function MarketplaceClient() {
               <Button variant="outline" onClick={() => setShowSendNotificationsDialog(false)}>Cancel</Button>
               <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => {
                 const recipientCount = mockOrders.filter(o => o.status === 'pending').length
-                toast.success('Notifications sent!' customers via email` })
+                toast.success('Notifications sent!')
                 setShowSendNotificationsDialog(false)
               }}>
                 <Send className="h-4 w-4 mr-2" />Send
@@ -3200,7 +3175,7 @@ export default function MarketplaceClient() {
                 a.download = `orders-${new Date().toISOString().split('T')[0]}.csv`
                 a.click()
                 URL.revokeObjectURL(url)
-                toast.success('CSV exported!' orders` })
+                toast.success('CSV exported!')
                 setShowExportCSVDialog(false)
               }}>
                 <Download className="h-4 w-4 mr-2" />Download CSV

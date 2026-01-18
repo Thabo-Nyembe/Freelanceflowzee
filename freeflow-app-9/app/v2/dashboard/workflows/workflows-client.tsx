@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
+import { cn } from '@/lib/utils'
 import { useWorkflows } from '@/lib/hooks/use-workflows'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -583,8 +584,7 @@ export default function WorkflowsClient() {
       })
 
       if (result.success) {
-        toast.success('Workflow created' has been created successfully`
-        })
+        toast.success('Workflow created: ' + newWorkflowName + ' has been created successfully')
         setShowCreateDialog(false)
         setNewWorkflowName('')
         setNewWorkflowDescription('')
@@ -602,8 +602,7 @@ export default function WorkflowsClient() {
     // Activate workflow - sets status to 'active' and started_at timestamp
     const result = await startWorkflow(workflow.id)
     if (result.success) {
-      toast.success('Workflow activated' is now active and running`
-      })
+      toast.success('Workflow activated: ' + workflow.name + ' is now active and running')
     } else {
       toast.error('Failed to activate workflow')
     }
@@ -613,8 +612,7 @@ export default function WorkflowsClient() {
     // Pause workflow - sets status to 'paused'
     const result = await pauseWorkflow(workflow.id)
     if (result.success) {
-      toast.success('Workflow paused' has been paused`
-      })
+      toast.success('Workflow paused: ' + workflow.name + ' has been paused')
     } else {
       toast.error('Failed to pause workflow')
     }
@@ -624,8 +622,7 @@ export default function WorkflowsClient() {
     // Activate/Resume workflow
     const result = await updateWorkflow(workflow.id, { status: 'active' })
     if (result.success) {
-      toast.success('Workflow activated' is now active`
-      })
+      toast.success('Workflow activated: ' + workflow.name + ' is now active')
     } else {
       toast.error('Failed to activate workflow')
     }
@@ -658,8 +655,7 @@ export default function WorkflowsClient() {
     })
 
     if (result.success) {
-      toast.success('Workflow duplicated' created`
-      })
+      toast.success('Workflow duplicated: ' + workflow.name + ' (Copy) created')
     } else {
       toast.error('Failed to duplicate workflow')
     }
@@ -669,8 +665,7 @@ export default function WorkflowsClient() {
     // Delete workflow (soft delete in Supabase)
     const result = await deleteWorkflow(workflow.id)
     if (result.success) {
-      toast.success('Workflow deleted' has been removed`
-      })
+      toast.success('Workflow deleted: ' + workflow.name + ' has been removed')
       setSelectedWorkflow(null) // Close the dialog if open
     } else {
       toast.error('Failed to delete workflow')
@@ -713,8 +708,7 @@ export default function WorkflowsClient() {
       document.body.removeChild(link)
       URL.revokeObjectURL(url)
 
-      toast.success('Workflows exported' workflow(s) downloaded successfully`
-      })
+      toast.success('Workflows exported: ' + selectedWorkflows.length + ' workflow(s) downloaded successfully')
     } catch (error) {
       toast.error('Export failed')
     }
@@ -746,7 +740,7 @@ export default function WorkflowsClient() {
                 />
               </div>
               <Button variant="outline" size="icon" onClick={() => fetchWorkflows()} disabled={dbLoading}>
-                <RefreshCw className={`w-4 h-4 ${dbLoading ? 'animate-spin' : ''}`} />
+                <RefreshCw className={cn("w-4 h-4", dbLoading && "animate-spin")} />
               </Button>
               <Button
                 className="bg-gradient-to-r from-orange-500 to-amber-600 text-white"
@@ -775,10 +769,10 @@ export default function WorkflowsClient() {
             <Card key={index} className="relative overflow-hidden">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-2">
-                  <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${stat.color} flex items-center justify-center`}>
+                  <div className={cn("w-8 h-8 rounded-lg bg-gradient-to-br flex items-center justify-center", stat.color)}>
                     <stat.icon className="w-4 h-4 text-white" />
                   </div>
-                  <div className={`flex items-center gap-1 text-xs ${stat.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  <div className={cn("flex items-center gap-1 text-xs", stat.change >= 0 ? 'text-green-600' : 'text-red-600')}>
                     {stat.change >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
                     {Math.abs(stat.change)}%
                   </div>
@@ -1027,7 +1021,7 @@ export default function WorkflowsClient() {
                   {mockRuns.map((run) => (
                     <div key={run.id} className="flex items-center justify-between p-4 rounded-lg border hover:bg-muted/30 cursor-pointer" onClick={() => setSelectedRun(run)}>
                       <div className="flex items-center gap-4">
-                        <div className={`w-3 h-3 rounded-full ${run.status === 'success' ? 'bg-green-500' : run.status === 'error' ? 'bg-red-500' : run.status === 'running' ? 'bg-blue-500 animate-pulse' : 'bg-yellow-500'}`} />
+                        <div className={cn("w-3 h-3 rounded-full", run.status === 'success' ? 'bg-green-500' : run.status === 'error' ? 'bg-red-500' : run.status === 'running' ? 'bg-blue-500 animate-pulse' : 'bg-yellow-500')} />
                         <div>
                           <p className="font-medium">{run.workflowName}</p>
                           <p className="text-sm text-muted-foreground">
@@ -1036,7 +1030,7 @@ export default function WorkflowsClient() {
                         </div>
                       </div>
                       <div className="flex items-center gap-4">
-                        <Badge className={`${run.status === 'success' ? 'bg-green-100 text-green-800' : run.status === 'error' ? 'bg-red-100 text-red-800' : run.status === 'running' ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                        <Badge className={cn(run.status === 'success' ? 'bg-green-100 text-green-800' : run.status === 'error' ? 'bg-red-100 text-red-800' : run.status === 'running' ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800')}>
                           {run.status}
                         </Badge>
                         <span className="text-sm text-muted-foreground">{formatTimeAgo(run.startedAt)}</span>
@@ -1298,11 +1292,7 @@ export default function WorkflowsClient() {
                         <button
                           key={item.id}
                           onClick={() => setSettingsTab(item.id)}
-                          className={`w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors ${
-                            settingsTab === item.id
-                              ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'
-                              : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
-                          }`}
+                          className={cn("w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors", settingsTab === item.id ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400' : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800')}
                         >
                           <item.icon className="h-4 w-4" />
                           {item.label}
@@ -1996,7 +1986,7 @@ export default function WorkflowsClient() {
             <AIInsightsPanel
               insights={mockWorkflowsAIInsights}
               title="Workflow Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -2154,7 +2144,7 @@ export default function WorkflowsClient() {
           {selectedRun && (
             <div className="space-y-4">
               <div className="flex items-center gap-3">
-                <Badge className={`${selectedRun.status === 'success' ? 'bg-green-100 text-green-800' : selectedRun.status === 'error' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800'}`}>
+                <Badge className={cn(selectedRun.status === 'success' ? 'bg-green-100 text-green-800' : selectedRun.status === 'error' ? 'bg-red-100 text-red-800' : 'bg-blue-100 text-blue-800')}>
                   {selectedRun.status}
                 </Badge>
                 <span className="text-sm text-muted-foreground">{selectedRun.duration}</span>
@@ -2403,18 +2393,10 @@ export default function WorkflowsClient() {
                 {mockRuns.map((run, idx) => (
                   <div
                     key={run.id}
-                    className={`p-2 rounded ${
-                      run.status === 'success' ? 'bg-green-50 dark:bg-green-950' :
-                      run.status === 'error' ? 'bg-red-50 dark:bg-red-950' :
-                      'bg-blue-50 dark:bg-blue-950'
-                    }`}
+                    className={cn("p-2 rounded", run.status === 'success' ? 'bg-green-50 dark:bg-green-950' : run.status === 'error' ? 'bg-red-50 dark:bg-red-950' : 'bg-blue-50 dark:bg-blue-950')}
                   >
                     <div className="flex items-center gap-2">
-                      <span className={`w-2 h-2 rounded-full ${
-                        run.status === 'success' ? 'bg-green-500' :
-                        run.status === 'error' ? 'bg-red-500' :
-                        'bg-blue-500'
-                      }`} />
+                      <span className={cn("w-2 h-2 rounded-full", run.status === 'success' ? 'bg-green-500' : run.status === 'error' ? 'bg-red-500' : 'bg-blue-500')} />
                       <span className="text-muted-foreground">{new Date(run.startedAt).toLocaleString()}</span>
                       <span className="font-medium">[{run.status.toUpperCase()}]</span>
                       <span>{run.workflowName}</span>
@@ -2460,8 +2442,7 @@ export default function WorkflowsClient() {
                 document.body.removeChild(link)
                 URL.revokeObjectURL(url)
 
-                toast.success('Logs exported successfully' log entries exported`
-                })
+                toast.success('Logs exported successfully: ' + logsData.length + ' log entries exported')
               } catch (error) {
                 toast.error('Export failed')
               }

@@ -727,8 +727,7 @@ export default function CampaignsClient() {
         status: 'running' as CampaignStatusDB,
         launched_at: new Date().toISOString()
       })
-      toast.success('Campaign launched'" is now live`
-      })
+      toast.success(`Campaign launched: ${campaignName} is now live`)
       refetch()
     } catch (error) {
       toast.error('Failed to launch campaign')
@@ -745,8 +744,7 @@ export default function CampaignsClient() {
         id: campaignId,
         status: 'paused' as CampaignStatusDB
       })
-      toast.success('Campaign paused'" has been paused`
-      })
+      toast.success(`Campaign paused: ${campaignName} has been paused`)
       refetch()
     } catch (error) {
       toast.error('Failed to pause campaign')
@@ -764,8 +762,7 @@ export default function CampaignsClient() {
         status: 'completed' as CampaignStatusDB,
         completed_at: new Date().toISOString()
       })
-      toast.success('Campaign ended'" has been completed`
-      })
+      toast.success(`Campaign ended: ${campaignName} has been completed`)
       refetch()
     } catch (error) {
       toast.error('Failed to end campaign')
@@ -779,8 +776,7 @@ export default function CampaignsClient() {
     setOperationLoading(campaignId)
     try {
       await deleteCampaign({ id: campaignId })
-      toast.success('Campaign deleted'" has been deleted`
-      })
+      toast.success(`Campaign deleted: ${campaignName} has been deleted`)
       refetch()
       setShowCampaignDialog(false)
       setSelectedCampaign(null)
@@ -825,8 +821,7 @@ export default function CampaignsClient() {
         requires_approval: false,
         approved: false
       } as any)
-      toast.success('Campaign duplicated'" created`
-      })
+      toast.success(`Campaign duplicated: ${campaign.name} created`)
       refetch()
     } catch (error) {
       toast.error('Failed to duplicate campaign')
@@ -858,8 +853,7 @@ export default function CampaignsClient() {
         id: campaignId,
         status: 'archived' as CampaignStatusDB
       })
-      toast.success('Campaign archived'" has been archived`
-      })
+      toast.success(`Campaign archived: ${campaignName} has been archived`)
       refetch()
     } catch (error) {
       toast.error('Failed to archive campaign')
@@ -2348,7 +2342,7 @@ export default function CampaignsClient() {
                               for (const campaign of completedCampaigns) {
                                 await updateCampaign({ id: campaign.id, status: 'archived' as CampaignStatusDB })
                               }
-                              toast.success('Campaigns archived' completed campaigns have been archived` })
+                              toast.success('Campaigns archived')
                               refetch()
                             }}
                           >
@@ -2378,7 +2372,7 @@ export default function CampaignsClient() {
                               for (const campaign of draftCampaigns) {
                                 await deleteCampaign({ id: campaign.id })
                               }
-                              toast.success('Test emails purged' draft campaigns have been deleted` })
+                              toast.success('Test emails purged')
                               refetch()
                             }}
                           >
@@ -2420,7 +2414,7 @@ export default function CampaignsClient() {
                               for (const campaign of dbCampaigns) {
                                 await deleteCampaign({ id: campaign.id })
                               }
-                              toast.success('All campaigns deleted' campaigns have been permanently deleted` })
+                              toast.success('All campaigns deleted')
                               refetch()
                             }}
                           >
@@ -3304,7 +3298,7 @@ export default function CampaignsClient() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
         <AIInsightsPanel
           insights={mockCampaignAIInsights}
-          onAskQuestion={(q) => toast.info('Question Submitted' })}
+          onAskQuestion={(q) => toast.info(`Question Submitted: ${q}`)}
         />
         <PredictiveAnalytics predictions={mockCampaignPredictions} />
       </div>

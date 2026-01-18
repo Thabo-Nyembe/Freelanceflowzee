@@ -1,5 +1,6 @@
 'use client'
 // Enhanced & Competitive Upgrade Components
+import { cn } from '@/lib/utils'
 import {
   AIInsightsPanel,
   CollaborationIndicator,
@@ -272,7 +273,8 @@ const generateMockClients = (): Client[] => {
     nextFollowUp: new Date(Date.now() + Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
     tags: ['priority', 'enterprise', 'growth'].slice(0, Math.floor(Math.random() * 3) + 1),
     createdAt: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString()
-  }))  return clients
+  }))
+  return clients
 }
 
 const generateMockProjects = (clients: Client[]): Project[] => {
@@ -304,7 +306,8 @@ const generateMockProjects = (clients: Client[]): Project[] => {
       endDate: new Date(Date.now() + Math.random() * 180 * 24 * 60 * 60 * 1000).toISOString(),
       team: ['John Doe', 'Jane Smith', 'Bob Johnson'].slice(0, Math.floor(Math.random() * 3) + 1)
     }
-  })  return projects
+  })
+  return projects
 }
 
 // ============================================================================
@@ -437,7 +440,8 @@ export default function ClientPortalClient() {
           const projects = generateMockProjects(clients)
 
           dispatch({ type: 'SET_CLIENTS', clients })
-          dispatch({ type: 'SET_PROJECTS', projects })          announce('Client portal loaded', 'polite')
+          dispatch({ type: 'SET_PROJECTS', projects })
+          announce('Client portal loaded', 'polite')
         } else {
           throw new Error(result.error || 'Failed to load clients')
         }
@@ -581,10 +585,10 @@ export default function ClientPortalClient() {
           createdAt: new Date().toISOString()
         }
 
-        dispatch({ type: 'ADD_CLIENT', client: newClient })        const followUpDate = new Date(newClient.nextFollowUp).toLocaleDateString()
+        dispatch({ type: 'ADD_CLIENT', client: newClient })
+        const followUpDate = new Date(newClient.nextFollowUp).toLocaleDateString()
 
-        toast.success('Client added successfully' - ${clientForm.tier} tier - ${clientForm.contactPerson} - Health: 85% - Follow-up: ${followUpDate}`
-        })
+        toast.success("Client added successfully - " + clientForm.tier + " tier - " + clientForm.contactPerson + " - Health: 85% - Follow-up: " + followUpDate)
         setIsAddClientModalOpen(false)
         setClientForm({ companyName: '', contactPerson: '', email: '', phone: '', tier: 'basic' })
       } else {
@@ -603,7 +607,8 @@ export default function ClientPortalClient() {
   }
 
   const handleDeleteClient = async (clientId: string) => {
-    const client = state.clients.find(c => c.id === clientId)    try {
+    const client = state.clients.find(c => c.id === clientId)
+    try {
       const response = await fetch('/api/clients', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -616,10 +621,10 @@ export default function ClientPortalClient() {
       const result = await response.json()
 
       if (result.success) {
-        dispatch({ type: 'DELETE_CLIENT', clientId })        const revenueLost = client?.totalRevenue || 0
+        dispatch({ type: 'DELETE_CLIENT', clientId })
+        const revenueLost = client?.totalRevenue || 0
 
-        toast.success('Client deleted successfully' - ${client?.tier || 'basic'} tier - ${client?.activeProjects || 0} projects - $${revenueLost.toLocaleString()} total revenue`
-        })
+        toast.success("Client deleted successfully - " + (client?.tier || 'basic') + " tier - " + (client?.activeProjects || 0) + " projects - $" + revenueLost.toLocaleString() + " total revenue")
         setIsDeleteModalOpen(false)
       } else {
         throw new Error(result.error || 'Failed to delete client')
@@ -646,7 +651,8 @@ export default function ClientPortalClient() {
       return
     }
 
-    const client = state.clients.find(c => c.id === projectForm.clientId)    try {
+    const client = state.clients.find(c => c.id === projectForm.clientId)
+    try {
       setIsSaving(true)
 
       // Dynamic import for code splitting
@@ -680,10 +686,10 @@ export default function ClientPortalClient() {
         team: []
       }
 
-      dispatch({ type: 'ADD_PROJECT', project: newProject })      const endDateFormatted = new Date(newProject.endDate).toLocaleDateString()
+      dispatch({ type: 'ADD_PROJECT', project: newProject })
+      const endDateFormatted = new Date(newProject.endDate).toLocaleDateString()
 
-      toast.success('Project added successfully' - ${client?.companyName} - Planning stage - Budget: $${budget.toLocaleString()} - Due: ${endDateFormatted}`
-      })
+      toast.success("Project added successfully - " + (client?.companyName) + " - Planning stage - Budget: $" + budget.toLocaleString() + " - Due: " + endDateFormatted)
       announce('Project added successfully', 'polite')
       setIsAddProjectModalOpen(false)
       setProjectForm({ name: '', description: '', budget: '', clientId: '' })
@@ -735,10 +741,10 @@ export default function ClientPortalClient() {
         createdBy: userId || 'Current User'
       }
 
-      dispatch({ type: 'ADD_COMMUNICATION', communication: newComm })      const timestamp = new Date(newComm.createdAt).toLocaleString()
+      dispatch({ type: 'ADD_COMMUNICATION', communication: newComm })
+      const timestamp = new Date(newComm.createdAt).toLocaleString()
 
-      toast.success('Communication logged successfully' - ${communicationForm.type} - ${communicationForm.subject} - ${timestamp}`
-      })
+      toast.success("Communication logged successfully - " + communicationForm.type + " - " + communicationForm.subject + " - " + timestamp)
       setIsAddCommunicationModalOpen(false)
       setCommunicationForm({ type: 'email', subject: '', content: '' })
     } catch (error: any) {
@@ -812,7 +818,7 @@ export default function ClientPortalClient() {
         extension = 'json'
       } else {
         // PDF - just create a text representation for now
-        content = `Client Portal Export\n\nGenerated: ${new Date().toLocaleString()}\n\nTotal Records: ${dataToExport.length}\n\n${JSON.stringify(dataToExport, null, 2)}`
+        content = "Client Portal Export\n\nGenerated: " + new Date().toLocaleString() + "\n\nTotal Records: " + dataToExport.length + "\n\n" + JSON.stringify(dataToExport, null, 2)
         mimeType = 'text/plain'
         extension = 'txt'
       }
@@ -822,12 +828,12 @@ export default function ClientPortalClient() {
       const url = URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
-      link.download = `${filename}-${new Date().toISOString().split('T')[0]}.${extension}`
+      link.download = filename + "-" + new Date().toISOString().split('T')[0] + "." + extension
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
-      URL.revokeObjectURL(url)      toast.success('Export completed' records exported as ${exportFormat.toUpperCase()}`
-      })
+      URL.revokeObjectURL(url)
+      toast.success("Export completed", { description: filteredClients.length + " records exported as " + exportFormat.toUpperCase() })
 
       setIsExportDialogOpen(false)
     } catch (error: any) {
@@ -850,8 +856,8 @@ export default function ClientPortalClient() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'update', section: 'client-portal', settings: portalSettings })
       })
-      if (!res.ok) throw new Error('Failed to save settings')      toast.success('Settings saved' | Health threshold: ${portalSettings.healthScoreThreshold}% | Default tier: ${portalSettings.defaultClientTier}`
-      })
+      if (!res.ok) throw new Error('Failed to save settings')
+      toast.success("Settings saved | Health threshold: " + portalSettings.healthScoreThreshold + "% | Default tier: " + portalSettings.defaultClientTier)
 
       setIsSettingsDialogOpen(false)
     } catch (error: any) {
@@ -1262,7 +1268,7 @@ export default function ClientPortalClient() {
                             <p className="text-xs text-muted-foreground">Revenue</p>
                           </div>
                           <div>
-                            <p className={`text-xl font-bold ${getHealthScoreColor(client.healthScore)}`}>
+                            <p className={cn("text-xl font-bold", getHealthScoreColor(client.healthScore))}>
                               {client.healthScore}%
                             </p>
                             <p className="text-xs text-muted-foreground">Health</p>
@@ -1330,7 +1336,7 @@ export default function ClientPortalClient() {
                           <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
                             <div
                               className="h-full bg-gradient-to-r from-blue-500 to-purple-500"
-                              style={{ width: `${project.progress}%` }}
+                              style={{ width: project.progress + "%" }}
                             />
                           </div>
                         </div>
@@ -1505,13 +1511,13 @@ export default function ClientPortalClient() {
                     </div>
                     <div>
                       <Label className="text-xs text-muted-foreground">Status</Label>
-                      <Badge className={`${getStatusColor(state.selectedClient.status)} mt-1`}>
+                      <Badge className={cn(getStatusColor(state.selectedClient.status), "mt-1")}>
                         {state.selectedClient.status}
                       </Badge>
                     </div>
                     <div>
                       <Label className="text-xs text-muted-foreground">Tier</Label>
-                      <Badge className={`${getTierColor(state.selectedClient.tier)} mt-1`}>
+                      <Badge className={cn(getTierColor(state.selectedClient.tier), "mt-1")}>
                         {state.selectedClient.tier}
                       </Badge>
                     </div>
@@ -1525,7 +1531,7 @@ export default function ClientPortalClient() {
                     </div>
                     <div>
                       <Label className="text-xs text-muted-foreground">Health Score</Label>
-                      <p className={`text-sm font-medium mt-1 ${getHealthScoreColor(state.selectedClient.healthScore)}`}>
+                      <p className={cn("text-sm font-medium mt-1", getHealthScoreColor(state.selectedClient.healthScore))}>
                         {state.selectedClient.healthScore}%
                       </p>
                     </div>
@@ -1780,9 +1786,9 @@ export default function ClientPortalClient() {
               <div className="p-3 bg-muted rounded-lg text-sm">
                 <p className="font-medium mb-1">Export Summary</p>
                 <p className="text-muted-foreground">
-                  {exportDataType === 'all' && `${state.clients.length} clients and ${state.projects.length} projects`}
-                  {exportDataType === 'clients' && `${state.clients.length} clients`}
-                  {exportDataType === 'projects' && `${state.projects.length} projects`}
+                  {exportDataType === 'all' && (state.clients.length + " clients and " + state.projects.length + " projects")}
+                  {exportDataType === 'clients' && (state.clients.length + " clients")}
+                  {exportDataType === 'projects' && (state.projects.length + " projects")}
                   {' will be exported as '}{exportFormat.toUpperCase()}
                 </p>
               </div>

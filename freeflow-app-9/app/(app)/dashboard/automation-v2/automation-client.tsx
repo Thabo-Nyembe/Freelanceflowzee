@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -74,6 +76,9 @@ import {
 
 
 import { useAutomation, type Automation, type AutomationType, type AutomationStatus } from '@/lib/hooks/use-automation'
+
+// Initialize Supabase client once at module level
+const supabase = createClient()
 
 // ============================================================================
 // TYPES - ZAPIER/MAKE LEVEL AUTOMATION SYSTEM
@@ -292,8 +297,7 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
         conditions: {},
         metadata: {}
       })
-      toast.success('Automation Created!'" is now ready. Add your first trigger and actions.`
-      })
+      toast.success(`${newName} is now ready. Add your first trigger and actions.`)
       setShowCreateDialog(false)
       setNewName('')
       setNewDescription('')
@@ -324,8 +328,7 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
         status: newStatus as AutomationStatus,
         is_enabled: newStatus === 'active'
       })
-      toast.success(`Automation ${newStatus === 'active' ? 'Activated' : 'Paused'}`" is now ${newStatus}`
-      })
+      toast.success(`Automation ${newStatus === 'active' ? 'Activated' : 'Paused'}: ${automation.name} is now ${newStatus}`)
       refetch()
     } catch (err) {
       // Error toast is handled by mutation hook
@@ -340,8 +343,7 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
         last_run_at: new Date().toISOString(),
         run_count: automation.run_count + 1
       })
-      toast.success('Running Automation'" triggered manually`
-      })
+      toast.success(`Running Automation: "${automation.name}" triggered manually`)
       // Simulate completion after delay (in real app, this would be async task)
       setTimeout(async () => {
         await updateAutomation(automation.id, {
@@ -392,8 +394,7 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
         category: automation.category,
         metadata: automation.metadata
       })
-      toast.success('Automation Duplicated'" created`
-      })
+      toast.success(`Automation Duplicated: created`)
       refetch()
     } catch (err) {
       // Error toast is handled by mutation hook
@@ -406,8 +407,7 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
     }
     try {
       await deleteAutomation(automation.id)
-      toast.success('Automation Deleted'" has been removed`
-      })
+      toast.success(`Automation Deleted has been removed`)
       refetch()
     } catch (err) {
       // Error toast is handled by mutation hook
@@ -2157,8 +2157,6 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                   if (!selectedTemplate) return
                   try {
                     toast.loading('Applying template...')
-                    const { createClient } = await import('@/lib/supabase/client')
-                    const supabase = createClient()
                     const { data: { user } } = await supabase.auth.getUser()
                     if (!user) throw new Error('Not authenticated')
 
@@ -2238,8 +2236,6 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
                   if (!selectedIntegration) return
                   try {
                     toast.loading('Connecting integration...')
-                    const { createClient } = await import('@/lib/supabase/client')
-                    const supabase = createClient()
                     const { data: { user } } = await supabase.auth.getUser()
                     if (!user) throw new Error('Not authenticated')
 

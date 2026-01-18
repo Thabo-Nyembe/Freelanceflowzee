@@ -521,7 +521,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
       if (result) {
         setShowAddContact(false)
         setNewContactForm({ firstName: '', lastName: '', email: '', phone: '', title: '', accountId: '', company: '', notes: '' })
-        toast.success('Contact Created' ${newContactForm.lastName} has been added to your CRM` })
+        toast.success(`${newContactForm.firstName} ${newContactForm.lastName} has been added to your CRM`)
         refetch()
       }
     } catch (err) {
@@ -575,7 +575,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
       if (result) {
         setShowEditDialog(false)
         setEditingCustomer(null)
-        toast.success('Contact Updated' ${editContactForm.lastName} has been updated` })
+        toast.success(`Contact Updated: ${editContactForm.firstName} ${editContactForm.lastName} has been updated`)
         refetch()
       }
     } catch (err) {
@@ -616,7 +616,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
         : 'active'
       const result = await updateCustomer(customerId, { status: clientStatus })
       if (result) {
-        toast.success('Status Updated'` })
+        toast.success(`Status Updated`)
         refetch()
       }
     } catch (err) {
@@ -639,7 +639,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
       }
       const result = await updateCustomer(customerId, { status: statusMap[newSegment] })
       if (result) {
-        toast.success('Segment Updated' segment` })
+        toast.success(`Segment Updated segment`)
         refetch()
       }
     } catch (err) {
@@ -773,12 +773,12 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
 
   const handleConvertLead = (contact: Contact) => {
     // In real app, this would call an API to convert the lead
-    toast.success('Lead Converted' ${contact.lastName} converted to customer` })
+    toast.success(`Lead Converted ${contact.lastName} converted to customer`)
   }
 
   const handleSendEmail = (contact: Contact) => {
     window.location.href = `mailto:${contact.email}`
-    toast.success('Opening Email Client'` })
+    toast.success(`Opening Email Client`)
   }
 
   const handleLogActivity = (contactId?: string) => {
@@ -857,13 +857,13 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
   // Handle phone call
   const handleCall = (phone: string, name?: string) => {
     window.location.href = `tel:${phone}`
-    toast.success('Initiating Call'` : `Calling ${phone}` })
+    toast.success(`Initiating Call: Calling ${phone}`)
   }
 
   // Handle opening calendar
   const handleScheduleMeeting = (contactName?: string) => {
     // Open calendar link or modal
-    toast.success('Calendar Opened'` : 'Select time slot for meeting' })
+    toast.success(`Calendar Opened: Select time slot for meeting`)
   }
 
   return (
@@ -982,10 +982,10 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                             <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); handleOpenEditDialog(client) }}>
                               <Edit className="h-4 w-4" />
                             </Button>
-                            <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); if (client.email) { window.location.href = `mailto:${client.email}`; toast.success('Opening Email'` }) } else { toast.error('No email address available') } }}>
+                            <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); if (client.email) { window.location.href = `mailto:${client.email}`; toast.success(`Opening Email`) } else { toast.error('No email address available') } }}>
                               <Mail className="h-4 w-4" />
                             </Button>
-                            <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); if (client.phone) { window.location.href = `tel:${client.phone}`; toast.success('Initiating Call'` }) } else { toast.error('No phone number available') } }}>
+                            <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); if (client.phone) { window.location.href = `tel:${client.phone}`; toast.success(`Initiating Call`) } else { toast.error('No phone number available') } }}>
                               <PhoneCall className="h-4 w-4" />
                             </Button>
                             <Button size="sm" variant="ghost" className="text-red-500 hover:text-red-700" onClick={(e) => { e.stopPropagation(); handleDeleteClick(client.id) }}>
@@ -2183,7 +2183,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                             input.onchange = (e) => {
                               const file = (e.target as HTMLInputElement).files?.[0]
                               if (file) {
-                                toast.success('File Selected'` })
+                                toast.success(`File Selected`)
                               }
                             }
                             input.click()
@@ -2359,8 +2359,8 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                   </div>
 
                   <div className="flex gap-2 pt-4 border-t">
-                    <Button className="flex-1" onClick={() => { window.location.href = `mailto:${selectedContact.email}`; toast.success('Opening Email'` }) }}><Mail className="h-4 w-4 mr-2" />Send Email</Button>
-                    <Button variant="outline" onClick={() => { window.location.href = `tel:${selectedContact.phone}`; toast.success('Initiating Call' ${selectedContact.lastName}` }) }}><PhoneCall className="h-4 w-4 mr-2" />Log Call</Button>
+                    <Button className="flex-1" onClick={() => { window.location.href = `mailto:${selectedContact.email}`; toast.success(`Opening Email`) }}><Mail className="h-4 w-4 mr-2" />Send Email</Button>
+                    <Button variant="outline" onClick={() => { window.location.href = `tel:${selectedContact.phone}`; toast.success(`Initiating Call ${selectedContact.lastName}`) }}><PhoneCall className="h-4 w-4 mr-2" />Log Call</Button>
                     <Button variant="outline" onClick={() => handleScheduleMeeting(`${selectedContact.firstName} ${selectedContact.lastName}`)}><Calendar className="h-4 w-4 mr-2" />Schedule</Button>
                   </div>
                 </div>
@@ -2611,7 +2611,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                 setTasks(prev => [newTask, ...prev])
                 setShowAddTaskDialog(false)
                 setNewTaskForm({ subject: '', description: '', dueDate: '', priority: 'medium', contactId: '' })
-                toast.success('Task Created'" has been added to your workflow` })
+                toast.success(`Task Created has been added to your workflow`)
               }}>Create Task</Button>
             </DialogFooter>
           </DialogContent>
@@ -2647,7 +2647,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                     t.id === selectedTask.id ? { ...t, ownerName: 'New Assignee', ownerId: 'u2' } : t
                   ))
                   setShowTaskOptionsDialog(false)
-                  toast.success('Task Reassigned'" has been reassigned` })
+                  toast.success(`Task Reassigned has been reassigned`)
                 }
               }}>
                 <Users className="h-4 w-4 mr-2" />Reassign Task
@@ -2658,7 +2658,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                     t.id === selectedTask.id ? { ...t, status: 'completed', completedDate: new Date().toISOString().split('T')[0] } : t
                   ))
                   setShowTaskOptionsDialog(false)
-                  toast.success('Task Completed'" marked as complete` })
+                  toast.success(`Task Completed marked as complete`)
                 }
               }}>
                 <CheckCircle className="h-4 w-4 mr-2" />Mark Complete
@@ -2667,7 +2667,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                 if (selectedTask) {
                   setTasks(prev => prev.filter(t => t.id !== selectedTask.id))
                   setShowTaskOptionsDialog(false)
-                  toast.success('Task Deleted'" has been removed` })
+                  toast.success(`Task Deleted has been removed`)
                   setSelectedTask(null)
                 }
               }}>
@@ -2805,7 +2805,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                 setCampaigns(prev => [newCampaign, ...prev])
                 setShowAddCampaignDialog(false)
                 setNewCampaignForm({ name: '', type: 'email', status: 'planned', startDate: '', endDate: '', budget: 0, expectedRevenue: 0, description: '' })
-                toast.success('Campaign Created'" has been created` })
+                toast.success(`Campaign Created has been created`)
               }}>Create Campaign</Button>
             </DialogFooter>
           </DialogContent>
@@ -2883,7 +2883,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                 setPipelineStages(prev => [...prev.slice(0, -2), newStage, ...prev.slice(-2)])
                 setShowAddStageDialog(false)
                 setNewStageForm({ name: '', probability: 50, color: 'blue' })
-                toast.success('Stage Added'" has been added to your pipeline` })
+                toast.success(`Stage Added has been added to your pipeline`)
               }}>Add Stage</Button>
             </DialogFooter>
           </DialogContent>
@@ -2904,7 +2904,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                     setPipelineStages(prev => prev.map(s =>
                       s.id === selectedStage.id ? { ...s, name: newName.trim() } : s
                     ))
-                    toast.success('Stage Updated'"` })
+                    toast.success(`Stage Updated`)
                   }
                 }
                 setShowStageOptionsDialog(false)
@@ -2919,7 +2919,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                     setPipelineStages(prev => prev.map(s =>
                       s.id === selectedStage.id ? { ...s, probability: prob } : s
                     ))
-                    toast.success('Probability Updated'%` })
+                    toast.success(`Probability Updated`)
                   }
                 }
                 setShowStageOptionsDialog(false)
@@ -2937,7 +2937,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                       newStages[currentIndex - 1] = temp
                       return newStages
                     })
-                    toast.success('Stage Reordered'" moved up in pipeline` })
+                    toast.success(`Stage Reordered moved up in pipeline`)
                   } else {
                     toast.info('Already First')
                   }
@@ -2954,7 +2954,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                     return
                   }
                   setPipelineStages(prev => prev.filter(s => s.id !== selectedStage.id))
-                  toast.success('Stage Deleted'" has been removed` })
+                  toast.success(`Stage Deleted has been removed`)
                   setSelectedStage(null)
                 }
                 setShowStageOptionsDialog(false)
@@ -3067,7 +3067,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                 setLeadScoringRules(prev => [...prev, newRule])
                 setShowLeadScoringRuleDialog(false)
                 setNewRuleForm({ name: '', field: '', operator: 'equals', value: '', points: 10, isActive: true })
-                toast.success('Scoring Rule Created'" will add ${newRule.points} points` })
+                toast.success(`Scoring Rule Created will add ${newRule.points} points`)
               }}>Create Rule</Button>
             </DialogFooter>
           </DialogContent>
@@ -3151,7 +3151,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                   input.onchange = async (e) => {
                     const file = (e.target as HTMLInputElement).files?.[0]
                     if (file) {
-                      toast.success('File Selected'` })
+                      toast.success(`File Selected`)
                       // Parse file and import customers
                       if (file.name.endsWith('.csv')) {
                         const text = await file.text()
@@ -3191,7 +3191,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
 
                           if (imported > 0) {
                             refetch()
-                            toast.success('Import Complete' customers` })
+                            toast.success(`Import Complete customers`)
                             setShowImportDialog(false)
                           } else {
                             toast.error('Import Failed')

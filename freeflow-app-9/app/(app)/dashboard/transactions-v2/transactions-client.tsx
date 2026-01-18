@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 // MIGRATED: Batch #18 - Verified database hook integration
 // Hooks used: useTransactions
 
@@ -517,7 +519,6 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
     }
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
       const supabase = createClient()
       const { error } = await supabase.from('clients').insert({
         name: customerForm.name,

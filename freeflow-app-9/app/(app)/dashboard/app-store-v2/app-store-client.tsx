@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
@@ -71,6 +73,9 @@ import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { CardDescription } from '@/components/ui/card'
 import { updateFilesViewMode } from '@/lib/storage/preferences-queries'
+
+// Initialize Supabase client once at module level
+const supabase = createClient()
 
 // ============================================================================
 // TYPE DEFINITIONS - App Store Connect Level
@@ -632,8 +637,6 @@ export default function AppStoreClient() {
   // Fetch user on mount
   useEffect(() => {
     const getUser = async () => {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (user) setUserId(user.id)
     }
@@ -784,8 +787,6 @@ export default function AppStoreClient() {
     }
     setLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('plugin_reviews')
         .upsert({
@@ -834,8 +835,6 @@ export default function AppStoreClient() {
     }
     setLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('installed_plugins')
         .insert({
@@ -849,16 +848,12 @@ export default function AppStoreClient() {
       if (error) throw error
 
       // Update install count
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       await supabase
         .from('plugins')
         .update({ install_count: app.downloadCount + 1 })
         .eq('id', app.id)
 
       // Record download
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       await supabase
         .from('plugin_downloads')
         .insert({
@@ -867,8 +862,7 @@ export default function AppStoreClient() {
           version: app.version
         })
 
-      toast.success('App installed successfully'" has been installed`
-      })
+      toast.success(`${app.name} has been installed`)
       await fetchApps()
     } catch (error: any) {
       toast.error('Failed to install app')
@@ -890,8 +884,6 @@ export default function AppStoreClient() {
 
     setLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('installed_plugins')
         .delete()
@@ -900,8 +892,7 @@ export default function AppStoreClient() {
 
       if (error) throw error
 
-      toast.success('App uninstalled'" has been removed`
-      })
+      toast.success('App uninstalled')
       await fetchApps()
     } catch (error: any) {
       toast.error('Failed to uninstall')
@@ -917,8 +908,6 @@ export default function AppStoreClient() {
     }
     setLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('installed_plugins')
         .update({ installed_version: update.newVersion, updated_at: new Date().toISOString() })
@@ -927,8 +916,7 @@ export default function AppStoreClient() {
 
       if (error) throw error
 
-      toast.success('App updated'" updated to v${update.newVersion}`
-      })
+      toast.success(`App updated to v${update.newVersion}`)
       setUpdates(prev => prev.filter(u => u.id !== update.id))
       await fetchApps()
     } catch (error: any) {
@@ -945,8 +933,6 @@ export default function AppStoreClient() {
     }
     setLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('plugin_reviews')
         .upsert({
@@ -960,8 +946,7 @@ export default function AppStoreClient() {
 
       if (error) throw error
 
-      toast.success('Rating submitted'"`
-      })
+      toast.success('Rating submitted')
       await fetchApps()
     } catch (error: any) {
       toast.error('Failed to submit rating')
@@ -980,8 +965,6 @@ export default function AppStoreClient() {
       const trialEnds = new Date()
       trialEnds.setDate(trialEnds.getDate() + app.trialDays)
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('installed_plugins')
         .insert({
@@ -994,8 +977,7 @@ export default function AppStoreClient() {
 
       if (error) throw error
 
-      toast.success('Trial started'-day trial for "${app.name}" has begun`
-      })
+      toast.success(`Trial started: 14-day trial for "${app.name}" has begun`)
       await fetchApps()
     } catch (error: any) {
       toast.error('Failed to start trial')
@@ -1010,8 +992,6 @@ export default function AppStoreClient() {
       return
     }
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('plugin_wishlists')
         .insert({
@@ -1021,8 +1001,7 @@ export default function AppStoreClient() {
 
       if (error) throw error
 
-      toast.success('Added to wishlist'" added to your wishlist`
-      })
+      toast.success(`Added to wishlist: added to your wishlist`)
     } catch (error: any) {
       toast.error('Failed to add to wishlist')
     }
@@ -1033,16 +1012,13 @@ export default function AppStoreClient() {
     setLoading(true)
     try {
       for (const update of updates) {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         await supabase
           .from('installed_plugins')
           .update({ installed_version: update.newVersion, updated_at: new Date().toISOString() })
           .eq('plugin_id', update.appId)
           .eq('user_id', userId)
       }
-      toast.success('All apps updated' apps have been updated`
-      })
+      toast.success(`All apps updated: apps have been updated`)
       setUpdates([])
       await fetchApps()
     } catch (error: any) {
@@ -1081,8 +1057,7 @@ export default function AppStoreClient() {
       toast.info(insight.title || 'Updates Available')
     } else {
       // Default: show insight details in a toast with action
-      toast.info(insight.title || 'AI Insight'
-      })
+      toast.info(insight.title || 'AI Insight')
     }
   }
 

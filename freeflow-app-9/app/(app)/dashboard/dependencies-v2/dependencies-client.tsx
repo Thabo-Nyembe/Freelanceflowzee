@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { useSupabaseQuery, useSupabaseMutation } from '@/lib/hooks/use-supabase-helpers'
@@ -79,6 +81,9 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
+
+// Initialize Supabase client once at module level
+const supabase = createClient()
 
 // Type definitions for Dependabot/Snyk level
 type SeverityLevel = 'critical' | 'high' | 'medium' | 'low'
@@ -504,8 +509,7 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
     })
 
     if (result) {
-      toast.success('Dependency added' has been added to your project`
-      })
+      toast.success(`${dependencyForm.name} has been added to your project`)
       setShowAddDependencyDialog(false)
       setDependencyForm({
         name: '',
@@ -531,8 +535,7 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
     }, depId)
 
     if (result) {
-      toast.success('Dependency updated' has been updated to ${newVersion}`
-      })
+      toast.success(`Dependency updated: ${depName} has been updated to ${newVersion}`)
     } else {
       toast.error('Failed to update dependency')
     }
@@ -541,8 +544,7 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
   const handleDeleteDependency = async (depId: string, depName: string) => {
     const success = await dependencyMutation.remove(depId)
     if (success) {
-      toast.success('Dependency removed' has been removed from your project`
-      })
+      toast.success(`Dependency removed: ${depName} has been removed from your project`)
     } else {
       toast.error('Failed to remove dependency')
     }
@@ -556,14 +558,10 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
 
     // Simulate scan process
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
       // Create a scan record
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('dependency_scans')
         .insert({
@@ -584,8 +582,7 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
       if (error) throw error
 
       await refetchScans()
-      toast.success('Scan completed' critical/high vulnerabilities`
-      })
+      toast.success(`Scan completed critical/high vulnerabilities`)
     } catch (err) {
       toast.error('Scan failed')
     } finally {
@@ -611,8 +608,7 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
     }, vulnId)
 
     if (result) {
-      toast.success('Vulnerability fixed' has been updated to ${patchedVersion}`
-      })
+      toast.success(`Vulnerability fixed has been updated to ${patchedVersion}`)
       setShowVulnDialog(false)
     } else {
       toast.error('Failed to fix vulnerability')
@@ -626,8 +622,7 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
     }, vulnId)
 
     if (result) {
-      toast.success('Vulnerability ignored' vulnerability has been marked as ignored`
-      })
+      toast.success(`Vulnerability ignored vulnerability has been marked as ignored`)
       setShowVulnDialog(false)
     } else {
       toast.error('Failed to ignore vulnerability')
@@ -649,8 +644,7 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
     })
 
     if (result) {
-      toast.success('Policy created' security policy has been created`
-      })
+      toast.success(`Policy created security policy has been created`)
       setShowAddPolicyDialog(false)
       setPolicyForm({
         name: '',
@@ -667,8 +661,7 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
   const handleUpdatePolicy = async (policyId: string, enabled: boolean) => {
     const result = await policyMutation.mutate({ enabled }, policyId)
     if (result) {
-      toast.success('Policy updated'`
-      })
+      toast.success(`Policy updated`)
     } else {
       toast.error('Failed to update policy')
     }
@@ -677,8 +670,7 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
   const handleDeletePolicy = async (policyId: string, policyName: string) => {
     const success = await policyMutation.remove(policyId)
     if (success) {
-      toast.success('Policy deleted' has been removed`
-      })
+      toast.success(`Policy deleted has been removed`)
     } else {
       toast.error('Failed to delete policy')
     }
@@ -690,14 +682,10 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
     })
 
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
       // Create export record
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('dependency_exports')
         .insert({
@@ -733,14 +721,10 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
     toast.info('Generating SBOM')
 
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
       // Create SBOM export record
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('dependency_exports')
         .insert({
@@ -782,18 +766,13 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
   }
 
   const handleCreatePR = async (packageName: string, targetVersion: string) => {
-    toast.info('Creating Pull Request' to ${targetVersion}...`
-    })
+    toast.info(`Creating Pull Request to ${targetVersion}...`)
 
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
       // Record PR creation
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('dependency_update_prs')
         .insert({
@@ -807,8 +786,7 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
 
       if (error) throw error
 
-      toast.success('Pull Request created' update has been created`
-      })
+      toast.success(`Pull Request created update has been created`)
     } catch (err) {
       toast.error('Failed to create PR')
     }
@@ -818,14 +796,10 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
     toast.info('Clearing cache')
 
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
       // Clear cached scan data (soft delete old scans)
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('dependency_scans')
         .update({ deleted_at: new Date().toISOString() })
@@ -844,14 +818,10 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
     toast.info('Resetting policies')
 
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
       // Soft delete all custom policies
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('security_policies')
         .update({ deleted_at: new Date().toISOString() })
@@ -874,8 +844,6 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
     toast.info('Deleting history')
 
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
@@ -914,8 +882,6 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
     })
 
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
@@ -929,8 +895,7 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
       }
 
       await refetchDependencies()
-      toast.success('Dependencies updated' packages to latest versions`
-      })
+      toast.success(`Dependencies updated packages to latest versions`)
     } catch (err) {
       toast.error('Update failed')
     }
@@ -943,8 +908,6 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
     })
 
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
@@ -973,8 +936,6 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
     })
 
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
@@ -1000,8 +961,6 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
       URL.revokeObjectURL(url)
 
       // Record export
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       await supabase.from('dependency_exports').insert({
         user_id: user.id,
         export_type: 'security_report',
@@ -1022,8 +981,6 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
     })
 
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 

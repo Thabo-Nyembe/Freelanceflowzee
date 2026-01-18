@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -577,8 +579,6 @@ export default function MonitoringClient() {
   // Fetch servers from Supabase
   const fetchServers = useCallback(async () => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('servers')
         .select('*')
@@ -595,8 +595,6 @@ export default function MonitoringClient() {
   // Fetch alerts from Supabase
   const fetchAlerts = useCallback(async () => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('system_alerts')
         .select('*')
@@ -619,13 +617,9 @@ export default function MonitoringClient() {
   const handleCreateServer = async () => {
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('servers').insert({
         user_id: user.id,
         server_name: serverForm.server_name,
@@ -655,8 +649,6 @@ export default function MonitoringClient() {
   // Delete server
   const handleDeleteServer = async (serverId: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('servers')
         .update({ deleted_at: new Date().toISOString() })
@@ -675,13 +667,9 @@ export default function MonitoringClient() {
   const handleCreateAlert = async () => {
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('system_alerts').insert({
         user_id: user.id,
         title: alertForm.title,
@@ -708,12 +696,8 @@ export default function MonitoringClient() {
   // Acknowledge alert
   const handleAcknowledgeAlert = async (alertId: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('system_alerts')
         .update({
@@ -735,12 +719,8 @@ export default function MonitoringClient() {
   // Resolve alert
   const handleResolveAlert = async (alertId: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('system_alerts')
         .update({
@@ -1103,8 +1083,6 @@ export default function MonitoringClient() {
                     <Input placeholder="Search logs..." className="w-64" />
                     <Button variant="outline" size="sm" onClick={async () => {
                       try {
-                        const { createClient } = await import('@/lib/supabase/client')
-                        const supabase = createClient()
                         await supabase.from('monitoring_logs').select('count')
                         toast.success('Filters applied successfully')
                       } catch (err) {
@@ -1556,8 +1534,6 @@ export default function MonitoringClient() {
                             </Button>
                             <Button variant="outline" size="icon" onClick={async () => {
                               try {
-                                const { createClient } = await import('@/lib/supabase/client')
-                                const supabase = createClient()
                                 const newKey = `dd_api_${crypto.randomUUID().replace(/-/g, '').slice(0, 16)}`
                                 const { error } = await supabase.from('api_keys').upsert({ id: 'monitoring', key: newKey, updated_at: new Date().toISOString() })
                                 if (error) throw error
@@ -1930,8 +1906,6 @@ export default function MonitoringClient() {
                               ) : (
                                 <Button variant="outline" size="sm" onClick={async () => {
                                   try {
-                                    const { createClient } = await import('@/lib/supabase/client')
-                                    const supabase = createClient()
                                     const { error } = await supabase.from('database_integrations').insert({
                                       name: db.name,
                                       type: db.name.toLowerCase(),
@@ -2135,8 +2109,6 @@ export default function MonitoringClient() {
                           <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={async () => {
                             if (!confirm('Are you sure you want to reset all alerts? This action cannot be undone.')) return
                             try {
-                              const { createClient } = await import('@/lib/supabase/client')
-                              const supabase = createClient()
                               const { error } = await supabase.from('monitoring_alerts').update({ status: 'resolved', resolved_at: new Date().toISOString() }).eq('status', 'active')
                               if (error) throw error
                               toast.success('All alerts have been reset')
@@ -2155,8 +2127,6 @@ export default function MonitoringClient() {
                           <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={async () => {
                             if (!confirm('Are you sure you want to remove all hosts? You will need to re-register them to continue monitoring.')) return
                             try {
-                              const { createClient } = await import('@/lib/supabase/client')
-                              const supabase = createClient()
                               const { error } = await supabase.from('monitoring_hosts').update({ status: 'removed', removed_at: new Date().toISOString() }).neq('status', 'removed')
                               if (error) throw error
                               toast.success('All hosts have been removed')
@@ -2179,8 +2149,6 @@ export default function MonitoringClient() {
                               return
                             }
                             try {
-                              const { createClient } = await import('@/lib/supabase/client')
-                              const supabase = createClient()
                               const { error } = await supabase.from('organizations').update({ deleted_at: new Date().toISOString() }).is('deleted_at', null)
                               if (error) throw error
                               toast.success('Organization deleted successfully', { description: 'You will be redirected shortly' })
@@ -2685,8 +2653,6 @@ export default function MonitoringClient() {
               <Button variant="outline" onClick={() => setShowMetricsExplorerDialog(false)}>Close</Button>
               <Button onClick={async () => {
                 try {
-                  const { createClient } = await import('@/lib/supabase/client')
-                  const supabase = createClient()
                   const { data: metrics } = await supabase.from('monitoring_metrics').select('*').limit(1000)
                   const csvContent = metrics ? `timestamp,metric_name,value\n${metrics.map(m => `${m.created_at},${m.name},${m.value}`).join('\n')}` : 'No data'
                   const blob = new Blob([csvContent], { type: 'text/csv' })

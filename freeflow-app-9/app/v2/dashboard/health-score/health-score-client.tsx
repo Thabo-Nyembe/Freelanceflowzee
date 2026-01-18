@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import {
@@ -66,6 +68,9 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+
+// Initialize Supabase client once at module level
+const supabase = createClient()
 
 // Types
 type ServiceStatus = 'healthy' | 'degraded' | 'critical' | 'unknown'
@@ -741,13 +746,9 @@ export default function HealthScoreClient() {
   // Fetch health scores from Supabase
   const fetchHealthScores = useCallback(async () => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('health_scores')
         .select('*')
@@ -778,16 +779,12 @@ export default function HealthScoreClient() {
 
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to create health scores')
         return
       }
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('health_scores').insert({
         user_id: user.id,
         health_code: generateHealthCode(),
@@ -828,8 +825,6 @@ export default function HealthScoreClient() {
     setIsSubmitting(true)
     try {
       const current = dbHealthScores.find(h => h.id === editingId)
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('health_scores')
         .update({
@@ -868,8 +863,6 @@ export default function HealthScoreClient() {
   // Delete health score (soft delete)
   const handleDeleteHealthScore = async (id: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('health_scores')
         .update({ deleted_at: new Date().toISOString() })
@@ -2173,7 +2166,7 @@ export default function HealthScoreClient() {
             <AIInsightsPanel
               insights={mockHealthScoreAIInsights}
               title="Health Score Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -2471,7 +2464,7 @@ export default function HealthScoreClient() {
                   <div className="flex gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
                     <button
                       onClick={() => {
-                        toast.success('Incident Acknowledged' has been acknowledged` })
+                        toast.success('Incident Acknowledged')
                         setSelectedIncident(null)
                       }}
                       className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700"
@@ -2480,7 +2473,7 @@ export default function HealthScoreClient() {
                     </button>
                     <button
                       onClick={() => {
-                        toast.success('Incident Resolved' has been marked as resolved` })
+                        toast.success('Incident Resolved')
                         setSelectedIncident(null)
                       }}
                       className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"

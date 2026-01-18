@@ -1,4 +1,6 @@
 'use client'
+
+import { createClient } from '@/lib/supabase/client'
 import { useState, useMemo } from 'react'
 import {
   Users, UserPlus, Building2, Target, Award, MessageSquare, Calendar, BarChart3,
@@ -299,8 +301,6 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
   const handleExportTeams = async () => {
     setExporting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
@@ -329,12 +329,11 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `team-export-${new Date().toISOString().split('T')[0]}.csv`
+      a.download = "team-export-" + new Date().toISOString().split("T")[0] + ".csv"
       a.click()
       window.URL.revokeObjectURL(url)
 
-      toast.success('Export completed' teams`
-      })
+      toast.success("Export completed: " + (teamsData?.length || 0) + " teams")
     } catch (error: any) {
       toast.error('Export failed')
     } finally {
@@ -349,13 +348,9 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
     }
     setAddingMember(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('team_members')
         .insert({
@@ -375,8 +370,7 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
 
       if (error) throw error
 
-      toast.success('Team member added' has been added to the team`
-      })
+      toast.success("Team member added: " + newMemberForm.name + " has been added to the team")
       setShowAddMemberModal(false)
       setNewMemberForm({ name: '', email: '', role: '', department: 'Engineering' })
     } catch (error: any) {
@@ -390,8 +384,7 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
     setArchivingTeam(team.id)
     try {
       await updateTeam({ id: team.id, status: 'archived' as TeamStatus })
-      toast.success('Team archived'" has been archived`
-      })
+      toast.success("Team archived: " + team.team_name + " has been archived")
       refetch()
     } catch (error: any) {
       toast.error('Failed to archive team')
@@ -407,15 +400,11 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
     }
     setSendingRecognition(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
       const recipient = teamMembers.find(m => m.id === recognitionForm.recipientId)
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('team_recognitions')
         .insert({
@@ -430,8 +419,7 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
 
       if (error) throw error
 
-      toast.success('Recognition sent!' has been posted`
-      })
+      toast.success("Recognition sent! Your recognition has been posted")
       setShowRecognitionModal(false)
       setRecognitionForm({ recipientId: '', value: 'Excellence', message: '' })
     } catch (error: any) {
@@ -448,15 +436,11 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
     }
     setScheduling1on1(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
       const participant = teamMembers.find(m => m.id === schedule1on1Form.participantId)
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('team_meetings')
         .insert({
@@ -472,8 +456,7 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
 
       if (error) throw error
 
-      toast.success('1:1 scheduled'`
-      })
+      toast.success('1:1 scheduled')
       setShowSchedule1on1Modal(false)
       setSchedule1on1Form({ participantId: '', scheduledDate: '', topics: '' })
     } catch (error: any) {
@@ -490,8 +473,6 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
     }
     setStartingReviewCycle(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
@@ -507,16 +488,13 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
         metadata: {}
       }))
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('team_reviews')
         .insert(reviewInserts)
 
       if (error) throw error
 
-      toast.success('Review cycle started' review entries`
-      })
+      toast.success("Review cycle started - " + reviewInserts.length + " review entries created")
       setShowReviewCycleModal(false)
       setReviewCycleForm({ cycleName: '', reviewType: '360', dueDate: '' })
     } catch (error: any) {
@@ -531,13 +509,9 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
       return
     }
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('team_management')
         .update({
@@ -561,13 +535,9 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
       return
     }
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('team_reviews')
         .update({ status: 'archived' })
@@ -584,8 +554,6 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
   const handleExportAllData = async () => {
     setExporting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
@@ -689,11 +657,11 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
                           key={value}
                           type="button"
                           onClick={() => setRecognitionForm(prev => ({ ...prev, value }))}
-                          className={`px-3 py-1.5 rounded-full border transition-colors ${
+                          className={"px-3 py-1.5 rounded-full border transition-colors " + (
                             recognitionForm.value === value
                               ? 'border-purple-500 bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300'
                               : 'hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/30'
-                          }`}
+                          )}
                         >
                           {value}
                         </button>
@@ -859,20 +827,20 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
                 <button
                   key={view.id}
                   onClick={() => setActiveView(view.id)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
+                  className={"flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap " + (
                     activeView === view.id
                       ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300'
                       : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700'
-                  }`}
+                  )}
                 >
                   <view.icon className="w-4 h-4" />
                   {view.name}
                   {view.count !== null && (
-                    <span className={`px-2 py-0.5 rounded-full text-xs ${
+                    <span className={"px-2 py-0.5 rounded-full text-xs " + (
                       activeView === view.id
                         ? 'bg-purple-200 dark:bg-purple-800'
                         : 'bg-gray-200 dark:bg-gray-600'
-                    }`}>
+                    )}>
                       {view.count}
                     </span>
                   )}
@@ -969,7 +937,7 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
                               </div>
                               {team.health_score && (
                                 <div className="text-center">
-                                  <div className={`text-2xl font-bold ${team.health_score >= 80 ? 'text-green-600' : team.health_score >= 60 ? 'text-yellow-600' : 'text-red-600'}`}>
+                                  <div className={"text-2xl font-bold " + (team.health_score >= 80 ? 'text-green-600' : team.health_score >= 60 ? 'text-yellow-600' : 'text-red-600')}>
                                     {team.health_score.toFixed(0)}%
                                   </div>
                                   <div className="text-xs text-gray-500">health</div>
@@ -1013,7 +981,7 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
                                       <Badge className={getStatusColor(okr.status)} variant="secondary">{okr.progress}%</Badge>
                                     </div>
                                     <div className="h-1.5 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
-                                      <div className={`h-full ${getProgressColor(okr.progress)} rounded-full`} style={{ width: `${okr.progress}%` }} />
+                                      <div className={"h-full " + (getProgressColor(okr.progress)) + " rounded-full"} style={{ width: `${okr.progress}%` }} />
                                     </div>
                                   </div>
                                 ))}
@@ -1097,7 +1065,7 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
                         <td className="py-3 px-4">
                           <div className="flex items-center gap-2">
                             <div className="w-24 h-2 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
-                              <div className={`h-full ${getProgressColor(member.performance || 0)} rounded-full`} style={{ width: `${member.performance}%` }} />
+                              <div className={"h-full " + (getProgressColor(member.performance || 0)) + " rounded-full"} style={{ width: `${member.performance}%` }} />
                             </div>
                             <span className="text-sm font-medium">{member.performance}%</span>
                           </div>
@@ -1235,7 +1203,7 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
                       </div>
                     </div>
                     <div className="h-2 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden mb-4">
-                      <div className={`h-full ${getProgressColor(okr.progress)} rounded-full transition-all`} style={{ width: `${okr.progress}%` }} />
+                      <div className={"h-full " + (getProgressColor(okr.progress)) + " rounded-full transition-all"} style={{ width: `${okr.progress}%` }} />
                     </div>
                     <div className="space-y-3">
                       {okr.keyResults.map((kr, idx) => (
@@ -1246,7 +1214,7 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
                               <span className="text-sm text-gray-500">{kr.progress}% / {kr.target}</span>
                             </div>
                             <div className="h-1.5 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
-                              <div className={`h-full ${getProgressColor(kr.progress)} rounded-full`} style={{ width: `${kr.progress}%` }} />
+                              <div className={"h-full " + (getProgressColor(kr.progress)) + " rounded-full"} style={{ width: `${kr.progress}%` }} />
                             </div>
                           </div>
                         </div>
@@ -1470,8 +1438,8 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
                   <div key={meeting.id} className="p-4 border rounded-xl dark:border-gray-700">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
-                        <div className={`p-3 rounded-xl ${meeting.status === 'completed' ? 'bg-green-100 dark:bg-green-900/30' : 'bg-blue-100 dark:bg-blue-900/30'}`}>
-                          <MessageSquare className={`w-5 h-5 ${meeting.status === 'completed' ? 'text-green-600' : 'text-blue-600'}`} />
+                        <div className={"p-3 rounded-xl " + (meeting.status === 'completed' ? 'bg-green-100 dark:bg-green-900/30' : 'bg-blue-100 dark:bg-blue-900/30')}>
+                          <MessageSquare className={"w-5 h-5 " + (meeting.status === 'completed' ? 'text-green-600' : 'text-blue-600')} />
                         </div>
                         <div>
                           <h3 className="font-semibold text-gray-900 dark:text-white">{meeting.participant} & {meeting.manager}</h3>
@@ -1525,12 +1493,12 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
                 <div className="flex items-center gap-4">
                   <div className="flex -space-x-2">
                     {['Excellence', 'Innovation', 'Teamwork', 'Leadership'].map((value, idx) => (
-                      <div key={value} className={`w-8 h-8 rounded-full border-2 border-white dark:border-gray-800 flex items-center justify-center text-xs font-bold ${
+                      <div key={value} className={"w-8 h-8 rounded-full border-2 border-white dark:border-gray-800 flex items-center justify-center text-xs font-bold " + (
                         idx === 0 ? 'bg-purple-100 text-purple-700' :
                         idx === 1 ? 'bg-blue-100 text-blue-700' :
                         idx === 2 ? 'bg-green-100 text-green-700' :
                         'bg-orange-100 text-orange-700'
-                      }`} title={value}>
+                      )} title={value}>
                         {value.charAt(0)}
                       </div>
                     ))}
@@ -2439,7 +2407,7 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
             <AIInsightsPanel
               insights={teamManagementAIInsights}
               title="Team Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">

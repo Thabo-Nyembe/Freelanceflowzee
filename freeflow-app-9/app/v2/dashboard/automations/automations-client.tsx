@@ -1,4 +1,6 @@
 'use client'
+
+import { createClient } from '@/lib/supabase/client'
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import { useAutomations, type AutomationWorkflow, type WorkflowType, type WorkflowStatus } from '@/lib/hooks/use-automations'
@@ -468,13 +470,9 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
   // Fetch workflows from Supabase
   const fetchWorkflows = useCallback(async () => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('automations')
         .select('*')
@@ -500,16 +498,12 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
 
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to create workflows')
         return
       }
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('automations').insert({
         user_id: user.id,
         workflow_name: formState.workflow_name,
@@ -561,8 +555,6 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
   // Run workflow handler
   const handleRunAutomation = async (workflow: AutomationWorkflow) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('automations')
         .update({
@@ -575,8 +567,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
 
       if (error) throw error
 
-      toast.success('Automation started' is now executing`
-      })
+      toast.success(`Automation "${workflow.name}" is now executing`)
       fetchWorkflows()
     } catch (err) {
       console.error('Error running workflow:', err)
@@ -588,8 +579,6 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
   const handleToggleAutomation = async (workflow: AutomationWorkflow) => {
     const newStatus = workflow.status === 'active' ? 'paused' : 'active'
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('automations')
         .update({
@@ -601,8 +590,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
 
       if (error) throw error
 
-      toast.success(newStatus === 'active' ? 'Automation activated' : 'Automation paused' is now ${newStatus}`
-      })
+      toast.success(`Automation "${workflow.name}" is now ${newStatus}`)
       fetchWorkflows()
     } catch (err) {
       console.error('Error toggling workflow:', err)
@@ -613,16 +601,12 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
   // Duplicate workflow handler
   const handleDuplicateAutomation = async (workflow: AutomationWorkflow) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to duplicate workflows')
         return
       }
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('automations').insert({
         user_id: user.id,
         workflow_name: `${workflow.workflow_name} (Copy)`,
@@ -658,8 +642,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
 
       if (error) throw error
 
-      toast.success('Automation duplicated' created`
-      })
+      toast.success(`Automation "${workflow.name} (Copy)" created`)
       fetchWorkflows()
     } catch (err) {
       console.error('Error duplicating workflow:', err)
@@ -670,8 +653,6 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
   // Delete workflow handler
   const handleDeleteAutomation = async (workflow: AutomationWorkflow) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('automations')
         .delete()
@@ -679,8 +660,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
 
       if (error) throw error
 
-      toast.success('Automation deleted' has been removed`
-      })
+      toast.success(`Automation "${workflow.name}" has been removed`)
       setShowDeleteConfirmDialog(false)
       setWorkflowToDelete(null)
       fetchWorkflows()
@@ -732,8 +712,6 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
 
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('automations')
         .update({
@@ -748,8 +726,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
 
       if (error) throw error
 
-      toast.success('Workflow updated successfully' has been saved`
-      })
+      toast.success(`Workflow "${workflowToEdit.name}" has been saved`)
       setShowEditWorkflowDialog(false)
       setWorkflowToEdit(null)
       setEditFormState(initialFormState)
@@ -783,8 +760,6 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
   const handleRunAllWorkflows = async () => {
     setIsRunningAll(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to run workflows')
@@ -803,8 +778,6 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
       }
 
       // Update all selected workflows to running status
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('automations')
         .update({
@@ -833,8 +806,6 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
   const handleExportLogs = async () => {
     setIsExporting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to export logs')
@@ -929,8 +900,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
 
-      toast.success('Logs exported successfully' file`
-      })
+      toast.success(`Logs exported successfully as ${extension.toUpperCase()} file`)
 
       setShowExportLogsDialog(false)
     } catch (err) {
@@ -945,8 +915,6 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
   const handlePauseAllWorkflows = async () => {
     setIsProcessing(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to pause workflows')
@@ -959,8 +927,6 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
         return
       }
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('automations')
         .update({
@@ -986,8 +952,6 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
   const handleStopAllRunning = async () => {
     setIsProcessing(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to stop workflows')
@@ -1000,8 +964,6 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
         return
       }
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('automations')
         .update({
@@ -1027,8 +989,6 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
   const handleRetryFailed = async () => {
     setIsProcessing(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to retry workflows')
@@ -1041,8 +1001,6 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
         return
       }
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('automations')
         .update({
@@ -1120,8 +1078,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
       return
     }
 
-    toast.success('Connection settings updated' has been updated`
-    })
+    toast.success(`Connection "${connectionEditForm.name}" has been updated`)
     setShowConnectionSettingsDialog(false)
     setSelectedConnection(null)
   }
@@ -1130,8 +1087,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
   const handleDisconnectConnection = () => {
     if (!selectedConnection) return
 
-    toast.success('Connection removed' has been disconnected`
-    })
+    toast.success(`Connection "${selectedConnection.name}" has been disconnected`)
     setShowConnectionSettingsDialog(false)
     setSelectedConnection(null)
   }
@@ -1140,8 +1096,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
   const handleReconnectConnection = () => {
     if (!selectedConnection) return
 
-    toast.success('Connection refreshed' credentials have been renewed`
-    })
+    toast.success(`Connection "${selectedConnection.name}" credentials have been renewed`)
   }
 
   // Create new connection handler
@@ -1151,8 +1106,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
       return
     }
 
-    toast.success('Connection created successfully' is now connected`
-    })
+    toast.success(`Connection "${newConnectionForm.name}" is now connected`)
     setShowNewConnectionDialog(false)
     setNewConnectionForm({ name: '', app: '', apiKey: '' })
   }
@@ -1165,8 +1119,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
     }
 
     const webhookUrl = `https://hook.freeflow.app/${Math.random().toString(36).substring(7)}`
-    toast.success('Webhook created successfully'`
-    })
+    toast.success(`Webhook "${newWebhookForm.name}" created at ${webhookUrl}`)
     setShowNewWebhookDialog(false)
     setNewWebhookForm({ name: '', method: 'POST', scenarioId: '' })
   }
@@ -1186,16 +1139,12 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
   const handleDeleteAllScenarios = async () => {
     setIsProcessing(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to delete scenarios')
         return
       }
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('automations')
         .delete()
@@ -1218,8 +1167,6 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
   const handleClearExecutionHistory = async () => {
     setIsProcessing(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to clear history')
@@ -1227,8 +1174,6 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
       }
 
       // Reset execution counts on all workflows
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('automations')
         .update({
@@ -1261,8 +1206,6 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
     }
     setIsProcessing(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to import scenarios')
@@ -1270,8 +1213,6 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
       }
 
       const imported = JSON.parse(importJsonContent)
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('automations').insert({
         user_id: user.id,
         workflow_name: imported.name || 'Imported Scenario',
@@ -1405,8 +1346,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
       if (workflow) {
         await handleRunAutomation(workflow)
       }
-      toast.success('Execution retried' is now running`
-      })
+      toast.success(`Execution retried and is now running`)
     } catch (err) {
       console.error('Error retrying execution:', err)
       toast.error('Failed to retry execution')
@@ -1419,16 +1359,12 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
   const handleUseTemplate = async (template: WorkflowTemplate) => {
     setIsProcessing(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to use templates')
         return
       }
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('automations').insert({
         user_id: user.id,
         workflow_name: template.name,
@@ -1464,8 +1400,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
 
       if (error) throw error
 
-      toast.success('Template applied successfully'" scenario created`
-      })
+      toast.success(`Template "${template.name}" scenario created`)
       setSelectedTemplate(null)
       fetchWorkflows()
     } catch (err) {
@@ -1480,8 +1415,6 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
   const handleRestoreVersion = async (workflow: AutomationWorkflow, version: number) => {
     setIsProcessing(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('automations')
         .update({

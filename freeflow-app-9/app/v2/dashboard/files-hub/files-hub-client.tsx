@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -483,8 +485,6 @@ export default function FilesHubClient() {
   const fetchData = useCallback(async () => {
     try {
       setLoading(true)
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
@@ -608,8 +608,6 @@ export default function FilesHubClient() {
     }
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
@@ -617,8 +615,6 @@ export default function FilesHubClient() {
         ? folders.find(f => f.id === currentFolderId)?.path || '/'
         : '/'
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('folders').insert({
         user_id: user.id,
         parent_id: currentFolderId,
@@ -628,7 +624,7 @@ export default function FilesHubClient() {
       })
 
       if (error) throw error
-      toast.success('Folder created'" has been created` })
+      toast.success("Folder " + newFolderName.trim() + " has been created")
       setNewFolderName('')
       setShowCreateFolderDialog(false)
       fetchData()
@@ -641,11 +637,9 @@ export default function FilesHubClient() {
 
   const handleDeleteFile = async (fileId: string, fileName: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('files').update({ status: 'deleted', deleted_at: new Date().toISOString() }).eq('id', fileId)
       if (error) throw error
-      toast.success('File deleted' moved to trash` })
+      toast.success('File deleted')
       fetchData()
     } catch (error) {
       toast.error('Failed to delete file')
@@ -654,8 +648,6 @@ export default function FilesHubClient() {
 
   const handleToggleStar = async (fileId: string, currentlyStarred: boolean) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('files').update({ is_starred: !currentlyStarred }).eq('id', fileId)
       if (error) throw error
       toast.success(currentlyStarred ? 'Removed from starred' : 'Added to starred')
@@ -667,13 +659,9 @@ export default function FilesHubClient() {
 
   const handleShareFile = async (fileId: string, fileName: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('file_shares').insert({
         file_id: fileId,
         shared_by: user.id,
@@ -682,10 +670,8 @@ export default function FilesHubClient() {
       })
       if (error) throw error
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       await supabase.from('files').update({ is_shared: true }).eq('id', fileId)
-      toast.success('File shared'` })
+      toast.success("File " + fileName + " shared successfully")
       fetchData()
     } catch (error) {
       toast.error('Failed to share file')
@@ -694,11 +680,9 @@ export default function FilesHubClient() {
 
   const handleDeleteFolder = async (folderId: string, folderName: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('folders').delete().eq('id', folderId)
       if (error) throw error
-      toast.success('Folder deleted'" has been deleted` })
+      toast.success("Folder " + folderName + " has been deleted")
       if (currentFolderId === folderId) setCurrentFolderId(null)
       fetchData()
     } catch (error) {
@@ -971,7 +955,7 @@ export default function FilesHubClient() {
                     onClick={() => setCurrentFolderId(folder.id)}
                   >
                     <CardContent className="p-4 text-center">
-                      <FolderOpen className={`w-12 h-12 mx-auto mb-2 text-${folder.color || 'blue'}-500`} />
+                      <FolderOpen className={"w-12 h-12 mx-auto mb-2 text-" + (folder.color || 'blue') + "-500"} />
                       <h3 className="font-medium text-gray-900 dark:text-white truncate">{folder.name}</h3>
                       <p className="text-xs text-gray-500">{folder.itemCount} items</p>
                     </CardContent>
@@ -996,11 +980,11 @@ export default function FilesHubClient() {
                     <CardContent className={viewMode === 'grid' ? 'p-4' : 'p-3'}>
                       <div className={viewMode === 'grid' ? 'text-center' : 'flex items-center gap-4'}>
                         <div className={viewMode === 'grid' ? 'mb-3' : ''}>
-                          <FileIcon className={`${viewMode === 'grid' ? 'w-12 h-12 mx-auto' : 'w-10 h-10'} ${getFileColor(file.type)}`} />
+                          <FileIcon className={(viewMode === "grid" ? "w-12 h-12 mx-auto" : "w-10 h-10") + " " + getFileColor(file.type)} />
                         </div>
                         <div className={viewMode === 'grid' ? '' : 'flex-1 min-w-0'}>
                           <div className="flex items-center gap-2 justify-center">
-                            <h3 className={`font-medium text-gray-900 dark:text-white ${viewMode === 'grid' ? 'truncate' : ''}`}>
+                            <h3 className={"font-medium text-gray-900 dark:text-white " + (viewMode === 'grid' ? 'truncate' : '') + ""}>
                               {file.name}
                             </h3>
                             {file.isStarred && <Star className="w-3 h-3 text-yellow-500 fill-yellow-500 flex-shrink-0" />}
@@ -1044,14 +1028,14 @@ export default function FilesHubClient() {
                   return (
                     <Card key={file.id} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
                       <CardContent className="p-4 flex items-center gap-4">
-                        <FileIcon className={`w-10 h-10 ${getFileColor(file.type)}`} />
+                        <FileIcon className={"w-10 h-10 " + (getFileColor(file.type)) + ""} />
                         <div className="flex-1">
                           <h3 className="font-medium text-gray-900 dark:text-white">{file.name}</h3>
                           <p className="text-sm text-gray-500">Modified {formatDate(file.modifiedAt)} at {formatTime(file.modifiedAt)}</p>
                         </div>
                         <div className="flex items-center gap-2">
                           <Button variant="ghost" size="sm" onClick={async () => {
-                            toast.success(`Downloading ${file.name}...`)
+                            toast.success('Downloading ' + file.name + '...')
                             try {
                               const response = await fetch(`/api/files-hub?id=${file.id}&action=download`)
                               if (!response.ok) throw new Error('Download failed')
@@ -1064,7 +1048,7 @@ export default function FilesHubClient() {
                               a.click()
                               window.URL.revokeObjectURL(url)
                               document.body.removeChild(a)
-                              toast.success(`${file.name} downloaded successfully!`)
+                              toast.success(file.name + ' downloaded successfully!')
                             } catch (error) {
                               toast.error('Download failed')
                             }
@@ -1090,7 +1074,7 @@ export default function FilesHubClient() {
                 return (
                   <Card key={file.id} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm cursor-pointer" onClick={() => { setSelectedFile(file); setShowFileDialog(true) }}>
                     <CardContent className="p-4 text-center">
-                      <FileIcon className={`w-12 h-12 mx-auto mb-2 ${getFileColor(file.type)}`} />
+                      <FileIcon className={"w-12 h-12 mx-auto mb-2 " + (getFileColor(file.type)) + ""} />
                       <h3 className="font-medium text-gray-900 dark:text-white truncate">{file.name}</h3>
                       <p className="text-xs text-gray-500">{formatSize(file.size)}</p>
                     </CardContent>
@@ -1378,7 +1362,7 @@ export default function FilesHubClient() {
                             </div>
                           </div>
                           <Button variant="ghost" size="sm" className="text-red-600" onClick={async () => { if (confirm(`Unlink ${device.name}?`)) {
-                            toast.success(`Unlinking ${device.name}...`)
+                            toast.success('Unlinking ' + device.name + '...')
                             try {
                               const response = await fetch('/api/files-hub', {
                                 method: 'DELETE',
@@ -1386,7 +1370,7 @@ export default function FilesHubClient() {
                                 body: JSON.stringify({ action: 'unlink-device', deviceName: device.name })
                               })
                               if (!response.ok) throw new Error('Failed to unlink device')
-                              toast.success(`${device.name} has been unlinked`)
+                              toast.success(device.name + ' has been unlinked')
                             } catch (error) {
                               toast.error('Failed to unlink device')
                             }
@@ -1745,7 +1729,7 @@ export default function FilesHubClient() {
                               <Badge className="bg-green-100 text-green-700">Connected</Badge>
                             ) : (
                               <Button variant="outline" size="sm" onClick={async () => {
-                                toast.success(`Connecting ${app.name}...`)
+                                toast.success('Connecting ' + app.name + '...')
                                 try {
                                   const response = await fetch('/api/files-hub', {
                                     method: 'POST',
@@ -1753,7 +1737,7 @@ export default function FilesHubClient() {
                                     body: JSON.stringify({ action: 'connect-app', appName: app.name })
                                   })
                                   if (!response.ok) throw new Error('Failed to connect app')
-                                  toast.success(`${app.name} connected successfully!`)
+                                  toast.success(app.name + ' connected successfully!')
                                 } catch (error) {
                                   toast.error('Failed to connect app')
                                 }
@@ -2344,7 +2328,7 @@ export default function FilesHubClient() {
             <AIInsightsPanel
               insights={mockFilesHubAIInsights}
               title="Files Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -2382,7 +2366,7 @@ export default function FilesHubClient() {
                 <div className="flex items-start gap-4">
                   {(() => {
                     const FileIcon = getFileIcon(selectedFile.type)
-                    return <FileIcon className={`w-16 h-16 ${getFileColor(selectedFile.type)}`} />
+                    return <FileIcon className={"w-16 h-16 " + (getFileColor(selectedFile.type)) + ""} />
                   })()}
                   <div className="flex-1">
                     <h2 className="text-xl font-bold text-gray-900 dark:text-white">{selectedFile.name}</h2>
@@ -2423,7 +2407,7 @@ export default function FilesHubClient() {
                 )}
                 <div className="flex gap-2">
                   <Button className="flex-1 bg-gradient-to-r from-cyan-500 to-blue-600 text-white" onClick={async () => {
-                    toast.success(`Downloading ${selectedFile.name}...`)
+                    toast.success('Downloading ' + selectedFile.name + '...')
                     try {
                       const response = await fetch(`/api/files-hub?id=${selectedFile.id}&action=download`)
                       if (!response.ok) throw new Error('Download failed')
@@ -2436,7 +2420,7 @@ export default function FilesHubClient() {
                       a.click()
                       window.URL.revokeObjectURL(url)
                       document.body.removeChild(a)
-                      toast.success(`${selectedFile.name} downloaded successfully!`)
+                      toast.success(selectedFile.name + ' downloaded successfully!')
                       setShowFileDialog(false)
                     } catch (error) {
                       toast.error('Download failed')
@@ -2450,7 +2434,7 @@ export default function FilesHubClient() {
                     Share
                   </Button>
                   <Button variant="outline" onClick={() => handleToggleStar(selectedFile.id, selectedFile.isStarred)}>
-                    <Star className={`w-4 h-4 ${selectedFile.isStarred ? 'fill-yellow-500 text-yellow-500' : ''}`} />
+                    <Star className={"w-4 h-4 " + (selectedFile.isStarred ? 'fill-yellow-500 text-yellow-500' : '') + ""} />
                   </Button>
                   <Button variant="outline" className="text-red-600" onClick={() => { handleDeleteFile(selectedFile.id, selectedFile.name); setShowFileDialog(false) }}>
                     <Trash2 className="w-4 h-4" />
@@ -2523,7 +2507,7 @@ export default function FilesHubClient() {
                   e.currentTarget.classList.remove('border-cyan-500', 'bg-cyan-50', 'dark:bg-cyan-900/20')
                   const droppedFiles = Array.from(e.dataTransfer.files)
                   if (droppedFiles.length > 0) {
-                    toast.success(`Uploading ${droppedFiles.length} file(s)...`)
+                    toast.success('Uploading ' + droppedFiles.length + ' file(s)...')
                     try {
                       const formData = new FormData()
                       droppedFiles.forEach(file => formData.append('files', file))
@@ -2533,7 +2517,7 @@ export default function FilesHubClient() {
                         body: formData
                       })
                       if (!response.ok) throw new Error('Upload failed')
-                      toast.success(`${droppedFiles.length} file(s) uploaded successfully`)
+                      toast.success(droppedFiles.length + ' file(s) uploaded successfully')
                       setShowUploadDialog(false)
                       fetchData()
                     } catch (error) {
@@ -2550,7 +2534,7 @@ export default function FilesHubClient() {
                   onChange={async (e) => {
                     const selectedFiles = Array.from(e.target.files || [])
                     if (selectedFiles.length > 0) {
-                      toast.success(`Uploading ${selectedFiles.length} file(s)...`)
+                      toast.success('Uploading ' + selectedFiles.length + ' file(s)...')
                       try {
                         const formData = new FormData()
                         selectedFiles.forEach(file => formData.append('files', file))
@@ -2560,7 +2544,7 @@ export default function FilesHubClient() {
                           body: formData
                         })
                         if (!response.ok) throw new Error('Upload failed')
-                        toast.success(`${selectedFiles.length} file(s) uploaded successfully`)
+                        toast.success(selectedFiles.length + ' file(s) uploaded successfully')
                         setShowUploadDialog(false)
                         fetchData()
                       } catch (error) {
@@ -2767,7 +2751,7 @@ export default function FilesHubClient() {
                 onClick={() => {
                   setSearchQuery(quickSearchQuery)
                   setShowSearchDialog(false)
-                  toast.success(`Searching for "${quickSearchQuery}"`)
+                  toast.success('Searching for "' + quickSearchQuery + '"')
                 }}
                 className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white"
               >

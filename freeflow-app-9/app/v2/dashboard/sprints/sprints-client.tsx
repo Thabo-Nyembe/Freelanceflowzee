@@ -620,8 +620,7 @@ export default function SprintsClient() {
         labels: ['story'],
       })
 
-      toast.success('Story Created'" has been added to the sprint`
-      })
+      toast.success('Story "' + newStoryTitle + '" has been added to the sprint')
       setShowNewStoryDialog(false)
       resetStoryForm()
       refetchTasks()
@@ -644,8 +643,7 @@ export default function SprintsClient() {
 
     try {
       await startSprint(sprintToStart)
-      toast.success('Sprint Started'" is now active with ${sprintDuration}-week duration`
-      })
+      toast.success('"' + sprintName + '" is now active with ' + sprintDuration + '-week duration')
       setShowStartSprintDialog(false)
       resetStartSprintForm()
       refetchSprints()
@@ -688,8 +686,7 @@ export default function SprintsClient() {
           : 14,
       })
 
-      toast.success('Sprint Created'" has been created successfully`
-      })
+      toast.success('Sprint "' + newSprintName + '" has been created successfully')
       setShowCreateSprintDialog(false)
       resetSprintForm()
       refetchSprints()
@@ -702,8 +699,7 @@ export default function SprintsClient() {
   const handleStartSprint = async (sprintId: string, sprintName: string) => {
     try {
       await startSprint(sprintId)
-      toast.success('Sprint Started'" is now active`
-      })
+      toast.success("Sprint is now active")
       refetchSprints()
     } catch (error) {
       toast.error('Failed to Start Sprint')
@@ -714,8 +710,7 @@ export default function SprintsClient() {
   const handleCompleteSprint = async (sprintId: string, sprintName: string) => {
     try {
       await completeSprint({ id: sprintId })
-      toast.success('Sprint Completed'" has been completed`
-      })
+      toast.success("Sprint has been completed")
       refetchSprints()
     } catch (error) {
       toast.error('Failed to Complete Sprint')
@@ -775,8 +770,7 @@ export default function SprintsClient() {
         labels: [],
       })
 
-      toast.success('Task Created'" has been added to the sprint`
-      })
+      toast.success("Task has been added to the sprint")
       setShowCreateTaskDialog(false)
       resetTaskForm()
       refetchTasks()
@@ -793,8 +787,7 @@ export default function SprintsClient() {
         id: taskId,
         updates: { status: newStatus }
       })
-      toast.info('Task Moved'" moved to ${newStatus.replace('_', ' ')}`
-      })
+      toast.info("Task moved to " + newStatus.replace("_", " "))
       refetchTasks()
     } catch (error) {
       toast.error('Failed to Move Task')
@@ -805,8 +798,7 @@ export default function SprintsClient() {
   const handleCompleteTask = async (taskId: string, taskName: string) => {
     try {
       await completeTask(taskId)
-      toast.success('Task Completed'" has been marked as done`
-      })
+      toast.success("Task has been marked as done")
       refetchTasks()
       refetchSprints()
     } catch (error) {
@@ -830,8 +822,7 @@ export default function SprintsClient() {
         labels: taskData.labels,
       })
 
-      toast.success('Task Added to Sprint'" has been added to the sprint`
-      })
+      toast.success("Task has been added to the sprint")
       refetchTasks()
       refetchSprints()
     } catch (error) {
@@ -857,8 +848,7 @@ export default function SprintsClient() {
       for (const sprint of completedSprints) {
         await deleteSprint(sprint.id)
       }
-      toast.success('Sprints Archived' completed sprints have been archived`
-      })
+      toast.success("Completed sprints have been archived")
       refetchSprints()
     } catch (error) {
       toast.error('Failed to Archive Sprints')
@@ -2360,7 +2350,7 @@ export default function SprintsClient() {
             <AIInsightsPanel
               insights={mockSprintsAIInsights}
               title="Sprint Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">

@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -404,8 +406,6 @@ export default function ContentClient() {
     async function fetchAssets() {
       setAssetsLoading(true)
       try {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) return
 
@@ -457,13 +457,9 @@ export default function ContentClient() {
     async function fetchWebhooks() {
       setWebhooksLoading(true)
       try {
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) return
 
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         const { data, error } = await supabase
           .from('webhooks')
           .select('*')
@@ -634,8 +630,7 @@ export default function ContentClient() {
       })
 
       if (result) {
-        toast.success('Content created successfully'" has been created as a ${contentForm.status}`
-        })
+        toast.success("Content created successfully - " + contentForm.title + " has been created as a " + contentForm.status)
         setContentForm(defaultContentForm)
         setIsCreateDialogOpen(false)
         refetchContent()
@@ -672,8 +667,7 @@ export default function ContentClient() {
       }, selectedEntry.id)
 
       if (result) {
-        toast.success('Content updated successfully'" has been updated`
-        })
+        toast.success("Content updated successfully - " + contentForm.title + " has been updated")
         setContentForm(defaultContentForm)
         setSelectedEntry(null)
         setIsEditDialogOpen(false)
@@ -694,8 +688,7 @@ export default function ContentClient() {
       const result = await deleteContent(selectedEntry.id)
 
       if (result) {
-        toast.success('Content deleted'" has been moved to trash`
-        })
+        toast.success("Content deleted - " + selectedEntry.title + " has been moved to trash")
         setSelectedEntry(null)
         setIsDeleteDialogOpen(false)
         refetchContent()
@@ -717,8 +710,7 @@ export default function ContentClient() {
       }, entry.id)
 
       if (result) {
-        toast.success('Content published'" is now live`
-        })
+        toast.success("Content published - " + entry.title + " is now live")
         refetchContent()
       }
     } catch (error) {
@@ -738,8 +730,7 @@ export default function ContentClient() {
       }, entry.id)
 
       if (result) {
-        toast.success('Content scheduled'" will be published on ${new Date(scheduledDate).toLocaleDateString()}`
-        })
+        toast.success("Content scheduled - " + entry.title + " will be published on " + new Date(scheduledDate).toLocaleDateString())
         refetchContent()
       }
     } catch (error) {
@@ -758,8 +749,7 @@ export default function ContentClient() {
       }, entry.id)
 
       if (result) {
-        toast.info('Content archived'" has been archived`
-        })
+        toast.info("Content archived - " + entry.title + " has been archived")
         refetchContent()
       }
     } catch (error) {
@@ -802,8 +792,7 @@ export default function ContentClient() {
       })
 
       if (result) {
-        toast.success('Content duplicated'"`
-        })
+        toast.success("Content duplicated - " + entry.title + " (Copy) created")
         refetchContent()
       }
     } catch (error) {
@@ -835,13 +824,9 @@ export default function ContentClient() {
     }
 
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('assets')
         .update({ deleted_at: new Date().toISOString() })
@@ -850,8 +835,7 @@ export default function ContentClient() {
 
       if (error) throw error
 
-      toast.success('Asset deleted'" has been removed`
-      })
+      toast.success("Asset deleted - " + asset.title + " has been removed")
 
       setAssets(prev => prev.filter(a => a.id !== asset.id))
       setSelectedAsset(null)
@@ -869,13 +853,9 @@ export default function ContentClient() {
 
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('webhooks')
         .insert({
@@ -893,8 +873,7 @@ export default function ContentClient() {
 
       if (error) throw error
 
-      toast.success('Webhook created'" is now active`
-      })
+      toast.success("Webhook created - " + webhookForm.name + " is now active")
 
       setWebhooks(prev => [{
         id: data.id,
@@ -920,13 +899,9 @@ export default function ContentClient() {
 
   const handleToggleWebhook = async (webhook: WebhookConfig) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('webhooks')
         .update({ is_active: !webhook.isActive })
@@ -998,8 +973,7 @@ export default function ContentClient() {
     }
 
     setIsSubmitting(true)
-    toast.success('Creating content type...'"...`
-    })
+    toast.info("Creating content type - " + contentTypeForm.name + "...")
 
     try {
       const response = await fetch('/api/content', {
@@ -1018,8 +992,7 @@ export default function ContentClient() {
         throw new Error(errorData.error || 'Failed to create content type')
       }
 
-      toast.success('Content Type Created'" has been created. Configure fields in the builder.`
-      })
+      toast.success("Content Type Created - " + contentTypeForm.name + " has been created. Configure fields in the builder.")
       setContentTypeForm({ name: '', apiId: '', description: '' })
       setIsCreateTypeDialogOpen(false)
     } catch (error) {
@@ -1043,8 +1016,7 @@ export default function ContentClient() {
     }
 
     setIsSubmitting(true)
-    toast.success('Adding locale...'"...`
-    })
+    toast.info("Adding locale - " + localeForm.name + "...")
 
     try {
       const response = await fetch('/api/content', {
@@ -1063,8 +1035,7 @@ export default function ContentClient() {
         throw new Error(errorData.error || 'Failed to add locale')
       }
 
-      toast.success('Locale Added'" (${localeForm.code}) has been added`
-      })
+      toast.success("Locale Added - " + localeForm.name + " (" + localeForm.code + ") has been added")
       setLocaleForm({ code: '', name: '', fallback: 'en-US' })
       setIsAddLocaleDialogOpen(false)
     } catch (error) {
@@ -1087,8 +1058,7 @@ export default function ContentClient() {
         const text = await file.text()
         const data = JSON.parse(text)
 
-        toast.success('Import Started' entries and ${data.assets?.length || 0} assets...`
-        })
+        toast.success("Import Started - " + (data.entries?.length || 0) + " entries and " + (data.assets?.length || 0) + " assets...")
 
         // Call the API to process the import
         const response = await fetch('/api/content', {
@@ -1789,7 +1759,7 @@ export default function ContentClient() {
             <AIInsightsPanel
               insights={mockContentAIInsights}
               title="Content Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -2344,7 +2314,7 @@ export default function ContentClient() {
                       throw new Error(errorData.error || 'Failed to update content type')
                     }
 
-                    toast.success('Content Type Updated'" has been saved` })
+                    toast.success("Content Type Updated - " + selectedContentType.name + " has been saved")
                     setIsConfigureTypeDialogOpen(false)
                   } catch (error) {
                     toast.error('Failed to update content type')

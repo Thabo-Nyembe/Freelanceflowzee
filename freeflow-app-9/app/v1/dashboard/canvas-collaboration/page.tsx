@@ -427,7 +427,8 @@ export default function CanvasCollaboration() {
         }
 
         setRecentProjects([newProject, ...recentProjects])
-        setCanvasName(name)        toast.success(`Canvas created - ${name} (${size}) - Ready to start designing`)
+        setCanvasName(name)
+        toast.success(`Canvas created - ${name} (${size}) - Ready to start designing`)
         announce('Canvas created successfully', 'polite')
       }
 
@@ -444,7 +445,8 @@ export default function CanvasCollaboration() {
     const project = recentProjects.find(p => p.id === canvasId)
 
     if (project) {
-      setCanvasName(project.name)      toast.success(`Canvas ${project.name} (${project.size}) loaded successfully`)
+      setCanvasName(project.name)
+    toast.success(`Canvas ${project.name} (${project.size}) loaded successfully`)
     }
   }
 
@@ -542,7 +544,8 @@ export default function CanvasCollaboration() {
 
     try {
       // Copy to clipboard
-      await navigator.clipboard.writeText(shareLink)      toast.success(`Share link generated - Link copied to clipboard - ${collaborators.length} collaborators can access`)
+      await navigator.clipboard.writeText(shareLink)
+    toast.success(`Share link generated - Link copied to clipboard - ${collaborators.length} collaborators can access`)
     } catch (err) {
       logger.error('Failed to copy share link', { error: err })
       toast.error('Failed to copy share link to clipboard')
@@ -596,7 +599,8 @@ export default function CanvasCollaboration() {
       tool: 'select'
     }
 
-    setCollaborators([...collaborators, newCollaborator])    toast.success(`Invitation sent - Collaboration invite sent to ${email} - Total collaborators: ${collaborators.length + 1}`)
+    setCollaborators([...collaborators, newCollaborator])
+    toast.success(`Invitation sent - Collaboration invite sent to ${email} - Total collaborators: ${collaborators.length + 1}`)
     announce('Collaborator invited successfully', 'polite')
     setShowInviteDialog(false)
     setInviteEmail('')
@@ -630,7 +634,8 @@ export default function CanvasCollaboration() {
       }
     }
 
-    setCollaborators(collaborators.filter(c => c.name !== removeCollaborator.name))    toast.success(`Collaborator removed - ${removeCollaborator.name} has been removed - ${collaborators.length - 1} collaborators remaining`)
+    setCollaborators(collaborators.filter(c => c.name !== removeCollaborator.name))
+    toast.success(`Collaborator removed - ${removeCollaborator.name} has been removed - ${collaborators.length - 1} collaborators remaining`)
     announce('Collaborator removed', 'polite')
     setRemoveCollaborator(null)
   }
@@ -717,7 +722,8 @@ export default function CanvasCollaboration() {
 
     // Perform actual paste by adding duplicated elements with offset
     const pastedElements = clipboard.elements?.map((el: string, i: number) => `${el}-pasted-${Date.now()}-${i}`) || []
-    setSelectedElements(pastedElements)    toast.success(`Element pasted - ${clipboard.type} element pasted onto canvas`)
+    setSelectedElements(pastedElements)
+    toast.success(`Element pasted - ${clipboard.type} element pasted onto canvas`)
   }
 
   const handleDeleteElement = () => {
@@ -732,7 +738,8 @@ export default function CanvasCollaboration() {
     setSelectedElements([])
 
     // Save canvas state after deletion
-    saveCanvasState()    toast.success(`Elements deleted - ${count} element(s) removed from canvas`)
+    saveCanvasState()
+    toast.success(`Elements deleted - ${count} element(s) removed from canvas`)
   }
 
   const handleDuplicateElement = () => {
@@ -748,7 +755,8 @@ export default function CanvasCollaboration() {
     setSelectedElements([...selectedElements, ...duplicatedElements])
 
     // Save canvas state after duplication
-    saveCanvasState()    toast.success(`Elements duplicated - ${count} duplicate(s) created and placed on canvas`)
+    saveCanvasState()
+    toast.success(`Elements duplicated - ${count} duplicate(s) created and placed on canvas`)
   }
 
   const handleGroupElements = () => {
@@ -772,7 +780,8 @@ export default function CanvasCollaboration() {
       opacity: 100,
       type: 'shape'
     }
-    setLayers([...layers, newLayer])    toast.success(`Elements grouped - ${count} elements grouped together as one unit`)
+    setLayers([...layers, newLayer])
+    toast.success(`Elements grouped - ${count} elements grouped together as one unit`)
   }
 
   const handleUngroupElements = () => {
@@ -785,7 +794,8 @@ export default function CanvasCollaboration() {
 
     // Remove group layers
     setLayers(layers.filter(l => !l.name.startsWith('Group (')))
-    setSelectedElements([])    toast.success('Group ungrouped - Elements separated and can now be edited individually')
+    setSelectedElements([])
+    toast.success('Group ungrouped - Elements separated and can now be edited individually')
   }
 
   const handleAlignElements = (align: string) => {
@@ -795,7 +805,8 @@ export default function CanvasCollaboration() {
     }
 
     // Perform alignment action - update canvas state
-    saveCanvasState()    toast.success(`Elements aligned - ${selectedElements.length} elements aligned: ${align}`)
+    saveCanvasState()
+    toast.success(`Elements aligned - ${selectedElements.length} elements aligned: ${align}`)
   }
 
   const handleDistributeElements = (direction: string) => {
@@ -805,7 +816,8 @@ export default function CanvasCollaboration() {
     }
 
     // Perform distribution action - update canvas state
-    saveCanvasState()    toast.success(`Elements distributed - ${selectedElements.length} elements distributed evenly: ${direction}`)
+    saveCanvasState()
+    toast.success(`Elements distributed - ${selectedElements.length} elements distributed evenly: ${direction}`)
   }
 
   const handleBringToFront = () => {
@@ -818,7 +830,8 @@ export default function CanvasCollaboration() {
     const selectedLayerIds = selectedElements
     const selectedLayers = layers.filter(l => selectedLayerIds.includes(l.id))
     const otherLayers = layers.filter(l => !selectedLayerIds.includes(l.id))
-    setLayers([...otherLayers, ...selectedLayers])    toast.success(`Brought to front - ${selectedElements.length} element(s) moved to top layer`)
+    setLayers([...otherLayers, ...selectedLayers])
+    toast.success(`Brought to front - ${selectedElements.length} element(s) moved to top layer`)
   }
 
   const handleSendToBack = () => {
@@ -831,7 +844,8 @@ export default function CanvasCollaboration() {
     const selectedLayerIds = selectedElements
     const selectedLayers = layers.filter(l => selectedLayerIds.includes(l.id))
     const otherLayers = layers.filter(l => !selectedLayerIds.includes(l.id))
-    setLayers([...selectedLayers, ...otherLayers])    toast.success(`Sent to back - ${selectedElements.length} element(s) moved to bottom layer`)
+    setLayers([...selectedLayers, ...otherLayers])
+    toast.success(`Sent to back - ${selectedElements.length} element(s) moved to bottom layer`)
   }
 
   const handleLockElement = () => {
@@ -844,7 +858,8 @@ export default function CanvasCollaboration() {
     const selectedLayerIds = selectedElements
     setLayers(layers.map(l =>
       selectedLayerIds.includes(l.id) ? { ...l, locked: true } : l
-    ))    toast.success(`Elements locked - ${selectedElements.length} element(s) locked and protected from changes`)
+    ))
+    toast.success(`Elements locked - ${selectedElements.length} element(s) locked and protected from changes`)
   }
 
   const handleUnlockElement = () => {
@@ -857,7 +872,8 @@ export default function CanvasCollaboration() {
     const selectedLayerIds = selectedElements
     setLayers(layers.map(l =>
       selectedLayerIds.includes(l.id) ? { ...l, locked: false } : l
-    ))    toast.success(`Elements unlocked - ${selectedElements.length} element(s) unlocked and can be edited`)
+    ))
+    toast.success(`Elements unlocked - ${selectedElements.length} element(s) unlocked and can be edited`)
   }
 
   const handleAIGenerateIdeas = () => {
@@ -870,7 +886,8 @@ export default function CanvasCollaboration() {
       `Consider using ${layers.length > 3 ? 'layer grouping' : 'additional layers'} for organization`,
       `The current ${selectedColor} could be complemented with analogous colors`
     ]
-    const suggestion = suggestions[Math.floor(Math.random() * suggestions.length)]    toast.success(`AI ideas generated - Creative suggestion: ${suggestion}`)
+    const suggestion = suggestions[Math.floor(Math.random() * suggestions.length)]
+    toast.success(`AI ideas generated - Creative suggestion: ${suggestion}`)
   }
 
   const handleAISuggestColors = () => {
@@ -891,7 +908,8 @@ export default function CanvasCollaboration() {
 
     // Apply a suggested color to the palette
     const newSuggestedColor = colors[Math.floor(Math.random() * colors.length)]
-    setSelectedColor(newSuggestedColor)    toast.success(`AI color suggestions - ${randomScheme} scheme recommended: ${suggestedColors}. Applied: ${newSuggestedColor}`)
+    setSelectedColor(newSuggestedColor)
+    toast.success(`AI color suggestions - ${randomScheme} scheme recommended: ${suggestedColors}. Applied: ${newSuggestedColor}`)
   }
 
   const handleAIImproveLayout = () => {
@@ -909,7 +927,8 @@ export default function CanvasCollaboration() {
     }
 
     // Zoom to fit canvas
-    setZoom(100)    toast.success(`AI layout suggestions - Recommendation: ${randomSuggestion}. Grid enabled for alignment.`)
+    setZoom(100)
+    toast.success(`AI layout suggestions - Recommendation: ${randomSuggestion}. Grid enabled for alignment.`)
   }
 
   const toggleLayer = (layerId: string, property: 'visible' | 'locked') => {

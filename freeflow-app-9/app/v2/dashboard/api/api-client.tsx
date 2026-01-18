@@ -724,10 +724,10 @@ export default function ApiClient() {
     { label: 'Total Requests', value: formatNumber(stats.totalRequests), change: 42.3, icon: Zap, gradient: 'from-indigo-500 to-blue-500' },
     { label: 'Avg Latency', value: formatLatency(stats.avgLatency), change: -18.5, icon: Clock, gradient: 'from-green-500 to-emerald-500' },
     { label: 'Active Endpoints', value: stats.activeEndpoints.toString(), change: 15.7, icon: Server, gradient: 'from-purple-500 to-pink-500' },
-    { label: 'Error Rate', value: `${stats.avgErrorRate.toFixed(2)}%`, change: -8.2, icon: AlertTriangle, gradient: 'from-red-500 to-orange-500' },
-    { label: 'API Keys', value: `${stats.activeKeys}/${stats.totalKeys}`, change: 5.0, icon: Key, gradient: 'from-yellow-500 to-amber-500' },
-    { label: 'Test Pass Rate', value: `${Math.round((stats.passedTests / stats.totalTests) * 100)}%`, change: 2.5, icon: TestTube, gradient: 'from-cyan-500 to-teal-500' },
-    { label: 'Monitors', value: `${stats.healthyMonitors}/${stats.totalMonitors}`, change: 0, icon: Gauge, gradient: 'from-blue-500 to-indigo-500' },
+    { label: 'Error Rate', value: stats.avgErrorRate.toFixed(2) + '%', change: -8.2, icon: AlertTriangle, gradient: 'from-red-500 to-orange-500' },
+    { label: 'API Keys', value: stats.activeKeys + '/' + stats.totalKeys, change: 5.0, icon: Key, gradient: 'from-yellow-500 to-amber-500' },
+    { label: 'Test Pass Rate', value: Math.round((stats.passedTests / stats.totalTests) * 100) + '%', change: 2.5, icon: TestTube, gradient: 'from-cyan-500 to-teal-500' },
+    { label: 'Monitors', value: stats.healthyMonitors + '/' + stats.totalMonitors, change: 0, icon: Gauge, gradient: 'from-blue-500 to-indigo-500' },
     { label: 'Webhooks', value: webhooks.filter(w => w.isActive).length.toString(), change: 12.0, icon: Webhook, gradient: 'from-pink-500 to-rose-500' }
   ]
 
@@ -750,7 +750,7 @@ export default function ApiClient() {
         rate_limit_per_hour: endpointForm.rateLimit,
         tags: endpointForm.tags
       })
-      toast.success('Endpoint created' has been created` })
+      toast.success('Endpoint created')
       setShowCreateEndpointDialog(false)
       setEndpointForm({ name: '', description: '', method: 'GET', path: '/api/v1/', version: 'v1', requiresAuth: true, rateLimit: 1000, tags: [] })
     } catch (err) {
@@ -776,7 +776,7 @@ export default function ApiClient() {
         rate_limit_per_hour: apiKeyForm.rateLimit,
         expires_at: apiKeyForm.expiresAt || undefined
       })
-      toast.success('API key generated' has been created. Key: ${result.key_value?.slice(0, 20)}...` })
+      toast.success('API key generated')
       setShowCreateKeyDialog(false)
       setApiKeyForm({ name: '', description: '', environment: 'development', scopes: ['read'], rateLimit: 1000, expiresAt: '' })
     } catch (err) {
@@ -789,7 +789,7 @@ export default function ApiClient() {
   const handleRevokeApiKey = async (keyId: string, keyName: string) => {
     try {
       await revokeKey(keyId, 'Revoked by user')
-      toast.info('Key revoked'" has been revoked` })
+      toast.info('Key revoked: ' + keyName + ' has been revoked')
     } catch (err) {
       toast.error('Failed to revoke key')
     }
@@ -798,7 +798,7 @@ export default function ApiClient() {
   const handleDeleteEndpoint = async (endpointId: string, endpointName: string) => {
     try {
       await deleteEndpoint(endpointId)
-      toast.success('Endpoint deleted'" has been removed` })
+      toast.success('Endpoint deleted: ' + endpointName + ' has been removed')
     } catch (err) {
       toast.error('Failed to delete endpoint')
     }
@@ -807,14 +807,14 @@ export default function ApiClient() {
   const handleDeleteApiKey = async (keyId: string, keyName: string) => {
     try {
       await deleteKey(keyId)
-      toast.success('API key deleted'" has been removed` })
+      toast.success('API key deleted: ' + keyName + ' has been removed')
     } catch (err) {
       toast.error('Failed to delete key')
     }
   }
 
   const handleTestEndpoint = (endpointName: string) => {
-    toast.success('Test complete'" responded with 200 OK` })
+    toast.success('Test complete: ' + endpointName + ' responded with 200 OK')
   }
 
   const handleExportApiDocs = () => {
@@ -867,10 +867,10 @@ export default function ApiClient() {
             <Card key={index} className="border-0 shadow-sm">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-2">
-                  <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${stat.gradient} flex items-center justify-center`}>
+                  <div className={'w-8 h-8 rounded-lg bg-gradient-to-br ' + stat.gradient + ' flex items-center justify-center'}>
                     <stat.icon className="w-4 h-4 text-white" />
                   </div>
-                  <div className={`flex items-center gap-1 text-xs ${stat.change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  <div className={'flex items-center gap-1 text-xs ' + (stat.change >= 0 ? 'text-green-600' : 'text-red-600')}>
                     {stat.change >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
                     {Math.abs(stat.change)}%
                   </div>
@@ -956,7 +956,7 @@ export default function ApiClient() {
                 <Button
                   key={idx}
                   variant="ghost"
-                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  className={'h-20 flex-col gap-2 ' + action.color + ' hover:scale-105 transition-all duration-200'}
                   onClick={action.onClick}
                 >
                   <action.icon className="w-5 h-5" />
@@ -993,7 +993,7 @@ export default function ApiClient() {
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center gap-2">
-                          <Badge className={`font-mono font-bold ${getMethodColor(endpoint.method)}`}>
+                          <Badge className={'font-mono font-bold ' + getMethodColor(endpoint.method)}>
                             {endpoint.method}
                           </Badge>
                           <code className="text-sm font-mono text-gray-900 dark:text-white">{endpoint.path}</code>
@@ -1020,7 +1020,7 @@ export default function ApiClient() {
                           <p className="text-xs text-gray-500">P95</p>
                         </div>
                         <div className="text-center">
-                          <p className={`text-lg font-bold ${endpoint.errorRate > 1 ? 'text-red-600' : 'text-green-600'}`}>{endpoint.errorRate}%</p>
+                          <p className={'text-lg font-bold ' + (endpoint.errorRate > 1 ? 'text-red-600' : 'text-green-600')}>{endpoint.errorRate}%</p>
                           <p className="text-xs text-gray-500">Error Rate</p>
                         </div>
                       </div>
@@ -1072,7 +1072,7 @@ export default function ApiClient() {
                       { name: 'version', value: 'v1' }
                     ].map((variable, i) => (
                       <div key={i} className="flex items-center gap-2 p-2 rounded-lg bg-gray-50 dark:bg-gray-800">
-                        <code className="text-xs font-mono text-indigo-600">{`{{${variable.name}}}`}</code>
+                        <code className="text-xs font-mono text-indigo-600">{'{{' + variable.name + '}}'}</code>
                         <span className="text-xs text-gray-500 truncate flex-1">{variable.value}</span>
                       </div>
                     ))}
@@ -1136,7 +1136,7 @@ export default function ApiClient() {
                 <Button
                   key={idx}
                   variant="ghost"
-                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  className={'h-20 flex-col gap-2 ' + action.color + ' hover:scale-105 transition-all duration-200'}
                   onClick={action.onClick}
                 >
                   <action.icon className="w-5 h-5" />
@@ -1264,7 +1264,7 @@ export default function ApiClient() {
                 <Button
                   key={idx}
                   variant="ghost"
-                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  className={'h-20 flex-col gap-2 ' + action.color + ' hover:scale-105 transition-all duration-200'}
                   onClick={action.onClick}
                 >
                   <action.icon className="w-5 h-5" />
@@ -1300,7 +1300,7 @@ export default function ApiClient() {
                         <p className="text-xs text-gray-500">Tests</p>
                       </div>
                       <div className="text-center p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <p className={`text-lg font-bold ${collection.passRate >= 90 ? 'text-green-600' : collection.passRate >= 70 ? 'text-yellow-600' : 'text-red-600'}`}>{collection.passRate}%</p>
+                        <p className={'text-lg font-bold ' + (collection.passRate >= 90 ? 'text-green-600' : collection.passRate >= 70 ? 'text-yellow-600' : 'text-red-600')}>{collection.passRate}%</p>
                         <p className="text-xs text-gray-500">Pass Rate</p>
                       </div>
                     </div>
@@ -1364,7 +1364,7 @@ export default function ApiClient() {
                 <Button
                   key={idx}
                   variant="ghost"
-                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  className={'h-20 flex-col gap-2 ' + action.color + ' hover:scale-105 transition-all duration-200'}
                   onClick={action.onClick}
                 >
                   <action.icon className="w-5 h-5" />
@@ -1382,11 +1382,11 @@ export default function ApiClient() {
                 <div className="space-y-2">
                   {history.map(request => (
                     <div key={request.id} className="flex items-center gap-4 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
-                      <Badge className={`font-mono font-bold ${getMethodColor(request.method)}`}>
+                      <Badge className={'font-mono font-bold ' + getMethodColor(request.method)}>
                         {request.method}
                       </Badge>
                       <code className="text-sm font-mono flex-1 text-gray-700 dark:text-gray-300">{request.url}</code>
-                      <span className={`font-mono font-bold ${getHttpStatusColor(request.status)}`}>{request.status}</span>
+                      <span className={'font-mono font-bold ' + getHttpStatusColor(request.status)}>{request.status}</span>
                       <span className="text-sm text-gray-500 w-16 text-right">{formatLatency(request.duration)}</span>
                       <span className="text-sm text-gray-500 w-20 text-right">{formatSize(request.size)}</span>
                       <Badge className={getEnvironmentColor(request.environment)}>{request.environment}</Badge>
@@ -1439,7 +1439,7 @@ export default function ApiClient() {
                 <Button
                   key={idx}
                   variant="ghost"
-                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  className={'h-20 flex-col gap-2 ' + action.color + ' hover:scale-105 transition-all duration-200'}
                   onClick={action.onClick}
                 >
                   <action.icon className="w-5 h-5" />
@@ -1467,7 +1467,7 @@ export default function ApiClient() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg mb-4">
                       <div className="text-center">
-                        <p className={`text-lg font-bold ${monitor.uptime >= 99.9 ? 'text-green-600' : monitor.uptime >= 99 ? 'text-yellow-600' : 'text-red-600'}`}>{monitor.uptime}%</p>
+                        <p className={'text-lg font-bold ' + (monitor.uptime >= 99.9 ? 'text-green-600' : monitor.uptime >= 99 ? 'text-yellow-600' : 'text-red-600')}>{monitor.uptime}%</p>
                         <p className="text-xs text-gray-500">Uptime</p>
                       </div>
                       <div className="text-center">
@@ -1479,7 +1479,7 @@ export default function ApiClient() {
                         <p className="text-xs text-gray-500">Interval</p>
                       </div>
                       <div className="text-center">
-                        <p className={`text-lg font-bold ${monitor.alerts > 0 ? 'text-red-600' : 'text-green-600'}`}>{monitor.alerts}</p>
+                        <p className={'text-lg font-bold ' + (monitor.alerts > 0 ? 'text-red-600' : 'text-green-600')}>{monitor.alerts}</p>
                         <p className="text-xs text-gray-500">Alerts</p>
                       </div>
                     </div>
@@ -1535,7 +1535,7 @@ export default function ApiClient() {
                 <Button
                   key={idx}
                   variant="ghost"
-                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  className={'h-20 flex-col gap-2 ' + action.color + ' hover:scale-105 transition-all duration-200'}
                   onClick={action.onClick}
                 >
                   <action.icon className="w-5 h-5" />
@@ -1558,7 +1558,7 @@ export default function ApiClient() {
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${webhook.isActive ? 'bg-gradient-to-br from-green-500 to-emerald-500' : 'bg-gray-300 dark:bg-gray-600'}`}>
+                        <div className={'w-10 h-10 rounded-lg flex items-center justify-center ' + (webhook.isActive ? 'bg-gradient-to-br from-green-500 to-emerald-500' : 'bg-gray-300 dark:bg-gray-600')}>
                           <Webhook className="w-5 h-5 text-white" />
                         </div>
                         <div>
@@ -1584,7 +1584,7 @@ export default function ApiClient() {
                       </div>
                       <div>
                         <p className="text-xs text-gray-500">Success Rate</p>
-                        <p className={`font-semibold ${webhook.successRate >= 99 ? 'text-green-600' : webhook.successRate >= 95 ? 'text-yellow-600' : 'text-red-600'}`}>{webhook.successRate}%</p>
+                        <p className={'font-semibold ' + (webhook.successRate >= 99 ? 'text-green-600' : webhook.successRate >= 95 ? 'text-yellow-600' : 'text-red-600')}>{webhook.successRate}%</p>
                       </div>
                       <div>
                         <p className="text-xs text-gray-500">Last Triggered</p>
@@ -1638,7 +1638,7 @@ export default function ApiClient() {
                 <Button
                   key={idx}
                   variant="ghost"
-                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  className={'h-20 flex-col gap-2 ' + action.color + ' hover:scale-105 transition-all duration-200'}
                   onClick={action.onClick}
                 >
                   <action.icon className="w-5 h-5" />
@@ -1677,12 +1677,7 @@ export default function ApiClient() {
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center gap-3">
-                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                            suite.status === 'passed' ? 'bg-gradient-to-br from-green-500 to-emerald-500' :
-                            suite.status === 'failed' ? 'bg-gradient-to-br from-red-500 to-orange-500' :
-                            suite.status === 'running' ? 'bg-gradient-to-br from-blue-500 to-indigo-500' :
-                            'bg-gray-300'
-                          }`}>
+                          <div className={'w-10 h-10 rounded-lg flex items-center justify-center ' + (suite.status === 'passed' ? 'bg-gradient-to-br from-green-500 to-emerald-500' : suite.status === 'failed' ? 'bg-gradient-to-br from-red-500 to-orange-500' : suite.status === 'running' ? 'bg-gradient-to-br from-blue-500 to-indigo-500' : 'bg-gray-300')}>
                             {suite.status === 'passed' && <CheckCircle className="w-5 h-5 text-white" />}
                             {suite.status === 'failed' && <XCircle className="w-5 h-5 text-white" />}
                             {suite.status === 'running' && <RefreshCw className="w-5 h-5 text-white animate-spin" />}
@@ -1803,7 +1798,7 @@ export default function ApiClient() {
                     {mockServersState.map(server => (
                       <div key={server.id} className="flex items-center justify-between p-2 rounded-lg bg-gray-50 dark:bg-gray-800">
                         <div className="flex items-center gap-2">
-                          <div className={`w-2 h-2 rounded-full ${server.isActive ? 'bg-green-500' : 'bg-gray-400'}`} />
+                          <div className={'w-2 h-2 rounded-full ' + (server.isActive ? 'bg-green-500' : 'bg-gray-400')} />
                           <span className="text-sm font-medium">{server.name}</span>
                         </div>
                         <span className="text-xs text-gray-500">{formatNumber(server.requests)} req</span>
@@ -2050,7 +2045,7 @@ export default function ApiClient() {
             <AIInsightsPanel
               insights={mockApiAIInsights}
               title="API Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">
@@ -2082,7 +2077,7 @@ export default function ApiClient() {
           <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
-                <Badge className={`font-mono font-bold ${selectedEndpoint && getMethodColor(selectedEndpoint.method)}`}>
+                <Badge className={'font-mono font-bold ' + (selectedEndpoint && getMethodColor(selectedEndpoint.method))}>
                   {selectedEndpoint?.method}
                 </Badge>
                 <code>{selectedEndpoint?.path}</code>
@@ -2107,7 +2102,7 @@ export default function ApiClient() {
                     </div>
                     <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
                       <p className="text-xs text-gray-500">Error Rate</p>
-                      <p className={`text-xl font-bold ${selectedEndpoint.errorRate > 1 ? 'text-red-600' : 'text-green-600'}`}>{selectedEndpoint.errorRate}%</p>
+                      <p className={'text-xl font-bold ' + (selectedEndpoint.errorRate > 1 ? 'text-red-600' : 'text-green-600')}>{selectedEndpoint.errorRate}%</p>
                     </div>
                   </div>
 
@@ -2193,7 +2188,7 @@ export default function ApiClient() {
                             <p className="font-medium text-sm truncate">{test.name}</p>
                             <p className="text-xs text-gray-500">{test.description}</p>
                           </div>
-                          <Badge className={`${getMethodColor(test.method)} font-mono`}>{test.method}</Badge>
+                          <Badge className={getMethodColor(test.method) + ' font-mono'}>{test.method}</Badge>
                           <div className="text-right">
                             <p className="text-sm font-medium">{test.passedAssertions}/{test.assertions}</p>
                             <p className="text-xs text-gray-500">assertions</p>
@@ -2522,7 +2517,7 @@ export default function ApiClient() {
                 <Button variant="outline" size="icon" onClick={() => {
                     const query = (document.querySelector('input[placeholder="Search documentation..."]') as HTMLInputElement)?.value;
                     if (query && query.trim()) {
-                      toast.success(`Searching documentation for "${query}"`);
+                      toast.success('Searching documentation for "' + query + '"');
                     } else {
                       toast.info('Please enter a search term');
                     }
@@ -2535,7 +2530,7 @@ export default function ApiClient() {
                   {endpoints.slice(0, 5).map(endpoint => (
                     <div key={endpoint.id} className="p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
                       <div className="flex items-center gap-2 mb-1">
-                        <Badge className={`font-mono text-xs ${getMethodColor(endpoint.method)}`}>{endpoint.method}</Badge>
+                        <Badge className={'font-mono text-xs ' + getMethodColor(endpoint.method)}>{endpoint.method}</Badge>
                         <code className="text-sm">{endpoint.path}</code>
                       </div>
                       <p className="text-sm text-gray-500">{endpoint.description}</p>
@@ -2665,7 +2660,7 @@ export default function ApiClient() {
                     try {
                       if (selectedKeyForEdit) {
                         await revokeKey(selectedKeyForEdit.id);
-                        toast.success('API key revoked successfully' has been revoked and can no longer be used.` });
+                        toast.success('API key revoked successfully');
                       }
                       setShowRevokeKeyDialog(false);
                     } catch (error) {
@@ -2862,7 +2857,7 @@ export default function ApiClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowEditKeyDialog(false)}>Cancel</Button>
-              <Button onClick={() => { setShowEditKeyDialog(false); toast.success(`API key "${selectedKeyForEdit?.name}" updated`); }}>
+              <Button onClick={() => { setShowEditKeyDialog(false); toast.success('API key "' + (selectedKeyForEdit?.name || '') + '" updated'); }}>
                 Save Changes
               </Button>
             </DialogFooter>
@@ -2957,7 +2952,7 @@ export default function ApiClient() {
                           <Badge className={getMethodColor(item.method)}>{item.method}</Badge>
                           <code className="text-sm">{item.url}</code>
                         </div>
-                        <span className={`text-sm font-mono ${getHttpStatusColor(item.status)}`}>{item.status}</span>
+                        <span className={'text-sm font-mono ' + getHttpStatusColor(item.status)}>{item.status}</span>
                       </div>
                       <div className="flex items-center gap-4 text-xs text-gray-400">
                         <span>{item.duration}ms</span>
@@ -2973,7 +2968,7 @@ export default function ApiClient() {
               <Button variant="outline" onClick={() => setShowHistoryDialog(false)}>Close</Button>
               <Button variant="destructive" onClick={() => {
                   if (confirm('Are you sure you want to clear all request history? This action cannot be undone.')) {
-                    toast.success('Request history cleared' requests have been removed from history.` });
+                    toast.success('Request history cleared');
                     setShowHistoryDialog(false);
                   }
                 }}>
@@ -3157,7 +3152,7 @@ export default function ApiClient() {
                   const url = URL.createObjectURL(blob);
                   const a = document.createElement('a');
                   a.href = url;
-                  a.download = `api-usage-report-${new Date().toISOString().split('T')[0]}.json`;
+                  a.download = 'api-usage-report-' + new Date().toISOString().split('T')[0] + '.json';
                   document.body.appendChild(a);
                   a.click();
                   document.body.removeChild(a);
@@ -3361,53 +3356,11 @@ export default function ApiClient() {
             <div className="space-y-4">
               <div className="p-4 bg-gray-900 rounded-lg">
                 <pre className="text-sm text-green-400 font-mono overflow-x-auto">
-{selectedCodeGenLanguage === 'cURL' && `curl -X GET "https://api.example.com/v1/users" \\
-  -H "Authorization: Bearer YOUR_API_KEY" \\
-  -H "Content-Type: application/json"`}
-{selectedCodeGenLanguage === 'JavaScript' && `fetch('https://api.example.com/v1/users', {
-  method: 'GET',
-  headers: {
-    'Authorization': 'Bearer YOUR_API_KEY',
-    'Content-Type': 'application/json'
-  }
-})
-.then(response => response.json())
-.then(data => console.log(data));`}
-{selectedCodeGenLanguage === 'Python' && `import requests
-
-response = requests.get(
-    'https://api.example.com/v1/users',
-    headers={
-        'Authorization': 'Bearer YOUR_API_KEY',
-        'Content-Type': 'application/json'
-    }
-)
-print(response.json())`}
-{selectedCodeGenLanguage === 'Go' && `package main
-
-import (
-    "net/http"
-    "fmt"
-)
-
-func main() {
-    req, _ := http.NewRequest("GET", "https://api.example.com/v1/users", nil)
-    req.Header.Set("Authorization", "Bearer YOUR_API_KEY")
-    client := &http.Client{}
-    resp, _ := client.Do(req)
-    fmt.Println(resp)
-}`}
-{selectedCodeGenLanguage === 'PHP' && `<?php
-$ch = curl_init();
-curl_setopt($ch, CURLOPT_URL, 'https://api.example.com/v1/users');
-curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-    'Authorization: Bearer YOUR_API_KEY',
-    'Content-Type: application/json'
-));
-$response = curl_exec($ch);
-curl_close($ch);
-echo $response;
-?>`}
+{selectedCodeGenLanguage === 'cURL' && 'curl -X GET "https://api.example.com/v1/users" \\\n  -H "Authorization: Bearer YOUR_API_KEY" \\\n  -H "Content-Type: application/json"'}
+{selectedCodeGenLanguage === 'JavaScript' && "fetch('https://api.example.com/v1/users', {\n  method: 'GET',\n  headers: {\n    'Authorization': 'Bearer YOUR_API_KEY',\n    'Content-Type': 'application/json'\n  }\n})\n.then(response => response.json())\n.then(data => console.log(data));"}
+{selectedCodeGenLanguage === 'Python' && "import requests\n\nresponse = requests.get(\n    'https://api.example.com/v1/users',\n    headers={\n        'Authorization': 'Bearer YOUR_API_KEY',\n        'Content-Type': 'application/json'\n    }\n)\nprint(response.json())"}
+{selectedCodeGenLanguage === 'Go' && 'package main\n\nimport (\n    "net/http"\n    "fmt"\n)\n\nfunc main() {\n    req, _ := http.NewRequest("GET", "https://api.example.com/v1/users", nil)\n    req.Header.Set("Authorization", "Bearer YOUR_API_KEY")\n    client := &http.Client{}\n    resp, _ := client.Do(req)\n    fmt.Println(resp)\n}'}
+{selectedCodeGenLanguage === 'PHP' && "<?php\n$ch = curl_init();\ncurl_setopt($ch, CURLOPT_URL, 'https://api.example.com/v1/users');\ncurl_setopt($ch, CURLOPT_HTTPHEADER, array(\n    'Authorization: Bearer YOUR_API_KEY',\n    'Content-Type: application/json'\n));\n$response = curl_exec($ch);\ncurl_close($ch);\necho $response;\n?>"}
                 </pre>
               </div>
             </div>
@@ -3415,57 +3368,15 @@ echo $response;
               <Button variant="outline" onClick={() => setShowCodeGenDialog(false)}>Close</Button>
               <Button onClick={() => {
                   const codeSnippets: Record<string, string> = {
-                    'cURL': `curl -X GET "https://api.example.com/v1/users" \\
-  -H "Authorization: Bearer YOUR_API_KEY" \\
-  -H "Content-Type: application/json"`,
-                    'JavaScript': `fetch('https://api.example.com/v1/users', {
-  method: 'GET',
-  headers: {
-    'Authorization': 'Bearer YOUR_API_KEY',
-    'Content-Type': 'application/json'
-  }
-})
-.then(response => response.json())
-.then(data => console.log(data));`,
-                    'Python': `import requests
-
-response = requests.get(
-    'https://api.example.com/v1/users',
-    headers={
-        'Authorization': 'Bearer YOUR_API_KEY',
-        'Content-Type': 'application/json'
-    }
-)
-print(response.json())`,
-                    'Go': `package main
-
-import (
-    "net/http"
-    "fmt"
-)
-
-func main() {
-    req, _ := http.NewRequest("GET", "https://api.example.com/v1/users", nil)
-    req.Header.Set("Authorization", "Bearer YOUR_API_KEY")
-    client := &http.Client{}
-    resp, _ := client.Do(req)
-    fmt.Println(resp)
-}`,
-                    'PHP': `<?php
-$ch = curl_init();
-curl_setopt($ch, CURLOPT_URL, 'https://api.example.com/v1/users');
-curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-    'Authorization: Bearer YOUR_API_KEY',
-    'Content-Type: application/json'
-));
-$response = curl_exec($ch);
-curl_close($ch);
-echo $response;
-?>`
+                    'cURL': 'curl -X GET "https://api.example.com/v1/users" \\\n  -H "Authorization: Bearer YOUR_API_KEY" \\\n  -H "Content-Type: application/json"',
+                    'JavaScript': "fetch('https://api.example.com/v1/users', {\n  method: 'GET',\n  headers: {\n    'Authorization': 'Bearer YOUR_API_KEY',\n    'Content-Type': 'application/json'\n  }\n})\n.then(response => response.json())\n.then(data => console.log(data));",
+                    'Python': "import requests\n\nresponse = requests.get(\n    'https://api.example.com/v1/users',\n    headers={\n        'Authorization': 'Bearer YOUR_API_KEY',\n        'Content-Type': 'application/json'\n    }\n)\nprint(response.json())",
+                    'Go': 'package main\n\nimport (\n    "net/http"\n    "fmt"\n)\n\nfunc main() {\n    req, _ := http.NewRequest("GET", "https://api.example.com/v1/users", nil)\n    req.Header.Set("Authorization", "Bearer YOUR_API_KEY")\n    client := &http.Client{}\n    resp, _ := client.Do(req)\n    fmt.Println(resp)\n}',
+                    'PHP': "<?php\n$ch = curl_init();\ncurl_setopt($ch, CURLOPT_URL, 'https://api.example.com/v1/users');\ncurl_setopt($ch, CURLOPT_HTTPHEADER, array(\n    'Authorization: Bearer YOUR_API_KEY',\n    'Content-Type: application/json'\n));\n$response = curl_exec($ch);\ncurl_close($ch);\necho $response;\n?>"
                   };
                   const code = codeSnippets[selectedCodeGenLanguage] || codeSnippets['cURL'];
                   navigator.clipboard.writeText(code);
-                  toast.success('Code copied to clipboard' snippet ready to use` });
+                  toast.success('Code copied to clipboard');
                 }}>
                 <Copy className="w-4 h-4 mr-2" /> Copy Code
               </Button>
@@ -3537,7 +3448,7 @@ echo $response;
               <Button
                 onClick={() => {
                   const collectionId = 'col_' + Math.random().toString(36).substring(2, 10)
-                  toast.success(`Collection created: ${collectionId}`)
+                  toast.success('Collection created: ' + collectionId)
                   setShowCreateCollectionDialog(false)
                 }}>
                 <FolderPlus className="w-4 h-4 mr-2" />
@@ -3644,13 +3555,13 @@ echo $response;
                   const url = URL.createObjectURL(blob);
                   const a = document.createElement('a');
                   a.href = url;
-                  a.download = `api-collections-${new Date().toISOString().split('T')[0]}.json`;
+                  a.download = 'api-collections-' + new Date().toISOString().split('T')[0] + '.json';
                   document.body.appendChild(a);
                   a.click();
                   document.body.removeChild(a);
                   URL.revokeObjectURL(url);
                   setShowExportCollectionsDialog(false);
-                  toast.success('Collections exported' collections saved to file` });
+                  toast.success('Collections exported');
                 }}>
                 <Download className="w-4 h-4 mr-2" /> Export
               </Button>
@@ -3790,7 +3701,7 @@ echo $response;
                   a.click()
                   document.body.removeChild(a)
                   URL.revokeObjectURL(url)
-                  toast.success(`SDK generated: ${endpoints.length} endpoints, TypeScript definitions included`)
+                  toast.success('SDK generated: ' + endpoints.length + ' endpoints, TypeScript definitions included')
                   setShowGenerateSdkDialog(false)
                 }}>
                 <FileCode className="w-4 h-4 mr-2" />
@@ -3840,7 +3751,7 @@ echo $response;
                 onClick={() => {
                   const totalRequests = collections.reduce((sum, c) => sum + c.requests, 0)
                   const successRate = Math.floor(95 + Math.random() * 5)
-                  toast.success(`Collection run complete: ${successRate}% success rate (${totalRequests} requests)`)
+                  toast.success('Collection run complete: ' + successRate + '% success rate (' + totalRequests + ' requests)')
                   setShowRunAllCollectionsDialog(false)
                 }}>
                 <PlayCircle className="w-4 h-4 mr-2" />
@@ -3904,7 +3815,7 @@ echo $response;
                     <div key={h.id} className="flex items-center gap-2 p-2 border rounded hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
                       <Badge className={getMethodColor(h.method)}>{h.method}</Badge>
                       <span className="text-sm truncate flex-1">{h.url}</span>
-                      <span className={`text-sm ${getHttpStatusColor(h.status)}`}>{h.status}</span>
+                      <span className={'text-sm ' + getHttpStatusColor(h.status)}>{h.status}</span>
                     </div>
                   ))}
                 </div>
@@ -4005,7 +3916,7 @@ echo $response;
                         time: h.duration,
                         request: {
                           method: h.method,
-                          url: `https://api.example.com${h.url}`,
+                          url: 'https://api.example.com' + h.url,
                           httpVersion: 'HTTP/1.1',
                           headers: [{ name: 'Content-Type', value: 'application/json' }],
                           queryString: [],
@@ -4033,13 +3944,13 @@ echo $response;
                   const url = URL.createObjectURL(blob);
                   const a = document.createElement('a');
                   a.href = url;
-                  a.download = `api-requests-${new Date().toISOString().split('T')[0]}.har`;
+                  a.download = 'api-requests-' + new Date().toISOString().split('T')[0] + '.har';
                   document.body.appendChild(a);
                   a.click();
                   document.body.removeChild(a);
                   URL.revokeObjectURL(url);
                   setShowExportHarDialog(false);
-                  toast.success('HAR file exported' requests exported` });
+                  toast.success('HAR file exported');
                 }}>
                 <Download className="w-4 h-4 mr-2" /> Export HAR
               </Button>
@@ -4079,7 +3990,7 @@ echo $response;
               <Button variant="outline" onClick={() => setShowClearHistoryDialog(false)}>Cancel</Button>
               <Button variant="destructive" onClick={() => {
                   if (confirm('Are you sure you want to clear history? This action cannot be undone.')) {
-                    toast.success('History cleared successfully' request records have been deleted.` });
+                    toast.success('History cleared successfully');
                     setShowClearHistoryDialog(false);
                   }
                 }}>
@@ -4134,7 +4045,7 @@ echo $response;
               <ScrollArea className="h-48">
                 <div className="space-y-2">
                   {history.map(h => (
-                    <div key={h.id} className="flex items-center gap-2 p-2 border rounded hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => { navigator.clipboard.writeText(`curl -X ${h.method} "${h.url}"`); toast.success('cURL copied to clipboard'); setShowCopyCurlDialog(false); }}>
+                    <div key={h.id} className="flex items-center gap-2 p-2 border rounded hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => { navigator.clipboard.writeText('curl -X ' + h.method + ' "' + h.url + '"'); toast.success('cURL copied to clipboard'); setShowCopyCurlDialog(false); }}>
                       <Badge className={getMethodColor(h.method)}>{h.method}</Badge>
                       <span className="text-sm truncate flex-1">{h.url}</span>
                     </div>
@@ -4284,7 +4195,7 @@ echo $response;
               <Button
                 onClick={() => {
                   const monitorId = 'mon_' + Math.random().toString(36).substring(2, 10)
-                  toast.success(`Monitor created: ${monitorId} - First check scheduled`)
+                  toast.success('Monitor created: ' + monitorId + ' - First check scheduled')
                   setShowNewMonitorDialog(false)
                 }}>
                 <Plus className="w-4 h-4 mr-2" />
@@ -4495,7 +4406,7 @@ echo $response;
                   const url = URL.createObjectURL(blob);
                   const a = document.createElement('a');
                   a.href = url;
-                  a.download = `monitor-analytics-${new Date().toISOString().split('T')[0]}.json`;
+                  a.download = 'monitor-analytics-' + new Date().toISOString().split('T')[0] + '.json';
                   document.body.appendChild(a);
                   a.click();
                   document.body.removeChild(a);
@@ -4627,7 +4538,7 @@ echo $response;
               <Button
                 onClick={() => {
                   const webhookId = 'whk_' + Math.random().toString(36).substring(2, 10)
-                  toast.success(`Webhook created: ${webhookId}`)
+                  toast.success('Webhook created: ' + webhookId)
                   setShowNewWebhookDialog(false)
                 }}>
                 <Plus className="w-4 h-4 mr-2" />
@@ -4744,7 +4655,7 @@ echo $response;
               <ScrollArea className="h-64">
                 <div className="space-y-2">
                   {webhooks.flatMap(w => [1, 2].map(i => (
-                    <div key={`${w.id}-${i}`} className="p-3 border rounded-lg">
+                    <div key={w.id + '-' + i} className="p-3 border rounded-lg">
                       <div className="flex items-center justify-between mb-2">
                         <span className="font-medium">{w.name}</span>
                         <Badge className={i === 1 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}>{i === 1 ? 'Success' : 'Failed'}</Badge>
@@ -4774,7 +4685,7 @@ echo $response;
                   const url = URL.createObjectURL(blob);
                   const a = document.createElement('a');
                   a.href = url;
-                  a.download = `webhook-logs-${new Date().toISOString().split('T')[0]}.json`;
+                  a.download = 'webhook-logs-' + new Date().toISOString().split('T')[0] + '.json';
                   document.body.appendChild(a);
                   a.click();
                   document.body.removeChild(a);
@@ -4918,13 +4829,13 @@ echo $response;
                   const url = URL.createObjectURL(blob);
                   const a = document.createElement('a');
                   a.href = url;
-                  a.download = `webhooks-config-${new Date().toISOString().split('T')[0]}.json`;
+                  a.download = 'webhooks-config-' + new Date().toISOString().split('T')[0] + '.json';
                   document.body.appendChild(a);
                   a.click();
                   document.body.removeChild(a);
                   URL.revokeObjectURL(url);
                   setShowExportWebhooksDialog(false);
-                  toast.success('Webhooks exported' webhook configurations saved` });
+                  toast.success('Webhooks exported');
                 }}>
                 <Download className="w-4 h-4 mr-2" /> Export
               </Button>
@@ -5022,7 +4933,7 @@ echo $response;
                   const duration = Math.ceil(testSuites.reduce((sum, s) => sum + s.duration, 0) / 1000)
                   const passedTests = Math.floor(totalTests * 0.92)
                   const failedTests = totalTests - passedTests
-                  toast.success(`Test run complete: ${passedTests} passed, ${failedTests} failed (${duration}s)`)
+                  toast.success('Test run complete: ' + passedTests + ' passed, ' + failedTests + ' failed (' + duration + 's)')
                   setShowRunAllTestsDialog(false)
                 }}>
                 <PlayCircle className="w-4 h-4 mr-2" />
@@ -5079,7 +4990,7 @@ echo $response;
               <Button
                 onClick={() => {
                   const suiteId = 'suite_' + Math.random().toString(36).substring(2, 10)
-                  toast.success(`Test suite created: ${suiteId}`)
+                  toast.success('Test suite created: ' + suiteId)
                   setShowNewTestSuiteDialog(false)
                 }}>
                 <Plus className="w-4 h-4 mr-2" />
@@ -5152,7 +5063,7 @@ echo $response;
                   const url = URL.createObjectURL(blob);
                   const a = document.createElement('a');
                   a.href = url;
-                  a.download = `test-coverage-${new Date().toISOString().split('T')[0]}.json`;
+                  a.download = 'test-coverage-' + new Date().toISOString().split('T')[0] + '.json';
                   document.body.appendChild(a);
                   a.click();
                   document.body.removeChild(a);
@@ -5190,8 +5101,7 @@ echo $response;
               </div>
               <div className="p-4 bg-gray-900 rounded-lg">
                 <p className="text-xs text-gray-400 mb-2">Add to your workflow:</p>
-                <pre className="text-xs text-green-400 font-mono overflow-x-auto">{`- name: Run API Tests
-  run: npx api-test run --suite all`}</pre>
+                <pre className="text-xs text-green-400 font-mono overflow-x-auto">{"- name: Run API Tests\n  run: npx api-test run --suite all"}</pre>
               </div>
               <div className="flex items-center gap-2">
                 <Switch defaultChecked />
@@ -5278,7 +5188,7 @@ echo $response;
                   const url = URL.createObjectURL(blob);
                   const a = document.createElement('a');
                   a.href = url;
-                  a.download = `test-report-${new Date().toISOString().split('T')[0]}.json`;
+                  a.download = 'test-report-' + new Date().toISOString().split('T')[0] + '.json';
                   document.body.appendChild(a);
                   a.click();
                   document.body.removeChild(a);
@@ -5472,7 +5382,7 @@ echo $response;
                 onClick={() => {
                   const failedCount = stats.totalTests - stats.passedTests
                   const fixed = Math.floor(failedCount * 0.7)
-                  toast.success(`Rerun complete: ${fixed} tests now passing, ${failedCount - fixed} still failing`)
+                  toast.success('Rerun complete: ' + fixed + ' tests now passing, ' + (failedCount - fixed) + ' still failing')
                   setShowRerunFailedDialog(false)
                 }}>
                 <Repeat className="w-4 h-4 mr-2" />
@@ -5801,7 +5711,7 @@ echo $response;
                   a.click()
                   document.body.removeChild(a)
                   URL.revokeObjectURL(url)
-                  toast.success(`Documentation generated: ${endpoints.length} endpoints documented`)
+                  toast.success('Documentation generated: ' + endpoints.length + ' endpoints documented')
                   setShowGenerateDocsDialog(false)
                 }}>
                 <FileText className="w-4 h-4 mr-2" />
@@ -5842,8 +5752,7 @@ echo $response;
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowTryEndpointDialog(false)}>Close</Button>
               <Button onClick={() => {
-                  toast.success('Request completed' ${selectedEndpoint?.path} - 200 OK (145ms)`
-                  })
+                  toast.success('Request completed: ' + (selectedEndpoint?.path || '') + ' - 200 OK (145ms)')
                 }}>
                 <Send className="w-4 h-4 mr-2" /> Send
               </Button>
@@ -5915,31 +5824,15 @@ echo $response;
                 </Select>
               </div>
               <div className="p-4 bg-gray-900 rounded-lg">
-                <pre className="text-sm text-green-400 font-mono overflow-x-auto">{`fetch('${selectedEndpoint?.path}', {
-  method: '${selectedEndpoint?.method}',
-  headers: {
-    'Authorization': 'Bearer YOUR_API_KEY',
-    'Content-Type': 'application/json'
-  }
-})
-.then(response => response.json())
-.then(data => console.log(data));`}</pre>
+                <pre className="text-sm text-green-400 font-mono overflow-x-auto">{"fetch('" + (selectedEndpoint?.path || '') + "', {\n  method: '" + (selectedEndpoint?.method || '') + "',\n  headers: {\n    'Authorization': 'Bearer YOUR_API_KEY',\n    'Content-Type': 'application/json'\n  }\n})\n.then(response => response.json())\n.then(data => console.log(data));"}</pre>
               </div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowEndpointCodeDialog(false)}>Close</Button>
               <Button onClick={() => {
-                  const code = `fetch('${selectedEndpoint?.path}', {
-  method: '${selectedEndpoint?.method}',
-  headers: {
-    'Authorization': 'Bearer YOUR_API_KEY',
-    'Content-Type': 'application/json'
-  }
-})
-.then(response => response.json())
-.then(data => console.log(data));`;
+                  const code = "fetch('" + (selectedEndpoint?.path || '') + "', {\n  method: '" + (selectedEndpoint?.method || '') + "',\n  headers: {\n    'Authorization': 'Bearer YOUR_API_KEY',\n    'Content-Type': 'application/json'\n  }\n})\n.then(response => response.json())\n.then(data => console.log(data));";
                   navigator.clipboard.writeText(code);
-                  toast.success('Code copied to clipboard' ${selectedEndpoint?.path}` });
+                  toast.success('Code copied to clipboard');
                 }}>
                 <Copy className="w-4 h-4 mr-2" /> Copy
               </Button>
@@ -5990,7 +5883,7 @@ echo $response;
                 onClick={() => {
                   const passed = selectedTestSuite?.passed || 0
                   const failed = selectedTestSuite?.failed || 0
-                  toast.success(`Test suite complete: ${passed} passed, ${failed} failed`)
+                  toast.success('Test suite complete: ' + passed + ' passed, ' + failed + ' failed')
                   setShowRunTestSuiteDialog(false)
                 }}>
                 <PlayCircle className="w-4 h-4 mr-2" />
@@ -6095,13 +5988,13 @@ echo $response;
                   const url = URL.createObjectURL(blob);
                   const a = document.createElement('a');
                   a.href = url;
-                  a.download = `test-report-${selectedTestSuite?.name?.replace(/\s+/g, '-').toLowerCase() || 'suite'}-${new Date().toISOString().split('T')[0]}.json`;
+                  a.download = 'test-report-' + (selectedTestSuite?.name?.replace(/\s+/g, '-').toLowerCase() || 'suite') + '-' + new Date().toISOString().split('T')[0] + '.json';
                   document.body.appendChild(a);
                   a.click();
                   document.body.removeChild(a);
                   URL.revokeObjectURL(url);
                   setShowExportTestReportDialog(false);
-                  toast.success('Test report exported' test results saved` });
+                  toast.success('Test report exported');
                 }}>
                 <Download className="w-4 h-4 mr-2" /> Export Report
               </Button>

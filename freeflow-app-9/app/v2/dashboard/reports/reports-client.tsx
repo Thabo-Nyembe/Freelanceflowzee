@@ -524,8 +524,7 @@ export default function ReportsClient() {
       })
 
       if (result.success) {
-        toast.success('Report created successfully'" has been created in the ${newReportFolder} folder`
-        })
+        toast.success('Report created successfully', { description: newReportName + ' has been created in the ' + newReportFolder + ' folder' })
 
         // Refresh reports list
         await loadReports()
@@ -571,8 +570,7 @@ export default function ReportsClient() {
       })
 
       if (result.data) {
-        toast.success('Export scheduled successfully' at ${scheduleExportTime}`
-        })
+        toast.success(`Export scheduled successfully`, { description: `Scheduled at ${scheduleExportTime}` })
 
         // Refresh scheduled reports list
         await loadScheduledReports()
@@ -604,8 +602,7 @@ export default function ReportsClient() {
       return
     }
 
-    toast.success('Data source connected'" has been added and is now syncing`
-    })
+    toast.success(`Data source connected`, { description: `"${newDataSourceName}" has been added and is now syncing` })
 
     // Reset form
     setNewDataSourceName('')
@@ -616,8 +613,7 @@ export default function ReportsClient() {
 
   // Apply Filters Handler
   const handleApplyFilters = () => {
-    toast.success('Filters applied', Type: ${filterType}, Date: ${filterDateRange}`
-    })
+    toast.success(`Filters applied`, { description: `Type: ${filterType}, Date: ${filterDateRange}` })
     setShowFilterDialog(false)
   }
 
@@ -636,8 +632,7 @@ export default function ReportsClient() {
         body: JSON.stringify({ action: 'import', file: importFile, format: importFormat })
       })
       if (!res.ok) throw new Error('Failed to import reports')
-      toast.success('Reports imported successfully' file`
-      })
+      toast.success(`Reports imported successfully`, { description: `Imported from file` })
       // Refresh reports list
       await loadReports()
       setImportFile('')
@@ -656,8 +651,7 @@ export default function ReportsClient() {
       // Export all reports via analytics API
       const result = await fetchAnalyticsAPI('comprehensive')
       if (result.success) {
-        toast.success('Export started'. Download will begin shortly.`
-        })
+        toast.success(`Export started`, { description: `Download will begin shortly.` })
         setShowExportAllDialog(false)
       } else {
         toast.error('Export failed')
@@ -683,8 +677,7 @@ export default function ReportsClient() {
           'Marketing spend optimization can save 20% budget',
           'Product feature adoption correlates with retention'
         ])
-        toast.success('AI analysis complete' actionable insights`
-        })
+        toast.success(`AI analysis complete`, { description: `Found ${insights.length} actionable insights` })
       } else {
         // Fallback to default insights
         setAiInsightsResults([
@@ -704,22 +697,19 @@ export default function ReportsClient() {
 
   // Apply Theme Handler
   const handleApplyTheme = () => {
-    toast.success('Theme applied'" theme to all reports`
-    })
+    toast.success(`Theme applied`, { description: `Applied "${selectedTheme}" theme to all reports` })
     setShowThemeDialog(false)
   }
 
   // Publish Report Handler
   const handlePublishReport = () => {
-    toast.success('Report published'`
-    })
+    toast.success(`Report published`, { description: `Report is now publicly accessible` })
     setShowPublishDialog(false)
   }
 
   // Refresh Data Source Handler
   const handleRefreshDataSource = (source: DataSource) => {
-    toast.success('Data source refreshed' has been synced successfully`
-    })
+    toast.success(`Data source refreshed`, { description: `${source.name} has been synced successfully` })
   }
 
   // Data Source Settings Handler
@@ -731,8 +721,7 @@ export default function ReportsClient() {
   // Save Data Source Settings Handler
   const handleSaveDataSourceSettings = () => {
     if (!selectedDataSource) return
-    toast.success('Settings saved' settings updated`
-    })
+    toast.success(`Settings saved`, { description: `${selectedDataSource.name} settings updated` })
     setShowDataSourceSettingsDialog(false)
     setSelectedDataSource(null)
   }
@@ -746,8 +735,7 @@ export default function ReportsClient() {
   // Toggle Schedule Status Handler
   const handleToggleScheduleStatus = async (scheduleId: string, currentStatus: string) => {
     const newStatus = currentStatus === 'active' ? 'paused' : 'active'
-    toast.success(`Schedule ${newStatus}``
-    })
+    toast.success('Schedule ' + newStatus, { description: 'Schedule status has been updated' })
   }
 
   // Delete All Reports Handler
@@ -770,8 +758,7 @@ export default function ReportsClient() {
   // Open Report Handler
   const handleOpenReport = () => {
     if (!selectedReport) return
-    toast.success('Opening report'" in full view`
-    })
+    toast.success('Opening report', { description: selectedReport.name + ' in full view' })
     // In a real app, this would navigate to the report view
   }
 
@@ -788,8 +775,7 @@ export default function ReportsClient() {
       toast.error('Report name is required')
       return
     }
-    toast.success('Report updated'" has been saved`
-    })
+    toast.success('Report updated', { description: editReportName + ' has been saved' })
     setShowEditReportDialog(false)
   }
 
@@ -806,8 +792,7 @@ export default function ReportsClient() {
       return
     }
     const emailCount = shareEmails.split(',').length
-    toast.success('Report shared' recipient${emailCount > 1 ? 's' : ''} with ${sharePermission} access`
-    })
+    toast.success(`Report shared`, { description: `Sent to ${emailCount} recipient${emailCount > 1 ? 's' : ''} with ${sharePermission} access` })
     setShowShareReportDialog(false)
   }
 
@@ -823,8 +808,7 @@ export default function ReportsClient() {
     try {
       const result = await exportReportAPI(selectedReport.id, exportFormat)
       if (result.success) {
-        toast.success('Export started'" will be downloaded as ${exportFormat.toUpperCase()}`
-        })
+        toast.success(`Export started`, { description: `Report will be downloaded as ${exportFormat.toUpperCase()}` })
         setShowExportReportDialog(false)
       } else {
         toast.error('Export failed')
@@ -847,8 +831,7 @@ export default function ReportsClient() {
     try {
       const result = await deleteReportAPI(selectedReport.id)
       if (result.success) {
-        toast.success('Report deleted'" has been removed`
-        })
+        toast.success('Report deleted', { description: selectedReport.name + ' has been removed' })
         // Refresh reports list
         await loadReports()
         setShowDeleteReportDialog(false)
@@ -908,8 +891,7 @@ export default function ReportsClient() {
       toast.error('Connection string is required')
       return
     }
-    toast.success('Connection added'" is now connected and syncing`
-    })
+    toast.success('Connection added', { description: newDataSourceName + ' is now connected and syncing' })
     setShowAddConnectionDialog(false)
     setNewDataSourceName('')
     setNewDataSourceType('database')
@@ -1050,8 +1032,7 @@ export default function ReportsClient() {
 
   // Duplicate Report Handler (legacy - for context menu)
   const handleDuplicateReport = (reportName: string) => {
-    toast.success('Report duplicated'" created`
-    })
+    toast.success('Report duplicated', { description: reportName + ' copy created' })
   }
 
   return (
@@ -2279,7 +2260,7 @@ export default function ReportsClient() {
             <AIInsightsPanel
               insights={[]}
               title="Reports Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">

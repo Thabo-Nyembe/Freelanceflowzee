@@ -506,7 +506,7 @@ export default function TicketsClient() {
   const allTickets = useMemo(() => {
     return (dbTickets || []).map(t => ({
         id: t.id,
-        ticketNumber: t.ticket_number || `TKT-${t.id.slice(0, 8)}`,
+        ticketNumber: t.ticket_number || ('TKT-' + t.id.slice(0, 8)),
         subject: t.subject,
         description: t.description || '',
         status: (t.status || 'new') as TicketStatus,
@@ -667,9 +667,9 @@ export default function TicketsClient() {
     const diffHours = Math.floor(diffMs / 3600000)
     const diffDays = Math.floor(diffMs / 86400000)
 
-    if (diffMins < 60) return `${diffMins}m ago`
-    if (diffHours < 24) return `${diffHours}h ago`
-    if (diffDays < 7) return `${diffDays}d ago`
+    if (diffMins < 60) return diffMins + 'm ago'
+    if (diffHours < 24) return diffHours + 'h ago'
+    if (diffDays < 7) return diffDays + 'd ago'
     return date.toLocaleDateString()
   }
 
@@ -685,7 +685,7 @@ export default function TicketsClient() {
     }
 
     try {
-      const ticketNumber = `TKT-${Date.now().toString().slice(-8)}`
+      const ticketNumber = 'TKT-' + Date.now().toString().slice(-8)
       await createTicket({
         ticket_number: ticketNumber,
         subject: newTicket.subject,
@@ -701,7 +701,7 @@ export default function TicketsClient() {
         attachment_count: 0,
         metadata: {}
       })
-      toast.success('Ticket Created' created successfully` })
+      toast.success('Ticket Created')
       setShowCreateDialog(false)
       setNewTicket({ subject: '', description: '', priority: 'normal', category: 'General', customer_name: '', customer_email: '' })
       refetch()
@@ -720,7 +720,7 @@ export default function TicketsClient() {
 
     try {
       await assignTicket(ticketToAssign, agentId, agentName)
-      toast.success('Ticket Assigned'` })
+      toast.success('Ticket Assigned')
       setShowAssignDialog(false)
       setTicketToAssign(null)
       refetch()
@@ -783,14 +783,14 @@ export default function TicketsClient() {
   const handleExportTickets = () => {
     // Export tickets to CSV
     const csvContent = allTickets.map(t =>
-      `${t.ticketNumber},${t.subject},${t.status},${t.priority},${t.customer.name},${t.customer.email}`
+      [t.ticketNumber, t.subject, t.status, t.priority, t.customer.name, t.customer.email].join(",")
     ).join('\n')
 
-    const blob = new Blob([`Ticket#,Subject,Status,Priority,Customer,Email\n${csvContent}`], { type: 'text/csv' })
+    const blob = new Blob(['Ticket#,Subject,Status,Priority,Customer,Email\n' + csvContent], { type: 'text/csv' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `tickets-export-${new Date().toISOString().split('T')[0]}.csv`
+    a.download = 'tickets-export-' + new Date().toISOString().split('T')[0] + '.csv'
     a.click()
     URL.revokeObjectURL(url)
 
@@ -837,8 +837,7 @@ export default function TicketsClient() {
       for (const ticket of ticketsToAssign) {
         await assignTicket(ticket.id, selectedAgentForBulk, agent.name)
       }
-      toast.success('Bulk Assign Complete' tickets assigned to ${agent.name}`
-      })
+      toast.success('Bulk Assign Complete')
       setShowBulkAssignDialog(false)
       setSelectedAgentForBulk('')
       refetch()
@@ -851,7 +850,7 @@ export default function TicketsClient() {
     try {
       // In a real app, get current user info
       await assignTicket(ticketId, 'current-user-id', 'Me')
-      toast.success('Ticket Assigned' assigned to you` })
+      toast.success('Ticket Assigned')
       refetch()
     } catch (error) {
       toast.error('Error')
@@ -869,8 +868,7 @@ export default function TicketsClient() {
     }
 
     // In a real implementation, this would call an API to create the agent
-    toast.success('Agent Added' has been added to the ${newAgent.team} team`
-    })
+    toast.success('Agent Added')
     setShowAddAgentDialog(false)
     setNewAgent({ name: '', email: '', team: 'Technical Support', role: 'agent' })
   }
@@ -895,12 +893,11 @@ export default function TicketsClient() {
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `support-report-${reportType}-${reportPeriod}-${new Date().toISOString().split('T')[0]}.json`
+    a.download = 'support-report-' + reportType + '-' + reportPeriod + '-' + new Date().toISOString().split('T')[0] + '.json'
     a.click()
     URL.revokeObjectURL(url)
 
-    toast.success('Report Generated' report for the last ${reportPeriod} downloaded`
-    })
+    toast.success('Report Generated')
     setShowFullReportDialog(false)
   }
 
@@ -947,7 +944,7 @@ export default function TicketsClient() {
         updateData.closed_at = new Date().toISOString()
       }
       await updateTicket(updateData)
-      toast.success('Status Updated'` })
+      toast.success('Status Updated')
       refetch()
     } catch (error) {
       toast.error('Error')
@@ -1001,9 +998,9 @@ export default function TicketsClient() {
     if (exportFormat === 'csv') {
       const headers = 'Ticket#,Subject,Status,Priority,Customer,Email,Category,Created,Updated'
       const rows = ticketsToExport.map(t =>
-        `"${t.ticketNumber}","${t.subject}","${t.status}","${t.priority}","${t.customer.name}","${t.customer.email}","${t.category}","${t.createdAt}","${t.updatedAt}"`
+        '"' + t.ticketNumber + '","' + t.subject + '","' + t.status + '","' + t.priority + '","' + t.customer.name + '","' + t.customer.email + '","' + t.category + '","' + t.createdAt + '","' + t.updatedAt + '"'
       ).join('\n')
-      content = `${headers}\n${rows}`
+      content = headers + '\n' + rows
       mimeType = 'text/csv'
       extension = 'csv'
     } else if (exportFormat === 'json') {
@@ -1014,9 +1011,9 @@ export default function TicketsClient() {
       // For xlsx, fallback to CSV format
       const headers = 'Ticket#,Subject,Status,Priority,Customer,Email,Category,Created,Updated'
       const rows = ticketsToExport.map(t =>
-        `"${t.ticketNumber}","${t.subject}","${t.status}","${t.priority}","${t.customer.name}","${t.customer.email}","${t.category}","${t.createdAt}","${t.updatedAt}"`
+        '"' + t.ticketNumber + '","' + t.subject + '","' + t.status + '","' + t.priority + '","' + t.customer.name + '","' + t.customer.email + '","' + t.category + '","' + t.createdAt + '","' + t.updatedAt + '"'
       ).join('\n')
-      content = `${headers}\n${rows}`
+      content = headers + '\n' + rows
       mimeType = 'text/csv'
       extension = 'csv'
     }
@@ -1025,12 +1022,11 @@ export default function TicketsClient() {
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `tickets-export-${exportDateRange}-${new Date().toISOString().split('T')[0]}.${extension}`
+    a.download = 'tickets-export-' + exportDateRange + '-' + new Date().toISOString().split('T')[0] + '.' + extension
     a.click()
     URL.revokeObjectURL(url)
 
-    toast.success('Export Complete' tickets exported as ${extension.toUpperCase()}`
-    })
+    toast.success('Export Complete')
     setShowExportAllDialog(false)
   }
 
@@ -1082,14 +1078,14 @@ export default function TicketsClient() {
     const content = exportFormat === 'json'
       ? JSON.stringify(analyticsData, null, 2)
       : Object.entries(analyticsData).map(([key, value]) =>
-          typeof value === 'object' ? `${key}:\n${JSON.stringify(value, null, 2)}` : `${key}: ${value}`
+          typeof value === 'object' ? key + ':\n' + JSON.stringify(value, null, 2) : key + ': ' + value
         ).join('\n\n')
 
     const blob = new Blob([content], { type: exportFormat === 'json' ? 'application/json' : 'text/plain' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `analytics-export-${new Date().toISOString().split('T')[0]}.${exportFormat === 'json' ? 'json' : 'txt'}`
+    a.download = 'analytics-export-' + new Date().toISOString().split('T')[0] + '.' + (exportFormat === 'json' ? 'json' : 'txt')
     a.click()
     URL.revokeObjectURL(url)
 
@@ -1114,8 +1110,7 @@ export default function TicketsClient() {
       for (const ticket of resolvedTickets) {
         await deleteTicket(ticket.id)
       }
-      toast.success('Tickets Deleted' resolved tickets have been deleted`
-      })
+      toast.success('Tickets Deleted')
       setShowDeleteResolvedDialog(false)
       refetch()
     } catch (error) {
@@ -1132,11 +1127,9 @@ export default function TicketsClient() {
     if (!selectedIntegration) return
 
     if (selectedIntegration.status === 'connected') {
-      toast.success('Integration Configured' settings have been updated`
-      })
+      toast.success('Integration Configured')
     } else {
-      toast.success('Integration Connected' has been connected successfully`
-      })
+      toast.success('Integration Connected')
     }
     setShowIntegrationDialog(false)
     setSelectedIntegration(null)
@@ -1330,7 +1323,7 @@ export default function TicketsClient() {
                 ].map((action, i) => (
                   <Card key={i} className="border-gray-200 dark:border-gray-700 hover:shadow-md transition-all cursor-pointer">
                     <CardContent className="p-3 text-center">
-                      <action.icon className={`h-5 w-5 mx-auto mb-2 text-${action.color}-600`} />
+                      <action.icon className={"h-5 w-5 mx-auto mb-2 text-" + action.color + "-600"} />
                       <h4 className="font-medium text-xs">{action.name}</h4>
                       <p className="text-xs text-gray-500">{action.desc}</p>
                     </CardContent>
@@ -1366,9 +1359,9 @@ export default function TicketsClient() {
                   {filteredTickets.map(ticket => (
                     <Card
                       key={ticket.id}
-                      className={`bg-white dark:bg-gray-800 hover:shadow-md transition-shadow cursor-pointer ${
+                      className={'bg-white dark:bg-gray-800 hover:shadow-md transition-shadow cursor-pointer ' + (
                         selectedTicket?.id === ticket.id ? 'ring-2 ring-orange-500' : ''
-                      }`}
+                      )}
                       onClick={() => setSelectedTicket(ticket)}
                     >
                       <CardContent className="p-4">
@@ -1494,18 +1487,18 @@ export default function TicketsClient() {
                           <ScrollArea className="h-64">
                             <div className="space-y-3 pr-4">
                               {selectedTicket.messages.filter(m => !m.isInternal).map(message => (
-                                <div key={message.id} className={`flex gap-2 ${message.sender === 'agent' ? 'flex-row-reverse' : ''}`}>
+                                <div key={message.id} className={'flex gap-2 ' + (message.sender === 'agent' ? 'flex-row-reverse' : '')}>
                                   <Avatar className="w-8 h-8 flex-shrink-0">
-                                    <AvatarFallback className={`text-xs ${message.sender === 'agent' ? 'bg-orange-500 text-white' : 'bg-gray-200'}`}>
+                                    <AvatarFallback className={'text-xs ' + (message.sender === 'agent' ? 'bg-orange-500 text-white' : 'bg-gray-200')}>
                                       {message.senderName.split(' ').map(n => n[0]).join('')}
                                     </AvatarFallback>
                                   </Avatar>
-                                  <div className={`flex-1 ${message.sender === 'agent' ? 'text-right' : ''}`}>
-                                    <div className={`inline-block p-3 rounded-lg text-sm max-w-full ${
+                                  <div className={'flex-1 ' + (message.sender === 'agent' ? 'text-right' : '')}>
+                                    <div className={'inline-block p-3 rounded-lg text-sm max-w-full ' + (
                                       message.sender === 'agent'
                                         ? 'bg-orange-100 dark:bg-orange-900/30 text-left'
                                         : 'bg-gray-100 dark:bg-gray-700'
-                                    }`}>
+                                    )}>
                                       {message.content}
                                     </div>
                                     <div className="text-xs text-gray-400 mt-1">{formatDate(message.createdAt)}</div>
@@ -1633,7 +1626,7 @@ export default function TicketsClient() {
                         { priority: 'Low', count: allTickets.filter(t => t.priority === 'low').length, color: 'green' },
                       ].map((item, i) => (
                         <div key={i} className="flex items-center gap-3">
-                          <div className={`w-3 h-3 rounded-full bg-${item.color}-500`} />
+                          <div className={"w-3 h-3 rounded-full bg-" + item.color + "-500"} />
                           <span className="text-sm flex-1">{item.priority}</span>
                           <span className="font-medium">{item.count}</span>
                         </div>
@@ -1807,9 +1800,9 @@ export default function TicketsClient() {
                   { status: 'Away', count: mockAgents.filter(a => a.status === 'away').length, color: 'orange' },
                   { status: 'Offline', count: mockAgents.filter(a => a.status === 'offline').length, color: 'gray' },
                 ].map((item, i) => (
-                  <Card key={i} className={`border-${item.color}-200 bg-${item.color}-50 dark:bg-${item.color}-900/20`}>
+                  <Card key={i} className={"border-" + item.color + "-200 bg-" + item.color + "-50 dark:bg-" + item.color + "-900/20"}>
                     <CardContent className="p-4 text-center">
-                      <div className={`w-3 h-3 rounded-full bg-${item.color}-500 mx-auto mb-2`} />
+                      <div className={"w-3 h-3 rounded-full bg-" + item.color + "-500 mx-auto mb-2"} />
                       <p className="text-2xl font-bold">{item.count}</p>
                       <p className="text-sm text-gray-500">{item.status}</p>
                     </CardContent>
@@ -1828,7 +1821,7 @@ export default function TicketsClient() {
                               {agent.name.split(' ').map(n => n[0]).join('')}
                             </AvatarFallback>
                           </Avatar>
-                          <div className={`absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 border-white dark:border-gray-800 ${getAgentStatusColor(agent.status)}`} />
+                          <div className={'absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 border-white dark:border-gray-800 ' + getAgentStatusColor(agent.status)} />
                         </div>
                         <div>
                           <h3 className="font-semibold text-gray-900 dark:text-white">{agent.name}</h3>
@@ -1908,8 +1901,8 @@ export default function TicketsClient() {
                 {[
                   { label: 'First Response Time', value: stats.avgResponseTime, target: '15 min', status: 'good' },
                   { label: 'Resolution Time', value: stats.avgResolutionTime, target: '4 hrs', status: 'warning' },
-                  { label: 'Customer Satisfaction', value: `${stats.csatScore}%`, target: '95%', status: 'good' },
-                  { label: 'SLA Compliance', value: `${Math.round(((stats.total - stats.slaBreached) / stats.total) * 100)}%`, target: '98%', status: 'warning' },
+                  { label: 'Customer Satisfaction', value: stats.csatScore + '%', target: '95%', status: 'good' },
+                  { label: 'SLA Compliance', value: Math.round(((stats.total - stats.slaBreached) / stats.total) * 100) + '%', target: '98%', status: 'warning' },
                 ].map((kpi, i) => (
                   <Card key={i} className="bg-white dark:bg-gray-800">
                     <CardContent className="p-4">
@@ -2032,7 +2025,7 @@ export default function TicketsClient() {
                         { channel: 'web', icon: Globe, count: 12, color: 'bg-purple-500' }
                       ].map(item => (
                         <div key={item.channel} className="flex items-center gap-3">
-                          <div className={`w-3 h-3 rounded-full ${item.color}`} />
+                          <div className={'w-3 h-3 rounded-full ' + item.color} />
                           <item.icon className="w-4 h-4 text-gray-400" />
                           <span className="text-sm text-gray-600 dark:text-gray-400 flex-1 capitalize">{item.channel}</span>
                           <span className="text-sm font-medium">{item.count}%</span>
@@ -2117,7 +2110,7 @@ export default function TicketsClient() {
                       return (
                         <div key={day} className="text-center">
                           <div className="h-24 bg-gray-100 dark:bg-gray-800 rounded-lg relative overflow-hidden">
-                            <div className="absolute bottom-0 w-full bg-gradient-to-t from-orange-500 to-amber-500 rounded-lg transition-all" style={{ height: `${(values[i] / max) * 100}%` }} />
+                            <div className="absolute bottom-0 w-full bg-gradient-to-t from-orange-500 to-amber-500 rounded-lg transition-all" style={{ height: ((values[i] / max) * 100) + '%' }} />
                           </div>
                           <p className="text-xs text-gray-500 mt-2">{day}</p>
                           <p className="text-sm font-bold">{values[i]}</p>
@@ -2141,7 +2134,7 @@ export default function TicketsClient() {
                       ].map((hour, i) => (
                         <div key={i} className="flex items-center justify-between text-sm">
                           <span className="text-gray-500">{hour.time}</span>
-                          <Badge className={`bg-${hour.color}-100 text-${hour.color}-800`}>{hour.tickets} tickets</Badge>
+                          <Badge className={"bg-" + hour.color + "-100 text-" + hour.color + "-800"}>{hour.tickets} tickets</Badge>
                         </div>
                       ))}
                     </div>
@@ -2175,7 +2168,7 @@ export default function TicketsClient() {
                       <p className="text-sm text-gray-500 mb-4">out of 5.0</p>
                       <div className="flex justify-center gap-2">
                         {[1, 2, 3, 4, 5].map(star => (
-                          <Star key={star} className={`h-5 w-5 ${star <= 4 ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`} />
+                          <Star key={star} className={'h-5 w-5 ' + (star <= 4 ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300')} />
                         ))}
                       </div>
                     </div>
@@ -2216,7 +2209,7 @@ export default function TicketsClient() {
                         { id: 'notifications', icon: Bell, label: 'Notifications' },
                         { id: 'advanced', icon: Layers, label: 'Advanced' },
                       ].map(item => (
-                        <button key={item.id} onClick={() => setSettingsTab(item.id)} className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${settingsTab === item.id ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-700' : 'hover:bg-gray-100 dark:hover:bg-gray-800'}`}>
+                        <button key={item.id} onClick={() => setSettingsTab(item.id)} className={'w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ' + (settingsTab === item.id ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-700' : 'hover:bg-gray-100 dark:hover:bg-gray-800')}>
                           <item.icon className="h-4 w-4" /><span className="text-sm font-medium">{item.label}</span>
                         </button>
                       ))}
@@ -2267,9 +2260,9 @@ export default function TicketsClient() {
                             { name: 'High', response: '1 hr', resolution: '8 hrs', color: 'orange' },
                             { name: 'Normal', response: '4 hrs', resolution: '24 hrs', color: 'blue' },
                           ].map((sla, i) => (
-                            <Card key={i} className={`border-${sla.color}-200 bg-${sla.color}-50 dark:bg-${sla.color}-900/20`}>
+                            <Card key={i} className={"border-" + sla.color + "-200 bg-" + sla.color + "-50 dark:bg-" + sla.color + "-900/20"}>
                               <CardContent className="p-4">
-                                <h4 className={`font-semibold text-${sla.color}-700 mb-3`}>{sla.name} Priority</h4>
+                                <h4 className={"font-semibold text-" + sla.color + "-700 mb-3"}>{sla.name} Priority</h4>
                                 <div className="space-y-2 text-sm">
                                   <div className="flex justify-between"><span>First Response</span><span className="font-medium">{sla.response}</span></div>
                                   <div className="flex justify-between"><span>Resolution Time</span><span className="font-medium">{sla.resolution}</span></div>
@@ -2331,7 +2324,7 @@ export default function TicketsClient() {
                             { name: 'Salesforce', status: 'available', icon: Users, desc: 'CRM sync' },
                             { name: 'Intercom', status: 'available', icon: MessageSquare, desc: 'Chat support' },
                           ].map((integration, i) => (
-                            <Card key={i} className={`border ${integration.status === 'connected' ? 'border-green-200 bg-green-50 dark:bg-green-900/20' : ''}`}>
+                            <Card key={i} className={'border ' + (integration.status === 'connected' ? 'border-green-200 bg-green-50 dark:bg-green-900/20' : '')}>
                               <CardContent className="p-4">
                                 <div className="flex items-center justify-between mb-3">
                                   <div className="flex items-center gap-2">
@@ -2442,7 +2435,7 @@ export default function TicketsClient() {
               <AIInsightsPanel
                 insights={mockTicketsAIInsights}
                 title="Ticket Intelligence"
-                onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+                onInsightAction={(insight) => toast.info(insight.title)}
               />
             </div>
             <div className="space-y-6">
@@ -2590,7 +2583,7 @@ export default function TicketsClient() {
                     <p className="text-sm text-gray-500">{agent.team} - {agent.openTickets} open tickets</p>
                   </div>
                 </div>
-                <div className={`w-3 h-3 rounded-full ${getAgentStatusColor(agent.status)}`} />
+                <div className={'w-3 h-3 rounded-full ' + getAgentStatusColor(agent.status)} />
               </div>
             ))}
           </div>
@@ -2819,9 +2812,9 @@ export default function TicketsClient() {
             </div>
             <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                {bulkAssignFilter === 'unassigned' && `${allTickets.filter(t => !t.assignee).length} tickets will be assigned`}
-                {bulkAssignFilter === 'urgent' && `${allTickets.filter(t => t.priority === 'urgent' && !t.assignee).length} urgent tickets will be assigned`}
-                {bulkAssignFilter === 'all' && `${allTickets.filter(t => !t.assignee).length} tickets will be assigned`}
+                {bulkAssignFilter === 'unassigned' && (allTickets.filter(t => !t.assignee).length + ' tickets will be assigned')}
+                {bulkAssignFilter === 'urgent' && (allTickets.filter(t => t.priority === 'urgent' && !t.assignee).length + ' urgent tickets will be assigned')}
+                {bulkAssignFilter === 'all' && (allTickets.filter(t => !t.assignee).length + ' tickets will be assigned')}
               </p>
             </div>
           </div>
@@ -3114,8 +3107,8 @@ export default function TicketsClient() {
             </DialogTitle>
             <DialogDescription>
               {selectedIntegration?.status === 'connected'
-                ? `Manage your ${selectedIntegration?.name} integration settings`
-                : `Connect ${selectedIntegration?.name} to enable ${selectedIntegration?.desc?.toLowerCase()}`}
+                ? ('Manage your ' + selectedIntegration?.name + ' integration settings')
+                : ('Connect ' + selectedIntegration?.name + ' to enable ' + (selectedIntegration?.desc?.toLowerCase() || ''))}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">

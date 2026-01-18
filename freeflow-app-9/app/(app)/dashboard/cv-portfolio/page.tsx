@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 export const dynamic = 'force-dynamic';
 
 ;
@@ -1988,7 +1990,6 @@ export default function CVPortfolioPage() {
 
     toast.promise(
       (async () => {
-        const { createClient } = await import('@/lib/supabase/client')
         const supabase = createClient()
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) throw new Error('Not authenticated')

@@ -497,8 +497,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
   const handleShareDocument = async (doc: DocumentFile) => {
     try {
       await shareDocument(doc.id)
-      toast.success('Share link copied'" copied to clipboard`
-      })
+      toast.success("Share link copied - " + doc.name + " copied to clipboard")
       refetch()
     } catch (error) {
       console.error('Failed to share document:', error)
@@ -521,8 +520,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
     try {
       const folder = mockFolders.find(f => f.id === folderId)
       await moveToFolder(doc.id, folderId, folder?.name)
-      toast.success('Document moved'" moved to ${folder?.name || 'folder'}`
-      })
+      toast.success("Document moved - " + doc.name + " moved to " + (folder?.name || "folder"))
       setShowMoveDialog(false)
       setDocumentToAction(null)
       refetch()
@@ -535,9 +533,8 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
   const handleStarDocument = async (doc: DocumentFile) => {
     try {
       await starDocument(doc.id, !doc.starred)
-      const action = doc.starred ? 'removed from' : 'added to'
-      toast.success('Star updated'" ${action} starred`
-      })
+      const action = doc.starred ? "removed from" : "added to"
+      toast.success("Star updated - " + doc.name + " " + action + " starred")
       refetch()
     } catch (error) {
       console.error('Failed to star document:', error)
@@ -548,8 +545,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
   const handleDownloadDocument = async (doc: DocumentFile) => {
     try {
       await downloadDocument(doc.id)
-      toast.success('Download started'"...`
-      })
+      toast.success("Download started - Downloading " + doc.name + "...")
     } catch (error) {
       console.error('Failed to download document:', error)
     }

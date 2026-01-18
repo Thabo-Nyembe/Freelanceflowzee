@@ -114,8 +114,7 @@ export default function ModelingStudioPage() {
         // Log successful data load        setIsLoading(false)
         announce('3D modeling studio loaded successfully', 'polite')
 
-        toast.success('3D Modeling Studio loaded' projects • ${statsResult.data?.total_scenes || 0} scenes • ${statsResult.data?.total_objects || 0} objects`
-        })
+        toast.success(`3D Modeling Studio loaded - ${projectsResult.data?.length || 0} projects, ${statsResult.data?.total_scenes || 0} scenes, ${statsResult.data?.total_objects || 0} objects`)
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load 3D modeling studio'
         logger.error('Exception loading 3D Modeling data', { error: errorMessage, userId })
@@ -155,7 +154,8 @@ export default function ModelingStudioPage() {
   }, [objects])
 
   const handleApplyMaterial = useCallback((materialName: string) => {
-    const material = materials.find(m => m.name === materialName)    if (selectedObject) {
+    const material = materials.find(m => m.name === materialName)
+    if (selectedObject) {
       // Apply material to selected object
       setObjects(prev => prev.map(obj =>
         obj.id === selectedObject ? { ...obj, material: material?.id || 'default' } : obj
@@ -183,7 +183,8 @@ export default function ModelingStudioPage() {
       intensity: 1.0,
       color: '#ffffff',
       position: { x: 0, y: 5, z: 0 }
-    }    setLights([...lights, newLight])
+    }
+    setLights([...lights, newLight])
 
     toast.success(`Light added: ${lightType} - Intensity: ${newLight.intensity} - ${lights.length + 1} total lights in scene`)
   }, [lights])
@@ -350,7 +351,8 @@ export default function ModelingStudioPage() {
         camera: cameraPosition,
         settings: { renderQuality: renderQuality[0] }
       }
-    }    const modelJSON = JSON.stringify(modelData, null, 2)
+    }
+    const modelJSON = JSON.stringify(modelData, null, 2)
     const blob = new Blob([modelJSON], { type: 'application/json' })
     const fileName = `3d-model-${Date.now()}.json`
     const url = URL.createObjectURL(blob)
@@ -389,7 +391,8 @@ export default function ModelingStudioPage() {
     const qualityLabels = { 25: 'Low', 50: 'Medium', 75: 'High', 100: 'Ultra' }
     const qualityMap: Record<number, 'low' | 'medium' | 'high' | 'ultra'> = { 25: 'low', 50: 'medium', 75: 'high', 100: 'ultra' }
     const quality = qualityLabels[renderQuality[0] as keyof typeof qualityLabels] || 'Medium'
-    const qualityValue = qualityMap[renderQuality[0] as keyof typeof qualityMap] || 'medium'    toast.success(`Scene rendered: ${quality} quality - ${objects.length} objects - ${lights.length} lights - ${objects.filter(o => o.visible).length} visible`)
+    const qualityValue = qualityMap[renderQuality[0] as keyof typeof qualityMap] || 'medium'
+    toast.success('Scene rendered: ' + quality + ' quality - ' + objects.length + ' objects - ' + lights.length + ' lights - ' + objects.filter(o => o.visible).length + ' visible')
 
     // Save render job to database if user is authenticated
     if (userId) {
@@ -522,7 +525,7 @@ export default function ModelingStudioPage() {
                           scene: { camera: cameraPosition, settings: { renderQuality: renderQuality[0] } }
                         }
                         navigator.clipboard.writeText(JSON.stringify(modelData, null, 2))
-                        toast.success('Model Copied' objects, ${materials.length} materials copied to clipboard` })
+                        toast.success(`Model Copied - ${objects.length} objects, ${materials.length} materials`)
                       }}
                       data-testid="share-model-btn"
                     >
@@ -698,7 +701,7 @@ export default function ModelingStudioPage() {
                             variant="outline"
                             size="sm"
                             onClick={() => {                              addObject(primitive.id)
-                              toast.success(`${primitive.name} Added` total objects in scene` })
+                              toast.success(`${primitive.name} Added - ${objects.length + 1} total objects`)
                             }}
                             className="gap-2"
                             data-testid={`add-${primitive.id}-btn`}
@@ -735,7 +738,8 @@ export default function ModelingStudioPage() {
                                 variant="ghost"
                                 size="sm"
                                 onClick={(e) => {
-                                  e.stopPropagation()                                  updateObjectProperty(obj.id, 'visible', !obj.visible)
+                                  e.stopPropagation()
+                                  updateObjectProperty(obj.id, 'visible', !obj.visible)
                                   toast.success(`${obj.name} ${!obj.visible ? 'Visible' : 'Hidden'}`)
                                 }}
                                 data-testid={`toggle-visibility-${obj.id}-btn`}
@@ -746,8 +750,9 @@ export default function ModelingStudioPage() {
                                 variant="ghost"
                                 size="sm"
                                 onClick={(e) => {
-                                  e.stopPropagation()                                  duplicateObject(obj.id)
-                                  toast.success(`${obj.name} Duplicated` total objects` })
+                                  e.stopPropagation()
+                                  duplicateObject(obj.id)
+                                  toast.success(`${obj.name} Duplicated`)
                                 }}
                                 data-testid={`duplicate-${obj.id}-btn`}
                               >
@@ -757,8 +762,9 @@ export default function ModelingStudioPage() {
                                 variant="ghost"
                                 size="sm"
                                 onClick={(e) => {
-                                  e.stopPropagation()                                  deleteObject(obj.id)
-                                  toast.success(`${obj.name} Deleted` objects remaining` })
+                                  e.stopPropagation()
+                                  deleteObject(obj.id)
+                                  toast.success(`${obj.name} Deleted`)
                                 }}
                                 data-testid={`delete-${obj.id}-btn`}
                               >
@@ -812,8 +818,9 @@ export default function ModelingStudioPage() {
                             roughness: 0.5,
                             metallic: 0.0,
                             emission: 0
-                          }                          setMaterials([...materials, newMaterial])
-                          toast.success(`${newMaterial.name} Created` total materials` })
+                          }
+                          setMaterials([...materials, newMaterial])
+                          toast.success(`${newMaterial.name} Created`)
                         }}
                         data-testid="add-material-btn"
                       >
@@ -881,8 +888,9 @@ export default function ModelingStudioPage() {
                             color: '#ffffff',
                             position: { x: 0, y: 5, z: 0 },
                             enabled: true
-                          }                          setLights([...lights, newLight])
-                          toast.success(`${newLight.name} Added` light - ${lights.length + 1} total` })
+                          }
+                          setLights([...lights, newLight])
+                          toast.success(`${newLight.name} Added - ${lights.length + 1} total`)
                         }}
                         data-testid="add-light-btn"
                       >

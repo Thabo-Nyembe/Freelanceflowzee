@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -81,6 +83,9 @@ import {
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { CardDescription } from '@/components/ui/card'
+
+// Initialize Supabase client once at module level
+const supabase = createClient()
 
 // Types
 type SpaceType = 'team' | 'personal' | 'project' | 'documentation' | 'archive'
@@ -765,13 +770,9 @@ export default function KnowledgeBaseClient() {
   const fetchData = useCallback(async () => {
     try {
       setLoading(true)
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('knowledge_base')
         .select('*')
@@ -892,14 +893,10 @@ export default function KnowledgeBaseClient() {
     }
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
       const slug = newPageTitle.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('knowledge_base').insert({
         user_id: user.id,
         article_title: newPageTitle.trim(),
@@ -912,7 +909,7 @@ export default function KnowledgeBaseClient() {
       })
 
       if (error) throw error
-      toast.success('Page created'" has been created` })
+      toast.success("Page created")
       setNewPageTitle('')
       setNewPageContent('')
       setShowCreateDialog(false)
@@ -926,15 +923,13 @@ export default function KnowledgeBaseClient() {
 
   const handleDeletePage = async (pageId: string, pageTitle: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('knowledge_base')
         .update({ deleted_at: new Date().toISOString() })
         .eq('id', pageId)
 
       if (error) throw error
-      toast.success('Page deleted'" moved to trash` })
+      toast.success("Page moved to trash")
       setShowPageDialog(false)
       fetchData()
     } catch (error) {
@@ -944,15 +939,13 @@ export default function KnowledgeBaseClient() {
 
   const handlePublishPage = async (pageId: string, pageTitle: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('knowledge_base')
         .update({ status: 'published', is_published: true, published_at: new Date().toISOString() })
         .eq('id', pageId)
 
       if (error) throw error
-      toast.success('Page published'" is now live` })
+      toast.success("Page published and is now live")
       fetchData()
     } catch (error) {
       toast.error('Failed to publish page')
@@ -961,8 +954,6 @@ export default function KnowledgeBaseClient() {
 
   const handleBookmark = async (page: Page) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('knowledge_base')
         .update({ is_featured: !page.isBookmarked })
@@ -1010,7 +1001,7 @@ export default function KnowledgeBaseClient() {
       document.body.removeChild(link)
       URL.revokeObjectURL(url)
 
-      toast.success('Export complete' articles successfully` })
+      toast.success('Export complete')
     } catch (error) {
       console.error('Export failed:', error)
       toast.error('Export failed')
@@ -1045,14 +1036,10 @@ export default function KnowledgeBaseClient() {
       }
 
       // Persist to database (using a watch tracking field or separate table)
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         // Note: In a full implementation, you'd have a separate watch/subscription table
         // For now, we're updating a field in the knowledge_base table
-        const { createClient } = await import('@/lib/supabase/client')
-        const supabase = createClient()
         await supabase
           .from('knowledge_base')
           .update({ updated_at: new Date().toISOString() })
@@ -1087,13 +1074,9 @@ export default function KnowledgeBaseClient() {
     }
     setIsUpdating(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('knowledge_base')
         .update({
@@ -1107,7 +1090,7 @@ export default function KnowledgeBaseClient() {
 
       if (error) throw error
 
-      toast.success('Page updated'" has been saved` })
+      toast.success("Page updated")
       setShowEditDialog(false)
       setEditingPage(null)
       setEditPageTitle('')
@@ -1133,8 +1116,6 @@ export default function KnowledgeBaseClient() {
     }
     setIsCreatingSpace(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
@@ -1146,7 +1127,7 @@ export default function KnowledgeBaseClient() {
       })
       if (!res.ok) throw new Error('Failed to create space')
 
-      toast.success('Space created'" has been created successfully` })
+      toast.success("Space created successfully")
       setNewSpaceName('')
       setNewSpaceKey('')
       setNewSpaceDescription('')
@@ -1180,7 +1161,7 @@ export default function KnowledgeBaseClient() {
       if (!res.ok) throw new Error('Import failed')
 
       const importCount = importSource === 'file' ? importFiles.length : 1
-      toast.success('Documents imported' document(s)` })
+      toast.success('Documents imported')
       setImportUrl('')
       setImportFiles([])
       setImportSource('file')
@@ -2169,7 +2150,7 @@ export default function KnowledgeBaseClient() {
             <AIInsightsPanel
               insights={mockKnowledgeBaseAIInsights}
               title="Knowledge Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">

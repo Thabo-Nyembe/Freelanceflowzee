@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import dynamic from 'next/dynamic'
 import { useDeployments } from '@/lib/hooks/use-deployments'
@@ -70,6 +72,9 @@ const QuickActionsToolbar = dynamic(
 
 import { Textarea } from '@/components/ui/textarea'
 import { Loader2 } from 'lucide-react'
+
+// Initialize Supabase client once at module level
+const supabase = createClient()
 
 // Database types
 interface DbDeployment {
@@ -330,8 +335,6 @@ export default function DeploymentsClient() {
   const fetchDeployments = useCallback(async () => {
     try {
       setLoading(true)
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('deployments')
         .select('*')
@@ -362,8 +365,6 @@ export default function DeploymentsClient() {
       const { data: userData } = await supabase.auth.getUser()
       if (!userData.user) throw new Error('Not authenticated')
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('deployments').insert({
         user_id: userData.user.id,
         deployment_name: deploymentForm.deployment_name,
@@ -381,7 +382,7 @@ export default function DeploymentsClient() {
       })
 
       if (error) throw error
-      toast.success('Deployment Created' v${deploymentForm.version} queued` })
+      toast.success(`Deployment v${deploymentForm.version} queued`)
       setShowCreateDialog(false)
       setDeploymentForm(defaultDeploymentForm)
       fetchDeployments()
@@ -395,15 +396,13 @@ export default function DeploymentsClient() {
   // Start deployment (update status to in_progress)
   const handleStartDeployment = async (deployment: DbDeployment) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('deployments')
         .update({ status: 'in_progress', started_at: new Date().toISOString() })
         .eq('id', deployment.id)
 
       if (error) throw error
-      toast.info('Deployment Started' is now deploying...` })
+      toast.info(`Deployment Started: ${deployment.project_name} is now deploying...`)
       fetchDeployments()
     } catch (error: any) {
       toast.error('Failed to start deployment')
@@ -416,8 +415,6 @@ export default function DeploymentsClient() {
       const startTime = deployment.started_at ? new Date(deployment.started_at).getTime() : Date.now()
       const duration = Math.floor((Date.now() - startTime) / 1000)
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('deployments')
         .update({
@@ -446,15 +443,13 @@ export default function DeploymentsClient() {
     }
 
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('deployments')
         .update({ status: 'rolled_back' })
         .eq('id', deployment.id)
 
       if (error) throw error
-      toast.success('Rollback Initiated'` })
+      toast.success(`Rollback Initiated`)
       setShowRollbackDialog(false)
       fetchDeployments()
     } catch (error: any) {
@@ -465,15 +460,13 @@ export default function DeploymentsClient() {
   // Cancel deployment
   const handleCancelDeployment = async (deployment: DbDeployment) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('deployments')
         .update({ status: 'cancelled' })
         .eq('id', deployment.id)
 
       if (error) throw error
-      toast.info('Deployment Cancelled' has been cancelled` })
+      toast.info(`Deployment Cancelled: "${deployment.name}" has been cancelled`)
       fetchDeployments()
     } catch (error: any) {
       toast.error('Failed to cancel deployment')
@@ -483,8 +476,6 @@ export default function DeploymentsClient() {
   // Delete deployment
   const handleDeleteDeployment = async (id: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('deployments').delete().eq('id', id)
       if (error) throw error
       toast.success('Deployment Deleted')
@@ -573,7 +564,7 @@ export default function DeploymentsClient() {
 
       switch (insight.type) {
         case 'warning':
-          toast.info('Action Required'` })
+          toast.info(`Action Required`)
           setActiveTab('logs')
           break
         case 'success':
@@ -584,7 +575,7 @@ export default function DeploymentsClient() {
           setActiveTab('analytics')
           break
         default:
-          toast.info('Processing Insight'` })
+          toast.info(`Processing Insight`)
       }
     } catch (error: any) {
       toast.error('Action Failed')
@@ -641,11 +632,9 @@ export default function DeploymentsClient() {
   const handleDeleteEnvVar = async (envVar: EnvVar) => {
     setIsProcessing(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('environment_variables').delete().eq('id', envVar.id)
       if (error) throw error
-      toast.success('Variable Deleted' has been removed` })
+      toast.success(`Variable Deleted: "${envVar.key}" has been removed`)
       setShowDeleteEnvVarDialog(false)
       setSelectedEnvVar(null)
     } catch (error: any) {
@@ -659,11 +648,9 @@ export default function DeploymentsClient() {
   const handleDeleteBlob = async (blob: StorageBlob) => {
     setIsProcessing(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('storage_blobs').delete().eq('id', blob.id)
       if (error) throw error
-      toast.success('Deleted' has been deleted` })
+      toast.success(`Deleted: "${blob.name}" has been deleted`)
       setShowDeleteBlobDialog(false)
       setSelectedBlob(null)
     } catch (error: any) {
@@ -696,11 +683,9 @@ export default function DeploymentsClient() {
   const handleDeleteHook = async (hookName: string) => {
     setIsProcessing(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('deploy_hooks').delete().eq('name', hookName)
       if (error) throw error
-      toast.success('Hook Deleted' has been removed` })
+      toast.success(`Hook Deleted: "${hookName}" has been removed`)
       setShowDeleteHookDialog(false)
       setSelectedHookName('')
     } catch (error: any) {
@@ -714,11 +699,9 @@ export default function DeploymentsClient() {
   const handleRemoveTeamMember = async (member: TeamMember) => {
     setIsProcessing(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('team_members').delete().eq('id', member.id)
       if (error) throw error
-      toast.success('Member Removed' has been removed from the team` })
+      toast.success(`Member Removed: "${member.name}" has been removed from the team`)
       setShowTeamMemberMenu(false)
       setSelectedTeamMember(null)
     } catch (error: any) {
@@ -731,7 +714,7 @@ export default function DeploymentsClient() {
   // Plugin install handler
   const handleInstallPlugin = async (pluginName: string) => {
     setIsProcessing(true)
-    toast.info('Installing Plugin' is being installed...` })
+    toast.info(`Installing Plugin: "${pluginName}" is being installed...`)
     try {
       // Real API call to install plugin
       const response = await fetch('/api/plugins/install', {
@@ -741,15 +724,13 @@ export default function DeploymentsClient() {
       })
       if (!response.ok) throw new Error('Plugin installation failed')
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('installed_plugins').insert({
         name: pluginName,
         installed_at: new Date().toISOString(),
         enabled: true
       })
       if (error) throw error
-      toast.success('Plugin Installed' has been installed successfully` })
+      toast.success(`Plugin Installed: "${pluginName}" has been installed successfully`)
     } catch (error: any) {
       toast.error('Install Failed')
     } finally {
@@ -826,8 +807,6 @@ export default function DeploymentsClient() {
       const { data: userData } = await supabase.auth.getUser()
       if (!userData.user) throw new Error('Not authenticated')
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('serverless_functions').insert({
         user_id: userData.user.id,
         name,
@@ -840,7 +819,7 @@ export default function DeploymentsClient() {
         created_at: new Date().toISOString()
       })
       if (error) throw error
-      toast.success('Function Created' has been created` })
+      toast.success(`Function Created: "${name}" has been created`)
       setShowNewFunctionDialog(false)
     } catch (error: any) {
       toast.error('Create Failed')
@@ -856,8 +835,6 @@ export default function DeploymentsClient() {
       const { data: userData } = await supabase.auth.getUser()
       if (!userData.user) throw new Error('Not authenticated')
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('edge_configs').insert({
         user_id: userData.user.id,
         name,
@@ -868,7 +845,7 @@ export default function DeploymentsClient() {
         created_at: new Date().toISOString()
       })
       if (error) throw error
-      toast.success('Config Created' edge config has been created` })
+      toast.success(`Config Created: edge config has been created`)
       setShowEdgeConfigDialog(false)
     } catch (error: any) {
       toast.error('Create Failed')
@@ -971,8 +948,6 @@ export default function DeploymentsClient() {
       const { data: userData } = await supabase.auth.getUser()
       if (!userData.user) throw new Error('Not authenticated')
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('deploy_hooks').insert({
         user_id: userData.user.id,
         name,
@@ -982,7 +957,7 @@ export default function DeploymentsClient() {
         created_at: new Date().toISOString()
       })
       if (error) throw error
-      toast.success('Hook Created' deploy hook has been created` })
+      toast.success(`Hook Created: deploy hook has been created`)
       setShowCreateHookDialog(false)
     } catch (error: any) {
       toast.error('Create Failed')
@@ -1026,15 +1001,13 @@ export default function DeploymentsClient() {
   // Promote deployment to production
   const handlePromoteDeployment = async (deployment: DbDeployment) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('deployments')
         .update({ environment: 'production' })
         .eq('id', deployment.id)
 
       if (error) throw error
-      toast.success('Promoted' promoted to production` })
+      toast.success(`Promoted: promoted to production`)
       fetchDeployments()
     } catch (error: any) {
       toast.error('Failed to promote')
@@ -1530,9 +1503,9 @@ export default function DeploymentsClient() {
                         <div><p className={`font-medium ${fn.errors > 20 ? 'text-red-600' : 'text-green-600'}`}>{fn.errors}</p><p className="text-xs text-gray-500">errors</p></div>
                       </div>
                       <div className="flex gap-1">
-                        <Button variant="ghost" size="sm" onClick={() => { setSelectedFunction(fn); setActiveTab('logs'); setLogFilters(prev => ({ ...prev, functionFilter: fn.name })); toast.success('Terminal Opened'` }); }}><Terminal className="h-4 w-4" /></Button>
-                        <Button variant="ghost" size="sm" onClick={() => { setSelectedFunction(fn); setActiveTab('analytics'); toast.success('Metrics Loaded' invocations, ${fn.avgDuration}ms avg` }); }}><BarChart3 className="h-4 w-4" /></Button>
-                        <Button variant="ghost" size="sm" onClick={() => { setSelectedFunction(fn); setActiveTab('settings'); setSettingsTab('general'); toast.success('Settings Opened' function` }); }}><Settings className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="sm" onClick={() => { setSelectedFunction(fn); setActiveTab('logs'); setLogFilters(prev => ({ ...prev, functionFilter: fn.name })); toast.success(`Terminal Opened`); }}><Terminal className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="sm" onClick={() => { setSelectedFunction(fn); setActiveTab('analytics'); toast.success(`Metrics Loaded: ${fn.invocations} invocations, ${fn.avgDuration}ms avg`); }}><BarChart3 className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="sm" onClick={() => { setSelectedFunction(fn); setActiveTab('settings'); setSettingsTab('general'); toast.success(`Settings Opened: ${fn.name} function`); }}><Settings className="h-4 w-4" /></Button>
                       </div>
                     </div>
                   ))}
@@ -1723,7 +1696,7 @@ export default function DeploymentsClient() {
                         <Button variant="ghost" size="icon" onClick={async () => {
                           try {
                             await navigator.clipboard.writeText(`https://storage.freeflow.app/${blob.name}`)
-                            toast.success('Copied' copied to clipboard` })
+                            toast.success(`Copied: URL copied to clipboard`)
                           } catch {
                             toast.error('Copy Failed')
                           }
@@ -1733,7 +1706,7 @@ export default function DeploymentsClient() {
                           link.href = `https://storage.freeflow.app/${blob.name}`
                           link.download = blob.name.split('/').pop() || blob.name
                           link.click()
-                          toast.success('Download Started'` })
+                          toast.success(`Download Started`)
                         }}><Download className="h-4 w-4" /></Button>
                         <Button variant="ghost" size="icon" onClick={() => { setSelectedBlob(blob); setShowDeleteBlobDialog(true); }}><Trash2 className="h-4 w-4 text-red-500" /></Button>
                       </div>
@@ -1832,7 +1805,7 @@ export default function DeploymentsClient() {
                     try {
                       const logsText = mockBuildLogs.map(l => `[${l.timestamp}] [${l.level.toUpperCase()}] [${l.step}] ${l.message}`).join('\n')
                       await navigator.clipboard.writeText(logsText)
-                      toast.success('Copied' log entries copied to clipboard` })
+                      toast.success(`Copied: log entries copied to clipboard`)
                     } catch {
                       toast.error('Copy Failed')
                     }
@@ -2405,19 +2378,17 @@ export default function DeploymentsClient() {
                               try {
                                 const response = await fetch(`/api/webhooks/${webhook.id}/test`, { method: 'POST' })
                                 if (!response.ok) throw new Error('Test failed')
-                                toast.success('Webhook Tested' test successful` })
+                                toast.success(`Webhook Tested: test successful`)
                               } catch {
-                                toast.info('Test Webhook' - ${webhook.successRate}% success rate` })
+                                toast.info(`Test Webhook: ${webhook.name} - ${webhook.successRate}% success rate`)
                               }
                             }}><RefreshCw className="h-4 w-4" /></Button>
                             <Button variant="ghost" size="icon" className="text-red-500" onClick={async () => {
                               setIsProcessing(true)
                               try {
-                                const { createClient } = await import('@/lib/supabase/client')
-                                const supabase = createClient()
                                 const { error } = await supabase.from('webhooks').delete().eq('id', webhook.id)
                                 if (error) throw error
-                                toast.success('Webhook Deleted' has been removed` })
+                                toast.success(`Webhook Deleted: "${webhook.url}" has been removed`)
                               } catch (error: any) {
                                 toast.error('Delete Failed')
                               } finally {
@@ -2562,8 +2533,6 @@ export default function DeploymentsClient() {
                   try {
                     const { data: userData } = await supabase.auth.getUser()
                     if (!userData.user) throw new Error('Not authenticated')
-                    const { createClient } = await import('@/lib/supabase/client')
-                    const supabase = createClient()
                     const { error } = await supabase.from('environment_variables').insert({
                       user_id: userData.user.id,
                       key,
@@ -2572,7 +2541,7 @@ export default function DeploymentsClient() {
                       encrypted: true
                     })
                     if (error) throw error
-                    toast.success('Variable Added' has been added` })
+                    toast.success(`Variable Added: "${key}" has been added`)
                     keyInput.value = ''
                     valueInput.value = ''
                   } catch (error: any) {
@@ -2627,7 +2596,7 @@ export default function DeploymentsClient() {
                   try {
                     const { data: userData } = await supabase.auth.getUser()
                     if (!userData.user) throw new Error('Not authenticated')
-                    toast.success('Domain Added' has been added` })
+                    toast.success(`Domain Added: "${input.value}" has been added`)
                     input.value = ''
                   } catch (error: any) {
                     toast.error('Failed to add domain')
@@ -2647,7 +2616,7 @@ export default function DeploymentsClient() {
                       <Badge variant={domain.type === 'production' ? 'default' : 'outline'}>{domain.type}</Badge>
                       <Button variant="ghost" size="icon" onClick={() => {
                         window.open(`https://${domain.domain}`, '_blank', 'noopener,noreferrer')
-                        toast.success('Opened' opened in new tab` })
+                        toast.success(`Opened: ${domain.domain} opened in new tab`)
                       }}><ExternalLink className="h-4 w-4" /></Button>
                     </div>
                   ))}
@@ -2706,7 +2675,7 @@ export default function DeploymentsClient() {
               try {
                 const { data: userData } = await supabase.auth.getUser()
                 if (!userData.user) throw new Error('Not authenticated')
-                toast.success('Webhook Created' has been added` })
+                toast.success(`Webhook Created has been added`)
                 setShowWebhookDialog(false)
               } catch (error: any) {
                 toast.error('Failed to create webhook')
@@ -2733,7 +2702,7 @@ export default function DeploymentsClient() {
                 return
               }
               try {
-                toast.success('Invitation Sent'` })
+                toast.success(`Invitation Sent`)
                 setShowTeamDialog(false)
               } catch (error: any) {
                 toast.error('Failed to send invitation')
@@ -2749,9 +2718,9 @@ export default function DeploymentsClient() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
                 {[{ name: 'GitHub', icon: GitBranch, color: 'gray' }, { name: 'Datadog', icon: Activity, color: 'purple' }, { name: 'Slack', icon: MessageSquare, color: 'pink' }, { name: 'Sentry', icon: AlertCircle, color: 'red' }, { name: 'PagerDuty', icon: Webhook, color: 'green' }, { name: 'Linear', icon: Layers, color: 'blue' }].map(int => (
                   <button key={int.name} className="p-4 border rounded-lg hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors text-center" onClick={() => {
-                    toast.info(`Connecting ${int.name}` integration...` })
+                    toast.info(`Connecting ${int.name} integration...`)
                     setTimeout(() => {
-                      toast.success(`${int.name} Connected` integration has been connected successfully` })
+                      toast.success(`${int.name} connected: integration has been connected successfully`)
                       setShowIntegrationDialog(false)
                     }, 1500)
                   }}>
@@ -3176,7 +3145,7 @@ export default function DeploymentsClient() {
                       toast.error('Validation Error')
                       return
                     }
-                    toast.success('Config Item Added' has been added to ${selectedEdgeConfig?.name}` })
+                    toast.success(`Config Item Added has been added to ${selectedEdgeConfig?.name}`)
                     if (keyInput) keyInput.value = ''
                     if (valueInput) valueInput.value = ''
                   }}><Plus className="h-4 w-4" /></Button>
@@ -3205,8 +3174,6 @@ export default function DeploymentsClient() {
                 try {
                   const { data: userData } = await supabase.auth.getUser();
                   if (!userData.user) throw new Error('Not authenticated');
-                  const { createClient } = await import('@/lib/supabase/client')
-                  const supabase = createClient()
                   const { error } = await supabase.from('edge_configs').upsert({
                     id: selectedEdgeConfig.id,
                     user_id: userData.user.id,
@@ -3215,7 +3182,7 @@ export default function DeploymentsClient() {
                     updated_at: new Date().toISOString()
                   });
                   if (error) throw error;
-                  toast.success('Config Saved' has been updated` });
+                  toast.success(`Config Saved has been updated`);
                   setShowEdgeConfigEditDialog(false);
                 } catch (error: any) {
                   toast.error('Save Failed');
@@ -3267,8 +3234,6 @@ export default function DeploymentsClient() {
                 try {
                   const { data: userData } = await supabase.auth.getUser();
                   if (!userData.user) throw new Error('Not authenticated');
-                  const { createClient } = await import('@/lib/supabase/client')
-                  const supabase = createClient()
                   const { error } = await supabase.from('storage_folders').insert({
                     user_id: userData.user.id,
                     name: name,
@@ -3276,7 +3241,7 @@ export default function DeploymentsClient() {
                     created_at: new Date().toISOString()
                   });
                   if (error) throw error;
-                  toast.success('Folder Created' has been created` });
+                  toast.success(`Folder Created has been created`);
                   setShowNewFolderDialog(false);
                 } catch (error: any) {
                   toast.error('Create Failed');
@@ -3310,7 +3275,7 @@ export default function DeploymentsClient() {
                     const files = (e.target as HTMLInputElement).files
                     if (files && files.length > 0) {
                       const fileNames = Array.from(files).map(f => f.name).join(', ')
-                      toast.success('Files Selected'` })
+                      toast.success(`Files Selected: ${fileNames}`)
                     }
                   }
                   fileInput.click()
@@ -3421,7 +3386,7 @@ export default function DeploymentsClient() {
                 );
                 setRealTimeLogs(filteredLogs);
                 setShowLogFiltersDialog(false);
-                toast.success('Filters Applied' log entries` });
+                toast.success(`Filters Applied: ${filteredLogs.length} log entries`);
               }}>Apply Filters</Button>
             </DialogFooter>
           </DialogContent>
@@ -3637,7 +3602,7 @@ export default function DeploymentsClient() {
                   link.download = `deployment-logs-${new Date().toISOString().split('T')[0]}.txt`;
                   link.click();
                   URL.revokeObjectURL(url);
-                  toast.success('Export Complete' log entries exported` });
+                  toast.success(`Export Complete: ${logsToExport.length} log entries exported`);
                   setShowExportLogsDialog(false);
                 } catch (error: any) {
                   toast.error('Export Failed');
@@ -3687,7 +3652,7 @@ export default function DeploymentsClient() {
                 <div className="flex gap-2 mt-2">
                   {['PDF', 'CSV', 'JSON'].map(fmt => (
                     <Button key={fmt} variant="outline" size="sm" className="flex-1" onClick={() => {
-                      toast.info(`${fmt} Format Selected` file` })
+                      toast.info(`${fmt} Format Selected: preparing file...`)
                     }}>{fmt}</Button>
                   ))}
                 </div>
@@ -3848,8 +3813,6 @@ export default function DeploymentsClient() {
                 try {
                   const { data: userData } = await supabase.auth.getUser();
                   if (!userData.user) throw new Error('Not authenticated');
-                  const { createClient } = await import('@/lib/supabase/client')
-                  const supabase = createClient()
                   const { error } = await supabase.from('protection_rules').insert({
                     user_id: userData.user.id,
                     name: ruleName,
@@ -3859,7 +3822,7 @@ export default function DeploymentsClient() {
                     created_at: new Date().toISOString()
                   });
                   if (error) throw error;
-                  toast.success('Rule Created' has been added` });
+                  toast.success(`Rule Created has been added`);
                   setShowAddRuleDialog(false);
                 } catch (error: any) {
                   toast.error('Create Failed');
@@ -4185,7 +4148,7 @@ export default function DeploymentsClient() {
                     headers: { 'Content-Type': 'application/json' }
                   })
                   if (!response.ok) throw new Error('Failed to delete config item')
-                  toast.success('Config Item Deleted' has been removed from ${selectedEdgeConfig?.name}` })
+                  toast.success(`Config Item Deleted has been removed from ${selectedEdgeConfig?.name}`)
                   setShowDeleteConfigItemDialog(false)
                   setSelectedConfigItem('')
                 } catch (error: any) {

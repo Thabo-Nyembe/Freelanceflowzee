@@ -402,6 +402,7 @@ const mockCourses_OLD: Course[] = [
     hasQuizzes: true
   }
 ]
+*/
 
 // MIGRATED: Batch #10 - Removed mock data, using database hooks
 const mockLearningPaths: LearningPath[] = []
@@ -590,7 +591,7 @@ export default function LearningClient() {
   const handleStartCourse = async (course: any) => {
     try {
       await updateProgress({ course_id: course.id, progress: 0, lessons_completed: 0, last_accessed_at: new Date().toISOString() })
-      toast.success('Course started'` })
+      toast.success(`Course started: "${course.title}"`)
     } catch (err) {
       toast.error('Failed to start course')
     }
@@ -599,7 +600,7 @@ export default function LearningClient() {
   const handleResumeCourse = async (course: any) => {
     try {
       await updateProgress({ course_id: course.id, last_accessed_at: new Date().toISOString() })
-      toast.success('Resuming course'` })
+      toast.success(`Resuming course: "${course.title}"`)
     } catch (err) {
       toast.error('Failed to resume course')
     }
@@ -630,7 +631,7 @@ export default function LearningClient() {
   const handleEnrollCourse = async (courseId: string, courseName: string) => {
     try {
       await updateProgress({ course_id: courseId, progress: 0, lessons_completed: 0, last_accessed_at: new Date().toISOString() })
-      toast.success('Enrolled'"` })
+      toast.success(`Enrolled in "${courseName}"`)
     } catch (err) {
       toast.error('Failed to enroll in course')
     }
@@ -664,7 +665,7 @@ export default function LearningClient() {
         enrolled_count: 0,
         status: 'draft'
       })
-      toast.success('Learning path created'" has been created` })
+      toast.success(`Learning path created: "${newPathForm.title}" has been created`)
       setShowCreatePathModal(false)
       setNewPathForm({ title: '', description: '', level: 'beginner', estimated_weeks: 4 })
     } catch (err) {
@@ -675,7 +676,7 @@ export default function LearningClient() {
   const handleDeletePath = async (pathId: string, pathTitle: string) => {
     try {
       await deletePath(pathId)
-      toast.success('Learning path deleted'" has been removed` })
+      toast.success(`Learning path deleted has been removed`)
     } catch (err) {
       toast.error('Failed to delete learning path')
     }
@@ -693,7 +694,7 @@ export default function LearningClient() {
         is_public: newCollectionForm.is_public,
         likes: 0
       })
-      toast.success('Collection created'" has been created` })
+      toast.success(`Collection created has been created`)
       setShowCreateCollectionModal(false)
       setNewCollectionForm({ name: '', description: '', is_public: false })
     } catch (err) {
@@ -704,7 +705,7 @@ export default function LearningClient() {
   const handleDeleteCollection = async (collectionId: string, collectionName: string) => {
     try {
       await deleteCollection(collectionId)
-      toast.success('Collection deleted'" has been removed` })
+      toast.success('Collection "' + collectionName + '" has been removed')
     } catch (err) {
       toast.error('Failed to delete collection')
     }
@@ -721,7 +722,6 @@ export default function LearningClient() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50/30 to-cyan-50/40 dark:bg-none dark:bg-gray-900">
-      {/* Premium Header */}
       <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 text-white">
         <div className="max-w-[1800px] mx-auto px-6 py-8">
           <div className="flex items-center justify-between mb-6">
@@ -741,7 +741,6 @@ export default function LearningClient() {
               </div>
             </div>
             <div className="flex items-center gap-4">
-              {/* Streak Badge */}
               <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-xl px-4 py-2">
                 <Flame className="w-5 h-5 text-orange-300" />
                 <div>
@@ -749,7 +748,6 @@ export default function LearningClient() {
                   <div className="text-xs text-emerald-100">Best: {stats.longestStreak} days</div>
                 </div>
               </div>
-              {/* Weekly Goal */}
               <div className="bg-white/20 backdrop-blur-sm rounded-xl px-4 py-2">
                 <div className="flex items-center gap-2 mb-1">
                   <Target className="w-4 h-4" />
@@ -768,7 +766,6 @@ export default function LearningClient() {
             </div>
           </div>
 
-          {/* Quick Stats */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
             {[
               { label: 'Hours Learned', value: stats.totalLearningHours.toFixed(1), icon: Clock, change: '+4.2 this week' },
@@ -791,7 +788,6 @@ export default function LearningClient() {
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="max-w-[1800px] mx-auto px-6 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <div className="flex items-center justify-between mb-6">
@@ -836,9 +832,7 @@ export default function LearningClient() {
             </div>
           </div>
 
-          {/* My Learning Tab */}
           <TabsContent value="my-learning" className="space-y-6">
-            {/* Continue Learning */}
             {coursesInProgress.length > 0 && (
               <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
                 <div className="flex items-center justify-between mb-4">
@@ -886,7 +880,6 @@ export default function LearningClient() {
               </div>
             )}
 
-            {/* Learning Paths Progress */}
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-semibold flex items-center gap-2">
@@ -920,16 +913,11 @@ export default function LearningClient() {
                           </div>
                           <span className="text-sm font-medium text-teal-600">{path.progress}%</span>
                         </div>
-                        {/* Milestones */}
                         <div className="flex items-center gap-2 mt-3">
                           {path.milestones.map(m => (
                             <div
                               key={m.id}
-                              className={`w-8 h-8 rounded-full flex items-center justify-center text-lg ${
-                                m.unlocked
-                                  ? 'bg-gradient-to-br from-yellow-400 to-orange-500 shadow-lg'
-                                  : 'bg-gray-200 dark:bg-gray-700 opacity-50'
-                              }`}
+                              className={'w-8 h-8 rounded-full flex items-center justify-center text-lg ' + (m.unlocked ? 'bg-gradient-to-br from-yellow-400 to-orange-500 shadow-lg' : 'bg-gray-200 dark:bg-gray-700 opacity-50')}
                               title={m.title}
                             >
                               {m.badge}
@@ -943,7 +931,6 @@ export default function LearningClient() {
               </div>
             </div>
 
-            {/* Recommended For You */}
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-semibold flex items-center gap-2">
@@ -1002,7 +989,6 @@ export default function LearningClient() {
               </div>
             </div>
 
-            {/* Collections */}
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-semibold flex items-center gap-2">
@@ -1072,10 +1058,8 @@ export default function LearningClient() {
             </div>
           </TabsContent>
 
-          {/* Learning Paths Tab */}
           <TabsContent value="paths" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Paths List */}
               <div className="lg:col-span-2 space-y-4">
                 {learningPaths.map(path => (
                   <div
@@ -1115,7 +1099,6 @@ export default function LearningClient() {
                             {path.enrolledCount.toLocaleString()} enrolled
                           </span>
                         </div>
-                        {/* Skills */}
                         <div className="flex items-center gap-2 mt-4">
                           {path.skills.slice(0, 4).map((skill, i) => (
                             <span key={i} className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded text-xs">
@@ -1126,7 +1109,7 @@ export default function LearningClient() {
                             <span className="text-xs text-gray-500">+{path.skills.length - 4} more</span>
                           )}
                         </div>
-                        {/* Progress if enrolled */}
+                        
                         {path.progress > 0 && (
                           <div className="flex items-center gap-3 mt-4 pt-4 border-t border-gray-100 dark:border-gray-700">
                             <div className="flex-1 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
@@ -1144,7 +1127,7 @@ export default function LearningClient() {
                 ))}
               </div>
 
-              {/* Sidebar */}
+              
               <div className="space-y-6">
                 <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
                   <h3 className="font-semibold mb-4 flex items-center gap-2">
@@ -1190,9 +1173,9 @@ export default function LearningClient() {
             </div>
           </TabsContent>
 
-          {/* Explore Tab */}
+          
           <TabsContent value="explore" className="space-y-6">
-            {/* Filters */}
+            
             <div className="flex items-center gap-4 flex-wrap">
               <select
                 value={selectedCategory}
@@ -1229,7 +1212,7 @@ export default function LearningClient() {
               </div>
             </div>
 
-            {/* Course Grid */}
+            
             <div className={viewMode === 'grid'
               ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'
               : 'space-y-4'
@@ -1294,7 +1277,7 @@ export default function LearningClient() {
             )}
           </TabsContent>
 
-          {/* Skills Tab */}
+          
           <TabsContent value="skills" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2 space-y-4">
@@ -1391,7 +1374,7 @@ export default function LearningClient() {
             </div>
           </TabsContent>
 
-          {/* Analytics Tab */}
+          
           <TabsContent value="analytics" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {[
@@ -1459,7 +1442,7 @@ export default function LearningClient() {
             </div>
           </TabsContent>
 
-          {/* Settings Tab */}
+          
           <TabsContent value="settings" className="space-y-6">
             <Card className="border-0 bg-gradient-to-r from-gray-600 via-gray-700 to-gray-800 text-white">
               <CardContent className="p-6">
@@ -1478,7 +1461,7 @@ export default function LearningClient() {
             </Card>
 
             <div className="grid grid-cols-12 gap-6">
-              {/* Settings Sidebar */}
+              
               <div className="col-span-3">
                 <Card className="bg-white dark:bg-gray-800">
                   <CardContent className="p-4">
@@ -1509,9 +1492,9 @@ export default function LearningClient() {
                 </Card>
               </div>
 
-              {/* Settings Content */}
+              
               <div className="col-span-9 space-y-6">
-                {/* General Settings */}
+                
                 {settingsTab === 'general' && (
                   <>
                     <Card className="bg-white dark:bg-gray-800">
@@ -1610,7 +1593,7 @@ export default function LearningClient() {
                   </>
                 )}
 
-                {/* Goals Settings */}
+                
                 {settingsTab === 'goals' && (
                   <>
                     <Card className="bg-white dark:bg-gray-800">
@@ -1676,7 +1659,7 @@ export default function LearningClient() {
                         <Button variant="outline" className="w-full" onClick={() => {
                           const skillName = prompt('Enter skill name:', 'New Skill')
                           if (skillName && skillName.trim()) {
-                            toast.success('Skill goal added'` })
+                            toast.success(`Skill goal added`)
                           }
                         }}>
                           <Plus className="w-4 h-4 mr-2" />
@@ -1687,7 +1670,7 @@ export default function LearningClient() {
                   </>
                 )}
 
-                {/* Notifications Settings */}
+                
                 {settingsTab === 'notifications' && (
                   <>
                     <Card className="bg-white dark:bg-gray-800">
@@ -1741,7 +1724,7 @@ export default function LearningClient() {
                   </>
                 )}
 
-                {/* Integrations Settings */}
+                
                 {settingsTab === 'integrations' && (
                   <>
                     <Card className="bg-white dark:bg-gray-800">
@@ -1828,7 +1811,7 @@ export default function LearningClient() {
                   </>
                 )}
 
-                {/* Security Settings */}
+                
                 {settingsTab === 'security' && (
                   <>
                     <Card className="bg-white dark:bg-gray-800">
@@ -1891,7 +1874,7 @@ export default function LearningClient() {
                   </>
                 )}
 
-                {/* Advanced Settings */}
+                
                 {settingsTab === 'advanced' && (
                   <>
                     <Card className="bg-white dark:bg-gray-800">
@@ -1991,7 +1974,7 @@ export default function LearningClient() {
           </TabsContent>
         </Tabs>
 
-        {/* Enhanced Competitive Upgrade Components */}
+        
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
@@ -2025,7 +2008,7 @@ export default function LearningClient() {
         </div>
       </div>
 
-      {/* Course Detail Dialog */}
+      
       <Dialog open={!!selectedCourse} onOpenChange={() => setSelectedCourse(null)}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
           <DialogHeader>
@@ -2039,7 +2022,7 @@ export default function LearningClient() {
           {selectedCourse && (
             <ScrollArea className="max-h-[calc(90vh-120px)]">
               <div className="space-y-6 pr-4">
-                {/* Course Header */}
+                
                 <div className="flex items-start gap-6">
                   <div className="w-48 h-32 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center text-white">
                     <GraduationCap className="w-12 h-12" />
@@ -2080,7 +2063,7 @@ export default function LearningClient() {
                   </div>
                 </div>
 
-                {/* Instructor */}
+                
                 <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-xl">
                   <div className="flex items-center gap-4">
                     <div className="w-16 h-16 bg-gradient-to-br from-gray-300 to-gray-400 rounded-full flex items-center justify-center text-white text-xl font-bold">
@@ -2097,7 +2080,7 @@ export default function LearningClient() {
                   </div>
                 </div>
 
-                {/* Course Content */}
+                
                 <div>
                   <h4 className="font-semibold mb-4">Course Content</h4>
                   <div className="space-y-2">
@@ -2137,7 +2120,7 @@ export default function LearningClient() {
                   </div>
                 </div>
 
-                {/* Skills */}
+                
                 <div>
                   <h4 className="font-semibold mb-4">Skills You'll Gain</h4>
                   <div className="flex flex-wrap gap-2">
@@ -2154,7 +2137,7 @@ export default function LearningClient() {
         </DialogContent>
       </Dialog>
 
-      {/* Create Collection Modal */}
+      
       <Dialog open={showCreateCollectionModal} onOpenChange={setShowCreateCollectionModal}>
         <DialogContent className="max-w-md">
           <DialogHeader>
@@ -2207,7 +2190,7 @@ export default function LearningClient() {
         </DialogContent>
       </Dialog>
 
-      {/* Create Learning Path Modal */}
+      
       <Dialog open={showCreatePathModal} onOpenChange={setShowCreatePathModal}>
         <DialogContent className="max-w-md">
           <DialogHeader>
@@ -2277,7 +2260,7 @@ export default function LearningClient() {
         </DialogContent>
       </Dialog>
 
-      {/* Continue Learning Dialog */}
+      
       <Dialog open={showContinueLearningDialog} onOpenChange={setShowContinueLearningDialog}>
         <DialogContent className="max-w-md">
           <DialogHeader>
@@ -2316,7 +2299,7 @@ export default function LearningClient() {
         </DialogContent>
       </Dialog>
 
-      {/* Browse Courses Dialog */}
+      
       <Dialog open={showBrowseCoursesDialog} onOpenChange={setShowBrowseCoursesDialog}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
@@ -2360,7 +2343,7 @@ export default function LearningClient() {
         </DialogContent>
       </Dialog>
 
-      {/* Certificates Dialog */}
+      
       <Dialog open={showCertificatesDialog} onOpenChange={setShowCertificatesDialog}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
@@ -2420,7 +2403,7 @@ export default function LearningClient() {
         </DialogContent>
       </Dialog>
 
-      {/* Study Plan Dialog */}
+      
       <Dialog open={showStudyPlanDialog} onOpenChange={setShowStudyPlanDialog}>
         <DialogContent className="max-w-md">
           <DialogHeader>

@@ -149,7 +149,8 @@ export default function WorkflowBuilderPage() {
             success: `Workflow imported! "${workflowData.name}" has been imported successfully`,
             error: 'Import completed but failed to refresh list'
           }
-        )        announce('Workflow imported successfully', 'polite')
+        )
+        announce('Workflow imported successfully', 'polite')
       } catch (error) {
         logger.error('Failed to import workflow', { error })
         toast.error('Import failed')
@@ -274,7 +275,8 @@ export default function WorkflowBuilderPage() {
       await updateWorkflow(workflow.id, {
         run_count: (workflow.run_count || 0) + 1,
         last_run: new Date().toISOString()
-      })      announce(`Workflow ${workflow.name} executed with ${stepsCompleted} steps`, 'polite')
+      })
+      announce(`Workflow ${workflow.name} executed with ${stepsCompleted} steps`, 'polite')
 
       // Reload workflows to show updated run count
       await loadWorkflowData()
@@ -328,7 +330,8 @@ export default function WorkflowBuilderPage() {
       )
 
       await loadWorkflowData() // Reload workflows
-      setActiveTab('workflows') // Switch to workflows tab    } catch (error) {
+      setActiveTab('workflows') // Switch to workflows tab
+    } catch (error) {
       logger.error('Failed to create from template', { error, templateId: template.id })
       toast.error('Failed to create workflow')
     }

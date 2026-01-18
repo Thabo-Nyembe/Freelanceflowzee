@@ -17,6 +17,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
+import { cn } from '@/lib/utils'
 import {
   MessageSquare,
   Send,
@@ -346,8 +347,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
         message_type: 'text',
         status: 'sent'
       })
-      toast.success('Message Sent'`
-      })
+      toast.success('Message Sent')
       setNewMessage('')
     } catch (err) {
       toast.error('Failed to send message')
@@ -397,8 +397,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
           : conv
       ))
       setSelectedConversation(prev => prev ? { ...prev, assignee: member } : null)
-      toast.success('Conversation Assigned'`
-      })
+      toast.success('Conversation Assigned')
       setShowAssignDialog(false)
     } catch (err) {
       toast.error('Failed to assign conversation')
@@ -557,8 +556,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
       toast.error('Please enter a tag name')
       return
     }
-    toast.success('Tag Created'" has been added`
-    })
+    toast.success(`Tag "${newSettingsTagInput}" has been added`)
     setNewSettingsTagInput('')
   }, [newSettingsTagInput])
 
@@ -1916,7 +1914,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
           <AIInsightsPanel
             insights={chatAIInsights}
             title="Chat Intelligence"
-            onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+            onInsightAction={(insight) => toast.info(insight.title)}
           />
         </div>
         <div className="space-y-6">
@@ -1998,9 +1996,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                       <AvatarImage src={member.avatar} alt="User avatar" />
                       <AvatarFallback>{member.name[0]}</AvatarFallback>
                     </Avatar>
-                    <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 border-2 border-white rounded-full ${
-                      member.status === 'online' ? 'bg-green-500' : member.status === 'away' ? 'bg-yellow-500' : 'bg-gray-400'
-                    }`} />
+                    <div className={cn("absolute -bottom-0.5 -right-0.5 w-3 h-3 border-2 border-white rounded-full", member.status === 'online' ? 'bg-green-500' : member.status === 'away' ? 'bg-yellow-500' : 'bg-gray-400')} />
                   </div>
                   <div>
                     <div className="font-medium">{member.name}</div>
@@ -2140,10 +2136,10 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                         <Badge variant="outline">{reply.category}</Badge>
                         <span className="text-xs text-gray-400">{reply.usageCount} uses</span>
                         <Button variant="ghost" size="icon" onClick={() => {
-                          toast.success(`Editing "${reply.name}"`)
+                          toast.success("Editing " + reply.name)
                         }}><Edit className="h-4 w-4" /></Button>
                         <Button variant="ghost" size="icon" onClick={() => {
-                          toast.success(`"${reply.name}" deleted successfully`)
+                          toast.success(reply.name + " deleted successfully")
                         }}><Trash2 className="h-4 w-4" /></Button>
                       </div>
                     </div>
@@ -2157,7 +2153,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                   <div className="flex items-center justify-between"><div><p className="font-medium">Enable Chat Widget</p><p className="text-sm text-gray-500">Show widget on website</p></div><Switch defaultChecked /></div>
                   <div><Label>Widget Position</Label><Select defaultValue="right"><SelectTrigger className="mt-1"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="left">Bottom Left</SelectItem><SelectItem value="right">Bottom Right</SelectItem></SelectContent></Select></div>
                   <div><Label>Widget Color</Label><div className="flex gap-2 mt-2">{['#06B6D4', '#3B82F6', '#8B5CF6', '#10B981', '#F59E0B'].map(c => (<button key={c} className="w-8 h-8 rounded-full border-2" style={{ backgroundColor: c }} onClick={() => {
-                          toast.success(`Widget color set to ${c}`)
+                          toast.success("Widget color set to " + c)
                         }} />))}</div></div>
                 </CardContent></Card>
                 <Card><CardHeader><CardTitle>Email Channel</CardTitle></CardHeader><CardContent className="space-y-4">
@@ -2182,7 +2178,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                       <div className="flex items-center gap-3">
                         <div className="relative">
                           <Avatar><AvatarImage src={member.avatar} alt="User avatar" /><AvatarFallback>{member.name[0]}</AvatarFallback></Avatar>
-                          <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 border-2 border-white rounded-full ${member.status === 'online' ? 'bg-green-500' : member.status === 'away' ? 'bg-yellow-500' : 'bg-gray-400'}`} />
+                          <div className={cn("absolute -bottom-0.5 -right-0.5 w-3 h-3 border-2 border-white rounded-full", member.status === 'online' ? 'bg-green-500' : member.status === 'away' ? 'bg-yellow-500' : 'bg-gray-400')} />
                         </div>
                         <div><p className="font-medium">{member.name}</p><p className="text-sm text-gray-500">{member.email}</p></div>
                       </div>
@@ -2190,7 +2186,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                         <Badge variant="outline" className="capitalize">{member.role}</Badge>
                         <div className="text-right text-xs text-gray-500"><div>{member.assignedConversations} active</div><div>{member.resolvedToday} resolved today</div></div>
                         <Button variant="ghost" size="icon" onClick={() => {
-                          toast.success(`Options for ${member.name}`)
+                          toast.success("Options for " + member.name)
                         }}><MoreHorizontal className="h-4 w-4" /></Button>
                       </div>
                     </div>
@@ -2346,7 +2342,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
               variant="outline"
               className="text-red-600 hover:text-red-700"
               onClick={() => {
-                toast.success(`${selectedChannel} disconnected`)
+                toast.success(selectedChannel + " disconnected")
                 setShowChannelConfigDialog(false)
               }}
             >
@@ -2355,8 +2351,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
             <Button
               className="bg-cyan-600"
               onClick={() => {
-                toast.success('Configuration Saved' settings updated`
-                })
+                toast.success("Configuration settings updated")
                 setShowChannelConfigDialog(false)
               }}
             >

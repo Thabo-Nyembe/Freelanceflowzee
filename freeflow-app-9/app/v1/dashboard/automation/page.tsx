@@ -105,7 +105,8 @@ export default function AutomationPage() {
 
       try {
         setIsLoading(true)
-        setError(null)        const { getWorkflows } = await import('@/lib/automation-queries')
+        setError(null)
+        const { getWorkflows } = await import('@/lib/automation-queries')
         const workflowsResult = await getWorkflows(userId)
 
         setWorkflows(workflowsResult || [])
@@ -114,8 +115,8 @@ export default function AutomationPage() {
 
         setIsLoading(false)
         announce('Automation data loaded successfully', 'polite')
-        toast.success('Automation loaded' workflows loaded`
-        })      } catch (err) {
+        toast.success(`Automation loaded - ${workflowsResult?.length || 0} workflows`)
+      } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load automation'
         setError(errorMessage)
         setIsLoading(false)
@@ -144,7 +145,8 @@ export default function AutomationPage() {
         userId
       })
 
-      toast.success('Workflow Created')      announce('Workflow created successfully', 'polite')
+      toast.success('Workflow Created')
+      announce('Workflow created successfully', 'polite')
 
       // Reload workflows
       const { getWorkflows } = await import('@/lib/automation-queries')
@@ -171,7 +173,8 @@ export default function AutomationPage() {
         description: 'Updated workflow configuration'
       })
 
-      toast.success('Workflow Updated')      announce('Workflow updated successfully', 'polite')
+      toast.success('Workflow Updated')
+      announce('Workflow updated successfully', 'polite')
 
       // Reload workflows
       const { getWorkflows } = await import('@/lib/automation-queries')
@@ -200,7 +203,8 @@ export default function AutomationPage() {
     try {      const { deleteWorkflow: deleteWorkflowQuery } = await import('@/lib/automation-queries')
       await deleteWorkflowQuery(deleteWorkflow.id)
 
-      toast.success('Workflow Deleted'" has been permanently removed` })      announce('Workflow deleted successfully', 'polite')
+      toast.success(`Workflow Deleted - ${deleteWorkflow.name} has been removed`)
+      announce('Workflow deleted successfully', 'polite')
 
       // Reload workflows
       const { getWorkflows } = await import('@/lib/automation-queries')
@@ -227,7 +231,8 @@ export default function AutomationPage() {
 
       await updateWorkflow(workflowId, { status: 'active' })
 
-      toast.success('Workflow Enabled'" is now active and will run automatically` })      announce('Workflow enabled successfully', 'polite')
+      toast.success(`Workflow Enabled - ${workflowName} is now active`)
+      announce('Workflow enabled successfully', 'polite')
 
       // Reload workflows
       const workflowsResult = await getWorkflows(userId)
@@ -251,7 +256,8 @@ export default function AutomationPage() {
 
       await updateWorkflow(workflowId, { status: 'paused' })
 
-      toast.success('Workflow Disabled'" has been paused and will not run` })      announce('Workflow disabled successfully', 'polite')
+      toast.success(`Workflow Disabled - ${workflowName} has been paused`)
+      announce('Workflow disabled successfully', 'polite')
 
       // Reload workflows
       const workflowsResult = await getWorkflows(userId)
@@ -282,7 +288,8 @@ export default function AutomationPage() {
       if (!response.ok) throw new Error('Failed to test workflow')
       const result = await response.json()
 
-      toast.success('Workflow Test Complete'" test run completed successfully` })      announce('Workflow test completed', 'polite')
+      toast.success(`Workflow Test Complete - ${workflowName} test run completed`)
+      announce('Workflow test completed', 'polite')
 
       // Optimistic update - ideally reload from database
       setWorkflows(prev => prev.map(w => w.id === workflowId ? { ...w, runsCount: w.runsCount + 1 } : w))
@@ -313,7 +320,8 @@ export default function AutomationPage() {
       if (!response.ok) throw new Error('Failed to connect integration')
       const result = await response.json()
 
-      toast.success('Integration Connected' has been connected successfully` })      announce('Integration connected successfully', 'polite')
+      toast.success(`Integration Connected - ${integrationName} has been connected`)
+      announce('Integration connected successfully', 'polite')
 
       // Optimistic update - ideally reload from database
       setIntegrations(prev => prev.map(i => i.id === integrationId ? {
@@ -351,7 +359,8 @@ export default function AutomationPage() {
 
       if (!response.ok) throw new Error('Failed to disconnect integration')
 
-      toast.success('Integration Disconnected' has been disconnected` })      announce('Integration disconnected successfully', 'polite')
+      toast.success(`Integration Disconnected - ${disconnectIntegration.name}`)
+      announce('Integration disconnected successfully', 'polite')
 
       // Optimistic update - ideally reload from database
       setIntegrations(prev => prev.map(i => i.id === disconnectIntegration.id ? {
@@ -389,7 +398,8 @@ export default function AutomationPage() {
       if (!response.ok) throw new Error('Failed to test webhook')
       const result = await response.json()
 
-      toast.success('Webhook Test Successful')      announce('Webhook test successful', 'polite')
+      toast.success('Webhook Test Successful')
+      announce('Webhook test successful', 'polite')
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Test failed'
       toast.error('Webhook Test Failed')
@@ -412,7 +422,8 @@ export default function AutomationPage() {
       // Note: Integrations would be loaded from integration queries when available
       setIntegrations([])
 
-      toast.success('Automation Refreshed' workflows)` })      announce('Automation refreshed successfully', 'polite')
+      toast.success('Automation Refreshed')
+      announce('Automation refreshed successfully', 'polite')
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Refresh failed'
       toast.error('Refresh Failed')

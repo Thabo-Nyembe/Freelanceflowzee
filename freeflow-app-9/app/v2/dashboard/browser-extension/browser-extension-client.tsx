@@ -286,7 +286,8 @@ const generateMockCaptures = (): PageCapture[] => {
         scrollPosition: type === 'full-page' ? Math.floor(Math.random() * 5000) : undefined
       }
     })
-  }  return captures
+  }
+  return captures
 }
 
 const generateMockActions = (): QuickAction[] => {
@@ -353,7 +354,8 @@ const generateMockActions = (): QuickAction[] => {
       enabled: false,
       usageCount: Math.floor(Math.random() * 100)
     }
-  ]  return actions
+  ]
+  return actions
 }
 
 const generateMockFeatures = (): ExtensionFeature[] => {
@@ -414,7 +416,8 @@ const generateMockFeatures = (): ExtensionFeature[] => {
       enabled: false,
       settings: { model: 'gpt-4' }
     }
-  ]  return features
+  ]
+  return features
 }
 
 // ========================================
@@ -611,13 +614,15 @@ export default function BrowserExtensionClient() {
   const [deleteCapture, setDeleteCapture] = useState<{ id: string; title: string; fileSize: number; type: CaptureType } | null>(null)
 
   // Load mock data
-  useEffect(() => {    const mockCaptures = generateMockCaptures()
+  useEffect(() => {
+    const mockCaptures = generateMockCaptures()
     const mockActions = generateMockActions()
     const mockFeatures = generateMockFeatures()
 
     dispatch({ type: 'SET_CAPTURES', captures: mockCaptures })
     dispatch({ type: 'SET_ACTIONS', actions: mockActions })
-    dispatch({ type: 'SET_FEATURES', features: mockFeatures })    announce('Browser extension page loaded', 'polite')
+    dispatch({ type: 'SET_FEATURES', features: mockFeatures })
+    announce('Browser extension page loaded', 'polite')
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Computed Stats
@@ -710,11 +715,12 @@ export default function BrowserExtensionClient() {
           total_actions: 0,
           storage_used: 0
         })
-        if (error) throw error      }
+        if (error) throw error
+      }
 
       dispatch({ type: 'SET_INSTALLED', isInstalled: true })
-      setShowInstallModal(false)      toast.success('Extension installed' - Active and syncing - All features enabled`
-      })
+      setShowInstallModal(false)
+      toast.success("Extension installed - Active and syncing - All features enabled")
       announce('Extension installed', 'polite')
     } catch (error) {
       logger.error('Extension installation error', {
@@ -738,11 +744,13 @@ export default function BrowserExtensionClient() {
     if (!capture) {
       logger.warn('Capture deletion failed', { reason: 'Capture not found', captureId })
       return
-    }    setDeleteCapture({ id: captureId, title: capture.title, fileSize: capture.fileSize, type: capture.type })
+    }
+    setDeleteCapture({ id: captureId, title: capture.title, fileSize: capture.fileSize, type: capture.type })
   }
 
   const handleConfirmDeleteCapture = async () => {
-    if (!deleteCapture || !userId) return    try {
+    if (!deleteCapture || !userId) return
+    try {
       // Dynamic import for code splitting
       const { deleteCapture: deleteCaptureFromDB } = await import('@/lib/browser-extension-queries')
 
@@ -754,8 +762,8 @@ export default function BrowserExtensionClient() {
 
       dispatch({ type: 'DELETE_CAPTURE', captureId: deleteCapture.id })
 
-      const fileSizeMB = (deleteCapture.fileSize / (1024 * 1024)).toFixed(1)      toast.success('Capture deleted' - ${deleteCapture.type} - ${fileSizeMB} MB freed`
-      })
+      const fileSizeMB = (deleteCapture.fileSize / (1024 * 1024)).toFixed(1)
+      toast.success("Capture deleted - " + deleteCapture.type + " - " + fileSizeMB + " MB freed")
       announce('Capture deleted', 'polite')
     } catch (error: any) {
       logger.error('Failed to delete capture', {
@@ -785,11 +793,11 @@ export default function BrowserExtensionClient() {
         const enabledFeatures = newState
           ? [...(installation.enabled_features || []), featureId]
           : (installation.enabled_features || []).filter((f: string) => f !== featureId)
-        await updateInstallation(installation.id, { enabled_features: enabledFeatures })      }
+        await updateInstallation(installation.id, { enabled_features: enabledFeatures })
+      }
     }
 
-    toast.success(newState ? `${feature.name} enabled` : `${feature.name} disabled` - ${newState ? 'Now active' : 'Disabled'}`
-    })
+    toast.success((newState ? feature.name + " enabled" : feature.name + " disabled") + " - " + (newState ? "Now active" : "Disabled"))
     announce(newState ? `${feature.name} enabled` : `${feature.name} disabled`, 'polite')
   }
 
@@ -825,8 +833,7 @@ export default function BrowserExtensionClient() {
 
     dispatch({ type: 'ADD_CAPTURE', capture: newCapture })
 
-    toast.success('Capture created successfully' - ${newCapture.type}`
-    })
+    toast.success("Capture created successfully - " + newCapture.type)
 
     // Reset form and close dialog
     setNewItemForm({ title: '', url: '', type: 'screenshot', tags: '' })
@@ -903,8 +910,7 @@ export default function BrowserExtensionClient() {
       URL.revokeObjectURL(url)
     }
 
-    toast.success('Export completed' captures exported as ${exportForm.format.toUpperCase()}`
-    })
+    toast.success("Export completed: " + capturesForExport.length + " captures exported as " + exportForm.format.toUpperCase())
 
     setShowExportDialog(false)
     announce('Data exported successfully', 'polite')

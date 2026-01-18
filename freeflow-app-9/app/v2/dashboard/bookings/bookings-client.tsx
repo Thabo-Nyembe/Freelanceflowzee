@@ -244,8 +244,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
         meeting_url: newBookingForm.addVideoMeeting ? 'https://zoom.us/j/pending' : undefined
       })
 
-      toast.success('Booking Created' has been created successfully`
-      })
+      toast.success('Booking has been created successfully')
       setShowNewBooking(false)
       setNewBookingForm({
         serviceType: '1',
@@ -270,8 +269,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
         confirmed_at: new Date().toISOString(),
         confirmation_code: `CONF-${Date.now().toString(36).toUpperCase()}`
       })
-      toast.success('Booking Confirmed' has been confirmed`
-      })
+      toast.success('Booking has been confirmed')
       refetch()
       if (selectedBooking?.id === booking.id) {
         setSelectedBooking(null)
@@ -288,8 +286,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
         cancelled_at: new Date().toISOString(),
         cancellation_reason: 'Cancelled by user'
       })
-      toast.success('Booking Cancelled' has been cancelled`
-      })
+      toast.success('Booking has been cancelled')
       refetch()
       if (selectedBooking?.id === booking.id) {
         setSelectedBooking(null)
@@ -323,8 +320,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
         end_time: endTime.toISOString(),
         status: 'rescheduled' as BookingStatus
       })
-      toast.success('Booking Rescheduled'`
-      })
+      toast.success('Booking Rescheduled')
       setShowRescheduleDialog(false)
       setRescheduleData(null)
       refetch()
@@ -343,8 +339,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
 
     try {
       await deleteBooking(booking.id)
-      toast.success('Booking Deleted'" has been deleted`
-      })
+      toast.success("Booking Deleted - " + booking.title + " has been deleted")
       refetch()
       if (selectedBooking?.id === booking.id) {
         setSelectedBooking(null)
@@ -382,7 +377,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
     a.click()
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
-    toast.success('Export Complete' bookings exported to CSV` })
+    toast.success('Export Complete')
   }
 
   // Confirm all pending bookings
@@ -1869,7 +1864,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                           isCurrentMonth ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-900'
                         } ${isToday ? 'border-sky-500 ring-1 ring-sky-500' : 'border-transparent'} hover:border-sky-300 cursor-pointer`}
                       >
-                        <div className={`text-sm ${isCurrentMonth ? 'text-gray-900 dark:text-white' : 'text-gray-400'} ${isToday ? 'font-bold text-sky-600' : ''}`}>
+                        <div className={"text-sm " + (isCurrentMonth ? "text-gray-900 dark:text-white" : "text-gray-400") + " " + (isToday ? "font-bold text-sky-600" : "")}>
                           {day.getDate()}
                         </div>
                         {hasBookings && isCurrentMonth && (
@@ -2459,7 +2454,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                       requirements: {},
                       metadata: { isBlockedTime: true }
                     })
-                    toast.success('Time Blocked'` })
+                    toast.success('Time Blocked')
                     setShowBlockTimeDialog(false)
                     setBlockTimeForm({ date: '', startTime: '09:00', endTime: '10:00', reason: '' })
                     refetch()
@@ -2500,9 +2495,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                   return (
                     <div
                       key={i}
-                      className={`p-2 min-h-[60px] rounded-lg border cursor-pointer transition-colors ${
-                        isCurrentMonth ? 'bg-white dark:bg-gray-800 hover:bg-sky-50 dark:hover:bg-sky-900/20' : 'bg-gray-50 dark:bg-gray-900'
-                      } ${isToday ? 'border-sky-500 ring-1 ring-sky-500' : 'border-gray-200 dark:border-gray-700'}`}
+                      className={"p-2 min-h-[60px] rounded-lg border cursor-pointer transition-colors " + (isCurrentMonth ? "bg-white dark:bg-gray-800 hover:bg-sky-50 dark:hover:bg-sky-900/20" : "bg-gray-50 dark:bg-gray-900") + " " + (isToday ? "border-sky-500 ring-1 ring-sky-500" : "border-gray-200 dark:border-gray-700")}
                       onClick={() => {
                         setCurrentDate(day)
                         setShowViewCalendarDialog(false)
@@ -2510,7 +2503,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                         setCalendarView('day')
                       }}
                     >
-                      <div className={`text-sm ${isCurrentMonth ? 'text-gray-900 dark:text-white' : 'text-gray-400'} ${isToday ? 'font-bold text-sky-600' : ''}`}>
+                      <div className={"text-sm " + (isCurrentMonth ? "text-gray-900 dark:text-white" : "text-gray-400") + " " + (isToday ? "font-bold text-sky-600" : "")}>
                         {day.getDate()}
                       </div>
                       {hasBookings && isCurrentMonth && (
@@ -2917,7 +2910,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
             <AIInsightsPanel
               insights={mockBookingsAIInsights}
               title="Booking Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">

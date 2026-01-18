@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react'
 import { toast } from 'sonner'
 import { copyToClipboard } from '@/lib/button-handlers'
@@ -448,8 +450,6 @@ export default function FilesHubClient({ initialFiles = [] }: FilesHubClientProp
   // Fetch shared links and activities (files/folders now use API hooks)
   const fetchData = useCallback(async () => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
@@ -526,8 +526,6 @@ export default function FilesHubClient({ initialFiles = [] }: FilesHubClientProp
   // Handle advanced upload completion
   const handleAdvancedUploadComplete = useCallback(async (uploadedFiles: UploadedFile[]) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
@@ -682,8 +680,6 @@ export default function FilesHubClient({ initialFiles = [] }: FilesHubClientProp
 
   const handleShareFile = async (fileId: string, fileName: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
@@ -706,8 +702,6 @@ export default function FilesHubClient({ initialFiles = [] }: FilesHubClientProp
 
   const handleDeleteFolder = async (folderId: string, folderName: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('folders').delete().eq('id', folderId)
       if (error) throw error
       toast.success(`Folder "${folderName}" has been deleted`)
@@ -795,8 +789,6 @@ export default function FilesHubClient({ initialFiles = [] }: FilesHubClientProp
 
     try {
       toast.loading('Revoking access...')
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('file_shares').delete().eq('id', linkId)
       if (error) throw error
       toast.dismiss()

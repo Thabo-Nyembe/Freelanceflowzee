@@ -1554,7 +1554,7 @@ export default function WorkflowBuilderClient() {
   const handleViewAllVariables = useCallback(() => {
     setActiveTab('variables')
     setShowVariablesDialog(true)
-    toast.success('All Variables' variables` })
+    toast.success('All Variables')
   }, [variables.length])
 
   const handleVariableSettings = useCallback(() => {
@@ -1631,7 +1631,7 @@ export default function WorkflowBuilderClient() {
   const handleCopyToClipboard = useCallback(async (text: string, label: string) => {
     try {
       await navigator.clipboard.writeText(text)
-      toast.success('Copied' copied to clipboard` })
+      toast.success('Copied')
     } catch {
       toast.error('Copy failed')
     }
@@ -1687,8 +1687,7 @@ export default function WorkflowBuilderClient() {
           : w
       ))
 
-      toast.success('Connection created' to ${dropTargetRef.current.nodeId}`
-      })
+      toast.success("Connection created to " + dropTargetRef.current.nodeId)
     }
     dragNodeRef.current = null
     dropTargetRef.current = null
@@ -2988,7 +2987,7 @@ export default function WorkflowBuilderClient() {
             <AIInsightsPanel
               insights={mockWorkflowAIInsights}
               title="Workflow Intelligence"
-              onInsightAction={(insight) => toast.info(insight.title`) } : undefined })}
+              onInsightAction={(insight) => toast.info("Insight: " + insight.title)}
             />
           </div>
           <div className="space-y-6">

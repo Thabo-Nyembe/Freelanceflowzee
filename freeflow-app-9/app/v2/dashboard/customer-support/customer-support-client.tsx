@@ -1,5 +1,7 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
+
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -385,8 +387,6 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
   const fetchTickets = useCallback(async () => {
     setIsLoading(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('support_tickets')
         .select('*')
@@ -490,16 +490,12 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
 
     setIsSubmitting(true)
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         toast.error('Please sign in to create tickets')
         return
       }
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('support_tickets').insert({
         user_id: user.id,
         subject: ticketForm.subject,
@@ -530,8 +526,6 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
   // Assign agent to ticket
   const handleAssignAgent = async (ticketId: string, agentId: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('support_tickets')
         .update({
@@ -555,12 +549,8 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
   // Resolve ticket
   const handleResolveTicket = async (ticketId: string, notes?: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('support_tickets')
         .update({
@@ -586,8 +576,6 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
   // Escalate ticket
   const handleEscalateTicket = async (ticketId: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('support_tickets')
         .update({
@@ -611,12 +599,8 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
   // Send reply to ticket
   const handleSendTicketReply = async (ticketId: string, message: string, isInternal: boolean) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase.from('support_ticket_replies').insert({
         ticket_id: ticketId,
         message: message,
@@ -629,8 +613,6 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
       if (error) throw error
 
       // Update first response time if not set
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       await supabase
         .from('support_tickets')
         .update({
@@ -652,8 +634,6 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
   // Delete ticket
   const handleDeleteTicket = async (ticketId: string) => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { error } = await supabase
         .from('support_tickets')
         .update({ deleted_at: new Date().toISOString() })
@@ -673,8 +653,6 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
   // Export tickets
   const handleExportTickets = async () => {
     try {
-      const { createClient } = await import('@/lib/supabase/client')
-      const supabase = createClient()
       const { data, error } = await supabase
         .from('support_tickets')
         .select('*')
@@ -2336,7 +2314,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
         <AIInsightsPanel
           insights={mockSupportAIInsights}
-          onAskQuestion={(q) => toast.info('Question Submitted' })}
+          onAskQuestion={(q) => toast.info("Question Submitted: " + q)}
         />
         <PredictiveAnalytics predictions={mockSupportPredictions} />
       </div>
@@ -3128,7 +3106,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                   <h4 className="font-medium">{team.name}</h4>
                   <p className="text-sm text-gray-500">{team.members} members - Lead: {team.lead}</p>
                 </div>
-                <Button variant="outline" size="sm" onClick={() => toast.info(`Manage ${team.name}` members - Lead: ${team.lead}` })}>Manage</Button>
+                <Button variant="outline" size="sm" onClick={() => toast.info("Manage " + team.name + " - " + team.members + " members - Lead: " + team.lead)}>Manage</Button>
               </div>
             ))}
             <Button variant="outline" className="w-full" onClick={() => {
@@ -3592,7 +3570,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                   <p className="font-medium">{segment.name}</p>
                   <p className="text-sm text-gray-600">{segment.count} customers</p>
                 </div>
-                <Button variant="outline" size="sm" onClick={() => toast.info(`Viewing ${segment.name}` customers in this segment` })}>View</Button>
+                <Button variant="outline" size="sm" onClick={() => toast.info("Viewing " + segment.name + " - " + segment.count + " customers in this segment")}>View</Button>
               </div>
             ))}
           </div>
