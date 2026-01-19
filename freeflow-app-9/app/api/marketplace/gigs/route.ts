@@ -6,8 +6,276 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
-// Demo gig listings
-const demoGigs = [
+// ============================================================================
+// INTERFACES
+// ============================================================================
+
+interface GigPackage {
+  name: string;
+  price: number;
+  description: string;
+  deliveryDays: number;
+  revisions: number | string;
+  features: string[];
+}
+
+interface GigAddon {
+  id: string;
+  name: string;
+  price: number;
+  description: string;
+}
+
+interface Gig {
+  id: string;
+  freelancerId: string;
+  freelancerName: string;
+  freelancerLevel: string;
+  title: string;
+  slug: string;
+  description: string;
+  category: string;
+  subcategory: string;
+  tags: string[];
+  images: string[];
+  video: string | null;
+  packages: {
+    basic: GigPackage;
+    standard: GigPackage;
+    premium: GigPackage;
+  };
+  addOns: GigAddon[];
+  requirements: Array<{ question: string; type: string; options?: string[]; required: boolean }>;
+  faqs: Array<{ question: string; answer: string }>;
+  stats: {
+    orders: number;
+    rating: number;
+    totalReviews: number;
+    responseTime: string;
+    onTimeDelivery: number;
+    repeatClients: number;
+  };
+  seo: {
+    title: string;
+    description: string;
+    keywords: string[];
+  };
+  status: string;
+  featured: boolean;
+  impressions: number;
+  clicks: number;
+  conversionRate: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// ============================================================================
+// DATABASE HELPER FUNCTIONS
+// ============================================================================
+
+async function getGigs(supabase: any, filters?: {
+  freelancerId?: string;
+  category?: string;
+  subcategory?: string;
+  status?: string;
+  featured?: boolean;
+}): Promise<Gig[]> {
+  let query = supabase
+    .from('gigs')
+    .select(`
+      *,
+      freelancer:freelancers(id, name, full_name, level)
+    `)
+    .order('created_at', { ascending: false });
+
+  if (filters?.freelancerId) {
+    query = query.eq('freelancer_id', filters.freelancerId);
+  }
+  if (filters?.category) {
+    query = query.eq('category', filters.category);
+  }
+  if (filters?.subcategory) {
+    query = query.eq('subcategory', filters.subcategory);
+  }
+  if (filters?.status) {
+    query = query.eq('status', filters.status);
+  }
+  if (filters?.featured) {
+    query = query.eq('featured', filters.featured);
+  }
+
+  const { data, error } = await query;
+
+  if (error || !data?.length) {
+    return getDefaultGigs();
+  }
+
+  return data.map((g: any) => ({
+    id: g.id,
+    freelancerId: g.freelancer_id,
+    freelancerName: g.freelancer?.name || g.freelancer?.full_name || 'Unknown',
+    freelancerLevel: g.freelancer?.level || g.freelancer_level || 'Top Rated',
+    title: g.title,
+    slug: g.slug,
+    description: g.description,
+    category: g.category,
+    subcategory: g.subcategory,
+    tags: g.tags || [],
+    images: g.images || [],
+    video: g.video,
+    packages: g.packages || getDefaultGigs()[0].packages,
+    addOns: g.add_ons || [],
+    requirements: g.requirements || [],
+    faqs: g.faqs || [],
+    stats: g.stats || { orders: 0, rating: 0, totalReviews: 0, responseTime: 'N/A', onTimeDelivery: 0, repeatClients: 0 },
+    seo: g.seo || { title: g.title, description: g.description, keywords: g.tags || [] },
+    status: g.status || 'active',
+    featured: g.featured || false,
+    impressions: g.impressions || 0,
+    clicks: g.clicks || 0,
+    conversionRate: g.conversion_rate || 0,
+    createdAt: g.created_at,
+    updatedAt: g.updated_at
+  }));
+}
+
+async function getGigById(supabase: any, gigId: string): Promise<Gig | null> {
+  const { data, error } = await supabase
+    .from('gigs')
+    .select(`
+      *,
+      freelancer:freelancers(id, name, full_name, level)
+    `)
+    .eq('id', gigId)
+    .single();
+
+  if (error || !data) {
+    const defaultGigs = getDefaultGigs();
+    return defaultGigs.find(g => g.id === gigId) || null;
+  }
+
+  return {
+    id: data.id,
+    freelancerId: data.freelancer_id,
+    freelancerName: data.freelancer?.name || data.freelancer?.full_name || 'Unknown',
+    freelancerLevel: data.freelancer?.level || data.freelancer_level || 'Top Rated',
+    title: data.title,
+    slug: data.slug,
+    description: data.description,
+    category: data.category,
+    subcategory: data.subcategory,
+    tags: data.tags || [],
+    images: data.images || [],
+    video: data.video,
+    packages: data.packages || getDefaultGigs()[0].packages,
+    addOns: data.add_ons || [],
+    requirements: data.requirements || [],
+    faqs: data.faqs || [],
+    stats: data.stats || { orders: 0, rating: 0, totalReviews: 0, responseTime: 'N/A', onTimeDelivery: 0, repeatClients: 0 },
+    seo: data.seo || { title: data.title, description: data.description, keywords: data.tags || [] },
+    status: data.status || 'active',
+    featured: data.featured || false,
+    impressions: data.impressions || 0,
+    clicks: data.clicks || 0,
+    conversionRate: data.conversion_rate || 0,
+    createdAt: data.created_at,
+    updatedAt: data.updated_at
+  };
+}
+
+async function getGigBySlug(supabase: any, slug: string): Promise<Gig | null> {
+  const { data, error } = await supabase
+    .from('gigs')
+    .select(`
+      *,
+      freelancer:freelancers(id, name, full_name, level)
+    `)
+    .eq('slug', slug)
+    .single();
+
+  if (error || !data) {
+    const defaultGigs = getDefaultGigs();
+    return defaultGigs.find(g => g.slug === slug) || null;
+  }
+
+  return getGigById(supabase, data.id);
+}
+
+async function createGigInDb(supabase: any, gigData: Partial<Gig>): Promise<Gig | null> {
+  const { data, error } = await supabase
+    .from('gigs')
+    .insert({
+      freelancer_id: gigData.freelancerId,
+      title: gigData.title,
+      slug: gigData.slug,
+      description: gigData.description,
+      category: gigData.category,
+      subcategory: gigData.subcategory,
+      tags: gigData.tags,
+      images: gigData.images || [],
+      video: gigData.video,
+      packages: gigData.packages,
+      add_ons: gigData.addOns || [],
+      requirements: gigData.requirements || [],
+      faqs: gigData.faqs || [],
+      stats: { orders: 0, rating: 0, totalReviews: 0, responseTime: 'N/A', onTimeDelivery: 0, repeatClients: 0 },
+      status: 'draft',
+      featured: false,
+      impressions: 0,
+      clicks: 0,
+      conversion_rate: 0
+    })
+    .select()
+    .single();
+
+  if (error || !data) {
+    return null;
+  }
+
+  return getGigById(supabase, data.id);
+}
+
+async function updateGigInDb(supabase: any, gigId: string, updates: Record<string, unknown>): Promise<Gig | null> {
+  const dbUpdates: Record<string, unknown> = {};
+
+  if (updates.title) dbUpdates.title = updates.title;
+  if (updates.description) dbUpdates.description = updates.description;
+  if (updates.category) dbUpdates.category = updates.category;
+  if (updates.subcategory) dbUpdates.subcategory = updates.subcategory;
+  if (updates.tags) dbUpdates.tags = updates.tags;
+  if (updates.images) dbUpdates.images = updates.images;
+  if (updates.video) dbUpdates.video = updates.video;
+  if (updates.packages) dbUpdates.packages = updates.packages;
+  if (updates.addOns) dbUpdates.add_ons = updates.addOns;
+  if (updates.requirements) dbUpdates.requirements = updates.requirements;
+  if (updates.faqs) dbUpdates.faqs = updates.faqs;
+  if (updates.status) dbUpdates.status = updates.status;
+  if (updates.featured !== undefined) dbUpdates.featured = updates.featured;
+
+  dbUpdates.updated_at = new Date().toISOString();
+
+  const { error } = await supabase
+    .from('gigs')
+    .update(dbUpdates)
+    .eq('id', gigId);
+
+  if (error) {
+    return null;
+  }
+
+  return getGigById(supabase, gigId);
+}
+
+async function trackGigImpression(supabase: any, gigId: string): Promise<void> {
+  await supabase.rpc('increment_gig_impressions', { gig_id: gigId });
+}
+
+// ============================================================================
+// DEFAULT DATA (fallback when database is empty)
+// ============================================================================
+
+function getDefaultGigs(): Gig[] {
+  return [
   {
     id: 'gig-001',
     freelancerId: 'fl-001',
@@ -195,7 +463,8 @@ const demoGigs = [
     createdAt: '2023-08-20',
     updatedAt: '2024-01-05'
   }
-]
+  ];
+}
 
 // Gig categories
 const gigCategories = [
@@ -209,36 +478,37 @@ const gigCategories = [
 
 export async function POST(request: NextRequest) {
   try {
+    const supabase = await createClient();
     const body = await request.json()
     const { action, ...params } = body
 
     switch (action) {
       case 'search-gigs':
-        return handleSearchGigs(params)
+        return handleSearchGigs(supabase, params)
       case 'get-gig':
-        return handleGetGig(params)
+        return handleGetGig(supabase, params)
       case 'create-gig':
-        return handleCreateGig(params)
+        return handleCreateGig(supabase, params)
       case 'update-gig':
-        return handleUpdateGig(params)
+        return handleUpdateGig(supabase, params)
       case 'add-package':
-        return handleAddPackage(params)
+        return handleAddPackage(supabase, params)
       case 'add-addon':
-        return handleAddAddon(params)
+        return handleAddAddon(supabase, params)
       case 'get-gig-analytics':
-        return handleGetGigAnalytics(params)
+        return handleGetGigAnalytics(supabase, params)
       case 'ai-optimize-gig':
-        return handleAIOptimizeGig(params)
+        return handleAIOptimizeGig(supabase, params)
       case 'generate-gig-content':
         return handleGenerateGigContent(params)
       case 'calculate-pricing':
         return handleCalculatePricing(params)
       case 'toggle-status':
-        return handleToggleStatus(params)
+        return handleToggleStatus(supabase, params)
       case 'feature-gig':
-        return handleFeatureGig(params)
+        return handleFeatureGig(supabase, params)
       case 'get-trending':
-        return handleGetTrending(params)
+        return handleGetTrending(supabase, params)
       default:
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
@@ -248,7 +518,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function handleSearchGigs(params: {
+async function handleSearchGigs(supabase: any, params: {
   query?: string
   category?: string
   subcategory?: string
@@ -273,7 +543,8 @@ async function handleSearchGigs(params: {
     limit = 24
   } = params
 
-  let gigs = [...demoGigs]
+  // Get gigs from database with initial filters
+  let gigs = await getGigs(supabase, { category, subcategory, status: 'active' });
 
   // Apply filters
   if (query) {
@@ -362,44 +633,49 @@ async function handleSearchGigs(params: {
   })
 }
 
-async function handleGetGig(params: { gigId?: string, slug?: string }) {
+async function handleGetGig(supabase: any, params: { gigId?: string, slug?: string }) {
   const { gigId, slug } = params
 
+  // Get gig from database
   const gig = gigId
-    ? demoGigs.find(g => g.id === gigId)
-    : demoGigs.find(g => g.slug === slug)
+    ? await getGigById(supabase, gigId)
+    : slug ? await getGigBySlug(supabase, slug) : null;
 
   if (!gig) {
     return NextResponse.json({ error: 'Gig not found' }, { status: 404 })
   }
 
-  // Track impression
-  gig.impressions += 1
+  // Track impression in database
+  await trackGigImpression(supabase, gig.id);
+
+  // Get related gigs from database
+  const allGigs = await getGigs(supabase, { category: gig.category, status: 'active' });
+  const relatedGigs = allGigs.filter(g => g.id !== gig.id).slice(0, 4);
 
   return NextResponse.json({
     success: true,
     data: {
       ...gig,
-      relatedGigs: demoGigs.filter(g => g.id !== gig.id && g.category === gig.category).slice(0, 4)
+      relatedGigs
     }
   })
 }
 
-async function handleCreateGig(params: {
+async function handleCreateGig(supabase: any, params: {
   freelancerId: string
   title: string
   description: string
   category: string
   subcategory: string
   tags: string[]
-  packages: typeof demoGigs[0]['packages']
+  packages: Gig['packages']
 }) {
   const { freelancerId, title, description, category, subcategory, tags, packages } = params
 
   const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 80)
 
-  const newGig = {
-    id: `gig-${Date.now()}`,
+  // Create gig in database
+  const newGig = await createGigInDb(supabase, {
     freelancerId,
     title,
     slug,
@@ -412,22 +688,53 @@ async function handleCreateGig(params: {
     packages,
     addOns: [],
     requirements: [],
-    faqs: [],
-    stats: {
-      orders: 0,
-      rating: 0,
-      totalReviews: 0,
-      responseTime: 'N/A',
-      onTimeDelivery: 0,
-      repeatClients: 0
-    },
-    status: 'draft',
-    featured: false,
-    impressions: 0,
-    clicks: 0,
-    conversionRate: 0,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+    faqs: []
+  });
+
+  if (!newGig) {
+    // Fallback to in-memory response if database fails
+    const fallbackGig = {
+      id: `gig-${Date.now()}`,
+      freelancerId,
+      freelancerName: 'Unknown',
+      freelancerLevel: 'New Seller',
+      title,
+      slug,
+      description,
+      category,
+      subcategory,
+      tags,
+      images: [],
+      video: null,
+      packages,
+      addOns: [],
+      requirements: [],
+      faqs: [],
+      stats: { orders: 0, rating: 0, totalReviews: 0, responseTime: 'N/A', onTimeDelivery: 0, repeatClients: 0 },
+      seo: { title, description, keywords: tags },
+      status: 'draft',
+      featured: false,
+      impressions: 0,
+      clicks: 0,
+      conversionRate: 0,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        gig: fallbackGig,
+        message: 'Gig created as draft (local)',
+        nextSteps: [
+          'Add high-quality images (min 3)',
+          'Add a video introduction',
+          'Set up gig requirements',
+          'Add FAQs',
+          'Publish when ready'
+        ]
+      }
+    });
   }
 
   return NextResponse.json({
@@ -446,25 +753,26 @@ async function handleCreateGig(params: {
   })
 }
 
-async function handleUpdateGig(params: { gigId: string, updates: Record<string, unknown> }) {
+async function handleUpdateGig(supabase: any, params: { gigId: string, updates: Record<string, unknown> }) {
   const { gigId, updates } = params
 
-  const gig = demoGigs.find(g => g.id === gigId)
+  // Update gig in database
+  const updatedGig = await updateGigInDb(supabase, gigId, updates);
 
-  if (!gig) {
-    return NextResponse.json({ error: 'Gig not found' }, { status: 404 })
+  if (!updatedGig) {
+    return NextResponse.json({ error: 'Gig not found or update failed' }, { status: 404 })
   }
 
   return NextResponse.json({
     success: true,
     data: {
-      gig: { ...gig, ...updates, updatedAt: new Date().toISOString() },
+      gig: updatedGig,
       message: 'Gig updated successfully'
     }
   })
 }
 
-async function handleAddPackage(params: {
+async function handleAddPackage(supabase: any, params: {
   gigId: string
   packageType: 'basic' | 'standard' | 'premium'
   package: {
@@ -478,6 +786,20 @@ async function handleAddPackage(params: {
 }) {
   const { gigId, packageType, package: pkg } = params
 
+  // Get current gig
+  const gig = await getGigById(supabase, gigId);
+  if (!gig) {
+    return NextResponse.json({ error: 'Gig not found' }, { status: 404 });
+  }
+
+  // Update packages
+  const updatedPackages = {
+    ...gig.packages,
+    [packageType]: pkg
+  };
+
+  await updateGigInDb(supabase, gigId, { packages: updatedPackages });
+
   return NextResponse.json({
     success: true,
     data: {
@@ -489,7 +811,7 @@ async function handleAddPackage(params: {
   })
 }
 
-async function handleAddAddon(params: {
+async function handleAddAddon(supabase: any, params: {
   gigId: string
   addon: {
     name: string
@@ -499,30 +821,47 @@ async function handleAddAddon(params: {
 }) {
   const { gigId, addon } = params
 
+  // Get current gig
+  const gig = await getGigById(supabase, gigId);
+  if (!gig) {
+    return NextResponse.json({ error: 'Gig not found' }, { status: 404 });
+  }
+
+  const newAddon = {
+    id: `addon-${Date.now()}`,
+    ...addon
+  };
+
+  // Update addons in database
+  const updatedAddOns = [...gig.addOns, newAddon];
+  await updateGigInDb(supabase, gigId, { addOns: updatedAddOns });
+
   return NextResponse.json({
     success: true,
     data: {
       gigId,
-      addon: {
-        id: `addon-${Date.now()}`,
-        ...addon
-      },
+      addon: newAddon,
       message: 'Add-on created'
     }
   })
 }
 
-async function handleGetGigAnalytics(params: {
+async function handleGetGigAnalytics(supabase: any, params: {
   gigId: string
   period?: string
 }) {
   const { gigId, period = '30days' } = params
 
-  const gig = demoGigs.find(g => g.id === gigId)
+  // Get gig from database
+  const gig = await getGigById(supabase, gigId);
 
   if (!gig) {
     return NextResponse.json({ error: 'Gig not found' }, { status: 404 })
   }
+
+  // Calculate analytics from gig data
+  const impressions = gig.impressions || 1;
+  const clicks = gig.clicks || 0;
 
   return NextResponse.json({
     success: true,
@@ -532,19 +871,19 @@ async function handleGetGigAnalytics(params: {
       analytics: {
         impressions: gig.impressions,
         clicks: gig.clicks,
-        clickThroughRate: ((gig.clicks / gig.impressions) * 100).toFixed(2) + '%',
+        clickThroughRate: ((clicks / impressions) * 100).toFixed(2) + '%',
         orders: gig.stats.orders,
         conversionRate: gig.conversionRate.toFixed(2) + '%',
         revenue: gig.stats.orders * gig.packages.standard.price * 0.7, // Estimated
         avgOrderValue: gig.packages.standard.price,
-        searchAppearances: Math.round(gig.impressions * 1.5),
-        savedByBuyers: Math.round(gig.clicks * 0.15),
+        searchAppearances: Math.round(impressions * 1.5),
+        savedByBuyers: Math.round(clicks * 0.15),
         trendsComparison: {
           impressions: '+12%',
           clicks: '+8%',
           orders: '+15%'
         },
-        topSearchTerms: ['react developer', 'web application', 'frontend'],
+        topSearchTerms: gig.tags.slice(0, 3),
         peakHours: ['10 AM PST', '2 PM PST', '8 PM EST'],
         buyerDemographics: {
           countries: [
@@ -559,10 +898,11 @@ async function handleGetGigAnalytics(params: {
   })
 }
 
-async function handleAIOptimizeGig(params: { gigId: string }) {
+async function handleAIOptimizeGig(supabase: any, params: { gigId: string }) {
   const { gigId } = params
 
-  const gig = demoGigs.find(g => g.id === gigId)
+  // Get gig from database
+  const gig = await getGigById(supabase, gigId);
 
   if (!gig) {
     return NextResponse.json({ error: 'Gig not found' }, { status: 404 })
@@ -744,8 +1084,15 @@ async function handleCalculatePricing(params: {
   })
 }
 
-async function handleToggleStatus(params: { gigId: string, status: 'active' | 'paused' | 'draft' }) {
+async function handleToggleStatus(supabase: any, params: { gigId: string, status: 'active' | 'paused' | 'draft' }) {
   const { gigId, status } = params
+
+  // Update status in database
+  const updatedGig = await updateGigInDb(supabase, gigId, { status });
+
+  if (!updatedGig) {
+    return NextResponse.json({ error: 'Gig not found' }, { status: 404 });
+  }
 
   return NextResponse.json({
     success: true,
@@ -757,12 +1104,15 @@ async function handleToggleStatus(params: { gigId: string, status: 'active' | 'p
   })
 }
 
-async function handleFeatureGig(params: {
+async function handleFeatureGig(supabase: any, params: {
   gigId: string
   duration: number
   placement: 'category' | 'homepage' | 'search'
 }) {
   const { gigId, duration, placement } = params
+
+  // Update featured status in database
+  await updateGigInDb(supabase, gigId, { featured: true });
 
   const pricing = {
     category: 19,
@@ -789,16 +1139,13 @@ async function handleFeatureGig(params: {
   })
 }
 
-async function handleGetTrending(params: { category?: string, limit?: number }) {
+async function handleGetTrending(supabase: any, params: { category?: string, limit?: number }) {
   const { category, limit = 10 } = params
 
-  let gigs = [...demoGigs]
+  // Get gigs from database
+  let gigs = await getGigs(supabase, { category, status: 'active' });
 
-  if (category) {
-    gigs = gigs.filter(g => g.category === category)
-  }
-
-  // Sort by recent performance
+  // Sort by recent performance (conversion rate)
   gigs.sort((a, b) => b.conversionRate - a.conversionRate)
 
   return NextResponse.json({

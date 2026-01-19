@@ -17,105 +17,259 @@ const defaultWeights = {
   reviewRating: 0.10
 }
 
-// Demo project for matching
-const demoProject = {
-  id: 'proj-001',
-  title: 'E-commerce Platform Development',
-  description: 'Build a modern e-commerce platform with React, Node.js, and PostgreSQL',
-  requiredSkills: ['React', 'Node.js', 'TypeScript', 'PostgreSQL'],
-  preferredSkills: ['AWS', 'Docker', 'GraphQL'],
-  budget: { min: 50000, max: 80000 },
-  duration: '4-6 months',
-  hoursPerWeek: 40,
-  timezone: 'PST',
-  experienceRequired: 5,
-  projectType: 'long-term',
-  clientIndustry: 'Retail'
+// ============================================================================
+// DATABASE HELPER FUNCTIONS
+// ============================================================================
+
+interface Project {
+  id: string;
+  title: string;
+  description: string;
+  requiredSkills: string[];
+  preferredSkills: string[];
+  budget: { min: number; max: number };
+  duration: string;
+  hoursPerWeek: number;
+  timezone: string;
+  experienceRequired: number;
+  projectType: string;
+  clientIndustry: string;
 }
 
-// Demo freelancer pool
-const demoFreelancerPool = [
-  {
-    id: 'fl-001',
-    name: 'Sarah Chen',
-    skills: {
-      primary: ['React', 'Node.js', 'TypeScript', 'PostgreSQL'],
-      secondary: ['AWS', 'Docker', 'GraphQL', 'Redis']
-    },
-    experienceYears: 8,
-    hourlyRate: 150,
-    availability: { hoursPerWeek: 40, startDate: 'immediate' },
-    successRate: 98,
-    communicationScore: 95,
-    reviewRating: 4.98,
-    totalProjects: 87,
-    industryExperience: ['Retail', 'FinTech', 'Healthcare'],
-    timezone: 'PST',
-    workStyle: 'async-friendly',
-    responseTime: 2
-  },
-  {
-    id: 'fl-002',
-    name: 'Alex Kumar',
-    skills: {
-      primary: ['React', 'Node.js', 'MongoDB'],
-      secondary: ['AWS', 'Python']
-    },
-    experienceYears: 5,
-    hourlyRate: 100,
-    availability: { hoursPerWeek: 30, startDate: '2 weeks' },
-    successRate: 92,
-    communicationScore: 88,
-    reviewRating: 4.7,
-    totalProjects: 45,
-    industryExperience: ['SaaS', 'Education'],
-    timezone: 'EST',
-    workStyle: 'overlap-required',
-    responseTime: 8
-  },
-  {
-    id: 'fl-003',
-    name: 'Maria Santos',
-    skills: {
-      primary: ['React', 'TypeScript', 'Node.js', 'PostgreSQL', 'AWS'],
-      secondary: ['Kubernetes', 'Terraform', 'GraphQL']
-    },
-    experienceYears: 10,
-    hourlyRate: 175,
-    availability: { hoursPerWeek: 25, startDate: 'immediate' },
-    successRate: 100,
-    communicationScore: 98,
-    reviewRating: 5.0,
-    totalProjects: 120,
-    industryExperience: ['Retail', 'FinTech', 'Enterprise'],
-    timezone: 'CET',
-    workStyle: 'async-friendly',
-    responseTime: 1
+interface Freelancer {
+  id: string;
+  name: string;
+  skills: { primary: string[]; secondary: string[] };
+  experienceYears: number;
+  hourlyRate: number;
+  availability: { hoursPerWeek: number; startDate: string };
+  successRate: number;
+  communicationScore: number;
+  reviewRating: number;
+  totalProjects: number;
+  industryExperience: string[];
+  timezone: string;
+  workStyle: string;
+  responseTime: number;
+}
+
+async function getProject(supabase: any, projectId?: string): Promise<Project> {
+  if (projectId) {
+    const { data, error } = await supabase
+      .from('projects')
+      .select('*')
+      .eq('id', projectId)
+      .single();
+
+    if (!error && data) {
+      return {
+        id: data.id,
+        title: data.title || data.name,
+        description: data.description || '',
+        requiredSkills: data.required_skills || data.skills || [],
+        preferredSkills: data.preferred_skills || [],
+        budget: data.budget || { min: 50000, max: 80000 },
+        duration: data.duration || '4-6 months',
+        hoursPerWeek: data.hours_per_week || 40,
+        timezone: data.timezone || 'PST',
+        experienceRequired: data.experience_required || 5,
+        projectType: data.project_type || 'long-term',
+        clientIndustry: data.industry || 'Technology'
+      };
+    }
   }
-]
+  return getDefaultProject();
+}
+
+async function getFreelancerPool(supabase: any): Promise<Freelancer[]> {
+  const { data, error } = await supabase
+    .from('freelancers')
+    .select(`
+      *,
+      reviews:freelancer_reviews(rating),
+      projects:freelancer_projects(status)
+    `)
+    .eq('status', 'active')
+    .order('success_rate', { ascending: false });
+
+  if (error || !data?.length) {
+    return getDefaultFreelancerPool();
+  }
+
+  return data.map((f: any) => ({
+    id: f.id,
+    name: f.name || f.full_name,
+    skills: {
+      primary: f.primary_skills || f.skills?.slice(0, 4) || [],
+      secondary: f.secondary_skills || f.skills?.slice(4) || []
+    },
+    experienceYears: f.experience_years || 5,
+    hourlyRate: f.hourly_rate || 100,
+    availability: {
+      hoursPerWeek: f.hours_per_week || 40,
+      startDate: f.available_from || 'immediate'
+    },
+    successRate: f.success_rate || 90,
+    communicationScore: f.communication_score || 85,
+    reviewRating: f.reviews?.length > 0
+      ? f.reviews.reduce((sum: number, r: any) => sum + r.rating, 0) / f.reviews.length
+      : 4.5,
+    totalProjects: f.projects?.length || f.total_projects || 50,
+    industryExperience: f.industry_experience || [],
+    timezone: f.timezone || 'PST',
+    workStyle: f.work_style || 'async-friendly',
+    responseTime: f.response_time || 4
+  }));
+}
+
+async function getFreelancerById(supabase: any, freelancerId: string): Promise<Freelancer | null> {
+  const { data, error } = await supabase
+    .from('freelancers')
+    .select(`
+      *,
+      reviews:freelancer_reviews(rating),
+      projects:freelancer_projects(status)
+    `)
+    .eq('id', freelancerId)
+    .single();
+
+  if (error || !data) {
+    const pool = getDefaultFreelancerPool();
+    return pool.find(f => f.id === freelancerId) || null;
+  }
+
+  return {
+    id: data.id,
+    name: data.name || data.full_name,
+    skills: {
+      primary: data.primary_skills || data.skills?.slice(0, 4) || [],
+      secondary: data.secondary_skills || data.skills?.slice(4) || []
+    },
+    experienceYears: data.experience_years || 5,
+    hourlyRate: data.hourly_rate || 100,
+    availability: {
+      hoursPerWeek: data.hours_per_week || 40,
+      startDate: data.available_from || 'immediate'
+    },
+    successRate: data.success_rate || 90,
+    communicationScore: data.communication_score || 85,
+    reviewRating: data.reviews?.length > 0
+      ? data.reviews.reduce((sum: number, r: any) => sum + r.rating, 0) / data.reviews.length
+      : 4.5,
+    totalProjects: data.projects?.length || data.total_projects || 50,
+    industryExperience: data.industry_experience || [],
+    timezone: data.timezone || 'PST',
+    workStyle: data.work_style || 'async-friendly',
+    responseTime: data.response_time || 4
+  };
+}
+
+// ============================================================================
+// DEFAULT DATA (fallback when database is empty)
+// ============================================================================
+
+function getDefaultProject(): Project {
+  return {
+    id: 'proj-001',
+    title: 'E-commerce Platform Development',
+    description: 'Build a modern e-commerce platform with React, Node.js, and PostgreSQL',
+    requiredSkills: ['React', 'Node.js', 'TypeScript', 'PostgreSQL'],
+    preferredSkills: ['AWS', 'Docker', 'GraphQL'],
+    budget: { min: 50000, max: 80000 },
+    duration: '4-6 months',
+    hoursPerWeek: 40,
+    timezone: 'PST',
+    experienceRequired: 5,
+    projectType: 'long-term',
+    clientIndustry: 'Retail'
+  };
+}
+
+function getDefaultFreelancerPool(): Freelancer[] {
+  return [
+    {
+      id: 'fl-001',
+      name: 'Sarah Chen',
+      skills: {
+        primary: ['React', 'Node.js', 'TypeScript', 'PostgreSQL'],
+        secondary: ['AWS', 'Docker', 'GraphQL', 'Redis']
+      },
+      experienceYears: 8,
+      hourlyRate: 150,
+      availability: { hoursPerWeek: 40, startDate: 'immediate' },
+      successRate: 98,
+      communicationScore: 95,
+      reviewRating: 4.98,
+      totalProjects: 87,
+      industryExperience: ['Retail', 'FinTech', 'Healthcare'],
+      timezone: 'PST',
+      workStyle: 'async-friendly',
+      responseTime: 2
+    },
+    {
+      id: 'fl-002',
+      name: 'Alex Kumar',
+      skills: {
+        primary: ['React', 'Node.js', 'MongoDB'],
+        secondary: ['AWS', 'Python']
+      },
+      experienceYears: 5,
+      hourlyRate: 100,
+      availability: { hoursPerWeek: 30, startDate: '2 weeks' },
+      successRate: 92,
+      communicationScore: 88,
+      reviewRating: 4.7,
+      totalProjects: 45,
+      industryExperience: ['SaaS', 'Education'],
+      timezone: 'EST',
+      workStyle: 'overlap-required',
+      responseTime: 8
+    },
+    {
+      id: 'fl-003',
+      name: 'Maria Santos',
+      skills: {
+        primary: ['React', 'TypeScript', 'Node.js', 'PostgreSQL', 'AWS'],
+        secondary: ['Kubernetes', 'Terraform', 'GraphQL']
+      },
+      experienceYears: 10,
+      hourlyRate: 175,
+      availability: { hoursPerWeek: 25, startDate: 'immediate' },
+      successRate: 100,
+      communicationScore: 98,
+      reviewRating: 5.0,
+      totalProjects: 120,
+      industryExperience: ['Retail', 'FinTech', 'Enterprise'],
+      timezone: 'CET',
+      workStyle: 'async-friendly',
+      responseTime: 1
+    }
+  ];
+}
 
 export async function POST(request: NextRequest) {
   try {
+    const supabase = await createClient();
     const body = await request.json()
     const { action, ...params } = body
 
     switch (action) {
       case 'match-project':
-        return handleMatchProject(params)
+        return handleMatchProject(supabase, params)
       case 'calculate-score':
-        return handleCalculateScore(params)
+        return handleCalculateScore(supabase, params)
       case 'get-match-breakdown':
-        return handleGetMatchBreakdown(params)
+        return handleGetMatchBreakdown(supabase, params)
       case 'customize-weights':
         return handleCustomizeWeights(params)
       case 'predict-success':
-        return handlePredictSuccess(params)
+        return handlePredictSuccess(supabase, params)
       case 'batch-match':
-        return handleBatchMatch(params)
+        return handleBatchMatch(supabase, params)
       case 'get-top-percent':
-        return handleGetTopPercent(params)
+        return handleGetTopPercent(supabase, params)
       case 'compatibility-check':
-        return handleCompatibilityCheck(params)
+        return handleCompatibilityCheck(supabase, params)
       default:
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
@@ -125,15 +279,21 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function handleMatchProject(params: {
+async function handleMatchProject(supabase: any, params: {
   projectId?: string
-  project?: typeof demoProject
+  project?: Project
   limit?: number
   minScore?: number
 }) {
-  const { project = demoProject, limit = 10, minScore = 60 } = params
+  const { projectId, limit = 10, minScore = 60 } = params;
 
-  const matches = demoFreelancerPool.map(freelancer => {
+  // Get project from database or use provided/default
+  const project = params.project || await getProject(supabase, projectId);
+
+  // Get freelancer pool from database
+  const freelancerPool = await getFreelancerPool(supabase);
+
+  const matches = freelancerPool.map(freelancer => {
     const scores = calculateMatchScores(freelancer, project)
     const totalScore = Object.entries(scores).reduce((sum, [key, value]) => {
       return sum + (value * (defaultWeights[key as keyof typeof defaultWeights] || 0))
@@ -162,12 +322,12 @@ async function handleMatchProject(params: {
       project: project.title,
       matches: qualifiedMatches,
       summary: {
-        totalCandidates: demoFreelancerPool.length,
+        totalCandidates: freelancerPool.length,
         qualifiedCandidates: qualifiedMatches.length,
         topTierCount: qualifiedMatches.filter(m => m.tier === 'Exceptional').length,
-        averageScore: Math.round(
+        averageScore: qualifiedMatches.length > 0 ? Math.round(
           qualifiedMatches.reduce((sum, m) => sum + m.totalScore, 0) / qualifiedMatches.length
-        )
+        ) : 0
       },
       algorithmVersion: '2.0',
       weightsUsed: defaultWeights
@@ -175,7 +335,7 @@ async function handleMatchProject(params: {
   })
 }
 
-function calculateMatchScores(freelancer: typeof demoFreelancerPool[0], project: typeof demoProject) {
+function calculateMatchScores(freelancer: Freelancer, project: Project) {
   // Skill Match (0-100)
   const allFreelancerSkills = [...freelancer.skills.primary, ...freelancer.skills.secondary]
   const requiredMatches = project.requiredSkills.filter(s => allFreelancerSkills.includes(s))
@@ -261,20 +421,24 @@ function getRecommendation(score: number, scores: Record<string, number>): strin
   return 'Consider - Review concerns before proceeding'
 }
 
-async function handleCalculateScore(params: {
+async function handleCalculateScore(supabase: any, params: {
   freelancerId: string
-  projectId: string
+  projectId?: string
   customWeights?: typeof defaultWeights
 }) {
-  const { freelancerId, customWeights } = params
+  const { freelancerId, projectId, customWeights } = params
   const weights = customWeights || defaultWeights
 
-  const freelancer = demoFreelancerPool.find(f => f.id === freelancerId)
+  // Get freelancer from database
+  const freelancer = await getFreelancerById(supabase, freelancerId);
   if (!freelancer) {
     return NextResponse.json({ error: 'Freelancer not found' }, { status: 404 })
   }
 
-  const scores = calculateMatchScores(freelancer, demoProject)
+  // Get project from database
+  const project = await getProject(supabase, projectId);
+
+  const scores = calculateMatchScores(freelancer, project)
   const totalScore = Object.entries(scores).reduce((sum, [key, value]) => {
     return sum + (value * (weights[key as keyof typeof defaultWeights] || 0))
   }, 0)
@@ -291,15 +455,19 @@ async function handleCalculateScore(params: {
   })
 }
 
-async function handleGetMatchBreakdown(params: { freelancerId: string, projectId: string }) {
-  const { freelancerId } = params
+async function handleGetMatchBreakdown(supabase: any, params: { freelancerId: string, projectId?: string }) {
+  const { freelancerId, projectId } = params
 
-  const freelancer = demoFreelancerPool.find(f => f.id === freelancerId)
+  // Get freelancer from database
+  const freelancer = await getFreelancerById(supabase, freelancerId);
   if (!freelancer) {
     return NextResponse.json({ error: 'Freelancer not found' }, { status: 404 })
   }
 
-  const scores = calculateMatchScores(freelancer, demoProject)
+  // Get project from database
+  const project = await getProject(supabase, projectId);
+
+  const scores = calculateMatchScores(freelancer, project)
 
   return NextResponse.json({
     success: true,
@@ -314,12 +482,12 @@ async function handleGetMatchBreakdown(params: { freelancerId: string, projectId
           weight: defaultWeights.skillMatch,
           contribution: Math.round(scores.skillMatch * defaultWeights.skillMatch),
           details: {
-            requiredSkills: demoProject.requiredSkills,
-            matchedRequired: demoProject.requiredSkills.filter(s =>
+            requiredSkills: project.requiredSkills,
+            matchedRequired: project.requiredSkills.filter(s =>
               [...freelancer.skills.primary, ...freelancer.skills.secondary].includes(s)
             ),
-            preferredSkills: demoProject.preferredSkills,
-            matchedPreferred: demoProject.preferredSkills.filter(s =>
+            preferredSkills: project.preferredSkills,
+            matchedPreferred: project.preferredSkills.filter(s =>
               [...freelancer.skills.primary, ...freelancer.skills.secondary].includes(s)
             )
           }
@@ -329,9 +497,9 @@ async function handleGetMatchBreakdown(params: { freelancerId: string, projectId
           weight: defaultWeights.experienceMatch,
           contribution: Math.round(scores.experienceMatch * defaultWeights.experienceMatch),
           details: {
-            required: demoProject.experienceRequired,
+            required: project.experienceRequired,
             actual: freelancer.experienceYears,
-            industryMatch: freelancer.industryExperience.includes(demoProject.clientIndustry)
+            industryMatch: freelancer.industryExperience.includes(project.clientIndustry)
           }
         },
         budgetFit: {
@@ -340,7 +508,7 @@ async function handleGetMatchBreakdown(params: { freelancerId: string, projectId
           contribution: Math.round(scores.budgetFit * defaultWeights.budgetFit),
           details: {
             freelancerRate: freelancer.hourlyRate,
-            projectBudget: demoProject.budget
+            projectBudget: project.budget
           }
         },
         availabilityMatch: {
@@ -348,7 +516,7 @@ async function handleGetMatchBreakdown(params: { freelancerId: string, projectId
           weight: defaultWeights.availabilityMatch,
           contribution: Math.round(scores.availabilityMatch * defaultWeights.availabilityMatch),
           details: {
-            required: demoProject.hoursPerWeek,
+            required: project.hoursPerWeek,
             available: freelancer.availability.hoursPerWeek,
             startDate: freelancer.availability.startDate
           }
@@ -417,19 +585,23 @@ async function handleCustomizeWeights(params: {
   })
 }
 
-async function handlePredictSuccess(params: {
+async function handlePredictSuccess(supabase: any, params: {
   freelancerId: string
-  projectId: string
+  projectId?: string
 }) {
-  const { freelancerId } = params
+  const { freelancerId, projectId } = params
 
-  const freelancer = demoFreelancerPool.find(f => f.id === freelancerId)
+  // Get freelancer from database
+  const freelancer = await getFreelancerById(supabase, freelancerId);
   if (!freelancer) {
     return NextResponse.json({ error: 'Freelancer not found' }, { status: 404 })
   }
 
+  // Get project from database
+  const project = await getProject(supabase, projectId);
+
   // ML-based success prediction (simulated)
-  const scores = calculateMatchScores(freelancer, demoProject)
+  const scores = calculateMatchScores(freelancer, project)
   const baseSuccessProbability = Object.entries(scores).reduce((sum, [key, value]) => {
     return sum + (value * (defaultWeights[key as keyof typeof defaultWeights] || 0))
   }, 0)
@@ -468,16 +640,22 @@ async function handlePredictSuccess(params: {
   })
 }
 
-async function handleBatchMatch(params: {
+async function handleBatchMatch(supabase: any, params: {
   projectIds: string[]
   freelancerPool?: string[]
 }) {
   const { projectIds } = params
 
+  // Get freelancer pool from database
+  const freelancerPool = await getFreelancerPool(supabase);
+
   // Match multiple projects at once
-  const batchResults = projectIds.map(projectId => {
-    const matches = demoFreelancerPool.map(freelancer => {
-      const scores = calculateMatchScores(freelancer, demoProject)
+  const batchResults = await Promise.all(projectIds.map(async (projectId) => {
+    // Get project from database
+    const project = await getProject(supabase, projectId);
+
+    const matches = freelancerPool.map(freelancer => {
+      const scores = calculateMatchScores(freelancer, project)
       const totalScore = Object.entries(scores).reduce((sum, [key, value]) => {
         return sum + (value * (defaultWeights[key as keyof typeof defaultWeights] || 0))
       }, 0)
@@ -490,9 +668,10 @@ async function handleBatchMatch(params: {
 
     return {
       projectId,
+      projectTitle: project.title,
       topMatches: matches.slice(0, 5)
     }
-  })
+  }));
 
   return NextResponse.json({
     success: true,
@@ -503,14 +682,14 @@ async function handleBatchMatch(params: {
   })
 }
 
-async function handleGetTopPercent(params: {
+async function handleGetTopPercent(supabase: any, params: {
   percent: number
   skill?: string
 }) {
   const { percent = 3, skill } = params
 
-  // Simulate Toptal's "Top 3%" feature
-  let pool = [...demoFreelancerPool]
+  // Get freelancer pool from database
+  let pool = await getFreelancerPool(supabase);
 
   if (skill) {
     pool = pool.filter(f =>
@@ -552,13 +731,14 @@ async function handleGetTopPercent(params: {
   })
 }
 
-async function handleCompatibilityCheck(params: {
+async function handleCompatibilityCheck(supabase: any, params: {
   freelancerId: string
   clientId: string
 }) {
   const { freelancerId } = params
 
-  const freelancer = demoFreelancerPool.find(f => f.id === freelancerId)
+  // Get freelancer from database
+  const freelancer = await getFreelancerById(supabase, freelancerId);
   if (!freelancer) {
     return NextResponse.json({ error: 'Freelancer not found' }, { status: 404 })
   }
