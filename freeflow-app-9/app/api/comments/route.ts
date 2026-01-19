@@ -15,7 +15,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@/lib/supabase/server'
 import { getServerSession } from '@/lib/auth'
 import { checkPermission } from '@/lib/rbac/rbac-service'
 
@@ -101,22 +101,12 @@ interface CommentThread {
 }
 
 // ============================================================================
-// DATABASE CLIENT
-// ============================================================================
-
-function getSupabase() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
-}
-
-// ============================================================================
 // GET - List Comments / Get Single Comment / Get Thread
 // ============================================================================
 
 export async function GET(request: NextRequest) {
   try {
+    const supabase = await createClient()
     const session = await getServerSession()
     const { searchParams } = new URL(request.url)
 
@@ -136,8 +126,6 @@ export async function GET(request: NextRequest) {
     const sortOrder = searchParams.get('sort_order') || 'desc'
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '50')
-
-    const supabase = getSupabase()
 
     // Demo mode for unauthenticated users
     if (!session?.user) {
@@ -326,11 +314,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const supabase = await createClient()
     const userId = session.user.id
     const body = await request.json()
     const { action = 'create' } = body
-
-    const supabase = getSupabase()
 
     // Handle different actions
     switch (action) {
@@ -391,6 +378,7 @@ export async function PUT(request: NextRequest) {
       )
     }
 
+    const supabase = await createClient()
     const userId = session.user.id
     const body = await request.json()
     const { id, ...updates } = body
@@ -401,8 +389,6 @@ export async function PUT(request: NextRequest) {
         { status: 400 }
       )
     }
-
-    const supabase = getSupabase()
 
     // Verify ownership or permission
     const { data: existingComment } = await supabase
@@ -501,6 +487,7 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
+    const supabase = await createClient()
     const userId = session.user.id
     const { searchParams } = new URL(request.url)
     const commentId = searchParams.get('id')
@@ -512,8 +499,6 @@ export async function DELETE(request: NextRequest) {
         { status: 400 }
       )
     }
-
-    const supabase = getSupabase()
 
     // Verify ownership or permission
     const { data: existingComment } = await supabase
@@ -601,7 +586,7 @@ export async function DELETE(request: NextRequest) {
 // ============================================================================
 
 async function handleCreateComment(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   body: Record<string, unknown>
 ) {
@@ -697,7 +682,7 @@ async function handleCreateComment(
 }
 
 async function handleReplyToComment(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   body: Record<string, unknown>
 ) {
@@ -809,7 +794,7 @@ async function handleReplyToComment(
 }
 
 async function handleReaction(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   body: Record<string, unknown>
 ) {
@@ -895,7 +880,7 @@ async function handleReaction(
 }
 
 async function handleResolveComment(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   body: Record<string, unknown>
 ) {
@@ -945,7 +930,7 @@ async function handleResolveComment(
 }
 
 async function handleReopenComment(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   body: Record<string, unknown>
 ) {
@@ -991,7 +976,7 @@ async function handleReopenComment(
 }
 
 async function handlePinComment(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   body: Record<string, unknown>
 ) {
@@ -1030,7 +1015,7 @@ async function handlePinComment(
 }
 
 async function handleMentions(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   body: Record<string, unknown>
 ) {
@@ -1073,7 +1058,7 @@ async function handleMentions(
 }
 
 async function handleAnnotation(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   body: Record<string, unknown>
 ) {
@@ -1137,7 +1122,7 @@ async function handleAnnotation(
 }
 
 async function handleBulkResolve(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   body: Record<string, unknown>
 ) {
@@ -1176,7 +1161,7 @@ async function handleBulkResolve(
 }
 
 async function handleExportComments(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   body: Record<string, unknown>
 ) {
@@ -1251,7 +1236,7 @@ function extractMentions(content: string): string[] {
 }
 
 async function processMentions(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   commentId: string,
   actorId: string,
   userIds: string[],
@@ -1274,7 +1259,7 @@ async function processMentions(
 }
 
 async function createNotification(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   data: Record<string, unknown>
 ) {
@@ -1299,7 +1284,7 @@ async function createNotification(
 }
 
 async function updateReactionCounts(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   commentId: string
 ) {
   const { data: reactions } = await supabase
@@ -1319,7 +1304,7 @@ async function updateReactionCounts(
 }
 
 async function getCommentStats(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   entityType: string,
   entityId: string
 ) {
@@ -1364,7 +1349,7 @@ async function getCommentStats(
 }
 
 async function logCommentActivity(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   commentId: string,
   userId: string,
   action: string,
