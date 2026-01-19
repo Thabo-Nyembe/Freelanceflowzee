@@ -1,15 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@/lib/supabase/server'
 
 // ============================================================================
 // INVOICE DOWNLOAD API - Dynamic Route
 // ============================================================================
 // Download individual invoice as PDF or text format
 // ============================================================================
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
 // ============================================================================
 // GET HANDLER - Download invoice by ID
@@ -19,6 +15,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const supabase = await createClient()
     const { id } = await params
 
     if (!id) {
