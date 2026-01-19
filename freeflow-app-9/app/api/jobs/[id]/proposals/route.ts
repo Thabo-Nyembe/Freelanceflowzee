@@ -1,0 +1,61 @@
+/**
+ * Job Proposals API - FreeFlow A+++ Implementation
+ * Proposals for a specific job (client view)
+ */
+
+import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@/lib/supabase/server';
+
+// GET - Get proposals for a job (client only)
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    const supabase = await createClient();
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Verify user is the job owner
+    const { data: job, error: jobError } = await supabase
+      .from('freelancer_jobs')
+      .select('client_id')
+      .eq('id', id)
+      .single();
+
+    if (jobError) {
+      return NextResponse.json({ error: 'Job not found' }, { status: 404 });
+    }
+
+    if (job.client_id !== user.id) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
+    const { data: proposals, error } = await supabase
+      .from('job_proposals')
+      .select(`
+        *,
+        freelancer:seller_profiles!seller_profile_id (
+          display_name, tagline, profile_image, level, rating,
+          reviews_count, orders_completed, hourly_rate_min, hourly_rate_max,
+          skills
+        )
+      `)
+      .eq('job_id', id)
+      .order('match_score', { ascending: false })
+      .order('created_at', { ascending: false });
+
+    if (error && error.code !== '42P01') {
+      throw error;
+    }
+
+    return NextResponse.json({ proposals: proposals || [] });
+  } catch (error) {
+    console.error('Job proposals GET error:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}

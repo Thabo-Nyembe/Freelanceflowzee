@@ -1,9 +1,10 @@
 /**
- * Smart Job Matching API
+ * AI Job Matching API - FreeFlow A+++ Implementation
+ * Complete job matching with AI embeddings
  *
- * Beats Contra's Indy AI with:
- * - ML-powered skill matching
- * - Portfolio analysis
+ * Beats Upwork/Contra with:
+ * - ML-powered skill matching with OpenAI embeddings
+ * - Portfolio analysis for relevance scoring
  * - Availability-aware matching
  * - Rate optimization suggestions
  * - Client compatibility scoring
@@ -12,461 +13,486 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import {
+  matchFreelancerToJobs,
+  matchJobToFreelancers,
+  getMarketInsights,
+  getProfileOptimization,
+  createJobEmbedding,
+  createProfileEmbedding,
+} from '@/lib/ai/job-matching';
+import { z } from 'zod';
 
 // ============================================================================
-// TYPES
+// VALIDATION SCHEMAS
 // ============================================================================
 
-type MatchConfidence = 'high' | 'medium' | 'low';
-type JobCategory = 'development' | 'design' | 'writing' | 'marketing' | 'video' | 'audio' | 'consulting' | 'other';
-
-interface JobMatch {
-  id: string;
-  job_id: string;
-  job_title: string;
-  client_name: string;
-  client_avatar: string | null;
-  client_rating: number;
-  client_total_spent: number;
-  category: JobCategory;
-  description: string;
-  budget: { type: 'fixed' | 'hourly'; min: number; max: number };
-  duration: string;
-  posted_at: string;
-  proposals_count: number;
-  match_score: number;
-  match_confidence: MatchConfidence;
-  match_reasons: string[];
-  skill_matches: { skill: string; match_type: 'exact' | 'related' | 'transferable' }[];
-  portfolio_matches: { project_id: string; project_title: string; relevance: number }[];
-  rate_recommendation: { min: number; max: number; optimal: number };
-  competition_level: 'low' | 'medium' | 'high';
-  win_probability: number;
-  career_growth_score: number;
-}
-
-interface FreelancerProfile {
-  id: string;
-  name: string;
-  skills: { name: string; level: 'beginner' | 'intermediate' | 'expert'; years: number }[];
-  hourly_rate: number;
-  availability: 'full-time' | 'part-time' | 'limited';
-  preferred_categories: JobCategory[];
-  min_budget: number;
-  portfolio_strength: number;
-  response_rate: number;
-  completion_rate: number;
-}
-
-interface JobMatchRequest {
-  action:
-    | 'get-matches'
-    | 'get-match-details'
-    | 'update-preferences'
-    | 'analyze-job'
-    | 'get-recommendations'
-    | 'save-job'
-    | 'hide-job'
-    | 'get-saved'
-    | 'get-insights'
-    | 'optimize-profile';
-  userId?: string;
-  jobId?: string;
-  preferences?: Partial<FreelancerProfile>;
-  filters?: {
-    categories?: JobCategory[];
-    minBudget?: number;
-    maxBudget?: number;
-    minMatchScore?: number;
-    postedWithin?: number; // hours
-  };
-}
+const matchRequestSchema = z.object({
+  action: z.enum([
+    'get-matches',
+    'get-match-details',
+    'match-freelancers',
+    'update-preferences',
+    'analyze-job',
+    'get-recommendations',
+    'save-job',
+    'hide-job',
+    'get-saved',
+    'get-insights',
+    'optimize-profile',
+    'refresh-embedding',
+  ]),
+  userId: z.string().uuid().optional(),
+  jobId: z.string().uuid().optional(),
+  preferences: z.any().optional(),
+  filters: z.object({
+    categories: z.array(z.string()).optional(),
+    minBudget: z.number().optional(),
+    maxBudget: z.number().optional(),
+    minMatchScore: z.number().optional(),
+    experienceLevel: z.enum(['entry', 'intermediate', 'expert']).optional(),
+    jobType: z.enum(['one_time', 'ongoing', 'full_time', 'part_time']).optional(),
+    postedWithin: z.number().optional(), // hours
+  }).optional(),
+});
 
 // ============================================================================
-// DEMO DATA
-// ============================================================================
-
-function getDemoMatches(filters?: JobMatchRequest['filters']): JobMatch[] {
-  const matches: JobMatch[] = [
-    {
-      id: 'match-1',
-      job_id: 'job-1',
-      job_title: 'Senior React Developer for FinTech Startup',
-      client_name: 'TechVentures Inc.',
-      client_avatar: '/avatars/techventures.jpg',
-      client_rating: 4.9,
-      client_total_spent: 285000,
-      category: 'development',
-      description: 'Looking for an experienced React developer to build our next-generation trading platform. Must have experience with real-time data, WebSockets, and financial applications.',
-      budget: { type: 'hourly', min: 80, max: 120 },
-      duration: '3-6 months',
-      posted_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-      proposals_count: 8,
-      match_score: 96,
-      match_confidence: 'high',
-      match_reasons: [
-        'Expert React skills match exactly',
-        'Previous FinTech experience in portfolio',
-        'WebSocket projects demonstrated',
-        'Rate within budget range',
-      ],
-      skill_matches: [
-        { skill: 'React', match_type: 'exact' },
-        { skill: 'TypeScript', match_type: 'exact' },
-        { skill: 'WebSocket', match_type: 'exact' },
-        { skill: 'Redux', match_type: 'related' },
-      ],
-      portfolio_matches: [
-        { project_id: 'proj-1', project_title: 'CryptoTrader Dashboard', relevance: 95 },
-        { project_id: 'proj-2', project_title: 'Real-time Analytics Platform', relevance: 88 },
-      ],
-      rate_recommendation: { min: 90, max: 115, optimal: 100 },
-      competition_level: 'medium',
-      win_probability: 78,
-      career_growth_score: 85,
-    },
-    {
-      id: 'match-2',
-      job_id: 'job-2',
-      job_title: 'Full-Stack Developer for E-commerce Platform',
-      client_name: 'ShopFlow',
-      client_avatar: '/avatars/shopflow.jpg',
-      client_rating: 4.7,
-      client_total_spent: 156000,
-      category: 'development',
-      description: 'Need a full-stack developer to rebuild our e-commerce platform using Next.js and Stripe integration. Experience with high-traffic applications required.',
-      budget: { type: 'fixed', min: 15000, max: 25000 },
-      duration: '2-3 months',
-      posted_at: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(),
-      proposals_count: 15,
-      match_score: 92,
-      match_confidence: 'high',
-      match_reasons: [
-        'Next.js expertise demonstrated',
-        'Stripe integration experience',
-        'E-commerce projects in portfolio',
-        'Available for project timeline',
-      ],
-      skill_matches: [
-        { skill: 'Next.js', match_type: 'exact' },
-        { skill: 'Stripe', match_type: 'exact' },
-        { skill: 'PostgreSQL', match_type: 'exact' },
-        { skill: 'Shopify', match_type: 'related' },
-      ],
-      portfolio_matches: [
-        { project_id: 'proj-3', project_title: 'Fashion Marketplace', relevance: 91 },
-      ],
-      rate_recommendation: { min: 18000, max: 23000, optimal: 20000 },
-      competition_level: 'high',
-      win_probability: 65,
-      career_growth_score: 70,
-    },
-    {
-      id: 'match-3',
-      job_id: 'job-3',
-      job_title: 'UI/UX Designer for Mobile App',
-      client_name: 'HealthTech Pro',
-      client_avatar: '/avatars/healthtech.jpg',
-      client_rating: 4.8,
-      client_total_spent: 89000,
-      category: 'design',
-      description: 'Seeking a talented UI/UX designer to create an intuitive health tracking mobile application. Must understand accessibility and health industry regulations.',
-      budget: { type: 'fixed', min: 8000, max: 12000 },
-      duration: '4-6 weeks',
-      posted_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-      proposals_count: 22,
-      match_score: 78,
-      match_confidence: 'medium',
-      match_reasons: [
-        'UI/UX skills match',
-        'Mobile design experience',
-        'Health-related project potential',
-      ],
-      skill_matches: [
-        { skill: 'Figma', match_type: 'exact' },
-        { skill: 'Mobile Design', match_type: 'exact' },
-        { skill: 'Healthcare UX', match_type: 'transferable' },
-      ],
-      portfolio_matches: [],
-      rate_recommendation: { min: 9000, max: 11000, optimal: 10000 },
-      competition_level: 'high',
-      win_probability: 45,
-      career_growth_score: 60,
-    },
-    {
-      id: 'match-4',
-      job_id: 'job-4',
-      job_title: 'Technical Writer for API Documentation',
-      client_name: 'DevTools Co',
-      client_avatar: '/avatars/devtools.jpg',
-      client_rating: 4.6,
-      client_total_spent: 45000,
-      category: 'writing',
-      description: 'Looking for a technical writer with developer experience to create comprehensive API documentation and tutorials for our developer platform.',
-      budget: { type: 'hourly', min: 50, max: 75 },
-      duration: '1-2 months',
-      posted_at: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
-      proposals_count: 5,
-      match_score: 85,
-      match_confidence: 'high',
-      match_reasons: [
-        'Developer background enables technical accuracy',
-        'API experience from previous projects',
-        'Documentation skills transferable',
-        'Low competition opportunity',
-      ],
-      skill_matches: [
-        { skill: 'API Development', match_type: 'related' },
-        { skill: 'Technical Communication', match_type: 'transferable' },
-      ],
-      portfolio_matches: [
-        { project_id: 'proj-4', project_title: 'Open Source Contribution Docs', relevance: 72 },
-      ],
-      rate_recommendation: { min: 55, max: 70, optimal: 65 },
-      competition_level: 'low',
-      win_probability: 82,
-      career_growth_score: 55,
-    },
-  ];
-
-  // Apply filters
-  let filtered = matches;
-  if (filters) {
-    if (filters.categories?.length) {
-      filtered = filtered.filter(m => filters.categories!.includes(m.category));
-    }
-    if (filters.minBudget) {
-      filtered = filtered.filter(m => m.budget.max >= filters.minBudget!);
-    }
-    if (filters.minMatchScore) {
-      filtered = filtered.filter(m => m.match_score >= filters.minMatchScore!);
-    }
-  }
-
-  return filtered.sort((a, b) => b.match_score - a.match_score);
-}
-
-function getDemoInsights() {
-  return {
-    market_trends: {
-      hot_skills: ['AI/ML', 'React', 'Mobile Development', 'No-Code'],
-      declining_skills: ['jQuery', 'Flash', 'PHP (legacy)'],
-      emerging_categories: ['AI Integration', 'Blockchain', 'AR/VR'],
-      average_rates: {
-        development: { min: 50, max: 150, trend: 'up' },
-        design: { min: 40, max: 120, trend: 'stable' },
-        writing: { min: 30, max: 80, trend: 'up' },
-        marketing: { min: 35, max: 100, trend: 'stable' },
-      },
-    },
-    your_performance: {
-      profile_strength: 78,
-      response_rate: 92,
-      win_rate: 34,
-      average_match_score: 85,
-      jobs_viewed: 156,
-      proposals_sent: 23,
-      interviews: 12,
-      hires: 8,
-    },
-    recommendations: [
-      {
-        type: 'skill',
-        title: 'Add AI/ML skills',
-        description: 'Jobs requiring AI skills have increased 150% this quarter. Consider upskilling.',
-        impact: 'high',
-      },
-      {
-        type: 'rate',
-        title: 'Increase your rate by 15%',
-        description: 'Your win rate and experience justify a higher rate. Similar freelancers charge $95-110/hr.',
-        impact: 'medium',
-      },
-      {
-        type: 'availability',
-        title: 'Update availability',
-        description: 'Your availability shows "limited" but you\'ve been accepting new projects. Update for better matches.',
-        impact: 'low',
-      },
-    ],
-    weekly_digest: {
-      new_matches: 47,
-      high_quality_matches: 12,
-      jobs_ending_soon: 8,
-      perfect_matches: 3,
-    },
-  };
-}
-
-function getDemoProfileOptimization() {
-  return {
-    current_score: 78,
-    potential_score: 95,
-    improvements: [
-      {
-        category: 'skills',
-        current: 'Good skill coverage',
-        suggestion: 'Add proficiency levels and years of experience to each skill',
-        impact: '+5 points',
-        effort: 'low',
-      },
-      {
-        category: 'portfolio',
-        current: '8 projects listed',
-        suggestion: 'Add case studies with measurable results (e.g., "Increased conversion by 40%")',
-        impact: '+7 points',
-        effort: 'medium',
-      },
-      {
-        category: 'description',
-        current: 'Generic overview',
-        suggestion: 'Lead with your unique value proposition and specific expertise',
-        impact: '+4 points',
-        effort: 'low',
-      },
-      {
-        category: 'testimonials',
-        current: '3 reviews',
-        suggestion: 'Request reviews from your last 5 clients to improve social proof',
-        impact: '+6 points',
-        effort: 'medium',
-      },
-    ],
-    competitor_comparison: {
-      your_percentile: 72,
-      top_performers_have: [
-        'Video introduction (you don\'t have)',
-        'Detailed case studies with metrics',
-        '10+ verified reviews',
-        'Certifications displayed',
-      ],
-    },
-  };
-}
-
-// ============================================================================
-// HANDLER
+// GET - Quick match retrieval
 // ============================================================================
 
 export async function GET(request: NextRequest) {
   try {
+    const supabase = await createClient();
+
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const jobId = searchParams.get('jobId');
+    const limit = parseInt(searchParams.get('limit') || '20');
+    const minScore = parseInt(searchParams.get('minScore') || '50');
 
     if (jobId) {
-      const matches = getDemoMatches();
-      const match = matches.find(m => m.job_id === jobId);
+      // Get specific job match details
+      const { data: match } = await supabase
+        .from('job_matches')
+        .select(`
+          *,
+          job:freelancer_jobs (
+            id, title, description, budget_type, budget_min, budget_max,
+            duration, posted_at, proposals_count, required_skills, status,
+            client:client_profiles!client_id (company_name, rating, total_spent)
+          )
+        `)
+        .eq('job_id', jobId)
+        .eq('freelancer_id', user.id)
+        .single();
+
       return NextResponse.json({
         success: true,
-        data: match || null,
-        source: 'demo',
+        data: match,
       });
+    }
+
+    // Get stored matches for freelancer
+    const { data: storedMatches } = await supabase
+      .from('job_matches')
+      .select(`
+        *,
+        job:freelancer_jobs (
+          id, title, description, budget_type, budget_min, budget_max,
+          duration, posted_at, proposals_count, required_skills, status,
+          client:client_profiles!client_id (company_name, rating, total_spent)
+        )
+      `)
+      .eq('freelancer_id', user.id)
+      .eq('is_dismissed', false)
+      .gte('expires_at', new Date().toISOString())
+      .gte('match_score', minScore)
+      .order('match_score', { ascending: false })
+      .limit(limit);
+
+    // If no stored matches, calculate fresh ones
+    if (!storedMatches || storedMatches.length < 5) {
+      try {
+        const freshMatches = await matchFreelancerToJobs(user.id, {
+          limit,
+          minScore,
+        });
+
+        // Store the matches for quick retrieval
+        if (freshMatches.length > 0) {
+          const matchRecords = freshMatches.map(match => ({
+            job_id: match.job_id,
+            freelancer_id: user.id,
+            match_score: match.total_score,
+            similarity_score: match.similarity_score / 100,
+            skill_match_score: match.skill_score / 100,
+            experience_match_score: match.experience_score / 100,
+            availability_match_score: match.availability_score / 100,
+            match_reasons: match.match_reasons,
+            skills_matched: match.skills_matched,
+            skills_missing: match.skills_missing,
+            recommended_rate_min: match.rate_recommendation.min,
+            recommended_rate_max: match.rate_recommendation.max,
+            recommended_rate_optimal: match.rate_recommendation.optimal,
+            competition_level: match.competition_level,
+            win_probability: match.win_probability,
+            career_growth_score: match.career_growth_score,
+          }));
+
+          // Upsert matches
+          await supabase
+            .from('job_matches')
+            .upsert(matchRecords, { onConflict: 'job_id,freelancer_id' });
+        }
+
+        return NextResponse.json({
+          success: true,
+          data: {
+            matches: freshMatches,
+            total: freshMatches.length,
+            source: 'calculated',
+          },
+        });
+      } catch (error) {
+        console.error('Error calculating matches:', error);
+        // Return stored matches even if stale
+        return NextResponse.json({
+          success: true,
+          data: {
+            matches: storedMatches || [],
+            total: storedMatches?.length || 0,
+            source: 'stored',
+          },
+        });
+      }
     }
 
     return NextResponse.json({
       success: true,
-      data: getDemoMatches(),
-      source: 'demo',
+      data: {
+        matches: storedMatches,
+        total: storedMatches.length,
+        source: 'stored',
+      },
     });
-  } catch (err) {
-    console.error('Job Matching GET error:', err);
-    return NextResponse.json({
-      success: true,
-      data: getDemoMatches(),
-      source: 'demo',
-    });
+  } catch (error) {
+    console.error('Job Matching GET error:', error);
+    return NextResponse.json(
+      { success: false, error: 'Internal server error' },
+      { status: 500 }
+    );
   }
 }
 
+// ============================================================================
+// POST - Advanced matching operations
+// ============================================================================
+
 export async function POST(request: NextRequest) {
   try {
-    const body: JobMatchRequest = await request.json();
-    const { action } = body;
-
     const supabase = await createClient();
 
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const { action, jobId, filters } = matchRequestSchema.parse(body);
+
     switch (action) {
+      // ----------------------------------------------------------------
+      // FREELANCER: Get job matches
+      // ----------------------------------------------------------------
       case 'get-matches': {
-        const { filters } = body;
-        return NextResponse.json({
-          success: true,
-          data: {
-            matches: getDemoMatches(filters),
-            total: 47,
-            filtered: getDemoMatches(filters).length,
-          },
-        });
+        try {
+          const matches = await matchFreelancerToJobs(user.id, {
+            limit: 20,
+            minScore: filters?.minMatchScore || 50,
+            categories: filters?.categories,
+            budgetMin: filters?.minBudget,
+            budgetMax: filters?.maxBudget,
+          });
+
+          return NextResponse.json({
+            success: true,
+            data: {
+              matches,
+              total: matches.length,
+              filters_applied: filters,
+            },
+          });
+        } catch (error) {
+          console.error('Match calculation error:', error);
+          return NextResponse.json({
+            success: false,
+            error: 'Failed to calculate matches',
+          }, { status: 500 });
+        }
       }
 
+      // ----------------------------------------------------------------
+      // FREELANCER: Get detailed match for specific job
+      // ----------------------------------------------------------------
       case 'get-match-details': {
-        const { jobId } = body;
         if (!jobId) {
-          return NextResponse.json({ success: false, error: 'Job ID required' }, { status: 400 });
+          return NextResponse.json(
+            { success: false, error: 'Job ID required' },
+            { status: 400 }
+          );
         }
 
-        const matches = getDemoMatches();
-        const match = matches.find(m => m.job_id === jobId);
+        // Get full job details
+        const { data: job, error: jobError } = await supabase
+          .from('freelancer_jobs')
+          .select(`
+            *,
+            client:client_profiles!client_id (
+              id, company_name, company_size, industry,
+              jobs_posted, jobs_filled, total_spent, average_hourly_rate,
+              rehire_rate, rating, reviews_count, payment_verified
+            ),
+            required_skills_details:job_required_skills (skill_name, importance)
+          `)
+          .eq('id', jobId)
+          .single();
 
-        if (!match) {
-          return NextResponse.json({ success: false, error: 'Job not found' }, { status: 404 });
+        if (jobError || !job) {
+          return NextResponse.json(
+            { success: false, error: 'Job not found' },
+            { status: 404 }
+          );
         }
 
-        // Add extra details
-        const detailedMatch = {
-          ...match,
-          client_history: {
-            jobs_posted: 23,
-            hires: 18,
-            rehire_rate: 78,
-            average_rating_given: 4.7,
-            typical_response_time: '< 2 hours',
+        // Get match score
+        const { data: existingMatch } = await supabase
+          .from('job_matches')
+          .select('*')
+          .eq('job_id', jobId)
+          .eq('freelancer_id', user.id)
+          .single();
+
+        // Get similar jobs user has worked on
+        const { data: similarWins } = await supabase
+          .from('service_orders')
+          .select(`
+            id,
+            listing:service_listings (title, category_id),
+            total,
+            completed_at
+          `)
+          .eq('seller_id', user.id)
+          .eq('status', 'completed')
+          .limit(5);
+
+        // Enhanced match details
+        const matchDetails = {
+          job,
+          match: existingMatch || {
+            match_score: 0,
+            match_reasons: [],
+            skills_matched: [],
+            skills_missing: job.required_skills || [],
           },
-          similar_jobs_you_won: [
-            { title: 'React Dashboard Development', budget: 12000, date: '2024-08-15' },
-            { title: 'Trading Platform UI', budget: 18000, date: '2024-06-20' },
-          ],
-          suggested_proposal_approach: 'Lead with your FinTech experience. Mention the CryptoTrader Dashboard project specifically.',
+          client_history: {
+            jobs_posted: job.client?.jobs_posted || 0,
+            hires: job.client?.jobs_filled || 0,
+            rehire_rate: job.client?.rehire_rate || 0,
+            average_rating_given: job.client?.rating || 0,
+            payment_verified: job.client?.payment_verified || false,
+          },
+          similar_jobs_completed: similarWins?.map(w => ({
+            title: (w.listing as { title?: string })?.title || 'Untitled',
+            amount: w.total,
+            date: w.completed_at,
+          })) || [],
+          proposal_tips: generateProposalTips(job, existingMatch),
         };
 
         return NextResponse.json({
           success: true,
-          data: detailedMatch,
+          data: matchDetails,
         });
       }
 
+      // ----------------------------------------------------------------
+      // CLIENT: Get matching freelancers for a job
+      // ----------------------------------------------------------------
+      case 'match-freelancers': {
+        if (!jobId) {
+          return NextResponse.json(
+            { success: false, error: 'Job ID required' },
+            { status: 400 }
+          );
+        }
+
+        // Verify user owns the job
+        const { data: job } = await supabase
+          .from('freelancer_jobs')
+          .select('client_id')
+          .eq('id', jobId)
+          .single();
+
+        if (!job || job.client_id !== user.id) {
+          return NextResponse.json(
+            { success: false, error: 'Access denied' },
+            { status: 403 }
+          );
+        }
+
+        try {
+          const matches = await matchJobToFreelancers(jobId, {
+            limit: 50,
+            minScore: filters?.minMatchScore || 50,
+          });
+
+          return NextResponse.json({
+            success: true,
+            data: {
+              matches,
+              total: matches.length,
+            },
+          });
+        } catch (error) {
+          console.error('Freelancer matching error:', error);
+          return NextResponse.json({
+            success: false,
+            error: 'Failed to find matching freelancers',
+          }, { status: 500 });
+        }
+      }
+
+      // ----------------------------------------------------------------
+      // Update matching preferences
+      // ----------------------------------------------------------------
       case 'update-preferences': {
         const { preferences } = body;
+
+        // Update seller profile with preferences
+        const { error: updateError } = await supabase
+          .from('seller_profiles')
+          .update({
+            hourly_rate_min: preferences?.hourly_rate_min,
+            hourly_rate_max: preferences?.hourly_rate_max,
+            available_hours_per_week: preferences?.available_hours,
+            timezone: preferences?.timezone,
+          })
+          .eq('user_id', user.id);
+
+        if (updateError) {
+          return NextResponse.json(
+            { success: false, error: 'Failed to update preferences' },
+            { status: 500 }
+          );
+        }
+
+        // Clear old matches to force recalculation
+        await supabase
+          .from('job_matches')
+          .delete()
+          .eq('freelancer_id', user.id);
+
+        // Calculate new matches
+        const newMatches = await matchFreelancerToJobs(user.id, { limit: 10 });
 
         return NextResponse.json({
           success: true,
           data: {
             updated: true,
-            new_matches_count: 12,
-            preferences_applied: preferences,
+            new_matches_count: newMatches.length,
           },
-          message: 'Preferences updated. Found 12 new matches based on your criteria.',
+          message: `Preferences updated. Found ${newMatches.length} new matches.`,
         });
       }
 
+      // ----------------------------------------------------------------
+      // Analyze a specific job
+      // ----------------------------------------------------------------
       case 'analyze-job': {
-        const { jobId } = body;
+        if (!jobId) {
+          return NextResponse.json(
+            { success: false, error: 'Job ID required' },
+            { status: 400 }
+          );
+        }
+
+        const { data: job } = await supabase
+          .from('freelancer_jobs')
+          .select(`
+            *,
+            client:client_profiles!client_id (
+              rating, total_spent, payment_verified, rehire_rate
+            )
+          `)
+          .eq('id', jobId)
+          .single();
+
+        if (!job) {
+          return NextResponse.json(
+            { success: false, error: 'Job not found' },
+            { status: 404 }
+          );
+        }
+
+        // Analyze job quality
+        const greenFlags: string[] = [];
+        const redFlags: string[] = [];
+
+        if (job.client?.payment_verified) {
+          greenFlags.push('Verified payment method');
+        } else {
+          redFlags.push('Payment not verified');
+        }
+
+        if ((job.client?.rating || 0) >= 4.5) {
+          greenFlags.push(`High client rating (${job.client.rating}/5)`);
+        }
+
+        if ((job.client?.total_spent || 0) >= 10000) {
+          greenFlags.push('Experienced client with $10k+ spent');
+        }
+
+        if (job.description && job.description.length > 500) {
+          greenFlags.push('Detailed job description');
+        } else {
+          redFlags.push('Limited job description');
+        }
+
+        if (job.deadline) {
+          greenFlags.push('Clear deadline provided');
+        }
+
+        if ((job.budget_max || 0) < 50) {
+          redFlags.push('Very low budget');
+        }
+
+        // Budget analysis
+        const marketRate = {
+          min: job.budget_min || 0,
+          max: job.budget_max || (job.budget_min || 0) * 1.5,
+        };
 
         const analysis = {
           job_id: jobId,
-          red_flags: [],
-          green_flags: ['Verified payment method', 'High client rating', 'Clear requirements', 'Reasonable deadline'],
+          green_flags: greenFlags,
+          red_flags: redFlags,
           budget_analysis: {
-            market_rate: { min: 80, max: 130 },
-            offered: { min: 80, max: 120 },
-            verdict: 'Fair - at market rate',
+            offered: { min: job.budget_min, max: job.budget_max },
+            market_rate: marketRate,
+            verdict: job.budget_min >= marketRate.min * 0.8
+              ? 'Fair - at market rate'
+              : 'Below market rate',
           },
           competition_analysis: {
-            total_proposals: 8,
-            estimated_quality: 'medium-high',
-            your_advantage: 'You have direct experience with this tech stack and industry',
+            total_proposals: job.proposals_count || 0,
+            estimated_quality: job.proposals_count < 10 ? 'medium' : 'high',
           },
-          recommended_action: 'apply',
-          confidence: 'high',
+          recommended_action: redFlags.length < greenFlags.length ? 'apply' : 'review_carefully',
+          confidence: greenFlags.length >= 3 ? 'high' : 'medium',
         };
 
         return NextResponse.json({
@@ -475,55 +501,229 @@ export async function POST(request: NextRequest) {
         });
       }
 
+      // ----------------------------------------------------------------
+      // Get career recommendations
+      // ----------------------------------------------------------------
       case 'get-recommendations': {
+        const optimization = await getProfileOptimization(user.id);
+
         return NextResponse.json({
           success: true,
-          data: getDemoInsights().recommendations,
+          data: optimization.improvements,
         });
       }
 
+      // ----------------------------------------------------------------
+      // Save/bookmark a job
+      // ----------------------------------------------------------------
       case 'save-job': {
-        const { jobId } = body;
+        if (!jobId) {
+          return NextResponse.json(
+            { success: false, error: 'Job ID required' },
+            { status: 400 }
+          );
+        }
+
+        const { error: saveError } = await supabase
+          .from('saved_jobs')
+          .upsert({
+            job_id: jobId,
+            user_id: user.id,
+          }, { onConflict: 'job_id,user_id' });
+
+        if (saveError) {
+          return NextResponse.json(
+            { success: false, error: 'Failed to save job' },
+            { status: 500 }
+          );
+        }
+
         return NextResponse.json({
           success: true,
-          data: { job_id: jobId, saved: true, saved_at: new Date().toISOString() },
-          message: 'Job saved to your list',
+          data: { job_id: jobId, saved: true },
+          message: 'Job saved successfully',
         });
       }
 
+      // ----------------------------------------------------------------
+      // Hide/dismiss a job match
+      // ----------------------------------------------------------------
       case 'hide-job': {
-        const { jobId } = body;
+        if (!jobId) {
+          return NextResponse.json(
+            { success: false, error: 'Job ID required' },
+            { status: 400 }
+          );
+        }
+
+        await supabase
+          .from('job_matches')
+          .update({
+            is_dismissed: true,
+            dismissed_at: new Date().toISOString(),
+          })
+          .eq('job_id', jobId)
+          .eq('freelancer_id', user.id);
+
         return NextResponse.json({
           success: true,
           data: { job_id: jobId, hidden: true },
-          message: 'Job hidden from your matches',
+          message: 'Job hidden from matches',
         });
       }
 
+      // ----------------------------------------------------------------
+      // Get saved jobs
+      // ----------------------------------------------------------------
       case 'get-saved': {
-        const savedJobs = getDemoMatches().slice(0, 3).map(m => ({
-          ...m,
-          saved_at: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
-        }));
+        const { data: savedJobs } = await supabase
+          .from('saved_jobs')
+          .select(`
+            *,
+            job:freelancer_jobs (
+              id, title, description, budget_type, budget_min, budget_max,
+              duration, posted_at, status, required_skills,
+              client:client_profiles!client_id (company_name, rating)
+            )
+          `)
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
 
         return NextResponse.json({
           success: true,
-          data: savedJobs,
+          data: savedJobs || [],
         });
       }
 
+      // ----------------------------------------------------------------
+      // Get market insights
+      // ----------------------------------------------------------------
       case 'get-insights': {
-        return NextResponse.json({
-          success: true,
-          data: getDemoInsights(),
-        });
+        try {
+          const insights = await getMarketInsights();
+
+          // Get user's performance stats
+          const { data: profile } = await supabase
+            .from('seller_profiles')
+            .select('*')
+            .eq('user_id', user.id)
+            .single();
+
+          const { count: proposalsSent } = await supabase
+            .from('job_proposals')
+            .select('*', { count: 'exact', head: true })
+            .eq('freelancer_id', user.id);
+
+          const { count: jobsWon } = await supabase
+            .from('job_proposals')
+            .select('*', { count: 'exact', head: true })
+            .eq('freelancer_id', user.id)
+            .eq('status', 'accepted');
+
+          return NextResponse.json({
+            success: true,
+            data: {
+              market_trends: insights,
+              your_performance: {
+                profile_strength: profile ? 70 : 0,
+                proposals_sent: proposalsSent || 0,
+                jobs_won: jobsWon || 0,
+                win_rate: proposalsSent
+                  ? Math.round(((jobsWon || 0) / proposalsSent) * 100)
+                  : 0,
+                rating: profile?.rating || 0,
+                level: profile?.level || 'new',
+              },
+            },
+          });
+        } catch (error) {
+          console.error('Insights error:', error);
+          return NextResponse.json({
+            success: false,
+            error: 'Failed to get insights',
+          }, { status: 500 });
+        }
       }
 
+      // ----------------------------------------------------------------
+      // Profile optimization suggestions
+      // ----------------------------------------------------------------
       case 'optimize-profile': {
-        return NextResponse.json({
-          success: true,
-          data: getDemoProfileOptimization(),
-        });
+        try {
+          const optimization = await getProfileOptimization(user.id);
+
+          return NextResponse.json({
+            success: true,
+            data: optimization,
+          });
+        } catch (error) {
+          console.error('Profile optimization error:', error);
+          return NextResponse.json({
+            success: false,
+            error: 'Failed to analyze profile',
+          }, { status: 500 });
+        }
+      }
+
+      // ----------------------------------------------------------------
+      // Refresh embeddings
+      // ----------------------------------------------------------------
+      case 'refresh-embedding': {
+        try {
+          const { data: profile } = await supabase
+            .from('seller_profiles')
+            .select(`
+              *,
+              skills_details:freelancer_skills (skill_name)
+            `)
+            .eq('user_id', user.id)
+            .single();
+
+          if (!profile) {
+            return NextResponse.json(
+              { success: false, error: 'Profile not found' },
+              { status: 404 }
+            );
+          }
+
+          const skills = profile.skills_details?.map((s: { skill_name: string }) => s.skill_name) || profile.skills || [];
+
+          const embedding = await createProfileEmbedding({
+            user_id: user.id,
+            display_name: profile.display_name,
+            bio: profile.bio || '',
+            skills,
+            experience_years: profile.experience_years || 0,
+            hourly_rate_min: profile.hourly_rate_min || 0,
+            hourly_rate_max: profile.hourly_rate_max || 0,
+            available_hours_per_week: profile.available_hours_per_week || 40,
+            rating: profile.rating || 0,
+            orders_completed: profile.orders_completed || 0,
+            level: profile.level || 'new',
+          });
+
+          await supabase
+            .from('seller_profiles')
+            .update({ embedding })
+            .eq('user_id', user.id);
+
+          // Clear old matches
+          await supabase
+            .from('job_matches')
+            .delete()
+            .eq('freelancer_id', user.id);
+
+          return NextResponse.json({
+            success: true,
+            message: 'Profile embedding updated. New matches will be calculated.',
+          });
+        } catch (error) {
+          console.error('Embedding refresh error:', error);
+          return NextResponse.json({
+            success: false,
+            error: 'Failed to refresh embedding',
+          }, { status: 500 });
+        }
       }
 
       default:
@@ -532,11 +732,47 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
     }
-  } catch (err) {
-    console.error('Job Matching POST error:', err);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { success: false, error: 'Validation error', details: error.errors },
+        { status: 400 }
+      );
+    }
+    console.error('Job Matching POST error:', error);
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }
     );
   }
+}
+
+// ============================================================================
+// HELPER FUNCTIONS
+// ============================================================================
+
+function generateProposalTips(
+  job: { title?: string; required_skills?: string[]; description?: string },
+  match?: { skills_matched?: string[]; match_score?: number } | null
+): string[] {
+  const tips: string[] = [];
+
+  if (match?.skills_matched?.length) {
+    tips.push(
+      `Highlight your experience with: ${match.skills_matched.slice(0, 3).join(', ')}`
+    );
+  }
+
+  if (job.description && job.description.length > 200) {
+    tips.push('Reference specific requirements from the job description');
+  }
+
+  tips.push('Include a relevant portfolio piece or case study');
+  tips.push('Mention your availability and response time');
+
+  if ((match?.match_score || 0) >= 80) {
+    tips.push('Your strong match score gives you leverage - consider premium pricing');
+  }
+
+  return tips;
 }
