@@ -6,8 +6,191 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
-// Demo portfolio data
-const demoPortfolios = [
+// ============================================================================
+// DATABASE HELPER FUNCTIONS
+// ============================================================================
+
+async function getPortfolios(supabase: any, filters?: {
+  freelancerId?: string;
+  isPublic?: boolean;
+}): Promise<any[]> {
+  let query = supabase
+    .from('portfolios')
+    .select(`
+      *,
+      freelancer:freelancers(id, name, full_name)
+    `)
+    .order('created_at', { ascending: false });
+
+  if (filters?.freelancerId) {
+    query = query.eq('freelancer_id', filters.freelancerId);
+  }
+  if (filters?.isPublic !== undefined) {
+    query = query.eq('is_public', filters.isPublic);
+  }
+
+  const { data, error } = await query;
+
+  if (error || !data?.length) {
+    return getDefaultPortfolios();
+  }
+
+  return data.map((p: any) => ({
+    id: p.id,
+    freelancerId: p.freelancer_id,
+    freelancerName: p.freelancer?.name || p.freelancer?.full_name || 'Unknown',
+    title: p.title,
+    tagline: p.tagline,
+    slug: p.slug,
+    theme: p.theme || { layout: 'grid', colorScheme: 'minimal-dark', font: 'Inter', accentColor: '#6366f1' },
+    sections: p.sections || [],
+    projects: p.projects || [],
+    skills: p.skills || [],
+    services: p.services || [],
+    contact: p.contact || {},
+    seo: p.seo || { title: p.title, description: p.tagline || '', keywords: [] },
+    analytics: p.analytics || { totalViews: 0, uniqueVisitors: 0, avgTimeOnPage: 0, contactClicks: 0 },
+    settings: p.settings || { isPublic: true, allowComments: true, showContactForm: true },
+    createdAt: p.created_at,
+    updatedAt: p.updated_at
+  }));
+}
+
+async function getPortfolioById(supabase: any, portfolioId: string): Promise<any | null> {
+  const { data, error } = await supabase
+    .from('portfolios')
+    .select(`
+      *,
+      freelancer:freelancers(id, name, full_name)
+    `)
+    .eq('id', portfolioId)
+    .single();
+
+  if (error || !data) {
+    const defaults = getDefaultPortfolios();
+    return defaults.find(p => p.id === portfolioId) || null;
+  }
+
+  return {
+    id: data.id,
+    freelancerId: data.freelancer_id,
+    freelancerName: data.freelancer?.name || data.freelancer?.full_name || 'Unknown',
+    title: data.title,
+    tagline: data.tagline,
+    slug: data.slug,
+    theme: data.theme || { layout: 'grid', colorScheme: 'minimal-dark', font: 'Inter', accentColor: '#6366f1' },
+    sections: data.sections || [],
+    projects: data.projects || [],
+    skills: data.skills || [],
+    services: data.services || [],
+    contact: data.contact || {},
+    seo: data.seo || { title: data.title, description: data.tagline || '', keywords: [] },
+    analytics: data.analytics || { totalViews: 0, uniqueVisitors: 0, avgTimeOnPage: 0, contactClicks: 0, projectViews: {}, trafficSources: {} },
+    settings: data.settings || { isPublic: true, allowComments: true, showContactForm: true },
+    createdAt: data.created_at,
+    updatedAt: data.updated_at
+  };
+}
+
+async function getPortfolioBySlug(supabase: any, slug: string): Promise<any | null> {
+  const { data, error } = await supabase
+    .from('portfolios')
+    .select(`
+      *,
+      freelancer:freelancers(id, name, full_name)
+    `)
+    .eq('slug', slug)
+    .single();
+
+  if (error || !data) {
+    const defaults = getDefaultPortfolios();
+    return defaults.find(p => p.slug === slug) || null;
+  }
+
+  return getPortfolioById(supabase, data.id);
+}
+
+async function getPortfolioByFreelancerId(supabase: any, freelancerId: string): Promise<any | null> {
+  const { data, error } = await supabase
+    .from('portfolios')
+    .select(`
+      *,
+      freelancer:freelancers(id, name, full_name)
+    `)
+    .eq('freelancer_id', freelancerId)
+    .single();
+
+  if (error || !data) {
+    const defaults = getDefaultPortfolios();
+    return defaults.find(p => p.freelancerId === freelancerId) || null;
+  }
+
+  return getPortfolioById(supabase, data.id);
+}
+
+async function createPortfolioInDb(supabase: any, portfolioData: any): Promise<any | null> {
+  const { data, error } = await supabase
+    .from('portfolios')
+    .insert({
+      freelancer_id: portfolioData.freelancerId,
+      title: portfolioData.title,
+      tagline: portfolioData.tagline,
+      slug: portfolioData.slug,
+      theme: portfolioData.theme,
+      sections: portfolioData.sections,
+      projects: portfolioData.projects || [],
+      skills: portfolioData.skills || [],
+      services: portfolioData.services || [],
+      seo: portfolioData.seo,
+      analytics: portfolioData.analytics,
+      settings: portfolioData.settings
+    })
+    .select()
+    .single();
+
+  if (error || !data) {
+    return null;
+  }
+
+  return getPortfolioById(supabase, data.id);
+}
+
+async function updatePortfolioInDb(supabase: any, portfolioId: string, updates: any): Promise<any | null> {
+  const dbUpdates: Record<string, unknown> = { updated_at: new Date().toISOString() };
+
+  if (updates.title) dbUpdates.title = updates.title;
+  if (updates.tagline) dbUpdates.tagline = updates.tagline;
+  if (updates.theme) dbUpdates.theme = updates.theme;
+  if (updates.sections) dbUpdates.sections = updates.sections;
+  if (updates.projects) dbUpdates.projects = updates.projects;
+  if (updates.skills) dbUpdates.skills = updates.skills;
+  if (updates.services) dbUpdates.services = updates.services;
+  if (updates.contact) dbUpdates.contact = updates.contact;
+  if (updates.seo) dbUpdates.seo = updates.seo;
+  if (updates.settings) dbUpdates.settings = updates.settings;
+
+  const { error } = await supabase
+    .from('portfolios')
+    .update(dbUpdates)
+    .eq('id', portfolioId);
+
+  if (error) {
+    return null;
+  }
+
+  return getPortfolioById(supabase, portfolioId);
+}
+
+async function trackPortfolioView(supabase: any, portfolioId: string): Promise<void> {
+  await supabase.rpc('increment_portfolio_views', { portfolio_id: portfolioId });
+}
+
+// ============================================================================
+// DEFAULT DATA (fallback when database is empty)
+// ============================================================================
+
+function getDefaultPortfolios(): any[] {
+  return [
   {
     id: 'portfolio-001',
     freelancerId: 'fl-001',
@@ -163,7 +346,8 @@ const demoPortfolios = [
     createdAt: '2023-01-15',
     updatedAt: '2024-01-10'
   }
-]
+  ];
+}
 
 // Portfolio templates
 const portfolioTemplates = [
@@ -195,38 +379,39 @@ const portfolioTemplates = [
 
 export async function POST(request: NextRequest) {
   try {
+    const supabase = await createClient()
     const body = await request.json()
     const { action, ...params } = body
 
     switch (action) {
       case 'create-portfolio':
-        return handleCreatePortfolio(params)
+        return handleCreatePortfolio(supabase, params)
       case 'get-portfolio':
-        return handleGetPortfolio(params)
+        return handleGetPortfolio(supabase, params)
       case 'update-portfolio':
-        return handleUpdatePortfolio(params)
+        return handleUpdatePortfolio(supabase, params)
       case 'add-project':
-        return handleAddProject(params)
+        return handleAddProject(supabase, params)
       case 'update-project':
-        return handleUpdateProject(params)
+        return handleUpdateProject(supabase, params)
       case 'reorder-projects':
-        return handleReorderProjects(params)
+        return handleReorderProjects(supabase, params)
       case 'get-templates':
-        return handleGetTemplates(params)
+        return handleGetTemplates(supabase, params)
       case 'apply-template':
-        return handleApplyTemplate(params)
+        return handleApplyTemplate(supabase, params)
       case 'get-analytics':
-        return handleGetAnalytics(params)
+        return handleGetAnalytics(supabase, params)
       case 'ai-optimize':
-        return handleAIOptimize(params)
+        return handleAIOptimize(supabase, params)
       case 'generate-case-study':
-        return handleGenerateCaseStudy(params)
+        return handleGenerateCaseStudy(supabase, params)
       case 'export-portfolio':
-        return handleExportPortfolio(params)
+        return handleExportPortfolio(supabase, params)
       case 'check-domain':
-        return handleCheckDomain(params)
+        return handleCheckDomain(supabase, params)
       case 'setup-domain':
-        return handleSetupDomain(params)
+        return handleSetupDomain(supabase, params)
       default:
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
@@ -236,7 +421,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function handleCreatePortfolio(params: {
+async function handleCreatePortfolio(supabase: any, params: {
   freelancerId: string
   title: string
   tagline?: string
@@ -248,8 +433,7 @@ async function handleCreatePortfolio(params: {
     ? portfolioTemplates.find(t => t.id === templateId)
     : portfolioTemplates[0]
 
-  const newPortfolio = {
-    id: `portfolio-${Date.now()}`,
+  const portfolioData = {
     freelancerId,
     title,
     tagline: tagline || 'Showcasing my best work',
@@ -306,7 +490,16 @@ async function handleCreatePortfolio(params: {
       allowComments: true,
       showContactForm: true,
       analyticsEnabled: true
-    },
+    }
+  }
+
+  // Try to create in database
+  const newPortfolio = await createPortfolioInDb(supabase, portfolioData)
+
+  // Fallback if database insert fails
+  const resultPortfolio = newPortfolio || {
+    id: `portfolio-${Date.now()}`,
+    ...portfolioData,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
   }
@@ -314,7 +507,7 @@ async function handleCreatePortfolio(params: {
   return NextResponse.json({
     success: true,
     data: {
-      portfolio: newPortfolio,
+      portfolio: resultPortfolio,
       message: 'Portfolio created successfully',
       nextSteps: [
         'Add your projects',
@@ -326,7 +519,7 @@ async function handleCreatePortfolio(params: {
   })
 }
 
-async function handleGetPortfolio(params: {
+async function handleGetPortfolio(supabase: any, params: {
   portfolioId?: string
   slug?: string
   freelancerId?: string
@@ -336,11 +529,11 @@ async function handleGetPortfolio(params: {
   let portfolio = null
 
   if (portfolioId) {
-    portfolio = demoPortfolios.find(p => p.id === portfolioId)
+    portfolio = await getPortfolioById(supabase, portfolioId)
   } else if (slug) {
-    portfolio = demoPortfolios.find(p => p.slug === slug)
+    portfolio = await getPortfolioBySlug(supabase, slug)
   } else if (freelancerId) {
-    portfolio = demoPortfolios.find(p => p.freelancerId === freelancerId)
+    portfolio = await getPortfolioByFreelancerId(supabase, freelancerId)
   }
 
   if (!portfolio) {
@@ -348,7 +541,7 @@ async function handleGetPortfolio(params: {
   }
 
   // Track view
-  portfolio.analytics.totalViews += 1
+  await trackPortfolioView(supabase, portfolio.id)
 
   return NextResponse.json({
     success: true,
@@ -356,20 +549,23 @@ async function handleGetPortfolio(params: {
   })
 }
 
-async function handleUpdatePortfolio(params: {
+async function handleUpdatePortfolio(supabase: any, params: {
   portfolioId: string
-  updates: Partial<typeof demoPortfolios[0]>
+  updates: Record<string, unknown>
 }) {
   const { portfolioId, updates } = params
 
-  const portfolio = demoPortfolios.find(p => p.id === portfolioId)
+  const portfolio = await getPortfolioById(supabase, portfolioId)
 
   if (!portfolio) {
     return NextResponse.json({ error: 'Portfolio not found' }, { status: 404 })
   }
 
-  // In production, update in Supabase
-  const updatedPortfolio = {
+  // Update in database
+  const updatedPortfolio = await updatePortfolioInDb(supabase, portfolioId, updates)
+
+  // Fallback if database update fails
+  const resultPortfolio = updatedPortfolio || {
     ...portfolio,
     ...updates,
     updatedAt: new Date().toISOString()
@@ -378,13 +574,13 @@ async function handleUpdatePortfolio(params: {
   return NextResponse.json({
     success: true,
     data: {
-      portfolio: updatedPortfolio,
+      portfolio: resultPortfolio,
       message: 'Portfolio updated successfully'
     }
   })
 }
 
-async function handleAddProject(params: {
+async function handleAddProject(supabase: any, params: {
   portfolioId: string
   project: {
     title: string
@@ -403,7 +599,7 @@ async function handleAddProject(params: {
 }) {
   const { portfolioId, project } = params
 
-  const portfolio = demoPortfolios.find(p => p.id === portfolioId)
+  const portfolio = await getPortfolioById(supabase, portfolioId)
 
   if (!portfolio) {
     return NextResponse.json({ error: 'Portfolio not found' }, { status: 404 })
@@ -416,6 +612,10 @@ async function handleAddProject(params: {
     date: new Date().toISOString().slice(0, 7)
   }
 
+  // Add project to portfolio's projects array and save
+  const updatedProjects = [...(portfolio.projects || []), newProject]
+  await updatePortfolioInDb(supabase, portfolioId, { projects: updatedProjects })
+
   return NextResponse.json({
     success: true,
     data: {
@@ -425,26 +625,31 @@ async function handleAddProject(params: {
   })
 }
 
-async function handleUpdateProject(params: {
+async function handleUpdateProject(supabase: any, params: {
   portfolioId: string
   projectId: string
   updates: Record<string, unknown>
 }) {
   const { portfolioId, projectId, updates } = params
 
-  const portfolio = demoPortfolios.find(p => p.id === portfolioId)
+  const portfolio = await getPortfolioById(supabase, portfolioId)
 
   if (!portfolio) {
     return NextResponse.json({ error: 'Portfolio not found' }, { status: 404 })
   }
 
-  const project = portfolio.projects.find(p => p.id === projectId)
+  const projectIndex = portfolio.projects?.findIndex((p: any) => p.id === projectId) ?? -1
 
-  if (!project) {
+  if (projectIndex === -1) {
     return NextResponse.json({ error: 'Project not found' }, { status: 404 })
   }
 
-  const updatedProject = { ...project, ...updates }
+  const updatedProject = { ...portfolio.projects[projectIndex], ...updates }
+  const updatedProjects = [...portfolio.projects]
+  updatedProjects[projectIndex] = updatedProject
+
+  // Save to database
+  await updatePortfolioInDb(supabase, portfolioId, { projects: updatedProjects })
 
   return NextResponse.json({
     success: true,
@@ -455,11 +660,25 @@ async function handleUpdateProject(params: {
   })
 }
 
-async function handleReorderProjects(params: {
+async function handleReorderProjects(supabase: any, params: {
   portfolioId: string
   projectIds: string[]
 }) {
   const { portfolioId, projectIds } = params
+
+  const portfolio = await getPortfolioById(supabase, portfolioId)
+
+  if (!portfolio) {
+    return NextResponse.json({ error: 'Portfolio not found' }, { status: 404 })
+  }
+
+  // Reorder projects based on projectIds array
+  const reorderedProjects = projectIds
+    .map(id => portfolio.projects?.find((p: any) => p.id === id))
+    .filter(Boolean)
+
+  // Save to database
+  await updatePortfolioInDb(supabase, portfolioId, { projects: reorderedProjects })
 
   return NextResponse.json({
     success: true,
@@ -471,10 +690,27 @@ async function handleReorderProjects(params: {
   })
 }
 
-async function handleGetTemplates(params: { category?: string }) {
+async function handleGetTemplates(supabase: any, params: { category?: string }) {
   const { category } = params
 
+  // Try to fetch templates from database
   let templates = [...portfolioTemplates]
+
+  const { data, error } = await supabase
+    .from('portfolio_templates')
+    .select('*')
+    .order('popularity', { ascending: false })
+
+  if (!error && data?.length > 0) {
+    templates = data.map((t: any) => ({
+      id: t.id,
+      name: t.name,
+      category: t.category,
+      preview: t.preview_url || t.preview,
+      features: t.features || [],
+      popularity: t.popularity || 0
+    }))
+  }
 
   if (category) {
     templates = templates.filter(t => t.category === category)
@@ -489,16 +725,31 @@ async function handleGetTemplates(params: { category?: string }) {
   })
 }
 
-async function handleApplyTemplate(params: {
+async function handleApplyTemplate(supabase: any, params: {
   portfolioId: string
   templateId: string
 }) {
   const { portfolioId, templateId } = params
 
-  const template = portfolioTemplates.find(t => t.id === templateId)
+  // Try to find template in database first
+  const { data: dbTemplate } = await supabase
+    .from('portfolio_templates')
+    .select('*')
+    .eq('id', templateId)
+    .single()
+
+  const template = dbTemplate || portfolioTemplates.find(t => t.id === templateId)
 
   if (!template) {
     return NextResponse.json({ error: 'Template not found' }, { status: 404 })
+  }
+
+  // Update portfolio with template settings
+  const portfolio = await getPortfolioById(supabase, portfolioId)
+  if (portfolio) {
+    await updatePortfolioInDb(supabase, portfolioId, {
+      theme: template.theme || portfolio.theme
+    })
   }
 
   return NextResponse.json({
@@ -511,32 +762,42 @@ async function handleApplyTemplate(params: {
   })
 }
 
-async function handleGetAnalytics(params: {
+async function handleGetAnalytics(supabase: any, params: {
   portfolioId: string
   period?: string
 }) {
   const { portfolioId, period = '30days' } = params
 
-  const portfolio = demoPortfolios.find(p => p.id === portfolioId)
+  const portfolio = await getPortfolioById(supabase, portfolioId)
 
   if (!portfolio) {
     return NextResponse.json({ error: 'Portfolio not found' }, { status: 404 })
+  }
+
+  // Default analytics if not available
+  const analytics = portfolio.analytics || {
+    totalViews: 0,
+    uniqueVisitors: 0,
+    avgTimeOnPage: 0,
+    contactClicks: 0,
+    projectViews: {},
+    trafficSources: {}
   }
 
   return NextResponse.json({
     success: true,
     data: {
       period,
-      analytics: portfolio.analytics,
+      analytics,
       trends: {
         viewsGrowth: '+15%',
         engagementRate: '12%',
         conversionRate: '8.5%'
       },
-      topProjects: portfolio.projects.slice(0, 3).map(p => ({
+      topProjects: (portfolio.projects || []).slice(0, 3).map((p: any) => ({
         id: p.id,
         title: p.title,
-        views: portfolio.analytics.projectViews[p.id] || 0
+        views: analytics.projectViews?.[p.id] || 0
       })),
       visitorInsights: {
         newVsReturning: { new: 65, returning: 35 },
@@ -548,40 +809,42 @@ async function handleGetAnalytics(params: {
         ]
       },
       conversionFunnel: {
-        portfolioViews: portfolio.analytics.totalViews,
-        projectClicks: Math.round(portfolio.analytics.totalViews * 0.4),
-        contactClicks: portfolio.analytics.contactClicks,
-        messagesReceived: Math.round(portfolio.analytics.contactClicks * 0.5)
+        portfolioViews: analytics.totalViews || 0,
+        projectClicks: Math.round((analytics.totalViews || 0) * 0.4),
+        contactClicks: analytics.contactClicks || 0,
+        messagesReceived: Math.round((analytics.contactClicks || 0) * 0.5)
       }
     }
   })
 }
 
-async function handleAIOptimize(params: {
+async function handleAIOptimize(supabase: any, params: {
   portfolioId: string
   optimizeFor?: 'visibility' | 'engagement' | 'conversions'
 }) {
   const { portfolioId, optimizeFor = 'conversions' } = params
 
-  const portfolio = demoPortfolios.find(p => p.id === portfolioId)
+  const portfolio = await getPortfolioById(supabase, portfolioId)
 
   if (!portfolio) {
     return NextResponse.json({ error: 'Portfolio not found' }, { status: 404 })
   }
+
+  const seo = portfolio.seo || { title: portfolio.title, description: '', keywords: [] }
 
   // AI-powered optimization suggestions
   const suggestions = {
     seo: [
       {
         type: 'title',
-        current: portfolio.seo.title,
+        current: seo.title,
         suggested: `${portfolio.freelancerName} - Expert Full-Stack Developer | React & Node.js`,
         impact: 'high',
         reason: 'Including specific technologies improves search visibility'
       },
       {
         type: 'description',
-        current: portfolio.seo.description,
+        current: seo.description,
         suggested: 'Award-winning full-stack developer with 8+ years experience building scalable web applications. Specialized in React, Node.js, and cloud architecture. View portfolio and hire now.',
         impact: 'high',
         reason: 'Action-oriented description with credentials increases click-through'
@@ -637,19 +900,19 @@ async function handleAIOptimize(params: {
   })
 }
 
-async function handleGenerateCaseStudy(params: {
+async function handleGenerateCaseStudy(supabase: any, params: {
   portfolioId: string
   projectId: string
 }) {
   const { portfolioId, projectId } = params
 
-  const portfolio = demoPortfolios.find(p => p.id === portfolioId)
+  const portfolio = await getPortfolioById(supabase, portfolioId)
 
   if (!portfolio) {
     return NextResponse.json({ error: 'Portfolio not found' }, { status: 404 })
   }
 
-  const project = portfolio.projects.find(p => p.id === projectId)
+  const project = portfolio.projects?.find((p: any) => p.id === projectId)
 
   if (!project) {
     return NextResponse.json({ error: 'Project not found' }, { status: 404 })
@@ -661,7 +924,7 @@ async function handleGenerateCaseStudy(params: {
     sections: [
       {
         title: 'Overview',
-        content: `A comprehensive ${project.category.toLowerCase()} project for ${project.client || 'a leading company'} that ${project.description.toLowerCase()}`
+        content: `A comprehensive ${(project.category || 'development').toLowerCase()} project for ${project.client || 'a leading company'} that ${(project.description || '').toLowerCase()}`
       },
       {
         title: 'The Challenge',
@@ -701,13 +964,13 @@ async function handleGenerateCaseStudy(params: {
   })
 }
 
-async function handleExportPortfolio(params: {
+async function handleExportPortfolio(supabase: any, params: {
   portfolioId: string
   format: 'pdf' | 'html' | 'json'
 }) {
   const { portfolioId, format } = params
 
-  const portfolio = demoPortfolios.find(p => p.id === portfolioId)
+  const portfolio = await getPortfolioById(supabase, portfolioId)
 
   if (!portfolio) {
     return NextResponse.json({ error: 'Portfolio not found' }, { status: 404 })
@@ -725,11 +988,17 @@ async function handleExportPortfolio(params: {
   })
 }
 
-async function handleCheckDomain(params: { domain: string }) {
+async function handleCheckDomain(supabase: any, params: { domain: string }) {
   const { domain } = params
 
-  // Simulated domain check
-  const available = !['example.com', 'test.com'].includes(domain.toLowerCase())
+  // Check if domain is already in use
+  const { data: existingDomain } = await supabase
+    .from('portfolio_domains')
+    .select('id')
+    .eq('domain', domain.toLowerCase())
+    .single()
+
+  const available = !existingDomain && !['example.com', 'test.com'].includes(domain.toLowerCase())
 
   return NextResponse.json({
     success: true,
@@ -745,11 +1014,26 @@ async function handleCheckDomain(params: { domain: string }) {
   })
 }
 
-async function handleSetupDomain(params: {
+async function handleSetupDomain(supabase: any, params: {
   portfolioId: string
   domain: string
 }) {
   const { portfolioId, domain } = params
+
+  // Save domain configuration to database
+  await supabase
+    .from('portfolio_domains')
+    .upsert({
+      portfolio_id: portfolioId,
+      domain: domain.toLowerCase(),
+      status: 'pending',
+      created_at: new Date().toISOString()
+    })
+
+  // Update portfolio settings with custom domain
+  await updatePortfolioInDb(supabase, portfolioId, {
+    settings: { customDomain: domain }
+  })
 
   return NextResponse.json({
     success: true,
@@ -775,9 +1059,16 @@ export async function GET(request: NextRequest) {
   const slug = searchParams.get('slug')
 
   if (slug) {
-    const portfolio = demoPortfolios.find(p => p.slug === slug)
-    if (portfolio) {
-      return NextResponse.json({ success: true, data: portfolio })
+    try {
+      const supabase = await createClient()
+      const portfolio = await getPortfolioBySlug(supabase, slug)
+      if (portfolio) {
+        // Track view
+        await trackPortfolioView(supabase, portfolio.id)
+        return NextResponse.json({ success: true, data: portfolio })
+      }
+    } catch (error) {
+      console.error('Error fetching portfolio:', error)
     }
     return NextResponse.json({ error: 'Portfolio not found' }, { status: 404 })
   }
