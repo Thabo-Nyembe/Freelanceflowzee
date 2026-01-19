@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@/lib/supabase/server';
 import logger from '@/lib/logger';
 
 /**
@@ -8,13 +8,9 @@ import logger from '@/lib/logger';
  * Track and report API usage and costs
  */
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
 export async function GET(request: NextRequest) {
   try {
+    const supabase = await createClient();
     const { searchParams } = new URL(request.url);
     const period = searchParams.get('period') || '30d'; // 1d, 7d, 30d, 90d
 
