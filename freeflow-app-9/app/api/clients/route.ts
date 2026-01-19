@@ -9,7 +9,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@/lib/supabase/server'
 import { getServerSession } from '@/lib/auth'
 import { checkPermission } from '@/lib/rbac/rbac-service'
 
@@ -95,22 +95,12 @@ interface ClientStats {
 }
 
 // ============================================================================
-// DATABASE CLIENT
-// ============================================================================
-
-function getSupabase() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
-}
-
-// ============================================================================
 // GET - List Clients / Get Single Client
 // ============================================================================
 
 export async function GET(request: NextRequest) {
   try {
+    const supabase = await createClient()
     const session = await getServerSession()
     const { searchParams } = new URL(request.url)
 
@@ -128,8 +118,6 @@ export async function GET(request: NextRequest) {
     const includeStats = searchParams.get('include_stats') === 'true'
     const includeContacts = searchParams.get('include_contacts') === 'true'
     const includeInteractions = searchParams.get('include_interactions') === 'true'
-
-    const supabase = getSupabase()
 
     // Demo mode for unauthenticated users
     if (!session?.user) {
@@ -318,11 +306,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const supabase = await createClient()
     const userId = session.user.id
     const body = await request.json()
     const { action = 'create' } = body
-
-    const supabase = getSupabase()
 
     // Handle different actions
     switch (action) {
@@ -374,6 +361,7 @@ export async function PUT(request: NextRequest) {
       )
     }
 
+    const supabase = await createClient()
     const userId = session.user.id
     const body = await request.json()
     const { id, ...updates } = body
@@ -393,8 +381,6 @@ export async function PUT(request: NextRequest) {
         { status: 403 }
       )
     }
-
-    const supabase = getSupabase()
 
     // Prepare update data
     const allowedFields = [
@@ -471,6 +457,7 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
+    const supabase = await createClient()
     const userId = session.user.id
     const { searchParams } = new URL(request.url)
     const clientId = searchParams.get('id')
@@ -491,8 +478,6 @@ export async function DELETE(request: NextRequest) {
         { status: 403 }
       )
     }
-
-    const supabase = getSupabase()
 
     // Get client info for logging
     const { data: client } = await supabase

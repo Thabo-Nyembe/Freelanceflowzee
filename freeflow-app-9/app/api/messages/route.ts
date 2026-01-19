@@ -1,18 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@/lib/supabase/server';
 import { createFeatureLogger } from '@/lib/logger';
 
 const logger = createFeatureLogger('API-Messages');
-
-// Initialize Supabase client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-
-function getSupabaseClient() {
-  return createClient(supabaseUrl, supabaseServiceKey);
-}
 
 // ============================================================================
 // TYPES
@@ -144,6 +136,7 @@ function getDemoChats(): Partial<Chat>[] {
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
+    const supabase = await createClient();
     const session = await getServerSession(authOptions);
     const { searchParams } = new URL(request.url);
 
@@ -188,7 +181,6 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       }
     }
 
-    const supabase = getSupabaseClient();
     const userId = session.user.id;
 
     // Get chats
@@ -209,7 +201,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 }
 
 async function getChats(
-  supabase: ReturnType<typeof getSupabaseClient>,
+  supabase: any,
   userId: string,
   search: string | null,
   limit: number
@@ -291,7 +283,7 @@ async function getChats(
 }
 
 async function getMessages(
-  supabase: ReturnType<typeof getSupabaseClient>,
+  supabase: any,
   userId: string,
   chatId: string,
   limit: number,
@@ -404,6 +396,7 @@ async function getMessages(
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
+    const supabase = await createClient();
     const session = await getServerSession(authOptions);
     const body = await request.json();
     const { action, ...data } = body;
@@ -413,7 +406,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       return handleDemoAction(action, data);
     }
 
-    const supabase = getSupabaseClient();
     const userId = session.user.id;
 
     switch (action) {
@@ -528,7 +520,7 @@ function handleDemoAction(action: string, data: Record<string, unknown>): NextRe
 // ============================================================================
 
 async function handleSendMessage(
-  supabase: ReturnType<typeof getSupabaseClient>,
+  supabase: any,
   userId: string,
   data: {
     chatId: string;
@@ -616,7 +608,7 @@ async function handleSendMessage(
 }
 
 async function handleEditMessage(
-  supabase: ReturnType<typeof getSupabaseClient>,
+  supabase: any,
   userId: string,
   data: { messageId: string; text?: string; content?: string }
 ): Promise<NextResponse> {
@@ -666,7 +658,7 @@ async function handleEditMessage(
 }
 
 async function handleDeleteMessage(
-  supabase: ReturnType<typeof getSupabaseClient>,
+  supabase: any,
   userId: string,
   data: { messageId: string }
 ): Promise<NextResponse> {
@@ -724,7 +716,7 @@ async function handleDeleteMessage(
 }
 
 async function handleReaction(
-  supabase: ReturnType<typeof getSupabaseClient>,
+  supabase: any,
   userId: string,
   data: { messageId: string; emoji: string; remove?: boolean }
 ): Promise<NextResponse> {
@@ -770,7 +762,7 @@ async function handleReaction(
 }
 
 async function handleMarkRead(
-  supabase: ReturnType<typeof getSupabaseClient>,
+  supabase: any,
   userId: string,
   data: { chatId: string; messageIds?: string[] }
 ): Promise<NextResponse> {
@@ -802,7 +794,7 @@ async function handleMarkRead(
 }
 
 async function handlePinMessage(
-  supabase: ReturnType<typeof getSupabaseClient>,
+  supabase: any,
   userId: string,
   data: { messageId: string; pin: boolean }
 ): Promise<NextResponse> {
@@ -828,7 +820,7 @@ async function handlePinMessage(
 }
 
 async function handleCreateChat(
-  supabase: ReturnType<typeof getSupabaseClient>,
+  supabase: any,
   userId: string,
   data: {
     name: string;
@@ -883,7 +875,7 @@ async function handleCreateChat(
 }
 
 async function handleAddMembers(
-  supabase: ReturnType<typeof getSupabaseClient>,
+  supabase: any,
   userId: string,
   data: { chatId: string; userIds: string[] }
 ): Promise<NextResponse> {
@@ -924,7 +916,7 @@ async function handleAddMembers(
 }
 
 async function handleRemoveMember(
-  supabase: ReturnType<typeof getSupabaseClient>,
+  supabase: any,
   userId: string,
   data: { chatId: string; memberId: string }
 ): Promise<NextResponse> {
@@ -962,7 +954,7 @@ async function handleRemoveMember(
 }
 
 async function handleLeaveChat(
-  supabase: ReturnType<typeof getSupabaseClient>,
+  supabase: any,
   userId: string,
   data: { chatId: string }
 ): Promise<NextResponse> {
@@ -984,7 +976,7 @@ async function handleLeaveChat(
 }
 
 async function handleArchiveChat(
-  supabase: ReturnType<typeof getSupabaseClient>,
+  supabase: any,
   userId: string,
   data: { chatId: string; archive: boolean }
 ): Promise<NextResponse> {
@@ -1006,7 +998,7 @@ async function handleArchiveChat(
 }
 
 async function handleUpdateChat(
-  supabase: ReturnType<typeof getSupabaseClient>,
+  supabase: any,
   userId: string,
   data: { chatId: string; name?: string; description?: string; avatarUrl?: string }
 ): Promise<NextResponse> {
@@ -1049,7 +1041,7 @@ async function handleUpdateChat(
 }
 
 async function handleTypingIndicator(
-  supabase: ReturnType<typeof getSupabaseClient>,
+  supabase: any,
   userId: string,
   data: { chatId: string; typing: boolean }
 ): Promise<NextResponse> {
@@ -1078,7 +1070,7 @@ async function handleTypingIndicator(
 }
 
 async function handleSearch(
-  supabase: ReturnType<typeof getSupabaseClient>,
+  supabase: any,
   userId: string,
   data: { query: string; chatId?: string; limit?: number }
 ): Promise<NextResponse> {
