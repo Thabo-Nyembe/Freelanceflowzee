@@ -1,61 +1,177 @@
+/**
+ * Tax Calculation API
+ *
+ * Calculate tax for transactions using TaxJar/Avalara
+ *
+ * POST /api/tax/calculate - Calculate tax for a transaction
+ * GET /api/tax/calculate - Get tax rate for a location
+ */
+
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { taxService } from '@/lib/tax/tax-service'
+import { taxService, type TaxCalculationParams, type TaxLineItem } from '@/lib/tax/tax-service'
 
-export async function POST(request: NextRequest) {
+/**
+ * Calculate tax for a transaction
+ */
+export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
 
-    // Check authentication
+    // Get current user
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
     }
 
     const body = await request.json()
+    const {
+      transactionId,
+      transactionType,
+      transactionDate,
+      subtotal,
+      shippingAmount,
+      discountAmount,
+      originCountry,
+      originState,
+      originCity,
+      originPostalCode,
+      destinationCountry,
+      destinationState,
+      destinationCity,
+      destinationPostalCode,
+      lineItems,
+      manualTaxRate,
+      exemptionCertificateId,
+      customerId
+    } = body
 
     // Validate required fields
-    if (!body.transactionId || !body.transactionType || !body.subtotal || !body.destinationCountry) {
+    if (!transactionId || !transactionType || !subtotal || !destinationCountry) {
       return NextResponse.json(
-        { error: 'Missing required fields: transactionId, transactionType, subtotal, destinationCountry' },
+        { error: 'transactionId, transactionType, subtotal, and destinationCountry are required' },
         { status: 400 }
       )
     }
 
-    // Calculate tax
-    const result = await taxService.calculateTax({
+    // Validate transaction type
+    const validTypes = ['invoice', 'expense', 'payment', 'refund']
+    if (!validTypes.includes(transactionType)) {
+      return NextResponse.json(
+        { error: `Invalid transactionType. Use: ${validTypes.join(', ')}` },
+        { status: 400 }
+      )
+    }
+
+    // Build calculation params
+    const params: TaxCalculationParams = {
       userId: user.id,
-      transactionId: body.transactionId,
-      transactionType: body.transactionType,
-      transactionDate: body.transactionDate ? new Date(body.transactionDate) : new Date(),
-      subtotal: parseFloat(body.subtotal),
-      shippingAmount: body.shippingAmount ? parseFloat(body.shippingAmount) : 0,
-      discountAmount: body.discountAmount ? parseFloat(body.discountAmount) : 0,
+      transactionId,
+      transactionType,
+      transactionDate: new Date(transactionDate || Date.now()),
+      subtotal: Math.round(subtotal), // Ensure integer cents
+      shippingAmount: shippingAmount ? Math.round(shippingAmount) : undefined,
+      discountAmount: discountAmount ? Math.round(discountAmount) : undefined,
+      originCountry,
+      originState,
+      originCity,
+      originPostalCode,
+      destinationCountry,
+      destinationState,
+      destinationCity,
+      destinationPostalCode,
+      lineItems: lineItems?.map((item: TaxLineItem) => ({
+        ...item,
+        unitPrice: Math.round(item.unitPrice),
+        discount: item.discount ? Math.round(item.discount) : undefined
+      })),
+      manualTaxRate,
+      exemptionCertificateId,
+      customerId
+    }
 
-      originCountry: body.originCountry,
-      originState: body.originState,
-      originCity: body.originCity,
-      originPostalCode: body.originPostalCode,
-
-      destinationCountry: body.destinationCountry,
-      destinationState: body.destinationState,
-      destinationCity: body.destinationCity,
-      destinationPostalCode: body.destinationPostalCode,
-
-      lineItems: body.lineItems,
-      manualTaxRate: body.manualTaxRate,
-      exemptionCertificateId: body.exemptionCertificateId
-    })
+    // Calculate tax
+    const result = await taxService.calculateTax(params)
 
     return NextResponse.json({
       success: true,
-      data: result
+      calculation: {
+        transactionId,
+        subtotal: params.subtotal,
+        taxAmount: result.taxAmount,
+        taxRate: result.taxRate,
+        totalAmount: result.totalAmount,
+        breakdown: result.breakdown,
+        jurisdictions: result.jurisdictions,
+        lineItemTaxes: result.lineItemTaxes,
+        hasNexus: result.hasNexus,
+        isTaxable: result.isTaxable,
+        provider: result.provider,
+        calculationMethod: result.calculationMethod
+      }
     })
-
   } catch (error) {
     console.error('Tax calculation error:', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to calculate tax' },
+      { status: 500 }
+    )
+  }
+}
+
+/**
+ * Get tax rate for a location
+ */
+export async function GET(request: NextRequest): Promise<NextResponse> {
+  try {
+    const supabase = await createClient()
+
+    // Get current user
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
+    const searchParams = request.nextUrl.searchParams
+    const postalCode = searchParams.get('postalCode')
+    const country = searchParams.get('country')
+    const state = searchParams.get('state')
+    const city = searchParams.get('city')
+
+    if (!postalCode || !country) {
+      return NextResponse.json(
+        { error: 'postalCode and country are required' },
+        { status: 400 }
+      )
+    }
+
+    const rate = await taxService.getTaxRate({
+      postalCode,
+      country,
+      state: state || undefined,
+      city: city || undefined
+    })
+
+    return NextResponse.json({
+      success: true,
+      rate: {
+        postalCode,
+        country,
+        state,
+        city,
+        ...rate
+      }
+    })
+  } catch (error) {
+    console.error('Tax rate lookup error:', error)
+    return NextResponse.json(
+      { error: 'Failed to get tax rate' },
       { status: 500 }
     )
   }

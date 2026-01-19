@@ -1,8 +1,19 @@
+/**
+ * Tax Summary API
+ *
+ * Get comprehensive tax summary and analytics
+ *
+ * GET /api/tax/summary - Get tax summary for a year
+ */
+
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { taxService } from '@/lib/tax/tax-service'
 
-export async function GET(request: NextRequest) {
+/**
+ * Get tax summary for a year
+ */
+export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     const supabase = await createClient()
 
@@ -12,15 +23,22 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { searchParams } = new URL(request.url)
+    const searchParams = request.nextUrl.searchParams
     const year = parseInt(searchParams.get('year') || new Date().getFullYear().toString())
 
     // Get tax summary
-    const summary = await taxService.getTaxSummary(user.id, year, supabase)
+    const summary = await taxService.getTaxSummary(user.id, year)
+
+    // Get provider status
+    const providerStatus = taxService.getProviderStatus()
 
     return NextResponse.json({
       success: true,
-      data: summary
+      summary: {
+        year,
+        ...summary
+      },
+      providers: providerStatus
     })
 
   } catch (error) {
