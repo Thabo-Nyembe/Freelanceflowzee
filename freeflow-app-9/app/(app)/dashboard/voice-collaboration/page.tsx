@@ -86,7 +86,7 @@ import {
   getRoomTypeBadgeColor,
   getStatusColor,
   getRoomTypeIcon
-} from '@/lib/voice-collaboration-utils.tsx'
+} from '@/lib/voice-collaboration-utils'
 
 const logger = createFeatureLogger('VoiceCollaboration')
 

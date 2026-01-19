@@ -27,7 +27,7 @@ import * as Y from 'yjs'
 import { IndexeddbPersistence } from 'y-indexeddb'
 import { Awareness } from 'y-protocols/awareness'
 import { createClient } from '@/lib/supabase/client'
-import { useCurrentUser } from '@/lib/hooks/use-current-user'
+import { useCurrentUser } from '@/hooks/use-current-user'
 import { cn } from '@/lib/utils'
 import {
   Bold, Italic, Underline, Strikethrough, Code,

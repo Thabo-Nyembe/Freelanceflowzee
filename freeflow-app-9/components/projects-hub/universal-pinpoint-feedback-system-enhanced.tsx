@@ -3,10 +3,10 @@
 import React, { useState, useRef, useEffect, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { useTheme } from "next-themes"
-import { useUser } from "@/lib/hooks/use-user"
+import { useCurrentUser } from "@/hooks/use-current-user"
 import { useSupabaseClient } from "@supabase/auth-helpers-react"
 import { formatDistanceToNow } from "date-fns"
-import { useMediaQuery } from "@/lib/hooks/use-media-query"
+import { useMediaQuery } from "@/hooks/use-media-query"
 import { useToast } from "@/components/ui/use-toast"
 
 // UI Components
@@ -380,7 +380,7 @@ export function UniversalPinpointFeedbackSystemEnhanced({
   const { toast } = useToast()
   const { theme } = useTheme()
   const supabase = useSupabaseClient()
-  const { user } = useUser()
+  const { user } = useCurrentUser()
   const isMobile = useMediaQuery("(max-width: 768px)")
 
   // Derived state

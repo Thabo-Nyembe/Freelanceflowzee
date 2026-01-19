@@ -170,7 +170,7 @@ export function MainNavigation() {
         </NavigationMenuItem>
 
         <NavigationMenuItem>
-          <Link href="/settings" legacyBehavior passHref>
+          <Link href="/dashboard/settings-v2" legacyBehavior passHref>
             <NavigationMenuLink className={navigationMenuTriggerStyle()}>
               <Settings className="h-4 w-4 mr-2" />
               Settings
