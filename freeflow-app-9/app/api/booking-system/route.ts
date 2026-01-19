@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@/lib/supabase/server';
 
 // ============================================================================
 // WORLD-CLASS BOOKING SYSTEM API
@@ -219,7 +220,7 @@ interface BookingPageConfig {
   socialLinks: { platform: string; url: string }[];
 }
 
-// In-memory storage
+// In-memory storage (fallback when database is unavailable)
 const servicesDb = new Map<string, Service>();
 const packagesDb = new Map<string, Package>();
 const bookingsDb = new Map<string, Booking>();
@@ -228,6 +229,365 @@ const availabilityDb = new Map<string, Availability>();
 const couponsDb = new Map<string, Coupon>();
 const teamMembersDb = new Map<string, TeamMember>();
 const bookingPageDb = new Map<string, BookingPageConfig>();
+
+// ============================================================================
+// DATABASE HELPER FUNCTIONS
+// ============================================================================
+
+async function getServicesFromDb(supabase: any, userId: string, filters?: { category?: string; active?: boolean }): Promise<Service[]> {
+  try {
+    let query = supabase.from('booking_services').select('*').eq('user_id', userId);
+    if (filters?.category) query = query.eq('category', filters.category);
+    if (filters?.active !== undefined) query = query.eq('active', filters.active);
+    query = query.order('order_index', { ascending: true });
+
+    const { data, error } = await query;
+    if (error || !data || data.length === 0) return [];
+    return data.map(mapDbService);
+  } catch {
+    return [];
+  }
+}
+
+async function getServiceFromDb(supabase: any, serviceId: string): Promise<Service | null> {
+  try {
+    const { data, error } = await supabase.from('booking_services').select('*').eq('id', serviceId).single();
+    if (error || !data) return null;
+    return mapDbService(data);
+  } catch {
+    return null;
+  }
+}
+
+async function createServiceInDb(supabase: any, service: Service): Promise<boolean> {
+  try {
+    const { error } = await supabase.from('booking_services').insert({
+      id: service.id,
+      user_id: service.userId,
+      name: service.name,
+      description: service.description,
+      category: service.category,
+      duration: service.duration,
+      buffer_before: service.bufferBefore,
+      buffer_after: service.bufferAfter,
+      price: service.price,
+      currency: service.currency,
+      deposit: service.deposit,
+      deposit_type: service.depositType,
+      max_bookings_per_slot: service.maxBookingsPerSlot,
+      requires_approval: service.requiresApproval,
+      allow_instant_booking: service.allowInstantBooking,
+      images: service.images,
+      tags: service.tags,
+      questions: service.questions,
+      add_ons: service.addOns,
+      team_members: service.teamMembers,
+      active: service.active,
+      order_index: service.order,
+      metadata: service.metadata
+    });
+    return !error;
+  } catch {
+    return false;
+  }
+}
+
+async function updateServiceInDb(supabase: any, serviceId: string, updates: Partial<Service>): Promise<boolean> {
+  try {
+    const dbUpdates: any = { updated_at: new Date().toISOString() };
+    if (updates.name !== undefined) dbUpdates.name = updates.name;
+    if (updates.description !== undefined) dbUpdates.description = updates.description;
+    if (updates.category !== undefined) dbUpdates.category = updates.category;
+    if (updates.duration !== undefined) dbUpdates.duration = updates.duration;
+    if (updates.price !== undefined) dbUpdates.price = updates.price;
+    if (updates.active !== undefined) dbUpdates.active = updates.active;
+
+    const { error } = await supabase.from('booking_services').update(dbUpdates).eq('id', serviceId);
+    return !error;
+  } catch {
+    return false;
+  }
+}
+
+async function getBookingsFromDb(supabase: any, userId: string, filters?: { status?: string; clientId?: string; startDate?: string; endDate?: string }): Promise<Booking[]> {
+  try {
+    let query = supabase.from('bookings').select('*').eq('user_id', userId);
+    if (filters?.status) query = query.eq('status', filters.status);
+    if (filters?.clientId) query = query.eq('client_id', filters.clientId);
+    if (filters?.startDate) query = query.gte('date', filters.startDate);
+    if (filters?.endDate) query = query.lte('date', filters.endDate);
+    query = query.order('date', { ascending: true }).order('start_time', { ascending: true });
+
+    const { data, error } = await query;
+    if (error || !data || data.length === 0) return [];
+    return data.map(mapDbBooking);
+  } catch {
+    return [];
+  }
+}
+
+async function getBookingFromDb(supabase: any, bookingId: string): Promise<Booking | null> {
+  try {
+    const { data, error } = await supabase.from('bookings').select('*').eq('id', bookingId).single();
+    if (error || !data) return null;
+    return mapDbBooking(data);
+  } catch {
+    return null;
+  }
+}
+
+async function createBookingInDb(supabase: any, booking: Booking): Promise<boolean> {
+  try {
+    const { error } = await supabase.from('bookings').insert({
+      id: booking.id,
+      user_id: booking.userId,
+      service_id: booking.serviceId,
+      package_id: booking.packageId,
+      client_id: booking.clientId,
+      team_member_id: booking.teamMemberId,
+      date: booking.date,
+      start_time: booking.startTime,
+      end_time: booking.endTime,
+      duration: booking.duration,
+      status: booking.status,
+      price: booking.price,
+      deposit: booking.deposit,
+      deposit_paid: booking.depositPaid,
+      total_paid: booking.totalPaid,
+      currency: booking.currency,
+      add_ons: booking.addOns,
+      answers: booking.answers,
+      notes: booking.notes,
+      internal_notes: booking.internalNotes,
+      cancellation_reason: booking.cancellationReason,
+      rescheduled_from: booking.rescheduledFrom,
+      confirmation_code: booking.confirmationCode,
+      reminders_sent: booking.remindersSent,
+      payment_intent_id: booking.paymentIntentId,
+      calendar_event_id: booking.calendarEventId,
+      metadata: booking.metadata
+    });
+    return !error;
+  } catch {
+    return false;
+  }
+}
+
+async function updateBookingInDb(supabase: any, bookingId: string, updates: Partial<Booking>): Promise<boolean> {
+  try {
+    const dbUpdates: any = { updated_at: new Date().toISOString() };
+    if (updates.status !== undefined) dbUpdates.status = updates.status;
+    if (updates.totalPaid !== undefined) dbUpdates.total_paid = updates.totalPaid;
+    if (updates.depositPaid !== undefined) dbUpdates.deposit_paid = updates.depositPaid;
+    if (updates.notes !== undefined) dbUpdates.notes = updates.notes;
+    if (updates.internalNotes !== undefined) dbUpdates.internal_notes = updates.internalNotes;
+    if (updates.cancellationReason !== undefined) dbUpdates.cancellation_reason = updates.cancellationReason;
+    if (updates.remindersSent !== undefined) dbUpdates.reminders_sent = updates.remindersSent;
+
+    const { error } = await supabase.from('bookings').update(dbUpdates).eq('id', bookingId);
+    return !error;
+  } catch {
+    return false;
+  }
+}
+
+async function getClientsFromDb(supabase: any, userId: string, search?: string): Promise<Client[]> {
+  try {
+    let query = supabase.from('booking_clients').select('*').eq('user_id', userId);
+    if (search) {
+      query = query.or(`name.ilike.%${search}%,email.ilike.%${search}%`);
+    }
+    query = query.order('last_booking', { ascending: false, nullsFirst: false });
+
+    const { data, error } = await query;
+    if (error || !data || data.length === 0) return [];
+    return data.map(mapDbClient);
+  } catch {
+    return [];
+  }
+}
+
+async function getClientFromDb(supabase: any, clientId: string): Promise<Client | null> {
+  try {
+    const { data, error } = await supabase.from('booking_clients').select('*').eq('id', clientId).single();
+    if (error || !data) return null;
+    return mapDbClient(data);
+  } catch {
+    return null;
+  }
+}
+
+async function createClientInDb(supabase: any, client: Client): Promise<boolean> {
+  try {
+    const { error } = await supabase.from('booking_clients').insert({
+      id: client.id,
+      user_id: client.userId,
+      email: client.email,
+      name: client.name,
+      phone: client.phone,
+      address: client.address,
+      notes: client.notes,
+      tags: client.tags,
+      total_bookings: client.totalBookings,
+      total_spent: client.totalSpent,
+      last_booking: client.lastBooking
+    });
+    return !error;
+  } catch {
+    return false;
+  }
+}
+
+async function updateClientInDb(supabase: any, clientId: string, updates: Partial<Client>): Promise<boolean> {
+  try {
+    const dbUpdates: any = { updated_at: new Date().toISOString() };
+    if (updates.totalBookings !== undefined) dbUpdates.total_bookings = updates.totalBookings;
+    if (updates.totalSpent !== undefined) dbUpdates.total_spent = updates.totalSpent;
+    if (updates.lastBooking !== undefined) dbUpdates.last_booking = updates.lastBooking;
+    if (updates.notes !== undefined) dbUpdates.notes = updates.notes;
+    if (updates.tags !== undefined) dbUpdates.tags = updates.tags;
+
+    const { error } = await supabase.from('booking_clients').update(dbUpdates).eq('id', clientId);
+    return !error;
+  } catch {
+    return false;
+  }
+}
+
+async function getAvailabilityFromDb(supabase: any, userId: string, teamMemberId?: string): Promise<Availability | null> {
+  try {
+    const key = teamMemberId || userId;
+    const { data, error } = await supabase.from('booking_availability').select('*').eq('user_id', key).single();
+    if (error || !data) return null;
+    return mapDbAvailability(data);
+  } catch {
+    return null;
+  }
+}
+
+async function saveAvailabilityToDb(supabase: any, availability: Availability): Promise<boolean> {
+  try {
+    const { error } = await supabase.from('booking_availability').upsert({
+      user_id: availability.teamMemberId || availability.userId,
+      timezone: availability.timezone,
+      weekly_schedule: availability.weeklySchedule,
+      date_overrides: availability.dateOverrides,
+      time_off: availability.timeOff,
+      buffer_between_bookings: availability.bufferBetweenBookings,
+      minimum_notice: availability.minimumNotice,
+      maximum_advance: availability.maximumAdvance
+    });
+    return !error;
+  } catch {
+    return false;
+  }
+}
+
+// Mapping functions
+function mapDbService(db: any): Service {
+  return {
+    id: db.id,
+    userId: db.user_id,
+    name: db.name,
+    description: db.description || '',
+    category: db.category || 'General',
+    duration: db.duration || 60,
+    bufferBefore: db.buffer_before || 0,
+    bufferAfter: db.buffer_after || 15,
+    price: db.price || 100,
+    currency: db.currency || 'USD',
+    deposit: db.deposit || 0,
+    depositType: db.deposit_type || 'percentage',
+    maxBookingsPerSlot: db.max_bookings_per_slot || 1,
+    requiresApproval: db.requires_approval || false,
+    allowInstantBooking: db.allow_instant_booking ?? true,
+    images: db.images || [],
+    tags: db.tags || [],
+    questions: db.questions || [],
+    addOns: db.add_ons || [],
+    teamMembers: db.team_members || [],
+    active: db.active ?? true,
+    order: db.order_index || 0,
+    metadata: db.metadata || {},
+    createdAt: db.created_at,
+    updatedAt: db.updated_at || db.created_at,
+  };
+}
+
+function mapDbBooking(db: any): Booking {
+  return {
+    id: db.id,
+    userId: db.user_id,
+    serviceId: db.service_id,
+    packageId: db.package_id,
+    clientId: db.client_id,
+    teamMemberId: db.team_member_id,
+    date: db.date,
+    startTime: db.start_time,
+    endTime: db.end_time,
+    duration: db.duration || 60,
+    status: db.status || 'pending',
+    price: db.price || 0,
+    deposit: db.deposit || 0,
+    depositPaid: db.deposit_paid || false,
+    totalPaid: db.total_paid || 0,
+    currency: db.currency || 'USD',
+    addOns: db.add_ons || [],
+    answers: db.answers || [],
+    notes: db.notes,
+    internalNotes: db.internal_notes,
+    cancellationReason: db.cancellation_reason,
+    rescheduledFrom: db.rescheduled_from,
+    confirmationCode: db.confirmation_code,
+    remindersSent: db.reminders_sent || [],
+    paymentIntentId: db.payment_intent_id,
+    calendarEventId: db.calendar_event_id,
+    metadata: db.metadata || {},
+    createdAt: db.created_at,
+    updatedAt: db.updated_at || db.created_at,
+  };
+}
+
+function mapDbClient(db: any): Client {
+  return {
+    id: db.id,
+    userId: db.user_id,
+    email: db.email,
+    name: db.name,
+    phone: db.phone,
+    address: db.address,
+    notes: db.notes,
+    tags: db.tags || [],
+    totalBookings: db.total_bookings || 0,
+    totalSpent: db.total_spent || 0,
+    lastBooking: db.last_booking,
+    createdAt: db.created_at,
+    updatedAt: db.updated_at || db.created_at,
+  };
+}
+
+function mapDbAvailability(db: any): Availability {
+  const defaultSlot = [{ start: '09:00', end: '17:00' }];
+  return {
+    userId: db.user_id,
+    teamMemberId: db.team_member_id,
+    timezone: db.timezone || 'America/New_York',
+    weeklySchedule: db.weekly_schedule || {
+      monday: defaultSlot,
+      tuesday: defaultSlot,
+      wednesday: defaultSlot,
+      thursday: defaultSlot,
+      friday: defaultSlot,
+      saturday: [],
+      sunday: [],
+    },
+    dateOverrides: db.date_overrides || [],
+    timeOff: db.time_off || [],
+    bufferBetweenBookings: db.buffer_between_bookings || 15,
+    minimumNotice: db.minimum_notice || 60,
+    maximumAdvance: db.maximum_advance || 60 * 24 * 60,
+  };
+}
 
 // Helper functions
 function generateId(prefix: string = 'book'): string {
@@ -358,6 +718,7 @@ function getAvailableSlots(
 // POST handler
 export async function POST(request: NextRequest) {
   try {
+    const supabase = await createClient();
     const body = await request.json();
     const { action, userId = '00000000-0000-0000-0000-000000000001', ...params } = body;
 
@@ -381,13 +742,17 @@ export async function POST(request: NextRequest) {
         if (price) service.price = price;
         Object.assign(service, rest);
 
+        // Try to save to database, fallback to in-memory
+        await createServiceInDb(supabase, service);
         servicesDb.set(service.id, service);
         return NextResponse.json({ success: true, service, message: 'Service created' });
       }
 
       case 'get-service': {
         const { serviceId } = params;
-        let service = servicesDb.get(serviceId);
+        // Try database first, then in-memory, then create demo
+        let service = await getServiceFromDb(supabase, serviceId);
+        if (!service) service = servicesDb.get(serviceId);
 
         if (!service) {
           service = createDefaultService(userId, 'Demo Service');
@@ -400,25 +765,38 @@ export async function POST(request: NextRequest) {
 
       case 'update-service': {
         const { serviceId, updates } = params;
-        let service = servicesDb.get(serviceId) || createDefaultService(userId, 'Service');
+        let service = await getServiceFromDb(supabase, serviceId) || servicesDb.get(serviceId) || createDefaultService(userId, 'Service');
         service = { ...service, ...updates, updatedAt: new Date().toISOString() };
+
+        await updateServiceInDb(supabase, serviceId, updates);
         servicesDb.set(serviceId, service);
         return NextResponse.json({ success: true, service, message: 'Service updated' });
       }
 
       case 'delete-service': {
         const { serviceId } = params;
+        // Try to delete from database
+        try {
+          await supabase.from('booking_services').delete().eq('id', serviceId);
+        } catch {}
         servicesDb.delete(serviceId);
         return NextResponse.json({ success: true, message: 'Service deleted' });
       }
 
       case 'list-services': {
         const { limit = 20, offset = 0, category, active } = params;
-        let services = Array.from(servicesDb.values()).filter(s => s.userId === userId);
 
-        if (category) services = services.filter(s => s.category === category);
-        if (active !== undefined) services = services.filter(s => s.active === active);
+        // Try database first
+        let services = await getServicesFromDb(supabase, userId, { category, active });
 
+        // Fallback to in-memory
+        if (services.length === 0) {
+          services = Array.from(servicesDb.values()).filter(s => s.userId === userId);
+          if (category) services = services.filter(s => s.category === category);
+          if (active !== undefined) services = services.filter(s => s.active === active);
+        }
+
+        // Fallback to demo data
         if (services.length === 0) {
           services = [
             { ...createDefaultService(userId, 'Consultation Call'), duration: 30, price: 50, category: 'Consultation' },
@@ -487,28 +865,40 @@ export async function POST(request: NextRequest) {
       case 'set-availability': {
         const { weeklySchedule, timezone, bufferBetweenBookings, minimumNotice, maximumAdvance, teamMemberId } = params;
 
-        const availability = availabilityDb.get(teamMemberId || userId) || createDefaultAvailability(userId);
+        // Try database first, then in-memory, then create default
+        let availability = await getAvailabilityFromDb(supabase, userId, teamMemberId);
+        if (!availability) availability = availabilityDb.get(teamMemberId || userId);
+        if (!availability) availability = createDefaultAvailability(userId);
 
         if (weeklySchedule) availability.weeklySchedule = weeklySchedule;
         if (timezone) availability.timezone = timezone;
         if (bufferBetweenBookings !== undefined) availability.bufferBetweenBookings = bufferBetweenBookings;
         if (minimumNotice !== undefined) availability.minimumNotice = minimumNotice;
         if (maximumAdvance !== undefined) availability.maximumAdvance = maximumAdvance;
+        if (teamMemberId) availability.teamMemberId = teamMemberId;
 
+        // Save to database and in-memory
+        await saveAvailabilityToDb(supabase, availability);
         availabilityDb.set(teamMemberId || userId, availability);
         return NextResponse.json({ success: true, availability, message: 'Availability updated' });
       }
 
       case 'get-availability': {
         const { teamMemberId } = params;
-        const availability = availabilityDb.get(teamMemberId || userId) || createDefaultAvailability(userId);
+        // Try database first, then in-memory, then create default
+        let availability = await getAvailabilityFromDb(supabase, userId, teamMemberId);
+        if (!availability) availability = availabilityDb.get(teamMemberId || userId);
+        if (!availability) availability = createDefaultAvailability(userId);
         return NextResponse.json({ success: true, availability });
       }
 
       case 'add-time-off': {
         const { startDate, endDate, reason, allDay = true, teamMemberId } = params;
 
-        const availability = availabilityDb.get(teamMemberId || userId) || createDefaultAvailability(userId);
+        // Try database first, then in-memory, then create default
+        let availability = await getAvailabilityFromDb(supabase, userId, teamMemberId);
+        if (!availability) availability = availabilityDb.get(teamMemberId || userId);
+        if (!availability) availability = createDefaultAvailability(userId);
 
         const timeOff: TimeOff = {
           id: generateId('to'),
@@ -519,6 +909,9 @@ export async function POST(request: NextRequest) {
         };
 
         availability.timeOff.push(timeOff);
+
+        // Save to database and in-memory
+        await saveAvailabilityToDb(supabase, availability);
         availabilityDb.set(teamMemberId || userId, availability);
 
         return NextResponse.json({ success: true, timeOff, message: 'Time off added' });
@@ -526,10 +919,15 @@ export async function POST(request: NextRequest) {
 
       case 'remove-time-off': {
         const { timeOffId, teamMemberId } = params;
-        const availability = availabilityDb.get(teamMemberId || userId);
+
+        // Try database first, then in-memory
+        let availability = await getAvailabilityFromDb(supabase, userId, teamMemberId);
+        if (!availability) availability = availabilityDb.get(teamMemberId || userId);
 
         if (availability) {
           availability.timeOff = availability.timeOff.filter(to => to.id !== timeOffId);
+          // Save to database and in-memory
+          await saveAvailabilityToDb(supabase, availability);
           availabilityDb.set(teamMemberId || userId, availability);
         }
 
@@ -543,11 +941,25 @@ export async function POST(request: NextRequest) {
           return NextResponse.json({ success: false, error: 'Service ID and date required' }, { status: 400 });
         }
 
-        const service = servicesDb.get(serviceId) || createDefaultService(userId, 'Service');
-        const availability = availabilityDb.get(teamMemberId || userId) || createDefaultAvailability(userId);
-        const existingBookings = Array.from(bookingsDb.values()).filter(b =>
-          b.date === date && (teamMemberId ? b.teamMemberId === teamMemberId : b.userId === userId)
-        );
+        // Try database for service, then in-memory, then demo
+        let service = await getServiceFromDb(supabase, serviceId);
+        if (!service) service = servicesDb.get(serviceId);
+        if (!service) service = createDefaultService(userId, 'Service');
+
+        // Try database for availability, then in-memory, then default
+        let availability = await getAvailabilityFromDb(supabase, userId, teamMemberId);
+        if (!availability) availability = availabilityDb.get(teamMemberId || userId);
+        if (!availability) availability = createDefaultAvailability(userId);
+
+        // Try database for bookings, then in-memory
+        let existingBookings = await getBookingsFromDb(supabase, userId, { startDate: date, endDate: date });
+        if (existingBookings.length === 0) {
+          existingBookings = Array.from(bookingsDb.values()).filter(b =>
+            b.date === date && (teamMemberId ? b.teamMemberId === teamMemberId : b.userId === userId)
+          );
+        } else if (teamMemberId) {
+          existingBookings = existingBookings.filter(b => b.teamMemberId === teamMemberId);
+        }
 
         const slots = getAvailableSlots(availability, service, date, existingBookings);
 
@@ -580,11 +992,27 @@ export async function POST(request: NextRequest) {
       case 'check-slot-availability': {
         const { serviceId, date, startTime, teamMemberId } = params;
 
-        const service = servicesDb.get(serviceId) || createDefaultService(userId, 'Service');
-        const availability = availabilityDb.get(teamMemberId || userId) || createDefaultAvailability(userId);
-        const existingBookings = Array.from(bookingsDb.values()).filter(b =>
-          b.date === date && b.status !== 'cancelled' && (teamMemberId ? b.teamMemberId === teamMemberId : b.userId === userId)
-        );
+        // Try database for service, then in-memory, then demo
+        let service = await getServiceFromDb(supabase, serviceId);
+        if (!service) service = servicesDb.get(serviceId);
+        if (!service) service = createDefaultService(userId, 'Service');
+
+        // Try database for availability, then in-memory, then default
+        let availability = await getAvailabilityFromDb(supabase, userId, teamMemberId);
+        if (!availability) availability = availabilityDb.get(teamMemberId || userId);
+        if (!availability) availability = createDefaultAvailability(userId);
+
+        // Try database for bookings, then in-memory
+        let existingBookings = await getBookingsFromDb(supabase, userId, { startDate: date, endDate: date });
+        if (existingBookings.length === 0) {
+          existingBookings = Array.from(bookingsDb.values()).filter(b =>
+            b.date === date && b.status !== 'cancelled' && (teamMemberId ? b.teamMemberId === teamMemberId : b.userId === userId)
+          );
+        } else {
+          existingBookings = existingBookings.filter(b =>
+            b.status !== 'cancelled' && (!teamMemberId || b.teamMemberId === teamMemberId)
+          );
+        }
 
         const slots = getAvailableSlots(availability, service, date, existingBookings);
         const isAvailable = slots.some(slot => slot.start === startTime);
@@ -608,7 +1036,10 @@ export async function POST(request: NextRequest) {
           return NextResponse.json({ success: false, error: 'Missing required fields' }, { status: 400 });
         }
 
-        const service = servicesDb.get(serviceId) || createDefaultService(userId, 'Service');
+        // Try database for service, then in-memory, then demo
+        let service = await getServiceFromDb(supabase, serviceId);
+        if (!service) service = servicesDb.get(serviceId);
+        if (!service) service = createDefaultService(userId, 'Service');
 
         // Calculate end time
         const [hours, minutes] = startTime.split(':').map(Number);
@@ -639,8 +1070,24 @@ export async function POST(request: NextRequest) {
           }
         }
 
-        // Get or create client
-        let client = Array.from(clientsDb.values()).find(c => c.email === clientEmail);
+        // Try to find client in database by email
+        let client: Client | null = null;
+        try {
+          const { data: dbClient } = await supabase
+            .from('booking_clients')
+            .select('*')
+            .eq('email', clientEmail)
+            .eq('user_id', userId)
+            .single();
+          if (dbClient) client = mapDbClient(dbClient);
+        } catch { /* ignore */ }
+
+        // If not found, check in-memory
+        if (!client) {
+          client = Array.from(clientsDb.values()).find(c => c.email === clientEmail) || null;
+        }
+
+        // If still not found, create new client
         if (!client) {
           client = {
             id: generateId('client'),
@@ -654,6 +1101,7 @@ export async function POST(request: NextRequest) {
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
           };
+          await createClientInDb(supabase, client);
           clientsDb.set(client.id, client);
         }
 
@@ -683,11 +1131,14 @@ export async function POST(request: NextRequest) {
           updatedAt: new Date().toISOString(),
         };
 
+        // Save booking to database and in-memory
+        await createBookingInDb(supabase, booking);
         bookingsDb.set(booking.id, booking);
 
         // Update client stats
         client.totalBookings++;
         client.lastBooking = new Date().toISOString();
+        await updateClientInDb(supabase, client.id, { totalBookings: client.totalBookings, lastBooking: client.lastBooking });
         clientsDb.set(client.id, client);
 
         return NextResponse.json({
@@ -700,10 +1151,28 @@ export async function POST(request: NextRequest) {
 
       case 'get-booking': {
         const { bookingId, confirmationCode } = params;
-        let booking = bookingId
-          ? bookingsDb.get(bookingId)
-          : Array.from(bookingsDb.values()).find(b => b.confirmationCode === confirmationCode);
 
+        // Try database first
+        let booking: Booking | null = null;
+        if (bookingId) {
+          booking = await getBookingFromDb(supabase, bookingId);
+          if (!booking) booking = bookingsDb.get(bookingId) || null;
+        } else if (confirmationCode) {
+          // Search database by confirmation code
+          try {
+            const { data } = await supabase
+              .from('bookings')
+              .select('*')
+              .eq('confirmation_code', confirmationCode)
+              .single();
+            if (data) booking = mapDbBooking(data);
+          } catch { /* ignore */ }
+          if (!booking) {
+            booking = Array.from(bookingsDb.values()).find(b => b.confirmationCode === confirmationCode) || null;
+          }
+        }
+
+        // Return demo booking if not found
         if (!booking) {
           booking = {
             id: bookingId || 'demo',
@@ -735,10 +1204,14 @@ export async function POST(request: NextRequest) {
 
       case 'update-booking': {
         const { bookingId, updates } = params;
-        let booking = bookingsDb.get(bookingId);
+
+        // Try database first, then in-memory
+        let booking = await getBookingFromDb(supabase, bookingId);
+        if (!booking) booking = bookingsDb.get(bookingId) || null;
 
         if (booking) {
           booking = { ...booking, ...updates, updatedAt: new Date().toISOString() };
+          await updateBookingInDb(supabase, bookingId, updates);
           bookingsDb.set(bookingId, booking);
         }
 
@@ -747,12 +1220,16 @@ export async function POST(request: NextRequest) {
 
       case 'cancel-booking': {
         const { bookingId, reason, notifyClient = true } = params;
-        const booking = bookingsDb.get(bookingId);
+
+        // Try database first, then in-memory
+        let booking = await getBookingFromDb(supabase, bookingId);
+        if (!booking) booking = bookingsDb.get(bookingId) || null;
 
         if (booking) {
           booking.status = 'cancelled';
           booking.cancellationReason = reason;
           booking.updatedAt = new Date().toISOString();
+          await updateBookingInDb(supabase, bookingId, { status: 'cancelled', cancellationReason: reason });
           bookingsDb.set(bookingId, booking);
         }
 
@@ -766,7 +1243,10 @@ export async function POST(request: NextRequest) {
 
       case 'reschedule-booking': {
         const { bookingId, newDate, newStartTime, notifyClient = true } = params;
-        const booking = bookingsDb.get(bookingId);
+
+        // Try database first, then in-memory
+        let booking = await getBookingFromDb(supabase, bookingId);
+        if (!booking) booking = bookingsDb.get(bookingId) || null;
 
         if (booking) {
           const oldBookingId = booking.id;
@@ -793,6 +1273,10 @@ export async function POST(request: NextRequest) {
           // Mark old booking as rescheduled
           booking.status = 'rescheduled';
           booking.updatedAt = new Date().toISOString();
+
+          // Save both to database and in-memory
+          await updateBookingInDb(supabase, bookingId, { status: 'rescheduled' });
+          await createBookingInDb(supabase, newBooking);
           bookingsDb.set(bookingId, booking);
           bookingsDb.set(newBooking.id, newBooking);
 
@@ -810,14 +1294,26 @@ export async function POST(request: NextRequest) {
 
       case 'list-bookings': {
         const { limit = 20, offset = 0, status, startDate, endDate, clientId, teamMemberId } = params;
-        let bookings = Array.from(bookingsDb.values()).filter(b => b.userId === userId);
 
-        if (status) bookings = bookings.filter(b => b.status === status);
-        if (clientId) bookings = bookings.filter(b => b.clientId === clientId);
-        if (teamMemberId) bookings = bookings.filter(b => b.teamMemberId === teamMemberId);
-        if (startDate) bookings = bookings.filter(b => b.date >= startDate);
-        if (endDate) bookings = bookings.filter(b => b.date <= endDate);
+        // Try database first
+        let bookings = await getBookingsFromDb(supabase, userId, { status, clientId, startDate, endDate });
 
+        // Apply team member filter if present
+        if (bookings.length > 0 && teamMemberId) {
+          bookings = bookings.filter(b => b.teamMemberId === teamMemberId);
+        }
+
+        // Fallback to in-memory
+        if (bookings.length === 0) {
+          bookings = Array.from(bookingsDb.values()).filter(b => b.userId === userId);
+          if (status) bookings = bookings.filter(b => b.status === status);
+          if (clientId) bookings = bookings.filter(b => b.clientId === clientId);
+          if (teamMemberId) bookings = bookings.filter(b => b.teamMemberId === teamMemberId);
+          if (startDate) bookings = bookings.filter(b => b.date >= startDate);
+          if (endDate) bookings = bookings.filter(b => b.date <= endDate);
+        }
+
+        // Fallback to demo data
         if (bookings.length === 0) {
           const today = new Date().toISOString().split('T')[0];
           const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
@@ -840,11 +1336,15 @@ export async function POST(request: NextRequest) {
 
       case 'confirm-booking': {
         const { bookingId, notifyClient = true } = params;
-        const booking = bookingsDb.get(bookingId);
+
+        // Try database first, then in-memory
+        let booking = await getBookingFromDb(supabase, bookingId);
+        if (!booking) booking = bookingsDb.get(bookingId) || null;
 
         if (booking) {
           booking.status = 'confirmed';
           booking.updatedAt = new Date().toISOString();
+          await updateBookingInDb(supabase, bookingId, { status: 'confirmed' });
           bookingsDb.set(bookingId, booking);
         }
 
@@ -858,19 +1358,28 @@ export async function POST(request: NextRequest) {
 
       case 'complete-booking': {
         const { bookingId, notes } = params;
-        const booking = bookingsDb.get(bookingId);
+
+        // Try database first, then in-memory
+        let booking = await getBookingFromDb(supabase, bookingId);
+        if (!booking) booking = bookingsDb.get(bookingId) || null;
 
         if (booking) {
           booking.status = 'completed';
           if (notes) booking.internalNotes = notes;
           booking.updatedAt = new Date().toISOString();
+
+          // Update database and in-memory
+          await updateBookingInDb(supabase, bookingId, { status: 'completed', internalNotes: notes });
           bookingsDb.set(bookingId, booking);
 
-          // Update client stats
-          const client = clientsDb.get(booking.clientId);
+          // Update client stats - try database first
+          let client = await getClientFromDb(supabase, booking.clientId);
+          if (!client) client = clientsDb.get(booking.clientId) || null;
+
           if (client) {
             client.totalSpent += booking.price;
             client.updatedAt = new Date().toISOString();
+            await updateClientInDb(supabase, client.id, { totalSpent: client.totalSpent });
             clientsDb.set(client.id, client);
           }
         }
@@ -885,13 +1394,25 @@ export async function POST(request: NextRequest) {
       case 'get-calendar': {
         const { startDate, endDate, teamMemberId } = params;
 
-        let bookings = Array.from(bookingsDb.values()).filter(b => b.userId === userId);
+        // Try database first
+        let bookings = await getBookingsFromDb(supabase, userId, { startDate, endDate });
 
-        if (teamMemberId) bookings = bookings.filter(b => b.teamMemberId === teamMemberId);
-        if (startDate) bookings = bookings.filter(b => b.date >= startDate);
-        if (endDate) bookings = bookings.filter(b => b.date <= endDate);
+        if (bookings.length > 0 && teamMemberId) {
+          bookings = bookings.filter(b => b.teamMemberId === teamMemberId);
+        }
 
-        const availability = availabilityDb.get(teamMemberId || userId) || createDefaultAvailability(userId);
+        // Fallback to in-memory
+        if (bookings.length === 0) {
+          bookings = Array.from(bookingsDb.values()).filter(b => b.userId === userId);
+          if (teamMemberId) bookings = bookings.filter(b => b.teamMemberId === teamMemberId);
+          if (startDate) bookings = bookings.filter(b => b.date >= startDate);
+          if (endDate) bookings = bookings.filter(b => b.date <= endDate);
+        }
+
+        // Try database for availability, then in-memory, then default
+        let availability = await getAvailabilityFromDb(supabase, userId, teamMemberId);
+        if (!availability) availability = availabilityDb.get(teamMemberId || userId);
+        if (!availability) availability = createDefaultAvailability(userId);
 
         // Generate demo calendar if empty
         if (bookings.length === 0) {
@@ -967,22 +1488,31 @@ export async function POST(request: NextRequest) {
           updatedAt: new Date().toISOString(),
         };
 
+        // Save to database and in-memory
+        await createClientInDb(supabase, client);
         clientsDb.set(client.id, client);
         return NextResponse.json({ success: true, client, message: 'Client added' });
       }
 
       case 'list-clients': {
         const { limit = 20, offset = 0, search } = params;
-        let clients = Array.from(clientsDb.values()).filter(c => c.userId === userId);
 
-        if (search) {
-          const searchLower = search.toLowerCase();
-          clients = clients.filter(c =>
-            c.name.toLowerCase().includes(searchLower) ||
-            c.email.toLowerCase().includes(searchLower)
-          );
+        // Try database first
+        let clients = await getClientsFromDb(supabase, userId, search);
+
+        // Fallback to in-memory
+        if (clients.length === 0) {
+          clients = Array.from(clientsDb.values()).filter(c => c.userId === userId);
+          if (search) {
+            const searchLower = search.toLowerCase();
+            clients = clients.filter(c =>
+              c.name.toLowerCase().includes(searchLower) ||
+              c.email.toLowerCase().includes(searchLower)
+            );
+          }
         }
 
+        // Fallback to demo data
         if (clients.length === 0) {
           clients = [
             { id: generateId('client'), userId, email: 'john@example.com', name: 'John Doe', phone: '+1234567890', tags: ['VIP'], totalBookings: 5, totalSpent: 750, lastBooking: new Date(Date.now() - 7 * 86400000).toISOString(), createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
@@ -1002,9 +1532,16 @@ export async function POST(request: NextRequest) {
       case 'get-client-history': {
         const { clientId } = params;
 
-        const bookings = Array.from(bookingsDb.values())
-          .filter(b => b.clientId === clientId)
-          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        // Try database first
+        let bookings = await getBookingsFromDb(supabase, userId, { clientId });
+
+        // Fallback to in-memory
+        if (bookings.length === 0) {
+          bookings = Array.from(bookingsDb.values())
+            .filter(b => b.clientId === clientId);
+        }
+
+        bookings.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
         return NextResponse.json({
           success: true,
@@ -1024,7 +1561,10 @@ export async function POST(request: NextRequest) {
 
       case 'create-payment': {
         const { bookingId, amount, method = 'card' } = params;
-        const booking = bookingsDb.get(bookingId);
+
+        // Try database first, then in-memory
+        let booking = await getBookingFromDb(supabase, bookingId);
+        if (!booking) booking = bookingsDb.get(bookingId) || null;
 
         if (booking) {
           booking.totalPaid += amount;
@@ -1032,6 +1572,9 @@ export async function POST(request: NextRequest) {
             booking.depositPaid = true;
           }
           booking.updatedAt = new Date().toISOString();
+
+          // Update database and in-memory
+          await updateBookingInDb(supabase, bookingId, { totalPaid: booking.totalPaid, depositPaid: booking.depositPaid });
           bookingsDb.set(bookingId, booking);
         }
 
