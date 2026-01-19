@@ -9,7 +9,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@/lib/supabase/server'
 import { getServerSession } from '@/lib/auth'
 import { checkPermission } from '@/lib/rbac/rbac-service'
 
@@ -79,22 +79,12 @@ interface TaskStats {
 }
 
 // ============================================================================
-// DATABASE CLIENT
-// ============================================================================
-
-function getSupabase() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
-}
-
-// ============================================================================
 // GET - List Tasks / Get Single Task
 // ============================================================================
 
 export async function GET(request: NextRequest) {
   try {
+    const supabase = await createClient()
     const session = await getServerSession()
     const { searchParams } = new URL(request.url)
 
@@ -115,8 +105,6 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '50')
     const includeSubtasks = searchParams.get('include_subtasks') === 'true'
     const includeTimeEntries = searchParams.get('include_time_entries') === 'true'
-
-    const supabase = getSupabase()
 
     // Demo mode for unauthenticated users
     if (!session?.user) {
@@ -338,7 +326,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { action = 'create' } = body
 
-    const supabase = getSupabase()
+    const supabase = await createClient()
 
     // Handle different actions
     switch (action) {
@@ -419,7 +407,7 @@ export async function PUT(request: NextRequest) {
       )
     }
 
-    const supabase = getSupabase()
+    const supabase = await createClient()
 
     // Get current task for comparison
     const { data: currentTask } = await supabase
@@ -539,7 +527,7 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    const supabase = getSupabase()
+    const supabase = await createClient()
 
     // Get task info for logging
     const { data: task } = await supabase

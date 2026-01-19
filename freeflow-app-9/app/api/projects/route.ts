@@ -9,7 +9,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@/lib/supabase/server'
 import { getServerSession } from '@/lib/auth'
 import { checkPermission } from '@/lib/rbac/rbac-service'
 
@@ -52,22 +52,12 @@ interface ProjectStats {
 }
 
 // ============================================================================
-// DATABASE CLIENT
-// ============================================================================
-
-function getSupabase() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
-}
-
-// ============================================================================
 // GET - List Projects / Get Single Project
 // ============================================================================
 
 export async function GET(request: NextRequest) {
   try {
+    const supabase = await createClient()
     const session = await getServerSession()
     const { searchParams } = new URL(request.url)
 
@@ -85,8 +75,6 @@ export async function GET(request: NextRequest) {
     const includeStats = searchParams.get('include_stats') === 'true'
     const includeMembers = searchParams.get('include_members') === 'true'
     const includeTasks = searchParams.get('include_tasks') === 'true'
-
-    const supabase = getSupabase()
 
     // Demo mode for unauthenticated users
     if (!session?.user) {
@@ -314,7 +302,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const supabase = getSupabase()
+    const supabase = await createClient()
 
     // If using a template, copy template settings
     let templateData = {}
@@ -475,7 +463,7 @@ export async function PUT(request: NextRequest) {
       )
     }
 
-    const supabase = getSupabase()
+    const supabase = await createClient()
 
     // Get current project for comparison
     const { data: currentProject } = await supabase
@@ -600,7 +588,7 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    const supabase = getSupabase()
+    const supabase = await createClient()
 
     // Get project info for logging
     const { data: project } = await supabase
