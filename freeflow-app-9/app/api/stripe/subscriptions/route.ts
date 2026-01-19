@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@/lib/supabase/server';
 import Stripe from 'stripe';
 
 // ============================================================================
@@ -18,10 +18,6 @@ import Stripe from 'stripe';
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder', {
   apiVersion: '2024-11-20.acacia',
 });
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 // Plan limits for feature gating
 const PLAN_LIMITS = {
@@ -76,18 +72,13 @@ interface SubscriptionRequest {
 
 export async function POST(request: NextRequest) {
   try {
+    const supabase = await createClient();
     const body: SubscriptionRequest = await request.json();
     const { action } = body;
 
     // Get user from auth
-    const authHeader = request.headers.get('authorization');
-    let userId: string | null = null;
-
-    if (authHeader?.startsWith('Bearer ')) {
-      const token = authHeader.substring(7);
-      const { data: { user } } = await supabase.auth.getUser(token);
-      userId = user?.id || null;
-    }
+    const { data: { user } } = await supabase.auth.getUser();
+    const userId = user?.id || null;
 
     const isDemo = !process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY.includes('placeholder');
 

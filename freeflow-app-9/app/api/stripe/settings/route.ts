@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@/lib/supabase/server';
 
 // ============================================================================
 // SUBSCRIPTION SETTINGS API
@@ -8,10 +8,6 @@ import { createClient } from '@supabase/supabase-js';
 // - Get settings
 // - Update settings (auto-renew, email notifications)
 // ============================================================================
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 interface SettingsRequest {
   action: string;
@@ -22,27 +18,15 @@ interface SettingsRequest {
 }
 
 // ============================================================================
-// HELPER: Get user from auth header
-// ============================================================================
-async function getUserFromAuth(request: NextRequest) {
-  const authHeader = request.headers.get('authorization');
-  if (authHeader?.startsWith('Bearer ')) {
-    const token = authHeader.substring(7);
-    const { data: { user } } = await supabase.auth.getUser(token);
-    return user;
-  }
-  return null;
-}
-
-// ============================================================================
 // POST HANDLER
 // ============================================================================
 export async function POST(request: NextRequest) {
   try {
+    const supabase = await createClient();
     const body: SettingsRequest = await request.json();
     const { action } = body;
 
-    const user = await getUserFromAuth(request);
+    const { data: { user } } = await supabase.auth.getUser();
     const userId = user?.id;
 
     switch (action) {

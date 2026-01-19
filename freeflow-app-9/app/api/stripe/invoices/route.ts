@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@/lib/supabase/server';
 import Stripe from 'stripe';
 
 // ============================================================================
@@ -15,26 +15,9 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder'
   apiVersion: '2024-11-20.acacia',
 });
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
 interface InvoiceRequest {
   action: string;
   invoiceId?: string;
-}
-
-// ============================================================================
-// HELPER: Get user from auth header
-// ============================================================================
-async function getUserFromAuth(request: NextRequest) {
-  const authHeader = request.headers.get('authorization');
-  if (authHeader?.startsWith('Bearer ')) {
-    const token = authHeader.substring(7);
-    const { data: { user } } = await supabase.auth.getUser(token);
-    return user;
-  }
-  return null;
 }
 
 // ============================================================================
@@ -42,10 +25,11 @@ async function getUserFromAuth(request: NextRequest) {
 // ============================================================================
 export async function POST(request: NextRequest) {
   try {
+    const supabase = await createClient();
     const body: InvoiceRequest = await request.json();
     const { action, invoiceId } = body;
 
-    const user = await getUserFromAuth(request);
+    const { data: { user } } = await supabase.auth.getUser();
     const userId = user?.id;
 
     const isDemo = !process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY.includes('placeholder');

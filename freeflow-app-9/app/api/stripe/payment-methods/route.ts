@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@/lib/supabase/server';
 import Stripe from 'stripe';
 
 // ============================================================================
@@ -16,10 +16,6 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder'
   apiVersion: '2024-11-20.acacia',
 });
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
 interface PaymentMethodRequest {
   action: string;
   paymentMethodId?: string;
@@ -32,22 +28,9 @@ interface PaymentMethodRequest {
 }
 
 // ============================================================================
-// HELPER: Get user from auth header
-// ============================================================================
-async function getUserFromAuth(request: NextRequest) {
-  const authHeader = request.headers.get('authorization');
-  if (authHeader?.startsWith('Bearer ')) {
-    const token = authHeader.substring(7);
-    const { data: { user } } = await supabase.auth.getUser(token);
-    return user;
-  }
-  return null;
-}
-
-// ============================================================================
 // HELPER: Get or create Stripe customer
 // ============================================================================
-async function getStripeCustomerId(userId: string): Promise<string | null> {
+async function getStripeCustomerId(userId: string, supabase: any): Promise<string | null> {
   const { data: user } = await supabase
     .from('users')
     .select('stripe_customer_id, email')
@@ -85,10 +68,11 @@ async function getStripeCustomerId(userId: string): Promise<string | null> {
 // ============================================================================
 export async function POST(request: NextRequest) {
   try {
+    const supabase = await createClient();
     const body: PaymentMethodRequest = await request.json();
     const { action } = body;
 
-    const user = await getUserFromAuth(request);
+    const { data: { user } } = await supabase.auth.getUser();
     const userId = user?.id;
 
     const isDemo = !process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY.includes('placeholder');
@@ -134,7 +118,7 @@ export async function POST(request: NextRequest) {
           });
         }
 
-        const customerId = await getStripeCustomerId(userId);
+        const customerId = await getStripeCustomerId(userId, supabase);
         if (!customerId) {
           return NextResponse.json({
             success: true,
@@ -206,7 +190,7 @@ export async function POST(request: NextRequest) {
           });
         }
 
-        const customerId = await getStripeCustomerId(userId);
+        const customerId = await getStripeCustomerId(userId, supabase);
         if (!customerId) {
           return NextResponse.json({
             success: false,
@@ -258,7 +242,7 @@ export async function POST(request: NextRequest) {
           });
         }
 
-        const customerId = await getStripeCustomerId(userId);
+        const customerId = await getStripeCustomerId(userId, supabase);
         if (!customerId) {
           return NextResponse.json({
             success: false,
@@ -302,10 +286,11 @@ export async function POST(request: NextRequest) {
 // ============================================================================
 export async function DELETE(request: NextRequest) {
   try {
+    const supabase = await createClient();
     const body = await request.json();
     const { paymentMethodId } = body;
 
-    const user = await getUserFromAuth(request);
+    const { data: { user } } = await supabase.auth.getUser();
     const userId = user?.id;
 
     if (!userId) {

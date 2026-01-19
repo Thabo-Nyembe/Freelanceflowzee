@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@/lib/supabase/server';
 import Stripe from 'stripe';
 
 // ============================================================================
@@ -14,10 +14,6 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder'
   apiVersion: '2024-11-20.acacia',
 });
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
 interface RefundRequest {
   invoiceId?: string;
   chargeId?: string;
@@ -26,27 +22,15 @@ interface RefundRequest {
 }
 
 // ============================================================================
-// HELPER: Get user from auth header
-// ============================================================================
-async function getUserFromAuth(request: NextRequest) {
-  const authHeader = request.headers.get('authorization');
-  if (authHeader?.startsWith('Bearer ')) {
-    const token = authHeader.substring(7);
-    const { data: { user } } = await supabase.auth.getUser(token);
-    return user;
-  }
-  return null;
-}
-
-// ============================================================================
 // POST HANDLER - Submit refund request
 // ============================================================================
 export async function POST(request: NextRequest) {
   try {
+    const supabase = await createClient();
     const body: RefundRequest = await request.json();
     const { invoiceId, chargeId, amount, reason } = body;
 
-    const user = await getUserFromAuth(request);
+    const { data: { user } } = await supabase.auth.getUser();
     const userId = user?.id;
 
     if (!userId) {
@@ -171,10 +155,11 @@ export async function POST(request: NextRequest) {
 // ============================================================================
 export async function GET(request: NextRequest) {
   try {
+    const supabase = await createClient();
     const { searchParams } = new URL(request.url);
     const refundId = searchParams.get('id');
 
-    const user = await getUserFromAuth(request);
+    const { data: { user } } = await supabase.auth.getUser();
     const userId = user?.id;
 
     if (!userId) {

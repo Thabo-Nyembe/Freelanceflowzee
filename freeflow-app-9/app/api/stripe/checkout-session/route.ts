@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@/lib/supabase/server';
 import Stripe from 'stripe';
 
 // ============================================================================
@@ -18,11 +18,6 @@ import Stripe from 'stripe';
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder', {
   apiVersion: '2024-11-20.acacia',
 });
-
-// Supabase client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 // Plan configurations
 const PLANS = {
@@ -115,7 +110,7 @@ interface CheckoutRequest {
 // HELPER FUNCTIONS
 // ============================================================================
 
-async function getOrCreateStripeCustomer(userId: string, email: string): Promise<string> {
+async function getOrCreateStripeCustomer(userId: string, email: string, supabase: any): Promise<string> {
   // Check if user already has a Stripe customer ID
   const { data: user } = await supabase
     .from('users')
@@ -163,20 +158,14 @@ function calculatePrice(plan: typeof PLANS[keyof typeof PLANS], interval: 'month
 
 export async function POST(request: NextRequest) {
   try {
+    const supabase = await createClient();
     const body: CheckoutRequest = await request.json();
     const { action } = body;
 
-    // Get user from auth header
-    const authHeader = request.headers.get('authorization');
-    let userId: string | null = null;
-    let userEmail: string | null = null;
-
-    if (authHeader?.startsWith('Bearer ')) {
-      const token = authHeader.substring(7);
-      const { data: { user } } = await supabase.auth.getUser(token);
-      userId = user?.id || null;
-      userEmail = user?.email || null;
-    }
+    // Get user from auth
+    const { data: { user } } = await supabase.auth.getUser();
+    const userId = user?.id || null;
+    const userEmail = user?.email || null;
 
     const isDemo = !process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY.includes('placeholder');
 
@@ -242,7 +231,7 @@ export async function POST(request: NextRequest) {
 
         // Production: Create actual Stripe checkout session
         const customerId = userId && userEmail
-          ? await getOrCreateStripeCustomer(userId, userEmail)
+          ? await getOrCreateStripeCustomer(userId, userEmail, supabase)
           : undefined;
 
         const sessionConfig: Stripe.Checkout.SessionCreateParams = {
@@ -325,7 +314,7 @@ export async function POST(request: NextRequest) {
         }
 
         const customerId = userId && userEmail
-          ? await getOrCreateStripeCustomer(userId, userEmail)
+          ? await getOrCreateStripeCustomer(userId, userEmail, supabase)
           : undefined;
 
         const session = await stripe.checkout.sessions.create({
