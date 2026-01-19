@@ -1,13 +1,9 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-)
 
 export async function GET(request: Request) {
   try {
+    const supabase = await createClient()
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') || 'all'
     const category = searchParams.get('category')
