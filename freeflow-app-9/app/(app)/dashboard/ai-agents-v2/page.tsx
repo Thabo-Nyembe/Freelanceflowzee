@@ -74,6 +74,7 @@ import { TextShimmer } from '@/components/ui/text-shimmer';
 import { toast } from 'sonner';
 import { createFeatureLogger } from '@/lib/logger';
 import type { AgentRole } from '@/lib/ai/agent-orchestrator';
+import { useAIAgents, useAgentChat, type AIAgent, type CreateAgentInput } from '@/lib/hooks/use-ai-agents';
 
 const logger = createFeatureLogger('AIAgents-Page');
 
@@ -232,18 +233,69 @@ const DEFAULT_SETTINGS: AgentSettings = {
 };
 
 export default function AIAgentsPage() {
+  // Real API hooks
+  const {
+    myAgents,
+    templates: apiTemplates,
+    isLoadingAgents,
+    isCreating: isCreatingAgent,
+    isUpdating,
+    isDeleting,
+    createAgent: apiCreateAgent,
+    updateAgent: apiUpdateAgent,
+    deleteAgent: apiDeleteAgent,
+  } = useAIAgents();
+
   // State
-  const [agents, setAgents] = useState<CustomAgent[]>([]);
   const [selectedAgent, setSelectedAgent] = useState<CustomAgent | null>(null);
+  const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
   const [activeTab, setActiveTab] = useState('my-agents');
   const [searchQuery, setSearchQuery] = useState('');
   const [showTestDialog, setShowTestDialog] = useState(false);
   const [testMessage, setTestMessage] = useState('');
-  const [testResponse, setTestResponse] = useState('');
-  const [isTesting, setIsTesting] = useState(false);
+
+  // Chat hook for testing agents
+  const {
+    messages: chatMessages,
+    isLoading: isChatLoading,
+    sendMessage: sendChatMessage,
+    clearConversation,
+  } = useAgentChat(selectedAgentId || '');
+
+  // Convert API agents to local format
+  const agents: CustomAgent[] = myAgents.map((agent: AIAgent) => ({
+    id: agent.id,
+    name: agent.name,
+    description: agent.description || '',
+    avatar: agent.avatar_url || undefined,
+    role: 'custom' as AgentRole,
+    systemPrompt: agent.system_prompt,
+    capabilities: DEFAULT_CAPABILITIES.map(c => ({
+      ...c,
+      enabled: agent.capabilities?.[c.id.replace('-', '_') as keyof typeof agent.capabilities] || false,
+    })),
+    tools: [],
+    knowledgeBases: [],
+    settings: {
+      model: agent.model,
+      temperature: agent.temperature,
+      maxTokens: agent.max_tokens,
+      topP: 1,
+      frequencyPenalty: 0,
+      presencePenalty: 0,
+      responseFormat: 'markdown' as const,
+    },
+    status: 'active' as const,
+    isPublic: agent.is_public,
+    usageCount: agent.conversation_count || 0,
+    rating: 4.5,
+    createdAt: agent.created_at,
+    updatedAt: agent.updated_at,
+  }));
+
+  const isSaving = isCreatingAgent || isUpdating;
 
   // Form state for creating/editing
   const [formData, setFormData] = useState({
@@ -258,30 +310,7 @@ export default function AIAgentsPage() {
     isPublic: false,
   });
 
-  // Load agents
-  useEffect(() => {
-    // In a real app, fetch from API
-    const mockAgents: CustomAgent[] = [
-      {
-        id: 'agent-1',
-        name: 'My Research Bot',
-        description: 'Helps with research and fact-checking',
-        role: 'researcher',
-        systemPrompt: 'You are a helpful research assistant.',
-        capabilities: DEFAULT_CAPABILITIES.map(c => ({ ...c, enabled: c.id === 'web-search' || c.id === 'file-analysis' })),
-        tools: ['summarizer', 'translator'],
-        knowledgeBases: [],
-        settings: DEFAULT_SETTINGS,
-        status: 'active',
-        isPublic: false,
-        usageCount: 156,
-        rating: 4.5,
-        createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
-    ];
-    setAgents(mockAgents);
-  }, []);
+  // Agents are loaded via useAIAgents hook - no mock data needed
 
   // Create agent from template
   const createFromTemplate = (template: AgentTemplate) => {
@@ -304,82 +333,96 @@ export default function AIAgentsPage() {
     logger.info('Creating agent from template', { templateId: template.id });
   };
 
-  // Save agent
+  // Save agent - uses real API
   const saveAgent = async () => {
     if (!formData.name.trim()) {
       toast.error('Agent name is required');
       return;
     }
+    if (!formData.systemPrompt.trim()) {
+      toast.error('System prompt is required');
+      return;
+    }
 
-    setIsSaving(true);
     try {
-      const newAgent: CustomAgent = {
-        id: isEditing && selectedAgent ? selectedAgent.id : `agent-${Date.now()}`,
-        ...formData,
-        status: 'draft',
-        usageCount: isEditing && selectedAgent ? selectedAgent.usageCount : 0,
-        rating: isEditing && selectedAgent ? selectedAgent.rating : 0,
-        createdAt: isEditing && selectedAgent ? selectedAgent.createdAt : new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
+      // Convert capabilities to API format
+      const capabilities: Record<string, boolean> = {};
+      formData.capabilities.forEach(cap => {
+        const key = cap.id.replace('-', '_');
+        capabilities[key] = cap.enabled;
+      });
 
-      if (isEditing) {
-        setAgents(prev => prev.map(a => a.id === newAgent.id ? newAgent : a));
-        toast.success('Agent updated successfully');
+      if (isEditing && selectedAgent) {
+        // Update existing agent
+        await apiUpdateAgent(selectedAgent.id, {
+          name: formData.name,
+          description: formData.description,
+          system_prompt: formData.systemPrompt,
+          model: formData.settings.model,
+          temperature: formData.settings.temperature,
+          max_tokens: formData.settings.maxTokens,
+          capabilities,
+          is_public: formData.isPublic,
+        });
+        logger.info('Agent updated', { agentId: selectedAgent.id, name: formData.name });
       } else {
-        setAgents(prev => [newAgent, ...prev]);
-        toast.success('Agent created successfully');
+        // Create new agent
+        const input: CreateAgentInput = {
+          name: formData.name,
+          description: formData.description,
+          system_prompt: formData.systemPrompt,
+          model: formData.settings.model,
+          temperature: formData.settings.temperature,
+          max_tokens: formData.settings.maxTokens,
+          capabilities,
+          is_public: formData.isPublic,
+        };
+        await apiCreateAgent(input);
+        logger.info('Agent created', { name: formData.name });
       }
 
-      logger.info('Agent saved', { agentId: newAgent.id, name: newAgent.name });
       setIsCreating(false);
       setIsEditing(false);
       setSelectedAgent(null);
       resetForm();
     } catch (error) {
-      toast.error('Failed to save agent');
       logger.error('Save agent error', { error });
-    } finally {
-      setIsSaving(false);
     }
   };
 
-  // Delete agent
-  const deleteAgent = (agentId: string) => {
-    setAgents(prev => prev.filter(a => a.id !== agentId));
-    if (selectedAgent?.id === agentId) {
-      setSelectedAgent(null);
+  // Delete agent - uses real API
+  const deleteAgent = async (agentId: string) => {
+    try {
+      await apiDeleteAgent(agentId);
+      if (selectedAgent?.id === agentId) {
+        setSelectedAgent(null);
+      }
+      logger.info('Agent deleted', { agentId });
+    } catch (error) {
+      logger.error('Delete agent error', { error });
     }
-    toast.success('Agent deleted');
-    logger.info('Agent deleted', { agentId });
   };
 
   // Toggle agent status
-  const toggleAgentStatus = (agent: CustomAgent) => {
-    const newStatus = agent.status === 'active' ? 'paused' : 'active';
-    setAgents(prev => prev.map(a => a.id === agent.id ? { ...a, status: newStatus } : a));
-    toast.success(`Agent ${newStatus === 'active' ? 'activated' : 'paused'}`);
-    logger.info('Agent status toggled', { agentId: agent.id, newStatus });
+  const toggleAgentStatus = async (agent: CustomAgent) => {
+    // Note: Status toggle would need to be added to the API
+    // For now, show a toast indicating the feature
+    toast.info(`Agent status toggle - feature in development`);
+    logger.info('Agent status toggle attempted', { agentId: agent.id });
   };
 
-  // Test agent
+  // Test agent - uses real chat API
   const testAgent = async () => {
     if (!testMessage.trim() || !selectedAgent) return;
 
-    setIsTesting(true);
-    setTestResponse('');
-
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      setTestResponse(`[${selectedAgent.name}]: Based on my analysis, here's what I found...\n\nThis is a simulated response demonstrating how your agent would respond to the query: "${testMessage}"\n\nThe agent uses the following capabilities:\n${selectedAgent.capabilities.filter(c => c.enabled).map(c => `- ${c.name}`).join('\n')}`);
-
-      logger.info('Agent test completed', { agentId: selectedAgent.id, query: testMessage });
+      setSelectedAgentId(selectedAgent.id);
+      await sendChatMessage(testMessage);
+      setTestMessage('');
+      logger.info('Agent test message sent', { agentId: selectedAgent.id, query: testMessage });
     } catch (error) {
       toast.error('Test failed');
       logger.error('Agent test error', { error });
-    } finally {
-      setIsTesting(false);
     }
   };
 
@@ -577,7 +620,7 @@ export default function AIAgentsPage() {
                               <Edit2 className="w-4 h-4 mr-2" />
                               Edit
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => { setSelectedAgent(agent); setShowTestDialog(true); }}>
+                            <DropdownMenuItem onClick={() => { setSelectedAgent(agent); setSelectedAgentId(agent.id); setShowTestDialog(true); }}>
                               <Play className="w-4 h-4 mr-2" />
                               Test
                             </DropdownMenuItem>
@@ -623,7 +666,7 @@ export default function AIAgentsPage() {
                         <Button
                           variant="outline"
                           className="flex-1"
-                          onClick={() => { setSelectedAgent(agent); setShowTestDialog(true); }}
+                          onClick={() => { setSelectedAgent(agent); setSelectedAgentId(agent.id); setShowTestDialog(true); }}
                         >
                           <MessageSquare className="w-4 h-4 mr-2" />
                           Chat
@@ -685,16 +728,107 @@ export default function AIAgentsPage() {
             </div>
           </TabsContent>
 
-          {/* Marketplace Tab */}
+          {/* Marketplace Tab - Real Public Agents */}
           <TabsContent value="marketplace" className="space-y-4">
-            <Card className="p-12 text-center">
-              <Globe className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
-              <h3 className="text-lg font-medium mb-2">Agent Marketplace</h3>
-              <p className="text-muted-foreground mb-4">
-                Browse and install agents created by the community
-              </p>
-              <Badge variant="secondary">Coming Soon</Badge>
-            </Card>
+            {/* Search */}
+            <div className="flex items-center gap-4">
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search public agents..."
+                  className="pl-10"
+                />
+              </div>
+            </div>
+
+            {isLoadingAgents ? (
+              <Card className="p-12 text-center">
+                <Loader2 className="w-8 h-8 mx-auto mb-4 animate-spin text-primary" />
+                <p className="text-muted-foreground">Loading marketplace...</p>
+              </Card>
+            ) : apiTemplates.length === 0 ? (
+              <Card className="p-12 text-center">
+                <Globe className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
+                <h3 className="text-lg font-medium mb-2">No Public Agents Yet</h3>
+                <p className="text-muted-foreground mb-4">
+                  Be the first to share an agent with the community!
+                </p>
+                <Button onClick={() => { resetForm(); setIsCreating(true); }}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create & Share
+                </Button>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {apiTemplates.map((agent: AIAgent) => (
+                  <Card key={agent.id} className="hover:shadow-lg transition-shadow">
+                    <CardHeader>
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                          <Bot className="w-6 h-6 text-white" />
+                        </div>
+                        <div>
+                          <CardTitle className="text-lg">{agent.name}</CardTitle>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="secondary">Template</Badge>
+                            {agent.is_public && <Badge variant="outline">Public</Badge>}
+                          </div>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                        {agent.description || 'A customizable AI assistant'}
+                      </p>
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-1">
+                          <MessageSquare className="w-4 h-4" />
+                          {agent.conversation_count || 0} chats
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Star className="w-4 h-4 text-yellow-500" />
+                          4.5
+                        </div>
+                      </div>
+                    </CardContent>
+                    <CardFooter>
+                      <Button
+                        className="w-full"
+                        onClick={() => {
+                          setFormData({
+                            name: agent.name + ' (Copy)',
+                            description: agent.description || '',
+                            role: 'custom',
+                            systemPrompt: agent.system_prompt,
+                            capabilities: DEFAULT_CAPABILITIES.map(c => ({
+                              ...c,
+                              enabled: agent.capabilities?.[c.id.replace('-', '_') as keyof typeof agent.capabilities] || false,
+                            })),
+                            tools: [],
+                            knowledgeBases: [],
+                            settings: {
+                              model: agent.model,
+                              temperature: agent.temperature,
+                              maxTokens: agent.max_tokens,
+                              topP: 1,
+                              frequencyPenalty: 0,
+                              presencePenalty: 0,
+                              responseFormat: 'markdown',
+                            },
+                            isPublic: false,
+                          });
+                          setIsCreating(true);
+                          toast.success(`Cloning "${agent.name}" template`);
+                        }}
+                      >
+                        <Plus className="w-4 h-4 mr-2" />
+                        Use This Agent
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                ))}
+              </div>
+            )}
           </TabsContent>
         </Tabs>
 
@@ -952,53 +1086,88 @@ export default function AIAgentsPage() {
           </DialogContent>
         </Dialog>
 
-        {/* Test Agent Dialog */}
-        <Dialog open={showTestDialog} onOpenChange={setShowTestDialog}>
-          <DialogContent className="max-w-2xl">
+        {/* Test Agent Dialog - Real Chat */}
+        <Dialog open={showTestDialog} onOpenChange={(open) => {
+          setShowTestDialog(open);
+          if (!open) {
+            setTestMessage('');
+            clearConversation();
+          }
+        }}>
+          <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
             <DialogHeader>
-              <DialogTitle>Test Agent: {selectedAgent?.name}</DialogTitle>
+              <DialogTitle>Chat with: {selectedAgent?.name}</DialogTitle>
               <DialogDescription>
-                Send a message to test your agent&apos;s response
+                Test your agent with real AI-powered responses
               </DialogDescription>
             </DialogHeader>
 
-            <div className="space-y-4 mt-4">
-              <div className="space-y-2">
-                <Label>Your Message</Label>
+            <div className="flex-1 flex flex-col min-h-[300px] mt-4 space-y-4">
+              {/* Chat Messages */}
+              <ScrollArea className="flex-1 border rounded-lg p-4">
+                {chatMessages.length === 0 ? (
+                  <div className="text-center text-muted-foreground py-8">
+                    <MessageSquare className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                    <p>Start a conversation with your agent</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {chatMessages.map((msg, i) => (
+                      <div
+                        key={i}
+                        className={`p-3 rounded-lg ${
+                          msg.role === 'user'
+                            ? 'bg-primary text-primary-foreground ml-12'
+                            : 'bg-muted mr-12'
+                        }`}
+                      >
+                        <p className="text-sm font-medium mb-1">
+                          {msg.role === 'user' ? 'You' : selectedAgent?.name}
+                        </p>
+                        <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                      </div>
+                    ))}
+                    {isChatLoading && (
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span className="text-sm">Agent is thinking...</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </ScrollArea>
+
+              {/* Input */}
+              <div className="flex gap-2">
                 <Textarea
                   value={testMessage}
                   onChange={(e) => setTestMessage(e.target.value)}
-                  placeholder="Type a message to test your agent..."
-                  rows={3}
+                  placeholder="Type a message..."
+                  rows={2}
+                  className="flex-1"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      testAgent();
+                    }
+                  }}
                 />
+                <Button onClick={testAgent} disabled={isChatLoading || !testMessage.trim()} className="self-end">
+                  {isChatLoading ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <ArrowRight className="w-4 h-4" />
+                  )}
+                </Button>
               </div>
-
-              {testResponse && (
-                <div className="space-y-2">
-                  <Label>Agent Response</Label>
-                  <div className="p-4 rounded-lg bg-muted whitespace-pre-wrap text-sm">
-                    {testResponse}
-                  </div>
-                </div>
-              )}
             </div>
 
             <DialogFooter className="mt-4">
-              <Button variant="outline" onClick={() => { setShowTestDialog(false); setTestMessage(''); setTestResponse(''); }}>
-                Close
+              <Button variant="outline" onClick={() => clearConversation()}>
+                Clear Chat
               </Button>
-              <Button onClick={testAgent} disabled={isTesting || !testMessage.trim()}>
-                {isTesting ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Testing...
-                  </>
-                ) : (
-                  <>
-                    <Play className="w-4 h-4 mr-2" />
-                    Send Message
-                  </>
-                )}
+              <Button variant="outline" onClick={() => setShowTestDialog(false)}>
+                Close
               </Button>
             </DialogFooter>
           </DialogContent>

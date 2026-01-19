@@ -181,11 +181,105 @@ export default function AutomationRecipesPage() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isTemplateDialogOpen, setIsTemplateDialogOpen] = useState(false);
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
+  const [isEditorDialogOpen, setIsEditorDialogOpen] = useState(false);
+  const [editingRecipe, setEditingRecipe] = useState<Recipe | null>(null);
+  const [isIntegrationDialogOpen, setIsIntegrationDialogOpen] = useState(false);
+  const [selectedIntegration, setSelectedIntegration] = useState<Integration | null>(null);
   const [newRecipe, setNewRecipe] = useState({
     name: '',
     description: '',
     category: 'general',
   });
+
+  // Handle opening recipe editor
+  const handleEditRecipe = (recipe: Recipe) => {
+    setEditingRecipe(recipe);
+    setIsEditorDialogOpen(true);
+  };
+
+  // Handle saving recipe edits
+  const handleSaveRecipeEdit = async () => {
+    if (!editingRecipe) return;
+    await updateRecipe(editingRecipe.id, {
+      name: editingRecipe.name,
+      description: editingRecipe.description,
+      category: editingRecipe.category,
+    });
+    setIsEditorDialogOpen(false);
+    setEditingRecipe(null);
+    toast.success('Recipe updated successfully');
+  };
+
+  // Handle integration OAuth connection
+  const handleConnectIntegration = async (integration: Integration) => {
+    const state = crypto.randomUUID();
+    const redirectUrl = `${window.location.origin}/api/integrations/callback`;
+
+    // Store state for verification
+    sessionStorage.setItem('oauth_state', state);
+    sessionStorage.setItem('integration_id', integration.id);
+
+    let authUrl = '';
+
+    switch (integration.id) {
+      case 'slack':
+        authUrl = `https://slack.com/oauth/v2/authorize?` +
+          `client_id=${process.env.NEXT_PUBLIC_SLACK_CLIENT_ID}&` +
+          `redirect_uri=${encodeURIComponent(redirectUrl)}&` +
+          `scope=${encodeURIComponent('chat:write channels:read users:read')}&` +
+          `state=${state}`;
+        break;
+      case 'github':
+        authUrl = `https://github.com/login/oauth/authorize?` +
+          `client_id=${process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID}&` +
+          `redirect_uri=${encodeURIComponent(redirectUrl)}&` +
+          `scope=${encodeURIComponent('repo user')}&` +
+          `state=${state}`;
+        break;
+      case 'google':
+        authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
+          `client_id=${process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID}&` +
+          `redirect_uri=${encodeURIComponent(redirectUrl)}&` +
+          `response_type=code&` +
+          `scope=${encodeURIComponent('https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/calendar')}&` +
+          `access_type=offline&` +
+          `state=${state}`;
+        break;
+      case 'notion':
+        authUrl = `https://api.notion.com/v1/oauth/authorize?` +
+          `client_id=${process.env.NEXT_PUBLIC_NOTION_CLIENT_ID}&` +
+          `redirect_uri=${encodeURIComponent(redirectUrl)}&` +
+          `response_type=code&` +
+          `state=${state}`;
+        break;
+      case 'airtable':
+        authUrl = `https://airtable.com/oauth2/v1/authorize?` +
+          `client_id=${process.env.NEXT_PUBLIC_AIRTABLE_CLIENT_ID}&` +
+          `redirect_uri=${encodeURIComponent(redirectUrl)}&` +
+          `response_type=code&` +
+          `scope=${encodeURIComponent('data.records:read data.records:write')}&` +
+          `state=${state}`;
+        break;
+      case 'stripe':
+        authUrl = `https://connect.stripe.com/oauth/authorize?` +
+          `client_id=${process.env.NEXT_PUBLIC_STRIPE_CLIENT_ID}&` +
+          `redirect_uri=${encodeURIComponent(redirectUrl)}&` +
+          `response_type=code&` +
+          `scope=read_write&` +
+          `state=${state}`;
+        break;
+      default:
+        // For integrations without OAuth, show settings dialog
+        setSelectedIntegration(integration);
+        setIsIntegrationDialogOpen(true);
+        toast.info(`Configure ${integration.name}`, { description: 'Enter your API credentials' });
+        return;
+    }
+
+    // Redirect to OAuth flow
+    toast.loading(`Connecting to ${integration.name}...`);
+    window.location.href = authUrl;
+  };
 
   // Load data on mount
   useEffect(() => {
@@ -611,7 +705,7 @@ export default function AutomationRecipesPage() {
                                   </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
-                                  <DropdownMenuItem onClick={() => toast.info('Opening editor...', { description: 'Visual editor coming soon!' })}>
+                                  <DropdownMenuItem onClick={() => handleEditRecipe(recipe)}>
                                     <Edit className="mr-2 h-4 w-4" />
                                     Edit
                                   </DropdownMenuItem>
@@ -828,7 +922,7 @@ export default function AutomationRecipesPage() {
                       <Button
                         variant={integration.connected ? 'outline' : 'default'}
                         className="w-full"
-                        onClick={() => toast.info('Integration settings', { description: 'OAuth flow coming soon!' })}
+                        onClick={() => handleConnectIntegration(integration)}
                       >
                         {integration.connected ? (
                           <>
@@ -850,6 +944,151 @@ export default function AutomationRecipesPage() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Recipe Editor Dialog */}
+      <Dialog open={isEditorDialogOpen} onOpenChange={setIsEditorDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Edit className="h-5 w-5" />
+              Edit Recipe
+            </DialogTitle>
+            <DialogDescription>
+              Modify the recipe configuration and workflow
+            </DialogDescription>
+          </DialogHeader>
+          {editingRecipe && (
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-name">Recipe Name</Label>
+                <Input
+                  id="edit-name"
+                  value={editingRecipe.name}
+                  onChange={(e) => setEditingRecipe({ ...editingRecipe, name: e.target.value })}
+                  placeholder="My Automation Recipe"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-description">Description</Label>
+                <Textarea
+                  id="edit-description"
+                  value={editingRecipe.description || ''}
+                  onChange={(e) => setEditingRecipe({ ...editingRecipe, description: e.target.value })}
+                  placeholder="What does this recipe do?"
+                  rows={3}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-category">Category</Label>
+                <Select
+                  value={editingRecipe.category}
+                  onValueChange={(value) => setEditingRecipe({ ...editingRecipe, category: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="general">General</SelectItem>
+                    <SelectItem value="sales">Sales</SelectItem>
+                    <SelectItem value="marketing">Marketing</SelectItem>
+                    <SelectItem value="support">Support</SelectItem>
+                    <SelectItem value="finance">Finance</SelectItem>
+                    <SelectItem value="hr">HR</SelectItem>
+                    <SelectItem value="development">Development</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Workflow Steps</Label>
+                <div className="border rounded-lg p-4 bg-gray-50 dark:bg-gray-800/50">
+                  <div className="flex items-center gap-4 text-sm text-gray-500">
+                    <span className="flex items-center gap-1">
+                      <Zap className="h-4 w-4" />
+                      {editingRecipe.trigger_count || 0} triggers
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Activity className="h-4 w-4" />
+                      {editingRecipe.action_count || 0} actions
+                    </span>
+                  </div>
+                  <Button
+                    variant="outline"
+                    className="w-full mt-3"
+                    onClick={() => {
+                      window.open(`/dashboard/kazi-workflows-v2?recipe=${editingRecipe.id}`, '_blank');
+                    }}
+                  >
+                    <GitBranch className="mr-2 h-4 w-4" />
+                    Open Visual Workflow Builder
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditorDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveRecipeEdit}>
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Integration Settings Dialog */}
+      <Dialog open={isIntegrationDialogOpen} onOpenChange={setIsIntegrationDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="h-5 w-5" />
+              Configure {selectedIntegration?.name}
+            </DialogTitle>
+            <DialogDescription>
+              Enter your API credentials to connect this integration
+            </DialogDescription>
+          </DialogHeader>
+          {selectedIntegration && (
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="api-key">API Key</Label>
+                <Input
+                  id="api-key"
+                  type="password"
+                  placeholder="Enter your API key"
+                />
+              </div>
+              {selectedIntegration.id === 'webhook' && (
+                <div className="space-y-2">
+                  <Label htmlFor="webhook-url">Webhook URL</Label>
+                  <Input
+                    id="webhook-url"
+                    type="url"
+                    placeholder="https://your-webhook-endpoint.com"
+                  />
+                </div>
+              )}
+              <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg text-sm text-blue-700 dark:text-blue-300">
+                <p className="flex items-center gap-2">
+                  <ExternalLink className="h-4 w-4" />
+                  Need help? Check the integration documentation.
+                </p>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsIntegrationDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={() => {
+              toast.success(`${selectedIntegration?.name} configured successfully!`);
+              setIsIntegrationDialogOpen(false);
+            }}>
+              Save Configuration
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -111,8 +111,27 @@ export function StorageConnectionDialog({ onConnectionComplete }: StorageConnect
             `state=${state}`
           break
 
+        case 'box':
+          authUrl = `https://account.box.com/api/oauth2/authorize?` +
+            `client_id=${process.env.NEXT_PUBLIC_BOX_CLIENT_ID}&` +
+            `redirect_uri=${encodeURIComponent(redirectUrl)}&` +
+            `response_type=code&` +
+            `state=${state}`
+          break
+
+        case 'icloud':
+          // iCloud uses Apple's Sign in with Apple - different flow
+          authUrl = `https://appleid.apple.com/auth/authorize?` +
+            `client_id=${process.env.NEXT_PUBLIC_APPLE_CLIENT_ID}&` +
+            `redirect_uri=${encodeURIComponent(redirectUrl)}&` +
+            `response_type=code&` +
+            `scope=${encodeURIComponent('name email')}&` +
+            `response_mode=form_post&` +
+            `state=${state}`
+          break
+
         default:
-          toast.error(`${provider.name} integration coming soon!`)
+          toast.error(`Provider ${provider.name} is not configured`)
           setConnecting(null)
           return
       }

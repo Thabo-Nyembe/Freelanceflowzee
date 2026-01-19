@@ -325,8 +325,9 @@ export function ListingDetail({ listing }: ListingDetailProps) {
             seller={listing.seller}
             variant="compact"
             onContact={() => {
-              // TODO: Open contact modal
-              toast.info('Contact feature coming soon');
+              // Navigate to messages with pre-filled recipient and subject
+              router.push(`/dashboard/messages-v2?recipient=${listing.seller?.id}&subject=${encodeURIComponent(`Inquiry about: ${listing.title}`)}`);
+              toast.success('Opening conversation with seller');
             }}
           />
         )}

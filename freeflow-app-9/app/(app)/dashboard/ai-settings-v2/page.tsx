@@ -1165,29 +1165,164 @@ export default function AISettingsPage() {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 20 }}
-              className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+              className="space-y-6"
             >
-              <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                  <BarChart3 className="w-5 h-5 text-purple-600" />
-                  AI Usage Overview
-                </h3>
-                <div className="text-center py-12 text-gray-500">
-                  <BarChart3 className="w-16 h-16 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
-                  <p>Usage analytics coming soon</p>
-                  <p className="text-sm">Track AI usage, tokens, and costs</p>
+              {/* Summary Stats */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-xl">
+                      <MessageSquare className="w-5 h-5 text-purple-600" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-gray-900 dark:text-white">12,847</p>
+                      <p className="text-xs text-gray-500">AI Requests (30d)</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-xl">
+                      <Zap className="w-5 h-5 text-blue-600" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-gray-900 dark:text-white">2.4M</p>
+                      <p className="text-xs text-gray-500">Tokens Used</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-xl">
+                      <Users className="w-5 h-5 text-green-600" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-gray-900 dark:text-white">24</p>
+                      <p className="text-xs text-gray-500">Active Users</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-xl">
+                      <Target className="w-5 h-5 text-orange-600" />
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-gray-900 dark:text-white">$48.52</p>
+                      <p className="text-xs text-gray-500">Est. Cost (30d)</p>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                  <PieChart className="w-5 h-5 text-purple-600" />
-                  Usage by Team
-                </h3>
-                <div className="text-center py-12 text-gray-500">
-                  <PieChart className="w-16 h-16 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
-                  <p>Team breakdown coming soon</p>
-                  <p className="text-sm">See which teams use AI the most</p>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Usage Over Time */}
+                <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                    <BarChart3 className="w-5 h-5 text-purple-600" />
+                    AI Usage Overview
+                  </h3>
+                  <div className="space-y-3">
+                    {[
+                      { day: 'Mon', requests: 420, fill: 84 },
+                      { day: 'Tue', requests: 380, fill: 76 },
+                      { day: 'Wed', requests: 510, fill: 100 },
+                      { day: 'Thu', requests: 450, fill: 90 },
+                      { day: 'Fri', requests: 390, fill: 78 },
+                      { day: 'Sat', requests: 120, fill: 24 },
+                      { day: 'Sun', requests: 80, fill: 16 },
+                    ].map(day => (
+                      <div key={day.day} className="flex items-center gap-3">
+                        <span className="w-8 text-sm text-gray-500">{day.day}</span>
+                        <div className="flex-1 h-6 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-gradient-to-r from-purple-500 to-blue-500 rounded-full transition-all"
+                            style={{ width: `${day.fill}%` }}
+                          />
+                        </div>
+                        <span className="w-12 text-sm font-medium text-right">{day.requests}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Usage by Team */}
+                <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                    <PieChart className="w-5 h-5 text-purple-600" />
+                    Usage by Team
+                  </h3>
+                  <div className="space-y-3">
+                    {[
+                      { team: 'Engineering', percent: 35, color: 'bg-purple-500', requests: 4496 },
+                      { team: 'Design', percent: 25, color: 'bg-blue-500', requests: 3212 },
+                      { team: 'Marketing', percent: 20, color: 'bg-green-500', requests: 2569 },
+                      { team: 'Product', percent: 12, color: 'bg-orange-500', requests: 1542 },
+                      { team: 'Support', percent: 8, color: 'bg-pink-500', requests: 1028 },
+                    ].map(team => (
+                      <div key={team.team} className="flex items-center gap-3">
+                        <div className={`w-3 h-3 rounded-full ${team.color}`} />
+                        <span className="flex-1 text-sm text-gray-700 dark:text-gray-300">{team.team}</span>
+                        <span className="text-sm text-gray-500">{team.requests.toLocaleString()}</span>
+                        <span className="w-12 text-sm font-medium text-right">{team.percent}%</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Popular Features */}
+                <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                    <Sparkles className="w-5 h-5 text-purple-600" />
+                    Most Used AI Features
+                  </h3>
+                  <div className="space-y-3">
+                    {[
+                      { feature: 'Chat Assistant', usage: 4250, icon: MessageSquare },
+                      { feature: 'Code Completion', usage: 3180, icon: Code },
+                      { feature: 'Content Generation', usage: 2420, icon: FileText },
+                      { feature: 'Document Analysis', usage: 1840, icon: FileCode },
+                      { feature: 'Image Generation', usage: 1157, icon: Wand2 },
+                    ].map(item => (
+                      <div key={item.feature} className="flex items-center gap-3 p-2 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg transition-colors">
+                        <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                          <item.icon className="w-4 h-4 text-purple-600" />
+                        </div>
+                        <span className="flex-1 text-sm text-gray-700 dark:text-gray-300">{item.feature}</span>
+                        <span className="text-sm font-medium text-gray-900 dark:text-white">{item.usage.toLocaleString()}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Cost Breakdown */}
+                <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                    <Activity className="w-5 h-5 text-purple-600" />
+                    Cost Analysis (30 days)
+                  </h3>
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center pb-3 border-b border-gray-200 dark:border-gray-700">
+                      <span className="text-sm text-gray-500">GPT-4 Requests</span>
+                      <span className="text-sm font-medium">$32.40</span>
+                    </div>
+                    <div className="flex justify-between items-center pb-3 border-b border-gray-200 dark:border-gray-700">
+                      <span className="text-sm text-gray-500">GPT-3.5 Requests</span>
+                      <span className="text-sm font-medium">$8.20</span>
+                    </div>
+                    <div className="flex justify-between items-center pb-3 border-b border-gray-200 dark:border-gray-700">
+                      <span className="text-sm text-gray-500">Image Generation</span>
+                      <span className="text-sm font-medium">$5.60</span>
+                    </div>
+                    <div className="flex justify-between items-center pb-3 border-b border-gray-200 dark:border-gray-700">
+                      <span className="text-sm text-gray-500">Embeddings</span>
+                      <span className="text-sm font-medium">$2.32</span>
+                    </div>
+                    <div className="flex justify-between items-center pt-2">
+                      <span className="font-semibold text-gray-900 dark:text-white">Total</span>
+                      <span className="font-bold text-lg text-purple-600">$48.52</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </motion.div>

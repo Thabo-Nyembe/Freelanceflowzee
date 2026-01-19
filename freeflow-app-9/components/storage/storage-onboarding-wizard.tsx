@@ -155,10 +155,23 @@ export function StorageOnboardingWizard({
         break
 
       case 'box':
+        authUrl = `https://account.box.com/api/oauth2/authorize?` +
+          `client_id=${process.env.NEXT_PUBLIC_BOX_CLIENT_ID}&` +
+          `redirect_uri=${encodeURIComponent(redirectUrl)}&` +
+          `response_type=code&` +
+          `state=${state}`
+        break
+
       case 'icloud':
-        toast.info(`${provider.name} integration coming soon!`)
-        setConnecting(false)
-        return
+        // Apple Sign-In for iCloud Drive access
+        authUrl = `https://appleid.apple.com/auth/authorize?` +
+          `client_id=${process.env.NEXT_PUBLIC_APPLE_CLIENT_ID}&` +
+          `redirect_uri=${encodeURIComponent(redirectUrl)}&` +
+          `response_type=code&` +
+          `scope=${encodeURIComponent('name email')}&` +
+          `response_mode=form_post&` +
+          `state=${state}`
+        break
     }
 
     // Redirect to OAuth flow

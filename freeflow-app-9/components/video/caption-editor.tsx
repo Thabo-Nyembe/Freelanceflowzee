@@ -573,6 +573,10 @@ export default function CaptionEditor({
   const [showFindReplace, setShowFindReplace] = useState(false);
   const [filterSpeaker, setFilterSpeaker] = useState<string | 'all'>('all');
 
+  // AI Features State
+  const [isAiProcessing, setIsAiProcessing] = useState(false);
+  const [selectedTranslationLang, setSelectedTranslationLang] = useState('es');
+
   // Style Settings
   const [globalStyle, setGlobalStyle] = useState<CaptionStyle>({
     fontFamily: 'Arial',
@@ -781,6 +785,142 @@ export default function CaptionEditor({
     onCaptionsChange?.(updated);
     toast.success('Caption duplicated');
   }, [captions, saveUndoState, onCaptionsChange]);
+
+  // AI Caption Features
+  const handleAiCorrection = useCallback(async () => {
+    if (captions.length === 0) {
+      toast.error('No captions to correct');
+      return;
+    }
+
+    setIsAiProcessing(true);
+    try {
+      const response = await fetch('/api/ai/captions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'correct',
+          captions: captions.map(c => ({
+            id: c.id,
+            text: c.text,
+            start: c.startTime,
+            end: c.endTime,
+          })),
+        }),
+      });
+
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error);
+
+      saveUndoState();
+      const correctedMap = new Map(result.captions.map((c: { id: string; text: string }) => [c.id, c.text]));
+      const updated = captions.map(c => ({
+        ...c,
+        text: (correctedMap.get(c.id) as string) || c.text,
+        isEdited: true,
+      }));
+
+      setCaptions(updated);
+      onCaptionsChange?.(updated);
+      toast.success(`Corrected ${result.stats.corrected} captions`);
+    } catch (error) {
+      console.error('AI correction error:', error);
+      toast.error('Failed to correct captions');
+    } finally {
+      setIsAiProcessing(false);
+    }
+  }, [captions, saveUndoState, onCaptionsChange]);
+
+  const handleAiTranslation = useCallback(async () => {
+    if (captions.length === 0) {
+      toast.error('No captions to translate');
+      return;
+    }
+
+    setIsAiProcessing(true);
+    try {
+      const response = await fetch('/api/ai/captions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'translate',
+          captions: captions.map(c => ({
+            id: c.id,
+            text: c.text,
+            start: c.startTime,
+            end: c.endTime,
+          })),
+          targetLanguage: selectedTranslationLang,
+        }),
+      });
+
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error);
+
+      saveUndoState();
+      const translatedMap = new Map(result.captions.map((c: { id: string; text: string }) => [c.id, c.text]));
+      const updated = captions.map(c => ({
+        ...c,
+        text: (translatedMap.get(c.id) as string) || c.text,
+        isEdited: true,
+      }));
+
+      setCaptions(updated);
+      onCaptionsChange?.(updated);
+      toast.success(`Translated to ${result.languageName}`);
+    } catch (error) {
+      console.error('AI translation error:', error);
+      toast.error('Failed to translate captions');
+    } finally {
+      setIsAiProcessing(false);
+    }
+  }, [captions, selectedTranslationLang, saveUndoState, onCaptionsChange]);
+
+  const handleReTranscribe = useCallback(async () => {
+    if (!videoUrl) {
+      toast.error('No video URL available');
+      return;
+    }
+
+    setIsAiProcessing(true);
+    try {
+      const response = await fetch('/api/ai/captions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'retranscribe',
+          audioUrl: videoUrl,
+          settings: {
+            enableSpeakerDiarization: speakers.length > 0,
+          },
+        }),
+      });
+
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error);
+
+      saveUndoState();
+      const newCaptions: Caption[] = result.captions.map((c: { id: string; text: string; start: number; end: number; speaker?: string }, index: number) => ({
+        id: c.id || generateCaptionId(),
+        index,
+        startTime: c.start,
+        endTime: c.end,
+        text: c.text,
+        speaker: c.speaker,
+        speakerColor: c.speaker ? SPEAKER_COLORS[index % SPEAKER_COLORS.length] : undefined,
+        isEdited: false,
+      }));
+
+      setCaptions(newCaptions);
+      onCaptionsChange?.(newCaptions);
+      toast.success(`Re-transcribed ${newCaptions.length} captions`);
+    } catch (error) {
+      console.error('Re-transcription error:', error);
+      toast.error('Failed to re-transcribe video');
+    } finally {
+      setIsAiProcessing(false);
+    }
+  }, [videoUrl, speakers, saveUndoState, onCaptionsChange]);
 
   // Find & Replace
   const handleFindReplace = useCallback((replaceAll: boolean) => {
@@ -1567,11 +1707,14 @@ export default function CaptionEditor({
                   <Button
                     variant="outline"
                     className="w-full"
-                    onClick={() => {
-                      toast.info('AI correction feature coming soon');
-                    }}
+                    onClick={handleAiCorrection}
+                    disabled={isAiProcessing || captions.length === 0}
                   >
-                    <Sparkles className="h-4 w-4 mr-2" />
+                    {isAiProcessing ? (
+                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Sparkles className="h-4 w-4 mr-2" />
+                    )}
                     Auto-Correct All Captions
                   </Button>
                 </CardContent>
@@ -1588,7 +1731,7 @@ export default function CaptionEditor({
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-2">
-                  <Select>
+                  <Select value={selectedTranslationLang} onValueChange={setSelectedTranslationLang}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select target language" />
                     </SelectTrigger>
@@ -1601,16 +1744,22 @@ export default function CaptionEditor({
                       <SelectItem value="ko">Korean</SelectItem>
                       <SelectItem value="pt">Portuguese</SelectItem>
                       <SelectItem value="ar">Arabic</SelectItem>
+                      <SelectItem value="it">Italian</SelectItem>
+                      <SelectItem value="ru">Russian</SelectItem>
+                      <SelectItem value="hi">Hindi</SelectItem>
                     </SelectContent>
                   </Select>
                   <Button
                     variant="outline"
                     className="w-full"
-                    onClick={() => {
-                      toast.info('Translation feature coming soon');
-                    }}
+                    onClick={handleAiTranslation}
+                    disabled={isAiProcessing || captions.length === 0}
                   >
-                    <RefreshCw className="h-4 w-4 mr-2" />
+                    {isAiProcessing ? (
+                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Languages className="h-4 w-4 mr-2" />
+                    )}
                     Translate Captions
                   </Button>
                 </CardContent>
@@ -1630,11 +1779,14 @@ export default function CaptionEditor({
                   <Button
                     variant="outline"
                     className="w-full"
-                    onClick={() => {
-                      toast.info('Re-transcription feature coming soon');
-                    }}
+                    onClick={handleReTranscribe}
+                    disabled={isAiProcessing}
                   >
-                    <RefreshCw className="h-4 w-4 mr-2" />
+                    {isAiProcessing ? (
+                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Mic className="h-4 w-4 mr-2" />
+                    )}
                     Re-Transcribe Video
                   </Button>
                 </CardContent>

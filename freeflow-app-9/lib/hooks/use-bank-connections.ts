@@ -429,3 +429,272 @@ export function getAccountTypeIcon(type: string): string {
   };
   return icons[type] || icons.other;
 }
+
+// ============ Categorization Rules ============
+
+export interface CategorizationRule {
+  id: string;
+  name: string;
+  match_field: 'merchant' | 'description' | 'amount';
+  match_type: 'contains' | 'equals' | 'starts_with' | 'regex' | 'greater_than' | 'less_than';
+  match_value: string;
+  category: string;
+  subcategory?: string;
+  is_active: boolean;
+  priority: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateRuleInput {
+  name: string;
+  match_field: 'merchant' | 'description' | 'amount';
+  match_type: 'contains' | 'equals' | 'starts_with' | 'regex' | 'greater_than' | 'less_than';
+  match_value: string;
+  category: string;
+  subcategory?: string;
+  priority?: number;
+}
+
+interface UseCategorizationRulesReturn {
+  rules: CategorizationRule[];
+  isLoading: boolean;
+  error: string | null;
+  createRule: (input: CreateRuleInput) => Promise<CategorizationRule | null>;
+  updateRule: (id: string, input: Partial<CreateRuleInput>) => Promise<boolean>;
+  deleteRule: (id: string) => Promise<boolean>;
+  toggleRule: (id: string) => Promise<boolean>;
+  reorderRules: (ruleIds: string[]) => Promise<boolean>;
+  testRule: (ruleId: string, sampleText: string) => Promise<boolean>;
+  applyRules: () => Promise<{ matched: number; updated: number }>;
+  refresh: () => Promise<void>;
+}
+
+export function useCategorizationRules(): UseCategorizationRulesReturn {
+  const [rules, setRules] = useState<CategorizationRule[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch rules
+  const fetchRules = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const response = await fetch('/api/plaid/categorization-rules');
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to fetch rules');
+      }
+
+      setRules(result.data?.rules || []);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to fetch rules';
+      setError(message);
+      // Don't toast on initial load failure - use empty state
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Create rule
+  const createRule = useCallback(async (input: CreateRuleInput): Promise<CategorizationRule | null> => {
+    try {
+      const response = await fetch('/api/plaid/categorization-rules', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(input),
+      });
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to create rule');
+      }
+
+      const newRule = result.data.rule;
+      setRules(prev => [...prev, newRule].sort((a, b) => a.priority - b.priority));
+      toast.success('Rule created successfully');
+      return newRule;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to create rule';
+      toast.error(message);
+      return null;
+    }
+  }, []);
+
+  // Update rule
+  const updateRule = useCallback(async (id: string, input: Partial<CreateRuleInput>): Promise<boolean> => {
+    try {
+      const response = await fetch(`/api/plaid/categorization-rules?id=${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(input),
+      });
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to update rule');
+      }
+
+      setRules(prev => prev.map(r => r.id === id ? { ...r, ...result.data.rule } : r));
+      toast.success('Rule updated');
+      return true;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to update rule';
+      toast.error(message);
+      return false;
+    }
+  }, []);
+
+  // Delete rule
+  const deleteRule = useCallback(async (id: string): Promise<boolean> => {
+    try {
+      const response = await fetch(`/api/plaid/categorization-rules?id=${id}`, {
+        method: 'DELETE',
+      });
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to delete rule');
+      }
+
+      setRules(prev => prev.filter(r => r.id !== id));
+      toast.success('Rule deleted');
+      return true;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to delete rule';
+      toast.error(message);
+      return false;
+    }
+  }, []);
+
+  // Toggle rule active status
+  const toggleRule = useCallback(async (id: string): Promise<boolean> => {
+    const rule = rules.find(r => r.id === id);
+    if (!rule) return false;
+    return updateRule(id, { name: rule.name, match_field: rule.match_field, match_type: rule.match_type, match_value: rule.match_value, category: rule.category });
+  }, [rules, updateRule]);
+
+  // Reorder rules
+  const reorderRules = useCallback(async (ruleIds: string[]): Promise<boolean> => {
+    try {
+      const response = await fetch('/api/plaid/categorization-rules/reorder', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ruleIds }),
+      });
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to reorder rules');
+      }
+
+      await fetchRules();
+      return true;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to reorder rules';
+      toast.error(message);
+      return false;
+    }
+  }, [fetchRules]);
+
+  // Test a rule against sample text
+  const testRule = useCallback(async (ruleId: string, sampleText: string): Promise<boolean> => {
+    const rule = rules.find(r => r.id === ruleId);
+    if (!rule) return false;
+
+    try {
+      let matches = false;
+      const text = sampleText.toLowerCase();
+      const value = rule.match_value.toLowerCase();
+
+      switch (rule.match_type) {
+        case 'contains':
+          matches = text.includes(value);
+          break;
+        case 'equals':
+          matches = text === value;
+          break;
+        case 'starts_with':
+          matches = text.startsWith(value);
+          break;
+        case 'regex':
+          matches = new RegExp(rule.match_value, 'i').test(sampleText);
+          break;
+        case 'greater_than':
+          matches = parseFloat(sampleText) > parseFloat(rule.match_value);
+          break;
+        case 'less_than':
+          matches = parseFloat(sampleText) < parseFloat(rule.match_value);
+          break;
+      }
+
+      return matches;
+    } catch {
+      return false;
+    }
+  }, [rules]);
+
+  // Apply all rules to uncategorized transactions
+  const applyRules = useCallback(async (): Promise<{ matched: number; updated: number }> => {
+    try {
+      const response = await fetch('/api/plaid/categorization-rules/apply', {
+        method: 'POST',
+      });
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to apply rules');
+      }
+
+      const { matched, updated } = result.data;
+      toast.success(`Applied rules to ${updated} transactions`);
+      return { matched, updated };
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to apply rules';
+      toast.error(message);
+      return { matched: 0, updated: 0 };
+    }
+  }, []);
+
+  // Refresh
+  const refresh = useCallback(async () => {
+    await fetchRules();
+  }, [fetchRules]);
+
+  // Initial fetch
+  useEffect(() => {
+    fetchRules();
+  }, [fetchRules]);
+
+  return {
+    rules,
+    isLoading,
+    error,
+    createRule,
+    updateRule,
+    deleteRule,
+    toggleRule,
+    reorderRules,
+    testRule,
+    applyRules,
+    refresh,
+  };
+}
+
+// Default categories for transactions
+export const TRANSACTION_CATEGORIES = [
+  { id: 'income', label: 'Income', subcategories: ['Salary', 'Freelance', 'Investment', 'Other'] },
+  { id: 'housing', label: 'Housing', subcategories: ['Rent', 'Mortgage', 'Utilities', 'Maintenance'] },
+  { id: 'transportation', label: 'Transportation', subcategories: ['Gas', 'Public Transit', 'Parking', 'Car Payment', 'Insurance'] },
+  { id: 'food', label: 'Food & Dining', subcategories: ['Groceries', 'Restaurants', 'Coffee Shops', 'Delivery'] },
+  { id: 'shopping', label: 'Shopping', subcategories: ['Clothing', 'Electronics', 'Home', 'Other'] },
+  { id: 'entertainment', label: 'Entertainment', subcategories: ['Streaming', 'Movies', 'Games', 'Events'] },
+  { id: 'health', label: 'Health & Fitness', subcategories: ['Doctor', 'Pharmacy', 'Gym', 'Insurance'] },
+  { id: 'business', label: 'Business', subcategories: ['Software', 'Equipment', 'Marketing', 'Services'] },
+  { id: 'travel', label: 'Travel', subcategories: ['Flights', 'Hotels', 'Car Rental', 'Activities'] },
+  { id: 'fees', label: 'Fees & Charges', subcategories: ['Bank Fees', 'Interest', 'Late Fees'] },
+  { id: 'transfer', label: 'Transfer', subcategories: ['Internal', 'External', 'Investment'] },
+  { id: 'other', label: 'Other', subcategories: ['Uncategorized'] },
+];

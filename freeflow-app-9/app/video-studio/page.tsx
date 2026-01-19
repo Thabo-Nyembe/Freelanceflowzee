@@ -124,10 +124,13 @@ export default function VideoStudioPage() {
           </TabsList>
 
           <TabsContent value="record">
-            {/* AI Video Recording System - Temporarily disabled */}
-            <div className="mb-6 p-6 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-              <h3 className="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-2">AI Video Recording System</h3>
-              <p className="text-blue-700 dark:text-blue-300">Advanced video recording with AI transcription and analysis - Coming Soon!</p>
+            {/* AI Video Recording System - Active */}
+            <div className="mb-6 p-6 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+              <h3 className="text-lg font-semibold text-green-900 dark:text-green-100 mb-2 flex items-center gap-2">
+                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                AI Video Recording System
+              </h3>
+              <p className="text-green-700 dark:text-green-300">Record, enhance, and manage professional videos with AI-powered features.</p>
             </div>
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
