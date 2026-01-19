@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@/lib/supabase/server';
 import Stripe from 'stripe';
 
 // ============================================================================
@@ -16,10 +16,6 @@ import Stripe from 'stripe';
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder', {
   apiVersion: '2024-11-20.acacia',
 });
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 // ============================================================================
 // Types
@@ -118,7 +114,7 @@ const USAGE_UNITS: Record<UsageType, string> = {
 // ============================================================================
 // HELPER: Get user from auth header
 // ============================================================================
-async function getUserFromAuth(request: NextRequest) {
+async function getUserFromAuth(request: NextRequest, supabase: any) {
   const authHeader = request.headers.get('authorization');
   if (authHeader?.startsWith('Bearer ')) {
     const token = authHeader.substring(7);
@@ -141,7 +137,7 @@ function getCurrentBillingPeriod() {
 // ============================================================================
 // HELPER: Get user's plan
 // ============================================================================
-async function getUserPlan(userId: string): Promise<string> {
+async function getUserPlan(userId: string, supabase: any): Promise<string> {
   const { data } = await supabase
     .from('subscriptions')
     .select('plan_id')
@@ -157,10 +153,11 @@ async function getUserPlan(userId: string): Promise<string> {
 // ============================================================================
 export async function POST(request: NextRequest) {
   try {
+    const supabase = await createClient();
     const body: UsageRequest = await request.json();
     const { action } = body;
 
-    const user = await getUserFromAuth(request);
+    const user = await getUserFromAuth(request, supabase);
     const userId = user?.id;
 
     const isDemo = !process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY.includes('placeholder');
@@ -260,7 +257,7 @@ export async function POST(request: NextRequest) {
           }, { status: 401 });
         }
 
-        const plan = await getUserPlan(userId);
+        const plan = await getUserPlan(userId, supabase);
         const limits = PLAN_LIMITS[plan] || PLAN_LIMITS.free;
         const { start, end } = getCurrentBillingPeriod();
 
@@ -387,7 +384,7 @@ export async function POST(request: NextRequest) {
           }, { status: 400 });
         }
 
-        const plan = await getUserPlan(userId);
+        const plan = await getUserPlan(userId, supabase);
         const limits = PLAN_LIMITS[plan] || PLAN_LIMITS.free;
         const limit = limits[usageType];
         const { start, end } = getCurrentBillingPeriod();
@@ -439,7 +436,8 @@ export async function POST(request: NextRequest) {
 // ============================================================================
 export async function GET(request: NextRequest) {
   try {
-    const user = await getUserFromAuth(request);
+    const supabase = await createClient();
+    const user = await getUserFromAuth(request, supabase);
     const userId = user?.id;
 
     if (!userId) {
@@ -450,7 +448,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Quick summary for dashboard
-    const plan = await getUserPlan(userId);
+    const plan = await getUserPlan(userId, supabase);
     const limits = PLAN_LIMITS[plan] || PLAN_LIMITS.free;
     const { start } = getCurrentBillingPeriod();
 
