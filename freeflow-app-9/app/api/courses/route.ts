@@ -9,7 +9,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@/lib/supabase/server'
 import { getServerSession } from '@/lib/auth'
 
 // ============================================================================
@@ -95,17 +95,6 @@ interface Course {
 }
 
 // ============================================================================
-// DATABASE CLIENT
-// ============================================================================
-
-function getSupabase() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
-}
-
-// ============================================================================
 // GET - List Courses / Get Single Course
 // ============================================================================
 
@@ -125,7 +114,7 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '20')
 
-    const supabase = getSupabase()
+    const supabase = await createClient()
 
     // Demo mode for unauthenticated users
     if (!session?.user) {
@@ -249,7 +238,7 @@ export async function POST(request: NextRequest) {
     const userId = session.user.id
     const body = await request.json()
 
-    const supabase = getSupabase()
+    const supabase = await createClient()
 
     const {
       course_name,
@@ -417,7 +406,7 @@ export async function PUT(request: NextRequest) {
       )
     }
 
-    const supabase = getSupabase()
+    const supabase = await createClient()
 
     // Verify ownership
     const { data: existing } = await supabase
@@ -514,7 +503,7 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    const supabase = getSupabase()
+    const supabase = await createClient()
 
     // Verify ownership
     const { data: existing } = await supabase
@@ -582,7 +571,7 @@ export async function DELETE(request: NextRequest) {
 // ============================================================================
 
 async function getAggregateCourseStats(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string
 ) {
   try {

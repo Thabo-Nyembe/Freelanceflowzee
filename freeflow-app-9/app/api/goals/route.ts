@@ -13,7 +13,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@/lib/supabase/server'
 
 // ============================================================================
 // TYPES
@@ -75,17 +75,6 @@ interface GoalProgress {
   notes?: string
   recorded_by: string
   recorded_at: string
-}
-
-// ============================================================================
-// SUPABASE CLIENT
-// ============================================================================
-
-function getSupabase() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
 }
 
 // ============================================================================
@@ -217,7 +206,7 @@ export async function GET(request: NextRequest) {
     const includeKeyResults = searchParams.get('include_key_results') === 'true'
     const includeMilestones = searchParams.get('include_milestones') === 'true'
 
-    const supabase = getSupabase()
+    const supabase = await createClient()
 
     // Check if tables exist by trying a query
     let useDemo = false
@@ -329,7 +318,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { action, ...data } = body
 
-    const supabase = getSupabase()
+    const supabase = await createClient()
 
     switch (action) {
       // ======================================================================

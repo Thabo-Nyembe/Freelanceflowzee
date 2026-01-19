@@ -9,19 +9,8 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@/lib/supabase/server'
 import { getServerSession } from '@/lib/auth'
-
-// ============================================================================
-// DATABASE CLIENT
-// ============================================================================
-
-function getSupabase() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
-}
 
 // ============================================================================
 // GET - List Tickets / Get Single Ticket
@@ -40,7 +29,7 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '20')
 
-    const supabase = getSupabase()
+    const supabase = await createClient()
 
     // Demo mode for unauthenticated users
     if (!session?.user) {
@@ -147,7 +136,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { action = 'create' } = body
 
-    const supabase = getSupabase()
+    const supabase = await createClient()
 
     switch (action) {
       case 'create':
@@ -217,7 +206,7 @@ export async function PUT(request: NextRequest) {
       )
     }
 
-    const supabase = getSupabase()
+    const supabase = await createClient()
 
     const allowedFields = [
       'subject', 'description', 'status', 'priority', 'category',
@@ -295,7 +284,7 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    const supabase = getSupabase()
+    const supabase = await createClient()
 
     if (permanent) {
       const { error } = await supabase
@@ -344,7 +333,7 @@ export async function DELETE(request: NextRequest) {
 // ============================================================================
 
 async function handleCreateTicket(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   body: Record<string, unknown>
 ) {
@@ -408,7 +397,7 @@ async function handleCreateTicket(
 }
 
 async function handleSendReply(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   body: Record<string, unknown>
 ) {
@@ -469,7 +458,7 @@ async function handleSendReply(
 }
 
 async function handleEscalateTicket(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   body: Record<string, unknown>
 ) {
@@ -528,7 +517,7 @@ async function handleEscalateTicket(
 }
 
 async function handleAssignTicket(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   body: Record<string, unknown>
 ) {
@@ -565,7 +554,7 @@ async function handleAssignTicket(
 }
 
 async function handleAddTag(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   body: Record<string, unknown>
 ) {
@@ -619,7 +608,7 @@ async function handleAddTag(
 }
 
 async function handleArchiveTickets(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   body: Record<string, unknown>
 ) {
@@ -655,7 +644,7 @@ async function handleArchiveTickets(
 }
 
 async function handleAddAgent(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   body: Record<string, unknown>
 ) {
@@ -680,7 +669,7 @@ async function handleAddAgent(
 }
 
 async function handleAddCustomer(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   body: Record<string, unknown>
 ) {
@@ -730,7 +719,7 @@ async function handleAddCustomer(
 }
 
 async function handleEmailAll(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   body: Record<string, unknown>
 ) {
@@ -753,7 +742,7 @@ async function handleEmailAll(
 }
 
 async function handleCreateSegment(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   body: Record<string, unknown>
 ) {
@@ -774,7 +763,7 @@ async function handleCreateSegment(
 }
 
 async function handleSaveSettings(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   body: Record<string, unknown>
 ) {
@@ -788,7 +777,7 @@ async function handleSaveSettings(
 }
 
 async function handleUpdateSchedule(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   body: Record<string, unknown>
 ) {
@@ -801,7 +790,7 @@ async function handleUpdateSchedule(
 }
 
 async function handleUpdateGoals(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   body: Record<string, unknown>
 ) {
@@ -814,7 +803,7 @@ async function handleUpdateGoals(
 }
 
 async function handleImportCustomers(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   body: Record<string, unknown>
 ) {
@@ -836,7 +825,7 @@ async function handleImportCustomers(
 }
 
 async function handleApplyFilters(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   body: Record<string, unknown>
 ) {
