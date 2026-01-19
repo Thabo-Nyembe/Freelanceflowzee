@@ -277,22 +277,250 @@ class IntegrationService {
     expires_at: string;
   }> {
     // Provider-specific token refresh logic
-    // This is a stub - real implementation would make OAuth calls
     switch (integration.type) {
       case 'google_calendar':
       case 'google_drive':
-        // Call Google OAuth refresh endpoint
-        break;
+        return this.refreshGoogleToken(integration);
       case 'outlook_calendar':
-        // Call Microsoft OAuth refresh endpoint
-        break;
+        return this.refreshMicrosoftToken(integration);
       case 'dropbox':
-        // Call Dropbox OAuth refresh endpoint
-        break;
-      // ... other providers
+        return this.refreshDropboxToken(integration);
+      case 'slack':
+        return this.refreshSlackToken(integration);
+      case 'notion':
+        // Notion uses long-lived tokens that don't need refresh
+        throw new Error('Notion tokens do not require refresh');
+      case 'stripe':
+      case 'paypal':
+        // Payment providers use API keys, not OAuth
+        throw new Error(`${integration.type} uses API keys, not OAuth refresh tokens`);
+      default:
+        throw new Error(`Token refresh not supported for ${integration.type}`);
+    }
+  }
+
+  private async refreshGoogleToken(integration: Integration): Promise<{
+    access_token: string;
+    refresh_token?: string;
+    expires_at: string;
+  }> {
+    const clientId = process.env.GOOGLE_CLIENT_ID;
+    const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+
+    if (!clientId || !clientSecret) {
+      throw new Error('Google OAuth credentials not configured');
     }
 
-    throw new Error(`Token refresh not implemented for ${integration.type}`);
+    const response = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        client_id: clientId,
+        client_secret: clientSecret,
+        refresh_token: integration.refresh_token!,
+        grant_type: 'refresh_token',
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(`Google token refresh failed: ${errorData.error_description || response.statusText}`);
+    }
+
+    const data = await response.json();
+
+    return {
+      access_token: data.access_token,
+      // Google may or may not return a new refresh token
+      refresh_token: data.refresh_token || integration.refresh_token,
+      expires_at: new Date(Date.now() + (data.expires_in || 3600) * 1000).toISOString(),
+    };
+  }
+
+  private async refreshMicrosoftToken(integration: Integration): Promise<{
+    access_token: string;
+    refresh_token?: string;
+    expires_at: string;
+  }> {
+    const clientId = process.env.MICROSOFT_CLIENT_ID;
+    const clientSecret = process.env.MICROSOFT_CLIENT_SECRET;
+
+    if (!clientId || !clientSecret) {
+      throw new Error('Microsoft OAuth credentials not configured');
+    }
+
+    const response = await fetch('https://login.microsoftonline.com/common/oauth2/v2.0/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        client_id: clientId,
+        client_secret: clientSecret,
+        refresh_token: integration.refresh_token!,
+        grant_type: 'refresh_token',
+        scope: integration.scopes?.join(' ') || 'https://graph.microsoft.com/Calendars.ReadWrite offline_access',
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(`Microsoft token refresh failed: ${errorData.error_description || response.statusText}`);
+    }
+
+    const data = await response.json();
+
+    return {
+      access_token: data.access_token,
+      refresh_token: data.refresh_token,
+      expires_at: new Date(Date.now() + (data.expires_in || 3600) * 1000).toISOString(),
+    };
+  }
+
+  private async refreshDropboxToken(integration: Integration): Promise<{
+    access_token: string;
+    refresh_token?: string;
+    expires_at: string;
+  }> {
+    const clientId = process.env.DROPBOX_CLIENT_ID;
+    const clientSecret = process.env.DROPBOX_CLIENT_SECRET;
+
+    if (!clientId || !clientSecret) {
+      throw new Error('Dropbox OAuth credentials not configured');
+    }
+
+    const response = await fetch('https://api.dropboxapi.com/oauth2/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString('base64')}`,
+      },
+      body: new URLSearchParams({
+        refresh_token: integration.refresh_token!,
+        grant_type: 'refresh_token',
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(`Dropbox token refresh failed: ${errorData.error_description || response.statusText}`);
+    }
+
+    const data = await response.json();
+
+    return {
+      access_token: data.access_token,
+      // Dropbox refresh tokens are long-lived and don't rotate
+      refresh_token: integration.refresh_token,
+      expires_at: new Date(Date.now() + (data.expires_in || 14400) * 1000).toISOString(),
+    };
+  }
+
+  private async refreshSlackToken(integration: Integration): Promise<{
+    access_token: string;
+    refresh_token?: string;
+    expires_at: string;
+  }> {
+    const clientId = process.env.SLACK_CLIENT_ID;
+    const clientSecret = process.env.SLACK_CLIENT_SECRET;
+
+    if (!clientId || !clientSecret) {
+      throw new Error('Slack OAuth credentials not configured');
+    }
+
+    // Slack uses a different rotation strategy - they don't use refresh tokens
+    // Instead, bot tokens are long-lived. User tokens may need refresh.
+    if (!integration.refresh_token) {
+      // Bot tokens don't expire
+      throw new Error('Slack bot tokens do not require refresh');
+    }
+
+    const response = await fetch('https://slack.com/api/oauth.v2.access', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        client_id: clientId,
+        client_secret: clientSecret,
+        grant_type: 'refresh_token',
+        refresh_token: integration.refresh_token,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!data.ok) {
+      throw new Error(`Slack token refresh failed: ${data.error}`);
+    }
+
+    return {
+      access_token: data.access_token,
+      refresh_token: data.refresh_token,
+      expires_at: new Date(Date.now() + (data.expires_in || 43200) * 1000).toISOString(),
+    };
+  }
+
+  /**
+   * Check all integrations for tokens that need refresh
+   * and refresh them proactively
+   */
+  async refreshExpiringTokens(userId: string): Promise<{
+    refreshed: string[];
+    failed: Array<{ integrationId: string; error: string }>;
+  }> {
+    const integrations = await this.getIntegrations(userId);
+    const refreshed: string[] = [];
+    const failed: Array<{ integrationId: string; error: string }> = [];
+
+    // Check each integration
+    for (const integration of integrations) {
+      if (integration.status !== 'active') continue;
+      if (!integration.refresh_token) continue;
+      if (!integration.token_expires_at) continue;
+
+      const expiresAt = new Date(integration.token_expires_at);
+      const now = new Date();
+      const fiveMinutesFromNow = new Date(now.getTime() + 5 * 60 * 1000);
+
+      // Refresh if token expires within 5 minutes
+      if (expiresAt <= fiveMinutesFromNow) {
+        try {
+          await this.refreshIntegrationToken(integration.id);
+          refreshed.push(integration.id);
+        } catch (error) {
+          const message = error instanceof Error ? error.message : 'Unknown error';
+          failed.push({ integrationId: integration.id, error: message });
+
+          // Mark integration as having an error
+          await this.updateIntegration(integration.id, {
+            status: 'error',
+            error_message: `Token refresh failed: ${message}`,
+          });
+        }
+      }
+    }
+
+    return { refreshed, failed };
+  }
+
+  /**
+   * Get integrations that need attention (expired or expiring soon)
+   */
+  async getIntegrationsNeedingRefresh(userId: string): Promise<Integration[]> {
+    const integrations = await this.getIntegrations(userId);
+    const now = new Date();
+    const oneHourFromNow = new Date(now.getTime() + 60 * 60 * 1000);
+
+    return integrations.filter(integration => {
+      if (!integration.token_expires_at) return false;
+      if (!integration.refresh_token) return false;
+
+      const expiresAt = new Date(integration.token_expires_at);
+      return expiresAt <= oneHourFromNow;
+    });
   }
 
   // =====================================================

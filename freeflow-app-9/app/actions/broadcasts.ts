@@ -4,8 +4,10 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
 import { createFeatureLogger } from '@/lib/logger'
+import { getEmailService } from '@/lib/email/email-service'
 
 const logger = createFeatureLogger('broadcasts-actions')
+const emailService = getEmailService()
 
 // ===================================
 // Broadcast Server Actions
@@ -139,35 +141,101 @@ export async function sendBroadcast(id: string): Promise<ActionResult<any>> {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
+    // Get the broadcast with all details
+    const { data: broadcast, error: fetchError } = await supabase
+      .from('broadcasts')
+      .select('*')
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .single()
+
+    if (fetchError || !broadcast) {
+      logger.error('Broadcast not found', fetchError)
+      return actionError('Broadcast not found', 'NOT_FOUND')
+    }
+
     // Update status to sending
-    const { data: broadcast, error } = await supabase
+    await supabase
       .from('broadcasts')
       .update({
         status: 'sending',
         sent_at: new Date().toISOString()
       })
       .eq('id', id)
-      .eq('user_id', user.id)
-      .select()
-      .single()
 
-    if (error) {
-      logger.error('Failed to send broadcast', error)
-      return actionError(error.message, 'DATABASE_ERROR')
+    // Get recipient emails
+    let recipientEmails: string[] = []
+
+    if (broadcast.recipient_type === 'all') {
+      // Get all users with email
+      const { data: users } = await supabase
+        .from('users')
+        .select('email')
+        .not('email', 'is', null)
+
+      recipientEmails = users?.map(u => u.email).filter(Boolean) || []
+    } else if (broadcast.recipient_list) {
+      // Use provided recipient list
+      recipientEmails = Array.isArray(broadcast.recipient_list)
+        ? broadcast.recipient_list
+        : [broadcast.recipient_list]
     }
 
-    // TODO: Implement actual broadcast sending logic here
-    // This would integrate with email service, SMS provider, etc.
+    // Send emails in batches
+    let deliveredCount = 0
+    let failedCount = 0
 
-    // For now, just update status to sent
+    if (recipientEmails.length > 0) {
+      const emailMessages = recipientEmails.map(email => ({
+        to: email,
+        from: broadcast.sender_email || undefined,
+        subject: broadcast.subject || broadcast.title,
+        html: broadcast.html_content || `<p>${broadcast.message}</p>`,
+        text: broadcast.plain_text_content || broadcast.message,
+        tags: broadcast.tags || [],
+        metadata: {
+          broadcast_id: id,
+          campaign_id: id
+        }
+      }))
+
+      // Send batch emails
+      const result = await emailService.sendBatch(emailMessages)
+      deliveredCount = result.successful
+      failedCount = result.failed
+
+      logger.info('Broadcast emails sent', {
+        broadcastId: id,
+        total: emailMessages.length,
+        successful: deliveredCount,
+        failed: failedCount
+      })
+    }
+
+    // Update broadcast with results
     await supabase
       .from('broadcasts')
-      .update({ status: 'sent' })
+      .update({
+        status: 'sent',
+        recipient_count: recipientEmails.length,
+        delivered_count: deliveredCount,
+        failed_count: failedCount
+      })
       .eq('id', id)
 
+    // Update the broadcast object for return
+    broadcast.status = 'sent'
+    broadcast.delivered_count = deliveredCount
+    broadcast.failed_count = failedCount
+
     revalidatePath('/dashboard/broadcasts-v2')
-    logger.info('Broadcast sent successfully', { broadcastId: id })
-    return actionSuccess(broadcast, 'Broadcast sent successfully')
+    logger.info('Broadcast sent successfully', {
+      broadcastId: id,
+      recipients: recipientEmails.length,
+      delivered: deliveredCount
+    })
+
+    return actionSuccess(broadcast, `Broadcast sent to ${deliveredCount} recipients`)
   } catch (error: any) {
     logger.error('Unexpected error sending broadcast', error)
     return actionError('An unexpected error occurred', 'INTERNAL_ERROR')

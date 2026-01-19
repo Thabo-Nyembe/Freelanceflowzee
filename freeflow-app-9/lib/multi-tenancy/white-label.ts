@@ -6,6 +6,7 @@
 // =====================================================
 
 import { createClient } from '@/lib/supabase/client';
+import { sendTeamInvite } from '@/lib/email/email-templates';
 
 // =====================================================
 // TYPES
@@ -773,7 +774,32 @@ export class WhiteLabelService {
 
     if (error) throw error;
 
-    // TODO: Send invite email
+    // Get tenant and inviter details for the email
+    const tenant = await this.getTenant(tenantId);
+    const { data: inviterData } = await this.supabase
+      .from('users')
+      .select('name, email')
+      .eq('id', invitedBy)
+      .single();
+
+    // Send invite email
+    if (tenant && data) {
+      try {
+        await sendTeamInvite({
+          inviteeName: email.split('@')[0], // Use email prefix as name
+          inviteeEmail: email,
+          teamName: tenant.name,
+          inviterName: inviterData?.name || 'A team member',
+          role: role,
+          acceptInviteUrl: `${process.env.NEXT_PUBLIC_APP_URL}/invite/accept/${data.id}`,
+          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+          teamLogoUrl: tenant.branding?.logoUrl
+        });
+      } catch (emailError) {
+        console.error('Failed to send team invite email:', emailError);
+        // Don't throw - invite was created, email just failed
+      }
+    }
 
     return this.mapInviteFromDb(data);
   }

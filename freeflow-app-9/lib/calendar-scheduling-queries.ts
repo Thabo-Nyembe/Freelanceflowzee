@@ -5,6 +5,7 @@
 
 import { supabase } from './supabase'
 import { addDays, addWeeks, addMonths, startOfDay, endOfDay, format } from 'date-fns'
+import { sendBookingConfirmation, sendBookingCancellation, sendBookingReschedule } from '@/lib/email/email-templates'
 
 // =====================================================
 // TYPES
@@ -947,7 +948,24 @@ export async function createBooking(booking: Partial<Booking>): Promise<Booking 
         }]
       })
 
-      // TODO: Send confirmation email
+      // Send confirmation email
+      if (booking.client_email) {
+        try {
+          await sendBookingConfirmation({
+            clientName: booking.client_name,
+            clientEmail: booking.client_email,
+            bookingTitle: bookingType.name,
+            bookingDate: format(new Date(data.start_time), 'EEEE, MMMM d, yyyy'),
+            bookingTime: format(new Date(data.start_time), 'h:mm a'),
+            duration: `${bookingType.duration} minutes`,
+            meetingUrl: data.video_url || undefined,
+            hostName: 'Your Host', // Would be fetched from user profile
+            notes: booking.notes
+          })
+        } catch (emailError) {
+          console.error('Failed to send booking confirmation email:', emailError)
+        }
+      }
     }
 
     return data
@@ -982,6 +1000,16 @@ export async function updateBooking(bookingId: string, updates: Partial<Booking>
 
 export async function confirmBooking(bookingId: string): Promise<boolean> {
   try {
+    // First get the booking details for the email
+    const { data: booking } = await supabase
+      .from('bookings')
+      .select(`
+        *,
+        booking_type:booking_type_id (name, duration)
+      `)
+      .eq('id', bookingId)
+      .single()
+
     const { error } = await supabase
       .from('bookings')
       .update({
@@ -993,7 +1021,24 @@ export async function confirmBooking(bookingId: string): Promise<boolean> {
 
     if (error) throw error
 
-    // TODO: Send confirmation email
+    // Send confirmation email
+    if (booking?.client_email) {
+      try {
+        await sendBookingConfirmation({
+          clientName: booking.client_name,
+          clientEmail: booking.client_email,
+          bookingTitle: booking.booking_type?.name || 'Booking',
+          bookingDate: format(new Date(booking.start_time), 'EEEE, MMMM d, yyyy'),
+          bookingTime: format(new Date(booking.start_time), 'h:mm a'),
+          duration: `${booking.booking_type?.duration || 30} minutes`,
+          meetingUrl: booking.video_url || undefined,
+          hostName: 'Your Host',
+          notes: booking.notes
+        })
+      } catch (emailError) {
+        console.error('Failed to send confirmation email:', emailError)
+      }
+    }
 
     return true
   } catch (error) {
@@ -1008,9 +1053,13 @@ export async function cancelBooking(
   reason?: string
 ): Promise<boolean> {
   try {
+    // First get booking details for the cancellation email
     const { data: booking } = await supabase
       .from('bookings')
-      .select('booking_id:id')
+      .select(`
+        *,
+        booking_type:booking_type_id (name, duration)
+      `)
       .eq('id', bookingId)
       .single()
 
@@ -1033,9 +1082,25 @@ export async function cancelBooking(
         .from('calendar_events')
         .update({ status: 'cancelled' })
         .eq('booking_id', bookingId)
-    }
 
-    // TODO: Send cancellation email
+      // Send cancellation email
+      if (booking.client_email) {
+        try {
+          await sendBookingCancellation({
+            clientName: booking.client_name,
+            clientEmail: booking.client_email,
+            bookingTitle: booking.booking_type?.name || 'Booking',
+            originalDate: format(new Date(booking.start_time), 'EEEE, MMMM d, yyyy'),
+            originalTime: format(new Date(booking.start_time), 'h:mm a'),
+            cancelledBy: cancelledBy === booking.user_id ? 'host' : 'client',
+            reason: reason,
+            rescheduleUrl: `${process.env.NEXT_PUBLIC_APP_URL}/book/${booking.user_id}`
+          })
+        } catch (emailError) {
+          console.error('Failed to send cancellation email:', emailError)
+        }
+      }
+    }
 
     return true
   } catch (error) {
@@ -1052,6 +1117,9 @@ export async function rescheduleBooking(
   try {
     const booking = await getBookingById(bookingId)
     if (!booking) return null
+
+    // Store original times for the email
+    const originalStartTime = booking.start_time
 
     // Check for conflicts
     const hasConflict = await checkBookingConflict(
@@ -1090,7 +1158,25 @@ export async function rescheduleBooking(
       })
       .eq('booking_id', bookingId)
 
-    // TODO: Send reschedule notification
+    // Send reschedule notification email
+    if (data?.client_email) {
+      try {
+        await sendBookingReschedule({
+          clientName: data.client_name,
+          clientEmail: data.client_email,
+          bookingTitle: data.booking_type?.name || 'Booking',
+          originalDate: format(new Date(originalStartTime), 'EEEE, MMMM d, yyyy'),
+          originalTime: format(new Date(originalStartTime), 'h:mm a'),
+          newDate: format(newStartTime, 'EEEE, MMMM d, yyyy'),
+          newTime: format(newStartTime, 'h:mm a'),
+          duration: `${data.booking_type?.duration || 30} minutes`,
+          meetingUrl: data.video_url || undefined,
+          hostName: 'Your Host'
+        })
+      } catch (emailError) {
+        console.error('Failed to send reschedule email:', emailError)
+      }
+    }
 
     return data
   } catch (error) {

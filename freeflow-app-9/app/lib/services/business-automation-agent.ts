@@ -18,6 +18,14 @@ import { EmailAgentService } from './email-agent-service';
 import { AIService } from './ai-service';
 import { createClient } from '@supabase/supabase-js';
 import logger from '@/lib/logger';
+import { getEmailService } from '@/lib/email/email-service';
+import {
+  sendBookingConfirmation,
+  sendBookingCancellation,
+  sendBookingReschedule
+} from '@/lib/email/email-templates';
+
+const emailService = getEmailService();
 
 // ============================================================================
 // TYPES AND INTERFACES
@@ -716,8 +724,39 @@ Return as JSON with fields: message, nextSteps (array), summary`;
         const update = await this.generateProjectUpdate(project.id);
         updates.push(update);
 
-        // Send email (integrate with email service)
-        // TODO: Actually send the email
+        // Send project update email
+        if (project.client_email) {
+          try {
+            await emailService.send({
+              to: project.client_email,
+              subject: `Weekly Update: ${project.title}`,
+              html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                  <h2 style="color: #3B82F6;">Project Update</h2>
+                  <h3>${project.title}</h3>
+                  <p><strong>Status:</strong> ${update.status}</p>
+                  <p><strong>Progress:</strong> ${update.progress}%</p>
+                  <p>${update.summary}</p>
+                  <h4>Recent Activities:</h4>
+                  <ul>
+                    ${update.activities.slice(0, 5).map((a: any) => `<li>${a.description}</li>`).join('')}
+                  </ul>
+                  <p style="margin-top: 20px;">
+                    <a href="${process.env.NEXT_PUBLIC_APP_URL}/project/${project.id}"
+                       style="background-color: #3B82F6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">
+                      View Full Project
+                    </a>
+                  </p>
+                </div>
+              `,
+              text: `Project Update: ${project.title}\nStatus: ${update.status}\nProgress: ${update.progress}%\n${update.summary}`,
+              tags: ['project-update', 'weekly-update']
+            });
+            logger.info('Project update email sent', { projectId: project.id });
+          } catch (emailError) {
+            logger.error('Failed to send project update email', { projectId: project.id, error: emailError });
+          }
+        }
       }
 
       logger.info('Weekly project updates sent', { count: updates.length });
@@ -1387,8 +1426,24 @@ Return as JSON with fields: subject, message`;
         message = parsed.message || message;
       }
 
-      // TODO: Send actual email
-      logger.info('Booking confirmation sent', { bookingId: booking.id });
+      // Send booking confirmation email
+      try {
+        const startTime = new Date(booking.startTime);
+        await sendBookingConfirmation({
+          clientName: booking.clientName,
+          clientEmail: booking.clientEmail,
+          bookingTitle: booking.serviceType,
+          bookingDate: startTime.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
+          bookingTime: startTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+          duration: `${booking.serviceDuration} minutes`,
+          meetingUrl: booking.videoCallUrl,
+          hostName: 'Your Service Provider',
+          notes: booking.specialRequests
+        });
+        logger.info('Booking confirmation email sent', { bookingId: booking.id });
+      } catch (emailError) {
+        logger.error('Failed to send booking confirmation email', { bookingId: booking.id, error: emailError });
+      }
     } catch (error) {
       logger.error('Error sending booking confirmation', { error });
     }
@@ -1453,20 +1508,48 @@ Return as JSON with fields: subject, message`;
       }
 
       let message = '';
+      let subject = '';
 
       switch (type) {
         case '24h':
+          subject = `Reminder: ${booking.service_type} Tomorrow`;
           message = `Hi ${booking.client_name}! Reminder: You have a ${booking.service_type} appointment tomorrow at ${new Date(booking.start_time).toLocaleTimeString()}. Reply CONFIRM or RESCHEDULE.`;
           break;
         case '1h':
+          subject = `Starting Soon: ${booking.service_type} in 1 Hour`;
           message = `Hi ${booking.client_name}! Your ${booking.service_type} appointment starts in 1 hour. See you soon!`;
           break;
         case '15m':
+          subject = `Starting Now: ${booking.service_type} in 15 Minutes`;
           message = `Your appointment starts in 15 minutes! ${booking.location || 'See booking details for location.'}`;
           break;
       }
 
-      // TODO: Send actual reminder via email/SMS
+      // Send reminder email
+      if (booking.client_email) {
+        try {
+          await emailService.send({
+            to: booking.client_email,
+            subject,
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <h2 style="color: #3B82F6;">Appointment Reminder</h2>
+                <p>${message}</p>
+                <p><strong>Service:</strong> ${booking.service_type}</p>
+                <p><strong>Date:</strong> ${new Date(booking.start_time).toLocaleDateString()}</p>
+                <p><strong>Time:</strong> ${new Date(booking.start_time).toLocaleTimeString()}</p>
+                ${booking.location ? `<p><strong>Location:</strong> ${booking.location}</p>` : ''}
+                ${booking.video_call_url ? `<p><a href="${booking.video_call_url}" style="background-color: #3B82F6; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Join Video Call</a></p>` : ''}
+              </div>
+            `,
+            text: message,
+            tags: ['booking-reminder', type]
+          });
+          logger.info('Booking reminder email sent', { bookingId, type });
+        } catch (emailError) {
+          logger.error('Failed to send booking reminder email', { bookingId, type, error: emailError });
+        }
+      }
       logger.info('Booking reminder sent', { bookingId, type });
 
       // Update reminders sent
@@ -1520,9 +1603,29 @@ Return as JSON with fields: subject, message`;
 
         logger.info('Booking cancelled', { bookingId });
 
-        // Send cancellation confirmation
-        // TODO: Send email
+        // Send cancellation email
+        if (booking.client_email) {
+          try {
+            const startTime = new Date(booking.start_time);
+            await sendBookingCancellation({
+              clientName: booking.client_name,
+              clientEmail: booking.client_email,
+              bookingTitle: booking.service_type,
+              originalDate: startTime.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
+              originalTime: startTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+              cancelledBy: 'client',
+              reason: 'Cancelled by request',
+              rescheduleUrl: `${process.env.NEXT_PUBLIC_APP_URL}/book`
+            });
+            logger.info('Booking cancellation email sent', { bookingId });
+          } catch (emailError) {
+            logger.error('Failed to send booking cancellation email', { bookingId, error: emailError });
+          }
+        }
       } else if (action === 'reschedule' && newSlot) {
+        // Store original time for email
+        const originalStartTime = new Date(booking.start_time);
+
         // Update booking with new time
         const newEndTime = new Date(newSlot.date);
         newEndTime.setMinutes(newEndTime.getMinutes() + booking.service_duration);
@@ -1537,8 +1640,26 @@ Return as JSON with fields: subject, message`;
 
         logger.info('Booking rescheduled', { bookingId, newTime: newSlot.startTime });
 
-        // Send rescheduling confirmation
-        // TODO: Send email
+        // Send rescheduling email
+        if (booking.client_email) {
+          try {
+            await sendBookingReschedule({
+              clientName: booking.client_name,
+              clientEmail: booking.client_email,
+              bookingTitle: booking.service_type,
+              originalDate: originalStartTime.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
+              originalTime: originalStartTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+              newDate: newSlot.date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
+              newTime: newSlot.date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+              duration: `${booking.service_duration} minutes`,
+              meetingUrl: booking.video_call_url,
+              hostName: 'Your Service Provider'
+            });
+            logger.info('Booking reschedule email sent', { bookingId });
+          } catch (emailError) {
+            logger.error('Failed to send booking reschedule email', { bookingId, error: emailError });
+          }
+        }
       }
 
       const { data: updatedBooking } = await this.supabase

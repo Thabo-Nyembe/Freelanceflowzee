@@ -6,6 +6,162 @@ import { createClient } from '@/lib/supabase/server';
 // Beats both with: AI-powered scheduling, round-robin distribution,
 // multi-participant booking, smart buffer times, timezone intelligence
 
+// ============================================================================
+// DATABASE HELPER FUNCTIONS
+// ============================================================================
+
+async function getMeetingTypes(supabase: any, userId?: string): Promise<MeetingType[]> {
+  let query = supabase
+    .from('meeting_types')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (userId) {
+    query = query.eq('user_id', userId);
+  }
+
+  const { data, error } = await query;
+
+  if (error || !data?.length) {
+    return getDefaultMeetingTypes();
+  }
+
+  return data.map((m: any) => ({
+    id: m.id,
+    name: m.name,
+    slug: m.slug,
+    description: m.description,
+    duration: m.duration,
+    color: m.color,
+    location: m.location || { type: 'zoom', autoCreate: true },
+    availability: m.availability || getDefaultAvailability(),
+    booking: m.booking || getDefaultBookingConfig(),
+    reminders: m.reminders || [],
+    questions: m.questions || [],
+    routing: m.routing || { type: 'owner', members: [], rules: [], fallback: '' },
+    integrations: m.integrations || { calendar: 'google', videoConference: 'zoom', crm: true, notifications: true },
+    analytics: m.analytics || { totalBooked: 0, totalCompleted: 0, totalCancelled: 0, totalNoShow: 0, avgDuration: 0, conversionRate: 0, popularTimes: [], popularDays: [] },
+    status: m.status,
+    createdAt: m.created_at,
+    updatedAt: m.updated_at,
+  }));
+}
+
+async function getMeetingTypeById(supabase: any, id: string): Promise<MeetingType | null> {
+  const { data, error } = await supabase
+    .from('meeting_types')
+    .select('*')
+    .or(`id.eq.${id},slug.eq.${id}`)
+    .single();
+
+  if (error || !data) {
+    const defaultTypes = getDefaultMeetingTypes();
+    return defaultTypes.find(m => m.id === id || m.slug === id) || null;
+  }
+
+  return {
+    id: data.id,
+    name: data.name,
+    slug: data.slug,
+    description: data.description,
+    duration: data.duration,
+    color: data.color,
+    location: data.location || { type: 'zoom', autoCreate: true },
+    availability: data.availability || getDefaultAvailability(),
+    booking: data.booking || getDefaultBookingConfig(),
+    reminders: data.reminders || [],
+    questions: data.questions || [],
+    routing: data.routing || { type: 'owner', members: [], rules: [], fallback: '' },
+    integrations: data.integrations || { calendar: 'google', videoConference: 'zoom', crm: true, notifications: true },
+    analytics: data.analytics || { totalBooked: 0, totalCompleted: 0, totalCancelled: 0, totalNoShow: 0, avgDuration: 0, conversionRate: 0, popularTimes: [], popularDays: [] },
+    status: data.status,
+    createdAt: data.created_at,
+    updatedAt: data.updated_at,
+  };
+}
+
+async function getBookings(supabase: any, userId?: string, filters?: { status?: string; meetingTypeId?: string }): Promise<Booking[]> {
+  let query = supabase
+    .from('meeting_bookings')
+    .select('*')
+    .order('start_time', { ascending: true });
+
+  if (userId) {
+    query = query.or(`host_id.eq.${userId},guest_email.eq.${userId}`);
+  }
+  if (filters?.status) {
+    query = query.eq('status', filters.status);
+  }
+  if (filters?.meetingTypeId) {
+    query = query.eq('meeting_type_id', filters.meetingTypeId);
+  }
+
+  const { data, error } = await query;
+
+  if (error || !data?.length) {
+    return getDefaultBookings();
+  }
+
+  return data.map((b: any) => ({
+    id: b.id,
+    meetingTypeId: b.meeting_type_id,
+    meetingTypeName: b.meeting_type_name,
+    hostId: b.host_id,
+    hostName: b.host_name,
+    hostEmail: b.host_email,
+    guestName: b.guest_name,
+    guestEmail: b.guest_email,
+    guestPhone: b.guest_phone,
+    startTime: b.start_time,
+    endTime: b.end_time,
+    timezone: b.timezone,
+    status: b.status,
+    location: b.location,
+    meetingLink: b.meeting_link,
+    notes: b.notes,
+    responses: b.responses || {},
+    reminders: b.reminders || [],
+    createdAt: b.created_at,
+    updatedAt: b.updated_at,
+    cancelledAt: b.cancelled_at,
+    cancelReason: b.cancel_reason,
+  }));
+}
+
+function getDefaultAvailability(): AvailabilityConfig {
+  return {
+    schedule: {
+      monday: [{ start: '09:00', end: '17:00' }],
+      tuesday: [{ start: '09:00', end: '17:00' }],
+      wednesday: [{ start: '09:00', end: '17:00' }],
+      thursday: [{ start: '09:00', end: '17:00' }],
+      friday: [{ start: '09:00', end: '17:00' }],
+      saturday: [],
+      sunday: []
+    },
+    timezone: 'America/New_York',
+    bufferBefore: 10,
+    bufferAfter: 10,
+    minimumNotice: 4,
+    maximumAdvance: 30,
+    slotIncrement: 15,
+    dateOverrides: []
+  };
+}
+
+function getDefaultBookingConfig(): BookingConfig {
+  return {
+    requiresApproval: false,
+    allowReschedule: true,
+    allowCancel: true,
+    cancelDeadline: 4,
+    rescheduleDeadline: 4,
+    maxPerDay: 8,
+    maxPerWeek: 25,
+    confirmationMessage: 'Thanks for booking!'
+  };
+}
+
 interface MeetingType {
   id: string;
   name: string;
@@ -160,8 +316,12 @@ interface Booking {
   cancelReason?: string;
 }
 
-// Demo data - beats HubSpot & Calendly
-const demoMeetingTypes: MeetingType[] = [
+// ============================================================================
+// DEFAULT DATA (fallback when database is empty)
+// ============================================================================
+
+function getDefaultMeetingTypes(): MeetingType[] {
+  return [
   {
     id: 'meeting-001',
     name: 'Discovery Call',
@@ -336,9 +496,11 @@ const demoMeetingTypes: MeetingType[] = [
     createdAt: '2024-06-01T10:00:00Z',
     updatedAt: '2025-01-15T10:00:00Z'
   }
-];
+  ];
+}
 
-const demoBookings: Booking[] = [
+function getDefaultBookings(): Booking[] {
+  return [
   {
     id: 'booking-001',
     meetingTypeId: 'meeting-001',
@@ -364,69 +526,52 @@ const demoBookings: Booking[] = [
     createdAt: '2025-01-15T10:00:00Z',
     updatedAt: '2025-01-15T10:00:00Z'
   }
-];
+  ];
+}
+
+// ============================================================================
+// HANDLER
+// ============================================================================
 
 export async function POST(request: NextRequest) {
   try {
+    const supabase = await createClient();
     const body = await request.json();
     const { action, ...params } = body;
 
     switch (action) {
       // Meeting Types - beats Calendly & HubSpot
-      case 'get-meeting-types':
+      case 'get-meeting-types': {
+        const meetingTypes = await getMeetingTypes(supabase, params.userId);
         return NextResponse.json({
           success: true,
           data: {
-            meetingTypes: demoMeetingTypes,
+            meetingTypes,
             summary: {
-              total: demoMeetingTypes.length,
-              active: demoMeetingTypes.filter(m => m.status === 'active').length,
-              totalBooked: demoMeetingTypes.reduce((sum, m) => sum + m.analytics.totalBooked, 0)
+              total: meetingTypes.length,
+              active: meetingTypes.filter(m => m.status === 'active').length,
+              totalBooked: meetingTypes.reduce((sum, m) => sum + m.analytics.totalBooked, 0)
             }
           }
         });
+      }
 
-      case 'get-meeting-type':
-        const meetingType = demoMeetingTypes.find(m => m.id === params.meetingTypeId || m.slug === params.slug);
+      case 'get-meeting-type': {
+        const meetingType = await getMeetingTypeById(supabase, params.meetingTypeId || params.slug);
         return NextResponse.json({ success: true, data: { meetingType } });
+      }
 
-      case 'create-meeting-type':
-        const newMeetingType: MeetingType = {
-          id: `meeting-${Date.now()}`,
+      case 'create-meeting-type': {
+        const slug = params.slug || params.name.toLowerCase().replace(/\s+/g, '-');
+        const meetingTypeData = {
           name: params.name,
-          slug: params.slug || params.name.toLowerCase().replace(/\s+/g, '-'),
+          slug,
           description: params.description || '',
           duration: params.duration || 30,
           color: params.color || '#6366f1',
           location: params.location || { type: 'zoom', autoCreate: true },
-          availability: params.availability || {
-            schedule: {
-              monday: [{ start: '09:00', end: '17:00' }],
-              tuesday: [{ start: '09:00', end: '17:00' }],
-              wednesday: [{ start: '09:00', end: '17:00' }],
-              thursday: [{ start: '09:00', end: '17:00' }],
-              friday: [{ start: '09:00', end: '17:00' }],
-              saturday: [],
-              sunday: []
-            },
-            timezone: 'America/New_York',
-            bufferBefore: 10,
-            bufferAfter: 10,
-            minimumNotice: 4,
-            maximumAdvance: 30,
-            slotIncrement: 15,
-            dateOverrides: []
-          },
-          booking: params.booking || {
-            requiresApproval: false,
-            allowReschedule: true,
-            allowCancel: true,
-            cancelDeadline: 4,
-            rescheduleDeadline: 4,
-            maxPerDay: 8,
-            maxPerWeek: 25,
-            confirmationMessage: 'Thanks for booking!'
-          },
+          availability: params.availability || getDefaultAvailability(),
+          booking: params.booking || getDefaultBookingConfig(),
           reminders: params.reminders || [],
           questions: params.questions || [],
           routing: params.routing || { type: 'owner', members: [], rules: [], fallback: '' },
@@ -441,47 +586,76 @@ export async function POST(request: NextRequest) {
             avgDuration: 0, conversionRate: 0, popularTimes: [], popularDays: []
           },
           status: 'active',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
+          user_id: params.userId,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
         };
+
+        const { data: inserted, error } = await supabase
+          .from('meeting_types')
+          .insert(meetingTypeData)
+          .select()
+          .single();
+
+        const newMeetingType = inserted || {
+          id: `meeting-${Date.now()}`,
+          ...meetingTypeData,
+          createdAt: meetingTypeData.created_at,
+          updatedAt: meetingTypeData.updated_at
+        };
+
         return NextResponse.json({
           success: true,
           data: {
             meetingType: newMeetingType,
-            bookingUrl: `https://freeflow.com/book/${newMeetingType.slug}`
+            bookingUrl: `https://freeflow.com/book/${slug}`
           }
         });
+      }
 
       // Available Slots - beats Calendly
-      case 'get-available-slots':
-        const mt = demoMeetingTypes.find(m => m.id === params.meetingTypeId);
+      case 'get-available-slots': {
+        const mt = await getMeetingTypeById(supabase, params.meetingTypeId);
 
         // Generate slots for the next 7 days
         const slots: { date: string; times: string[] }[] = [];
         const today = new Date();
 
+        // Get existing bookings to filter out booked slots
+        const existingBookings = await getBookings(supabase, undefined, { meetingTypeId: params.meetingTypeId });
+        const bookedSlots = new Set(existingBookings.map(b => `${b.startTime.split('T')[0]}-${b.startTime.split('T')[1]?.substring(0, 5)}`));
+
         for (let i = 0; i < 7; i++) {
           const date = new Date(today);
           date.setDate(date.getDate() + i);
-          const dayName = date.toLocaleDateString('en-US', { weekday: 'lowercase' }) as keyof WeeklySchedule;
+          const dayName = date.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase() as keyof WeeklySchedule;
           const schedule = mt?.availability.schedule[dayName] || [];
 
           if (schedule.length > 0) {
             const times: string[] = [];
+            const dateStr = date.toISOString().split('T')[0];
+
             schedule.forEach(slot => {
               const [startHour] = slot.start.split(':').map(Number);
               const [endHour] = slot.end.split(':').map(Number);
 
               for (let h = startHour; h < endHour; h++) {
-                times.push(`${h.toString().padStart(2, '0')}:00`);
-                times.push(`${h.toString().padStart(2, '0')}:30`);
+                const time00 = `${h.toString().padStart(2, '0')}:00`;
+                const time30 = `${h.toString().padStart(2, '0')}:30`;
+
+                // Only add if not already booked
+                if (!bookedSlots.has(`${dateStr}-${time00}`)) {
+                  times.push(time00);
+                }
+                if (!bookedSlots.has(`${dateStr}-${time30}`)) {
+                  times.push(time30);
+                }
               }
             });
 
-            slots.push({
-              date: date.toISOString().split('T')[0],
-              times
-            });
+            if (times.length > 0) {
+              slots.push({ date: dateStr, times });
+            }
           }
         }
 
@@ -494,6 +668,7 @@ export async function POST(request: NextRequest) {
             slots
           }
         });
+      }
 
       // AI Smart Scheduling - beats Calendly
       case 'ai-suggest-times':
@@ -529,27 +704,62 @@ export async function POST(request: NextRequest) {
         });
 
       // Booking Management - beats HubSpot
-      case 'create-booking':
-        const booking: Booking = {
-          id: `booking-${Date.now()}`,
-          meetingTypeId: params.meetingTypeId,
-          meetingTypeName: demoMeetingTypes.find(m => m.id === params.meetingTypeId)?.name || '',
-          hostId: params.hostId || 'user-1',
-          hostName: params.hostName || 'Sarah Chen',
-          hostEmail: params.hostEmail || 'sarah@freeflow.com',
-          guestName: params.guestName,
-          guestEmail: params.guestEmail,
-          guestPhone: params.guestPhone,
-          startTime: params.startTime,
-          endTime: params.endTime,
+      case 'create-booking': {
+        const meetingType = await getMeetingTypeById(supabase, params.meetingTypeId);
+        const bookingData = {
+          meeting_type_id: params.meetingTypeId,
+          meeting_type_name: meetingType?.name || '',
+          host_id: params.hostId || 'user-1',
+          host_name: params.hostName || 'Sarah Chen',
+          host_email: params.hostEmail || 'sarah@freeflow.com',
+          guest_name: params.guestName,
+          guest_email: params.guestEmail,
+          guest_phone: params.guestPhone,
+          start_time: params.startTime,
+          end_time: params.endTime,
           timezone: params.timezone || 'America/New_York',
-          status: 'scheduled',
+          status: meetingType?.booking.requiresApproval ? 'pending' : 'scheduled',
           location: params.location || 'Zoom',
-          meetingLink: `https://zoom.us/j/${Date.now()}`,
+          meeting_link: `https://zoom.us/j/${Date.now()}`,
           responses: params.responses || {},
           reminders: [],
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+
+        const { data: inserted, error } = await supabase
+          .from('meeting_bookings')
+          .insert(bookingData)
+          .select()
+          .single();
+
+        // Update meeting type analytics
+        if (!error && inserted) {
+          const analytics = meetingType?.analytics || { totalBooked: 0 };
+          await supabase
+            .from('meeting_types')
+            .update({
+              analytics: { ...analytics, totalBooked: analytics.totalBooked + 1 },
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', params.meetingTypeId);
+
+          // Send notification to host
+          await supabase.from('notifications').insert({
+            user_id: params.hostId,
+            type: 'meeting_booked',
+            title: `New booking: ${meetingType?.name}`,
+            message: `${params.guestName} has booked a ${meetingType?.name} for ${params.startTime}`,
+            data: { booking_id: inserted.id, meeting_type_id: params.meetingTypeId },
+            created_at: new Date().toISOString()
+          });
+        }
+
+        const booking = inserted || {
+          id: `booking-${Date.now()}`,
+          meetingTypeId: params.meetingTypeId,
+          meetingTypeName: meetingType?.name || '',
+          ...bookingData
         };
 
         return NextResponse.json({
@@ -561,22 +771,49 @@ export async function POST(request: NextRequest) {
             crmRecord: 'created'
           }
         });
+      }
 
-      case 'get-bookings':
+      case 'get-bookings': {
+        const bookings = await getBookings(supabase, params.userId, { status: params.status, meetingTypeId: params.meetingTypeId });
         return NextResponse.json({
           success: true,
           data: {
-            bookings: demoBookings,
+            bookings,
             summary: {
-              upcoming: demoBookings.filter(b => b.status === 'scheduled').length,
-              completed: demoBookings.filter(b => b.status === 'completed').length,
-              cancelled: demoBookings.filter(b => b.status === 'cancelled').length,
-              noShow: demoBookings.filter(b => b.status === 'no-show').length
+              upcoming: bookings.filter(b => b.status === 'scheduled').length,
+              completed: bookings.filter(b => b.status === 'completed').length,
+              cancelled: bookings.filter(b => b.status === 'cancelled').length,
+              noShow: bookings.filter(b => b.status === 'no-show').length
             }
           }
         });
+      }
 
-      case 'reschedule-booking':
+      case 'reschedule-booking': {
+        const { data: updated, error } = await supabase
+          .from('meeting_bookings')
+          .update({
+            start_time: params.newTime,
+            end_time: params.newEndTime,
+            status: 'rescheduled',
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', params.bookingId)
+          .select()
+          .single();
+
+        // Send notifications
+        if (!error && updated) {
+          await supabase.from('notifications').insert({
+            user_id: updated.host_id,
+            type: 'meeting_rescheduled',
+            title: 'Meeting rescheduled',
+            message: `${updated.guest_name} has rescheduled the meeting to ${params.newTime}`,
+            data: { booking_id: params.bookingId },
+            created_at: new Date().toISOString()
+          });
+        }
+
         return NextResponse.json({
           success: true,
           data: {
@@ -588,8 +825,35 @@ export async function POST(request: NextRequest) {
             calendarUpdated: true
           }
         });
+      }
 
-      case 'cancel-booking':
+      case 'cancel-booking': {
+        const { data: updated, error } = await supabase
+          .from('meeting_bookings')
+          .update({
+            status: 'cancelled',
+            cancelled_at: new Date().toISOString(),
+            cancel_reason: params.reason,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', params.bookingId)
+          .select()
+          .single();
+
+        // Update meeting type analytics
+        if (!error && updated) {
+          const meetingType = await getMeetingTypeById(supabase, updated.meeting_type_id);
+          if (meetingType) {
+            await supabase
+              .from('meeting_types')
+              .update({
+                analytics: { ...meetingType.analytics, totalCancelled: (meetingType.analytics.totalCancelled || 0) + 1 },
+                updated_at: new Date().toISOString()
+              })
+              .eq('id', updated.meeting_type_id);
+          }
+        }
+
         return NextResponse.json({
           success: true,
           data: {
@@ -601,29 +865,65 @@ export async function POST(request: NextRequest) {
             calendarUpdated: true
           }
         });
+      }
 
       // Round-Robin Distribution - beats HubSpot
-      case 'get-round-robin-stats':
+      case 'get-round-robin-stats': {
+        const meetingType = await getMeetingTypeById(supabase, params.meetingTypeId);
+        const allBookings = await getBookings(supabase, undefined, { meetingTypeId: params.meetingTypeId });
+
+        // Calculate distribution per team member
+        const memberStats: Record<string, { assigned: number; completed: number; noShow: number }> = {};
+        const members = meetingType?.routing?.members || [];
+
+        members.forEach(m => {
+          memberStats[m.id] = { assigned: 0, completed: 0, noShow: 0 };
+        });
+
+        allBookings.forEach(b => {
+          if (memberStats[b.hostId]) {
+            memberStats[b.hostId].assigned++;
+            if (b.status === 'completed') memberStats[b.hostId].completed++;
+            if (b.status === 'no-show') memberStats[b.hostId].noShow++;
+          }
+        });
+
+        const totalAssigned = Object.values(memberStats).reduce((s, m) => s + m.assigned, 0);
+        const distribution = members.map(m => ({
+          member: m.name,
+          assigned: memberStats[m.id]?.assigned || 0,
+          completed: memberStats[m.id]?.completed || 0,
+          noShow: memberStats[m.id]?.noShow || 0,
+          percentage: totalAssigned > 0 ? Math.round((memberStats[m.id]?.assigned || 0) / totalAssigned * 100) : 0
+        }));
+
+        // Calculate fairness score
+        const percentages = distribution.map(d => d.percentage);
+        const avg = percentages.reduce((a, b) => a + b, 0) / percentages.length || 0;
+        const variance = percentages.reduce((sum, p) => sum + Math.pow(p - avg, 2), 0) / percentages.length || 0;
+        const fairnessScore = Math.max(0, 100 - variance);
+
+        const totalCompleted = distribution.reduce((s, d) => s + d.completed, 0);
+        const conversionRate = totalAssigned > 0 ? Math.round((totalCompleted / totalAssigned) * 100) : 0;
+
         return NextResponse.json({
           success: true,
           data: {
             meetingTypeId: params.meetingTypeId,
-            distribution: [
-              { member: 'Sarah Chen', assigned: 45, completed: 42, noShow: 2, percentage: 52 },
-              { member: 'Marcus Johnson', assigned: 42, completed: 38, noShow: 3, percentage: 48 }
-            ],
+            distribution,
             fairness: {
-              score: 94,
-              variance: 3.2,
-              recommendation: 'Distribution is balanced'
+              score: Math.round(fairnessScore),
+              variance: Math.round(variance * 10) / 10,
+              recommendation: fairnessScore > 80 ? 'Distribution is balanced' : 'Consider adjusting weights'
             },
             performance: {
               avgResponseTime: '15 min',
-              conversionRate: 34,
+              conversionRate,
               satisfactionScore: 4.8
             }
           }
         });
+      }
 
       // Timezone Intelligence - beats Calendly
       case 'detect-timezone':
@@ -651,49 +951,97 @@ export async function POST(request: NextRequest) {
         });
 
       // Analytics - beats HubSpot & Calendly
-      case 'get-meeting-analytics':
+      case 'get-meeting-analytics': {
+        const meetingTypes = await getMeetingTypes(supabase, params.userId);
+        const allBookings = await getBookings(supabase, params.userId);
+
+        // Calculate overview from database
+        const totalBooked = allBookings.length;
+        const totalCompleted = allBookings.filter(b => b.status === 'completed').length;
+        const totalCancelled = allBookings.filter(b => b.status === 'cancelled').length;
+        const totalNoShow = allBookings.filter(b => b.status === 'no-show').length;
+        const bookingRate = totalBooked > 0 ? Math.round((totalCompleted / totalBooked) * 100) : 0;
+        const showRate = totalBooked > 0 ? Math.round(((totalBooked - totalNoShow) / totalBooked) * 100) : 0;
+
+        // Calculate daily trends from last 7 days
+        const dailyTrends: { date: string; booked: number; completed: number; cancelled: number }[] = [];
+        for (let i = 6; i >= 0; i--) {
+          const date = new Date();
+          date.setDate(date.getDate() - i);
+          const dateStr = date.toISOString().split('T')[0];
+
+          const dayBookings = allBookings.filter(b => b.createdAt?.startsWith(dateStr));
+          dailyTrends.push({
+            date: dateStr,
+            booked: dayBookings.length,
+            completed: dayBookings.filter(b => b.status === 'completed').length,
+            cancelled: dayBookings.filter(b => b.status === 'cancelled').length
+          });
+        }
+
+        // Calculate heatmap from actual bookings
+        const heatmap: Record<string, number[]> = {
+          monday: new Array(24).fill(0),
+          tuesday: new Array(24).fill(0),
+          wednesday: new Array(24).fill(0),
+          thursday: new Array(24).fill(0),
+          friday: new Array(24).fill(0),
+          saturday: new Array(24).fill(0),
+          sunday: new Array(24).fill(0)
+        };
+
+        allBookings.forEach(b => {
+          if (b.startTime) {
+            const date = new Date(b.startTime);
+            const day = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'][date.getDay()];
+            const hour = date.getHours();
+            if (heatmap[day]) {
+              heatmap[day][hour]++;
+            }
+          }
+        });
+
+        // Generate recommendations
+        const recommendations: string[] = [];
+        const maxBookings = Math.max(...Object.values(heatmap).flat());
+        if (maxBookings > 0) {
+          Object.entries(heatmap).forEach(([day, hours]) => {
+            const maxHour = hours.indexOf(Math.max(...hours));
+            if (hours[maxHour] > maxBookings * 0.7) {
+              recommendations.push(`${day.charAt(0).toUpperCase() + day.slice(1)} ${maxHour}:00 is popular - consider adding more availability`);
+            }
+          });
+        }
+        if (totalNoShow > 0) {
+          recommendations.push('Reminder emails reduce no-shows by 45%');
+        }
+
         return NextResponse.json({
           success: true,
           data: {
             period: params.period || '30d',
             overview: {
-              totalBooked: 323,
-              totalCompleted: 276,
-              totalCancelled: 32,
-              totalNoShow: 15,
-              bookingRate: 68,
-              showRate: 95,
-              conversionRate: 38
+              totalBooked,
+              totalCompleted,
+              totalCancelled,
+              totalNoShow,
+              bookingRate,
+              showRate,
+              conversionRate: meetingTypes.reduce((sum, mt) => sum + mt.analytics.conversionRate, 0) / meetingTypes.length || 0
             },
-            byMeetingType: demoMeetingTypes.map(mt => ({
+            byMeetingType: meetingTypes.map(mt => ({
               id: mt.id,
               name: mt.name,
               ...mt.analytics
             })),
-            trends: {
-              daily: [
-                { date: '2025-01-10', booked: 12, completed: 10, cancelled: 1 },
-                { date: '2025-01-11', booked: 15, completed: 13, cancelled: 2 },
-                { date: '2025-01-12', booked: 8, completed: 7, cancelled: 0 },
-                { date: '2025-01-13', booked: 18, completed: 16, cancelled: 1 },
-                { date: '2025-01-14', booked: 14, completed: 12, cancelled: 1 },
-                { date: '2025-01-15', booked: 11, completed: 10, cancelled: 1 }
-              ]
-            },
-            heatmap: {
-              monday: [0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 22, 18, 8, 25, 20, 15, 12, 0, 0, 0, 0, 0, 0, 0],
-              tuesday: [0, 0, 0, 0, 0, 0, 0, 0, 0, 28, 35, 30, 12, 32, 28, 22, 18, 0, 0, 0, 0, 0, 0, 0],
-              wednesday: [0, 0, 0, 0, 0, 0, 0, 0, 0, 25, 32, 28, 10, 30, 25, 20, 15, 0, 0, 0, 0, 0, 0, 0],
-              thursday: [0, 0, 0, 0, 0, 0, 0, 0, 0, 22, 28, 25, 8, 28, 22, 18, 12, 0, 0, 0, 0, 0, 0, 0],
-              friday: [0, 0, 0, 0, 0, 0, 0, 0, 0, 18, 22, 20, 5, 20, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-            },
-            recommendations: [
-              'Tuesday 10 AM is your most popular slot - consider adding more availability',
-              'Friday afternoons are underutilized - consider reducing availability',
-              'Reminder emails reduce no-shows by 45%'
+            trends: { daily: dailyTrends },
+            heatmap,
+            recommendations: recommendations.length > 0 ? recommendations : [
+              'Start booking meetings to see analytics recommendations'
             ]
           }
         });
+      }
 
       // Embed & Widget
       case 'get-embed-code':
@@ -731,41 +1079,54 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
-  const slug = searchParams.get('slug');
+  try {
+    const supabase = await createClient();
+    const { searchParams } = new URL(request.url);
+    const slug = searchParams.get('slug');
+    const userId = searchParams.get('userId') || undefined;
 
-  if (slug) {
-    const meetingType = demoMeetingTypes.find(m => m.slug === slug);
-    return NextResponse.json({ success: true, data: { meetingType } });
-  }
+    if (slug) {
+      const meetingType = await getMeetingTypeById(supabase, slug);
+      return NextResponse.json({ success: true, data: { meetingType } });
+    }
 
-  return NextResponse.json({
-    success: true,
-    data: {
-      meetingTypes: demoMeetingTypes,
-      bookings: demoBookings,
-      features: [
-        'AI-powered scheduling suggestions',
-        'Round-robin team distribution',
-        'Multi-participant booking',
-        'Smart buffer times',
-        'Timezone intelligence',
-        'Custom booking questions',
-        'Automated reminders',
-        'Calendar integrations',
-        'CRM sync',
-        'Embedded booking widgets'
-      ],
-      competitorComparison: {
-        calendly: {
-          advantage: 'FreeFlow offers AI scheduling and CRM integration in one platform',
-          features: ['AI suggestions', 'Built-in CRM', 'No additional cost']
-        },
-        hubspot: {
-          advantage: 'FreeFlow offers more flexible round-robin and booking customization',
-          features: ['Better round-robin', 'Custom questions', 'Timezone intelligence']
+    const meetingTypes = await getMeetingTypes(supabase, userId);
+    const bookings = await getBookings(supabase, userId);
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        meetingTypes,
+        bookings,
+        features: [
+          'AI-powered scheduling suggestions',
+          'Round-robin team distribution',
+          'Multi-participant booking',
+          'Smart buffer times',
+          'Timezone intelligence',
+          'Custom booking questions',
+          'Automated reminders',
+          'Calendar integrations',
+          'CRM sync',
+          'Embedded booking widgets'
+        ],
+        competitorComparison: {
+          calendly: {
+            advantage: 'FreeFlow offers AI scheduling and CRM integration in one platform',
+            features: ['AI suggestions', 'Built-in CRM', 'No additional cost']
+          },
+          hubspot: {
+            advantage: 'FreeFlow offers more flexible round-robin and booking customization',
+            features: ['Better round-robin', 'Custom questions', 'Timezone intelligence']
+          }
         }
       }
-    }
-  });
+    });
+  } catch (error) {
+    console.error('Meeting Scheduler GET error:', error);
+    return NextResponse.json(
+      { success: false, error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
 }

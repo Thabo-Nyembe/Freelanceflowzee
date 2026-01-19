@@ -142,86 +142,30 @@ interface PageTemplate {
   sections: string[];
 }
 
-// Demo data - beats HubSpot's landing pages
-const demoPages: LandingPage[] = [
-  {
-    id: 'page-001',
-    name: 'Freelance Growth Masterclass',
-    slug: 'freelance-growth-masterclass',
-    url: 'https://freeflow.com/lp/freelance-growth-masterclass',
-    status: 'published',
-    template: 'webinar-registration',
+// Helper function to get pages from database
+async function getPages(supabase: any, userId: string): Promise<LandingPage[]> {
+  const { data: pages } = await supabase
+    .from('lead_gen_landing_pages')
+    .select('*')
+    .eq('user_id', userId)
+    .order('updated_at', { ascending: false });
+
+  if (!pages || pages.length === 0) {
+    return [];
+  }
+
+  return pages.map((p: any) => ({
+    id: p.id,
+    name: p.name,
+    slug: p.slug,
+    url: `https://freeflow.com/lp/${p.slug}`,
+    status: p.status,
+    template: p.template,
     design: {
-      sections: [
-        {
-          id: 'hero-001',
-          type: 'hero',
-          order: 1,
-          content: {
-            headline: 'Master the Art of Freelance Growth',
-            subheadline: 'Join 10,000+ freelancers who doubled their income in 90 days',
-            ctaText: 'Register Free Now',
-            ctaUrl: '#register',
-            backgroundVideo: '/videos/hero-bg.mp4',
-            countdown: { enabled: true, endDate: '2025-02-01T00:00:00Z' }
-          },
-          styles: {
-            backgroundColor: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            padding: '100px 20px',
-            margin: '0',
-            maxWidth: '100%',
-            alignment: 'center'
-          },
-          animations: [
-            { type: 'fade', trigger: 'onLoad', duration: 1000, delay: 0 }
-          ],
-          visibility: []
-        },
-        {
-          id: 'social-proof-001',
-          type: 'testimonials',
-          order: 2,
-          content: {
-            testimonials: [
-              { name: 'Sarah Chen', role: 'UX Designer', quote: 'Doubled my rates in 3 months', avatar: '/avatars/sarah.jpg', rating: 5 },
-              { name: 'Marcus Johnson', role: 'Developer', quote: 'Finally hit 6 figures', avatar: '/avatars/marcus.jpg', rating: 5 }
-            ],
-            logos: ['google.png', 'meta.png', 'amazon.png', 'microsoft.png']
-          },
-          styles: {
-            backgroundColor: '#f8f9fa',
-            padding: '60px 20px',
-            margin: '0',
-            maxWidth: '1200px',
-            alignment: 'center'
-          },
-          animations: [],
-          visibility: []
-        },
-        {
-          id: 'form-001',
-          type: 'form',
-          order: 3,
-          content: {
-            formId: 'webinar-registration',
-            fields: ['firstName', 'email', 'company'],
-            buttonText: 'Save My Spot',
-            privacyText: 'We respect your privacy. Unsubscribe anytime.'
-          },
-          styles: {
-            backgroundColor: '#ffffff',
-            padding: '80px 20px',
-            margin: '0',
-            maxWidth: '600px',
-            alignment: 'center'
-          },
-          animations: [],
-          visibility: []
-        }
-      ],
-      styles: {
-        primaryColor: '#667eea',
-        secondaryColor: '#764ba2',
+      sections: p.sections || [],
+      styles: p.styles || {
+        primaryColor: '#3b82f6',
+        secondaryColor: '#8b5cf6',
         fontFamily: 'Inter',
         headingFont: 'Inter',
         bodyFont: 'Inter',
@@ -230,63 +174,54 @@ const demoPages: LandingPage[] = [
       }
     },
     settings: {
-      title: 'Freelance Growth Masterclass - Free Registration',
-      description: 'Learn proven strategies to grow your freelance business',
-      redirectAfterSubmit: '/thank-you',
-      thankYouPage: 'thank-you-webinar'
+      title: p.title,
+      description: p.description
     },
-    seo: {
-      title: 'Freelance Growth Masterclass | FreeFlow',
-      description: 'Join 10,000+ freelancers who doubled their income. Free masterclass on freelance growth strategies.',
-      keywords: ['freelance', 'growth', 'masterclass', 'income', 'business'],
-      noIndex: false,
-      noFollow: false
-    },
-    tracking: {
-      googleAnalyticsId: 'GA-123456',
-      facebookPixelId: 'FB-789012',
-      customScripts: [],
-      utmTracking: true,
-      heatmapEnabled: true
-    },
+    seo: p.seo || {},
+    tracking: p.tracking || {},
     metrics: {
-      views: 45000,
-      uniqueVisitors: 38000,
-      submissions: 4560,
-      conversionRate: 12.0,
-      avgTimeOnPage: 180,
-      bounceRate: 35,
-      scrollDepth: 72,
-      deviceBreakdown: { desktop: 58, mobile: 38, tablet: 4 }
+      views: p.views || 0,
+      uniqueVisitors: p.unique_visitors || 0,
+      submissions: p.submissions || 0,
+      conversionRate: p.conversion_rate || 0,
+      avgTimeOnPage: 0,
+      bounceRate: p.bounce_rate || 0,
+      scrollDepth: 0,
+      deviceBreakdown: { desktop: 60, mobile: 35, tablet: 5 }
     },
-    variants: [
-      {
-        id: 'variant-001',
-        name: 'Urgency CTA',
-        changes: [
-          { sectionId: 'hero-001', property: 'ctaText', originalValue: 'Register Free Now', newValue: 'Limited Spots - Register Now!' }
-        ],
-        traffic: 50,
-        metrics: {
-          views: 22500,
-          uniqueVisitors: 19000,
-          submissions: 2508,
-          conversionRate: 13.2,
-          avgTimeOnPage: 175,
-          bounceRate: 33,
-          scrollDepth: 74,
-          deviceBreakdown: { desktop: 57, mobile: 39, tablet: 4 }
-        },
-        status: 'winner'
-      }
-    ],
-    createdAt: '2024-12-01T10:00:00Z',
-    updatedAt: '2025-01-15T14:30:00Z',
-    publishedAt: '2024-12-05T09:00:00Z'
-  }
-];
+    variants: p.variants || [],
+    createdAt: p.created_at,
+    updatedAt: p.updated_at,
+    publishedAt: p.published_at
+  }));
+}
 
-const demoTemplates: PageTemplate[] = [
+// Helper function to get templates from database
+async function getTemplates(supabase: any): Promise<PageTemplate[]> {
+  const { data: templates } = await supabase
+    .from('landing_page_templates')
+    .select('*')
+    .order('popularity', { ascending: false });
+
+  if (templates && templates.length > 0) {
+    return templates.map((t: any) => ({
+      id: t.id,
+      name: t.name,
+      category: t.category,
+      thumbnail: t.thumbnail,
+      description: t.description,
+      popularity: t.popularity || 0,
+      avgConversionRate: t.avg_conversion_rate || 0,
+      sections: t.sections || []
+    }));
+  }
+
+  // Return default templates if none in database
+  return defaultTemplates;
+}
+
+// Default templates
+const defaultTemplates: PageTemplate[] = [
   {
     id: 'template-webinar',
     name: 'Webinar Registration',
@@ -341,74 +276,69 @@ const demoTemplates: PageTemplate[] = [
 
 export async function POST(request: NextRequest) {
   try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    const userId = user?.id || '00000000-0000-0000-0000-000000000001';
+
     const body = await request.json();
     const { action, ...params } = body;
 
     switch (action) {
       // Page Management - beats HubSpot landing pages
-      case 'get-pages':
+      case 'get-pages': {
+        const pages = await getPages(supabase, userId);
         return NextResponse.json({
           success: true,
           data: {
-            pages: demoPages,
+            pages,
             summary: {
-              total: demoPages.length,
-              published: demoPages.filter(p => p.status === 'published').length,
-              totalViews: demoPages.reduce((sum, p) => sum + p.metrics.views, 0),
-              totalConversions: demoPages.reduce((sum, p) => sum + p.metrics.submissions, 0),
-              avgConversionRate: demoPages.reduce((sum, p) => sum + p.metrics.conversionRate, 0) / demoPages.length
+              total: pages.length,
+              published: pages.filter(p => p.status === 'published').length,
+              totalViews: pages.reduce((sum, p) => sum + p.metrics.views, 0),
+              totalConversions: pages.reduce((sum, p) => sum + p.metrics.submissions, 0),
+              avgConversionRate: pages.length > 0
+                ? pages.reduce((sum, p) => sum + p.metrics.conversionRate, 0) / pages.length
+                : 0
             }
           }
         });
+      }
 
-      case 'create-page':
-        const newPage: LandingPage = {
-          id: `page-${Date.now()}`,
-          name: params.name,
-          slug: params.slug || params.name.toLowerCase().replace(/\s+/g, '-'),
-          url: '',
-          status: 'draft',
-          template: params.templateId || 'blank',
-          design: params.design || {
-            sections: [],
-            styles: {
-              primaryColor: '#3b82f6',
-              secondaryColor: '#8b5cf6',
-              fontFamily: 'Inter',
-              headingFont: 'Inter',
-              bodyFont: 'Inter',
-              buttonStyle: 'rounded',
-              spacing: 'normal'
-            }
-          },
-          settings: {
-            title: params.name,
-            description: ''
-          },
-          seo: {
+      case 'create-page': {
+        const slug = params.slug || params.name.toLowerCase().replace(/\s+/g, '-');
+        const { data: newPage, error: createError } = await supabase
+          .from('lead_gen_landing_pages')
+          .insert({
+            user_id: userId,
+            name: params.name,
+            slug,
             title: params.name,
             description: '',
-            keywords: [],
-            noIndex: false,
-            noFollow: false
-          },
-          tracking: {
-            customScripts: [],
-            utmTracking: true,
-            heatmapEnabled: false
-          },
-          metrics: {
-            views: 0, uniqueVisitors: 0, submissions: 0, conversionRate: 0,
-            avgTimeOnPage: 0, bounceRate: 0, scrollDepth: 0,
-            deviceBreakdown: { desktop: 0, mobile: 0, tablet: 0 }
-          },
-          variants: [],
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        };
-        return NextResponse.json({ success: true, data: { page: newPage } });
+            status: 'draft',
+            template: params.templateId || 'blank',
+            sections: params.design?.sections || [],
+            seo: params.seo || {}
+          })
+          .select()
+          .single();
 
-      case 'update-page':
+        if (createError) throw createError;
+
+        return NextResponse.json({ success: true, data: { page: newPage } });
+      }
+
+      case 'update-page': {
+        const { error: updateError } = await supabase
+          .from('lead_gen_landing_pages')
+          .update({
+            ...params.updates,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', params.pageId)
+          .eq('user_id', userId);
+
+        if (updateError) throw updateError;
+
         return NextResponse.json({
           success: true,
           data: {
@@ -417,17 +347,33 @@ export async function POST(request: NextRequest) {
             updatedAt: new Date().toISOString()
           }
         });
+      }
 
-      case 'publish-page':
+      case 'publish-page': {
+        const { data: page, error: publishError } = await supabase
+          .from('lead_gen_landing_pages')
+          .update({
+            status: 'published',
+            published_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', params.pageId)
+          .eq('user_id', userId)
+          .select()
+          .single();
+
+        if (publishError) throw publishError;
+
         return NextResponse.json({
           success: true,
           data: {
             pageId: params.pageId,
             status: 'published',
-            url: `https://freeflow.com/lp/${params.slug}`,
+            url: `https://freeflow.com/lp/${page?.slug || params.slug}`,
             publishedAt: new Date().toISOString()
           }
         });
+      }
 
       // AI-Powered Design - beats HubSpot builder
       case 'ai-generate-page':
@@ -518,36 +464,40 @@ export async function POST(request: NextRequest) {
         });
 
       // Templates - beats HubSpot marketplace
-      case 'get-templates':
+      case 'get-templates': {
+        const templates = await getTemplates(supabase);
         return NextResponse.json({
           success: true,
           data: {
-            templates: demoTemplates,
+            templates,
             categories: [
-              { id: 'lead-generation', name: 'Lead Generation', count: 12 },
-              { id: 'product', name: 'Product Launch', count: 8 },
-              { id: 'portfolio', name: 'Portfolio', count: 6 },
-              { id: 'event', name: 'Event', count: 5 },
-              { id: 'launch', name: 'Coming Soon', count: 4 }
+              { id: 'lead-generation', name: 'Lead Generation', count: templates.filter(t => t.category === 'lead-generation').length },
+              { id: 'product', name: 'Product Launch', count: templates.filter(t => t.category === 'product').length },
+              { id: 'portfolio', name: 'Portfolio', count: templates.filter(t => t.category === 'portfolio').length },
+              { id: 'event', name: 'Event', count: templates.filter(t => t.category === 'event').length },
+              { id: 'launch', name: 'Coming Soon', count: templates.filter(t => t.category === 'launch').length }
             ],
-            featured: demoTemplates.slice(0, 3)
+            featured: templates.slice(0, 3)
           }
         });
+      }
 
-      case 'apply-template':
-        const template = demoTemplates.find(t => t.id === params.templateId);
+      case 'apply-template': {
+        const templates = await getTemplates(supabase);
+        const template = templates.find(t => t.id === params.templateId);
         return NextResponse.json({
           success: true,
           data: {
             template,
             applied: true,
-            sections: template?.sections.map(s => ({
+            sections: template?.sections.map((s, idx) => ({
               id: `section-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
               type: s,
-              order: template.sections.indexOf(s) + 1
+              order: idx + 1
             }))
           }
         });
+      }
 
       // A/B Testing - beats HubSpot testing
       case 'create-variant':
@@ -618,49 +568,43 @@ export async function POST(request: NextRequest) {
         });
 
       // Analytics - beats HubSpot analytics
-      case 'get-page-analytics':
-        const analyticsPage = demoPages.find(p => p.id === params.pageId);
+      case 'get-page-analytics': {
+        const { data: analyticsPage } = await supabase
+          .from('lead_gen_landing_pages')
+          .select('*')
+          .eq('id', params.pageId)
+          .eq('user_id', userId)
+          .single();
+
         return NextResponse.json({
           success: true,
           data: {
             pageId: params.pageId,
-            metrics: analyticsPage?.metrics,
+            metrics: analyticsPage ? {
+              views: analyticsPage.views || 0,
+              uniqueVisitors: analyticsPage.unique_visitors || 0,
+              submissions: analyticsPage.submissions || 0,
+              conversionRate: analyticsPage.conversion_rate || 0,
+              avgTimeOnPage: 0,
+              bounceRate: analyticsPage.bounce_rate || 0,
+              scrollDepth: 0,
+              deviceBreakdown: { desktop: 60, mobile: 35, tablet: 5 }
+            } : null,
             heatmap: {
-              clicks: [
-                { x: 50, y: 20, count: 234 },
-                { x: 50, y: 80, count: 456 }
-              ],
-              scrollMap: [
-                { depth: 25, percentage: 95 },
-                { depth: 50, percentage: 78 },
-                { depth: 75, percentage: 56 },
-                { depth: 100, percentage: 34 }
-              ]
+              clicks: [],
+              scrollMap: []
             },
             trends: {
-              daily: [
-                { date: '2025-01-10', views: 1500, conversions: 180 },
-                { date: '2025-01-11', views: 1650, conversions: 198 },
-                { date: '2025-01-12', views: 1420, conversions: 170 },
-                { date: '2025-01-13', views: 1780, conversions: 214 },
-                { date: '2025-01-14', views: 1890, conversions: 227 }
-              ]
+              daily: []
             },
-            sources: [
-              { source: 'google', views: 18000, conversions: 2160 },
-              { source: 'facebook', views: 12000, conversions: 1440 },
-              { source: 'linkedin', views: 8000, conversions: 960 }
-            ],
+            sources: [],
             formAnalytics: {
-              fieldDropoff: [
-                { field: 'firstName', dropoff: 2 },
-                { field: 'email', dropoff: 5 },
-                { field: 'company', dropoff: 12 }
-              ],
-              avgCompletionTime: 28
+              fieldDropoff: [],
+              avgCompletionTime: 0
             }
           }
         });
+      }
 
       // Form Builder - beats HubSpot forms
       case 'create-form':
@@ -726,29 +670,46 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
-  return NextResponse.json({
-    success: true,
-    data: {
-      pages: demoPages,
-      templates: demoTemplates,
-      features: [
-        'AI-powered page generation',
-        'Drag-and-drop builder',
-        'Mobile-first templates',
-        'Smart A/B testing',
-        'Conversion optimization AI',
-        'Custom domain support',
-        'Heatmap analytics',
-        'Form builder with logic',
-        'Dynamic personalization',
-        'Fast page load optimization'
-      ],
-      competitorComparison: {
-        hubspot: {
-          advantage: 'FreeFlow offers AI-powered design and freelancer-specific templates',
-          features: ['AI generation', 'Better templates', 'Lower cost']
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    const userId = user?.id || '00000000-0000-0000-0000-000000000001';
+
+    const [pages, templates] = await Promise.all([
+      getPages(supabase, userId),
+      getTemplates(supabase)
+    ]);
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        pages,
+        templates,
+        features: [
+          'AI-powered page generation',
+          'Drag-and-drop builder',
+          'Mobile-first templates',
+          'Smart A/B testing',
+          'Conversion optimization AI',
+          'Custom domain support',
+          'Heatmap analytics',
+          'Form builder with logic',
+          'Dynamic personalization',
+          'Fast page load optimization'
+        ],
+        competitorComparison: {
+          hubspot: {
+            advantage: 'FreeFlow offers AI-powered design and freelancer-specific templates',
+            features: ['AI generation', 'Better templates', 'Lower cost']
+          }
         }
       }
-    }
-  });
+    });
+  } catch (error) {
+    console.error('Landing Pages GET error:', error);
+    return NextResponse.json(
+      { success: false, error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
 }

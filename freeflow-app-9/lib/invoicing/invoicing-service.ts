@@ -18,6 +18,7 @@ import * as recurringService from './recurring-invoice-service';
 import * as analyticsService from './payment-analytics-service';
 import * as lateFeeService from './late-fee-service';
 import * as reminderService from './payment-reminder-service';
+import { sendInvoiceEmail } from '@/lib/email/email-templates';
 
 // ============================================================================
 // Types
@@ -1062,9 +1063,34 @@ class InvoicingService {
   /**
    * Send invoice email
    */
-  private async sendInvoiceEmail(invoice: Invoice): Promise<void> {
-    // TODO: Integrate with email service (Resend, SendGrid, etc.)
-    console.log('Sending invoice email to:', invoice.client_email);
+  private async sendInvoiceEmailInternal(invoice: Invoice): Promise<void> {
+    try {
+      const paymentUrl = `${process.env.NEXT_PUBLIC_APP_URL}/pay/${invoice.id}`;
+
+      await sendInvoiceEmail({
+        clientName: invoice.client_name,
+        clientEmail: invoice.client_email,
+        invoiceNumber: invoice.invoice_number,
+        amount: invoice.total.toFixed(2),
+        currency: invoice.currency,
+        dueDate: new Date(invoice.due_date).toLocaleDateString('en-US', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        }),
+        items: invoice.items.map(item => ({
+          description: item.description,
+          quantity: item.quantity,
+          price: `${invoice.currency} ${(item.quantity * item.unit_price).toFixed(2)}`
+        })),
+        paymentUrl
+      });
+
+      console.log('Invoice email sent to:', invoice.client_email);
+    } catch (error) {
+      console.error('Failed to send invoice email:', error);
+    }
   }
 
   /**

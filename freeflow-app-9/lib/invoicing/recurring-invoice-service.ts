@@ -7,12 +7,16 @@
 
 import { createFeatureLogger } from '@/lib/logger'
 import { createClient } from '@/lib/supabase/server'
+import { getEmailService } from '@/lib/email/email-service'
+import { sendRecurringInvoiceCreated } from '@/lib/email/email-templates'
 import type {
   Invoice,
   InvoiceItem,
   BillingCycle,
   Currency
 } from '@/lib/invoice-types'
+
+const emailService = getEmailService()
 
 const logger = createFeatureLogger('RecurringInvoiceService')
 
@@ -740,23 +744,40 @@ export async function processRecurringInvoices(): Promise<ScheduleResult> {
 // ============================================================================
 
 /**
- * Send invoice email (placeholder - integrate with email service)
+ * Send invoice email for recurring invoice
  */
 async function sendInvoiceEmail(invoice: Invoice): Promise<void> {
-  // This should integrate with your email service
-  // For now, just log the action
   logger.info('Sending invoice email', {
     invoiceId: invoice.id,
     invoiceNumber: invoice.invoiceNumber,
     clientEmail: invoice.clientEmail
   })
 
-  // TODO: Integrate with actual email service (SendGrid, Resend, etc.)
-  // await emailService.send({
-  //   to: invoice.clientEmail,
-  //   template: 'invoice',
-  //   data: { invoice }
-  // })
+  try {
+    await sendRecurringInvoiceCreated({
+      clientName: invoice.clientName,
+      clientEmail: invoice.clientEmail,
+      invoiceNumber: invoice.invoiceNumber,
+      amount: invoice.total,
+      currency: invoice.currency,
+      dueDate: invoice.dueDate,
+      items: invoice.items,
+      viewInvoiceUrl: `${process.env.NEXT_PUBLIC_APP_URL}/invoice/${invoice.id}`,
+      payNowUrl: `${process.env.NEXT_PUBLIC_APP_URL}/pay/${invoice.id}`,
+      billingCycle: invoice.recurringConfig?.cycle || 'monthly'
+    })
+
+    logger.info('Invoice email sent successfully', {
+      invoiceId: invoice.id,
+      invoiceNumber: invoice.invoiceNumber
+    })
+  } catch (emailError) {
+    logger.error('Failed to send invoice email', {
+      invoiceId: invoice.id,
+      error: emailError instanceof Error ? emailError.message : 'Unknown error'
+    })
+    throw emailError
+  }
 }
 
 // ============================================================================

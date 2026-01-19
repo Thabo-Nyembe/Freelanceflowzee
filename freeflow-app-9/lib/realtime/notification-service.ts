@@ -12,6 +12,7 @@
  */
 
 import { createClient } from '@/lib/supabase/server'
+import { getEmailService } from '@/lib/email/email-service'
 
 // Types
 export type NotificationType = 'info' | 'success' | 'warning' | 'error' | 'system'
@@ -283,26 +284,76 @@ export class NotificationService {
    * Send email notification
    */
   private async sendEmailNotification(notification: Notification): Promise<void> {
-    // Integration with email service (SendGrid, SES, etc.)
-    // For now, log the email
-    console.log('Email notification:', {
-      to: notification.user_id,
+    const supabase = await createClient()
+    const emailService = getEmailService()
+
+    // Get user email
+    const { data: user } = await supabase
+      .from('users')
+      .select('email, name')
+      .eq('id', notification.user_id)
+      .single()
+
+    if (!user?.email) {
+      console.log('No email found for user:', notification.user_id)
+      return
+    }
+
+    // Generate email HTML
+    const actionButton = notification.action_url
+      ? `<p style="margin-top: 20px;">
+          <a href="${process.env.NEXT_PUBLIC_APP_URL}${notification.action_url}"
+             style="background-color: #4F46E5; color: white; padding: 12px 24px;
+                    text-decoration: none; border-radius: 6px; display: inline-block;">
+            ${notification.action_label || 'View Details'}
+          </a>
+        </p>`
+      : ''
+
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                     line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                      padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
+            <h1 style="color: white; margin: 0; font-size: 24px;">KAZI</h1>
+          </div>
+          <div style="background: #ffffff; padding: 30px; border: 1px solid #e5e7eb;
+                      border-top: none; border-radius: 0 0 10px 10px;">
+            <h2 style="color: #1f2937; margin-top: 0;">${notification.title}</h2>
+            <p style="color: #4b5563; font-size: 16px;">${notification.message}</p>
+            ${actionButton}
+          </div>
+          <div style="text-align: center; padding: 20px; color: #9ca3af; font-size: 12px;">
+            <p>This notification was sent by KAZI. You can manage your notification preferences in your account settings.</p>
+          </div>
+        </body>
+      </html>
+    `
+
+    // Send email
+    await emailService.send({
+      to: user.email,
       subject: notification.title,
-      body: notification.message
+      html,
+      text: `${notification.title}\n\n${notification.message}${notification.action_url ? `\n\nView details: ${process.env.NEXT_PUBLIC_APP_URL}${notification.action_url}` : ''}`,
+      tags: [notification.category, notification.type],
+      metadata: {
+        notification_id: notification.id,
+        user_id: notification.user_id,
+        category: notification.category
+      }
     })
 
-    // In production:
-    // await emailService.send({
-    //   to: userEmail,
-    //   subject: notification.title,
-    //   template: 'notification',
-    //   data: {
-    //     title: notification.title,
-    //     message: notification.message,
-    //     actionUrl: notification.action_url,
-    //     actionLabel: notification.action_label
-    //   }
-    // })
+    console.log('Email notification sent:', {
+      to: user.email,
+      subject: notification.title
+    })
   }
 
   /**

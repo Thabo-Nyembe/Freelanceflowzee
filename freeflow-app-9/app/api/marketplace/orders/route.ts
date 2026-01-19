@@ -6,6 +6,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { z } from 'zod';
+import { stripeConnectService } from '@/lib/stripe/stripe-connect-service';
+import { notificationService } from '@/lib/realtime/notification-service';
 
 const createOrderSchema = z.object({
   listing_id: z.string().uuid(),
@@ -254,20 +256,63 @@ export async function POST(request: NextRequest) {
         .eq('id', order.id);
     }
 
-    // TODO: Process payment with Stripe
-    // For now, simulate successful payment
+    // Get seller's Stripe account
+    const { data: sellerProfile } = await supabase
+      .from('seller_profiles')
+      .select('stripe_account_id')
+      .eq('user_id', listing.user_id)
+      .single();
+
+    // Process payment with Stripe Connect
+    const paymentResult = await stripeConnectService.createMarketplacePayment({
+      amount: Math.round(total * 100), // Convert to cents
+      currency: 'usd',
+      buyerId: user.id,
+      sellerId: listing.user_id,
+      sellerStripeAccountId: sellerProfile?.stripe_account_id || 'acct_pending',
+      orderId: order.id,
+      listingTitle: listing.title,
+      platformFeePercent: serviceFeeRate * 100,
+    });
+
+    if (!paymentResult.success) {
+      // Delete the order if payment fails
+      await supabase.from('service_orders').delete().eq('id', order.id);
+      return NextResponse.json({ error: 'Payment processing failed' }, { status: 400 });
+    }
+
+    // Update order with payment info
     await supabase
       .from('service_orders')
       .update({
         payment_status: 'held',
+        payment_intent_id: paymentResult.paymentIntentId,
         paid_at: new Date().toISOString(),
       })
       .eq('id', order.id);
 
     // Send notification to seller
-    // TODO: Implement notification system
+    await notificationService.send({
+      userId: listing.user_id,
+      title: 'New Order Received!',
+      message: `You have a new order for "${listing.title}" (${selectedPackage.name}) worth $${(total / 100).toFixed(2)}`,
+      type: 'success',
+      category: 'payment',
+      priority: 'high',
+      actionUrl: `/dashboard/orders?id=${order.id}`,
+      actionLabel: 'View Order',
+      data: {
+        orderId: order.id,
+        listingId: listing.id,
+        amount: total,
+        packageName: selectedPackage.name
+      }
+    });
 
-    return NextResponse.json({ order }, { status: 201 });
+    return NextResponse.json({
+      order,
+      clientSecret: paymentResult.clientSecret
+    }, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -433,7 +478,24 @@ export async function PATCH(request: NextRequest) {
           released_at: new Date().toISOString(),
         };
 
-        // TODO: Release payment to seller
+        // Release payment to seller - capture the held payment
+        if (order.payment_intent_id) {
+          const captureResult = await stripeConnectService.capturePayment(order.payment_intent_id);
+          if (!captureResult.success) {
+            console.error('Failed to capture payment:', captureResult.error);
+          }
+        }
+
+        // Notify seller of payment release
+        await notificationService.send({
+          userId: order.seller_id,
+          title: 'Payment Released!',
+          message: `Payment of $${(order.total / 100).toFixed(2)} has been released for your completed order.`,
+          type: 'success',
+          category: 'payment',
+          priority: 'high',
+          data: { orderId: order.id, amount: order.total }
+        });
         break;
 
       case 'request_cancellation':
@@ -452,7 +514,28 @@ export async function PATCH(request: NextRequest) {
           updates.status = 'cancelled';
           updates.cancelled_at = new Date().toISOString();
           updates.payment_status = 'refunded';
-          // TODO: Process refund
+
+          // Process refund
+          if (order.payment_intent_id) {
+            const refundResult = await stripeConnectService.processRefund({
+              paymentIntentId: order.payment_intent_id,
+              reason: 'requested_by_customer',
+              orderId: order.id
+            });
+            if (!refundResult.success) {
+              console.error('Failed to process refund:', refundResult.error);
+            }
+          }
+
+          // Notify buyer of refund
+          await notificationService.send({
+            userId: order.buyer_id,
+            title: 'Order Cancelled - Refund Issued',
+            message: `Your order has been cancelled and a refund of $${(order.total / 100).toFixed(2)} has been initiated.`,
+            type: 'info',
+            category: 'payment',
+            data: { orderId: order.id, refundAmount: order.total }
+          });
         }
         break;
 
@@ -467,7 +550,37 @@ export async function PATCH(request: NextRequest) {
           cancelled_at: new Date().toISOString(),
           payment_status: 'refunded',
         };
-        // TODO: Process refund
+
+        // Process refund
+        if (order.payment_intent_id) {
+          const refundResult = await stripeConnectService.processRefund({
+            paymentIntentId: order.payment_intent_id,
+            reason: 'requested_by_customer',
+            orderId: order.id
+          });
+          if (!refundResult.success) {
+            console.error('Failed to process refund:', refundResult.error);
+          }
+        }
+
+        // Notify both parties
+        await notificationService.send({
+          userId: order.buyer_id,
+          title: 'Cancellation Approved - Refund Issued',
+          message: `Your order cancellation has been approved. A refund of $${(order.total / 100).toFixed(2)} has been initiated.`,
+          type: 'info',
+          category: 'payment',
+          data: { orderId: order.id }
+        });
+
+        await notificationService.send({
+          userId: order.seller_id,
+          title: 'Order Cancelled',
+          message: 'An order has been cancelled by mutual agreement.',
+          type: 'info',
+          category: 'payment',
+          data: { orderId: order.id }
+        });
         break;
 
       default:

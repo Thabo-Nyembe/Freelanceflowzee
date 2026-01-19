@@ -8,7 +8,10 @@
 import { createFeatureLogger } from '@/lib/logger'
 import { createClient } from '@/lib/supabase/server'
 import { generateReminderEmailHTML } from '@/lib/invoice-email-template'
+import { getEmailService } from '@/lib/email/email-service'
 import type { InvoiceStatus, Currency } from '@/lib/invoice-types'
+
+const emailService = getEmailService()
 
 const logger = createFeatureLogger('PaymentReminderService')
 
@@ -427,9 +430,35 @@ async function sendReminder(
     companyEmail: process.env.COMPANY_EMAIL || 'billing@kazi.com'
   })
 
-  // Send email (integrate with your email service)
-  // For now, we'll simulate successful sending
-  const deliveryId = `delivery_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+  // Send email via email service
+  let deliveryId = `delivery_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+
+  try {
+    const emailResult = await emailService.send({
+      to: invoice.clientEmail,
+      subject: reminder.emailSubject,
+      html: emailHtml,
+      text: `Payment reminder for Invoice ${invoice.invoiceNumber}. Amount: ${invoice.currency} ${invoice.total}. ${daysOverdue > 0 ? `This invoice is ${daysOverdue} days overdue.` : ''} Pay now: ${process.env.NEXT_PUBLIC_APP_URL}/pay/${invoice.id}`,
+      tags: ['payment-reminder', reminder.reminderType],
+      metadata: {
+        reminderId: reminder.id,
+        invoiceId: invoice.id,
+        reminderType: reminder.reminderType
+      }
+    })
+    deliveryId = emailResult.messageId || deliveryId
+    logger.info('Payment reminder email sent successfully', {
+      reminderId: reminder.id,
+      invoiceId: invoice.id,
+      messageId: deliveryId
+    })
+  } catch (emailError) {
+    logger.error('Failed to send payment reminder email', {
+      reminderId: reminder.id,
+      error: emailError instanceof Error ? emailError.message : 'Unknown error'
+    })
+    throw emailError
+  }
 
   // Update reminder status
   await supabase
@@ -457,13 +486,6 @@ async function sendReminder(
       updated_at: new Date().toISOString()
     })
     .eq('id', invoice.id)
-
-  // TODO: Integrate with actual email service
-  // await emailService.send({
-  //   to: invoice.clientEmail,
-  //   subject: reminder.emailSubject,
-  //   html: emailHtml
-  // })
 
   logger.info('Reminder sent', {
     reminderId: reminder.id,

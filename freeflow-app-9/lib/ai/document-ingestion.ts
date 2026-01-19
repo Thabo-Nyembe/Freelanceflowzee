@@ -406,15 +406,161 @@ export class DocumentIngestionService {
   }
 
   private async extractPdfText(file: File | Blob): Promise<string> {
-    // Placeholder - would use pdf.js or similar
-    console.warn('PDF extraction requires pdf.js library')
-    return 'PDF content extraction not implemented. Please install pdf.js.'
+    try {
+      // Convert File/Blob to ArrayBuffer
+      const arrayBuffer = await file.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+
+      // Dynamic import for pdf-parse (server-side)
+      if (typeof window === 'undefined') {
+        try {
+          const pdfParse = (await import('pdf-parse')).default;
+          const data = await pdfParse(buffer);
+          return data.text || '';
+        } catch (importError) {
+          // If pdf-parse is not installed, try alternative approach
+          console.warn('pdf-parse not available, using basic extraction');
+          return this.extractPdfTextBasic(buffer);
+        }
+      }
+
+      // Client-side: Use pdf.js
+      try {
+        const pdfjs = await import('pdfjs-dist');
+
+        // Set worker path if not already set
+        if (!pdfjs.GlobalWorkerOptions.workerSrc) {
+          pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+        }
+
+        const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
+        const textParts: string[] = [];
+
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const textContent = await page.getTextContent();
+          const pageText = textContent.items
+            .map((item: any) => ('str' in item ? item.str : ''))
+            .join(' ');
+          textParts.push(pageText);
+        }
+
+        return textParts.join('\n\n');
+      } catch (pdfjsError) {
+        console.warn('pdfjs-dist not available:', pdfjsError);
+        return this.extractPdfTextBasic(buffer);
+      }
+    } catch (error) {
+      console.error('PDF extraction error:', error);
+      throw new Error(`Failed to extract PDF text: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  private extractPdfTextBasic(buffer: Buffer): string {
+    // Basic PDF text extraction without external libraries
+    // This extracts visible text streams from the PDF
+    const content = buffer.toString('latin1');
+    const textParts: string[] = [];
+
+    // Find text streams (simplified extraction)
+    const streamRegex = /stream\s*([\s\S]*?)\s*endstream/g;
+    let match;
+
+    while ((match = streamRegex.exec(content)) !== null) {
+      const stream = match[1];
+      // Look for text showing operators (Tj, TJ)
+      const textMatches = stream.match(/\(([^)]+)\)\s*Tj|\[([^\]]+)\]\s*TJ/g);
+      if (textMatches) {
+        for (const textMatch of textMatches) {
+          // Extract text from parentheses
+          const extracted = textMatch.match(/\(([^)]+)\)/g);
+          if (extracted) {
+            const text = extracted.map(t => t.slice(1, -1)).join('');
+            if (text.length > 0 && /[a-zA-Z]/.test(text)) {
+              textParts.push(text);
+            }
+          }
+        }
+      }
+    }
+
+    if (textParts.length === 0) {
+      return 'Unable to extract text from this PDF. The file may be scanned or image-based.';
+    }
+
+    return textParts.join(' ').replace(/\s+/g, ' ').trim();
   }
 
   private async extractDocxText(file: File | Blob): Promise<string> {
-    // Placeholder - would use docx parser
-    console.warn('DOCX extraction requires docx-parser library')
-    return 'DOCX content extraction not implemented. Please install docx-parser.'
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+
+      // Try mammoth for DOCX extraction
+      if (typeof window === 'undefined') {
+        try {
+          const mammoth = await import('mammoth');
+          const result = await mammoth.extractRawText({ arrayBuffer });
+          return result.value || '';
+        } catch (importError) {
+          // If mammoth is not installed, try basic extraction
+          console.warn('mammoth not available, using basic extraction');
+          return this.extractDocxTextBasic(arrayBuffer);
+        }
+      }
+
+      // Client-side: Try mammoth or use basic extraction
+      try {
+        const mammoth = await import('mammoth');
+        const result = await mammoth.extractRawText({ arrayBuffer });
+        return result.value || '';
+      } catch (mammothError) {
+        console.warn('mammoth not available on client:', mammothError);
+        return this.extractDocxTextBasic(arrayBuffer);
+      }
+    } catch (error) {
+      console.error('DOCX extraction error:', error);
+      throw new Error(`Failed to extract DOCX text: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  private async extractDocxTextBasic(arrayBuffer: ArrayBuffer): Promise<string> {
+    // Basic DOCX extraction without mammoth
+    // DOCX files are ZIP archives containing XML
+    try {
+      // Dynamic import JSZip for DOCX parsing
+      const JSZip = (await import('jszip')).default;
+      const zip = await JSZip.loadAsync(arrayBuffer);
+
+      // Get the main document content
+      const documentXml = await zip.file('word/document.xml')?.async('string');
+
+      if (!documentXml) {
+        throw new Error('Could not find document.xml in DOCX file');
+      }
+
+      // Extract text from XML
+      // Remove XML tags and get text content
+      const text = documentXml
+        // Get text from paragraph and text elements
+        .replace(/<w:t[^>]*>([^<]*)<\/w:t>/g, '$1 ')
+        // Remove all remaining XML tags
+        .replace(/<[^>]+>/g, '')
+        // Clean up whitespace
+        .replace(/\s+/g, ' ')
+        // Decode XML entities
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&apos;/g, "'")
+        .trim();
+
+      return text;
+    } catch (zipError) {
+      // If JSZip is not available or fails, return an error message
+      console.error('Basic DOCX extraction failed:', zipError);
+      return 'Unable to extract text from this DOCX file. Please ensure the file is not corrupted.';
+    }
   }
 
   // Metadata extraction

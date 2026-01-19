@@ -116,8 +116,45 @@ export async function POST(request: NextRequest) {
         const { name, sourceText, sourceLang, targetLang } = body
         const { data: { user } } = await supabase.auth.getUser()
 
-        // In production: call translation API (DeepL, Google Translate, etc.)
-        const translatedText = `[Translated] ${sourceText}` // Placeholder
+        // Use OpenAI for translation
+        let translatedText = sourceText
+
+        if (process.env.OPENAI_API_KEY) {
+          try {
+            const response = await fetch('https://api.openai.com/v1/chat/completions', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+              },
+              body: JSON.stringify({
+                model: 'gpt-4o-mini',
+                messages: [
+                  {
+                    role: 'system',
+                    content: `You are a professional translator. Translate the following text from ${sourceLang || 'English'} to ${targetLang || 'Spanish'}. Only respond with the translation, no explanations.`
+                  },
+                  {
+                    role: 'user',
+                    content: sourceText
+                  }
+                ],
+                temperature: 0.3,
+                max_tokens: 2000
+              })
+            })
+
+            if (response.ok) {
+              const data = await response.json()
+              translatedText = data.choices?.[0]?.message?.content || sourceText
+            }
+          } catch (error) {
+            console.error('OpenAI translation error:', error)
+            translatedText = `[Translated] ${sourceText}`
+          }
+        } else {
+          translatedText = `[Translated] ${sourceText}`
+        }
 
         const { data, error } = await supabase
           .from('translations')
@@ -225,16 +262,55 @@ export async function POST(request: NextRequest) {
       case 'translate': {
         const { text, sourceLang, targetLang } = body
 
-        // In production: call real translation API
-        // This is a placeholder response
-        const translatedText = `[${targetLang}] ${text}`
+        // Use OpenAI for translation
+        let translatedText = text
+
+        if (process.env.OPENAI_API_KEY) {
+          try {
+            const response = await fetch('https://api.openai.com/v1/chat/completions', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+              },
+              body: JSON.stringify({
+                model: 'gpt-4o-mini',
+                messages: [
+                  {
+                    role: 'system',
+                    content: `You are a professional translator. Translate the following text from ${sourceLang || 'auto-detect'} to ${targetLang || 'English'}. Only respond with the translation, no explanations.`
+                  },
+                  {
+                    role: 'user',
+                    content: text
+                  }
+                ],
+                temperature: 0.3,
+                max_tokens: 2000
+              })
+            })
+
+            if (response.ok) {
+              const data = await response.json()
+              translatedText = data.choices?.[0]?.message?.content || text
+            }
+          } catch (error) {
+            console.error('OpenAI translation error:', error)
+            // Fall back to placeholder
+            translatedText = `[${targetLang}] ${text}`
+          }
+        } else {
+          // Demo mode - simple placeholder
+          translatedText = `[${targetLang}] ${text}`
+        }
 
         return NextResponse.json({
           data: {
             source: text,
             translated: translatedText,
             sourceLang,
-            targetLang
+            targetLang,
+            provider: process.env.OPENAI_API_KEY ? 'openai' : 'demo'
           }
         })
       }
