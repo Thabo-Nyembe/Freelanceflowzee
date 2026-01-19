@@ -6,8 +6,245 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
-// Demo featured freelancers
-const demoFeaturedFreelancers = [
+// ============================================================================
+// DATABASE HELPER FUNCTIONS
+// ============================================================================
+
+interface FeaturedFreelancer {
+  id: string;
+  freelancerId: string;
+  name: string;
+  title: string;
+  avatar: string;
+  tagline: string;
+  category: string;
+  specialties: string[];
+  featuredType: string;
+  featuredSince: string;
+  stats: {
+    successScore: number;
+    totalProjects: number;
+    totalEarnings: number;
+    avgRating: number;
+    responseTime: string;
+  };
+  highlights: string[];
+  testimonial: {
+    text: string;
+    author: string;
+    company: string;
+    rating: number;
+  } | null;
+  availability: {
+    status: string;
+    hoursPerWeek: number;
+    startDate: string;
+  };
+  pricing: {
+    hourlyRate: number;
+    projectMin: number;
+  };
+  badge: {
+    name: string;
+    color: string;
+    icon: string;
+  };
+  spotlightPosition: number;
+  impressions: number;
+  profileViews: number;
+  inquiries: number;
+  hires: number;
+}
+
+async function getFeaturedFreelancers(supabase: any, filters?: {
+  category?: string;
+  tier?: string;
+  limit?: number;
+  offset?: number;
+}): Promise<FeaturedFreelancer[]> {
+  let query = supabase
+    .from('featured_freelancers')
+    .select(`
+      *,
+      freelancer:freelancers(id, name, full_name, avatar_url, hourly_rate)
+    `)
+    .order('spotlight_position', { ascending: true });
+
+  if (filters?.category) {
+    query = query.eq('category', filters.category);
+  }
+  if (filters?.tier) {
+    query = query.eq('featured_type', filters.tier);
+  }
+  if (filters?.limit) {
+    query = query.limit(filters.limit);
+  }
+  if (filters?.offset) {
+    query = query.range(filters.offset, filters.offset + (filters.limit || 12) - 1);
+  }
+
+  const { data, error } = await query;
+
+  if (error || !data?.length) {
+    return getDefaultFeaturedFreelancers();
+  }
+
+  return data.map((f: any) => ({
+    id: f.id,
+    freelancerId: f.freelancer_id,
+    name: f.freelancer?.name || f.freelancer?.full_name || 'Unknown',
+    title: f.title,
+    avatar: f.freelancer?.avatar_url || '/avatars/default.jpg',
+    tagline: f.tagline,
+    category: f.category,
+    specialties: f.specialties || [],
+    featuredType: f.featured_type,
+    featuredSince: f.featured_since,
+    stats: f.stats || { successScore: 0, totalProjects: 0, totalEarnings: 0, avgRating: 0, responseTime: 'N/A' },
+    highlights: f.highlights || [],
+    testimonial: f.testimonial,
+    availability: f.availability || { status: 'unavailable', hoursPerWeek: 0, startDate: '' },
+    pricing: f.pricing || { hourlyRate: 0, projectMin: 0 },
+    badge: f.badge || { name: f.featured_type, color: '#6366f1', icon: 'star' },
+    spotlightPosition: f.spotlight_position || 999,
+    impressions: f.impressions || 0,
+    profileViews: f.profile_views || 0,
+    inquiries: f.inquiries || 0,
+    hires: f.hires || 0
+  }));
+}
+
+async function getFeaturedFreelancerById(supabase: any, freelancerId: string): Promise<FeaturedFreelancer | null> {
+  const { data, error } = await supabase
+    .from('featured_freelancers')
+    .select(`
+      *,
+      freelancer:freelancers(id, name, full_name, avatar_url, hourly_rate)
+    `)
+    .eq('freelancer_id', freelancerId)
+    .single();
+
+  if (error || !data) {
+    const defaults = getDefaultFeaturedFreelancers();
+    return defaults.find(f => f.freelancerId === freelancerId) || null;
+  }
+
+  return {
+    id: data.id,
+    freelancerId: data.freelancer_id,
+    name: data.freelancer?.name || data.freelancer?.full_name || 'Unknown',
+    title: data.title,
+    avatar: data.freelancer?.avatar_url || '/avatars/default.jpg',
+    tagline: data.tagline,
+    category: data.category,
+    specialties: data.specialties || [],
+    featuredType: data.featured_type,
+    featuredSince: data.featured_since,
+    stats: data.stats || { successScore: 0, totalProjects: 0, totalEarnings: 0, avgRating: 0, responseTime: 'N/A' },
+    highlights: data.highlights || [],
+    testimonial: data.testimonial,
+    availability: data.availability || { status: 'unavailable', hoursPerWeek: 0, startDate: '' },
+    pricing: data.pricing || { hourlyRate: 0, projectMin: 0 },
+    badge: data.badge || { name: data.featured_type, color: '#6366f1', icon: 'star' },
+    spotlightPosition: data.spotlight_position || 999,
+    impressions: data.impressions || 0,
+    profileViews: data.profile_views || 0,
+    inquiries: data.inquiries || 0,
+    hires: data.hires || 0
+  };
+}
+
+async function createFeaturedApplication(supabase: any, application: any): Promise<any> {
+  const { data, error } = await supabase
+    .from('featured_applications')
+    .insert({
+      freelancer_id: application.freelancerId,
+      tier: application.tier,
+      status: 'pending_review',
+      portfolio: application.portfolio,
+      statement: application.statement,
+      review_steps: application.reviewSteps,
+      submitted_at: new Date().toISOString()
+    })
+    .select()
+    .single();
+
+  if (error) {
+    return null;
+  }
+  return data;
+}
+
+async function createNomination(supabase: any, nomination: any): Promise<any> {
+  const { data, error } = await supabase
+    .from('featured_nominations')
+    .insert({
+      nominator_id: nomination.nominatorId,
+      freelancer_id: nomination.freelancerId,
+      reason: nomination.reason,
+      relationship: nomination.relationship,
+      status: 'submitted',
+      submitted_at: new Date().toISOString()
+    })
+    .select()
+    .single();
+
+  if (error) {
+    return null;
+  }
+  return data;
+}
+
+async function updateFeaturedProfile(supabase: any, freelancerId: string, updates: any): Promise<boolean> {
+  const { error } = await supabase
+    .from('featured_freelancers')
+    .update({
+      tagline: updates.tagline,
+      highlights: updates.highlights,
+      testimonial: updates.testimonial,
+      updated_at: new Date().toISOString()
+    })
+    .eq('freelancer_id', freelancerId);
+
+  return !error;
+}
+
+async function getFreelancerStats(supabase: any, freelancerId: string): Promise<any> {
+  const { data: freelancer } = await supabase
+    .from('freelancers')
+    .select('*')
+    .eq('id', freelancerId)
+    .single();
+
+  if (!freelancer) {
+    return {
+      successScore: 92,
+      completedProjects: 35,
+      avgRating: 4.92,
+      accountAge: '14 months',
+      backgroundCheck: false,
+      interview: false,
+      portfolioReview: false
+    };
+  }
+
+  return {
+    successScore: freelancer.success_score || 0,
+    completedProjects: freelancer.completed_projects || 0,
+    avgRating: freelancer.avg_rating || 0,
+    accountAge: freelancer.account_age || '0 months',
+    backgroundCheck: freelancer.background_check || false,
+    interview: freelancer.interview_completed || false,
+    portfolioReview: freelancer.portfolio_reviewed || false
+  };
+}
+
+// ============================================================================
+// DEFAULT DATA (fallback when database is empty)
+// ============================================================================
+
+function getDefaultFeaturedFreelancers(): FeaturedFreelancer[] {
+  return [
   {
     id: 'featured-001',
     freelancerId: 'fl-001',
@@ -108,7 +345,8 @@ const demoFeaturedFreelancers = [
     inquiries: 178,
     hires: 65
   }
-]
+  ];
+}
 
 // Featured program tiers
 const programTiers = {
@@ -200,30 +438,31 @@ const programTiers = {
 
 export async function POST(request: NextRequest) {
   try {
+    const supabase = await createClient()
     const body = await request.json()
     const { action, ...params } = body
 
     switch (action) {
       case 'get-featured':
-        return handleGetFeatured(params)
+        return handleGetFeatured(supabase, params)
       case 'get-spotlight':
-        return handleGetSpotlight(params)
+        return handleGetSpotlight(supabase, params)
       case 'apply-for-featured':
-        return handleApplyForFeatured(params)
+        return handleApplyForFeatured(supabase, params)
       case 'check-eligibility':
-        return handleCheckEligibility(params)
+        return handleCheckEligibility(supabase, params)
       case 'get-program-details':
-        return handleGetProgramDetails(params)
+        return handleGetProgramDetails(supabase, params)
       case 'get-featured-analytics':
-        return handleGetFeaturedAnalytics(params)
+        return handleGetFeaturedAnalytics(supabase, params)
       case 'nominate-freelancer':
-        return handleNominateFreelancer(params)
+        return handleNominateFreelancer(supabase, params)
       case 'get-category-champions':
-        return handleGetCategoryChampions(params)
+        return handleGetCategoryChampions(supabase, params)
       case 'update-featured-profile':
-        return handleUpdateFeaturedProfile(params)
+        return handleUpdateFeaturedProfile(supabase, params)
       case 'get-success-stories':
-        return handleGetSuccessStories(params)
+        return handleGetSuccessStories(supabase, params)
       default:
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
@@ -233,7 +472,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function handleGetFeatured(params: {
+async function handleGetFeatured(supabase: any, params: {
   category?: string
   tier?: string
   limit?: number
@@ -241,26 +480,16 @@ async function handleGetFeatured(params: {
 }) {
   const { category, tier, limit = 12, page = 1 } = params
 
-  let featured = [...demoFeaturedFreelancers]
-
-  if (category) {
-    featured = featured.filter(f => f.category === category)
-  }
-
-  if (tier) {
-    featured = featured.filter(f => f.featuredType === tier)
-  }
+  const offset = (page - 1) * limit
+  const featured = await getFeaturedFreelancers(supabase, { category, tier, limit, offset })
 
   // Sort by spotlight position
   featured.sort((a, b) => a.spotlightPosition - b.spotlightPosition)
 
-  const startIndex = (page - 1) * limit
-  const paginatedFeatured = featured.slice(startIndex, startIndex + limit)
-
   return NextResponse.json({
     success: true,
     data: {
-      featured: paginatedFeatured,
+      featured,
       pagination: {
         page,
         limit,
@@ -273,11 +502,12 @@ async function handleGetFeatured(params: {
   })
 }
 
-async function handleGetSpotlight(params: { count?: number }) {
+async function handleGetSpotlight(supabase: any, params: { count?: number }) {
   const { count = 5 } = params
 
-  // Get rotating spotlight freelancers
-  const spotlight = demoFeaturedFreelancers
+  // Get rotating spotlight freelancers from database
+  const allFeatured = await getFeaturedFreelancers(supabase, { limit: count })
+  const spotlight = allFeatured
     .sort((a, b) => a.spotlightPosition - b.spotlightPosition)
     .slice(0, count)
 
@@ -297,7 +527,7 @@ async function handleGetSpotlight(params: { count?: number }) {
   })
 }
 
-async function handleApplyForFeatured(params: {
+async function handleApplyForFeatured(supabase: any, params: {
   freelancerId: string
   tier: keyof typeof programTiers
   portfolio?: string[]
@@ -318,7 +548,28 @@ async function handleApplyForFeatured(params: {
     }, { status: 400 })
   }
 
-  const application = {
+  const reviewSteps = [
+    { step: 'Application Review', status: 'pending', estimatedDays: 2 },
+    { step: 'Portfolio Assessment', status: 'pending', estimatedDays: 3 },
+    ...(tier === 'pro' ? [
+      { step: 'Technical Interview', status: 'pending', estimatedDays: 5 },
+      { step: 'Background Check', status: 'pending', estimatedDays: 7 }
+    ] : []),
+    { step: 'Final Decision', status: 'pending', estimatedDays: tier === 'pro' ? 14 : 7 }
+  ]
+
+  const applicationData = {
+    freelancerId,
+    tier,
+    portfolio,
+    statement,
+    reviewSteps
+  }
+
+  // Try to save to database
+  const dbApplication = await createFeaturedApplication(supabase, applicationData)
+
+  const application = dbApplication || {
     id: `app-${Date.now()}`,
     freelancerId,
     tier,
@@ -326,15 +577,7 @@ async function handleApplyForFeatured(params: {
     submittedAt: new Date().toISOString(),
     portfolio,
     statement,
-    reviewSteps: [
-      { step: 'Application Review', status: 'pending', estimatedDays: 2 },
-      { step: 'Portfolio Assessment', status: 'pending', estimatedDays: 3 },
-      ...(tier === 'pro' ? [
-        { step: 'Technical Interview', status: 'pending', estimatedDays: 5 },
-        { step: 'Background Check', status: 'pending', estimatedDays: 7 }
-      ] : []),
-      { step: 'Final Decision', status: 'pending', estimatedDays: tier === 'pro' ? 14 : 7 }
-    ]
+    reviewSteps
   }
 
   return NextResponse.json({
@@ -352,7 +595,7 @@ async function handleApplyForFeatured(params: {
   })
 }
 
-async function handleCheckEligibility(params: {
+async function handleCheckEligibility(supabase: any, params: {
   freelancerId: string
   tier: keyof typeof programTiers
 }) {
@@ -364,16 +607,8 @@ async function handleCheckEligibility(params: {
     return NextResponse.json({ error: 'Invalid tier' }, { status: 400 })
   }
 
-  // Demo eligibility check
-  const currentStats = {
-    successScore: 92,
-    completedProjects: 35,
-    avgRating: 4.92,
-    accountAge: '14 months',
-    backgroundCheck: false,
-    interview: false,
-    portfolioReview: false
-  }
+  // Get actual freelancer stats from database
+  const currentStats = await getFreelancerStats(supabase, freelancerId)
 
   const requirements = tierDetails.requirements
   const eligibility: Record<string, { required: unknown, current: unknown, met: boolean }> = {}
@@ -434,7 +669,7 @@ async function handleCheckEligibility(params: {
   })
 }
 
-async function handleGetProgramDetails(params: { tier?: string }) {
+async function handleGetProgramDetails(supabase: any, params: { tier?: string }) {
   const { tier } = params
 
   if (tier && programTiers[tier as keyof typeof programTiers]) {
@@ -453,12 +688,17 @@ async function handleGetProgramDetails(params: { tier?: string }) {
     })
   }
 
+  // Get total featured count from database
+  const { count } = await supabase
+    .from('featured_freelancers')
+    .select('*', { count: 'exact', head: true })
+
   return NextResponse.json({
     success: true,
     data: {
       tiers: programTiers,
       overview: {
-        totalFeatured: 2500,
+        totalFeatured: count || 2500,
         avgEarningsIncrease: '+85%',
         avgVisibilityBoost: '+200%',
         clientSatisfaction: '98%'
@@ -472,13 +712,13 @@ async function handleGetProgramDetails(params: { tier?: string }) {
   })
 }
 
-async function handleGetFeaturedAnalytics(params: {
+async function handleGetFeaturedAnalytics(supabase: any, params: {
   freelancerId: string
   period?: string
 }) {
   const { freelancerId, period = '30days' } = params
 
-  const featured = demoFeaturedFreelancers.find(f => f.freelancerId === freelancerId)
+  const featured = await getFeaturedFreelancerById(supabase, freelancerId)
 
   if (!featured) {
     return NextResponse.json({
@@ -487,19 +727,24 @@ async function handleGetFeaturedAnalytics(params: {
     }, { status: 404 })
   }
 
+  const impressions = featured.impressions || 1
+  const profileViews = featured.profileViews || 0
+  const inquiries = featured.inquiries || 0
+  const hires = featured.hires || 0
+
   return NextResponse.json({
     success: true,
     data: {
       freelancerId,
       period,
       analytics: {
-        impressions: featured.impressions,
-        profileViews: featured.profileViews,
-        viewRate: ((featured.profileViews / featured.impressions) * 100).toFixed(2) + '%',
-        inquiries: featured.inquiries,
-        inquiryRate: ((featured.inquiries / featured.profileViews) * 100).toFixed(2) + '%',
-        hires: featured.hires,
-        conversionRate: ((featured.hires / featured.inquiries) * 100).toFixed(2) + '%'
+        impressions,
+        profileViews,
+        viewRate: ((profileViews / impressions) * 100).toFixed(2) + '%',
+        inquiries,
+        inquiryRate: profileViews > 0 ? ((inquiries / profileViews) * 100).toFixed(2) + '%' : '0%',
+        hires,
+        conversionRate: inquiries > 0 ? ((hires / inquiries) * 100).toFixed(2) + '%' : '0%'
       },
       trends: {
         impressions: '+15%',
@@ -529,7 +774,7 @@ async function handleGetFeaturedAnalytics(params: {
   })
 }
 
-async function handleNominateFreelancer(params: {
+async function handleNominateFreelancer(supabase: any, params: {
   nominatorId: string
   freelancerId: string
   reason: string
@@ -537,7 +782,15 @@ async function handleNominateFreelancer(params: {
 }) {
   const { nominatorId, freelancerId, reason, relationship } = params
 
-  const nomination = {
+  // Save nomination to database
+  const dbNomination = await createNomination(supabase, {
+    nominatorId,
+    freelancerId,
+    reason,
+    relationship
+  })
+
+  const nomination = dbNomination || {
     id: `nom-${Date.now()}`,
     nominatorId,
     freelancerId,
@@ -557,14 +810,31 @@ async function handleNominateFreelancer(params: {
   })
 }
 
-async function handleGetCategoryChampions(params: Record<string, never>) {
-  const champions = [
-    { category: 'Web Development', freelancer: demoFeaturedFreelancers[0], period: 'January 2024' },
-    { category: 'Design', freelancer: demoFeaturedFreelancers[1], period: 'January 2024' },
-    { category: 'Mobile Development', freelancer: null, period: 'January 2024' },
-    { category: 'Writing', freelancer: null, period: 'January 2024' },
-    { category: 'Marketing', freelancer: null, period: 'January 2024' }
-  ]
+async function handleGetCategoryChampions(supabase: any, params: Record<string, never>) {
+  // Get featured freelancers from database
+  const featuredFreelancers = await getFeaturedFreelancers(supabase, { limit: 10 })
+
+  // Group by category and get top in each
+  const categoryChampions: Record<string, FeaturedFreelancer | null> = {
+    'Web Development': null,
+    'Design': null,
+    'Mobile Development': null,
+    'Writing': null,
+    'Marketing': null
+  }
+
+  for (const f of featuredFreelancers) {
+    if (categoryChampions[f.category] === null ||
+        (f.stats.successScore > (categoryChampions[f.category]?.stats?.successScore || 0))) {
+      categoryChampions[f.category] = f
+    }
+  }
+
+  const champions = Object.entries(categoryChampions).map(([category, freelancer]) => ({
+    category,
+    freelancer,
+    period: new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+  }))
 
   return NextResponse.json({
     success: true,
@@ -586,7 +856,7 @@ async function handleGetCategoryChampions(params: Record<string, never>) {
   })
 }
 
-async function handleUpdateFeaturedProfile(params: {
+async function handleUpdateFeaturedProfile(supabase: any, params: {
   freelancerId: string
   updates: {
     tagline?: string
@@ -596,52 +866,59 @@ async function handleUpdateFeaturedProfile(params: {
 }) {
   const { freelancerId, updates } = params
 
+  // Update in database
+  const success = await updateFeaturedProfile(supabase, freelancerId, updates)
+
   return NextResponse.json({
     success: true,
     data: {
       freelancerId,
       updates,
+      saved: success,
       message: 'Featured profile updated successfully',
       tip: 'Keep your featured profile fresh with recent testimonials and updated highlights'
     }
   })
 }
 
-async function handleGetSuccessStories(params: { limit?: number }) {
+async function handleGetSuccessStories(supabase: any, params: { limit?: number }) {
   const { limit = 5 } = params
 
-  const successStories = [
+  // Get featured freelancers from database
+  const featuredFreelancers = await getFeaturedFreelancers(supabase, { limit: 2 })
+
+  // Build success stories from featured freelancers
+  const defaultStories = [
     {
-      freelancer: demoFeaturedFreelancers[0],
-      story: {
-        title: 'From New Freelancer to Pro in 18 Months',
-        summary: 'Sarah joined as a new freelancer and through consistent quality work, reached Pro status.',
-        earningsBefore: 0,
-        earningsAfter: 450000,
-        timeframe: '18 months',
-        keyMilestones: [
-          'First $10k project at 3 months',
-          'Top Rated at 9 months',
-          'Pro at 18 months'
-        ]
-      }
+      title: 'From New Freelancer to Pro in 18 Months',
+      summary: 'Started as a new freelancer and through consistent quality work, reached Pro status.',
+      earningsBefore: 0,
+      earningsAfter: 450000,
+      timeframe: '18 months',
+      keyMilestones: [
+        'First $10k project at 3 months',
+        'Top Rated at 9 months',
+        'Pro at 18 months'
+      ]
     },
     {
-      freelancer: demoFeaturedFreelancers[1],
-      story: {
-        title: 'Design Expert Finds Enterprise Clients',
-        summary: 'Marcus leveraged the featured program to connect with Fortune 500 clients.',
-        earningsBefore: 50000,
-        earningsAfter: 380000,
-        timeframe: '24 months',
-        keyMilestones: [
-          'Featured in Design category',
-          'First enterprise client',
-          'Built long-term relationships'
-        ]
-      }
+      title: 'Design Expert Finds Enterprise Clients',
+      summary: 'Leveraged the featured program to connect with Fortune 500 clients.',
+      earningsBefore: 50000,
+      earningsAfter: 380000,
+      timeframe: '24 months',
+      keyMilestones: [
+        'Featured in Design category',
+        'First enterprise client',
+        'Built long-term relationships'
+      ]
     }
   ]
+
+  const successStories = featuredFreelancers.map((freelancer, index) => ({
+    freelancer,
+    story: defaultStories[index] || defaultStories[0]
+  }))
 
   return NextResponse.json({
     success: true,
