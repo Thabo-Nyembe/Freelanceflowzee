@@ -43,7 +43,20 @@ import {
   Zap,
   MessageCircle,
   Download,
-  ExternalLink
+  ExternalLink,
+  Phone,
+  Video,
+  PhoneOff,
+  VideoOff,
+  MicOff,
+  Monitor,
+  Hand,
+  Circle,
+  Square,
+  ScreenShare,
+  ScreenShareOff,
+  Users2,
+  Settings2
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -74,6 +87,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { useConversations, useMessagingMutations } from '@/lib/hooks/use-messaging'
+import { useVoiceVideo, useActiveCall } from '@/lib/hooks/use-voice-video'
 
 // Initialize Supabase client once at module level
 const supabase = createClient()
@@ -355,6 +369,14 @@ export default function MessagingClient() {
     updateMessage,
     deleteMessage
   } = useMessagingMutations()
+
+  // Voice/Video Calling Hooks
+  const voiceVideo = useVoiceVideo()
+  const { call: activeCall, participants, isConnecting: callConnecting } = useActiveCall(voiceVideo.activeCallId)
+
+  // Call UI State
+  const [showCallUI, setShowCallUI] = useState(false)
+  const [isStartingCall, setIsStartingCall] = useState(false)
 
   // UI State
   const [activeView, setActiveView] = useState<'channels' | 'dms' | 'threads' | 'search' | 'settings' | 'analytics'>('channels')
@@ -868,6 +890,122 @@ export default function MessagingClient() {
       setSelectedChannel(null)
     } catch (error) {
       toast.error('Failed to leave channel')
+    }
+  }
+
+  // ============================================================================
+  // VOICE/VIDEO CALL HANDLERS
+  // ============================================================================
+
+  const handleStartAudioCall = async () => {
+    if (!selectedChannel || isStartingCall) return
+
+    setIsStartingCall(true)
+    try {
+      await voiceVideo.startCall({
+        channelId: selectedChannel.id,
+        callType: 'audio',
+        title: `Voice call in #${selectedChannel.name}`,
+      })
+      setShowCallUI(true)
+      toast.success('Audio call started')
+    } catch (error) {
+      console.error('Failed to start audio call:', error)
+      toast.error('Failed to start audio call')
+    } finally {
+      setIsStartingCall(false)
+    }
+  }
+
+  const handleStartVideoCall = async () => {
+    if (!selectedChannel || isStartingCall) return
+
+    setIsStartingCall(true)
+    try {
+      await voiceVideo.startCall({
+        channelId: selectedChannel.id,
+        callType: 'video',
+        title: `Video call in #${selectedChannel.name}`,
+      })
+      setShowCallUI(true)
+      toast.success('Video call started')
+    } catch (error) {
+      console.error('Failed to start video call:', error)
+      toast.error('Failed to start video call')
+    } finally {
+      setIsStartingCall(false)
+    }
+  }
+
+  const handleJoinCall = async (callId: string) => {
+    try {
+      await voiceVideo.joinCall({ callId })
+      setShowCallUI(true)
+      toast.success('Joined call')
+    } catch (error) {
+      console.error('Failed to join call:', error)
+      toast.error('Failed to join call')
+    }
+  }
+
+  const handleLeaveCall = async () => {
+    try {
+      await voiceVideo.leaveCall()
+      setShowCallUI(false)
+      toast.success('Left call')
+    } catch (error) {
+      console.error('Failed to leave call:', error)
+      toast.error('Failed to leave call')
+    }
+  }
+
+  const handleEndCall = async () => {
+    try {
+      await voiceVideo.endCall()
+      setShowCallUI(false)
+      toast.success('Call ended')
+    } catch (error) {
+      console.error('Failed to end call:', error)
+      toast.error('Failed to end call')
+    }
+  }
+
+  const handleToggleAudio = () => {
+    voiceVideo.toggleAudio()
+  }
+
+  const handleToggleVideo = () => {
+    voiceVideo.toggleVideo()
+  }
+
+  const handleToggleScreenShare = async () => {
+    try {
+      await voiceVideo.toggleScreenShare()
+    } catch (error) {
+      toast.error('Failed to toggle screen share')
+    }
+  }
+
+  const handleToggleHandRaise = async () => {
+    try {
+      await voiceVideo.toggleHandRaise()
+      toast.success(voiceVideo.isHandRaised ? 'Hand lowered' : 'Hand raised')
+    } catch (error) {
+      toast.error('Failed to toggle hand raise')
+    }
+  }
+
+  const handleToggleRecording = async () => {
+    try {
+      if (voiceVideo.isRecording) {
+        await voiceVideo.stopRecording()
+        toast.success('Recording stopped')
+      } else {
+        await voiceVideo.startRecording()
+        toast.success('Recording started')
+      }
+    } catch (error) {
+      toast.error('Failed to toggle recording')
     }
   }
 
@@ -1683,6 +1821,38 @@ export default function MessagingClient() {
               )}
             </div>
             <div className="flex items-center gap-2">
+              {/* Voice/Video Call Buttons */}
+              <button
+                onClick={handleStartAudioCall}
+                disabled={isStartingCall || !!activeCall}
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg disabled:opacity-50 group relative"
+                title="Start voice call"
+              >
+                <Phone className="w-5 h-5 text-gray-500 group-hover:text-green-500" />
+              </button>
+              <button
+                onClick={handleStartVideoCall}
+                disabled={isStartingCall || !!activeCall}
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg disabled:opacity-50 group relative"
+                title="Start video call"
+              >
+                <Video className="w-5 h-5 text-gray-500 group-hover:text-blue-500" />
+              </button>
+
+              {/* Active Call Indicator */}
+              {activeCall && (
+                <button
+                  onClick={() => setShowCallUI(true)}
+                  className="flex items-center gap-2 px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm font-medium animate-pulse"
+                >
+                  <Phone className="w-4 h-4" />
+                  <span>In Call</span>
+                  <span className="text-xs opacity-75">({participants.length})</span>
+                </button>
+              )}
+
+              <div className="w-px h-6 bg-gray-200 dark:bg-gray-600 mx-1" />
+
               <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
                 <Users className="w-5 h-5 text-gray-500" />
               </button>
@@ -1695,6 +1865,168 @@ export default function MessagingClient() {
               >
                 <Settings className="w-5 h-5 text-gray-500" />
               </button>
+            </div>
+          </div>
+        )}
+
+        {/* Active Call Overlay */}
+        {showCallUI && activeCall && (
+          <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center">
+            <div className="bg-gray-900 rounded-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
+              {/* Call Header */}
+              <div className="px-6 py-4 border-b border-gray-800 flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    {activeCall.callType === 'video' ? (
+                      <Video className="w-5 h-5 text-blue-400" />
+                    ) : (
+                      <Phone className="w-5 h-5 text-green-400" />
+                    )}
+                    <h2 className="text-white font-semibold">{activeCall.title || `Call in #${selectedChannel?.name}`}</h2>
+                  </div>
+                  <Badge variant="secondary" className="bg-gray-800">
+                    {participants.length} participant{participants.length !== 1 ? 's' : ''}
+                  </Badge>
+                  {voiceVideo.isRecording && (
+                    <Badge variant="destructive" className="animate-pulse">
+                      <Circle className="w-2 h-2 mr-1 fill-current" /> Recording
+                    </Badge>
+                  )}
+                </div>
+                <button
+                  onClick={() => setShowCallUI(false)}
+                  className="p-2 hover:bg-gray-800 rounded-lg text-gray-400 hover:text-white"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Participants Grid */}
+              <div className="flex-1 p-6 overflow-auto">
+                <div className={`grid gap-4 ${
+                  participants.length === 1 ? 'grid-cols-1' :
+                  participants.length <= 4 ? 'grid-cols-2' :
+                  participants.length <= 9 ? 'grid-cols-3' : 'grid-cols-4'
+                }`}>
+                  {participants.map((participant) => (
+                    <div
+                      key={participant.odId}
+                      className={`relative bg-gray-800 rounded-xl overflow-hidden aspect-video flex items-center justify-center ${
+                        participant.isSpeaking ? 'ring-2 ring-green-500' : ''
+                      }`}
+                    >
+                      {participant.videoEnabled ? (
+                        <div className="w-full h-full bg-gradient-to-br from-blue-600 to-purple-700 flex items-center justify-center">
+                          <span className="text-white/50 text-sm">Video Feed</span>
+                        </div>
+                      ) : (
+                        <div className="w-20 h-20 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white text-2xl font-semibold">
+                          {participant.userName.charAt(0)}
+                        </div>
+                      )}
+
+                      {/* Participant overlay */}
+                      <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent">
+                        <div className="flex items-center justify-between">
+                          <span className="text-white text-sm font-medium flex items-center gap-2">
+                            {participant.userName}
+                            {participant.role === 'host' && (
+                              <Badge variant="secondary" className="text-xs">Host</Badge>
+                            )}
+                          </span>
+                          <div className="flex items-center gap-1">
+                            {!participant.audioEnabled && (
+                              <MicOff className="w-4 h-4 text-red-400" />
+                            )}
+                            {participant.handRaised && (
+                              <Hand className="w-4 h-4 text-yellow-400" />
+                            )}
+                            {participant.isScreenSharing && (
+                              <Monitor className="w-4 h-4 text-blue-400" />
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Call Controls */}
+              <div className="px-6 py-4 border-t border-gray-800 bg-gray-900/95">
+                <div className="flex items-center justify-center gap-4">
+                  {/* Audio Toggle */}
+                  <button
+                    onClick={handleToggleAudio}
+                    className={`p-4 rounded-full transition-colors ${
+                      voiceVideo.isAudioEnabled
+                        ? 'bg-gray-700 hover:bg-gray-600 text-white'
+                        : 'bg-red-500 hover:bg-red-600 text-white'
+                    }`}
+                  >
+                    {voiceVideo.isAudioEnabled ? <Mic className="w-6 h-6" /> : <MicOff className="w-6 h-6" />}
+                  </button>
+
+                  {/* Video Toggle */}
+                  <button
+                    onClick={handleToggleVideo}
+                    className={`p-4 rounded-full transition-colors ${
+                      voiceVideo.isVideoEnabled
+                        ? 'bg-gray-700 hover:bg-gray-600 text-white'
+                        : 'bg-red-500 hover:bg-red-600 text-white'
+                    }`}
+                  >
+                    {voiceVideo.isVideoEnabled ? <Video className="w-6 h-6" /> : <VideoOff className="w-6 h-6" />}
+                  </button>
+
+                  {/* Screen Share */}
+                  <button
+                    onClick={handleToggleScreenShare}
+                    className={`p-4 rounded-full transition-colors ${
+                      voiceVideo.isScreenSharing
+                        ? 'bg-blue-500 hover:bg-blue-600 text-white'
+                        : 'bg-gray-700 hover:bg-gray-600 text-white'
+                    }`}
+                  >
+                    {voiceVideo.isScreenSharing ? <ScreenShareOff className="w-6 h-6" /> : <ScreenShare className="w-6 h-6" />}
+                  </button>
+
+                  {/* Hand Raise */}
+                  <button
+                    onClick={handleToggleHandRaise}
+                    className={`p-4 rounded-full transition-colors ${
+                      voiceVideo.isHandRaised
+                        ? 'bg-yellow-500 hover:bg-yellow-600 text-white'
+                        : 'bg-gray-700 hover:bg-gray-600 text-white'
+                    }`}
+                  >
+                    <Hand className="w-6 h-6" />
+                  </button>
+
+                  {/* Recording */}
+                  <button
+                    onClick={handleToggleRecording}
+                    className={`p-4 rounded-full transition-colors ${
+                      voiceVideo.isRecording
+                        ? 'bg-red-500 hover:bg-red-600 text-white animate-pulse'
+                        : 'bg-gray-700 hover:bg-gray-600 text-white'
+                    }`}
+                  >
+                    {voiceVideo.isRecording ? <Square className="w-6 h-6" /> : <Circle className="w-6 h-6" />}
+                  </button>
+
+                  <div className="w-px h-10 bg-gray-700 mx-2" />
+
+                  {/* Leave Call */}
+                  <button
+                    onClick={handleLeaveCall}
+                    className="px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-full font-medium flex items-center gap-2"
+                  >
+                    <PhoneOff className="w-5 h-5" />
+                    Leave
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         )}
