@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
 import { createFeatureLogger } from '@/lib/logger'
 import { SmartCollaborationAI } from '@/lib/ai/smart-collaboration-ai';
 import { WebSocketServer } from '@/lib/websocket-server';
@@ -16,14 +15,9 @@ type DocumentType = 'contract' | 'proposal' | 'report' | 'policy' | 'invoice' | 
 const logger = createFeatureLogger('API-SmartCollaboration')
 
 // Environment configuration
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 const API_SECRET_KEY = process.env.API_SECRET_KEY || '';
 const MAX_REQUESTS_PER_MINUTE = 60;
 const MAX_DOCUMENT_SIZE_MB = 50;
-
-// Initialize Supabase client
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Initialize WebSocket server
 const wsServer = WebSocketServer.getInstance();

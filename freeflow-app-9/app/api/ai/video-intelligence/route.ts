@@ -7,7 +7,6 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
 import { createHash } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import { writeFile, mkdir } from 'fs';

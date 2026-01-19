@@ -13,7 +13,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@/lib/supabase/server'
 import OpenAI from 'openai'
 
 // ============================================================================
@@ -83,15 +83,8 @@ interface TimeEntryData {
 }
 
 // ============================================================================
-// SUPABASE CLIENT
+// SUPABASE CLIENT - Using server-side client
 // ============================================================================
-
-function getSupabase() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
-}
 
 // ============================================================================
 // OPENAI CLIENT
@@ -108,7 +101,7 @@ function getOpenAI() {
 // ============================================================================
 
 async function fetchProjectData(projectId: string): Promise<ProjectData | null> {
-  const supabase = getSupabase()
+  const supabase = await createClient()
 
   // Fetch project with related data
   const { data: project, error } = await supabase

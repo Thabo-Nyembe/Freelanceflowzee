@@ -5,7 +5,6 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
 import { v4 as uuidv4 } from 'uuid';
 import { OpenAI } from 'openai';
 import { createHash } from 'crypto';
@@ -13,14 +12,14 @@ import { rateLimit } from '@/lib/rate-limit';
 import { authenticate } from '@/lib/auth';
 import { logger } from '@/lib/logger';
 import { metrics } from '@/lib/metrics';
-import { 
-  AssemblyAI, 
-  TranscriptStatus, 
-  TranscriptResponse 
+import {
+  AssemblyAI,
+  TranscriptStatus,
+  TranscriptResponse
 } from '@/lib/assemblyai';
-import { 
-  Deepgram, 
-  DeepgramTranscriptionOptions 
+import {
+  Deepgram,
+  DeepgramTranscriptionOptions
 } from '@/lib/deepgram';
 
 // Environment configuration
@@ -30,19 +29,9 @@ const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
 const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET || 'default-webhook-secret';
 
 // Lazy-loaded clients (to avoid build-time initialization)
-let _supabase: any = null;
 let _openai: OpenAI | null = null;
 let _assemblyai: AssemblyAI | null = null;
 let _deepgram: Deepgram | null = null;
-
-function getSupabase() {
-  if (!_supabase) {
-    const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-    const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY!;
-    _supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
-  }
-  return _supabase;
-}
 
 function getOpenAI(): OpenAI | null {
   if (_openai === null && typeof _openai === 'object') return _openai;

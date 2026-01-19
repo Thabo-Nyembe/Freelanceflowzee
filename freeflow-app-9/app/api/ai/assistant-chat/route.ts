@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createFeatureLogger } from '@/lib/logger'
 import OpenAI from 'openai'
 import Anthropic from '@anthropic-ai/sdk'
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@/lib/supabase/server'
 
 const logger = createFeatureLogger('API-AIAssistantChat')
 
@@ -24,14 +24,6 @@ const openrouter = process.env.OPENROUTER_API_KEY
         'X-Title': 'Kazi AI Platform'
       }
     })
-  : null
-
-// Initialize Supabase client for server-side
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-const supabase = supabaseUrl && supabaseServiceKey
-  ? createClient(supabaseUrl, supabaseServiceKey)
   : null
 
 interface ChatMessage {
@@ -109,12 +101,8 @@ async function getConversationHistory(
   conversationId: string,
   limit: number = 20
 ): Promise<ChatMessage[]> {
-  if (!supabase) {
-    logger.warn('Supabase not configured, skipping history fetch')
-    return []
-  }
-
   try {
+    const supabase = await createClient()
     const { data, error } = await supabase
       .from('ai_messages')
       .select('role, content')
@@ -147,12 +135,8 @@ async function saveMessage(
   model: string,
   tokens?: { prompt: number; completion: number }
 ): Promise<void> {
-  if (!supabase) {
-    logger.warn('Supabase not configured, skipping message save')
-    return
-  }
-
   try {
+    const supabase = await createClient()
     await supabase.from('ai_messages').insert({
       conversation_id: conversationId,
       user_id: userId,

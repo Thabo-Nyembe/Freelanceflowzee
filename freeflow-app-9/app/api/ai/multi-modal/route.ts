@@ -5,7 +5,6 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
 import { headers } from 'next/headers';
 import { z } from 'zod';
 import { rateLimit } from '@/lib/rate-limit';
@@ -18,13 +17,6 @@ import { Server } from 'http';
 import { createFeatureLogger } from '@/lib/logger'
 
 const logger = createFeatureLogger('API-MultiModal')
-
-// Initialize Supabase client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
-const supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
-const supabaseAdmin = supabaseServiceKey ? createClient(supabaseUrl, supabaseServiceKey) : null;
 
 // Lazy-initialized Multi-modal AI System (to avoid build-time initialization)
 let multiModalSystem: MultiModalAISystem | null = null;
