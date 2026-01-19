@@ -45,54 +45,54 @@ const features = [
   {
     title: 'Video Studio',
     description: 'Create and edit videos with AI assistance',
-    href: '/video-studio',
+    href: '/dashboard/video-studio-v2',
     icon: Video
   },
   {
     title: 'Documents',
     description: 'Collaborative document editing',
-    href: '/documents',
+    href: '/dashboard/docs-v2',
     icon: FileText
   },
   {
     title: 'Community',
     description: 'Connect with other freelancers',
-    href: '/community',
+    href: '/dashboard/community-v2',
     icon: Users
   },
   {
     title: 'AI Assistant',
     description: 'Get AI-powered help',
-    href: '/ai-assistant',
+    href: '/dashboard/ai-assistant-v2',
     icon: Brain
   },
   {
     title: 'Calendar',
     description: 'Smart scheduling',
-    href: '/calendar',
+    href: '/dashboard/calendar-v2',
     icon: Calendar
   },
   {
     title: 'Analytics',
     description: 'Business insights',
-    href: '/analytics',
+    href: '/dashboard/analytics-v2',
     icon: BarChart3
   },
   {
     title: 'Files',
     description: 'File management',
-    href: '/files',
+    href: '/dashboard/files-hub-v2',
     icon: FileBox
   },
   {
     title: 'Client Portal',
     description: 'Client collaboration',
-    href: '/client-portal',
+    href: '/dashboard/client-portal',
     icon: MessageSquare
   },
   {
-    title: 'Freelancer',
-    href: '/freelancer',
+    title: 'Dashboard',
+    href: '/dashboard/overview-v2',
     icon: Briefcase,
     description: 'Manage your freelance business with AI-powered tools',
   },

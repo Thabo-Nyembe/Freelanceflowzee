@@ -48,16 +48,16 @@ export default function NotFound() {
               <h3 className="font-semibold text-gray-700 mb-3">Try these popular pages:</h3>
               <div className="space-y-2">
                 <Button variant="ghost" asChild className="w-full justify-start">
-                  <Link href="/video-studio">AI Video Studio</Link>
+                  <Link href="/dashboard/video-studio-v2">AI Video Studio</Link>
                 </Button>
                 <Button variant="ghost" asChild className="w-full justify-start">
                   <Link href="/dashboard/projects-hub-v2">Projects Hub</Link>
                 </Button>
                 <Button variant="ghost" asChild className="w-full justify-start">
-                  <Link href="/community">Community</Link>
+                  <Link href="/dashboard/community-v2">Community</Link>
                 </Button>
                 <Button variant="ghost" asChild className="w-full justify-start">
-                  <Link href="/features">Features</Link>
+                  <Link href="/pricing">Pricing</Link>
                 </Button>
               </div>
             </div>
