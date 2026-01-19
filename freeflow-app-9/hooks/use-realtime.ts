@@ -65,10 +65,12 @@ export function useRealtimeTable<T = any>(
   const [data, setData] = useState<T[]>([])
   const [isSubscribed, setIsSubscribed] = useState(false)
   const channelRef = useRef<RealtimeChannel | null>(null)
+  const isMountedRef = useRef(true)
 
   const { event = '*', filter, schema = 'public' } = options
 
   useEffect(() => {
+    isMountedRef.current = true
     const supabase = createClient()
 
     // Create channel
@@ -83,6 +85,8 @@ export function useRealtimeTable<T = any>(
           filter
         } as any,
         (payload: RealtimePostgresChangesPayload<T>) => {
+          if (!isMountedRef.current) return
+
           if (payload.eventType === 'INSERT') {
             setData((prev) => [...prev, payload.new as T])
           } else if (payload.eventType === 'UPDATE') {
@@ -97,7 +101,7 @@ export function useRealtimeTable<T = any>(
         }
       )
       .subscribe((status) => {
-        if (status === 'SUBSCRIBED') {
+        if (isMountedRef.current && status === 'SUBSCRIBED') {
           setIsSubscribed(true)
         }
       })
@@ -105,6 +109,7 @@ export function useRealtimeTable<T = any>(
     channelRef.current = channel
 
     return () => {
+      isMountedRef.current = false
       channel.unsubscribe()
       setIsSubscribed(false)
     }
@@ -130,10 +135,12 @@ export function useRealtimeRecord<T = any>(
 ) {
   const [record, setRecord] = useState<T | null>(null)
   const [isSubscribed, setIsSubscribed] = useState(false)
+  const isMountedRef = useRef(true)
 
   useEffect(() => {
     if (!id) return
 
+    isMountedRef.current = true
     const supabase = createClient()
 
     const channel = supabase
@@ -147,6 +154,8 @@ export function useRealtimeRecord<T = any>(
           filter: `${idColumn}=eq.${id}`
         } as any,
         (payload: RealtimePostgresChangesPayload<T>) => {
+          if (!isMountedRef.current) return
+
           if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
             setRecord(payload.new as T)
           } else if (payload.eventType === 'DELETE') {
@@ -155,12 +164,13 @@ export function useRealtimeRecord<T = any>(
         }
       )
       .subscribe((status) => {
-        if (status === 'SUBSCRIBED') {
+        if (isMountedRef.current && status === 'SUBSCRIBED') {
           setIsSubscribed(true)
         }
       })
 
     return () => {
+      isMountedRef.current = false
       channel.unsubscribe()
       setIsSubscribed(false)
     }
@@ -188,8 +198,10 @@ export function usePresence(
 ) {
   const [presenceState, setPresenceState] = useState<{ [key: string]: PresenceState[] }>({})
   const channelRef = useRef<RealtimeChannel | null>(null)
+  const isMountedRef = useRef(true)
 
   useEffect(() => {
+    isMountedRef.current = true
     const supabase = createClient()
 
     const channel = supabase.channel(`presence:${roomId}`, {
@@ -203,6 +215,7 @@ export function usePresence(
     // Track presence state changes
     channel
       .on('presence', { event: 'sync' }, () => {
+        if (!isMountedRef.current) return
         const state = channel.presenceState()
         setPresenceState(state)
       })
@@ -215,7 +228,7 @@ export function usePresence(
 
     // Subscribe and track if initial state provided
     channel.subscribe(async (status) => {
-      if (status === 'SUBSCRIBED' && initialState) {
+      if (isMountedRef.current && status === 'SUBSCRIBED' && initialState) {
         await channel.track(initialState)
       }
     })
@@ -223,6 +236,7 @@ export function usePresence(
     channelRef.current = channel
 
     return () => {
+      isMountedRef.current = false
       channel.unsubscribe()
     }
   }, [roomId])
@@ -274,20 +288,24 @@ export function useBroadcast<T = any>(
 ) {
   const channelRef = useRef<RealtimeChannel | null>(null)
   const [isSubscribed, setIsSubscribed] = useState(false)
+  const isMountedRef = useRef(true)
 
   useEffect(() => {
+    isMountedRef.current = true
     const supabase = createClient()
 
     const channel = supabase.channel(`broadcast:${channelName}`)
 
     if (onMessage) {
       channel.on('broadcast', { event: '*' }, (payload) => {
-        onMessage(payload as BroadcastPayload<T>)
+        if (isMountedRef.current) {
+          onMessage(payload as BroadcastPayload<T>)
+        }
       })
     }
 
     channel.subscribe((status) => {
-      if (status === 'SUBSCRIBED') {
+      if (isMountedRef.current && status === 'SUBSCRIBED') {
         setIsSubscribed(true)
       }
     })
@@ -295,6 +313,7 @@ export function useBroadcast<T = any>(
     channelRef.current = channel
 
     return () => {
+      isMountedRef.current = false
       channel.unsubscribe()
       setIsSubscribed(false)
     }

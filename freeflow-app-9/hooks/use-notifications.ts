@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 
 // ============================================================================
 // TYPES
@@ -223,12 +223,30 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
     return { success: permission === 'granted', permission }
   }, [])
 
+  // Ref to track if initial load has been done
+  const isInitialLoadRef = useRef(false)
+  const filterRef = useRef(filter)
+  filterRef.current = filter
+
   const refresh = useCallback(async () => {
     setIsLoading(true)
-    await fetchNotifications(filter)
-  }, [fetchNotifications, filter])
+    await fetchNotifications(filterRef.current)
+  }, [fetchNotifications])
 
-  useEffect(() => { refresh() }, [refresh])
+  // Initial load - runs once on mount
+  useEffect(() => {
+    if (!isInitialLoadRef.current) {
+      isInitialLoadRef.current = true
+      refresh()
+    }
+  }, [refresh])
+
+  // Re-fetch when filter changes (but not on mount)
+  useEffect(() => {
+    if (isInitialLoadRef.current) {
+      fetchNotifications(filter)
+    }
+  }, [filter, fetchNotifications])
 
   useEffect(() => {
     if (!autoRefresh) return

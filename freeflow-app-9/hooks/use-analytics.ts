@@ -42,10 +42,18 @@ class AnalyticsClient {
   private performanceObserver: PerformanceObserver | null = null
   private clsValue: number = 0
   private fidValue: number = 0
+  // Track event listeners for cleanup
+  private boundListeners: { target: EventTarget; event: string; handler: EventListener }[] = []
 
   constructor() {
     this.sessionId = this.generateSessionId()
     this.initializeIfNeeded()
+  }
+
+  // Helper to add event listeners with tracking for cleanup
+  private addTrackedListener(target: EventTarget, event: string, handler: EventListener) {
+    target.addEventListener(event, handler)
+    this.boundListeners.push({ target, event, handler })
   }
 
   private generateSessionId(): string {
@@ -98,11 +106,12 @@ class AnalyticsClient {
     }
 
     // Track page load performance
-    window.addEventListener('load', () => {
+    const loadHandler = () => {
       setTimeout(() => {
         this.trackPagePerformance()
       }, 0)
-    })
+    }
+    this.addTrackedListener(window, 'load', loadHandler)
   }
 
   private observePerformanceMetric(entryType: string, callback: (entries: PerformanceEntry[]) => void) {
@@ -152,7 +161,7 @@ class AnalyticsClient {
   }
 
   private setupErrorTracking() {
-    window.addEventListener('error', (event) => {
+    const errorHandler = (event: ErrorEvent) => {
       this.trackEvent('error', 'javascript_error', {
         error_message: event.message,
         filename: event.filename,
@@ -160,14 +169,16 @@ class AnalyticsClient {
         column_number: event.colno,
         stack: event.error?.stack
       })
-    })
+    }
+    this.addTrackedListener(window, 'error', errorHandler as EventListener)
 
-    window.addEventListener('unhandledrejection', (event) => {
+    const rejectionHandler = (event: PromiseRejectionEvent) => {
       this.trackEvent('error', 'unhandled_promise_rejection', {
         error_message: event.reason?.toString() || 'Unknown promise rejection',
         stack: event.reason?.stack
       })
-    })
+    }
+    this.addTrackedListener(window, 'unhandledrejection', rejectionHandler as EventListener)
   }
 
   private setupUnloadTracking() {
@@ -175,13 +186,22 @@ class AnalyticsClient {
       this.trackEvent('session', 'session_ended', {
         session_duration: Date.now() - parseInt(this.sessionId.split('-')[0])
       })
-      
+
       // Send any queued events before page unload
       this.flushEvents()
     }
 
-    window.addEventListener('beforeunload', trackSessionEnd)
-    window.addEventListener('pagehide', trackSessionEnd)
+    this.addTrackedListener(window, 'beforeunload', trackSessionEnd)
+    this.addTrackedListener(window, 'pagehide', trackSessionEnd)
+  }
+
+  // Cleanup method to remove all tracked listeners
+  public destroy() {
+    this.boundListeners.forEach(({ target, event, handler }) => {
+      target.removeEventListener(event, handler)
+    })
+    this.boundListeners = []
+    this.isInitialized = false
   }
 
   public trackEvent(

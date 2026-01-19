@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 
 // ============================================================================
 // TYPES
@@ -399,12 +399,21 @@ export function useForms(options: UseFormsOptions = {}) {
     return { success: true }
   }, [submissions])
 
+  // Ref to track if initial load has been done
+  const isInitialLoadRef = useRef(false)
+
   const refresh = useCallback(async () => {
     setIsLoading(true)
     await fetchForms()
   }, [fetchForms])
 
-  useEffect(() => { refresh() }, [refresh])
+  // Initial load - runs once on mount
+  useEffect(() => {
+    if (!isInitialLoadRef.current) {
+      isInitialLoadRef.current = true
+      refresh()
+    }
+  }, [refresh])
 
   const publishedForms = useMemo(() => forms.filter(f => f.status === 'published'), [forms])
   const draftForms = useMemo(() => forms.filter(f => f.status === 'draft'), [forms])

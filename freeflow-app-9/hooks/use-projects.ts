@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 
 // ============================================================================
 // TYPES
@@ -236,12 +236,21 @@ export function useProjects(options: UseProjectsOptions = {}) {
     fetchProjects({ search: query })
   }, [fetchProjects])
 
+  // Ref to track if initial load has been done
+  const isInitialLoadRef = useRef(false)
+
   const refresh = useCallback(async () => {
     setIsLoading(true)
     await fetchProjects()
   }, [fetchProjects])
 
-  useEffect(() => { refresh() }, [refresh])
+  // Initial load - runs once on mount
+  useEffect(() => {
+    if (!isInitialLoadRef.current) {
+      isInitialLoadRef.current = true
+      refresh()
+    }
+  }, [refresh])
 
   const activeProjects = useMemo(() => projects.filter(p => p.status === 'in_progress'), [projects])
   const completedProjects = useMemo(() => projects.filter(p => p.status === 'completed'), [projects])
