@@ -134,6 +134,8 @@
     "@fal-ai/client": "^1.8.1",
     "@fal-ai/server-proxy": "^1.1.2",
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
+    "@ffmpeg/ffmpeg": "^0.12.15",
+    "@ffmpeg/util": "^0.12.2",
     "@google/generative-ai": "^0.24.1",
     "@headlessui/react": "^2.2.4",
     "@hookform/resolvers": "^5.2.2",
