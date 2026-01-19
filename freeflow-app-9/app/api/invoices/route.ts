@@ -1,54 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { unstable_cache } from 'next/cache'
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@/lib/supabase/server'
 import { createFeatureLogger } from '@/lib/logger'
 
 const logger = createFeatureLogger('API-Invoices')
 
-// Initialize Supabase client with service role for API routes
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-const supabase = createClient(supabaseUrl, supabaseServiceKey)
+// Helper function to get invoice stats
+async function getInvoiceStats(supabase: any) {
+  const { data: allInvoices } = await supabase
+    .from('invoices')
+    .select('status, total_amount')
 
-// Cached function for invoice stats (user-specific, 5 minutes cache)
-const getCachedInvoiceStats = unstable_cache(
-  async () => {
-    const { data: allInvoices } = await supabase
-      .from('invoices')
-      .select('status, total_amount')
-
-    return {
-      totalInvoiced: allInvoices?.reduce((sum, inv) => sum + (inv.total_amount || 0), 0) || 0,
-      totalPaid: allInvoices?.filter(inv => inv.status === 'paid').reduce((sum, inv) => sum + (inv.total_amount || 0), 0) || 0,
-      totalPending: allInvoices?.filter(inv => inv.status === 'pending' || inv.status === 'sent').reduce((sum, inv) => sum + (inv.total_amount || 0), 0) || 0,
-      totalOverdue: allInvoices?.filter(inv => inv.status === 'overdue').reduce((sum, inv) => sum + (inv.total_amount || 0), 0) || 0,
-      totalInvoices: allInvoices?.length || 0
-    }
-  },
-  ['invoice-stats'],
-  { revalidate: 300 } // 5 minutes
-)
-
-// Helper to get user from auth header
-async function getUserFromAuth(request: NextRequest) {
-  const authHeader = request.headers.get('authorization')
-  if (authHeader?.startsWith('Bearer ')) {
-    const token = authHeader.substring(7)
-    const { data: { user } } = await supabase.auth.getUser(token)
-    return user
+  return {
+    totalInvoiced: allInvoices?.reduce((sum: number, inv: any) => sum + (inv.total_amount || 0), 0) || 0,
+    totalPaid: allInvoices?.filter((inv: any) => inv.status === 'paid').reduce((sum: number, inv: any) => sum + (inv.total_amount || 0), 0) || 0,
+    totalPending: allInvoices?.filter((inv: any) => inv.status === 'pending' || inv.status === 'sent').reduce((sum: number, inv: any) => sum + (inv.total_amount || 0), 0) || 0,
+    totalOverdue: allInvoices?.filter((inv: any) => inv.status === 'overdue').reduce((sum: number, inv: any) => sum + (inv.total_amount || 0), 0) || 0,
+    totalInvoices: allInvoices?.length || 0
   }
-  // Try to get from cookie-based session
-  const cookieHeader = request.headers.get('cookie')
-  if (cookieHeader) {
-    // For server-side, we trust the request if it comes from authenticated session
-    return null // Will use RLS policies
-  }
-  return null
 }
 
 // GET: Fetch invoices with optional filters from Supabase
 export async function GET(request: NextRequest) {
   try {
+    const supabase = await createClient()
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status')
     const clientId = searchParams.get('client_id')
@@ -88,8 +62,8 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Calculate stats from cached function for better performance
-    const stats = await getCachedInvoiceStats()
+    // Calculate stats
+    const stats = await getInvoiceStats(supabase)
 
     return NextResponse.json({
       success: true,
@@ -114,10 +88,12 @@ export async function GET(request: NextRequest) {
 // POST: Handle various invoice actions with Supabase
 export async function POST(request: NextRequest) {
   try {
+    const supabase = await createClient()
     const body = await request.json().catch(() => ({}))
     const { action } = body
 
-    const user = await getUserFromAuth(request)
+    // Get authenticated user
+    const { data: { user } } = await supabase.auth.getUser()
 
     switch (action) {
       case 'create': {
@@ -471,6 +447,7 @@ export async function POST(request: NextRequest) {
 // PUT: Update an existing invoice in Supabase
 export async function PUT(request: NextRequest) {
   try {
+    const supabase = await createClient()
     const body = await request.json().catch(() => ({}))
     const { id, ...updateData } = body
 
@@ -554,6 +531,7 @@ export async function PUT(request: NextRequest) {
 // DELETE: Delete an invoice from Supabase
 export async function DELETE(request: NextRequest) {
   try {
+    const supabase = await createClient()
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
 
