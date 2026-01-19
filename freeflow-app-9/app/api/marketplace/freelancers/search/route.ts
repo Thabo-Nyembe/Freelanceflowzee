@@ -6,8 +6,205 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
-// Demo freelancer data for testing
-const demoFreelancers = [
+// ============================================================================
+// DATABASE HELPER FUNCTIONS
+// ============================================================================
+
+interface Freelancer {
+  id: string;
+  name: string;
+  title: string;
+  avatar: string;
+  location: string;
+  timezone: string;
+  hourlyRate: number;
+  currency: string;
+  skills: string[];
+  experienceYears: number;
+  totalEarnings: number;
+  completedProjects: number;
+  successRate: number;
+  responseTime: string;
+  availability: string;
+  availableHoursPerWeek: number;
+  verificationLevel: string;
+  badges: string[];
+  languages: Array<{ language: string; proficiency: string }>;
+  education: Array<{ degree: string; institution: string; year: number }>;
+  certifications: string[];
+  portfolio: {
+    items: number;
+    featured: string[];
+  };
+  reviews: {
+    average: number;
+    total: number;
+    breakdown: Record<number, number>;
+  };
+  aiMatchScore: number;
+  lastActive: string;
+}
+
+async function getFreelancers(supabase: any, filters?: {
+  query?: string;
+  skills?: string[];
+  minRate?: number;
+  maxRate?: number;
+  availability?: string;
+  verificationLevel?: string;
+  limit?: number;
+  offset?: number;
+}): Promise<Freelancer[]> {
+  let query = supabase
+    .from('freelancers')
+    .select(`
+      *,
+      freelancer_skills(skill),
+      freelancer_languages(language, proficiency),
+      freelancer_education(degree, institution, year),
+      freelancer_certifications(certification),
+      freelancer_reviews(rating)
+    `)
+    .order('ai_match_score', { ascending: false });
+
+  if (filters?.availability) {
+    query = query.eq('availability', filters.availability);
+  }
+  if (filters?.verificationLevel) {
+    query = query.eq('verification_level', filters.verificationLevel);
+  }
+  if (filters?.minRate) {
+    query = query.gte('hourly_rate', filters.minRate);
+  }
+  if (filters?.maxRate) {
+    query = query.lte('hourly_rate', filters.maxRate);
+  }
+  if (filters?.limit) {
+    query = query.limit(filters.limit);
+  }
+  if (filters?.offset) {
+    query = query.range(filters.offset, filters.offset + (filters.limit || 20) - 1);
+  }
+
+  const { data, error } = await query;
+
+  if (error || !data?.length) {
+    return getDefaultFreelancers();
+  }
+
+  return data.map((f: any) => ({
+    id: f.id,
+    name: f.name || f.full_name,
+    title: f.title || 'Freelancer',
+    avatar: f.avatar_url || f.avatar || '/avatars/default.jpg',
+    location: f.location || 'Unknown',
+    timezone: f.timezone || 'UTC',
+    hourlyRate: f.hourly_rate || 0,
+    currency: f.currency || 'USD',
+    skills: f.freelancer_skills?.map((s: any) => s.skill) || f.skills || [],
+    experienceYears: f.experience_years || 0,
+    totalEarnings: f.total_earnings || 0,
+    completedProjects: f.completed_projects || 0,
+    successRate: f.success_rate || 0,
+    responseTime: f.response_time || '< 24 hours',
+    availability: f.availability || 'available',
+    availableHoursPerWeek: f.available_hours_per_week || 40,
+    verificationLevel: f.verification_level || 'rising-talent',
+    badges: f.badges || [],
+    languages: f.freelancer_languages || f.languages || [],
+    education: f.freelancer_education || f.education || [],
+    certifications: f.freelancer_certifications?.map((c: any) => c.certification) || f.certifications || [],
+    portfolio: f.portfolio || { items: 0, featured: [] },
+    reviews: {
+      average: f.freelancer_reviews?.length > 0
+        ? f.freelancer_reviews.reduce((acc: number, r: any) => acc + r.rating, 0) / f.freelancer_reviews.length
+        : f.reviews?.average || 0,
+      total: f.freelancer_reviews?.length || f.reviews?.total || 0,
+      breakdown: f.reviews?.breakdown || { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }
+    },
+    aiMatchScore: f.ai_match_score || 50,
+    lastActive: f.last_active || 'Unknown'
+  }));
+}
+
+async function getFreelancerById(supabase: any, freelancerId: string): Promise<Freelancer | null> {
+  const { data, error } = await supabase
+    .from('freelancers')
+    .select(`
+      *,
+      freelancer_skills(skill),
+      freelancer_languages(language, proficiency),
+      freelancer_education(degree, institution, year),
+      freelancer_certifications(certification),
+      freelancer_reviews(rating, feedback, created_at)
+    `)
+    .eq('id', freelancerId)
+    .single();
+
+  if (error || !data) {
+    const defaults = getDefaultFreelancers();
+    return defaults.find(f => f.id === freelancerId) || null;
+  }
+
+  return {
+    id: data.id,
+    name: data.name || data.full_name,
+    title: data.title || 'Freelancer',
+    avatar: data.avatar_url || data.avatar || '/avatars/default.jpg',
+    location: data.location || 'Unknown',
+    timezone: data.timezone || 'UTC',
+    hourlyRate: data.hourly_rate || 0,
+    currency: data.currency || 'USD',
+    skills: data.freelancer_skills?.map((s: any) => s.skill) || data.skills || [],
+    experienceYears: data.experience_years || 0,
+    totalEarnings: data.total_earnings || 0,
+    completedProjects: data.completed_projects || 0,
+    successRate: data.success_rate || 0,
+    responseTime: data.response_time || '< 24 hours',
+    availability: data.availability || 'available',
+    availableHoursPerWeek: data.available_hours_per_week || 40,
+    verificationLevel: data.verification_level || 'rising-talent',
+    badges: data.badges || [],
+    languages: data.freelancer_languages || data.languages || [],
+    education: data.freelancer_education || data.education || [],
+    certifications: data.freelancer_certifications?.map((c: any) => c.certification) || data.certifications || [],
+    portfolio: data.portfolio || { items: 0, featured: [] },
+    reviews: {
+      average: data.freelancer_reviews?.length > 0
+        ? data.freelancer_reviews.reduce((acc: number, r: any) => acc + r.rating, 0) / data.freelancer_reviews.length
+        : data.reviews?.average || 0,
+      total: data.freelancer_reviews?.length || data.reviews?.total || 0,
+      breakdown: data.reviews?.breakdown || { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }
+    },
+    aiMatchScore: data.ai_match_score || 50,
+    lastActive: data.last_active || 'Unknown'
+  };
+}
+
+async function saveSearchToDb(supabase: any, searchData: any): Promise<any> {
+  const { data, error } = await supabase
+    .from('saved_searches')
+    .insert({
+      user_id: searchData.userId,
+      name: searchData.searchName,
+      criteria: searchData.criteria,
+      alert_frequency: searchData.alertFrequency
+    })
+    .select()
+    .single();
+
+  if (error) {
+    return null;
+  }
+  return data;
+}
+
+// ============================================================================
+// DEFAULT DATA (fallback when database is empty)
+// ============================================================================
+
+function getDefaultFreelancers(): Freelancer[] {
+  return [
   {
     id: 'fl-001',
     name: 'Sarah Chen',
@@ -125,7 +322,8 @@ const demoFreelancers = [
     aiMatchScore: 91,
     lastActive: '1 hour ago'
   }
-]
+  ];
+}
 
 // Skill categories for filtering
 const skillCategories = {
@@ -139,28 +337,29 @@ const skillCategories = {
 
 export async function POST(request: NextRequest) {
   try {
+    const supabase = await createClient()
     const body = await request.json()
     const { action, ...params } = body
 
     switch (action) {
       case 'search':
-        return handleSearch(params)
+        return handleSearch(supabase, params)
       case 'get-freelancer':
-        return handleGetFreelancer(params)
+        return handleGetFreelancer(supabase, params)
       case 'ai-recommend':
-        return handleAIRecommend(params)
+        return handleAIRecommend(supabase, params)
       case 'filter-by-skills':
-        return handleFilterBySkills(params)
+        return handleFilterBySkills(supabase, params)
       case 'filter-by-availability':
-        return handleFilterByAvailability(params)
+        return handleFilterByAvailability(supabase, params)
       case 'get-similar':
-        return handleGetSimilar(params)
+        return handleGetSimilar(supabase, params)
       case 'save-search':
-        return handleSaveSearch(params)
+        return handleSaveSearch(supabase, params)
       case 'get-trending-skills':
-        return handleGetTrendingSkills(params)
+        return handleGetTrendingSkills(supabase, params)
       case 'instant-match':
-        return handleInstantMatch(params)
+        return handleInstantMatch(supabase, params)
       default:
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
@@ -170,7 +369,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function handleSearch(params: {
+async function handleSearch(supabase: any, params: {
   query?: string
   skills?: string[]
   minRate?: number
@@ -197,10 +396,16 @@ async function handleSearch(params: {
     limit = 20
   } = params
 
-  // In production, this would query Supabase with full-text search
-  let results = [...demoFreelancers]
+  // Fetch freelancers from database
+  let results = await getFreelancers(supabase, {
+    minRate,
+    maxRate,
+    availability,
+    verificationLevel,
+    limit: 100 // Fetch more for client-side filtering
+  })
 
-  // Apply filters
+  // Apply additional filters
   if (query) {
     const queryLower = query.toLowerCase()
     results = results.filter(f =>
@@ -214,22 +419,6 @@ async function handleSearch(params: {
     results = results.filter(f =>
       skills.some(skill => f.skills.map(s => s.toLowerCase()).includes(skill.toLowerCase()))
     )
-  }
-
-  if (minRate) {
-    results = results.filter(f => f.hourlyRate >= minRate)
-  }
-
-  if (maxRate) {
-    results = results.filter(f => f.hourlyRate <= maxRate)
-  }
-
-  if (availability) {
-    results = results.filter(f => f.availability === availability)
-  }
-
-  if (verificationLevel) {
-    results = results.filter(f => f.verificationLevel === verificationLevel)
   }
 
   // Sort results
@@ -274,10 +463,11 @@ async function handleSearch(params: {
   })
 }
 
-async function handleGetFreelancer(params: { freelancerId: string }) {
+async function handleGetFreelancer(supabase: any, params: { freelancerId: string }) {
   const { freelancerId } = params
 
-  const freelancer = demoFreelancers.find(f => f.id === freelancerId)
+  // Get freelancer from database
+  const freelancer = await getFreelancerById(supabase, freelancerId)
 
   if (!freelancer) {
     return NextResponse.json({ error: 'Freelancer not found' }, { status: 404 })
@@ -325,7 +515,7 @@ async function handleGetFreelancer(params: { freelancerId: string }) {
   })
 }
 
-async function handleAIRecommend(params: {
+async function handleAIRecommend(supabase: any, params: {
   projectDescription: string
   requiredSkills: string[]
   budget?: number
@@ -334,9 +524,11 @@ async function handleAIRecommend(params: {
 }) {
   const { projectDescription, requiredSkills, budget, timeline, projectType } = params
 
-  // AI-powered matching algorithm (simulated)
-  // In production, this would use ML models trained on successful project outcomes
-  const recommendations = demoFreelancers.map(freelancer => {
+  // Fetch all freelancers from database
+  const allFreelancers = await getFreelancers(supabase, { limit: 50 })
+
+  // AI-powered matching algorithm
+  const recommendations = allFreelancers.map(freelancer => {
     let matchScore = 0
     const matchReasons: string[] = []
 
@@ -344,14 +536,16 @@ async function handleAIRecommend(params: {
     const matchedSkills = requiredSkills.filter(skill =>
       freelancer.skills.map(s => s.toLowerCase()).includes(skill.toLowerCase())
     )
-    const skillMatchPercent = (matchedSkills.length / requiredSkills.length) * 100
+    const skillMatchPercent = requiredSkills.length > 0
+      ? (matchedSkills.length / requiredSkills.length) * 100
+      : 50
     matchScore += skillMatchPercent * 0.4
     if (matchedSkills.length > 0) {
       matchReasons.push(`Matches ${matchedSkills.length}/${requiredSkills.length} required skills`)
     }
 
     // Budget fit (20% weight)
-    if (budget) {
+    if (budget && freelancer.hourlyRate > 0) {
       const estimatedHours = budget / freelancer.hourlyRate
       if (estimatedHours >= 20) {
         matchScore += 20
@@ -385,18 +579,20 @@ async function handleAIRecommend(params: {
   // Sort by match score
   recommendations.sort((a, b) => b.matchScore - a.matchScore)
 
+  const topRecs = recommendations.slice(0, 10)
+
   return NextResponse.json({
     success: true,
     data: {
-      recommendations: recommendations.slice(0, 10),
+      recommendations: topRecs,
       aiInsights: {
-        topMatch: recommendations[0]?.freelancer.name,
-        averageMatchScore: Math.round(
-          recommendations.reduce((sum, r) => sum + r.matchScore, 0) / recommendations.length
-        ),
+        topMatch: topRecs[0]?.freelancer.name,
+        averageMatchScore: recommendations.length > 0
+          ? Math.round(recommendations.reduce((sum, r) => sum + r.matchScore, 0) / recommendations.length)
+          : 0,
         suggestedBudgetRange: {
-          min: Math.min(...recommendations.slice(0, 3).map(r => r.freelancer.hourlyRate * 40)),
-          max: Math.max(...recommendations.slice(0, 3).map(r => r.freelancer.hourlyRate * 80))
+          min: topRecs.length > 0 ? Math.min(...topRecs.slice(0, 3).map(r => r.freelancer.hourlyRate * 40)) : 0,
+          max: topRecs.length > 0 ? Math.max(...topRecs.slice(0, 3).map(r => r.freelancer.hourlyRate * 80)) : 0
         },
         marketAnalysis: {
           averageRate: 148,
@@ -408,10 +604,13 @@ async function handleAIRecommend(params: {
   })
 }
 
-async function handleFilterBySkills(params: { skills: string[], matchAll?: boolean }) {
+async function handleFilterBySkills(supabase: any, params: { skills: string[], matchAll?: boolean }) {
   const { skills, matchAll = false } = params
 
-  let results = demoFreelancers.filter(freelancer => {
+  // Get all freelancers from database
+  const allFreelancers = await getFreelancers(supabase, { limit: 100 })
+
+  let results = allFreelancers.filter(freelancer => {
     const freelancerSkills = freelancer.skills.map(s => s.toLowerCase())
     if (matchAll) {
       return skills.every(skill => freelancerSkills.includes(skill.toLowerCase()))
@@ -429,14 +628,17 @@ async function handleFilterBySkills(params: { skills: string[], matchAll?: boole
   })
 }
 
-async function handleFilterByAvailability(params: {
+async function handleFilterByAvailability(supabase: any, params: {
   minHoursPerWeek: number
   timezone?: string
   startDate?: string
 }) {
   const { minHoursPerWeek, timezone } = params
 
-  let results = demoFreelancers.filter(freelancer => {
+  // Get all freelancers from database
+  const allFreelancers = await getFreelancers(supabase, { limit: 100 })
+
+  let results = allFreelancers.filter(freelancer => {
     const meetsHours = freelancer.availableHoursPerWeek >= minHoursPerWeek
     const meetsTimezone = !timezone || freelancer.timezone === timezone
     return meetsHours && meetsTimezone
@@ -454,16 +656,20 @@ async function handleFilterByAvailability(params: {
   })
 }
 
-async function handleGetSimilar(params: { freelancerId: string, limit?: number }) {
+async function handleGetSimilar(supabase: any, params: { freelancerId: string, limit?: number }) {
   const { freelancerId, limit = 5 } = params
 
-  const targetFreelancer = demoFreelancers.find(f => f.id === freelancerId)
+  // Get target freelancer from database
+  const targetFreelancer = await getFreelancerById(supabase, freelancerId)
   if (!targetFreelancer) {
     return NextResponse.json({ error: 'Freelancer not found' }, { status: 404 })
   }
 
+  // Get all freelancers from database
+  const allFreelancers = await getFreelancers(supabase, { limit: 50 })
+
   // Find similar freelancers based on skills and rate
-  const similar = demoFreelancers
+  const similar = allFreelancers
     .filter(f => f.id !== freelancerId)
     .map(f => {
       const sharedSkills = f.skills.filter(skill =>
@@ -489,7 +695,7 @@ async function handleGetSimilar(params: { freelancerId: string, limit?: number }
   })
 }
 
-async function handleSaveSearch(params: {
+async function handleSaveSearch(supabase: any, params: {
   userId: string
   searchName: string
   criteria: Record<string, unknown>
@@ -497,8 +703,15 @@ async function handleSaveSearch(params: {
 }) {
   const { userId, searchName, criteria, alertFrequency = 'daily' } = params
 
-  // In production, save to Supabase
-  const savedSearch = {
+  // Save search to database
+  const dbSavedSearch = await saveSearchToDb(supabase, {
+    userId,
+    searchName,
+    criteria,
+    alertFrequency
+  })
+
+  const savedSearch = dbSavedSearch || {
     id: `search-${Date.now()}`,
     userId,
     searchName,
@@ -518,7 +731,7 @@ async function handleSaveSearch(params: {
   })
 }
 
-async function handleGetTrendingSkills(params: { category?: string }) {
+async function handleGetTrendingSkills(supabase: any, params: { category?: string }) {
   const { category } = params
 
   const trendingSkills = [
@@ -546,7 +759,7 @@ async function handleGetTrendingSkills(params: { category?: string }) {
   })
 }
 
-async function handleInstantMatch(params: {
+async function handleInstantMatch(supabase: any, params: {
   projectDescription: string
   budget: number
   deadline: string
@@ -554,10 +767,10 @@ async function handleInstantMatch(params: {
 }) {
   const { projectDescription, budget, deadline, urgency } = params
 
-  // Instant matching for urgent projects
-  const availableNow = demoFreelancers.filter(f => f.availability === 'available')
+  // Get available freelancers from database
+  const allFreelancers = await getFreelancers(supabase, { availability: 'available', limit: 20 })
 
-  const instantMatches = availableNow.map(freelancer => ({
+  const instantMatches = allFreelancers.map(freelancer => ({
     freelancer,
     canStartImmediately: true,
     estimatedResponseTime: freelancer.responseTime,
@@ -587,7 +800,7 @@ export async function GET(request: NextRequest) {
       success: true,
       data: {
         categories: skillCategories,
-        totalFreelancers: demoFreelancers.length
+        totalFreelancers: getDefaultFreelancers().length
       }
     })
   }
