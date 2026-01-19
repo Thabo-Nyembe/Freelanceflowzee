@@ -14,7 +14,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@/lib/supabase/server'
 import { getServerSession } from '@/lib/auth'
 import { checkPermission } from '@/lib/rbac/rbac-service'
 
@@ -77,15 +77,8 @@ interface CriticalPath {
 }
 
 // ============================================================================
-// DATABASE CLIENT
+// DATABASE CLIENT - Using server-side Supabase client
 // ============================================================================
-
-function getSupabase() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
-}
 
 // ============================================================================
 // GET - Get Timeline Data
@@ -111,7 +104,7 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const supabase = getSupabase()
+    const supabase = await createClient()
 
     // Demo mode for unauthenticated users
     if (!session?.user) {
@@ -268,7 +261,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const supabase = getSupabase()
+    const supabase = await createClient()
 
     // Check permission
     const canUpdate = await checkPermission(userId, 'projects', 'update', project_id)
@@ -324,7 +317,7 @@ export async function POST(request: NextRequest) {
 // ============================================================================
 
 async function handleUpdateTaskDates(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   body: Record<string, unknown>
 ) {
@@ -398,7 +391,7 @@ async function handleUpdateTaskDates(
 }
 
 async function handleUpdateDependencies(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   body: Record<string, unknown>
 ) {
@@ -441,7 +434,7 @@ async function handleUpdateDependencies(
 }
 
 async function handleAutoSchedule(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   body: Record<string, unknown>
 ) {
@@ -501,7 +494,7 @@ async function handleAutoSchedule(
 }
 
 async function handleShiftTimeline(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   body: Record<string, unknown>
 ) {
@@ -590,7 +583,7 @@ async function handleShiftTimeline(
 }
 
 async function handleCreatePhase(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   body: Record<string, unknown>
 ) {
@@ -648,7 +641,7 @@ async function handleCreatePhase(
 }
 
 async function handleExportTimeline(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   body: Record<string, unknown>
 ) {
@@ -704,7 +697,7 @@ async function handleExportTimeline(
 }
 
 async function handleCreateBaseline(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   body: Record<string, unknown>
 ) {
@@ -767,7 +760,7 @@ async function handleCreateBaseline(
 }
 
 async function handleCompareBaseline(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   body: Record<string, unknown>
 ) {
@@ -984,7 +977,7 @@ function calculateCriticalPath(tasks: Record<string, unknown>[], project: Record
 }
 
 async function getResourceAllocations(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   projectId: string,
   tasks: Record<string, unknown>[]
 ): Promise<ResourceAllocation[]> {

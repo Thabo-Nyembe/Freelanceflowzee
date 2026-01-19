@@ -13,7 +13,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@/lib/supabase/server'
 import { getServerSession } from '@/lib/auth'
 import { checkPermission } from '@/lib/rbac/rbac-service'
 
@@ -64,15 +64,8 @@ interface Deliverable {
 }
 
 // ============================================================================
-// DATABASE CLIENT
+// DATABASE CLIENT - Using server-side Supabase client
 // ============================================================================
-
-function getSupabase() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
-}
 
 // ============================================================================
 // GET - List Milestones / Get Single Milestone
@@ -91,7 +84,7 @@ export async function GET(request: NextRequest) {
     const includeDeliverables = searchParams.get('include_deliverables') !== 'false'
     const includePaymentInfo = searchParams.get('include_payment') === 'true'
 
-    const supabase = getSupabase()
+    const supabase = await createClient()
 
     // Demo mode for unauthenticated users
     if (!session?.user) {
@@ -252,7 +245,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const supabase = getSupabase()
+    const supabase = await createClient()
 
     // Check permission
     if (project_id) {
@@ -334,7 +327,7 @@ export async function PUT(request: NextRequest) {
       )
     }
 
-    const supabase = getSupabase()
+    const supabase = await createClient()
 
     // Get milestone and check permission
     const { data: milestone } = await supabase
@@ -436,7 +429,7 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    const supabase = getSupabase()
+    const supabase = await createClient()
 
     // Get milestone and check permission
     const { data: milestone } = await supabase
@@ -514,7 +507,7 @@ export async function DELETE(request: NextRequest) {
 // ============================================================================
 
 async function handleCreateMilestone(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   body: Record<string, unknown>
 ) {
@@ -612,7 +605,7 @@ async function handleCreateMilestone(
 }
 
 async function handleCompleteMilestone(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   body: Record<string, unknown>
 ) {
@@ -694,7 +687,7 @@ async function handleCompleteMilestone(
 }
 
 async function handleApproveMilestone(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   body: Record<string, unknown>
 ) {
@@ -741,7 +734,7 @@ async function handleApproveMilestone(
 }
 
 async function handleRejectMilestone(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   body: Record<string, unknown>
 ) {
@@ -792,7 +785,7 @@ async function handleRejectMilestone(
 }
 
 async function handleSubmitDeliverable(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   body: Record<string, unknown>
 ) {
@@ -854,7 +847,7 @@ async function handleSubmitDeliverable(
 }
 
 async function handleReviewDeliverable(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   body: Record<string, unknown>
 ) {
@@ -917,7 +910,7 @@ async function handleReviewDeliverable(
 }
 
 async function handleLinkTasks(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   body: Record<string, unknown>
 ) {
@@ -950,7 +943,7 @@ async function handleLinkTasks(
 }
 
 async function handleGenerateInvoice(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   body: Record<string, unknown>
 ) {
@@ -1054,7 +1047,7 @@ async function handleGenerateInvoice(
 }
 
 async function handleReorderMilestones(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   body: Record<string, unknown>
 ) {
@@ -1084,7 +1077,7 @@ async function handleReorderMilestones(
 }
 
 async function handleDuplicateMilestone(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   body: Record<string, unknown>
 ) {
@@ -1190,7 +1183,7 @@ function calculateMilestoneStats(milestones: Record<string, unknown>[]) {
 }
 
 async function updateProjectProgress(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   projectId: string
 ) {
   const { data: milestones } = await supabase
@@ -1216,7 +1209,7 @@ async function updateProjectProgress(
 }
 
 async function notifyForApproval(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   milestone: Record<string, unknown>
 ) {
   // Get project with client
@@ -1259,7 +1252,7 @@ async function notifyForApproval(
 }
 
 async function logMilestoneActivity(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   milestoneId: string,
   userId: string,
   action: string,
