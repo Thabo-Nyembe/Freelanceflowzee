@@ -1,5 +1,8 @@
 "use client"
 
+import jsPDF from 'jspdf'
+import autoTable from 'jspdf-autotable'
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -46,6 +49,52 @@ export function InvoiceCreator() {
   const subtotal = lineItems.reduce((sum, item) => sum + item.amount, 0)
   const tax = subtotal * 0.1
   const total = subtotal + tax
+
+  const handleDownloadPDF = () => {
+    const doc = new jsPDF()
+
+    // Add branding/header
+    doc.setFontSize(20)
+    doc.text("INVOICE", 14, 22)
+
+    doc.setFontSize(10)
+    doc.text(`Invoice #: INV-005`, 14, 30)
+    doc.text(`Date: ${new Date().toLocaleDateString()}`, 14, 35)
+    doc.text(`Due Date: 2024-02-08`, 14, 40)
+
+    // Add From/To
+    doc.text("From:", 14, 55)
+    doc.text("Creative Design Studio", 14, 60)
+    doc.text("123 Design Avenue, San Francisco, CA", 14, 65)
+
+    doc.text("Bill To:", 100, 55)
+    doc.text("Acme Corporation", 100, 60)
+    doc.text("456 Corporate Plaza, New York, NY", 100, 65)
+
+    // Add Line Items Table
+    const tableData = lineItems.map(item => [
+      item.description,
+      item.quantity.toString(),
+      `$${item.rate}`,
+      `$${item.amount}`
+    ])
+
+    autoTable(doc, {
+      head: [['Description', 'Qty', 'Rate', 'Amount']],
+      body: tableData,
+      startY: 80,
+    })
+
+    // Add Totals
+    const finalY = (doc as any).lastAutoTable.finalY + 10
+    doc.text(`Subtotal: $${subtotal.toFixed(2)}`, 140, finalY)
+    doc.text(`Tax (10%): $${tax.toFixed(2)}`, 140, finalY + 5)
+    doc.setFontSize(12)
+    doc.text(`Total: $${total.toFixed(2)}`, 140, finalY + 12)
+
+    // Save
+    doc.save("invoice.pdf")
+  }
 
   const recentInvoices = [
     {
@@ -129,11 +178,10 @@ export function InvoiceCreator() {
               {templates.map((template) => (
                 <div
                   key={template.id}
-                  className={`p-4 rounded-xl ${template.preview} border cursor-pointer transition-all duration-200 ${
-                    selectedTemplate === template.id
+                  className={`p-4 rounded-xl ${template.preview} border cursor-pointer transition-all duration-200 ${selectedTemplate === template.id
                       ? "ring-2 ring-purple-500 border-purple-200"
                       : "border-slate-200/50 hover:border-purple-200/50"
-                  }`}
+                    }`}
                   onClick={() => {
                     setSelectedTemplate(template.id)
                     setShowTemplateSelector(false)
@@ -156,12 +204,11 @@ export function InvoiceCreator() {
       {/* Invoice Editor */}
       <div className="grid grid-cols-3 gap-8">
         <div className="col-span-2">
-          <Card className={`border-slate-200/50 ${
-            selectedTemplate === "modern" ? "bg-gradient-to-br from-purple-50/30 to-pink-50/30" :
-            selectedTemplate === "classic" ? "bg-gradient-to-br from-blue-50/30 to-indigo-50/30" :
-            selectedTemplate === "creative" ? "bg-gradient-to-br from-emerald-50/30 to-teal-50/30" :
-            "bg-gradient-to-br from-amber-50/30 to-orange-50/30"
-          }`}>
+          <Card className={`border-slate-200/50 ${selectedTemplate === "modern" ? "bg-gradient-to-br from-purple-50/30 to-pink-50/30" :
+              selectedTemplate === "classic" ? "bg-gradient-to-br from-blue-50/30 to-indigo-50/30" :
+                selectedTemplate === "creative" ? "bg-gradient-to-br from-emerald-50/30 to-teal-50/30" :
+                  "bg-gradient-to-br from-amber-50/30 to-orange-50/30"
+            }`}>
             <CardHeader className="pb-3 border-b border-slate-200/50">
               <div className="flex justify-between items-center">
                 <div className="space-y-1">
@@ -173,7 +220,7 @@ export function InvoiceCreator() {
                     <Eye className="h-4 w-4 mr-1" />
                     Preview
                   </Button>
-                  <Button variant="outline" size="sm" className="text-slate-600">
+                  <Button variant="outline" size="sm" className="text-slate-600" onClick={handleDownloadPDF}>
                     <Download className="h-4 w-4 mr-1" />
                     Download
                   </Button>
@@ -248,19 +295,19 @@ billing@acme.com"
                     <div key={item.id} className="grid grid-cols-12 gap-2 items-center">
                       <div className="col-span-6">
                         <Input value={item.description} onChange={(e) => {
-                          const newItems = lineItems.map(i => 
+                          const newItems = lineItems.map(i =>
                             i.id === item.id ? { ...i, description: e.target.value } : i
                           )
                           setLineItems(newItems)
                         }} />
                       </div>
                       <div className="col-span-2">
-                        <Input 
-                          type="number" 
+                        <Input
+                          type="number"
                           value={item.quantity}
                           onChange={(e) => {
                             const qty = parseInt(e.target.value) || 0
-                            const newItems = lineItems.map(i => 
+                            const newItems = lineItems.map(i =>
                               i.id === item.id ? { ...i, quantity: qty, amount: qty * i.rate } : i
                             )
                             setLineItems(newItems)
@@ -268,12 +315,12 @@ billing@acme.com"
                         />
                       </div>
                       <div className="col-span-2">
-                        <Input 
+                        <Input
                           type="number"
                           value={item.rate}
                           onChange={(e) => {
                             const rate = parseInt(e.target.value) || 0
-                            const newItems = lineItems.map(i => 
+                            const newItems = lineItems.map(i =>
                               i.id === item.id ? { ...i, rate, amount: i.quantity * rate } : i
                             )
                             setLineItems(newItems)
@@ -284,8 +331,8 @@ billing@acme.com"
                         <div className="bg-slate-100 p-2 rounded text-right">${item.amount}</div>
                       </div>
                       <div className="col-span-1">
-                        <Button 
-                          variant="ghost" 
+                        <Button
+                          variant="ghost"
                           size="icon"
                           onClick={() => {
                             setLineItems(lineItems.filter(i => i.id !== item.id))
@@ -297,8 +344,8 @@ billing@acme.com"
                     </div>
                   ))}
 
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     className="text-slate-600"
                     onClick={() => {
                       const newId = Math.max(...lineItems.map(i => i.id)) + 1
@@ -350,12 +397,11 @@ billing@acme.com"
               {recentInvoices.map((invoice) => (
                 <div
                   key={invoice.id}
-                  className={`p-3 rounded-lg border ${
-                    invoice.template === "modern" ? "bg-purple-50/50 border-purple-200/50" :
-                    invoice.template === "classic" ? "bg-blue-50/50 border-blue-200/50" :
-                    invoice.template === "creative" ? "bg-emerald-50/50 border-emerald-200/50" :
-                    "bg-amber-50/50 border-amber-200/50"
-                  }`}
+                  className={`p-3 rounded-lg border ${invoice.template === "modern" ? "bg-purple-50/50 border-purple-200/50" :
+                      invoice.template === "classic" ? "bg-blue-50/50 border-blue-200/50" :
+                        invoice.template === "creative" ? "bg-emerald-50/50 border-emerald-200/50" :
+                          "bg-amber-50/50 border-amber-200/50"
+                    }`}
                 >
                   <div className="flex justify-between items-start mb-2">
                     <div>
@@ -364,9 +410,9 @@ billing@acme.com"
                     </div>
                     <Badge className={
                       invoice.status === "Paid" ? "bg-emerald-100 text-emerald-800" :
-                      invoice.status === "Pending" ? "bg-amber-100 text-amber-800" :
-                      invoice.status === "Overdue" ? "bg-red-100 text-red-800" :
-                      "bg-slate-100 text-slate-800"
+                        invoice.status === "Pending" ? "bg-amber-100 text-amber-800" :
+                          invoice.status === "Overdue" ? "bg-red-100 text-red-800" :
+                            "bg-slate-100 text-slate-800"
                     }>
                       {invoice.status}
                     </Badge>

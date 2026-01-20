@@ -19,6 +19,7 @@ import {
   type ClientFilters
 } from '@/lib/api-clients'
 import { useDeals } from '@/lib/hooks/use-deals'
+import { useRevenueIntelligence } from '@/lib/hooks/use-revenue-intelligence'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -297,28 +298,7 @@ interface ClientsClientProps {
 }
 
 // Enhanced Competitive Upgrade Mock Data
-const mockClientsAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Client Retention', description: '96% client retention rate this quarter. Up 4% from last quarter.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Retention' },
-  { id: '2', type: 'info' as const, title: 'Revenue Opportunity', description: '12 clients ready for upsell based on usage patterns.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Revenue' },
-  { id: '3', type: 'warning' as const, title: 'At-Risk Client', description: 'Acme Corp showing decreased engagement. Schedule check-in.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Risk' },
-]
-
-const mockClientsCollaborators = [
-  { id: '1', name: 'Account Manager', avatar: '/avatars/am.jpg', status: 'online' as const, role: 'Manager' },
-  { id: '2', name: 'Success Lead', avatar: '/avatars/cs.jpg', status: 'online' as const, role: 'Lead' },
-  { id: '3', name: 'Support Rep', avatar: '/avatars/support.jpg', status: 'away' as const, role: 'Support' },
-]
-
-const mockClientsPredictions = [
-  { id: '1', title: 'Q1 Revenue', prediction: '$2.4M projected from client base', confidence: 88, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'New Clients', prediction: '8 new enterprise clients expected', confidence: 72, trend: 'up' as const, impact: 'medium' as const },
-]
-
-const mockClientsActivities = [
-  { id: '1', user: 'Sarah Chen', action: 'Closed deal with', target: 'TechCorp ($50K)', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Mike Johnson', action: 'Scheduled call with', target: 'Innovate Inc', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'Lisa Park', action: 'Updated status for', target: 'GlobalTech', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
-]
+// Mock data removed - using real API hooks
 
 export default function ClientsClient({ initialClients, initialStats }: ClientsClientProps) {
   const [activeTab, setActiveTab] = useState('clients')
@@ -440,6 +420,9 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
   const deleteClientMutation = useDeleteClient()
   const recordContactMutation = useRecordContact()
   const updateFinancialsMutation = useUpdateClientFinancials()
+
+  // AI & Intelligence
+  const { report: revenueReport } = useRevenueIntelligence()
 
   // Extract clients array from paginated response
   const dbClients = useMemo(() => {
@@ -804,8 +787,8 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
       source: 'Direct',
       deals: [],
       tier: (c.total_revenue || 0) >= 100000 ? 'platinum' as const :
-            (c.total_revenue || 0) >= 50000 ? 'gold' as const :
-            (c.total_revenue || 0) >= 10000 ? 'silver' as const : 'bronze' as const,
+        (c.total_revenue || 0) >= 50000 ? 'gold' as const :
+          (c.total_revenue || 0) >= 10000 ? 'silver' as const : 'bronze' as const,
       isFromDatabase: true
     }))
 
@@ -865,8 +848,8 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
         name: d.title,
         value: d.value || 0,
         stage: d.stage === 'lead' ? 'qualification' as DealStage :
-               d.stage === 'qualified' ? 'discovery' as DealStage :
-               (d.stage as DealStage) || 'qualification' as DealStage,
+          d.stage === 'qualified' ? 'discovery' as DealStage :
+            (d.stage as DealStage) || 'qualification' as DealStage,
         probability: d.probability || 0,
         expectedClose: d.expected_close_date || '',
         createdAt: d.created_at,
@@ -1412,7 +1395,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                   company: client.company,
                   name: client.primaryContact.name,
                   email: client.primaryContact.email,
-                  phone: client.primaryContact.phone,
+                  phone: client.primaryContact.phone || '',
                   industry: client.industry,
                   status: client.status,
                   revenue: client.revenue,
@@ -1602,12 +1585,11 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                         const client = filteredClients.find(c => c.id === activity.clientId)
                         return (
                           <div key={activity.id} className="flex items-start gap-4 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                              activity.type === 'call' ? 'bg-green-100 text-green-600' :
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${activity.type === 'call' ? 'bg-green-100 text-green-600' :
                               activity.type === 'email' ? 'bg-blue-100 text-blue-600' :
-                              activity.type === 'meeting' ? 'bg-purple-100 text-purple-600' :
-                              'bg-gray-100 text-gray-600'
-                            }`}>
+                                activity.type === 'meeting' ? 'bg-purple-100 text-purple-600' :
+                                  'bg-gray-100 text-gray-600'
+                              }`}>
                               {activity.type === 'call' && <PhoneCall className="w-5 h-5" />}
                               {activity.type === 'email' && <Mail className="w-5 h-5" />}
                               {activity.type === 'meeting' && <Video className="w-5 h-5" />}
@@ -1674,11 +1656,10 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                     <Card key={task.id} className={`bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm ${isOverdue ? 'border-l-4 border-l-red-500' : ''}`}>
                       <CardContent className="p-4">
                         <div className="flex items-start gap-3">
-                          <div className={`w-5 h-5 rounded border-2 flex items-center justify-center cursor-pointer ${
-                            task.priority === 'urgent' ? 'border-red-500' :
+                          <div className={`w-5 h-5 rounded border-2 flex items-center justify-center cursor-pointer ${task.priority === 'urgent' ? 'border-red-500' :
                             task.priority === 'high' ? 'border-orange-500' :
-                            'border-gray-300'
-                          }`}>
+                              'border-gray-300'
+                            }`}>
                             {task.completed && <CheckCircle2 className="w-4 h-4 text-green-600" />}
                           </div>
                           <div className="flex-1">
@@ -1705,10 +1686,10 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                             <AvatarFallback className="text-xs">{task.assignee.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                           </Avatar>
                         </div>
-                    </CardContent>
-                  </Card>
-                )
-              })}
+                      </CardContent>
+                    </Card>
+                  )
+                })}
               </div>
             )}
           </TabsContent>
@@ -1806,11 +1787,10 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                   <button
                     key={item.id}
                     onClick={() => setSettingsTab(item.id)}
-                    className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-left transition-colors ${
-                      settingsTab === item.id
-                        ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300'
-                        : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400'
-                    }`}
+                    className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-left transition-colors ${settingsTab === item.id
+                      ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300'
+                      : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400'
+                      }`}
                   >
                     <item.icon className="w-4 h-4" />
                     {item.label}
@@ -2506,7 +2486,26 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockClientsAIInsights}
+              insights={revenueReport ? [
+                ...(revenueReport.revenueLeaks || []).map((leak: any, i: number) => ({
+                  id: `leak-${i}`,
+                  type: 'warning' as const,
+                  title: 'Revenue Leak Detected',
+                  description: leak.description,
+                  priority: (leak.severity === 'critical' || leak.severity === 'high') ? 'high' as const : 'medium' as const,
+                  timestamp: new Date().toISOString(),
+                  category: 'Revenue Leak'
+                })),
+                ...(revenueReport.upsellOpportunities || []).map((opp: any, i: number) => ({
+                  id: `opp-${i}`,
+                  type: 'success' as const,
+                  title: 'Upsell Opportunity',
+                  description: `${opp.clientName}: ${opp.reasoning}`,
+                  priority: 'medium' as const,
+                  timestamp: new Date().toISOString(),
+                  category: 'Upsell'
+                }))
+              ] : []}
               title="Client Intelligence"
               onInsightAction={(insight) => {
                 // Handle insight actions based on type
@@ -2522,11 +2521,20 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockClientsCollaborators}
+              collaborators={[]} // TODO: Wire to real collaborators if available
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockClientsPredictions}
+              predictions={revenueReport?.summary ? [
+                {
+                  id: '1',
+                  title: 'Revenue Forecast',
+                  prediction: `Projected MRR: $${revenueReport.summary.projectedMRR.toLocaleString()}`,
+                  confidence: 85,
+                  trend: 'up',
+                  impact: 'high'
+                }
+              ] : []}
               title="Client Forecasts"
             />
           </div>
@@ -2534,12 +2542,12 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockClientsActivities}
+            activities={[]} // TODO: Wire to real activities
             title="Client Activity"
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockClientsQuickActions}
+            actions={[]} // TODO: Wire actions
             variant="grid"
           />
         </div>
@@ -3744,8 +3752,8 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                       <div className="flex items-center gap-3">
                         <Badge className={
                           log.type === 'create' ? 'bg-green-100 text-green-700' :
-                          log.type === 'update' ? 'bg-blue-100 text-blue-700' :
-                          'bg-red-100 text-red-700'
+                            log.type === 'update' ? 'bg-blue-100 text-blue-700' :
+                              'bg-red-100 text-red-700'
                         }>
                           {log.action}
                         </Badge>
@@ -4196,12 +4204,11 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                           .filter(a => !selectedClientForAction || a.clientId === selectedClientForAction.id)
                           .map(activity => (
                             <div key={activity.id} className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                                activity.type === 'call' ? 'bg-green-100 text-green-600' :
+                              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${activity.type === 'call' ? 'bg-green-100 text-green-600' :
                                 activity.type === 'email' ? 'bg-blue-100 text-blue-600' :
-                                activity.type === 'meeting' ? 'bg-purple-100 text-purple-600' :
-                                'bg-gray-100 text-gray-600'
-                              }`}>
+                                  activity.type === 'meeting' ? 'bg-purple-100 text-purple-600' :
+                                    'bg-gray-100 text-gray-600'
+                                }`}>
                                 {activity.type === 'call' && <PhoneCall className="w-4 h-4" />}
                                 {activity.type === 'email' && <Mail className="w-4 h-4" />}
                                 {activity.type === 'meeting' && <Video className="w-4 h-4" />}
@@ -4245,8 +4252,8 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                           </div>
                         </div>
                       )) || (
-                        <p className="text-center text-gray-500 py-8">No deals found for this client</p>
-                      )}
+                          <p className="text-center text-gray-500 py-8">No deals found for this client</p>
+                        )}
                     </div>
                   </ScrollArea>
                 </TabsContent>

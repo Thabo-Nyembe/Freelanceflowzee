@@ -85,19 +85,9 @@ export function useFinancial(options: UseFinancialOptions = {}) {
 
   const { data, loading, error, refetch } = useSupabaseQuery<FinancialRecord>(queryOptions)
 
-  const { mutate: create } = useSupabaseMutation<FinancialRecord>({
+  const { create, update, remove, loading: mutating } = useSupabaseMutation({
     table: 'financial',
-    operation: 'insert'
-  })
-
-  const { mutate: update } = useSupabaseMutation<FinancialRecord>({
-    table: 'financial',
-    operation: 'update'
-  })
-
-  const { mutate: remove } = useSupabaseMutation<FinancialRecord>({
-    table: 'financial',
-    operation: 'delete'
+    onSuccess: refetch
   })
 
   return {

@@ -599,7 +599,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
         contactName: dbClient.name || '',
         email: dbClient.email || '',
         phone: dbClient.phone || '',
-        status: dbClient.status || 'active'
+        status: dbClient.status === 'lead' || dbClient.status === 'prospect' || dbClient.status === 'churned' || dbClient.status === 'inactive' ? dbClient.status as any : 'active'
       })
     } else {
       // Mock client format
@@ -679,16 +679,16 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
         isPrimary: true
       },
       revenue: c.total_revenue || 0,
-      lifetime_value: c.total_revenue || 0,
-      projects: c.total_projects || 0,
-      health_score: c.rating ? c.rating * 20 : 50,
-      nps: c.rating,
+      lifetime_value: c.lifetime_value || 0,
+      projects: c.projects_count || 0,
+      health_score: c.health_score || 50,
+      nps: c.satisfaction_score || 0,
       createdAt: c.created_at,
-      lastActivity: c.last_contact_at || c.updated_at,
+      lastActivity: c.last_activity_at || c.updated_at,
       tags: c.tags || [],
       address: {
         city: c.city || '',
-        state: '',
+        state: c.state || '',
         country: c.country || ''
       },
       owner: 'You',
@@ -696,13 +696,13 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
       source: 'Direct',
       deals: [],
       tier: (c.total_revenue || 0) >= 100000 ? 'platinum' as const :
-            (c.total_revenue || 0) >= 50000 ? 'gold' as const :
-            (c.total_revenue || 0) >= 10000 ? 'silver' as const : 'bronze' as const,
+        (c.total_revenue || 0) >= 50000 ? 'gold' as const :
+          (c.total_revenue || 0) >= 10000 ? 'silver' as const : 'bronze' as const,
       isFromDatabase: true
     }))
 
-    // Combine database and mock clients, database clients first
-    let result = [...dbClientsTransformed, ...mockClients]
+    // Use only database clients. Mock data removed for production.
+    let result = [...dbClientsTransformed]
 
     if (searchQuery) {
       const query = searchQuery.toLowerCase()
@@ -736,7 +736,8 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
       avgHealthScore: customers.length > 0 ? customers.reduce((sum, c) => sum + (c.health_score || 0), 0) / customers.length : 0,
       pipelineValue: openDealsList.reduce((sum, d) => sum + ((d.value || 0) * (d.probability || 0) / 100), 0),
       openDeals: openDealsList.length,
-      pendingTasks: mockTasks.filter(t => !t.completed).length
+      // Use only real deals from clients that have them
+      pendingTasks: 0 // TODO: Wire up real tasks
     }
   }, [filteredClients])
 
@@ -752,7 +753,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
   // Use filteredClients (combined db + mock) for deals aggregation
   const allDeals = useMemo(() =>
     filteredClients.flatMap(c => (c.deals || []).map(d => ({ ...d, clientName: c.name, clientId: c.id })))
-  , [filteredClients])
+    , [filteredClients])
 
   // Handlers
   const handleExportClients = () => {
@@ -1290,12 +1291,11 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                       const client = filteredClients.find(c => c.id === activity.clientId)
                       return (
                         <div key={activity.id} className="flex items-start gap-4 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                            activity.type === 'call' ? 'bg-green-100 text-green-600' :
-                            activity.type === 'email' ? 'bg-blue-100 text-blue-600' :
-                            activity.type === 'meeting' ? 'bg-purple-100 text-purple-600' :
-                            'bg-gray-100 text-gray-600'
-                          }`}>
+                          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${activity.type === 'call' ? 'bg-green-100 text-green-600' :
+                              activity.type === 'email' ? 'bg-blue-100 text-blue-600' :
+                                activity.type === 'meeting' ? 'bg-purple-100 text-purple-600' :
+                                  'bg-gray-100 text-gray-600'
+                            }`}>
                             {activity.type === 'call' && <PhoneCall className="w-5 h-5" />}
                             {activity.type === 'email' && <Mail className="w-5 h-5" />}
                             {activity.type === 'meeting' && <Video className="w-5 h-5" />}
@@ -1350,11 +1350,10 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                   <Card key={task.id} className={`bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm ${isOverdue ? 'border-l-4 border-l-red-500' : ''}`}>
                     <CardContent className="p-4">
                       <div className="flex items-start gap-3">
-                        <div className={`w-5 h-5 rounded border-2 flex items-center justify-center cursor-pointer ${
-                          task.priority === 'urgent' ? 'border-red-500' :
-                          task.priority === 'high' ? 'border-orange-500' :
-                          'border-gray-300'
-                        }`}>
+                        <div className={`w-5 h-5 rounded border-2 flex items-center justify-center cursor-pointer ${task.priority === 'urgent' ? 'border-red-500' :
+                            task.priority === 'high' ? 'border-orange-500' :
+                              'border-gray-300'
+                          }`}>
                           {task.completed && <CheckCircle2 className="w-4 h-4 text-green-600" />}
                         </div>
                         <div className="flex-1">
@@ -1477,11 +1476,10 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                   <button
                     key={item.id}
                     onClick={() => setSettingsTab(item.id)}
-                    className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-left transition-colors ${
-                      settingsTab === item.id
+                    className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-left transition-colors ${settingsTab === item.id
                         ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300'
                         : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400'
-                    }`}
+                      }`}
                   >
                     <item.icon className="w-4 h-4" />
                     {item.label}
@@ -3439,8 +3437,8 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                     <div className="flex items-center gap-3">
                       <Badge className={
                         log.action === 'Created' ? 'bg-green-100 text-green-700' :
-                        log.action === 'Updated' ? 'bg-blue-100 text-blue-700' :
-                        'bg-red-100 text-red-700'
+                          log.action === 'Updated' ? 'bg-blue-100 text-blue-700' :
+                            'bg-red-100 text-red-700'
                       }>
                         {log.action}
                       </Badge>

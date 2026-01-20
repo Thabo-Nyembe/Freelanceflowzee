@@ -8,28 +8,47 @@ import { toast } from 'sonner'
 export interface Client {
   id: string
   user_id: string
-  client_code: string
   name: string
-  email: string | null
+  email: string
   phone: string | null
   company: string | null
-  website: string | null
+  position: string | null
+  avatar: string | null
+  status: 'active' | 'inactive' | 'prospect' | 'lead' | 'churned' | 'vip'
+  type: 'individual' | 'business' | 'enterprise' | 'agency' | 'nonprofit'
+  priority: 'low' | 'medium' | 'high' | 'urgent'
   address: string | null
   city: string | null
+  state: string | null
   country: string | null
-  status: 'active' | 'inactive' | 'prospect' | 'lead' | 'churned'
-  type: 'individual' | 'business' | 'enterprise'
+  postal_code: string | null
+  timezone: string | null
+  website: string | null
   industry: string | null
-  notes: string | null
-  avatar_url: string | null
-  tags: string[]
+  company_size: string | null
   total_revenue: number
-  total_projects: number
-  rating: number | null
-  metadata: Record<string, any>
-  last_contact_at: string | null
+  lifetime_value: number
+  average_project_value: number
+  currency: string
+  projects_count: number
+  completed_projects: number
+  active_projects: number
+  health_score: number
+  lead_score: number
+  satisfaction_score: number
+  last_contact: string | null
+  next_follow_up: string | null
+  communication_frequency: number
+  tags: string[]
+  categories: string[]
+  linkedin_url: string | null
+  twitter_url: string | null
+  facebook_url: string | null
+  notes: string | null
+  internal_notes: string | null
   created_at: string
   updated_at: string
+  last_activity_at: string | null
 }
 
 export function useClients(initialClients: Client[] = []) {
@@ -51,7 +70,7 @@ export function useClients(initialClients: Client[] = []) {
       if (error) throw error
       setClients(data || [])
     } catch (err: unknown) {
-      setError(err.message)
+      setError(err instanceof Error ? err.message : 'Unknown error')
       console.error('Failed to fetch clients:', err)
     } finally {
       setIsLoading(false)
@@ -66,9 +85,44 @@ export function useClients(initialClients: Client[] = []) {
         throw new Error('User not authenticated')
       }
 
+      // Explicitly map fields to match DB schema exactly
       const clientData = {
-        ...client,
         user_id: userId,
+        name: client.name || 'New Client',
+        email: client.email || '',
+        phone: client.phone || null,
+        company: client.company || null,
+        position: client.position || null,
+        avatar: client.avatar || null,
+        status: client.status || 'lead',
+        type: client.type || 'individual',
+        priority: client.priority || 'medium',
+        address: client.address || null,
+        city: client.city || null,
+        state: client.state || null,
+        country: client.country || null,
+        postal_code: client.postal_code || null,
+        timezone: client.timezone || null,
+        website: client.website || null,
+        industry: client.industry || null,
+        company_size: client.company_size || null,
+        total_revenue: client.total_revenue || 0,
+        lifetime_value: client.lifetime_value || 0,
+        average_project_value: client.average_project_value || 0,
+        currency: client.currency || 'USD',
+        projects_count: client.projects_count || 0,
+        health_score: client.health_score || 50,
+        lead_score: client.lead_score || 50,
+        satisfaction_score: client.satisfaction_score || 0,
+        last_contact: client.last_contact || null,
+        next_follow_up: client.next_follow_up || null,
+        tags: client.tags || [],
+        categories: client.categories || [],
+        linkedin_url: client.linkedin_url || null,
+        twitter_url: client.twitter_url || null,
+        facebook_url: client.facebook_url || null,
+        notes: client.notes || null,
+        internal_notes: client.internal_notes || null,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       }
@@ -84,7 +138,7 @@ export function useClients(initialClients: Client[] = []) {
       toast.success('Client created successfully')
       return data
     } catch (err: unknown) {
-      toast.error(err.message || 'Failed to create client')
+      toast.error(err instanceof Error ? err.message : 'Failed to create client')
       throw err
     }
   }
@@ -103,14 +157,15 @@ export function useClients(initialClients: Client[] = []) {
       toast.success('Client updated successfully')
       return data
     } catch (err: unknown) {
-      toast.error(err.message || 'Failed to update client')
+      toast.error(err instanceof Error ? err.message : 'Failed to update client')
       throw err
     }
   }
 
   const archiveClient = async (id: string) => {
     try {
-      const result = await updateClient(id, { status: 'churned' })
+      // @ts-ignore - 'churned' is a valid status but TS might complain if strict
+      const result = await updateClient(id, { status: 'churned' as any })
       toast.success('Client archived')
       return result
     } catch (err) {
@@ -129,7 +184,7 @@ export function useClients(initialClients: Client[] = []) {
       setClients(prev => prev.filter(c => c.id !== id))
       toast.success('Client deleted')
     } catch (err: unknown) {
-      toast.error(err.message || 'Failed to delete client')
+      toast.error(err instanceof Error ? err.message : 'Failed to delete client')
       throw err
     }
   }
@@ -150,7 +205,7 @@ export function useClients(initialClients: Client[] = []) {
     active: clients.filter(c => c.status === 'active').length,
     prospects: clients.filter(c => c.status === 'prospect').length,
     totalRevenue: clients.reduce((sum, c) => sum + (c.total_revenue || 0), 0),
-    totalProjects: clients.reduce((sum, c) => sum + (c.total_projects || 0), 0)
+    totalProjects: clients.reduce((sum, c) => sum + (c.projects_count || 0), 0)
   }
 
   return {
@@ -160,7 +215,7 @@ export function useClients(initialClients: Client[] = []) {
     error,
     fetchClients,
     addClient,
-    createClient: addClient, // Alias for backward compatibility
+    createClient: addClient,
     updateClient,
     archiveClient,
     deleteClient

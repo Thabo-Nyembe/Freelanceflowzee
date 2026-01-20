@@ -1,73 +1,47 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
 
 // Project Management API
 // Supports: CRUD projects, update status, assign team, track progress
 
-interface Project {
-  id: string
-  title: string
-  description: string
-  status: 'active' | 'paused' | 'completed' | 'cancelled' | 'draft'
-  progress: number
-  client_name: string
-  budget: number
-  spent: number
-  start_date: string
-  end_date: string
-  team_members: { id: string; name: string; avatar: string }[]
-  priority: 'low' | 'medium' | 'high' | 'urgent'
-  comments_count: number
-  attachments: string[]
-  category: string
-  tags: string[]
-  created_at?: string
-  updated_at?: string
-}
+export const runtime = 'nodejs'
 
-interface ProjectRequest {
-  action: 'create' | 'list' | 'update' | 'delete' | 'update-status' | 'add-member' | 'update-progress'
-  projectId?: string
-  data?: Partial<Project>
-  filters?: {
-    status?: string
-    priority?: string
-    client?: string
-    category?: string
-    search?: string
-  }
-}
-
-// Generate unique project ID
-function generateProjectId(): string {
-  return `proj_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+async function getSupabase() {
+  const supabase = await createClient()
+  return supabase
 }
 
 // Create new project
-async function handleCreateProject(data: Partial<Project>): Promise<NextResponse> {
+async function handleCreateProject(data: any): Promise<NextResponse> {
   try {
-    const project: Project = {
-      id: generateProjectId(),
+    const supabase = await getSupabase()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const projectData = {
       title: data.title || 'Untitled Project',
       description: data.description || '',
       status: 'draft',
       progress: 0,
-      client_name: data.client_name || '',
+      client_id: data.client_id, // Ensure client_id is passed
       budget: data.budget || 0,
       spent: 0,
       start_date: data.start_date || new Date().toISOString(),
-      end_date: data.end_date || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-      team_members: data.team_members || [],
+      end_date: data.end_date,
       priority: data.priority || 'medium',
-      comments_count: 0,
-      attachments: [],
-      category: data.category || 'General',
-      tags: data.tags || [],
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
+      user_id: user.id
     }
 
-    // In production: Save to database
-    // await db.projects.create(project)
+    const { data: project, error } = await supabase
+      .from('projects')
+      .insert(projectData)
+      .select()
+      .single()
+
+    if (error) throw error
 
     return NextResponse.json({
       success: true,
@@ -87,90 +61,79 @@ async function handleCreateProject(data: Partial<Project>): Promise<NextResponse
 // List projects with filters
 async function handleListProjects(filters?: any): Promise<NextResponse> {
   try {
-    // Mock project data
-    const mockProjects: Project[] = [
-      {
-        id: 'proj_1',
-        title: 'E-commerce Website Redesign',
-        description: 'Complete redesign of online store with modern UI/UX',
-        status: 'active',
-        progress: 75,
-        client_name: 'TechCorp Inc.',
-        budget: 12000,
-        spent: 9000,
-        start_date: '2024-01-15T00:00:00.000Z',
-        end_date: '2024-02-28T00:00:00.000Z',
-        team_members: [
-          { id: '1', name: 'John Doe', avatar: '/avatars/john.jpg' },
-          { id: '2', name: 'Jane Smith', avatar: '/avatars/jane.jpg' }
-        ],
-        priority: 'high',
-        comments_count: 12,
-        attachments: ['wireframes.pdf', 'brand-guidelines.pdf'],
-        category: 'Web Development',
-        tags: ['React', 'E-commerce', 'UI/UX']
-      },
-      {
-        id: 'proj_2',
-        title: 'Mobile App Development',
-        description: 'iOS and Android app for fitness tracking',
-        status: 'active',
-        progress: 45,
-        client_name: 'FitLife Solutions',
-        budget: 25000,
-        spent: 11250,
-        start_date: '2024-01-20T00:00:00.000Z',
-        end_date: '2024-04-15T00:00:00.000Z',
-        team_members: [
-          { id: '1', name: 'John Doe', avatar: '/avatars/john.jpg' }
-        ],
-        priority: 'urgent',
-        comments_count: 24,
-        attachments: ['wireframes.sketch', 'api-docs.pdf'],
-        category: 'Mobile Development',
-        tags: ['React Native', 'iOS', 'Android']
-      }
-    ]
+    const supabase = await getSupabase()
+    const { data: { user } } = await supabase.auth.getUser()
 
-    let filteredProjects = mockProjects
+    if (!user) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
+    }
+
+    let query = supabase
+      .from('projects')
+      .select('*, client:clients(name)')
+      .eq('user_id', user.id)
 
     // Apply filters
     if (filters?.status && filters.status !== 'all') {
-      filteredProjects = filteredProjects.filter(p => p.status === filters.status)
+      query = query.eq('status', filters.status)
     }
     if (filters?.priority && filters.priority !== 'all') {
-      filteredProjects = filteredProjects.filter(p => p.priority === filters.priority)
+      query = query.eq('priority', filters.priority)
     }
     if (filters?.client) {
-      filteredProjects = filteredProjects.filter(p =>
-        p.client_name.toLowerCase().includes(filters.client.toLowerCase())
-      )
+      // Filter by client name logic would be complex with join, simplified to client_id if possible or post-filter
+      // For now assuming filters.client is an ID if passed, or we skip
     }
+
+    // Sort
+    query = query.order('created_at', { ascending: false })
+
+    const { data: projects, error } = await query
+
+    if (error) throw error
+
+    // Transform for UI if needed (client_name from joined client)
+    const formattedProjects = projects.map((p: any) => ({
+      ...p,
+      client_name: p.client?.name || 'Unknown Client',
+      // Attachments/Team members would need separate tables/queries in full impl
+      team_members: [], // Placeholder
+      attachments: [], // Placeholder
+      comments_count: 0 // Placeholder
+    }))
+
     if (filters?.search) {
-      filteredProjects = filteredProjects.filter(p =>
-        p.title.toLowerCase().includes(filters.search.toLowerCase()) ||
-        p.description.toLowerCase().includes(filters.search.toLowerCase()) ||
-        p.client_name.toLowerCase().includes(filters.search.toLowerCase())
-      )
+      // Post-fetch search for title/desc
+      const searchLower = filters.search.toLowerCase()
+      // @ts-ignore
+      return NextResponse.json({
+        success: true,
+        action: 'list',
+        projects: formattedProjects.filter((p: any) =>
+          p.title.toLowerCase().includes(searchLower) ||
+          (p.description && p.description.toLowerCase().includes(searchLower))
+        ),
+        message: 'Projects fetched'
+      })
     }
 
     const stats = {
-      total: filteredProjects.length,
-      active: filteredProjects.filter(p => p.status === 'active').length,
-      completed: filteredProjects.filter(p => p.status === 'completed').length,
-      totalBudget: filteredProjects.reduce((sum, p) => sum + p.budget, 0),
-      totalSpent: filteredProjects.reduce((sum, p) => sum + p.spent, 0),
-      avgProgress: filteredProjects.length > 0
-        ? Math.round(filteredProjects.reduce((sum, p) => sum + p.progress, 0) / filteredProjects.length)
-        : 0
+      total: formattedProjects.length,
+      active: formattedProjects.filter((p: any) => p.status === 'active').length,
+      completed: formattedProjects.filter((p: any) => p.status === 'completed').length,
+      totalBudget: formattedProjects.reduce((sum: number, p: any) => sum + (p.budget || 0), 0),
+      // @ts-ignore
+      totalSpent: formattedProjects.reduce((sum: number, p: any) => sum + (p.spent || 0), 0),
+      // @ts-ignore
+      avgProgress: formattedProjects.length > 0 ? Math.round(formattedProjects.reduce((sum, p) => sum + (p.progress || 0), 0) / formattedProjects.length) : 0
     }
 
     return NextResponse.json({
       success: true,
       action: 'list',
-      projects: filteredProjects,
+      projects: formattedProjects,
       stats,
-      message: `Found ${filteredProjects.length} projects`
+      message: `Found ${formattedProjects.length} projects`
     })
   } catch (error: any) {
     return NextResponse.json({
@@ -183,30 +146,25 @@ async function handleListProjects(filters?: any): Promise<NextResponse> {
 // Update project status
 async function handleUpdateStatus(projectId: string, newStatus: string): Promise<NextResponse> {
   try {
-    const project = {
-      id: projectId,
-      status: newStatus,
-      updated_at: new Date().toISOString()
-    }
+    const supabase = await getSupabase()
 
-    // If marked as completed, set progress to 100
-    if (newStatus === 'completed') {
-      project['progress'] = 100
-    }
+    const updates: any = { status: newStatus, updated_at: new Date().toISOString() }
+    if (newStatus === 'completed') updates.progress = 100
 
-    // In production: Update in database
-    // await db.projects.update(projectId, project)
+    const { data: project, error } = await supabase
+      .from('projects')
+      .update(updates)
+      .eq('id', projectId)
+      .select()
+      .single()
+
+    if (error) throw error
 
     return NextResponse.json({
       success: true,
       action: 'update-status',
       project,
-      message: `Project status updated to ${newStatus}`,
-      celebration: newStatus === 'completed' ? {
-        message: '🎉 Congratulations! Project completed!',
-        achievement: 'Project Master',
-        points: 50
-      } : undefined
+      message: `Project status updated to ${newStatus}`
     })
   } catch (error: any) {
     return NextResponse.json({
@@ -219,29 +177,26 @@ async function handleUpdateStatus(projectId: string, newStatus: string): Promise
 // Update project progress
 async function handleUpdateProgress(projectId: string, progress: number): Promise<NextResponse> {
   try {
-    const project = {
-      id: projectId,
-      progress: Math.min(Math.max(progress, 0), 100), // Clamp between 0-100
-      updated_at: new Date().toISOString()
-    }
+    const supabase = await getSupabase()
 
-    // Auto-complete if progress reaches 100
-    if (project.progress === 100) {
-      project['status'] = 'completed'
-    }
+    const safeProgress = Math.min(Math.max(progress, 0), 100)
+    const updates: any = { progress: safeProgress, updated_at: new Date().toISOString() }
+    if (safeProgress === 100) updates.status = 'completed'
+
+    const { data: project, error } = await supabase
+      .from('projects')
+      .update(updates)
+      .eq('id', projectId)
+      .select()
+      .single()
+
+    if (error) throw error
 
     return NextResponse.json({
       success: true,
       action: 'update-progress',
       project,
-      message: `Project progress updated to ${project.progress}%`,
-      milestone: project.progress >= 50 && project.progress < 55 ? {
-        message: '🎯 Halfway there! Keep going!',
-        type: 'halfway'
-      } : project.progress >= 75 && project.progress < 80 ? {
-        message: '🚀 Almost done! Final sprint!',
-        type: 'nearcompletion'
-      } : undefined
+      message: `Project progress updated to ${project.progress}%`
     })
   } catch (error: any) {
     return NextResponse.json({
@@ -252,13 +207,18 @@ async function handleUpdateProgress(projectId: string, progress: number): Promis
 }
 
 // Update project
-async function handleUpdateProject(projectId: string, updates: Partial<Project>): Promise<NextResponse> {
+async function handleUpdateProject(projectId: string, updates: any): Promise<NextResponse> {
   try {
-    const project = {
-      id: projectId,
-      ...updates,
-      updated_at: new Date().toISOString()
-    }
+    const supabase = await getSupabase()
+
+    const { data: project, error } = await supabase
+      .from('projects')
+      .update({ ...updates, updated_at: new Date().toISOString() })
+      .eq('id', projectId)
+      .select()
+      .single()
+
+    if (error) throw error
 
     return NextResponse.json({
       success: true,
@@ -277,8 +237,14 @@ async function handleUpdateProject(projectId: string, updates: Partial<Project>)
 // Delete project
 async function handleDeleteProject(projectId: string): Promise<NextResponse> {
   try {
-    // In production: Soft delete or archive
-    // await db.projects.delete(projectId)
+    const supabase = await getSupabase()
+
+    const { error } = await supabase
+      .from('projects')
+      .delete()
+      .eq('id', projectId)
+
+    if (error) throw error
 
     return NextResponse.json({
       success: true,
@@ -294,90 +260,41 @@ async function handleDeleteProject(projectId: string): Promise<NextResponse> {
   }
 }
 
-// Add team member to project
+// Add team member to project (Mock for now as we don't have team_members table)
 async function handleAddMember(projectId: string, member: any): Promise<NextResponse> {
-  try {
-    const result = {
-      projectId,
-      member,
-      added: true
-    }
-
-    return NextResponse.json({
-      success: true,
-      action: 'add-member',
-      result,
-      message: `${member.name} added to project`
-    })
-  } catch (error: any) {
-    return NextResponse.json({
-      success: false,
-      error: error.message || 'Failed to add member'
-    }, { status: 500 })
-  }
+  return NextResponse.json({
+    success: true,
+    action: 'add-member',
+    result: { projectId, member, added: true },
+    message: 'Team members not yet supported in DB'
+  })
 }
 
 // Main POST handler
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
-    const body: ProjectRequest = await request.json()
+    const body = await request.json()
 
     switch (body.action) {
       case 'create':
-        if (!body.data) {
-          return NextResponse.json({
-            success: false,
-            error: 'Project data required'
-          }, { status: 400 })
-        }
         return handleCreateProject(body.data)
 
       case 'list':
         return handleListProjects(body.filters)
 
       case 'update-status':
-        if (!body.projectId || !body.data?.status) {
-          return NextResponse.json({
-            success: false,
-            error: 'Project ID and status required'
-          }, { status: 400 })
-        }
         return handleUpdateStatus(body.projectId, body.data.status)
 
       case 'update-progress':
-        if (!body.projectId || body.data?.progress === undefined) {
-          return NextResponse.json({
-            success: false,
-            error: 'Project ID and progress required'
-          }, { status: 400 })
-        }
         return handleUpdateProgress(body.projectId, body.data.progress)
 
       case 'update':
-        if (!body.projectId || !body.data) {
-          return NextResponse.json({
-            success: false,
-            error: 'Project ID and update data required'
-          }, { status: 400 })
-        }
         return handleUpdateProject(body.projectId, body.data)
 
       case 'delete':
-        if (!body.projectId) {
-          return NextResponse.json({
-            success: false,
-            error: 'Project ID required'
-          }, { status: 400 })
-        }
         return handleDeleteProject(body.projectId)
 
       case 'add-member':
-        if (!body.projectId || !body.data) {
-          return NextResponse.json({
-            success: false,
-            error: 'Project ID and member data required'
-          }, { status: 400 })
-        }
         return handleAddMember(body.projectId, body.data)
 
       default:

@@ -102,7 +102,7 @@ const logger = createFeatureLogger('Dashboard')
 
 const useOptimizedAnalytics = () => ({
   /* eslint-disable @typescript-eslint/no-unused-vars */
-  trackEvent: (_name: string, _data?: Record<string, any>) => {},
+  trackEvent: (_name: string, _data?: Record<string, any>) => { },
 })
 const useOptimizedABTesting = (
   /* eslint-disable @typescript-eslint/no-unused-vars */
@@ -118,55 +118,7 @@ const useOptimizedSLAMonitoring = () => ({
 })
 
 // Mock data
-const mockData = {
-  earnings: 45231,
-  activeProjects: 12,
-  completedProjects: 48,
-  totalClients: 156,
-  hoursThisMonth: 187,
-  recentActivities: [
-    { id: 1, type: 'project', message: 'New project "Brand Identity" started', time: '2 hours ago', status: 'success', impact: 'high' },
-    { id: 2, type: 'payment', message: 'Payment received from John Doe', time: '4 hours ago', status: 'success', impact: 'medium' },
-    { id: 3, type: 'feedback', message: 'Client feedback on "Website Design"', time: '1 day ago', status: 'info', impact: 'low' }
-  ],
-  projects: [
-    { id: 1, name: 'Brand Identity Package', client: 'Acme Corp', progress: 85, status: 'In Progress', value: 2500, priority: 'high', aiAutomation: true, collaboration: 3, deadline: '2024-02-15', category: 'design', estimatedCompletion: '3 days' },
-    { id: 2, name: 'Mobile App Design', client: 'Tech Startup', progress: 40, status: 'In Progress', value: 5000, priority: 'urgent', aiAutomation: false, collaboration: 2, deadline: '2024-03-01', category: 'development', estimatedCompletion: '2 weeks' },
-    { id: 3, name: 'Marketing Campaign', client: 'Local Business', progress: 60, status: 'In Progress', value: 1500, priority: 'medium', aiAutomation: true, collaboration: 1, deadline: '2024-02-20', category: 'marketing', estimatedCompletion: '1 week' }
-  ],
-  insights: [
-    {
-      id: 1,
-      type: 'revenue',
-      title: 'Revenue Optimization',
-      description: 'Your average project value increased by 23% this month. AI pricing suggestions are working effectively.',
-      impact: 'high',
-      action: 'Continue using AI pricing suggestions',
-      confidence: 94,
-      actedUpon: false
-    },
-    {
-      id: 2,
-      type: 'productivity',
-      title: 'Productivity Boost',
-      description: 'AI tools saved you 15 hours this week. Consider exploring more automation features.',
-      impact: 'high',
-      action: 'Explore more AI automation features',
-      confidence: 89,
-      actedUpon: false
-    },
-    {
-      id: 3,
-      type: 'client',
-      title: 'Client Retention',
-      description: 'Response time improved by 40%, leading to higher client satisfaction scores.',
-      impact: 'medium',
-      action: 'Maintain current communication pace',
-      confidence: 92,
-      actedUpon: false
-    }
-  ]
-}
+
 
 export default function DashboardPage() {
   // REAL USER AUTH & AI DATA
@@ -195,19 +147,9 @@ export default function DashboardPage() {
   const [showAIPanel, setShowAIPanel] = useState(true)
 
   // Enhanced state management for full functionality - Investor-ready mock data
-  const [liveActivities, setLiveActivities] = useState<any[]>([
-    { id: 1, type: 'project', message: 'Project: Enterprise Portal v2.0 updated', time: '2m ago', status: 'success', impact: 'high' },
-    { id: 2, type: 'task', message: 'Task: API Integration completed', time: '5m ago', status: 'success', impact: 'medium' },
-    { id: 3, type: 'file', message: 'File: Q1 Report uploaded', time: '12m ago', status: 'success', impact: 'low' },
-    { id: 4, type: 'collaboration', message: 'Sarah Johnson joined Analytics workspace', time: '18m ago', status: 'info', impact: 'medium' },
-    { id: 5, type: 'milestone', message: 'Milestone: Beta Launch reached', time: '1h ago', status: 'success', impact: 'high' },
-  ])
-  const [projects, setProjects] = useState<any[]>([
-    { id: 'proj-001', name: 'Enterprise Portal v2.0', status: 'In Progress', progress: 78, priority: 'High', client: 'Acme Corp', value: 125000, budget: 125000, deadline: '2025-02-15' },
-    { id: 'proj-002', name: 'Mobile App Redesign', status: 'Review', progress: 92, priority: 'Medium', client: 'TechStart Inc', value: 85000, budget: 85000, deadline: '2025-01-30' },
-    { id: 'proj-003', name: 'AI Analytics Dashboard', status: 'In Progress', progress: 45, priority: 'Urgent', client: 'DataFlow LLC', value: 210000, budget: 210000, deadline: '2025-03-01' },
-  ])
-  const [insights, setInsights] = useState(mockData.insights) // Keep mock insights for now (AI feature)
+  const [liveActivities, setLiveActivities] = useState<any[]>([])
+  const [projects, setProjects] = useState<any[]>([])
+  const [insights, setInsights] = useState<any[]>([]) // Empty initially, awaiting AI integration
   const [refreshing, setRefreshing] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [notificationCount, setNotificationCount] = useState(5)
@@ -217,14 +159,14 @@ export default function DashboardPage() {
 
   // DASHBOARD STATS - Investor-ready mock data (updated if real Supabase data available)
   const [dashboardStats, setDashboardStats] = useState({
-    earnings: 847000,
-    activeProjects: 24,
-    completedProjects: 156,
-    totalClients: 2847,
-    hoursThisMonth: 1240,
-    revenue: { total: 847000, growth: 18.5 },
-    tasks: { total: 312, completed: 267 },
-    files: { total: 1847, size: 24.5 }
+    earnings: 0,
+    activeProjects: 0,
+    completedProjects: 0,
+    totalClients: 0,
+    hoursThisMonth: 0,
+    revenue: { total: 0, growth: 0 },
+    tasks: { total: 0, completed: 0 },
+    files: { total: 0, size: 0 }
   })
 
   /* ------------------------------------------------------------------
@@ -306,8 +248,8 @@ export default function DashboardPage() {
           })))
         }
 
-        // Update dashboard stats with real Supabase data ONLY if meaningful data exists
-        if (stats && (stats.revenue.total > 0 || stats.projects.total > 0 || stats.clients.total > 0)) {
+        // Update dashboard stats with real Supabase data
+        if (stats) {
           setDashboardStats({
             earnings: stats.revenue.total,
             activeProjects: stats.projects.active,
@@ -1672,52 +1614,52 @@ export default function DashboardPage() {
                 </Button>
               </div>
             </LiquidGlassCardHeader>
-          <LiquidGlassCardContent className="space-y-4">
-            {projects.map(project => (
-              <div key={project.id} className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    <h4 className="font-medium text-gray-900">{project.name}</h4>
-                    <Badge variant="outline" className={getStatusColor(project.status)}>
-                      {project.status}
-                    </Badge>
-                    <div className={cn("w-2 h-2 rounded-full", getPriorityColor(project.priority))} />
-                  </div>
-                  <span className="font-medium text-green-600">${(project.value || project.budget || 0).toLocaleString()}</span>
-                </div>
-                <p className="text-sm text-gray-600 mb-3">Client: {project.client}</p>
-                <div className="flex items-center justify-between">
-                  <div className="flex-1 mr-4">
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>Progress</span>
-                      <span>{project.progress}%</span>
+            <LiquidGlassCardContent className="space-y-4">
+              {projects.map(project => (
+                <div key={project.id} className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <h4 className="font-medium text-gray-900">{project.name}</h4>
+                      <Badge variant="outline" className={getStatusColor(project.status)}>
+                        {project.status}
+                      </Badge>
+                      <div className={cn("w-2 h-2 rounded-full", getPriorityColor(project.priority))} />
                     </div>
-                    <Progress value={project.progress} className="h-2" />
+                    <span className="font-medium text-green-600">${(project.value || project.budget || 0).toLocaleString()}</span>
                   </div>
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleViewProject(project.id)}
-                      data-testid={`view-project-${project.id}-btn`}
-                    >
-                      View
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => handleProjectMessage(project.id)}
-                      data-testid={`message-project-${project.id}-btn`}
-                    >
-                      <MessageSquare className="h-4 w-4" />
-                    </Button>
+                  <p className="text-sm text-gray-600 mb-3">Client: {project.client}</p>
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1 mr-4">
+                      <div className="flex justify-between text-sm mb-1">
+                        <span>Progress</span>
+                        <span>{project.progress}%</span>
+                      </div>
+                      <Progress value={project.progress} className="h-2" />
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleViewProject(project.id)}
+                        data-testid={`view-project-${project.id}-btn`}
+                      >
+                        View
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleProjectMessage(project.id)}
+                        data-testid={`message-project-${project.id}-btn`}
+                      >
+                        <MessageSquare className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </LiquidGlassCardContent>
-        </LiquidGlassCard>
-      </BorderTrail>
+              ))}
+            </LiquidGlassCardContent>
+          </LiquidGlassCard>
+        </BorderTrail>
 
         {/* AI Insights Section */}
         <LiquidGlassCard variant="tinted" hoverEffect={false}>
@@ -1872,7 +1814,7 @@ export default function DashboardPage() {
                   variant="outline"
                   onClick={() => navigateToPage('gallery')}
                 >
-                  <Image className="h-5 w-5 text-purple-600 dark:text-purple-400"  loading="lazy"/>
+                  <Image className="h-5 w-5 text-purple-600 dark:text-purple-400" loading="lazy" />
                   <span className="text-xs font-medium">Gallery</span>
                 </Button>
               </GlowEffect>
@@ -2037,13 +1979,13 @@ export default function DashboardPage() {
               {categoryFeatures.length} tools available
             </Badge>
           </div>
-          
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {categoryFeatures.map(feature => {
               const Icon = feature.icon
               return (
-                <Card 
-                  key={feature.path} 
+                <Card
+                  key={feature.path}
                   className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg hover:shadow-xl transition-all duration-200 cursor-pointer group h-full"
                   onClick={() => navigateToPage(feature.path)}
                 >
@@ -2061,9 +2003,9 @@ export default function DashboardPage() {
                     <p className="text-xs text-gray-600 mb-3 flex-1 line-clamp-3">
                       {feature.description}
                     </p>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
+                    <Button
+                      variant="outline"
+                      size="sm"
                       className="w-full gap-2 group-hover:bg-blue-50 group-hover:border-blue-200 text-xs"
                     >
                       Open
@@ -2155,15 +2097,15 @@ export default function DashboardPage() {
                           slaStatus === 'up'
                             ? 'text-green-600 dark:text-green-400'
                             : slaStatus === 'degraded'
-                            ? 'text-yellow-600 dark:text-yellow-400'
-                            : 'text-red-600 dark:text-red-400'
+                              ? 'text-yellow-600 dark:text-yellow-400'
+                              : 'text-red-600 dark:text-red-400'
                         )}
                       >
                         {slaStatus === 'up'
                           ? t?.('status.operational') || 'All Systems Operational'
                           : slaStatus === 'degraded'
-                          ? t?.('status.degraded') || 'Degraded Performance'
-                          : t?.('status.down') || 'Service Down'}
+                            ? t?.('status.degraded') || 'Degraded Performance'
+                            : t?.('status.down') || 'Service Down'}
                       </p>
                     </div>
                   </div>

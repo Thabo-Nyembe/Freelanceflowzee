@@ -16,24 +16,12 @@ export async function updateSession(request: NextRequest) {
   })
 
   // Check if we're in a test environment - skip auth for testing
-  const isTestEnvironment = process.env.NODE_ENV === 'test' || 
-                           request.headers.get('user-agent')?.includes('Playwright') ||
-                           request.headers.get('x-test-mode') === 'true'
-
-  // Check if we're in local development environment
-  const isDevelopmentLocal = process.env.NODE_ENV === 'development' &&
-                            (request.nextUrl.hostname === 'localhost' || 
-                             request.nextUrl.hostname === '127.0.0.1' ||
-                             request.nextUrl.hostname.startsWith('192.168.') ||
-                             request.nextUrl.hostname.endsWith('.local'))
+  const isTestEnvironment = process.env.NODE_ENV === 'test' ||
+    request.headers.get('user-agent')?.includes('Playwright') ||
+    request.headers.get('x-test-mode') === 'true'
 
   if (isTestEnvironment) {
     console.log('🧪 Test environment detected - skipping auth middleware')
-    return supabaseResponse
-  }
-
-  if (isDevelopmentLocal) {
-    console.log('🔧 Local development environment detected - bypassing authentication for testing')
     return supabaseResponse
   }
 
@@ -49,7 +37,7 @@ export async function updateSession(request: NextRequest) {
 
   // FULL AUTHENTICATION ENABLED - Production Mode
   console.log('🔐 Production environment detected - enforcing authentication')
-  
+
   const supabase = createServerClient(
     supabaseUrl,
     supabaseAnonKey,
@@ -87,12 +75,12 @@ export async function updateSession(request: NextRequest) {
   try {
     // First try to get session
     const { data: { session }, error: sessionError } = await supabase.auth.getSession()
-    
+
     if (sessionError) {
       console.error('Session error in middleware: ', sessionError);
       // Clear any corrupted session data
       await supabase.auth.signOut()
-      
+
       // Clear all auth cookies
       request.cookies.getAll().forEach(cookie => {
         if (cookie.name.startsWith('sb-')) {
@@ -100,7 +88,7 @@ export async function updateSession(request: NextRequest) {
           supabaseResponse.cookies.delete(cookie.name)
         }
       })
-      
+
       // Redirect to login with error message
       const loginUrl = request.nextUrl.clone()
       loginUrl.pathname = '/login'
@@ -110,12 +98,12 @@ export async function updateSession(request: NextRequest) {
 
     // Then get user data
     const { data: { user }, error: userError } = await supabase.auth.getUser()
-    
+
     if (userError) {
       console.error('User data error in middleware: ', userError);
       // Clear any corrupted session data
       await supabase.auth.signOut()
-      
+
       // Clear all auth cookies
       request.cookies.getAll().forEach(cookie => {
         if (cookie.name.startsWith('sb-')) {
@@ -123,7 +111,7 @@ export async function updateSession(request: NextRequest) {
           supabaseResponse.cookies.delete(cookie.name)
         }
       })
-      
+
       // Redirect to login with error message
       const loginUrl = request.nextUrl.clone()
       loginUrl.pathname = '/login'
@@ -144,7 +132,7 @@ export async function updateSession(request: NextRequest) {
     console.error('Unexpected error in middleware: ', error);
     // Clear any corrupted session data
     await supabase.auth.signOut()
-    
+
     // Clear all auth cookies
     request.cookies.getAll().forEach(cookie => {
       if (cookie.name.startsWith('sb-')) {
@@ -152,7 +140,7 @@ export async function updateSession(request: NextRequest) {
         supabaseResponse.cookies.delete(cookie.name)
       }
     })
-    
+
     // Redirect to login with error message
     const loginUrl = request.nextUrl.clone()
     loginUrl.pathname = '/login'

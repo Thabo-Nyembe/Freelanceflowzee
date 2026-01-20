@@ -137,6 +137,38 @@ interface Generation {
   tags: string[]
 }
 
+// Helper to map DB AIGeneration to UI Generation
+const mapToUiGeneration = (gen: any): Generation => ({
+  id: gen.id,
+  prompt: gen.prompt || '',
+  negativePrompt: gen.metadata?.negative_prompt || '',
+  type: (gen.generation_type as GenerationType) || 'image',
+  status: (gen.status as GenerationStatus) || 'pending',
+  style: (gen.metadata?.style as StylePreset) || 'realistic',
+  aspectRatio: (gen.metadata?.aspect_ratio as AspectRatio) || '1:1',
+  quality: (gen.metadata?.quality as QualityLevel) || 'high',
+  model: gen.model || 'unknown',
+  seed: gen.metadata?.seed || 0,
+  steps: gen.metadata?.steps || 30,
+  guidance: gen.metadata?.guidance || 7.5,
+  imageUrl: gen.generation_type === 'image' ? gen.result : undefined,
+  thumbnailUrl: gen.generation_type === 'image' ? gen.result : undefined,
+  likes: 0, // Not in DB yet
+  downloads: 0, // Not in DB yet
+  views: 0, // Not in DB yet
+  isPublic: false,
+  isFavorite: false,
+  variations: 0,
+  createdAt: gen.created_at || new Date().toISOString(),
+  completedAt: gen.updated_at,
+  processingTime: gen.latency_ms ? gen.latency_ms / 1000 : undefined,
+  cost: gen.cost || 0,
+  userId: gen.user_id,
+  userName: 'You',
+  userAvatar: '',
+  tags: gen.tags || []
+})
+
 interface Template {
   id: string
   name: string
@@ -153,6 +185,25 @@ interface Template {
   isPremium: boolean
   tags: string[]
 }
+
+// Templates Configuration (Static)
+const AVAILABLE_TEMPLATES: Template[] = [
+  {
+    id: 't1',
+    name: 'Product Photography',
+    description: 'Professional product shots on clean background',
+    prompt: 'Professional product photography of [SUBJECT], studio lighting, clean background, 8k',
+    style: 'realistic',
+    category: 'Marketing',
+    thumbnail: '/images/templates/product.jpg',
+    uses: 120,
+    likes: 45,
+    author: 'AI Studio',
+    authorAvatar: '',
+    isPremium: false,
+    tags: ['product', 'marketing']
+  }
+]
 
 interface AIModel {
   id: string
@@ -188,23 +239,52 @@ interface UsageStats {
 // MIGRATED DATA - Using database hooks instead of mock data
 // ============================================================================
 
-const mockGenerations: Generation[] = []
-const mockTemplates: Template[] = []
-const mockModels: AIModel[] = []
-const mockUsageStats: UsageStats = {
-  totalGenerations: 0,
-  completedGenerations: 0,
-  failedGenerations: 0,
-  totalCredits: 0,
-  usedCredits: 0,
-  remainingCredits: 0,
-  avgProcessingTime: 0,
-  totalLikes: 0,
-  totalDownloads: 0,
-  totalViews: 0,
-  favoriteStyle: 'realistic',
-  generationsThisMonth: 0
-}
+// Models Configuration (Static for now)
+const AVAILABLE_MODELS: AIModel[] = [
+  {
+    id: '1',
+    name: 'Flux Ultra',
+    description: 'Latest photorealistic model with superior lighting',
+    version: 'v1.0',
+    tier: 'pro',
+    type: 'image',
+    speed: 8,
+    quality: 9.5,
+    costPerGeneration: 2,
+    maxResolution: '1024x1024',
+    features: ['Photorealistic', 'High Detail'],
+    isDefault: true
+  },
+  {
+    id: '2',
+    name: 'Midjourney V6',
+    description: 'Artistic and creative generation',
+    version: 'v6.0',
+    tier: 'pro',
+    type: 'image',
+    speed: 12,
+    quality: 9.8,
+    costPerGeneration: 3,
+    maxResolution: '1024x1024',
+    features: ['Artistic', 'Creative'],
+    isDefault: false
+  },
+  {
+    id: '3',
+    name: 'DALL-E 3',
+    description: 'Faithful instruction following',
+    version: 'v3',
+    tier: 'enterprise',
+    type: 'image',
+    speed: 10,
+    quality: 9.0,
+    costPerGeneration: 4,
+    maxResolution: '1024x1792',
+    features: ['Instruction Following', 'Text Rendering'],
+    isDefault: false
+  }
+]
+
 
 // ============================================================================
 // HELPER FUNCTIONS
@@ -239,7 +319,7 @@ const getStyleColor = (style: StylePreset) => {
 
 const getTypeIcon = (type: GenerationType) => {
   const icons: Record<GenerationType, React.ReactNode> = {
-    image: <Image className="w-4 h-4"  loading="lazy"/>,
+    image: <Image className="w-4 h-4" loading="lazy" />,
     video: <Video className="w-4 h-4" />,
     audio: <Music className="w-4 h-4" />,
     text: <FileText className="w-4 h-4" />,
@@ -277,18 +357,23 @@ const formatNumber = (num: number) => {
 }
 
 // MIGRATED: Competitive Upgrade Data - Empty arrays, using database hooks
-const mockAICreateInsights = []
-const mockAICreateCollaborators = []
-const mockAICreatePredictions = []
-const mockAICreateActivities = []
 
-// Quick actions will be defined inside the component to access state setters
+
+const mockAICreateInsights: any[] = []
+const mockAICreateCollaborators: any[] = []
+const mockAICreatePredictions: any[] = []
+const mockAICreateActivities: any[] = []
+const mockModels: AIModel[] = [] // Kept empty or removed, using AVAILABLE_MODELS
+const mockTemplates: Template[] = [] // Kept empty, using AVAILABLE_TEMPLATES
+const mockGenerations: Generation[] = [] // Kept empty, using real data
+const mockUsageStats = { totalGenerations: 0, totalViews: 0, totalLikes: 0, totalDownloads: 0, totalCredits: 500 }
 
 // ============================================================================
 // MAIN COMPONENT
 // ============================================================================
 
 export default function AICreateClient() {
+  const supabase = createClient()
   // Database hook for AI creations
   const { generations, isLoading, fetchGenerations } = useAICreate()
 
@@ -322,6 +407,9 @@ export default function AICreateClient() {
     fetchGenerations()
   }, [])
 
+  // Mapped generations for UI
+  const uiGenerations = useMemo(() => generations.map(mapToUiGeneration), [generations])
+
   // Calculate stats from hook data
   const calculatedStats = useMemo(() => {
     const completed = generations.filter(g => g.status === 'completed').length
@@ -334,23 +422,26 @@ export default function AICreateClient() {
         const now = new Date()
         return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
       }).length,
-      remainingCredits: mockUsageStats.remainingCredits,
+      remainingCredits: 500 - total, // Simple calculation for now
       usedCredits: total,
       avgProcessingTime: generations.length > 0
-        ? Math.round(generations.reduce((sum, g) => sum + g.latency_ms, 0) / generations.length / 1000)
-        : 0
+        ? Math.round(generations.reduce((sum, g) => sum + (g.latency_ms || 0), 0) / generations.length / 1000)
+        : 5,
+      totalLikes: 0,
+      totalDownloads: 0,
+      totalViews: 0
     }
   }, [generations])
 
   // Filtered generations from database hook
   const filteredGenerations = useMemo(() => {
-    return generations.filter(gen => {
+    return uiGenerations.filter(gen => {
       const matchesSearch = gen.prompt.toLowerCase().includes(searchQuery.toLowerCase()) ||
         gen.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
       const matchesStatus = statusFilter === 'all' || gen.status === statusFilter
       return matchesSearch && matchesStatus
     })
-  }, [generations, searchQuery, statusFilter])
+  }, [uiGenerations, searchQuery, statusFilter])
 
   const styles: { value: StylePreset; label: string }[] = [
     { value: 'realistic', label: 'Realistic' },
@@ -552,10 +643,10 @@ export default function AICreateClient() {
             { label: 'This Month', value: calculatedStats.generationsThisMonth.toString(), change: 24.3, icon: TrendingUp, color: 'from-blue-500 to-cyan-500' },
             { label: 'Credits Used', value: calculatedStats.usedCredits.toString(), change: -5.2, icon: Zap, color: 'from-amber-500 to-orange-500' },
             { label: 'Avg Time', value: `${calculatedStats.avgProcessingTime}s`, change: -12.4, icon: Clock, color: 'from-green-500 to-emerald-500' },
-            { label: 'Total Views', value: formatNumber(mockUsageStats.totalViews), change: 45.7, icon: Eye, color: 'from-pink-500 to-rose-500' },
-            { label: 'Total Likes', value: formatNumber(mockUsageStats.totalLikes), change: 32.1, icon: Heart, color: 'from-red-500 to-pink-500' },
-            { label: 'Downloads', value: formatNumber(mockUsageStats.totalDownloads), change: 28.9, icon: Download, color: 'from-teal-500 to-cyan-500' },
-            { label: 'Success Rate', value: `${calculatedStats.totalGenerations > 0 ? ((calculatedStats.completedGenerations / calculatedStats.totalGenerations) * 100).toFixed(0) : 0}%`, change: 2.1, icon: Target, color: 'from-indigo-500 to-blue-500' }
+            { label: 'Total Views', value: formatNumber(calculatedStats.totalViews), change: 45.7, icon: Eye, color: 'from-pink-500 to-rose-500' },
+            { label: 'Total Likes', value: formatNumber(calculatedStats.totalLikes), change: 32.1, icon: Heart, color: 'from-red-500 to-pink-500' },
+            { label: 'Downloads', value: formatNumber(calculatedStats.totalDownloads), change: 28.9, icon: Download, color: 'from-teal-500 to-cyan-500' },
+            { label: 'Success Rate', value: `${calculatedStats.totalGenerations > 0 ? ((calculatedStats.completedGenerations / calculatedStats.totalGenerations) * 100).toFixed(0) : 100}%`, change: 2.1, icon: Target, color: 'from-indigo-500 to-blue-500' }
           ].map((stat, idx) => (
             <Card key={idx} className="relative overflow-hidden border-0 shadow-sm hover:shadow-md transition-shadow">
               <CardContent className="p-4">
@@ -715,11 +806,10 @@ export default function AICreateClient() {
                           <button
                             key={style.value}
                             onClick={() => setSelectedStyle(style.value)}
-                            className={`p-3 rounded-lg text-center transition-all ${
-                              selectedStyle === style.value
-                                ? `bg-gradient-to-r ${getStyleColor(style.value)} text-white shadow-lg`
-                                : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
-                            }`}
+                            className={`p-3 rounded-lg text-center transition-all ${selectedStyle === style.value
+                              ? `bg-gradient-to-r ${getStyleColor(style.value)} text-white shadow-lg`
+                              : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                              }`}
                           >
                             <span className="text-xs font-medium">{style.label}</span>
                           </button>
@@ -737,11 +827,10 @@ export default function AICreateClient() {
                           <button
                             key={ratio.value}
                             onClick={() => setSelectedRatio(ratio.value)}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
-                              selectedRatio === ratio.value
-                                ? 'bg-purple-500 text-white'
-                                : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
-                            }`}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${selectedRatio === ratio.value
+                              ? 'bg-purple-500 text-white'
+                              : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                              }`}
                           >
                             {getAspectRatioIcon(ratio.value)}
                             <span className="text-sm">{ratio.label}</span>
@@ -788,15 +877,14 @@ export default function AICreateClient() {
                         AI Model
                       </label>
                       <div className="space-y-2">
-                        {mockModels.map(model => (
+                        {AVAILABLE_MODELS.map(model => (
                           <button
                             key={model.id}
                             onClick={() => setSelectedModel(model.id)}
-                            className={`w-full p-3 rounded-lg text-left transition-all ${
-                              selectedModel === model.id
-                                ? 'bg-purple-100 dark:bg-purple-900/30 border-2 border-purple-500'
-                                : 'bg-gray-50 dark:bg-gray-800 border-2 border-transparent hover:border-gray-200 dark:hover:border-gray-700'
-                            }`}
+                            className={`w-full p-3 rounded-lg text-left transition-all ${selectedModel === model.id
+                              ? 'bg-purple-100 dark:bg-purple-900/30 border-2 border-purple-500'
+                              : 'bg-gray-50 dark:bg-gray-800 border-2 border-transparent hover:border-gray-200 dark:hover:border-gray-700'
+                              }`}
                           >
                             <div className="flex items-center justify-between">
                               <span className="font-medium text-gray-900 dark:text-white">{model.name}</span>
@@ -818,11 +906,10 @@ export default function AICreateClient() {
                           <button
                             key={q}
                             onClick={() => setQuality(q)}
-                            className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${
-                              quality === q
-                                ? 'bg-purple-500 text-white'
-                                : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
-                            }`}
+                            className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${quality === q
+                              ? 'bg-purple-500 text-white'
+                              : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
+                              }`}
                           >
                             {q.charAt(0).toUpperCase() + q.slice(1)}
                           </button>
@@ -1074,7 +1161,7 @@ export default function AICreateClient() {
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="text-right">
-                    <p className="text-3xl font-bold">{mockTemplates.length}</p>
+                    <p className="text-3xl font-bold">{AVAILABLE_TEMPLATES.length}</p>
                     <p className="text-green-200 text-sm">Available Templates</p>
                   </div>
                 </div>
@@ -1099,19 +1186,19 @@ export default function AICreateClient() {
                     if (action.label === 'Create New') {
                       setShowTemplateDialog(true)
                     } else if (action.label === 'Featured') {
-                      toast.info(`Showing ${mockTemplates.length} featured templates`)
+                      toast.info(`Showing ${AVAILABLE_TEMPLATES.length} featured templates`)
                     } else if (action.label === 'Trending') {
                       toast.info('Showing trending templates')
                     } else if (action.label === 'Premium') {
-                      const premiumCount = mockTemplates.filter(t => t.isPremium).length
+                      const premiumCount = AVAILABLE_TEMPLATES.filter(t => t.isPremium).length
                       toast.info(`${premiumCount} premium templates available`)
                     } else if (action.label === 'Community') {
-                      const communityCount = mockTemplates.filter(t => t.category === 'social').length
+                      const communityCount = AVAILABLE_TEMPLATES.filter(t => t.category === 'social').length
                       toast.info(`${communityCount} community templates shared by the community`)
                     } else if (action.label === 'Saved') {
                       toast.info('No saved templates yet')
                     } else if (action.label === 'Categories') {
-                      const categories = [...new Set(mockTemplates.map(t => t.category))]
+                      const categories = [...new Set(AVAILABLE_TEMPLATES.map(t => t.category))]
                       toast.info(`Categories: ${categories.join(', ')}`)
                     } else if (action.label === 'Search') {
                       toast.info('Use the search bar to find templates')
@@ -1134,7 +1221,7 @@ export default function AICreateClient() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {mockTemplates.map(template => (
+              {AVAILABLE_TEMPLATES.map(template => (
                 <Card key={template.id} className="hover:shadow-md transition-shadow cursor-pointer">
                   <div className="aspect-[4/3] bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 relative flex items-center justify-center text-4xl">
                     {template.style === 'fantasy' ? '⚔️' : template.style === 'cyberpunk' ? '🤖' : template.style === 'anime' ? '🎌' : '📷'}
@@ -1262,7 +1349,7 @@ export default function AICreateClient() {
             </div>
 
             <div className="space-y-3">
-              {mockGenerations.map(gen => (
+              {filteredGenerations.map(gen => (
                 <Card key={gen.id} className="hover:shadow-md transition-shadow">
                   <CardContent className="p-4">
                     <div className="flex items-start gap-4">
@@ -1348,7 +1435,7 @@ export default function AICreateClient() {
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="text-right">
-                    <p className="text-3xl font-bold">{mockModels.length}</p>
+                    <p className="text-3xl font-bold">{AVAILABLE_MODELS.length}</p>
                     <p className="text-indigo-200 text-sm">Available Models</p>
                   </div>
                 </div>
@@ -1371,21 +1458,21 @@ export default function AICreateClient() {
                   key={i}
                   onClick={() => {
                     if (action.label === 'All Models') {
-                      toast.info(`Showing all ${mockModels.length} available models`)
+                      toast.info(`Showing all ${AVAILABLE_MODELS.length} available models`)
                     } else if (action.label === 'Fast') {
-                      const fastModels = mockModels.filter(m => m.speed >= 90)
+                      const fastModels = AVAILABLE_MODELS.filter(m => m.speed >= 90)
                       toast.info(`${fastModels.length} fast models: ${fastModels.map(m => m.name).join(', ')}`)
                     } else if (action.label === 'Quality') {
-                      const qualityModels = mockModels.filter(m => m.quality >= 90)
+                      const qualityModels = AVAILABLE_MODELS.filter(m => m.quality >= 90)
                       toast.info(`${qualityModels.length} high-quality models: ${qualityModels.map(m => m.name).join(', ')}`)
                     } else if (action.label === 'Pro') {
-                      const proModels = mockModels.filter(m => m.tier === 'pro')
+                      const proModels = AVAILABLE_MODELS.filter(m => m.tier === 'pro')
                       toast.info(`${proModels.length} Pro models available`)
                     } else if (action.label === 'Free') {
-                      const freeModels = mockModels.filter(m => m.tier === 'free')
+                      const freeModels = AVAILABLE_MODELS.filter(m => m.tier === 'free')
                       toast.info(`${freeModels.length} free models: ${freeModels.map(m => m.name).join(', ')}`)
                     } else if (action.label === 'Image') {
-                      const imageModels = mockModels.filter(m => m.type === 'image')
+                      const imageModels = AVAILABLE_MODELS.filter(m => m.type === 'image')
                       toast.info(`${imageModels.length} image generation models`)
                     } else if (action.label === 'Video') {
                       toast.info('Video Models')
@@ -1406,7 +1493,7 @@ export default function AICreateClient() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {mockModels.map(model => (
+              {AVAILABLE_MODELS.map(model => (
                 <Card key={model.id} className={`transition-all ${model.isDefault ? 'ring-2 ring-purple-500' : ''}`}>
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-4">
@@ -1485,7 +1572,7 @@ export default function AICreateClient() {
                     <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <p className="text-sm text-gray-500">Credits Remaining</p>
                       <p className="text-2xl font-bold text-gray-900 dark:text-white">{calculatedStats.remainingCredits}</p>
-                      <Progress value={(calculatedStats.remainingCredits / mockUsageStats.totalCredits) * 100} className="h-2 mt-2" />
+                      <Progress value={(calculatedStats.remainingCredits / 500) * 100} className="h-2 mt-2" />
                     </div>
                     <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <p className="text-sm text-gray-500">Avg Processing</p>
@@ -1506,9 +1593,9 @@ export default function AICreateClient() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {[
-                    { label: 'Total Views', value: mockUsageStats.totalViews, icon: <Eye className="w-4 h-4" />, color: 'text-blue-500' },
-                    { label: 'Total Likes', value: mockUsageStats.totalLikes, icon: <Heart className="w-4 h-4" />, color: 'text-red-500' },
-                    { label: 'Downloads', value: mockUsageStats.totalDownloads, icon: <Download className="w-4 h-4" />, color: 'text-green-500' }
+                    { label: 'Total Views', value: calculatedStats.totalViews, icon: <Eye className="w-4 h-4" />, color: 'text-blue-500' },
+                    { label: 'Total Likes', value: calculatedStats.totalLikes, icon: <Heart className="w-4 h-4" />, color: 'text-red-500' },
+                    { label: 'Downloads', value: calculatedStats.totalDownloads, icon: <Download className="w-4 h-4" />, color: 'text-green-500' }
                   ].map((item, idx) => (
                     <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <div className="flex items-center gap-3">
@@ -1603,11 +1690,10 @@ export default function AICreateClient() {
                         <button
                           key={item.id}
                           onClick={() => setSettingsTab(item.id)}
-                          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors ${
-                            settingsTab === item.id
-                              ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
-                              : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
-                          }`}
+                          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors ${settingsTab === item.id
+                            ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
+                            : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                            }`}
                         >
                           <item.icon className="h-4 w-4" />
                           <span className="font-medium">{item.label}</span>
@@ -1854,23 +1940,23 @@ export default function AICreateClient() {
                                 })
                               } else {
                                 toast.loading(`Connecting to ${service.name}...`, { id: 'service-connect' })
-                                ;(async () => {
-                                  try {
-                                    const { data: { user } } = await supabase.auth.getUser()
-                                    if (!user) throw new Error('Not authenticated')
+                                  ; (async () => {
+                                    try {
+                                      const { data: { user } } = await supabase.auth.getUser()
+                                      if (!user) throw new Error('Not authenticated')
 
-                                    await supabase.from('ai_service_connections').upsert({
-                                      user_id: user.id,
-                                      service_name: service.name,
-                                      connected: true,
-                                      connected_at: new Date().toISOString()
-                                    }, { onConflict: 'user_id,service_name' })
+                                      await supabase.from('ai_service_connections').upsert({
+                                        user_id: user.id,
+                                        service_name: service.name,
+                                        connected: true,
+                                        connected_at: new Date().toISOString()
+                                      }, { onConflict: 'user_id,service_name' })
 
-                                    toast.success(`${service.name} connected`, { id: 'service-connect', description: 'Integration is now active' })
-                                  } catch (error: any) {
-                                    toast.error(`Failed to connect ${service.name}`, { id: 'service-connect', description: error.message })
-                                  }
-                                })()
+                                      toast.success(`${service.name} connected`, { id: 'service-connect', description: 'Integration is now active' })
+                                    } catch (error: any) {
+                                      toast.error(`Failed to connect ${service.name}`, { id: 'service-connect', description: error.message })
+                                    }
+                                  })()
                               }
                             }}>
                               {service.connected ? 'Disconnect' : 'Connect'}
@@ -2266,7 +2352,7 @@ export default function AICreateClient() {
               {importedFile && (
                 <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
                   <div className="flex items-center gap-2">
-                    <Image className="w-4 h-4"  loading="lazy"/>
+                    <Image className="w-4 h-4" loading="lazy" />
                     <span className="text-sm truncate max-w-[200px]">{importedFile.name}</span>
                   </div>
                   <Button variant="ghost" size="sm" onClick={() => setImportedFile(null)}>

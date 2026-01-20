@@ -46,6 +46,10 @@ import { useCurrentUser } from '@/hooks/use-ai-data'
 
 // Supabase Hooks
 import { useProjects, Project as SupabaseProject } from '@/lib/hooks/use-projects'
+import { useInsights } from '@/lib/hooks/use-insights-extended'
+import { useTeam } from '@/lib/hooks/use-team'
+import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
+import { useAnalyticsGoals } from '@/lib/hooks/use-analytics-extended'
 
 // CLIENT ZONE UTILITIES
 import {
@@ -60,33 +64,8 @@ const logger = createFeatureLogger('ProjectsV2')
 // V2 COMPETITIVE MOCK DATA - Projects Context
 // ============================================================================
 
-const projectsAIInsights = [
-  { id: '1', type: 'warning' as const, title: 'At-Risk Project', description: 'Website Redesign is 15% behind schedule. Consider reallocating resources.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Risk Management' },
-  { id: '2', type: 'success' as const, title: 'Budget Efficiency', description: 'Mobile App project is 20% under budget with 85% completion. Excellent resource management!', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Budget' },
-  { id: '3', type: 'info' as const, title: 'Resource Optimization', description: 'AI suggests moving 2 designers to Brand Identity project to meet deadline.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Resources' },
-  { id: '4', type: 'success' as const, title: 'Client Satisfaction', description: 'Average approval rate increased to 94% this month. Keep up the great work!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Quality' },
-]
+// Mock data replaced by real hooks
 
-const projectsCollaborators = [
-  { id: '1', name: 'Alexandra Chen', avatar: '/avatars/alex.jpg', status: 'online' as const, role: 'Project Manager', lastActive: 'Now' },
-  { id: '2', name: 'Marcus Johnson', avatar: '/avatars/marcus.jpg', status: 'online' as const, role: 'Lead Developer', lastActive: '2m ago' },
-  { id: '3', name: 'Sarah Williams', avatar: '/avatars/sarah.jpg', status: 'away' as const, role: 'Designer', lastActive: '15m ago' },
-  { id: '4', name: 'David Kim', avatar: '/avatars/david.jpg', status: 'offline' as const, role: 'QA Engineer', lastActive: '1h ago' },
-]
-
-const projectsPredictions = [
-  { id: '1', label: 'On-Time Delivery', current: 78, target: 95, predicted: 88, confidence: 85, trend: 'up' as const },
-  { id: '2', label: 'Budget Adherence', current: 92, target: 100, predicted: 96, confidence: 90, trend: 'up' as const },
-  { id: '3', label: 'Client Satisfaction', current: 4.6, target: 5.0, predicted: 4.8, confidence: 82, trend: 'up' as const },
-]
-
-const projectsActivities = [
-  { id: '1', user: 'Marcus Johnson', action: 'completed', target: 'API Integration milestone', timestamp: '10m ago', type: 'success' as const },
-  { id: '2', user: 'Sarah Williams', action: 'uploaded', target: '12 design assets to Brand Kit', timestamp: '25m ago', type: 'info' as const },
-  { id: '3', user: 'Alexandra Chen', action: 'approved', target: 'Mobile App Phase 2 budget', timestamp: '1h ago', type: 'success' as const },
-  { id: '4', user: 'David Kim', action: 'flagged', target: '3 bugs in Website Redesign', timestamp: '2h ago', type: 'warning' as const },
-  { id: '5', user: 'Client', action: 'requested', target: 'revision on homepage design', timestamp: '3h ago', type: 'info' as const },
-]
 
 // Quick actions are defined inside component to access handlers
 
@@ -112,34 +91,98 @@ export default function ProjectsClient() {
     deleteProject: deleteDbProject
   } = useProjects()
 
-  // STATE MANAGEMENT
-  const [projects, setProjects] = useState<Project[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  // Real Data Hooks
+  const { insights } = useInsights({ limit: 4 })
+  const { members } = useTeam()
+  const { logs: activityLogs, refetch: refetchActivities } = useActivityLogs([], { category: 'project' }) // Filtering by 'project' if supported, otherwise just getting latest
+  const { data: goals } = useAnalyticsGoals(userId || undefined)
+
+  // Map Data
+  const projectsAIInsights = useMemo(() => {
+    if (!insights || insights.length === 0) return []
+    return insights.map((insight: any) => ({
+      id: insight.id,
+      type: (['alert', 'recommendation', 'opportunity', 'prediction'].includes(insight.type) ? insight.type : 'alert') as any,
+      title: insight.title || 'Insight',
+      description: insight.description || '',
+      priority: (insight.priority === 'high' || insight.priority === 'medium' || insight.priority === 'low') ? insight.priority : 'medium',
+      timestamp: insight.created_at,
+      category: insight.category || 'General'
+    }))
+  }, [insights])
+
+  const projectsCollaborators = useMemo(() => {
+    if (!members || members.length === 0) return []
+    return members.map(m => ({
+      id: m.id,
+      name: m.name,
+      avatar: m.avatar_url || '',
+      status: m.status === 'active' ? 'online' : 'offline',
+      role: m.role || 'Member',
+      lastActive: m.updated_at ? new Date(m.updated_at).toLocaleDateString() : 'Unknown'
+    })) as any[]
+  }, [members])
+
+  const projectsActivities = useMemo(() => {
+    if (!activityLogs || activityLogs.length === 0) return []
+    return activityLogs.slice(0, 5).map(log => ({
+      id: log.id,
+      user: {
+        id: log.user_id || '0',
+        name: log.user_name || log.user_email || 'Unknown User',
+        avatar: '' // Placeholder if avatar not in log
+      },
+      action: log.action || 'updated',
+      target: log.resource_name || 'Project',
+      timestamp: new Date(log.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      type: (['delete', 'comment', 'update', 'create', 'mention', 'assignment', 'status_change', 'milestone', 'integration'].includes(log.action) ? log.action : 'update') as any
+    }))
+  }, [activityLogs])
+
+  const projectsPredictions = useMemo(() => {
+    if (!goals || goals.length === 0) {
+      // Fallback if no goals, maybe show empty or some defaults if needed, 
+      // but for now let's return a valid empty structure or minimal defaults
+      // so it doesn't crash if arrays are expected to be non-empty by the component (checked below: component handles it?)
+      // Actually component loops, so empty array is fine.
+      return []
+    }
+    return goals.slice(0, 3).map((g: any) => ({
+      id: g.id,
+      label: g.name || 'Goal',
+      current: g.current_value || 0,
+      target: g.target_value || 100,
+      predicted: g.projected_value || 0,
+      confidence: g.confidence_score || 0,
+      trend: (g.trend === 'up' || g.trend === 'down') ? g.trend : 'neutral'
+    })) as any[]
+  }, [goals])
+
+
+  // STATE MANAGEMENT - Simplified to use hook data directly
   const [actionLoading, setActionLoading] = useState<{ [key: string]: boolean }>({})
 
-  // Map Supabase projects to local format (with mock fallback)
-  const activeProjects = useMemo(() => {
-    if (dbProjects && dbProjects.length > 0) {
-      return dbProjects.map((p: SupabaseProject) => ({
-        id: parseInt(p.id) || 0,
-        name: p.name || 'Untitled Project',
-        description: p.description || '',
-        client: 'Client', // Default since not in hook
-        startDate: p.start_date || new Date().toISOString(),
-        dueDate: p.end_date || new Date().toISOString(),
-        status: p.status || 'planning',
-        progress: p.progress || 0,
-        budget: p.budget || 0,
-        spent: p.spent || 0,
-        milestones: [],
-        deliverables: [],
-        team: p.team_members || [],
-        tags: p.tags || []
-      })) as Project[]
-    }
-    return projects
-  }, [dbProjects, projects])
+  // Map Supabase projects to local format
+  const projects = useMemo(() => {
+    return dbProjects.map((p: SupabaseProject) => ({
+      id: parseInt(p.id) || 0,
+      name: p.name || 'Untitled Project',
+      description: p.description || '',
+      client: 'Client', // Default since not in hook
+      startDate: p.start_date || new Date().toISOString(),
+      dueDate: p.end_date || new Date().toISOString(),
+      status: p.status || 'planning',
+      progress: p.progress || 0,
+      budget: p.budget || 0,
+      spent: p.spent || 0,
+      milestones: [],
+      deliverables: [],
+      team: p.team_members || [],
+      tags: p.tags || [],
+      phase: p.status === 'completed' ? 'Delivered' : 'Execution', // Derived phase
+      lastUpdate: p.updated_at || new Date().toISOString()
+    })) as Project[]
+  }, [dbProjects])
 
   // V2 Enhanced State
   const [searchQuery, setSearchQuery] = useState('')
@@ -167,63 +210,13 @@ export default function ProjectsClient() {
   const [sharePermission, setSharePermission] = useState<string>('view')
 
   // ============================================================================
-  // DATA FETCHING - Synced with Supabase hooks
+  // DATA FETCHING - Uses Supabase hook directly
   // ============================================================================
 
+  // Fetch projects on mount
   useEffect(() => {
-    // Fetch projects from Supabase on mount
     refetchProjects()
   }, [refetchProjects])
-
-  // Sync loading state with Supabase hook
-  useEffect(() => {
-    if (!projectsLoading) {
-      setIsLoading(false)
-      if (activeProjects.length > 0) {
-        setProjects(activeProjects)
-      }
-    }
-  }, [projectsLoading, activeProjects])
-
-  // Legacy fetch function for backward compatibility - now uses Supabase
-  const fetchProjects = useCallback(async () => {
-    try {
-      setIsLoading(true)
-      setError(null)
-
-      // Use Supabase hook to refresh data
-      await refetchProjects()
-
-      // If no data from Supabase, fall back to API
-      if (dbProjects.length === 0) {
-        const response = await fetch('/api/client-zone/projects', {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' }
-        })
-
-        if (!response.ok) throw new Error('Failed to fetch projects: ' + response.statusText)
-
-        const data = await response.json()
-        if (data.success) {
-          setProjects(data.projects || [])
-        } else {
-          throw new Error(data.error || 'Failed to load projects')
-        }
-      }
-
-      // Update local state with Supabase data
-      if (activeProjects.length > 0) {
-        setProjects(activeProjects)
-      }
-    } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to load projects'
-      setError(errorMessage)
-      logger.error('Failed to fetch projects', { error: err })
-      toast.error('Failed to load projects')
-    } finally {
-      setIsLoading(false)
-    }
-  }, [refetchProjects, dbProjects.length, activeProjects])
 
   // ============================================================================
   // FILTERED & COMPUTED DATA
@@ -242,31 +235,16 @@ export default function ProjectsClient() {
     })
   }, [projects, searchQuery, statusFilter, activeTab])
 
-  // Use Supabase stats if available, fallback to computed local stats
-  const computedStats = useMemo(() => {
-    // Prefer Supabase hook stats if they have data
-    if (projectStats && projectStats.total > 0) {
-      return {
-        total: projectStats.total,
-        active: projectStats.active,
-        completed: projectStats.completed,
-        pending: projectStats.onHold || 0,
-        totalBudget: projectStats.totalBudget,
-        totalSpent: projectStats.totalSpent,
-        avgProgress: projectStats.avgProgress || 0,
-      }
-    }
-    // Fallback to local computation
-    return {
-      total: projects.length,
-      active: projects.filter(p => ['in-progress', 'review', 'active'].includes(p.status)).length,
-      completed: projects.filter(p => p.status === 'completed').length,
-      pending: projects.filter(p => ['pending', 'on_hold'].includes(p.status)).length,
-      totalBudget: projects.reduce((sum, p) => sum + (p.budget || 0), 0),
-      totalSpent: projects.reduce((sum, p) => sum + (p.spent || 0), 0),
-      avgProgress: projects.length > 0 ? Math.round(projects.reduce((sum, p) => sum + (p.progress || 0), 0) / projects.length) : 0,
-    }
-  }, [projects, projectStats])
+  // Use Supabase stats directly
+  const computedStats = useMemo(() => ({
+    total: projectStats.total,
+    active: projectStats.active,
+    completed: projectStats.completed,
+    pending: projectStats.onHold || 0,
+    totalBudget: projectStats.totalBudget,
+    totalSpent: projectStats.totalSpent,
+    avgProgress: projectStats.avgProgress || 0,
+  }), [projectStats])
 
   // ============================================================================
   // HANDLERS
@@ -304,7 +282,7 @@ export default function ProjectsClient() {
         setRevisionModalOpen(false)
         setRevisionProjectId(null)
         setRevisionNotes('')
-        await fetchProjects()
+        await refetchProjects()
       } else {
         throw new Error(result.error || 'Failed to submit revision')
       }
@@ -334,7 +312,7 @@ export default function ProjectsClient() {
       const result = await response.json()
       if (result.success) {
         toast.success('"' + project.name + '" approved!')
-        await fetchProjects()
+        await refetchProjects()
       } else {
         throw new Error(result.error || 'Failed to approve')
       }
@@ -393,39 +371,27 @@ export default function ProjectsClient() {
 
     setCreateLoading(true)
     try {
-      const response = await fetch('/api/projects', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      if (createDbProject) {
+        await createDbProject({
           name: newProjectName.trim(),
           description: newProjectDescription.trim(),
-          due_date: newProjectDueDate || null,
-          budget: newProjectBudget ? parseFloat(newProjectBudget) : null,
+          end_date: newProjectDueDate || undefined,
+          budget: newProjectBudget ? parseFloat(newProjectBudget) : undefined,
           status: 'planning',
           priority: 'medium'
         })
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to create project')
-      }
-
-      const result = await response.json()
-      if (result.success) {
-        toast.success('Project created successfully - ' + newProjectName.trim() + ' has been created')
         setShowCreateModal(false)
         setNewProjectName('')
         setNewProjectDescription('')
         setNewProjectDueDate('')
         setNewProjectBudget('')
-        await fetchProjects()
+        // refetchProjects is handled by hook subscription usually, or we can await it if returned
       } else {
-        throw new Error(result.error || 'Failed to create project')
+        throw new Error('Create function not available')
       }
     } catch (err: unknown) {
       logger.error('Create project failed', { error: err })
-      toast.error('Failed to create project')
+      // toast handled by hook
     } finally {
       setCreateLoading(false)
     }
@@ -439,28 +405,15 @@ export default function ProjectsClient() {
     if (!confirmed) return
 
     const actionKey = `delete-${projectId}`
+    const actionKey = `delete-${projectId}`
     try {
       setActionLoading(prev => ({ ...prev, [actionKey]: true }))
-      const response = await fetch('/api/projects?id=' + projectId + '&permanent=true', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' }
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to delete project')
-      }
-
-      const result = await response.json()
-      if (result.success) {
-        toast.success('Project deleted - ' + project.name + ' has been permanently deleted')
-        await fetchProjects()
-      } else {
-        throw new Error(result.error || 'Failed to delete project')
+      if (deleteDbProject) {
+        await deleteDbProject(project.id.toString()) // Assuming hook takes string ID
       }
     } catch (err: unknown) {
       logger.error('Delete project failed', { error: err })
-      toast.error('Failed to delete project')
+      // toast handled by hook
     } finally {
       setActionLoading(prev => ({ ...prev, [actionKey]: false }))
     }
@@ -473,27 +426,11 @@ export default function ProjectsClient() {
     const actionKey = 'archive-' + projectId
     try {
       setActionLoading(prev => ({ ...prev, [actionKey]: true }))
-      const response = await fetch('/api/projects', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: projectId, status: 'archived' })
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to archive project')
-      }
-
-      const result = await response.json()
-      if (result.success) {
-        toast.success('Project archived - ' + project.name + ' has been archived')
-        await fetchProjects()
-      } else {
-        throw new Error(result.error || 'Failed to archive project')
+      if (archiveDbProject) {
+        await archiveDbProject(project.id.toString())
       }
     } catch (err: unknown) {
       logger.error('Archive project failed', { error: err })
-      toast.error('Failed to archive project')
     } finally {
       setActionLoading(prev => ({ ...prev, [actionKey]: false }))
     }
@@ -540,33 +477,17 @@ export default function ProjectsClient() {
     const actionKey = 'duplicate-' + projectId
     try {
       setActionLoading(prev => ({ ...prev, [actionKey]: true }))
-      const response = await fetch('/api/projects', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      if (createDbProject) {
+        await createDbProject({
           name: project.name + ' (Copy)',
           description: project.description,
           budget: project.budget,
           status: 'planning',
           priority: 'medium'
         })
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to duplicate project')
-      }
-
-      const result = await response.json()
-      if (result.success) {
-        toast.success('Project duplicated - ' + project.name + ' has been duplicated')
-        await fetchProjects()
-      } else {
-        throw new Error(result.error || 'Failed to duplicate project')
       }
     } catch (err: unknown) {
       logger.error('Duplicate project failed', { error: err })
-      toast.error('Failed to duplicate project')
     } finally {
       setActionLoading(prev => ({ ...prev, [actionKey]: false }))
     }
@@ -648,7 +569,7 @@ export default function ProjectsClient() {
           setShareDialogOpen(false)
           setShareEmail('')
           setSharePermission('view')
-          await fetchProjects()
+          await refetchProjects()
         } else {
           throw new Error(result.error || 'Failed to share project')
         }
@@ -704,7 +625,7 @@ export default function ProjectsClient() {
   // LOADING STATE
   // ============================================================================
 
-  if (isLoading) {
+  if (projectsLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:bg-none dark:bg-gray-900 p-6">
         <div className="container mx-auto space-y-6">
@@ -720,11 +641,11 @@ export default function ProjectsClient() {
   // ERROR STATE
   // ============================================================================
 
-  if (error) {
+  if (projectsError) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:bg-none dark:bg-gray-900 p-6">
         <div className="container mx-auto">
-          <ErrorEmptyState error={error} onRetry={fetchProjects} />
+          <ErrorEmptyState error={projectsError} onRetry={refetchProjects} />
         </div>
       </div>
     )
@@ -759,7 +680,7 @@ export default function ProjectsClient() {
           </div>
 
           <div className="flex items-center gap-3">
-            <Button variant="outline" onClick={fetchProjects}>
+            <Button variant="outline" onClick={refetchProjects}>
               <RefreshCw className="h-4 w-4 mr-2" />
               Refresh
             </Button>

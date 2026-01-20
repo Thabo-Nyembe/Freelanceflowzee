@@ -116,17 +116,12 @@ interface BudgetItem {
 }
 
 // Use centralized mock data - mapped to local variable names for compatibility
-const mockAccounts = financialAccounts as Account[]
-const mockBankAccounts = financialBankAccounts as BankAccount[]
-const mockTransactions = financialTransactions as Transaction[]
-const mockBudgetItems = financialBudgetItems as BudgetItem[]
-const profitLossData = financialProfitLoss
-const cashFlowData = financialCashFlow
-const mockAIInsights = financialAIInsights
-const mockFinancialCollaborators = financialCollaborators
-const mockFinancialPredictions = financialPredictions
-const mockFinancialActivities = financialActivities
-const mockFinancialQuickActions = financialQuickActions
+// Mapped Data Adapters
+const mockAIInsights: any[] = [] // Future: Connect to useRevenueIntelligence
+const mockFinancialCollaborators: any[] = []
+const mockFinancialPredictions: any[] = []
+const mockFinancialActivities: any[] = []
+const mockFinancialQuickActions = financialQuickActions // Keep static actions
 
 export default function FinancialClient({ initialFinancial }: { initialFinancial: FinancialRecord[] }) {
   const [activeTab, setActiveTab] = useState('overview')
@@ -141,6 +136,65 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
   const { records, createRecord, updateRecord, deleteRecord, loading: creating, refetch } = useFinancial({})
   const displayRecords = records.length > 0 ? records : initialFinancial
   const [isProcessing, setIsProcessing] = useState(false)
+
+  // Derived Financial Data
+  const financialData = useMemo(() => {
+    const totalIncome = displayRecords
+      .filter(r => r.record_type === 'income' && r.status === 'paid')
+      .reduce((sum, r) => sum + r.amount, 0)
+
+    const totalExpenses = displayRecords
+      .filter(r => r.record_type === 'expense' && r.status === 'paid')
+      .reduce((sum, r) => sum + r.amount, 0)
+
+    const pendingIncome = displayRecords
+      .filter(r => r.record_type === 'income' && r.status === 'pending')
+      .reduce((sum, r) => sum + r.amount, 0)
+
+    const balance = totalIncome - totalExpenses
+
+    // Virtual Accounts (Aggregated)
+    const accounts: Account[] = [
+      {
+        id: 'main-1',
+        code: '1000',
+        name: 'Operating Account',
+        type: 'asset',
+        subtype: 'checking',
+        balance: balance,
+        isActive: true,
+        description: 'Main operating funds'
+      },
+      {
+        id: 'main-2',
+        code: '1200',
+        name: 'Pending Receivables',
+        type: 'asset',
+        subtype: 'receivable',
+        balance: pendingIncome,
+        isActive: true,
+        description: 'Invoices sent but not paid'
+      }
+    ]
+
+    // Mapped Transactions
+    const transactions: Transaction[] = displayRecords.slice(0, 50).map(r => ({
+      id: r.id,
+      date: r.record_date || r.created_at,
+      description: r.title,
+      category: r.category,
+      account: 'Operating Account',
+      amount: r.amount,
+      type: r.record_type === 'income' ? 'income' : 'expense',
+      status: r.status === 'paid' ? 'cleared' : 'pending',
+      payee: r.description
+    }))
+
+    return { accounts, transactions, totalIncome, totalExpenses, balance }
+  }, [displayRecords])
+
+  const mockAccounts = financialData.accounts
+  const mockTransactions = financialData.transactions
 
   // Form state for new transaction
   const [newTransactionForm, setNewTransactionForm] = useState({
@@ -727,11 +781,10 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                             <p className={`font-semibold ${transaction.amount > 0 ? 'text-green-600' : 'text-red-600'}`}>
                               {transaction.amount > 0 ? '+' : ''}{formatCurrency(transaction.amount)}
                             </p>
-                            <span className={`text-xs px-2 py-0.5 rounded-full ${
-                              transaction.status === 'reconciled' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' :
-                              transaction.status === 'cleared' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' :
-                              'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300'
-                            }`}>
+                            <span className={`text-xs px-2 py-0.5 rounded-full ${transaction.status === 'reconciled' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' :
+                                transaction.status === 'cleared' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' :
+                                  'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300'
+                              }`}>
                               {transaction.status}
                             </span>
                           </div>
@@ -817,11 +870,10 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                   <div key={account.id} className="p-6">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-3">
-                        <div className={`p-2 rounded-lg ${
-                          account.type === 'checking' ? 'bg-blue-100 dark:bg-blue-900/30' :
-                          account.type === 'savings' ? 'bg-green-100 dark:bg-green-900/30' :
-                          'bg-purple-100 dark:bg-purple-900/30'
-                        }`}>
+                        <div className={`p-2 rounded-lg ${account.type === 'checking' ? 'bg-blue-100 dark:bg-blue-900/30' :
+                            account.type === 'savings' ? 'bg-green-100 dark:bg-green-900/30' :
+                              'bg-purple-100 dark:bg-purple-900/30'
+                          }`}>
                           {account.type === 'credit' ? (
                             <CreditCard className="w-5 h-5 text-purple-600" />
                           ) : (
@@ -1383,11 +1435,10 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
               {mockBankAccounts.map((account) => (
                 <div key={account.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
                   <div className="flex items-center justify-between mb-4">
-                    <div className={`p-3 rounded-xl ${
-                      account.type === 'checking' ? 'bg-blue-100 dark:bg-blue-900/30' :
-                      account.type === 'savings' ? 'bg-green-100 dark:bg-green-900/30' :
-                      'bg-purple-100 dark:bg-purple-900/30'
-                    }`}>
+                    <div className={`p-3 rounded-xl ${account.type === 'checking' ? 'bg-blue-100 dark:bg-blue-900/30' :
+                        account.type === 'savings' ? 'bg-green-100 dark:bg-green-900/30' :
+                          'bg-purple-100 dark:bg-purple-900/30'
+                      }`}>
                       {account.type === 'credit' ? (
                         <CreditCard className="w-6 h-6 text-purple-600" />
                       ) : (
@@ -1491,11 +1542,10 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{transaction.category}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{transaction.account}</td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
-                            transaction.status === 'reconciled' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' :
-                            transaction.status === 'cleared' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' :
-                            'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300'
-                          }`}>
+                          <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${transaction.status === 'reconciled' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' :
+                              transaction.status === 'cleared' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' :
+                                'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300'
+                            }`}>
                             {transaction.status === 'reconciled' && <CheckCircle className="w-3 h-3" />}
                             {transaction.status === 'cleared' && <CheckCircle className="w-3 h-3" />}
                             {transaction.status === 'pending' && <Clock className="w-3 h-3" />}
@@ -1577,11 +1627,10 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                       <button
                         key={item.id}
                         onClick={() => setSettingsTab(item.id)}
-                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
-                          settingsTab === item.id
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${settingsTab === item.id
                             ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400'
                             : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50'
-                        }`}
+                          }`}
                       >
                         <item.icon className="h-5 w-5" />
                         <div className="text-left">

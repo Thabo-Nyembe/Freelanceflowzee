@@ -5,6 +5,7 @@
 import { withAuth } from 'next-auth/middleware'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
+import { updateSession } from '@/lib/supabase/middleware'
 
 // Public routes that don't require authentication
 const publicRoutes = [
@@ -65,7 +66,7 @@ const isProtectedRoute = (pathname: string) =>
   pathname.startsWith('/analytics')
 
 export default withAuth(
-  function middleware(req: NextRequest) {
+  async function middleware(req: NextRequest) {
     const { pathname } = req.nextUrl
 
     // ----------------------------------------------------------
@@ -81,9 +82,19 @@ export default withAuth(
     }
 
     // ----------------------------------------------------------
-    // 2. Apply security headers
+    // 2. Update Supabase session (refresh tokens, manage cookies)
     // ----------------------------------------------------------
-    const res = NextResponse.next()
+    const supabaseResponse = await updateSession(req)
+
+    // If Supabase middleware returned a redirect (e.g., to login), use it
+    if (supabaseResponse.status === 307 || supabaseResponse.status === 308) {
+      return supabaseResponse
+    }
+
+    // ----------------------------------------------------------
+    // 3. Apply security headers
+    // ----------------------------------------------------------
+    const res = supabaseResponse
 
     // Basic security headers
     res.headers.set('X-Content-Type-Options', 'nosniff')

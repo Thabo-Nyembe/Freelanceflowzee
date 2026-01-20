@@ -116,11 +116,9 @@ interface BudgetItem {
 }
 
 // Use centralized mock data - mapped to local variable names for compatibility
-const mockAccounts = financialAccounts as Account[]
 const mockBankAccounts = financialBankAccounts as BankAccount[]
-const mockTransactions = financialTransactions as Transaction[]
 const mockBudgetItems = financialBudgetItems as BudgetItem[]
-const profitLossData = financialProfitLoss
+// const profitLossData = financialProfitLoss // Removed to use real data
 const cashFlowData = financialCashFlow
 const mockAIInsights = financialAIInsights
 const mockFinancialCollaborators = financialCollaborators
@@ -215,41 +213,109 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
     }
   }
 
+  // Derived Collections (from Real Data)
+  const allTransactions = useMemo<Transaction[]>(() => {
+    return displayRecords.filter(r =>
+      ['revenue', 'expense'].includes(r.record_type)
+    ).map(r => ({
+      id: r.id,
+      date: r.record_date,
+      description: r.title,
+      category: r.category,
+      account: r.account_code || 'General',
+      amount: r.amount,
+      type: (r.record_type === 'revenue' ? 'income' : 'expense') as 'income' | 'expense' | 'transfer',
+      status: (r.status === 'approved' ? 'cleared' : r.status === 'pending' ? 'pending' : 'reconciled') as 'cleared' | 'pending' | 'reconciled',
+      payee: r.metadata?.payee || r.description || '',
+      reference: r.transaction_reference || ''
+    }))
+  }, [displayRecords])
+
+  const allAccounts = useMemo<Account[]>(() => {
+    return displayRecords.filter(r =>
+      ['asset', 'liability', 'equity', 'revenue'].includes(r.record_type) && r.record_number?.startsWith('ACC-')
+    ).map(r => ({
+      id: r.id,
+      code: r.account_code || r.record_number.replace('ACC-', ''),
+      name: r.title,
+      type: r.record_type as 'asset' | 'liability' | 'equity' | 'revenue' | 'expense',
+      subtype: r.category,
+      balance: r.amount,
+      description: r.description || '',
+      isActive: r.status === 'approved',
+    }))
+  }, [displayRecords])
+
+  // Categorized Summaries
+  const revenueSummary = useMemo(() => {
+    const summary: Record<string, number> = {}
+    displayRecords.filter(r => r.record_type === 'revenue').forEach(r => {
+      summary[r.category] = (summary[r.category] || 0) + r.amount
+    })
+    return summary
+  }, [displayRecords])
+
+  const expenseSummary = useMemo(() => {
+    const summary: Record<string, number> = {}
+    displayRecords.filter(r => r.record_type === 'expense').forEach(r => {
+      summary[r.category] = (summary[r.category] || 0) + r.amount
+    })
+    return summary
+  }, [displayRecords])
+
   // Calculations
-  const totalRevenue = Object.values(profitLossData?.revenue || {}).reduce((a, b) => a + b, 0)
-  const totalCostOfSales = Object.values(profitLossData?.costOfRevenue || {}).reduce((a, b) => a + b, 0)
+  const totalRevenue = displayRecords
+    .filter(r => r.record_type === 'revenue')
+    .reduce((sum, r) => sum + r.amount, 0)
+
+  const totalExpenses = displayRecords
+    .filter(r => r.record_type === 'expense')
+    .reduce((sum, r) => sum + r.amount, 0)
+
+  const totalCostOfSales = 0 // Needs specific categorization in DB to separate from OpEx
   const grossProfit = totalRevenue - totalCostOfSales
-  const totalOperatingExpenses = Object.values(profitLossData?.operatingExpenses || {}).reduce((a, b) => a + b, 0)
-  const netIncome = grossProfit - totalOperatingExpenses
+  const totalOperatingExpenses = totalExpenses
+  const netIncome = totalRevenue - totalExpenses
 
-  const totalAssets = (mockAccounts || []).filter(a => a.type === 'asset').reduce((sum, a) => sum + a.balance, 0)
-  const totalLiabilities = (mockAccounts || []).filter(a => a.type === 'liability').reduce((sum, a) => sum + a.balance, 0)
-  const totalEquity = (mockAccounts || []).filter(a => a.type === 'equity').reduce((sum, a) => sum + a.balance, 0)
+  const totalAssets = allAccounts.filter(a => a.type === 'asset').reduce((sum, a) => sum + a.balance, 0)
+  const totalLiabilities = allAccounts.filter(a => a.type === 'liability').reduce((sum, a) => sum + a.balance, 0)
+  const totalEquity = allAccounts.filter(a => a.type === 'equity').reduce((sum, a) => sum + a.balance, 0)
 
-  const operatingCashFlow = Object.values(cashFlowData?.operating || {}).reduce((a, b) => a + b, 0)
-  const investingCashFlow = Object.values(cashFlowData?.investing || {}).reduce((a, b) => a + b, 0)
-  const financingCashFlow = Object.values(cashFlowData?.financing || {}).reduce((a, b) => a + b, 0)
+  // Cash Flow (Simplified)
+  const operatingCashFlow = netIncome
+  const investingCashFlow = 0
+  const financingCashFlow = 0
   const netCashFlow = operatingCashFlow + investingCashFlow + financingCashFlow
 
+  const cashFlowSummary: {
+    operating: Record<string, number>;
+    investing: Record<string, number>;
+    financing: Record<string, number>;
+  } = {
+    operating: { 'Net Income': netIncome },
+    investing: {},
+    financing: {}
+  }
+
   const filteredTransactions = useMemo(() => {
-    return mockTransactions.filter(t => {
+    return allTransactions.filter(t => {
       const matchesFilter = transactionFilter === 'all' || t.type === transactionFilter
       const matchesSearch = searchQuery === '' ||
         t.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        t.payee?.toLowerCase().includes(searchQuery.toLowerCase())
+        (t.payee && t.payee.toLowerCase().includes(searchQuery.toLowerCase()))
       return matchesFilter && matchesSearch
     })
-  }, [transactionFilter, searchQuery])
+  }, [allTransactions, transactionFilter, searchQuery])
 
   const accountsByType = useMemo(() => {
     return {
-      asset: mockAccounts.filter(a => a.type === 'asset'),
-      liability: mockAccounts.filter(a => a.type === 'liability'),
-      equity: mockAccounts.filter(a => a.type === 'equity'),
-      revenue: mockAccounts.filter(a => a.type === 'revenue'),
-      expense: mockAccounts.filter(a => a.type === 'expense'),
+      asset: allAccounts.filter(a => a.type === 'asset'),
+      liability: allAccounts.filter(a => a.type === 'liability'),
+      equity: allAccounts.filter(a => a.type === 'equity'),
+      revenue: allAccounts.filter(a => a.type === 'revenue'),
+      expense: allAccounts.filter(a => a.type === 'expense'),
     }
-  }, [])
+  }, [allAccounts])
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount)
@@ -355,7 +421,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
     }
   }
 
-  const handleReconcileAccount = async (account: typeof mockAccounts[0]) => {
+  const handleReconcileAccount = async (account: Account) => {
     setIsProcessing(true)
     toast.loading("Reconciling \"" + account.name + "\"...", { id: 'reconcile' })
 
@@ -443,7 +509,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
     }
   }
 
-  const handleApproveTransaction = async (transaction: typeof mockTransactions[0] | FinancialRecord) => {
+  const handleApproveTransaction = async (transaction: Transaction | FinancialRecord) => {
     setIsProcessing(true)
     const transactionTitle = 'title' in transaction ? transaction.title : transaction.description
 
@@ -643,7 +709,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Total Expenses</p>
-                <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">{formatCurrency(totalCostOfSales + totalOperatingExpenses)}</p>
+                <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">{formatCurrency(totalExpenses)}</p>
                 <div className="flex items-center gap-1 mt-2 text-red-600">
                   <ArrowDownRight className="w-4 h-4" />
                   <span className="text-sm font-medium">8.2% vs last year</span>
@@ -765,7 +831,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                 </div>
                 <ScrollArea className="h-[320px]">
                   <div className="divide-y divide-gray-100 dark:divide-gray-700">
-                    {mockTransactions.slice(0, 6).map((transaction) => (
+                    {filteredTransactions.slice(0, 6).map((transaction) => (
                       <div key={transaction.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
@@ -787,8 +853,8 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                             </p>
                             <span className={"text-xs px-2 py-0.5 rounded-full " + (
                               transaction.status === 'reconciled' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' :
-                              transaction.status === 'cleared' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' :
-                              'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300'
+                                transaction.status === 'cleared' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' :
+                                  'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300'
                             ) + ""}>
                               {transaction.status}
                             </span>
@@ -877,8 +943,8 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                       <div className="flex items-center gap-3">
                         <div className={"p-2 rounded-lg " + (
                           account.type === 'checking' ? 'bg-blue-100 dark:bg-blue-900/30' :
-                          account.type === 'savings' ? 'bg-green-100 dark:bg-green-900/30' :
-                          'bg-purple-100 dark:bg-purple-900/30'
+                            account.type === 'savings' ? 'bg-green-100 dark:bg-green-900/30' :
+                              'bg-purple-100 dark:bg-purple-900/30'
                         ) + ""}>
                           {account.type === 'credit' ? (
                             <CreditCard className="w-5 h-5 text-purple-600" />
@@ -951,10 +1017,11 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                 <div>
                   <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Revenue</h4>
                   <div className="space-y-2">
-                    {Object.entries(profitLossData?.revenue || {}).map(([name, amount]) => (
+                    {Object.entries(revenueSummary).length === 0 && <p className="text-sm text-gray-500 italic p-2">No revenue recorded</p>}
+                    {Object.entries(revenueSummary).map(([name, amount]) => (
                       <div key={name} className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700">
                         <span className="text-gray-700 dark:text-gray-300">{name}</span>
-                        <span className="font-medium text-gray-900 dark:text-white">{formatCurrency(amount)}</span>
+                        <span className="font-medium text-gray-900 dark:text-white">{formatCurrency(amount as number)}</span>
                       </div>
                     ))}
                     <div className="flex items-center justify-between py-2 bg-green-50 dark:bg-green-900/20 -mx-6 px-6">
@@ -968,7 +1035,9 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                 <div>
                   <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Cost of Sales</h4>
                   <div className="space-y-2">
-                    {Object.entries(profitLossData.costOfRevenue || {}).map(([name, amount]) => (
+                    {/* Cost of Revenue not fully implemented yet - using empty placeholder */}
+                    {/* Object.entries(expenseSummary).filter(([k]) => k.includes('Cost')).map... */}
+                    {Object.entries({}).map(([name, amount]) => (
                       <div key={name} className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700">
                         <span className="text-gray-700 dark:text-gray-300">{name}</span>
                         <span className="font-medium text-red-600">({formatCurrency(amount)})</span>
@@ -991,10 +1060,11 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                 <div>
                   <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Operating Expenses</h4>
                   <div className="space-y-2">
-                    {Object.entries(profitLossData?.operatingExpenses || {}).map(([name, amount]) => (
+                    {Object.entries(expenseSummary).length === 0 && <p className="text-sm text-gray-500 italic p-2">No expenses recorded</p>}
+                    {Object.entries(expenseSummary).map(([name, amount]) => (
                       <div key={name} className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700">
                         <span className="text-gray-700 dark:text-gray-300">{name}</span>
-                        <span className="font-medium text-red-600">({formatCurrency(amount)})</span>
+                        <span className="font-medium text-red-600">({formatCurrency(amount as number)})</span>
                       </div>
                     ))}
                     <div className="flex items-center justify-between py-2 bg-red-50 dark:bg-red-900/20 -mx-6 px-6">
@@ -1142,11 +1212,11 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                 <div>
                   <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Cash Flows from Operating Activities</h4>
                   <div className="space-y-2">
-                    {Object.entries(cashFlowData?.operating || {}).map(([name, amount]) => (
+                    {Object.entries(cashFlowSummary.operating || {}).map(([name, amount]) => (
                       <div key={name} className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700">
                         <span className="text-gray-700 dark:text-gray-300">{name}</span>
-                        <span className={"font-medium " + (amount >= 0 ? 'text-green-600' : 'text-red-600') + ""}>
-                          {amount >= 0 ? '' : '('}{formatCurrency(Math.abs(amount))}{amount < 0 && ')'}
+                        <span className={"font-medium " + ((amount as number) >= 0 ? 'text-green-600' : 'text-red-600') + ""}>
+                          {(amount as number) >= 0 ? '' : '('}{formatCurrency(Math.abs(amount as number))}{(amount as number) < 0 && ')'}
                         </span>
                       </div>
                     ))}
@@ -1161,11 +1231,11 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                 <div>
                   <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Cash Flows from Investing Activities</h4>
                   <div className="space-y-2">
-                    {Object.entries(cashFlowData?.investing || {}).map(([name, amount]) => (
+                    {Object.entries(cashFlowSummary.investing || {}).map(([name, amount]) => (
                       <div key={name} className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700">
                         <span className="text-gray-700 dark:text-gray-300">{name}</span>
-                        <span className={"font-medium " + (amount >= 0 ? 'text-green-600' : 'text-red-600') + ""}>
-                          {amount >= 0 ? '' : '('}{formatCurrency(Math.abs(amount))}{amount < 0 && ')'}
+                        <span className={"font-medium " + ((amount as number) >= 0 ? 'text-green-600' : 'text-red-600') + ""}>
+                          {(amount as number) >= 0 ? '' : '('}{formatCurrency(Math.abs(amount as number))}{(amount as number) < 0 && ')'}
                         </span>
                       </div>
                     ))}
@@ -1180,11 +1250,11 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                 <div>
                   <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Cash Flows from Financing Activities</h4>
                   <div className="space-y-2">
-                    {Object.entries(cashFlowData?.financing || {}).map(([name, amount]) => (
+                    {Object.entries(cashFlowSummary.financing || {}).map(([name, amount]) => (
                       <div key={name} className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700">
                         <span className="text-gray-700 dark:text-gray-300">{name}</span>
-                        <span className={"font-medium " + (amount >= 0 ? 'text-green-600' : 'text-red-600') + ""}>
-                          {amount >= 0 ? '' : '('}{formatCurrency(Math.abs(amount))}{amount < 0 && ')'}
+                        <span className={"font-medium " + ((amount as number) >= 0 ? 'text-green-600' : 'text-red-600') + ""}>
+                          {(amount as number) >= 0 ? '' : '('}{formatCurrency(Math.abs(amount as number))}{(amount as number) < 0 && ')'}
                         </span>
                       </div>
                     ))}
@@ -1437,8 +1507,8 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                   <div className="flex items-center justify-between mb-4">
                     <div className={"p-3 rounded-xl " + (
                       account.type === 'checking' ? 'bg-blue-100 dark:bg-blue-900/30' :
-                      account.type === 'savings' ? 'bg-green-100 dark:bg-green-900/30' :
-                      'bg-purple-100 dark:bg-purple-900/30'
+                        account.type === 'savings' ? 'bg-green-100 dark:bg-green-900/30' :
+                          'bg-purple-100 dark:bg-purple-900/30'
                     ) + ""}>
                       {account.type === 'credit' ? (
                         <CreditCard className="w-6 h-6 text-purple-600" />
@@ -1548,8 +1618,8 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className={"inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium " + (
                             transaction.status === 'reconciled' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' :
-                            transaction.status === 'cleared' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' :
-                            'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300'
+                              transaction.status === 'cleared' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' :
+                                'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300'
                           ) + ""}>
                             {transaction.status === 'reconciled' && <CheckCircle className="w-3 h-3" />}
                             {transaction.status === 'cleared' && <CheckCircle className="w-3 h-3" />}
@@ -2435,7 +2505,6 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
           <AIInsightsPanel
             insights={mockAIInsights}
-            onAskQuestion={(q) => toast.info('Question Submitted')}
           />
           <PredictiveAnalytics predictions={mockFinancialPredictions} />
         </div>
@@ -2445,7 +2514,6 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
           <ActivityFeed
             activities={mockFinancialActivities}
             maxItems={5}
-            showFilters={true}
           />
         </div>
 
@@ -2490,7 +2558,8 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                           type: 'asset',
                           subtype: selectedBankAccount.type,
                           balance: selectedBankAccount.balance,
-                          isActive: true
+                          isActive: true,
+                          description: ''
                         })
                         setShowBankAccountOptionsDialog(false)
                       }}

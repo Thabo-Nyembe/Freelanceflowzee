@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createFeatureLogger } from '@/lib/logger'
+import { createClient } from '@/lib/supabase/server'
 
 const logger = createFeatureLogger('API-AICreate')
+export const runtime = 'nodejs'
 
 // Comprehensive asset generation templates for freelancers
 const ASSET_GENERATION_TEMPLATES = {
+  // ... rest of templates
+
   photography: {
     luts: {
       generate: (style: string) => ({
@@ -242,6 +246,13 @@ const ASSET_GENERATION_TEMPLATES = {
 
 export async function POST(request: NextRequest) {
   try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
+    }
+
     const { creativeField, assetType, style = 'Professional', aiModel, prompt } = await request.json();
 
     logger.info('AI Create request received', {
@@ -261,7 +272,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if we have a template for this combination
-    const fieldTemplates = ASSET_GENERATION_TEMPLATES[creativeField as keyof typeof ASSET_GENERATION_TEMPLATES];
+    const fieldTemplates = (ASSET_GENERATION_TEMPLATES as any)[creativeField];
     if (!fieldTemplates) {
       return NextResponse.json({
         success: false,
@@ -269,7 +280,7 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    const assetTemplate = fieldTemplates[assetType as keyof typeof fieldTemplates];
+    const assetTemplate = fieldTemplates[assetType];
     if (!assetTemplate) {
       return NextResponse.json({
         success: false,
@@ -285,25 +296,49 @@ export async function POST(request: NextRequest) {
 
     // Add generation metadata
     const asset = {
-      id: `asset_${Date.now()}`,
-      ...generatedAsset,
-      type: assetType,
-      url: generatedAsset.downloadUrl,
-      thumbnailUrl: generatedAsset.previewUrl,
-      createdAt: new Date().toISOString(),
-      modelUsed: aiModel || 'FreeFlow AI',
-      prompt: prompt || `Generate ${style.toLowerCase()} ${assetType} for ${creativeField}`,
-      qualityScore: Math.floor(Math.random() * 20) + 80, // 80-99
-      estimatedValue: `$${Math.floor(Math.random() * 50) + 25}`, // $25-$75
-      licenseType: 'Commercial Use',
-      usage: 'Unlimited projects',
-      size: generatedAsset.files.reduce((acc: number, file: any) => acc + (parseFloat(file.size) || 0), 0).toFixed(2) + ' MB',
-      isFavorite: false
-    };
+      user_id: user.id,
+      prompt,
+      model: aiModel || 'FreeFlow AI',
+      generation_type: 'image', // simplified for now
+      result: generatedAsset.previewUrl,
+      metadata: {
+        ...generatedAsset,
+        creativeField,
+        assetType,
+        style,
+        quality: 'high'
+      },
+      status: 'completed',
+      cost: 0.02
+    }
+
+    // Persist to DB
+    const { data: dbGen, error: dbError } = await supabase
+      .from('ai_generations')
+      .insert(asset)
+      .select()
+      .single()
+
+    if (dbError) {
+      console.error('Failed to save to DB', dbError)
+      // formatting fail safe 
+    }
 
     const response = {
       success: true,
-      assets: [asset], // Changed from 'asset' to 'assets' array to match component expectation
+      assets: [dbGen ? {
+        ...generatedAsset,
+        id: dbGen.id,
+        url: dbGen.result,
+        thumbnailUrl: dbGen.result,
+        createdAt: dbGen.created_at
+      } : {
+        ...generatedAsset,
+        id: `temp_${Date.now()}`,
+        url: generatedAsset.previewUrl,
+        thumbnailUrl: generatedAsset.previewUrl,
+        createdAt: new Date().toISOString()
+      }],
       generationStats: {
         processingTime: '1.5s',
         tokensUsed: Math.floor(Math.random() * 500) + 100,
@@ -312,19 +347,11 @@ export async function POST(request: NextRequest) {
       }
     };
 
-    logger.info('Asset generated successfully', {
-      assetId: asset.id,
-      type: asset.type,
-      creativeField,
-      qualityScore: asset.qualityScore,
-      processingTime: response.generationStats.processingTime,
-      tokensUsed: response.generationStats.tokensUsed
-    });
     return NextResponse.json(response);
-  } catch (error) {
+  } catch (error: any) {
     logger.error('AI Create API error', {
-      error: error instanceof Error ? error.message : 'Unknown error',
-      stack: error instanceof Error ? error.stack : undefined
+      error: error.message,
+      stack: error.stack
     });
     return NextResponse.json({
       success: false,

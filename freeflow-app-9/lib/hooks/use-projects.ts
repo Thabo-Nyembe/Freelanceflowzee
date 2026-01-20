@@ -63,14 +63,20 @@ export function useProjects(initialProjects: Project[] = []) {
     fetch('/api/auth/session')
       .then(res => res.json())
       .then(data => setSession(data))
-      .catch(() => {})
+      .catch(() => { })
   }, [])
 
   // Get auth.users compatible ID (same pattern as useSupabaseMutation)
   const getUserId = useCallback(async (): Promise<string | null> => {
-    // First try Supabase auth
-    const { data: { user } } = await supabase.auth.getUser()
+    // First try Supabase auth - this is the most reliable method
+    const { data: { user }, error } = await supabase.auth.getUser()
     if (user?.id) return user.id
+
+    // If Supabase auth failed, try to refresh the session
+    if (error) {
+      const { data: { session: refreshedSession } } = await supabase.auth.getSession()
+      if (refreshedSession?.user?.id) return refreshedSession.user.id
+    }
 
     // Try authId from NextAuth session (set from profiles table)
     const authId = (session?.user as any)?.authId
@@ -104,16 +110,30 @@ export function useProjects(initialProjects: Project[] = []) {
     try {
       const userId = await getUserId()
       if (!userId) {
-        toast.error('You must be logged in to create a project')
-        throw new Error('User not authenticated')
+        console.error('Authentication failed: No user ID found')
+        console.log('Session state:', session)
+        toast.error('Please sign in to create a project')
+        throw new Error('User not authenticated. Please sign in and try again.')
       }
 
-      const projectData = {
-        ...project,
+      // Only include essential fields - let database handle defaults
+      const projectData: Record<string, any> = {
+        name: project.name || 'Untitled Project',
         user_id: userId,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        status: project.status || 'planning',
+        priority: project.priority || 'medium',
+        progress: project.progress !== undefined ? project.progress : 0,
+        spent: project.spent !== undefined ? project.spent : 0
       }
+
+      // Add optional fields only if provided
+      if (project.description) projectData.description = project.description
+      if (project.client_id) projectData.client_id = project.client_id
+      if (project.start_date) projectData.start_date = project.start_date
+      if (project.end_date) projectData.end_date = project.end_date
+      if (project.budget) projectData.budget = project.budget
+      if (project.team_members && project.team_members.length > 0) projectData.team_members = project.team_members
+      if (project.tags && project.tags.length > 0) projectData.tags = project.tags
 
       const { data, error } = await supabase
         .from('projects')
@@ -222,7 +242,7 @@ export function useProjectTasks(projectId: string, initialTasks: ProjectTask[] =
     fetch('/api/auth/session')
       .then(res => res.json())
       .then(data => setSession(data))
-      .catch(() => {})
+      .catch(() => { })
   }, [])
 
   // Get auth.users compatible ID
