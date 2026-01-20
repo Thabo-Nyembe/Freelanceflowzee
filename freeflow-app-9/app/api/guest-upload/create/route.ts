@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
     const expiresAt = calculateExpiration(priceAmount)
 
     // Create database record
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data, error } = await supabase
       .from('guest_upload_payments')
       .insert({

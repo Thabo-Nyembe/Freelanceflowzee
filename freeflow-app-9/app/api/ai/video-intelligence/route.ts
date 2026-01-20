@@ -19,6 +19,7 @@ import { rateLimit } from '@/lib/rate-limit';
 import { getErrorMessage } from '@/lib/error-utils';
 import { getVideoMetadata } from '@/lib/video-utils';
 import { createFeatureLogger } from '@/lib/logger'
+import { createClient } from '@/lib/supabase/server'
 
 // Inline type definitions to avoid module resolution issues
 type AIOperationType = 'transcription' | 'summarization' | 'analysis' | 'generation' | 'moderation';
@@ -42,15 +43,9 @@ async function getAISystem() {
   return _aiSystem;
 }
 
-// Lazy-loaded Supabase client
-let _supabase: any = null;
-function getSupabase() {
-  if (!_supabase) {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY!;
-    _supabase = createClient(supabaseUrl, supabaseServiceKey);
-  }
-  return _supabase;
+// Server-side Supabase client
+async function getSupabase() {
+  return await createClient();
 }
 
 // Constants
@@ -218,7 +213,8 @@ async function storeVideoFile(
   
   // Upload to Supabase Storage
   const fileBuffer = Buffer.from(videoData);
-  const { data, error } = await getSupabase().storage
+  const supabaseClient = await getSupabase();
+  const { data, error } = await supabaseClient.storage
     .from('video-processing')
     .upload(`uploads/${uniqueFileName}`, fileBuffer, {
       contentType,
@@ -454,7 +450,8 @@ async function saveResultsToDatabase(
 ): Promise<void> {
   try {
     // Save to video_intelligence table
-    const { error } = await supabase
+    const supabaseClient = await getSupabase();
+    const { error } = await supabaseClient
       .from('video_intelligence')
       .upsert({
         video_id: videoId,
@@ -496,7 +493,8 @@ async function trackPerformanceMetrics(
 ): Promise<void> {
   try {
     // Save to performance_metrics table
-    const { error } = await supabase
+    const supabaseClient = await getSupabase();
+    const { error } = await supabaseClient
       .from('performance_metrics')
       .insert({
         user_id: userId,
@@ -709,7 +707,8 @@ async function processVideoIntelligence(
 async function checkUserQuota(userId: string, estimatedCost: number): Promise<boolean> {
   try {
     // Get user quota from Supabase
-    const { data, error } = await supabase
+    const supabaseClient = await getSupabase();
+    const { data, error } = await supabaseClient
       .from('user_quotas')
       .select('*')
       .eq('user_id', userId)
@@ -735,7 +734,8 @@ async function checkUserQuota(userId: string, estimatedCost: number): Promise<bo
 async function updateUserQuota(userId: string, cost: number): Promise<void> {
   try {
     // Update user quota in Supabase
-    const { error } = await getSupabase().rpc('increment_user_quota_usage', {
+    const supabaseClient = await getSupabase();
+    const { error } = await supabaseClient.rpc('increment_user_quota_usage', {
       p_user_id: userId,
       p_usage: cost
     });
@@ -891,7 +891,8 @@ async function handleGetRequest(req: NextRequest): Promise<NextResponse> {
       
       if (!job) {
         // Check database for completed results
-        const { data, error } = await supabase
+        const supabaseClient = await getSupabase();
+        const { data, error } = await supabaseClient
           .from('video_intelligence')
           .select('*')
           .eq('user_id', userId)

@@ -25,7 +25,7 @@ export async function GET(
 
     logger.info('Download request received', { uploadLink })
 
-    const supabase = createClient()
+    const supabase = await createClient()
 
     // Get upload record
     const { data: payment, error: fetchError } = await supabase

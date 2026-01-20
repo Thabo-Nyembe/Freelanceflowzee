@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     })
 
     // Verify upload record exists
-    const supabase = createClient()
+    const supabase = await createClient()
     const { data: payment, error: fetchError } = await supabase
       .from('guest_upload_payments')
       .select('*')

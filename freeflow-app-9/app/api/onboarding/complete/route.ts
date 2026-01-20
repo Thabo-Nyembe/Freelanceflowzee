@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
 
     // DATABASE INTEGRATION - Save to Supabase
     try {
-      const supabase = createClient();
+      const supabase = await createClient();
 
       // Get current user
       const { data: { user }, error: userError } = await supabase.auth.getUser();

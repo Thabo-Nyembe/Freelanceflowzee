@@ -21,6 +21,7 @@ import {
   Deepgram,
   DeepgramTranscriptionOptions
 } from '@/lib/deepgram';
+import { createClient } from '@/lib/supabase/server';
 
 // Environment configuration
 const MAX_FILE_SIZE = 500 * 1024 * 1024; // 500MB
@@ -52,6 +53,11 @@ function getDeepgram(): Deepgram | null {
   const DEEPGRAM_API_KEY = process.env.DEEPGRAM_API_KEY;
   _deepgram = DEEPGRAM_API_KEY ? new Deepgram(DEEPGRAM_API_KEY) : null;
   return _deepgram;
+}
+
+// Server-side Supabase client
+async function getSupabase() {
+  return await createClient();
 }
 
 // WebSocket connections for real-time updates
@@ -259,7 +265,8 @@ async function uploadVideoToStorage(
     const fileExtension = file.name.split('.').pop();
     const filePath = `videos/${userId}/${projectId}/${fileId}.${fileExtension}`;
     
-    const { error } = await getSupabase().storage
+    const supabaseClient = await getSupabase();
+    const { error } = await supabaseClient.storage
       .from('media')
       .upload(filePath, file);
 
@@ -293,8 +300,9 @@ async function createProcessingJob(
   options: VideoProcessingOptions
 ): Promise<string> {
   const jobId = uuidv4();
-  
-  const { error } = await getSupabase()
+
+  const supabaseClient = await getSupabase();
+  const { error } = await supabaseClient
     .from('processing_jobs')
     .insert({
       id: jobId,
@@ -343,7 +351,8 @@ async function updateProcessingStatus(
     updateData.completed_at = new Date().toISOString();
   }
 
-  const { error: updateError } = await getSupabase()
+  const supabaseClient = await getSupabase();
+  const { error: updateError } = await supabaseClient
     .from('processing_jobs')
     .update(updateData)
     .eq('id', jobId);
@@ -384,7 +393,8 @@ function sendStatusUpdate(jobId: string, update: any): void {
 async function sendWebhookUpdate(jobId: string, data: any): Promise<void> {
   try {
     // Get job details to check if webhook is configured
-    const { data: job } = await getSupabase()
+    const supabaseClient = await getSupabase();
+    const { data: job } = await supabaseClient
       .from('processing_jobs')
       .select('options')
       .eq('id', jobId)
@@ -839,14 +849,15 @@ async function trackCost(
     timestamp: new Date().toISOString()
   };
 
-  const { error } = await getSupabase()
+  const supabaseClient = await getSupabase();
+  const { error } = await supabaseClient
     .from('cost_tracking')
     .insert(costTracking);
 
   if (error) {
     logger.error('Cost tracking error', { error, costTracking });
   }
-  
+
   // Update user quota
   await updateUserQuota(userId, cost);
 }
@@ -858,7 +869,8 @@ async function trackCost(
  */
 async function updateUserQuota(userId: string, cost: number): Promise<void> {
   // Get current user quota
-  const { data, error } = await getSupabase()
+  const supabaseClient = await getSupabase();
+  const { data, error } = await supabaseClient
     .from('user_quotas')
     .select('remaining_quota')
     .eq('user_id', userId)
@@ -871,8 +883,8 @@ async function updateUserQuota(userId: string, cost: number): Promise<void> {
 
   // Update quota
   const remainingQuota = Math.max(0, (data?.remaining_quota || 0) - cost);
-  
-  const { error: updateError } = await getSupabase()
+
+  const { error: updateError } = await supabaseClient
     .from('user_quotas')
     .update({ remaining_quota: remainingQuota })
     .eq('user_id', userId);
@@ -889,7 +901,8 @@ async function updateUserQuota(userId: string, cost: number): Promise<void> {
  * @returns Whether user has sufficient quota
  */
 async function checkUserQuota(userId: string, estimatedCost: number): Promise<boolean> {
-  const { data, error } = await getSupabase()
+  const supabaseClient = await getSupabase();
+  const { data, error } = await supabaseClient
     .from('user_quotas')
     .select('remaining_quota')
     .eq('user_id', userId)
@@ -913,7 +926,8 @@ async function processVideo(jobId: string): Promise<void> {
 
   try {
     // Get job details
-    const { data: job, error } = await getSupabase()
+    const supabaseClient = await getSupabase();
+    const { data: job, error } = await supabaseClient
       .from('processing_jobs')
       .select('*')
       .eq('id', jobId)
@@ -929,7 +943,7 @@ async function processVideo(jobId: string): Promise<void> {
     const options = job.options as VideoProcessingOptions;
 
     // Get video URL
-    const { data: urlData } = await getSupabase().storage
+    const { data: urlData } = await supabaseClient.storage
       .from('media')
       .createSignedUrl(videoPath, 3600);
 
@@ -1036,7 +1050,8 @@ async function processVideo(jobId: string): Promise<void> {
       provider
     };
     
-    const { error: saveError } = await getSupabase()
+    const supabaseClient2 = await getSupabase();
+    const { error: saveError } = await supabaseClient2
       .from('processing_results')
       .insert(processingResult);
       
