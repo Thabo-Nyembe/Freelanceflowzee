@@ -1,15 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@/lib/supabase/server'
 import { createFeatureLogger } from '@/lib/logger'
 
 const logger = createFeatureLogger('FilesAPI')
-
-function getSupabase() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
-}
 
 export async function GET(
   req: NextRequest,
@@ -20,7 +13,7 @@ export async function GET(
 
     logger.info('File download request', { fileId })
 
-    const supabase = getSupabase()
+    const supabase = await createClient()
 
     // Get file metadata from database
     const { data: file, error: fileError } = await supabase

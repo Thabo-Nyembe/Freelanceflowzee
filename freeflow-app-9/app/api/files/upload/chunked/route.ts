@@ -15,7 +15,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@/lib/supabase/server'
 import { getServerSession } from '@/lib/auth'
 import crypto from 'crypto'
 
@@ -63,16 +63,6 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024 * 1024 // 10GB
 const SESSION_EXPIRY_HOURS = 24
 const MAX_PARALLEL_CHUNKS = 6
 
-// ============================================================================
-// DATABASE CLIENT
-// ============================================================================
-
-function getSupabase() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
-}
 
 // ============================================================================
 // GET - Get Upload Session Status
@@ -99,7 +89,7 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const supabase = getSupabase()
+    const supabase = await createClient()
     const userId = session.user.id
 
     const { data: uploadSession, error } = await supabase
@@ -192,7 +182,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { action = 'init' } = body
 
-    const supabase = getSupabase()
+    const supabase = await createClient()
 
     switch (action) {
       case 'init':
@@ -248,7 +238,7 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    const supabase = getSupabase()
+    const supabase = await createClient()
 
     // Delete chunks from storage
     const { data: uploadSession } = await supabase
@@ -294,7 +284,7 @@ export async function DELETE(request: NextRequest) {
 // ============================================================================
 
 async function handleInitSession(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   body: Record<string, unknown>
 ) {
@@ -431,7 +421,7 @@ async function handleChunkUpload(request: NextRequest, userId: string) {
       )
     }
 
-    const supabase = getSupabase()
+    const supabase = await createClient()
 
     // Get upload session
     const { data: uploadSession, error: sessionError } = await supabase
@@ -569,7 +559,7 @@ async function handleChunkUpload(request: NextRequest, userId: string) {
 }
 
 async function handleCompleteUpload(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   body: Record<string, unknown>
 ) {
@@ -767,7 +757,7 @@ async function handleCompleteUpload(
 }
 
 async function handleCancelUpload(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   body: Record<string, unknown>
 ) {
@@ -811,7 +801,7 @@ async function handleCancelUpload(
 }
 
 async function handleResumeUpload(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   body: Record<string, unknown>
 ) {
@@ -886,7 +876,7 @@ async function handleResumeUpload(
 }
 
 async function handleVerifyUpload(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   body: Record<string, unknown>
 ) {

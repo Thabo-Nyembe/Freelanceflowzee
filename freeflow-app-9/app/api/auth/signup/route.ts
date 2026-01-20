@@ -1,13 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@/lib/supabase/server'
 import { z } from 'zod'
-
-// Initialize Supabase client for user creation
-// Using anon key for regular signUp flow (not admin)
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-)
 
 // Validation schema
 const signupSchema = z.object({
@@ -33,6 +26,7 @@ const signupSchema = z.object({
  */
 export async function POST(request: NextRequest) {
   try {
+    const supabase = await createClient()
     // Parse request body
     const body = await request.json()
 

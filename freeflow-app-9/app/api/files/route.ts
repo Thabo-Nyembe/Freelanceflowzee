@@ -1,18 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@/lib/supabase/server';
 import { createFeatureLogger } from '@/lib/logger';
 
 const logger = createFeatureLogger('API-Files');
-
-// Initialize Supabase client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-
-function getSupabaseClient() {
-  return createClient(supabaseUrl, supabaseServiceKey);
-}
 
 // ============================================================================
 // TYPES
@@ -254,7 +246,7 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    const supabase = getSupabaseClient();
+    const supabase = await createClient();
     const userId = session.user.id;
 
     // Build files query
@@ -378,7 +370,7 @@ export async function POST(request: NextRequest) {
       return handleDemoAction(action, data);
     }
 
-    const supabase = getSupabaseClient();
+    const supabase = await createClient();
     const userId = session.user.id;
 
     switch (action) {
@@ -477,7 +469,7 @@ function handleDemoAction(action: string, data: Record<string, unknown>): NextRe
 // ============================================================================
 
 async function handleCreateFolder(
-  supabase: ReturnType<typeof getSupabaseClient>,
+  supabase: any,
   userId: string,
   data: { name: string; parentId?: string; color?: string; icon?: string; description?: string }
 ): Promise<NextResponse> {
@@ -529,7 +521,7 @@ async function handleCreateFolder(
 }
 
 async function handleUploadFile(
-  supabase: ReturnType<typeof getSupabaseClient>,
+  supabase: any,
   userId: string,
   data: {
     name: string;
@@ -600,7 +592,7 @@ async function handleUploadFile(
 }
 
 async function handleDownloadFile(
-  supabase: ReturnType<typeof getSupabaseClient>,
+  supabase: any,
   userId: string,
   data: { fileId: string }
 ): Promise<NextResponse> {
@@ -651,7 +643,7 @@ async function handleDownloadFile(
 }
 
 async function handleShareFile(
-  supabase: ReturnType<typeof getSupabaseClient>,
+  supabase: any,
   userId: string,
   data: {
     fileIds: string[];
@@ -720,7 +712,7 @@ async function handleShareFile(
 }
 
 async function handleMoveFiles(
-  supabase: ReturnType<typeof getSupabaseClient>,
+  supabase: any,
   userId: string,
   data: { fileIds: string[]; targetFolderId: string | null }
 ): Promise<NextResponse> {
@@ -775,7 +767,7 @@ async function handleMoveFiles(
 }
 
 async function handleDeleteFiles(
-  supabase: ReturnType<typeof getSupabaseClient>,
+  supabase: any,
   userId: string,
   data: { fileIds: string[]; permanent?: boolean }
 ): Promise<NextResponse> {
@@ -823,7 +815,7 @@ async function handleDeleteFiles(
 }
 
 async function handleRestoreFiles(
-  supabase: ReturnType<typeof getSupabaseClient>,
+  supabase: any,
   userId: string,
   data: { fileIds: string[] }
 ): Promise<NextResponse> {
@@ -854,7 +846,7 @@ async function handleRestoreFiles(
 }
 
 async function handleCreateVersion(
-  supabase: ReturnType<typeof getSupabaseClient>,
+  supabase: any,
   userId: string,
   data: { fileId: string; url: string; size: number; changes?: string }
 ): Promise<NextResponse> {
@@ -924,7 +916,7 @@ async function handleCreateVersion(
 }
 
 async function handleGenerateLink(
-  supabase: ReturnType<typeof getSupabaseClient>,
+  supabase: any,
   userId: string,
   data: { fileId: string; permission: SharePermission; expiresIn?: string; password?: string }
 ): Promise<NextResponse> {
@@ -965,7 +957,7 @@ async function handleGenerateLink(
 }
 
 async function handleStarFiles(
-  supabase: ReturnType<typeof getSupabaseClient>,
+  supabase: any,
   userId: string,
   data: { fileIds: string[]; starred: boolean }
 ): Promise<NextResponse> {
@@ -989,7 +981,7 @@ async function handleStarFiles(
 }
 
 async function handleLockFile(
-  supabase: ReturnType<typeof getSupabaseClient>,
+  supabase: any,
   userId: string,
   data: { fileId: string; locked: boolean }
 ): Promise<NextResponse> {
@@ -1016,7 +1008,7 @@ async function handleLockFile(
 }
 
 async function handleRename(
-  supabase: ReturnType<typeof getSupabaseClient>,
+  supabase: any,
   userId: string,
   data: { id: string; name: string; type: 'file' | 'folder' }
 ): Promise<NextResponse> {
@@ -1049,7 +1041,7 @@ async function handleRename(
 }
 
 async function handleUpdateMetadata(
-  supabase: ReturnType<typeof getSupabaseClient>,
+  supabase: any,
   userId: string,
   data: { fileId: string; description?: string; tags?: string[]; accessLevel?: AccessLevel }
 ): Promise<NextResponse> {
@@ -1129,7 +1121,7 @@ function calculateExpiry(duration: string): string {
 }
 
 async function logActivity(
-  supabase: ReturnType<typeof getSupabaseClient>,
+  supabase: any,
   userId: string,
   resourceId: string,
   resourceType: 'file' | 'folder',
@@ -1150,7 +1142,7 @@ async function logActivity(
 }
 
 async function updateFolderCounts(
-  supabase: ReturnType<typeof getSupabaseClient>,
+  supabase: any,
   folderId: string
 ): Promise<void> {
   const { data: files } = await supabase

@@ -8,7 +8,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@/lib/supabase/server'
 import { getServerSession } from '@/lib/auth'
 
 // ============================================================================
@@ -70,16 +70,6 @@ interface ApprovalQueueItem {
   requested_by: string | null
 }
 
-// ============================================================================
-// DATABASE CLIENT
-// ============================================================================
-
-function getSupabase() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
-}
 
 // ============================================================================
 // GET - List Pay Runs / Get Analytics / Approval Queue
@@ -101,7 +91,7 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '20')
 
-    const supabase = getSupabase()
+    const supabase = await createClient()
 
     // Demo mode for unauthenticated users
     if (!session?.user) {
@@ -167,7 +157,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { action = 'create' } = body
 
-    const supabase = getSupabase()
+    const supabase = await createClient()
 
     // Handle different actions
     switch (action) {
@@ -230,7 +220,7 @@ export async function PUT(request: NextRequest) {
       )
     }
 
-    const supabase = getSupabase()
+    const supabase = await createClient()
 
     // Verify ownership
     const { data: existing } = await supabase
@@ -328,7 +318,7 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    const supabase = getSupabase()
+    const supabase = await createClient()
 
     // Verify ownership and status
     const { data: existing } = await supabase
@@ -402,7 +392,7 @@ export async function DELETE(request: NextRequest) {
 // ============================================================================
 
 async function handleGetApprovalQueue(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string
 ) {
   try {
@@ -446,7 +436,7 @@ async function handleGetApprovalQueue(
 }
 
 async function handleGetAnalytics(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string
 ) {
   try {
@@ -533,7 +523,7 @@ async function handleGetAnalytics(
 }
 
 async function handleGetSinglePayRun(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   runId: string
 ) {
@@ -558,7 +548,7 @@ async function handleGetSinglePayRun(
 }
 
 async function handleListPayRuns(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   options: {
     status: string | null
@@ -619,7 +609,7 @@ async function handleListPayRuns(
 }
 
 async function handleCreatePayRun(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   body: Record<string, unknown>
 ) {
@@ -689,7 +679,7 @@ async function handleCreatePayRun(
 }
 
 async function handleApprovePayRun(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   body: Record<string, unknown>
 ) {
@@ -755,7 +745,7 @@ async function handleApprovePayRun(
 }
 
 async function handleRejectPayRun(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   body: Record<string, unknown>
 ) {
@@ -814,7 +804,7 @@ async function handleRejectPayRun(
 }
 
 async function handleProcessPayRun(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   body: Record<string, unknown>
 ) {
@@ -878,7 +868,7 @@ async function handleProcessPayRun(
 }
 
 async function handleCancelPayRun(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   body: Record<string, unknown>
 ) {
@@ -945,7 +935,7 @@ async function handleCancelPayRun(
 }
 
 async function handleExportPayroll(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   body: Record<string, unknown>
 ) {
@@ -981,7 +971,7 @@ async function handleExportPayroll(
 }
 
 async function handleImportPayroll(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   userId: string,
   body: Record<string, unknown>
 ) {

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@/lib/supabase/server'
 
 /**
  * Test Database Connection
@@ -22,10 +22,7 @@ export async function GET() {
     }
 
     // Create Supabase client
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-      process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-    )
+    const supabase = await createClient()
 
     // Test 1: Check if users table exists
     const { data: tables, error: tablesError } = await supabase

@@ -1,15 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@/lib/supabase/server'
 import { createFeatureLogger } from '@/lib/logger'
 
 const logger = createFeatureLogger('FilesAPI')
-
-function getSupabase() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
-}
 
 export async function POST(
   req: NextRequest,
@@ -32,7 +25,7 @@ export async function POST(
       )
     }
 
-    const supabase = getSupabase()
+    const supabase = await createClient()
 
     // Verify file exists
     const { data: file, error: fileError } = await supabase
