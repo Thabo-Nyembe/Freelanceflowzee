@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import {
   Download, Edit, CheckCircle, MessageSquare, FolderOpen, AlertCircle, Loader2,
   Plus, Search, Filter, BarChart3, TrendingUp, Target, RefreshCw, Eye, Copy, Trash2, MoreHorizontal, Share2, Activity,
-  Archive
+  Archive, Sparkles
 } from 'lucide-react'
 import {
   DropdownMenu,
@@ -60,11 +60,7 @@ import {
 
 const logger = createFeatureLogger('ProjectsV2')
 
-// ============================================================================
-// V2 COMPETITIVE MOCK DATA - Projects Context
-// ============================================================================
 
-// Mock data replaced by real hooks
 
 
 // Quick actions are defined inside component to access handlers
@@ -133,7 +129,7 @@ export default function ProjectsClient() {
         avatar: '' // Placeholder if avatar not in log
       },
       action: log.action || 'updated',
-      target: log.resource_name || 'Project',
+      target: { type: 'project', name: log.resource_name || 'Project', url: '#' },
       timestamp: new Date(log.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       type: (['delete', 'comment', 'update', 'create', 'mention', 'assignment', 'status_change', 'milestone', 'integration'].includes(log.action) ? log.action : 'update') as any
     }))
@@ -202,6 +198,7 @@ export default function ProjectsClient() {
   const [newProjectDueDate, setNewProjectDueDate] = useState('')
   const [newProjectBudget, setNewProjectBudget] = useState('')
   const [createLoading, setCreateLoading] = useState(false)
+  const [showInsights, setShowInsights] = useState(false) // Default hidden for "cascade" effect
 
   // Share dialog state
   const [shareDialogOpen, setShareDialogOpen] = useState(false)
@@ -405,7 +402,6 @@ export default function ProjectsClient() {
     if (!confirmed) return
 
     const actionKey = `delete-${projectId}`
-    const actionKey = `delete-${projectId}`
     try {
       setActionLoading(prev => ({ ...prev, [actionKey]: true }))
       if (deleteDbProject) {
@@ -547,7 +543,7 @@ export default function ProjectsClient() {
             id: shareProjectId,
             metadata: {
               shared_with: [
-                ...(project.metadata?.shared_with || []),
+                ...((project as any).metadata?.shared_with || []),
                 {
                   email: shareEmail.trim(),
                   permission: sharePermission,
@@ -684,6 +680,14 @@ export default function ProjectsClient() {
               <RefreshCw className="h-4 w-4 mr-2" />
               Refresh
             </Button>
+            <Button
+              variant={showInsights ? "secondary" : "outline"}
+              onClick={() => setShowInsights(!showInsights)}
+              className="transition-all duration-300"
+            >
+              <Sparkles className="h-4 w-4 mr-2" />
+              {showInsights ? 'Hide Insights' : 'Smart Insights'}
+            </Button>
             <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white" onClick={() => setShowCreateModal(true)}>
               <Plus className="h-4 w-4 mr-2" />
               New Project
@@ -778,11 +782,31 @@ export default function ProjectsClient() {
         {/* ================================================================
             V2 COMPETITIVE UPGRADE COMPONENTS
             ================================================================ */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <AIInsightsPanel insights={projectsAIInsights} />
-          <PredictiveAnalytics predictions={projectsPredictions} />
-          <CollaborationIndicator collaborators={projectsCollaborators} />
-        </div>
+
+        {/* Toggle Button for Insights is added in the header section above */}
+
+
+
+        {/* ================================================================
+            V2 COMPETITIVE UPGRADE COMPONENTS (COLLAPSIBLE)
+            ================================================================ */}
+        <AnimatePresence>
+          {showInsights && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="overflow-hidden"
+            >
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                <AIInsightsPanel insights={projectsAIInsights} />
+                <PredictiveAnalytics predictions={projectsPredictions} />
+                <CollaborationIndicator collaborators={projectsCollaborators} />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* ================================================================
             QUICK ACTIONS & ACTIVITY
@@ -1133,6 +1157,6 @@ export default function ProjectsClient() {
           </DialogContent>
         </Dialog>
       </div>
-    </div>
+    </div >
   )
 }
