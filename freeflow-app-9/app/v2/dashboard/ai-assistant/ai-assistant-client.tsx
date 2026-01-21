@@ -288,6 +288,7 @@ export default function AIAssistantClient() {
     fetchMessages,
     createConversation,
     sendMessage,
+    sendMessageWithAI,
     updateConversation,
     deleteConversation,
     toggleStar: hookToggleStar,
@@ -410,12 +411,15 @@ export default function AIAssistantClient() {
 
     try {
       // Create conversation if none active
-      if (!activeConversation) {
-        const newConv = await createConversation(
+      let currentConversation = activeConversation
+      if (!currentConversation) {
+        currentConversation = await createConversation(
           'New Chat',
           selectedMode,
           selectedModel
         )
+        // Note: activeConversation update usually happens via hook's realtime/subscription or direct setter
+        // We'll proceed optimistically or wait for state update if crucial
         toast.success('Conversation created')
       }
 
@@ -424,37 +428,19 @@ export default function AIAssistantClient() {
       const userMessageContent = inputMessage
       setInputMessage('')
 
-      toast.success('Message sent')
-
-      // Call AI Assistant API to send message and get response
-      const response = await fetch('/api/ai-assistant', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'send-message',
-          conversationId: activeConversation?.id,
-          content: userMessageContent,
-          type: 'user'
-        })
+      // Use the hook's integrated function to save user message and get AI response
+      const result = await sendMessageWithAI(userMessageContent, {
+        mode: selectedMode,
+        model: selectedModel,
+        systemPrompt: assistantForm.systemPrompt
       })
 
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to send message')
-      }
-
-      const { data } = await response.json()
-
-      // Add user message to local state
-      await sendMessage(userMessageContent, 'user')
-
-      // Add assistant response to local state
-      if (data.assistantMessage) {
-        await sendMessage(data.assistantMessage.content, 'assistant')
+      if (!result.success) {
+        throw new Error(result.error)
       }
 
       setIsTyping(false)
-      toast.success('Response received')
+      // toast.success('Response received') // Hook manages state
     } catch (err) {
       console.error('Error sending message:', err)
       toast.error('Failed to send message')
@@ -1124,9 +1110,8 @@ export default function AIAssistantClient() {
                               setSelectedModel(model.id)
                               setShowModelSelector(false)
                             }}
-                            className={`w-full flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
-                              selectedModel === model.id ? 'bg-violet-50 dark:bg-violet-900/30' : ''
-                            }`}
+                            className={`w-full flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${selectedModel === model.id ? 'bg-violet-50 dark:bg-violet-900/30' : ''
+                              }`}
                           >
                             <div className="flex items-center gap-3">
                               <div className={`p-2 rounded-lg ${model.provider === 'OpenAI' ? 'bg-emerald-100 dark:bg-emerald-900/30' : 'bg-amber-100 dark:bg-amber-900/30'}`}>
@@ -1151,11 +1136,10 @@ export default function AIAssistantClient() {
                     <button
                       key={mode}
                       onClick={() => setSelectedMode(mode as ConversationMode)}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all ${
-                        selectedMode === mode
-                          ? 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300'
-                          : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
-                      }`}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all ${selectedMode === mode
+                        ? 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-300'
+                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700'
+                        }`}
                     >
                       {config.icon}
                       <span className="text-sm font-medium">{config.label}</span>
@@ -1207,11 +1191,10 @@ export default function AIAssistantClient() {
                             <button
                               key={conv.id}
                               onClick={() => setActiveConversation(conv)}
-                              className={`w-full flex items-center gap-2 p-2 rounded-lg text-left transition-colors ${
-                                activeConversation?.id === conv.id
-                                  ? 'bg-violet-50 dark:bg-violet-900/30'
-                                  : 'hover:bg-gray-50 dark:hover:bg-gray-700'
-                              }`}
+                              className={`w-full flex items-center gap-2 p-2 rounded-lg text-left transition-colors ${activeConversation?.id === conv.id
+                                ? 'bg-violet-50 dark:bg-violet-900/30'
+                                : 'hover:bg-gray-50 dark:hover:bg-gray-700'
+                                }`}
                             >
                               <Star className="h-4 w-4 text-yellow-500 flex-shrink-0" />
                               <span className="text-sm font-medium truncate text-gray-900 dark:text-white">
@@ -1243,11 +1226,10 @@ export default function AIAssistantClient() {
                             <button
                               key={conv.id}
                               onClick={() => setActiveConversation(conv)}
-                              className={`w-full p-3 rounded-xl text-left transition-all group ${
-                                activeConversation?.id === conv.id
-                                  ? 'bg-violet-50 dark:bg-violet-900/30 border border-violet-200 dark:border-violet-800'
-                                  : 'hover:bg-gray-50 dark:hover:bg-gray-700 border border-transparent'
-                              }`}
+                              className={`w-full p-3 rounded-xl text-left transition-all group ${activeConversation?.id === conv.id
+                                ? 'bg-violet-50 dark:bg-violet-900/30 border border-violet-200 dark:border-violet-800'
+                                : 'hover:bg-gray-50 dark:hover:bg-gray-700 border border-transparent'
+                                }`}
                             >
                               <div className="flex items-start justify-between mb-1">
                                 <span className="font-medium text-gray-900 dark:text-white truncate flex-1">
@@ -1397,11 +1379,10 @@ export default function AIAssistantClient() {
                             className={`flex gap-4 ${message.role === 'user' ? 'flex-row-reverse' : ''}`}
                           >
                             {/* Avatar */}
-                            <div className={`flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center ${
-                              message.role === 'user'
-                                ? 'bg-violet-600 text-white'
-                                : 'bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900/30 dark:to-purple-900/30'
-                            }`}>
+                            <div className={`flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center ${message.role === 'user'
+                              ? 'bg-violet-600 text-white'
+                              : 'bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900/30 dark:to-purple-900/30'
+                              }`}>
                               {message.role === 'user' ? (
                                 <Users className="h-5 w-5" />
                               ) : (
@@ -1411,11 +1392,10 @@ export default function AIAssistantClient() {
 
                             {/* Message Content */}
                             <div className={`flex-1 max-w-[80%] ${message.role === 'user' ? 'text-right' : ''}`}>
-                              <div className={`inline-block p-4 rounded-2xl ${
-                                message.role === 'user'
-                                  ? 'bg-violet-600 text-white'
-                                  : 'bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white'
-                              }`}>
+                              <div className={`inline-block p-4 rounded-2xl ${message.role === 'user'
+                                ? 'bg-violet-600 text-white'
+                                : 'bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white'
+                                }`}>
                                 <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap">
                                   {message.content}
                                 </div>
@@ -1776,13 +1756,12 @@ export default function AIAssistantClient() {
                           {file.chunks}
                         </td>
                         <td className="px-6 py-4">
-                          <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs ${
-                            file.status === 'ready'
-                              ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
-                              : file.status === 'processing'
+                          <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs ${file.status === 'ready'
+                            ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
+                            : file.status === 'processing'
                               ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300'
                               : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'
-                          }`}>
+                            }`}>
                             {file.status === 'processing' && <Loader2 className="h-3 w-3 animate-spin" />}
                             {file.status === 'ready' && <CheckCircle className="h-3 w-3" />}
                             {file.status === 'error' && <AlertCircle className="h-3 w-3" />}
@@ -1846,9 +1825,8 @@ export default function AIAssistantClient() {
                 </div>
                 <div className="w-full h-4 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
                   <div
-                    className={`h-full rounded-full transition-all ${
-                      quotaPercentage > 80 ? 'bg-red-500' : quotaPercentage > 50 ? 'bg-yellow-500' : 'bg-violet-600'
-                    }`}
+                    className={`h-full rounded-full transition-all ${quotaPercentage > 80 ? 'bg-red-500' : quotaPercentage > 50 ? 'bg-yellow-500' : 'bg-violet-600'
+                      }`}
                     style={{ width: `${quotaPercentage}%` }}
                   />
                 </div>
@@ -2097,11 +2075,10 @@ export default function AIAssistantClient() {
                             : [...prev.tools, tool]
                         }))
                       }}
-                      className={`px-3 py-1.5 border rounded-lg text-sm transition-colors ${
-                        assistantForm.tools.includes(tool)
-                          ? 'border-violet-500 bg-violet-50 dark:bg-violet-900/30 text-violet-700'
-                          : 'border-gray-200 dark:border-gray-700 hover:border-violet-500'
-                      }`}
+                      className={`px-3 py-1.5 border rounded-lg text-sm transition-colors ${assistantForm.tools.includes(tool)
+                        ? 'border-violet-500 bg-violet-50 dark:bg-violet-900/30 text-violet-700'
+                        : 'border-gray-200 dark:border-gray-700 hover:border-violet-500'
+                        }`}
                     >
                       {tool}
                     </button>
@@ -2280,13 +2257,11 @@ export default function AIAssistantClient() {
               </div>
               <button
                 onClick={handleToggleStreamResponses}
-                className={`w-12 h-6 rounded-full relative transition-colors ${
-                  streamResponses ? 'bg-violet-600' : 'bg-gray-300 dark:bg-gray-600'
-                }`}
+                className={`w-12 h-6 rounded-full relative transition-colors ${streamResponses ? 'bg-violet-600' : 'bg-gray-300 dark:bg-gray-600'
+                  }`}
               >
-                <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${
-                  streamResponses ? 'right-1' : 'left-1'
-                }`} />
+                <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${streamResponses ? 'right-1' : 'left-1'
+                  }`} />
               </button>
             </div>
             <div className="flex items-center justify-between">
@@ -2296,13 +2271,11 @@ export default function AIAssistantClient() {
               </div>
               <button
                 onClick={handleToggleSaveHistory}
-                className={`w-12 h-6 rounded-full relative transition-colors ${
-                  saveHistory ? 'bg-violet-600' : 'bg-gray-300 dark:bg-gray-600'
-                }`}
+                className={`w-12 h-6 rounded-full relative transition-colors ${saveHistory ? 'bg-violet-600' : 'bg-gray-300 dark:bg-gray-600'
+                  }`}
               >
-                <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${
-                  saveHistory ? 'right-1' : 'left-1'
-                }`} />
+                <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${saveHistory ? 'right-1' : 'left-1'
+                  }`} />
               </button>
             </div>
             <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
@@ -2342,11 +2315,10 @@ export default function AIAssistantClient() {
                   <button
                     key={mode}
                     onClick={() => setSelectedMode(mode as ConversationMode)}
-                    className={`flex items-center gap-2 p-3 rounded-xl border transition-colors ${
-                      selectedMode === mode
-                        ? 'border-violet-500 bg-violet-50 dark:bg-violet-900/30'
-                        : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
-                    }`}
+                    className={`flex items-center gap-2 p-3 rounded-xl border transition-colors ${selectedMode === mode
+                      ? 'border-violet-500 bg-violet-50 dark:bg-violet-900/30'
+                      : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
+                      }`}
                   >
                     {config.icon}
                     <span className="text-sm font-medium">{config.label}</span>
@@ -2463,13 +2435,12 @@ export default function AIAssistantClient() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className={`px-2 py-1 rounded-full text-xs ${
-                        file.status === 'ready'
-                          ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
-                          : file.status === 'processing'
+                      <span className={`px-2 py-1 rounded-full text-xs ${file.status === 'ready'
+                        ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300'
+                        : file.status === 'processing'
                           ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300'
                           : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'
-                      }`}>
+                        }`}>
                         {file.status}
                       </span>
                       <button
@@ -2509,11 +2480,10 @@ export default function AIAssistantClient() {
                       setSelectedModel(model.id)
                       toast.success(`Model changed to ${model.name}`)
                     }}
-                    className={`w-full flex items-center justify-between p-3 rounded-xl border transition-colors ${
-                      selectedModel === model.id
-                        ? 'border-violet-500 bg-violet-50 dark:bg-violet-900/30'
-                        : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
-                    }`}
+                    className={`w-full flex items-center justify-between p-3 rounded-xl border transition-colors ${selectedModel === model.id
+                      ? 'border-violet-500 bg-violet-50 dark:bg-violet-900/30'
+                      : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
+                      }`}
                   >
                     <div className="flex items-center gap-3">
                       <div className={`p-2 rounded-lg ${model.provider === 'OpenAI' ? 'bg-emerald-100 dark:bg-emerald-900/30' : 'bg-amber-100 dark:bg-amber-900/30'}`}>

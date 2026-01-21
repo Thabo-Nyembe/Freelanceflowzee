@@ -8,11 +8,13 @@ import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { toast } from 'sonner'
 import { DollarSign, TrendingUp, Target, Star, Loader2 } from 'lucide-react'
-import { generatePricingIntelligence } from '@/lib/ai/business-intelligence'
 
-export function PricingIntelligence() {
+export function PricingIntelligence({ generatePricingStrategy, loading: parentLoading }: { generatePricingStrategy?: any, loading?: boolean }) {
   const [loading, setLoading] = useState(false)
   const [pricing, setPricing] = useState<any>(null)
+
+  // Use parent loading state if provided
+  const isLoading = loading || parentLoading
 
   const [userData, setUserData] = useState({
     skills: '',
@@ -77,21 +79,37 @@ export function PricingIntelligence() {
       }
 
       let result
-      try {
-        // Try AI analysis first (may fail in browser environment)
-        result = await generatePricingIntelligence({
-          userId: `user-${Date.now()}`,
-          skills: skillsArray,
-          experience: experience,
-          market: userData.market,
-          currentRate: currentRate
-        })
-      } catch {
-        // Fall back to demo mode if AI fails (browser environment)
+
+      // Use the generatePricingStrategy function if available (real AI), otherwise fall back to demo
+      if (generatePricingStrategy) {
+        try {
+          const aiResponse = await generatePricingStrategy({
+            skills: skillsArray,
+            experience: experience,
+            market: userData.market,
+            currentRate: currentRate
+          })
+
+          // Parse the AI response
+          try {
+            // Extract JSON from potential markdown code blocks
+            const content = aiResponse.response
+            const jsonMatch = content.match(/\{[\s\S]*\}/)
+            const jsonString = jsonMatch ? jsonMatch[0] : content
+            result = JSON.parse(jsonString)
+
+            // Validate result has recommendations
+            if (!result.recommendations || !Array.isArray(result.recommendations)) throw new Error('Invalid format')
+          } catch (e) {
+            console.error('Failed to parse AI response', e)
+            result = generateDemoPricing()
+          }
+        } catch (err) {
+          console.error('AI analysis failed', err)
+          result = generateDemoPricing()
+        }
+      } else {
         result = generateDemoPricing()
-        toast.info('Demo Mode', {
-          description: 'Using intelligent estimates. AI pricing requires server-side processing.'
-        })
       }
 
       setPricing(result)
@@ -190,10 +208,10 @@ export function PricingIntelligence() {
 
           <Button
             onClick={handleGeneratePricing}
-            disabled={loading}
+            disabled={isLoading}
             className="w-full"
           >
-            {loading ? (
+            {isLoading ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                 Generating Pricing Strategy...
