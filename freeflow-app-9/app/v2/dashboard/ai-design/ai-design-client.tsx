@@ -147,127 +147,7 @@ const colorClasses: Record<string, { text: string; bg: string; bgDark: string }>
   fuchsia: { text: 'text-fuchsia-500', bg: 'bg-fuchsia-100', bgDark: 'dark:bg-fuchsia-900/30' },
 }
 
-// Mock data
-const mockGenerations: Generation[] = [
-  {
-    id: '1',
-    prompt: 'A majestic dragon flying over a neon-lit cyberpunk city at night, highly detailed, cinematic lighting',
-    negativePrompt: 'blurry, low quality',
-    style: 'digital_art',
-    model: 'midjourney_v6',
-    aspectRatio: '16:9',
-    quality: 'high',
-    status: 'completed',
-    imageUrl: '/generated/dragon-city.jpg',
-    thumbnailUrl: '/generated/dragon-city-thumb.jpg',
-    seed: 12345678,
-    likes: 245,
-    views: 1842,
-    downloads: 89,
-    isFavorite: true,
-    isPublic: true,
-    createdAt: '2024-12-23T14:30:00Z',
-    generationTime: 12500,
-    creditsUsed: 5
-  },
-  {
-    id: '2',
-    prompt: 'Serene Japanese garden with cherry blossoms, koi pond, traditional architecture, morning mist',
-    style: 'photorealistic',
-    model: 'midjourney_v6',
-    aspectRatio: '3:2',
-    quality: 'ultra',
-    status: 'completed',
-    imageUrl: '/generated/japanese-garden.jpg',
-    thumbnailUrl: '/generated/japanese-garden-thumb.jpg',
-    seed: 98765432,
-    likes: 189,
-    views: 1256,
-    downloads: 67,
-    isFavorite: true,
-    isPublic: true,
-    createdAt: '2024-12-23T10:15:00Z',
-    generationTime: 18200,
-    creditsUsed: 8
-  },
-  {
-    id: '3',
-    prompt: 'Portrait of a warrior princess with flowing silver hair, intricate armor, fantasy style',
-    style: 'anime',
-    model: 'midjourney_v6',
-    aspectRatio: '2:3',
-    quality: 'high',
-    status: 'processing',
-    likes: 0,
-    views: 0,
-    downloads: 0,
-    isFavorite: false,
-    isPublic: false,
-    createdAt: '2024-12-24T08:45:00Z',
-    creditsUsed: 5
-  },
-  {
-    id: '4',
-    prompt: 'Abstract geometric patterns with gold and marble textures, luxury design',
-    style: 'minimalist',
-    model: 'dalle_3',
-    aspectRatio: '1:1',
-    quality: 'standard',
-    status: 'completed',
-    imageUrl: '/generated/abstract-geo.jpg',
-    thumbnailUrl: '/generated/abstract-geo-thumb.jpg',
-    seed: 55667788,
-    likes: 78,
-    views: 534,
-    downloads: 23,
-    isFavorite: false,
-    isPublic: true,
-    createdAt: '2024-12-22T16:20:00Z',
-    generationTime: 8500,
-    creditsUsed: 3
-  },
-  {
-    id: '5',
-    prompt: 'Cozy coffee shop interior, warm lighting, rustic wood, plants, hygge atmosphere',
-    style: 'photorealistic',
-    model: 'stable_diffusion',
-    aspectRatio: '16:9',
-    quality: 'high',
-    status: 'completed',
-    imageUrl: '/generated/coffee-shop.jpg',
-    thumbnailUrl: '/generated/coffee-shop-thumb.jpg',
-    seed: 11223344,
-    likes: 156,
-    views: 892,
-    downloads: 45,
-    isFavorite: false,
-    isPublic: true,
-    createdAt: '2024-12-21T09:30:00Z',
-    generationTime: 11200,
-    creditsUsed: 5
-  },
-  {
-    id: '6',
-    prompt: 'Futuristic sports car, sleek design, holographic elements, studio lighting',
-    style: '3d_render',
-    model: 'midjourney_v6',
-    aspectRatio: '16:9',
-    quality: 'ultra',
-    status: 'upscaling',
-    imageUrl: '/generated/sports-car.jpg',
-    thumbnailUrl: '/generated/sports-car-thumb.jpg',
-    seed: 44556677,
-    likes: 312,
-    views: 2156,
-    downloads: 134,
-    isFavorite: true,
-    isPublic: true,
-    createdAt: '2024-12-20T14:45:00Z',
-    generationTime: 15800,
-    creditsUsed: 8
-  }
-]
-
+// Mock data for collections only (until collections hook is ready)
 const mockCollections: Collection[] = [
   { id: '1', name: 'Fantasy Worlds', description: 'Epic fantasy landscapes and characters', itemCount: 24, isPrivate: false, createdAt: '2024-12-01' },
   { id: '2', name: 'Architecture', description: 'Modern and futuristic buildings', itemCount: 18, isPrivate: false, createdAt: '2024-11-15' },
@@ -275,13 +155,8 @@ const mockCollections: Collection[] = [
   { id: '4', name: 'Product Mockups', description: 'Commercial product visualizations', itemCount: 15, isPrivate: true, createdAt: '2024-12-18' }
 ]
 
-const mockPromptHistory: PromptHistory[] = [
-  { id: '1', prompt: 'A majestic dragon flying over a neon-lit cyberpunk city', style: 'digital_art', usedAt: '2024-12-23T14:30:00Z', resultCount: 4, isFavorite: true },
-  { id: '2', prompt: 'Serene Japanese garden with cherry blossoms', style: 'photorealistic', usedAt: '2024-12-23T10:15:00Z', resultCount: 4, isFavorite: true },
-  { id: '3', prompt: 'Abstract geometric patterns with gold textures', style: 'minimalist', usedAt: '2024-12-22T16:20:00Z', resultCount: 4, isFavorite: false },
-  { id: '4', prompt: 'Cozy coffee shop interior, warm lighting', style: 'photorealistic', usedAt: '2024-12-21T09:30:00Z', resultCount: 4, isFavorite: false },
-  { id: '5', prompt: 'Futuristic sports car with holographic elements', style: '3d_render', usedAt: '2024-12-20T14:45:00Z', resultCount: 4, isFavorite: true }
-]
+// Removed mockPromptHistory to derive from real data
+const mockPromptHistory: PromptHistory[] = []
 
 const styleTemplates: StyleTemplate[] = [
   { id: '1', name: 'Cinematic', description: 'Movie-quality dramatic lighting', preview: '/styles/cinematic.jpg', style: 'photorealistic', promptModifiers: 'cinematic lighting, dramatic, film grain, anamorphic', isPopular: true, usageCount: 12500 },
@@ -414,9 +289,20 @@ export default function AIDesignClient() {
     deleteDesign
   } = useAIDesigns([])
 
-  // Keep mock data for collections and prompt history (no hooks available yet)
+  // Keep mock data for collections until hook
   const [collections, setCollections] = useState<Collection[]>(mockCollections)
-  const [promptHistory, setPromptHistory] = useState<PromptHistory[]>(mockPromptHistory)
+
+  // Derive prompt history from real generations
+  const promptHistory = useMemo(() => {
+    return dbDesigns.slice(0, 50).map(d => ({
+      id: d.id,
+      prompt: d.prompt,
+      style: styleMap[d.style] || 'digital_art',
+      usedAt: d.created_at,
+      resultCount: 1,
+      isFavorite: d.is_featured
+    }))
+  }, [dbDesigns])
   const [isLoading, setIsLoading] = useState(false)
 
   // Fetch designs on mount
@@ -449,12 +335,12 @@ export default function AIDesignClient() {
     if (!width || !height) return '1:1'
     const ratio = width / height
     if (Math.abs(ratio - 1) < 0.1) return '1:1'
-    if (Math.abs(ratio - 16/9) < 0.1) return '16:9'
-    if (Math.abs(ratio - 9/16) < 0.1) return '9:16'
-    if (Math.abs(ratio - 4/3) < 0.1) return '4:3'
-    if (Math.abs(ratio - 3/4) < 0.1) return '3:4'
-    if (Math.abs(ratio - 2/3) < 0.1) return '2:3'
-    if (Math.abs(ratio - 3/2) < 0.1) return '3:2'
+    if (Math.abs(ratio - 16 / 9) < 0.1) return '16:9'
+    if (Math.abs(ratio - 9 / 16) < 0.1) return '9:16'
+    if (Math.abs(ratio - 4 / 3) < 0.1) return '4:3'
+    if (Math.abs(ratio - 3 / 4) < 0.1) return '3:4'
+    if (Math.abs(ratio - 2 / 3) < 0.1) return '2:3'
+    if (Math.abs(ratio - 3 / 2) < 0.1) return '3:2'
     return '1:1'
   }
 
@@ -470,8 +356,8 @@ export default function AIDesignClient() {
       aspectRatio: aspectRatioFromResolution(dbDesign.resolution),
       quality: 'standard' as QualityLevel,
       status: (dbDesign.status === 'processing' ? 'processing' :
-               dbDesign.status === 'completed' ? 'completed' :
-               dbDesign.status === 'failed' ? 'failed' : 'pending') as GenerationStatus,
+        dbDesign.status === 'completed' ? 'completed' :
+          dbDesign.status === 'failed' ? 'failed' : 'pending') as GenerationStatus,
       imageUrl: dbDesign.output_url || undefined,
       thumbnailUrl: dbDesign.thumbnail_url || undefined,
       seed: dbDesign.seed || undefined,
@@ -538,9 +424,9 @@ export default function AIDesignClient() {
           title: prompt.slice(0, 50),
           model: selectedModel.replace('_', '-'),
           resolution: selectedRatio === '1:1' ? '1024x1024' :
-                     selectedRatio === '16:9' ? '1536x864' :
-                     selectedRatio === '9:16' ? '864x1536' :
-                     '1024x1024',
+            selectedRatio === '16:9' ? '1536x864' :
+              selectedRatio === '9:16' ? '864x1536' :
+                '1024x1024',
           tags: [selectedStyle, selectedModel]
         }
       )
@@ -689,11 +575,11 @@ export default function AIDesignClient() {
               History
             </Button>
             <Button className="bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white" onClick={() => {
-                toast.promise(
-                  fetch('/api/billing?action=get_plans').then(res => res.json()),
-                  { loading: 'Loading upgrade options...', success: 'Upgrade page ready! Choose your plan to unlock premium features', error: 'Failed to load options' }
-                )
-              }}>
+              toast.promise(
+                fetch('/api/billing?action=get_plans').then(res => res.json()),
+                { loading: 'Loading upgrade options...', success: 'Upgrade page ready! Choose your plan to unlock premium features', error: 'Failed to load options' }
+              )
+            }}>
               <Crown className="w-4 h-4 mr-2" />
               Upgrade
             </Button>
@@ -705,7 +591,7 @@ export default function AIDesignClient() {
           <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
             <CardContent className="p-4">
               <div className="flex items-center gap-2 mb-2">
-                <Image className="w-4 h-4 text-fuchsia-500"  loading="lazy"/>
+                <Image className="w-4 h-4 text-fuchsia-500" loading="lazy" />
                 <span className="text-xs text-gray-500 dark:text-gray-400">Generations</span>
               </div>
               <div className="text-xl font-bold text-gray-900 dark:text-white">
@@ -973,7 +859,7 @@ export default function AIDesignClient() {
               Generate
             </TabsTrigger>
             <TabsTrigger value="gallery" className="data-[state=active]:bg-fuchsia-100 data-[state=active]:text-fuchsia-700">
-              <Image className="w-4 h-4 mr-2"  loading="lazy"/>
+              <Image className="w-4 h-4 mr-2" loading="lazy" />
               Gallery
             </TabsTrigger>
             <TabsTrigger value="styles" className="data-[state=active]:bg-fuchsia-100 data-[state=active]:text-fuchsia-700">
@@ -1116,7 +1002,7 @@ export default function AIDesignClient() {
                               {gen.status === 'processing' ? (
                                 <RefreshCw className="w-8 h-8 text-fuchsia-500 animate-spin" />
                               ) : (
-                                <Image className="w-8 h-8 text-gray-400"  loading="lazy"/>
+                                <Image className="w-8 h-8 text-gray-400" loading="lazy" />
                               )}
                             </div>
                           )}
@@ -1156,11 +1042,10 @@ export default function AIDesignClient() {
                         <button
                           key={model}
                           onClick={() => setSelectedModel(model)}
-                          className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors ${
-                            selectedModel === model
+                          className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors ${selectedModel === model
                               ? 'bg-fuchsia-100 dark:bg-fuchsia-900/30 border-2 border-fuchsia-300'
                               : 'bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700'
-                          }`}
+                            }`}
                         >
                           <ModelIcon className="w-4 h-4 text-fuchsia-500" />
                           <span className="text-sm font-medium">{model.replace('_', ' ')}</span>
@@ -1186,11 +1071,10 @@ export default function AIDesignClient() {
                         <button
                           key={style}
                           onClick={() => setSelectedStyle(style)}
-                          className={`p-2 rounded-lg text-xs font-medium transition-colors ${
-                            selectedStyle === style
+                          className={`p-2 rounded-lg text-xs font-medium transition-colors ${selectedStyle === style
                               ? 'bg-fuchsia-100 dark:bg-fuchsia-900/30 text-fuchsia-700 border-2 border-fuchsia-300'
                               : 'bg-gray-50 dark:bg-gray-700/50 text-gray-600 dark:text-gray-400 hover:bg-gray-100'
-                          }`}
+                            }`}
                         >
                           {style.replace('_', ' ')}
                         </button>
@@ -1212,11 +1096,10 @@ export default function AIDesignClient() {
                         <button
                           key={ratio}
                           onClick={() => setSelectedRatio(ratio)}
-                          className={`p-2 rounded-lg text-xs font-medium transition-colors ${
-                            selectedRatio === ratio
+                          className={`p-2 rounded-lg text-xs font-medium transition-colors ${selectedRatio === ratio
                               ? 'bg-fuchsia-100 dark:bg-fuchsia-900/30 text-fuchsia-700 border-2 border-fuchsia-300'
                               : 'bg-gray-50 dark:bg-gray-700/50 text-gray-600 dark:text-gray-400 hover:bg-gray-100'
-                          }`}
+                            }`}
                         >
                           {ratio}
                         </button>
@@ -1243,11 +1126,10 @@ export default function AIDesignClient() {
                         <button
                           key={level}
                           onClick={() => setSelectedQuality(level)}
-                          className={`p-2 rounded-lg text-xs transition-colors ${
-                            selectedQuality === level
+                          className={`p-2 rounded-lg text-xs transition-colors ${selectedQuality === level
                               ? 'bg-fuchsia-100 dark:bg-fuchsia-900/30 text-fuchsia-700 border-2 border-fuchsia-300'
                               : 'bg-gray-50 dark:bg-gray-700/50 text-gray-600 dark:text-gray-400 hover:bg-gray-100'
-                          }`}
+                            }`}
                         >
                           <div className="font-medium capitalize">{level}</div>
                           <div className="text-gray-400">{credits} credits</div>
@@ -1268,7 +1150,7 @@ export default function AIDesignClient() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                      <Image className="w-7 h-7 text-white"  loading="lazy"/>
+                      <Image className="w-7 h-7 text-white" loading="lazy" />
                     </div>
                     <div>
                       <h3 className="text-xl font-bold">Your Gallery</h3>
@@ -1656,11 +1538,10 @@ export default function AIDesignClient() {
                       <button
                         key={item.id}
                         onClick={() => setSettingsTab(item.id)}
-                        className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
-                          settingsTab === item.id
+                        className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${settingsTab === item.id
                             ? 'bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-900/30 dark:text-fuchsia-400'
                             : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700/50'
-                        }`}
+                          }`}
                       >
                         <item.icon className="h-4 w-4" />
                         <span>{item.label}</span>
@@ -2236,7 +2117,7 @@ export default function AIDesignClient() {
           <DialogContent className="max-w-lg">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
-                <Image className="w-5 h-5 text-pink-500"  loading="lazy"/>
+                <Image className="w-5 h-5 text-pink-500" loading="lazy" />
                 Browse Gallery
               </DialogTitle>
             </DialogHeader>
@@ -2265,7 +2146,7 @@ export default function AIDesignClient() {
                     setActiveTab('gallery')
                   }}
                 >
-                  <Image className="w-4 h-4 mr-2"  loading="lazy"/>
+                  <Image className="w-4 h-4 mr-2" loading="lazy" />
                   Open Full Gallery
                 </Button>
                 <Button variant="outline" onClick={() => setShowGalleryDialog(false)}>
@@ -2316,7 +2197,7 @@ export default function AIDesignClient() {
                     setActiveTab('gallery')
                   }}
                 >
-                  <Image className="w-4 h-4 mr-2"  loading="lazy"/>
+                  <Image className="w-4 h-4 mr-2" loading="lazy" />
                   Select from Gallery
                 </Button>
                 <Button variant="outline" onClick={() => setShowUpscaleDialog(false)}>
@@ -2349,11 +2230,10 @@ export default function AIDesignClient() {
                       setShowStyleEditorDialog(false)
                       setActiveTab('generate')
                     }}
-                    className={`p-3 rounded-lg text-sm font-medium transition-colors ${
-                      selectedStyle === style
+                    className={`p-3 rounded-lg text-sm font-medium transition-colors ${selectedStyle === style
                         ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 border-2 border-amber-300'
                         : 'bg-gray-50 dark:bg-gray-700/50 text-gray-600 dark:text-gray-400 hover:bg-gray-100'
-                    }`}
+                      }`}
                   >
                     {style.replace('_', ' ')}
                   </button>

@@ -233,7 +233,7 @@ const getStyleColor = (style: StylePreset) => {
 
 const getTypeIcon = (type: GenerationType) => {
   const icons: Record<GenerationType, React.ReactNode> = {
-    image: <Image className="w-4 h-4"  loading="lazy"/>,
+    image: <Image className="w-4 h-4" loading="lazy" />,
     video: <Video className="w-4 h-4" />,
     audio: <Music className="w-4 h-4" />,
     text: <FileText className="w-4 h-4" />,
@@ -277,6 +277,8 @@ const mockAICreatePredictions: any[] = []
 const mockAICreateActivities: any[] = []
 
 // Quick actions are now defined inside the component to use dialog state
+import { useAICreate, type AIGeneration } from '@/lib/hooks/use-ai-create'
+import { createClient } from '@/lib/supabase/client'
 
 // ============================================================================
 // MAIN COMPONENT
@@ -312,14 +314,28 @@ export default function AICreateClient() {
   const [galleryDialogViewMode, setGalleryDialogViewMode] = useState<'grid' | 'list'>('grid')
 
   // Filtered generations
+  const {
+    generations: dbGenerations,
+    isGenerating: hookIsGenerating,
+    createGeneration
+  } = useAICreate()
+
+  // Map hook generating state to local state
+  // We use local state for immediate UI feedback, but sync with hook
+
   const filteredGenerations = useMemo(() => {
-    return mockGenerations.filter(gen => {
+    // Transform DB generations to UI format if needed, or use directly
+    // For now we map DB structure to UI structure
+    // const displayGenerations = dbGenerations.map(g => ({...}))
+    // Using dbGenerations directly and handling type mismatches in render
+
+    return dbGenerations.filter(gen => {
       const matchesSearch = gen.prompt.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        gen.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+        (gen.tags || []).some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
       const matchesStatus = statusFilter === 'all' || gen.status === statusFilter
       return matchesSearch && matchesStatus
     })
-  }, [searchQuery, statusFilter])
+  }, [searchQuery, statusFilter, dbGenerations])
 
   const styles: { value: StylePreset; label: string }[] = [
     { value: 'realistic', label: 'Realistic' },
@@ -350,11 +366,26 @@ export default function AICreateClient() {
     { id: '3', label: 'View Gallery', icon: 'image', action: () => setShowGalleryDialog(true), variant: 'outline' as const },
   ]
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     if (!prompt.trim()) return
     setIsGenerating(true)
-    toast.info('Generating...')
-    // MIGRATED: Batch #16 - Removed setTimeout mock simulation, using real API
+    toast.info('Starting generation...')
+
+    try {
+      await createGeneration(prompt, 'image', {
+        model: selectedModel === '1' ? 'dall-e-3' : 'stable-diffusion-xl',
+        temperature: 0.7,
+        maxTokens: 1, // Normalized for image gen
+        tags: [selectedStyle, selectedRatio, quality]
+      })
+      toast.success('Generation queued!')
+      setPrompt('')
+    } catch (error) {
+      toast.error('Failed to start generation')
+      console.error(error)
+    } finally {
+      setIsGenerating(false)
+    }
   }
 
   // Handlers
@@ -455,7 +486,7 @@ export default function AICreateClient() {
             <div className="px-4 py-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
               <div className="flex items-center gap-2">
                 <Gem className="w-4 h-4 text-purple-500" />
-                <span className="font-semibold text-gray-900 dark:text-white">{mockUsageStats.remainingCredits}</span>
+                <span className="font-semibold text-gray-900 dark:text-white">100</span>
                 <span className="text-sm text-gray-500">credits</span>
               </div>
             </div>
@@ -469,14 +500,14 @@ export default function AICreateClient() {
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
           {[
-            { label: 'Generations', value: formatNumber(mockUsageStats.totalGenerations), change: 18.5, icon: Sparkles, color: 'from-violet-500 to-purple-500' },
-            { label: 'This Month', value: mockUsageStats.generationsThisMonth.toString(), change: 24.3, icon: TrendingUp, color: 'from-blue-500 to-cyan-500' },
-            { label: 'Credits Used', value: mockUsageStats.usedCredits.toString(), change: -5.2, icon: Zap, color: 'from-amber-500 to-orange-500' },
-            { label: 'Avg Time', value: `${mockUsageStats.avgProcessingTime}s`, change: -12.4, icon: Clock, color: 'from-green-500 to-emerald-500' },
-            { label: 'Total Views', value: formatNumber(mockUsageStats.totalViews), change: 45.7, icon: Eye, color: 'from-pink-500 to-rose-500' },
-            { label: 'Total Likes', value: formatNumber(mockUsageStats.totalLikes), change: 32.1, icon: Heart, color: 'from-red-500 to-pink-500' },
-            { label: 'Downloads', value: formatNumber(mockUsageStats.totalDownloads), change: 28.9, icon: Download, color: 'from-teal-500 to-cyan-500' },
-            { label: 'Success Rate', value: `${((mockUsageStats.completedGenerations / mockUsageStats.totalGenerations) * 100).toFixed(0)}%`, change: 2.1, icon: Target, color: 'from-indigo-500 to-blue-500' }
+            { label: 'Generations', value: dbGenerations.length.toString(), change: 18.5, icon: Sparkles, color: 'from-violet-500 to-purple-500' },
+            { label: 'This Month', value: dbGenerations.filter(g => new Date(g.created_at).getMonth() === new Date().getMonth()).length.toString(), change: 24.3, icon: TrendingUp, color: 'from-blue-500 to-cyan-500' },
+            { label: 'Credits Used', value: dbGenerations.reduce((sum, g) => sum + (g.cost || 0), 0).toFixed(0), change: -5.2, icon: Zap, color: 'from-amber-500 to-orange-500' },
+            { label: 'Avg Time', value: "1.2s", change: -12.4, icon: Clock, color: 'from-green-500 to-emerald-500' },
+            { label: 'Total Views', value: "0", change: 45.7, icon: Eye, color: 'from-pink-500 to-rose-500' },
+            { label: 'Total Likes', value: "0", change: 32.1, icon: Heart, color: 'from-red-500 to-pink-500' },
+            { label: 'Downloads', value: "0", change: 28.9, icon: Download, color: 'from-teal-500 to-cyan-500' },
+            { label: 'Success Rate', value: `${dbGenerations.length > 0 ? ((dbGenerations.filter(g => g.status === 'completed').length / dbGenerations.length) * 100).toFixed(0) : 0}%`, change: 2.1, icon: Target, color: 'from-indigo-500 to-blue-500' }
           ].map((stat, idx) => (
             <Card key={idx} className="relative overflow-hidden border-0 shadow-sm hover:shadow-md transition-shadow">
               <CardContent className="p-4">
@@ -539,7 +570,7 @@ export default function AICreateClient() {
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="text-right">
-                    <p className="text-3xl font-bold">{mockUsageStats.remainingCredits}</p>
+                    <p className="text-3xl font-bold">100</p>
                     <p className="text-violet-200 text-sm">Credits Available</p>
                   </div>
                 </div>
@@ -613,11 +644,10 @@ export default function AICreateClient() {
                           <button
                             key={style.value}
                             onClick={() => setSelectedStyle(style.value)}
-                            className={`p-3 rounded-lg text-center transition-all ${
-                              selectedStyle === style.value
+                            className={`p-3 rounded-lg text-center transition-all ${selectedStyle === style.value
                                 ? `bg-gradient-to-r ${getStyleColor(style.value)} text-white shadow-lg`
                                 : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
-                            }`}
+                              }`}
                           >
                             <span className="text-xs font-medium">{style.label}</span>
                           </button>
@@ -635,11 +665,10 @@ export default function AICreateClient() {
                           <button
                             key={ratio.value}
                             onClick={() => setSelectedRatio(ratio.value)}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
-                              selectedRatio === ratio.value
+                            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${selectedRatio === ratio.value
                                 ? 'bg-purple-500 text-white'
                                 : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
-                            }`}
+                              }`}
                           >
                             {getAspectRatioIcon(ratio.value)}
                             <span className="text-sm">{ratio.label}</span>
@@ -651,7 +680,7 @@ export default function AICreateClient() {
                     {/* Generate Button */}
                     <Button
                       onClick={handleGenerate}
-                      disabled={!prompt.trim() || isGenerating}
+                      disabled={!prompt.trim() || isGenerating || hookIsGenerating}
                       className="w-full bg-gradient-to-r from-violet-500 to-purple-600 text-white h-12 text-lg"
                     >
                       {isGenerating ? (
@@ -690,11 +719,10 @@ export default function AICreateClient() {
                           <button
                             key={model.id}
                             onClick={() => setSelectedModel(model.id)}
-                            className={`w-full p-3 rounded-lg text-left transition-all ${
-                              selectedModel === model.id
+                            className={`w-full p-3 rounded-lg text-left transition-all ${selectedModel === model.id
                                 ? 'bg-purple-100 dark:bg-purple-900/30 border-2 border-purple-500'
                                 : 'bg-gray-50 dark:bg-gray-800 border-2 border-transparent hover:border-gray-200 dark:hover:border-gray-700'
-                            }`}
+                              }`}
                           >
                             <div className="flex items-center justify-between">
                               <span className="font-medium text-gray-900 dark:text-white">{model.name}</span>
@@ -716,11 +744,10 @@ export default function AICreateClient() {
                           <button
                             key={q}
                             onClick={() => setQuality(q)}
-                            className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${
-                              quality === q
+                            className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${quality === q
                                 ? 'bg-purple-500 text-white'
                                 : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
-                            }`}
+                              }`}
                           >
                             {q.charAt(0).toUpperCase() + q.slice(1)}
                           </button>
@@ -796,7 +823,7 @@ export default function AICreateClient() {
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="text-right">
-                    <p className="text-3xl font-bold">{mockGenerations.length}</p>
+                    <p className="text-3xl font-bold">{filteredGenerations.length}</p>
                     <p className="text-blue-200 text-sm">Total Creations</p>
                   </div>
                 </div>
@@ -1353,11 +1380,10 @@ export default function AICreateClient() {
                         <button
                           key={item.id}
                           onClick={() => setSettingsTab(item.id)}
-                          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors ${
-                            settingsTab === item.id
+                          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors ${settingsTab === item.id
                               ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
                               : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
-                          }`}
+                            }`}
                         >
                           <item.icon className="h-4 w-4" />
                           <span className="font-medium">{item.label}</span>
@@ -2003,7 +2029,7 @@ export default function AICreateClient() {
           <DialogContent className="max-w-4xl">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
-                <Image className="w-5 h-5 text-blue-500"  loading="lazy"/>
+                <Image className="w-5 h-5 text-blue-500" loading="lazy" />
                 Your Gallery
               </DialogTitle>
             </DialogHeader>
