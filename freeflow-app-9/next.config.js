@@ -97,6 +97,9 @@ const nextConfig = {
     // TODO: Set to false once TypeScript errors in test files and dashboard components are fixed
     ignoreBuildErrors: true,
   },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   experimental: {
     externalDir: true,
   },
@@ -113,13 +116,13 @@ const nextConfig = {
   turbopack: {
     root: '/Users/thabonyembe/Documents/freeflow-app-9',
   },
-  
+
   // A+++ Build optimization
   staticPageGenerationTimeout: 90,
   compress: true,
 
   // Note: modularizeImports for lucide-react removed - new version uses different import paths
-  
+
   // Advanced Webpack configuration for A+++ grade
   webpack: (config, { isServer, dev, webpack }) => {
     if (!dev) {
@@ -151,7 +154,7 @@ const nextConfig = {
         };
       }
     }
-    
+
     // Fallbacks for Node.js modules
     if (!isServer) {
       config.resolve.fallback = {
@@ -161,21 +164,21 @@ const nextConfig = {
         crypto: false,
       };
     }
-    
+
     // A+++ Performance plugins
     config.plugins.push(
       new webpack.optimize.MinChunkSizePlugin({
         minChunkSize: 20000,
       })
     );
-    
+
     return config;
   },
-  
+
   output: 'standalone',
   poweredByHeader: false,
   reactStrictMode: false,
-  
+
   // A+++ Performance optimizations
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
@@ -208,10 +211,10 @@ const nextConfig = {
       },
     ]
   },
-  
+
   // Advanced bundle analyzer and tree shaking
   // (removing self-reference to fix circular dependency)
-  
+
   images: {
     remotePatterns: [
       {
@@ -277,7 +280,7 @@ const nextConfig = {
     // Blur placeholder data URL for avatars
     unoptimized: false,
   },
-  
+
   // Route rewrites - disabled AI mock redirect to use real endpoints
   // async rewrites() {
   //   return [

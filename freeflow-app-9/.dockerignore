@@ -1,0 +1,15 @@
+
+node_modules
+.next
+.git
+.DS_Store
+*.pem
+*.log
+test-results
+playwright-report
+playwright-test-results-summary.md
+*.md
+docs
+docs/*
+.vscode
+.idea

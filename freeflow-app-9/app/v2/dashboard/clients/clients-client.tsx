@@ -3,6 +3,7 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useClients } from '@/lib/hooks/use-clients'
 import { useDeals } from '@/lib/hooks/use-deals'
@@ -21,6 +22,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { CardDescription } from '@/components/ui/card'
 import {
   Users,
+  Sparkles,
   Plus,
   Search,
   Mail,
@@ -165,155 +167,50 @@ interface Task {
 }
 
 // Mock data
-const mockClients: Client[] = [
+// Mock data removed
+const mockClients: Client[] = []
+const mockActivities: Activity[] = []
+const mockTasks: Task[] = []
+
+const mockAIInsights = [
   {
-    id: 'c1',
-    name: 'TechCorp International',
-    company: 'TechCorp International',
-    industry: 'Technology',
-    website: 'https://techcorp.com',
-    status: 'customer',
-    contacts: [
-      { id: 'ct1', name: 'Sarah Chen', email: 'sarah@techcorp.com', phone: '+1 555 0123', title: 'VP of Engineering', isPrimary: true, linkedin: 'linkedin.com/in/sarahchen' }
-    ],
-    primaryContact: { id: 'ct1', name: 'Sarah Chen', email: 'sarah@techcorp.com', phone: '+1 555 0123', title: 'VP of Engineering', isPrimary: true },
-    revenue: 450000,
-    lifetime_value: 1250000,
-    projects: 12,
-    health_score: 92,
-    nps: 9,
-    createdAt: '2023-01-15T10:00:00Z',
-    lastActivity: '2024-12-22T14:30:00Z',
-    tags: ['enterprise', 'technology', 'strategic'],
-    address: { city: 'San Francisco', state: 'CA', country: 'USA' },
-    owner: 'John Smith',
-    team: ['John Smith', 'Emily Davis'],
-    source: 'Inbound',
-    deals: [
-      { id: 'd1', name: 'Platform Expansion Q1', value: 150000, stage: 'negotiation', probability: 75, expectedClose: '2025-01-31', createdAt: '2024-11-01', owner: 'John Smith', products: ['Enterprise Suite', 'API Access'] }
-    ],
-    tier: 'platinum'
+    id: '1',
+    type: 'opportunity' as const,
+    title: 'High-Value Prospect',
+    description: 'TechCorp showing 85% engagement signals. Recommended action: Schedule demo.',
+    confidence: 0.85,
+    action: 'Schedule Demo'
   },
   {
-    id: 'c2',
-    name: 'Global Innovations Ltd',
-    company: 'Global Innovations Ltd',
-    industry: 'Manufacturing',
-    website: 'https://globalinnovations.com',
-    status: 'customer',
-    contacts: [
-      { id: 'ct2', name: 'Mike Johnson', email: 'mike@globalinnovations.com', phone: '+1 555 0456', title: 'CTO', isPrimary: true }
-    ],
-    primaryContact: { id: 'ct2', name: 'Mike Johnson', email: 'mike@globalinnovations.com', phone: '+1 555 0456', title: 'CTO', isPrimary: true },
-    revenue: 285000,
-    lifetime_value: 780000,
-    projects: 8,
-    health_score: 78,
-    nps: 7,
-    createdAt: '2023-03-20T11:00:00Z',
-    lastActivity: '2024-12-20T09:00:00Z',
-    tags: ['manufacturing', 'mid-market'],
-    address: { city: 'Chicago', state: 'IL', country: 'USA' },
-    owner: 'Emily Davis',
-    team: ['Emily Davis'],
-    source: 'Referral',
-    deals: [
-      { id: 'd2', name: 'Annual Renewal 2025', value: 95000, stage: 'proposal', probability: 90, expectedClose: '2025-02-28', createdAt: '2024-12-01', owner: 'Emily Davis', products: ['Core Platform'] }
-    ],
-    tier: 'gold'
-  },
-  {
-    id: 'c3',
-    name: 'Startup Ventures',
-    company: 'Startup Ventures',
-    industry: 'Venture Capital',
-    website: 'https://startupventures.io',
-    status: 'opportunity',
-    contacts: [
-      { id: 'ct3', name: 'James Wilson', email: 'james@startupventures.io', phone: '+1 555 0789', title: 'Partner', isPrimary: true }
-    ],
-    primaryContact: { id: 'ct3', name: 'James Wilson', email: 'james@startupventures.io', phone: '+1 555 0789', title: 'Partner', isPrimary: true },
-    revenue: 0,
-    lifetime_value: 0,
-    projects: 0,
-    health_score: 65,
-    createdAt: '2024-10-15T14:00:00Z',
-    lastActivity: '2024-12-21T16:00:00Z',
-    tags: ['finance', 'startup'],
-    address: { city: 'New York', state: 'NY', country: 'USA' },
-    owner: 'John Smith',
-    team: ['John Smith'],
-    source: 'Conference',
-    deals: [
-      { id: 'd3', name: 'Initial Contract', value: 75000, stage: 'discovery', probability: 40, expectedClose: '2025-03-15', createdAt: '2024-11-15', owner: 'John Smith', products: ['Starter Pack'] }
-    ],
-    tier: 'silver'
-  },
-  {
-    id: 'c4',
-    name: 'Healthcare Plus',
-    company: 'Healthcare Plus',
-    industry: 'Healthcare',
-    status: 'lead',
-    contacts: [
-      { id: 'ct4', name: 'Dr. Emily Carter', email: 'emily@healthcareplus.org', title: 'Director of IT', isPrimary: true }
-    ],
-    primaryContact: { id: 'ct4', name: 'Dr. Emily Carter', email: 'emily@healthcareplus.org', title: 'Director of IT', isPrimary: true },
-    revenue: 0,
-    lifetime_value: 0,
-    projects: 0,
-    health_score: 0,
-    createdAt: '2024-12-10T10:00:00Z',
-    lastActivity: '2024-12-18T11:00:00Z',
-    tags: ['healthcare', 'enterprise'],
-    address: { city: 'Boston', state: 'MA', country: 'USA' },
-    owner: 'Emily Davis',
-    team: ['Emily Davis'],
-    source: 'Webinar',
-    deals: [],
-    tier: 'bronze'
-  },
-  {
-    id: 'c5',
-    name: 'Retail Empire',
-    company: 'Retail Empire',
-    industry: 'Retail',
-    website: 'https://retailempire.com',
-    status: 'churned',
-    contacts: [
-      { id: 'ct5', name: 'Alex Thompson', email: 'alex@retailempire.com', title: 'Operations Manager', isPrimary: true }
-    ],
-    primaryContact: { id: 'ct5', name: 'Alex Thompson', email: 'alex@retailempire.com', title: 'Operations Manager', isPrimary: true },
-    revenue: 125000,
-    lifetime_value: 125000,
-    projects: 3,
-    health_score: 25,
-    nps: 4,
-    createdAt: '2022-06-01T09:00:00Z',
-    lastActivity: '2024-09-15T10:00:00Z',
-    tags: ['retail', 'at-risk'],
-    address: { city: 'Los Angeles', state: 'CA', country: 'USA' },
-    owner: 'John Smith',
-    team: ['John Smith'],
-    source: 'Partner',
-    deals: [],
-    tier: 'silver'
-  },
+    id: '2',
+    type: 'alert' as const,
+    title: 'Churn Risk: Acme Inc',
+    description: 'Usage dropped by 40% last week. Recommended action: Customer Success outreach.',
+    confidence: 0.92,
+    action: 'Contact CS'
+  }
 ]
 
-const mockActivities: Activity[] = [
-  { id: 'a1', clientId: 'c1', type: 'meeting', title: 'Q1 Planning Meeting', description: 'Discussed expansion plans', createdAt: '2024-12-22T14:30:00Z', createdBy: 'John Smith', completed: true, outcome: 'Positive - moving forward with proposal' },
-  { id: 'a2', clientId: 'c1', type: 'email', title: 'Follow-up on proposal', description: 'Sent updated pricing', createdAt: '2024-12-21T10:00:00Z', createdBy: 'John Smith', completed: true },
-  { id: 'a3', clientId: 'c2', type: 'call', title: 'Renewal discussion', description: 'Discussed annual renewal terms', createdAt: '2024-12-20T09:00:00Z', createdBy: 'Emily Davis', completed: true },
-  { id: 'a4', clientId: 'c3', type: 'meeting', title: 'Discovery call', description: 'Initial needs assessment', createdAt: '2024-12-21T16:00:00Z', createdBy: 'John Smith', completed: true },
-  { id: 'a5', clientId: 'c1', type: 'task', title: 'Send contract amendment', description: 'Update for new pricing', createdAt: '2024-12-23T09:00:00Z', createdBy: 'John Smith', completed: false, dueDate: '2024-12-26', priority: 'high' },
+const mockPredictions = [
+  {
+    dataset: 'Revenue Forecast',
+    trend: 'up' as const,
+    value: '+12.5%',
+    confidence: 0.88,
+    description: 'Projected Q3 growth based on current pipeline'
+  },
+  {
+    dataset: 'Churn Rate',
+    trend: 'stable' as const,
+    value: '2.1%',
+    confidence: 0.95,
+    description: 'Expected to remain stable through Q4'
+  }
 ]
 
-const mockTasks: Task[] = [
-  { id: 't1', clientId: 'c1', title: 'Send updated proposal', description: 'Include new pricing tier', dueDate: '2024-12-26', priority: 'high', assignee: 'John Smith', completed: false, createdAt: '2024-12-22' },
-  { id: 't2', clientId: 'c2', title: 'Schedule renewal call', description: 'Discuss 2025 contract', dueDate: '2024-12-28', priority: 'medium', assignee: 'Emily Davis', completed: false, createdAt: '2024-12-20' },
-  { id: 't3', clientId: 'c3', title: 'Send case studies', description: 'VC-focused success stories', dueDate: '2024-12-27', priority: 'medium', assignee: 'John Smith', completed: false, createdAt: '2024-12-21' },
-  { id: 't4', clientId: 'c4', title: 'Follow up on demo request', dueDate: '2024-12-24', priority: 'urgent', assignee: 'Emily Davis', completed: false, createdAt: '2024-12-18' },
+const mockCollaborators = [
+  { id: '1', name: 'Sarah Wilson', role: 'Sales Lead', avatar: '', status: 'online' as const },
+  { id: '2', name: 'Mike Chen', role: 'Account Exec', avatar: '', status: 'away' as const }
 ]
 
 // Helper functions
@@ -401,28 +298,12 @@ interface ClientsClientProps {
 }
 
 // Enhanced Competitive Upgrade Mock Data
-const mockClientsAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Client Retention', description: '96% client retention rate this quarter. Up 4% from last quarter.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Retention' },
-  { id: '2', type: 'info' as const, title: 'Revenue Opportunity', description: '12 clients ready for upsell based on usage patterns.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Revenue' },
-  { id: '3', type: 'warning' as const, title: 'At-Risk Client', description: 'Acme Corp showing decreased engagement. Schedule check-in.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Risk' },
-]
-
-const mockClientsCollaborators = [
-  { id: '1', name: 'Account Manager', avatar: '/avatars/am.jpg', status: 'online' as const, role: 'Manager' },
-  { id: '2', name: 'Success Lead', avatar: '/avatars/cs.jpg', status: 'online' as const, role: 'Lead' },
-  { id: '3', name: 'Support Rep', avatar: '/avatars/support.jpg', status: 'away' as const, role: 'Support' },
-]
-
-const mockClientsPredictions = [
-  { id: '1', title: 'Q1 Revenue', prediction: '$2.4M projected from client base', confidence: 88, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'New Clients', prediction: '8 new enterprise clients expected', confidence: 72, trend: 'up' as const, impact: 'medium' as const },
-]
-
-const mockClientsActivities = [
-  { id: '1', user: 'Sarah Chen', action: 'Closed deal with', target: 'TechCorp ($50K)', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Mike Johnson', action: 'Scheduled call with', target: 'Innovate Inc', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'Lisa Park', action: 'Updated status for', target: 'GlobalTech', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
-]
+// Enhanced Competitive Upgrade Components - Placeholders if needed, or remove completely if unused.
+// Leaving empty arrays for now to avoid breaking imports if they are used elsewhere in this file.
+const mockClientsAIInsights: any[] = []
+const mockClientsCollaborators: any[] = []
+const mockClientsPredictions: any[] = []
+const mockClientsActivities: any[] = []
 
 // Quick actions will be defined inside the component to access state setters
 
@@ -446,6 +327,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
   const [showEditStageDialog, setShowEditStageDialog] = useState(false)
   const [showAddStageDialog, setShowAddStageDialog] = useState(false)
   const [showCreateWorkflowDialog, setShowCreateWorkflowDialog] = useState(false)
+  const [showInsights, setShowInsights] = useState(false)
   const [showCreateSequenceDialog, setShowCreateSequenceDialog] = useState(false)
   const [showAppMarketplaceDialog, setShowAppMarketplaceDialog] = useState(false)
   const [showExportDataDialog, setShowExportDataDialog] = useState(false)
@@ -601,18 +483,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
         phone: dbClient.phone || '',
         status: dbClient.status === 'lead' || dbClient.status === 'prospect' || dbClient.status === 'churned' || dbClient.status === 'inactive' ? dbClient.status as any : 'active'
       })
-    } else {
-      // Mock client format
-      setEditClientForm({
-        id: client.id,
-        company: client.company || '',
-        industry: client.industry || 'Technology',
-        website: client.website || '',
-        contactName: client.primaryContact?.name || client.name || '',
-        email: client.primaryContact?.email || client.email || '',
-        phone: client.primaryContact?.phone || client.phone || '',
-        status: client.status === 'customer' ? 'active' : (client.status as any) || 'active'
-      })
+      setShowEditDialog(true)
     }
     setShowEditDialog(true)
   }
@@ -939,8 +810,35 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
               <Plus className="w-4 h-4 mr-2" />
               Add Client
             </Button>
+            <Button
+              variant={showInsights ? 'secondary' : 'outline'}
+              onClick={() => setShowInsights(!showInsights)}
+              className="gap-2"
+            >
+              <Sparkles className={`w-4 h-4 ${showInsights ? 'text-primary' : 'text-muted-foreground'}`} />
+              {showInsights ? 'Hide Insights' : 'Smart Insights'}
+            </Button>
           </div>
         </div>
+
+        {/* AI Insights & Predictive Analytics */}
+        <AnimatePresence>
+          {showInsights && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+              className="overflow-hidden"
+            >
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <AIInsightsPanel insights={mockAIInsights} />
+                <PredictiveAnalytics predictions={mockPredictions} />
+                <CollaborationIndicator collaborators={mockCollaborators} />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
@@ -1292,9 +1190,9 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                       return (
                         <div key={activity.id} className="flex items-start gap-4 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50">
                           <div className={`w-10 h-10 rounded-full flex items-center justify-center ${activity.type === 'call' ? 'bg-green-100 text-green-600' :
-                              activity.type === 'email' ? 'bg-blue-100 text-blue-600' :
-                                activity.type === 'meeting' ? 'bg-purple-100 text-purple-600' :
-                                  'bg-gray-100 text-gray-600'
+                            activity.type === 'email' ? 'bg-blue-100 text-blue-600' :
+                              activity.type === 'meeting' ? 'bg-purple-100 text-purple-600' :
+                                'bg-gray-100 text-gray-600'
                             }`}>
                             {activity.type === 'call' && <PhoneCall className="w-5 h-5" />}
                             {activity.type === 'email' && <Mail className="w-5 h-5" />}
@@ -1351,8 +1249,8 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                     <CardContent className="p-4">
                       <div className="flex items-start gap-3">
                         <div className={`w-5 h-5 rounded border-2 flex items-center justify-center cursor-pointer ${task.priority === 'urgent' ? 'border-red-500' :
-                            task.priority === 'high' ? 'border-orange-500' :
-                              'border-gray-300'
+                          task.priority === 'high' ? 'border-orange-500' :
+                            'border-gray-300'
                           }`}>
                           {task.completed && <CheckCircle2 className="w-4 h-4 text-green-600" />}
                         </div>
@@ -1477,8 +1375,8 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                     key={item.id}
                     onClick={() => setSettingsTab(item.id)}
                     className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-left transition-colors ${settingsTab === item.id
-                        ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300'
-                        : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400'
+                      ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300'
+                      : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400'
                       }`}
                   >
                     <item.icon className="w-4 h-4" />

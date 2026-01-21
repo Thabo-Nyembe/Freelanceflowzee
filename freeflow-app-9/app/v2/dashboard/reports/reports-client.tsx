@@ -59,6 +59,7 @@ import {
   CreditCard,
   Sliders
 } from 'lucide-react'
+import { AnimatePresence, motion } from 'framer-motion'
 
 // Enhanced & Competitive Upgrade Components
 import {
@@ -282,6 +283,13 @@ interface ChartData {
   labels: string[]
 }
 
+// Standardized AI Insights Mock Data
+const mockReportsAIInsights = [
+  { id: '1', type: 'opportunity' as const, title: 'Engagement Spike', description: 'Report views increased by 22% this week, driven by the "Q4 Sales" dashboard.', priority: 'low' as const, category: 'Engagement', timestamp: new Date().toISOString() },
+  { id: '2', type: 'alert' as const, title: 'Data Synergy', description: 'Sales and Marketing data sources showing high correlation. Consider merging reports.', priority: 'medium' as const, category: 'Data', timestamp: new Date().toISOString() },
+  { id: '3', type: 'recommendation' as const, title: 'Unused Reports', description: '5 automated reports have 0 opens in 30 days. Consider archiving to reduce clutter.', priority: 'high' as const, category: 'Optimization', timestamp: new Date().toISOString() },
+]
+
 // MIGRATED: Batch #16 - Removed mock data, using database hooks
 const chartTypes: { type: ChartType; icon: any; label: string }[] = [
   { type: 'bar', icon: BarChart3, label: 'Bar Chart' },
@@ -309,6 +317,7 @@ const folders = [
 
 export default function ReportsClient() {
   const [activeTab, setActiveTab] = useState('dashboard')
+  const [showInsights, setShowInsights] = useState(false)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedFolder, setSelectedFolder] = useState('All Reports')
@@ -909,8 +918,8 @@ export default function ReportsClient() {
   const filteredReports = useMemo(() => {
     return reports.filter(report => {
       const matchesSearch = report.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           report.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           report.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+        report.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        report.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
       const matchesFolder = selectedFolder === 'All Reports' || report.folder === selectedFolder
       return matchesSearch && matchesFolder
     })
@@ -1059,6 +1068,15 @@ export default function ReportsClient() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
+            <Button
+              variant={showInsights ? "secondary" : "ghost"}
+              size="sm"
+              onClick={() => setShowInsights(!showInsights)}
+              className={`hidden md:flex items-center gap-2 ${showInsights ? 'bg-white text-indigo-600 hover:bg-white/90' : 'text-indigo-100 hover:text-white hover:bg-white/10'}`}
+            >
+              <Sparkles className="w-4 h-4" />
+              <span>Smart Insights</span>
+            </Button>
             <Button variant="outline" onClick={() => setShowFilterDialog(true)}>
               <Filter className="h-4 w-4 mr-2" />
               Filters
@@ -1072,6 +1090,24 @@ export default function ReportsClient() {
             </Button>
           </div>
         </div>
+
+        {/* Collapsible Smart Insights Panel */}
+        <AnimatePresence>
+          {showInsights && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden mb-6"
+            >
+              <AIInsightsPanel
+                insights={mockReportsAIInsights}
+                className="mb-0"
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
@@ -1162,11 +1198,10 @@ export default function ReportsClient() {
                         <button
                           key={folder.name}
                           onClick={() => setSelectedFolder(folder.name)}
-                          className={`w-full flex items-center justify-between px-4 py-2.5 text-sm transition-colors ${
-                            selectedFolder === folder.name
-                              ? 'bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
-                              : 'hover:bg-gray-50 dark:hover:bg-gray-800'
-                          }`}
+                          className={`w-full flex items-center justify-between px-4 py-2.5 text-sm transition-colors ${selectedFolder === folder.name
+                            ? 'bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
+                            : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+                            }`}
                         >
                           <div className="flex items-center gap-3">
                             <folder.icon className="h-4 w-4" />
@@ -1456,9 +1491,9 @@ export default function ReportsClient() {
 
                         <Badge className={
                           source.status === 'connected' ? 'bg-green-100 text-green-700' :
-                          source.status === 'syncing' ? 'bg-blue-100 text-blue-700' :
-                          source.status === 'error' ? 'bg-red-100 text-red-700' :
-                          'bg-gray-100 text-gray-700'
+                            source.status === 'syncing' ? 'bg-blue-100 text-blue-700' :
+                              source.status === 'error' ? 'bg-red-100 text-red-700' :
+                                'bg-gray-100 text-gray-700'
                         }>
                           {source.status}
                         </Badge>
@@ -1542,8 +1577,8 @@ export default function ReportsClient() {
 
                       <Badge className={
                         schedule.status === 'active' ? 'bg-green-100 text-green-700' :
-                        schedule.status === 'paused' ? 'bg-amber-100 text-amber-700' :
-                        'bg-red-100 text-red-700'
+                          schedule.status === 'paused' ? 'bg-amber-100 text-amber-700' :
+                            'bg-red-100 text-red-700'
                       }>
                         {schedule.status}
                       </Badge>
@@ -1593,11 +1628,10 @@ export default function ReportsClient() {
                         <button
                           key={item.id}
                           onClick={() => setSettingsTab(item.id)}
-                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
-                            settingsTab === item.id
-                              ? 'bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400'
-                              : 'hover:bg-gray-100 dark:hover:bg-gray-700/50 text-gray-600 dark:text-gray-400'
-                          }`}
+                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${settingsTab === item.id
+                            ? 'bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400'
+                            : 'hover:bg-gray-100 dark:hover:bg-gray-700/50 text-gray-600 dark:text-gray-400'
+                            }`}
                         >
                           <item.icon className="w-4 h-4" />
                           <span className="text-sm font-medium">{item.label}</span>
@@ -2490,18 +2524,16 @@ export default function ReportsClient() {
                     <button
                       key={item.type}
                       onClick={() => setNewReportType(item.type)}
-                      className={`p-3 border rounded-lg transition-all ${
-                        newReportType === item.type
-                          ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30'
-                          : 'hover:bg-gray-50 dark:hover:bg-gray-800'
-                      }`}
+                      className={`p-3 border rounded-lg transition-all ${newReportType === item.type
+                        ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/30'
+                        : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+                        }`}
                     >
-                      <item.icon className={`h-6 w-6 mx-auto mb-1 ${
-                        item.color === 'purple' ? 'text-purple-600' :
+                      <item.icon className={`h-6 w-6 mx-auto mb-1 ${item.color === 'purple' ? 'text-purple-600' :
                         item.color === 'blue' ? 'text-blue-600' :
-                        item.color === 'green' ? 'text-green-600' :
-                        'text-amber-600'
-                      }`} />
+                          item.color === 'green' ? 'text-green-600' :
+                            'text-amber-600'
+                        }`} />
                       <p className="text-xs font-medium">{item.label}</p>
                     </button>
                   ))}
@@ -2649,11 +2681,10 @@ export default function ReportsClient() {
                     <button
                       key={item.format}
                       onClick={() => setScheduleExportFormat(item.format)}
-                      className={`p-3 border rounded-lg transition-all ${
-                        scheduleExportFormat === item.format
-                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30'
-                          : 'hover:bg-gray-50 dark:hover:bg-gray-800'
-                      }`}
+                      className={`p-3 border rounded-lg transition-all ${scheduleExportFormat === item.format
+                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30'
+                        : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+                        }`}
                     >
                       <item.icon className="h-5 w-5 mx-auto mb-1 text-gray-600" />
                       <p className="text-xs font-medium">{item.label}</p>
@@ -2737,9 +2768,9 @@ export default function ReportsClient() {
                           </div>
                           <Badge className={
                             source.status === 'connected' ? 'bg-green-100 text-green-700' :
-                            source.status === 'syncing' ? 'bg-blue-100 text-blue-700' :
-                            source.status === 'error' ? 'bg-red-100 text-red-700' :
-                            'bg-gray-100 text-gray-700'
+                              source.status === 'syncing' ? 'bg-blue-100 text-blue-700' :
+                                source.status === 'error' ? 'bg-red-100 text-red-700' :
+                                  'bg-gray-100 text-gray-700'
                           }>
                             {source.status}
                           </Badge>
@@ -2793,8 +2824,8 @@ export default function ReportsClient() {
                       id="ds-connection"
                       placeholder={
                         newDataSourceType === 'database' ? 'postgresql://user:pass@host:5432/dbname' :
-                        newDataSourceType === 'api' ? 'https://api.example.com/v1' :
-                        'Enter connection details...'
+                          newDataSourceType === 'api' ? 'https://api.example.com/v1' :
+                            'Enter connection details...'
                       }
                       value={newDataSourceConnection}
                       onChange={(e) => setNewDataSourceConnection(e.target.value)}
@@ -2982,11 +3013,10 @@ export default function ReportsClient() {
                     <button
                       key={format}
                       onClick={() => setExportAllFormat(format)}
-                      className={`p-3 border rounded-lg transition-all ${
-                        exportAllFormat === format
-                          ? 'border-green-500 bg-green-50 dark:bg-green-900/30'
-                          : 'hover:bg-gray-50 dark:hover:bg-gray-800'
-                      }`}
+                      className={`p-3 border rounded-lg transition-all ${exportAllFormat === format
+                        ? 'border-green-500 bg-green-50 dark:bg-green-900/30'
+                        : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+                        }`}
                     >
                       <FileText className="h-5 w-5 mx-auto mb-1 text-gray-600" />
                       <p className="text-xs font-medium">{format.toUpperCase()}</p>
@@ -3094,11 +3124,10 @@ export default function ReportsClient() {
                   <button
                     key={theme.id}
                     onClick={() => setSelectedTheme(theme.id)}
-                    className={`p-3 border rounded-lg transition-all ${
-                      selectedTheme === theme.id
-                        ? 'border-pink-500 bg-pink-50 dark:bg-pink-900/30'
-                        : 'hover:bg-gray-50 dark:hover:bg-gray-800'
-                    }`}
+                    className={`p-3 border rounded-lg transition-all ${selectedTheme === theme.id
+                      ? 'border-pink-500 bg-pink-50 dark:bg-pink-900/30'
+                      : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+                      }`}
                   >
                     <div className="flex gap-1 mb-2">
                       {theme.colors.map((color, i) => (
@@ -3142,11 +3171,10 @@ export default function ReportsClient() {
                   <button
                     key={option.id}
                     onClick={() => setPublishVisibility(option.id)}
-                    className={`w-full p-4 border rounded-lg text-left transition-all ${
-                      publishVisibility === option.id
-                        ? 'border-green-500 bg-green-50 dark:bg-green-900/30'
-                        : 'hover:bg-gray-50 dark:hover:bg-gray-800'
-                    }`}
+                    className={`w-full p-4 border rounded-lg text-left transition-all ${publishVisibility === option.id
+                      ? 'border-green-500 bg-green-50 dark:bg-green-900/30'
+                      : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+                      }`}
                   >
                     <p className="font-medium">{option.name}</p>
                     <p className="text-sm text-gray-500">{option.description}</p>
@@ -3217,8 +3245,8 @@ export default function ReportsClient() {
                   id="conn-string"
                   placeholder={
                     newDataSourceType === 'database' ? 'postgresql://user:pass@host:5432/db' :
-                    newDataSourceType === 'api' ? 'https://api.example.com/v1' :
-                    'Enter connection details...'
+                      newDataSourceType === 'api' ? 'https://api.example.com/v1' :
+                        'Enter connection details...'
                   }
                   value={newDataSourceConnection}
                   onChange={(e) => setNewDataSourceConnection(e.target.value)}
@@ -3576,11 +3604,10 @@ export default function ReportsClient() {
                     <button
                       key={format}
                       onClick={() => setExportFormat(format)}
-                      className={`p-3 border rounded-lg transition-all ${
-                        exportFormat === format
-                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30'
-                          : 'hover:bg-gray-50 dark:hover:bg-gray-800'
-                      }`}
+                      className={`p-3 border rounded-lg transition-all ${exportFormat === format
+                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30'
+                        : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+                        }`}
                     >
                       <FileText className="h-5 w-5 mx-auto mb-1 text-gray-600" />
                       <p className="text-xs font-medium">{format.toUpperCase()}</p>
@@ -3707,6 +3734,6 @@ export default function ReportsClient() {
           </DialogContent>
         </Dialog>
       </div>
-    </div>
+    </div >
   )
 }

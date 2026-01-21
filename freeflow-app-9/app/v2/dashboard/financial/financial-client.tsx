@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
 import {
   DollarSign,
   TrendingUp,
@@ -33,7 +34,8 @@ import {
   Search,
   ArrowUp,
   ArrowDown,
-  Trash2
+  Trash2,
+  Sparkles
 } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
@@ -55,20 +57,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-// Centralized Mock Data - Investor-Ready
-import {
-  financialAccounts,
-  financialBankAccounts,
-  financialTransactions,
-  financialBudgetItems,
-  financialProfitLoss,
-  financialCashFlow,
-  financialAIInsights,
-  financialCollaborators,
-  financialPredictions,
-  financialActivities,
-  financialQuickActions,
-} from '@/lib/mock-data/adapters'
+// Mock Imports Removed
+
 
 // Types
 interface Account {
@@ -116,18 +106,79 @@ interface BudgetItem {
 }
 
 // Use centralized mock data - mapped to local variable names for compatibility
-const mockBankAccounts = financialBankAccounts as BankAccount[]
-const mockBudgetItems = financialBudgetItems as BudgetItem[]
+const mockBankAccounts: BankAccount[] = []
+const mockBudgetItems: BudgetItem[] = []
 // const profitLossData = financialProfitLoss // Removed to use real data
-const cashFlowData = financialCashFlow
-const mockAIInsights = financialAIInsights
-const mockFinancialCollaborators = financialCollaborators
-const mockFinancialPredictions = financialPredictions
-const mockFinancialActivities = financialActivities
-const mockFinancialQuickActions = financialQuickActions
+const cashFlowData: any = {}
+const mockAIInsights = [
+  {
+    id: '1',
+    type: 'opportunity' as const,
+    title: 'Cash Flow Optimization',
+    description: 'Consider paying Vendor X early to get 2% discount. Impact: +$500 saved.',
+    confidence: 0.89,
+    action: 'View Invoice'
+  },
+  {
+    id: '2',
+    type: 'alert' as const,
+    title: 'Budget Variance',
+    description: 'Marketing expenses are 15% over budget for this month.',
+    confidence: 0.95,
+    action: 'Review Budget'
+  }
+]
+
+const mockFinancialCollaborators = [
+  { id: '1', name: 'Alex CFO', role: 'CFO', avatar: '', status: 'online' as const },
+  { id: '2', name: 'Sarah Accountant', role: 'Accountant', avatar: '', status: 'away' as const }
+]
+
+const mockFinancialPredictions = [
+  {
+    dataset: 'Revenue Forecast',
+    trend: 'up' as const,
+    value: '+8% QoQ',
+    confidence: 0.91,
+    description: 'Projected growth based on current contracts.'
+  },
+  {
+    dataset: 'Expense Trend',
+    trend: 'stable' as const,
+    value: '-2%',
+    confidence: 0.87,
+    description: 'Operational efficiency improvements showing results.'
+  }
+]
+
+const mockFinancialActivities = [
+  {
+    id: '1',
+    type: 'create' as const,
+    author: 'Alex CFO',
+    user: { name: 'Alex CFO', avatar: '' },
+    title: 'Approved invoice',
+    description: 'Approved invoice #1234',
+    timestamp: '2h ago',
+    metadata: {}
+  },
+  {
+    id: '2',
+    type: 'update' as const,
+    author: 'System',
+    user: { name: 'System', avatar: '' },
+    title: 'Generated P&L',
+    description: 'Generated monthly P&L',
+    timestamp: '5h ago',
+    metadata: {}
+  }
+]
+
+const mockFinancialQuickActions: any[] = []
 
 export default function FinancialClient({ initialFinancial }: { initialFinancial: FinancialRecord[] }) {
   const [activeTab, setActiveTab] = useState('overview')
+  const [showInsights, setShowInsights] = useState(false)
   const [selectedPeriod, setSelectedPeriod] = useState('this-year')
   const [showNewTransactionDialog, setShowNewTransactionDialog] = useState(false)
   const [showNewAccountDialog, setShowNewAccountDialog] = useState(false)
@@ -675,8 +726,35 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
               <Plus className="w-4 h-4" />
               New Transaction
             </button>
+            <Button
+              variant={showInsights ? 'secondary' : 'outline'}
+              onClick={() => setShowInsights(!showInsights)}
+              className="gap-2"
+            >
+              <Sparkles className={`w-4 h-4 ${showInsights ? 'text-primary' : 'text-muted-foreground'}`} />
+              {showInsights ? 'Hide Insights' : 'Smart Insights'}
+            </Button>
           </div>
         </div>
+
+        {/* AI Insights Panel */}
+        <AnimatePresence>
+          {showInsights && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+              className="overflow-hidden"
+            >
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <AIInsightsPanel insights={mockAIInsights} />
+                <PredictiveAnalytics predictions={mockFinancialPredictions} />
+                <CollaborationIndicator collaborators={mockFinancialCollaborators} />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Feature Pills */}
         <div className="flex flex-wrap gap-2">

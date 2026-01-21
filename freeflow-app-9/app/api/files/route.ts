@@ -553,7 +553,7 @@ async function handleUploadFile(
       size: data.size,
       url: data.url,
       storage_path: data.storagePath || `files/${userId}/${data.name}`,
-      storage_provider: 'wasabi',
+      storage_provider: (process.env.STORAGE_PROVIDER as StorageProvider) || 'supabase',
       mime_type: data.type,
       description: data.description || null,
       checksum: data.checksum || null,

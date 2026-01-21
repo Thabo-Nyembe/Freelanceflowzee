@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
           user.id,
           {
             type: fileType,
-            folder_id: folderId,
+            folder_id: folderId || undefined,
             search,
             is_starred: isStarred ? isStarred === 'true' : undefined,
             is_shared: isShared ? isShared === 'true' : undefined
@@ -106,6 +106,66 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const contentType = request.headers.get('content-type') || ''
+
+    if (contentType.includes('multipart/form-data')) {
+      const formData = await request.formData()
+      const files = formData.getAll('files') as File[]
+      const folderId = formData.get('folderId') as string | null
+
+      const results = []
+
+      for (const file of files) {
+        // Upload to Storage
+        const storageProvider = process.env.STORAGE_PROVIDER || 'supabase'
+        const fileName = `${Date.now()}-${file.name}`
+        const filePath = `${user.id}/${fileName}`
+        let publicUrl = ''
+        let storagePath = ''
+
+        if (storageProvider === 'supabase') {
+          const { error: uploadError } = await supabase.storage
+            .from('files')
+            .upload(filePath, file)
+
+          if (uploadError) throw uploadError
+
+          const { data: { publicUrl: url } } = supabase.storage
+            .from('files')
+            .getPublicUrl(filePath)
+
+          publicUrl = url
+          storagePath = filePath
+        } else {
+          // Mock Wasabi/S3 implementation for hybrid mode if needed
+          // In a real implementation this would use AWS SDK
+          storagePath = `wasabi://${filePath}`
+          publicUrl = `https://s3.wasabisys.com/${process.env.WASABI_BUCKET_NAME}/${filePath}`
+        }
+
+        // Create Database Record
+        const { data: fileRecord, error: dbError } = await createFile(user.id, {
+          name: file.name,
+          type: determineFileType(file.type),
+          extension: file.name.split('.').pop() || '',
+          size: file.size,
+          url: publicUrl,
+          storage_provider: storageProvider as any,
+          mime_type: file.type,
+          folder_id: folderId || undefined,
+          status: 'active',
+          access_level: 'private',
+          is_starred: false,
+          is_shared: false
+        })
+
+        if (dbError) throw dbError
+        results.push(fileRecord)
+      }
+
+      return NextResponse.json({ data: results, count: results.length }, { status: 201 })
+    }
+
     const body = await request.json()
     const { action, ...payload } = body
 
@@ -122,6 +182,13 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ data }, { status: 201 })
       }
 
+      case 'create-share-link': {
+        // Mock share link creation
+        // Generate a random token
+        const token = Math.random().toString(36).substring(7)
+        return NextResponse.json({ link: `https://files.freeflowkazi.com/share/${token}` })
+      }
+
       default:
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
@@ -132,4 +199,13 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     )
   }
+}
+
+function determineFileType(mimeType: string): any {
+  if (mimeType.startsWith('image/')) return 'image'
+  if (mimeType.startsWith('video/')) return 'video'
+  if (mimeType.startsWith('audio/')) return 'audio'
+  if (mimeType.includes('pdf') || mimeType.includes('document') || mimeType.includes('text')) return 'document'
+  if (mimeType.includes('zip') || mimeType.includes('compressed') || mimeType.includes('tar')) return 'archive'
+  return 'other'
 }

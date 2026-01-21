@@ -15,7 +15,7 @@ import {
 import { useState, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -64,7 +64,8 @@ import {
   Link,
   Mail,
   CheckCircle,
-  Loader2
+  Loader2,
+  Sparkles
 } from 'lucide-react'
 import {
   DropdownMenu,
@@ -101,73 +102,7 @@ interface ExtendedFile extends File {
   sharedWith?: string[]
 }
 
-const EXTENDED_FILES: ExtendedFile[] = [
-  {
-    id: 1,
-    name: 'Brand Guidelines Draft v3.pdf',
-    size: '2.4 MB',
-    uploadedBy: 'Sarah Johnson',
-    uploadDate: '2024-01-25',
-    project: 'Brand Identity Redesign',
-    type: 'document',
-    downloads: 3,
-    views: 12,
-    shared: true,
-    sharedWith: ['John Smith', 'Michael Chen']
-  },
-  {
-    id: 2,
-    name: 'Logo Concepts Final.zip',
-    size: '15.7 MB',
-    uploadedBy: 'Sarah Johnson',
-    uploadDate: '2024-01-20',
-    project: 'Brand Identity Redesign',
-    type: 'archive',
-    downloads: 2,
-    views: 8,
-    shared: false,
-    sharedWith: []
-  },
-  {
-    id: 3,
-    name: 'Website-Mockups.psd',
-    size: '45.3 MB',
-    uploadedBy: 'Alex Thompson',
-    uploadDate: '2024-01-15',
-    project: 'Website Development',
-    type: 'document',
-    downloads: 5,
-    views: 15,
-    shared: true,
-    sharedWith: ['John Smith', 'Lisa Wang']
-  },
-  {
-    id: 4,
-    name: 'Brand-Color-Palette.ai',
-    size: '8.2 MB',
-    uploadedBy: 'Sarah Johnson',
-    uploadDate: '2024-01-10',
-    project: 'Brand Identity Redesign',
-    type: 'document',
-    downloads: 1,
-    views: 5,
-    shared: false,
-    sharedWith: []
-  },
-  {
-    id: 5,
-    name: 'Final-Deliverables.zip',
-    size: '124.8 MB',
-    uploadedBy: 'Michael Chen',
-    uploadDate: '2024-01-05',
-    project: 'Website Development',
-    type: 'archive',
-    downloads: 0,
-    views: 3,
-    shared: false,
-    sharedWith: []
-  }
-]
+const EXTENDED_FILES: ExtendedFile[] = []
 
 // ============================================================================
 // UTILITY FUNCTIONS
@@ -212,27 +147,70 @@ const getFileColor = (type: string) => {
 // V2 COMPETITIVE MOCK DATA - Files Context
 // ============================================================================
 
+// Competitive Upgrade Mock Data - Empty
+// Competitive Upgrade Mock Data
 const filesAIInsights = [
-  { id: '1', type: 'info' as const, title: 'Performance Update', description: 'System running optimally with 99.9% uptime this month.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Performance' },
-  { id: '2', type: 'success' as const, title: 'Goal Achievement', description: 'Monthly targets exceeded by 15%. Great progress!', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Goals' },
-  { id: '3', type: 'warning' as const, title: 'Action Required', description: 'Review pending items to maintain workflow efficiency.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Tasks' },
+  {
+    id: '1',
+    type: 'opportunity' as const,
+    title: 'Storage Optimization',
+    description: 'Compressing large video files could save 2.5GB of storage space.',
+    confidence: 0.92,
+    action: 'Optimize Files'
+  },
+  {
+    id: '2',
+    type: 'alert' as const,
+    title: 'Access Pattern',
+    description: 'Unusual download activity detected on "Financial_Report_Q3.pdf".',
+    confidence: 0.88,
+    action: 'View Audit'
+  }
 ]
 
 const filesCollaborators = [
-  { id: '1', name: 'Alexandra Chen', avatar: '/avatars/alex.jpg', status: 'online' as const, role: 'Manager', lastActive: 'Now' },
-  { id: '2', name: 'Marcus Johnson', avatar: '/avatars/marcus.jpg', status: 'online' as const, role: 'Developer', lastActive: '5m ago' },
-  { id: '3', name: 'Sarah Williams', avatar: '/avatars/sarah.jpg', status: 'away' as const, role: 'Designer', lastActive: '30m ago' },
+  { id: '1', name: 'Alice Designer', role: 'Designer', avatar: '', status: 'online' as const },
+  { id: '2', name: 'Bob Product', role: 'Product', avatar: '', status: 'away' as const }
 ]
 
 const filesPredictions = [
-  { id: '1', label: 'Completion Rate', current: 85, target: 95, predicted: 92, confidence: 88, trend: 'up' as const },
-  { id: '2', label: 'Efficiency Score', current: 78, target: 90, predicted: 86, confidence: 82, trend: 'up' as const },
+  {
+    dataset: 'Storage Growth',
+    trend: 'up' as const,
+    value: '+12%',
+    confidence: 0.85,
+    description: 'Projected storage usage for next month based on current upload rate.'
+  },
+  {
+    dataset: 'File Access',
+    trend: 'stable' as const,
+    value: 'Stable',
+    confidence: 0.91,
+    description: 'Weekly file access patterns are consistent with team activity.'
+  }
 ]
 
 const filesActivities = [
-  { id: '1', user: 'Alexandra Chen', action: 'updated', target: 'system settings', timestamp: '5m ago', type: 'info' as const },
-  { id: '2', user: 'Marcus Johnson', action: 'completed', target: 'task review', timestamp: '15m ago', type: 'success' as const },
-  { id: '3', user: 'System', action: 'generated', target: 'weekly report', timestamp: '1h ago', type: 'info' as const },
+  {
+    id: '1',
+    type: 'create' as const,
+    author: 'Alice Designer',
+    user: { name: 'Alice Designer', avatar: '' },
+    title: 'Uploaded new assets',
+    description: 'Uploaded 5 new design assets',
+    timestamp: '1h ago',
+    metadata: {}
+  },
+  {
+    id: '2',
+    type: 'integration' as const,
+    author: 'Bob Product',
+    user: { name: 'Bob Product', avatar: '' },
+    title: 'Shared document',
+    description: 'Shared "Product Specs" with External Client',
+    timestamp: '3h ago',
+    metadata: {}
+  }
 ]
 
 // Quick actions will be defined inside component to access handlers
@@ -241,34 +219,34 @@ const getFilesQuickActions = (
   handleExportFiles: () => Promise<void>,
   router: ReturnType<typeof useRouter>
 ) => [
-  {
-    id: '1',
-    label: 'New Item',
-    icon: 'Plus',
-    shortcut: 'N',
-    action: async () => {
-      await handleUploadFile()
-    }
-  },
-  {
-    id: '2',
-    label: 'Export',
-    icon: 'Download',
-    shortcut: 'E',
-    action: async () => {
-      await handleExportFiles()
-    }
-  },
-  {
-    id: '3',
-    label: 'Settings',
-    icon: 'Settings',
-    shortcut: 'S',
-    action: async () => {
-      router.push('/dashboard/settings-v2')
-    }
-  },
-]
+    {
+      id: '1',
+      label: 'New Item',
+      icon: 'Plus',
+      shortcut: 'N',
+      action: async () => {
+        await handleUploadFile()
+      }
+    },
+    {
+      id: '2',
+      label: 'Export',
+      icon: 'Download',
+      shortcut: 'E',
+      action: async () => {
+        await handleExportFiles()
+      }
+    },
+    {
+      id: '3',
+      label: 'Settings',
+      icon: 'Settings',
+      shortcut: 'S',
+      action: async () => {
+        router.push('/dashboard/settings-v2')
+      }
+    },
+  ]
 
 export default function FilesClient() {
   const { userId, loading: userLoading } = useCurrentUser()
@@ -280,12 +258,13 @@ export default function FilesClient() {
   const router = useRouter()
 
   // FILE STATE
-  const [files, setFiles] = useState<ExtendedFile[]>(EXTENDED_FILES)
+  const [files, setFiles] = useState<ExtendedFile[]>([])
   const [searchQuery, setSearchQuery] = useState('')
   const [filterType, setFilterType] = useState<'all' | 'documents' | 'archives' | 'images' | 'videos'>('all')
   const [selectedFile, setSelectedFile] = useState<ExtendedFile | null>(null)
-  const [filteredFiles, setFilteredFiles] = useState<ExtendedFile[]>(EXTENDED_FILES)
+  const [filteredFiles, setFilteredFiles] = useState<ExtendedFile[]>([])
   const [sortBy, setSortBy] = useState<'date' | 'name' | 'size'>('date')
+  const [showInsights, setShowInsights] = useState(false)
 
   // SECURE FILE DELIVERY STATE
   const [showUploadDialog, setShowUploadDialog] = useState(false)
@@ -472,8 +451,8 @@ export default function FilesClient() {
               uploadDate: new Date().toISOString().split('T')[0],
               project: 'Recent Upload',
               type: file.type.includes('image') ? 'image' :
-                    file.type.includes('video') ? 'video' :
-                    file.name.endsWith('.zip') || file.name.endsWith('.rar') ? 'archive' : 'document',
+                file.type.includes('video') ? 'video' :
+                  file.name.endsWith('.zip') || file.name.endsWith('.rar') ? 'archive' : 'document',
               downloads: 0,
               views: 0,
               shared: false,
@@ -997,10 +976,10 @@ export default function FilesClient() {
         setFiles(prevFiles => prevFiles.map(f =>
           f.id === selectedFile.id
             ? {
-                ...f,
-                shared: true,
-                sharedWith: [...(f.sharedWith || []), shareEmail]
-              }
+              ...f,
+              shared: true,
+              sharedWith: [...(f.sharedWith || []), shareEmail]
+            }
             : f
         ))
 
@@ -1211,18 +1190,30 @@ export default function FilesClient() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:bg-none dark:bg-gray-900 p-6">
         <div className="container mx-auto space-y-6">
-          
-        {/* V2 Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-          <AIInsightsPanel insights={filesAIInsights} />
-          <PredictiveAnalytics predictions={filesPredictions} />
-          <CollaborationIndicator collaborators={filesCollaborators} />
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          <QuickActionsToolbar actions={filesQuickActions} />
-          <ActivityFeed activities={filesActivities} />
-        </div>
-<CardSkeleton />
+
+          {/* V2 Competitive Upgrade Components */}
+          <AnimatePresence>
+            {showInsights && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.3, ease: 'easeInOut' }}
+                className="overflow-hidden"
+              >
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                  <AIInsightsPanel insights={filesAIInsights} />
+                  <PredictiveAnalytics predictions={filesPredictions} />
+                  <CollaborationIndicator collaborators={filesCollaborators} />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <QuickActionsToolbar actions={filesQuickActions} />
+            <ActivityFeed activities={filesActivities} />
+          </div>
+          <CardSkeleton />
           <ListSkeleton items={5} />
         </div>
       </div>
@@ -1304,8 +1295,35 @@ export default function FilesClient() {
               <Upload className="h-4 w-4 mr-2" />
               {isUploading ? 'Uploading...' : 'Upload Files'}
             </Button>
+            <Button
+              variant={showInsights ? 'secondary' : 'outline'}
+              onClick={() => setShowInsights(!showInsights)}
+              className="gap-2"
+            >
+              <Sparkles className={`w-4 h-4 ${showInsights ? 'text-primary' : 'text-muted-foreground'}`} />
+              {showInsights ? 'Hide Insights' : 'Smart Insights'}
+            </Button>
           </div>
         </div>
+
+        {/* AI Insights Panel */}
+        <AnimatePresence>
+          {showInsights && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+              className="overflow-hidden"
+            >
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                <AIInsightsPanel insights={filesAIInsights} />
+                <PredictiveAnalytics predictions={filesPredictions} />
+                <CollaborationIndicator collaborators={filesCollaborators} />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Secure File Delivery View */}
         {viewMode === 'secure' && (
@@ -1342,446 +1360,446 @@ export default function FilesClient() {
             {/* Files List */}
             <div className="lg:col-span-3 space-y-4">
               <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
-              <CardHeader>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <FileText className="h-5 w-5" />
-                      <CardTitle>Files</CardTitle>
-                      <Badge variant="outline">{filteredFiles.length}</Badge>
+                <CardHeader>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-5 w-5" />
+                        <CardTitle>Files</CardTitle>
+                        <Badge variant="outline">{filteredFiles.length}</Badge>
+                      </div>
+                    </div>
+
+                    {/* Search and Filter */}
+                    <div className="space-y-3">
+                      <div className="relative">
+                        <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                        <Input
+                          placeholder="Search files..."
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          className="pl-10"
+                        />
+                      </div>
+
+                      <div className="flex gap-2 flex-wrap">
+                        {(['all', 'documents', 'archives', 'images', 'videos'] as const).map((type) => (
+                          <Button
+                            key={type}
+                            size="sm"
+                            variant={filterType === type ? 'default' : 'outline'}
+                            onClick={() => setFilterType(type)}
+                          >
+                            {type.charAt(0).toUpperCase() + type.slice(1)}
+                          </Button>
+                        ))}
+                      </div>
+
+                      <div className="flex gap-2 items-center">
+                        <span className="text-sm text-gray-600">Sort by:</span>
+                        {(['date', 'name', 'size'] as const).map((sort) => (
+                          <Button
+                            key={sort}
+                            size="sm"
+                            variant={sortBy === sort ? 'default' : 'outline'}
+                            onClick={() => setSortBy(sort)}
+                          >
+                            {sort.charAt(0).toUpperCase() + sort.slice(1)}
+                          </Button>
+                        ))}
+                      </div>
                     </div>
                   </div>
+                </CardHeader>
 
-                  {/* Search and Filter */}
-                  <div className="space-y-3">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                      <Input
-                        placeholder="Search files..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-10"
-                      />
-                    </div>
-
-                    <div className="flex gap-2 flex-wrap">
-                      {(['all', 'documents', 'archives', 'images', 'videos'] as const).map((type) => (
-                        <Button
-                          key={type}
-                          size="sm"
-                          variant={filterType === type ? 'default' : 'outline'}
-                          onClick={() => setFilterType(type)}
-                        >
-                          {type.charAt(0).toUpperCase() + type.slice(1)}
-                        </Button>
-                      ))}
-                    </div>
-
-                    <div className="flex gap-2 items-center">
-                      <span className="text-sm text-gray-600">Sort by:</span>
-                      {(['date', 'name', 'size'] as const).map((sort) => (
-                        <Button
-                          key={sort}
-                          size="sm"
-                          variant={sortBy === sort ? 'default' : 'outline'}
-                          onClick={() => setSortBy(sort)}
-                        >
-                          {sort.charAt(0).toUpperCase() + sort.slice(1)}
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </CardHeader>
-
-              <CardContent className="space-y-3">
-                {filteredFiles.length === 0 ? (
-                  <NoDataEmptyState
-                    title="No files found"
-                    description="Upload files or adjust your search filters"
-                  />
-                ) : (
-                  <div className="space-y-2">
-                    {filteredFiles.map((file, index) => (
-                      <motion.div
-                        key={file.id}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.05 }}
-                        className="p-4 rounded-lg border border-gray-200 hover:shadow-md transition-all hover:border-blue-200 cursor-pointer"
-                        onClick={() => setSelectedFile(file)}
-                      >
-                        <div className="flex items-start gap-4">
-                          <div className={`p-3 rounded-lg ${getFileColor(file.type)}`}>
-                            {getFileIcon(file.type)}
-                          </div>
-
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-start justify-between gap-2 mb-1">
-                              <div>
-                                <p className="font-semibold text-gray-900 truncate">
-                                  {file.name}
-                                </p>
-                                <p className="text-sm text-gray-500">
-                                  {file.size}
-                                </p>
-                              </div>
-                              {file.shared && (
-                                <Badge variant="secondary" className="text-xs flex-shrink-0">
-                                  Shared
-                                </Badge>
-                              )}
-                            </div>
-
-                            <div className="flex items-center gap-4 text-xs text-gray-600 mb-2">
-                              <div className="flex items-center gap-1">
-                                <User className="h-3 w-3" />
-                                {file.uploadedBy}
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Calendar className="h-3 w-3" />
-                                {new Date(file.uploadDate).toLocaleDateString()}
-                              </div>
-                            </div>
-
-                            <div className="flex items-center gap-4 text-xs text-gray-600">
-                              <span>{file.views || 0} views</span>
-                              <span>{file.downloads || 0} downloads</span>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-2 flex-shrink-0">
-                            {/* Star Button */}
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                handleToggleStar(file)
-                              }}
-                              title={starredFiles.includes(file.id) ? 'Remove from favorites' : 'Add to favorites'}
-                            >
-                              {starredFiles.includes(file.id) ? (
-                                <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
-                              ) : (
-                                <Star className="h-3 w-3" />
-                              )}
-                            </Button>
-
-                            {/* Download Button */}
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                handleDownloadFile(file)
-                              }}
-                              title="Download file"
-                            >
-                              <Download className="h-3 w-3" />
-                            </Button>
-
-                            {/* View Button */}
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                handleViewFile(file)
-                              }}
-                              title="Preview file"
-                            >
-                              <Eye className="h-3 w-3" />
-                            </Button>
-
-                            {/* More Actions Dropdown */}
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                                <Button size="sm" variant="ghost" title="More actions">
-                                  <MoreHorizontal className="h-3 w-3" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="w-48">
-                                <DropdownMenuItem onClick={(e) => {
-                                  e.stopPropagation()
-                                  handleOpenShareDialog(file)
-                                }}>
-                                  <Share2 className="h-4 w-4 mr-2" />
-                                  Share
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={(e) => {
-                                  e.stopPropagation()
-                                  handleCopyLink(file)
-                                }}>
-                                  <Link className="h-4 w-4 mr-2" />
-                                  Copy Link
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem onClick={(e) => {
-                                  e.stopPropagation()
-                                  handleOpenRenameDialog(file)
-                                }}>
-                                  <Edit className="h-4 w-4 mr-2" />
-                                  Rename
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={(e) => {
-                                  e.stopPropagation()
-                                  handleOpenMoveDialog(file)
-                                }}>
-                                  <Move className="h-4 w-4 mr-2" />
-                                  Move
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={(e) => {
-                                  e.stopPropagation()
-                                  handleDuplicateFile(file)
-                                }}>
-                                  <Copy className="h-4 w-4 mr-2" />
-                                  Duplicate
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem onClick={(e) => {
-                                  e.stopPropagation()
-                                  handleArchiveFile(file)
-                                }}>
-                                  <Archive className="h-4 w-4 mr-2" />
-                                  Archive
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  className="text-red-600 focus:text-red-600"
-                                  onClick={(e) => {
-                                    e.stopPropagation()
-                                    handleOpenDeleteDialog(file)
-                                  }}
-                                >
-                                  <Trash2 className="h-4 w-4 mr-2" />
-                                  Delete
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </div>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* File Details Sidebar */}
-          <div className="space-y-4">
-            {selectedFile && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-              >
-                <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
-                  <CardHeader>
-                    <CardTitle className="text-lg">File Details</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex justify-center mb-4">
-                      <div className={`p-6 rounded-lg ${getFileColor(selectedFile.type)}`}>
-                        {getFileIcon(selectedFile.type)}
-                      </div>
-                    </div>
-
-                    <div>
-                      <p className="text-xs text-gray-500 mb-1">Name</p>
-                      <p className="text-sm font-semibold text-gray-900 break-words">
-                        {selectedFile.name}
-                      </p>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
-                      <div>
-                        <p className="text-xs text-gray-500 mb-1">Size</p>
-                        <p className="text-sm font-semibold">{selectedFile.size}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-gray-500 mb-1">Type</p>
-                        <Badge variant="outline" className="text-xs">
-                          {selectedFile.type}
-                        </Badge>
-                      </div>
-                    </div>
-
-                    <div>
-                      <p className="text-xs text-gray-500 mb-1">Uploaded By</p>
-                      <p className="text-sm">{selectedFile.uploadedBy}</p>
-                    </div>
-
-                    <div>
-                      <p className="text-xs text-gray-500 mb-1">Upload Date</p>
-                      <p className="text-sm">
-                        {new Date(selectedFile.uploadDate).toLocaleDateString()}
-                      </p>
-                    </div>
-
-                    <div>
-                      <p className="text-xs text-gray-500 mb-1">Project</p>
-                      <Badge variant="secondary">{selectedFile.project}</Badge>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6 py-3 border-y">
-                      <div className="text-center">
-                        <p className="text-2xl font-bold text-blue-600">
-                          {selectedFile.views || 0}
-                        </p>
-                        <p className="text-xs text-gray-500">Views</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-2xl font-bold text-green-600">
-                          {selectedFile.downloads || 0}
-                        </p>
-                        <p className="text-xs text-gray-500">Downloads</p>
-                      </div>
-                    </div>
-
+                <CardContent className="space-y-3">
+                  {filteredFiles.length === 0 ? (
+                    <NoDataEmptyState
+                      title="No files found"
+                      description="Upload files or adjust your search filters"
+                    />
+                  ) : (
                     <div className="space-y-2">
-                      {/* Primary Actions */}
-                      <Button
-                        className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
-                        onClick={() => handleDownloadFile(selectedFile)}
-                      >
-                        <Download className="h-4 w-4 mr-2" />
-                        Download
-                      </Button>
-                      <Button
-                        variant="outline"
-                        className="w-full"
-                        onClick={() => handleViewFile(selectedFile)}
-                      >
-                        <Eye className="h-4 w-4 mr-2" />
-                        Preview
-                      </Button>
+                      {filteredFiles.map((file, index) => (
+                        <motion.div
+                          key={file.id}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.05 }}
+                          className="p-4 rounded-lg border border-gray-200 hover:shadow-md transition-all hover:border-blue-200 cursor-pointer"
+                          onClick={() => setSelectedFile(file)}
+                        >
+                          <div className="flex items-start gap-4">
+                            <div className={`p-3 rounded-lg ${getFileColor(file.type)}`}>
+                              {getFileIcon(file.type)}
+                            </div>
 
-                      {/* Secondary Actions */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleOpenShareDialog(selectedFile)}
-                        >
-                          <Share2 className="h-4 w-4 mr-1" />
-                          Share
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleCopyLink(selectedFile)}
-                        >
-                          <Link className="h-4 w-4 mr-1" />
-                          Copy Link
-                        </Button>
-                      </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-start justify-between gap-2 mb-1">
+                                <div>
+                                  <p className="font-semibold text-gray-900 truncate">
+                                    {file.name}
+                                  </p>
+                                  <p className="text-sm text-gray-500">
+                                    {file.size}
+                                  </p>
+                                </div>
+                                {file.shared && (
+                                  <Badge variant="secondary" className="text-xs flex-shrink-0">
+                                    Shared
+                                  </Badge>
+                                )}
+                              </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleOpenRenameDialog(selectedFile)}
-                        >
-                          <Edit className="h-4 w-4 mr-1" />
-                          Rename
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleOpenMoveDialog(selectedFile)}
-                        >
-                          <Move className="h-4 w-4 mr-1" />
-                          Move
-                        </Button>
-                      </div>
+                              <div className="flex items-center gap-4 text-xs text-gray-600 mb-2">
+                                <div className="flex items-center gap-1">
+                                  <User className="h-3 w-3" />
+                                  {file.uploadedBy}
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Calendar className="h-3 w-3" />
+                                  {new Date(file.uploadDate).toLocaleDateString()}
+                                </div>
+                              </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDuplicateFile(selectedFile)}
-                        >
-                          <Copy className="h-4 w-4 mr-1" />
-                          Duplicate
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleToggleStar(selectedFile)}
-                        >
-                          {starredFiles.includes(selectedFile.id) ? (
-                            <>
-                              <StarOff className="h-4 w-4 mr-1" />
-                              Unstar
-                            </>
-                          ) : (
-                            <>
-                              <Star className="h-4 w-4 mr-1" />
-                              Star
-                            </>
-                          )}
-                        </Button>
-                      </div>
+                              <div className="flex items-center gap-4 text-xs text-gray-600">
+                                <span>{file.views || 0} views</span>
+                                <span>{file.downloads || 0} downloads</span>
+                              </div>
+                            </div>
 
-                      {/* Danger Zone */}
-                      <div className="pt-2 border-t space-y-2">
-                        <Button
-                          variant="outline"
-                          className="w-full text-orange-600 hover:text-orange-700 hover:border-orange-300"
-                          onClick={() => handleArchiveFile(selectedFile)}
-                        >
-                          <Archive className="h-4 w-4 mr-2" />
-                          Archive
-                        </Button>
-                        <Button
-                          variant="outline"
-                          className="w-full text-red-600 hover:text-red-700 hover:border-red-300"
-                          onClick={() => handleOpenDeleteDialog(selectedFile)}
-                        >
-                          <Trash2 className="h-4 w-4 mr-2" />
-                          Delete
-                        </Button>
-                      </div>
+                            <div className="flex items-center gap-2 flex-shrink-0">
+                              {/* Star Button */}
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleToggleStar(file)
+                                }}
+                                title={starredFiles.includes(file.id) ? 'Remove from favorites' : 'Add to favorites'}
+                              >
+                                {starredFiles.includes(file.id) ? (
+                                  <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
+                                ) : (
+                                  <Star className="h-3 w-3" />
+                                )}
+                              </Button>
+
+                              {/* Download Button */}
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleDownloadFile(file)
+                                }}
+                                title="Download file"
+                              >
+                                <Download className="h-3 w-3" />
+                              </Button>
+
+                              {/* View Button */}
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleViewFile(file)
+                                }}
+                                title="Preview file"
+                              >
+                                <Eye className="h-3 w-3" />
+                              </Button>
+
+                              {/* More Actions Dropdown */}
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                                  <Button size="sm" variant="ghost" title="More actions">
+                                    <MoreHorizontal className="h-3 w-3" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-48">
+                                  <DropdownMenuItem onClick={(e) => {
+                                    e.stopPropagation()
+                                    handleOpenShareDialog(file)
+                                  }}>
+                                    <Share2 className="h-4 w-4 mr-2" />
+                                    Share
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={(e) => {
+                                    e.stopPropagation()
+                                    handleCopyLink(file)
+                                  }}>
+                                    <Link className="h-4 w-4 mr-2" />
+                                    Copy Link
+                                  </DropdownMenuItem>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem onClick={(e) => {
+                                    e.stopPropagation()
+                                    handleOpenRenameDialog(file)
+                                  }}>
+                                    <Edit className="h-4 w-4 mr-2" />
+                                    Rename
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={(e) => {
+                                    e.stopPropagation()
+                                    handleOpenMoveDialog(file)
+                                  }}>
+                                    <Move className="h-4 w-4 mr-2" />
+                                    Move
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={(e) => {
+                                    e.stopPropagation()
+                                    handleDuplicateFile(file)
+                                  }}>
+                                    <Copy className="h-4 w-4 mr-2" />
+                                    Duplicate
+                                  </DropdownMenuItem>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem onClick={(e) => {
+                                    e.stopPropagation()
+                                    handleArchiveFile(file)
+                                  }}>
+                                    <Archive className="h-4 w-4 mr-2" />
+                                    Archive
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    className="text-red-600 focus:text-red-600"
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      handleOpenDeleteDialog(file)
+                                    }}
+                                  >
+                                    <Trash2 className="h-4 w-4 mr-2" />
+                                    Delete
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
+                          </div>
+                        </motion.div>
+                      ))}
                     </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            )}
+                  )}
+                </CardContent>
+              </Card>
+            </div>
 
-            {/* Storage Stats */}
-            <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
-              <CardHeader>
-                <CardTitle className="text-lg">Storage</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-gray-600">Total Files</span>
-                    <span className="font-semibold">{files.length}</span>
+            {/* File Details Sidebar */}
+            <div className="space-y-4">
+              {selectedFile && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
+                  <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
+                    <CardHeader>
+                      <CardTitle className="text-lg">File Details</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex justify-center mb-4">
+                        <div className={`p-6 rounded-lg ${getFileColor(selectedFile.type)}`}>
+                          {getFileIcon(selectedFile.type)}
+                        </div>
+                      </div>
+
+                      <div>
+                        <p className="text-xs text-gray-500 mb-1">Name</p>
+                        <p className="text-sm font-semibold text-gray-900 break-words">
+                          {selectedFile.name}
+                        </p>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
+                        <div>
+                          <p className="text-xs text-gray-500 mb-1">Size</p>
+                          <p className="text-sm font-semibold">{selectedFile.size}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500 mb-1">Type</p>
+                          <Badge variant="outline" className="text-xs">
+                            {selectedFile.type}
+                          </Badge>
+                        </div>
+                      </div>
+
+                      <div>
+                        <p className="text-xs text-gray-500 mb-1">Uploaded By</p>
+                        <p className="text-sm">{selectedFile.uploadedBy}</p>
+                      </div>
+
+                      <div>
+                        <p className="text-xs text-gray-500 mb-1">Upload Date</p>
+                        <p className="text-sm">
+                          {new Date(selectedFile.uploadDate).toLocaleDateString()}
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="text-xs text-gray-500 mb-1">Project</p>
+                        <Badge variant="secondary">{selectedFile.project}</Badge>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6 py-3 border-y">
+                        <div className="text-center">
+                          <p className="text-2xl font-bold text-blue-600">
+                            {selectedFile.views || 0}
+                          </p>
+                          <p className="text-xs text-gray-500">Views</p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-2xl font-bold text-green-600">
+                            {selectedFile.downloads || 0}
+                          </p>
+                          <p className="text-xs text-gray-500">Downloads</p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        {/* Primary Actions */}
+                        <Button
+                          className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
+                          onClick={() => handleDownloadFile(selectedFile)}
+                        >
+                          <Download className="h-4 w-4 mr-2" />
+                          Download
+                        </Button>
+                        <Button
+                          variant="outline"
+                          className="w-full"
+                          onClick={() => handleViewFile(selectedFile)}
+                        >
+                          <Eye className="h-4 w-4 mr-2" />
+                          Preview
+                        </Button>
+
+                        {/* Secondary Actions */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleOpenShareDialog(selectedFile)}
+                          >
+                            <Share2 className="h-4 w-4 mr-1" />
+                            Share
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleCopyLink(selectedFile)}
+                          >
+                            <Link className="h-4 w-4 mr-1" />
+                            Copy Link
+                          </Button>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleOpenRenameDialog(selectedFile)}
+                          >
+                            <Edit className="h-4 w-4 mr-1" />
+                            Rename
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleOpenMoveDialog(selectedFile)}
+                          >
+                            <Move className="h-4 w-4 mr-1" />
+                            Move
+                          </Button>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDuplicateFile(selectedFile)}
+                          >
+                            <Copy className="h-4 w-4 mr-1" />
+                            Duplicate
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleToggleStar(selectedFile)}
+                          >
+                            {starredFiles.includes(selectedFile.id) ? (
+                              <>
+                                <StarOff className="h-4 w-4 mr-1" />
+                                Unstar
+                              </>
+                            ) : (
+                              <>
+                                <Star className="h-4 w-4 mr-1" />
+                                Star
+                              </>
+                            )}
+                          </Button>
+                        </div>
+
+                        {/* Danger Zone */}
+                        <div className="pt-2 border-t space-y-2">
+                          <Button
+                            variant="outline"
+                            className="w-full text-orange-600 hover:text-orange-700 hover:border-orange-300"
+                            onClick={() => handleArchiveFile(selectedFile)}
+                          >
+                            <Archive className="h-4 w-4 mr-2" />
+                            Archive
+                          </Button>
+                          <Button
+                            variant="outline"
+                            className="w-full text-red-600 hover:text-red-700 hover:border-red-300"
+                            onClick={() => handleOpenDeleteDialog(selectedFile)}
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Delete
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              )}
+
+              {/* Storage Stats */}
+              <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="text-lg">Storage</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm text-gray-600">Total Files</span>
+                      <span className="font-semibold">{files.length}</span>
+                    </div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm text-gray-600">Total Size</span>
+                      <span className="font-semibold">
+                        {(
+                          files.reduce(
+                            (sum, f) => sum + parseInt(f.size),
+                            0
+                          ) / 1024
+                        ).toFixed(1)}{' '}
+                        MB
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">Total Views</span>
+                      <span className="font-semibold">
+                        {files.reduce((sum, f) => sum + (f.views || 0), 0)}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-gray-600">Total Size</span>
-                    <span className="font-semibold">
-                      {(
-                        files.reduce(
-                          (sum, f) => sum + parseInt(f.size),
-                          0
-                        ) / 1024
-                      ).toFixed(1)}{' '}
-                      MB
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Total Views</span>
-                    <span className="font-semibold">
-                      {files.reduce((sum, f) => sum + (f.views || 0), 0)}
-                    </span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </div>
           </div>
-        </div>
         )}
 
         {/* Secure File Delivery Dialogs */}

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
 import { useMessages } from '@/lib/hooks/use-messages'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -36,13 +37,7 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  messagesAIInsights,
-  messagesCollaborators,
-  messagesPredictions,
-  messagesActivities,
-  messagesQuickActions,
-} from '@/lib/mock-data/adapters'
+
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -167,7 +162,7 @@ interface Mention {
   mentionedAt: string
 }
 
-// Mock Data
+// Mock Data - REMOVED
 const currentUser: User = {
   id: 'u0',
   name: 'you',
@@ -177,62 +172,81 @@ const currentUser: User = {
   title: 'Software Engineer'
 }
 
-const mockUsers: User[] = [
-  { id: 'u1', name: 'sarah.chen', displayName: 'Sarah Chen', email: 'sarah@example.com', status: 'online', title: 'Product Manager', statusText: 'In a meeting' },
-  { id: 'u2', name: 'mike.johnson', displayName: 'Mike Johnson', email: 'mike@example.com', status: 'away', title: 'Senior Developer' },
-  { id: 'u3', name: 'emily.davis', displayName: 'Emily Davis', email: 'emily@example.com', status: 'online', title: 'Designer' },
-  { id: 'u4', name: 'alex.kim', displayName: 'Alex Kim', email: 'alex@example.com', status: 'dnd', title: 'DevOps Engineer', statusText: 'Focusing' },
-  { id: 'u5', name: 'slackbot', displayName: 'Slackbot', email: 'bot@slack.com', status: 'online', isBot: true },
-  { id: 'u6', name: 'github', displayName: 'GitHub', email: 'github@slack.com', status: 'online', isBot: true }
+const mockUsers: User[] = []
+const mockChannels: Channel[] = []
+const mockMessages: Message[] = []
+const mockThreads: Thread[] = []
+const mockCalls: Call[] = []
+const mockFiles: SharedFile[] = []
+const mockMentions: Mention[] = []
+
+// Competitive Upgrade Mock Data
+const messagesAIInsights = [
+  {
+    id: '1',
+    type: 'opportunity' as const,
+    title: 'Communication Pattern',
+    description: 'Response times in #general have increased by 15%. Suggest checking thread activity.',
+    confidence: 0.89,
+    action: 'Analyze Threads'
+  },
+  {
+    id: '2',
+    type: 'alert' as const,
+    title: 'Missed Mentions',
+    description: 'You have 3 unanswered high-priority mentions from last week.',
+    confidence: 0.95,
+    action: 'View Mentions'
+  }
 ]
 
-const mockChannels: Channel[] = [
-  { id: 'c1', name: 'general', type: 'public', description: 'Company-wide announcements', topic: 'Welcome to the team!', members: mockUsers, memberCount: 156, unreadCount: 3, isMuted: false, isStarred: true, isPinned: true, lastActivity: '2024-01-15T14:30:00Z', createdAt: '2023-01-01T00:00:00Z', createdBy: mockUsers[0] },
-  { id: 'c2', name: 'engineering', type: 'public', description: 'Engineering team discussions', topic: 'Sprint 24 planning', members: [mockUsers[1], mockUsers[3]], memberCount: 42, unreadCount: 12, isMuted: false, isStarred: true, isPinned: false, lastActivity: '2024-01-15T14:28:00Z', createdAt: '2023-01-15T00:00:00Z', createdBy: mockUsers[1] },
-  { id: 'c3', name: 'design-team', type: 'private', description: 'Private design channel', members: [mockUsers[2]], memberCount: 8, unreadCount: 0, isMuted: true, isStarred: false, isPinned: false, lastActivity: '2024-01-15T12:00:00Z', createdAt: '2023-02-01T00:00:00Z', createdBy: mockUsers[2] },
-  { id: 'c4', name: 'random', type: 'public', description: 'Non-work banter', topic: 'Share memes!', members: mockUsers, memberCount: 134, unreadCount: 0, isMuted: false, isStarred: false, isPinned: false, lastActivity: '2024-01-15T10:00:00Z', createdAt: '2023-01-01T00:00:00Z', createdBy: mockUsers[0] },
-  { id: 'c5', name: 'product', type: 'public', description: 'Product discussions', members: mockUsers, memberCount: 28, unreadCount: 5, isMuted: false, isStarred: false, isPinned: false, lastActivity: '2024-01-15T13:00:00Z', createdAt: '2023-03-01T00:00:00Z', createdBy: mockUsers[0] },
-  { id: 'dm1', name: 'Sarah Chen', type: 'direct', members: [mockUsers[0]], memberCount: 2, unreadCount: 1, isMuted: false, isStarred: false, isPinned: false, lastActivity: '2024-01-15T14:25:00Z', createdAt: '2023-06-15T00:00:00Z', createdBy: currentUser },
-  { id: 'dm2', name: 'Mike Johnson', type: 'direct', members: [mockUsers[1]], memberCount: 2, unreadCount: 0, isMuted: false, isStarred: false, isPinned: false, lastActivity: '2024-01-14T16:00:00Z', createdAt: '2023-07-01T00:00:00Z', createdBy: currentUser }
+const messagesCollaborators = [
+  { id: '1', name: 'Alice Designer', role: 'Designer', avatar: '', status: 'online' as const },
+  { id: '2', name: 'Bob Product', role: 'Product', avatar: '', status: 'away' as const }
 ]
 
-const mockMessages: Message[] = [
-  { id: 'm1', channelId: 'c1', content: 'Hey team! Quick update on the Q1 roadmap - check out the attached doc.', author: mockUsers[0], createdAt: '2024-01-15T14:30:00Z', status: 'read', reactions: [{ type: 'thumbsup', count: 5, users: mockUsers.slice(0, 5), hasReacted: true }], threadCount: 3, threadParticipants: [mockUsers[1], mockUsers[2]], attachments: [{ id: 'a1', type: 'file', name: 'Q1_Roadmap.pdf', url: '#', size: 2500000 }], mentions: [], isPinned: true, isBookmarked: false },
-  { id: 'm2', channelId: 'c1', content: '@sarah.chen Looks great! Questions about the timeline.', author: mockUsers[1], createdAt: '2024-01-15T14:28:00Z', status: 'read', reactions: [], threadCount: 0, threadParticipants: [], attachments: [], mentions: [mockUsers[0]], isPinned: false, isBookmarked: false, parentId: 'm1' },
-  { id: 'm3', channelId: 'c2', content: '```javascript\nconst feature = { name: "Dark Mode", status: "done" };\n```\nJust pushed!', author: mockUsers[3], createdAt: '2024-01-15T14:20:00Z', status: 'read', reactions: [{ type: 'fire', count: 8, users: mockUsers, hasReacted: true }], threadCount: 5, threadParticipants: [mockUsers[0], mockUsers[1]], attachments: [], mentions: [], isPinned: false, isBookmarked: true },
-  { id: 'm4', channelId: 'c2', content: 'New deployment completed successfully!', author: mockUsers[5], createdAt: '2024-01-15T14:15:00Z', status: 'read', reactions: [{ type: 'celebrate', count: 12, users: mockUsers, hasReacted: true }], threadCount: 0, threadParticipants: [], attachments: [], mentions: [], isPinned: false, isBookmarked: false },
-  { id: 'm5', channelId: 'dm1', content: 'Hey! Are you free for a quick sync at 3pm?', author: mockUsers[0], createdAt: '2024-01-15T14:25:00Z', status: 'delivered', reactions: [], threadCount: 0, threadParticipants: [], attachments: [], mentions: [], isPinned: false, isBookmarked: false }
+const messagesPredictions = [
+  {
+    dataset: 'Message Volume',
+    trend: 'up' as const,
+    value: '+20%',
+    confidence: 0.82,
+    description: 'Message volume expected to peak during tomorrow\'s sprint planning.'
+  },
+  {
+    dataset: 'Response Time',
+    trend: 'down' as const,
+    value: '-5%',
+    confidence: 0.88,
+    description: 'Team response time is improving week over week.'
+  }
 ]
 
-const mockThreads: Thread[] = [
-  { id: 't1', parentMessage: mockMessages[0], channel: 'general', replies: 3, participants: [mockUsers[0], mockUsers[1], mockUsers[2]], lastReply: '2024-01-15T14:35:00Z', isFollowing: true, isUnread: true },
-  { id: 't2', parentMessage: mockMessages[2], channel: 'engineering', replies: 5, participants: [mockUsers[0], mockUsers[1], mockUsers[3]], lastReply: '2024-01-15T14:25:00Z', isFollowing: true, isUnread: false },
-  { id: 't3', parentMessage: mockMessages[0], channel: 'general', replies: 2, participants: [mockUsers[2], mockUsers[3]], lastReply: '2024-01-15T13:00:00Z', isFollowing: false, isUnread: false }
-]
-
-const mockCalls: Call[] = [
-  { id: 'call1', type: 'huddle', status: 'ongoing', channelId: 'c2', channelName: '#engineering', participants: [mockUsers[1], mockUsers[3]], startTime: '2024-01-15T14:00:00Z', isRecorded: false },
-  { id: 'call2', type: 'video', status: 'scheduled', channelId: 'c1', channelName: '#general', participants: mockUsers.slice(0, 4), startTime: '2024-01-16T10:00:00Z', isRecorded: true },
-  { id: 'call3', type: 'audio', status: 'ended', channelId: 'dm1', channelName: 'Sarah Chen', participants: [mockUsers[0]], startTime: '2024-01-15T11:00:00Z', endTime: '2024-01-15T11:30:00Z', duration: 1800, isRecorded: false },
-  { id: 'call4', type: 'video', status: 'missed', channelId: 'dm2', channelName: 'Mike Johnson', participants: [mockUsers[1]], startTime: '2024-01-15T09:00:00Z', isRecorded: false }
-]
-
-const mockFiles: SharedFile[] = [
-  { id: 'f1', name: 'Q1_Roadmap.pdf', type: 'application/pdf', size: 2500000, uploadedBy: mockUsers[0], uploadedAt: '2024-01-15T14:30:00Z', channelId: 'c1', channelName: '#general', downloads: 45 },
-  { id: 'f2', name: 'design-system.figma', type: 'application/figma', size: 15000000, uploadedBy: mockUsers[2], uploadedAt: '2024-01-14T10:00:00Z', channelId: 'c3', channelName: '#design-team', downloads: 12 },
-  { id: 'f3', name: 'architecture.png', type: 'image/png', size: 850000, uploadedBy: mockUsers[3], uploadedAt: '2024-01-13T16:00:00Z', channelId: 'c2', channelName: '#engineering', downloads: 28 },
-  { id: 'f4', name: 'demo-video.mp4', type: 'video/mp4', size: 125000000, uploadedBy: mockUsers[0], uploadedAt: '2024-01-12T09:00:00Z', channelId: 'c5', channelName: '#product', downloads: 67 },
-  { id: 'f5', name: 'meeting-notes.docx', type: 'application/docx', size: 45000, uploadedBy: mockUsers[1], uploadedAt: '2024-01-11T14:00:00Z', channelId: 'c1', channelName: '#general', downloads: 23 }
-]
-
-const mockMentions: Mention[] = [
-  { id: 'men1', message: mockMessages[1], channel: '#general', isRead: false, mentionedAt: '2024-01-15T14:28:00Z' },
-  { id: 'men2', message: { ...mockMessages[0], content: '@you Great work on the feature!' } as Message, channel: '#engineering', isRead: false, mentionedAt: '2024-01-15T13:00:00Z' },
-  { id: 'men3', message: { ...mockMessages[0], content: '@you Can you review this PR?' } as Message, channel: '#engineering', isRead: true, mentionedAt: '2024-01-14T16:00:00Z' }
+const messagesActivities = [
+  {
+    id: '1',
+    type: 'create' as const,
+    author: 'Alice Designer',
+    user: { name: 'Alice Designer', avatar: '' },
+    title: 'Started new thread',
+    description: 'Started a thread in #design-system',
+    timestamp: '10m ago',
+    metadata: {}
+  },
+  {
+    id: '2',
+    type: 'mention' as const,
+    author: 'Bob Product',
+    user: { name: 'Bob Product', avatar: '' },
+    title: 'Mentioned you',
+    description: 'Mentioned you in #product-roadmap',
+    timestamp: '1h ago',
+    metadata: {}
+  }
 ]
 
 export default function MessagesClient() {
-  const [selectedChannel, setSelectedChannel] = useState<Channel | null>(mockChannels[0])
+  const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [messageInput, setMessageInput] = useState('')
   const [showThreadPanel, setShowThreadPanel] = useState(false)
@@ -241,6 +255,7 @@ export default function MessagesClient() {
   const [activeCall, setActiveCall] = useState<Call | null>(null)
   const [recipientId, setRecipientId] = useState('')
   const [messageSubject, setMessageSubject] = useState('')
+  const [showInsights, setShowInsights] = useState(false)
 
   // Real Supabase hook for messages
   const {
@@ -292,29 +307,34 @@ export default function MessagesClient() {
   const [filterChannel, setFilterChannel] = useState<string>('all')
   const [sidebarThemeColor, setSidebarThemeColor] = useState('#4a154b')
 
-  // Map Supabase messages to local format with mock fallback
+  // Map Supabase messages to local format
   const activeMessages = useMemo(() => {
     if (supabaseMessages && supabaseMessages.length > 0) {
       return supabaseMessages.map((m: any) => ({
         id: m.id || '',
-        content: m.content || '',
-        senderId: m.sender_id || m.user_id || '',
-        senderName: m.sender_name || 'Unknown',
-        senderAvatar: m.sender_avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${m.sender_name}`,
         channelId: m.channel_id || m.conversation_id || 'general',
-        timestamp: m.created_at || new Date().toISOString(),
+        content: m.content || m.body || '',
+        author: {
+          id: m.sender_id || m.user_id || 'unknown',
+          name: m.sender_name || 'Unknown',
+          displayName: m.sender_name || 'Unknown',
+          email: m.sender_email || '',
+          avatar: m.sender_avatar,
+          status: 'offline' as UserStatus
+        },
+        createdAt: m.created_at || new Date().toISOString(),
         status: (m.status || 'sent') as MessageStatus,
         reactions: m.reactions || [],
-        replies: m.replies || [],
-        replyCount: m.reply_count || 0,
-        isPinned: m.is_pinned || false,
-        isEdited: m.is_edited || false,
+        threadCount: m.thread_count || 0,
+        threadParticipants: [],
         attachments: m.attachments || [],
         mentions: m.mentions || [],
+        isPinned: m.is_pinned || false,
+        isBookmarked: m.is_bookmarked || false,
         parentId: m.parent_id || undefined
       })) as Message[]
     }
-    return mockMessages
+    return []
   }, [supabaseMessages])
 
   // Reply and Forward Dialog states
@@ -359,14 +379,13 @@ export default function MessagesClient() {
 
   // Stats
   const stats = useMemo(() => {
-    // Use activeMessages for real data, with mock fallback multipliers for demo
     const realMessageCount = activeMessages.length
-    const totalMessages = realMessageCount > 0 ? realMessageCount : mockMessages.length * 150
+    const totalMessages = realMessageCount
     const totalChannels = mockChannels.length
     const unreadMessages = mockChannels.reduce((sum, c) => sum + c.unreadCount, 0)
     const activeThreads = mockThreads.filter(t => t.isUnread).length
-    const totalFiles = mockFiles.length * 25
-    const totalCalls = mockCalls.length * 12
+    const totalFiles = mockFiles.length
+    const totalCalls = mockCalls.length
     const onlineMembers = mockUsers.filter(u => u.status === 'online').length
     const mentions = mockMentions.filter(m => !m.isRead).length
     return { totalMessages, totalChannels, unreadMessages, activeThreads, totalFiles, totalCalls, onlineMembers, mentions }
@@ -1185,8 +1204,8 @@ export default function MessagesClient() {
     setThreadFilter(filter)
     const filterLabels = { all: 'all threads', following: 'threads you follow', unread: 'unread threads', mentions: 'threads with mentions', archived: 'archived threads' }
     const count = filter === 'unread' ? mockThreads.filter(t => t.isUnread).length :
-                  filter === 'following' ? mockThreads.filter(t => t.isFollowing).length :
-                  mockThreads.length
+      filter === 'following' ? mockThreads.filter(t => t.isFollowing).length :
+        mockThreads.length
     toast.success(`Showing ") + (filterLabels[filter]}`, { description: `") + (count} thread(s)` })
   }
 
@@ -1372,8 +1391,35 @@ export default function MessagesClient() {
               <Plus className="w-4 h-4 mr-2" />
               New Message
             </Button>
+            <Button
+              variant={showInsights ? 'secondary' : 'outline'}
+              onClick={() => setShowInsights(!showInsights)}
+              className="gap-2"
+            >
+              <Sparkles className={`w-4 h-4 ${showInsights ? 'text-primary' : 'text-muted-foreground'}`} />
+              {showInsights ? 'Hide Insights' : 'Smart Insights'}
+            </Button>
           </div>
         </div>
+
+        {/* AI Insights Panel */}
+        <AnimatePresence>
+          {showInsights && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+              className="overflow-hidden"
+            >
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                <AIInsightsPanel insights={messagesAIInsights} />
+                <PredictiveAnalytics predictions={messagesPredictions} />
+                <CollaborationIndicator collaborators={messagesCollaborators} />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
@@ -2118,10 +2164,10 @@ export default function MessagesClient() {
                     <div key={file.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
                       <div className="flex items-center gap-4">
                         <div className="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
-                          {file.type.includes('image') ? <Image className="w-6 h-6 text-blue-500"  loading="lazy"/> :
-                           file.type.includes('video') ? <Video className="w-6 h-6 text-purple-500" /> :
-                           file.type.includes('pdf') ? <FileText className="w-6 h-6 text-red-500" /> :
-                           <FolderOpen className="w-6 h-6 text-gray-500" />}
+                          {file.type.includes('image') ? <Image className="w-6 h-6 text-blue-500" loading="lazy" /> :
+                            file.type.includes('video') ? <Video className="w-6 h-6 text-purple-500" /> :
+                              file.type.includes('pdf') ? <FileText className="w-6 h-6 text-red-500" /> :
+                                <FolderOpen className="w-6 h-6 text-gray-500" />}
                         </div>
                         <div>
                           <p className="font-medium">{file.name}</p>
@@ -2941,18 +2987,18 @@ export default function MessagesClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={messagesAIInsights}
+              insights={[]}
               title="Messaging Intelligence"
               onInsightAction={(insight) => handleAIInsightAction(insight)}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={messagesCollaborators}
+              collaborators={[]}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={messagesPredictions}
+              predictions={[]}
               title="Communication Forecasts"
             />
           </div>
@@ -2960,12 +3006,12 @@ export default function MessagesClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={messagesActivities}
+            activities={[]}
             title="Message Activity"
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={messagesQuickActions}
+            actions={[]}
             variant="grid"
           />
         </div>

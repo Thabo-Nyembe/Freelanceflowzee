@@ -97,7 +97,22 @@ export function useProjects(initialProjects: Project[] = []) {
         .order('updated_at', { ascending: false })
 
       if (error) throw error
-      setProjects(data || [])
+
+      // Map DB fields to Project interface
+      const mappedProjects = (data || []).map(p => ({
+        ...p,
+        name: p.title, // Map title -> name
+        project_code: p.metadata?.project_code || '',
+        team_members: p.metadata?.team_members || [],
+        tags: p.metadata?.tags || [],
+        color: p.metadata?.color || '#3b82f6',
+        is_template: p.metadata?.is_template || false,
+        cover_image: p.metadata?.cover_image || null,
+        template_id: p.metadata?.template_id || null,
+        archived_at: p.metadata?.archived_at || null
+      }))
+
+      setProjects(mappedProjects)
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Unknown error'
       setError(message)
@@ -117,23 +132,35 @@ export function useProjects(initialProjects: Project[] = []) {
       }
 
       // Only include essential fields - let database handle defaults
+      // Map frontend fields to DB schema (MASTER_COMPLETE_SETUP.sql)
       const projectData: Record<string, any> = {
-        name: project.name || 'Untitled Project',
+        title: project.name || 'Untitled Project', // Map name -> title
         user_id: userId,
-        status: project.status || 'planning',
+        // Map "planning" to "active" as "planning" is not in the DB enum
+        status: project.status === 'planning' ? 'active' : (project.status || 'active'),
         priority: project.priority || 'medium',
         progress: project.progress !== undefined ? project.progress : 0,
-        spent: project.spent !== undefined ? project.spent : 0
+        spent: project.spent !== undefined ? project.spent : 0,
+        // Store non-schema fields in metadata
+        metadata: {
+          ...project.metadata,
+          team_members: project.team_members || [],
+          tags: project.tags || [],
+          color: project.color || '#3b82f6',
+          is_template: project.is_template || false,
+          cover_image: project.cover_image || null,
+          project_code: project.project_code || `PRJ-${Math.floor(Math.random() * 10000).toString().padStart(4, '0')}`
+        }
       }
 
-      // Add optional fields only if provided
+      // Add optional fields only if provided and they exist in schema
       if (project.description) projectData.description = project.description
       if (project.client_id) projectData.client_id = project.client_id
       if (project.start_date) projectData.start_date = project.start_date
       if (project.end_date) projectData.end_date = project.end_date
       if (project.budget) projectData.budget = project.budget
-      if (project.team_members && project.team_members.length > 0) projectData.team_members = project.team_members
-      if (project.tags && project.tags.length > 0) projectData.tags = project.tags
+
+      console.log('Creating project with data:', projectData)
 
       const { data, error } = await supabase
         .from('projects')
@@ -141,29 +168,108 @@ export function useProjects(initialProjects: Project[] = []) {
         .select()
         .single()
 
-      if (error) throw error
-      setProjects(prev => [data, ...prev])
+      if (error) {
+        console.error('Supabase Create Project Error:', error)
+        throw error
+      }
+
+      // Map DB response back to frontend interface
+      const mappedProject: Project = {
+        ...data,
+        name: data.title,
+        project_code: data.metadata?.project_code || '',
+        team_members: data.metadata?.team_members || [],
+        tags: data.metadata?.tags || [],
+        color: data.metadata?.color || '#3b82f6',
+        is_template: data.metadata?.is_template || false,
+        cover_image: data.metadata?.cover_image || null,
+        template_id: data.metadata?.template_id || null,
+        archived_at: data.metadata?.archived_at || null
+      }
+
+      setProjects(prev => [mappedProject, ...prev])
       toast.success('Project created successfully')
-      return data
+      return mappedProject
     } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : 'Failed to create project')
+      console.error('Project creation failed:', err)
+      // Expose the specific error for debugging
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred'
+      const errorDetails = (err as any)?.details || (err as any)?.hint || ''
+      toast.error(`Failed to create project: ${errorMessage} ${errorDetails ? `(${errorDetails})` : ''}`)
       throw err
     }
   }
 
   const updateProject = async (id: string, updates: Partial<Project>) => {
     try {
+      // Find current project to merge metadata
+      const currentProject = projects.find(p => p.id === id)
+
+      const updateData: Record<string, any> = {
+        updated_at: new Date().toISOString()
+      }
+
+      // Map fields
+      if (updates.name) updateData.title = updates.name
+      if (updates.description !== undefined) updateData.description = updates.description
+      if (updates.status) updateData.status = updates.status
+      if (updates.priority) updateData.priority = updates.priority
+      if (updates.budget !== undefined) updateData.budget = updates.budget
+      if (updates.spent !== undefined) updateData.spent = updates.spent
+      if (updates.progress !== undefined) updateData.progress = updates.progress
+      if (updates.start_date !== undefined) updateData.start_date = updates.start_date
+      if (updates.end_date !== undefined) updateData.end_date = updates.end_date
+      if (updates.client_id !== undefined) updateData.client_id = updates.client_id
+
+      // Handle metadata fields
+      const metadataFields = ['team_members', 'tags', 'color', 'is_template', 'cover_image', 'project_code', 'template_id', 'archived_at']
+      const hasMetadataUpdate = metadataFields.some(field => field in updates)
+
+      if (hasMetadataUpdate) {
+        const currentMetadata = currentProject?.metadata || {}
+        updateData.metadata = {
+          ...currentMetadata,
+          ...updates.metadata, // In case raw metadata is passed
+        }
+
+        // Update specific fields in metadata
+        if (updates.team_members) updateData.metadata.team_members = updates.team_members
+        if (updates.tags) updateData.metadata.tags = updates.tags
+        if (updates.color) updateData.metadata.color = updates.color
+        if (updates.is_template !== undefined) updateData.metadata.is_template = updates.is_template
+        if (updates.cover_image !== undefined) updateData.metadata.cover_image = updates.cover_image
+        if (updates.project_code) updateData.metadata.project_code = updates.project_code
+        if (updates.template_id !== undefined) updateData.metadata.template_id = updates.template_id
+        if (updates.archived_at !== undefined) updateData.metadata.archived_at = updates.archived_at
+      }
+
+      console.log('Updating project with data:', updateData)
+
       const { data, error } = await supabase
         .from('projects')
-        .update({ ...updates, updated_at: new Date().toISOString() })
+        .update(updateData)
         .eq('id', id)
         .select()
         .single()
 
       if (error) throw error
-      setProjects(prev => prev.map(p => p.id === id ? data : p))
+
+      const mappedProject: Project = {
+        ...data,
+        name: data.title,
+        project_code: data.metadata?.project_code || '',
+        team_members: data.metadata?.team_members || [],
+        tags: data.metadata?.tags || [],
+        color: data.metadata?.color || '#3b82f6',
+        is_template: data.metadata?.is_template || false,
+        cover_image: data.metadata?.cover_image || null,
+        template_id: data.metadata?.template_id || null,
+        archived_at: data.metadata?.archived_at || null
+      }
+
+      setProjects(prev => prev.map(p => p.id === id ? mappedProject : p))
       toast.success('Project updated successfully')
-      return data
+      return mappedProject
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : 'Failed to update project')
       throw err

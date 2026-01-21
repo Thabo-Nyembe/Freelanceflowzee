@@ -17,8 +17,10 @@ import {
   Search, Filter, MoreHorizontal, Download, ArrowUpRight, ArrowDownRight, BarChart3,
   Target, Cloud, Play,
   ExternalLink, Copy, Gauge, Timer, Webhook, Sliders, AlertOctagon, Trash2, Edit3, Mail,
-  Loader2
+  Loader2, Sparkles
 } from 'lucide-react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { createClient } from '@/lib/supabase/client'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { CardDescription } from '@/components/ui/card'
@@ -399,15 +401,15 @@ const formatDate = (dateString: string): string => {
 // ============================================================================
 
 const mockAIInsights = [
-  { id: '1', query: "What's causing the API latency spike?", insight: "Database connection pool exhaustion on db-primary-01. Consider increasing max_connections from 100 to 200.", confidence: 0.94, category: 'engagement' as const, timestamp: new Date().toISOString() },
-  { id: '2', query: "Which services need attention?", insight: "Payment Gateway showing 2.3% error rate, above 1% threshold. Related to upstream provider issues.", confidence: 0.89, category: 'conversion' as const, timestamp: new Date().toISOString() },
-  { id: '3', query: "How's our infrastructure health?", insight: "Overall system health at 98.7%. Recommended: Scale api-gateway replicas from 3 to 5 before peak hours.", confidence: 0.91, category: 'revenue' as const, timestamp: new Date().toISOString() },
+  { id: '1', type: 'alert' as const, title: 'API Latency Spike', description: 'Database connection pool exhaustion on db-primary-01. Consider increasing max_connections from 100 to 200.', priority: 'high' as const, category: 'Infrastructure', timestamp: new Date().toISOString() },
+  { id: '2', type: 'alert' as const, title: 'Payment Service Degradation', description: 'Payment Gateway showing 2.3% error rate, above 1% threshold. Related to upstream provider.', priority: 'high' as const, category: 'Services', timestamp: new Date().toISOString() },
+  { id: '3', type: 'opportunity' as const, title: 'System Health Optimized', description: 'Overall system health at 98.7%. api-gateway auto-scaled successfully during recent load.', priority: 'low' as const, category: 'Performance', timestamp: new Date().toISOString() },
 ]
 
 const mockOverviewCollaborators = [
-  { id: '1', name: 'DevOps Team', avatar: '/avatars/devops.jpg', status: 'active' as const, lastActive: 'Just now', role: 'On-call' },
-  { id: '2', name: 'Alex Kumar', avatar: '/avatars/alex.jpg', status: 'active' as const, lastActive: '1m ago', role: 'SRE Lead' },
-  { id: '3', name: 'Lisa Park', avatar: '/avatars/lisa.jpg', status: 'idle' as const, lastActive: '20m ago', role: 'Platform Engineer' },
+  { id: '1', name: 'DevOps Team', avatar: '/avatars/devops.jpg', status: 'online' as const, lastActive: 'Just now', role: 'On-call' },
+  { id: '2', name: 'Alex Kumar', avatar: '/avatars/alex.jpg', status: 'online' as const, lastActive: '1m ago', role: 'SRE Lead' },
+  { id: '3', name: 'Lisa Park', avatar: '/avatars/lisa.jpg', status: 'away' as const, lastActive: '20m ago', role: 'Platform Engineer' },
 ]
 
 const mockOverviewPredictions = [
@@ -417,9 +419,9 @@ const mockOverviewPredictions = [
 ]
 
 const mockOverviewActivities = [
-  { id: '1', type: 'status_change' as const, title: 'Service recovered', description: 'Payment Gateway back to operational', user: { name: 'System', avatar: '' }, timestamp: new Date().toISOString(), metadata: {} },
-  { id: '2', type: 'update' as const, title: 'Deployment completed', description: 'api-gateway v2.4.1 rolled out to production', user: { name: 'Alex Kumar', avatar: '/avatars/alex.jpg' }, timestamp: new Date(Date.now() - 1800000).toISOString(), metadata: {} },
-  { id: '3', type: 'create' as const, title: 'Alert created', description: 'New monitor for Redis memory usage', user: { name: 'Lisa Park', avatar: '/avatars/lisa.jpg' }, timestamp: new Date(Date.now() - 3600000).toISOString(), metadata: {} },
+  { id: '1', type: 'status_change' as const, title: 'Service recovered', description: 'Payment Gateway back to operational', user: { id: 'u1', name: 'System', avatar: '' }, timestamp: new Date().toISOString(), metadata: {} },
+  { id: '2', type: 'update' as const, title: 'Deployment completed', description: 'api-gateway v2.4.1 rolled out to production', user: { id: 'u2', name: 'Alex Kumar', avatar: '/avatars/alex.jpg' }, timestamp: new Date(Date.now() - 1800000).toISOString(), metadata: {} },
+  { id: '3', type: 'create' as const, title: 'Alert created', description: 'New monitor for Redis memory usage', user: { id: 'u3', name: 'Lisa Park', avatar: '/avatars/lisa.jpg' }, timestamp: new Date(Date.now() - 3600000).toISOString(), metadata: {} },
 ]
 
 // Quick actions will be defined inside the component to access state setters
@@ -429,10 +431,12 @@ const mockOverviewActivities = [
 // ============================================================================
 
 export default function OverviewClient() {
+  const supabase = createClient()
 
 
   // UI State
   const [activeTab, setActiveTab] = useState('dashboard')
+  const [showInsights, setShowInsights] = useState(false)
   const [timeRange, setTimeRange] = useState<TimeRange>('24h')
   const [searchQuery, setSearchQuery] = useState('')
   const [isRefreshing, setIsRefreshing] = useState(false)
@@ -611,7 +615,7 @@ export default function OverviewClient() {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [ fetchMetrics, fetchStats, fetchNotifications])
+  }, [fetchMetrics, fetchStats, fetchNotifications])
 
   const handleRefresh = async () => {
     setIsRefreshing(true)
@@ -818,6 +822,15 @@ export default function OverviewClient() {
                 collaborators={mockOverviewCollaborators}
                 maxVisible={3}
               />
+              <Button
+                variant={showInsights ? "secondary" : "ghost"}
+                size="sm"
+                onClick={() => setShowInsights(!showInsights)}
+                className={`hidden md:flex items-center gap-2 ${showInsights ? 'bg-white text-indigo-600 hover:bg-white/90' : 'text-indigo-100 hover:text-white hover:bg-white/10'}`}
+              >
+                <Sparkles className="w-4 h-4" />
+                <span>Smart Insights</span>
+              </Button>
               <div className="flex items-center bg-white/10 rounded-lg p-1">
                 {timeRanges.map(range => (
                   <Button
@@ -835,13 +848,31 @@ export default function OverviewClient() {
                 variant="outline"
                 className="bg-white/10 border-white/20 text-white hover:bg-white/20"
                 onClick={handleRefresh}
-               aria-label="Refresh">
-                  <RefreshCw className={`w-4 h-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+                aria-label="Refresh">
+                <RefreshCw className={`w-4 h-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
                 Refresh
               </Button>
             </div>
           </div>
         </div>
+
+        {/* Collapsible Smart Insights Panel */}
+        <AnimatePresence>
+          {showInsights && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden"
+            >
+              <AIInsightsPanel
+                insights={mockAIInsights}
+                className="mb-8"
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
@@ -938,10 +969,9 @@ export default function OverviewClient() {
                         onClick={() => setSelectedService(service)}
                       >
                         <div className="flex items-center gap-3">
-                          <div className={`w-2 h-2 rounded-full ${
-                            service.status === 'operational' ? 'bg-green-500' :
+                          <div className={`w-2 h-2 rounded-full ${service.status === 'operational' ? 'bg-green-500' :
                             service.status === 'degraded' ? 'bg-yellow-500' : 'bg-red-500'
-                          }`} />
+                            }`} />
                           <div>
                             <p className="font-medium text-gray-900 dark:text-white">{service.display_name}</p>
                             <p className="text-xs text-gray-500">{service.region} · {service.environment}</p>
@@ -1013,8 +1043,8 @@ export default function OverviewClient() {
                       <div className="flex items-start justify-between">
                         <div className="flex items-center gap-3">
                           {alert.severity === 'critical' ? <XCircle className="w-5 h-5" /> :
-                           alert.severity === 'warning' ? <AlertTriangle className="w-5 h-5" /> :
-                           <AlertCircle className="w-5 h-5" />}
+                            alert.severity === 'warning' ? <AlertTriangle className="w-5 h-5" /> :
+                              <AlertCircle className="w-5 h-5" />}
                           <div>
                             <p className="font-semibold">{alert.title}</p>
                             <p className="text-sm opacity-80">{alert.message}</p>
@@ -1048,7 +1078,7 @@ export default function OverviewClient() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <QuickActionsToolbar />
+                    <QuickActionsToolbar actions={overviewQuickActions} />
                   </CardContent>
                 </Card>
               </div>
@@ -1190,8 +1220,8 @@ export default function OverviewClient() {
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center gap-3">
                         {alert.severity === 'critical' ? <XCircle className="w-5 h-5" /> :
-                         alert.severity === 'warning' ? <AlertTriangle className="w-5 h-5" /> :
-                         <AlertCircle className="w-5 h-5" />}
+                          alert.severity === 'warning' ? <AlertTriangle className="w-5 h-5" /> :
+                            <AlertCircle className="w-5 h-5" />}
                         <div>
                           <h4 className="font-semibold">{alert.title}</h4>
                           <p className="text-sm opacity-80">{alert.message}</p>
@@ -1289,11 +1319,10 @@ export default function OverviewClient() {
                         <button
                           key={item.id}
                           onClick={() => setSettingsTab(item.id)}
-                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
-                            settingsTab === item.id
-                              ? 'bg-indigo-600 text-white'
-                              : 'hover:bg-gray-100 dark:hover:bg-gray-800'
-                          }`}
+                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${settingsTab === item.id
+                            ? 'bg-indigo-600 text-white'
+                            : 'hover:bg-gray-100 dark:hover:bg-gray-800'
+                            }`}
                         >
                           <item.icon className="h-4 w-4" />
                           <span className="text-sm font-medium">{item.label}</span>
@@ -2167,8 +2196,8 @@ export default function OverviewClient() {
                 <div className={`p-4 rounded-xl ${getSeverityColor(selectedAlert.severity)}`}>
                   <div className="flex items-center gap-3 mb-2">
                     {selectedAlert.severity === 'critical' ? <XCircle className="w-6 h-6" /> :
-                     selectedAlert.severity === 'warning' ? <AlertTriangle className="w-6 h-6" /> :
-                     <AlertCircle className="w-6 h-6" />}
+                      selectedAlert.severity === 'warning' ? <AlertTriangle className="w-6 h-6" /> :
+                        <AlertCircle className="w-6 h-6" />}
                     <h3 className="text-lg font-bold">{selectedAlert.title}</h3>
                   </div>
                   <p>{selectedAlert.message}</p>
@@ -2267,10 +2296,9 @@ export default function OverviewClient() {
                         {selectedService.health_checks.map(check => (
                           <div key={check.id} className="p-3 rounded-xl bg-gray-50 dark:bg-gray-800 flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                              <div className={`w-2 h-2 rounded-full ${
-                                check.status === 'passing' ? 'bg-green-500' :
+                              <div className={`w-2 h-2 rounded-full ${check.status === 'passing' ? 'bg-green-500' :
                                 check.status === 'warning' ? 'bg-yellow-500' : 'bg-red-500'
-                              }`} />
+                                }`} />
                               <div>
                                 <p className="font-medium">{check.name}</p>
                                 <p className="text-xs text-gray-500">{check.details}</p>
@@ -2338,12 +2366,8 @@ export default function OverviewClient() {
           </DialogContent>
         </Dialog>
 
-        {/* AI-Powered Infrastructure Insights */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
-          <AIInsightsPanel
-            insights={mockAIInsights}
-            onAskQuestion={(q) => toast.info("Question Submitted: " + q)}
-          />
+        {/* AI-Powered Infrastructure Insights (Predictive Only) */}
+        <div className="grid grid-cols-1 mt-8">
           <PredictiveAnalytics predictions={mockOverviewPredictions} />
         </div>
 
@@ -2352,7 +2376,6 @@ export default function OverviewClient() {
           <ActivityFeed
             activities={mockOverviewActivities}
             maxItems={5}
-            showFilters={true}
           />
         </div>
 
@@ -2582,6 +2605,6 @@ export default function OverviewClient() {
           </DialogContent>
         </Dialog>
       </div>
-    </div>
+    </div >
   )
 }

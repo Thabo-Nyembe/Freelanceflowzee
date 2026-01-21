@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
 import { toast } from 'sonner'
 import { useMyDayTasks, useFocusSessions, type MyDayTask } from '@/lib/hooks/use-my-day'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -59,7 +60,8 @@ import {
   Layers,
   Bell,
   AlertTriangle,
-  Video
+  Video,
+  Sparkles
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -240,301 +242,21 @@ const getDueLabel = (dueDate?: string): { label: string; color: string; icon: JS
 }
 
 // Mock data
-const mockTasks: Task[] = [
-  {
-    id: 't1',
-    title: 'Review Q4 financial reports',
-    description: 'Analyze quarterly financial statements and prepare summary for board meeting',
-    status: 'pending',
-    priority: 'p1',
-    projectId: 'proj1',
-    projectName: 'Finance',
-    projectColor: '#10B981',
-    sectionId: 'sec1',
-    sectionName: 'Reports',
-    labels: ['urgent', 'finance'],
-    dueDate: new Date().toISOString().split('T')[0],
-    dueTime: '14:00',
-    reminder: '30min',
-    estimatedMinutes: 90,
-    subTasks: [
-      { id: 'st1', title: 'Download financial statements', completed: true, createdAt: '2024-01-10' },
-      { id: 'st2', title: 'Analyze revenue trends', completed: false, createdAt: '2024-01-10' },
-      { id: 'st3', title: 'Prepare executive summary', completed: false, createdAt: '2024-01-10' }
-    ],
-    comments: [
-      { id: 'c1', userId: 'u1', userName: 'Sarah Chen', content: 'CFO needs this by EOD', createdAt: '2024-01-14T09:00:00' }
-    ],
-    attachments: 3,
-    isStarred: true,
-    createdAt: '2024-01-10',
-    order: 1
-  },
-  {
-    id: 't2',
-    title: 'Team standup meeting',
-    description: 'Daily sync with engineering team',
-    status: 'completed',
-    priority: 'p2',
-    projectId: 'proj2',
-    projectName: 'Engineering',
-    projectColor: '#6366F1',
-    labels: ['meeting', 'recurring'],
-    dueDate: new Date().toISOString().split('T')[0],
-    dueTime: '09:00',
-    recurrence: { type: 'daily', interval: 1 },
-    estimatedMinutes: 30,
-    actualMinutes: 25,
-    subTasks: [],
-    comments: [],
-    attachments: 0,
-    isStarred: false,
-    createdAt: '2024-01-01',
-    completedAt: new Date().toISOString(),
-    order: 2
-  },
-  {
-    id: 't3',
-    title: 'Update product roadmap',
-    description: 'Revise Q1 milestones based on new priorities',
-    status: 'in_progress',
-    priority: 'p2',
-    projectId: 'proj3',
-    projectName: 'Product',
-    projectColor: '#F59E0B',
-    sectionId: 'sec2',
-    sectionName: 'Planning',
-    labels: ['roadmap', 'strategy'],
-    dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0],
-    estimatedMinutes: 120,
-    actualMinutes: 45,
-    assigneeId: 'u2',
-    assigneeName: 'Mike Johnson',
-    assigneeAvatar: '/avatars/mike.jpg',
-    subTasks: [
-      { id: 'st4', title: 'Review current milestones', completed: true, createdAt: '2024-01-12' },
-      { id: 'st5', title: 'Gather stakeholder feedback', completed: true, createdAt: '2024-01-12' },
-      { id: 'st6', title: 'Draft new timeline', completed: false, createdAt: '2024-01-12' },
-      { id: 'st7', title: 'Get approval from leadership', completed: false, createdAt: '2024-01-12' }
-    ],
-    comments: [
-      { id: 'c2', userId: 'u3', userName: 'Lisa Park', content: 'Please include mobile app milestones', createdAt: '2024-01-13T14:30:00' },
-      { id: 'c3', userId: 'u2', userName: 'Mike Johnson', content: 'Added mobile section', createdAt: '2024-01-13T16:00:00' }
-    ],
-    attachments: 2,
-    isStarred: true,
-    createdAt: '2024-01-12',
-    order: 3
-  },
-  {
-    id: 't4',
-    title: 'Prepare client presentation',
-    description: 'Create slides for upcoming client demo',
-    status: 'pending',
-    priority: 'p1',
-    projectId: 'proj4',
-    projectName: 'Sales',
-    projectColor: '#EC4899',
-    labels: ['client', 'presentation'],
-    dueDate: new Date().toISOString().split('T')[0],
-    dueTime: '17:00',
-    estimatedMinutes: 180,
-    subTasks: [
-      { id: 'st8', title: 'Create outline', completed: true, createdAt: '2024-01-13' },
-      { id: 'st9', title: 'Design slides', completed: false, createdAt: '2024-01-13' },
-      { id: 'st10', title: 'Add demo videos', completed: false, createdAt: '2024-01-13' }
-    ],
-    comments: [],
-    attachments: 5,
-    isStarred: false,
-    createdAt: '2024-01-13',
-    order: 4
-  },
-  {
-    id: 't5',
-    title: 'Code review for authentication module',
-    description: 'Review PR #234 for new OAuth implementation',
-    status: 'pending',
-    priority: 'p2',
-    projectId: 'proj2',
-    projectName: 'Engineering',
-    projectColor: '#6366F1',
-    labels: ['code-review', 'security'],
-    dueDate: new Date().toISOString().split('T')[0],
-    estimatedMinutes: 60,
-    subTasks: [],
-    comments: [],
-    attachments: 1,
-    isStarred: false,
-    createdAt: '2024-01-14',
-    order: 5
-  },
-  {
-    id: 't6',
-    title: 'Weekly team retrospective',
-    description: 'Discuss wins, challenges, and improvements',
-    status: 'pending',
-    priority: 'p3',
-    projectId: 'proj2',
-    projectName: 'Engineering',
-    projectColor: '#6366F1',
-    labels: ['meeting', 'recurring'],
-    dueDate: new Date(Date.now() + 3 * 86400000).toISOString().split('T')[0],
-    dueTime: '15:00',
-    recurrence: { type: 'weekly', interval: 1, days: ['Friday'] },
-    estimatedMinutes: 60,
-    subTasks: [],
-    comments: [],
-    attachments: 0,
-    isStarred: false,
-    createdAt: '2024-01-01',
-    order: 6
-  },
-  {
-    id: 't7',
-    title: 'Update documentation',
-    description: 'Refresh API documentation with new endpoints',
-    status: 'pending',
-    priority: 'p3',
-    projectId: 'proj2',
-    projectName: 'Engineering',
-    projectColor: '#6366F1',
-    sectionId: 'sec3',
-    sectionName: 'Documentation',
-    labels: ['docs'],
-    dueDate: new Date(Date.now() + 5 * 86400000).toISOString().split('T')[0],
-    estimatedMinutes: 90,
-    subTasks: [
-      { id: 'st11', title: 'List new endpoints', completed: false, createdAt: '2024-01-14' },
-      { id: 'st12', title: 'Write request/response examples', completed: false, createdAt: '2024-01-14' }
-    ],
-    comments: [],
-    attachments: 0,
-    isStarred: false,
-    createdAt: '2024-01-14',
-    order: 7
-  },
-  {
-    id: 't8',
-    title: 'Personal: Schedule dentist appointment',
-    description: 'Annual checkup',
-    status: 'pending',
-    priority: 'p4',
-    labels: ['personal', 'health'],
-    dueDate: new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0],
-    subTasks: [],
-    comments: [],
-    attachments: 0,
-    isStarred: false,
-    createdAt: '2024-01-10',
-    order: 8
-  }
-]
-
-const mockProjects: Project[] = [
-  {
-    id: 'proj1',
-    name: 'Finance',
-    color: '#10B981',
-    description: 'Financial planning and reporting',
-    taskCount: 12,
-    completedCount: 8,
-    isFavorite: true,
-    isShared: false,
-    sections: [
-      { id: 'sec1', name: 'Reports', projectId: 'proj1', taskCount: 5, order: 1 },
-      { id: 'sec4', name: 'Budgeting', projectId: 'proj1', taskCount: 7, order: 2 }
-    ],
-    createdAt: '2024-01-01'
-  },
-  {
-    id: 'proj2',
-    name: 'Engineering',
-    color: '#6366F1',
-    description: 'Product development and technical tasks',
-    taskCount: 34,
-    completedCount: 21,
-    isFavorite: true,
-    isShared: true,
-    members: 8,
-    sections: [
-      { id: 'sec3', name: 'Documentation', projectId: 'proj2', taskCount: 6, order: 1 },
-      { id: 'sec5', name: 'Backend', projectId: 'proj2', taskCount: 15, order: 2 },
-      { id: 'sec6', name: 'Frontend', projectId: 'proj2', taskCount: 13, order: 3 }
-    ],
-    createdAt: '2024-01-01'
-  },
-  {
-    id: 'proj3',
-    name: 'Product',
-    color: '#F59E0B',
-    description: 'Product strategy and roadmap',
-    taskCount: 18,
-    completedCount: 10,
-    isFavorite: false,
-    isShared: true,
-    members: 5,
-    sections: [
-      { id: 'sec2', name: 'Planning', projectId: 'proj3', taskCount: 8, order: 1 },
-      { id: 'sec7', name: 'Research', projectId: 'proj3', taskCount: 10, order: 2 }
-    ],
-    createdAt: '2024-01-01'
-  },
-  {
-    id: 'proj4',
-    name: 'Sales',
-    color: '#EC4899',
-    description: 'Sales activities and client management',
-    taskCount: 25,
-    completedCount: 18,
-    isFavorite: false,
-    isShared: true,
-    members: 6,
-    sections: [],
-    createdAt: '2024-01-01'
-  },
-  {
-    id: 'proj5',
-    name: 'Marketing',
-    color: '#8B5CF6',
-    description: 'Marketing campaigns and content',
-    taskCount: 15,
-    completedCount: 9,
-    isFavorite: false,
-    isShared: false,
-    sections: [],
-    createdAt: '2024-01-05'
-  }
-]
-
-const mockLabels: Label[] = [
-  { id: 'l1', name: 'urgent', color: '#EF4444', taskCount: 5 },
-  { id: 'l2', name: 'meeting', color: '#3B82F6', taskCount: 8 },
-  { id: 'l3', name: 'code-review', color: '#10B981', taskCount: 3 },
-  { id: 'l4', name: 'client', color: '#F59E0B', taskCount: 6 },
-  { id: 'l5', name: 'docs', color: '#6366F1', taskCount: 4 },
-  { id: 'l6', name: 'personal', color: '#EC4899', taskCount: 2 },
-  { id: 'l7', name: 'recurring', color: '#8B5CF6', taskCount: 7 },
-  { id: 'l8', name: 'finance', color: '#14B8A6', taskCount: 3 }
-]
-
-const mockFilters: SavedFilter[] = [
-  { id: 'f1', name: 'Priority 1', icon: 'flag', query: 'priority:p1', color: '#EF4444', taskCount: 5 },
-  { id: 'f2', name: 'Due This Week', icon: 'calendar', query: 'due:7d', color: '#3B82F6', taskCount: 12 },
-  { id: 'f3', name: 'Assigned to Me', icon: 'user', query: 'assignee:me', color: '#10B981', taskCount: 8 },
-  { id: 'f4', name: 'No Due Date', icon: 'help', query: 'no:due', color: '#6B7280', taskCount: 15 },
-  { id: 'f5', name: 'Completed Today', icon: 'check', query: 'completed:today', color: '#22C55E', taskCount: 6 }
-]
+// Mock data removed
+const mockTasks: Task[] = []
+const mockProjects: Project[] = []
+const mockLabels: Label[] = []
+const mockFilters: SavedFilter[] = []
 
 const mockStats: ProductivityStats = {
-  tasksCompletedToday: 6,
-  tasksCompletedThisWeek: 28,
-  streakDays: 14,
-  focusMinutesToday: 185,
-  averageTasksPerDay: 5.2,
-  onTimeCompletionRate: 87,
-  topProductiveHour: '10:00 AM',
-  karmaPoints: 2847
+  tasksCompletedToday: 0,
+  tasksCompletedThisWeek: 0,
+  streakDays: 0,
+  focusMinutesToday: 0,
+  averageTasksPerDay: 0,
+  onTimeCompletionRate: 0,
+  topProductiveHour: 'N/A',
+  karmaPoints: 0
 }
 
 interface MyDayClientProps {
@@ -543,31 +265,56 @@ interface MyDayClientProps {
 }
 
 // Competitive Upgrade Mock Data - Sunsama/Todoist-level Daily Planning Intelligence
+// Competitive Upgrade Mock Data - Empty for now
 const mockMyDayAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Productivity Score', description: 'Task completion rate at 92% today - excellent!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Productivity' },
-  { id: '2', type: 'warning' as const, title: 'Overcommitted', description: 'Today has 12 hours of tasks - consider delegating.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Planning' },
-  { id: '3', type: 'info' as const, title: 'AI Suggestion', description: 'Schedule deep work tasks in your 9-11am peak focus window.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'AI Insights' },
+  {
+    id: '1',
+    type: 'opportunity' as const,
+    title: 'Focus Time Optimization',
+    description: 'You are most productive between 10am and 12pm. Schedule your P1 tasks then.',
+    confidence: 0.94,
+    action: 'Schedule Focus Block'
+  },
+  {
+    id: '2',
+    type: 'alert' as const,
+    title: 'Task Overload',
+    description: 'You have 3 P1 tasks due today. Consider rescheduling "Update Docs".',
+    confidence: 0.88,
+    action: 'Reschedule'
+  }
 ]
 
 const mockMyDayCollaborators = [
-  { id: '1', name: 'Team Lead', avatar: '/avatars/lead.jpg', status: 'online' as const, role: 'Lead' },
-  { id: '2', name: 'Project Manager', avatar: '/avatars/pm.jpg', status: 'online' as const, role: 'PM' },
-  { id: '3', name: 'Designer', avatar: '/avatars/designer.jpg', status: 'away' as const, role: 'Designer' },
+  { id: '1', name: 'Sarah Wilson', role: 'Sales Lead', avatar: '', status: 'online' as const },
+  { id: '2', name: 'Mike Chen', role: 'Account Exec', avatar: '', status: 'away' as const }
 ]
 
 const mockMyDayPredictions = [
-  { id: '1', title: 'Daily Completion', prediction: 'You will complete 8 of 10 tasks by 6pm', confidence: 85, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Focus Time', prediction: 'Blocking 2 hours will increase productivity by 40%', confidence: 78, trend: 'up' as const, impact: 'medium' as const },
+  {
+    dataset: 'Completion Rate',
+    trend: 'up' as const,
+    value: '+15%',
+    confidence: 0.85,
+    description: 'You are on track to complete all P1 tasks.'
+  },
+  {
+    dataset: 'Focus Quality',
+    trend: 'stable' as const,
+    value: 'High',
+    confidence: 0.92,
+    description: 'Distractions are 20% lower than average.'
+  }
 ]
 
 const mockMyDayActivities = [
-  { id: '1', user: 'You', action: 'Completed', target: 'Q4 planning doc', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Team Lead', action: 'Assigned', target: 'design review task', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'You', action: 'Started', target: 'focus session (2 hrs)', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
+  { author: 'System', description: 'Daily summary generated', timestamp: '10m ago' },
+  { author: 'You', description: 'Completed 3 tasks', timestamp: '1h ago' }
 ]
 
 export default function MyDayClient({ initialTasks, initialSessions }: MyDayClientProps) {
   const [activeTab, setActiveTab] = useState('today')
+  const [showInsights, setShowInsights] = useState(false)
 
   // Supabase hooks for real data
   const { tasks: dbTasks, stats: dbStats, isLoading, createTask: dbCreateTask, updateTask: dbUpdateTask, completeTask: dbCompleteTask, deleteTask: dbDeleteTask } = useMyDayTasks(initialTasks || [])
@@ -596,21 +343,19 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
         completedAt: t.completed_at
       })) as Task[]
     }
-    return mockTasks
+    return []
   }, [dbTasks])
 
   const [tasks, setTasks] = useState<Task[]>(activeTasks)
 
   // Keep tasks in sync with DB
   useEffect(() => {
-    if (activeTasks.length > 0) {
-      setTasks(activeTasks)
-    }
+    setTasks(activeTasks)
   }, [activeTasks])
 
-  const [projects, setProjects] = useState<Project[]>(mockProjects)
-  const [labels, setLabels] = useState<Label[]>(mockLabels)
-  const [filters] = useState<SavedFilter[]>(mockFilters)
+  const [projects, setProjects] = useState<Project[]>([])
+  const [labels, setLabels] = useState<Label[]>([])
+  const [filters] = useState<SavedFilter[]>([])
 
   // Use real stats when available
   const stats = useMemo<ProductivityStats>(() => {
@@ -1211,11 +956,10 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
     return (
       <div
         key={task.id}
-        className={`p-4 rounded-lg border transition-all cursor-pointer hover:shadow-md ${
-          task.status === 'completed'
-            ? 'bg-gray-50 dark:bg-gray-800/50 opacity-60'
-            : 'bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600'
-        }`}
+        className={`p-4 rounded-lg border transition-all cursor-pointer hover:shadow-md ${task.status === 'completed'
+          ? 'bg-gray-50 dark:bg-gray-800/50 opacity-60'
+          : 'bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600'
+          }`}
         onClick={() => openTaskDetail(task)}
       >
         <div className="flex items-start gap-3">
@@ -1226,11 +970,10 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
             {task.status === 'completed' ? (
               <CheckCircle2 className="w-5 h-5 text-green-500" />
             ) : (
-              <Circle className={`w-5 h-5 ${
-                task.priority === 'p1' ? 'text-red-400' :
+              <Circle className={`w-5 h-5 ${task.priority === 'p1' ? 'text-red-400' :
                 task.priority === 'p2' ? 'text-orange-400' :
-                task.priority === 'p3' ? 'text-blue-400' : 'text-gray-300'
-              }`} />
+                  task.priority === 'p3' ? 'text-blue-400' : 'text-gray-300'
+                }`} />
             )}
           </button>
 
@@ -1370,10 +1113,9 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
           <div className="flex items-center gap-3">
             {/* Pomodoro Timer */}
             <Card className="flex items-center gap-3 px-4 py-2">
-              <div className={`text-lg font-mono font-bold ${
-                timerMode === 'focus' ? 'text-red-500' :
+              <div className={`text-lg font-mono font-bold ${timerMode === 'focus' ? 'text-red-500' :
                 timerMode === 'short_break' ? 'text-green-500' : 'text-blue-500'
-              }`}>
+                }`}>
                 {formatTimer(timerSeconds)}
               </div>
               <div className="flex items-center gap-1">
@@ -1409,7 +1151,7 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
             </Button>
 
             <Button variant="ghost" size="icon" onClick={handleSettings} aria-label="Settings">
-                  <Settings className="w-5 h-5" />
+              <Settings className="w-5 h-5" />
             </Button>
 
             <Button
@@ -1419,8 +1161,35 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
               <Plus className="w-4 h-4 mr-2" />
               Add Task
             </Button>
+            <Button
+              variant={showInsights ? 'secondary' : 'outline'}
+              onClick={() => setShowInsights(!showInsights)}
+              className="gap-2"
+            >
+              <Sparkles className={`w-4 h-4 ${showInsights ? 'text-primary' : 'text-muted-foreground'}`} />
+              {showInsights ? 'Hide Insights' : 'Smart Insights'}
+            </Button>
           </div>
         </div>
+
+        {/* AI Insights Panel */}
+        <AnimatePresence>
+          {showInsights && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+              className="overflow-hidden"
+            >
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <AIInsightsPanel insights={mockMyDayAIInsights} />
+                <PredictiveAnalytics predictions={mockMyDayPredictions} />
+                <CollaborationIndicator collaborators={mockMyDayCollaborators} />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Quick Add Bar */}
         {showQuickAdd && (
@@ -1605,7 +1374,7 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
                       <div className="text-4xl font-bold">{formatTimer(timerSeconds)}</div>
                       <div className="text-sm opacity-80 mt-1">
                         {timerMode === 'focus' ? 'Focus Session' :
-                         timerMode === 'short_break' ? 'Short Break' : 'Long Break'}
+                          timerMode === 'short_break' ? 'Short Break' : 'Long Break'}
                       </div>
                     </div>
                     <div className="flex justify-center gap-2">
@@ -1756,11 +1525,10 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
                 {projects.map(project => (
                   <Card
                     key={project.id}
-                    className={`p-3 cursor-pointer transition-all ${
-                      selectedProject === project.id
-                        ? 'ring-2 ring-amber-500'
-                        : 'hover:bg-gray-50 dark:hover:bg-gray-800'
-                    }`}
+                    className={`p-3 cursor-pointer transition-all ${selectedProject === project.id
+                      ? 'ring-2 ring-amber-500'
+                      : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+                      }`}
                     onClick={() => setSelectedProject(project.id === selectedProject ? null : project.id)}
                   >
                     <div className="flex items-center justify-between">
@@ -1860,11 +1628,10 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
                 {labels.map(label => (
                   <Card
                     key={label.id}
-                    className={`p-3 cursor-pointer transition-all ${
-                      selectedLabel === label.name
-                        ? 'ring-2 ring-amber-500'
-                        : 'hover:bg-gray-50 dark:hover:bg-gray-800'
-                    }`}
+                    className={`p-3 cursor-pointer transition-all ${selectedLabel === label.name
+                      ? 'ring-2 ring-amber-500'
+                      : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+                      }`}
                     onClick={() => setSelectedLabel(label.name === selectedLabel ? null : label.name)}
                   >
                     <div className="flex items-center justify-between">
@@ -2002,13 +1769,11 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
                     return (
                       <div
                         key={i}
-                        className={`bg-white dark:bg-gray-900 min-h-[100px] p-2 ${
-                          isToday ? 'ring-2 ring-amber-500 ring-inset' : ''
-                        }`}
+                        className={`bg-white dark:bg-gray-900 min-h-[100px] p-2 ${isToday ? 'ring-2 ring-amber-500 ring-inset' : ''
+                          }`}
                       >
-                        <div className={`text-sm mb-1 ${
-                          dayNum > 0 && dayNum <= 31 ? '' : 'text-gray-300 dark:text-gray-700'
-                        } ${isToday ? 'font-bold text-amber-600' : ''}`}>
+                        <div className={`text-sm mb-1 ${dayNum > 0 && dayNum <= 31 ? '' : 'text-gray-300 dark:text-gray-700'
+                          } ${isToday ? 'font-bold text-amber-600' : ''}`}>
                           {dayNum > 0 && dayNum <= 31 ? dayNum : ''}
                         </div>
                         {dayTasks.slice(0, 3).map(task => (
@@ -2206,11 +1971,10 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
                   {selectedTask?.status === 'completed' ? (
                     <CheckCircle2 className="w-6 h-6 text-green-500" />
                   ) : (
-                    <Circle className={`w-6 h-6 ${
-                      selectedTask?.priority === 'p1' ? 'text-red-400' :
+                    <Circle className={`w-6 h-6 ${selectedTask?.priority === 'p1' ? 'text-red-400' :
                       selectedTask?.priority === 'p2' ? 'text-orange-400' :
-                      selectedTask?.priority === 'p3' ? 'text-blue-400' : 'text-gray-300'
-                    }`} />
+                        selectedTask?.priority === 'p3' ? 'text-blue-400' : 'text-gray-300'
+                      }`} />
                   )}
                 </button>
                 <DialogTitle className={selectedTask?.status === 'completed' ? 'line-through text-gray-500' : ''}>
