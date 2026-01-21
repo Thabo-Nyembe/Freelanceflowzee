@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -67,7 +68,8 @@ import {
   Webhook,
   Key,
   Shield,
-  Bell
+  Bell,
+  Sparkles
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -294,26 +296,70 @@ const getDaysOverdue = (dueDate: string) => {
 }
 
 // AI Insights data for competitive features
+// AI Insights data for competitive features - Empty
+// AI Insights data for competitive features
 const invoicingAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Payment Trends', description: 'Collection rate improved 12% this month. Keep up the excellent work!', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Payments' },
-  { id: '2', type: 'warning' as const, title: 'Overdue Alert', description: '3 invoices are 30+ days overdue. Consider sending follow-up reminders.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Collections' },
-  { id: '3', type: 'info' as const, title: 'Revenue Forecast', description: 'Based on current pipeline, expect $45K in payments next month.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Forecast' },
+  {
+    id: '1',
+    type: 'opportunity' as const,
+    title: 'Cash Flow Forecast',
+    description: 'Based on current invoices, cash flow is projected to increase by 15% next month.',
+    confidence: 0.89,
+    action: 'View Projection'
+  },
+  {
+    id: '2',
+    type: 'alert' as const,
+    title: 'Late Payment Risk',
+    description: 'Client "Acme Corp" has a history of paying 5 days late on invoices over $5k.',
+    confidence: 0.75,
+    action: 'Send Reminder'
+  }
 ]
 
 const invoicingCollaborators = [
-  { id: '1', name: 'Alexandra Chen', avatar: '/avatars/alex.jpg', status: 'online' as const, role: 'Finance Manager', lastActive: 'Now' },
-  { id: '2', name: 'Marcus Johnson', avatar: '/avatars/marcus.jpg', status: 'online' as const, role: 'Accountant', lastActive: '5m ago' },
+  { id: '1', name: 'Alice Accountant', role: 'Accountant', avatar: '', status: 'online' as const },
+  { id: '2', name: 'Bob CFO', role: 'CFO', avatar: '', status: 'away' as const }
 ]
 
 const invoicingPredictions = [
-  { id: '1', label: 'Collection Rate', current: 85, target: 95, predicted: 91, confidence: 88, trend: 'up' as const },
-  { id: '2', label: 'Avg Payment Days', current: 28, target: 14, predicted: 21, confidence: 75, trend: 'up' as const },
+  {
+    dataset: 'Revenue Growth',
+    trend: 'up' as const,
+    value: '+8%',
+    confidence: 0.92,
+    description: 'Recurring revenue is trending markedly upward this quarter.'
+  },
+  {
+    dataset: 'Expenses',
+    trend: 'stable' as const,
+    value: 'Stable',
+    confidence: 0.85,
+    description: 'Operating expenses remain within 2% of budget.'
+  }
 ]
 
 const invoicingActivities = [
-  { id: '1', user: 'System', action: 'sent', target: 'payment reminder for INV-2024-042', timestamp: '2h ago', type: 'info' as const },
-  { id: '2', user: 'Client', action: 'paid', target: 'Invoice INV-2024-039 ($2,500)', timestamp: '4h ago', type: 'success' as const },
-  { id: '3', user: 'Alexandra Chen', action: 'created', target: 'new invoice INV-2024-045', timestamp: '1d ago', type: 'info' as const },
+  {
+    id: '1',
+    type: 'create' as const,
+    author: 'Alice Accountant',
+    user: { id: 'u1', name: 'Alice Accountant', avatar: '' },
+    title: 'Created Invoice #INV-2024-001',
+    description: 'Drafted invoice for Q1 Services',
+    timestamp: '2h ago',
+    metadata: {}
+  },
+  {
+    id: '2',
+    type: 'status_change' as const,
+    author: 'Bob CFO',
+    user: { id: 'u2', name: 'Bob CFO', avatar: '' },
+    title: 'Approved Expense',
+    description: 'Approved travel reimbursement',
+    timestamp: '4h ago',
+    metadata: {}
+  }
 ]
 
 // ============================================================================
@@ -451,7 +497,9 @@ export default function InvoicingClient() {
   const [showInvoiceDialog, setShowInvoiceDialog] = useState(false)
   const [selectedClient, setSelectedClient] = useState<Client | null>(null)
   const [showClientDialog, setShowClientDialog] = useState(false)
+
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list')
+  const [showInsights, setShowInsights] = useState(false)
 
   // Quick Actions Dialog States
   const [showNewInvoiceDialog, setShowNewInvoiceDialog] = useState(false)
@@ -513,7 +561,7 @@ export default function InvoicingClient() {
   const [showEditVendorDialog, setShowEditVendorDialog] = useState(false)
   const [selectedVendor, setSelectedVendor] = useState<string | null>(null)
   const [showDownloadReceiptDialog, setShowDownloadReceiptDialog] = useState(false)
-  const [selectedPaymentReceipt, setSelectedPaymentReceipt] = useState<{id: string; amount: number; invoiceNumber: string; date: string} | null>(null)
+  const [selectedPaymentReceipt, setSelectedPaymentReceipt] = useState<{ id: string; amount: number; invoiceNumber: string; date: string } | null>(null)
 
   // Quick Actions with dialog openers
   const invoicingQuickActions = [
@@ -780,6 +828,14 @@ export default function InvoicingClient() {
               </div>
             </div>
             <div className="flex items-center gap-3">
+              <Button
+                variant={showInsights ? 'secondary' : 'outline'}
+                className={showInsights ? 'bg-white/20 text-white border-transparent' : 'border-white/30 text-white hover:bg-white/10'}
+                onClick={() => setShowInsights(!showInsights)}
+              >
+                <Sparkles className="w-4 h-4 mr-2" />
+                {showInsights ? 'Hide Insights' : 'Smart Insights'}
+              </Button>
               <Button variant="outline" className="border-white/30 text-white hover:bg-white/10" onClick={() => setShowExportInvoicesDialog(true)}>
                 <Download className="w-4 h-4 mr-2" />
                 Export
@@ -790,6 +846,25 @@ export default function InvoicingClient() {
               </Button>
             </div>
           </div>
+
+          {/* AI Insights Panel */}
+          <AnimatePresence>
+            {showInsights && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.3, ease: 'easeInOut' }}
+                className="overflow-hidden mb-8"
+              >
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-6">
+                  <AIInsightsPanel insights={invoicingAIInsights} />
+                  <PredictiveAnalytics predictions={invoicingPredictions} />
+                  <CollaborationIndicator collaborators={invoicingCollaborators} />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Stats Grid */}
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 mt-8">
@@ -1096,7 +1171,7 @@ export default function InvoicingClient() {
                     <p className="text-green-200 text-sm">Clients</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{clients.filter(c => c.balance > 0).length}</p>
+                    <p className="text-3xl font-bold">{(clients || []).filter(c => c.balance > 0).length}</p>
                     <p className="text-green-200 text-sm">With Balance</p>
                   </div>
                 </div>
@@ -1393,8 +1468,8 @@ export default function InvoicingClient() {
                         <p className="font-semibold text-orange-600">-{formatCurrency(expense.amount)}</p>
                         <Badge className={
                           expense.status === 'approved' ? 'bg-green-100 text-green-700' :
-                          expense.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
-                          'bg-red-100 text-red-700'
+                            expense.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                              'bg-red-100 text-red-700'
                         }>
                           {expense.status}
                         </Badge>
@@ -4253,10 +4328,12 @@ export default function InvoicingClient() {
               <Download className="w-4 h-4 mr-2" />
               Download PDF
             </Button>
-            <Button variant="outline" className="w-full justify-start text-red-600" onClick={() => { if (confirm('Are you sure you want to void this invoice? This action cannot be undone.')) {
-              toast.success('Invoice voided!')
-              setShowInvoiceOptionsDialog(false)
-            } }}>
+            <Button variant="outline" className="w-full justify-start text-red-600" onClick={() => {
+              if (confirm('Are you sure you want to void this invoice? This action cannot be undone.')) {
+                toast.success('Invoice voided!')
+                setShowInvoiceOptionsDialog(false)
+              }
+            }}>
               <FileX className="w-4 h-4 mr-2" />
               Void Invoice
             </Button>

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useEmployees, useCreateEmployee, useUpdateEmployee, useDeleteEmployee, Employee as DBEmployee } from '@/lib/hooks/use-employees'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -17,7 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import {
   Users, UserPlus, Briefcase, DollarSign, Eye, MessageCircle, Mail, Star,
   Search, Calendar, Clock, Heart, Target, FileText, CheckCircle, XCircle,
-  ChevronRight, ChevronDown, Building2, MapPin, Phone, GraduationCap, Zap,
+  ChevronRight, ChevronDown, Building2, MapPin, Phone, GraduationCap, Zap, Sparkles,
   Settings, Download, Upload, Edit3, Trash2, Bell, BookOpen, Cake,
   Plane, Umbrella, Coffee, Home, BarChart3, TrendingDown, ArrowUpRight,
   UserCheck, UserMinus, Layers, Wallet, Shield, Lock, Key, Plus,
@@ -36,10 +37,50 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+
+// Local Mock Data for UI Demonstration
+const localAIInsights = [
+  {
+    id: '1',
+    type: 'alert' as const,
+    title: 'Retention Risk',
+    description: '2 key engineers in the "Platform" team are showing signs of burnout risk.',
+    confidence: 0.82,
+    action: 'View Details'
+  },
+  {
+    id: '2',
+    type: 'opportunity' as const,
+    title: 'Performance Trend',
+    description: 'Sales team velocity has increased by 18% since the last training module.',
+    confidence: 0.91,
+    action: 'View Report'
+  }
+]
+
+const localCollaborators = [
+  { id: '1', name: 'Jennifer HR', role: 'HR Manager', avatar: '', status: 'online' as const },
+  { id: '2', name: 'David Recruiting', role: 'Recruiter', avatar: '', status: 'away' as const }
+]
+
+const localPredictions = [
+  {
+    dataset: 'Hiring Needs',
+    trend: 'up' as const,
+    value: '+5 Roles',
+    confidence: 0.88,
+    description: 'Projected need for 5 new engineering roles in Q3.'
+  },
+  {
+    dataset: 'Attrition',
+    trend: 'stable' as const,
+    value: 'Low',
+    confidence: 0.93,
+    description: 'Predicted attrition remains below industry average.'
+  }
+]
+
 import {
-  employeesAIInsights,
-  employeesCollaborators,
-  employeesPredictions,
   employeesActivities,
   employeesQuickActions,
 } from '@/lib/mock-data/adapters'
@@ -244,13 +285,17 @@ const mockOnboardingTasks: OnboardingTask[] = [
 const mockOrgChart: OrgNode = {
   id: '0', name: 'Alex CEO', position: 'Chief Executive Officer', department: 'Executive',
   children: [
-    { id: '1', name: 'Sarah Chen', position: 'VP Engineering', department: 'Engineering', children: [
-      { id: '2', name: 'Mike Johnson', position: 'Senior Engineer', department: 'Engineering' },
-      { id: '5', name: 'Jordan Lee', position: 'Software Engineer', department: 'Engineering' }
-    ]},
-    { id: '3', name: 'Emily Davis', position: 'Product Manager', department: 'Product', children: [
-      { id: '4', name: 'Alex Kim', position: 'UX Designer', department: 'Design' }
-    ]},
+    {
+      id: '1', name: 'Sarah Chen', position: 'VP Engineering', department: 'Engineering', children: [
+        { id: '2', name: 'Mike Johnson', position: 'Senior Engineer', department: 'Engineering' },
+        { id: '5', name: 'Jordan Lee', position: 'Software Engineer', department: 'Engineering' }
+      ]
+    },
+    {
+      id: '3', name: 'Emily Davis', position: 'Product Manager', department: 'Product', children: [
+        { id: '4', name: 'Alex Kim', position: 'UX Designer', department: 'Design' }
+      ]
+    },
     { id: '6', name: 'Taylor Swift', position: 'Marketing Manager', department: 'Marketing' }
   ]
 }
@@ -326,6 +371,7 @@ export default function EmployeesClient() {
   const [settingsTab, setSettingsTab] = useState('general')
   const [compensationTab, setCompensationTab] = useState('salary')
   const [performanceTab, setPerformanceTab] = useState('reviews')
+  const [showInsights, setShowInsights] = useState(false)
 
   // Additional dialog states for buttons without onClick
   const [showExportDialog, setShowExportDialog] = useState(false)
@@ -1012,8 +1058,8 @@ export default function EmployeesClient() {
   const filteredEmployees = useMemo(() => {
     return activeEmployees.filter(emp => {
       const matchesSearch = emp.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           emp.position.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           emp.email.toLowerCase().includes(searchQuery.toLowerCase())
+        emp.position.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        emp.email.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesDept = departmentFilter === 'all' || emp.department.toLowerCase() === departmentFilter.toLowerCase()
       return matchesSearch && matchesDept
     })
@@ -1119,9 +1165,36 @@ export default function EmployeesClient() {
           <div className="flex items-center gap-3">
             <div className="relative"><Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" /><Input placeholder="Search employees..." className="w-72 pl-10" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} /></div>
             <Button variant="outline" onClick={() => setShowExportDialog(true)}><Download className="h-4 w-4 mr-2" />Export</Button>
+            <Button
+              variant={showInsights ? 'secondary' : 'outline'}
+              className={showInsights ? 'bg-indigo-100 text-indigo-700 border-indigo-200' : ''}
+              onClick={() => setShowInsights(!showInsights)}
+            >
+              <Sparkles className="h-4 w-4 mr-2" />
+              {showInsights ? 'Hide Insights' : 'Smart Insights'}
+            </Button>
             <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => setShowAddDialog(true)}><UserPlus className="h-4 w-4 mr-2" />Add Employee</Button>
           </div>
         </div>
+
+        {/* AI Insights Panel */}
+        <AnimatePresence>
+          {showInsights && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+              className="overflow-hidden mb-6"
+            >
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-2">
+                <AIInsightsPanel insights={localAIInsights} />
+                <PredictiveAnalytics predictions={localPredictions} />
+                <CollaborationIndicator collaborators={localCollaborators} />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
@@ -1364,7 +1437,7 @@ export default function EmployeesClient() {
                     <Avatar><AvatarFallback className="bg-blue-100 text-blue-700">{request.employeeName.split(' ').map(n => n[0]).join('')}</AvatarFallback></Avatar>
                     <div className="flex-1"><p className="font-medium">{request.employeeName}</p><p className="text-sm text-gray-500">{request.type.charAt(0).toUpperCase() + request.type.slice(1)} • {request.days} day{request.days > 1 ? 's' : ''}</p></div>
                     <div className="text-right"><p className="text-sm">{request.startDate} - {request.endDate}</p><Badge className={getStatusColor(request.status)}>{request.status}</Badge></div>
-                    {request.status === 'pending' && <div className="flex gap-2"><Button size="icon" variant="ghost" className="text-green-600" onClick={async () => { toast.loading('Approving request...'); try { await fetch(`/api/time-off/${request.id}/approve`, { method: 'POST' }); toast.dismiss(); toast.success('Time off request approved'); } catch { toast.dismiss(); toast.error('Failed to approve request'); }}}><CheckCircle className="h-4 w-4" /></Button><Button size="icon" variant="ghost" className="text-red-600" onClick={async () => { toast.loading('Rejecting request...'); try { await fetch(`/api/time-off/${request.id}/reject`, { method: 'POST' }); toast.dismiss(); toast.success('Time off request rejected'); } catch { toast.dismiss(); toast.error('Failed to reject request'); }}}><XCircle className="h-4 w-4" /></Button></div>}
+                    {request.status === 'pending' && <div className="flex gap-2"><Button size="icon" variant="ghost" className="text-green-600" onClick={async () => { toast.loading('Approving request...'); try { await fetch(`/api/time-off/${request.id}/approve`, { method: 'POST' }); toast.dismiss(); toast.success('Time off request approved'); } catch { toast.dismiss(); toast.error('Failed to approve request'); } }}><CheckCircle className="h-4 w-4" /></Button><Button size="icon" variant="ghost" className="text-red-600" onClick={async () => { toast.loading('Rejecting request...'); try { await fetch(`/api/time-off/${request.id}/reject`, { method: 'POST' }); toast.dismiss(); toast.success('Time off request rejected'); } catch { toast.dismiss(); toast.error('Failed to reject request'); } }}><XCircle className="h-4 w-4" /></Button></div>}
                   </div>
                 ))}
               </CardContent>
@@ -1770,11 +1843,10 @@ export default function EmployeesClient() {
                         <button
                           key={item.id}
                           onClick={() => setSettingsTab(item.id)}
-                          className={`w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors ${
-                            settingsTab === item.id
-                              ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                              : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
-                          }`}
+                          className={`w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors ${settingsTab === item.id
+                            ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                            : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
+                            }`}
                         >
                           <item.icon className="h-4 w-4" />
                           {item.label}
