@@ -10,7 +10,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { hyperswitchPayment, processRefund, type Refund } from '@/lib/payments/hyperswitch'
+import { hyperswitchPayments, processRefund, type Refund } from '@/lib/payments/hyperswitch'
 
 /**
  * Create a new refund

@@ -10,7 +10,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { hyperswitchPayment } from '@/lib/payments/hyperswitch'
+import { hyperswitchPayments } from '@/lib/payments/hyperswitch'
 
 /**
  * Get payment analytics

@@ -10,7 +10,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { hyperswitchPayment, createFreeFlowPayment, type PaymentIntent } from '@/lib/payments/hyperswitch'
+import { hyperswitchPayments, createFreeFlowPayment, type PaymentIntent } from '@/lib/payments/hyperswitch'
 
 /**
  * Create a new payment intent

@@ -97,9 +97,6 @@ const nextConfig = {
     // TODO: Set to false once TypeScript errors in test files and dashboard components are fixed
     ignoreBuildErrors: true,
   },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   experimental: {
     externalDir: true,
   },
@@ -110,6 +107,11 @@ const nextConfig = {
     '@ffmpeg-installer/darwin-arm64',
     'fluent-ffmpeg',
     'sharp',
+    '@remotion/bundler',
+    '@remotion/renderer',
+    '@remotion/compositor-darwin-arm64',
+    '@remotion/compositor-darwin-x64',
+    'esbuild',
   ],
 
   // Turbopack configuration

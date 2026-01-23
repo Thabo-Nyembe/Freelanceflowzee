@@ -11,7 +11,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { hyperswitchPayment, type RoutingRule } from '@/lib/payments/hyperswitch'
+import { hyperswitchPayments, type RoutingRule } from '@/lib/payments/hyperswitch'
 
 // Check admin permission
 async function checkAdminPermission(supabase: Awaited<ReturnType<typeof createClient>>, userId: string): Promise<boolean> {
