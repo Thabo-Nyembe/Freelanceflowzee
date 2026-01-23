@@ -162,235 +162,13 @@ interface LogStats {
 }
 
 // Mock data
-const mockLogs: LogEntry[] = [
-  {
-    id: 'log1',
-    timestamp: '2024-12-23T08:45:23.456Z',
-    level: 'info',
-    source: 'api',
-    service: 'auth-service',
-    host: 'prod-api-01',
-    message: 'User login successful',
-    traceId: 'trace-abc123',
-    spanId: 'span-def456',
-    userId: 'usr_123',
-    userName: 'John Doe',
-    userEmail: 'john@example.com',
-    sessionId: 'sess_xyz789',
-    requestId: 'req_001',
-    method: 'POST',
-    path: '/api/auth/login',
-    statusCode: 200,
-    duration: 145,
-    ip: '192.168.1.100',
-    userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
-    country: 'US',
-    tags: ['auth', 'login', 'production'],
-    attributes: { provider: 'email', mfa: false },
-    stackTrace: null
-  },
-  {
-    id: 'log2',
-    timestamp: '2024-12-23T08:44:15.789Z',
-    level: 'error',
-    source: 'api',
-    service: 'payment-service',
-    host: 'prod-api-02',
-    message: 'Payment processing failed: Card declined',
-    traceId: 'trace-ghi789',
-    spanId: 'span-jkl012',
-    userId: 'usr_456',
-    userName: 'Jane Smith',
-    userEmail: 'jane@example.com',
-    sessionId: 'sess_abc123',
-    requestId: 'req_002',
-    method: 'POST',
-    path: '/api/payments/charge',
-    statusCode: 402,
-    duration: 2340,
-    ip: '192.168.1.101',
-    userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0)',
-    country: 'UK',
-    tags: ['payment', 'error', 'production'],
-    attributes: { amount: 99.99, currency: 'USD', error_code: 'card_declined' },
-    stackTrace: 'Error: Card declined\n  at PaymentService.charge (payment.ts:45)\n  at processPayment (checkout.ts:123)'
-  },
-  {
-    id: 'log3',
-    timestamp: '2024-12-23T08:43:45.123Z',
-    level: 'warn',
-    source: 'worker',
-    service: 'email-worker',
-    host: 'prod-worker-01',
-    message: 'Email delivery delayed: Rate limit reached',
-    traceId: 'trace-mno345',
-    spanId: null,
-    userId: null,
-    userName: null,
-    userEmail: null,
-    sessionId: null,
-    requestId: 'req_003',
-    method: null,
-    path: null,
-    statusCode: null,
-    duration: 50,
-    ip: null,
-    userAgent: null,
-    country: null,
-    tags: ['email', 'rate-limit', 'production'],
-    attributes: { queue_size: 1500, retry_after: 60 },
-    stackTrace: null
-  },
-  {
-    id: 'log4',
-    timestamp: '2024-12-23T08:42:30.567Z',
-    level: 'info',
-    source: 'web',
-    service: 'frontend',
-    host: 'cdn-edge-us-east',
-    message: 'Page view: Dashboard',
-    traceId: null,
-    spanId: null,
-    userId: 'usr_789',
-    userName: 'Bob Wilson',
-    userEmail: 'bob@example.com',
-    sessionId: 'sess_def456',
-    requestId: null,
-    method: 'GET',
-    path: '/dashboard',
-    statusCode: 200,
-    duration: 890,
-    ip: '10.0.0.50',
-    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
-    country: 'CA',
-    tags: ['pageview', 'dashboard', 'production'],
-    attributes: { referrer: '/login', load_time: 1.2 },
-    stackTrace: null
-  },
-  {
-    id: 'log5',
-    timestamp: '2024-12-23T08:41:12.890Z',
-    level: 'critical',
-    source: 'api',
-    service: 'database-service',
-    host: 'prod-db-01',
-    message: 'Database connection pool exhausted',
-    traceId: 'trace-pqr678',
-    spanId: 'span-stu901',
-    userId: null,
-    userName: null,
-    userEmail: null,
-    sessionId: null,
-    requestId: 'req_004',
-    method: null,
-    path: null,
-    statusCode: 503,
-    duration: 30000,
-    ip: null,
-    userAgent: null,
-    country: null,
-    tags: ['database', 'critical', 'production', 'incident'],
-    attributes: { pool_size: 100, active_connections: 100, waiting_requests: 250 },
-    stackTrace: 'Error: Connection pool exhausted\n  at DatabasePool.acquire (pool.ts:89)\n  at QueryExecutor.execute (executor.ts:34)'
-  },
-  {
-    id: 'log6',
-    timestamp: '2024-12-23T08:40:00.000Z',
-    level: 'debug',
-    source: 'api',
-    service: 'cache-service',
-    host: 'prod-cache-01',
-    message: 'Cache miss for key: user_profile_123',
-    traceId: 'trace-vwx234',
-    spanId: 'span-yza567',
-    userId: 'usr_123',
-    userName: 'John Doe',
-    userEmail: 'john@example.com',
-    sessionId: 'sess_xyz789',
-    requestId: 'req_005',
-    method: null,
-    path: null,
-    statusCode: null,
-    duration: 2,
-    ip: null,
-    userAgent: null,
-    country: null,
-    tags: ['cache', 'miss', 'production'],
-    attributes: { key: 'user_profile_123', ttl: 3600 },
-    stackTrace: null
-  }
-]
 
-const mockPatterns: LogPattern[] = [
-  { id: 'pat1', pattern: 'User login successful', count: 15420, level: 'info', firstSeen: '2024-12-01', lastSeen: '2024-12-23', trend: 'up', services: ['auth-service'] },
-  { id: 'pat2', pattern: 'Payment processing failed: *', count: 342, level: 'error', firstSeen: '2024-12-15', lastSeen: '2024-12-23', trend: 'up', services: ['payment-service'] },
-  { id: 'pat3', pattern: 'Database connection * exhausted', count: 12, level: 'critical', firstSeen: '2024-12-20', lastSeen: '2024-12-23', trend: 'stable', services: ['database-service'] },
-  { id: 'pat4', pattern: 'Email delivery delayed: *', count: 890, level: 'warn', firstSeen: '2024-12-10', lastSeen: '2024-12-23', trend: 'down', services: ['email-worker'] },
-  { id: 'pat5', pattern: 'Cache miss for key: *', count: 45000, level: 'debug', firstSeen: '2024-12-01', lastSeen: '2024-12-23', trend: 'stable', services: ['cache-service'] }
-]
-
-const mockSavedQueries: SavedQuery[] = [
-  { id: 'sq1', name: 'Production Errors', query: 'level:error OR level:critical', filters: { source: ['api', 'worker'], tags: ['production'] }, createdAt: '2024-12-01', isDefault: true },
-  { id: 'sq2', name: 'Auth Events', query: 'service:auth-service', filters: { tags: ['auth'] }, createdAt: '2024-12-10', isDefault: false },
-  { id: 'sq3', name: 'Slow Requests', query: 'duration:>1000', filters: { source: ['api'] }, createdAt: '2024-12-15', isDefault: false },
-  { id: 'sq4', name: 'Payment Failures', query: 'service:payment-service level:error', filters: {}, createdAt: '2024-12-18', isDefault: false }
-]
-
-const mockStats: LogStats = {
-  totalLogs: 1250000,
-  logsPerMinute: 8500,
-  errorRate: 2.3,
-  avgLatency: 245,
-  uniqueUsers: 12500,
-  uniqueSessions: 45000,
-  byLevel: { debug: 450000, info: 650000, warn: 85000, error: 62000, critical: 3000 },
-  bySource: { api: 780000, web: 320000, mobile: 95000, worker: 45000, cron: 8000, webhook: 2000 },
-  byService: { 'auth-service': 180000, 'payment-service': 95000, 'user-service': 320000, 'email-worker': 45000, 'frontend': 420000, 'database-service': 85000, 'cache-service': 105000 },
-  topErrors: [
-    { message: 'Payment processing failed', count: 342 },
-    { message: 'Rate limit exceeded', count: 256 },
-    { message: 'Validation error', count: 189 },
-    { message: 'Authentication failed', count: 145 },
-    { message: 'Database timeout', count: 98 }
-  ],
-  timeline: [
-    { time: '08:00', count: 42000, errors: 890 },
-    { time: '08:10', count: 45000, errors: 920 },
-    { time: '08:20', count: 48000, errors: 1050 },
-    { time: '08:30', count: 52000, errors: 1100 },
-    { time: '08:40', count: 47000, errors: 980 },
-    { time: '08:45', count: 44000, errors: 870 }
-  ]
-}
 
 interface ActivityLogsClientProps {
   initialLogs: ActivityLog[]
 }
 
-// Enhanced Competitive Upgrade Mock Data - Activity Logs Context
-const mockLogsAIInsights = [
-  { id: '1', type: 'warning' as const, title: 'Error Spike Detected', description: 'Error rate increased 150% in the last hour. Investigating root cause.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Errors' },
-  { id: '2', type: 'info' as const, title: 'Pattern Detected', description: 'Unusual login activity from new geographic region. Review recommended.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Security' },
-  { id: '3', type: 'success' as const, title: 'System Healthy', description: 'All critical services running normally. Uptime: 99.98%', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Health' },
-]
 
-const mockLogsCollaborators = [
-  { id: '1', name: 'DevOps Admin', avatar: '/avatars/devops.jpg', status: 'online' as const, role: 'Platform Engineer', lastActive: 'Now' },
-  { id: '2', name: 'SRE Team', avatar: '/avatars/sre.jpg', status: 'online' as const, role: 'Site Reliability', lastActive: '3m ago' },
-  { id: '3', name: 'Support Lead', avatar: '/avatars/support.jpg', status: 'away' as const, role: 'Support', lastActive: '15m ago' },
-]
-
-const mockLogsPredictions = [
-  { id: '1', label: 'Error Rate', current: 2.3, target: 1.0, predicted: 1.5, confidence: 78, trend: 'down' as const },
-  { id: '2', label: 'Log Volume', current: 45000, target: 50000, predicted: 48000, confidence: 85, trend: 'up' as const },
-  { id: '3', label: 'Anomaly Detection', current: 94, target: 99, predicted: 97, confidence: 80, trend: 'up' as const },
-]
-
-const mockLogsActivities = [
-  { id: '1', user: 'System', action: 'detected', target: 'memory spike on node-3', timestamp: '5m ago', type: 'warning' as const },
-  { id: '2', user: 'DevOps Admin', action: 'acknowledged', target: 'alert #2847', timestamp: '12m ago', type: 'info' as const },
-  { id: '3', user: 'SRE Team', action: 'resolved', target: 'database connection issue', timestamp: '30m ago', type: 'success' as const },
-]
 
 // Quick actions are defined inside the component to access state setters
 
@@ -429,38 +207,86 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
   const [timeRange, setTimeRange] = useState('1h')
   const [settingsTab, setSettingsTab] = useState('general')
 
+
+
+
+
   // Map Supabase ActivityLog to LogEntry format with mock fallback
   const activeLogs: LogEntry[] = useMemo(() => {
-    if (dbLogs && dbLogs.length > 0) {
-      return dbLogs.map((log: ActivityLog) => ({
-        id: log.id,
-        timestamp: log.created_at,
-        level: (log.status === 'failed' ? 'error' : log.status === 'pending' ? 'warn' : 'info') as LogLevel,
-        source: (log.category === 'api' ? 'api' : log.category === 'user' ? 'web' : log.category === 'file' ? 'worker' : 'api') as LogSource,
-        service: log.resource_type || 'app-service',
-        host: 'prod-app-01',
-        message: `${log.action}: ${log.resource_name || log.activity_type}`,
-        traceId: log.activity_code || null,
-        spanId: null,
-        userId: log.user_id,
-        userName: log.user_name,
-        userEmail: log.user_email,
-        sessionId: null,
-        requestId: log.activity_code,
-        method: log.activity_type === 'create' ? 'POST' : log.activity_type === 'update' ? 'PUT' : log.activity_type === 'delete' ? 'DELETE' : 'GET',
-        path: log.resource_type ? `/api/${log.resource_type.toLowerCase()}` : null,
-        statusCode: log.status === 'success' ? 200 : log.status === 'failed' ? 500 : 202,
-        duration: log.duration || 0,
-        ip: log.ip_address,
-        userAgent: log.user_agent,
-        country: null,
-        tags: [log.category, log.activity_type, log.status].filter(Boolean),
-        attributes: log.metadata || {},
-        stackTrace: null
-      })) as LogEntry[]
-    }
-    return mockLogs
+    if (!dbLogs) return []
+    return dbLogs.map((log: ActivityLog) => ({
+      id: log.id,
+      timestamp: log.created_at,
+      level: (log.status === 'failed' ? 'error' : log.status === 'pending' ? 'warn' : 'info') as LogLevel,
+      source: (log.category === 'api' ? 'api' : log.category === 'user' ? 'web' : log.category === 'file' ? 'worker' : 'api') as LogSource,
+      service: log.resource_type || 'app-service',
+      host: 'prod-app-01',
+      message: `${log.action}: ${log.resource_name || log.activity_type}`,
+      traceId: log.activity_code || null,
+      spanId: null,
+      userId: log.user_id,
+      userName: log.user_name,
+      userEmail: log.user_email,
+      sessionId: null,
+      requestId: log.activity_code,
+      method: log.activity_type === 'create' ? 'POST' : log.activity_type === 'update' ? 'PUT' : log.activity_type === 'delete' ? 'DELETE' : 'GET',
+      path: log.resource_type ? `/api/${log.resource_type.toLowerCase()}` : null,
+      statusCode: log.status === 'success' ? 200 : log.status === 'failed' ? 500 : 202,
+      duration: log.duration || 0,
+      ip: log.ip_address,
+      userAgent: log.user_agent,
+      country: null,
+      tags: [log.category, log.activity_type, log.status].filter(Boolean),
+      attributes: log.metadata || {},
+      stackTrace: null
+    })) as LogEntry[]
   }, [dbLogs])
+
+  // Calculate dynamic stats
+  const stats: LogStats = useMemo(() => {
+    if (!activeLogs || activeLogs.length === 0) {
+      return {
+        totalLogs: 0,
+        logsPerMinute: 0,
+        errorRate: 0,
+        avgLatency: 0,
+        uniqueUsers: 0,
+        uniqueSessions: 0,
+        byLevel: { debug: 0, info: 0, warn: 0, error: 0, critical: 0 },
+        bySource: { api: 0, web: 0, mobile: 0, worker: 0, cron: 0, webhook: 0 },
+        byService: {},
+        topErrors: [],
+        timeline: []
+      }
+    }
+
+    const totalLogs = activeLogs.length
+    const errors = activeLogs.filter(l => l.level === 'error' || l.level === 'critical').length
+    const uniqueUsers = new Set(activeLogs.map(l => l.userId).filter(Boolean)).size
+
+    // Calculate error rate
+    const errorRate = totalLogs > 0 ? (errors / totalLogs) * 100 : 0
+
+    // Count by level
+    const byLevel = activeLogs.reduce((acc, log) => {
+      acc[log.level] = (acc[log.level] || 0) + 1
+      return acc
+    }, {} as Record<LogLevel, number>)
+
+    return {
+      totalLogs,
+      logsPerMinute: 0, // Would need time window math
+      errorRate: Number(errorRate.toFixed(2)),
+      avgLatency: 0,
+      uniqueUsers,
+      uniqueSessions: 0,
+      byLevel,
+      bySource: {} as Record<LogSource, number>,
+      byService: {},
+      topErrors: [],
+      timeline: []
+    }
+  }, [activeLogs])
 
   const filteredLogs = useMemo(() => {
     return activeLogs.filter(log => {
@@ -520,57 +346,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
   }
 
   // Handlers
-  const handleExportLogs = () => {
-    toast.success('Export started')
-  }
 
-  const handleClearFilters = () => {
-    toast.success('Filters cleared')
-  }
-
-  const handleBookmarkLog = (log: ActivityLog) => {
-    toast.success('Log bookmarked')
-  }
-
-  const handleCreateAlert = (log: ActivityLog) => {
-    toast.success('Alert created')
-  }
-
-  const handleRefreshLogs = () => {
-    toast.success('Logs refreshed')
-  }
-
-  const handleCopyApiKey = () => {
-    navigator.clipboard.writeText('log_api_xxxxxxxxxxxxxxxxxx')
-    toast.success('API key copied')
-  }
-
-  const handleCopyLog = () => {
-    if (selectedLog) {
-      navigator.clipboard.writeText(JSON.stringify(selectedLog, null, 2))
-      toast.success('Log copied')
-    }
-  }
-
-  const handleSaveQuery = () => {
-    toast.success('Query saved')
-    setShowQueryDialog(false)
-  }
-
-  const handleSettingsAction = (action: string) => {
-    toast.info(`${action} settings configuration`)
-    // Navigate to appropriate settings tab
-    if (action === 'General') setSettingsTab('general')
-    else if (action === 'Alerts') setSettingsTab('alerts')
-    else if (action === 'Retention' || action === 'Export') setSettingsTab('archiving')
-    else if (action === 'Access' || action === 'API Keys') setSettingsTab('advanced')
-    else if (action === 'Webhooks' || action === 'Integrations') setSettingsTab('integrations')
-  }
-
-  const handleQueryOptions = (queryId: string) => {
-    setSelectedQueryId(queryId)
-    setShowQueryOptionsDialog(true)
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50/30 to-pink-50/40 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 dark:bg-none dark:bg-gray-900">
@@ -593,9 +369,8 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
               </span>
               <button
                 onClick={() => setIsLiveMode(!isLiveMode)}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
-                  isLiveMode ? 'bg-green-500 text-white' : 'bg-white/20 text-white'
-                }`}
+                className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${isLiveMode ? 'bg-green-500 text-white' : 'bg-white/20 text-white'
+                  }`}
               >
                 {isLiveMode ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
                 {isLiveMode ? 'Live' : 'Paused'}
@@ -610,7 +385,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
                 <BarChart3 className="w-4 h-4" />
                 Total Logs
               </div>
-              <div className="text-2xl font-bold">{(mockStats.totalLogs / 1000000).toFixed(2)}M</div>
+              <div className="text-2xl font-bold">{stats.totalLogs}</div>
               <div className="text-xs text-white/60">{timeRange} window</div>
             </div>
             <div className="bg-white/10 backdrop-blur rounded-xl p-4">
@@ -618,7 +393,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
                 <TrendingUp className="w-4 h-4" />
                 Logs/Min
               </div>
-              <div className="text-2xl font-bold">{(mockStats.logsPerMinute / 1000).toFixed(1)}K</div>
+              <div className="text-2xl font-bold">{stats.logsPerMinute}</div>
               <div className="text-xs text-white/60">Current rate</div>
             </div>
             <div className="bg-white/10 backdrop-blur rounded-xl p-4">
@@ -626,15 +401,15 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
                 <AlertCircle className="w-4 h-4" />
                 Error Rate
               </div>
-              <div className="text-2xl font-bold text-red-300">{mockStats.errorRate}%</div>
-              <div className="text-xs text-white/60">{mockStats.byLevel.error + mockStats.byLevel.critical} errors</div>
+              <div className="text-2xl font-bold text-red-300">{stats.errorRate}%</div>
+              <div className="text-xs text-white/60">{(stats.byLevel.error || 0) + (stats.byLevel.critical || 0)} errors</div>
             </div>
             <div className="bg-white/10 backdrop-blur rounded-xl p-4">
               <div className="flex items-center gap-2 text-white/70 text-sm mb-1">
                 <Clock className="w-4 h-4" />
                 Avg Latency
               </div>
-              <div className="text-2xl font-bold">{mockStats.avgLatency}ms</div>
+              <div className="text-2xl font-bold">{stats.avgLatency}ms</div>
               <div className="text-xs text-white/60">p50 response</div>
             </div>
             <div className="bg-white/10 backdrop-blur rounded-xl p-4">
@@ -642,7 +417,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
                 <User className="w-4 h-4" />
                 Users
               </div>
-              <div className="text-2xl font-bold">{(mockStats.uniqueUsers / 1000).toFixed(1)}K</div>
+              <div className="text-2xl font-bold">{stats.uniqueUsers}</div>
               <div className="text-xs text-white/60">Unique users</div>
             </div>
             <div className="bg-white/10 backdrop-blur rounded-xl p-4">
@@ -650,7 +425,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
                 <Layers className="w-4 h-4" />
                 Sessions
               </div>
-              <div className="text-2xl font-bold">{(mockStats.uniqueSessions / 1000).toFixed(1)}K</div>
+              <div className="text-2xl font-bold">{stats.uniqueSessions}</div>
               <div className="text-xs text-white/60">Active sessions</div>
             </div>
           </div>
@@ -779,13 +554,12 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
               {/* Quick Filters */}
               <div className="flex items-center gap-2 mt-3 pt-3 border-t dark:border-gray-700">
                 <span className="text-xs text-gray-500 dark:text-gray-400">Quick filters:</span>
-                {Object.entries(mockStats.byLevel).map(([level, count]) => (
+                {Object.entries(stats.byLevel || {}).map(([level, count]) => (
                   <button
                     key={level}
                     onClick={() => setLevelFilter(level as LogLevel)}
-                    className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
-                      levelFilter === level ? getLevelColor(level as LogLevel) : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
-                    }`}
+                    className={`px-2 py-1 rounded text-xs font-medium transition-colors ${levelFilter === level ? getLevelColor(level as LogLevel) : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
+                      }`}
                   >
                     {level}: {(count / 1000).toFixed(0)}K
                   </button>
@@ -916,7 +690,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockPatterns.length}</p>
+                    <p className="text-3xl font-bold">0</p>
                     <p className="text-purple-200 text-sm">Patterns</p>
                   </div>
                 </div>
@@ -928,42 +702,10 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
               <span className="text-sm text-gray-500 dark:text-gray-400">Auto-detected patterns from your logs</span>
             </div>
             <div className="space-y-3">
-              {mockPatterns.map((pattern) => (
-                <div key={pattern.id} className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-4">
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-start gap-3">
-                      <span className={`px-2 py-1 rounded text-xs font-medium ${getLevelColor(pattern.level)}`}>
-                        {pattern.level.toUpperCase()}
-                      </span>
-                      <div>
-                        <h3 className="font-mono text-sm font-medium text-gray-900 dark:text-white">{pattern.pattern}</h3>
-                        <div className="flex items-center gap-3 mt-1 text-xs text-gray-500 dark:text-gray-400">
-                          <span>First seen: {pattern.firstSeen}</span>
-                          <span>•</span>
-                          <span>Last seen: {pattern.lastSeen}</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-2xl font-bold text-gray-900 dark:text-white">{pattern.count.toLocaleString()}</div>
-                      <div className={`flex items-center justify-end gap-1 text-sm ${
-                        pattern.trend === 'up' ? 'text-red-500' : pattern.trend === 'down' ? 'text-green-500' : 'text-gray-500'
-                      }`}>
-                        {pattern.trend === 'up' ? <TrendingUp className="w-4 h-4" /> : pattern.trend === 'down' ? <TrendingDown className="w-4 h-4" /> : <Minus className="w-4 h-4" />}
-                        {pattern.trend}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-gray-500 dark:text-gray-400">Services:</span>
-                    {pattern.services.map(service => (
-                      <span key={service} className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded text-xs">
-                        {service}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              ))}
+              {/* Patterns list placeholder or empty state */}
+              <div className="text-center py-12 text-muted-foreground">
+                No patterns detected yet
+              </div>
             </div>
           </TabsContent>
 
@@ -991,8 +733,8 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
               <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Logs by Level</h3>
                 <div className="space-y-3">
-                  {Object.entries(mockStats.byLevel).map(([level, count]) => {
-                    const percentage = (count / mockStats.totalLogs) * 100
+                  {Object.entries(stats.byLevel).map(([level, count]) => {
+                    const percentage = stats.totalLogs > 0 ? (count / stats.totalLogs) * 100 : 0
                     return (
                       <div key={level} className="space-y-1">
                         <div className="flex items-center justify-between text-sm">
@@ -1004,12 +746,11 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
                         </div>
                         <div className="h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
                           <div
-                            className={`h-full rounded-full ${
-                              level === 'debug' ? 'bg-gray-400' :
+                            className={`h-full rounded-full ${level === 'debug' ? 'bg-gray-400' :
                               level === 'info' ? 'bg-blue-500' :
-                              level === 'warn' ? 'bg-yellow-500' :
-                              level === 'error' ? 'bg-red-500' : 'bg-purple-500'
-                            }`}
+                                level === 'warn' ? 'bg-yellow-500' :
+                                  level === 'error' ? 'bg-red-500' : 'bg-purple-500'
+                              }`}
                             style={{ width: `${percentage}%` }}
                           />
                         </div>
@@ -1023,8 +764,8 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
               <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Logs by Source</h3>
                 <div className="space-y-3">
-                  {Object.entries(mockStats.bySource).map(([source, count]) => {
-                    const percentage = (count / mockStats.totalLogs) * 100
+                  {Object.entries(stats.bySource).map(([source, count]) => {
+                    const percentage = stats.totalLogs > 0 ? (count / stats.totalLogs) * 100 : 0
                     return (
                       <div key={source} className="space-y-1">
                         <div className="flex items-center justify-between text-sm">
@@ -1047,7 +788,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
               <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Top Errors</h3>
                 <div className="space-y-3">
-                  {mockStats.topErrors.map((error, idx) => (
+                  {stats.topErrors.map((error, idx) => (
                     <div key={idx} className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
                       <span className="text-sm text-red-700 dark:text-red-400">{error.message}</span>
                       <span className="font-bold text-red-600 dark:text-red-400">{error.count}</span>
@@ -1060,7 +801,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
               <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Logs by Service</h3>
                 <div className="space-y-2">
-                  {Object.entries(mockStats.byService).slice(0, 5).map(([service, count]) => (
+                  {Object.entries(stats.byService).slice(0, 5).map(([service, count]) => (
                     <div key={service} className="flex items-center justify-between text-sm">
                       <span className="text-gray-700 dark:text-gray-300">{service}</span>
                       <span className="font-medium text-gray-900 dark:text-white">{(count / 1000).toFixed(0)}K</span>
@@ -1083,7 +824,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockSavedQueries.length}</p>
+                    <p className="text-3xl font-bold">0</p>
                     <p className="text-amber-200 text-sm">Saved</p>
                   </div>
                 </div>
@@ -1101,37 +842,9 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
               </button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {mockSavedQueries.map((query) => (
-                <div key={query.id} className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-5">
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-semibold text-gray-900 dark:text-white">{query.name}</h3>
-                        {query.isDefault && (
-                          <span className="px-2 py-0.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 rounded text-xs">
-                            Default
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Created {query.createdAt}</p>
-                    </div>
-                    <button
-                      onClick={() => handleQueryOptions(query.id)}
-                      className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-400">
-                      <MoreHorizontal className="w-4 h-4" />
-                    </button>
-                  </div>
-                  <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg font-mono text-sm text-gray-700 dark:text-gray-300 mb-3">
-                    {query.query}
-                  </div>
-                  <button
-                    onClick={() => setSearchQuery(query.query)}
-                    className="w-full px-4 py-2 bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 rounded-lg text-sm font-medium hover:bg-purple-100 dark:hover:bg-purple-900/30"
-                  >
-                    Run Query
-                  </button>
-                </div>
-              ))}
+              <div className="text-center py-12 text-muted-foreground">
+                No saved queries
+              </div>
             </div>
           </TabsContent>
 
@@ -1198,11 +911,10 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
                         <button
                           key={item.id}
                           onClick={() => setSettingsTab(item.id)}
-                          className={`w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors ${
-                            settingsTab === item.id
-                              ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
-                              : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
-                          }`}
+                          className={`w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors ${settingsTab === item.id
+                            ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
+                            : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
+                            }`}
                         >
                           <item.icon className="h-4 w-4" />
                           {item.label}
@@ -1817,18 +1529,18 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockLogsAIInsights}
+              insights={[]}
               title="Logs Intelligence"
               onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockLogsCollaborators}
+              collaborators={[]}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockLogsPredictions}
+              predictions={[]}
               title="System Metrics Forecast"
             />
           </div>
@@ -1836,7 +1548,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockLogsActivities}
+            activities={[]}
             title="System Activity"
             maxItems={5}
           />

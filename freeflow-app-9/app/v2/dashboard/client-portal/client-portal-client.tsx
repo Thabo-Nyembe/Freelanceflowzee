@@ -12,10 +12,13 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import { useClients } from '@/lib/hooks/use-clients'
+import { useProjects } from '@/lib/hooks/use-projects'
+
 
 export const dynamic = 'force-dynamic';
 
-import React, { useState, useEffect, useReducer, useMemo } from 'react'
+import { useState, useEffect, useReducer, useMemo } from 'react'
 import {
   Users,
   Building2,
@@ -181,33 +184,33 @@ function portalReducer(state: PortalState, action: PortalAction): PortalState {
   logger.debug('Reducer action', { type: action.type })
 
   switch (action.type) {
-    case 'SET_CLIENTS':      return { ...state, clients: action.clients }
+    case 'SET_CLIENTS': return { ...state, clients: action.clients }
 
-    case 'SET_PROJECTS':      return { ...state, projects: action.projects }
+    case 'SET_PROJECTS': return { ...state, projects: action.projects }
 
-    case 'SET_COMMUNICATIONS':      return { ...state, communications: action.communications }
+    case 'SET_COMMUNICATIONS': return { ...state, communications: action.communications }
 
-    case 'SET_FILES':      return { ...state, files: action.files }
+    case 'SET_FILES': return { ...state, files: action.files }
 
-    case 'ADD_CLIENT':      return { ...state, clients: [action.client, ...state.clients] }
+    case 'ADD_CLIENT': return { ...state, clients: [action.client, ...state.clients] }
 
-    case 'UPDATE_CLIENT':      return {
-        ...state,
-        clients: state.clients.map(c => c.id === action.client.id ? action.client : c)
-      }
+    case 'UPDATE_CLIENT': return {
+      ...state,
+      clients: state.clients.map(c => c.id === action.client.id ? action.client : c)
+    }
 
-    case 'DELETE_CLIENT':      return {
-        ...state,
-        clients: state.clients.filter(c => c.id !== action.clientId)
-      }
+    case 'DELETE_CLIENT': return {
+      ...state,
+      clients: state.clients.filter(c => c.id !== action.clientId)
+    }
 
-    case 'ADD_PROJECT':      return { ...state, projects: [action.project, ...state.projects] }
+    case 'ADD_PROJECT': return { ...state, projects: [action.project, ...state.projects] }
 
-    case 'ADD_COMMUNICATION':      return { ...state, communications: [action.communication, ...state.communications] }
+    case 'ADD_COMMUNICATION': return { ...state, communications: [action.communication, ...state.communications] }
 
-    case 'SELECT_CLIENT':      return { ...state, selectedClient: action.client }
+    case 'SELECT_CLIENT': return { ...state, selectedClient: action.client }
 
-    case 'SELECT_PROJECT':      return { ...state, selectedProject: action.project }
+    case 'SELECT_PROJECT': return { ...state, selectedProject: action.project }
 
     case 'SET_VIEW_MODE':
       logger.debug('View mode changed', { viewMode: action.viewMode })
@@ -238,77 +241,7 @@ function portalReducer(state: PortalState, action: PortalAction): PortalState {
 // MOCK DATA
 // ============================================================================
 
-const generateMockClients = (): Client[] => {
-  logger.debug('Generating mock clients')
 
-  const companies = [
-    'TechCorp Solutions', 'Digital Innovators', 'Cloud Systems Inc', 'Data Dynamics',
-    'Smart Solutions Ltd', 'Future Technologies', 'Alpha Enterprises', 'Beta Industries',
-    'Gamma Corporation', 'Delta Group', 'Epsilon Systems', 'Zeta Innovations',
-    'Eta Digital', 'Theta Tech', 'Iota Solutions', 'Kappa Corporation',
-    'Lambda Industries', 'Mu Systems', 'Nu Enterprises', 'Xi Technologies'
-  ]
-
-  const contacts = [
-    'John Smith', 'Sarah Johnson', 'Michael Brown', 'Emily Davis',
-    'David Wilson', 'Jennifer Martinez', 'Robert Anderson', 'Lisa Taylor',
-    'James Thomas', 'Mary Jackson', 'Christopher White', 'Patricia Harris'
-  ]
-
-  const statuses: ClientStatus[] = ['active', 'onboarding', 'inactive', 'churned']
-  const tiers: ClientTier[] = ['basic', 'standard', 'premium', 'enterprise']
-
-  const clients: Client[] = companies.map((company, index) => ({
-    id: `CL-${String(index + 1).padStart(3, '0')}`,
-    companyName: company,
-    contactPerson: contacts[index % contacts.length],
-    email: `contact@${company.toLowerCase().replace(/\s+/g, '')}.com`,
-    phone: `+1 (555) ${String(Math.floor(Math.random() * 900) + 100)}-${String(Math.floor(Math.random() * 9000) + 1000)}`,
-    status: statuses[Math.floor(Math.random() * statuses.length)],
-    tier: tiers[Math.floor(Math.random() * tiers.length)],
-    activeProjects: Math.floor(Math.random() * 5) + 1,
-    totalRevenue: Math.floor(Math.random() * 500000) + 50000,
-    healthScore: Math.floor(Math.random() * 30) + 70,
-    lastContact: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
-    nextFollowUp: new Date(Date.now() + Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
-    tags: ['priority', 'enterprise', 'growth'].slice(0, Math.floor(Math.random() * 3) + 1),
-    createdAt: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString()
-  }))
-  return clients
-}
-
-const generateMockProjects = (clients: Client[]): Project[] => {
-  logger.debug('Generating mock projects')
-
-  const projectNames = [
-    'Website Redesign', 'Mobile App Development', 'Cloud Migration', 'API Integration',
-    'Data Analytics Platform', 'CRM Implementation', 'E-commerce Solution', 'Brand Identity',
-    'Marketing Campaign', 'Security Audit', 'Performance Optimization', 'DevOps Setup'
-  ]
-
-  const statuses: ProjectStatus[] = ['planning', 'active', 'on-hold', 'completed', 'cancelled']
-
-  const projects: Project[] = projectNames.map((name, index) => {
-    const client = clients[index % clients.length]
-    const budget = Math.floor(Math.random() * 200000) + 50000
-    const spent = Math.floor(budget * (Math.random() * 0.8))
-
-    return {
-      id: `PR-${String(index + 1).padStart(3, '0')}`,
-      clientId: client.id,
-      name,
-      description: `${name} project for ${client.companyName}`,
-      status: statuses[Math.floor(Math.random() * statuses.length)],
-      budget,
-      spent,
-      progress: Math.floor(Math.random() * 100),
-      startDate: new Date(Date.now() - Math.random() * 180 * 24 * 60 * 60 * 1000).toISOString(),
-      endDate: new Date(Date.now() + Math.random() * 180 * 24 * 60 * 60 * 1000).toISOString(),
-      team: ['John Doe', 'Jane Smith', 'Bob Johnson'].slice(0, Math.floor(Math.random() * 3) + 1)
-    }
-  })
-  return projects
-}
 
 // ============================================================================
 // MAIN COMPONENT
@@ -319,28 +252,16 @@ const generateMockProjects = (clients: Client[]): Project[] => {
 // V2 COMPETITIVE MOCK DATA - ClientPortal Context
 // ============================================================================
 
-const clientPortalAIInsights = [
-  { id: '1', type: 'info' as const, title: 'Performance Update', description: 'System running optimally with 99.9% uptime this month.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Performance' },
-  { id: '2', type: 'success' as const, title: 'Goal Achievement', description: 'Monthly targets exceeded by 15%. Great progress!', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Goals' },
-  { id: '3', type: 'warning' as const, title: 'Action Required', description: 'Review pending items to maintain workflow efficiency.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Tasks' },
-]
+const clientPortalAIInsights: any[] = []
 
-const clientPortalCollaborators = [
-  { id: '1', name: 'Alexandra Chen', avatar: '/avatars/alex.jpg', status: 'online' as const, role: 'Manager', lastActive: 'Now' },
-  { id: '2', name: 'Marcus Johnson', avatar: '/avatars/marcus.jpg', status: 'online' as const, role: 'Developer', lastActive: '5m ago' },
-  { id: '3', name: 'Sarah Williams', avatar: '/avatars/sarah.jpg', status: 'away' as const, role: 'Designer', lastActive: '30m ago' },
-]
+const clientPortalCollaborators: any[] = []
 
-const clientPortalPredictions = [
-  { id: '1', label: 'Completion Rate', current: 85, target: 95, predicted: 92, confidence: 88, trend: 'up' as const },
-  { id: '2', label: 'Efficiency Score', current: 78, target: 90, predicted: 86, confidence: 82, trend: 'up' as const },
-]
+const clientPortalPredictions: any[] = []
 
-const clientPortalActivities = [
-  { id: '1', user: 'Alexandra Chen', action: 'updated', target: 'system settings', timestamp: '5m ago', type: 'info' as const },
-  { id: '2', user: 'Marcus Johnson', action: 'completed', target: 'task review', timestamp: '15m ago', type: 'success' as const },
-  { id: '3', user: 'System', action: 'generated', target: 'weekly report', timestamp: '1h ago', type: 'info' as const },
-]
+const clientPortalActivities: any[] = []
+
+
+
 
 // Quick actions will be defined inside the component to access state setters
 
@@ -348,7 +269,11 @@ export default function ClientPortalClient() {
   logger.debug('Component mounting')
 
   const { announce } = useAnnouncer()
-  const { userId, loading: userLoading } = useCurrentUser()
+  const { userId } = useCurrentUser()
+
+  // Real data hooks
+  const { clients: dbClients, isLoading: clientsLoading, fetchClients } = useClients()
+  const { projects: dbProjects, isLoading: projectsLoading, fetchProjects } = useProjects()
 
   // STATE
   const [state, dispatch] = useReducer(portalReducer, {
@@ -422,42 +347,56 @@ export default function ClientPortalClient() {
   // LOAD DATA
   // ============================================================================
 
-  useEffect(() => {    const loadData = async () => {
-      try {
-        setIsLoading(true)
+  // Sync data from hooks to local reducer
+  useEffect(() => {
+    fetchClients()
+    fetchProjects()
+  }, [fetchClients, fetchProjects])
 
-        const response = await fetch('/api/clients', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'list' })
-        })
-
-        const result = await response.json()
-
-        if (result.success) {
-          // Use mock data for richer visualization
-          const clients = generateMockClients()
-          const projects = generateMockProjects(clients)
-
-          dispatch({ type: 'SET_CLIENTS', clients })
-          dispatch({ type: 'SET_PROJECTS', projects })
-          announce('Client portal loaded', 'polite')
-        } else {
-          throw new Error(result.error || 'Failed to load clients')
-        }
-      } catch (error: any) {
-        logger.error('Portal data load error', {
-          error: error instanceof Error ? error.message : 'Unknown error',
-          errorObject: error
-        })
-        toast.error('Failed to load client portal data')
-      } finally {
-        setIsLoading(false)
-      }
+  useEffect(() => {
+    if (!clientsLoading) {
+      const mappedClients: Client[] = dbClients.map(c => ({
+        id: c.id,
+        companyName: c.company || c.name,
+        contactPerson: c.name,
+        email: c.email,
+        phone: c.phone || '',
+        status: (c.status === 'churned' ? 'churned' : c.status === 'active' ? 'active' : 'inactive') as ClientStatus, // Simplify status mapping
+        tier: 'standard' as ClientTier, // Default for now as real DB doesn't have tier yet or maps differently
+        activeProjects: c.active_projects || 0,
+        totalRevenue: c.total_revenue || 0,
+        healthScore: c.health_score || 80,
+        lastContact: c.last_contact || c.created_at,
+        nextFollowUp: c.next_follow_up || c.created_at,
+        tags: c.tags || [],
+        createdAt: c.created_at
+      }))
+      dispatch({ type: 'SET_CLIENTS', clients: mappedClients })
     }
+  }, [dbClients, clientsLoading])
 
-    loadData()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (!projectsLoading) {
+      const mappedProjects: Project[] = dbProjects.map(p => ({
+        id: p.id,
+        clientId: p.client_id || '',
+        name: p.name,
+        description: p.description || '',
+        status: (p.status === 'planning' ? 'planning' : p.status === 'active' ? 'active' : p.status === 'on_hold' ? 'on-hold' : p.status === 'completed' ? 'completed' : 'cancelled') as ProjectStatus,
+        budget: p.budget || 0,
+        spent: p.spent || 0,
+        progress: p.progress || 0,
+        startDate: p.start_date || p.created_at,
+        endDate: p.end_date || p.created_at,
+        team: p.team_members || []
+      }))
+      dispatch({ type: 'SET_PROJECTS', projects: mappedProjects })
+    }
+  }, [dbProjects, projectsLoading])
+
+  useEffect(() => {
+    setIsLoading(clientsLoading || projectsLoading)
+  }, [clientsLoading, projectsLoading])
 
   // ============================================================================
   // COMPUTED VALUES
@@ -546,7 +485,7 @@ export default function ClientPortalClient() {
       logger.warn('Client creation failed', { reason: 'Missing required fields' })
       toast.error('Please fill in all required fields')
       return
-    }    try {
+    } try {
       setIsSaving(true)
 
       const response = await fetch('/api/clients', {
@@ -712,7 +651,7 @@ export default function ClientPortalClient() {
       logger.warn('Communication creation failed', { reason: 'Missing required fields' })
       toast.error('Please fill in all required fields')
       return
-    }    try {
+    } try {
       setIsSaving(true)
 
       let commId = `CM-${String(state.communications.length + 1).padStart(3, '0')}`
@@ -724,12 +663,12 @@ export default function ClientPortalClient() {
           client_id: state.selectedClient.id,
           type: communicationForm.type,
           subject: communicationForm.subject,
-          content: communicationForm.content,
-          created_by: userId
+          content: communicationForm.content
         })
         if (createdComm?.id) {
           commId = createdComm.id
-        }      }
+        }
+      }
 
       const newComm: Communication = {
         id: commId,
@@ -759,7 +698,8 @@ export default function ClientPortalClient() {
     }
   }
 
-  const handleExportData = async () => {    try {
+  const handleExportData = async () => {
+    try {
       setIsExporting(true)
 
       // Prepare data based on selection
@@ -833,7 +773,7 @@ export default function ClientPortalClient() {
       link.click()
       document.body.removeChild(link)
       URL.revokeObjectURL(url)
-      toast.success("Export completed", { description: filteredClients.length + " records exported as " + exportFormat.toUpperCase() })
+      toast.success("Export completed", { description: dataToExport.length + " records exported as " + exportFormat.toUpperCase() })
 
       setIsExportDialogOpen(false)
     } catch (error: any) {
@@ -847,7 +787,8 @@ export default function ClientPortalClient() {
     }
   }
 
-  const handleSaveSettings = async () => {    try {
+  const handleSaveSettings = async () => {
+    try {
       setIsSaving(true)
 
       // Save settings via API
@@ -933,18 +874,18 @@ export default function ClientPortalClient() {
     return (
       <div className="kazi-bg-light dark:kazi-bg-dark min-h-screen py-8">
         <div className="container mx-auto px-4 space-y-6">
-          
-        {/* V2 Competitive Upgrade Components */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-          <AIInsightsPanel insights={clientPortalAIInsights} />
-          <PredictiveAnalytics predictions={clientPortalPredictions} />
-          <CollaborationIndicator collaborators={clientPortalCollaborators} />
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          <QuickActionsToolbar actions={clientPortalQuickActions} />
-          <ActivityFeed activities={clientPortalActivities} />
-        </div>
-<CardSkeleton />
+
+          {/* V2 Competitive Upgrade Components */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            <AIInsightsPanel insights={clientPortalAIInsights} />
+            <PredictiveAnalytics predictions={clientPortalPredictions} />
+            <CollaborationIndicator collaborators={clientPortalCollaborators} />
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <QuickActionsToolbar actions={clientPortalQuickActions} />
+            <ActivityFeed activities={clientPortalActivities} />
+          </div>
+          <CardSkeleton />
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <CardSkeleton />
             <CardSkeleton />
@@ -1038,7 +979,7 @@ export default function ClientPortalClient() {
                       </p>
                     </div>
                     <div className="relative">
-                      
+
                       <Users className="h-8 w-8 text-blue-500" />
                     </div>
                   </div>
@@ -1053,7 +994,7 @@ export default function ClientPortalClient() {
                       </p>
                     </div>
                     <div className="relative">
-                      
+
                       <CheckCircle2 className="h-8 w-8 text-green-500" />
                     </div>
                   </div>
@@ -1068,7 +1009,7 @@ export default function ClientPortalClient() {
                       </p>
                     </div>
                     <div className="relative">
-                      
+
                       <DollarSign className="h-8 w-8 text-purple-500" />
                     </div>
                   </div>
@@ -1083,7 +1024,7 @@ export default function ClientPortalClient() {
                       </p>
                     </div>
                     <div className="relative">
-                      
+
                       <Award className="h-8 w-8 text-orange-500" />
                     </div>
                   </div>
@@ -1186,11 +1127,9 @@ export default function ClientPortalClient() {
               <ScrollReveal>
                 <NoDataEmptyState
                   title="No clients found"
-                  message="Add clients or adjust your filters"
-                  action={{
-                    label: 'Add Client',
-                    onClick: () => setIsAddClientModalOpen(true)
-                  }}
+                  description="Add clients or adjust your filters"
+                  actionLabel="Add Client"
+                  onAction={() => setIsAddClientModalOpen(true)}
                 />
               </ScrollReveal>
             ) : (
@@ -1213,7 +1152,7 @@ export default function ClientPortalClient() {
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button variant="ghost" size="icon" aria-label="More options">
-                  <MoreVertical className="h-4 w-4" />
+                                <MoreVertical className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
@@ -1365,7 +1304,7 @@ export default function ClientPortalClient() {
             {state.communications.length === 0 ? (
               <NoDataEmptyState
                 title="No communications"
-                message="Communication logs will appear here"
+                description="Communication logs will appear here"
               />
             ) : (
               <div className="space-y-4">

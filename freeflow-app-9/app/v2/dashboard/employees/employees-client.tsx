@@ -108,14 +108,7 @@ interface OnboardingTask {
   category: 'paperwork' | 'training' | 'setup' | 'intro'
 }
 
-interface OrgNode {
-  id: string
-  name: string
-  position: string
-  department: string
-  avatar?: string
-  children?: OrgNode[]
-}
+
 
 
 
@@ -210,7 +203,7 @@ export default function EmployeesClient() {
   const [searchQuery, setSearchQuery] = useState('')
   const [departmentFilter, setDepartmentFilter] = useState<string>('all')
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null)
-  const [expandedNodes, setExpandedNodes] = useState<string[]>(['0', '1', '3'])
+
   const [showProfileDialog, setShowProfileDialog] = useState(false)
   const [showAddDialog, setShowAddDialog] = useState(false)
   const [showReviewDialog, setShowReviewDialog] = useState(false)
@@ -272,7 +265,7 @@ export default function EmployeesClient() {
         projectsCount: emp.projects_count || 3,
         directReports: emp.direct_reports || 0,
         skills: emp.skills || ['Communication', 'Teamwork']
-      })) as Employee[]
+      }))
     }
     return []
   }, [dbEmployees])
@@ -304,7 +297,7 @@ export default function EmployeesClient() {
     if (insights.length === 0) {
       insights.push({ id: 'welcome', type: 'info', title: 'AI Insights', description: 'Insights will appear here as your team grows.', confidence: 1.0, action: 'Learn More' })
     }
-    return insights as any[]
+    return insights
   }, [activeEmployees])
 
   // Dynamic Predictions
@@ -315,14 +308,14 @@ export default function EmployeesClient() {
       value: activeEmployees.length < 5 ? '+2 Roles' : 'Stable',
       confidence: 0.85, description: activeEmployees.length < 5 ? 'Team is small, consider hiring.' : 'Team size looks optimal.'
     })
-    return preds as any[]
+    return preds
   }, [activeEmployees])
 
   // Dynamic Collaborators
   const collaborators = useMemo(() => {
     return activeEmployees.slice(0, 5).map(e => ({
       id: e.id, name: e.name, role: e.position, avatar: e.avatar, status: 'online'
-    })) as any[]
+    }))
   }, [activeEmployees])
 
   // Edit dialog state
@@ -933,11 +926,22 @@ export default function EmployeesClient() {
     return colors[status] || 'bg-gray-100 text-gray-700'
   }
 
-  const toggleOrgNode = (id: string) => {
-    setExpandedNodes(prev => prev.includes(id) ? prev.filter(n => n !== id) : [...prev, id])
-  }
-
   // Handlers (handleExportEmployees is defined above at line 541)
+
+  const employeesQuickActions = [
+    { id: 'add', label: 'Add Employee', icon: UserPlus, action: () => setShowAddDialog(true) },
+    { id: 'export', label: 'Export Data', icon: Download, action: () => setShowExportDialog(true) },
+    { id: 'review', label: 'Start Review', icon: Star, action: () => setShowReviewDialog(true) },
+    { id: 'org', label: 'Org Chart', icon: Layers, action: () => setActiveTab('org-chart') },
+  ]
+
+  const employeesActivities = activeEmployees.slice(0, 5).map(emp => ({
+    id: `join-${emp.id}`,
+    type: 'joined',
+    title: `${emp.name} joined the team`,
+    timestamp: emp.hireDate,
+    user: { name: emp.name, avatar: emp.avatar }
+  }))
 
   const handleScheduleReview = (employee: Employee) => {
     toast.success(`Review scheduled`, { description: `Performance review has been scheduled` })
@@ -951,19 +955,7 @@ export default function EmployeesClient() {
     toast.info('Send Announcement')
   }
 
-  const renderOrgNode = (node: OrgNode, level: number = 0): JSX.Element => (
-    <div key={node.id} className={`${level > 0 ? 'ml-8 border-l-2 border-gray-200 dark:border-gray-700 pl-4' : ''}`}>
-      <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50">
-        {node.children && node.children.length > 0 ? (
-          <button onClick={() => toggleOrgNode(node.id)} className="p-1">{expandedNodes.includes(node.id) ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}</button>
-        ) : <div className="w-6" />}
-        <Avatar><AvatarFallback className="bg-blue-100 text-blue-700">{node.name.split(' ').map(n => n[0]).join('')}</AvatarFallback></Avatar>
-        <div className="flex-1"><p className="font-medium">{node.name}</p><p className="text-sm text-gray-500">{node.position}</p></div>
-        <Badge className={getDepartmentColor(node.department)}>{node.department}</Badge>
-      </div>
-      {node.children && expandedNodes.includes(node.id) && <div className="mt-1">{node.children.map(child => renderOrgNode(child, level + 1))}</div>}
-    </div>
-  )
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:bg-none dark:bg-gray-900 p-6">

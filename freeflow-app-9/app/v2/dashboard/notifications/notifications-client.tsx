@@ -71,13 +71,7 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  notificationsAIInsights,
-  notificationsCollaborators,
-  notificationsPredictions,
-  notificationsActivities,
-  notificationsQuickActions,
-} from '@/lib/mock-data/adapters'
+import { useCampaigns } from '@/lib/hooks/use-campaigns'
 
 // ============================================================================
 // TYPES - SLACK NOTIFICATIONS LEVEL
@@ -237,51 +231,7 @@ interface Notification {
 // MOCK DATA
 // ============================================================================
 
-// Mock data removed - using real data from useNotifications hook
-
-const mockCampaigns: Campaign[] = [
-  { id: 'c1', name: 'Product Launch Announcement', status: 'sent', channel: 'push', segment: 'All Users', title: 'New Feature Alert!', message: 'Check out our amazing new dashboard features', sentAt: '2024-01-28T10:00:00Z', createdAt: '2024-01-27T15:00:00Z', createdBy: 'admin@company.com', priority: 'high', stats: { sent: 15420, delivered: 14890, opened: 8234, clicked: 3456, converted: 892, unsubscribed: 12, bounced: 45, complained: 3 } },
-  { id: 'c2', name: 'Weekly Digest', status: 'scheduled', channel: 'email', segment: 'Active Users', title: 'Your Weekly Summary', message: 'Here\'s what happened this week...', scheduledAt: '2024-01-29T09:00:00Z', createdAt: '2024-01-28T14:00:00Z', createdBy: 'marketing@company.com', priority: 'normal', stats: { sent: 0, delivered: 0, opened: 0, clicked: 0, converted: 0, unsubscribed: 0, bounced: 0, complained: 0 } },
-  { id: 'c3', name: 'Re-engagement Campaign', status: 'sending', channel: 'push', segment: 'Inactive 30 Days', title: 'We miss you!', message: 'Come back and see what\'s new', createdAt: '2024-01-28T08:00:00Z', createdBy: 'growth@company.com', priority: 'normal', stats: { sent: 5234, delivered: 4890, opened: 1234, clicked: 567, converted: 89, unsubscribed: 23, bounced: 12, complained: 1 } },
-  { id: 'c4', name: 'Flash Sale Alert', status: 'draft', channel: 'sms', segment: 'Premium Users', title: '50% Off Today Only!', message: 'Use code FLASH50 for 50% off', createdAt: '2024-01-28T16:00:00Z', createdBy: 'sales@company.com', priority: 'urgent', stats: { sent: 0, delivered: 0, opened: 0, clicked: 0, converted: 0, unsubscribed: 0, bounced: 0, complained: 0 } },
-  { id: 'c5', name: 'Security Update Notice', status: 'sent', channel: 'email', segment: 'All Users', title: 'Important Security Update', message: 'We have updated our security protocols', sentAt: '2024-01-25T14:00:00Z', createdAt: '2024-01-25T10:00:00Z', createdBy: 'security@company.com', priority: 'high', stats: { sent: 25430, delivered: 24890, opened: 18234, clicked: 5456, converted: 0, unsubscribed: 8, bounced: 120, complained: 0 } }
-]
-
-const mockSegments: Segment[] = [
-  { id: 's1', name: 'All Users', description: 'All registered users', filters: [], userCount: 25430, createdAt: '2024-01-01', isDefault: true, lastUpdated: '2024-01-28' },
-  { id: 's2', name: 'Active Users', description: 'Users active in last 7 days', filters: [{ field: 'last_seen', operator: 'gt', value: '7d' }], userCount: 18920, createdAt: '2024-01-15', isDefault: false, lastUpdated: '2024-01-28' },
-  { id: 's3', name: 'Premium Users', description: 'Users with premium subscription', filters: [{ field: 'plan', operator: 'equals', value: 'premium' }], userCount: 4560, createdAt: '2024-01-10', isDefault: false, lastUpdated: '2024-01-27' },
-  { id: 's4', name: 'Inactive 30 Days', description: 'Users inactive for 30+ days', filters: [{ field: 'last_seen', operator: 'lt', value: '30d' }], userCount: 3210, createdAt: '2024-01-20', isDefault: false, lastUpdated: '2024-01-28' },
-  { id: 's5', name: 'New Users', description: 'Users registered in last 7 days', filters: [{ field: 'created_at', operator: 'gt', value: '7d' }], userCount: 1250, createdAt: '2024-01-25', isDefault: false, lastUpdated: '2024-01-28' },
-  { id: 's6', name: 'Mobile Users', description: 'Users primarily on mobile devices', filters: [{ field: 'device_type', operator: 'equals', value: 'mobile' }], userCount: 12340, createdAt: '2024-01-18', isDefault: false, lastUpdated: '2024-01-26' }
-]
-
-const mockTemplates: Template[] = [
-  { id: 't1', name: 'Welcome Message', channel: 'push', title: 'Welcome to {{app_name}}!', message: 'Hey {{name}}, great to have you!', variables: ['app_name', 'name'], usageCount: 15420, category: 'Onboarding', isDefault: true },
-  { id: 't2', name: 'Order Confirmation', channel: 'email', title: 'Order #{{order_id}} Confirmed', message: 'Your order has been confirmed and will ship soon.', variables: ['order_id'], usageCount: 8900, category: 'Transactional', isDefault: false },
-  { id: 't3', name: 'Reminder', channel: 'push', title: 'Don\'t forget!', message: '{{task_name}} is due {{due_date}}', variables: ['task_name', 'due_date'], usageCount: 5670, category: 'Reminders', isDefault: false },
-  { id: 't4', name: 'Promotion', channel: 'sms', title: '{{discount}}% Off!', message: 'Use code {{code}} for {{discount}}% off. Ends {{expiry}}.', variables: ['discount', 'code', 'expiry'], usageCount: 3450, category: 'Marketing', isDefault: false },
-  { id: 't5', name: 'Security Alert', channel: 'email', title: 'Security Alert: {{alert_type}}', message: 'We detected {{alert_type}} on your account from {{location}}.', variables: ['alert_type', 'location'], usageCount: 2340, category: 'Security', isDefault: true },
-  { id: 't6', name: 'Slack Notification', channel: 'slack', title: '{{channel}} Update', message: '{{user}} posted in #{{channel}}: {{preview}}', variables: ['channel', 'user', 'preview'], usageCount: 45000, category: 'Collaboration', isDefault: false }
-]
-
-const mockAutomations: Automation[] = [
-  { id: 'a1', name: 'Welcome Series', description: 'Send welcome emails over 7 days', status: 'active', trigger: { type: 'event', config: { event: 'user.created' } }, actions: [{ id: 'a1-1', type: 'send_notification', config: { template: 't1' } }, { id: 'a1-2', type: 'wait', config: { duration: '1d' } }, { id: 'a1-3', type: 'send_notification', config: { template: 't2' } }], stats: { totalTriggered: 5420, totalCompleted: 4890, totalFailed: 45, conversionRate: 32.5 }, createdAt: '2024-01-01', lastTriggered: '2024-01-28T14:30:00Z' },
-  { id: 'a2', name: 'Cart Abandonment', description: 'Remind users about abandoned carts', status: 'active', trigger: { type: 'event', config: { event: 'cart.abandoned' } }, actions: [{ id: 'a2-1', type: 'wait', config: { duration: '1h' } }, { id: 'a2-2', type: 'send_notification', config: { channel: 'email' } }], stats: { totalTriggered: 2340, totalCompleted: 2100, totalFailed: 12, conversionRate: 18.5 }, createdAt: '2024-01-10', lastTriggered: '2024-01-28T12:00:00Z' },
-  { id: 'a3', name: 'Re-engagement Flow', description: 'Win back inactive users', status: 'paused', trigger: { type: 'segment_entry', config: { segment: 's4' } }, actions: [{ id: 'a3-1', type: 'send_notification', config: { channel: 'push' } }], stats: { totalTriggered: 890, totalCompleted: 756, totalFailed: 23, conversionRate: 8.2 }, createdAt: '2024-01-15' },
-  { id: 'a4', name: 'Daily Digest', description: 'Send daily activity summary', status: 'active', trigger: { type: 'schedule', config: { cron: '0 9 * * *' } }, actions: [{ id: 'a4-1', type: 'send_notification', config: { template: 't6' } }], stats: { totalTriggered: 12500, totalCompleted: 12450, totalFailed: 5, conversionRate: 45.2 }, createdAt: '2024-01-05', lastTriggered: '2024-01-28T09:00:00Z' }
-]
-
-const mockWebhooks: WebhookEndpoint[] = [
-  { id: 'w1', name: 'Slack Integration', url: 'https://hooks.slack.com/services/xxx', events: ['notification.sent', 'notification.failed'], status: 'active', secret: 'whsec_xxx', createdAt: '2024-01-10', lastDelivery: '2024-01-28T14:30:00Z', successRate: 99.8 },
-  { id: 'w2', name: 'Analytics Webhook', url: 'https://analytics.example.com/webhook', events: ['campaign.completed', 'user.converted'], status: 'active', secret: 'whsec_yyy', createdAt: '2024-01-15', lastDelivery: '2024-01-28T10:00:00Z', successRate: 98.5 },
-  { id: 'w3', name: 'CRM Sync', url: 'https://crm.example.com/api/notifications', events: ['notification.opened', 'notification.clicked'], status: 'failed', secret: 'whsec_zzz', createdAt: '2024-01-20', lastDelivery: '2024-01-27T16:00:00Z', successRate: 45.2 }
-]
-
-const mockABTests: ABTest[] = [
-  { id: 'ab1', name: 'Subject Line Test', variants: [{ id: 'v1', name: 'Variant A', title: 'Don\'t miss out!', message: 'Check our latest features', percentage: 50, stats: { sent: 5000, delivered: 4890, opened: 1956, clicked: 489, converted: 98, unsubscribed: 2, bounced: 10, complained: 0 } }, { id: 'v2', name: 'Variant B', title: 'New features just for you', message: 'Check our latest features', percentage: 50, stats: { sent: 5000, delivered: 4895, opened: 2203, clicked: 551, converted: 132, unsubscribed: 1, bounced: 8, complained: 0 } }], winner: 'v2', status: 'completed', confidenceLevel: 95.2, startDate: '2024-01-20', endDate: '2024-01-25' },
-  { id: 'ab2', name: 'CTA Button Test', variants: [{ id: 'v3', name: 'Get Started', title: 'Welcome!', message: 'Click to get started', percentage: 50, stats: { sent: 2500, delivered: 2450, opened: 980, clicked: 245, converted: 49, unsubscribed: 0, bounced: 5, complained: 0 } }, { id: 'v4', name: 'Learn More', title: 'Welcome!', message: 'Click to learn more', percentage: 50, stats: { sent: 2500, delivered: 2455, opened: 982, clicked: 196, converted: 39, unsubscribed: 1, bounced: 4, complained: 0 } }], status: 'running', confidenceLevel: 78.5, startDate: '2024-01-26' }
-]
+// Mock data removed - using real data from hooks
 
 // ============================================================================
 // MAIN COMPONENT
@@ -289,6 +239,14 @@ const mockABTests: ABTest[] = [
 
 export default function NotificationsClient() {
   const { notifications: dbNotifications, loading, createNotification, updateNotification, deleteNotification, refetch } = useNotifications()
+  const { campaigns: dbCampaigns, loading: campaignsLoading } = useCampaigns({ status: 'all' })
+
+  // Empty arrays for features without backend support
+  const mockSegments: Segment[] = []
+  const mockTemplates: Template[] = []
+  const mockAutomations: Automation[] = []
+  const mockWebhooks: WebhookEndpoint[] = []
+  const mockABTests: ABTest[] = []
 
   const [activeTab, setActiveTab] = useState('inbox')
   const [searchQuery, setSearchQuery] = useState('')
@@ -349,12 +307,13 @@ export default function NotificationsClient() {
     })
   }, [activeNotifications, statusFilter, channelFilter, searchQuery])
 
-  // Calculate stats - use activeNotifications (Supabase data with mock fallback)
+  // Calculate stats - use real data from dbCampaigns and activeNotifications
   const stats = useMemo(() => {
-    const totalSent = mockCampaigns.reduce((sum, c) => sum + c.stats.sent, 0)
-    const totalDelivered = mockCampaigns.reduce((sum, c) => sum + c.stats.delivered, 0)
-    const totalOpened = mockCampaigns.reduce((sum, c) => sum + c.stats.opened, 0)
-    const totalClicked = mockCampaigns.reduce((sum, c) => sum + c.stats.clicked, 0)
+    const campaigns = dbCampaigns || []
+    const totalSent = campaigns.reduce((sum: number, c: any) => sum + (c.impressions || 0), 0)
+    const totalDelivered = campaigns.reduce((sum: number, c: any) => sum + (c.emails_delivered || c.impressions || 0), 0)
+    const totalOpened = campaigns.reduce((sum: number, c: any) => sum + (c.emails_opened || c.clicks || 0), 0)
+    const totalClicked = campaigns.reduce((sum: number, c: any) => sum + (c.clicks || 0), 0)
     return {
       totalNotifications: activeNotifications.length,
       unread: activeNotifications.filter(n => n.status === 'unread').length,
@@ -363,9 +322,9 @@ export default function NotificationsClient() {
       deliveryRate: totalSent > 0 ? ((totalDelivered / totalSent) * 100).toFixed(1) : '0',
       openRate: totalDelivered > 0 ? ((totalOpened / totalDelivered) * 100).toFixed(1) : '0',
       clickRate: totalOpened > 0 ? ((totalClicked / totalOpened) * 100).toFixed(1) : '0',
-      activeAutomations: mockAutomations.filter(a => a.status === 'active').length
+      activeAutomations: mockAutomations.filter((a: any) => a.status === 'active').length
     }
-  }, [activeNotifications])
+  }, [activeNotifications, dbCampaigns, mockAutomations])
 
   const statsCards = [
     { label: 'Total', value: stats.totalNotifications.toString(), icon: Bell, color: 'from-violet-500 to-purple-600' },
@@ -376,6 +335,23 @@ export default function NotificationsClient() {
     { label: 'Open Rate', value: `${stats.openRate}%`, icon: Eye, color: 'from-cyan-500 to-cyan-600' },
     { label: 'Click Rate', value: `${stats.clickRate}%`, icon: MousePointer, color: 'from-purple-500 to-purple-600' },
     { label: 'Automations', value: stats.activeAutomations.toString(), icon: Workflow, color: 'from-rose-500 to-rose-600' }
+  ]
+
+  // Define adapter variables for competitive upgrade components
+  const notificationsAIInsights = []
+  const notificationsCollaborators = []
+  const notificationsPredictions = []
+  const notificationsActivities = activeNotifications.slice(0, 5).map(n => ({
+    id: n.id,
+    type: 'notification',
+    title: n.title,
+    timestamp: n.timestamp,
+    user: { name: n.sender || 'System', avatar: '' }
+  }))
+  const notificationsQuickActions = [
+    { id: 'new-campaign', label: 'New Campaign', icon: Plus, action: () => setShowCreateCampaign(true) },
+    { id: 'view-inbox', label: 'View Inbox', icon: Inbox, action: () => setActiveTab('inbox') },
+    { id: 'export', label: 'Export Data', icon: Download, action: () => handleExportNotifications() },
   ]
 
   const formatTimeAgo = (dateString: string) => {
@@ -734,7 +710,7 @@ export default function NotificationsClient() {
             <Card className="border-gray-200 dark:border-gray-700">
               <CardContent className="p-0">
                 <div className="divide-y divide-gray-100 dark:divide-gray-800">
-                  {mockCampaigns.map(campaign => {
+                  {(dbCampaigns || []).map((campaign: any) => {
                     const ChannelIcon = getChannelIcon(campaign.channel)
                     return (
                       <div key={campaign.id} className="p-6 hover:bg-gray-50 dark:hover:bg-gray-800">
@@ -793,7 +769,7 @@ export default function NotificationsClient() {
           {/* Segments Tab */}
           <TabsContent value="segments" className="mt-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6">
-              {mockSegments.map(segment => (
+              {mockSegments.map((segment: any) => (
                 <Card key={segment.id} className="border-gray-200 dark:border-gray-700">
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-4">
@@ -821,7 +797,7 @@ export default function NotificationsClient() {
           {/* Templates Tab */}
           <TabsContent value="templates" className="mt-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
-              {mockTemplates.map(template => {
+              {mockTemplates.map((template: any) => {
                 const ChannelIcon = getChannelIcon(template.channel)
                 return (
                   <Card key={template.id} className="border-gray-200 dark:border-gray-700">
@@ -855,7 +831,7 @@ export default function NotificationsClient() {
               <Button onClick={() => setShowCreateAutomation(true)}><Plus className="h-4 w-4 mr-2" />Create Automation</Button>
             </div>
             <div className="space-y-4">
-              {mockAutomations.map(automation => (
+              {mockAutomations.map((automation: any) => (
                 <Card key={automation.id} className="border-gray-200 dark:border-gray-700">
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-4">
@@ -898,7 +874,7 @@ export default function NotificationsClient() {
           {/* A/B Testing Tab */}
           <TabsContent value="ab-testing" className="mt-6">
             <div className="space-y-6">
-              {mockABTests.map(test => (
+              {mockABTests.map((test: any) => (
                 <Card key={test.id} className="border-gray-200 dark:border-gray-700">
                   <CardHeader>
                     <div className="flex items-center justify-between">
@@ -954,7 +930,7 @@ export default function NotificationsClient() {
             <Card className="border-gray-200 dark:border-gray-700">
               <CardContent className="p-0">
                 <div className="divide-y divide-gray-100 dark:divide-gray-800">
-                  {mockWebhooks.map(webhook => (
+                  {mockWebhooks.map((webhook: any) => (
                     <div key={webhook.id} className="flex items-center gap-4 p-4">
                       <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${webhook.status === 'active' ? 'bg-green-100' : webhook.status === 'failed' ? 'bg-red-100' : 'bg-gray-100'}`}>
                         <Webhook className={`h-5 w-5 ${webhook.status === 'active' ? 'text-green-600' : webhook.status === 'failed' ? 'text-red-600' : 'text-gray-600'}`} />
@@ -1713,13 +1689,13 @@ export default function NotificationsClient() {
                           toast.promise(
                             (async () => {
                               const analyticsData = {
-                                campaigns: mockCampaigns.map(c => ({
+                                campaigns: (dbCampaigns || []).map((c: any) => ({
                                   name: c.name,
                                   channel: c.channel,
                                   status: c.status,
                                   stats: c.stats
                                 })),
-                                segments: mockSegments.map(s => ({
+                                segments: mockSegments.map((s: any) => ({
                                   name: s.name,
                                   userCount: s.userCount
                                 })),
@@ -2422,7 +2398,7 @@ export default function NotificationsClient() {
               <div><Label>Campaign Name</Label><Input placeholder="e.g., Product Launch" value={campaignForm.name} onChange={(e) => setCampaignForm(prev => ({ ...prev, name: e.target.value }))} /></div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div><Label>Channel</Label><Select value={campaignForm.channel} onValueChange={(v) => setCampaignForm(prev => ({ ...prev, channel: v }))}><SelectTrigger><SelectValue placeholder="Select channel" /></SelectTrigger><SelectContent><SelectItem value="push">Push</SelectItem><SelectItem value="email">Email</SelectItem><SelectItem value="sms">SMS</SelectItem><SelectItem value="slack">Slack</SelectItem></SelectContent></Select></div>
-                <div><Label>Segment</Label><Select value={campaignForm.segment} onValueChange={(v) => setCampaignForm(prev => ({ ...prev, segment: v }))}><SelectTrigger><SelectValue placeholder="Select segment" /></SelectTrigger><SelectContent>{mockSegments.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent></Select></div>
+                <div><Label>Segment</Label><Select value={campaignForm.segment} onValueChange={(v) => setCampaignForm(prev => ({ ...prev, segment: v }))}><SelectTrigger><SelectValue placeholder="Select segment" /></SelectTrigger><SelectContent>{mockSegments.map((s: any) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent></Select></div>
               </div>
               <div><Label>Title</Label><Input placeholder="Notification title" value={campaignForm.title} onChange={(e) => setCampaignForm(prev => ({ ...prev, title: e.target.value }))} /></div>
               <div><Label>Message</Label><Textarea placeholder="Notification message..." rows={3} value={campaignForm.message} onChange={(e) => setCampaignForm(prev => ({ ...prev, message: e.target.value }))} /></div>
