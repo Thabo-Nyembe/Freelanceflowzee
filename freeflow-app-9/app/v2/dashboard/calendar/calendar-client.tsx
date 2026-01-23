@@ -32,14 +32,6 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  calendarAIInsights,
-  calendarCollaborators,
-  calendarPredictions,
-  calendarActivities,
-  calendarQuickActions,
-} from '@/lib/mock-data/adapters'
-
 // ============================================================================
 // TYPE DEFINITIONS - Google Calendar Level Platform
 // ============================================================================
@@ -405,6 +397,23 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
       .sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime())
       .slice(0, 10)
   }, [displayEvents])
+
+  // Define adapter variables for competitive upgrade components
+  const calendarAIInsights = []
+  const calendarCollaborators = []
+  const calendarPredictions = []
+  const calendarActivities = displayEvents.slice(0, 5).map(e => ({
+    id: e.id,
+    type: 'event',
+    title: e.title,
+    timestamp: e.start_time,
+    user: { name: 'System', avatar: '' }
+  }))
+  const calendarQuickActions = [
+    { id: 'new', label: 'New Event', icon: 'plus', action: () => setShowNewEvent(true), variant: 'default' as const },
+    { id: 'schedule', label: 'Schedule', icon: 'calendar', action: () => setShowScheduleDialog(true), variant: 'default' as const },
+    { id: 'export', label: 'Export', icon: 'download', action: () => handleExportCalendar(), variant: 'outline' as const },
+  ]
 
   // Handlers
   // Edit form state
