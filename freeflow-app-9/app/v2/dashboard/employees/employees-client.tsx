@@ -38,8 +38,6 @@ import {
 } from '@/components/ui/competitive-upgrades-extended'
 
 
-// Local Mock Data for UI Demonstration
-
 
 // Adapters removed
 
@@ -201,7 +199,7 @@ interface HRIntegration {
   icon: string
 }
 
-// Mock Data
+
 
 
 // Mock data arrays removed (TimeOff, Reviews, Onboarding, OrgChart, Courses, Documents, Benefits, Goals, TeamMetrics, Integrations)
@@ -264,7 +262,7 @@ export default function EmployeesClient() {
         level: 'IC',
         manager: undefined,
         managerId: undefined,
-        status: (emp.status === 'active' ? 'active' : emp.status === 'on_leave' ? 'on_leave' : emp.status === 'onboarding' ? 'onboarding' : 'active') as EmployeeStatus,
+        status: (emp.status === 'active' ? (emp.onboarding_completed ? 'active' : 'onboarding') : emp.status === 'on-leave' ? 'on_leave' : 'active') as EmployeeStatus,
         hireDate: emp.start_date || emp.created_at || new Date().toISOString(),
         location: 'Remote',
         avatar: emp.avatar_url || undefined,
@@ -661,7 +659,6 @@ export default function EmployeesClient() {
     try {
       const fullExport = {
         employees: activeEmployees,
-        employees: activeEmployees,
         documents: [],
         reviews: [],
         timeOffRequests: [],
@@ -798,8 +795,8 @@ export default function EmployeesClient() {
     }
   }
 
-  // Handle updating mock employee profile
-  const handleUpdateMockProfile = async () => {
+  // Handle updating employee profile
+  const handleUpdateProfile = async () => {
     toast.success('Updating employee profile...')
     try {
       const response = await fetch('/api/employees', {
@@ -1191,7 +1188,7 @@ export default function EmployeesClient() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
-              {[{ type: 'Vacation', icon: Plane, available: 12, used: 3, total: 15, color: 'blue' }, { type: 'Sick Leave', icon: Heart, available: 8, used: 2, total: 10, color: 'red' }, { type: 'Personal', icon: Coffee, available: 3, used: 0, total: 3, color: 'purple' }, { type: 'Parental', icon: Home, available: 12, used: 0, total: 12, color: 'green' }].map(balance => (
+              {[{ type: 'Vacation', icon: Plane, available: 15, used: 0, total: 15, color: 'blue' }, { type: 'Sick Leave', icon: Heart, available: 10, used: 0, total: 10, color: 'red' }, { type: 'Personal', icon: Coffee, available: 3, used: 0, total: 3, color: 'purple' }, { type: 'Parental', icon: Home, available: 12, used: 0, total: 12, color: 'green' }].map(balance => (
                 <Card key={balance.type} className="border-gray-200 dark:border-gray-700">
                   <CardContent className="pt-4">
                     <div className="flex items-center gap-3 mb-3"><div className={`p-2 bg-${balance.color}-100 dark:bg-${balance.color}-900/30 rounded-lg`}><balance.icon className={`h-5 w-5 text-${balance.color}-600`} /></div><span className="font-medium">{balance.type}</span></div>
@@ -1343,9 +1340,9 @@ export default function EmployeesClient() {
               <Card>
                 <CardHeader><CardTitle>Quick Stats</CardTitle></CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg"><div className="flex items-center gap-3 mb-2"><UserPlus className="h-5 w-5 text-blue-600" /><span className="font-medium">New Hires</span></div><p className="text-3xl font-bold text-blue-600">1</p><p className="text-sm text-gray-500">This month</p></div>
-                  <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg"><div className="flex items-center gap-3 mb-2"><GraduationCap className="h-5 w-5 text-green-600" /><span className="font-medium">Completed</span></div><p className="text-3xl font-bold text-green-600">5</p><p className="text-sm text-gray-500">Onboardings this quarter</p></div>
-                  <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg"><div className="flex items-center gap-3 mb-2"><Clock className="h-5 w-5 text-purple-600" /><span className="font-medium">Avg Time</span></div><p className="text-3xl font-bold text-purple-600">12</p><p className="text-sm text-gray-500">Days to complete</p></div>
+                  <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg"><div className="flex items-center gap-3 mb-2"><UserPlus className="h-5 w-5 text-blue-600" /><span className="font-medium">New Hires</span></div><p className="text-3xl font-bold text-blue-600">0</p><p className="text-sm text-gray-500">This month</p></div>
+                  <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg"><div className="flex items-center gap-3 mb-2"><GraduationCap className="h-5 w-5 text-green-600" /><span className="font-medium">Completed</span></div><p className="text-3xl font-bold text-green-600">0</p><p className="text-sm text-gray-500">Onboardings this quarter</p></div>
+                  <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg"><div className="flex items-center gap-3 mb-2"><Clock className="h-5 w-5 text-purple-600" /><span className="font-medium">Avg Time</span></div><p className="text-3xl font-bold text-purple-600">-</p><p className="text-sm text-gray-500">Days to complete</p></div>
                 </CardContent>
               </Card>
             </div>
@@ -1468,9 +1465,9 @@ export default function EmployeesClient() {
                     </div>
                     <div className="space-y-2">
                       <h4 className="font-medium">Upcoming Vestings</h4>
-                      {[{ name: 'Sarah Chen', amount: 12500, date: 'Feb 15, 2024' }, { name: 'Mike Johnson', amount: 6250, date: 'Mar 1, 2024' }, { name: 'Emily Davis', amount: 5000, date: 'Mar 15, 2024' }].map((vest, i) => (
-                        <div key={i} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded"><span className="text-sm">{vest.name}</span><div className="text-right"><span className="font-medium text-green-600">${vest.amount.toLocaleString()}</span><span className="text-xs text-gray-500 ml-2">{vest.date}</span></div></div>
-                      ))}
+                      <div className="text-center py-4 text-gray-500 text-sm">
+                        <p>No upcoming vesting events</p>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -3157,7 +3154,7 @@ export default function EmployeesClient() {
             )}
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowEditProfileDialog(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={handleUpdateMockProfile}>
+              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={handleUpdateProfile}>
                 Save Changes
               </Button>
             </DialogFooter>
