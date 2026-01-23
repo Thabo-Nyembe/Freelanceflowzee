@@ -198,394 +198,14 @@ interface UtilizationData {
 }
 
 // ============================================================================
-// MOCK DATA GENERATION
+// DATA FROM HOOKS - Resources, Projects, TimeOff (Future Integration)
 // ============================================================================
 
-const mockResources: Resource[] = [
-  {
-    id: 'r1',
-    name: 'Sarah Chen',
-    email: 'sarah.chen@company.com',
-    phone: '+1 (555) 123-4567',
-    avatar: '',
-    role: 'Senior Developer',
-    department: 'Engineering',
-    location: 'San Francisco, CA',
-    status: 'available',
-    hourly_rate: 150,
-    cost_rate: 85,
-    capacity_hours: 40,
-    allocated_hours: 32,
-    utilization: 80,
-    skills: [
-      { name: 'React', level: 'expert', years_experience: 6 },
-      { name: 'TypeScript', level: 'expert', years_experience: 5 },
-      { name: 'Node.js', level: 'advanced', years_experience: 4 }
-    ],
-    manager_id: 'm1',
-    manager_name: 'Mike Wilson',
-    start_date: '2021-03-15',
-    timezone: 'America/Los_Angeles',
-    is_billable: true
-  },
-  {
-    id: 'r2',
-    name: 'Mike Wilson',
-    email: 'mike.wilson@company.com',
-    phone: '+1 (555) 234-5678',
-    avatar: '',
-    role: 'Engineering Manager',
-    department: 'Engineering',
-    location: 'New York, NY',
-    status: 'partially_available',
-    hourly_rate: 200,
-    cost_rate: 120,
-    capacity_hours: 40,
-    allocated_hours: 45,
-    utilization: 112,
-    skills: [
-      { name: 'Leadership', level: 'expert', years_experience: 10 },
-      { name: 'System Design', level: 'expert', years_experience: 12 },
-      { name: 'Python', level: 'advanced', years_experience: 8 }
-    ],
-    manager_id: null,
-    manager_name: null,
-    start_date: '2019-01-10',
-    timezone: 'America/New_York',
-    is_billable: true
-  },
-  {
-    id: 'r3',
-    name: 'Emma Davis',
-    email: 'emma.davis@company.com',
-    phone: '+1 (555) 345-6789',
-    avatar: '',
-    role: 'UX Designer',
-    department: 'Design',
-    location: 'Austin, TX',
-    status: 'available',
-    hourly_rate: 125,
-    cost_rate: 70,
-    capacity_hours: 40,
-    allocated_hours: 36,
-    utilization: 90,
-    skills: [
-      { name: 'Figma', level: 'expert', years_experience: 5 },
-      { name: 'User Research', level: 'advanced', years_experience: 4 },
-      { name: 'Prototyping', level: 'expert', years_experience: 5 }
-    ],
-    manager_id: 'm2',
-    manager_name: 'Lisa Thompson',
-    start_date: '2022-06-01',
-    timezone: 'America/Chicago',
-    is_billable: true
-  },
-  {
-    id: 'r4',
-    name: 'James Brown',
-    email: 'james.brown@company.com',
-    phone: '+1 (555) 456-7890',
-    avatar: '',
-    role: 'Backend Developer',
-    department: 'Engineering',
-    location: 'Seattle, WA',
-    status: 'on_leave',
-    hourly_rate: 140,
-    cost_rate: 80,
-    capacity_hours: 40,
-    allocated_hours: 0,
-    utilization: 0,
-    skills: [
-      { name: 'Go', level: 'expert', years_experience: 5 },
-      { name: 'Kubernetes', level: 'advanced', years_experience: 3 },
-      { name: 'PostgreSQL', level: 'expert', years_experience: 6 }
-    ],
-    manager_id: 'm1',
-    manager_name: 'Mike Wilson',
-    start_date: '2020-08-20',
-    timezone: 'America/Los_Angeles',
-    is_billable: true
-  },
-  {
-    id: 'r5',
-    name: 'Alex Johnson',
-    email: 'alex.johnson@company.com',
-    phone: '+1 (555) 567-8901',
-    avatar: '',
-    role: 'DevOps Engineer',
-    department: 'Operations',
-    location: 'Denver, CO',
-    status: 'available',
-    hourly_rate: 160,
-    cost_rate: 95,
-    capacity_hours: 40,
-    allocated_hours: 40,
-    utilization: 100,
-    skills: [
-      { name: 'AWS', level: 'expert', years_experience: 7 },
-      { name: 'Terraform', level: 'expert', years_experience: 5 },
-      { name: 'Docker', level: 'advanced', years_experience: 6 }
-    ],
-    manager_id: 'm3',
-    manager_name: 'David Kim',
-    start_date: '2021-11-01',
-    timezone: 'America/Denver',
-    is_billable: true
-  }
-]
-
-const mockProjects: Project[] = [
-  {
-    id: 'p1',
-    name: 'Platform Redesign',
-    code: 'PLAT-001',
-    client_name: 'Internal',
-    status: 'active',
-    priority: 'high',
-    start_date: '2024-01-01',
-    end_date: '2024-06-30',
-    budget_hours: 2400,
-    allocated_hours: 1800,
-    consumed_hours: 1200,
-    budget_amount: 360000,
-    spent_amount: 180000,
-    pm_name: 'Lisa Thompson',
-    pm_avatar: '',
-    color: '#8B5CF6',
-    team_size: 8
-  },
-  {
-    id: 'p2',
-    name: 'Mobile App V2',
-    code: 'MOB-002',
-    client_name: 'TechCorp Inc',
-    status: 'active',
-    priority: 'critical',
-    start_date: '2024-02-01',
-    end_date: '2024-08-31',
-    budget_hours: 3200,
-    allocated_hours: 2400,
-    consumed_hours: 1600,
-    budget_amount: 480000,
-    spent_amount: 240000,
-    pm_name: 'Mike Wilson',
-    pm_avatar: '',
-    color: '#EC4899',
-    team_size: 12
-  },
-  {
-    id: 'p3',
-    name: 'API Migration',
-    code: 'API-003',
-    client_name: 'DataFlow Systems',
-    status: 'planning',
-    priority: 'medium',
-    start_date: '2024-04-01',
-    end_date: '2024-09-30',
-    budget_hours: 1600,
-    allocated_hours: 800,
-    consumed_hours: 0,
-    budget_amount: 240000,
-    spent_amount: 0,
-    pm_name: 'Sarah Chen',
-    pm_avatar: '',
-    color: '#14B8A6',
-    team_size: 5
-  },
-  {
-    id: 'p4',
-    name: 'Security Audit',
-    code: 'SEC-004',
-    client_name: 'FinanceFirst',
-    status: 'active',
-    priority: 'high',
-    start_date: '2024-01-15',
-    end_date: '2024-03-31',
-    budget_hours: 400,
-    allocated_hours: 360,
-    consumed_hours: 320,
-    budget_amount: 64000,
-    spent_amount: 51200,
-    pm_name: 'David Kim',
-    pm_avatar: '',
-    color: '#F59E0B',
-    team_size: 3
-  },
-  {
-    id: 'p5',
-    name: 'Training Portal',
-    code: 'TRN-005',
-    client_name: 'Internal',
-    status: 'on_hold',
-    priority: 'low',
-    start_date: '2024-05-01',
-    end_date: '2024-10-31',
-    budget_hours: 800,
-    allocated_hours: 0,
-    consumed_hours: 0,
-    budget_amount: 120000,
-    spent_amount: 0,
-    pm_name: 'Emma Davis',
-    pm_avatar: '',
-    color: '#6366F1',
-    team_size: 0
-  }
-]
-
-const mockAllocations: Allocation[] = [
-  {
-    id: 'a1',
-    resource_id: 'r1',
-    resource_name: 'Sarah Chen',
-    resource_avatar: '',
-    resource_role: 'Senior Developer',
-    project_id: 'p1',
-    project_name: 'Platform Redesign',
-    project_code: 'PLAT-001',
-    project_color: '#8B5CF6',
-    status: 'active',
-    allocation_type: 'full-time',
-    priority: 'high',
-    hours_per_week: 32,
-    start_date: '2024-01-01',
-    end_date: '2024-06-30',
-    billable_rate: 150,
-    cost_rate: 85,
-    notes: 'Lead frontend development',
-    created_at: '2023-12-15T10:00:00Z',
-    updated_at: '2024-01-15T14:30:00Z',
-    approved_by: 'Mike Wilson',
-    approved_at: '2023-12-16T09:00:00Z'
-  },
-  {
-    id: 'a2',
-    resource_id: 'r2',
-    resource_name: 'Mike Wilson',
-    resource_avatar: '',
-    resource_role: 'Engineering Manager',
-    project_id: 'p2',
-    project_name: 'Mobile App V2',
-    project_code: 'MOB-002',
-    project_color: '#EC4899',
-    status: 'active',
-    allocation_type: 'part-time',
-    priority: 'critical',
-    hours_per_week: 20,
-    start_date: '2024-02-01',
-    end_date: '2024-08-31',
-    billable_rate: 200,
-    cost_rate: 120,
-    notes: 'Technical oversight and architecture review',
-    created_at: '2024-01-20T08:00:00Z',
-    updated_at: '2024-02-01T10:00:00Z',
-    approved_by: null,
-    approved_at: null
-  },
-  {
-    id: 'a3',
-    resource_id: 'r3',
-    resource_name: 'Emma Davis',
-    resource_avatar: '',
-    resource_role: 'UX Designer',
-    project_id: 'p1',
-    project_name: 'Platform Redesign',
-    project_code: 'PLAT-001',
-    project_color: '#8B5CF6',
-    status: 'active',
-    allocation_type: 'full-time',
-    priority: 'high',
-    hours_per_week: 36,
-    start_date: '2024-01-01',
-    end_date: '2024-04-30',
-    billable_rate: 125,
-    cost_rate: 70,
-    notes: 'Lead UX design and user research',
-    created_at: '2023-12-15T10:00:00Z',
-    updated_at: '2024-01-10T16:00:00Z',
-    approved_by: 'Lisa Thompson',
-    approved_at: '2023-12-16T11:00:00Z'
-  },
-  {
-    id: 'a4',
-    resource_id: 'r5',
-    resource_name: 'Alex Johnson',
-    resource_avatar: '',
-    resource_role: 'DevOps Engineer',
-    project_id: 'p2',
-    project_name: 'Mobile App V2',
-    project_code: 'MOB-002',
-    project_color: '#EC4899',
-    status: 'active',
-    allocation_type: 'full-time',
-    priority: 'critical',
-    hours_per_week: 40,
-    start_date: '2024-02-01',
-    end_date: '2024-08-31',
-    billable_rate: 160,
-    cost_rate: 95,
-    notes: 'CI/CD pipeline and infrastructure setup',
-    created_at: '2024-01-25T09:00:00Z',
-    updated_at: '2024-02-01T08:00:00Z',
-    approved_by: 'Mike Wilson',
-    approved_at: '2024-01-26T14:00:00Z'
-  },
-  {
-    id: 'a5',
-    resource_id: 'r2',
-    resource_name: 'Mike Wilson',
-    resource_avatar: '',
-    resource_role: 'Engineering Manager',
-    project_id: 'p4',
-    project_name: 'Security Audit',
-    project_code: 'SEC-004',
-    project_color: '#F59E0B',
-    status: 'active',
-    allocation_type: 'part-time',
-    priority: 'high',
-    hours_per_week: 25,
-    start_date: '2024-01-15',
-    end_date: '2024-03-31',
-    billable_rate: 200,
-    cost_rate: 120,
-    notes: 'Security review and compliance oversight',
-    created_at: '2024-01-10T10:00:00Z',
-    updated_at: '2024-01-15T09:00:00Z',
-    approved_by: 'David Kim',
-    approved_at: '2024-01-11T15:00:00Z'
-  },
-  {
-    id: 'a6',
-    resource_id: 'r1',
-    resource_name: 'Sarah Chen',
-    resource_avatar: '',
-    resource_role: 'Senior Developer',
-    project_id: 'p3',
-    project_name: 'API Migration',
-    project_code: 'API-003',
-    project_color: '#14B8A6',
-    status: 'pending',
-    allocation_type: 'part-time',
-    priority: 'medium',
-    hours_per_week: 8,
-    start_date: '2024-04-01',
-    end_date: '2024-09-30',
-    billable_rate: 150,
-    cost_rate: 85,
-    notes: 'API design consultation',
-    created_at: '2024-02-01T14:00:00Z',
-    updated_at: '2024-02-01T14:00:00Z',
-    approved_by: null,
-    approved_at: null
-  }
-]
-
-const mockTimeOff: TimeOff[] = [
-  { id: 't1', resource_id: 'r4', resource_name: 'James Brown', resource_avatar: '', type: 'vacation', start_date: '2024-02-12', end_date: '2024-02-23', hours: 80, status: 'approved', notes: 'Annual vacation', approved_by: 'Mike Wilson' },
-  { id: 't2', resource_id: 'r1', resource_name: 'Sarah Chen', resource_avatar: '', type: 'sick', start_date: '2024-01-29', end_date: '2024-01-30', hours: 16, status: 'approved', notes: 'Doctor appointment', approved_by: 'Mike Wilson' },
-  { id: 't3', resource_id: 'r3', resource_name: 'Emma Davis', resource_avatar: '', type: 'remote', start_date: '2024-02-05', end_date: '2024-02-09', hours: 40, status: 'approved', notes: 'Working from home', approved_by: 'Lisa Thompson' },
-  { id: 't4', resource_id: 'r5', resource_name: 'Alex Johnson', resource_avatar: '', type: 'personal', start_date: '2024-03-01', end_date: '2024-03-01', hours: 8, status: 'pending', notes: 'Personal day', approved_by: null },
-  { id: 't5', resource_id: 'r2', resource_name: 'Mike Wilson', resource_avatar: '', type: 'holiday', start_date: '2024-02-19', end_date: '2024-02-19', hours: 8, status: 'approved', notes: 'Presidents Day', approved_by: null }
-]
+// Placeholder arrays for features not yet implemented
+// TODO: Create hooks for resources, projects, time-off when backend tables are ready
+const resources: Resource[] = []
+const projects: Project[] = []
+const timeOff: TimeOff[] = []
 
 // ============================================================================
 // HELPER FUNCTIONS
@@ -660,33 +280,13 @@ const getUtilizationColor = (utilization: number): string => {
 }
 
 // ============================================================================
-// ENHANCED COMPETITIVE UPGRADE MOCK DATA - Resource Guru Level
+// Competitive Upgrade Component Variables
 // ============================================================================
 
-const mockAllocationAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Optimal Balance', description: 'Team allocation at 85% utilization - healthy capacity buffer maintained.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Capacity' },
-  { id: '2', type: 'warning' as const, title: 'Overallocation Risk', description: '4 resources are allocated over 100% for next sprint.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Planning' },
-  { id: '3', type: 'info' as const, title: 'Skill Match', description: 'New project requires React expertise - 3 available resources identified.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Matching' },
-]
-
-const mockAllocationCollaborators = [
-  { id: '1', name: 'Resource Manager', avatar: '/avatars/rm.jpg', status: 'online' as const, role: 'Manager' },
-  { id: '2', name: 'Project Lead', avatar: '/avatars/pl.jpg', status: 'online' as const, role: 'Lead' },
-  { id: '3', name: 'Capacity Planner', avatar: '/avatars/cp.jpg', status: 'away' as const, role: 'Planner' },
-]
-
-const mockAllocationPredictions = [
-  { id: '1', title: 'Capacity Forecast', prediction: 'Team will need 2 additional FTEs by Q2 based on pipeline', confidence: 88, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Utilization Trend', prediction: 'Billable hours trending 15% higher than last quarter', confidence: 92, trend: 'up' as const, impact: 'medium' as const },
-]
-
-const mockAllocationActivities = [
-  { id: '1', user: 'Resource Manager', action: 'Allocated', target: 'Sarah Chen to Project Phoenix', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Project Lead', action: 'Requested', target: 'Extension for Mike Johnson', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'System', action: 'Flagged', target: 'Conflicting allocations for 2 resources', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'warning' as const },
-]
-
-// Quick actions will be defined inside the component to access state setters
+const allocationAIInsights: any[] = []
+const allocationCollaborators: any[] = []
+const allocationPredictions: any[] = []
+const allocationActivities: any[] = []
 
 // ============================================================================
 // MAIN COMPONENT
@@ -1470,12 +1070,11 @@ export default function AllocationClient() {
                     <div className="space-y-3">
                       {mockTimeOff.slice(0, 4).map(timeOff => (
                         <div key={timeOff.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
-                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                            timeOff.type === 'vacation' ? 'bg-blue-100 text-blue-600' :
+                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${timeOff.type === 'vacation' ? 'bg-blue-100 text-blue-600' :
                             timeOff.type === 'sick' ? 'bg-red-100 text-red-600' :
-                            timeOff.type === 'remote' ? 'bg-green-100 text-green-600' :
-                            'bg-gray-100 text-gray-600'
-                          }`}>
+                              timeOff.type === 'remote' ? 'bg-green-100 text-green-600' :
+                                'bg-gray-100 text-gray-600'
+                            }`}>
                             {getTimeOffIcon(timeOff.type)}
                           </div>
                           <div className="flex-1">
@@ -2781,12 +2380,11 @@ export default function AllocationClient() {
               <div className="space-y-3">
                 {mockTimeOff.map(timeOff => (
                   <div key={timeOff.id} className="flex items-center gap-3 p-3 border rounded-lg">
-                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                      timeOff.type === 'vacation' ? 'bg-blue-100 text-blue-600' :
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${timeOff.type === 'vacation' ? 'bg-blue-100 text-blue-600' :
                       timeOff.type === 'sick' ? 'bg-red-100 text-red-600' :
-                      timeOff.type === 'remote' ? 'bg-green-100 text-green-600' :
-                      'bg-gray-100 text-gray-600'
-                    }`}>
+                        timeOff.type === 'remote' ? 'bg-green-100 text-green-600' :
+                          'bg-gray-100 text-gray-600'
+                      }`}>
                       {getTimeOffIcon(timeOff.type)}
                     </div>
                     <div className="flex-1">
