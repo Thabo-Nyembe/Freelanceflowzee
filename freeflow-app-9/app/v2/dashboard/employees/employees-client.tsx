@@ -41,10 +41,8 @@ import {
 // Local Mock Data for UI Demonstration
 
 
-import {
-  employeesActivities,
-  employeesQuickActions,
-} from '@/lib/mock-data/adapters'
+// Adapters removed
+
 
 // Types
 type EmployeeStatus = 'active' | 'on_leave' | 'terminated' | 'onboarding'
@@ -206,96 +204,8 @@ interface HRIntegration {
 // Mock Data
 
 
-const mockTimeOffRequests: TimeOffRequest[] = [
-  { id: '1', employeeId: '2', employeeName: 'Mike Johnson', type: 'vacation', startDate: '2024-02-15', endDate: '2024-02-20', days: 5, status: 'pending' },
-  { id: '2', employeeId: '4', employeeName: 'Alex Kim', type: 'sick', startDate: '2024-01-25', endDate: '2024-01-25', days: 1, status: 'approved' },
-  { id: '3', employeeId: '1', employeeName: 'Sarah Chen', type: 'personal', startDate: '2024-02-01', endDate: '2024-02-02', days: 2, status: 'approved' },
-  { id: '4', employeeId: '6', employeeName: 'Taylor Swift', type: 'vacation', startDate: '2024-03-01', endDate: '2024-03-08', days: 7, status: 'pending' }
-]
+// Mock data arrays removed (TimeOff, Reviews, Onboarding, OrgChart, Courses, Documents, Benefits, Goals, TeamMetrics, Integrations)
 
-const mockReviews: PerformanceReview[] = [
-  { id: '1', employeeId: '2', employeeName: 'Mike Johnson', reviewerId: '1', reviewerName: 'Sarah Chen', period: 'Q4 2023', overallScore: 4.5, strengths: ['Technical expertise', 'Team collaboration'], improvements: ['Documentation'], goals: ['Lead project', 'Mentor junior devs'], status: 'completed', createdAt: '2024-01-10' },
-  { id: '2', employeeId: '4', employeeName: 'Alex Kim', reviewerId: '3', reviewerName: 'Emily Davis', period: 'Q4 2023', overallScore: 4.2, strengths: ['Creative design', 'User empathy'], improvements: ['Time management'], goals: ['Design system update'], status: 'in_progress', createdAt: '2024-01-08' },
-  { id: '3', employeeId: '6', employeeName: 'Taylor Swift', reviewerId: '0', reviewerName: 'Alex CEO', period: 'Q4 2023', overallScore: 4.3, strengths: ['Growth mindset', 'Data-driven'], improvements: ['Cross-team communication'], goals: ['Launch campaign'], status: 'completed', createdAt: '2024-01-05' }
-]
-
-const mockOnboardingTasks: OnboardingTask[] = [
-  { id: '1', employeeId: '5', title: 'Complete I-9 Form', description: 'Employment eligibility verification', dueDate: '2024-01-20', completed: true, category: 'paperwork' },
-  { id: '2', employeeId: '5', title: 'Setup Workstation', description: 'Computer, monitors, peripherals', dueDate: '2024-01-21', completed: true, category: 'setup' },
-  { id: '3', employeeId: '5', title: 'Security Training', description: 'Complete mandatory security awareness', dueDate: '2024-01-25', completed: false, category: 'training' },
-  { id: '4', employeeId: '5', title: 'Meet with Manager', description: '1:1 introduction and goal setting', dueDate: '2024-01-22', completed: true, category: 'intro' },
-  { id: '5', employeeId: '5', title: 'Team Introductions', description: 'Meet team members', dueDate: '2024-01-23', completed: false, category: 'intro' }
-]
-
-const mockOrgChart: OrgNode = {
-  id: '0', name: 'Alex CEO', position: 'Chief Executive Officer', department: 'Executive',
-  children: [
-    {
-      id: '1', name: 'Sarah Chen', position: 'VP Engineering', department: 'Engineering', children: [
-        { id: '2', name: 'Mike Johnson', position: 'Senior Engineer', department: 'Engineering' },
-        { id: '5', name: 'Jordan Lee', position: 'Software Engineer', department: 'Engineering' }
-      ]
-    },
-    {
-      id: '3', name: 'Emily Davis', position: 'Product Manager', department: 'Product', children: [
-        { id: '4', name: 'Alex Kim', position: 'UX Designer', department: 'Design' }
-      ]
-    },
-    { id: '6', name: 'Taylor Swift', position: 'Marketing Manager', department: 'Marketing' }
-  ]
-}
-
-const mockCourses: TrainingCourse[] = [
-  { id: '1', title: 'Security Awareness Training', description: 'Annual mandatory security training', category: 'Compliance', duration: '2 hours', status: 'completed', progress: 100, mandatory: true, completedDate: '2024-01-10' },
-  { id: '2', title: 'Leadership Fundamentals', description: 'Core leadership skills for managers', category: 'Leadership', duration: '8 hours', status: 'in_progress', progress: 65, mandatory: false, dueDate: '2024-02-28' },
-  { id: '3', title: 'Diversity & Inclusion', description: 'Building inclusive workplaces', category: 'Compliance', duration: '1.5 hours', status: 'not_started', progress: 0, mandatory: true, dueDate: '2024-01-31' },
-  { id: '4', title: 'Advanced Python', description: 'Python best practices and patterns', category: 'Technical', duration: '12 hours', status: 'in_progress', progress: 40, mandatory: false },
-  { id: '5', title: 'Project Management', description: 'Agile and Scrum methodologies', category: 'Skills', duration: '6 hours', status: 'completed', progress: 100, mandatory: false, completedDate: '2023-12-15' }
-]
-
-const mockDocuments: EmployeeDocument[] = [
-  { id: '1', name: 'Employment Contract - Mike Johnson.pdf', type: 'contract', uploadedBy: 'HR Admin', uploadedAt: '2021-06-01', size: '2.4 MB', status: 'active' },
-  { id: '2', name: 'W-4 Tax Form.pdf', type: 'tax', uploadedBy: 'Mike Johnson', uploadedAt: '2024-01-05', size: '156 KB', status: 'active' },
-  { id: '3', name: 'Driver License Copy.jpg', type: 'id', uploadedBy: 'Mike Johnson', uploadedAt: '2021-06-01', size: '890 KB', status: 'expired', expiresAt: '2024-01-15' },
-  { id: '4', name: 'AWS Certification.pdf', type: 'certification', uploadedBy: 'Mike Johnson', uploadedAt: '2023-08-20', size: '512 KB', status: 'active', expiresAt: '2025-08-20' },
-  { id: '5', name: 'NDA Agreement.pdf', type: 'policy', uploadedBy: 'HR Admin', uploadedAt: '2021-06-01', size: '345 KB', status: 'pending_signature' }
-]
-
-const mockBenefits: Benefit[] = [
-  { id: '1', name: 'Medical Insurance', type: 'health', provider: 'Blue Cross Blue Shield', enrollmentStatus: 'enrolled', cost: 650, employerContribution: 520, coverageLevel: 'Family', effectiveDate: '2024-01-01' },
-  { id: '2', name: 'Dental Insurance', type: 'dental', provider: 'Delta Dental', enrollmentStatus: 'enrolled', cost: 85, employerContribution: 68, coverageLevel: 'Family', effectiveDate: '2024-01-01' },
-  { id: '3', name: 'Vision Insurance', type: 'vision', provider: 'VSP', enrollmentStatus: 'enrolled', cost: 25, employerContribution: 20, coverageLevel: 'Family', effectiveDate: '2024-01-01' },
-  { id: '4', name: 'Life Insurance', type: 'life', provider: 'MetLife', enrollmentStatus: 'enrolled', cost: 0, employerContribution: 45, coverageLevel: '2x Salary', effectiveDate: '2024-01-01' },
-  { id: '5', name: '401(k) Plan', type: '401k', provider: 'Fidelity', enrollmentStatus: 'enrolled', cost: 800, employerContribution: 400, coverageLevel: '6% match', effectiveDate: '2021-07-01' },
-  { id: '6', name: 'HSA Account', type: 'hsa', provider: 'Optum Bank', enrollmentStatus: 'enrolled', cost: 200, employerContribution: 100, coverageLevel: 'Individual', effectiveDate: '2024-01-01' }
-]
-
-const mockGoals: Goal[] = [
-  { id: '1', employeeId: '2', title: 'Lead Q1 Feature Development', description: 'Successfully deliver the new authentication system', category: 'performance', progress: 75, status: 'in_progress', dueDate: '2024-03-31', createdAt: '2024-01-01', keyResults: [{ title: 'Complete design review', progress: 100 }, { title: 'Implement core features', progress: 80 }, { title: 'Deploy to production', progress: 45 }] },
-  { id: '2', employeeId: '2', title: 'Improve Code Quality', description: 'Reduce technical debt and increase test coverage', category: 'development', progress: 60, status: 'in_progress', dueDate: '2024-06-30', createdAt: '2024-01-01', keyResults: [{ title: 'Increase test coverage to 80%', progress: 65 }, { title: 'Reduce critical bugs by 50%', progress: 55 }] },
-  { id: '3', employeeId: '2', title: 'Mentor Junior Developers', description: 'Support the growth of 2 junior team members', category: 'team', progress: 40, status: 'in_progress', dueDate: '2024-12-31', createdAt: '2024-01-01', keyResults: [{ title: 'Weekly 1:1 meetings', progress: 60 }, { title: 'Code review sessions', progress: 35 }, { title: 'Knowledge sharing presentations', progress: 25 }] },
-  { id: '4', employeeId: '1', title: 'Team Growth & Hiring', description: 'Expand engineering team to meet company goals', category: 'company', progress: 30, status: 'at_risk', dueDate: '2024-06-30', createdAt: '2024-01-01', keyResults: [{ title: 'Hire 5 new engineers', progress: 20 }, { title: 'Reduce time-to-hire to 30 days', progress: 40 }] }
-]
-
-
-
-const mockTeamMetrics: TeamMetric[] = [
-  { id: '1', label: 'Employee Engagement', value: 85, previousValue: 82, trend: 'up', category: 'engagement' },
-  { id: '2', label: 'eNPS Score', value: 72, previousValue: 68, trend: 'up', category: 'satisfaction' },
-  { id: '3', label: 'Performance Score', value: 91, previousValue: 89, trend: 'up', category: 'performance' },
-  { id: '4', label: 'Retention Rate', value: 94, previousValue: 96, trend: 'down', category: 'retention' },
-  { id: '5', label: 'Training Completion', value: 78, previousValue: 75, trend: 'up', category: 'performance' },
-  { id: '6', label: 'Goal Completion', value: 65, previousValue: 60, trend: 'up', category: 'performance' }
-]
-
-const mockIntegrations: HRIntegration[] = [
-  { id: '1', name: 'ADP Payroll', type: 'payroll', status: 'connected', lastSync: '2024-01-16 09:00', icon: 'dollar' },
-  { id: '2', name: 'Gusto Benefits', type: 'benefits', status: 'connected', lastSync: '2024-01-16 08:00', icon: 'heart' },
-  { id: '3', name: 'Greenhouse ATS', type: 'ats', status: 'connected', lastSync: '2024-01-16 07:30', icon: 'users' },
-  { id: '4', name: 'Checkr', type: 'background', status: 'connected', lastSync: '2024-01-15 18:00', icon: 'shield' },
-  { id: '5', name: 'Okta SSO', type: 'identity', status: 'connected', lastSync: '2024-01-16 09:15', icon: 'key' },
-  { id: '6', name: 'Slack', type: 'communication', status: 'connected', lastSync: '2024-01-16 09:10', icon: 'message' }
-]
 
 export default function EmployeesClient() {
   const [activeTab, setActiveTab] = useState('directory')
@@ -751,9 +661,10 @@ export default function EmployeesClient() {
     try {
       const fullExport = {
         employees: activeEmployees,
-        documents: mockDocuments,
-        reviews: mockReviews,
-        timeOffRequests: mockTimeOffRequests,
+        employees: activeEmployees,
+        documents: [],
+        reviews: [],
+        timeOffRequests: [],
         exportedAt: new Date().toISOString()
       }
 
@@ -788,7 +699,7 @@ export default function EmployeesClient() {
         type: 'GDPR Compliance',
         generatedAt: new Date().toISOString(),
         employeeCount: activeEmployees.length,
-        documentsAudited: mockDocuments.length,
+        documentsAudited: 0,
         complianceStatus: 'Compliant'
       }
 
@@ -978,8 +889,8 @@ export default function EmployeesClient() {
       avgPerformance: withPerformance.length > 0
         ? (withPerformance.reduce((sum, e) => sum + e.performanceScore, 0) / withPerformance.length).toFixed(0)
         : '0',
-      pendingTimeOff: mockTimeOffRequests.filter(r => r.status === 'pending').length,
-      pendingReviews: mockReviews.filter(r => r.status !== 'completed').length,
+      pendingTimeOff: 0,
+      pendingReviews: 0,
       totalPayroll: activeEmployees.reduce((sum, e) => sum + e.salary, 0),
       avgTenure: '2.3'
     }
@@ -1035,7 +946,7 @@ export default function EmployeesClient() {
     toast.success(`Review scheduled`, { description: `Performance review has been scheduled` })
   }
 
-  const handleApproveTimeOff = (request: typeof mockTimeOffRequests[0]) => {
+  const handleApproveTimeOff = (request: any) => {
     toast.success(`Time off approved`, { description: `${request.employeeName}'s time off has been approved` })
   }
 
@@ -1246,7 +1157,14 @@ export default function EmployeesClient() {
 
           {/* Org Chart Tab */}
           <TabsContent value="org-chart" className="mt-6">
-            <Card className="border-gray-200 dark:border-gray-700"><CardHeader><CardTitle>Organization Structure</CardTitle></CardHeader><CardContent>{renderOrgNode(mockOrgChart)}</CardContent></Card>
+            <Card className="border-gray-200 dark:border-gray-700">
+              <CardHeader><CardTitle>Organization Structure</CardTitle></CardHeader>
+              <CardContent>
+                <div className="text-center py-12 text-gray-500">
+                  <p>Organization chart unavailable</p>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Time Off Tab */}
@@ -1261,11 +1179,11 @@ export default function EmployeesClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockTimeOffRequests.filter(r => r.status === 'pending').length}</p>
+                    <p className="text-3xl font-bold">0</p>
                     <p className="text-emerald-200 text-sm">Pending</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockTimeOffRequests.length}</p>
+                    <p className="text-3xl font-bold">0</p>
                     <p className="text-emerald-200 text-sm">Requests</p>
                   </div>
                 </div>
@@ -1285,14 +1203,10 @@ export default function EmployeesClient() {
             <Card className="border-gray-200 dark:border-gray-700">
               <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Time Off Requests</CardTitle><Button onClick={() => setShowTimeOffRequestDialog(true)}><Plus className="h-4 w-4 mr-2" />Request Time Off</Button></CardHeader>
               <CardContent className="p-0 divide-y divide-gray-100 dark:divide-gray-800">
-                {mockTimeOffRequests.map(request => (
-                  <div key={request.id} className="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-800">
-                    <Avatar><AvatarFallback className="bg-blue-100 text-blue-700">{request.employeeName.split(' ').map(n => n[0]).join('')}</AvatarFallback></Avatar>
-                    <div className="flex-1"><p className="font-medium">{request.employeeName}</p><p className="text-sm text-gray-500">{request.type.charAt(0).toUpperCase() + request.type.slice(1)} • {request.days} day{request.days > 1 ? 's' : ''}</p></div>
-                    <div className="text-right"><p className="text-sm">{request.startDate} - {request.endDate}</p><Badge className={getStatusColor(request.status)}>{request.status}</Badge></div>
-                    {request.status === 'pending' && <div className="flex gap-2"><Button size="icon" variant="ghost" className="text-green-600" onClick={async () => { toast.loading('Approving request...'); try { await fetch(`/api/time-off/${request.id}/approve`, { method: 'POST' }); toast.dismiss(); toast.success('Time off request approved'); } catch { toast.dismiss(); toast.error('Failed to approve request'); } }}><CheckCircle className="h-4 w-4" /></Button><Button size="icon" variant="ghost" className="text-red-600" onClick={async () => { toast.loading('Rejecting request...'); try { await fetch(`/api/time-off/${request.id}/reject`, { method: 'POST' }); toast.dismiss(); toast.success('Time off request rejected'); } catch { toast.dismiss(); toast.error('Failed to reject request'); } }}><XCircle className="h-4 w-4" /></Button></div>}
-                  </div>
-                ))}
+                <div className="text-center py-12 text-gray-500">
+                  <Calendar className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                  <p>No time off requests pending</p>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -1309,11 +1223,11 @@ export default function EmployeesClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockReviews.length}</p>
+                    <p className="text-3xl font-bold">0</p>
                     <p className="text-orange-200 text-sm">Reviews</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockReviews.filter(r => r.status === 'completed').length}</p>
+                    <p className="text-3xl font-bold">0</p>
                     <p className="text-orange-200 text-sm">Completed</p>
                   </div>
                 </div>
@@ -1337,26 +1251,17 @@ export default function EmployeesClient() {
             {performanceTab === 'reviews' && (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6">
-                  <Card><CardContent className="p-6 text-center"><p className="text-5xl font-bold text-blue-600">{stats.avgPerformance}%</p><p className="text-sm text-gray-500 mt-2">Average Performance Score</p></CardContent></Card>
-                  <Card><CardContent className="p-6 text-center"><p className="text-5xl font-bold text-green-600">{mockReviews.filter(r => r.status === 'completed').length}</p><p className="text-sm text-gray-500 mt-2">Completed Reviews</p></CardContent></Card>
-                  <Card><CardContent className="p-6 text-center"><p className="text-5xl font-bold text-amber-600">{mockReviews.filter(r => r.status !== 'completed').length}</p><p className="text-sm text-gray-500 mt-2">Pending Reviews</p></CardContent></Card>
+                  <Card><CardContent className="p-6 text-center"><p className="text-5xl font-bold text-blue-600">0%</p><p className="text-sm text-gray-500 mt-2">Average Performance Score</p></CardContent></Card>
+                  <Card><CardContent className="p-6 text-center"><p className="text-5xl font-bold text-green-600">0</p><p className="text-sm text-gray-500 mt-2">Completed Reviews</p></CardContent></Card>
+                  <Card><CardContent className="p-6 text-center"><p className="text-5xl font-bold text-amber-600">0</p><p className="text-sm text-gray-500 mt-2">Pending Reviews</p></CardContent></Card>
                 </div>
                 <Card className="border-gray-200 dark:border-gray-700">
                   <CardHeader><CardTitle>Recent Reviews</CardTitle></CardHeader>
                   <CardContent className="space-y-4">
-                    {mockReviews.map(review => (
-                      <div key={review.id} className="p-4 border rounded-lg">
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center gap-3"><Avatar><AvatarFallback className="bg-blue-100 text-blue-700">{review.employeeName.split(' ').map(n => n[0]).join('')}</AvatarFallback></Avatar><div><p className="font-medium">{review.employeeName}</p><p className="text-sm text-gray-500">{review.period} • Reviewer: {review.reviewerName}</p></div></div>
-                          <div className="text-right"><p className="text-2xl font-bold text-blue-600">{review.overallScore}/5</p><Badge className={getStatusColor(review.status)}>{review.status.replace('_', ' ')}</Badge></div>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 text-sm">
-                          <div><p className="font-medium text-green-600 mb-1">Strengths</p><ul className="text-gray-500 space-y-1">{review.strengths.map((s, i) => <li key={i}>• {s}</li>)}</ul></div>
-                          <div><p className="font-medium text-orange-600 mb-1">Areas to Improve</p><ul className="text-gray-500 space-y-1">{review.improvements.map((s, i) => <li key={i}>• {s}</li>)}</ul></div>
-                          <div><p className="font-medium text-blue-600 mb-1">Goals</p><ul className="text-gray-500 space-y-1">{review.goals.map((s, i) => <li key={i}>• {s}</li>)}</ul></div>
-                        </div>
-                      </div>
-                    ))}
+                    <div className="text-center py-12 text-gray-500">
+                      <FileCheck className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                      <p>No recent performance reviews</p>
+                    </div>
                   </CardContent>
                 </Card>
               </>
@@ -1366,22 +1271,10 @@ export default function EmployeesClient() {
               <Card className="border-gray-200 dark:border-gray-700">
                 <CardHeader><CardTitle>OKRs & Goals</CardTitle></CardHeader>
                 <CardContent className="space-y-4">
-                  {mockGoals.map(goal => (
-                    <div key={goal.id} className="p-4 border rounded-lg">
-                      <div className="flex items-center justify-between mb-3">
-                        <div><h4 className="font-semibold">{goal.title}</h4><p className="text-sm text-gray-500">{goal.description}</p></div>
-                        <div className="flex items-center gap-3"><Badge variant="outline">{goal.category}</Badge><Badge className={getStatusColor(goal.status)}>{goal.status.replace('_', ' ')}</Badge></div>
-                      </div>
-                      <div className="mb-4"><div className="flex items-center justify-between mb-1"><span className="text-sm text-gray-500">Overall Progress</span><span className="text-sm font-medium">{goal.progress}%</span></div><Progress value={goal.progress} className="h-2" /></div>
-                      <div className="space-y-2"><p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Key Results</p>{goal.keyResults.map((kr, i) => (
-                        <div key={i} className="flex items-center gap-3 p-2 bg-gray-50 dark:bg-gray-800 rounded">
-                          <div className="flex-1"><p className="text-sm">{kr.title}</p><Progress value={kr.progress} className="h-1 mt-1" /></div>
-                          <span className="text-sm font-medium">{kr.progress}%</span>
-                        </div>
-                      ))}</div>
-                      <div className="flex items-center justify-between mt-3 pt-3 border-t text-xs text-gray-500"><span>Due: {goal.dueDate}</span><span>Created: {goal.createdAt}</span></div>
-                    </div>
-                  ))}
+                  <div className="text-center py-12 text-gray-500">
+                    <Target className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                    <p>No active goals</p>
+                  </div>
                 </CardContent>
               </Card>
             )}
@@ -1391,26 +1284,17 @@ export default function EmployeesClient() {
                 <Card className="border-gray-200 dark:border-gray-700">
                   <CardHeader><CardTitle>Team Metrics</CardTitle></CardHeader>
                   <CardContent className="space-y-4">
-                    {mockTeamMetrics.map(metric => (
-                      <div key={metric.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div><p className="font-medium">{metric.label}</p><p className="text-xs text-gray-500">{metric.category}</p></div>
-                        <div className="flex items-center gap-3">
-                          <span className="text-2xl font-bold">{metric.value}%</span>
-                          <div className={`flex items-center gap-1 text-xs ${metric.trend === 'up' ? 'text-green-600' : metric.trend === 'down' ? 'text-red-600' : 'text-gray-500'}`}>
-                            {metric.trend === 'up' && <ArrowUpRight className="h-3 w-3" />}
-                            {metric.trend === 'down' && <TrendingDown className="h-3 w-3" />}
-                            {metric.value - metric.previousValue > 0 ? '+' : ''}{metric.value - metric.previousValue}%
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                    <div className="text-center py-8 text-gray-500">
+                      <BarChart3 className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                      <p>No performance metrics available</p>
+                    </div>
                   </CardContent>
                 </Card>
                 <Card className="border-gray-200 dark:border-gray-700">
                   <CardHeader><CardTitle>Performance Distribution</CardTitle></CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      {[{ label: 'Exceeds Expectations', count: 2, percentage: 33, color: 'green' }, { label: 'Meets Expectations', count: 3, percentage: 50, color: 'blue' }, { label: 'Needs Improvement', count: 1, percentage: 17, color: 'amber' }, { label: 'Below Expectations', count: 0, percentage: 0, color: 'red' }].map((band, i) => (
+                      {[{ label: 'Exceeds Expectations', count: 0, percentage: 0, color: 'green' }, { label: 'Meets Expectations', count: 0, percentage: 0, color: 'blue' }, { label: 'Needs Improvement', count: 0, percentage: 0, color: 'amber' }, { label: 'Below Expectations', count: 0, percentage: 0, color: 'red' }].map((band, i) => (
                         <div key={i}>
                           <div className="flex items-center justify-between mb-1"><span className="text-sm">{band.label}</span><span className="text-sm font-medium">{band.count} ({band.percentage}%)</span></div>
                           <div className="h-3 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden"><div className={`h-full bg-${band.color}-500 rounded-full`} style={{ width: `${band.percentage}%` }} /></div>
@@ -1435,11 +1319,11 @@ export default function EmployeesClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockOnboardingTasks.length}</p>
+                    <p className="text-3xl font-bold">0</p>
                     <p className="text-pink-200 text-sm">Tasks</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockOnboardingTasks.filter(t => t.completed).length}</p>
+                    <p className="text-3xl font-bold">0</p>
                     <p className="text-pink-200 text-sm">Completed</p>
                   </div>
                 </div>
@@ -1450,15 +1334,9 @@ export default function EmployeesClient() {
               <Card className="md:col-span-2">
                 <CardHeader><CardTitle>Onboarding Progress - Jordan Lee</CardTitle></CardHeader>
                 <CardContent>
-                  <div className="mb-6"><div className="flex items-center justify-between mb-2"><span className="text-sm font-medium">Overall Completion</span><span className="text-sm font-medium">{mockOnboardingTasks.filter(t => t.completed).length}/{mockOnboardingTasks.length} tasks</span></div><Progress value={(mockOnboardingTasks.filter(t => t.completed).length / mockOnboardingTasks.length) * 100} className="h-3" /></div>
-                  <div className="space-y-3">
-                    {mockOnboardingTasks.map(task => (
-                      <div key={task.id} className={`flex items-center gap-4 p-4 rounded-lg border ${task.completed ? 'bg-green-50 dark:bg-green-900/20 border-green-200' : 'bg-white dark:bg-gray-800 border-gray-200'}`}>
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${task.completed ? 'bg-green-500 text-white' : 'bg-gray-100 dark:bg-gray-700'}`}>{task.completed ? <CheckCircle className="h-5 w-5" /> : <div className="w-3 h-3 rounded-full border-2" />}</div>
-                        <div className="flex-1"><p className={`font-medium ${task.completed ? 'line-through text-gray-500' : ''}`}>{task.title}</p><p className="text-sm text-gray-500">{task.description}</p></div>
-                        <div className="text-right"><Badge variant="secondary">{task.category}</Badge><p className="text-xs text-gray-500 mt-1">Due: {task.dueDate}</p></div>
-                      </div>
-                    ))}
+                  <div className="text-center py-12 text-gray-500">
+                    <UserPlus className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                    <p>No onboarding tasks pending</p>
                   </div>
                 </CardContent>
               </Card>
@@ -1540,34 +1418,18 @@ export default function EmployeesClient() {
             {compensationTab === 'benefits' && (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
-                  <Card><CardContent className="p-4"><p className="text-2xl font-bold">${mockBenefits.reduce((sum, b) => sum + b.employerContribution, 0).toLocaleString()}</p><p className="text-sm text-gray-500">Monthly Employer Cost</p></CardContent></Card>
-                  <Card><CardContent className="p-4"><p className="text-2xl font-bold">{mockBenefits.filter(b => b.enrollmentStatus === 'enrolled').length}/{mockBenefits.length}</p><p className="text-sm text-gray-500">Enrolled Benefits</p></CardContent></Card>
-                  <Card><CardContent className="p-4"><p className="text-2xl font-bold">95%</p><p className="text-sm text-gray-500">Enrollment Rate</p></CardContent></Card>
+                  <Card><CardContent className="p-4"><p className="text-2xl font-bold">$0</p><p className="text-sm text-gray-500">Monthly Employer Cost</p></CardContent></Card>
+                  <Card><CardContent className="p-4"><p className="text-2xl font-bold">0/0</p><p className="text-sm text-gray-500">Enrolled Benefits</p></CardContent></Card>
+                  <Card><CardContent className="p-4"><p className="text-2xl font-bold">0%</p><p className="text-sm text-gray-500">Enrollment Rate</p></CardContent></Card>
                   <Card><CardContent className="p-4"><p className="text-2xl font-bold">Jan 1</p><p className="text-sm text-gray-500">Next Open Enrollment</p></CardContent></Card>
                 </div>
                 <Card className="border-gray-200 dark:border-gray-700">
                   <CardHeader><CardTitle>Benefits Enrollment</CardTitle></CardHeader>
                   <CardContent className="space-y-4">
-                    {mockBenefits.map(benefit => (
-                      <div key={benefit.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div className="flex items-center gap-4">
-                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${benefit.type === 'health' ? 'bg-red-100' : benefit.type === '401k' ? 'bg-green-100' : 'bg-blue-100'}`}>
-                            {benefit.type === 'health' && <Heart className="h-5 w-5 text-red-600" />}
-                            {benefit.type === 'dental' && <Activity className="h-5 w-5 text-blue-600" />}
-                            {benefit.type === 'vision' && <Eye className="h-5 w-5 text-purple-600" />}
-                            {benefit.type === 'life' && <Shield className="h-5 w-5 text-gray-600" />}
-                            {benefit.type === '401k' && <DollarSign className="h-5 w-5 text-green-600" />}
-                            {benefit.type === 'hsa' && <Wallet className="h-5 w-5 text-amber-600" />}
-                          </div>
-                          <div><h4 className="font-medium">{benefit.name}</h4><p className="text-sm text-gray-500">{benefit.provider} • {benefit.coverageLevel}</p></div>
-                        </div>
-                        <div className="flex items-center gap-6">
-                          <div className="text-right"><p className="text-sm text-gray-500">Your Cost</p><p className="font-medium">${benefit.cost}/mo</p></div>
-                          <div className="text-right"><p className="text-sm text-gray-500">Employer</p><p className="font-medium text-green-600">${benefit.employerContribution}/mo</p></div>
-                          <Badge className={getStatusColor(benefit.enrollmentStatus)}>{benefit.enrollmentStatus}</Badge>
-                        </div>
-                      </div>
-                    ))}
+                    <div className="text-center py-12 text-gray-500">
+                      <Heart className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                      <p>No benefits data available</p>
+                    </div>
                   </CardContent>
                 </Card>
               </>
@@ -1628,11 +1490,11 @@ export default function EmployeesClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockCourses.length}</p>
+                    <p className="text-3xl font-bold">0</p>
                     <p className="text-cyan-200 text-sm">Courses</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockCourses.filter(c => c.status === 'completed').length}</p>
+                    <p className="text-3xl font-bold">0</p>
                     <p className="text-cyan-200 text-sm">Completed</p>
                   </div>
                 </div>
@@ -1640,32 +1502,18 @@ export default function EmployeesClient() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
-              <Card><CardContent className="p-4"><p className="text-2xl font-bold">{mockCourses.length}</p><p className="text-sm text-gray-500">Total Courses</p></CardContent></Card>
-              <Card><CardContent className="p-4"><p className="text-2xl font-bold text-green-600">{mockCourses.filter(c => c.status === 'completed').length}</p><p className="text-sm text-gray-500">Completed</p></CardContent></Card>
-              <Card><CardContent className="p-4"><p className="text-2xl font-bold text-blue-600">{mockCourses.filter(c => c.status === 'in_progress').length}</p><p className="text-sm text-gray-500">In Progress</p></CardContent></Card>
-              <Card><CardContent className="p-4"><p className="text-2xl font-bold text-amber-600">{mockCourses.filter(c => c.mandatory && c.status !== 'completed').length}</p><p className="text-sm text-gray-500">Mandatory Pending</p></CardContent></Card>
+              <Card><CardContent className="p-4"><p className="text-2xl font-bold">0</p><p className="text-sm text-gray-500">Total Courses</p></CardContent></Card>
+              <Card><CardContent className="p-4"><p className="text-2xl font-bold text-green-600">0</p><p className="text-sm text-gray-500">Completed</p></CardContent></Card>
+              <Card><CardContent className="p-4"><p className="text-2xl font-bold text-blue-600">0</p><p className="text-sm text-gray-500">In Progress</p></CardContent></Card>
+              <Card><CardContent className="p-4"><p className="text-2xl font-bold text-amber-600">0</p><p className="text-sm text-gray-500">Mandatory Pending</p></CardContent></Card>
             </div>
             <Card className="border-gray-200 dark:border-gray-700">
               <CardHeader><CardTitle>Training Courses</CardTitle></CardHeader>
               <CardContent className="space-y-4">
-                {mockCourses.map(course => (
-                  <div key={course.id} className="flex items-center gap-4 p-4 border rounded-lg">
-                    <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${course.status === 'completed' ? 'bg-green-100' : course.status === 'in_progress' ? 'bg-blue-100' : 'bg-gray-100'}`}>
-                      {course.status === 'completed' ? <CheckCircle className="h-6 w-6 text-green-600" /> : course.status === 'in_progress' ? <Play className="h-6 w-6 text-blue-600" /> : <BookOpen className="h-6 w-6 text-gray-600" />}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2"><h4 className="font-medium">{course.title}</h4>{course.mandatory && <Badge className="bg-red-100 text-red-700">Required</Badge>}</div>
-                      <p className="text-sm text-gray-500">{course.description}</p>
-                      <div className="flex items-center gap-4 mt-2 text-xs text-gray-500"><span>{course.category}</span><span>{course.duration}</span>{course.dueDate && <span>Due: {course.dueDate}</span>}</div>
-                    </div>
-                    <div className="w-32">
-                      <div className="flex items-center justify-between text-sm mb-1"><span>{course.progress}%</span></div>
-                      <Progress value={course.progress} className="h-2" />
-                    </div>
-                    <Badge className={getStatusColor(course.status)}>{course.status.replace('_', ' ')}</Badge>
-                    <Button variant="outline" size="sm" onClick={() => { setSelectedCourse(course); setShowCourseDialog(true) }}>{course.status === 'completed' ? 'View' : course.status === 'in_progress' ? 'Continue' : 'Start'}</Button>
-                  </div>
-                ))}
+                <div className="text-center py-12 text-gray-500">
+                  <BookOpen className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                  <p>No training courses assigned</p>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -2184,28 +2032,10 @@ export default function EmployeesClient() {
                         </Button>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        {mockIntegrations.map(integration => (
-                          <div key={integration.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                            <div className="flex items-center gap-4">
-                              <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${integration.status === 'connected' ? 'bg-green-100 dark:bg-green-900/30' : 'bg-gray-100 dark:bg-gray-700'}`}>
-                                {integration.type === 'payroll' && <DollarSign className="h-5 w-5 text-green-600" />}
-                                {integration.type === 'benefits' && <Heart className="h-5 w-5 text-pink-600" />}
-                                {integration.type === 'ats' && <Users className="h-5 w-5 text-blue-600" />}
-                                {integration.type === 'background' && <Shield className="h-5 w-5 text-purple-600" />}
-                                {integration.type === 'identity' && <Key className="h-5 w-5 text-amber-600" />}
-                                {integration.type === 'communication' && <MessageCircle className="h-5 w-5 text-indigo-600" />}
-                              </div>
-                              <div>
-                                <h4 className="font-medium">{integration.name}</h4>
-                                <p className="text-sm text-gray-500">Last sync: {integration.lastSync}</p>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-3">
-                              <Badge className={getStatusColor(integration.status)}>{integration.status}</Badge>
-                              <Button variant="ghost" size="sm" onClick={() => { setSelectedIntegration(integration); setShowConfigureIntegrationDialog(true) }}>Configure</Button>
-                            </div>
-                          </div>
-                        ))}
+                        <div className="text-center py-12 text-gray-500">
+                          <Zap className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                          <p>No connected integrations</p>
+                        </div>
                       </CardContent>
                     </Card>
 
@@ -2262,28 +2092,10 @@ export default function EmployeesClient() {
                         </Button>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        {mockDocuments.map(doc => (
-                          <div key={doc.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                            <div className="flex items-center gap-4">
-                              <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-                                <FileText className="h-5 w-5 text-blue-600" />
-                              </div>
-                              <div>
-                                <h4 className="font-medium">{doc.name}</h4>
-                                <p className="text-sm text-gray-500">{doc.type} • {doc.size} • Uploaded {doc.uploadedAt}</p>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-3">
-                              <Badge className={getStatusColor(doc.status)}>{doc.status.replace('_', ' ')}</Badge>
-                              <Button variant="ghost" size="icon" onClick={() => { setSelectedDocument(doc); setShowDownloadDocDialog(true) }}>
-                                <Download className="h-4 w-4" />
-                              </Button>
-                              <Button variant="ghost" size="icon" className="text-red-500" onClick={() => { setSelectedDocument(doc); setShowDeleteDocDialog(true) }}>
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </div>
-                        ))}
+                        <div className="text-center py-12 text-gray-500">
+                          <FileText className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                          <p>No document templates available</p>
+                        </div>
                       </CardContent>
                     </Card>
 
@@ -2352,7 +2164,7 @@ export default function EmployeesClient() {
                             <div className="text-sm text-gray-500">Employees</div>
                           </div>
                           <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
-                            <div className="text-2xl font-bold">{mockDocuments.length}</div>
+                            <div className="text-2xl font-bold">0</div>
                             <div className="text-sm text-gray-500">Documents</div>
                           </div>
                           <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
@@ -3070,9 +2882,9 @@ export default function EmployeesClient() {
                 <p className="font-medium">Data to export:</p>
                 <ul className="text-sm text-gray-500 mt-2 space-y-1">
                   <li>- {activeEmployees.length} Employee records</li>
-                  <li>- {mockDocuments.length} Documents</li>
-                  <li>- {mockReviews.length} Performance reviews</li>
-                  <li>- {mockTimeOffRequests.length} Time off requests</li>
+                  <li>- 0 Documents</li>
+                  <li>- 0 Performance reviews</li>
+                  <li>- 0 Time off requests</li>
                   <li>- All settings and configurations</li>
                 </ul>
               </div>
@@ -3412,6 +3224,6 @@ export default function EmployeesClient() {
           </DialogContent>
         </Dialog>
       </div>
-    </div>
+    </div >
   )
 }
