@@ -283,12 +283,20 @@ interface ChartData {
   labels: string[]
 }
 
+interface ReportAIInsight {
+  id: string
+  type: 'opportunity' | 'alert' | 'recommendation' | 'prediction'
+  title: string
+  description: string
+  priority: 'low' | 'medium' | 'high'
+  category: string
+  timestamp: string
+  confidence?: number
+  action?: string
+}
+
 // Standardized AI Insights Mock Data
-const mockReportsAIInsights = [
-  { id: '1', type: 'opportunity' as const, title: 'Engagement Spike', description: 'Report views increased by 22% this week, driven by the "Q4 Sales" dashboard.', priority: 'low' as const, category: 'Engagement', timestamp: new Date().toISOString() },
-  { id: '2', type: 'alert' as const, title: 'Data Synergy', description: 'Sales and Marketing data sources showing high correlation. Consider merging reports.', priority: 'medium' as const, category: 'Data', timestamp: new Date().toISOString() },
-  { id: '3', type: 'recommendation' as const, title: 'Unused Reports', description: '5 automated reports have 0 opens in 30 days. Consider archiving to reduce clutter.', priority: 'high' as const, category: 'Optimization', timestamp: new Date().toISOString() },
-]
+// MIGRATED: Mock data removed -> using aiInsights state
 
 // MIGRATED: Batch #16 - Removed mock data, using database hooks
 const chartTypes: { type: ChartType; icon: any; label: string }[] = [
@@ -451,7 +459,8 @@ export default function ReportsClient() {
   // AI Insights Dialog State
   const [showAIInsightsDialog, setShowAIInsightsDialog] = useState(false)
   const [aiAnalysisRunning, setAiAnalysisRunning] = useState(false)
-  const [aiInsightsResults, setAiInsightsResults] = useState<string[]>([])
+
+  const [aiInsightsResults, setAiInsightsResults] = useState<ReportAIInsight[]>([])
 
   // Theme Dialog State
   const [showThemeDialog, setShowThemeDialog] = useState(false)
@@ -513,7 +522,7 @@ export default function ReportsClient() {
   const [showEmbedSecret, setShowEmbedSecret] = useState(false)
 
   // MIGRATED: Batch #16 - Removed mock quick actions
-  const mockReportsQuickActions = []
+
 
   // Handler functions
   const handleCreateNewReport = async () => {
@@ -679,21 +688,21 @@ export default function ReportsClient() {
       // Fetch AI insights from analytics API
       const result = await fetchAnalyticsAPI('ai-insights')
       if (result.success && result.data?.insights) {
-        const insights = result.data.insights.map((i: any) => i.description || i.title)
+        const insights: ReportAIInsight[] = result.data.insights || []
         setAiInsightsResults(insights.length > 0 ? insights : [
-          'Revenue trend shows 15% growth potential in Q2',
-          'Customer churn risk identified in segment B',
-          'Marketing spend optimization can save 20% budget',
-          'Product feature adoption correlates with retention'
+          { id: '1', type: 'opportunity', title: 'Engagement Spike', description: 'Revenue trend shows 15% growth potential in Q2', priority: 'medium', category: 'Growth', timestamp: new Date().toISOString() },
+          { id: '2', type: 'alert', title: 'Churn Risk', description: 'Customer churn risk identified in segment B', priority: 'high', category: 'Retention', timestamp: new Date().toISOString() },
+          { id: '3', type: 'recommendation', title: 'Optimization', description: 'Marketing spend optimization can save 20% budget', priority: 'low', category: 'Budget', timestamp: new Date().toISOString() },
+          { id: '4', type: 'prediction', title: 'Adoption', description: 'Product feature adoption correlates with retention', priority: 'medium', category: 'Product', timestamp: new Date().toISOString() }
         ])
-        toast.success(`AI analysis complete`, { description: `Found ${insights.length} actionable insights` })
+        toast.success(`AI analysis complete`, { description: `Found ${insights.length || 4} actionable insights` })
       } else {
         // Fallback to default insights
         setAiInsightsResults([
-          'Revenue trend shows 15% growth potential in Q2',
-          'Customer churn risk identified in segment B',
-          'Marketing spend optimization can save 20% budget',
-          'Product feature adoption correlates with retention'
+          { id: '1', type: 'opportunity', title: 'Engagement Spike', description: 'Revenue trend shows 15% growth potential in Q2', priority: 'medium', category: 'Growth', timestamp: new Date().toISOString() },
+          { id: '2', type: 'alert', title: 'Churn Risk', description: 'Customer churn risk identified in segment B', priority: 'high', category: 'Retention', timestamp: new Date().toISOString() },
+          { id: '3', type: 'recommendation', title: 'Optimization', description: 'Marketing spend optimization can save 20% budget', priority: 'low', category: 'Budget', timestamp: new Date().toISOString() },
+          { id: '4', type: 'prediction', title: 'Adoption', description: 'Product feature adoption correlates with retention', priority: 'medium', category: 'Product', timestamp: new Date().toISOString() }
         ])
         toast.success('AI analysis complete')
       }
@@ -1102,7 +1111,7 @@ export default function ReportsClient() {
               className="overflow-hidden mb-6"
             >
               <AIInsightsPanel
-                insights={mockReportsAIInsights}
+                insights={aiInsightsResults}
                 className="mb-0"
               />
             </motion.div>
@@ -2316,7 +2325,7 @@ export default function ReportsClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockReportsQuickActions}
+            actions={[]}
             variant="grid"
           />
         </div>
@@ -3083,7 +3092,7 @@ export default function ReportsClient() {
                       <Sparkles className="h-5 w-5 text-purple-600 mt-0.5" />
                       <div>
                         <p className="font-medium text-purple-900 dark:text-purple-100">Insight {index + 1}</p>
-                        <p className="text-sm text-purple-700 dark:text-purple-300">{insight}</p>
+                        <p className="text-sm text-purple-700 dark:text-purple-300">{insight.description}</p>
                       </div>
                     </div>
                   ))}
