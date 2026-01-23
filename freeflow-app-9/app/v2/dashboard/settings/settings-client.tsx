@@ -152,7 +152,7 @@ interface Invoice {
 // MIGRATED: Batch #16 - Removed mock data, using database hooks
 
 export default function SettingsClient() {
-
+  const supabase = createClient()
   const [userId, setUserId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
@@ -900,7 +900,9 @@ export default function SettingsClient() {
       <AIInsightsPanel
         insights={[]}
         title="Account Insights"
-        onActionClick={handleInsightAction}
+        onInsightAction={(insight) => {
+          handleInsightAction(insight)
+        }}
       />
 
       {/* Main Settings Tabs */}
@@ -1225,9 +1227,8 @@ export default function SettingsClient() {
                 {sessions.map((session) => (
                   <div
                     key={session.id}
-                    className={`flex items-center justify-between p-4 rounded-lg border ${
-                      session.isCurrent ? 'bg-primary/5 border-primary/20' : 'bg-muted/30'
-                    }`}
+                    className={`flex items-center justify-between p-4 rounded-lg border ${session.isCurrent ? 'bg-primary/5 border-primary/20' : 'bg-muted/30'
+                      }`}
                   >
                     <div className="flex items-center gap-4">
                       <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center">
@@ -1382,11 +1383,10 @@ export default function SettingsClient() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                   <button
                     onClick={() => handleSaveTheme('light')}
-                    className={`p-4 rounded-lg border-2 transition-all ${
-                      theme === 'light'
-                        ? 'border-primary bg-primary/5'
-                        : 'border-muted hover:border-primary/50'
-                    }`}
+                    className={`p-4 rounded-lg border-2 transition-all ${theme === 'light'
+                      ? 'border-primary bg-primary/5'
+                      : 'border-muted hover:border-primary/50'
+                      }`}
                   >
                     <div className="flex flex-col items-center gap-2">
                       <div className="h-12 w-12 bg-white border rounded-lg flex items-center justify-center">
@@ -1397,11 +1397,10 @@ export default function SettingsClient() {
                   </button>
                   <button
                     onClick={() => handleSaveTheme('dark')}
-                    className={`p-4 rounded-lg border-2 transition-all ${
-                      theme === 'dark'
-                        ? 'border-primary bg-primary/5'
-                        : 'border-muted hover:border-primary/50'
-                    }`}
+                    className={`p-4 rounded-lg border-2 transition-all ${theme === 'dark'
+                      ? 'border-primary bg-primary/5'
+                      : 'border-muted hover:border-primary/50'
+                      }`}
                   >
                     <div className="flex flex-col items-center gap-2">
                       <div className="h-12 w-12 bg-gray-900 border rounded-lg flex items-center justify-center">
@@ -1412,11 +1411,10 @@ export default function SettingsClient() {
                   </button>
                   <button
                     onClick={() => handleSaveTheme('system')}
-                    className={`p-4 rounded-lg border-2 transition-all ${
-                      theme === 'system'
-                        ? 'border-primary bg-primary/5'
-                        : 'border-muted hover:border-primary/50'
-                    }`}
+                    className={`p-4 rounded-lg border-2 transition-all ${theme === 'system'
+                      ? 'border-primary bg-primary/5'
+                      : 'border-muted hover:border-primary/50'
+                      }`}
                   >
                     <div className="flex flex-col items-center gap-2">
                       <div className="h-12 w-12 bg-gradient-to-br from-white to-gray-900 border rounded-lg flex items-center justify-center">

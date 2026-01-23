@@ -35,6 +35,12 @@ import {
   Mic,
   Star,
   Share2,
+  MessageSquare,
+  Plus,
+  Info,
+  XCircle,
+  Edit,
+  Box,
 } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -51,7 +57,7 @@ import { Progress } from "@/components/ui/progress"
 
 interface AIInsight {
   id: string
-  type: 'recommendation' | 'alert' | 'opportunity' | 'prediction'
+  type: 'recommendation' | 'alert' | 'opportunity' | 'prediction' | 'success' | 'info' | 'warning' | 'error'
   title: string
   description: string
   impact?: 'high' | 'medium' | 'low'
@@ -534,8 +540,8 @@ export function TrendIndicator({
     )}>
       {showIcon && (
         isPositive ? <ArrowUp className={iconSizes[size]} /> :
-        isNeutral ? <Minus className={iconSizes[size]} /> :
-        <ArrowDown className={iconSizes[size]} />
+          isNeutral ? <Minus className={iconSizes[size]} /> :
+            <ArrowDown className={iconSizes[size]} />
       )}
       <span className="font-medium">{isPositive ? '+' : ''}{formatValue()}</span>
     </div>
@@ -668,7 +674,7 @@ export function CollaborationIndicator({
                   <span className={cn(
                     "absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-background",
                     collaborator.status === 'online' ? 'bg-green-500' :
-                    collaborator.status === 'away' ? 'bg-yellow-500' : 'bg-gray-400'
+                      collaborator.status === 'away' ? 'bg-yellow-500' : 'bg-gray-400'
                   )} />
                 </div>
               </TooltipTrigger>
@@ -1488,6 +1494,162 @@ export function DataStory({
         </div>
       </CardContent>
     </Card>
+  )
+}
+
+// ============================================================================
+// 8. ACTIVITY FEED
+// ============================================================================
+
+export interface ActivityItem {
+  id: string
+  user: string
+  action: string
+  target: string
+  timestamp: string
+  type: 'comment' | 'update' | 'create' | 'delete' | 'mention' | 'assignment' | 'status_change' | 'milestone' | 'integration' | 'success' | 'info' | 'warning' | 'error'
+  avatar?: string
+}
+
+interface ActivityFeedProps {
+  activities: ActivityItem[]
+  className?: string
+  limit?: number
+}
+
+export function ActivityFeed({
+  activities = [],
+  className,
+  limit
+}: ActivityFeedProps) {
+  const displayActivities = limit ? activities.slice(0, limit) : activities
+
+  const getActivityIcon = (type: ActivityItem['type']) => {
+    switch (type) {
+      case 'comment': return <MessageSquare className="h-4 w-4 text-blue-500" />
+      case 'update': return <RefreshCw className="h-4 w-4 text-orange-500" />
+      case 'create': return <Plus className="h-4 w-4 text-green-500" />
+      case 'delete': return <Trash2 className="h-4 w-4 text-red-500" />
+      case 'success': return <CheckCircle className="h-4 w-4 text-green-500" />
+      case 'info': return <Info className="h-4 w-4 text-blue-500" />
+      case 'warning': return <AlertTriangle className="h-4 w-4 text-amber-500" />
+      case 'error': return <XCircle className="h-4 w-4 text-red-500" />
+      default: return <Activity className="h-4 w-4 text-gray-500" />
+    }
+  }
+
+  return (
+    <div className={cn("space-y-4", className)}>
+      <h3 className="font-semibold flex items-center gap-2">
+        <Activity className="h-5 w-5" />
+        Activity History
+      </h3>
+      <div className="space-y-4 relative before:absolute before:left-4 before:top-2 before:bottom-2 before:w-px before:bg-border">
+        {displayActivities.map((item, i) => (
+          <motion.div
+            key={item.id}
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: i * 0.05 }}
+            className="flex gap-4 relative"
+          >
+            <div className="mt-1 relative z-10 bg-background p-1 rounded-full border">
+              {getActivityIcon(item.type)}
+            </div>
+            <div className="flex-1 bg-card border rounded-lg p-3 text-sm">
+              <div className="flex justify-between items-start">
+                <p>
+                  <span className="font-semibold">{item.user}</span>
+                  <span className="text-muted-foreground mx-1">{item.action}</span>
+                  <span className="font-medium text-primary">{item.target}</span>
+                </p>
+                <span className="text-xs text-muted-foreground whitespace-nowrap ml-2">
+                  {item.timestamp}
+                </span>
+              </div>
+            </div>
+          </motion.div>
+        ))}
+        {displayActivities.length === 0 && (
+          <p className="text-sm text-muted-foreground text-center py-4">No recent activity</p>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ============================================================================
+// 9. QUICK ACTIONS TOOLBAR
+// ============================================================================
+
+interface QuickAction {
+  id: string
+  label: string
+  icon: string // Lucide icon name or similar
+  action: () => void
+  variant?: 'default' | 'secondary' | 'outline' | 'ghost' | 'destructive'
+  disabled?: boolean
+}
+
+interface QuickActionsToolbarProps {
+  actions: QuickAction[]
+  variant?: 'row' | 'grid'
+  className?: string
+}
+
+export function QuickActionsToolbar({
+  actions = [],
+  variant = 'row',
+  className
+}: QuickActionsToolbarProps) {
+  // Helper to render icon based on string name - falling back to Box if not found
+  // In a real app, you might map names to components or accept ReactNode in Action
+  const renderIcon = (iconName: string) => {
+    // Simplified mapping for demo purposes
+    switch (iconName.toLowerCase()) {
+      case 'edit': return <Edit className="h-4 w-4 mr-2" />
+      case 'plus': return <Plus className="h-4 w-4 mr-2" />
+      case 'download': return <Download className="h-4 w-4 mr-2" />
+      case 'trash': return <Trash2 className="h-4 w-4 mr-2" />
+      case 'share': return <Share2 className="h-4 w-4 mr-2" />
+      default: return <Box className="h-4 w-4 mr-2" />
+    }
+  }
+
+  if (variant === 'grid') {
+    return (
+      <div className={cn("grid grid-cols-2 md:grid-cols-4 gap-2", className)}>
+        {actions.map((action) => (
+          <Button
+            key={action.id}
+            variant={action.variant || 'default'}
+            onClick={action.action}
+            disabled={action.disabled}
+            className="h-auto py-3 flex-col gap-1"
+          >
+            {renderIcon(action.icon)}
+            <span>{action.label}</span>
+          </Button>
+        ))}
+      </div>
+    )
+  }
+
+  return (
+    <div className={cn("flex flex-wrap items-center gap-2", className)}>
+      {actions.map((action) => (
+        <Button
+          key={action.id}
+          variant={action.variant || 'default'}
+          size="sm"
+          onClick={action.action}
+          disabled={action.disabled}
+        >
+          {renderIcon(action.icon)}
+          {action.label}
+        </Button>
+      ))}
+    </div>
   )
 }
 

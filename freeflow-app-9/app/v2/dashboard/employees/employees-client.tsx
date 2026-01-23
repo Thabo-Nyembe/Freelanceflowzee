@@ -16,12 +16,12 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
-  Users, UserPlus, Briefcase, DollarSign, Eye, MessageCircle, Mail, Star,
+  Users, UserPlus, DollarSign, Eye, MessageCircle, Mail, Star,
   Search, Calendar, Clock, Heart, Target, FileText, CheckCircle, XCircle,
-  ChevronRight, ChevronDown, Building2, MapPin, Phone, GraduationCap, Zap, Sparkles,
+  ChevronRight, ChevronDown, Building2, MapPin, GraduationCap, Zap, Sparkles,
   Settings, Download, Upload, Edit3, Trash2, Bell, BookOpen, Cake,
   Plane, Umbrella, Coffee, Home, BarChart3, TrendingDown, ArrowUpRight,
-  UserCheck, UserMinus, Layers, Wallet, Shield, Lock, Key, Plus,
+  UserCheck, Layers, Wallet, Shield, Lock, Key, Plus,
   Play, FileCheck, Clipboard, Activity
 } from 'lucide-react'
 
@@ -39,46 +39,7 @@ import {
 
 
 // Local Mock Data for UI Demonstration
-const localAIInsights = [
-  {
-    id: '1',
-    type: 'alert' as const,
-    title: 'Retention Risk',
-    description: '2 key engineers in the "Platform" team are showing signs of burnout risk.',
-    confidence: 0.82,
-    action: 'View Details'
-  },
-  {
-    id: '2',
-    type: 'opportunity' as const,
-    title: 'Performance Trend',
-    description: 'Sales team velocity has increased by 18% since the last training module.',
-    confidence: 0.91,
-    action: 'View Report'
-  }
-]
 
-const localCollaborators = [
-  { id: '1', name: 'Jennifer HR', role: 'HR Manager', avatar: '', status: 'online' as const },
-  { id: '2', name: 'David Recruiting', role: 'Recruiter', avatar: '', status: 'away' as const }
-]
-
-const localPredictions = [
-  {
-    dataset: 'Hiring Needs',
-    trend: 'up' as const,
-    value: '+5 Roles',
-    confidence: 0.88,
-    description: 'Projected need for 5 new engineering roles in Q3.'
-  },
-  {
-    dataset: 'Attrition',
-    trend: 'stable' as const,
-    value: 'Low',
-    confidence: 0.93,
-    description: 'Predicted attrition remains below industry average.'
-  }
-]
 
 import {
   employeesActivities,
@@ -160,16 +121,7 @@ interface OrgNode {
   children?: OrgNode[]
 }
 
-interface Compensation {
-  id: string
-  employeeId: string
-  baseSalary: number
-  bonus: number
-  equity: number
-  benefits: string[]
-  effectiveDate: string
-  nextReview: string
-}
+
 
 interface TrainingCourse {
   id: string
@@ -252,14 +204,7 @@ interface HRIntegration {
 }
 
 // Mock Data
-const mockEmployees: Employee[] = [
-  { id: '1', name: 'Sarah Chen', email: 'sarah@company.com', phone: '+1-555-0101', position: 'VP of Engineering', department: 'Engineering', level: 'L7', manager: 'Alex CEO', managerId: '0', status: 'active', hireDate: '2020-03-15', location: 'San Francisco, CA', salary: 280000, equity: 50000, performanceScore: 98, projectsCount: 12, directReports: 8, skills: ['Leadership', 'Architecture', 'Python', 'Go'] },
-  { id: '2', name: 'Mike Johnson', email: 'mike@company.com', phone: '+1-555-0102', position: 'Senior Engineer', department: 'Engineering', level: 'L5', manager: 'Sarah Chen', managerId: '1', status: 'active', hireDate: '2021-06-01', location: 'New York, NY', salary: 180000, equity: 25000, performanceScore: 92, projectsCount: 8, directReports: 0, skills: ['React', 'TypeScript', 'Node.js'] },
-  { id: '3', name: 'Emily Davis', email: 'emily@company.com', phone: '+1-555-0103', position: 'Product Manager', department: 'Product', level: 'L5', manager: 'Alex CEO', managerId: '0', status: 'active', hireDate: '2021-09-15', location: 'Austin, TX', salary: 165000, equity: 20000, performanceScore: 95, projectsCount: 6, directReports: 2, skills: ['Product Strategy', 'Analytics', 'User Research'] },
-  { id: '4', name: 'Alex Kim', email: 'alex@company.com', phone: '+1-555-0104', position: 'UX Designer', department: 'Design', level: 'L4', manager: 'Emily Davis', managerId: '3', status: 'active', hireDate: '2022-01-10', location: 'Remote', salary: 140000, equity: 15000, performanceScore: 88, projectsCount: 10, directReports: 0, skills: ['Figma', 'User Testing', 'Design Systems'] },
-  { id: '5', name: 'Jordan Lee', email: 'jordan@company.com', phone: '+1-555-0105', position: 'Software Engineer', department: 'Engineering', level: 'L4', manager: 'Sarah Chen', managerId: '1', status: 'onboarding', hireDate: '2024-01-15', location: 'Seattle, WA', salary: 150000, equity: 18000, performanceScore: 0, projectsCount: 0, directReports: 0, skills: ['Python', 'AWS', 'Machine Learning'] },
-  { id: '6', name: 'Taylor Swift', email: 'taylor@company.com', phone: '+1-555-0106', position: 'Marketing Manager', department: 'Marketing', level: 'L5', manager: 'Alex CEO', managerId: '0', status: 'active', hireDate: '2021-04-20', location: 'Los Angeles, CA', salary: 155000, equity: 18000, performanceScore: 91, projectsCount: 5, directReports: 3, skills: ['Growth', 'Content', 'SEO'] }
-]
+
 
 const mockTimeOffRequests: TimeOffRequest[] = [
   { id: '1', employeeId: '2', employeeName: 'Mike Johnson', type: 'vacation', startDate: '2024-02-15', endDate: '2024-02-20', days: 5, status: 'pending' },
@@ -332,11 +277,7 @@ const mockGoals: Goal[] = [
   { id: '4', employeeId: '1', title: 'Team Growth & Hiring', description: 'Expand engineering team to meet company goals', category: 'company', progress: 30, status: 'at_risk', dueDate: '2024-06-30', createdAt: '2024-01-01', keyResults: [{ title: 'Hire 5 new engineers', progress: 20 }, { title: 'Reduce time-to-hire to 30 days', progress: 40 }] }
 ]
 
-const mockSurveys: Survey[] = [
-  { id: '1', title: 'Q1 2024 Employee Engagement', type: 'engagement', status: 'active', responseRate: 78, avgScore: 4.2, createdAt: '2024-01-15', closesAt: '2024-01-31', responses: 47, totalInvited: 60 },
-  { id: '2', title: 'Weekly Pulse Check', type: 'pulse', status: 'completed', responseRate: 92, avgScore: 4.5, createdAt: '2024-01-08', closesAt: '2024-01-12', responses: 55, totalInvited: 60 },
-  { id: '3', title: 'Manager Feedback Survey', type: 'feedback', status: 'draft', responseRate: 0, avgScore: 0, createdAt: '2024-01-20', closesAt: '2024-02-28', responses: 0, totalInvited: 12 }
-]
+
 
 const mockTeamMetrics: TeamMetric[] = [
   { id: '1', label: 'Employee Engagement', value: 85, previousValue: 82, trend: 'up', category: 'engagement' },
@@ -425,8 +366,56 @@ export default function EmployeesClient() {
         skills: emp.skills || ['Communication', 'Teamwork']
       })) as Employee[]
     }
-    return mockEmployees
+    return []
   }, [dbEmployees])
+  // Dynamic AI Insights
+  const aiInsights = useMemo(() => {
+    const insights = []
+    if (activeEmployees.length > 0) {
+      const lowPerf = activeEmployees.filter(e => e.performanceScore < 70).length
+      if (lowPerf > 0) {
+        insights.push({
+          id: 'perf-risk', type: 'alert', title: 'Performance Risk',
+          description: `${lowPerf} employees are below performance standards.`,
+          confidence: 0.85, action: 'View Reviews'
+        })
+      }
+      const growth = activeEmployees.filter(e => {
+        const hire = new Date(e.hireDate)
+        return (new Date().getTime() - hire.getTime()) < 30 * 24 * 60 * 60 * 1000
+      }).length
+      if (growth > 0) {
+        insights.push({
+          id: 'onboarding-surge', type: 'opportunity', title: 'Onboarding Surge',
+          description: `${growth} new hires in the last 30 days. Consider team bonding event.`,
+          confidence: 0.92, action: 'View Onboarding'
+        })
+      }
+    }
+    // Default if empty
+    if (insights.length === 0) {
+      insights.push({ id: 'welcome', type: 'info', title: 'AI Insights', description: 'Insights will appear here as your team grows.', confidence: 1.0, action: 'Learn More' })
+    }
+    return insights as any[]
+  }, [activeEmployees])
+
+  // Dynamic Predictions
+  const predictions = useMemo(() => {
+    const preds = []
+    preds.push({
+      dataset: 'Hiring Needs', trend: activeEmployees.length < 5 ? 'up' : 'stable',
+      value: activeEmployees.length < 5 ? '+2 Roles' : 'Stable',
+      confidence: 0.85, description: activeEmployees.length < 5 ? 'Team is small, consider hiring.' : 'Team size looks optimal.'
+    })
+    return preds as any[]
+  }, [activeEmployees])
+
+  // Dynamic Collaborators
+  const collaborators = useMemo(() => {
+    return activeEmployees.slice(0, 5).map(e => ({
+      id: e.id, name: e.name, role: e.position, avatar: e.avatar, status: 'online'
+    })) as any[]
+  }, [activeEmployees])
 
   // Edit dialog state
   const [showEditDialog, setShowEditDialog] = useState(false)
@@ -524,20 +513,7 @@ export default function EmployeesClient() {
     }
   }
 
-  // Handle terminating an employee
-  const handleTerminateEmployee = async (employee: DBEmployee) => {
-    try {
-      await updateEmployee({
-        status: 'terminated',
-        termination_date: new Date().toISOString().split('T')[0]
-      } as any, employee.id)
-      toast.success(`${employee.employee_name} has been terminated`)
-      refetch()
-    } catch (error) {
-      console.error('Failed to terminate employee:', error)
-      toast.error('Failed to terminate employee')
-    }
-  }
+
 
   // Handle deleting an employee (soft delete)
   const handleDeleteEmployee = async () => {
@@ -615,23 +591,8 @@ export default function EmployeesClient() {
 
   // Handle survey creation
   const handleCreateSurvey = async () => {
-    toast.success('Creating survey...')
-    try {
-      const response = await fetch('/api/employees', {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' }
-      })
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to create survey')
-      }
-      const { data } = await response.json()
-      toast.success(`Survey created and invitations sent to ${data?.length || 0} employees!`)
-      setShowSurveyDialog(false)
-    } catch (error) {
-      console.error('Failed to create survey:', error)
-      toast.error(error instanceof Error ? error.message : 'Failed to create survey')
-    }
+    toast.info('Survey creation feature coming soon')
+    setShowSurveyDialog(false)
   }
 
   // Handle performance review start
@@ -746,63 +707,21 @@ export default function EmployeesClient() {
 
   // Handle integration connection
   const handleConnectIntegration = async () => {
-    toast.success('Connecting integration...')
-    try {
-      const response = await fetch('/api/employees', {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' }
-      })
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to connect integration')
-      }
-      toast.success('Integration connected successfully!')
-      setShowAddIntegrationDialog(false)
-    } catch (error) {
-      console.error('Failed to connect integration:', error)
-      toast.error(error instanceof Error ? error.message : 'Failed to connect integration')
-    }
+    toast.info('Integration features coming soon')
+    setShowAddIntegrationDialog(false)
   }
 
   // Handle integration disconnection
   const handleDisconnectIntegration = async () => {
     if (!confirm('Are you sure you want to disconnect this integration?')) return
-    toast.success('Disconnecting integration...')
-    try {
-      const response = await fetch('/api/employees', {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' }
-      })
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to disconnect integration')
-      }
-      toast.success('Integration disconnected')
-      setShowConfigureIntegrationDialog(false)
-    } catch (error) {
-      console.error('Failed to disconnect integration:', error)
-      toast.error(error instanceof Error ? error.message : 'Failed to disconnect integration')
-    }
+    toast.info('Integration features coming soon')
+    setShowConfigureIntegrationDialog(false)
   }
 
   // Handle integration settings save
   const handleSaveIntegrationSettings = async () => {
-    toast.success('Saving integration settings...')
-    try {
-      const response = await fetch('/api/employees', {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' }
-      })
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to save integration settings')
-      }
-      toast.success('Integration settings saved!')
-      setShowConfigureIntegrationDialog(false)
-    } catch (error) {
-      console.error('Failed to save integration settings:', error)
-      toast.error(error instanceof Error ? error.message : 'Failed to save integration settings')
-    }
+    toast.info('Integration features coming soon')
+    setShowConfigureIntegrationDialog(false)
   }
 
   // Handle API key regeneration
@@ -857,23 +776,8 @@ export default function EmployeesClient() {
 
   // Handle HR data import
   const handleImportHRData = async () => {
-    toast.success('Importing HR data...')
-    try {
-      const response = await fetch('/api/employees', {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' }
-      })
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Failed to import HR data')
-      }
-      toast.success('HR data imported successfully!')
-      setShowImportDataDialog(false)
-      refetch()
-    } catch (error) {
-      console.error('Failed to import HR data:', error)
-      toast.error(error instanceof Error ? error.message : 'Failed to import HR data')
-    }
+    toast.info('HR Data Import coming soon')
+    setShowImportDataDialog(false)
   }
 
   // Handle compliance report generation
@@ -1188,9 +1092,9 @@ export default function EmployeesClient() {
               className="overflow-hidden mb-6"
             >
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-2">
-                <AIInsightsPanel insights={localAIInsights} />
-                <PredictiveAnalytics predictions={localPredictions} />
-                <CollaborationIndicator collaborators={localCollaborators} />
+                <AIInsightsPanel insights={aiInsights} />
+                <PredictiveAnalytics predictions={predictions} />
+                <CollaborationIndicator collaborators={collaborators} />
               </div>
             </motion.div>
           )}
@@ -1255,140 +1159,89 @@ export default function EmployeesClient() {
               ))}
             </div>
             {/* Database Employees Section */}
-            {dbEmployees && dbEmployees.length > 0 && (
-              <>
-                <div className="flex items-center justify-between mt-8">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                    <Users className="h-5 w-5 text-blue-600" />
-                    Your Employees ({dbEmployees.length})
-                  </h3>
-                  {employeesLoading && <span className="text-sm text-gray-500">Loading...</span>}
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {dbEmployees.map(employee => (
-                    <Card key={employee.id} className="border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow overflow-hidden">
-                      <div className="h-20 bg-gradient-to-r from-green-500 to-emerald-600 relative">
-                        <Avatar className="absolute -bottom-8 left-6 w-16 h-16 border-4 border-white dark:border-gray-800">
-                          <AvatarImage src={employee.avatar_url || undefined} alt="User avatar" />
-                          <AvatarFallback className="bg-green-100 text-green-700 text-lg">
-                            {employee.employee_name?.split(' ').map(n => n[0]).join('') || 'E'}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="absolute top-2 right-2 flex gap-1">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 bg-white/20 hover:bg-white/40 text-white"
-                            onClick={() => handleOpenEditDialog(employee)}
-                          >
-                            <Edit3 className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 bg-white/20 hover:bg-red-500/80 text-white"
-                            onClick={() => handleOpenDeleteDialog(employee)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                      <CardContent className="pt-10 pb-4">
-                        <div className="flex items-start justify-between mb-3">
-                          <div>
-                            <h3 className="font-semibold text-lg flex items-center gap-2">
-                              {employee.employee_name}
-                              {employee.performance_score >= 95 && <Star className="h-4 w-4 fill-amber-400 text-amber-400" />}
-                            </h3>
-                            <p className="text-sm text-gray-500">{employee.position || employee.job_title || 'No position'}</p>
-                          </div>
-                          <Badge className={employee.status === 'active' ? 'bg-green-100 text-green-700' : employee.status === 'terminated' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700'}>
-                            {employee.status}
-                          </Badge>
-                        </div>
-                        <div className="space-y-2 mb-4">
-                          {employee.email && (
-                            <p className="text-sm flex items-center gap-2 text-gray-500">
-                              <Mail className="h-4 w-4" />{employee.email}
-                            </p>
-                          )}
-                          {employee.department && (
-                            <p className="text-sm flex items-center gap-2 text-gray-500">
-                              <Building2 className="h-4 w-4" />{employee.department}
-                            </p>
-                          )}
-                          {employee.phone && (
-                            <p className="text-sm flex items-center gap-2 text-gray-500">
-                              <Phone className="h-4 w-4" />{employee.phone}
-                            </p>
-                          )}
-                        </div>
-                        <div className="flex items-center justify-between pt-3 border-t">
-                          <div className="flex items-center gap-4 text-sm">
-                            <div>
-                              <p className="text-gray-500">Performance</p>
-                              <p className="font-semibold text-blue-600">
-                                {employee.performance_score > 0 ? `${employee.performance_score}%` : 'N/A'}
-                              </p>
-                            </div>
-                            <div>
-                              <p className="text-gray-500">Projects</p>
-                              <p className="font-semibold">{employee.projects_count || 0}</p>
-                            </div>
-                          </div>
-                          <div className="flex gap-1">
-                            {employee.status === 'active' && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="text-amber-600 hover:text-amber-700 hover:bg-amber-50"
-                                onClick={() => handleTerminateEmployee(employee)}
-                                disabled={updating}
-                              >
-                                <UserMinus className="h-4 w-4 mr-1" />
-                                Terminate
-                              </Button>
-                            )}
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </>
-            )}
 
-            {/* Mock Employees Section */}
+
+            {/* Employees List */}
             <div className="flex items-center justify-between mt-8">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                <Briefcase className="h-5 w-5 text-blue-600" />
-                Sample Employees ({filteredEmployees.length})
+                <Users className="h-5 w-5 text-blue-600" />
+                Employees ({filteredEmployees.length})
               </h3>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredEmployees.map(employee => (
-                <Card key={employee.id} className="border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow overflow-hidden">
-                  <div className="h-20 bg-gradient-to-r from-blue-500 to-indigo-600 relative"><Avatar className="absolute -bottom-8 left-6 w-16 h-16 border-4 border-white dark:border-gray-800"><AvatarFallback className="bg-blue-100 text-blue-700 text-lg">{employee.name.split(' ').map(n => n[0]).join('')}</AvatarFallback></Avatar></div>
-                  <CardContent className="pt-10 pb-4">
-                    <div className="flex items-start justify-between mb-3">
-                      <div><h3 className="font-semibold text-lg flex items-center gap-2">{employee.name}{employee.performanceScore >= 95 && <Star className="h-4 w-4 fill-amber-400 text-amber-400" />}</h3><p className="text-sm text-gray-500">{employee.position}</p></div>
-                      <Badge className={getDepartmentColor(employee.department)}>{employee.department}</Badge>
-                    </div>
-                    <div className="space-y-2 mb-4">
-                      <p className="text-sm flex items-center gap-2 text-gray-500"><Mail className="h-4 w-4" />{employee.email}</p>
-                      <p className="text-sm flex items-center gap-2 text-gray-500"><MapPin className="h-4 w-4" />{employee.location}</p>
-                    </div>
-                    <div className="flex items-center justify-between pt-3 border-t">
-                      <div className="flex items-center gap-4 text-sm">
-                        <div><p className="text-gray-500">Performance</p><p className="font-semibold text-blue-600">{employee.performanceScore > 0 ? `${employee.performanceScore}%` : 'N/A'}</p></div>
-                        <div><p className="text-gray-500">Projects</p><p className="font-semibold">{employee.projectsCount}</p></div>
+
+            {employeesLoading ? (
+              <div className="flex justify-center py-12">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-500"></div>
+              </div>
+            ) : filteredEmployees.length === 0 ? (
+              <div className="text-center py-12 text-muted-foreground border-2 border-dashed rounded-xl">
+                <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <h3 className="text-lg font-medium">No employees found</h3>
+                <p className="text-sm mb-4">Add your first employee to get started</p>
+                <Button onClick={() => setShowAddDialog(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Employee
+                </Button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredEmployees.map(employee => (
+                  <Card key={employee.id} className="border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow overflow-hidden">
+                    <div className="h-20 bg-gradient-to-r from-blue-500 to-indigo-600 relative">
+                      <Avatar className="absolute -bottom-8 left-6 w-16 h-16 border-4 border-white dark:border-gray-800">
+                        <AvatarImage src={employee.avatar || undefined} />
+                        <AvatarFallback className="bg-blue-100 text-blue-700 text-lg">{employee.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                      </Avatar>
+                      <div className="absolute top-2 right-2 flex gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 bg-white/20 hover:bg-white/40 text-white"
+                          onClick={() => {
+                            // Correctly map UI employee back to DB employee for editing if needed
+                            // Currently simplified to passing the UI employee which might need adjustment
+                            // But since handleOpenEditDialog expects DBEmployee, and our mapped object is slightly different,
+                            // we might need to find the original from dbEmployees.
+                            const original = dbEmployees?.find(e => e.id === employee.id)
+                            if (original) handleOpenEditDialog(original)
+                          }}
+                        >
+                          <Edit3 className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 bg-white/20 hover:bg-red-500/80 text-white"
+                          onClick={() => {
+                            const original = dbEmployees?.find(e => e.id === employee.id)
+                            if (original) handleOpenDeleteDialog(original)
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
-                      <Button variant="ghost" size="icon" onClick={() => { setSelectedEmployee(employee); setShowProfileDialog(true) }}><Eye className="h-4 w-4" /></Button>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                    <CardContent className="pt-10 pb-4">
+                      <div className="flex items-start justify-between mb-3">
+                        <div><h3 className="font-semibold text-lg flex items-center gap-2">{employee.name}{employee.performanceScore >= 95 && <Star className="h-4 w-4 fill-amber-400 text-amber-400" />}</h3><p className="text-sm text-gray-500">{employee.position}</p></div>
+                        <Badge className={getDepartmentColor(employee.department)}>{employee.department}</Badge>
+                      </div>
+                      <div className="space-y-2 mb-4">
+                        <p className="text-sm flex items-center gap-2 text-gray-500"><Mail className="h-4 w-4" />{employee.email}</p>
+                        <p className="text-sm flex items-center gap-2 text-gray-500"><MapPin className="h-4 w-4" />{employee.location}</p>
+                      </div>
+                      <div className="flex items-center justify-between pt-3 border-t">
+                        <div className="flex items-center gap-4 text-sm">
+                          <div><p className="text-gray-500">Performance</p><p className="font-semibold text-blue-600">{employee.performanceScore > 0 ? `${employee.performanceScore}%` : 'N/A'}</p></div>
+                          <div><p className="text-gray-500">Projects</p><p className="font-semibold">{employee.projectsCount}</p></div>
+                        </div>
+                        <Button variant="ghost" size="icon" onClick={() => { setSelectedEmployee(employee); setShowProfileDialog(true) }}><Eye className="h-4 w-4" /></Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </TabsContent>
 
           {/* Org Chart Tab */}
@@ -2604,18 +2457,18 @@ export default function EmployeesClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={employeesAIInsights}
+              insights={aiInsights}
               title="HR Intelligence"
               onInsightAction={(insight) => toast.info(insight.title)}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={employeesCollaborators}
+              collaborators={collaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={employeesPredictions}
+              predictions={predictions}
               title="Workforce Forecasts"
             />
           </div>

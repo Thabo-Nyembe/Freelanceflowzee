@@ -172,46 +172,7 @@ const mockClients: Client[] = []
 const mockActivities: Activity[] = []
 const mockTasks: Task[] = []
 
-const mockAIInsights = [
-  {
-    id: '1',
-    type: 'opportunity' as const,
-    title: 'High-Value Prospect',
-    description: 'TechCorp showing 85% engagement signals. Recommended action: Schedule demo.',
-    confidence: 0.85,
-    action: 'Schedule Demo'
-  },
-  {
-    id: '2',
-    type: 'alert' as const,
-    title: 'Churn Risk: Acme Inc',
-    description: 'Usage dropped by 40% last week. Recommended action: Customer Success outreach.',
-    confidence: 0.92,
-    action: 'Contact CS'
-  }
-]
-
-const mockPredictions = [
-  {
-    dataset: 'Revenue Forecast',
-    trend: 'up' as const,
-    value: '+12.5%',
-    confidence: 0.88,
-    description: 'Projected Q3 growth based on current pipeline'
-  },
-  {
-    dataset: 'Churn Rate',
-    trend: 'stable' as const,
-    value: '2.1%',
-    confidence: 0.95,
-    description: 'Expected to remain stable through Q4'
-  }
-]
-
-const mockCollaborators = [
-  { id: '1', name: 'Sarah Wilson', role: 'Sales Lead', avatar: '', status: 'online' as const },
-  { id: '2', name: 'Mike Chen', role: 'Account Exec', avatar: '', status: 'away' as const }
-]
+// Mock data removed - using real data from hooks
 
 // Helper functions
 const getStatusColor = (status: ClientStatus): string => {
@@ -832,9 +793,9 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
               className="overflow-hidden"
             >
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                <AIInsightsPanel insights={mockAIInsights} />
-                <PredictiveAnalytics predictions={mockPredictions} />
-                <CollaborationIndicator collaborators={mockCollaborators} />
+                <AIInsightsPanel insights={[]} /> {/* TODO: Wire real AI insights */}
+                <PredictiveAnalytics predictions={[]} /> {/* TODO: Wire real predictions */}
+                <CollaborationIndicator collaborators={[]} /> {/* TODO: Wire real collaborators */}
               </div>
             </motion.div>
           )}

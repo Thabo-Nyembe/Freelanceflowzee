@@ -146,37 +146,24 @@ const eventColors: Record<string, string> = {
 // MOCK DATA
 // ============================================================================
 
-const mockCalendars: CalendarSource[] = [
-  { id: '1', name: 'Personal', color: 'bg-blue-500', enabled: true, type: 'personal', eventCount: 45 },
-  { id: '2', name: 'Work', color: 'bg-green-500', enabled: true, type: 'work', email: 'work@company.com', eventCount: 128 },
-  { id: '3', name: 'Team Meetings', color: 'bg-purple-500', enabled: true, type: 'shared', owner: 'Team Lead', eventCount: 32 },
-  { id: '4', name: 'US Holidays', color: 'bg-red-500', enabled: false, type: 'holiday', eventCount: 12 },
-  { id: '5', name: 'Birthdays', color: 'bg-pink-500', enabled: false, type: 'birthday', eventCount: 24 },
-  { id: '6', name: 'NBA Schedule', color: 'bg-orange-500', enabled: false, type: 'subscribed', eventCount: 82 },
-]
+// Mock data removed - mockCalendars
+// Keep one default calendar for functionality
+const defaultCalendar: CalendarSource = {
+  id: '1',
+  name: 'My Calendar',
+  color: 'bg-blue-500',
+  enabled: true,
+  type: 'personal',
+  eventCount: 0
+}
 
-const mockSchedulingLinks: SchedulingLink[] = [
-  { id: '1', name: '30-min Meeting', duration: 30, url: 'https://cal.com/user/30min', isActive: true, bookingsCount: 45, availability: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'], buffer: 15 },
-  { id: '2', name: '1-hour Consultation', duration: 60, url: 'https://cal.com/user/1hour', isActive: true, bookingsCount: 23, availability: ['Tue', 'Thu'], buffer: 30 },
-  { id: '3', name: '15-min Quick Chat', duration: 15, url: 'https://cal.com/user/15min', isActive: true, bookingsCount: 67, availability: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'], buffer: 5 },
-  { id: '4', name: 'Team Sync', duration: 45, url: 'https://cal.com/user/team', isActive: false, bookingsCount: 12, availability: ['Wed'], buffer: 15 },
-]
+// Mock data removed - mockSchedulingLinks
 
-const mockReminders: Reminder[] = [
-  { id: '1', title: 'Review Q4 Reports', datetime: new Date(Date.now() + 1000 * 60 * 60 * 2), completed: false, type: 'notification' },
-  { id: '2', title: 'Send follow-up email', datetime: new Date(Date.now() + 1000 * 60 * 60 * 24), completed: false, type: 'email' },
-  { id: '3', title: 'Prepare presentation', datetime: new Date(Date.now() + 1000 * 60 * 60 * 48), completed: false, type: 'notification' },
-  { id: '4', title: 'Call client', datetime: new Date(Date.now() - 1000 * 60 * 60 * 2), completed: true, type: 'notification' },
-]
+// Mock data removed - mockReminders
 
-const mockAttendees: Attendee[] = [
-  { id: '1', name: 'Sarah Chen', email: 'sarah@company.com', avatar: '', status: 'accepted', organizer: true },
-  { id: '2', name: 'Mike Johnson', email: 'mike@company.com', avatar: '', status: 'accepted' },
-  { id: '3', name: 'Emily Davis', email: 'emily@company.com', avatar: '', status: 'tentative' },
-  { id: '4', name: 'James Wilson', email: 'james@company.com', avatar: '', status: 'pending' },
-]
-
-const mockWorkingHours: WorkingHours[] = [
+// Mock data removed - mockAttendees and mockWorkingHours
+// Default working hours: Mon-Fri 9-5
+const defaultWorkingHours: WorkingHours[] = [
   { day: 'Monday', enabled: true, start: '09:00', end: '17:00' },
   { day: 'Tuesday', enabled: true, start: '09:00', end: '17:00' },
   { day: 'Wednesday', enabled: true, start: '09:00', end: '17:00' },
@@ -556,9 +543,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                         <div>
                           <label className="block text-sm font-medium mb-1">Calendar</label>
                           <select className="w-full px-4 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
-                            {mockCalendars.filter(c => c.enabled).map(cal => (
-                              <option key={cal.id} value={cal.id}>{cal.name}</option>
-                            ))}
+                            <option value={defaultCalendar.id}>{defaultCalendar.name}</option>
                           </select>
                         </div>
                         <div>
@@ -606,7 +591,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
             { label: 'Confirmed', value: stats.confirmed, icon: CheckCircle2, color: 'emerald', change: '+8' },
             { label: 'Hours/Week', value: stats.hoursThisWeek, icon: Timer, color: 'amber', change: '' },
             { label: 'Avg Attendees', value: stats.avgAttendees, icon: Users, color: 'pink', change: '' },
-            { label: 'Bookings', value: mockSchedulingLinks.reduce((sum, l) => sum + l.bookingsCount, 0), icon: Link2, color: 'sky', change: '+5' },
+            { label: 'Bookings', value: 0, icon: Link2, color: 'sky', change: '+5' },
           ].map((stat, index) => (
             <Card key={index} className="border-0 shadow-sm">
               <CardContent className="p-4">
@@ -663,11 +648,10 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                   <button
                     key={mode}
                     onClick={() => setViewMode(mode)}
-                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
-                      viewMode === mode
-                        ? 'bg-teal-600 text-white'
-                        : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                    }`}
+                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all ${viewMode === mode
+                      ? 'bg-teal-600 text-white'
+                      : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                      }`}
                   >
                     {mode.charAt(0).toUpperCase() + mode.slice(1)}
                   </button>
@@ -761,11 +745,11 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                         </div>
                       </div>
                     )) || (
-                    <div className="text-center py-8 text-gray-500">
-                      <CalendarIcon className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                      <p>No events scheduled for today</p>
-                    </div>
-                  )}
+                      <div className="text-center py-8 text-gray-500">
+                        <CalendarIcon className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                        <p>No events scheduled for today</p>
+                      </div>
+                    )}
                 </CardContent>
               </Card>
 
@@ -796,16 +780,15 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                   <CardTitle className="text-lg font-semibold">My Calendars</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
-                  {mockCalendars.map(cal => (
-                    <label key={cal.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer group">
-                      <div className={`w-3 h-3 rounded ${cal.color} ${!cal.enabled && 'opacity-50'}`}></div>
-                      <span className={`flex-1 text-sm ${cal.enabled ? 'text-gray-900 dark:text-white' : 'text-gray-500'}`}>
-                        {cal.name}
-                      </span>
-                      <span className="text-xs text-gray-400">{cal.eventCount}</span>
-                      <Switch checked={cal.enabled} className="scale-75" />
-                    </label>
-                  ))}
+                  {/* Single default calendar */}
+                  <label className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer group">
+                    <div className={`w-3 h-3 rounded ${defaultCalendar.color}`}></div>
+                    <span className="flex-1 text-sm text-gray-900 dark:text-white">
+                      {defaultCalendar.name}
+                    </span>
+                    <span className="text-xs text-gray-400">{defaultCalendar.eventCount}</span>
+                    <Switch checked={defaultCalendar.enabled} className="scale-75" />
+                  </label>
                   <Button variant="outline" className="w-full mt-2" size="sm" onClick={() => setShowAddCalendarDialog(true)}>
                     <Plus className="h-4 w-4 mr-2" />
                     Add Calendar
@@ -820,28 +803,12 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                   <Button variant="ghost" size="sm" onClick={() => setActiveTab('scheduling')}>Manage</Button>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {mockSchedulingLinks.filter(l => l.isActive).slice(0, 3).map(link => (
-                    <div key={link.id} className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="font-medium text-gray-900 dark:text-white">{link.name}</span>
-                        <Badge variant="outline">{link.duration} min</Badge>
-                      </div>
-                      <div className="flex items-center gap-2 text-xs text-gray-500">
-                        <span>{link.bookingsCount} bookings</span>
-                        <span>•</span>
-                        <span>{link.availability.join(', ')}</span>
-                      </div>
-                      <div className="flex items-center gap-2 mt-2">
-                        <Input value={link.url} readOnly className="text-xs h-8" />
-                        <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={() => {
-                          navigator.clipboard.writeText(link.url)
-                          toast.success('Scheduling link copied to clipboard')
-                        }}>
-                          <Copy className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
+                  {/* No scheduling links yet */}
+                  <div className="text-center py-8 text-gray-500">
+                    <Link2 className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                    <p>No scheduling links created</p>
+                    <p className="text-sm mt-1">Create a link to let others book time with you</p>
+                  </div>
                 </CardContent>
               </Card>
 
@@ -918,11 +885,10 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                         <button
                           key={i}
                           onClick={() => setCurrentDate(day.date)}
-                          className={`text-xs p-1.5 rounded-full transition-colors ${
-                            day.isToday ? 'bg-teal-600 text-white' :
+                          className={`text-xs p-1.5 rounded-full transition-colors ${day.isToday ? 'bg-teal-600 text-white' :
                             day.isCurrentMonth ? 'text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700' :
-                            'text-gray-400'
-                          } ${day.events.length > 0 ? 'font-bold' : ''}`}
+                              'text-gray-400'
+                            } ${day.events.length > 0 ? 'font-bold' : ''}`}
                         >
                           {day.date.getDate()}
                         </button>
@@ -937,13 +903,12 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                     <CardTitle className="text-sm font-semibold">My Calendars</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-1 pt-0">
-                    {mockCalendars.slice(0, 4).map(cal => (
-                      <label key={cal.id} className="flex items-center gap-2 p-1.5 rounded cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
-                        <div className={`w-2.5 h-2.5 rounded ${cal.color} ${!cal.enabled && 'opacity-50'}`}></div>
-                        <span className={`text-sm flex-1 ${cal.enabled ? '' : 'text-gray-500'}`}>{cal.name}</span>
-                        <Switch checked={cal.enabled} className="scale-75" />
-                      </label>
-                    ))}
+                    {/* Single default calendar */}
+                    <label className="flex items-center gap-2 p-1.5 rounded cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
+                      <div className={`w-2.5 h-2.5 rounded ${defaultCalendar.color}`}></div>
+                      <span className="text-sm flex-1">{defaultCalendar.name}</span>
+                      <Switch checked={defaultCalendar.enabled} className="scale-75" />
+                    </label>
                   </CardContent>
                 </Card>
 
@@ -1017,14 +982,12 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                       {calendarDays.map((day, i) => (
                         <div
                           key={i}
-                          className={`min-h-[100px] p-2 border-b border-r dark:border-gray-700 last:border-r-0 ${
-                            !day.isCurrentMonth ? 'bg-gray-50 dark:bg-gray-800/50' : ''
-                          } ${day.isToday ? 'bg-teal-50 dark:bg-teal-900/20' : ''}`}
+                          className={`min-h-[100px] p-2 border-b border-r dark:border-gray-700 last:border-r-0 ${!day.isCurrentMonth ? 'bg-gray-50 dark:bg-gray-800/50' : ''
+                            } ${day.isToday ? 'bg-teal-50 dark:bg-teal-900/20' : ''}`}
                         >
-                          <div className={`text-sm mb-1 ${
-                            day.isToday ? 'w-7 h-7 bg-teal-600 text-white rounded-full flex items-center justify-center font-bold' :
+                          <div className={`text-sm mb-1 ${day.isToday ? 'w-7 h-7 bg-teal-600 text-white rounded-full flex items-center justify-center font-bold' :
                             day.isCurrentMonth ? 'text-gray-900 dark:text-white' : 'text-gray-400'
-                          }`}>
+                            }`}>
                             {day.date.getDate()}
                           </div>
                           <div className="space-y-1">
@@ -1256,15 +1219,15 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockSchedulingLinks.length}</p>
+                    <p className="text-3xl font-bold">0</p>
                     <p className="text-sm text-green-200">Links</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockSchedulingLinks.filter(l => l.isActive).length}</p>
+                    <p className="text-3xl font-bold">0</p>
                     <p className="text-sm text-green-200">Active</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockSchedulingLinks.reduce((sum, l) => sum + l.bookingsCount, 0)}</p>
+                    <p className="text-3xl font-bold">0</p>
                     <p className="text-sm text-green-200">Bookings</p>
                   </div>
                 </div>
@@ -1283,38 +1246,16 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {mockSchedulingLinks.map(link => (
-                <Card key={link.id}>
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div>
-                        <h3 className="font-semibold text-lg text-gray-900 dark:text-white">{link.name}</h3>
-                        <p className="text-sm text-gray-500">{link.duration} minutes • {link.buffer} min buffer</p>
-                      </div>
-                      <Switch checked={link.isActive} />
-                    </div>
-                    <div className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg mb-4">
-                      <Link2 className="h-4 w-4 text-gray-400" />
-                      <code className="text-sm text-gray-600 dark:text-gray-400 flex-1 truncate">{link.url}</code>
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => {
-                        navigator.clipboard.writeText(link.url)
-                        toast.success('Scheduling link copied to clipboard')
-                      }}>
-                        <Copy className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => {
-                        window.open(link.url, '_blank', 'noopener,noreferrer')
-                      }}>
-                        <ExternalLink className="h-4 w-4" />
-                      </Button>
-                    </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-500">Available: {link.availability.join(', ')}</span>
-                      <span className="text-teal-600 font-medium">{link.bookingsCount} bookings</span>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+              {/* No scheduling links yet */}
+              <div className="col-span-full text-center py-12 text-gray-500">
+                <Link2 className="h-16 w-16 mx-auto mb-4 opacity-50" />
+                <p className="text-lg font-medium">No scheduling links created</p>
+                <p className="text-sm mt-2">Create a link to let others book time with you</p>
+                <Button className="mt-4 bg-teal-600 hover:bg-teal-700" onClick={() => setShowCreateLinkDialog(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Your First Link
+                </Button>
+              </div>
             </div>
           </TabsContent>
 
@@ -1334,15 +1275,15 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockReminders.length}</p>
+                    <p className="text-3xl font-bold">0</p>
                     <p className="text-sm text-orange-200">Total</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockReminders.filter(r => !r.completed).length}</p>
+                    <p className="text-3xl font-bold">0</p>
                     <p className="text-sm text-orange-200">Pending</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockReminders.filter(r => r.completed).length}</p>
+                    <p className="text-3xl font-bold">0</p>
                     <p className="text-sm text-orange-200">Done</p>
                   </div>
                 </div>
@@ -1358,21 +1299,12 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                 </Button>
               </CardHeader>
               <CardContent className="space-y-3">
-                {mockReminders.map(reminder => (
-                  <div key={reminder.id} className={`flex items-center gap-4 p-4 rounded-lg ${reminder.completed ? 'bg-gray-100 dark:bg-gray-800 opacity-60' : 'bg-gray-50 dark:bg-gray-800'}`}>
-                    <button className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${reminder.completed ? 'bg-teal-600 border-teal-600' : 'border-gray-300'}`}>
-                      {reminder.completed && <CheckCircle2 className="h-3 w-3 text-white" />}
-                    </button>
-                    <div className="flex-1">
-                      <p className={`font-medium ${reminder.completed ? 'line-through text-gray-500' : 'text-gray-900 dark:text-white'}`}>{reminder.title}</p>
-                      <p className="text-sm text-gray-500">
-                        {reminder.datetime.toLocaleDateString()} at {formatTime(reminder.datetime)}
-                      </p>
-                    </div>
-                    <Badge variant="outline">{reminder.type}</Badge>
-                    <Button variant="ghost" size="sm" onClick={() => { setReminderToDelete(reminder); setShowDeleteReminderDialog(true); }}><Trash2 className="h-4 w-4 text-gray-400" /></Button>
-                  </div>
-                ))}
+                {/* No reminders yet */}
+                <div className="text-center py-8 text-gray-500">
+                  <Bell className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                  <p>No reminders set</p>
+                  <p className="text-sm mt-1">Click "Add Reminder" to create one</p>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -1397,7 +1329,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                     const calendarData = {
                       events: displayEvents,
                       exportedAt: new Date().toISOString(),
-                      calendars: mockCalendars.filter(c => c.enabled).map(c => c.name)
+                      calendars: [defaultCalendar.name]
                     }
                     const blob = new Blob([JSON.stringify(calendarData, null, 2)], { type: 'application/json' })
                     const url = URL.createObjectURL(blob)
@@ -1435,11 +1367,10 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                         <button
                           key={item.id}
                           onClick={() => setSettingsTab(item.id)}
-                          className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-all ${
-                            settingsTab === item.id
-                              ? 'bg-teal-50 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400'
-                              : 'hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400'
-                          }`}
+                          className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-all ${settingsTab === item.id
+                            ? 'bg-teal-50 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400'
+                            : 'hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400'
+                            }`}
                         >
                           <item.icon className="w-5 h-5" />
                           <div className="text-left">
@@ -1578,7 +1509,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      {mockWorkingHours.map(wh => (
+                      {defaultWorkingHours.map(wh => (
                         <div key={wh.day} className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <Switch checked={wh.enabled} className="scale-90" />
                           <span className={`w-24 text-sm ${wh.enabled ? 'font-medium' : 'text-gray-500'}`}>{wh.day}</span>
@@ -2337,12 +2268,11 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
               <div>
                 <label className="block text-sm font-medium mb-2">Calendars to Export</label>
                 <div className="space-y-2">
-                  {mockCalendars.slice(0, 3).map(cal => (
-                    <label key={cal.id} className="flex items-center gap-2">
-                      <input type="checkbox" defaultChecked className="rounded" />
-                      <span className="text-sm">{cal.name}</span>
-                    </label>
-                  ))}
+                  {/* Single default calendar */}
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" defaultChecked className="rounded" />
+                    <span className="text-sm">{defaultCalendar.name}</span>
+                  </label>
                 </div>
               </div>
               <div className="flex justify-end gap-2 pt-4">
@@ -2351,7 +2281,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                   const calendarData = {
                     events: displayEvents,
                     exportedAt: new Date().toISOString(),
-                    calendars: mockCalendars.filter(c => c.enabled).map(c => c.name)
+                    calendars: [defaultCalendar.name]
                   }
                   const blob = new Blob([JSON.stringify(calendarData, null, 2)], { type: 'application/json' })
                   const url = URL.createObjectURL(blob)
