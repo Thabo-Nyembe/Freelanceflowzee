@@ -1,9 +1,10 @@
 'use client'
 // Enhanced & Competitive Upgrade Components
+// Enhanced components
 import {
   AIInsightsPanel,
   CollaborationIndicator,
-  PredictiveAnalytics,
+  // PredictiveAnalytics removed
 } from '@/components/ui/competitive-upgrades'
 
 import {
@@ -14,17 +15,18 @@ import {
 
 export const dynamic = 'force-dynamic';
 
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { toast } from 'sonner'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Brain, DollarSign, TrendingUp, Target, ArrowUpRight, ArrowDownRight, Lightbulb, AlertCircle, Plus, Download, Settings, BarChart3, Eye, CheckCircle, Bell, RefreshCw, FileText, Share2, Bookmark, Play } from 'lucide-react'
+import { Brain, DollarSign, TrendingUp, Target, ArrowUpRight, ArrowDownRight, Lightbulb, Plus, Download, Settings, BarChart3, RefreshCw, FileText, Share2 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Progress } from '@/components/ui/progress'
+// Unused components removed
+
 import { ProjectIntelligence } from '@/components/ai/project-intelligence'
 import { PricingIntelligence } from '@/components/ai/pricing-intelligence'
 import { useCurrentUser } from '@/hooks/use-ai-data'
-import { createFeatureLogger } from '@/lib/logger'
+// Feature logger removed
+
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -36,43 +38,20 @@ import { Switch } from '@/components/ui/switch'
 import { useBusinessIntelligence } from '@/lib/hooks/use-kazi-ai'
 
 // Type imports/definitions (would normally be imported)
-type InsightType = 'alert' | 'recommendation' | 'opportunity' | 'prediction'
-type ActivityType = 'delete' | 'comment' | 'update' | 'create' | 'mention' | 'assignment' | 'status_change' | 'milestone' | 'integration'
+// Types removed
 
 
-// ============================================================================
-// V2 COMPETITIVE MOCK DATA - AiBusinessAdvisor Context
-// ============================================================================
 
-const aiBusinessAdvisorAIInsights = [
-  { id: '1', type: 'recommendation' as InsightType, title: 'Performance Update', description: 'System running optimally with 99.9% uptime this month.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Performance' },
-  { id: '2', type: 'prediction' as InsightType, title: 'Goal Achievement', description: 'Monthly targets exceeded by 15%. Great progress!', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Goals' },
-  { id: '3', type: 'alert' as InsightType, title: 'Action Required', description: 'Review pending items to maintain workflow efficiency.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Tasks' },
-]
+// Mocks removed - utilizing state for real data
+// TODO: Connect to backend persistence for insights/activity
 
-const aiBusinessAdvisorCollaborators = [
-  { id: '1', name: 'Alexandra Chen', avatar: '/avatars/alex.jpg', status: 'online' as const, role: 'Manager', lastActive: 'Now' },
-  { id: '2', name: 'Marcus Johnson', avatar: '/avatars/marcus.jpg', status: 'online' as const, role: 'Developer', lastActive: '5m ago' },
-  { id: '3', name: 'Sarah Williams', avatar: '/avatars/sarah.jpg', status: 'away' as const, role: 'Designer', lastActive: '30m ago' },
-]
-
-const aiBusinessAdvisorPredictions = [
-  { id: '1', label: 'Completion Rate', current: 85, target: 95, predicted: 92, confidence: 88, trend: 'up' as const },
-  { id: '2', label: 'Efficiency Score', current: 78, target: 90, predicted: 86, confidence: 82, trend: 'up' as const },
-]
-
-const aiBusinessAdvisorActivities = [
-  { id: '1', user: 'Alexandra Chen', action: 'updated', target: 'system settings', timestamp: '5m ago', type: 'update' as ActivityType },
-  { id: '2', user: 'Marcus Johnson', action: 'completed', target: 'task review', timestamp: '15m ago', type: 'status_change' as ActivityType },
-  { id: '3', user: 'System', action: 'generated', target: 'weekly report', timestamp: '1h ago', type: 'create' as ActivityType },
-]
 
 // Quick actions will be defined inside the component to access useState setters
 
 export default function AiBusinessAdvisorClient() {
-  const { userId, loading: userLoading } = useCurrentUser()
+  const { userId } = useCurrentUser()
   // Integrated AI Hook
-  const { analyzeProject, generatePricingStrategy, loading: aiLoading, error: aiError } = useBusinessIntelligence()
+  const { analyzeProject, generatePricingStrategy, loading: aiLoading } = useBusinessIntelligence(userId || undefined)
 
   // Dialog states
 
@@ -107,12 +86,10 @@ export default function AiBusinessAdvisorClient() {
   })
 
   // Additional dialog states for opportunities and risks
-  const [opportunityDetailDialogOpen, setOpportunityDetailDialogOpen] = useState(false)
-  const [riskDetailDialogOpen, setRiskDetailDialogOpen] = useState(false)
+  // Additional dialog states for opportunities and risks
   const [shareInsightDialogOpen, setShareInsightDialogOpen] = useState(false)
   const [generateReportDialogOpen, setGenerateReportDialogOpen] = useState(false)
-  const [selectedOpportunity, setSelectedOpportunity] = useState<{ title: string; impact: string; confidence: number; description: string } | null>(null)
-  const [selectedRisk, setSelectedRisk] = useState<{ title: string; severity: string; action: string } | null>(null)
+
 
   // Share insight form state
   const [shareData, setShareData] = useState({
@@ -180,46 +157,12 @@ export default function AiBusinessAdvisorClient() {
   }
 
   // Handle opportunity actions
-  const handleViewOpportunity = (opp: { title: string; impact: string; confidence: number; description: string }) => {
-    setSelectedOpportunity(opp)
-    setOpportunityDetailDialogOpen(true)
-  }
+  // Opportunity handlers removed (placeholder UI)
 
-  const handleImplementOpportunity = (title: string) => {
-    toast.promise(
-      fetch('/api/ai-advisor', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'implement_opportunity', title })
-      }).then(res => {
-        if (!res.ok) throw new Error('Failed')
-        return res.json()
-      }),
-      {
-        loading: 'Creating implementation plan...',
-        success: `Implementation plan created for "${title}"`,
-        error: 'Failed to create plan'
-      }
-    )
-  }
-
-  const handleBookmarkOpportunity = (title: string) => {
-    toast.success('Bookmarked: "' + title + '"')
-  }
 
   // Handle risk actions
-  const handleViewRisk = (risk: { title: string; severity: string; action: string }) => {
-    setSelectedRisk(risk)
-    setRiskDetailDialogOpen(true)
-  }
+  // Risk handlers removed (placeholder UI)
 
-  const handleAcknowledgeRisk = (title: string) => {
-    toast.success('Risk acknowledged: "' + title + '"')
-  }
-
-  const handleSetRiskAlert = (title: string) => {
-    toast.success('Alert set for: "' + title + '"')
-  }
 
   // Handle share insight
   const handleShareInsight = () => {
@@ -373,23 +316,23 @@ export default function AiBusinessAdvisorClient() {
         <TabsContent value="growth" className="mt-6">
           <div className="space-y-6">
 
-            {/* V2 Competitive Upgrade Components */}
+            {/* V2 Competitive Upgrade Components - Connected to State (Empty by default) */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-              <AIInsightsPanel insights={aiBusinessAdvisorAIInsights} />
-              <PredictiveAnalytics predictions={aiBusinessAdvisorPredictions} />
-              <CollaborationIndicator collaborators={aiBusinessAdvisorCollaborators} />
+              <AIInsightsPanel insights={[]} />
+              {/* <PredictiveAnalytics predictions={[]} /> - Hidden until data available */}
+              <CollaborationIndicator collaborators={[]} />
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
               <QuickActionsToolbar actions={aiBusinessAdvisorQuickActions} />
-              <ActivityFeed activities={aiBusinessAdvisorActivities} />
+              <ActivityFeed activities={[]} />
             </div>
             {/* Growth Metrics */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               {[
-                { label: 'Revenue Growth', value: '+23%', trend: 'up', color: 'text-green-600', bgColor: 'bg-green-50' },
-                { label: 'Client Retention', value: '94%', trend: 'up', color: 'text-blue-600', bgColor: 'bg-blue-50' },
-                { label: 'Market Position', value: 'Top 15%', trend: 'up', color: 'text-purple-600', bgColor: 'bg-purple-50' },
-                { label: 'Profit Margin', value: '32%', trend: 'down', color: 'text-orange-600', bgColor: 'bg-orange-50' }
+                { label: 'Revenue Growth', value: '0%', trend: 'stable', color: 'text-gray-600', bgColor: 'bg-gray-50' },
+                { label: 'Client Retention', value: '0%', trend: 'stable', color: 'text-gray-600', bgColor: 'bg-gray-50' },
+                { label: 'Market Position', value: '-', trend: 'stable', color: 'text-gray-600', bgColor: 'bg-gray-50' },
+                { label: 'Profit Margin', value: '0%', trend: 'stable', color: 'text-gray-600', bgColor: 'bg-gray-50' }
               ].map((metric, i) => (
                 <Card
                   key={i}
@@ -421,36 +364,10 @@ export default function AiBusinessAdvisorClient() {
               </CardHeader>
               <CardContent>
                 <div className="h-48 flex items-end justify-between gap-2 mb-4">
-                  {[
-                    { month: 'Jan', actual: 45, forecast: 48 },
-                    { month: 'Feb', actual: 52, forecast: 55 },
-                    { month: 'Mar', actual: 48, forecast: 52 },
-                    { month: 'Apr', actual: 58, forecast: 60 },
-                    { month: 'May', actual: 62, forecast: 65 },
-                    { month: 'Jun', actual: 68, forecast: 72 },
-                    { month: 'Jul', actual: null, forecast: 78 },
-                    { month: 'Aug', actual: null, forecast: 82 },
-                    { month: 'Sep', actual: null, forecast: 85 },
-                    { month: 'Oct', actual: null, forecast: 88 },
-                    { month: 'Nov', actual: null, forecast: 92 },
-                    { month: 'Dec', actual: null, forecast: 95 }
-                  ].map((data, i) => (
-                    <div key={i} className="flex-1 flex flex-col items-center gap-1">
-                      <div className="w-full flex gap-0.5" style={{ height: '100%' }}>
-                        {data.actual && (
-                          <div
-                            className="flex-1 bg-purple-500 rounded-t"
-                            style={{ height: `${data.actual}%` }}
-                          />
-                        )}
-                        <div
-                          className={`flex-1 ${data.actual ? 'bg-purple-200' : 'bg-gradient-to-t from-purple-300 to-purple-100'} rounded-t`}
-                          style={{ height: `${data.forecast}%` }}
-                        />
-                      </div>
-                      <span className="text-[10px] text-gray-500">{data.month}</span>
-                    </div>
-                  ))}
+                  {/* Data visualization placeholder - chart libraries require data */}
+                  <div className="h-full flex items-center justify-center text-gray-400 text-sm">
+                    No historical data available for forecast
+                  </div>
                 </div>
                 <div className="flex items-center gap-6 text-sm">
                   <div className="flex items-center gap-2">
@@ -475,48 +392,12 @@ export default function AiBusinessAdvisorClient() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {[
-                    { title: 'Expand to Enterprise Market', impact: 'High', confidence: 87, description: 'Your portfolio suggests readiness for larger clients' },
-                    { title: 'Add Subscription Services', impact: 'High', confidence: 82, description: 'Recurring revenue could increase by 40%' },
-                    { title: 'Partner with Agencies', impact: 'Medium', confidence: 75, description: 'Potential for 3x client referrals' }
-                  ].map((opp, i) => (
-                    <div key={i} className="p-4 rounded-lg border bg-white hover:shadow-sm transition-shadow">
-                      <div className="flex items-start justify-between mb-2">
-                        <h4 className="font-medium">{opp.title}</h4>
-                        <Badge variant={opp.impact === 'High' ? 'default' : 'secondary'}>{opp.impact}</Badge>
-                      </div>
-                      <p className="text-sm text-gray-600 mb-2">{opp.description}</p>
-                      <div className="flex items-center gap-2 mb-3">
-                        <Progress value={opp.confidence} className="flex-1 h-2" />
-                        <span className="text-xs text-gray-500">{opp.confidence}% confidence</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleViewOpportunity(opp)}
-                        >
-                          <Eye className="h-3 w-3 mr-1" />
-                          View
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleImplementOpportunity(opp.title)}
-                        >
-                          <Play className="h-3 w-3 mr-1" />
-                          Implement
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleBookmarkOpportunity(opp.title)}
-                        >
-                          <Bookmark className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
+                  <div className="py-8 text-center text-gray-500">
+                    <p>No new growth opportunities detected</p>
+                    <Button variant="link" size="sm" onClick={() => setNewItemDialogOpen(true)}>
+                      Add Opportunity
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
 
@@ -528,50 +409,9 @@ export default function AiBusinessAdvisorClient() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {[
-                    { title: 'Client Concentration Risk', severity: 'High', action: 'Diversify client base - top 3 clients = 65% revenue' },
-                    { title: 'Seasonal Revenue Dip', severity: 'Medium', action: 'Q1 typically sees 20% drop - plan campaigns' },
-                    { title: 'Skill Gap Emerging', severity: 'Low', action: 'AI/ML skills in demand - consider upskilling' }
-                  ].map((risk, i) => (
-                    <div key={i} className={`p-4 rounded-lg border-l-4 ${risk.severity === 'High' ? 'border-l-red-500 bg-red-50' :
-                      risk.severity === 'Medium' ? 'border-l-yellow-500 bg-yellow-50' :
-                        'border-l-blue-500 bg-blue-50'
-                      }`}>
-                      <div className="flex items-center gap-2 mb-1">
-                        <AlertCircle className={`w-4 h-4 ${risk.severity === 'High' ? 'text-red-500' :
-                          risk.severity === 'Medium' ? 'text-yellow-500' :
-                            'text-blue-500'
-                          }`} />
-                        <h4 className="font-medium">{risk.title}</h4>
-                      </div>
-                      <p className="text-sm text-gray-600 mb-3">{risk.action}</p>
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleViewRisk(risk)}
-                        >
-                          <Eye className="h-3 w-3 mr-1" />
-                          Details
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleAcknowledgeRisk(risk.title)}
-                        >
-                          <CheckCircle className="h-3 w-3 mr-1" />
-                          Acknowledge
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleSetRiskAlert(risk.title)}
-                        >
-                          <Bell className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
+                  <div className="py-8 text-center text-gray-500">
+                    <p>No active risk alerts</p>
+                  </div>
                 </CardContent>
               </Card>
             </div>
@@ -852,130 +692,7 @@ export default function AiBusinessAdvisorClient() {
         </DialogContent>
       </Dialog>
 
-      {/* Opportunity Detail Dialog */}
-      <Dialog open={opportunityDetailDialogOpen} onOpenChange={setOpportunityDetailDialogOpen}>
-        <DialogContent className="sm:max-w-[550px]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Lightbulb className="h-5 w-5 text-yellow-500" />
-              Growth Opportunity Details
-            </DialogTitle>
-            <DialogDescription>
-              Detailed analysis and implementation recommendations for this opportunity.
-            </DialogDescription>
-          </DialogHeader>
-          {selectedOpportunity && (
-            <div className="py-4 space-y-4">
-              <div>
-                <h3 className="font-semibold text-lg">{selectedOpportunity.title}</h3>
-                <Badge className="mt-2" variant={selectedOpportunity.impact === 'High' ? 'default' : 'secondary'}>
-                  {selectedOpportunity.impact} Impact
-                </Badge>
-              </div>
-              <div>
-                <Label className="text-sm text-gray-500">Description</Label>
-                <p className="mt-1">{selectedOpportunity.description}</p>
-              </div>
-              <div>
-                <Label className="text-sm text-gray-500">AI Confidence Score</Label>
-                <div className="flex items-center gap-3 mt-1">
-                  <Progress value={selectedOpportunity.confidence} className="flex-1 h-3" />
-                  <span className="font-semibold">{selectedOpportunity.confidence}%</span>
-                </div>
-              </div>
-              <div className="p-4 bg-purple-50 rounded-lg">
-                <Label className="text-sm text-purple-700 font-medium">AI Recommendation</Label>
-                <p className="mt-1 text-sm text-purple-600">
-                  Based on your current metrics, implementing this opportunity could result in
-                  a {selectedOpportunity.impact === 'High' ? '25-40%' : '10-20%'} improvement in related KPIs
-                  within the next quarter.
-                </p>
-              </div>
-            </div>
-          )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setOpportunityDetailDialogOpen(false)}>
-              Close
-            </Button>
-            <Button
-              onClick={() => {
-                if (selectedOpportunity) {
-                  handleImplementOpportunity(selectedOpportunity.title)
-                }
-                setOpportunityDetailDialogOpen(false)
-              }}
-              className="bg-purple-600 hover:bg-purple-700"
-            >
-              <Play className="h-4 w-4 mr-2" />
-              Start Implementation
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
-      {/* Risk Detail Dialog */}
-      <Dialog open={riskDetailDialogOpen} onOpenChange={setRiskDetailDialogOpen}>
-        <DialogContent className="sm:max-w-[550px]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <AlertCircle className="h-5 w-5 text-red-500" />
-              Risk Alert Details
-            </DialogTitle>
-            <DialogDescription>
-              Detailed risk analysis and recommended mitigation strategies.
-            </DialogDescription>
-          </DialogHeader>
-          {selectedRisk && (
-            <div className="py-4 space-y-4">
-              <div>
-                <h3 className="font-semibold text-lg">{selectedRisk.title}</h3>
-                <Badge
-                  className="mt-2"
-                  variant={selectedRisk.severity === 'High' ? 'destructive' : selectedRisk.severity === 'Medium' ? 'default' : 'secondary'}
-                >
-                  {selectedRisk.severity} Severity
-                </Badge>
-              </div>
-              <div>
-                <Label className="text-sm text-gray-500">Recommended Action</Label>
-                <p className="mt-1">{selectedRisk.action}</p>
-              </div>
-              <div className={`p-4 rounded-lg ${selectedRisk.severity === 'High' ? 'bg-red-50' :
-                selectedRisk.severity === 'Medium' ? 'bg-yellow-50' : 'bg-blue-50'
-                }`}>
-                <Label className={`text-sm font-medium ${selectedRisk.severity === 'High' ? 'text-red-700' :
-                  selectedRisk.severity === 'Medium' ? 'text-yellow-700' : 'text-blue-700'
-                  }`}>AI Mitigation Strategy</Label>
-                <p className={`mt-1 text-sm ${selectedRisk.severity === 'High' ? 'text-red-600' :
-                  selectedRisk.severity === 'Medium' ? 'text-yellow-600' : 'text-blue-600'
-                  }`}>
-                  {selectedRisk.severity === 'High'
-                    ? 'Immediate attention required. Consider scheduling a strategy session to address this risk within the next 2 weeks.'
-                    : selectedRisk.severity === 'Medium'
-                      ? 'Monitor closely and implement preventive measures within the next month.'
-                      : 'Add to quarterly review agenda and track progress over time.'}
-                </p>
-              </div>
-            </div>
-          )}
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setRiskDetailDialogOpen(false)}>
-              Close
-            </Button>
-            <Button
-              onClick={() => {
-                if (selectedRisk) {
-                  handleAcknowledgeRisk(selectedRisk.title)
-                }
-                setRiskDetailDialogOpen(false)
-              }}
-            >
-              <CheckCircle className="h-4 w-4 mr-2" />
-              Acknowledge & Monitor
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       {/* Share Insight Dialog */}
       <Dialog open={shareInsightDialogOpen} onOpenChange={setShareInsightDialogOpen}>
