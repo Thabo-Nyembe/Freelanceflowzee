@@ -178,31 +178,7 @@ interface PricingPlan {
   subscribers: number
 }
 
-// Competitive Upgrade Mock Data - Stripe/Chargebee-level Billing Intelligence
-const mockBillingAIInsights = [
-  { id: '1', type: 'opportunity' as const, title: 'Revenue Growth', description: 'MRR increased 12% month-over-month!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Revenue' },
-  { id: '2', type: 'alert' as const, title: 'Churn Risk', description: '15 accounts showing payment failure patterns.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Retention' },
-  { id: '3', type: 'recommendation' as const, title: 'AI Suggestion', description: 'Annual billing conversion could increase by offering 20% discount.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'AI Insights' },
-]
-
-const mockBillingCollaborators = [
-  { id: '1', name: 'Finance Lead', avatar: '/avatars/finance.jpg', status: 'online' as const, role: 'Lead' },
-  { id: '2', name: 'Revenue Ops', avatar: '/avatars/revops.jpg', status: 'online' as const, role: 'Ops' },
-  { id: '3', name: 'Accountant', avatar: '/avatars/accountant.jpg', status: 'away' as const, role: 'Accountant' },
-]
-
-const mockBillingPredictions = [
-  { id: '1', title: 'Monthly Revenue', prediction: 'Next month revenue projected at $125K based on current pipeline', confidence: 91, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Dunning Recovery', prediction: 'Smart retry strategy will recover 65% of failed payments', confidence: 78, trend: 'up' as const, impact: 'medium' as const },
-]
-
-const mockBillingActivities = [
-  { id: '1', user: 'Finance Lead', action: 'Processed', target: '47 subscription renewals', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Revenue Ops', action: 'Updated', target: 'enterprise pricing tiers', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'Accountant', action: 'Reconciled', target: 'Q4 revenue report', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
-]
-
-// Quick actions are now defined inside the component to access state setters
+// Competitive upgrade components data defined locally after stats calculation
 
 export default function BillingClient({ initialBilling }: { initialBilling: BillingTransaction[] }) {
   const [activeTab, setActiveTab] = useState('dashboard')
@@ -414,149 +390,17 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
     }
   }
 
-  // Mock subscriptions data
-  const subscriptions: Subscription[] = [
-    {
-      id: 'sub_1', customer_id: 'cus_1', customer_name: 'Acme Corp', customer_email: 'billing@acme.com',
-      plan: 'Pro Monthly', status: 'active', amount: 99, interval: 'month',
-      current_period_start: '2024-12-01', current_period_end: '2025-01-01', cancel_at_period_end: false, trial_end: null,
-      payment_method: { id: 'pm_1', type: 'card', brand: 'visa', last4: '4242', exp_month: 12, exp_year: 2025, is_default: true, fingerprint: 'abc123' },
-      metadata: { company_size: '50-100' }, created_at: '2024-06-15'
-    },
-    {
-      id: 'sub_2', customer_id: 'cus_2', customer_name: 'TechStart Inc', customer_email: 'finance@techstart.io',
-      plan: 'Enterprise Annual', status: 'active', amount: 999, interval: 'year',
-      current_period_start: '2024-01-15', current_period_end: '2025-01-15', cancel_at_period_end: false, trial_end: null,
-      payment_method: { id: 'pm_2', type: 'card', brand: 'mastercard', last4: '5555', exp_month: 3, exp_year: 2026, is_default: true, fingerprint: 'def456' },
-      metadata: { company_size: '100-500' }, created_at: '2024-01-15'
-    },
-    {
-      id: 'sub_3', customer_id: 'cus_3', customer_name: 'Startup Labs', customer_email: 'billing@startuplabs.co',
-      plan: 'Pro Monthly', status: 'past_due', amount: 99, interval: 'month',
-      current_period_start: '2024-11-15', current_period_end: '2024-12-15', cancel_at_period_end: false, trial_end: null,
-      payment_method: { id: 'pm_3', type: 'card', brand: 'visa', last4: '1234', exp_month: 1, exp_year: 2024, is_default: true, fingerprint: 'ghi789' },
-      metadata: {}, created_at: '2024-05-01'
-    },
-    {
-      id: 'sub_4', customer_id: 'cus_4', customer_name: 'Creative Agency', customer_email: 'accounts@creative.agency',
-      plan: 'Team Monthly', status: 'trialing', amount: 49, interval: 'month',
-      current_period_start: '2024-12-10', current_period_end: '2025-01-10', cancel_at_period_end: false, trial_end: '2024-12-24',
-      metadata: { referral: 'partner_123' }, created_at: '2024-12-10'
-    },
-    {
-      id: 'sub_5', customer_id: 'cus_5', customer_name: 'Global Industries', customer_email: 'ap@global-ind.com',
-      plan: 'Enterprise Annual', status: 'canceled', amount: 999, interval: 'year',
-      current_period_start: '2024-06-01', current_period_end: '2024-12-01', cancel_at_period_end: true, trial_end: null,
-      payment_method: { id: 'pm_5', type: 'card', brand: 'amex', last4: '1111', exp_month: 8, exp_year: 2025, is_default: true, fingerprint: 'jkl012' },
-      metadata: { cancel_reason: 'budget_constraints' }, created_at: '2023-06-01'
-    }
-  ]
+  // Use real data from database hooks
+  const subscriptions = dbSubscriptions || []
+  const invoices = dbInvoices || []
+  const coupons = dbCoupons || []
 
-  // Mock invoices data
-  const invoices: Invoice[] = [
-    {
-      id: 'inv_1', number: 'INV-2024-001', customer_id: 'cus_1', customer_name: 'Acme Corp', customer_email: 'billing@acme.com',
-      status: 'paid', amount_due: 99, amount_paid: 99, amount_remaining: 0, subtotal: 99, tax: 0, total: 99,
-      due_date: '2024-12-15', created_at: '2024-12-01', paid_at: '2024-12-03', hosted_invoice_url: 'https://pay.stripe.com/inv_1',
-      line_items: [{ id: 'li_1', description: 'Pro Monthly Plan - Dec 2024', quantity: 1, unit_amount: 99, amount: 99, period: { start: '2024-12-01', end: '2025-01-01' } }]
-    },
-    {
-      id: 'inv_2', number: 'INV-2024-002', customer_id: 'cus_2', customer_name: 'TechStart Inc', customer_email: 'finance@techstart.io',
-      status: 'paid', amount_due: 999, amount_paid: 999, amount_remaining: 0, subtotal: 999, tax: 0, total: 999,
-      due_date: '2024-12-20', created_at: '2024-12-05', paid_at: '2024-12-05', hosted_invoice_url: 'https://pay.stripe.com/inv_2',
-      line_items: [{ id: 'li_2', description: 'Enterprise Annual Plan - 2024', quantity: 1, unit_amount: 999, amount: 999, period: { start: '2024-01-15', end: '2025-01-15' } }]
-    },
-    {
-      id: 'inv_3', number: 'INV-2024-003', customer_id: 'cus_3', customer_name: 'Startup Labs', customer_email: 'billing@startuplabs.co',
-      status: 'open', amount_due: 99, amount_paid: 0, amount_remaining: 99, subtotal: 99, tax: 0, total: 99,
-      due_date: '2024-12-25', created_at: '2024-12-10', hosted_invoice_url: 'https://pay.stripe.com/inv_3',
-      line_items: [{ id: 'li_3', description: 'Pro Monthly Plan - Dec 2024', quantity: 1, unit_amount: 99, amount: 99, period: { start: '2024-11-15', end: '2024-12-15' } }]
-    },
-    {
-      id: 'inv_4', number: 'INV-2024-004', customer_id: 'cus_4', customer_name: 'Creative Agency', customer_email: 'accounts@creative.agency',
-      status: 'draft', amount_due: 49, amount_paid: 0, amount_remaining: 49, subtotal: 49, tax: 0, total: 49,
-      due_date: '2025-01-10', created_at: '2024-12-20', line_items: [{ id: 'li_4', description: 'Team Monthly Plan - Jan 2025', quantity: 1, unit_amount: 49, amount: 49, period: { start: '2024-12-10', end: '2025-01-10' } }]
-    },
-    {
-      id: 'inv_5', number: 'INV-2024-005', customer_id: 'cus_1', customer_name: 'Acme Corp', customer_email: 'billing@acme.com',
-      status: 'paid', amount_due: 89.10, amount_paid: 89.10, amount_remaining: 0, subtotal: 99, tax: 0, total: 89.10,
-      due_date: '2024-11-15', created_at: '2024-11-01', paid_at: '2024-11-02', discount: { coupon_id: 'coup_1', amount_off: 9.90 },
-      line_items: [{ id: 'li_5', description: 'Pro Monthly Plan - Nov 2024', quantity: 1, unit_amount: 99, amount: 99, period: { start: '2024-11-01', end: '2024-12-01' } }]
-    }
-  ]
-
-  // Mock coupons
-  const coupons: Coupon[] = [
-    {
-      id: 'coup_1', name: 'First Month 10% Off', code: 'WELCOME10', type: 'percent_off', value: 10, duration: 'once',
-      max_redemptions: 100, times_redeemed: 47, valid: true, expires_at: '2025-03-31', created_at: '2024-01-01'
-    },
-    {
-      id: 'coup_2', name: 'Annual Discount', code: 'ANNUAL20', type: 'percent_off', value: 20, duration: 'forever',
-      times_redeemed: 23, valid: true, created_at: '2024-02-15'
-    },
-    {
-      id: 'coup_3', name: 'Partner Referral', code: 'PARTNER50', type: 'amount_off', value: 50, currency: 'USD', duration: 'once',
-      max_redemptions: 50, times_redeemed: 12, valid: true, created_at: '2024-03-01'
-    },
-    {
-      id: 'coup_4', name: 'Summer Sale', code: 'SUMMER25', type: 'percent_off', value: 25, duration: 'repeating', duration_in_months: 3,
-      max_redemptions: 200, times_redeemed: 189, valid: false, expires_at: '2024-09-30', created_at: '2024-06-01'
-    }
-  ]
-
-  // Mock tax rates
-  const taxRates: TaxRate[] = [
-    { id: 'txr_1', name: 'US Sales Tax', percentage: 8.25, jurisdiction: 'California', country: 'US', state: 'CA', inclusive: false, active: true },
-    { id: 'txr_2', name: 'EU VAT', percentage: 20, jurisdiction: 'European Union', country: 'EU', inclusive: true, active: true },
-    { id: 'txr_3', name: 'UK VAT', percentage: 20, jurisdiction: 'United Kingdom', country: 'GB', inclusive: true, active: true }
-  ]
-
-  // Mock refunds
-  const refunds: Refund[] = [
-    { id: 'ref_1', payment_id: 'pay_123', amount: 99, currency: 'USD', status: 'succeeded', reason: 'requested_by_customer', created_at: '2024-12-20' },
-    { id: 'ref_2', payment_id: 'pay_456', amount: 49, currency: 'USD', status: 'pending', reason: 'duplicate', created_at: '2024-12-22' }
-  ]
-
-  // Mock usage records
-  const usageRecords: UsageRecord[] = [
-    { id: 'use_1', subscription_id: 'sub_1', customer_id: 'cus_1', customer_name: 'Acme Corp', quantity: 15000, timestamp: '2024-12-23', unit_price: 0.001, total: 15, action: 'set' },
-    { id: 'use_2', subscription_id: 'sub_1', customer_id: 'cus_1', customer_name: 'Acme Corp', quantity: 12000, timestamp: '2024-12-22', unit_price: 0.001, total: 12, action: 'increment' },
-    { id: 'use_3', subscription_id: 'sub_2', customer_id: 'cus_2', customer_name: 'TechStart Inc', quantity: 45000, timestamp: '2024-12-23', unit_price: 0.001, total: 45, action: 'set' },
-    { id: 'use_4', subscription_id: 'sub_2', customer_id: 'cus_2', customer_name: 'TechStart Inc', quantity: 38000, timestamp: '2024-12-22', unit_price: 0.001, total: 38, action: 'increment' }
-  ]
-
-  // Mock webhooks
-  const webhooks: WebhookEndpoint[] = [
-    {
-      id: 'we_1', url: 'https://api.yourapp.com/webhooks/stripe', events: ['invoice.paid', 'invoice.payment_failed', 'customer.subscription.updated'],
-      status: 'enabled', secret: 'whsec_xxxxx', created_at: '2024-01-01', last_delivery: '2024-12-23T15:30:00Z', success_rate: 99.8
-    },
-    {
-      id: 'we_2', url: 'https://slack.yourapp.com/billing-alerts', events: ['invoice.payment_failed', 'customer.subscription.deleted'],
-      status: 'enabled', secret: 'whsec_yyyyy', created_at: '2024-03-15', last_delivery: '2024-12-20T10:00:00Z', success_rate: 100
-    }
-  ]
-
-  // Mock pricing plans
-  const pricingPlans: PricingPlan[] = [
-    {
-      id: 'plan_1', name: 'Starter', description: 'For individuals and small teams', amount: 0, currency: 'USD', interval: 'month',
-      features: ['Up to 3 users', '1GB storage', 'Basic support'], is_active: true, trial_days: 0, subscribers: 156
-    },
-    {
-      id: 'plan_2', name: 'Team', description: 'For growing teams', amount: 49, currency: 'USD', interval: 'month',
-      features: ['Up to 10 users', '10GB storage', 'Priority support', 'API access'], is_active: true, trial_days: 14, subscribers: 89
-    },
-    {
-      id: 'plan_3', name: 'Pro', description: 'For professionals', amount: 99, currency: 'USD', interval: 'month',
-      features: ['Unlimited users', '100GB storage', 'Premium support', 'API access', 'Custom integrations'], is_active: true, trial_days: 14, subscribers: 234
-    },
-    {
-      id: 'plan_4', name: 'Enterprise', description: 'For large organizations', amount: 999, currency: 'USD', interval: 'year',
-      features: ['Unlimited everything', 'Dedicated support', 'Custom contracts', 'SLA guarantee', 'SSO'], is_active: true, trial_days: 30, subscribers: 45
-    }
-  ]
+  // Empty arrays for features without backend hooks yet
+  const taxRates: TaxRate[] = []
+  const refunds: Refund[] = []
+  const usageRecords: UsageRecord[] = []
+  const webhooks: WebhookEndpoint[] = []
+  const pricingPlans: PricingPlan[] = []
 
   const stats = useMemo(() => {
     const mrr = subscriptions.filter(s => s.status === 'active').reduce((sum, s) => sum + (s.interval === 'month' ? s.amount : s.interval === 'year' ? s.amount / 12 : s.amount * 4), 0)
