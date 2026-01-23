@@ -46,14 +46,15 @@ import {
   Loader2,
   ThumbsUp,
   ThumbsDown,
-  Share
+  Share,
+  Archive
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
 import {
   AIInsightsPanel,
   CollaborationIndicator,
-  PredictiveAnalytics,
+  // PredictiveAnalytics removed
 } from '@/components/ui/competitive-upgrades'
 
 import {
@@ -239,38 +240,8 @@ const getFileIcon = (type: FileType): React.ReactNode => {
 }
 
 // Enhanced AI Assistant Mock Data
-const mockAIAssistantAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Response Quality', description: 'AI response accuracy at 94%. Users rating responses highly this week.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Quality' },
-  { id: '2', type: 'info' as const, title: 'Popular Topics', description: 'Code generation and debugging are trending. Consider adding more examples.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Analytics' },
-  { id: '3', type: 'warning' as const, title: 'Rate Limits', description: 'Approaching 80% of monthly API quota. Consider upgrading plan.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Usage' },
-]
+// Mocks removed - utilizing state for real data
 
-const mockAIAssistantCollaborators = [
-  { id: '1', name: 'AI Engineer', avatar: '/avatars/ai-eng.jpg', status: 'online' as const, role: 'Model Training', lastActive: 'Now' },
-  { id: '2', name: 'Prompt Designer', avatar: '/avatars/prompt.jpg', status: 'online' as const, role: 'Prompt Engineering', lastActive: '5m ago' },
-  { id: '3', name: 'Data Scientist', avatar: '/avatars/data.jpg', status: 'away' as const, role: 'Analytics', lastActive: '20m ago' },
-]
-
-const mockAIAssistantPredictions = [
-  { id: '1', label: 'Daily Queries', current: 4520, target: 5000, predicted: 4800, confidence: 85, trend: 'up' as const },
-  { id: '2', label: 'Response Time', current: 1.2, target: 1.0, predicted: 1.1, confidence: 78, trend: 'up' as const },
-  { id: '3', label: 'User Satisfaction', current: 92, target: 95, predicted: 94, confidence: 82, trend: 'up' as const },
-]
-
-const mockAIAssistantActivities = [
-  { id: '1', user: 'AI Engineer', action: 'deployed', target: 'new model version 2.4', timestamp: '10m ago', type: 'success' as const },
-  { id: '2', user: 'Prompt Designer', action: 'created', target: '5 new prompt templates', timestamp: '30m ago', type: 'info' as const },
-  { id: '3', user: 'Data Scientist', action: 'analyzed', target: 'conversation patterns', timestamp: '1h ago', type: 'info' as const },
-]
-
-// Note: This mock data is kept for backwards compatibility but the component uses
-// the quickActions array defined inside the component with proper dialog handlers
-const mockAIAssistantQuickActions = [
-  { id: '1', label: 'New Chat', icon: 'MessageSquare', shortcut: 'N', action: () => { /* Handled by quickActions in component */ } },
-  { id: '2', label: 'Templates', icon: 'FileText', shortcut: 'T', action: () => { /* Handled by quickActions in component */ } },
-  { id: '3', label: 'Knowledge', icon: 'Database', shortcut: 'K', action: () => { /* Handled by quickActions in component */ } },
-  { id: '4', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => { /* Handled by quickActions in component */ } },
-]
 
 export default function AIAssistantClient() {
 
@@ -283,7 +254,7 @@ export default function AIAssistantClient() {
     stats,
     isLoading,
     isSending,
-    error,
+    // error removed
     fetchConversations,
     fetchMessages,
     createConversation,
@@ -322,8 +293,7 @@ export default function AIAssistantClient() {
   const [showModelSelector, setShowModelSelector] = useState(false)
 
   const [showNewAssistant, setShowNewAssistant] = useState(false)
-  const [showPromptDetail, setShowPromptDetail] = useState(false)
-  const [selectedPrompt, setSelectedPrompt] = useState<PromptTemplate | null>(null)
+  // unused state removed
   const [showSettings, setShowSettings] = useState(false)
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const [showNewPrompt, setShowNewPrompt] = useState(false)
@@ -812,8 +782,8 @@ export default function AIAssistantClient() {
     }
   }
 
-  // Handle message feedback (thumbs up/down)
-  const handleMessageFeedback = (messageId: string, feedback: 'positive' | 'negative') => {
+  // messageId unused variable removed
+  const handleMessageFeedback = (_: string, feedback: 'positive' | 'negative') => {
     toast.success(feedback === 'positive' ? 'Thanks for the feedback!' : 'Feedback recorded')
   }
 
@@ -1319,6 +1289,13 @@ export default function AIAssistantClient() {
                           ) : (
                             <StarOff className="h-5 w-5 text-gray-400" />
                           )}
+                        </button>
+                        <button
+                          onClick={() => handleArchiveConversation(activeConversation.id)}
+                          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                          title="Archive Conversation"
+                        >
+                          <Archive className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                         </button>
                         <button
                           onClick={handleExportChat}
@@ -1948,26 +1925,23 @@ export default function AIAssistantClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockAIAssistantAIInsights}
+              insights={[]}
               title="AI Intelligence"
               onInsightAction={(insight) => toast.info('Insight action: ' + insight.title)}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockAIAssistantCollaborators}
+              collaborators={[]}
               maxVisible={4}
             />
-            <PredictiveAnalytics
-              predictions={mockAIAssistantPredictions}
-              title="Assistant Forecasts"
-            />
+            {/* <PredictiveAnalytics predictions={[]} title="Assistant Forecasts" /> - Hidden until data available */}
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockAIAssistantActivities}
+            activities={[]}
             title="AI Activity"
             maxItems={5}
           />
