@@ -14,6 +14,7 @@ import {
   useAnalyticsRevenue,
   useAnalyticsUserActivity,
   useAnalyticsRealtimeMetrics,
+  useAnalyticsInsights,
 } from '@/lib/hooks/use-analytics-extended'
 import { usePerformanceAnalytics, PerformanceAnalytic } from '@/lib/hooks/use-performance-analytics'
 import { useSupabaseMutation } from '@/lib/hooks/use-supabase-mutation'
@@ -52,10 +53,7 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-// Centralized Mock Data - Investor-Ready
-import {
-  companyInfo,
-} from '@/lib/mock-data/adapters'
+
 
 // Type definitions
 interface AnalyticsMetric {
@@ -130,51 +128,10 @@ interface Dashboard {
   sharedWith: string[]
 }
 
-// Use centralized mock data - mapped to local variable names for compatibility
-// Local Mock Data for UI Demonstration
-const localAIInsights = [
-  {
-    id: '1',
-    type: 'prediction' as const,
-    title: 'Traffic Anomaly',
-    description: 'Unusual spike in traffic from "Direct" source detected (+45%).',
-    confidence: 0.85,
-    action: 'Investigate'
-  },
-  {
-    id: '2',
-    type: 'opportunity' as const,
-    title: 'Conversion Optimization',
-    description: 'Checkout page drop-off rate is 12% higher than industry average.',
-    confidence: 0.78,
-    action: 'View Funnel'
-  }
-]
 
-const localCollaborators = [
-  { id: '1', name: 'Sarah Data', role: 'Analyst', avatar: '', status: 'online' as const },
-  { id: '2', name: 'Mike Growth', role: 'Growth Lead', avatar: '', status: 'away' as const }
-]
-
-const localPredictions = [
-  {
-    dataset: 'User Growth',
-    trend: 'up' as const,
-    value: '+12%',
-    confidence: 0.94,
-    description: 'Projected user growth for next month based on current trajectory.'
-  },
-  {
-    dataset: 'Churn Rate',
-    trend: 'down' as const,
-    value: '-1.5%',
-    confidence: 0.88,
-    description: 'Churn probability decreasing due to new onboarding flow.'
-  }
-]
 
 // Mock data constants removed from top level - see component body for data sources
-// Note: localAIInsights, localCollaborators, localPredictions are defined above and used as fallbacks
+
 
 export default function AnalyticsClient() {
   const { getUserId } = useAuthUserId()
@@ -256,6 +213,7 @@ export default function AnalyticsClient() {
   // Fix type mismatch potentially if hook returns different shape, but for now assign to match mock interface
   const { data: dbUserActivity = [], isLoading: userActivityLoading } = useAnalyticsUserActivity(userId || undefined)
   const { data: dbRealtimeMetrics = [] } = useAnalyticsRealtimeMetrics()
+  const { data: dbInsights = [] } = useAnalyticsInsights(userId || undefined)
   const { performanceAnalytics = [], loading: perfLoading } = usePerformanceAnalytics()
 
   // Data Aliases for Compatibility
@@ -265,10 +223,9 @@ export default function AnalyticsClient() {
   const mockDashboards = dbDashboards
   const mockCohorts = dbCohorts
   const mockActivities = dbUserActivity
-  const mockAIInsights = localAIInsights
-  const mockCollaborators = localCollaborators
-  const mockPredictions = localPredictions
-  const mockQuickActions: any[] = []
+  const mockAIInsights = dbInsights
+  const mockCollaborators: any[] = []
+  const mockPredictions: any[] = []
 
   // Combined loading state
   const isDataLoading = metricsLoading || funnelsLoading || reportsLoading || dashboardsLoading || cohortsLoading || revenueLoading || userActivityLoading
