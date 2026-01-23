@@ -1,11 +1,88 @@
 /**
  * KAZI – Production Middleware with NextAuth Integration
- * Handles authentication, authorization, and security headers
+ * Handles authentication, authorization, rate limiting, and security headers
  */
 import { withAuth } from 'next-auth/middleware'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
+
+// ============================================================================
+// INLINE RATE LIMITER (avoids module import issues in Edge Runtime)
+// ============================================================================
+const rateLimitStore = new Map<string, { count: number; reset: number }>()
+
+interface RateLimitConfig {
+  requests: number
+  windowMs: number
+}
+
+// Endpoint-specific rate limits
+const RATE_LIMITS: Record<string, RateLimitConfig> = {
+  // AI endpoints (resource intensive)
+  '/api/ai/': { requests: 50, windowMs: 3600000 },
+  // Auth endpoints (security critical)
+  '/api/auth/': { requests: 20, windowMs: 900000 },
+  // Payment endpoints
+  '/api/payments/': { requests: 100, windowMs: 3600000 },
+  // Admin endpoints
+  '/api/admin/': { requests: 100, windowMs: 3600000 },
+  // Default for all other API routes
+  '/api/': { requests: 200, windowMs: 60000 }
+}
+
+function getRateLimitConfig(pathname: string): RateLimitConfig {
+  for (const [prefix, config] of Object.entries(RATE_LIMITS)) {
+    if (pathname.startsWith(prefix)) {
+      return config
+    }
+  }
+  return { requests: 200, windowMs: 60000 }
+}
+
+function checkRateLimit(
+  identifier: string,
+  config: RateLimitConfig
+): { success: boolean; remaining: number; reset: number; retryAfter?: number } {
+  const now = Date.now()
+  const windowKey = Math.floor(now / config.windowMs)
+  const key = `${identifier}:${windowKey}`
+
+  const current = rateLimitStore.get(key) || { count: 0, reset: (windowKey + 1) * config.windowMs }
+
+  if (current.count >= config.requests) {
+    return {
+      success: false,
+      remaining: 0,
+      reset: current.reset,
+      retryAfter: Math.ceil((current.reset - now) / 1000)
+    }
+  }
+
+  current.count++
+  rateLimitStore.set(key, current)
+
+  // Cleanup old entries periodically
+  if (rateLimitStore.size > 5000) {
+    const cutoff = windowKey - 5
+    for (const [k] of rateLimitStore) {
+      const kWindow = parseInt(k.split(':').pop() || '0')
+      if (kWindow < cutoff) {
+        rateLimitStore.delete(k)
+      }
+    }
+  }
+
+  return {
+    success: true,
+    remaining: config.requests - current.count,
+    reset: current.reset
+  }
+}
+
+// ============================================================================
+// ROUTE CONFIGURATION
+// ============================================================================
 
 // Public routes that don't require authentication
 const publicRoutes = [
@@ -82,7 +159,48 @@ export default withAuth(
     }
 
     // ----------------------------------------------------------
-    // 2. Update Supabase session (refresh tokens, manage cookies)
+    // 2. Rate limiting for API routes
+    // ----------------------------------------------------------
+    if (pathname.startsWith('/api/')) {
+      // Skip rate limiting for webhooks (they have their own auth)
+      const skipRateLimit =
+        pathname.includes('/webhooks') ||
+        pathname === '/api/health' ||
+        pathname.startsWith('/api/auth/callback')
+
+      if (!skipRateLimit) {
+        // Get identifier (prefer user IP, fallback to a hash)
+        const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+                   req.headers.get('x-real-ip') ||
+                   'anonymous'
+
+        const identifier = `${ip}:${pathname}`
+        const config = getRateLimitConfig(pathname)
+        const rateLimitResult = checkRateLimit(identifier, config)
+
+        if (!rateLimitResult.success) {
+          return NextResponse.json(
+            {
+              error: 'Too Many Requests',
+              message: 'Rate limit exceeded. Please try again later.',
+              retryAfter: rateLimitResult.retryAfter
+            },
+            {
+              status: 429,
+              headers: {
+                'X-RateLimit-Limit': config.requests.toString(),
+                'X-RateLimit-Remaining': '0',
+                'X-RateLimit-Reset': rateLimitResult.reset.toString(),
+                'Retry-After': rateLimitResult.retryAfter?.toString() || '60'
+              }
+            }
+          )
+        }
+      }
+    }
+
+    // ----------------------------------------------------------
+    // 3. Update Supabase session (refresh tokens, manage cookies)
     // ----------------------------------------------------------
     const supabaseResponse = await updateSession(req)
 
@@ -92,7 +210,7 @@ export default withAuth(
     }
 
     // ----------------------------------------------------------
-    // 3. Apply security headers
+    // 4. Apply security headers
     // ----------------------------------------------------------
     const res = supabaseResponse
 
@@ -101,6 +219,22 @@ export default withAuth(
     res.headers.set('Referrer-Policy', 'origin-when-cross-origin')
     res.headers.set('X-Frame-Options', 'DENY')
     res.headers.set('X-XSS-Protection', '1; mode=block')
+
+    // Add rate limit headers for API routes
+    if (pathname.startsWith('/api/')) {
+      const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+                 req.headers.get('x-real-ip') ||
+                 'anonymous'
+      const config = getRateLimitConfig(pathname)
+      const identifier = `${ip}:${pathname}`
+      const windowKey = Math.floor(Date.now() / config.windowMs)
+      const key = `${identifier}:${windowKey}`
+      const current = rateLimitStore.get(key)
+
+      res.headers.set('X-RateLimit-Limit', config.requests.toString())
+      res.headers.set('X-RateLimit-Remaining', current ? (config.requests - current.count).toString() : config.requests.toString())
+      res.headers.set('X-RateLimit-Reset', current ? current.reset.toString() : (Date.now() + config.windowMs).toString())
+    }
 
     // Strict CSP in production
     if (process.env.NODE_ENV === 'production') {

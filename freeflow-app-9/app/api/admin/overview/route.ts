@@ -1,6 +1,39 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth.config'
+import { createFeatureLogger } from '@/lib/logger'
 
-export async function GET() {
+const logger = createFeatureLogger('API-AdminOverview')
+
+async function verifyAdminAccess(request: NextRequest) {
+  const session = await getServerSession(authOptions)
+
+  if (!session?.user) {
+    return { authorized: false, error: 'Authentication required', status: 401 }
+  }
+
+  // Check for admin role (adjust based on your role system)
+  const userRole = (session.user as any).role || 'user'
+  if (!['admin', 'super_admin'].includes(userRole)) {
+    logger.warn('Unauthorized admin access attempt', { userId: session.user.id, role: userRole })
+    return { authorized: false, error: 'Admin access required', status: 403 }
+  }
+
+  return { authorized: true, user: session.user }
+}
+
+export async function GET(request: NextRequest) {
+  const authResult = await verifyAdminAccess(request)
+
+  if (!authResult.authorized) {
+    return NextResponse.json(
+      { success: false, error: authResult.error },
+      { status: authResult.status }
+    )
+  }
+
+  logger.info('Admin overview accessed', { userId: authResult.user?.id })
+
   return NextResponse.json({
     success: true,
     data: {
@@ -18,6 +51,24 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  const body = await request.json().catch(() => ({}))
-  return NextResponse.json({ success: true, data: body })
+  const authResult = await verifyAdminAccess(request)
+
+  if (!authResult.authorized) {
+    return NextResponse.json(
+      { success: false, error: authResult.error },
+      { status: authResult.status }
+    )
+  }
+
+  try {
+    const body = await request.json()
+    logger.info('Admin overview POST', { userId: authResult.user?.id, action: body.action })
+    return NextResponse.json({ success: true, data: body })
+  } catch (error) {
+    logger.error('Admin overview POST error', { error })
+    return NextResponse.json(
+      { success: false, error: 'Invalid request body' },
+      { status: 400 }
+    )
+  }
 }

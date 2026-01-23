@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth.config'
 import { createFeatureLogger } from '@/lib/logger'
 import { kaziAI, type AITaskType } from '@/lib/ai/kazi-ai-router'
 
@@ -6,6 +8,9 @@ const logger = createFeatureLogger('API-AIChat')
 
 export async function POST(request: NextRequest) {
   try {
+    // Verify authentication
+    const session = await getServerSession(authOptions)
+
     const body = await request.json();
     const {
       message,
@@ -13,8 +18,19 @@ export async function POST(request: NextRequest) {
       taskType = 'chat',
       maxTokens = 4096,
       temperature = 0.7,
-      userId
+      userId: providedUserId
     } = body;
+
+    // Use session userId if available, fall back to provided userId
+    const userId = session?.user?.id || providedUserId
+
+    if (!userId) {
+      logger.warn('AI Chat request without authentication')
+      return NextResponse.json(
+        { success: false, error: 'Authentication required for AI services' },
+        { status: 401 }
+      )
+    }
 
     if (!message || typeof message !== 'string') {
       return NextResponse.json(
@@ -26,7 +42,8 @@ export async function POST(request: NextRequest) {
     logger.info('AI Chat request', {
       taskType,
       messageLength: message.length,
-      userId
+      userId,
+      authenticated: !!session
     })
 
     // Use real AI router
