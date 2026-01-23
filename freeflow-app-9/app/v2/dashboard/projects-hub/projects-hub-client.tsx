@@ -193,24 +193,24 @@ interface Integration {
   icon: string
 }
 
-// Use centralized mock data - mapped to local variable names for compatibility
-const statusColumns = projectsStatusColumns
-const mockProjects = projectsHubProjects as Project[]
-const mockSprints = projectsHubSprints
-const mockBacklog = projectsHubBacklog
-const mockRoadmap = projectsHubRoadmap
-const mockAutomations = projectsHubAutomations
-const mockTemplates = projectsHubTemplates
-const mockIssues = projectsHubIssues as Issue[]
-const mockEpics = projectsHubEpics as Epic[]
-const mockActivities = projectsHubActivities as unknown as Activity[]
-const mockReports = projectsHubReports as Report[]
-const mockIntegrations = projectsHubIntegrations as Integration[]
-const mockProjectsAIInsights = projectsHubAIInsights
-const mockProjectsCollaborators = projectsHubCollaborators
-const mockProjectsPredictions = projectsHubPredictions
-const mockProjectsActivities = projectsHubActivities
-const mockProjectsQuickActions = projectsHubQuickActions
+// Empty defaults for backward compatibility (data comes from Supabase hooks)
+const statusColumns: any[] = []
+const mockProjects: Project[] = []
+const mockSprints: Sprint[] = []
+const mockBacklog: BacklogItem[] = []
+const mockRoadmap: RoadmapItem[] = []
+const mockAutomations: Automation[] = []
+const mockTemplates: Template[] = []
+const mockIssues: Issue[] = []
+const mockEpics: Epic[] = []
+const mockActivities: Activity[] = []
+const mockReports: Report[] = []
+const mockIntegrations: Integration[] = []
+const mockProjectsAIInsights: any[] = []
+const mockProjectsCollaborators: any[] = []
+const mockProjectsPredictions: any[] = []
+const mockProjectsActivities: any[] = []
+const mockProjectsQuickActions: any[] = []
 
 const priorityConfig = {
   critical: { color: 'bg-red-500', label: 'Critical' },

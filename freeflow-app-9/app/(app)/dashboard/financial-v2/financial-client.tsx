@@ -101,13 +101,12 @@ interface BudgetItem {
   remaining: number
 }
 
-// Use centralized mock data - mapped to local variable names for compatibility
-// Mapped Data Adapters
-const mockAIInsights: any[] = [] // Future: Connect to useRevenueIntelligence
+// Empty defaults for backward compatibility (data comes from Supabase hooks)
+const mockAIInsights: any[] = []
 const mockFinancialCollaborators: any[] = []
 const mockFinancialPredictions: any[] = []
 const mockFinancialActivities: any[] = []
-const mockFinancialQuickActions = financialQuickActions // Keep static actions
+const mockFinancialQuickActions: any[] = []
 
 export default function FinancialClient({ initialFinancial }: { initialFinancial: FinancialRecord[] }) {
   // Define adapter variables locally (removed mock data imports)

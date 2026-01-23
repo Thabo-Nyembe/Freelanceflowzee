@@ -138,19 +138,26 @@ interface Automation {
   lastRun: string
 }
 
-// Use centralized mock data - mapped to local variable names for compatibility
-const mockContacts = crmContacts as Contact[]
-const mockCompanies = crmCompanies as Company[]
-const mockDeals = crmDeals as Deal[]
-const mockActivities = crmActivities as CrmActivity[]
-const mockReports = crmReports as Report[]
-const mockAutomations = crmAutomations as Automation[]
-const PIPELINE_STAGES = crmPipelineStages as { id: DealStage; label: string; color: string }[]
-const mockAIInsights = crmAIInsights
-const mockCrmCollaborators = crmCollaborators
-const mockCrmPredictions = crmPredictions
-const mockCrmActivitiesFeed = crmActivities
-const mockCrmQuickActions = crmQuickActions
+// Empty defaults for backward compatibility (data comes from Supabase hooks)
+const mockContacts: Contact[] = []
+const mockCompanies: Company[] = []
+const mockDeals: Deal[] = []
+const mockActivities: CrmActivity[] = []
+const mockReports: Report[] = []
+const mockAutomations: Automation[] = []
+const PIPELINE_STAGES: { id: DealStage; label: string; color: string }[] = [
+  { id: 'prospecting', label: 'Prospecting', color: 'bg-blue-500' },
+  { id: 'qualification', label: 'Qualification', color: 'bg-yellow-500' },
+  { id: 'proposal', label: 'Proposal', color: 'bg-orange-500' },
+  { id: 'negotiation', label: 'Negotiation', color: 'bg-purple-500' },
+  { id: 'closed_won', label: 'Closed Won', color: 'bg-green-500' },
+  { id: 'closed_lost', label: 'Closed Lost', color: 'bg-red-500' }
+]
+const mockAIInsights: any[] = []
+const mockCrmCollaborators: any[] = []
+const mockCrmPredictions: any[] = []
+const mockCrmActivitiesFeed: any[] = []
+const mockCrmQuickActions: any[] = []
 
 export default function CrmClient() {
   // Define adapter variables locally (removed mock data imports)

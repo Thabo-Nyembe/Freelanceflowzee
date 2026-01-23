@@ -146,14 +146,14 @@ const PIPELINE_STAGES: { id: DealStage; label: string; color: string }[] = [
   { id: 'closed_lost', label: 'Closed Lost', color: 'red' }
 ]
 
-// Use mock data for reports, automations, and AI features (not stored in DB yet)
-const mockCompanies = crmCompanies as Company[]
-const mockReports = crmReports as Report[]
-const mockAutomations = crmAutomations as Automation[]
-const mockAIInsights = crmAIInsights
-const mockCrmCollaborators = crmCollaborators
-const mockCrmPredictions = crmPredictions
-const mockCrmQuickActions = crmQuickActions
+// Empty defaults for backward compatibility (data comes from Supabase hooks)
+const mockCompanies: Company[] = []
+const mockReports: Report[] = []
+const mockAutomations: Automation[] = []
+const mockAIInsights: any[] = []
+const mockCrmCollaborators: any[] = []
+const mockCrmPredictions: any[] = []
+const mockCrmQuickActions: any[] = []
 
 export default function CrmClient() {
   // Define adapter variables locally (removed mock data imports)
