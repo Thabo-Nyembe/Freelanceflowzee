@@ -10,7 +10,7 @@ import {
   Briefcase, Award, Star, Users, Shield, MessageSquare, Settings,
   Share2, Download, Plus, Search, Eye, Link2, TrendingUp,
   GraduationCap, Building2, FileText, Heart, ThumbsUp, Bookmark,
-  BarChart3, CheckCircle, Clock, ExternalLink, Image, Video, Zap, Target, Bell, Lock, Activity, UserPlus,
+  BarChart3, CheckCircle, Clock, Image, Video, Zap, Target, Bell, Lock, Activity, UserPlus,
   Languages, BookOpen, Trophy, Network, Sparkles,
   ArrowUpRight, ArrowDownRight, MoreHorizontal, Twitter, Github, Youtube,
   Mic, Podcast, Newspaper, Hash, Database, Terminal, Crown, ChevronRight, Play, Sliders,
@@ -51,114 +51,16 @@ const supabase = createClient()
 // Types
 type SkillLevel = 'beginner' | 'intermediate' | 'advanced' | 'expert'
 type ConnectionStatus = 'connected' | 'pending' | 'following' | 'none'
-type PostType = 'text' | 'article' | 'image' | 'video' | 'document' | 'poll' | 'event' | 'celebration'
-type VisibilityLevel = 'public' | 'connections' | 'private'
 type EmploymentType = 'full-time' | 'part-time' | 'contract' | 'freelance' | 'internship' | 'volunteer' | 'self-employed'
 type LocationType = 'onsite' | 'remote' | 'hybrid'
-type FeaturedType = 'post' | 'article' | 'link' | 'media' | 'newsletter' | 'event'
 type JobType = 'full-time' | 'part-time' | 'contract' | 'temporary' | 'internship'
-type JobPreference = 'actively-looking' | 'open-to-offers' | 'not-looking'
-type LanguageProficiency = 'elementary' | 'limited-working' | 'professional-working' | 'full-professional' | 'native-bilingual'
 type AssessmentStatus = 'not-taken' | 'in-progress' | 'passed' | 'failed'
-
-interface Profile {
-  id: string
-  userId: string
-  firstName: string
-  lastName: string
-  pronouns: string
-  headline: string
-  summary: string
-  location: string
-  email: string
-  phone: string
-  website: string
-  avatar: string
-  banner: string
-  isVerified: boolean
-  isPremium: boolean
-  isCreatorMode: boolean
-  isOpenToWork: boolean
-  isHiring: boolean
-  profileViews: number
-  profileViewsChange: number
-  searchAppearances: number
-  searchAppearancesChange: number
-  postImpressions: number
-  postImpressionsChange: number
-  followers: number
-  following: number
-  connections: number
-  profileStrength: number
-  industry: string
-  currentCompany: string
-  currentTitle: string
-  createdAt: string
-  lastActive: string
-  customUrl: string
-  coverStory: string | null
-  topVoice: boolean
-  topVoiceBadge: string | null
-  socialLinks: SocialLink[]
-  featuredCount: number
-  articlesCount: number
-  newsletterSubscribers: number
-}
 
 interface SocialLink {
   platform: string
   url: string
   icon: string
 }
-
-interface Experience {
-  id: string
-  company: string
-  companyLogo?: string
-  companyUrl?: string
-  title: string
-  location: string
-  locationType: LocationType
-  employmentType: EmploymentType
-  startDate: string
-  endDate?: string
-  isCurrent: boolean
-  description: string
-  skills: string[]
-  media: { type: string; url: string; title: string }[]
-  achievements: string[]
-}
-
-interface Education {
-  id: string
-  school: string
-  schoolLogo?: string
-  degree: string
-  field: string
-  startYear: number
-  endYear?: number
-  grade?: string
-  activities: string
-  description: string
-  societies: string[]
-}
-
-interface Skill {
-  id: string
-  name: string
-  level: SkillLevel
-  endorsements: number
-  endorsers: { id: string; name: string; avatar: string; title: string }[]
-  isTopSkill: boolean
-  isPinned: boolean
-  assessmentStatus: AssessmentStatus
-  assessmentScore?: number
-  category: string
-}
-
-// Types removed
-
-// Types removed
 
 interface Connection {
   id: string
@@ -189,8 +91,6 @@ interface Job {
   matchScore: number
   skills: string[]
 }
-
-// Types removed
 
 // Types removed
 
@@ -277,15 +177,8 @@ const getAssessmentColor = (status: AssessmentStatus): string => {
   return colors[status]
 }
 
-const getConnectionStatusColor = (status: ConnectionStatus): string => {
-  const colors: Record<ConnectionStatus, string> = {
-    connected: 'bg-blue-100 text-blue-700',
-    pending: 'bg-yellow-100 text-yellow-700',
-    following: 'bg-purple-100 text-purple-700',
-    none: 'bg-gray-100 text-gray-600'
-  }
-  return colors[status]
-}
+// Helper removed (getConnectionStatusColor)
+
 
 const formatDate = (date: string) => {
   return new Date(date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
@@ -309,18 +202,8 @@ const calculateDuration = (start: string, end?: string) => {
   return `${remainingMonths} mo${remainingMonths !== 1 ? 's' : ''}`
 }
 
-const formatTimeAgo = (date: string) => {
-  const now = new Date()
-  const then = new Date(date)
-  const diffMs = now.getTime() - then.getTime()
-  const diffMins = Math.floor(diffMs / 60000)
-  const diffHours = Math.floor(diffMs / 3600000)
-  const diffDays = Math.floor(diffMs / 86400000)
-  if (diffMins < 60) return `${diffMins}m ago`
-  if (diffHours < 24) return `${diffHours}h ago`
-  if (diffDays < 7) return `${diffDays}d ago`
-  return formatDate(date)
-}
+// Helper removed (formatTimeAgo)
+
 
 // Enhanced Competitive Upgrade Mock Data
 // Mock data removed - AI component mocks
@@ -617,31 +500,8 @@ export default function ProfileClient() {
     }
   }
 
-  // Add experience
-  const handleAddExperience = async (exp: Partial<DBExperience>) => {
-    if (!user?.id) return
+  // Add experience handler removed (unused)
 
-    try {
-      const { error } = await supabase.from('experience').insert({
-        user_id: user.id,
-        company: exp.company || '',
-        title: exp.title || '',
-        location: exp.location,
-        start_date: exp.start_date,
-        end_date: exp.end_date,
-        current: exp.current || false,
-        description: exp.description,
-        achievements: exp.achievements || []
-      })
-
-      if (error) throw error
-
-      toast.success('Experience added')
-      fetchProfileData()
-    } catch (error) {
-      toast.error('Failed to add experience')
-    }
-  }
 
   // Delete experience
   const handleDeleteExperience = async (expId: string) => {
@@ -918,7 +778,7 @@ export default function ProfileClient() {
                   <div className="flex flex-wrap items-center gap-2 mb-4">
                     {displayProfile.isOpenToWork && <Badge className="bg-green-100 text-green-700"><Target className="w-3 h-3 mr-1" />Open to Work</Badge>}
                     {displayProfile.isHiring && <Badge className="bg-purple-100 text-purple-700"><Briefcase className="w-3 h-3 mr-1" />Hiring</Badge>}
-                    {displayProfile.socialLinks.map((link, i) => (
+                    {displayProfile.socialLinks.map((link: SocialLink, i: number) => (
                       <Button key={i} variant="ghost" size="sm" className="h-7 px-2" asChild>
                         <a href={link.url} target="_blank" rel="noopener noreferrer">
                           {link.platform === 'Twitter' && <Twitter className="w-4 h-4" />}
@@ -2864,23 +2724,10 @@ export default function ProfileClient() {
                 <DialogDescription>Trending skills in your industry</DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">
-                {[
-                  { skill: 'AI/Machine Learning', growth: '+45%', demand: 'Very High' },
-                  { skill: 'Cloud Architecture', growth: '+32%', demand: 'High' },
-                  { skill: 'Kubernetes', growth: '+28%', demand: 'High' },
-                  { skill: 'TypeScript', growth: '+24%', demand: 'High' },
-                  { skill: 'React', growth: '+18%', demand: 'Very High' },
-                ].map((trend, i) => (
-                  <div key={i} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                    <div>
-                      <p className="font-medium">{trend.skill}</p>
-                      <p className="text-sm text-gray-500">Demand: {trend.demand}</p>
-                    </div>
-                    <div className="text-right">
-                      <Badge className="bg-green-100 text-green-700">{trend.growth}</Badge>
-                    </div>
-                  </div>
-                ))}
+                <div className="text-center py-12 text-gray-500">
+                  <TrendingUp className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                  <p>No skill trends available for your industry yet</p>
+                </div>
               </div>
               <div className="flex justify-end">
                 <Button variant="outline" onClick={() => setShowSkillTrendsDialog(false)}>Close</Button>
@@ -2896,27 +2743,10 @@ export default function ProfileClient() {
                 <DialogDescription>Browse companies in your network</DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">
-                {[
-                  { name: 'Google', industry: 'Technology', followers: '15M', jobs: 234 },
-                  { name: 'Microsoft', industry: 'Technology', followers: '12M', jobs: 187 },
-                  { name: 'Apple', industry: 'Technology', followers: '14M', jobs: 156 },
-                  { name: 'Amazon', industry: 'E-commerce', followers: '10M', jobs: 312 },
-                ].map((company, i) => (
-                  <div key={i} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <Avatar>
-                        <AvatarFallback>{company.name[0]}</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="font-medium">{company.name}</p>
-                        <p className="text-sm text-gray-500">{company.industry} - {company.followers} followers</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <Badge variant="outline">{company.jobs} jobs</Badge>
-                    </div>
-                  </div>
-                ))}
+                <div className="text-center py-12 text-gray-500">
+                  <Building2 className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                  <p>No companies found in your network</p>
+                </div>
               </div>
               <div className="flex justify-end">
                 <Button variant="outline" onClick={() => setShowCompaniesDialog(false)}>Close</Button>
@@ -2941,10 +2771,7 @@ export default function ProfileClient() {
                         <p className="text-sm text-gray-500">{edu.degree}, {edu.field}</p>
                       </div>
                     </div>
-                    <div className="flex gap-2">
-                      <Badge variant="outline">2,500+ alumni on FreeFlow</Badge>
-                      <Badge variant="outline">45 mutual connections</Badge>
-                    </div>
+                    {/* Badges removed - requiring real data */}
                     <Button variant="link" className="p-0 h-auto mt-2 text-purple-600">
                       Browse {edu.school} Alumni
                     </Button>
@@ -2965,25 +2792,10 @@ export default function ProfileClient() {
                 <DialogDescription>Discover and join professional groups</DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">
-                {[
-                  { name: 'React Developers', members: '125K', posts: '50/week' },
-                  { name: 'Software Engineering Leaders', members: '89K', posts: '35/week' },
-                  { name: 'Tech Startups', members: '234K', posts: '120/week' },
-                  { name: 'Product Managers Network', members: '156K', posts: '80/week' },
-                ].map((group, i) => (
-                  <div key={i} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                        <Users className="w-4 h-4 text-blue-600" />
-                      </div>
-                      <div>
-                        <p className="font-medium">{group.name}</p>
-                        <p className="text-sm text-gray-500">{group.members} members - {group.posts}</p>
-                      </div>
-                    </div>
-                    <Button size="sm">Join</Button>
-                  </div>
-                ))}
+                <div className="text-center py-12 text-gray-500">
+                  <Globe className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                  <p>No professional groups found</p>
+                </div>
               </div>
               <div className="flex justify-end">
                 <Button variant="outline" onClick={() => setShowGroupsDialog(false)}>Close</Button>
@@ -2999,35 +2811,9 @@ export default function ProfileClient() {
                 <DialogDescription>Salary data for your industry and role</DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">
-                <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 rounded-lg">
-                  <h4 className="font-medium">Senior Software Engineer</h4>
-                  <p className="text-sm text-gray-500">San Francisco Bay Area</p>
-                  <div className="mt-3">
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>Salary Range</span>
-                      <span className="font-medium">$180K - $350K</span>
-                    </div>
-                    <Progress value={65} className="h-2" />
-                    <div className="flex justify-between text-xs text-gray-500 mt-1">
-                      <span>$180K</span>
-                      <span>Median: $245K</span>
-                      <span>$350K</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="space-y-3">
-                  <h4 className="font-medium">Salary by Company</h4>
-                  {[
-                    { company: 'Google', range: '$220K - $380K' },
-                    { company: 'Meta', range: '$200K - $350K' },
-                    { company: 'Apple', range: '$190K - $320K' },
-                    { company: 'Netflix', range: '$250K - $400K' },
-                  ].map((item, i) => (
-                    <div key={i} className="flex justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
-                      <span>{item.company}</span>
-                      <span className="font-medium text-green-600">{item.range}</span>
-                    </div>
-                  ))}
+                <div className="text-center py-12 text-gray-500">
+                  <TrendingUp className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                  <p>No salary insights available for your role/location</p>
                 </div>
               </div>
               <div className="flex justify-end">
@@ -3165,21 +2951,10 @@ export default function ProfileClient() {
                 <DialogDescription>Popular hashtags in your industry</DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">
-                {[
-                  { tag: '#TechIndustry', posts: '125K posts' },
-                  { tag: '#SoftwareEngineering', posts: '89K posts' },
-                  { tag: '#ReactJS', posts: '234K posts' },
-                  { tag: '#CareerGrowth', posts: '156K posts' },
-                  { tag: '#TechHiring', posts: '67K posts' },
-                  { tag: '#AI', posts: '345K posts' },
-                  { tag: '#StartupLife', posts: '78K posts' },
-                  { tag: '#RemoteWork', posts: '198K posts' },
-                ].map((hashtag, i) => (
-                  <div key={i} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-100">
-                    <span className="font-medium text-blue-600">{hashtag.tag}</span>
-                    <span className="text-sm text-gray-500">{hashtag.posts}</span>
-                  </div>
-                ))}
+                <div className="text-center py-12 text-gray-500">
+                  <Hash className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                  <p>No trending hashtags found</p>
+                </div>
               </div>
               <div className="flex justify-end">
                 <Button variant="outline" onClick={() => setShowHashtagsDialog(false)}>Close</Button>
