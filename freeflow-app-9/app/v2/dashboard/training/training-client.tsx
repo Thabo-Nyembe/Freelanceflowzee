@@ -93,13 +93,6 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  trainingAIInsights,
-  trainingCollaborators,
-  trainingPredictions,
-  trainingActivities,
-  trainingQuickActions,
-} from '@/lib/mock-data/adapters'
 
 // Types
 type CourseStatus = 'draft' | 'published' | 'archived'
@@ -549,6 +542,12 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
     updateEnrollment, isUpdatingEnrollment
   } = useTrainingMutations()
 
+  // Define adapter variables locally (removed mock data imports)
+  const trainingAIInsights: any[] = []
+  const trainingCollaborators: any[] = []
+  const trainingPredictions: any[] = []
+  const trainingActivities: any[] = []
+  const trainingQuickActions: any[] = []
 
   // UI state
   const [activeTab, setActiveTab] = useState('catalog')

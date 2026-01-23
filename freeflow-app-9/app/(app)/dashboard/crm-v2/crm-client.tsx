@@ -38,16 +38,6 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-// Centralized Mock Data - For features not yet stored in Supabase
-import {
-  crmCompanies,
-  crmReports,
-  crmAutomations,
-  crmAIInsights,
-  crmCollaborators,
-  crmPredictions,
-  crmQuickActions,
-} from '@/lib/mock-data/adapters'
 
 // Types
 type ContactType = 'lead' | 'prospect' | 'customer' | 'partner' | 'vendor'
@@ -166,6 +156,14 @@ const mockCrmPredictions = crmPredictions
 const mockCrmQuickActions = crmQuickActions
 
 export default function CrmClient() {
+  // Define adapter variables locally (removed mock data imports)
+  const crmCompanies: any[] = []
+  const crmReports: any[] = []
+  const crmAutomations: any[] = []
+  const crmAIInsights: any[] = []
+  const crmCollaborators: any[] = []
+  const crmPredictions: any[] = []
+  const crmQuickActions: any[] = []
 
   // Supabase queries
   const { data: dbContacts, isLoading: contactsLoading, refetch: refetchContacts } = useSupabaseQuery<any>({

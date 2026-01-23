@@ -45,13 +45,6 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  broadcastsAIInsights,
-  broadcastsCollaborators,
-  broadcastsPredictions,
-  broadcastsActivities,
-  broadcastsQuickActions,
-} from '@/lib/mock-data/adapters'
 
 // Intercom / Customer.io / OneSignal level interfaces
 interface Campaign {
@@ -407,6 +400,12 @@ const mockEvents: EventTracking[] = [
 ]
 
 export default function BroadcastsClient({ initialBroadcasts }: { initialBroadcasts: Broadcast[] }) {
+  // Define adapter variables locally (removed mock data imports)
+  const broadcastsAIInsights: any[] = []
+  const broadcastsCollaborators: any[] = []
+  const broadcastsPredictions: any[] = []
+  const broadcastsActivities: any[] = []
+  const broadcastsQuickActions: any[] = []
 
   const [activeTab, setActiveTab] = useState('campaigns')
   const [broadcastTypeFilter, setBroadcastTypeFilter] = useState<BroadcastType | 'all'>('all')

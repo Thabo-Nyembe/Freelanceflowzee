@@ -80,12 +80,6 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  teamHubAIInsights,
-  teamHubPredictions,
-  teamHubActivities,
-  teamHubQuickActions,
-} from '@/lib/mock-data/adapters'
 
 // Types
 type MemberStatus = 'online' | 'away' | 'dnd' | 'offline' | 'in-meeting'
@@ -454,6 +448,12 @@ export default function TeamHubClient() {
     updateMemberStatus,
     inviteMember
   } = useTeamHub()
+
+  // Define adapter variables locally (removed mock data imports)
+  const teamHubAIInsights: any[] = []
+  const teamHubPredictions: any[] = []
+  const teamHubActivities: any[] = []
+  const teamHubQuickActions: any[] = []
 
   // Map hook members to TeamMember format with mock fallback
   const displayMembers = useMemo(() => {

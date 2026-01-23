@@ -37,13 +37,6 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useTeamManagement, type Team, type TeamType, type TeamStatus } from '@/lib/hooks/use-team-management'
 import { toast } from 'sonner'
-import {
-  teamManagementAIInsights,
-  teamManagementCollaborators,
-  teamManagementPredictions,
-  teamManagementActivities,
-  teamManagementQuickActions,
-} from '@/lib/mock-data/adapters'
 
 interface TeamMember {
   id: string
@@ -104,6 +97,13 @@ interface Review {
 }
 
 export default function TeamManagementClient({ initialTeams }: { initialTeams: Team[] }) {
+  // Define adapter variables locally (removed mock data imports)
+  const teamManagementAIInsights: any[] = []
+  const teamManagementCollaborators: any[] = []
+  const teamManagementPredictions: any[] = []
+  const teamManagementActivities: any[] = []
+  const teamManagementQuickActions: any[] = []
+
   const [activeView, setActiveView] = useState<'teams' | 'people' | 'goals' | 'reviews' | 'oneOnOnes' | 'recognition' | 'settings'>('teams')
   const [searchQuery, setSearchQuery] = useState('')
   const [typeFilter, setTypeFilter] = useState<TeamType | 'all'>('all')

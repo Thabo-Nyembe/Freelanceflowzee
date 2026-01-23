@@ -100,13 +100,6 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  announcementsAIInsights,
-  announcementsCollaborators,
-  announcementsPredictions,
-  announcementsActivities,
-  announcementsQuickActions,
-} from '@/lib/mock-data/adapters'
 
 // Types
 type AnnouncementStatus = 'draft' | 'scheduled' | 'published' | 'archived'
@@ -412,6 +405,13 @@ const typeColors: Record<AnnouncementType, string> = {
 }
 
 export default function AnnouncementsClient() {
+  // Define adapter variables locally (removed mock data imports)
+  const announcementsAIInsights: any[] = []
+  const announcementsCollaborators: any[] = []
+  const announcementsPredictions: any[] = []
+  const announcementsActivities: any[] = []
+  const announcementsQuickActions: any[] = []
+
   // Supabase hook for real database operations
   const {
     announcements: dbAnnouncements,

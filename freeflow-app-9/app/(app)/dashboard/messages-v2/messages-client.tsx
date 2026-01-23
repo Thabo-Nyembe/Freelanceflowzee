@@ -55,13 +55,6 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  messagesAIInsights,
-  messagesCollaborators,
-  messagesPredictions,
-  messagesActivities,
-  messagesQuickActions,
-} from '@/lib/mock-data/adapters'
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
@@ -249,6 +242,13 @@ const mockMentions: Mention[] = [
 ]
 
 export default function MessagesClient() {
+  // Define adapter variables locally (removed mock data imports)
+  const messagesAIInsights: any[] = []
+  const messagesCollaborators: any[] = []
+  const messagesPredictions: any[] = []
+  const messagesActivities: any[] = []
+  const messagesQuickActions: any[] = []
+
   const [selectedChannel, setSelectedChannel] = useState<Channel | null>(mockChannels[0])
   const [searchQuery, setSearchQuery] = useState('')
   const [messageInput, setMessageInput] = useState('')

@@ -138,9 +138,8 @@ const QuickActionsToolbar = dynamic(
   }
 )
 
-// MIGRATED: Batch #12 - Removed mock data, using database hooks
+/// MIGRATED: Batch #12 - Removed mock data, using database hooks
 // Mock data imports removed - replaced with database hooks
-import { companyInfo } from '@/lib/mock-data/adapters'
 
 // Initialize Supabase client once at module level
 const supabase = createClient()
@@ -232,6 +231,14 @@ const mockActivities: any[] = []
 const mockQuickActions: any[] = []
 
 export default function AnalyticsClient() {
+  // Define adapter variables locally (removed mock data imports)
+  const companyInfo = {
+    name: 'FreeFlow',
+    description: 'The all-in-one platform for freelancers and agencies',
+    tagline: 'Elevate Your Freelance Business',
+    metrics: { customers: 0, mrr: 0, arr: 0, growth: 0, nps: 0, churnRate: 0, ltv: 0, cac: 0 }
+  }
+
   // Initialize Supabase client
   const { getUserId } = useAuthUserId()
   const [userId, setUserId] = useState<string | null>(null)

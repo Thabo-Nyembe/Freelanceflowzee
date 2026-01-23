@@ -75,13 +75,6 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  payrollAIInsights,
-  payrollCollaborators,
-  payrollPredictions,
-  payrollActivities,
-  payrollQuickActions,
-} from '@/lib/mock-data/adapters'
 
 // Types
 type PayRunStatus = 'draft' | 'pending_approval' | 'approved' | 'processing' | 'completed' | 'failed' | 'cancelled'
@@ -660,7 +653,12 @@ const formatCurrencyDetailed = (amount: number) => {
 }
 
 export default function PayrollClient() {
-
+  // Define adapter variables locally (removed mock data imports)
+  const payrollAIInsights: any[] = []
+  const payrollCollaborators: any[] = []
+  const payrollPredictions: any[] = []
+  const payrollActivities: any[] = []
+  const payrollQuickActions: any[] = []
 
   // UI State
   const [activeTab, setActiveTab] = useState('pay-runs')

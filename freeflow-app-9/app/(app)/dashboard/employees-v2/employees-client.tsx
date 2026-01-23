@@ -48,13 +48,6 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  employeesAIInsights,
-  employeesCollaborators,
-  employeesPredictions,
-  employeesActivities,
-  employeesQuickActions,
-} from '@/lib/mock-data/adapters'
 
 // Types
 type EmployeeStatus = 'active' | 'on_leave' | 'terminated' | 'onboarding'
@@ -224,6 +217,13 @@ interface HRIntegration {
 
 // Mock Data
 export default function EmployeesClient() {
+  // Define adapter variables locally (removed mock data imports)
+  const employeesAIInsights: any[] = []
+  const employeesCollaborators: any[] = []
+  const employeesPredictions: any[] = []
+  const employeesActivities: any[] = []
+  const employeesQuickActions: any[] = []
+
   const [activeTab, setActiveTab] = useState('directory')
   const [searchQuery, setSearchQuery] = useState('')
   const [departmentFilter, setDepartmentFilter] = useState<string>('all')

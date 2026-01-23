@@ -80,13 +80,6 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  eventsAIInsights,
-  eventsCollaborators,
-  eventsPredictions,
-  eventsActivities,
-  eventsQuickActions,
-} from '@/lib/mock-data/adapters'
 
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
@@ -193,6 +186,13 @@ const mockAttendees: Attendee[] = []
 const mockRegistrations: Registration[] = []
 
 export default function EventsClient() {
+  // Define adapter variables locally (removed mock data imports)
+  const eventsAIInsights: any[] = []
+  const eventsCollaborators: any[] = []
+  const eventsPredictions: any[] = []
+  const eventsActivities: any[] = []
+  const eventsQuickActions: any[] = []
+
   const [activeTab, setActiveTab] = useState('events')
   const [searchQuery, setSearchQuery] = useState('')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')

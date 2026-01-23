@@ -70,13 +70,6 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  recruitmentAIInsights,
-  recruitmentCollaborators,
-  recruitmentPredictions,
-  recruitmentActivities,
-  recruitmentQuickActions,
-} from '@/lib/mock-data/adapters'
 
 // Types
 type JobStatus = 'draft' | 'open' | 'on-hold' | 'filled' | 'cancelled'
@@ -688,6 +681,13 @@ const mockTalentPool: TalentPoolCandidate[] = [
 ]
 
 export default function RecruitmentClient() {
+  // Define adapter variables locally (removed mock data imports)
+  const recruitmentAIInsights: any[] = []
+  const recruitmentCollaborators: any[] = []
+  const recruitmentPredictions: any[] = []
+  const recruitmentActivities: any[] = []
+  const recruitmentQuickActions: any[] = []
+
   const [activeTab, setActiveTab] = useState('jobs')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedJob, setSelectedJob] = useState<JobRequisition | null>(null)

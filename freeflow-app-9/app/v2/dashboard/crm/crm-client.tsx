@@ -40,20 +40,6 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-// Centralized Mock Data - Investor-Ready
-import {
-  crmContacts,
-  crmCompanies,
-  crmDeals,
-  crmActivities,
-  crmReports,
-  crmAutomations,
-  crmAIInsights,
-  crmCollaborators,
-  crmPredictions,
-  crmQuickActions,
-  crmPipelineStages,
-} from '@/lib/mock-data/adapters'
 
 // Types
 type ContactType = 'lead' | 'prospect' | 'customer' | 'partner' | 'vendor'
@@ -167,6 +153,19 @@ const mockCrmActivitiesFeed = crmActivities
 const mockCrmQuickActions = crmQuickActions
 
 export default function CrmClient() {
+  // Define adapter variables locally (removed mock data imports)
+  const crmContacts: any[] = []
+  const crmCompanies: any[] = []
+  const crmDeals: any[] = []
+  const crmActivities: any[] = []
+  const crmReports: any[] = []
+  const crmAutomations: any[] = []
+  const crmAIInsights: any[] = []
+  const crmCollaborators: any[] = []
+  const crmPredictions: any[] = []
+  const crmQuickActions: any[] = []
+  const crmPipelineStages: any[] = []
+
   const { getUserId } = useAuthUserId()
   const [userId, setUserId] = useState<string | null>(null)
 

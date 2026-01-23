@@ -51,13 +51,6 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  communityAIInsights,
-  communityCollaborators,
-  communityPredictions,
-  communityActivities,
-  communityQuickActions,
-} from '@/lib/mock-data/adapters'
 
 import {
   CommunityAnnouncements,
@@ -500,6 +493,12 @@ const getModActionColor = (type: ModActionType): string => {
 // ============== MAIN COMPONENT ==============
 
 export default function CommunityClient() {
+  // Define adapter variables locally (removed mock data imports)
+  const communityAIInsights: any[] = []
+  const communityCollaborators: any[] = []
+  const communityPredictions: any[] = []
+  const communityActivities: any[] = []
+  const communityQuickActions: any[] = []
 
   const [activeTab, setActiveTab] = useState('chat')
   const [selectedChannel, setSelectedChannel] = useState<Channel>(mockChannelCategories[1].channels[0])

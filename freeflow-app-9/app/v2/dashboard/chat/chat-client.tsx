@@ -63,13 +63,6 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  chatAIInsights,
-  chatCollaborators,
-  chatPredictions,
-  chatActivities,
-  chatQuickActions,
-} from '@/lib/mock-data/adapters'
 
 import { useChat, type ChatMessage, type RoomType } from '@/lib/hooks/use-chat'
 
@@ -256,7 +249,12 @@ interface ChatClientProps {
 }
 
 export default function ChatClient({ initialChatMessages }: ChatClientProps) {
-  // Supabase client
+  // Define adapter variables locally (removed mock data imports)
+  const chatAIInsights: any[] = []
+  const chatCollaborators: any[] = []
+  const chatPredictions: any[] = []
+  const chatActivities: any[] = []
+  const chatQuickActions: any[] = []
 
   // State
   const [activeTab, setActiveTab] = useState('inbox')

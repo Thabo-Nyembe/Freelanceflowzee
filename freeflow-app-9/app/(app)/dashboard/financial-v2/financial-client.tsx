@@ -55,20 +55,6 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-// Centralized Mock Data - Investor-Ready
-import {
-  financialAccounts,
-  financialBankAccounts,
-  financialTransactions,
-  financialBudgetItems,
-  financialProfitLoss,
-  financialCashFlow,
-  financialAIInsights,
-  financialCollaborators,
-  financialPredictions,
-  financialActivities,
-  financialQuickActions,
-} from '@/lib/mock-data/adapters'
 
 // Types
 interface Account {
@@ -124,6 +110,19 @@ const mockFinancialActivities: any[] = []
 const mockFinancialQuickActions = financialQuickActions // Keep static actions
 
 export default function FinancialClient({ initialFinancial }: { initialFinancial: FinancialRecord[] }) {
+  // Define adapter variables locally (removed mock data imports)
+  const financialAccounts: any[] = []
+  const financialBankAccounts: any[] = []
+  const financialTransactions: any[] = []
+  const financialBudgetItems: any[] = []
+  const financialProfitLoss: any[] = []
+  const financialCashFlow: any[] = []
+  const financialAIInsights: any[] = []
+  const financialCollaborators: any[] = []
+  const financialPredictions: any[] = []
+  const financialActivities: any[] = []
+  const financialQuickActions: any[] = []
+
   const [activeTab, setActiveTab] = useState('overview')
   const [selectedPeriod, setSelectedPeriod] = useState('this-year')
   const [showNewTransactionDialog, setShowNewTransactionDialog] = useState(false)

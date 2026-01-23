@@ -38,25 +38,6 @@ import {
 } from '@/components/ui/competitive-upgrades-extended'
 
 
-// Centralized Mock Data - Investor-Ready
-import {
-  projectsHubProjects,
-  projectsHubSprints,
-  projectsHubBacklog,
-  projectsHubRoadmap,
-  projectsHubAutomations,
-  projectsHubTemplates,
-  projectsHubIssues,
-  projectsHubEpics,
-  projectsHubReports,
-  projectsHubIntegrations,
-  projectsHubAIInsights,
-  projectsHubCollaborators,
-  projectsHubPredictions,
-  projectsHubActivities,
-  projectsHubQuickActions,
-  projectsStatusColumns,
-} from '@/lib/mock-data/adapters'
 
 // Types
 type ProjectStatus = 'planning' | 'active' | 'review' | 'completed' | 'on_hold'
@@ -316,6 +297,24 @@ export default function ProjectsHubClient() {
   const [customFieldForm, setCustomFieldForm] = useState({ name: '', type: 'text' as const, required: false, appliesTo: [] as string[] })
   const [statusForm, setStatusForm] = useState({ name: '' })
   const [filterForm, setFilterForm] = useState({ status: 'all', priority: 'all', dateRange: 'all' })
+
+  // Define adapter variables locally (removed mock data imports)
+  const projectsHubProjects: any[] = []
+  const projectsHubSprints: any[] = []
+  const projectsHubBacklog: any[] = []
+  const projectsHubRoadmap: any[] = []
+  const projectsHubAutomations: any[] = []
+  const projectsHubTemplates: any[] = []
+  const projectsHubIssues: any[] = []
+  const projectsHubEpics: any[] = []
+  const projectsHubReports: any[] = []
+  const projectsHubIntegrations: any[] = []
+  const projectsHubAIInsights: any[] = []
+  const projectsHubCollaborators: any[] = []
+  const projectsHubPredictions: any[] = []
+  const projectsHubActivities: any[] = []
+  const projectsHubQuickActions: any[] = []
+  const projectsStatusColumns: any[] = []
 
   // Database integration - use real projects hook
   const { projects: dbProjects, fetchProjects, createProject, updateProject, deleteProject, isLoading: projectsLoading } = useProjects()

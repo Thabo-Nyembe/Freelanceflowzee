@@ -71,13 +71,6 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  messagingAIInsights,
-  messagingCollaborators,
-  messagingPredictions,
-  messagingActivities,
-  messagingQuickActions,
-} from '@/lib/mock-data/adapters'
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -355,8 +348,12 @@ const quickReactions = ['👍', '❤️', '😂', '😮', '😢', '🔥', '🎉'
 // ============================================================================
 
 export default function MessagingClient() {
-  // Supabase client
-
+  // Define adapter variables locally (removed mock data imports)
+  const messagingAIInsights: any[] = []
+  const messagingCollaborators: any[] = []
+  const messagingPredictions: any[] = []
+  const messagingActivities: any[] = []
+  const messagingQuickActions: any[] = []
 
   // Supabase hooks for real data
   const { conversations, loading: conversationsLoading, refetch: refetchConversations } = useConversations({ type: 'channel' })

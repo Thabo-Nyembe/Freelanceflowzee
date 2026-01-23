@@ -96,12 +96,6 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  teamHubAIInsights,
-  teamHubPredictions,
-  teamHubActivities,
-  teamHubQuickActions,
-} from '@/lib/mock-data/adapters'
 
 // Types
 type MemberStatus = 'online' | 'away' | 'dnd' | 'offline' | 'in-meeting'
@@ -462,6 +456,11 @@ interface DbTeamMember {
 }
 
 export default function TeamHubClient() {
+  // Define adapter variables locally (removed mock data imports)
+  const teamHubAIInsights: any[] = []
+  const teamHubPredictions: any[] = []
+  const teamHubActivities: any[] = []
+  const teamHubQuickActions: any[] = []
 
   // ==========================================================================
   // REAL-TIME TEAM COLLABORATION HOOKS - Wired to Supabase APIs

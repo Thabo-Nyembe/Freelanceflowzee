@@ -25,13 +25,6 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  logisticsAIInsights,
-  logisticsCollaborators,
-  logisticsPredictions,
-  logisticsActivities,
-  logisticsQuickActions,
-} from '@/lib/mock-data/adapters'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -684,7 +677,12 @@ const initialShipmentForm: ShipmentFormState = {
 }
 
 export default function LogisticsClient() {
-
+  // Define adapter variables locally (removed mock data imports)
+  const logisticsAIInsights: any[] = []
+  const logisticsCollaborators: any[] = []
+  const logisticsPredictions: any[] = []
+  const logisticsActivities: any[] = []
+  const logisticsQuickActions: any[] = []
 
   const [activeTab, setActiveTab] = useState('dashboard')
   const [searchQuery, setSearchQuery] = useState('')

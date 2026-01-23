@@ -33,13 +33,6 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  calendarAIInsights,
-  calendarCollaborators,
-  calendarPredictions,
-  calendarActivities,
-  calendarQuickActions,
-} from '@/lib/mock-data/adapters'
 
 // ============================================================================
 // TYPE DEFINITIONS - Google Calendar Level Platform
@@ -222,6 +215,13 @@ const formatDateRange = (start: string, end: string) => {
 // ============================================================================
 
 export default function CalendarClient({ initialEvents }: { initialEvents: CalendarEvent[] }) {
+  // Define adapter variables locally (removed mock data imports)
+  const calendarAIInsights: any[] = []
+  const calendarCollaborators: any[] = []
+  const calendarPredictions: any[] = []
+  const calendarActivities: any[] = []
+  const calendarQuickActions: any[] = []
+
   const [activeTab, setActiveTab] = useState('calendar')
   const [settingsTab, setSettingsTab] = useState('general')
   const [eventTypeFilter, setEventTypeFilter] = useState<EventType | 'all'>('all')

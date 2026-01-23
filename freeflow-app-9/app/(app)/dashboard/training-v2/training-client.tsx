@@ -95,13 +95,6 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  trainingAIInsights,
-  trainingCollaborators,
-  trainingPredictions,
-  trainingActivities,
-  trainingQuickActions,
-} from '@/lib/mock-data/adapters'
 
 // Types
 type CourseStatus = 'draft' | 'published' | 'archived'
@@ -541,6 +534,13 @@ const defaultEnrollmentForm: EnrollmentFormData = {
 }
 
 export default function TrainingClient({ initialPrograms }: TrainingClientProps) {
+  // Define adapter variables locally (removed mock data imports)
+  const trainingAIInsights: any[] = []
+  const trainingCollaborators: any[] = []
+  const trainingPredictions: any[] = []
+  const trainingActivities: any[] = []
+  const trainingQuickActions: any[] = []
+
   // Hooks for real data
   const { programs: dbPrograms, stats: dbStats, isLoading, refetch } = useTrainingPrograms(initialPrograms || [])
   const {

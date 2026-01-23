@@ -78,13 +78,6 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  onboardingAIInsights,
-  onboardingCollaborators,
-  onboardingPredictions,
-  onboardingActivities,
-  onboardingQuickActions,
-} from '@/lib/mock-data/adapters'
 
 // Types
 type FlowStatus = 'active' | 'paused' | 'draft' | 'archived'
@@ -420,6 +413,12 @@ const formatDuration = (seconds: number) => {
 }
 
 export default function OnboardingClient() {
+  // Define adapter variables locally (removed mock data imports)
+  const onboardingAIInsights: any[] = []
+  const onboardingCollaborators: any[] = []
+  const onboardingPredictions: any[] = []
+  const onboardingActivities: any[] = []
+  const onboardingQuickActions: any[] = []
 
   const [userId, setUserId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)

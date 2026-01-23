@@ -74,13 +74,6 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import {
-  notificationsAIInsights,
-  notificationsCollaborators,
-  notificationsPredictions,
-  notificationsActivities,
-  notificationsQuickActions,
-} from '@/lib/mock-data/adapters'
 
 // ============================================================================
 // TYPES - SLACK NOTIFICATIONS LEVEL
@@ -245,6 +238,13 @@ interface Notification {
 // ============================================================================
 
 export default function NotificationsClient() {
+  // Define adapter variables locally (removed mock data imports)
+  const notificationsAIInsights: any[] = []
+  const notificationsCollaborators: any[] = []
+  const notificationsPredictions: any[] = []
+  const notificationsActivities: any[] = []
+  const notificationsQuickActions: any[] = []
+
   const router = useRouter()
 
   // Use the new comprehensive notifications hook with real Supabase data
