@@ -217,18 +217,8 @@ interface Dashboard {
   sharedWith: string[]
 }
 
-// MIGRATED: Mock data constants replaced with empty arrays/objects
-// Using database hooks for real data (useAnalyticsDailyMetrics, useAnalyticsRealtimeMetrics, etc.)
-const mockMetrics: any[] = []
-const mockFunnels: any[] = []
-const mockCohorts: any[] = []
-const mockReports: any[] = []
-const mockDashboards: any[] = []
-const mockAIInsights: any[] = []
-const mockCollaborators: any[] = []
-const mockPredictions: any[] = []
-const mockActivities: any[] = []
-const mockQuickActions: any[] = []
+// PRODUCTION: All mock data removed - using database hooks for real data
+// (useAnalyticsDailyMetrics, useAnalyticsRealtimeMetrics, useAnalyticsInsights, etc.)
 
 export default function AnalyticsClient() {
   // Define adapter variables locally (removed mock data imports)
@@ -1845,8 +1835,9 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
               </div>
               <div className="flex items-center gap-3">
                 {/* Collaboration Indicator */}
+                {/* CollaborationIndicator - using empty array until real collaboration data is wired */}
                 <CollaborationIndicator
-                  collaborators={mockCollaborators}
+                  collaborators={[]}
                   maxVisible={3}
                 />
                 <Button

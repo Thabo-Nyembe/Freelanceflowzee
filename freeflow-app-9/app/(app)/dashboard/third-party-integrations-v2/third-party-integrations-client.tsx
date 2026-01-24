@@ -2,6 +2,8 @@
 
 import { createClient } from '@/lib/supabase/client'
 
+const supabase = createClient()
+
 import React, { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -167,188 +169,27 @@ interface ExecutionLog {
   error?: string
 }
 
-// Mock Data
-const mockApps: IntegrationApp[] = [
-  { id: '1', name: 'Slack', description: 'Team communication', icon: 'slack', category: 'communication', website: 'https://slack.com', docsUrl: 'https://api.slack.com', popular: true },
-  { id: '2', name: 'Salesforce', description: 'CRM platform', icon: 'salesforce', category: 'crm', website: 'https://salesforce.com', docsUrl: 'https://developer.salesforce.com', popular: true },
-  { id: '3', name: 'Stripe', description: 'Payment processing', icon: 'stripe', category: 'payment', website: 'https://stripe.com', docsUrl: 'https://stripe.com/docs', popular: true },
-  { id: '4', name: 'Google Sheets', description: 'Spreadsheets', icon: 'sheets', category: 'productivity', website: 'https://sheets.google.com', docsUrl: 'https://developers.google.com/sheets', popular: true },
-  { id: '5', name: 'Mailchimp', description: 'Email marketing', icon: 'mailchimp', category: 'marketing', website: 'https://mailchimp.com', docsUrl: 'https://mailchimp.com/developer', popular: true },
-  { id: '6', name: 'HubSpot', description: 'Marketing & CRM', icon: 'hubspot', category: 'crm', website: 'https://hubspot.com', docsUrl: 'https://developers.hubspot.com', popular: true },
-  { id: '7', name: 'Dropbox', description: 'Cloud storage', icon: 'dropbox', category: 'storage', website: 'https://dropbox.com', docsUrl: 'https://dropbox.com/developers', popular: false },
-  { id: '8', name: 'Shopify', description: 'E-commerce', icon: 'shopify', category: 'ecommerce', website: 'https://shopify.com', docsUrl: 'https://shopify.dev', popular: true },
-  { id: '9', name: 'Notion', description: 'Workspace', icon: 'notion', category: 'productivity', website: 'https://notion.so', docsUrl: 'https://developers.notion.com', popular: true },
-  { id: '10', name: 'Airtable', description: 'Database', icon: 'airtable', category: 'productivity', website: 'https://airtable.com', docsUrl: 'https://airtable.com/developers', popular: false },
-]
-
-const mockConnections: Connection[] = [
-  {
-    id: '1',
-    app: mockApps[0],
-    status: 'connected',
-    connectedAt: '2024-01-15',
-    lastSync: '2024-03-20T14:30:00',
-    credentials: { type: 'oauth', expiresAt: '2025-01-15' },
-    usageThisMonth: 45230,
-    rateLimit: 100000,
-    rateLimitRemaining: 54770
-  },
-  {
-    id: '2',
-    app: mockApps[1],
-    status: 'connected',
-    connectedAt: '2024-02-01',
-    lastSync: '2024-03-20T12:00:00',
-    credentials: { type: 'oauth', expiresAt: '2024-08-01' },
-    usageThisMonth: 12450,
-    rateLimit: 50000,
-    rateLimitRemaining: 37550
-  },
-  {
-    id: '3',
-    app: mockApps[2],
-    status: 'connected',
-    connectedAt: '2024-01-20',
-    lastSync: '2024-03-20T15:00:00',
-    credentials: { type: 'api_key' },
-    usageThisMonth: 8920,
-    rateLimit: 25000,
-    rateLimitRemaining: 16080
-  },
-  {
-    id: '4',
-    app: mockApps[4],
-    status: 'error',
-    connectedAt: '2024-03-01',
-    lastSync: '2024-03-18T10:00:00',
-    credentials: { type: 'api_key' },
-    usageThisMonth: 560,
-    rateLimit: 10000,
-    rateLimitRemaining: 9440
-  }
-]
-
-const mockZaps: Zap[] = [
-  {
-    id: '1',
-    name: 'New Stripe Payment → Slack',
-    description: 'Send notification to #sales when payment received',
-    status: 'active',
-    trigger: {
-      id: 't1',
-      type: 'trigger',
-      app: mockApps[2],
-      config: { event: 'payment.succeeded' }
-    },
-    actions: [
-      {
-        id: 'a1',
-        type: 'action',
-        app: mockApps[0],
-        config: { channel: '#sales', message: 'New payment!' }
-      }
-    ],
-    createdAt: '2024-02-15',
-    updatedAt: '2024-03-18',
-    lastRun: '2024-03-20T15:30:00',
-    runCount: 1245,
-    errorCount: 3,
-    avgExecutionTime: 1.2
-  },
-  {
-    id: '2',
-    name: 'New Salesforce Lead → HubSpot',
-    description: 'Sync new leads to HubSpot CRM',
-    status: 'active',
-    trigger: {
-      id: 't2',
-      type: 'trigger',
-      app: mockApps[1],
-      config: { object: 'Lead', event: 'create' }
-    },
-    actions: [
-      {
-        id: 'a2',
-        type: 'action',
-        app: mockApps[5],
-        config: { action: 'create_contact' }
-      }
-    ],
-    createdAt: '2024-01-20',
-    updatedAt: '2024-03-15',
-    lastRun: '2024-03-20T14:00:00',
-    runCount: 892,
-    errorCount: 12,
-    avgExecutionTime: 2.5
-  },
-  {
-    id: '3',
-    name: 'New Shopify Order → Google Sheets',
-    description: 'Log all orders to spreadsheet',
-    status: 'paused',
-    trigger: {
-      id: 't3',
-      type: 'trigger',
-      app: mockApps[7],
-      config: { event: 'order.created' }
-    },
-    actions: [
-      {
-        id: 'a3',
-        type: 'action',
-        app: mockApps[3],
-        config: { spreadsheet: 'Orders 2024', worksheet: 'Sheet1' }
-      }
-    ],
-    createdAt: '2024-03-01',
-    updatedAt: '2024-03-10',
-    runCount: 156,
-    errorCount: 0,
-    avgExecutionTime: 0.8
-  }
-]
-
-const mockLogs: ExecutionLog[] = [
-  { id: '1', zapId: '1', zapName: 'New Stripe Payment → Slack', status: 'success', triggeredAt: '2024-03-20T15:30:00', completedAt: '2024-03-20T15:30:01', duration: 1.2, stepsExecuted: 2 },
-  { id: '2', zapId: '2', zapName: 'New Salesforce Lead → HubSpot', status: 'success', triggeredAt: '2024-03-20T14:00:00', completedAt: '2024-03-20T14:00:03', duration: 2.8, stepsExecuted: 2 },
-  { id: '3', zapId: '1', zapName: 'New Stripe Payment → Slack', status: 'error', triggeredAt: '2024-03-20T12:15:00', completedAt: '2024-03-20T12:15:02', duration: 1.5, stepsExecuted: 1, error: 'Slack channel not found' },
-  { id: '4', zapId: '1', zapName: 'New Stripe Payment → Slack', status: 'success', triggeredAt: '2024-03-20T10:45:00', completedAt: '2024-03-20T10:45:01', duration: 1.1, stepsExecuted: 2 },
-  { id: '5', zapId: '3', zapName: 'New Shopify Order → Google Sheets', status: 'skipped', triggeredAt: '2024-03-20T09:00:00', completedAt: '2024-03-20T09:00:00', duration: 0.1, stepsExecuted: 0 },
-]
+// Empty data arrays (no mock data)
+const emptyApps: IntegrationApp[] = []
+const emptyConnections: Connection[] = []
+const emptyZaps: Zap[] = []
+const emptyLogs: ExecutionLog[] = []
 
 const categories = ['All', 'CRM', 'Marketing', 'Payment', 'Storage', 'Communication', 'Analytics', 'E-commerce', 'Productivity']
 
-// Enhanced Competitive Upgrade Mock Data
-const mockIntegrationsAIInsights = [
-  { id: '1', type: 'success' as const, title: 'All Systems Operational', description: '12 of 12 integrations running with 99.9% uptime.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Health' },
-  { id: '2', type: 'warning' as const, title: 'Rate Limit Warning', description: 'Salesforce API approaching 80% of daily quota.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'API' },
-  { id: '3', type: 'info' as const, title: 'New Integration Available', description: 'HubSpot v3 API now supported with enhanced features.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Updates' },
-]
-
-const mockIntegrationsCollaborators = [
-  { id: '1', name: 'Integration Lead', avatar: '/avatars/mike.jpg', status: 'online' as const, role: 'Lead' },
-  { id: '2', name: 'API Developer', avatar: '/avatars/alex.jpg', status: 'online' as const, role: 'Developer' },
-  { id: '3', name: 'Support Engineer', avatar: '/avatars/bob.jpg', status: 'away' as const, role: 'Support' },
-]
-
-const mockIntegrationsPredictions = [
-  { id: '1', title: 'API Usage Trend', prediction: 'Stripe API calls expected to increase 25% next week', confidence: 82, trend: 'up' as const, impact: 'medium' as const },
-  { id: '2', title: 'Sync Performance', prediction: 'Data sync times will improve with new batching', confidence: 88, trend: 'down' as const, impact: 'low' as const },
-]
-
-const mockIntegrationsActivities = [
-  { id: '1', user: 'Integration Lead', action: 'Connected', target: 'new Stripe webhook endpoint', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'API Developer', action: 'Updated', target: 'Salesforce OAuth credentials', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'System', action: 'Synced', target: '2,450 records from HubSpot', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
-]
+// Empty arrays for competitive upgrade components
+const emptyAIInsights: { id: string; type: 'success' | 'warning' | 'info'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
+const emptyCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }[] = []
+const emptyPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down'; impact: 'low' | 'medium' | 'high' }[] = []
+const emptyActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' | 'error' }[] = []
 
 // Quick actions will be defined inside the component to access state setters
 
 export default function ThirdPartyIntegrationsClient() {
-  const [apps] = useState<IntegrationApp[]>(mockApps)
-  const [connections] = useState<Connection[]>(mockConnections)
-  const [zaps] = useState<Zap[]>(mockZaps)
-  const [logs] = useState<ExecutionLog[]>(mockLogs)
+  const [apps] = useState<IntegrationApp[]>(emptyApps)
+  const [connections] = useState<Connection[]>(emptyConnections)
+  const [zaps] = useState<Zap[]>(emptyZaps)
+  const [logs] = useState<ExecutionLog[]>(emptyLogs)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('All')
   const [selectedConnection, setSelectedConnection] = useState<Connection | null>(null)
@@ -457,7 +298,7 @@ export default function ThirdPartyIntegrationsClient() {
       return
     }
 
-    const selectedApp = mockApps.find(a => a.id === newIntegrationApp)
+    const selectedApp = apps.find(a => a.id === newIntegrationApp)
     toast.success(`Integration Connected has been successfully connected using ${newIntegrationAuthType === 'api_key' ? 'API Key' : newIntegrationAuthType === 'basic' ? 'Basic Auth' : 'OAuth'}`)
 
     // Reset form
@@ -637,8 +478,8 @@ export default function ThirdPartyIntegrationsClient() {
       toast.error('Please fill in all required fields')
       return
     }
-    const triggerApp = mockApps.find(a => a.id === newZapTriggerApp)
-    const actionApp = mockApps.find(a => a.id === newZapActionApp)
+    const triggerApp = apps.find(a => a.id === newZapTriggerApp)
+    const actionApp = apps.find(a => a.id === newZapActionApp)
     toast.success(`Zap Created: ${triggerApp?.name} → ${actionApp?.name}`)
     setNewZapName('')
     setNewZapDescription('')
@@ -663,7 +504,7 @@ export default function ThirdPartyIntegrationsClient() {
 
   // Apply zap filters handler
   const handleApplyZapFilters = () => {
-    toast.success(`Filters Applied: Showing ${filterZapStatus || 'all'} zaps${filterZapApp ? ` for ${mockApps.find(a => a.id === filterZapApp)?.name}` : ''}`)
+    toast.success(`Filters Applied: Showing ${filterZapStatus || 'all'} zaps${filterZapApp ? ` for ${apps.find(a => a.id === filterZapApp)?.name}` : ''}`)
     setShowFilterZapsDialog(false)
   }
 
@@ -1053,11 +894,11 @@ export default function ThirdPartyIntegrationsClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockZaps.length}</p>
+                    <p className="text-3xl font-bold">{zaps.length}</p>
                     <p className="text-orange-200 text-sm">Zaps</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockZaps.filter(z => z.status === 'active').length}</p>
+                    <p className="text-3xl font-bold">{zaps.filter(z => z.status === 'active').length}</p>
                     <p className="text-orange-200 text-sm">Active</p>
                   </div>
                 </div>
@@ -1165,11 +1006,11 @@ export default function ThirdPartyIntegrationsClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockApps.length}</p>
+                    <p className="text-3xl font-bold">{apps.length}</p>
                     <p className="text-purple-200 text-sm">Available</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockApps.filter(a => a.connected).length}</p>
+                    <p className="text-3xl font-bold">{apps.filter(a => a.connected).length}</p>
                     <p className="text-purple-200 text-sm">Connected</p>
                   </div>
                 </div>
@@ -1398,11 +1239,11 @@ export default function ThirdPartyIntegrationsClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockLogs.length}</p>
+                    <p className="text-3xl font-bold">{logs.length}</p>
                     <p className="text-pink-200 text-sm">Executions</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockLogs.filter(e => e.status === 'success').length}</p>
+                    <p className="text-3xl font-bold">{logs.filter(e => e.status === 'success').length}</p>
                     <p className="text-pink-200 text-sm">Successful</p>
                   </div>
                 </div>
@@ -2188,18 +2029,18 @@ export default function ThirdPartyIntegrationsClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockIntegrationsAIInsights}
+              insights={emptyAIInsights}
               title="Integration Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockIntegrationsCollaborators}
+              collaborators={emptyCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockIntegrationsPredictions}
+              predictions={emptyPredictions}
               title="Integration Forecasts"
             />
           </div>
@@ -2207,7 +2048,7 @@ export default function ThirdPartyIntegrationsClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockIntegrationsActivities}
+            activities={emptyActivities}
             title="Integration Activity"
             maxItems={5}
           />
@@ -2427,7 +2268,7 @@ export default function ThirdPartyIntegrationsClient() {
                   <SelectValue placeholder="Choose an app to connect..." />
                 </SelectTrigger>
                 <SelectContent>
-                  {mockApps.map(app => (
+                  {apps.map(app => (
                     <SelectItem key={app.id} value={app.id}>
                       <div className="flex items-center gap-2">
                         <div className="w-6 h-6 rounded bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center text-white text-xs font-bold">
@@ -2478,7 +2319,7 @@ export default function ThirdPartyIntegrationsClient() {
                   <div>
                     <p className="font-medium text-blue-700 dark:text-blue-400">OAuth Authentication</p>
                     <p className="text-sm text-blue-600 dark:text-blue-300 mt-1">
-                      You will be redirected to {mockApps.find(a => a.id === newIntegrationApp)?.name || 'the application'} to authorize access.
+                      You will be redirected to {apps.find(a => a.id === newIntegrationApp)?.name || 'the application'} to authorize access.
                       This is the most secure authentication method.
                     </p>
                   </div>
@@ -2823,7 +2664,7 @@ export default function ThirdPartyIntegrationsClient() {
                   <SelectValue placeholder="Select trigger app..." />
                 </SelectTrigger>
                 <SelectContent>
-                  {mockApps.map(app => (
+                  {apps.map(app => (
                     <SelectItem key={app.id} value={app.id}>{app.name}</SelectItem>
                   ))}
                 </SelectContent>
@@ -2836,7 +2677,7 @@ export default function ThirdPartyIntegrationsClient() {
                   <SelectValue placeholder="Select action app..." />
                 </SelectTrigger>
                 <SelectContent>
-                  {mockApps.map(app => (
+                  {apps.map(app => (
                     <SelectItem key={app.id} value={app.id}>{app.name}</SelectItem>
                   ))}
                 </SelectContent>
@@ -2883,7 +2724,7 @@ export default function ThirdPartyIntegrationsClient() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="">All Apps</SelectItem>
-                  {mockApps.map(app => (
+                  {apps.map(app => (
                     <SelectItem key={app.id} value={app.id}>{app.name}</SelectItem>
                   ))}
                 </SelectContent>

@@ -137,60 +137,23 @@ interface MobileAppClientProps {
   initialStats: any
 }
 
-// Mock Data
-const mockBuilds: Build[] = [
-  { id: 'b1', version: '2.5.0', buildNumber: '250', platform: 'ios', status: 'released', releaseType: 'production', uploadedAt: '2024-01-15', size: '45.2 MB', minOsVersion: 'iOS 15.0', testFlightEnabled: true, testers: 156, crashes: 12, sessions: 45000, feedback: 23 },
-  { id: 'b2', version: '2.5.1', buildNumber: '251', platform: 'ios', status: 'in-review', releaseType: 'production', uploadedAt: '2024-01-18', size: '45.8 MB', minOsVersion: 'iOS 15.0', testFlightEnabled: true, testers: 89, crashes: 2, sessions: 8500, feedback: 8 },
-  { id: 'b3', version: '2.5.0', buildNumber: '2500', platform: 'android', status: 'released', releaseType: 'production', uploadedAt: '2024-01-15', size: '38.4 MB', minOsVersion: 'Android 10', testFlightEnabled: false, testers: 0, crashes: 18, sessions: 62000, feedback: 0 },
-  { id: 'b4', version: '2.6.0', buildNumber: '260', platform: 'ios', status: 'processing', releaseType: 'beta', uploadedAt: '2024-01-18', size: '46.1 MB', minOsVersion: 'iOS 15.0', expiresAt: '2024-04-18', testFlightEnabled: true, testers: 45, crashes: 0, sessions: 1200, feedback: 5 },
-]
+// Data arrays - empty by default, populated from Supabase
+const mockBuilds: Build[] = []
 
-const mockReviews: AppReview[] = [
-  { id: 'r1', rating: 5, title: 'Best productivity app!', body: 'This app has completely changed how I manage my work. The interface is beautiful and intuitive.', author: 'ProductivityPro', date: '2024-01-17', version: '2.5.0', platform: 'ios', helpful: 42, territory: 'US' },
-  { id: 'r2', rating: 4, title: 'Great but needs dark mode', body: 'Love the app overall but my eyes hurt at night. Please add dark mode!', author: 'NightOwl', date: '2024-01-16', version: '2.5.0', platform: 'ios', response: 'Thanks for the feedback! Dark mode is coming in v2.6.0, available in beta now.', responseDate: '2024-01-17', helpful: 28, territory: 'UK' },
-  { id: 'r3', rating: 2, title: 'Crashes on startup', body: 'App keeps crashing on my Pixel 6. Please fix!', author: 'PixelUser', date: '2024-01-15', version: '2.5.0', platform: 'android', helpful: 15, territory: 'DE' },
-  { id: 'r4', rating: 5, title: 'Worth every penny', body: 'The pro subscription is absolutely worth it. Customer support is excellent too.', author: 'HappyCustomer', date: '2024-01-14', version: '2.4.2', platform: 'android', helpful: 67, territory: 'US' },
-]
+const mockReviews: AppReview[] = []
 
-const mockCampaigns: PushCampaign[] = [
-  { id: 'p1', title: 'New Feature Launch', message: 'Check out our new AI assistant feature!', status: 'sent', sentAt: '2024-01-15', platform: 'all', targetAudience: 'All Users', sent: 125000, opened: 45000, clicked: 12500 },
-  { id: 'p2', title: 'Weekend Sale', message: '50% off Pro subscription this weekend only!', status: 'scheduled', scheduledAt: '2024-01-20', platform: 'all', targetAudience: 'Free Users', sent: 0, opened: 0, clicked: 0 },
-  { id: 'p3', title: 'Update Available', message: 'Version 2.5.1 is now available with bug fixes.', status: 'draft', platform: 'ios', targetAudience: 'iOS Users', sent: 0, opened: 0, clicked: 0 },
-]
+const mockCampaigns: PushCampaign[] = []
 
-const mockIAPs: InAppPurchase[] = [
-  { id: 'iap1', productId: 'com.app.pro_monthly', name: 'Pro Monthly', type: 'subscription', price: '$9.99/mo', status: 'active', purchases: 4500, revenue: 44955 },
-  { id: 'iap2', productId: 'com.app.pro_yearly', name: 'Pro Yearly', type: 'subscription', price: '$79.99/yr', status: 'active', purchases: 2100, revenue: 167979 },
-  { id: 'iap3', productId: 'com.app.credits_100', name: '100 Credits', type: 'consumable', price: '$4.99', status: 'active', purchases: 8900, revenue: 44411 },
-  { id: 'iap4', productId: 'com.app.lifetime', name: 'Lifetime Access', type: 'non-consumable', price: '$199.99', status: 'active', purchases: 156, revenue: 31198 },
-]
+const mockIAPs: InAppPurchase[] = []
 
-// ============================================================================
-// ENHANCED COMPETITIVE UPGRADE MOCK DATA - App Store Connect Level
-// ============================================================================
+// Enhanced Competitive Upgrade data - empty arrays
+const mockMobileAppAIInsights: { id: string; type: 'success' | 'warning' | 'info' | 'error'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
 
-const mockMobileAppAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Store Approved', description: 'iOS v3.2.1 approved and live on App Store with 4.8★ rating.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Release' },
-  { id: '2', type: 'warning' as const, title: 'Crash Rate Spike', description: 'Android crash rate increased 0.3% on Samsung devices. Investigation needed.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Stability' },
-  { id: '3', type: 'info' as const, title: 'Revenue Milestone', description: 'In-app purchases crossed $50K this month. 15% increase from last month.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Revenue' },
-]
+const mockMobileAppCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }[] = []
 
-const mockMobileAppCollaborators = [
-  { id: '1', name: 'iOS Lead', avatar: '/avatars/ios.jpg', status: 'online' as const, role: 'iOS Developer' },
-  { id: '2', name: 'Android Lead', avatar: '/avatars/android.jpg', status: 'online' as const, role: 'Android Developer' },
-  { id: '3', name: 'QA Manager', avatar: '/avatars/qa.jpg', status: 'away' as const, role: 'QA' },
-]
+const mockMobileAppPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: 'low' | 'medium' | 'high' }[] = []
 
-const mockMobileAppPredictions = [
-  { id: '1', title: 'Download Forecast', prediction: 'Expected 25K new downloads next week based on ASO improvements', confidence: 87, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Revenue Projection', prediction: 'Subscription revenue to reach $75K by end of quarter', confidence: 91, trend: 'up' as const, impact: 'medium' as const },
-]
-
-const mockMobileAppActivities = [
-  { id: '1', user: 'iOS Lead', action: 'Submitted', target: 'v3.2.2 to App Store review', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Android Lead', action: 'Released', target: 'v3.2.1 to Play Store beta', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'QA Manager', action: 'Flagged', target: '3 critical bugs for hotfix', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'warning' as const },
-]
+const mockMobileAppActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' | 'error' }[] = []
 
 // Quick actions will be defined inside the component to access state setters
 
@@ -274,17 +237,17 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
   }, [builds, selectedPlatform])
 
   const stats = {
-    totalDownloads: 2340000,
-    monthlyActiveUsers: 890000,
-    dailyActiveUsers: 125000,
-    avgRating: 4.6,
-    totalReviews: 12500,
-    crashFreeRate: 99.2,
-    avgSessionLength: 8.5,
-    retention7Day: 42,
-    revenue: 288543,
-    iosDownloads: 1250000,
-    androidDownloads: 1090000
+    totalDownloads: initialStats?.totalDownloads ?? 0,
+    monthlyActiveUsers: initialStats?.monthlyActiveUsers ?? 0,
+    dailyActiveUsers: initialStats?.dailyActiveUsers ?? 0,
+    avgRating: initialStats?.avgRating ?? 0,
+    totalReviews: initialStats?.totalReviews ?? 0,
+    crashFreeRate: initialStats?.crashFreeRate ?? 0,
+    avgSessionLength: initialStats?.avgSessionLength ?? 0,
+    retention7Day: initialStats?.retention7Day ?? 0,
+    revenue: initialStats?.revenue ?? 0,
+    iosDownloads: initialStats?.iosDownloads ?? 0,
+    androidDownloads: initialStats?.androidDownloads ?? 0
   }
 
   const getStatusColor = (status: BuildStatus | string) => {
@@ -918,11 +881,11 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockBuilds.length}</p>
+                    <p className="text-3xl font-bold">{builds.length}</p>
                     <p className="text-emerald-200 text-sm">Builds</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockBuilds.filter(b => b.status === 'released').length}</p>
+                    <p className="text-3xl font-bold">{builds.filter(b => b.status === 'released').length}</p>
                     <p className="text-emerald-200 text-sm">Released</p>
                   </div>
                 </div>
@@ -1003,11 +966,11 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockReviews.length}</p>
+                    <p className="text-3xl font-bold">{reviews.length}</p>
                     <p className="text-amber-200 text-sm">Reviews</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{(stats?.rating || 0).toFixed(1)}</p>
+                    <p className="text-3xl font-bold">{(stats?.avgRating || 0).toFixed(1)}</p>
                     <p className="text-amber-200 text-sm">Avg Rating</p>
                   </div>
                 </div>
@@ -1252,11 +1215,11 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockCampaigns.length}</p>
+                    <p className="text-3xl font-bold">{campaigns.length}</p>
                     <p className="text-rose-200 text-sm">Campaigns</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockCampaigns.reduce((sum, c) => sum + c.sent, 0).toLocaleString()}</p>
+                    <p className="text-3xl font-bold">{campaigns.reduce((sum, c) => sum + c.sent, 0).toLocaleString()}</p>
                     <p className="text-rose-200 text-sm">Sent</p>
                   </div>
                 </div>
@@ -1360,23 +1323,23 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockIAPs.length}</p>
+                    <p className="text-3xl font-bold">{iaps.length}</p>
                     <p className="text-green-200 text-sm">Products</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">${(stats?.revenue || 0 / 1000).toFixed(1)}k</p>
+                    <p className="text-3xl font-bold">${((stats?.revenue || 0) / 1000).toFixed(1)}k</p>
                     <p className="text-green-200 text-sm">Revenue</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockIAPs.filter(p => p.type === 'subscription').length}</p>
+                    <p className="text-3xl font-bold">{iaps.filter(p => p.type === 'subscription').length}</p>
                     <p className="text-green-200 text-sm">Subs</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockIAPs.filter(p => p.type === 'consumable').length}</p>
+                    <p className="text-3xl font-bold">{iaps.filter(p => p.type === 'consumable').length}</p>
                     <p className="text-green-200 text-sm">Consumable</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">85%</p>
+                    <p className="text-3xl font-bold">{stats?.retention7Day || 0}%</p>
                     <p className="text-green-200 text-sm">Retention</p>
                   </div>
                 </div>
@@ -1470,11 +1433,11 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">v{mockBuilds[0]?.version || '1.0'}</p>
+                    <p className="text-3xl font-bold">v{builds[0]?.version || '1.0'}</p>
                     <p className="text-slate-200 text-sm">Version</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">2</p>
+                    <p className="text-3xl font-bold">{new Set(builds.map(b => b.platform)).size || 0}</p>
                     <p className="text-slate-200 text-sm">Platforms</p>
                   </div>
                 </div>

@@ -141,31 +141,14 @@ interface BulkSendBatch {
   created_at: string
 }
 
-// Enhanced Competitive Upgrade Mock Data
-const mockContractsAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Signing Rate', description: '89% of contracts signed within 48 hours. Industry leading performance.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Performance' },
-  { id: '2', type: 'info' as const, title: 'Expiring Soon', description: '5 contracts expiring in 30 days. Renewal reminders scheduled.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Renewals' },
-  { id: '3', type: 'warning' as const, title: 'Pending Approval', description: '3 contracts awaiting legal review for over 5 days.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Approvals' },
-]
+// Empty arrays for competitive upgrade components (typed)
+const contractsAIInsights: { id: string; type: 'success' | 'info' | 'warning' | 'error'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
 
-const mockContractsCollaborators = [
-  { id: '1', name: 'Legal Counsel', avatar: '/avatars/legal.jpg', status: 'online' as const, role: 'Legal' },
-  { id: '2', name: 'Contract Admin', avatar: '/avatars/admin.jpg', status: 'online' as const, role: 'Admin' },
-  { id: '3', name: 'Sales Rep', avatar: '/avatars/sales.jpg', status: 'away' as const, role: 'Sales' },
-]
+const contractsCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'offline' | 'away'; role: string }[] = []
 
-const mockContractsPredictions = [
-  { id: '1', title: 'Q1 Contracts', prediction: '45 new contracts projected', confidence: 82, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Renewal Rate', prediction: '92% renewal rate expected', confidence: 88, trend: 'stable' as const, impact: 'medium' as const },
-]
+const contractsPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: 'low' | 'medium' | 'high' }[] = []
 
-const mockContractsActivities = [
-  { id: '1', user: 'John Smith', action: 'Signed contract', target: 'Enterprise Agreement', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Legal Team', action: 'Approved', target: 'Vendor Contract #456', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'System', action: 'Reminder sent for', target: 'Expiring contracts', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
-]
-
-// mockContractsQuickActions are defined inside component to use state setters
+const contractsActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' | 'error' | 'update' }[] = []
 
 export default function ContractsClient({ initialContracts }: { initialContracts: Contract[] }) {
   const [activeTab, setActiveTab] = useState('dashboard')
@@ -189,120 +172,20 @@ export default function ContractsClient({ initialContracts }: { initialContracts
   const [newRecipientEmail, setNewRecipientEmail] = useState('')
   const [newFolderName, setNewFolderName] = useState('')
 
-  // Mock envelopes
-  const envelopes: Envelope[] = [
-    {
-      id: '1', name: 'Service Agreement - Acme Corp', status: 'signed', type: 'standard',
-      created_at: '2024-01-10T09:00:00Z', sent_at: '2024-01-10T09:15:00Z', completed_at: null, expires_at: '2024-02-10T23:59:59Z',
-      sender: { name: 'Sarah Chen', email: 'sarah@company.com' },
-      recipients: [
-        { id: '1', name: 'John Smith', email: 'john@acme.com', role: 'signer', status: 'signed', signed_at: '2024-01-10T10:30:00Z', viewed_at: '2024-01-10T10:00:00Z', order: 1, routing: 'sequential', authentication: 'email', private_message: null },
-        { id: '2', name: 'Emily Davis', email: 'emily@acme.com', role: 'signer', status: 'pending', signed_at: null, viewed_at: null, order: 2, routing: 'sequential', authentication: 'sms', private_message: null }
-      ],
-      documents: [
-        { id: '1', name: 'Service_Agreement_v2.pdf', file_type: 'pdf', pages: 12, size_bytes: 2456789, fields_count: 8, signed_fields: 4 }
-      ],
-      total_value: 45000, is_starred: true, folder_id: 'folder-1', tags: ['enterprise', 'services']
-    },
-    {
-      id: '2', name: 'NDA - Mutual Agreement', status: 'completed', type: 'template',
-      created_at: '2024-01-08T14:00:00Z', sent_at: '2024-01-08T14:30:00Z', completed_at: '2024-01-09T11:00:00Z', expires_at: null,
-      sender: { name: 'Mike Ross', email: 'mike@company.com' },
-      recipients: [
-        { id: '3', name: 'Lisa Wang', email: 'lisa@partner.com', role: 'signer', status: 'completed', signed_at: '2024-01-09T11:00:00Z', viewed_at: '2024-01-08T16:00:00Z', order: 1, routing: 'parallel', authentication: 'email', private_message: null }
-      ],
-      documents: [
-        { id: '2', name: 'Mutual_NDA.pdf', file_type: 'pdf', pages: 4, size_bytes: 892345, fields_count: 4, signed_fields: 4 }
-      ],
-      total_value: null, is_starred: false, folder_id: 'folder-2', tags: ['legal', 'nda']
-    },
-    {
-      id: '3', name: 'Employment Contract - Senior Developer', status: 'sent', type: 'standard',
-      created_at: '2024-01-12T10:00:00Z', sent_at: '2024-01-12T10:15:00Z', completed_at: null, expires_at: '2024-01-26T23:59:59Z',
-      sender: { name: 'Sarah Chen', email: 'sarah@company.com' },
-      recipients: [
-        { id: '4', name: 'David Kim', email: 'david@gmail.com', role: 'signer', status: 'viewed', signed_at: null, viewed_at: '2024-01-12T15:00:00Z', order: 1, routing: 'sequential', authentication: 'id_verification', private_message: 'Welcome to the team!' }
-      ],
-      documents: [
-        { id: '3', name: 'Employment_Contract.pdf', file_type: 'pdf', pages: 8, size_bytes: 1567890, fields_count: 12, signed_fields: 0 },
-        { id: '4', name: 'Benefits_Package.pdf', file_type: 'pdf', pages: 6, size_bytes: 987654, fields_count: 0, signed_fields: 0 }
-      ],
-      total_value: 125000, is_starred: true, folder_id: 'folder-3', tags: ['hr', 'hiring']
-    },
-    {
-      id: '4', name: 'Bulk Onboarding - Q1 Hires', status: 'signed', type: 'bulk_send',
-      created_at: '2024-01-05T08:00:00Z', sent_at: '2024-01-05T08:30:00Z', completed_at: null, expires_at: '2024-01-19T23:59:59Z',
-      sender: { name: 'HR Team', email: 'hr@company.com' },
-      recipients: [
-        { id: '5', name: 'Various Recipients', email: 'bulk@company.com', role: 'signer', status: 'signed', signed_at: null, viewed_at: null, order: 1, routing: 'parallel', authentication: 'email', private_message: null }
-      ],
-      documents: [
-        { id: '5', name: 'Onboarding_Packet.pdf', file_type: 'pdf', pages: 15, size_bytes: 3456789, fields_count: 20, signed_fields: 17 }
-      ],
-      total_value: null, is_starred: false, folder_id: 'folder-3', tags: ['hr', 'onboarding', 'bulk']
-    },
-    {
-      id: '5', name: 'Sales Contract - TechStart Inc', status: 'draft', type: 'standard',
-      created_at: '2024-01-13T16:00:00Z', sent_at: null, completed_at: null, expires_at: null,
-      sender: { name: 'Sarah Chen', email: 'sarah@company.com' },
-      recipients: [],
-      documents: [
-        { id: '6', name: 'Sales_Contract_Draft.pdf', file_type: 'pdf', pages: 10, size_bytes: 2123456, fields_count: 15, signed_fields: 0 }
-      ],
-      total_value: 78000, is_starred: false, folder_id: 'folder-1', tags: ['sales', 'pending']
-    }
-  ]
+  // Empty envelopes array (typed)
+  const envelopes: Envelope[] = []
 
-  // Mock templates
-  const templates: ContractTemplate[] = [
-    { id: '1', name: 'Service Agreement', category: 'Services', subcategory: 'Standard', description: 'Standard service agreement with SLA terms',
-      usage_count: 156, last_used: '2024-01-10', created_by: 'Sarah Chen', is_shared: true, is_starred: true,
-      documents_count: 1, recipients_count: 2, fields_count: 12, tags: ['services', 'sla'] },
-    { id: '2', name: 'NDA - Mutual', category: 'Legal', subcategory: 'Confidentiality', description: 'Mutual non-disclosure agreement',
-      usage_count: 234, last_used: '2024-01-08', created_by: 'Legal Team', is_shared: true, is_starred: true,
-      documents_count: 1, recipients_count: 2, fields_count: 6, tags: ['legal', 'nda', 'confidential'] },
-    { id: '3', name: 'Employment Contract', category: 'HR', subcategory: 'Hiring', description: 'Standard employment contract template',
-      usage_count: 89, last_used: '2024-01-12', created_by: 'HR Team', is_shared: true, is_starred: false,
-      documents_count: 2, recipients_count: 1, fields_count: 18, tags: ['hr', 'employment'] },
-    { id: '4', name: 'Freelancer Agreement', category: 'Contracts', subcategory: 'Contractors', description: 'Independent contractor agreement',
-      usage_count: 178, last_used: '2024-01-07', created_by: 'Sarah Chen', is_shared: true, is_starred: false,
-      documents_count: 1, recipients_count: 1, fields_count: 10, tags: ['contractor', 'freelance'] },
-    { id: '5', name: 'Sales Contract', category: 'Sales', subcategory: 'Enterprise', description: 'Enterprise sales agreement with custom terms',
-      usage_count: 312, last_used: '2024-01-11', created_by: 'Sales Team', is_shared: true, is_starred: true,
-      documents_count: 1, recipients_count: 3, fields_count: 15, tags: ['sales', 'enterprise'] },
-    { id: '6', name: 'Partnership Agreement', category: 'Legal', subcategory: 'Partnerships', description: 'Business partnership terms and conditions',
-      usage_count: 67, last_used: '2024-01-03', created_by: 'Legal Team', is_shared: false, is_starred: false,
-      documents_count: 2, recipients_count: 4, fields_count: 22, tags: ['legal', 'partnership'] }
-  ]
+  // Empty templates array (typed)
+  const templates: ContractTemplate[] = []
 
-  // Mock audit trail
-  const auditTrail: AuditEvent[] = [
-    { id: '1', action: 'Envelope Created', actor: { name: 'Sarah Chen', email: 'sarah@company.com' }, timestamp: '2024-01-10T09:00:00Z',
-      details: 'Created from Service Agreement template', ip_address: '192.168.1.1', location: 'San Francisco, CA', device: 'Chrome on macOS', event_type: 'create' },
-    { id: '2', action: 'Sent for Signature', actor: { name: 'Sarah Chen', email: 'sarah@company.com' }, timestamp: '2024-01-10T09:15:00Z',
-      details: 'Sent to 2 recipients via email', ip_address: '192.168.1.1', location: 'San Francisco, CA', device: 'Chrome on macOS', event_type: 'send' },
-    { id: '3', action: 'Document Viewed', actor: { name: 'John Smith', email: 'john@acme.com' }, timestamp: '2024-01-10T10:00:00Z',
-      details: 'Viewed document for 5 minutes on page 1-3', ip_address: '10.0.0.5', location: 'New York, NY', device: 'Safari on iOS', event_type: 'view' },
-    { id: '4', action: 'Signature Applied', actor: { name: 'John Smith', email: 'john@acme.com' }, timestamp: '2024-01-10T10:30:00Z',
-      details: 'Signed on page 3, field: signer1_signature', ip_address: '10.0.0.5', location: 'New York, NY', device: 'Safari on iOS', event_type: 'sign' },
-    { id: '5', action: 'Reminder Sent', actor: { name: 'System', email: 'no-reply@company.com' }, timestamp: '2024-01-11T09:00:00Z',
-      details: 'Automatic reminder sent to Emily Davis', ip_address: '0.0.0.0', location: 'System', device: 'Automated', event_type: 'remind' }
-  ]
+  // Empty audit trail array (typed)
+  const auditTrail: AuditEvent[] = []
 
-  // Mock folders
-  const folders: ContractFolder[] = [
-    { id: 'folder-1', name: 'Client Contracts', color: 'blue', envelopes_count: 24, parent_id: null, created_at: '2023-12-01' },
-    { id: 'folder-2', name: 'Legal Documents', color: 'purple', envelopes_count: 18, parent_id: null, created_at: '2023-12-01' },
-    { id: 'folder-3', name: 'HR & Employment', color: 'green', envelopes_count: 45, parent_id: null, created_at: '2023-12-01' },
-    { id: 'folder-4', name: 'Sales Proposals', color: 'orange', envelopes_count: 32, parent_id: null, created_at: '2023-12-15' },
-    { id: 'folder-5', name: 'Archive', color: 'gray', envelopes_count: 156, parent_id: null, created_at: '2023-11-01' }
-  ]
+  // Empty folders array (typed)
+  const folders: ContractFolder[] = []
 
-  // Mock bulk send batches
-  const bulkBatches: BulkSendBatch[] = [
-    { id: '1', name: 'Q1 Onboarding Batch', template_id: '3', total_recipients: 25, sent: 25, completed: 22, failed: 1, status: 'in_progress', created_at: '2024-01-05' },
-    { id: '2', name: 'Policy Update 2024', template_id: '2', total_recipients: 150, sent: 150, completed: 145, failed: 0, status: 'completed', created_at: '2024-01-02' }
-  ]
+  // Empty bulk send batches array (typed)
+  const bulkBatches: BulkSendBatch[] = []
 
   const stats = useMemo(() => ({
     totalEnvelopes: envelopes.length,
@@ -2286,18 +2169,18 @@ export default function ContractsClient({ initialContracts }: { initialContracts
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockContractsAIInsights}
+              insights={contractsAIInsights}
               title="Contract Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockContractsCollaborators}
+              collaborators={contractsCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockContractsPredictions}
+              predictions={contractsPredictions}
               title="Contract Forecasts"
             />
           </div>
@@ -2305,7 +2188,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockContractsActivities}
+            activities={contractsActivities}
             title="Contract Activity"
             maxItems={5}
           />

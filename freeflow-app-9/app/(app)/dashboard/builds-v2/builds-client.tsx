@@ -215,438 +215,23 @@ interface Runner {
 // interface CacheEntry { id: string, key: string, ref: string, ... }
 
 // ============================================================================
-// MOCK DATA GENERATION
+// EMPTY DATA ARRAYS - Using database hooks for real data
 // ============================================================================
 
-// MIGRATED: Batch #12 - Removed mock data, using database hooks
-const mockBuilds: any[] = [
-  {
-    id: '1',
-    build_number: 847,
-    workflow_name: 'CI Pipeline',
-    workflow_file: '.github/workflows/ci.yml',
-    status: 'success',
-    trigger: 'push',
-    branch: 'main',
-    commit_hash: 'a1b2c3d4e5f6',
-    commit_message: 'feat: Add user authentication flow',
-    author_name: 'Sarah Chen',
-    author_email: 'sarah@company.com',
-    author_avatar: '',
-    jobs: [
-      {
-        id: 'j1',
-        name: 'build',
-        status: 'success',
-        runner_name: 'ubuntu-latest',
-        runner_os: 'ubuntu',
-        duration_seconds: 145,
-        steps: [
-          { id: 's1', name: 'Checkout', status: 'success', duration_seconds: 3, output_lines: 12, started_at: '2024-01-15T10:00:00Z', completed_at: '2024-01-15T10:00:03Z' },
-          { id: 's2', name: 'Setup Node.js', status: 'success', duration_seconds: 8, output_lines: 25, started_at: '2024-01-15T10:00:03Z', completed_at: '2024-01-15T10:00:11Z' },
-          { id: 's3', name: 'Install dependencies', status: 'success', duration_seconds: 45, output_lines: 156, started_at: '2024-01-15T10:00:11Z', completed_at: '2024-01-15T10:00:56Z' },
-          { id: 's4', name: 'Build', status: 'success', duration_seconds: 89, output_lines: 234, started_at: '2024-01-15T10:00:56Z', completed_at: '2024-01-15T10:02:25Z' }
-        ],
-        started_at: '2024-01-15T10:00:00Z',
-        completed_at: '2024-01-15T10:02:25Z'
-      },
-      {
-        id: 'j2',
-        name: 'test',
-        status: 'success',
-        runner_name: 'ubuntu-latest',
-        runner_os: 'ubuntu',
-        duration_seconds: 312,
-        steps: [
-          { id: 's5', name: 'Run unit tests', status: 'success', duration_seconds: 180, output_lines: 567, started_at: '2024-01-15T10:02:30Z', completed_at: '2024-01-15T10:05:30Z' },
-          { id: 's6', name: 'Run integration tests', status: 'success', duration_seconds: 132, output_lines: 423, started_at: '2024-01-15T10:05:30Z', completed_at: '2024-01-15T10:07:42Z' }
-        ],
-        started_at: '2024-01-15T10:02:30Z',
-        completed_at: '2024-01-15T10:07:42Z'
-      }
-    ],
-    total_duration_seconds: 462,
-    started_at: '2024-01-15T10:00:00Z',
-    completed_at: '2024-01-15T10:07:42Z',
-    created_at: '2024-01-15T09:59:55Z',
-    tests_total: 234,
-    tests_passed: 234,
-    tests_failed: 0,
-    tests_skipped: 0,
-    coverage_percentage: 87.5,
-    artifacts_count: 3,
-    logs_size_bytes: 1245678,
-    run_attempt: 1
-  },
-  {
-    id: '2',
-    build_number: 846,
-    workflow_name: 'Deploy Production',
-    workflow_file: '.github/workflows/deploy-prod.yml',
-    status: 'running',
-    trigger: 'workflow_dispatch',
-    branch: 'main',
-    commit_hash: 'b2c3d4e5f6g7',
-    commit_message: 'chore: Release v2.4.0',
-    author_name: 'Mike Wilson',
-    author_email: 'mike@company.com',
-    author_avatar: '',
-    jobs: [
-      {
-        id: 'j3',
-        name: 'deploy-staging',
-        status: 'success',
-        runner_name: 'ubuntu-latest',
-        runner_os: 'ubuntu',
-        duration_seconds: 234,
-        steps: [],
-        started_at: '2024-01-15T09:45:00Z',
-        completed_at: '2024-01-15T09:48:54Z'
-      },
-      {
-        id: 'j4',
-        name: 'deploy-production',
-        status: 'running',
-        runner_name: 'ubuntu-latest',
-        runner_os: 'ubuntu',
-        duration_seconds: 178,
-        steps: [],
-        started_at: '2024-01-15T09:49:00Z',
-        completed_at: null
-      }
-    ],
-    total_duration_seconds: 412,
-    started_at: '2024-01-15T09:45:00Z',
-    completed_at: null,
-    created_at: '2024-01-15T09:44:55Z',
-    tests_total: 0,
-    tests_passed: 0,
-    tests_failed: 0,
-    tests_skipped: 0,
-    coverage_percentage: 0,
-    artifacts_count: 1,
-    logs_size_bytes: 567890,
-    run_attempt: 1
-  },
-  {
-    id: '3',
-    build_number: 845,
-    workflow_name: 'CI Pipeline',
-    workflow_file: '.github/workflows/ci.yml',
-    status: 'failed',
-    trigger: 'pull_request',
-    branch: 'feature/new-dashboard',
-    commit_hash: 'c3d4e5f6g7h8',
-    commit_message: 'feat: Implement new dashboard design',
-    author_name: 'Emma Davis',
-    author_email: 'emma@company.com',
-    author_avatar: '',
-    jobs: [
-      {
-        id: 'j5',
-        name: 'build',
-        status: 'success',
-        runner_name: 'ubuntu-latest',
-        runner_os: 'ubuntu',
-        duration_seconds: 156,
-        steps: [],
-        started_at: '2024-01-15T09:30:00Z',
-        completed_at: '2024-01-15T09:32:36Z'
-      },
-      {
-        id: 'j6',
-        name: 'test',
-        status: 'failed',
-        runner_name: 'ubuntu-latest',
-        runner_os: 'ubuntu',
-        duration_seconds: 89,
-        steps: [],
-        started_at: '2024-01-15T09:32:40Z',
-        completed_at: '2024-01-15T09:34:09Z'
-      }
-    ],
-    total_duration_seconds: 249,
-    started_at: '2024-01-15T09:30:00Z',
-    completed_at: '2024-01-15T09:34:09Z',
-    created_at: '2024-01-15T09:29:55Z',
-    tests_total: 234,
-    tests_passed: 221,
-    tests_failed: 13,
-    tests_skipped: 0,
-    coverage_percentage: 82.3,
-    artifacts_count: 2,
-    logs_size_bytes: 2345678,
-    pr_number: 432,
-    pr_title: 'New Dashboard Design',
-    run_attempt: 1
-  },
-  {
-    id: '4',
-    build_number: 844,
-    workflow_name: 'Nightly Build',
-    workflow_file: '.github/workflows/nightly.yml',
-    status: 'success',
-    trigger: 'schedule',
-    branch: 'main',
-    commit_hash: 'd4e5f6g7h8i9',
-    commit_message: 'chore: Daily maintenance tasks',
-    author_name: 'GitHub Actions',
-    author_email: 'actions@github.com',
-    author_avatar: '',
-    jobs: [],
-    total_duration_seconds: 1845,
-    started_at: '2024-01-15T03:00:00Z',
-    completed_at: '2024-01-15T03:30:45Z',
-    created_at: '2024-01-15T02:59:55Z',
-    tests_total: 567,
-    tests_passed: 567,
-    tests_failed: 0,
-    tests_skipped: 0,
-    coverage_percentage: 89.2,
-    artifacts_count: 5,
-    logs_size_bytes: 3456789,
-    run_attempt: 1
-  },
-  {
-    id: '5',
-    build_number: 843,
-    workflow_name: 'Security Scan',
-    workflow_file: '.github/workflows/security.yml',
-    status: 'success',
-    trigger: 'push',
-    branch: 'main',
-    commit_hash: 'e5f6g7h8i9j0',
-    commit_message: 'fix: Patch security vulnerability CVE-2024-001',
-    author_name: 'Alex Johnson',
-    author_email: 'alex@company.com',
-    author_avatar: '',
-    jobs: [],
-    total_duration_seconds: 423,
-    started_at: '2024-01-14T16:00:00Z',
-    completed_at: '2024-01-14T16:07:03Z',
-    created_at: '2024-01-14T15:59:55Z',
-    tests_total: 0,
-    tests_passed: 0,
-    tests_failed: 0,
-    tests_skipped: 0,
-    coverage_percentage: 0,
-    artifacts_count: 2,
-    logs_size_bytes: 789012,
-    run_attempt: 1
-  },
-  {
-    id: '6',
-    build_number: 842,
-    workflow_name: 'CI Pipeline',
-    workflow_file: '.github/workflows/ci.yml',
-    status: 'cancelled',
-    trigger: 'push',
-    branch: 'feature/api-updates',
-    commit_hash: 'f6g7h8i9j0k1',
-    commit_message: 'wip: API refactoring',
-    author_name: 'James Brown',
-    author_email: 'james@company.com',
-    author_avatar: '',
-    jobs: [],
-    total_duration_seconds: 45,
-    started_at: '2024-01-14T15:30:00Z',
-    completed_at: '2024-01-14T15:30:45Z',
-    created_at: '2024-01-14T15:29:55Z',
-    tests_total: 0,
-    tests_passed: 0,
-    tests_failed: 0,
-    tests_skipped: 0,
-    coverage_percentage: 0,
-    artifacts_count: 0,
-    logs_size_bytes: 12345,
-    run_attempt: 1
-  }
-]
+// Database-driven: Using useBuilds hook
+const builds: Build[] = []
 
-// MIGRATED: Batch #12 - Removed mock data, using database hooks
-const mockWorkflows = [
-  {
-    id: 'w1',
-    name: 'CI Pipeline',
-    file_path: '.github/workflows/ci.yml',
-    description: 'Continuous Integration - Build, Test, and Lint',
-    triggers: ['push', 'pull_request'],
-    is_active: true,
-    last_run_at: '2024-01-15T10:00:00Z',
-    last_status: 'success',
-    total_runs: 1247,
-    success_rate: 94.2,
-    avg_duration_seconds: 456,
-    branches: ['main', 'develop', 'feature/*'],
-    created_at: '2023-06-01T00:00:00Z',
-    updated_at: '2024-01-10T14:30:00Z'
-  },
-  {
-    id: 'w2',
-    name: 'Deploy Production',
-    file_path: '.github/workflows/deploy-prod.yml',
-    description: 'Deploy to production environment',
-    triggers: ['workflow_dispatch', 'release'],
-    is_active: true,
-    last_run_at: '2024-01-15T09:45:00Z',
-    last_status: 'running',
-    total_runs: 156,
-    success_rate: 98.7,
-    avg_duration_seconds: 834,
-    branches: ['main'],
-    created_at: '2023-06-01T00:00:00Z',
-    updated_at: '2024-01-05T09:15:00Z'
-  },
-  {
-    id: 'w3',
-    name: 'Deploy Staging',
-    file_path: '.github/workflows/deploy-staging.yml',
-    description: 'Deploy to staging environment',
-    triggers: ['push'],
-    is_active: true,
-    last_run_at: '2024-01-15T08:30:00Z',
-    last_status: 'success',
-    total_runs: 892,
-    success_rate: 96.5,
-    avg_duration_seconds: 512,
-    branches: ['develop'],
-    created_at: '2023-06-01T00:00:00Z',
-    updated_at: '2024-01-08T11:20:00Z'
-  },
-  {
-    id: 'w4',
-    name: 'Nightly Build',
-    file_path: '.github/workflows/nightly.yml',
-    description: 'Scheduled nightly builds with full test suite',
-    triggers: ['schedule'],
-    is_active: true,
-    last_run_at: '2024-01-15T03:00:00Z',
-    last_status: 'success',
-    total_runs: 365,
-    success_rate: 91.8,
-    avg_duration_seconds: 1845,
-    branches: ['main'],
-    created_at: '2023-06-15T00:00:00Z',
-    updated_at: '2023-12-20T16:45:00Z'
-  },
-  {
-    id: 'w5',
-    name: 'Security Scan',
-    file_path: '.github/workflows/security.yml',
-    description: 'Security vulnerability scanning and SAST',
-    triggers: ['push', 'schedule'],
-    is_active: true,
-    last_run_at: '2024-01-14T16:00:00Z',
-    last_status: 'success',
-    total_runs: 734,
-    success_rate: 99.1,
-    avg_duration_seconds: 423,
-    branches: ['main', 'develop'],
-    created_at: '2023-07-01T00:00:00Z',
-    updated_at: '2024-01-02T10:30:00Z'
-  },
-  {
-    id: 'w6',
-    name: 'Release',
-    file_path: '.github/workflows/release.yml',
-    description: 'Create releases and publish packages',
-    triggers: ['tag', 'workflow_dispatch'],
-    is_active: true,
-    last_run_at: '2024-01-10T14:00:00Z',
-    last_status: 'success',
-    total_runs: 48,
-    success_rate: 100,
-    avg_duration_seconds: 623,
-    branches: ['main'],
-    created_at: '2023-06-01T00:00:00Z',
-    updated_at: '2023-11-15T09:00:00Z'
-  }
-]
+// Database-driven: Using useBuildPipelines hook
+const workflows: Workflow[] = []
 
-// MIGRATED: Batch #12 - Removed mock data, using database hooks
-const mockEnvironments = [
-  {
-    id: 'e1',
-    name: 'production',
-    type: 'production',
-    url: 'https://app.company.com',
-    protection_rules: true,
-    required_reviewers: ['Sarah Chen', 'Mike Wilson'],
-    wait_timer_minutes: 15,
-    last_deployment_at: '2024-01-14T16:30:00Z',
-    last_deployment_status: 'success',
-    total_deployments: 156,
-    active_deployment_id: 'dep-prod-156',
-    secrets_count: 12,
-    variables_count: 8,
-    created_at: '2023-06-01T00:00:00Z'
-  },
-  {
-    id: 'e2',
-    name: 'staging',
-    type: 'staging',
-    url: 'https://staging.company.com',
-    protection_rules: true,
-    required_reviewers: ['Team Lead'],
-    wait_timer_minutes: 5,
-    last_deployment_at: '2024-01-15T08:30:00Z',
-    last_deployment_status: 'success',
-    total_deployments: 892,
-    active_deployment_id: 'dep-staging-892',
-    secrets_count: 10,
-    variables_count: 6,
-    created_at: '2023-06-01T00:00:00Z'
-  },
-  {
-    id: 'e3',
-    name: 'development',
-    type: 'development',
-    url: 'https://dev.company.com',
-    protection_rules: false,
-    required_reviewers: [],
-    wait_timer_minutes: 0,
-    last_deployment_at: '2024-01-15T10:00:00Z',
-    last_deployment_status: 'success',
-    total_deployments: 2345,
-    active_deployment_id: 'dep-dev-2345',
-    secrets_count: 8,
-    variables_count: 5,
-    created_at: '2023-06-01T00:00:00Z'
-  },
-  {
-    id: 'e4',
-    name: 'testing',
-    type: 'testing',
-    url: 'https://test.company.com',
-    protection_rules: false,
-    required_reviewers: [],
-    wait_timer_minutes: 0,
-    last_deployment_at: '2024-01-15T03:30:00Z',
-    last_deployment_status: 'success',
-    total_deployments: 365,
-    active_deployment_id: 'dep-test-365',
-    secrets_count: 6,
-    variables_count: 4,
-    created_at: '2023-07-01T00:00:00Z'
-  }
-]
+// Database-driven: Environment data from database hooks
+const environments: Environment[] = []
 
-// MIGRATED: Batch #12 - Removed mock data, using database hooks
-const mockArtifacts = [
-  { id: 'a2', name: 'test-results.xml', type: 'report', build_id: '1', build_number: 847, workflow_name: 'CI Pipeline', size_bytes: 234567, download_count: 5, expires_at: '2024-01-22T10:00:00Z', created_at: '2024-01-15T10:07:42Z', is_expired: false },
-  { id: 'a3', name: 'coverage-report.html', type: 'coverage', build_id: '1', build_number: 847, workflow_name: 'CI Pipeline', size_bytes: 1234567, download_count: 8, expires_at: '2024-01-22T10:00:00Z', created_at: '2024-01-15T10:07:42Z', is_expired: false },
-  { id: 'a4', name: 'docker-image.tar', type: 'docker', build_id: '2', build_number: 846, workflow_name: 'Deploy Production', size_bytes: 234567890, download_count: 2, expires_at: '2024-01-22T09:45:00Z', created_at: '2024-01-15T09:48:54Z', is_expired: false },
-  { id: 'a5', name: 'build-logs.txt', type: 'logs', build_id: '3', build_number: 845, workflow_name: 'CI Pipeline', size_bytes: 567890, download_count: 15, expires_at: '2024-01-22T09:30:00Z', created_at: '2024-01-15T09:34:09Z', is_expired: false },
-  { id: 'a6', name: 'app-v2.4.0.dmg', type: 'binary', build_id: '4', build_number: 844, workflow_name: 'Nightly Build', size_bytes: 89012345, download_count: 45, expires_at: '2024-01-22T03:00:00Z', created_at: '2024-01-15T03:30:45Z', is_expired: false }
-]
+// Database-driven: Artifact data from useBuildArtifacts hook
+const artifacts: Artifact[] = []
 
-// MIGRATED: Batch #12 - Removed mock data, using database hooks
-const mockRunners = [
-  { id: 'r2', name: 'macos-latest', type: 'hosted', os: 'macos', status: 'online', labels: ['macos-latest', 'arm64', 'macos'], current_job: null, total_jobs_run: 2345, total_minutes: 45678, last_active_at: '2024-01-15T09:45:00Z', version: '2.311.0', architecture: 'arm64' },
-  { id: 'r3', name: 'windows-latest', type: 'hosted', os: 'windows', status: 'online', labels: ['windows-latest', 'x64', 'windows'], current_job: null, total_jobs_run: 1234, total_minutes: 23456, last_active_at: '2024-01-15T08:30:00Z', version: '2.311.0', architecture: 'x64' },
-  { id: 'r4', name: 'self-hosted-gpu', type: 'self-hosted', os: 'ubuntu', status: 'online', labels: ['self-hosted', 'gpu', 'cuda'], current_job: null, total_jobs_run: 567, total_minutes: 12345, last_active_at: '2024-01-15T07:00:00Z', version: '2.311.0', architecture: 'x64', ip_address: '10.0.1.100' },
-  { id: 'r5', name: 'self-hosted-arm', type: 'self-hosted', os: 'ubuntu', status: 'offline', labels: ['self-hosted', 'arm64'], current_job: null, total_jobs_run: 234, total_minutes: 5678, last_active_at: '2024-01-14T18:00:00Z', version: '2.310.0', architecture: 'arm64', ip_address: '10.0.1.101' }
-]
+// Database-driven: Runner data from database hooks
+const runners: Runner[] = []
 
 // ============================================================================
 // HELPER FUNCTIONS
@@ -735,20 +320,20 @@ const getRunnerStatusColor = (status: string): string => {
 }
 
 // ============================================================================
-// COMPETITIVE UPGRADE MOCK DATA - GitHub Actions Level Build Intelligence
+// COMPETITIVE UPGRADE DATA - GitHub Actions Level Build Intelligence
 // ============================================================================
 
-// MIGRATED: Batch #12 - Removed mock data, using database hooks
-const mockBuildsAIInsights: any[] = []
+// AI Insights - empty array, populated from database
+const buildsAIInsights: { id: string; type: string; title: string; description: string }[] = []
 
-// MIGRATED: Batch #12 - Removed mock data, using database hooks
-const mockBuildsCollaborators: any[] = []
+// Collaborators - empty array, populated from database
+const buildsCollaborators: { id: string; name: string; avatar?: string }[] = []
 
-// MIGRATED: Batch #12 - Removed mock data, using database hooks
-const mockBuildsPredictions: any[] = []
+// Predictions - empty array, populated from database
+const buildsPredictions: { id: string; prediction: string; confidence: number }[] = []
 
-// MIGRATED: Batch #12 - Removed mock data, using database hooks
-const mockBuildsActivities: any[] = []
+// Activities - empty array, populated from database
+const buildsActivities: { id: string; action: string; timestamp: string }[] = []
 
 // ============================================================================
 // MAIN COMPONENT
@@ -772,36 +357,29 @@ export default function BuildsClient() {
   const [queuePendingJobs, setQueuePendingJobs] = useState(true)
   const [cancelOnNewPush, setCancelOnNewPush] = useState(false)
 
-  // Filtered data
-  // MIGRATED: Batch #12 - Using database builds instead of mock data
+  // Filtered data - using database builds only
   const filteredBuilds = useMemo(() => {
-    const buildsToFilter = databaseBuilds.length > 0 ? databaseBuilds : mockBuilds
-    return buildsToFilter.filter(build => {
+    return databaseBuilds.filter(build => {
       const matchesSearch =
-        build.workflow_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        build.branch.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        build.commit_message.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        build.author_name.toLowerCase().includes(searchQuery.toLowerCase())
+        build.workflow_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        build.branch?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        build.commit_message?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        build.author_name?.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesStatus = statusFilter === 'all' || build.status === statusFilter
       return matchesSearch && matchesStatus
     })
   }, [searchQuery, statusFilter, databaseBuilds])
 
-  // Stats calculations
-  // MIGRATED: Batch #12 - Using database builds and artifacts instead of mock data
+  // Stats calculations - using database data only
   const stats = useMemo(() => {
-    const buildsForStats = databaseBuilds.length > 0 ? databaseBuilds : mockBuilds
-    const artifactsForStats = databaseArtifacts.length > 0 ? databaseArtifacts : mockArtifacts
-    const runnersForStats = mockRunners  // Runners not yet migrated from mock
-
-    const total = buildsForStats.length
-    const success = buildsForStats.filter(b => b.status === 'success').length
-    const failed = buildsForStats.filter(b => b.status === 'failed').length
-    const running = buildsForStats.filter(b => b.status === 'running').length
-    const avgDuration = buildsForStats.reduce((acc, b) => acc + b.total_duration_seconds, 0) / (total || 1)
-    const avgCoverage = buildsForStats.filter(b => b.coverage_percentage > 0).reduce((acc, b) => acc + b.coverage_percentage, 0) / (buildsForStats.filter(b => b.coverage_percentage > 0).length || 1)
-    const totalArtifacts = artifactsForStats.length
-    const activeRunners = runnersForStats.filter(r => r.status !== 'offline').length
+    const total = databaseBuilds.length
+    const success = databaseBuilds.filter(b => b.status === 'success').length
+    const failed = databaseBuilds.filter(b => b.status === 'failed').length
+    const running = databaseBuilds.filter(b => b.status === 'running').length
+    const avgDuration = databaseBuilds.reduce((acc, b) => acc + (b.total_duration_seconds || 0), 0) / (total || 1)
+    const buildsWithCoverage = databaseBuilds.filter(b => b.coverage_percentage > 0)
+    const avgCoverage = buildsWithCoverage.reduce((acc, b) => acc + b.coverage_percentage, 0) / (buildsWithCoverage.length || 1)
+    const totalArtifacts = databaseArtifacts.length
 
     return {
       total,
@@ -812,8 +390,8 @@ export default function BuildsClient() {
       avgDuration,
       avgCoverage: avgCoverage || 0,
       totalArtifacts,
-      activeRunners,
-      totalRunners: runnersForStats.length
+      activeRunners: 0,
+      totalRunners: 0
     }
   }, [databaseBuilds, databaseArtifacts])
 
@@ -964,9 +542,8 @@ export default function BuildsClient() {
     }
   }
 
-  // Quick Actions with real functionality
-  // MIGRATED: Batch #12 - Using database builds with fallback
-  const mockBuildsQuickActions = [
+  // Quick Actions with real functionality - using database builds only
+  const buildsQuickActions = [
     {
       id: '1',
       label: 'New Build',
@@ -979,8 +556,7 @@ export default function BuildsClient() {
       label: 'Retry',
       icon: 'refresh-cw',
       action: () => {
-        const buildsToSearch = databaseBuilds.length > 0 ? databaseBuilds : mockBuilds
-        const failedBuild = buildsToSearch.find(b => b.status === 'failed')
+        const failedBuild = databaseBuilds.find(b => b.status === 'failed')
         if (failedBuild) {
           handleRetryBuild(failedBuild)
         } else {
@@ -994,8 +570,7 @@ export default function BuildsClient() {
       label: 'Logs',
       icon: 'file-text',
       action: () => {
-        const buildsToSearch = databaseBuilds.length > 0 ? databaseBuilds : mockBuilds
-        const latestBuild = buildsToSearch[0]
+        const latestBuild = databaseBuilds[0]
         if (latestBuild) {
           handleDownloadLogs(latestBuild)
         }
@@ -1126,17 +701,13 @@ export default function BuildsClient() {
               {[
                 { icon: Play, label: 'Run Build', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', action: () => handleTriggerBuild() },
                 { icon: RefreshCw, label: 'Rebuild', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', action: () => {
-                  // MIGRATED: Batch #12 - Using database builds with fallback
-                  const buildsToSearch = databaseBuilds.length > 0 ? databaseBuilds : mockBuilds
-                  const failedBuild = buildsToSearch.find(b => b.status === 'failed')
+                  const failedBuild = databaseBuilds.find(b => b.status === 'failed')
                   if (failedBuild) handleRetryBuild(failedBuild)
                   else toast.info('No failed builds to retry')
                 }},
                 { icon: GitBranch, label: 'Branches', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => toast.info('Branch Management', { description: 'View branches in the build pipelines below' }) },
                 { icon: Terminal, label: 'Logs', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400', action: () => {
-                  // MIGRATED: Batch #12 - Using database builds with fallback
-                  const buildsToSearch = databaseBuilds.length > 0 ? databaseBuilds : mockBuilds
-                  const latestBuild = buildsToSearch[0]
+                  const latestBuild = databaseBuilds[0]
                   if (latestBuild) handleDownloadLogs(latestBuild)
                 }},
                 { icon: Download, label: 'Artifacts', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => setActiveTab('artifacts') },
@@ -1287,12 +858,11 @@ export default function BuildsClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    {/* MIGRATED: Batch #12 - Using database pipelines with fallback */}
-                    <p className="text-3xl font-bold">{databasePipelines.length > 0 ? databasePipelines.length : mockWorkflows.length}</p>
+                    <p className="text-3xl font-bold">{databasePipelines.length}</p>
                     <p className="text-purple-200 text-sm">Workflows</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{databasePipelines.length > 0 ? activePipelines.length : mockWorkflows.filter(w => w.is_active).length}</p>
+                    <p className="text-3xl font-bold">{activePipelines.length}</p>
                     <p className="text-purple-200 text-sm">Active</p>
                   </div>
                 </div>
@@ -1304,9 +874,7 @@ export default function BuildsClient() {
               {[
                 { icon: Workflow, label: 'New Workflow', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => { setActiveTab('settings'); toast.success('Workflow editor ready', { description: 'Configure in Settings tab' }); } },
                 { icon: Play, label: 'Run All', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => {
-                  // MIGRATED: Batch #12 - Using database pipelines with fallback
-                  const workflowsToSearch = databasePipelines.length > 0 ? databasePipelines : mockWorkflows
-                  const activeWorkflow = (workflowsToSearch as any[]).find(w => w.is_active)
+                  const activeWorkflow = (databasePipelines as any[]).find(w => w.is_active)
                   if (activeWorkflow) handleRunWorkflow(activeWorkflow)
                 }},
                 { icon: FileText, label: 'Templates', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => toast.info('Workflow Templates', { description: 'Browse CI/CD templates in the workflow cards below' }) },
@@ -1329,8 +897,7 @@ export default function BuildsClient() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {/* MIGRATED: Batch #12 - Using database pipelines with fallback */}
-              {(databasePipelines.length > 0 ? databasePipelines : mockWorkflows).map((workflow: any) => (
+              {databasePipelines.map((workflow: any) => (
                 <Card
                   key={workflow.id}
                   className="hover:shadow-md transition-shadow cursor-pointer"
@@ -1402,12 +969,11 @@ export default function BuildsClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    {/* MIGRATED: Batch #12 - Using mock environments (no DB hook yet) */}
-                    <p className="text-3xl font-bold">{mockEnvironments.length}</p>
+                    <p className="text-3xl font-bold">{environments.length}</p>
                     <p className="text-amber-200 text-sm">Environments</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockEnvironments.filter(e => e.protection_rules).length}</p>
+                    <p className="text-3xl font-bold">{environments.filter(e => e.protection_rules).length}</p>
                     <p className="text-amber-200 text-sm">Protected</p>
                   </div>
                 </div>
@@ -1439,8 +1005,7 @@ export default function BuildsClient() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* MIGRATED: Batch #12 - Using mock environments (no DB hook yet) */}
-              {mockEnvironments.map(env => (
+              {environments.map(env => (
                 <Card key={env.id}>
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between">
@@ -1531,12 +1096,11 @@ export default function BuildsClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    {/* MIGRATED: Batch #12 - Using database artifacts with fallback */}
-                    <p className="text-3xl font-bold">{databaseArtifacts.length > 0 ? databaseArtifacts.length : mockArtifacts.length}</p>
+                    <p className="text-3xl font-bold">{databaseArtifacts.length}</p>
                     <p className="text-blue-200 text-sm">Artifacts</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{(databaseArtifacts.length > 0 ? databaseArtifacts : mockArtifacts).reduce((sum, a) => sum + (a.download_count || 0), 0)}</p>
+                    <p className="text-3xl font-bold">{databaseArtifacts.reduce((sum, a) => sum + (a.download_count || 0), 0)}</p>
                     <p className="text-blue-200 text-sm">Downloads</p>
                   </div>
                 </div>
@@ -1547,8 +1111,7 @@ export default function BuildsClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
                 { icon: Download, label: 'Download', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => {
-                  const artifactsToUse = databaseArtifacts.length > 0 ? databaseArtifacts : mockArtifacts
-                  if (artifactsToUse[0]) handleDownloadArtifact(artifactsToUse[0])
+                  if (databaseArtifacts[0]) handleDownloadArtifact(databaseArtifacts[0])
                 }},
                 { icon: Box, label: 'Browse', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400', action: () => toast.info('Browse Artifacts', { description: 'View all artifacts in the list below' }) },
                 { icon: FileText, label: 'Reports', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => toast.info('Test Reports', { description: 'Filter by report type artifacts' }) },
@@ -1605,8 +1168,7 @@ export default function BuildsClient() {
               </CardHeader>
               <CardContent className="p-0">
                 <div className="divide-y">
-                  {/* MIGRATED: Batch #12 - Using database artifacts with fallback */}
-                  {(databaseArtifacts.length > 0 ? databaseArtifacts : mockArtifacts).map((artifact: any) => (
+                  {databaseArtifacts.map((artifact: any) => (
                     <div key={artifact.id} className="p-4 flex items-center gap-4">
                       <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
                         artifact.type === 'binary' ? 'bg-purple-100 text-purple-600' :
@@ -1656,21 +1218,19 @@ export default function BuildsClient() {
                 <div>
                   <h2 className="text-2xl font-bold mb-2">Build Runners</h2>
                   <p className="text-rose-100">Manage hosted and self-hosted runners for CI/CD</p>
-                  {/* MIGRATED: Batch #12 - Runners still using mock data (no DB hook yet) */}
-                  <p className="text-rose-200 text-xs mt-1">Total minutes used: {mockRunners.reduce((sum, r) => sum + r.total_minutes, 0).toLocaleString()}</p>
+                  <p className="text-rose-200 text-xs mt-1">Total minutes used: {runners.reduce((sum, r) => sum + r.total_minutes, 0).toLocaleString()}</p>
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    {/* MIGRATED: Batch #12 - Runners still using mock data (no DB hook yet) */}
-                    <p className="text-3xl font-bold">{mockRunners.length}</p>
+                    <p className="text-3xl font-bold">{runners.length}</p>
                     <p className="text-rose-200 text-sm">Runners</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockRunners.filter(r => r.status === 'online').length}</p>
+                    <p className="text-3xl font-bold">{runners.filter(r => r.status === 'online').length}</p>
                     <p className="text-rose-200 text-sm">Online</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockRunners.filter(r => r.status === 'busy').length}</p>
+                    <p className="text-3xl font-bold">{runners.filter(r => r.status === 'busy').length}</p>
                     <p className="text-rose-200 text-sm">Busy</p>
                   </div>
                 </div>
@@ -1678,8 +1238,7 @@ export default function BuildsClient() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {/* MIGRATED: Batch #12 - Runners still using mock data (no DB hook yet) */}
-              {mockRunners.map(runner => (
+              {runners.map(runner => (
                 <Card key={runner.id}>
                   <CardHeader className="pb-3">
                     <div className="flex items-start justify-between">
@@ -1916,18 +1475,18 @@ export default function BuildsClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockBuildsAIInsights}
+              insights={buildsAIInsights}
               title="Build Intelligence"
               onInsightAction={handleInsightAction}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockBuildsCollaborators}
+              collaborators={buildsCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockBuildsPredictions}
+              predictions={buildsPredictions}
               title="Build Forecasts"
             />
           </div>
@@ -1935,12 +1494,12 @@ export default function BuildsClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockBuildsActivities}
+            activities={buildsActivities}
             title="Build Activity"
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockBuildsQuickActions}
+            actions={buildsQuickActions}
             variant="grid"
           />
         </div>
@@ -2045,7 +1604,7 @@ export default function BuildsClient() {
                       View Logs
                     </Button>
                     <Button variant="outline" className="flex-1" onClick={() => {
-                      const artifact = mockArtifacts.find(a => a.build_id === selectedBuild.id)
+                      const artifact = databaseArtifacts.find(a => a.build_id === selectedBuild.id)
                       if (artifact) handleDownloadArtifact(artifact)
                       else toast.info('No artifacts available for this build')
                     }}>

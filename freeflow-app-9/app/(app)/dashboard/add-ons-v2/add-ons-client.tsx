@@ -973,13 +973,7 @@ export default function AddOnsClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {[
-                      { name: 'AI Assistant Pro', category: 'ai', downloads: 12500, trend: '+45%' },
-                      { name: 'Slack Integration', category: 'integration', downloads: 8900, trend: '+32%' },
-                      { name: 'Security Shield', category: 'security', downloads: 7600, trend: '+28%' },
-                      { name: 'Analytics Dashboard', category: 'analytics', downloads: 6200, trend: '+22%' },
-                      { name: 'Email Composer', category: 'communication', downloads: 5100, trend: '+18%' }
-                    ].map((item, idx) => (
+                    {([] as { name: string; category: string; downloads: number; trend: string }[]).map((item, idx) => (
                       <div key={idx} className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50">
                         <div className="flex items-center gap-3">
                           <span className="text-lg font-bold text-gray-400">#{idx + 1}</span>
@@ -1007,13 +1001,7 @@ export default function AddOnsClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {[
-                      { name: 'Cloud Backup Plus', category: 'storage', rating: 4.9, reviews: 2340 },
-                      { name: 'Design System Kit', category: 'design', rating: 4.8, reviews: 1890 },
-                      { name: 'API Gateway', category: 'developer', rating: 4.8, reviews: 1560 },
-                      { name: 'Marketing Automation', category: 'marketing', rating: 4.7, reviews: 1230 },
-                      { name: 'Workflow Builder', category: 'productivity', rating: 4.7, reviews: 980 }
-                    ].map((item, idx) => (
+                    {([] as { name: string; category: string; rating: number; reviews: number }[]).map((item, idx) => (
                       <div key={idx} className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50">
                         <div className="flex items-center gap-3">
                           <div className="flex items-center gap-1 text-yellow-500">
@@ -1045,13 +1033,7 @@ export default function AddOnsClient() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {[
-                    { action: 'New Release', addon: 'AI Image Generator v2.0', time: '2 hours ago', icon: Zap },
-                    { action: 'Major Update', addon: 'Security Scanner Pro', time: '5 hours ago', icon: Shield },
-                    { action: 'Featured', addon: 'Team Collaboration Suite', time: '8 hours ago', icon: Crown },
-                    { action: 'Price Drop', addon: 'Premium Analytics', time: '1 day ago', icon: TrendingDown },
-                    { action: 'New Release', addon: 'Email Marketing Hub', time: '2 days ago', icon: Mail }
-                  ].map((activity, idx) => (
+                  {([] as { action: string; addon: string; time: string; icon: typeof Zap }[]).map((activity, idx) => (
                     <div key={idx} className="flex items-center gap-4 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50">
                       <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
                         <activity.icon className="w-5 h-5 text-blue-600" />
@@ -1395,13 +1377,7 @@ export default function AddOnsClient() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {[
-                    { addon: 'AI Assistant Pro', from: '2.4.0', to: '2.5.0', date: 'Dec 26, 2024', status: 'success' },
-                    { addon: 'Security Scanner', from: '1.8.2', to: '1.9.0', date: 'Dec 25, 2024', status: 'success' },
-                    { addon: 'Slack Integration', from: '3.1.0', to: '3.2.0', date: 'Dec 24, 2024', status: 'success' },
-                    { addon: 'Analytics Dashboard', from: '4.0.0', to: '4.1.0', date: 'Dec 23, 2024', status: 'success' },
-                    { addon: 'Email Composer', from: '2.2.0', to: '2.3.0', date: 'Dec 22, 2024', status: 'success' }
-                  ].map((update, idx) => (
+                  {([] as { addon: string; from: string; to: string; date: string; status: string }[]).map((update, idx) => (
                     <div key={idx} className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">

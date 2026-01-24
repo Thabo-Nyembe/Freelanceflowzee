@@ -168,275 +168,21 @@ interface Playbook {
   activeAccounts: number
 }
 
-// Mock Data
-const mockCSMs: CSM[] = [
-  { id: '1', name: 'Sarah Chen', avatar: '/avatars/sarah.jpg', email: 'sarah@company.com', accounts: 45, arr: 2500000 },
-  { id: '2', name: 'Mike Johnson', avatar: '/avatars/mike.jpg', email: 'mike@company.com', accounts: 38, arr: 1800000 },
-  { id: '3', name: 'Emily Davis', avatar: '/avatars/emily.jpg', email: 'emily@company.com', accounts: 52, arr: 3200000 },
-]
+// Data arrays - empty, to be populated from API/database
+const mockCSMs: CSM[] = []
 
-const mockCustomers: Customer[] = [
-  {
-    id: '1',
-    name: 'Acme Corporation',
-    logo: '/logos/acme.png',
-    industry: 'Technology',
-    size: 'Enterprise (5000+)',
-    tier: 'enterprise',
-    healthScore: 92,
-    healthStatus: 'healthy',
-    healthTrend: [
-      { date: '2024-01', score: 85 },
-      { date: '2024-02', score: 88 },
-      { date: '2024-03', score: 92 }
-    ],
-    engagementLevel: 'champion',
-    csm: mockCSMs[0],
-    mrr: 45000,
-    arr: 540000,
-    nps: 9,
-    csat: 95,
-    renewalDate: '2024-12-15',
-    daysToRenewal: 265,
-    renewalRisk: 'low',
-    lifetimeValue: 1620000,
-    contractStart: '2021-12-15',
-    touchpoints: [
-      { id: '1', type: 'qbr', date: '2024-03-15', summary: 'Q1 Business Review - Strong adoption', sentiment: 'positive', csmId: '1' },
-      { id: '2', type: 'call', date: '2024-03-10', summary: 'Expansion discussion', sentiment: 'positive', csmId: '1' }
-    ],
-    usageMetrics: [
-      { feature: 'Dashboard', adoption: 95, trend: 5, benchmark: 80 },
-      { feature: 'Reports', adoption: 88, trend: 3, benchmark: 70 },
-      { feature: 'API', adoption: 75, trend: 10, benchmark: 50 },
-      { feature: 'Integrations', adoption: 60, trend: -2, benchmark: 45 }
-    ],
-    risks: [],
-    opportunities: [
-      { id: '1', type: 'expansion', product: 'Enterprise Add-on', value: 120000, probability: 80, stage: 'Proposal' }
-    ],
-    keyContacts: [
-      { name: 'John Smith', role: 'VP Engineering', email: 'john@acme.com', champion: true },
-      { name: 'Lisa Wong', role: 'Product Manager', email: 'lisa@acme.com', champion: false }
-    ],
-    milestones: [
-      { name: 'Onboarding Complete', date: '2022-01-15', completed: true },
-      { name: 'First Value Realization', date: '2022-02-28', completed: true },
-      { name: 'Expansion Discussion', date: '2024-04-01', completed: false }
-    ],
-    tags: ['strategic', 'reference-able', 'high-growth']
-  },
-  {
-    id: '2',
-    name: 'GlobalTech Inc',
-    logo: '/logos/globaltech.png',
-    industry: 'Financial Services',
-    size: 'Mid-Market (500-5000)',
-    tier: 'business',
-    healthScore: 65,
-    healthStatus: 'concerning',
-    healthTrend: [
-      { date: '2024-01', score: 78 },
-      { date: '2024-02', score: 72 },
-      { date: '2024-03', score: 65 }
-    ],
-    engagementLevel: 'passive',
-    csm: mockCSMs[1],
-    mrr: 18000,
-    arr: 216000,
-    nps: 6,
-    csat: 72,
-    renewalDate: '2024-06-30',
-    daysToRenewal: 97,
-    renewalRisk: 'high',
-    lifetimeValue: 432000,
-    contractStart: '2022-06-30',
-    touchpoints: [
-      { id: '3', type: 'support', date: '2024-03-18', summary: 'Multiple support tickets', sentiment: 'negative', csmId: '2' },
-      { id: '4', type: 'email', date: '2024-03-12', summary: 'Check-in email - no response', sentiment: 'neutral', csmId: '2' }
-    ],
-    usageMetrics: [
-      { feature: 'Dashboard', adoption: 45, trend: -15, benchmark: 80 },
-      { feature: 'Reports', adoption: 30, trend: -8, benchmark: 70 },
-      { feature: 'API', adoption: 15, trend: -5, benchmark: 50 },
-      { feature: 'Integrations', adoption: 10, trend: 0, benchmark: 45 }
-    ],
-    risks: [
-      { id: '1', type: 'Low Engagement', severity: 'high', description: 'Usage dropped 30% in 60 days', mitigation: 'Schedule executive review', status: 'open' },
-      { id: '2', type: 'Champion Left', severity: 'critical', description: 'Primary champion moved to new role', mitigation: 'Identify new champion', status: 'open' }
-    ],
-    opportunities: [],
-    keyContacts: [
-      { name: 'Robert Chen', role: 'CTO', email: 'robert@globaltech.com', champion: false },
-      { name: 'Amy Taylor', role: 'Director IT', email: 'amy@globaltech.com', champion: false }
-    ],
-    milestones: [
-      { name: 'Onboarding Complete', date: '2022-07-15', completed: true },
-      { name: 'First Value Realization', date: '2022-09-01', completed: true },
-      { name: 'Renewal Discussion', date: '2024-04-01', completed: false }
-    ],
-    tags: ['at-risk', 'needs-attention']
-  },
-  {
-    id: '3',
-    name: 'InnovateCo',
-    logo: '/logos/innovateco.png',
-    industry: 'Healthcare',
-    size: 'Enterprise (5000+)',
-    tier: 'enterprise',
-    healthScore: 88,
-    healthStatus: 'healthy',
-    healthTrend: [
-      { date: '2024-01', score: 82 },
-      { date: '2024-02', score: 85 },
-      { date: '2024-03', score: 88 }
-    ],
-    engagementLevel: 'active',
-    csm: mockCSMs[2],
-    mrr: 62000,
-    arr: 744000,
-    nps: 8,
-    csat: 90,
-    renewalDate: '2024-09-30',
-    daysToRenewal: 189,
-    renewalRisk: 'low',
-    lifetimeValue: 2232000,
-    contractStart: '2021-09-30',
-    touchpoints: [
-      { id: '5', type: 'meeting', date: '2024-03-20', summary: 'Product roadmap review', sentiment: 'positive', csmId: '3' }
-    ],
-    usageMetrics: [
-      { feature: 'Dashboard', adoption: 92, trend: 2, benchmark: 80 },
-      { feature: 'Reports', adoption: 85, trend: 5, benchmark: 70 },
-      { feature: 'API', adoption: 70, trend: 8, benchmark: 50 },
-      { feature: 'Integrations', adoption: 55, trend: 12, benchmark: 45 }
-    ],
-    risks: [],
-    opportunities: [
-      { id: '2', type: 'upsell', product: 'Analytics Pro', value: 84000, probability: 60, stage: 'Discovery' }
-    ],
-    keyContacts: [
-      { name: 'Dr. Sarah Mitchell', role: 'Chief Digital Officer', email: 'sarah@innovateco.com', champion: true }
-    ],
-    milestones: [
-      { name: 'Onboarding Complete', date: '2021-10-30', completed: true },
-      { name: 'First Value Realization', date: '2021-12-15', completed: true }
-    ],
-    tags: ['healthcare', 'expansion-ready']
-  },
-  {
-    id: '4',
-    name: 'StartupXYZ',
-    logo: '/logos/startupxyz.png',
-    industry: 'Technology',
-    size: 'SMB (<500)',
-    tier: 'starter',
-    healthScore: 78,
-    healthStatus: 'good',
-    healthTrend: [
-      { date: '2024-01', score: 70 },
-      { date: '2024-02', score: 75 },
-      { date: '2024-03', score: 78 }
-    ],
-    engagementLevel: 'active',
-    csm: mockCSMs[0],
-    mrr: 2500,
-    arr: 30000,
-    nps: 8,
-    csat: 85,
-    renewalDate: '2024-08-15',
-    daysToRenewal: 143,
-    renewalRisk: 'low',
-    lifetimeValue: 60000,
-    contractStart: '2023-08-15',
-    touchpoints: [
-      { id: '6', type: 'onboarding', date: '2024-03-01', summary: 'Onboarding kickoff', sentiment: 'positive', csmId: '1' }
-    ],
-    usageMetrics: [
-      { feature: 'Dashboard', adoption: 80, trend: 10, benchmark: 80 },
-      { feature: 'Reports', adoption: 65, trend: 15, benchmark: 70 },
-      { feature: 'API', adoption: 40, trend: 20, benchmark: 50 },
-      { feature: 'Integrations', adoption: 30, trend: 8, benchmark: 45 }
-    ],
-    risks: [],
-    opportunities: [
-      { id: '3', type: 'upsell', product: 'Team Plan', value: 12000, probability: 70, stage: 'Qualified' }
-    ],
-    keyContacts: [
-      { name: 'Alex Rivera', role: 'CEO', email: 'alex@startupxyz.com', champion: true }
-    ],
-    milestones: [
-      { name: 'Onboarding Complete', date: '2023-09-01', completed: true }
-    ],
-    tags: ['high-potential', 'fast-growing']
-  }
-]
+const mockCustomers: Customer[] = []
 
-const mockPlaybooks: Playbook[] = [
-  {
-    id: '1',
-    name: 'At-Risk Recovery',
-    trigger: 'Health score drops below 70',
-    steps: [
-      { order: 1, action: 'Send personalized check-in email', timing: 'Day 1' },
-      { order: 2, action: 'Schedule discovery call', timing: 'Day 3' },
-      { order: 3, action: 'Create action plan', timing: 'Day 7' },
-      { order: 4, action: 'Executive escalation if needed', timing: 'Day 14' }
-    ],
-    successRate: 72,
-    activeAccounts: 8
-  },
-  {
-    id: '2',
-    name: 'Renewal Preparation',
-    trigger: '90 days before renewal',
-    steps: [
-      { order: 1, action: 'Review account health and usage', timing: 'Day 1' },
-      { order: 2, action: 'Schedule renewal discussion', timing: 'Day 7' },
-      { order: 3, action: 'Prepare value realization report', timing: 'Day 14' },
-      { order: 4, action: 'QBR presentation', timing: 'Day 30' }
-    ],
-    successRate: 95,
-    activeAccounts: 12
-  },
-  {
-    id: '3',
-    name: 'Expansion Play',
-    trigger: 'Health score above 85 + high usage',
-    steps: [
-      { order: 1, action: 'Identify expansion opportunities', timing: 'Day 1' },
-      { order: 2, action: 'Share success story/case study', timing: 'Day 3' },
-      { order: 3, action: 'Product demo of new features', timing: 'Day 10' },
-      { order: 4, action: 'Commercial discussion', timing: 'Day 20' }
-    ],
-    successRate: 45,
-    activeAccounts: 15
-  }
-]
+const mockPlaybooks: Playbook[] = []
 
-// Enhanced Competitive Upgrade Mock Data
-const mockCSAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Customer Health', description: '87% of accounts in healthy status. NPS score: 72.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Health' },
-  { id: '2', type: 'warning' as const, title: 'Churn Risk', description: '3 enterprise accounts showing declining engagement.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Churn' },
-  { id: '3', type: 'info' as const, title: 'Expansion Opportunity', description: '8 accounts ready for upsell conversation.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Growth' },
-]
+// Enhanced Competitive Upgrade Data - empty arrays
+const mockCSAIInsights: { id: string; type: 'success' | 'warning' | 'info'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
 
-const mockCSCollaborators = [
-  { id: '1', name: 'CS Manager', avatar: '/avatars/csm.jpg', status: 'online' as const, role: 'Manager' },
-  { id: '2', name: 'Account Exec', avatar: '/avatars/ae.jpg', status: 'online' as const, role: 'AE' },
-  { id: '3', name: 'Support Lead', avatar: '/avatars/support.jpg', status: 'away' as const, role: 'Support' },
-]
+const mockCSCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }[] = []
 
-const mockCSPredictions = [
-  { id: '1', title: 'Renewal Forecast', prediction: '95% renewal rate expected this quarter', confidence: 88, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Support Volume', prediction: 'Ticket volume expected to decrease 15% with new onboarding', confidence: 76, trend: 'down' as const, impact: 'medium' as const },
-]
+const mockCSPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: 'low' | 'medium' | 'high' }[] = []
 
-const mockCSActivities = [
-  { id: '1', user: 'CS Manager', action: 'Completed', target: 'QBR with Acme Corp', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Account Exec', action: 'Scheduled', target: 'expansion call with TechStart', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'System', action: 'Detected', target: 'usage spike at GlobalTech', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
-]
+const mockCSActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'update' | 'warning' }[] = []
 
 // Helper function for exporting customer success data
 function exportCustomerSuccessData(customers: Customer[]) {
@@ -481,6 +227,10 @@ async function createPlaybook() {
 
 // Helper function for generating health report
 function generateHealthReport(customers: Customer[]) {
+  if (customers.length === 0) {
+    toast.info('No customers to generate health report')
+    return
+  }
   const healthyCount = customers.filter(c => c.healthStatus === 'healthy').length
   const atRiskCount = customers.filter(c => c.healthStatus === 'at_risk' || c.healthStatus === 'critical').length
   const churningCount = customers.filter(c => c.healthStatus === 'churned').length
@@ -515,13 +265,8 @@ export default function CustomerSuccessClient() {
     enabled: true
   })
 
-  // Mock data for enrollments
-  const [enrollments, setEnrollments] = useState([
-    { id: '1', customer: 'Acme Corporation', playbook: 'At-Risk Recovery', status: 'active', startedAt: '2024-03-15', progress: 60 },
-    { id: '2', customer: 'GlobalTech Inc', playbook: 'Renewal Preparation', status: 'active', startedAt: '2024-03-10', progress: 30 },
-    { id: '3', customer: 'InnovateCo', playbook: 'Expansion Play', status: 'active', startedAt: '2024-03-01', progress: 80 },
-    { id: '4', customer: 'StartupXYZ', playbook: 'Onboarding', status: 'completed', startedAt: '2024-02-15', progress: 100 },
-  ])
+  // Enrollments data - empty array to be populated from API/database
+  const [enrollments, setEnrollments] = useState<{ id: string; customer: string; playbook: string; status: string; startedAt: string; progress: number }[]>([])
 
   // State for re-enrollment dialog
   const [showReEnrollDialog, setShowReEnrollDialog] = useState(false)
@@ -621,8 +366,8 @@ export default function CustomerSuccessClient() {
   const stats = useMemo(() => {
     const totalARR = customers.reduce((sum, c) => sum + c.arr, 0)
     const atRiskARR = customers.filter(c => c.renewalRisk === 'high' || c.renewalRisk === 'critical').reduce((sum, c) => sum + c.arr, 0)
-    const avgHealth = customers.reduce((sum, c) => sum + c.healthScore, 0) / customers.length
-    const avgNPS = customers.reduce((sum, c) => sum + c.nps, 0) / customers.length
+    const avgHealth = customers.length > 0 ? customers.reduce((sum, c) => sum + c.healthScore, 0) / customers.length : 0
+    const avgNPS = customers.length > 0 ? customers.reduce((sum, c) => sum + c.nps, 0) / customers.length : 0
     const expansionPipeline = customers.reduce((sum, c) => sum + c.opportunities.reduce((s, o) => s + o.value * (o.probability / 100), 0), 0)
     const renewalsNext90 = customers.filter(c => c.daysToRenewal <= 90).length
 
@@ -1027,7 +772,7 @@ export default function CustomerSuccessClient() {
                     <div className="space-y-4">
                       {['healthy', 'good', 'concerning', 'at_risk', 'critical'].map(status => {
                         const count = customers.filter(c => c.healthStatus === status).length
-                        const percentage = (count / customers.length) * 100
+                        const percentage = customers.length > 0 ? (count / customers.length) * 100 : 0
                         return (
                           <div key={status} className="space-y-2">
                             <div className="flex items-center justify-between text-sm">
@@ -1249,7 +994,7 @@ export default function CustomerSuccessClient() {
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="text-right">
-                    <p className="text-2xl font-bold">{(playbooks.reduce((sum, p) => sum + p.successRate, 0) / playbooks.length).toFixed(0)}%</p>
+                    <p className="text-2xl font-bold">{playbooks.length > 0 ? (playbooks.reduce((sum, p) => sum + p.successRate, 0) / playbooks.length).toFixed(0) : 0}%</p>
                     <p className="text-orange-100 text-sm">Avg Success Rate</p>
                   </div>
                   <Button

@@ -163,309 +163,12 @@ interface Forecast {
   netRetention: number
 }
 
-// Mock Data
-const mockRenewals: Renewal[] = [
-  {
-    id: '1',
-    customerName: 'Acme Corporation',
-    customerLogo: '',
-    status: 'negotiating',
-    type: 'expansion',
-    priority: 'high',
-    healthScore: 'healthy',
-    healthScoreValue: 92,
-    currentARR: 180000,
-    proposedARR: 240000,
-    expansionValue: 60000,
-    probability: 85,
-    renewalDate: new Date('2025-02-15'),
-    daysToRenewal: 52,
-    contractTerm: 12,
-    currency: 'USD',
-    csmName: 'Sarah Chen',
-    csmAvatar: '',
-    aeName: 'Mike Johnson',
-    aeAvatar: '',
-    lastContactDate: new Date('2024-12-20'),
-    nextActionDate: new Date('2024-12-28'),
-    nextAction: 'Send revised proposal',
-    meetingsScheduled: 3,
-    proposalSent: true,
-    contractSent: false,
-    contacts: [
-      { id: 'c1', name: 'John Smith', role: 'VP Engineering', email: 'john@acme.com', phone: '+1 555-0101', avatar: '', isPrimary: true, sentiment: 'positive' },
-      { id: 'c2', name: 'Lisa Wang', role: 'Director of IT', email: 'lisa@acme.com', phone: '+1 555-0102', avatar: '', isPrimary: false, sentiment: 'positive' }
-    ],
-    activities: [
-      { id: 'a1', type: 'meeting', title: 'QBR Meeting', description: 'Quarterly business review with stakeholders', date: new Date('2024-12-15'), user: 'Sarah Chen', outcome: 'positive' },
-      { id: 'a2', type: 'proposal', title: 'Sent Expansion Proposal', description: 'Proposal for additional seats and features', date: new Date('2024-12-18'), user: 'Mike Johnson', outcome: 'positive' }
-    ],
-    milestones: [
-      { id: 'm1', name: 'Initial Outreach', dueDate: new Date('2024-11-01'), completed: true, completedDate: new Date('2024-10-28') },
-      { id: 'm2', name: 'QBR Completed', dueDate: new Date('2024-12-15'), completed: true, completedDate: new Date('2024-12-15') },
-      { id: 'm3', name: 'Proposal Sent', dueDate: new Date('2024-12-20'), completed: true, completedDate: new Date('2024-12-18') },
-      { id: 'm4', name: 'Contract Signed', dueDate: new Date('2025-01-15'), completed: false }
-    ],
-    products: ['Enterprise Plan', 'API Access', 'Priority Support'],
-    riskFactors: [],
-    notes: 'Customer is very happy with the product. Looking to expand to 3 more departments.',
-    createdAt: new Date('2024-10-01'),
-    updatedAt: new Date('2024-12-20')
-  },
-  {
-    id: '2',
-    customerName: 'TechStart Inc',
-    customerLogo: '',
-    status: 'at_risk',
-    type: 'contraction',
-    priority: 'critical',
-    healthScore: 'at_risk',
-    healthScoreValue: 45,
-    currentARR: 96000,
-    proposedARR: 72000,
-    expansionValue: -24000,
-    probability: 55,
-    renewalDate: new Date('2025-01-31'),
-    daysToRenewal: 37,
-    contractTerm: 12,
-    currency: 'USD',
-    csmName: 'Alex Rivera',
-    csmAvatar: '',
-    aeName: 'Emma Wilson',
-    aeAvatar: '',
-    lastContactDate: new Date('2024-12-10'),
-    nextActionDate: new Date('2024-12-26'),
-    nextAction: 'Executive escalation call',
-    meetingsScheduled: 1,
-    proposalSent: false,
-    contractSent: false,
-    contacts: [
-      { id: 'c3', name: 'David Park', role: 'CTO', email: 'david@techstart.com', phone: '+1 555-0201', avatar: '', isPrimary: true, sentiment: 'negative' }
-    ],
-    activities: [
-      { id: 'a3', type: 'call', title: 'Check-in Call', description: 'Discussed concerns about ROI', date: new Date('2024-12-10'), user: 'Alex Rivera', outcome: 'negative' }
-    ],
-    milestones: [
-      { id: 'm5', name: 'Initial Outreach', dueDate: new Date('2024-11-15'), completed: true, completedDate: new Date('2024-11-20') },
-      { id: 'm6', name: 'Risk Assessment', dueDate: new Date('2024-12-01'), completed: true, completedDate: new Date('2024-12-05') },
-      { id: 'm7', name: 'Executive Escalation', dueDate: new Date('2024-12-26'), completed: false }
-    ],
-    products: ['Pro Plan', 'Standard Support'],
-    riskFactors: ['Low product usage', 'Budget constraints', 'Champion left company'],
-    notes: 'Customer expressing concerns about value. Need executive alignment.',
-    createdAt: new Date('2024-09-15'),
-    updatedAt: new Date('2024-12-10')
-  },
-  {
-    id: '3',
-    customerName: 'Global Enterprises',
-    customerLogo: '',
-    status: 'upcoming',
-    type: 'multi_year',
-    priority: 'high',
-    healthScore: 'healthy',
-    healthScoreValue: 88,
-    currentARR: 450000,
-    proposedARR: 520000,
-    expansionValue: 70000,
-    probability: 90,
-    renewalDate: new Date('2025-03-31'),
-    daysToRenewal: 96,
-    contractTerm: 36,
-    currency: 'USD',
-    csmName: 'Sarah Chen',
-    csmAvatar: '',
-    aeName: 'James Park',
-    aeAvatar: '',
-    lastContactDate: new Date('2024-12-18'),
-    nextActionDate: new Date('2025-01-10'),
-    nextAction: 'Schedule QBR',
-    meetingsScheduled: 0,
-    proposalSent: false,
-    contractSent: false,
-    contacts: [
-      { id: 'c4', name: 'Maria Garcia', role: 'SVP Operations', email: 'maria@global.com', phone: '+1 555-0301', avatar: '', isPrimary: true, sentiment: 'positive' },
-      { id: 'c5', name: 'Robert Chen', role: 'Director IT', email: 'robert@global.com', phone: '+1 555-0302', avatar: '', isPrimary: false, sentiment: 'positive' }
-    ],
-    activities: [],
-    milestones: [
-      { id: 'm8', name: 'Initial Outreach', dueDate: new Date('2025-01-01'), completed: false },
-      { id: 'm9', name: 'QBR Scheduled', dueDate: new Date('2025-01-15'), completed: false }
-    ],
-    products: ['Enterprise Plan', 'API Access', 'Premium Support', 'Custom Integrations'],
-    riskFactors: [],
-    notes: 'Strategic account. Looking to lock in 3-year deal with volume discount.',
-    createdAt: new Date('2024-08-01'),
-    updatedAt: new Date('2024-12-18')
-  },
-  {
-    id: '4',
-    customerName: 'Startup Labs',
-    customerLogo: '',
-    status: 'won',
-    type: 'expansion',
-    priority: 'medium',
-    healthScore: 'healthy',
-    healthScoreValue: 95,
-    currentARR: 36000,
-    proposedARR: 60000,
-    expansionValue: 24000,
-    probability: 100,
-    renewalDate: new Date('2024-12-15'),
-    daysToRenewal: -9,
-    contractTerm: 12,
-    currency: 'USD',
-    csmName: 'Alex Rivera',
-    csmAvatar: '',
-    aeName: 'Emma Wilson',
-    aeAvatar: '',
-    lastContactDate: new Date('2024-12-14'),
-    nextActionDate: new Date('2024-12-14'),
-    nextAction: 'Completed',
-    meetingsScheduled: 2,
-    proposalSent: true,
-    contractSent: true,
-    contacts: [
-      { id: 'c6', name: 'Tom Wilson', role: 'CEO', email: 'tom@startuplabs.com', phone: '+1 555-0401', avatar: '', isPrimary: true, sentiment: 'positive' }
-    ],
-    activities: [
-      { id: 'a4', type: 'contract', title: 'Contract Signed', description: '12-month expansion contract signed', date: new Date('2024-12-14'), user: 'Emma Wilson', outcome: 'positive' }
-    ],
-    milestones: [
-      { id: 'm10', name: 'Contract Signed', dueDate: new Date('2024-12-15'), completed: true, completedDate: new Date('2024-12-14') }
-    ],
-    products: ['Pro Plan', 'API Access'],
-    riskFactors: [],
-    notes: 'Great renewal with 67% expansion!',
-    createdAt: new Date('2024-09-01'),
-    updatedAt: new Date('2024-12-14')
-  },
-  {
-    id: '5',
-    customerName: 'MegaCorp Industries',
-    customerLogo: '',
-    status: 'in_progress',
-    type: 'flat',
-    priority: 'medium',
-    healthScore: 'needs_attention',
-    healthScoreValue: 68,
-    currentARR: 120000,
-    proposedARR: 120000,
-    expansionValue: 0,
-    probability: 75,
-    renewalDate: new Date('2025-02-28'),
-    daysToRenewal: 65,
-    contractTerm: 12,
-    currency: 'USD',
-    csmName: 'Sarah Chen',
-    csmAvatar: '',
-    aeName: 'Mike Johnson',
-    aeAvatar: '',
-    lastContactDate: new Date('2024-12-15'),
-    nextActionDate: new Date('2024-12-30'),
-    nextAction: 'Follow up on proposal',
-    meetingsScheduled: 2,
-    proposalSent: true,
-    contractSent: false,
-    contacts: [
-      { id: 'c7', name: 'Jennifer Lee', role: 'VP Technology', email: 'jennifer@megacorp.com', phone: '+1 555-0501', avatar: '', isPrimary: true, sentiment: 'neutral' }
-    ],
-    activities: [],
-    milestones: [
-      { id: 'm11', name: 'Proposal Sent', dueDate: new Date('2024-12-20'), completed: true, completedDate: new Date('2024-12-18') },
-      { id: 'm12', name: 'Follow-up Meeting', dueDate: new Date('2024-12-30'), completed: false }
-    ],
-    products: ['Enterprise Plan', 'Standard Support'],
-    riskFactors: ['Competitive evaluation'],
-    notes: 'Customer evaluating alternatives. Need to reinforce value.',
-    createdAt: new Date('2024-10-15'),
-    updatedAt: new Date('2024-12-15')
-  },
-  {
-    id: '6',
-    customerName: 'DataFlow Systems',
-    customerLogo: '',
-    status: 'churned',
-    type: 'contraction',
-    priority: 'low',
-    healthScore: 'critical',
-    healthScoreValue: 20,
-    currentARR: 84000,
-    proposedARR: 0,
-    expansionValue: -84000,
-    probability: 0,
-    renewalDate: new Date('2024-11-30'),
-    daysToRenewal: -24,
-    contractTerm: 12,
-    currency: 'USD',
-    csmName: 'Alex Rivera',
-    csmAvatar: '',
-    aeName: 'James Park',
-    aeAvatar: '',
-    lastContactDate: new Date('2024-11-25'),
-    nextActionDate: new Date('2024-11-30'),
-    nextAction: 'N/A',
-    meetingsScheduled: 0,
-    proposalSent: false,
-    contractSent: false,
-    contacts: [],
-    activities: [],
-    milestones: [],
-    products: ['Pro Plan'],
-    riskFactors: ['Product fit issues', 'Acquisition by competitor'],
-    notes: 'Customer acquired by competitor. Churn unavoidable.',
-    createdAt: new Date('2024-06-01'),
-    updatedAt: new Date('2024-11-30')
-  }
-]
+// Empty data arrays (real data comes from props or API)
+const renewalsData: Renewal[] = []
 
-const mockPlaybooks: Playbook[] = [
-  {
-    id: 'p1',
-    name: 'Expansion Playbook',
-    type: 'expansion',
-    description: 'Guide for expanding existing accounts with additional products or seats',
-    steps: ['Identify expansion opportunities', 'Schedule value review', 'Present ROI analysis', 'Send expansion proposal', 'Negotiate terms', 'Close deal'],
-    successRate: 78,
-    timesUsed: 156
-  },
-  {
-    id: 'p2',
-    name: 'At-Risk Retention',
-    type: 'retention',
-    description: 'Playbook for saving at-risk renewals',
-    steps: ['Escalate to leadership', 'Conduct root cause analysis', 'Create success plan', 'Weekly check-ins', 'Offer incentives if needed', 'Secure commitment'],
-    successRate: 62,
-    timesUsed: 89
-  },
-  {
-    id: 'p3',
-    name: 'Win-Back Campaign',
-    type: 'win_back',
-    description: 'Strategy for winning back churned customers',
-    steps: ['Wait 90 days', 'Send re-engagement email', 'Offer special pricing', 'Demonstrate new features', 'Remove friction', 'Close'],
-    successRate: 24,
-    timesUsed: 45
-  },
-  {
-    id: 'p4',
-    name: 'Strategic Upsell',
-    type: 'upsell',
-    description: 'Playbook for upgrading customers to higher tiers',
-    steps: ['Analyze usage patterns', 'Identify tier limitations', 'Present upgrade benefits', 'Offer trial of premium features', 'Propose upgrade', 'Execute'],
-    successRate: 71,
-    timesUsed: 203
-  }
-]
+const playbooksData: Playbook[] = []
 
-const mockForecasts: Forecast[] = [
-  { month: 'Jan 2025', renewals: 12, arr: 420000, expansion: 85000, churn: 24000, netRetention: 114 },
-  { month: 'Feb 2025', renewals: 8, arr: 280000, expansion: 45000, churn: 36000, netRetention: 103 },
-  { month: 'Mar 2025', renewals: 15, arr: 680000, expansion: 120000, churn: 48000, netRetention: 111 },
-  { month: 'Apr 2025', renewals: 10, arr: 350000, expansion: 65000, churn: 30000, netRetention: 110 },
-  { month: 'May 2025', renewals: 6, arr: 180000, expansion: 25000, churn: 18000, netRetention: 104 },
-  { month: 'Jun 2025', renewals: 14, arr: 520000, expansion: 95000, churn: 42000, netRetention: 110 }
-]
+const forecastsData: Forecast[] = []
 
 // Helper Functions
 const getStatusColor = (status: RenewalStatus): string => {
@@ -546,29 +249,14 @@ interface RenewalsClientProps {
   initialRenewals?: any[]
 }
 
-// Enhanced Competitive Upgrade Mock Data
-const mockRenewalsAIInsights = [
-  { id: '1', type: 'success' as const, title: 'High Renewal Rate', description: 'Renewal rate at 92%. 15% above industry benchmark.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Performance' },
-  { id: '2', type: 'warning' as const, title: 'At-Risk Accounts', description: '3 accounts flagged as at-risk. Executive escalation recommended.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Risk' },
-  { id: '3', type: 'info' as const, title: 'Expansion Opportunity', description: 'Identified $180K expansion potential across 5 accounts.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Revenue' },
-]
+// Empty arrays for competitive upgrade components (real data comes from props or API)
+const renewalsAIInsights: { id: string; type: 'success' | 'warning' | 'info'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
 
-const mockRenewalsCollaborators = [
-  { id: '1', name: 'Customer Success Lead', avatar: '/avatars/cs.jpg', status: 'online' as const, role: 'CS Lead' },
-  { id: '2', name: 'Account Executive', avatar: '/avatars/ae.jpg', status: 'online' as const, role: 'AE' },
-  { id: '3', name: 'Revenue Ops', avatar: '/avatars/revops.jpg', status: 'away' as const, role: 'RevOps' },
-]
+const renewalsCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }[] = []
 
-const mockRenewalsPredictions = [
-  { id: '1', title: 'Q1 Renewal Forecast', prediction: 'Expecting 94% renewal rate with $520K ARR retained', confidence: 88, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Churn Risk Analysis', prediction: 'TechStart and 2 others may need intervention', confidence: 75, trend: 'down' as const, impact: 'high' as const },
-]
+const renewalsPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down'; impact: 'low' | 'medium' | 'high' }[] = []
 
-const mockRenewalsActivities = [
-  { id: '1', user: 'Sarah Chen', action: 'Closed', target: 'Startup Labs renewal with 67% expansion', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Alex Rivera', action: 'Escalated', target: 'TechStart to executive team', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'warning' as const },
-  { id: '3', user: 'Mike Johnson', action: 'Sent', target: 'proposal to Acme Corporation', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'info' as const },
-]
+const renewalsActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'warning' | 'info' }[] = []
 
 // Quick actions are defined inside component to access state setters
 
@@ -670,9 +358,9 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
     { id: '3', label: 'Export Pipeline', icon: 'download', action: handleExportPipeline, variant: 'outline' as const },
   ]
 
-  const renewals = mockRenewals
-  const playbooks = mockPlaybooks
-  const forecasts = mockForecasts
+  const renewals = renewalsData
+  const playbooks = playbooksData
+  const forecasts = forecastsData
 
   // Computed Statistics
   const stats = useMemo(() => {
@@ -2043,18 +1731,18 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockRenewalsAIInsights}
+              insights={renewalsAIInsights}
               title="Renewal Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockRenewalsCollaborators}
+              collaborators={renewalsCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockRenewalsPredictions}
+              predictions={renewalsPredictions}
               title="Renewal Forecasts"
             />
           </div>
@@ -2062,7 +1750,7 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockRenewalsActivities}
+            activities={renewalsActivities}
             title="Renewal Activity"
             maxItems={5}
           />

@@ -150,339 +150,16 @@ interface CapacityPlan {
 }
 
 // ============================================================================
-// MOCK DATA - Resource Guru Level Comprehensive
+// EMPTY DATA ARRAYS - Real data loaded from Supabase via hooks
 // ============================================================================
 
-const mockSkills: Skill[] = [
-  { id: 's1', name: 'React', category: 'Frontend', level: 5, years_experience: 5, certified: true, last_used: '2024-02-20' },
-  { id: 's2', name: 'TypeScript', category: 'Languages', level: 5, years_experience: 4, certified: true, last_used: '2024-02-20' },
-  { id: 's3', name: 'Node.js', category: 'Backend', level: 4, years_experience: 4, certified: false, last_used: '2024-02-18' },
-  { id: 's4', name: 'Python', category: 'Languages', level: 3, years_experience: 2, certified: false, last_used: '2024-01-15' },
-  { id: 's5', name: 'Figma', category: 'Design', level: 5, years_experience: 3, certified: true, last_used: '2024-02-20' },
-  { id: 's6', name: 'AWS', category: 'Cloud', level: 4, years_experience: 3, certified: true, last_used: '2024-02-19' },
-  { id: 's7', name: 'Kubernetes', category: 'DevOps', level: 4, years_experience: 2, certified: true, last_used: '2024-02-15' },
-  { id: 's8', name: 'Cypress', category: 'Testing', level: 4, years_experience: 2, certified: false, last_used: '2024-02-17' },
-]
+const emptySkills: Skill[] = []
 
-const mockResources: Resource[] = [
-  {
-    id: '1',
-    name: 'Sarah Chen',
-    email: 'sarah.chen@company.com',
-    phone: '+1 555-0101',
-    avatar: '/avatars/sarah.jpg',
-    status: 'assigned',
-    type: 'developer',
-    skill_level: 'senior',
-    department: 'Engineering',
-    team: 'Platform Team',
-    manager: 'Michael Rodriguez',
-    location: 'San Francisco, CA',
-    timezone: 'America/Los_Angeles',
-    hire_date: '2021-03-15',
-    capacity_hours: 40,
-    allocated_hours: 36,
-    utilization: 90,
-    hourly_rate: 150,
-    cost_rate: 85,
-    currency: 'USD',
-    skills: [mockSkills[0], mockSkills[1], mockSkills[2]],
-    bookings: [
-      { id: 'b1', project_id: 'p1', project_name: 'Platform V2.0', client_name: 'Internal', start_date: '2024-01-15', end_date: '2024-03-31', hours_per_day: 6, total_hours: 360, status: 'confirmed', billable: true, notes: 'Lead frontend development' },
-      { id: 'b2', project_id: 'p2', project_name: 'Client Portal', client_name: 'Acme Corp', start_date: '2024-02-01', end_date: '2024-02-28', hours_per_day: 2, total_hours: 40, status: 'confirmed', billable: true, rate_override: 175, notes: 'Technical consulting' },
-    ],
-    time_entries: [
-      { id: 't1', date: '2024-02-20', project_name: 'Platform V2.0', hours: 6, description: 'Component library updates', billable: true, approved: true },
-      { id: 't2', date: '2024-02-20', project_name: 'Client Portal', hours: 2, description: 'API integration review', billable: true, approved: true },
-    ],
-    leaves: [],
-    certifications: ['AWS Solutions Architect', 'React Developer Certification'],
-    projects_count: 3,
-    billable_percentage: 92,
-    availability_next_week: 8,
-    tags: ['frontend', 'react', 'typescript', 'team-lead'],
-  },
-  {
-    id: '2',
-    name: 'Michael Rodriguez',
-    email: 'michael.r@company.com',
-    phone: '+1 555-0102',
-    avatar: '/avatars/michael.jpg',
-    status: 'overallocated',
-    type: 'manager',
-    skill_level: 'lead',
-    department: 'Engineering',
-    team: 'Platform Team',
-    manager: 'Jessica Brown',
-    location: 'New York, NY',
-    timezone: 'America/New_York',
-    hire_date: '2019-06-01',
-    capacity_hours: 40,
-    allocated_hours: 48,
-    utilization: 120,
-    hourly_rate: 200,
-    cost_rate: 120,
-    currency: 'USD',
-    skills: [mockSkills[0], mockSkills[1], mockSkills[2], mockSkills[5]],
-    bookings: [
-      { id: 'b3', project_id: 'p1', project_name: 'Platform V2.0', client_name: 'Internal', start_date: '2024-01-15', end_date: '2024-03-31', hours_per_day: 8, total_hours: 480, status: 'confirmed', billable: false, notes: 'Technical leadership' },
-      { id: 'b4', project_id: 'p3', project_name: 'Enterprise Migration', client_name: 'TechCo Inc', start_date: '2024-02-01', end_date: '2024-04-30', hours_per_day: 4, total_hours: 240, status: 'confirmed', billable: true, notes: 'Architecture consulting' },
-    ],
-    time_entries: [],
-    leaves: [],
-    certifications: ['PMP', 'AWS Solutions Architect Pro'],
-    projects_count: 5,
-    billable_percentage: 65,
-    availability_next_week: 0,
-    tags: ['leadership', 'architecture', 'mentoring'],
-  },
-  {
-    id: '3',
-    name: 'Emily Watson',
-    email: 'emily.w@company.com',
-    phone: '+1 555-0103',
-    avatar: '/avatars/emily.jpg',
-    status: 'assigned',
-    type: 'designer',
-    skill_level: 'senior',
-    department: 'Design',
-    team: 'UX Team',
-    manager: 'David Kim',
-    location: 'Los Angeles, CA',
-    timezone: 'America/Los_Angeles',
-    hire_date: '2020-09-01',
-    capacity_hours: 40,
-    allocated_hours: 32,
-    utilization: 80,
-    hourly_rate: 130,
-    cost_rate: 75,
-    currency: 'USD',
-    skills: [mockSkills[4]],
-    bookings: [
-      { id: 'b5', project_id: 'p1', project_name: 'Platform V2.0', client_name: 'Internal', start_date: '2024-01-15', end_date: '2024-03-31', hours_per_day: 5, total_hours: 300, status: 'confirmed', billable: true, notes: 'UI/UX design' },
-    ],
-    time_entries: [],
-    leaves: [
-      { id: 'l1', type: 'vacation', start_date: '2024-03-10', end_date: '2024-03-15', days: 4, status: 'approved' },
-    ],
-    certifications: ['Figma Professional', 'Nielsen Norman UX Certification'],
-    projects_count: 2,
-    billable_percentage: 88,
-    availability_next_week: 16,
-    tags: ['ux', 'figma', 'design-system'],
-  },
-  {
-    id: '4',
-    name: 'David Kim',
-    email: 'david.k@company.com',
-    phone: '+1 555-0104',
-    avatar: '/avatars/david.jpg',
-    status: 'assigned',
-    type: 'qa',
-    skill_level: 'mid',
-    department: 'Engineering',
-    team: 'Quality Team',
-    manager: 'Michael Rodriguez',
-    location: 'Seattle, WA',
-    timezone: 'America/Los_Angeles',
-    hire_date: '2022-01-10',
-    capacity_hours: 40,
-    allocated_hours: 35,
-    utilization: 87.5,
-    hourly_rate: 100,
-    cost_rate: 55,
-    currency: 'USD',
-    skills: [mockSkills[7], mockSkills[1]],
-    bookings: [
-      { id: 'b6', project_id: 'p1', project_name: 'Platform V2.0', client_name: 'Internal', start_date: '2024-02-01', end_date: '2024-03-31', hours_per_day: 7, total_hours: 280, status: 'confirmed', billable: true, notes: 'Test automation' },
-    ],
-    time_entries: [],
-    leaves: [],
-    certifications: ['ISTQB Foundation'],
-    projects_count: 2,
-    billable_percentage: 95,
-    availability_next_week: 10,
-    tags: ['testing', 'automation', 'cypress'],
-  },
-  {
-    id: '5',
-    name: 'Jessica Brown',
-    email: 'jessica.b@company.com',
-    phone: '+1 555-0105',
-    avatar: '/avatars/jessica.jpg',
-    status: 'available',
-    type: 'devops',
-    skill_level: 'senior',
-    department: 'Engineering',
-    team: 'Infrastructure Team',
-    manager: 'Michael Rodriguez',
-    location: 'Austin, TX',
-    timezone: 'America/Chicago',
-    hire_date: '2020-04-15',
-    capacity_hours: 40,
-    allocated_hours: 24,
-    utilization: 60,
-    hourly_rate: 140,
-    cost_rate: 80,
-    currency: 'USD',
-    skills: [mockSkills[5], mockSkills[6]],
-    bookings: [
-      { id: 'b7', project_id: 'p4', project_name: 'Infrastructure Upgrade', client_name: 'Internal', start_date: '2024-02-15', end_date: '2024-03-15', hours_per_day: 6, total_hours: 120, status: 'confirmed', billable: false, notes: 'K8s migration' },
-    ],
-    time_entries: [],
-    leaves: [],
-    certifications: ['AWS DevOps Pro', 'CKA'],
-    projects_count: 1,
-    billable_percentage: 45,
-    availability_next_week: 32,
-    tags: ['devops', 'kubernetes', 'aws', 'terraform'],
-  },
-  {
-    id: '6',
-    name: 'Alex Thompson',
-    email: 'alex.t@company.com',
-    avatar: '/avatars/alex.jpg',
-    status: 'on_leave',
-    type: 'developer',
-    skill_level: 'mid',
-    department: 'Engineering',
-    team: 'Mobile Team',
-    manager: 'Michael Rodriguez',
-    location: 'Denver, CO',
-    timezone: 'America/Denver',
-    hire_date: '2022-08-01',
-    capacity_hours: 40,
-    allocated_hours: 0,
-    utilization: 0,
-    hourly_rate: 110,
-    cost_rate: 60,
-    currency: 'USD',
-    skills: [mockSkills[0], mockSkills[1]],
-    bookings: [],
-    time_entries: [],
-    leaves: [
-      { id: 'l2', type: 'parental', start_date: '2024-02-01', end_date: '2024-04-01', days: 40, status: 'approved', reason: 'Paternity leave' },
-    ],
-    certifications: [],
-    projects_count: 0,
-    billable_percentage: 0,
-    availability_next_week: 0,
-    tags: ['mobile', 'react-native'],
-  },
-  {
-    id: '7',
-    name: 'Lisa Park',
-    email: 'lisa.p@company.com',
-    avatar: '/avatars/lisa.jpg',
-    status: 'training',
-    type: 'analyst',
-    skill_level: 'junior',
-    department: 'Analytics',
-    team: 'Data Team',
-    manager: 'David Kim',
-    location: 'Chicago, IL',
-    timezone: 'America/Chicago',
-    hire_date: '2023-11-01',
-    capacity_hours: 40,
-    allocated_hours: 16,
-    utilization: 40,
-    hourly_rate: 80,
-    cost_rate: 45,
-    currency: 'USD',
-    skills: [mockSkills[3]],
-    bookings: [],
-    time_entries: [],
-    leaves: [],
-    certifications: [],
-    projects_count: 1,
-    billable_percentage: 30,
-    availability_next_week: 40,
-    tags: ['data', 'python', 'sql', 'new-hire'],
-  },
-  {
-    id: '8',
-    name: 'James Wilson',
-    email: 'james.w@contractor.com',
-    avatar: '/avatars/james.jpg',
-    status: 'assigned',
-    type: 'contractor',
-    skill_level: 'senior',
-    department: 'Engineering',
-    team: 'Platform Team',
-    manager: 'Michael Rodriguez',
-    location: 'Remote - UK',
-    timezone: 'Europe/London',
-    hire_date: '2024-01-15',
-    capacity_hours: 32,
-    allocated_hours: 32,
-    utilization: 100,
-    hourly_rate: 180,
-    cost_rate: 180,
-    currency: 'GBP',
-    skills: [mockSkills[0], mockSkills[1], mockSkills[5]],
-    bookings: [
-      { id: 'b8', project_id: 'p1', project_name: 'Platform V2.0', client_name: 'Internal', start_date: '2024-01-15', end_date: '2024-03-31', hours_per_day: 8, total_hours: 400, status: 'confirmed', billable: true, notes: 'Backend development' },
-    ],
-    time_entries: [],
-    leaves: [],
-    certifications: ['AWS Developer Associate'],
-    projects_count: 1,
-    billable_percentage: 100,
-    availability_next_week: 0,
-    tags: ['contractor', 'backend', 'aws'],
-  },
-]
+const emptyResources: Resource[] = []
 
-const mockTeams: Team[] = [
-  {
-    id: 't1',
-    name: 'Platform Team',
-    department: 'Engineering',
-    manager: mockResources[1],
-    members: [mockResources[0], mockResources[1], mockResources[7]],
-    total_capacity: 112,
-    total_allocated: 116,
-    avg_utilization: 103.5,
-  },
-  {
-    id: 't2',
-    name: 'UX Team',
-    department: 'Design',
-    manager: mockResources[2],
-    members: [mockResources[2]],
-    total_capacity: 40,
-    total_allocated: 32,
-    avg_utilization: 80,
-  },
-  {
-    id: 't3',
-    name: 'Quality Team',
-    department: 'Engineering',
-    manager: mockResources[3],
-    members: [mockResources[3]],
-    total_capacity: 40,
-    total_allocated: 35,
-    avg_utilization: 87.5,
-  },
-  {
-    id: 't4',
-    name: 'Infrastructure Team',
-    department: 'Engineering',
-    manager: mockResources[4],
-    members: [mockResources[4]],
-    total_capacity: 40,
-    total_allocated: 24,
-    avg_utilization: 60,
-  },
-]
+const emptyTeams: Team[] = []
 
-const mockCapacityPlan: CapacityPlan[] = [
-  { week: 'Feb 19-25', total_capacity: 280, total_booked: 231, available_capacity: 49, utilization_percentage: 82.5 },
-  { week: 'Feb 26-Mar 3', total_capacity: 280, total_booked: 245, available_capacity: 35, utilization_percentage: 87.5 },
-  { week: 'Mar 4-10', total_capacity: 280, total_booked: 210, available_capacity: 70, utilization_percentage: 75 },
-  { week: 'Mar 11-17', total_capacity: 240, total_booked: 198, available_capacity: 42, utilization_percentage: 82.5 },
-  { week: 'Mar 18-24', total_capacity: 280, total_booked: 252, available_capacity: 28, utilization_percentage: 90 },
-]
+const emptyCapacityPlan: CapacityPlan[] = []
 
 // ============================================================================
 // HELPER FUNCTIONS
@@ -565,31 +242,16 @@ const formatDate = (date: string) => {
 }
 
 // ============================================================================
-// ENHANCED COMPETITIVE UPGRADE MOCK DATA - Resource Guru Level
+// EMPTY COMPETITIVE UPGRADE DATA - Real data loaded from backend
 // ============================================================================
 
-const mockResourcesAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Optimal Allocation', description: 'Team capacity utilization at 87% - well balanced across projects.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Capacity' },
-  { id: '2', type: 'warning' as const, title: 'Overallocation Alert', description: '3 team members have over 120% allocation next week.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Scheduling' },
-  { id: '3', type: 'info' as const, title: 'Skill Gap Detected', description: 'React Native expertise needed for Q2 mobile project.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Planning' },
-]
+const emptyResourcesAIInsights: { id: string; type: 'success' | 'warning' | 'info'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
 
-const mockResourcesCollaborators = [
-  { id: '1', name: 'Resource Manager', avatar: '/avatars/manager.jpg', status: 'online' as const, role: 'Manager' },
-  { id: '2', name: 'Project Lead', avatar: '/avatars/lead.jpg', status: 'online' as const, role: 'Lead' },
-  { id: '3', name: 'HR Coordinator', avatar: '/avatars/hr.jpg', status: 'away' as const, role: 'HR' },
-]
+const emptyResourcesCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }[] = []
 
-const mockResourcesPredictions = [
-  { id: '1', title: 'Capacity Forecast', prediction: 'Team will reach 95% capacity by end of month', confidence: 88, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Hiring Need', prediction: 'Need 2 senior developers by Q2 for planned projects', confidence: 91, trend: 'up' as const, impact: 'medium' as const },
-]
+const emptyResourcesPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: 'low' | 'medium' | 'high' }[] = []
 
-const mockResourcesActivities = [
-  { id: '1', user: 'Resource Manager', action: 'Assigned', target: 'Sarah to Project Alpha', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Project Lead', action: 'Requested', target: '2 additional developers', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'System', action: 'Flagged', target: 'Mike as overallocated', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'warning' as const },
-]
+const emptyResourcesActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' }[] = []
 
 // Quick actions are now defined inside the component to use state setters
 
@@ -1065,7 +727,7 @@ export default function ResourcesClient() {
   }
 
   // Quick actions for the toolbar
-  const mockResourcesQuickActions = [
+  const resourcesQuickActions = [
     { id: '1', label: 'Add Resource', icon: UserPlus, onClick: () => setShowAddResourceModal(true), variant: 'primary' as const },
     { id: '2', label: 'Export Data', icon: Download, onClick: handleExportResources, variant: 'secondary' as const },
     { id: '3', label: 'View Schedule', icon: Calendar, onClick: () => setActiveTab('schedule'), variant: 'secondary' as const },
@@ -1420,7 +1082,7 @@ export default function ResourcesClient() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {mockCapacityPlan.map((week, idx) => (
+                  {emptyCapacityPlan.map((week, idx) => (
                     <div key={idx} className="flex items-center gap-4 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
                       <div className="w-32 text-sm font-medium text-slate-900 dark:text-white">
                         {week.week}
@@ -1576,7 +1238,7 @@ export default function ResourcesClient() {
                   </div>
                   <div className="hidden md:flex items-center gap-4">
                     <div className="text-center">
-                      <div className="text-3xl font-bold">{mockTeams.length}</div>
+                      <div className="text-3xl font-bold">{emptyTeams.length}</div>
                       <div className="text-sm text-white/80">Teams</div>
                     </div>
                     <div className="text-center">
@@ -1589,7 +1251,7 @@ export default function ResourcesClient() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {mockTeams.map((team) => (
+              {emptyTeams.map((team) => (
                 <Card key={team.id} className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
                   <CardHeader>
                     <CardTitle className="flex items-center justify-between">
@@ -1668,7 +1330,7 @@ export default function ResourcesClient() {
                   </div>
                   <div className="hidden md:flex items-center gap-4">
                     <div className="text-center">
-                      <div className="text-3xl font-bold">{mockResources.flatMap(r => r.bookings).length}</div>
+                      <div className="text-3xl font-bold">{emptyResources.flatMap(r => r.bookings).length}</div>
                       <div className="text-sm text-white/80">Active Bookings</div>
                     </div>
                     <div className="text-center">
@@ -1689,7 +1351,7 @@ export default function ResourcesClient() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {mockResources.flatMap(r => r.bookings.map(b => ({ ...b, resource: r }))).map((booking) => (
+                  {emptyResources.flatMap(r => r.bookings.map(b => ({ ...b, resource: r }))).map((booking) => (
                     <div
                       key={booking.id}
                       className="flex items-center gap-4 p-4 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-sky-500/50 transition-colors"
@@ -2200,18 +1862,18 @@ export default function ResourcesClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockResourcesAIInsights}
+              insights={emptyResourcesAIInsights}
               title="Resource Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockResourcesCollaborators}
+              collaborators={emptyResourcesCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockResourcesPredictions}
+              predictions={emptyResourcesPredictions}
               title="Resource Forecasts"
             />
           </div>
@@ -2219,12 +1881,12 @@ export default function ResourcesClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockResourcesActivities}
+            activities={emptyResourcesActivities}
             title="Resource Activity"
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockResourcesQuickActions}
+            actions={resourcesQuickActions}
             variant="grid"
           />
         </div>

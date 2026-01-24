@@ -32,7 +32,7 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-// Import mock data from centralized adapters
+// Data arrays are initialized as empty - real data should be fetched from API
 
 
 
@@ -148,164 +148,21 @@ interface ReleaseStats {
   downloadsTrend: number
 }
 
-// Mock data
-const mockContributors: Contributor[] = [
-  { id: 'c1', username: 'sarahchen', avatarUrl: '', name: 'Sarah Chen', contributions: 156, commits: 89, additions: 12450, deletions: 3200, role: 'maintainer', profileUrl: '#' },
-  { id: 'c2', username: 'davidkim', avatarUrl: '', name: 'David Kim', contributions: 98, commits: 67, additions: 8900, deletions: 2100, role: 'maintainer', profileUrl: '#' },
-  { id: 'c3', username: 'emilyrodriguez', avatarUrl: '', name: 'Emily Rodriguez', contributions: 67, commits: 45, additions: 5600, deletions: 1800, role: 'contributor', profileUrl: '#' },
-  { id: 'c4', username: 'marcusjohnson', avatarUrl: '', name: 'Marcus Johnson', contributions: 45, commits: 32, additions: 3400, deletions: 890, role: 'contributor', profileUrl: '#' },
-  { id: 'c5', username: 'lisathompson', avatarUrl: '', name: 'Lisa Thompson', contributions: 34, commits: 28, additions: 2800, deletions: 650, role: 'contributor', profileUrl: '#' },
-  { id: 'c6', username: 'newcontributor', avatarUrl: '', name: 'Alex Rivera', contributions: 3, commits: 3, additions: 120, deletions: 45, role: 'first-time', profileUrl: '#' },
-]
-
-const mockAssets: ReleaseAsset[] = [
-  { id: 'a1', name: 'freeflow-2.5.0-linux-amd64.tar.gz', type: 'binary', size: 45678900, downloadCount: 12450, uploadedAt: '2024-12-20T10:00:00Z', contentType: 'application/gzip', browserDownloadUrl: '#', checksumSha256: 'abc123...' },
-  { id: 'a2', name: 'freeflow-2.5.0-darwin-arm64.tar.gz', type: 'binary', size: 43567800, downloadCount: 8900, uploadedAt: '2024-12-20T10:00:00Z', contentType: 'application/gzip', browserDownloadUrl: '#', checksumSha256: 'def456...' },
-  { id: 'a3', name: 'freeflow-2.5.0-windows-amd64.zip', type: 'binary', size: 48900000, downloadCount: 15600, uploadedAt: '2024-12-20T10:00:00Z', contentType: 'application/zip', browserDownloadUrl: '#', checksumSha256: 'ghi789...' },
-  { id: 'a4', name: 'Source code (zip)', type: 'source', size: 12345000, downloadCount: 2340, uploadedAt: '2024-12-20T10:00:00Z', contentType: 'application/zip', browserDownloadUrl: '#' },
-  { id: 'a5', name: 'Source code (tar.gz)', type: 'source', size: 10234000, downloadCount: 1890, uploadedAt: '2024-12-20T10:00:00Z', contentType: 'application/gzip', browserDownloadUrl: '#' },
-  { id: 'a6', name: 'SHA256SUMS.txt', type: 'checksum', size: 1024, downloadCount: 890, uploadedAt: '2024-12-20T10:00:00Z', contentType: 'text/plain', browserDownloadUrl: '#' },
-]
-
-const mockCommits: CommitInfo[] = [
-  { sha: 'abc1234', message: 'feat: Add AI-powered workflow suggestions', author: { name: 'Sarah Chen', avatar: 'SC', date: '2024-12-19' }, additions: 450, deletions: 120, files: 12 },
-  { sha: 'def5678', message: 'feat: Implement smart task prioritization', author: { name: 'David Kim', avatar: 'DK', date: '2024-12-18' }, additions: 380, deletions: 85, files: 8 },
-  { sha: 'ghi9012', message: 'perf: Optimize dashboard load times by 40%', author: { name: 'Emily Rodriguez', avatar: 'ER', date: '2024-12-17' }, additions: 120, deletions: 280, files: 6 },
-  { sha: 'jkl3456', message: 'fix: Resolve calendar sync duplication issue', author: { name: 'Marcus Johnson', avatar: 'MJ', date: '2024-12-16' }, additions: 45, deletions: 23, files: 3 },
-]
-
-const mockReleases: Release[] = [
-  {
-    id: 'rel-1',
-    tagName: 'v2.5.0',
-    name: 'AI-Powered Workflow Automation',
-    body: '## What\'s Changed\n\n### New Features\n- AI Workflow Suggestions - Get intelligent recommendations based on your work patterns\n- Smart Task Prioritization - AI automatically prioritizes tasks\n- Enhanced Dashboard Performance - 40% faster load times\n\n### Bug Fixes\n- Fixed calendar sync duplication issue\n- Resolved session timeout problems\n\n### Contributors\nThanks to all contributors who made this release possible!',
-    isDraft: false,
-    isPrerelease: false,
-    releaseType: 'stable',
-    createdAt: '2024-12-20T08:00:00Z',
-    publishedAt: '2024-12-20T10:00:00Z',
-    author: { name: 'Sarah Chen', avatar: 'SC', username: 'sarahchen' },
-    assets: mockAssets,
-    targetCommitish: 'main',
-    compareUrl: '#',
-    contributors: mockContributors.slice(0, 4),
-    commits: mockCommits,
-    totalDownloads: 42180,
-    reactions: [{ type: '🎉', count: 89 }, { type: '❤️', count: 54 }, { type: '🚀', count: 32 }],
-    discussionUrl: '#',
-    isLatest: true,
-    isVerified: true,
-    signatureUrl: '#'
-  },
-  {
-    id: 'rel-2',
-    tagName: 'v2.5.0-rc.2',
-    name: 'v2.5.0 Release Candidate 2',
-    body: '## Pre-release Notes\n\nThis is the second release candidate for v2.5.0. Please test and report any issues.',
-    isDraft: false,
-    isPrerelease: true,
-    releaseType: 'rc',
-    createdAt: '2024-12-18T14:00:00Z',
-    publishedAt: '2024-12-18T14:30:00Z',
-    author: { name: 'David Kim', avatar: 'DK', username: 'davidkim' },
-    assets: mockAssets.slice(0, 3),
-    targetCommitish: 'release/2.5.0',
-    compareUrl: '#',
-    contributors: mockContributors.slice(0, 2),
-    commits: mockCommits.slice(0, 2),
-    totalDownloads: 1250,
-    reactions: [{ type: '👀', count: 12 }, { type: '🔥', count: 8 }],
-    isLatest: false,
-    isVerified: true
-  },
-  {
-    id: 'rel-3',
-    tagName: 'v2.4.2',
-    name: 'Security Enhancements & Bug Fixes',
-    body: '## Security Updates\n\n- Added FIDO2/WebAuthn support for hardware security keys\n- Enhanced session management\n\n## Bug Fixes\n\n- Fixed session timeout issues\n- Improved database query performance',
-    isDraft: false,
-    isPrerelease: false,
-    releaseType: 'stable',
-    createdAt: '2024-12-15T12:00:00Z',
-    publishedAt: '2024-12-15T14:30:00Z',
-    author: { name: 'David Kim', avatar: 'DK', username: 'davidkim' },
-    assets: mockAssets.slice(0, 5),
-    targetCommitish: 'main',
-    compareUrl: '#',
-    contributors: mockContributors.slice(1, 4),
-    commits: mockCommits.slice(1, 4),
-    totalDownloads: 28900,
-    reactions: [{ type: '🔒', count: 45 }, { type: '👏', count: 23 }],
-    isLatest: false,
-    isVerified: true
-  },
-  {
-    id: 'rel-4',
-    tagName: 'v2.6.0-beta.1',
-    name: 'Advanced Reporting Suite (Beta)',
-    body: '## Beta Release\n\nEarly access to our new reporting features. Not recommended for production.',
-    isDraft: false,
-    isPrerelease: true,
-    releaseType: 'beta',
-    createdAt: '2024-12-22T10:00:00Z',
-    publishedAt: '2024-12-22T11:00:00Z',
-    author: { name: 'Marcus Johnson', avatar: 'MJ', username: 'marcusjohnson' },
-    assets: mockAssets.slice(0, 2),
-    targetCommitish: 'develop',
-    compareUrl: '#',
-    contributors: mockContributors.slice(3, 6),
-    commits: mockCommits.slice(0, 2),
-    totalDownloads: 450,
-    reactions: [{ type: '🧪', count: 8 }],
-    isLatest: false,
-    isVerified: false
-  },
-  {
-    id: 'rel-5',
-    tagName: 'v2.4.1',
-    name: 'Team Collaboration Improvements',
-    body: '## New Features\n\n- Real-time presence indicators\n- Comment threading\n- @mentions in comments',
-    isDraft: false,
-    isPrerelease: false,
-    releaseType: 'stable',
-    createdAt: '2024-12-10T08:00:00Z',
-    publishedAt: '2024-12-10T09:00:00Z',
-    author: { name: 'Emily Rodriguez', avatar: 'ER', username: 'emilyrodriguez' },
-    assets: mockAssets.slice(0, 5),
-    targetCommitish: 'main',
-    compareUrl: '#',
-    contributors: mockContributors.slice(2, 5),
-    commits: mockCommits,
-    totalDownloads: 35600,
-    reactions: [{ type: '👥', count: 56 }, { type: '💬', count: 34 }],
-    isLatest: false,
-    isVerified: true
-  }
-]
-
-const mockDiscussions: Discussion[] = [
-  { id: 'd1', title: 'v2.5.0 Release Announcement', body: 'We are excited to announce the release of v2.5.0 with AI-powered features!', author: { name: 'Sarah Chen', avatar: 'SC' }, createdAt: '2024-12-20T10:00:00Z', replies: 45, upvotes: 89, isPinned: true, isAnswered: false, category: 'announcements' },
-  { id: 'd2', title: 'Feedback on new AI features', body: 'Share your experience with the new AI workflow suggestions.', author: { name: 'Community Manager', avatar: 'CM' }, createdAt: '2024-12-20T12:00:00Z', replies: 28, upvotes: 34, isPinned: false, isAnswered: false, category: 'feedback' },
-  { id: 'd3', title: 'How to migrate from v2.4 to v2.5?', body: 'Looking for migration guide and best practices.', author: { name: 'Alex Johnson', avatar: 'AJ' }, createdAt: '2024-12-21T08:00:00Z', replies: 12, upvotes: 23, isPinned: false, isAnswered: true, category: 'questions' },
-  { id: 'd4', title: 'Feature request: Dark mode for widgets', body: 'Would love to see dark mode support for embedded widgets.', author: { name: 'Maria Garcia', avatar: 'MG' }, createdAt: '2024-12-19T14:00:00Z', replies: 8, upvotes: 56, isPinned: false, isAnswered: false, category: 'ideas' },
-]
-
-const mockWebhooks: WebhookConfig[] = [
-  { id: 'w1', name: 'Slack Notifications', url: 'https://hooks.slack.com/...', events: ['release.published'], isActive: true, lastTriggered: '2024-12-20T10:00:00Z', lastStatus: 'success' },
-  { id: 'w2', name: 'Discord Bot', url: 'https://discord.com/api/webhooks/...', events: ['release.published', 'release.created'], isActive: true, lastTriggered: '2024-12-20T10:00:00Z', lastStatus: 'success' },
-  { id: 'w3', name: 'CI/CD Pipeline', url: 'https://ci.example.com/webhook', events: ['release.created', 'release.published'], isActive: false, lastTriggered: '2024-12-15T14:00:00Z', lastStatus: 'failure' },
-]
-
-const mockStats: ReleaseStats = {
-  totalReleases: 45,
-  stableReleases: 38,
-  prereleases: 7,
-  totalDownloads: 1250000,
-  avgDownloadsPerRelease: 27778,
-  totalContributors: 86,
-  releasesThisMonth: 4,
-  downloadsTrend: 24.5
+// Empty typed arrays (no mock data)
+const releases: Release[] = []
+const contributors: Contributor[] = []
+const assets: ReleaseAsset[] = []
+const discussions: Discussion[] = []
+const webhooks: WebhookConfig[] = []
+const releaseStats: ReleaseStats = {
+  totalReleases: 0,
+  stableReleases: 0,
+  prereleases: 0,
+  totalDownloads: 0,
+  avgDownloadsPerRelease: 0,
+  totalContributors: 0,
+  releasesThisMonth: 0,
+  downloadsTrend: 0
 }
 
 const formatBytes = (bytes: number): string => {
@@ -360,30 +217,14 @@ const getReleaseTypeColor = (type: ReleaseType): string => {
   return colors[type]
 }
 
-// Enhanced Changelog Mock Data
-const mockChangelogAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Release Cadence', description: 'Shipping 2x faster than last quarter. Great velocity!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Velocity' },
-  { id: '2', type: 'info' as const, title: 'Breaking Changes', description: 'v3.0 has 5 breaking changes. Prepare migration guide.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Planning' },
-  { id: '3', type: 'warning' as const, title: 'Documentation', description: '3 releases missing detailed documentation. Update needed.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Docs' },
-]
+// Empty typed arrays for enhanced components
+const changelogAIInsights: { id: string; type: 'success' | 'info' | 'warning' | 'error'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
 
-const mockChangelogCollaborators = [
-  { id: '1', name: 'Release Manager', avatar: '/avatars/release.jpg', status: 'online' as const, role: 'Releases', lastActive: 'Now' },
-  { id: '2', name: 'Developer', avatar: '/avatars/dev.jpg', status: 'online' as const, role: 'Engineering', lastActive: '5m ago' },
-  { id: '3', name: 'Tech Writer', avatar: '/avatars/writer.jpg', status: 'away' as const, role: 'Documentation', lastActive: '1h ago' },
-]
+const changelogCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string; lastActive: string }[] = []
 
-const mockChangelogPredictions = [
-  { id: '1', label: 'Releases/Month', current: 8, target: 10, predicted: 9, confidence: 85, trend: 'up' as const },
-  { id: '2', label: 'Adoption Rate', current: 78, target: 90, predicted: 85, confidence: 78, trend: 'up' as const },
-  { id: '3', label: 'Bug Fixes', current: 24, target: 30, predicted: 28, confidence: 82, trend: 'up' as const },
-]
+const changelogPredictions: { id: string; label: string; current: number; target: number; predicted: number; confidence: number; trend: 'up' | 'down' | 'stable' }[] = []
 
-const mockChangelogActivities = [
-  { id: '1', user: 'Release Manager', action: 'published', target: 'v2.8.0 stable release', timestamp: '1h ago', type: 'success' as const },
-  { id: '2', user: 'Developer', action: 'tagged', target: 'v2.9.0-beta.1', timestamp: '3h ago', type: 'info' as const },
-  { id: '3', user: 'Tech Writer', action: 'updated', target: 'migration guide for v3.0', timestamp: '5h ago', type: 'info' as const },
-]
+const changelogActivities: { id: string; user: { id: string; name: string; avatar?: string }; type: 'comment' | 'update' | 'create' | 'delete' | 'mention' | 'assignment' | 'status_change' | 'milestone' | 'integration'; title: string; description?: string; timestamp: string | Date }[] = []
 
 // Quick actions are defined inside the component to access state setters
 // See getChangelogQuickActions() function inside ChangelogClient component
@@ -448,7 +289,7 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
 
   // Filter releases
   const filteredReleases = useMemo(() => {
-    return mockReleases.filter(release => {
+    return releases.filter(release => {
       if (!showDrafts && release.isDraft) return false
       if (releaseTypeFilter !== 'all' && release.releaseType !== releaseTypeFilter) return false
       if (searchQuery) {
@@ -463,18 +304,18 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
 
   // Calculate stats
   const stats = useMemo(() => {
-    const stable = mockReleases.filter(r => r.releaseType === 'stable' && !r.isDraft)
-    const prerelease = mockReleases.filter(r => r.isPrerelease)
-    const totalDownloads = mockReleases.reduce((sum, r) => sum + r.totalDownloads, 0)
+    const stable = releases.filter(r => r.releaseType === 'stable' && !r.isDraft)
+    const prerelease = releases.filter(r => r.isPrerelease)
+    const totalDownloads = releases.reduce((sum, r) => sum + r.totalDownloads, 0)
     return {
-      total: mockReleases.length,
+      total: releases.length,
       stable: stable.length,
       prerelease: prerelease.length,
       downloads: totalDownloads,
-      contributors: mockContributors.length,
-      latestVersion: mockReleases.find(r => r.isLatest)?.tagName || 'v0.0.0',
-      verified: mockReleases.filter(r => r.isVerified).length,
-      avgDownloads: Math.round(totalDownloads / mockReleases.length)
+      contributors: contributors.length,
+      latestVersion: releases.find(r => r.isLatest)?.tagName || 'v0.0.0',
+      verified: releases.filter(r => r.isVerified).length,
+      avgDownloads: releases.length > 0 ? Math.round(totalDownloads / releases.length) : 0
     }
   }, [])
 
@@ -833,13 +674,8 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
     )
   }, [exportFormat])
 
-  // Quick actions for toolbar
-  const mockChangelogQuickActions = [
-    { id: '1', label: 'Draft Release', icon: Plus, action: () => setIsCreateDialogOpen(true), variant: 'default' as const },
-    { id: '2', label: 'Add Webhook', icon: Webhook, action: () => setIsWebhookDialogOpen(true), variant: 'outline' as const },
-    { id: '3', label: 'New Discussion', icon: MessageSquare, action: () => setIsDiscussionDialogOpen(true), variant: 'outline' as const },
-    { id: '4', label: 'Export Data', icon: Download, action: () => setIsExportAnalyticsDialogOpen(true), variant: 'outline' as const },
-  ]
+  // Quick actions for toolbar (empty array - no mock data)
+  const changelogQuickActions: { id: string; label: string; icon: React.ReactNode; action: () => void; variant?: 'default' | 'outline' }[] = []
 
   if (error) {
     return (
@@ -1394,7 +1230,7 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
               </CardHeader>
               <CardContent>
                 <div className="space-y-8">
-                  {mockReleases.filter(r => !r.isDraft && !r.isPrerelease).slice(0, 3).map(release => (
+                  {releases.filter(r => !r.isDraft && !r.isPrerelease).slice(0, 3).map(release => (
                     <div key={release.id} className="border-l-4 border-slate-300 dark:border-slate-700 pl-6">
                       <div className="flex items-center gap-3 mb-4">
                         <Badge variant="outline" className="font-mono">{release.tagName}</Badge>
@@ -1435,7 +1271,7 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
           {/* Contributors Tab */}
           <TabsContent value="contributors" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {mockContributors.map(contributor => (
+              {contributors.map(contributor => (
                 <Card key={contributor.id} className="hover:shadow-md transition-shadow">
                   <CardContent className="p-6">
                     <div className="flex items-start gap-4">
@@ -1576,7 +1412,7 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
             </div>
 
             <div className="space-y-4">
-              {mockDiscussions.map(discussion => (
+              {discussions.map(discussion => (
                 <Card key={discussion.id} className={`${discussion.isPinned ? 'border-amber-300 dark:border-amber-700' : ''}`}>
                   <CardContent className="p-6">
                     <div className="flex items-start gap-4">
@@ -1611,26 +1447,26 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <Card>
                 <CardContent className="p-6">
-                  <div className="text-3xl font-bold text-slate-600">{formatNumber(mockStats.totalDownloads)}</div>
+                  <div className="text-3xl font-bold text-slate-600">{formatNumber(releaseStats.totalDownloads)}</div>
                   <div className="text-sm text-gray-500">Total Downloads</div>
-                  <div className="text-xs text-green-600 mt-1">↑ {mockStats.downloadsTrend}% vs last month</div>
+                  <div className="text-xs text-green-600 mt-1">↑ {releaseStats.downloadsTrend}% vs last month</div>
                 </CardContent>
               </Card>
               <Card>
                 <CardContent className="p-6">
-                  <div className="text-3xl font-bold text-blue-600">{mockStats.releasesThisMonth}</div>
+                  <div className="text-3xl font-bold text-blue-600">{releaseStats.releasesThisMonth}</div>
                   <div className="text-sm text-gray-500">Releases This Month</div>
                 </CardContent>
               </Card>
               <Card>
                 <CardContent className="p-6">
-                  <div className="text-3xl font-bold text-purple-600">{mockStats.totalContributors}</div>
+                  <div className="text-3xl font-bold text-purple-600">{releaseStats.totalContributors}</div>
                   <div className="text-sm text-gray-500">Total Contributors</div>
                 </CardContent>
               </Card>
               <Card>
                 <CardContent className="p-6">
-                  <div className="text-3xl font-bold text-amber-600">{formatNumber(mockStats.avgDownloadsPerRelease)}</div>
+                  <div className="text-3xl font-bold text-amber-600">{formatNumber(releaseStats.avgDownloadsPerRelease)}</div>
                   <div className="text-sm text-gray-500">Avg Downloads/Release</div>
                 </CardContent>
               </Card>
@@ -1642,7 +1478,7 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {mockReleases.filter(r => !r.isDraft).slice(0, 5).map(release => (
+                  {releases.filter(r => !r.isDraft).slice(0, 5).map(release => (
                     <div key={release.id} className="flex items-center gap-4">
                       <div className="w-24 text-sm font-mono text-gray-500">{release.tagName}</div>
                       <div className="flex-1">
@@ -1750,7 +1586,7 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
             </div>
 
             <div className="space-y-4">
-              {mockWebhooks.map(webhook => (
+              {webhooks.map(webhook => (
                 <Card key={webhook.id}>
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
@@ -1802,7 +1638,7 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {mockAssets.map(asset => {
+                  {assets.map(asset => {
                     const AssetIcon = getAssetIcon(asset.type)
                     return (
                       <div key={asset.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
@@ -2612,18 +2448,18 @@ Thanks to all contributors!`}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockChangelogAIInsights}
+              insights={changelogAIInsights}
               title="Changelog Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockChangelogCollaborators}
+              collaborators={changelogCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockChangelogPredictions}
+              predictions={changelogPredictions}
               title="Release Forecasts"
             />
           </div>
@@ -2631,12 +2467,12 @@ Thanks to all contributors!`}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockChangelogActivities}
+            activities={changelogActivities}
             title="Changelog Activity"
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockChangelogQuickActions}
+            actions={changelogQuickActions}
             variant="grid"
           />
         </div>

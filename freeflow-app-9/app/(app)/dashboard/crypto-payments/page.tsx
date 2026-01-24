@@ -270,86 +270,6 @@ const cryptoPaymentReducer = (
 }
 
 // ========================================
-// MOCK DATA GENERATORS
-// ========================================
-
-const generateMockTransactions = (): CryptoTransaction[] => {
-  logger.debug('Generating mock transactions')
-
-  const currencies: CryptoCurrency[] = ['BTC', 'ETH', 'USDT', 'USDC', 'BNB', 'SOL', 'ADA', 'DOGE']
-  const statuses: PaymentStatus[] = ['pending', 'confirming', 'confirmed', 'completed', 'failed', 'cancelled', 'refunded']
-  const types: TransactionType[] = ['payment', 'withdrawal', 'refund', 'fee']
-
-  const transactions: CryptoTransaction[] = []
-
-  for (let i = 1; i <= 60; i++) {
-    const currency = currencies[Math.floor(Math.random() * currencies.length)]
-    const status = i <= 40 ? 'completed' : statuses[Math.floor(Math.random() * statuses.length)]
-    const type = i <= 50 ? 'payment' : types[Math.floor(Math.random() * types.length)]
-    const amount = Math.random() * 10 + 0.1
-    const usdAmount = amount * (currency === 'BTC' ? 45000 : currency === 'ETH' ? 2500 : 1)
-
-    transactions.push({
-      id: `TX-${String(i).padStart(3, '0')}`,
-      type,
-      amount,
-      currency,
-      usdAmount,
-      fee: Math.random() * 5,
-      status,
-      toAddress: `0x${Math.random().toString(36).substr(2, 40)}`,
-      fromAddress: Math.random() > 0.5 ? `0x${Math.random().toString(36).substr(2, 40)}` : undefined,
-      txHash: status !== 'pending' ? `0x${Math.random().toString(36).substr(2, 64)}` : undefined,
-      confirmations: status === 'completed' ? 12 : Math.floor(Math.random() * 6),
-      requiredConfirmations: currency === 'BTC' ? 6 : currency === 'ETH' ? 12 : 3,
-      network: currency === 'BTC' ? 'Bitcoin' : currency === 'SOL' ? 'Solana' : 'Ethereum',
-      description: `${type.charAt(0).toUpperCase() + type.slice(1)} for ${['Product Purchase', 'Service Payment', 'Invoice Settlement', 'Subscription'][Math.floor(Math.random() * 4)]}`,
-      metadata: {
-        customerEmail: `customer${i}@example.com`,
-        customerName: ['Alice Chen', 'Bob Smith', 'Carol White', 'David Brown', 'Emma Davis'][Math.floor(Math.random() * 5)],
-        invoiceId: `INV-${String(i).padStart(4, '0')}`,
-        productId: `PROD-${Math.floor(Math.random() * 100)}`
-      },
-      createdAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
-      updatedAt: new Date(Date.now() - Math.random() * 24 * 60 * 60 * 1000).toISOString(),
-      completedAt: status === 'completed' ? new Date(Date.now() - Math.random() * 20 * 24 * 60 * 60 * 1000).toISOString() : undefined,
-      expiresAt: status === 'pending' ? new Date(Date.now() + Math.random() * 24 * 60 * 60 * 1000).toISOString() : undefined
-    })
-  }
-
-  logger.info('Mock transactions generated', { count: transactions.length })
-  return transactions
-}
-
-const generateMockWallets = (): CryptoWallet[] => {
-  logger.debug('Generating mock wallets')
-
-  const currencies: CryptoCurrency[] = ['BTC', 'ETH', 'USDT', 'USDC', 'BNB', 'SOL', 'ADA', 'DOGE']
-  const walletTypes: WalletType[] = ['hot', 'cold', 'exchange', 'hardware']
-
-  const wallets: CryptoWallet[] = currencies.map((currency, index) => {
-    const balance = Math.random() * 10 + 0.5
-    const usdPrice = currency === 'BTC' ? 45000 : currency === 'ETH' ? 2500 : currency === 'BNB' ? 300 : currency === 'SOL' ? 100 : 1
-
-    return {
-      id: `WALLET-${String(index + 1).padStart(3, '0')}`,
-      name: `${currency} Wallet`,
-      currency,
-      address: currency === 'BTC' ? `bc1q${Math.random().toString(36).substr(2, 38)}` : `0x${Math.random().toString(36).substr(2, 40)}`,
-      balance,
-      usdValue: balance * usdPrice,
-      type: walletTypes[Math.floor(Math.random() * walletTypes.length)],
-      isActive: Math.random() > 0.2,
-      network: currency === 'BTC' ? 'Bitcoin' : currency === 'SOL' ? 'Solana' : 'Ethereum',
-      createdAt: new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000).toISOString()
-    }
-  })
-
-  logger.info('Mock wallets generated', { count: wallets.length })
-  return wallets
-}
-
-// ========================================
 // UTILITY FUNCTIONS
 // ========================================
 
@@ -450,19 +370,19 @@ export default function CryptoPaymentsPage() {
   const [cancelTransaction, setCancelTransaction] = useState<CryptoTransaction | null>(null)
   const [refundTransaction, setRefundTransaction] = useState<CryptoTransaction | null>(null)
 
-  // Load mock data
+  // Initialize with empty data - real data will be loaded from database
   useEffect(() => {
-    logger.info('Loading initial data')
+    logger.info('Initializing crypto payments page')
 
-    const mockTransactions = generateMockTransactions()
-    const mockWallets = generateMockWallets()
+    const emptyTransactions: CryptoTransaction[] = []
+    const emptyWallets: CryptoWallet[] = []
 
-    dispatch({ type: 'SET_TRANSACTIONS', transactions: mockTransactions })
-    dispatch({ type: 'SET_WALLETS', wallets: mockWallets })
+    dispatch({ type: 'SET_TRANSACTIONS', transactions: emptyTransactions })
+    dispatch({ type: 'SET_WALLETS', wallets: emptyWallets })
 
     logger.info('Initial data loaded', {
-      transactionCount: mockTransactions.length,
-      walletCount: mockWallets.length
+      transactionCount: emptyTransactions.length,
+      walletCount: emptyWallets.length
     })
     announce('Crypto payments page loaded', 'polite')
   }, []) // eslint-disable-line react-hooks/exhaustive-deps

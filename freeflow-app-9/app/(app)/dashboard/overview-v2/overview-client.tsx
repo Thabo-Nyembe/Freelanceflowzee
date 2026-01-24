@@ -273,58 +273,20 @@ interface InfraHost {
 }
 
 // ============================================================================
-// MOCK DATA - Datadog Level
+// DATA ARRAYS - Empty (populated from Supabase)
 // ============================================================================
 
-const mockMetrics: Metric[] = [
-  { id: 'm1', name: 'system.revenue.total', display_name: 'Total Revenue', value: 284500, unit: 'USD', change: 12500, change_percent: 4.6, status: 'healthy', sparkline: [65, 72, 68, 75, 82, 78, 85, 90, 88, 92, 95, 98], tags: ['env:production', 'team:finance'], host: 'app-server-1', last_updated: '2024-01-15T14:30:00Z', aggregation: 'sum', interval_seconds: 60 },
-  { id: 'm2', name: 'app.users.active', display_name: 'Active Users', value: 12847, unit: '', change: 847, change_percent: 7.1, status: 'healthy', sparkline: [100, 105, 110, 108, 115, 120, 118, 125, 130, 128, 135, 140], tags: ['env:production', 'team:product'], host: 'app-server-1', last_updated: '2024-01-15T14:30:00Z', aggregation: 'avg', interval_seconds: 60 },
-  { id: 'm3', name: 'api.requests.rate', display_name: 'API Requests/min', value: 45200, unit: 'rpm', change: -2100, change_percent: -4.4, status: 'warning', sparkline: [50, 52, 48, 55, 53, 51, 49, 47, 45, 46, 44, 45], tags: ['env:production', 'service:api-gateway'], host: 'api-server-1', last_updated: '2024-01-15T14:30:00Z', aggregation: 'avg', interval_seconds: 10 },
-  { id: 'm4', name: 'api.errors.rate', display_name: 'Error Rate', value: 0.12, unit: '%', change: -0.03, change_percent: -20, status: 'healthy', sparkline: [0.2, 0.18, 0.15, 0.14, 0.13, 0.12, 0.11, 0.12, 0.11, 0.12, 0.12, 0.12], tags: ['env:production', 'service:api-gateway'], host: 'api-server-1', last_updated: '2024-01-15T14:30:00Z', aggregation: 'avg', interval_seconds: 60 },
-  { id: 'm5', name: 'api.latency.p95', display_name: 'P95 Latency', value: 145, unit: 'ms', change: 12, change_percent: 9, status: 'warning', sparkline: [120, 125, 130, 128, 135, 140, 138, 142, 145, 143, 146, 145], tags: ['env:production', 'service:api-gateway'], host: 'api-server-1', last_updated: '2024-01-15T14:30:00Z', aggregation: 'avg', interval_seconds: 60 },
-  { id: 'm6', name: 'system.cpu.percent', display_name: 'CPU Usage', value: 67, unit: '%', change: 5, change_percent: 8.1, status: 'healthy', sparkline: [55, 58, 62, 60, 65, 63, 68, 66, 70, 68, 67, 67], tags: ['env:production', 'host:app-server-1'], host: 'app-server-1', last_updated: '2024-01-15T14:30:00Z', aggregation: 'avg', interval_seconds: 10 },
-  { id: 'm7', name: 'system.memory.percent', display_name: 'Memory Usage', value: 72, unit: '%', change: 3, change_percent: 4.3, status: 'healthy', sparkline: [65, 66, 68, 67, 69, 70, 71, 70, 72, 71, 72, 72], tags: ['env:production', 'host:app-server-1'], host: 'app-server-1', last_updated: '2024-01-15T14:30:00Z', aggregation: 'avg', interval_seconds: 10 },
-  { id: 'm8', name: 'system.disk.percent', display_name: 'Disk Usage', value: 45, unit: '%', change: 2, change_percent: 4.6, status: 'healthy', sparkline: [40, 41, 42, 42, 43, 43, 44, 44, 45, 45, 45, 45], tags: ['env:production', 'host:app-server-1'], host: 'app-server-1', last_updated: '2024-01-15T14:30:00Z', aggregation: 'avg', interval_seconds: 300 }
-]
+const metrics: Metric[] = []
 
-const mockAlerts: Alert[] = [
-  { id: 'a1', title: 'High Response Time', message: 'API response time exceeded threshold of 200ms', severity: 'warning', status: 'triggered', source: 'monitor', service: 'API Gateway', metric: 'api.latency.p95', threshold: 200, current_value: 245, triggered_at: '2024-01-15T14:25:00Z', acknowledged_by: null, acknowledged_at: null, resolved_at: null, muted_until: null, tags: ['env:production', 'team:platform'], related_alerts: [], runbook_url: 'https://runbook.example.com/high-latency', notification_channels: ['#platform-alerts', 'pagerduty'] },
-  { id: 'a2', title: 'Database Connection Pool', message: 'Connection pool utilization at 85%', severity: 'warning', status: 'acknowledged', source: 'monitor', service: 'PostgreSQL', metric: 'db.connection_pool.usage', threshold: 80, current_value: 85, triggered_at: '2024-01-15T14:20:00Z', acknowledged_by: 'john.doe', acknowledged_at: '2024-01-15T14:22:00Z', resolved_at: null, muted_until: null, tags: ['env:production', 'team:database'], related_alerts: [], runbook_url: null, notification_channels: ['#db-alerts'] },
-  { id: 'a3', title: 'SSL Certificate Expiring', message: 'Certificate expires in 14 days', severity: 'info', status: 'triggered', source: 'synthetics', service: 'CDN', metric: 'ssl.days_remaining', threshold: 30, current_value: 14, triggered_at: '2024-01-15T10:00:00Z', acknowledged_by: null, acknowledged_at: null, resolved_at: null, muted_until: null, tags: ['env:production', 'team:security'], related_alerts: [], runbook_url: 'https://runbook.example.com/ssl-renewal', notification_channels: ['#security'] },
-  { id: 'a4', title: 'Memory Usage Critical', message: 'Memory usage exceeded 90% threshold', severity: 'critical', status: 'triggered', source: 'monitor', service: 'Worker Nodes', metric: 'system.memory.percent', threshold: 90, current_value: 92, triggered_at: '2024-01-15T14:28:00Z', acknowledged_by: null, acknowledged_at: null, resolved_at: null, muted_until: null, tags: ['env:production', 'team:infrastructure'], related_alerts: ['a2'], runbook_url: 'https://runbook.example.com/high-memory', notification_channels: ['#infra-alerts', 'pagerduty'] },
-  { id: 'a5', title: 'Deployment Failed', message: 'CI/CD pipeline deployment failed for service api-gateway', severity: 'critical', status: 'resolved', source: 'ci-cd', service: 'API Gateway', metric: 'deployment.status', threshold: 1, current_value: 0, triggered_at: '2024-01-15T12:00:00Z', acknowledged_by: 'jane.smith', acknowledged_at: '2024-01-15T12:05:00Z', resolved_at: '2024-01-15T12:30:00Z', muted_until: null, tags: ['env:production', 'team:platform'], related_alerts: [], runbook_url: null, notification_channels: ['#deployments'] }
-]
+const alerts: Alert[] = []
 
-const mockServices: Service[] = [
-  { id: 's1', name: 'api-gateway', display_name: 'API Gateway', status: 'operational', uptime_percent: 99.98, response_time_p50: 25, response_time_p95: 145, response_time_p99: 320, error_rate: 0.02, throughput: 12500, region: 'us-east-1', environment: 'production', last_incident_at: '2024-01-10T08:00:00Z', dependencies: ['auth-service', 'database'], health_checks: [{ id: 'hc1', name: 'HTTP Health', type: 'http', status: 'passing', last_check_at: '2024-01-15T14:30:00Z', response_time_ms: 23, details: 'HTTP 200 OK' }], apm_enabled: true, version: '2.5.1' },
-  { id: 's2', name: 'auth-service', display_name: 'Auth Service', status: 'operational', uptime_percent: 99.99, response_time_p50: 15, response_time_p95: 45, response_time_p99: 120, error_rate: 0.01, throughput: 8400, region: 'us-east-1', environment: 'production', last_incident_at: null, dependencies: ['database', 'redis'], health_checks: [{ id: 'hc2', name: 'HTTP Health', type: 'http', status: 'passing', last_check_at: '2024-01-15T14:30:00Z', response_time_ms: 12, details: 'HTTP 200 OK' }], apm_enabled: true, version: '1.8.0' },
-  { id: 's3', name: 'database', display_name: 'PostgreSQL', status: 'operational', uptime_percent: 99.95, response_time_p50: 5, response_time_p95: 25, response_time_p99: 80, error_rate: 0.00, throughput: 25000, region: 'us-east-1', environment: 'production', last_incident_at: '2024-01-05T14:00:00Z', dependencies: [], health_checks: [{ id: 'hc3', name: 'TCP Check', type: 'tcp', status: 'passing', last_check_at: '2024-01-15T14:30:00Z', response_time_ms: 2, details: 'Port 5432 accepting connections' }], apm_enabled: false, version: '15.4' },
-  { id: 's4', name: 'worker-nodes', display_name: 'Worker Nodes', status: 'degraded', uptime_percent: 99.85, response_time_p50: 100, response_time_p95: 450, response_time_p99: 1200, error_rate: 0.15, throughput: 5200, region: 'us-east-1', environment: 'production', last_incident_at: '2024-01-15T14:28:00Z', dependencies: ['database', 'redis', 'queue'], health_checks: [{ id: 'hc4', name: 'Process Check', type: 'process', status: 'warning', last_check_at: '2024-01-15T14:30:00Z', response_time_ms: 0, details: 'High memory usage detected' }], apm_enabled: true, version: '3.2.0' },
-  { id: 's5', name: 'cdn', display_name: 'CDN', status: 'operational', uptime_percent: 99.99, response_time_p50: 5, response_time_p95: 15, response_time_p99: 35, error_rate: 0.00, throughput: 85000, region: 'global', environment: 'production', last_incident_at: null, dependencies: [], health_checks: [{ id: 'hc5', name: 'SSL Check', type: 'ssl', status: 'warning', last_check_at: '2024-01-15T14:30:00Z', response_time_ms: 50, details: 'Certificate expires in 14 days' }], apm_enabled: false, version: 'N/A' },
-  { id: 's6', name: 'redis', display_name: 'Redis Cache', status: 'operational', uptime_percent: 99.97, response_time_p50: 1, response_time_p95: 3, response_time_p99: 8, error_rate: 0.00, throughput: 150000, region: 'us-east-1', environment: 'production', last_incident_at: null, dependencies: [], health_checks: [{ id: 'hc6', name: 'TCP Check', type: 'tcp', status: 'passing', last_check_at: '2024-01-15T14:30:00Z', response_time_ms: 1, details: 'Port 6379 accepting connections' }], apm_enabled: false, version: '7.2.3' }
-]
+const services: Service[] = []
 
-const mockLogs: LogEntry[] = [
-  { id: 'l1', timestamp: '2024-01-15T14:30:45Z', level: 'error', service: 'api-gateway', host: 'api-server-1', message: 'Connection timeout to database after 30s', attributes: { error_code: 'ETIMEDOUT', retry_count: 3 }, trace_id: 'abc123', span_id: 'def456', tags: ['env:production'] },
-  { id: 'l2', timestamp: '2024-01-15T14:30:30Z', level: 'warn', service: 'worker-nodes', host: 'worker-1', message: 'High memory usage detected: 92%', attributes: { memory_used_mb: 7500, memory_total_mb: 8192 }, trace_id: null, span_id: null, tags: ['env:production'] },
-  { id: 'l3', timestamp: '2024-01-15T14:30:15Z', level: 'info', service: 'auth-service', host: 'auth-server-1', message: 'User authentication successful', attributes: { user_id: 'user_123', method: 'oauth2' }, trace_id: 'ghi789', span_id: 'jkl012', tags: ['env:production'] },
-  { id: 'l4', timestamp: '2024-01-15T14:30:00Z', level: 'debug', service: 'api-gateway', host: 'api-server-1', message: 'Request received: GET /api/v1/users', attributes: { method: 'GET', path: '/api/v1/users', user_agent: 'Mozilla/5.0' }, trace_id: 'mno345', span_id: 'pqr678', tags: ['env:production'] },
-  { id: 'l5', timestamp: '2024-01-15T14:29:45Z', level: 'info', service: 'database', host: 'db-primary', message: 'Query executed in 12ms', attributes: { query_type: 'SELECT', rows_affected: 150 }, trace_id: null, span_id: null, tags: ['env:production'] },
-  { id: 'l6', timestamp: '2024-01-15T14:29:30Z', level: 'error', service: 'worker-nodes', host: 'worker-2', message: 'Job processing failed: OutOfMemoryError', attributes: { job_id: 'job_456', job_type: 'data_export' }, trace_id: 'stu901', span_id: 'vwx234', tags: ['env:production'] }
-]
+const logs: LogEntry[] = []
 
-const mockHosts: InfraHost[] = [
-  { id: 'h1', name: 'app-server-1', hostname: 'ip-10-0-1-10.ec2.internal', os: 'Ubuntu 22.04', ip_address: '10.0.1.10', cpu_percent: 67, memory_percent: 72, disk_percent: 45, network_in_mbps: 125, network_out_mbps: 85, status: 'running', agent_version: '7.50.0', last_seen_at: '2024-01-15T14:30:00Z', tags: ['env:production', 'role:app'], cloud_provider: 'aws', instance_type: 't3.xlarge' },
-  { id: 'h2', name: 'api-server-1', hostname: 'ip-10-0-1-20.ec2.internal', os: 'Ubuntu 22.04', ip_address: '10.0.1.20', cpu_percent: 45, memory_percent: 58, disk_percent: 38, network_in_mbps: 250, network_out_mbps: 180, status: 'running', agent_version: '7.50.0', last_seen_at: '2024-01-15T14:30:00Z', tags: ['env:production', 'role:api'], cloud_provider: 'aws', instance_type: 't3.2xlarge' },
-  { id: 'h3', name: 'worker-1', hostname: 'ip-10-0-2-10.ec2.internal', os: 'Ubuntu 22.04', ip_address: '10.0.2.10', cpu_percent: 85, memory_percent: 92, disk_percent: 55, network_in_mbps: 50, network_out_mbps: 30, status: 'running', agent_version: '7.50.0', last_seen_at: '2024-01-15T14:30:00Z', tags: ['env:production', 'role:worker'], cloud_provider: 'aws', instance_type: 'r5.xlarge' },
-  { id: 'h4', name: 'db-primary', hostname: 'ip-10-0-3-10.ec2.internal', os: 'Ubuntu 22.04', ip_address: '10.0.3.10', cpu_percent: 35, memory_percent: 65, disk_percent: 72, network_in_mbps: 180, network_out_mbps: 220, status: 'running', agent_version: '7.50.0', last_seen_at: '2024-01-15T14:30:00Z', tags: ['env:production', 'role:database'], cloud_provider: 'aws', instance_type: 'r5.2xlarge' }
-]
+const hosts: InfraHost[] = []
 
-const mockSLOs: SLO[] = [
-  { id: 'slo1', name: 'API Availability', description: 'API should be available 99.9% of the time', target_percent: 99.9, current_percent: 99.95, time_window: '30d', type: 'monitor', status: 'ok', error_budget_remaining: 85, burn_rate: 0.5 },
-  { id: 'slo2', name: 'API Latency P95', description: 'P95 latency should be under 200ms', target_percent: 95, current_percent: 92.5, time_window: '7d', type: 'metric', status: 'warning', error_budget_remaining: 25, burn_rate: 2.5 },
-  { id: 'slo3', name: 'Error Rate', description: 'Error rate should be under 0.1%', target_percent: 99.9, current_percent: 99.88, time_window: '30d', type: 'metric', status: 'ok', error_budget_remaining: 78, burn_rate: 0.8 }
-]
+const slos: SLO[] = []
 
 // ============================================================================
 // HELPER FUNCTIONS
@@ -397,32 +359,16 @@ const formatDate = (dateString: string): string => {
 }
 
 // ============================================================================
-// COMPETITIVE UPGRADE MOCK DATA
+// COMPETITIVE UPGRADE DATA - Empty arrays (populated from real data sources)
 // ============================================================================
 
-const mockAIInsights = [
-  { id: '1', query: "What's causing the API latency spike?", insight: "Database connection pool exhaustion on db-primary-01. Consider increasing max_connections from 100 to 200.", confidence: 0.94, category: 'engagement' as const, timestamp: new Date().toISOString() },
-  { id: '2', query: "Which services need attention?", insight: "Payment Gateway showing 2.3% error rate, above 1% threshold. Related to upstream provider issues.", confidence: 0.89, category: 'conversion' as const, timestamp: new Date().toISOString() },
-  { id: '3', query: "How's our infrastructure health?", insight: "Overall system health at 98.7%. Recommended: Scale api-gateway replicas from 3 to 5 before peak hours.", confidence: 0.91, category: 'revenue' as const, timestamp: new Date().toISOString() },
-]
+const aiInsights: { id: string; query: string; insight: string; confidence: number; category: 'engagement' | 'conversion' | 'revenue'; timestamp: string }[] = []
 
-const mockOverviewCollaborators = [
-  { id: '1', name: 'DevOps Team', avatar: '/avatars/devops.jpg', status: 'active' as const, lastActive: 'Just now', role: 'On-call' },
-  { id: '2', name: 'Alex Kumar', avatar: '/avatars/alex.jpg', status: 'active' as const, lastActive: '1m ago', role: 'SRE Lead' },
-  { id: '3', name: 'Lisa Park', avatar: '/avatars/lisa.jpg', status: 'idle' as const, lastActive: '20m ago', role: 'Platform Engineer' },
-]
+const overviewCollaborators: { id: string; name: string; avatar: string; status: 'active' | 'idle' | 'offline'; lastActive: string; role: string }[] = []
 
-const mockOverviewPredictions = [
-  { id: '1', metric: 'Uptime SLA', currentValue: 99.95, predictedValue: 99.98, confidence: 0.88, trend: 'up' as const, timeframe: 'End of month', factors: ['Infrastructure upgrades', 'Auto-scaling improvements'] },
-  { id: '2', metric: 'Avg Response Time', currentValue: 145, predictedValue: 120, confidence: 0.82, trend: 'down' as const, timeframe: 'Next 7 days', factors: ['CDN optimization', 'Database indexing'] },
-  { id: '3', metric: 'Error Rate', currentValue: 0.8, predictedValue: 0.5, confidence: 0.76, trend: 'down' as const, timeframe: 'Next 14 days', factors: ['Bug fixes deployed', 'Better error handling'] },
-]
+const overviewPredictions: { id: string; metric: string; currentValue: number; predictedValue: number; confidence: number; trend: 'up' | 'down' | 'stable'; timeframe: string; factors: string[] }[] = []
 
-const mockOverviewActivities = [
-  { id: '1', type: 'status_change' as const, title: 'Service recovered', description: 'Payment Gateway back to operational', user: { name: 'System', avatar: '' }, timestamp: new Date().toISOString(), metadata: {} },
-  { id: '2', type: 'update' as const, title: 'Deployment completed', description: 'api-gateway v2.4.1 rolled out to production', user: { name: 'Alex Kumar', avatar: '/avatars/alex.jpg' }, timestamp: new Date(Date.now() - 1800000).toISOString(), metadata: {} },
-  { id: '3', type: 'create' as const, title: 'Alert created', description: 'New monitor for Redis memory usage', user: { name: 'Lisa Park', avatar: '/avatars/lisa.jpg' }, timestamp: new Date(Date.now() - 3600000).toISOString(), metadata: {} },
-]
+const overviewActivities: { id: string; type: 'status_change' | 'update' | 'create' | 'delete' | 'comment'; title: string; description: string; user: { name: string; avatar: string }; timestamp: string; metadata: Record<string, unknown> }[] = []
 
 // Note: Quick actions are defined inside the component using useState dialog handlers
 // See quickActions useMemo for the proper implementation with dialog-based workflows
@@ -502,19 +448,19 @@ export default function OverviewClient() {
 
   // Dashboard stats
   const stats = useMemo(() => ({
-    healthyServices: mockServices.filter(s => s.status === 'operational').length,
-    totalServices: mockServices.length,
-    criticalAlerts: mockAlerts.filter(a => a.severity === 'critical' && a.status === 'triggered').length,
-    warningAlerts: mockAlerts.filter(a => a.severity === 'warning' && a.status === 'triggered').length,
-    overallUptime: (mockServices.reduce((sum, s) => sum + s.uptime_percent, 0) / mockServices.length).toFixed(2),
-    totalHosts: mockHosts.length,
-    activeHosts: mockHosts.filter(h => h.status === 'running').length,
-    avgCpu: Math.round(mockHosts.reduce((sum, h) => sum + h.cpu_percent, 0) / mockHosts.length)
+    healthyServices: services.filter(s => s.status === 'operational').length,
+    totalServices: services.length,
+    criticalAlerts: alerts.filter(a => a.severity === 'critical' && a.status === 'triggered').length,
+    warningAlerts: alerts.filter(a => a.severity === 'warning' && a.status === 'triggered').length,
+    overallUptime: services.length > 0 ? (services.reduce((sum, s) => sum + s.uptime_percent, 0) / services.length).toFixed(2) : '0.00',
+    totalHosts: hosts.length,
+    activeHosts: hosts.filter(h => h.status === 'running').length,
+    avgCpu: hosts.length > 0 ? Math.round(hosts.reduce((sum, h) => sum + h.cpu_percent, 0) / hosts.length) : 0
   }), [])
 
   // Filtered data
   const filteredAlerts = useMemo(() => {
-    return mockAlerts.filter(alert =>
+    return alerts.filter(alert =>
       alert.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       alert.service.toLowerCase().includes(searchQuery.toLowerCase()) ||
       alert.message.toLowerCase().includes(searchQuery.toLowerCase())
@@ -522,7 +468,7 @@ export default function OverviewClient() {
   }, [searchQuery])
 
   const filteredLogs = useMemo(() => {
-    return mockLogs.filter(log =>
+    return logs.filter(log =>
       log.message.toLowerCase().includes(searchQuery.toLowerCase()) ||
       log.service.toLowerCase().includes(searchQuery.toLowerCase())
     )
@@ -815,7 +761,7 @@ export default function OverviewClient() {
             <div className="flex items-center gap-3">
               {/* Collaboration Indicator */}
               <CollaborationIndicator
-                collaborators={mockOverviewCollaborators}
+                collaborators={overviewCollaborators}
                 maxVisible={3}
               />
               <div className="flex items-center bg-white/10 rounded-lg p-1">
@@ -888,7 +834,7 @@ export default function OverviewClient() {
           <TabsContent value="dashboard" className="space-y-6 mt-6">
             {/* Key Metrics */}
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {mockMetrics.slice(0, 8).map(metric => (
+              {metrics.slice(0, 8).map(metric => (
                 <Card key={metric.id} className="border-0 shadow-sm hover:shadow-md transition-all dark:bg-gray-800">
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-2">
@@ -931,7 +877,7 @@ export default function OverviewClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {mockServices.map(service => (
+                    {services.map(service => (
                       <div
                         key={service.id}
                         className="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors"
@@ -973,7 +919,7 @@ export default function OverviewClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {mockSLOs.map(slo => (
+                    {slos.map(slo => (
                       <div key={slo.id} className="p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50">
                         <div className="flex items-center justify-between mb-2">
                           <span className="font-medium text-gray-900 dark:text-white">{slo.name}</span>
@@ -1004,7 +950,7 @@ export default function OverviewClient() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {mockAlerts.slice(0, 4).map(alert => (
+                  {alerts.slice(0, 4).map(alert => (
                     <div
                       key={alert.id}
                       className={`p-4 rounded-xl border ${getSeverityColor(alert.severity)} cursor-pointer hover:shadow-md transition-all`}
@@ -1058,7 +1004,7 @@ export default function OverviewClient() {
           {/* Metrics Tab */}
           <TabsContent value="metrics" className="space-y-6 mt-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {mockMetrics.map(metric => (
+              {metrics.map(metric => (
                 <Card key={metric.id} className="border-0 shadow-sm hover:shadow-md transition-all dark:bg-gray-800">
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between mb-4">
@@ -1102,7 +1048,7 @@ export default function OverviewClient() {
           {/* Services Tab */}
           <TabsContent value="services" className="space-y-6 mt-6">
             <div className="space-y-4">
-              {mockServices.map(service => (
+              {services.map(service => (
                 <Card
                   key={service.id}
                   className="border-0 shadow-sm hover:shadow-lg transition-all cursor-pointer dark:bg-gray-800"
@@ -2360,16 +2306,16 @@ export default function OverviewClient() {
         {/* AI-Powered Infrastructure Insights */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
           <AIInsightsPanel
-            insights={mockAIInsights}
+            insights={aiInsights}
             onAskQuestion={(q) => toast.info('Question submitted')}
           />
-          <PredictiveAnalytics predictions={mockOverviewPredictions} />
+          <PredictiveAnalytics predictions={overviewPredictions} />
         </div>
 
         {/* Activity Feed */}
         <div className="mt-6">
           <ActivityFeed
-            activities={mockOverviewActivities}
+            activities={overviewActivities}
             maxItems={5}
             showFilters={true}
           />
@@ -2468,7 +2414,7 @@ export default function OverviewClient() {
               </div>
               <ScrollArea className="h-[400px] border rounded-lg">
                 <div className="font-mono text-sm">
-                  {mockLogs.map(log => (
+                  {logs.map(log => (
                     <div key={log.id} className="flex items-start gap-4 p-3 border-b hover:bg-gray-50 dark:hover:bg-gray-800">
                       <span className="text-xs text-gray-500 whitespace-nowrap">{formatDate(log.timestamp)}</span>
                       <Badge className={getLogLevelColor(log.level)}>{log.level.toUpperCase()}</Badge>
@@ -2507,7 +2453,7 @@ export default function OverviewClient() {
                 </div>
               </div>
               <div className="space-y-3">
-                {mockServices.map(service => (
+                {services.map(service => (
                   <div key={service.id} className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
                     <div className="flex items-center gap-3">
                       <div className={`w-2 h-2 rounded-full ${
@@ -2781,7 +2727,7 @@ export default function OverviewClient() {
                 </Button>
                 <Button className="flex-1 bg-indigo-600 hover:bg-indigo-700" onClick={() => {
                   const exportData = {
-                    logs: mockLogs,
+                    logs: logs,
                     exportedAt: new Date().toISOString()
                   }
                   const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
@@ -2844,7 +2790,7 @@ export default function OverviewClient() {
               </div>
               <ScrollArea className="h-[350px] border rounded-lg bg-gray-900 p-4">
                 <div className="font-mono text-sm text-gray-100 space-y-2">
-                  {mockLogs.map(log => (
+                  {logs.map(log => (
                     <div key={log.id} className="flex items-start gap-3">
                       <span className="text-xs text-gray-500">{formatDate(log.timestamp)}</span>
                       <Badge className={getLogLevelColor(log.level)}>{log.level.toUpperCase()}</Badge>

@@ -206,204 +206,24 @@ interface TutorialsClientProps {
   initialStats: TutorialStats
 }
 
-// Mock Data - Pluralsight Level
-const mockInstructors: Instructor[] = [
-  { id: 'i-1', name: 'Sarah Chen', avatar: 'SC', title: 'Senior Software Engineer', bio: '10+ years in web development', rating: 4.9, studentsCount: 125000, coursesCount: 15, verified: true },
-  { id: 'i-2', name: 'Marcus Johnson', avatar: 'MJ', title: 'UX Design Lead', bio: 'Former Google designer', rating: 4.8, studentsCount: 89000, coursesCount: 8, verified: true },
-  { id: 'i-3', name: 'Alex Rivera', avatar: 'AR', title: 'Data Scientist', bio: 'PhD in Machine Learning', rating: 4.7, studentsCount: 67000, coursesCount: 12, verified: true },
-]
+// Empty arrays - data will come from database hooks
+const mockInstructors: Instructor[] = []
 
-const mockCourses: Course[] = [
-  {
-    id: 'c-1',
-    title: 'Complete React Developer Course 2024',
-    slug: 'complete-react-developer-2024',
-    description: 'Master React 18, Redux, Hooks, and modern web development from scratch to deployment.',
-    longDescription: 'This comprehensive course takes you from React beginner to advanced developer. Learn component patterns, state management, testing, and real-world projects.',
-    thumbnail: '',
-    instructor: mockInstructors[0],
-    level: 'all-levels',
-    category: 'development',
-    subcategory: 'Web Development',
-    language: 'English',
-    status: 'published',
-    price: 99.99,
-    discountPrice: 14.99,
-    duration: { hours: 42, minutes: 30, totalMinutes: 2550 },
-    chapters: [
-      {
-        id: 'ch-1', title: 'Getting Started with React', order: 1, duration: 120,
-        lessons: [
-          { id: 'l-1', title: 'Course Introduction', type: 'video', duration: 5, isPreview: true },
-          { id: 'l-2', title: 'Setting Up Your Environment', type: 'video', duration: 15, isPreview: true },
-          { id: 'l-3', title: 'Your First React Component', type: 'video', duration: 20, isPreview: false },
-          { id: 'l-4', title: 'Understanding JSX', type: 'video', duration: 18, isPreview: false },
-          { id: 'l-5', title: 'Chapter Quiz', type: 'quiz', duration: 10, isPreview: false },
-        ]
-      },
-      {
-        id: 'ch-2', title: 'React Fundamentals', order: 2, duration: 180,
-        lessons: [
-          { id: 'l-6', title: 'Props and State', type: 'video', duration: 25, isPreview: false },
-          { id: 'l-7', title: 'Event Handling', type: 'video', duration: 20, isPreview: false },
-          { id: 'l-8', title: 'Conditional Rendering', type: 'video', duration: 15, isPreview: false },
-          { id: 'l-9', title: 'Lists and Keys', type: 'video', duration: 18, isPreview: false },
-          { id: 'l-10', title: 'Hands-on Exercise', type: 'exercise', duration: 30, isPreview: false },
-        ]
-      },
-      {
-        id: 'ch-3', title: 'React Hooks Deep Dive', order: 3, duration: 240,
-        lessons: [
-          { id: 'l-11', title: 'useState Hook', type: 'video', duration: 25, isPreview: false },
-          { id: 'l-12', title: 'useEffect Hook', type: 'video', duration: 30, isPreview: false },
-          { id: 'l-13', title: 'Custom Hooks', type: 'video', duration: 35, isPreview: false },
-          { id: 'l-14', title: 'useContext and useReducer', type: 'video', duration: 40, isPreview: false },
-          { id: 'l-15', title: 'Build a Custom Hook Project', type: 'project', duration: 60, isPreview: false },
-        ]
-      },
-    ],
-    skills: ['React', 'JavaScript', 'Redux', 'TypeScript', 'Testing'],
-    prerequisites: ['Basic HTML/CSS', 'JavaScript fundamentals'],
-    whatYouLearn: [
-      'Build powerful, fast, user-friendly and reactive web apps',
-      'Apply for high-paid React developer positions',
-      'Understand React Hooks and modern patterns',
-      'Build real-world projects from scratch'
-    ],
-    requirements: ['A computer with internet access', 'No prior React knowledge needed'],
-    targetAudience: ['Developers wanting to learn React', 'Bootcamp graduates', 'Anyone interested in web development'],
-    certificate: true,
-    metrics: { enrollments: 156000, completions: 89000, rating: 4.8, reviewsCount: 12500, watchTime: 2500000, completionRate: 57 },
-    tags: ['react', 'javascript', 'web development', 'frontend'],
-    lastUpdated: '2024-01-20',
-    createdAt: '2023-06-15'
-  },
-  {
-    id: 'c-2',
-    title: 'UX/UI Design Masterclass',
-    slug: 'ux-ui-design-masterclass',
-    description: 'Learn professional UX/UI design from research to high-fidelity prototypes in Figma.',
-    longDescription: 'Complete UX/UI design course covering user research, wireframing, prototyping, and design systems.',
-    thumbnail: '',
-    instructor: mockInstructors[1],
-    level: 'beginner',
-    category: 'design',
-    subcategory: 'UX Design',
-    language: 'English',
-    status: 'published',
-    price: 89.99,
-    discountPrice: 12.99,
-    duration: { hours: 28, minutes: 45, totalMinutes: 1725 },
-    chapters: [
-      {
-        id: 'ch-4', title: 'Introduction to UX Design', order: 1, duration: 90,
-        lessons: [
-          { id: 'l-16', title: 'What is UX Design?', type: 'video', duration: 12, isPreview: true },
-          { id: 'l-17', title: 'UX vs UI', type: 'video', duration: 10, isPreview: true },
-          { id: 'l-18', title: 'Design Thinking Process', type: 'video', duration: 25, isPreview: false },
-        ]
-      },
-      {
-        id: 'ch-5', title: 'User Research', order: 2, duration: 150,
-        lessons: [
-          { id: 'l-19', title: 'Research Methods', type: 'video', duration: 30, isPreview: false },
-          { id: 'l-20', title: 'User Interviews', type: 'video', duration: 25, isPreview: false },
-          { id: 'l-21', title: 'Creating Personas', type: 'video', duration: 20, isPreview: false },
-        ]
-      },
-    ],
-    skills: ['Figma', 'User Research', 'Wireframing', 'Prototyping', 'Design Systems'],
-    prerequisites: ['No experience required'],
-    whatYouLearn: ['Create professional UI designs', 'Conduct user research', 'Build interactive prototypes'],
-    requirements: ['Computer with Figma installed'],
-    targetAudience: ['Aspiring UX designers', 'Developers wanting to learn design'],
-    certificate: true,
-    metrics: { enrollments: 89000, completions: 52000, rating: 4.7, reviewsCount: 7800, watchTime: 1200000, completionRate: 58 },
-    tags: ['ux', 'ui', 'design', 'figma'],
-    lastUpdated: '2024-01-18',
-    createdAt: '2023-08-20'
-  },
-  {
-    id: 'c-3',
-    title: 'Python for Data Science & Machine Learning',
-    slug: 'python-data-science-ml',
-    description: 'Complete data science bootcamp covering Python, Pandas, NumPy, Matplotlib, and Scikit-Learn.',
-    longDescription: 'Learn data science and machine learning with Python. Cover data analysis, visualization, and predictive modeling.',
-    thumbnail: '',
-    instructor: mockInstructors[2],
-    level: 'intermediate',
-    category: 'data-science',
-    subcategory: 'Machine Learning',
-    language: 'English',
-    status: 'published',
-    price: 129.99,
-    discountPrice: 16.99,
-    duration: { hours: 56, minutes: 0, totalMinutes: 3360 },
-    chapters: [
-      {
-        id: 'ch-6', title: 'Python Fundamentals', order: 1, duration: 180,
-        lessons: [
-          { id: 'l-22', title: 'Python Setup', type: 'video', duration: 10, isPreview: true },
-          { id: 'l-23', title: 'Data Types', type: 'video', duration: 25, isPreview: false },
-          { id: 'l-24', title: 'Functions', type: 'video', duration: 30, isPreview: false },
-        ]
-      },
-    ],
-    skills: ['Python', 'Pandas', 'NumPy', 'Machine Learning', 'Data Visualization'],
-    prerequisites: ['Basic programming knowledge'],
-    whatYouLearn: ['Analyze data with Python', 'Build ML models', 'Create visualizations'],
-    requirements: ['Computer with Python installed'],
-    targetAudience: ['Data analysts', 'Developers', 'Students'],
-    certificate: true,
-    metrics: { enrollments: 234000, completions: 145000, rating: 4.9, reviewsCount: 18500, watchTime: 4500000, completionRate: 62 },
-    tags: ['python', 'data science', 'machine learning', 'ai'],
-    lastUpdated: '2024-01-22',
-    createdAt: '2023-03-10'
-  }
-]
+const mockCourses: Course[] = []
 
-const mockLearningPaths: LearningPath[] = [
-  { id: 'lp-1', title: 'Full-Stack Web Developer', description: 'Master frontend and backend development', courses: ['c-1', 'c-2'], duration: { hours: 120, minutes: 0, totalMinutes: 7200 }, level: 'beginner', skills: ['React', 'Node.js', 'Database', 'APIs'], enrollments: 45000 },
-  { id: 'lp-2', title: 'Data Science Career Path', description: 'Become a professional data scientist', courses: ['c-3'], duration: { hours: 80, minutes: 0, totalMinutes: 4800 }, level: 'intermediate', skills: ['Python', 'ML', 'Statistics'], enrollments: 32000 },
-]
+const mockLearningPaths: LearningPath[] = []
 
-const mockProgress: UserProgress[] = [
-  { courseId: 'c-1', progress: 45, lessonsCompleted: 7, totalLessons: 15, lastAccessed: '2024-01-22', bookmarked: true, notes: [] },
-  { courseId: 'c-2', progress: 12, lessonsCompleted: 2, totalLessons: 6, lastAccessed: '2024-01-20', bookmarked: false, notes: [] },
-]
+const mockProgress: UserProgress[] = []
 
-const mockReviews: Review[] = [
-  { id: 'r-1', courseId: 'c-1', user: { name: 'John D.', avatar: 'JD' }, rating: 5, title: 'Best React course ever!', content: 'This course completely changed my career. The instructor explains complex concepts in simple terms.', helpful: 234, date: '2024-01-15' },
-  { id: 'r-2', courseId: 'c-1', user: { name: 'Emily S.', avatar: 'ES' }, rating: 5, title: 'Comprehensive and practical', content: 'Loved the hands-on projects. I built 5 real apps during this course!', helpful: 189, date: '2024-01-12' },
-]
+const mockReviews: Review[] = []
 
-const mockAchievements: Achievement[] = [
-  { id: 'a-1', name: 'Fast Learner', description: 'Complete 5 courses in a month', icon: 'zap', progress: 3, maxProgress: 5, category: 'learning', points: 500 },
-  { id: 'a-2', name: 'First Steps', description: 'Enroll in your first course', icon: 'trophy', progress: 1, maxProgress: 1, unlockedAt: '2024-01-10', category: 'milestone', points: 100 },
-  { id: 'a-3', name: 'Study Streak', description: 'Learn for 7 days in a row', icon: 'flame', progress: 5, maxProgress: 7, category: 'streak', points: 250 },
-  { id: 'a-4', name: 'Knowledge Sharer', description: 'Leave 10 helpful reviews', icon: 'heart', progress: 4, maxProgress: 10, category: 'social', points: 300 },
-  { id: 'a-5', name: 'Course Completionist', description: 'Complete your first course', icon: 'award', progress: 1, maxProgress: 1, unlockedAt: '2024-01-15', category: 'milestone', points: 200 },
-  { id: 'a-6', name: 'Deep Dive', description: 'Watch 100 hours of content', icon: 'clock', progress: 68, maxProgress: 100, category: 'learning', points: 1000 },
-]
+const mockAchievements: Achievement[] = []
 
-const mockSubscriptions: Subscription[] = [
-  { id: 'sub-1', name: 'Free', price: 0, interval: 'monthly', features: ['Access to free courses', 'Community forums', 'Basic certificates'], isCurrent: false, coursesIncluded: 10 },
-  { id: 'sub-2', name: 'Pro', price: 29.99, interval: 'monthly', features: ['Unlimited course access', 'Offline downloads', 'Priority support', 'Premium certificates', 'Exercise files'], isCurrent: true, coursesIncluded: 'unlimited' },
-  { id: 'sub-3', name: 'Team', price: 49.99, interval: 'monthly', features: ['Everything in Pro', 'Team analytics', 'Admin dashboard', 'Custom learning paths', 'SSO integration'], isCurrent: false, coursesIncluded: 'unlimited' },
-]
+const mockSubscriptions: Subscription[] = []
 
-const mockGoals: LearningGoal[] = [
-  { id: 'g-1', name: 'Complete React Course', targetHours: 42, completedHours: 18, deadline: '2024-02-28', status: 'on_track' },
-  { id: 'g-2', name: 'Learn Python Basics', targetHours: 20, completedHours: 5, deadline: '2024-03-15', status: 'behind' },
-  { id: 'g-3', name: 'UX Design Certification', targetHours: 28, completedHours: 28, deadline: '2024-01-20', status: 'completed' },
-]
+const mockGoals: LearningGoal[] = []
 
-const mockNotifications: LearningNotification[] = [
-  { id: 'n-1', type: 'course_update', title: 'New Content Available', message: 'React Developer Course has 3 new lessons!', isRead: false, createdAt: '2024-01-22T10:00:00Z' },
-  { id: 'n-2', type: 'achievement', title: 'Achievement Unlocked!', message: 'You earned the "First Steps" badge!', isRead: true, createdAt: '2024-01-20T15:30:00Z' },
-  { id: 'n-3', type: 'reminder', title: 'Learning Reminder', message: 'You haven\'t learned today. Keep your streak!', isRead: false, createdAt: '2024-01-22T09:00:00Z' },
-  { id: 'n-4', type: 'promotion', title: 'Flash Sale!', message: 'All courses 85% off for the next 24 hours', isRead: false, createdAt: '2024-01-21T12:00:00Z' },
-]
+const mockNotifications: LearningNotification[] = []
 
 const categories: { id: CourseCategory; name: string; icon: React.ReactNode; count: number }[] = [
   { id: 'development', name: 'Development', icon: <Code className="w-4 h-4" />, count: 156 },
@@ -518,10 +338,8 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
   const [activeTutorial, setActiveTutorial] = useState<Course | null>(null)
   const [showTutorialPlayer, setShowTutorialPlayer] = useState(false)
 
-  // Bookmarks state - initialize from mock data
-  const [bookmarkedCourses, setBookmarkedCourses] = useState<string[]>(() =>
-    mockProgress.filter(p => p.bookmarked).map(p => p.courseId)
-  )
+  // Bookmarks state - initialize as empty array
+  const [bookmarkedCourses, setBookmarkedCourses] = useState<string[]>([])
 
   // Completed courses state
   const [completedCourses, setCompletedCourses] = useState<string[]>([])

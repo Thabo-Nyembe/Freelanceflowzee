@@ -172,154 +172,16 @@ interface AutomationRule {
   executionCount: number
 }
 
-// Mock data
-const mockCustomers: Customer[] = [
-  { id: 'cu1', name: 'Sarah Chen', email: 'sarah@techcorp.com', company: 'TechCorp', tier: 'enterprise', totalTickets: 12, satisfaction: 4.8, createdAt: '2024-01-15' },
-  { id: 'cu2', name: 'Mike Johnson', email: 'mike@startup.io', company: 'Startup.io', tier: 'premium', totalTickets: 8, satisfaction: 4.5, createdAt: '2024-03-20' },
-  { id: 'cu3', name: 'Emily Davis', email: 'emily@design.co', company: 'Design Co', tier: 'basic', totalTickets: 3, satisfaction: 5.0, createdAt: '2024-06-10' },
-]
+// Empty data arrays - to be populated from API/database
+const mockCustomers: Customer[] = []
 
-const mockAgents: Agent[] = [
-  { id: 'a1', name: 'John Smith', email: 'john@support.com', role: 'supervisor', status: 'online', openTickets: 8, resolvedToday: 12, avgResponseTime: 1.2, satisfaction: 4.8, skills: ['billing', 'technical', 'enterprise'] },
-  { id: 'a2', name: 'Emily Davis', email: 'emily@support.com', role: 'agent', status: 'online', openTickets: 5, resolvedToday: 8, avgResponseTime: 0.8, satisfaction: 4.9, skills: ['technical', 'api'] },
-  { id: 'a3', name: 'Mike Wilson', email: 'mike@support.com', role: 'agent', status: 'busy', openTickets: 10, resolvedToday: 6, avgResponseTime: 1.5, satisfaction: 4.6, skills: ['billing', 'refunds'] },
-]
+const mockAgents: Agent[] = []
 
-const mockTickets: Ticket[] = [
-  {
-    id: 't1',
-    code: 'TKT-2024-001234',
-    subject: 'Unable to access premium features after upgrade',
-    description: 'I upgraded my account to premium yesterday but still cannot access the premium features. My payment went through successfully.',
-    status: 'in_progress',
-    priority: 'high',
-    type: 'incident',
-    channel: 'email',
-    customer: mockCustomers[0],
-    assignee: mockAgents[0],
-    group: 'Billing',
-    tags: ['billing', 'upgrade', 'premium'],
-    createdAt: '2024-12-22T10:30:00Z',
-    updatedAt: '2024-12-22T14:30:00Z',
-    firstResponseAt: '2024-12-22T11:00:00Z',
-    dueDate: '2024-12-23T10:30:00Z',
-    slaBreached: false,
-    replies: [
-      { id: 'r1', content: 'Hi, I understand your concern. Let me look into this right away.', type: 'reply', isPublic: true, author: mockAgents[0], createdAt: '2024-12-22T11:00:00Z', attachments: [] },
-      { id: 'r2', content: 'Customer account shows active premium status. Checking cache issues.', type: 'note', isPublic: false, author: mockAgents[0], createdAt: '2024-12-22T14:00:00Z', attachments: [] }
-    ],
-    linkedTickets: [],
-    watchers: ['a2'],
-    customFields: { 'subscription_id': 'sub_abc123' }
-  },
-  {
-    id: 't2',
-    code: 'TKT-2024-001235',
-    subject: 'API rate limit questions',
-    description: 'What are the current API rate limits for the enterprise plan? We are planning to scale our integration.',
-    status: 'open',
-    priority: 'medium',
-    type: 'question',
-    channel: 'portal',
-    customer: mockCustomers[0],
-    group: 'Technical',
-    tags: ['api', 'enterprise', 'rate-limit'],
-    createdAt: '2024-12-22T09:00:00Z',
-    updatedAt: '2024-12-22T09:00:00Z',
-    dueDate: '2024-12-24T09:00:00Z',
-    slaBreached: false,
-    replies: [],
-    linkedTickets: [],
-    watchers: [],
-    customFields: {}
-  },
-  {
-    id: 't3',
-    code: 'TKT-2024-001236',
-    subject: 'Request for refund - duplicate charge',
-    description: 'I was charged twice for my subscription this month. Please process a refund for the duplicate charge.',
-    status: 'waiting_on_customer',
-    priority: 'high',
-    type: 'refund',
-    channel: 'chat',
-    customer: mockCustomers[1],
-    assignee: mockAgents[2],
-    group: 'Billing',
-    tags: ['refund', 'billing', 'urgent'],
-    createdAt: '2024-12-21T16:00:00Z',
-    updatedAt: '2024-12-22T10:00:00Z',
-    firstResponseAt: '2024-12-21T16:15:00Z',
-    dueDate: '2024-12-22T16:00:00Z',
-    slaBreached: false,
-    replies: [
-      { id: 'r3', content: 'I apologize for the inconvenience. Could you please provide your transaction ID?', type: 'reply', isPublic: true, author: mockAgents[2], createdAt: '2024-12-21T16:15:00Z', attachments: [] }
-    ],
-    linkedTickets: [],
-    watchers: ['a1'],
-    customFields: { 'refund_amount': '$49.99' }
-  },
-  {
-    id: 't4',
-    code: 'TKT-2024-001237',
-    subject: 'Feature request: Dark mode support',
-    description: 'It would be great if the dashboard supported dark mode. Many of us work late hours and a dark theme would be easier on the eyes.',
-    status: 'resolved',
-    priority: 'low',
-    type: 'feature_request',
-    channel: 'portal',
-    customer: mockCustomers[2],
-    assignee: mockAgents[1],
-    group: 'Product',
-    tags: ['feature-request', 'ui', 'dark-mode'],
-    createdAt: '2024-12-20T14:00:00Z',
-    updatedAt: '2024-12-22T09:00:00Z',
-    firstResponseAt: '2024-12-20T15:00:00Z',
-    resolvedAt: '2024-12-22T09:00:00Z',
-    dueDate: '2024-12-27T14:00:00Z',
-    slaBreached: false,
-    replies: [
-      { id: 'r4', content: 'Thank you for the suggestion! This is already on our roadmap for Q1 2025.', type: 'reply', isPublic: true, author: mockAgents[1], createdAt: '2024-12-20T15:00:00Z', attachments: [] }
-    ],
-    satisfaction: { rating: 5, comment: 'Quick and helpful response!' },
-    linkedTickets: [],
-    watchers: [],
-    customFields: {}
-  },
-  {
-    id: 't5',
-    code: 'TKT-2024-001238',
-    subject: 'Integration not working with Slack',
-    description: 'After the latest update, our Slack integration stopped sending notifications. We rely on this for our workflow.',
-    status: 'open',
-    priority: 'urgent',
-    type: 'incident',
-    channel: 'phone',
-    customer: mockCustomers[0],
-    group: 'Technical',
-    tags: ['integration', 'slack', 'urgent', 'breaking'],
-    createdAt: '2024-12-22T08:00:00Z',
-    updatedAt: '2024-12-22T08:00:00Z',
-    dueDate: '2024-12-22T12:00:00Z',
-    slaBreached: true,
-    replies: [],
-    linkedTickets: ['t2'],
-    watchers: [],
-    customFields: { 'affected_workspace': 'TechCorp Main' }
-  },
-]
+const mockTickets: Ticket[] = []
 
-const mockCannedResponses: CannedResponse[] = [
-  { id: 'cr1', title: 'Greeting - Standard', content: 'Hi {{customer.name}},\n\nThank you for reaching out to us. I would be happy to help you with this.', category: 'greetings', shortcut: '!greet', usageCount: 245 },
-  { id: 'cr2', title: 'Refund Process', content: 'I apologize for the inconvenience. I have initiated your refund which will be processed within 5-7 business days.', category: 'billing', shortcut: '!refund', usageCount: 89 },
-  { id: 'cr3', title: 'Escalation Notice', content: 'I am escalating this to our senior team for immediate attention. You will hear back within 2 hours.', category: 'escalation', shortcut: '!escalate', usageCount: 34 },
-]
+const mockCannedResponses: CannedResponse[] = []
 
-const mockSLAPolicies: SLAPolicy[] = [
-  { id: 'sla1', name: 'Enterprise SLA', priority: 'urgent', firstResponseTime: 1, resolutionTime: 4, businessHours: false },
-  { id: 'sla2', name: 'Enterprise SLA', priority: 'high', firstResponseTime: 4, resolutionTime: 8, businessHours: true },
-  { id: 'sla3', name: 'Standard SLA', priority: 'medium', firstResponseTime: 8, resolutionTime: 24, businessHours: true },
-  { id: 'sla4', name: 'Standard SLA', priority: 'low', firstResponseTime: 24, resolutionTime: 72, businessHours: true },
-]
+const mockSLAPolicies: SLAPolicy[] = []
 
 // Helper functions
 const getStatusColor = (status: TicketStatus): string => {
@@ -396,35 +258,16 @@ interface SupportClientProps {
   initialStats?: any
 }
 
-// Competitive Upgrade Mock Data - Zendesk/Freshdesk Level Support Intelligence
-const mockSupportAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Resolution Time', description: 'Average first response time improved to 12 minutes—industry leading!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Performance' },
-  { id: '2', type: 'warning' as const, title: 'Ticket Surge', description: 'Billing tickets up 45% this week. Consider FAQ update.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Volume' },
-  { id: '3', type: 'info' as const, title: 'AI Suggestion', description: 'Auto-response templates could resolve 30% of password reset tickets.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'AI Insights' },
-]
+// Empty arrays for competitive upgrade components - to be populated from API/database
+const mockSupportAIInsights: { id: string; type: 'success' | 'warning' | 'info'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
 
-const mockSupportCollaborators = [
-  { id: '1', name: 'Support Lead', avatar: '/avatars/support.jpg', status: 'online' as const, role: 'Lead' },
-  { id: '2', name: 'Senior Agent', avatar: '/avatars/agent.jpg', status: 'online' as const, role: 'Tier 2' },
-  { id: '3', name: 'Technical Expert', avatar: '/avatars/tech.jpg', status: 'away' as const, role: 'Tier 3' },
-]
+const mockSupportCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }[] = []
 
-const mockSupportPredictions = [
-  { id: '1', title: 'CSAT Score', prediction: 'Customer satisfaction trending toward 4.8/5.0 this month', confidence: 91, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Ticket Volume', prediction: 'Expect 15% increase during product launch week', confidence: 85, trend: 'up' as const, impact: 'medium' as const },
-]
+const mockSupportPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: 'low' | 'medium' | 'high' }[] = []
 
-const mockSupportActivities = [
-  { id: '1', user: 'Support Lead', action: 'Resolved', target: 'Priority 1 escalation #4521', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Senior Agent', action: 'Escalated', target: 'Technical issue to engineering', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'AI Bot', action: 'Auto-resolved', target: '23 password reset requests', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
-]
+const mockSupportActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' | 'error' }[] = []
 
-const mockSupportQuickActionsConfig = [
-  { id: '1', label: 'New Ticket', icon: 'plus', actionType: 'createTicket', variant: 'default' as const },
-  { id: '2', label: 'Live Chat', icon: 'messageSquare', actionType: 'liveChat', variant: 'default' as const },
-  { id: '3', label: 'Knowledge', icon: 'book', actionType: 'knowledgeBase', variant: 'outline' as const },
-]
+const mockSupportQuickActionsConfig: { id: string; label: string; icon: string; actionType: string; variant: 'default' | 'outline' }[] = []
 
 export default function SupportClient({ initialTickets, initialStats }: SupportClientProps) {
   const [activeTab, setActiveTab] = useState('tickets')

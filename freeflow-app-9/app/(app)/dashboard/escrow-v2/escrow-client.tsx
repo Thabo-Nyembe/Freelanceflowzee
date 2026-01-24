@@ -34,7 +34,9 @@ import {
   Mail,
   Send,
   XCircle,
-  Loader2
+  Loader2,
+  DollarSign,
+  BarChart3
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -58,7 +60,6 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useEscrow, type EscrowDeposit } from '@/lib/hooks/use-escrow'
-import { downloadAsCsv } from '@/lib/button-handlers'
 
 // Initialize Supabase client once at module level
 const supabase = createClient()
@@ -139,7 +140,7 @@ interface Dispute {
   }
 }
 
-interface Balance {
+interface _Balance { // eslint-disable-line @typescript-eslint/no-unused-vars
   available: number
   pending: number
   reserved: number
@@ -224,11 +225,11 @@ export default function EscrowClient() {
   }, [fetchDeposits])
 
   // Quick actions with real functionality
-  const mockEscrowQuickActions = useMemo(() => [
+  const escrowQuickActions = useMemo(() => [
     {
       id: '1',
       label: 'New Transfer',
-      icon: 'Send',
+      icon: <Send className="w-4 h-4" />,
       shortcut: 'T',
       action: () => {
         setShowCreatePayout(true)
@@ -237,7 +238,7 @@ export default function EscrowClient() {
     {
       id: '2',
       label: 'View Payouts',
-      icon: 'DollarSign',
+      icon: <DollarSign className="w-4 h-4" />,
       shortcut: 'P',
       action: () => {
         setActiveTab('payouts')
@@ -247,7 +248,7 @@ export default function EscrowClient() {
     {
       id: '3',
       label: 'Disputes',
-      icon: 'AlertTriangle',
+      icon: <AlertTriangle className="w-4 h-4" />,
       shortcut: 'D',
       action: () => {
         setActiveTab('disputes')
@@ -257,7 +258,7 @@ export default function EscrowClient() {
     {
       id: '4',
       label: 'Reports',
-      icon: 'BarChart3',
+      icon: <BarChart3 className="w-4 h-4" />,
       shortcut: 'R',
       action: () => {
         // Open reports in new tab or navigate to reports section
@@ -1848,7 +1849,7 @@ export default function EscrowClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockEscrowQuickActions}
+            actions={escrowQuickActions}
             variant="grid"
           />
         </div>

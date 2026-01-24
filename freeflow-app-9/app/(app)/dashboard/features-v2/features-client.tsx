@@ -171,258 +171,26 @@ interface Segment {
   userCount: number
 }
 
-// Mock Data
-const mockOwners: FeatureOwner[] = [
-  { id: '1', name: 'Sarah Chen', avatar: '/avatars/sarah.jpg', role: 'Product Manager' },
-  { id: '2', name: 'Mike Johnson', avatar: '/avatars/mike.jpg', role: 'Tech Lead' },
-  { id: '3', name: 'Emily Davis', avatar: '/avatars/emily.jpg', role: 'UX Designer' },
-  { id: '4', name: 'Alex Kim', avatar: '/avatars/alex.jpg', role: 'Engineering Manager' },
-]
-
-const mockFeatures: Feature[] = [
-  {
-    id: '1',
-    key: 'ai_copilot',
-    name: 'AI Copilot Assistant',
-    description: 'Intelligent assistant that helps users complete tasks faster with contextual suggestions and automation.',
-    status: 'in_progress',
-    priority: 'critical',
-    category: 'AI & ML',
-    tags: ['ai', 'productivity', 'flagship'],
-    owner: mockOwners[0],
-    team: 'Platform',
-    createdAt: '2024-01-15',
-    updatedAt: '2024-03-20',
-    targetRelease: 'Q2 2024',
-    votes: Array(156).fill({ id: '1', userId: '1', userName: 'User', createdAt: '2024-01-01' }),
-    comments: [
-      {
-        id: '1',
-        userId: '1',
-        userName: 'John Doe',
-        userAvatar: '/avatars/john.jpg',
-        content: 'This will be a game changer for our workflow!',
-        createdAt: '2024-03-18',
-        reactions: [{ emoji: '👍', count: 12 }, { emoji: '🎉', count: 5 }]
-      }
-    ],
-    rice: { reach: 95, impact: 3, confidence: 80, effort: 8, score: 28.5 },
-    metrics: { adoption: 45, usage: 78, satisfaction: 92, errorRate: 0.5, latency: 120 },
-    rollout: {
-      stage: 'beta',
-      percentage: 25,
-      targetSegments: ['power_users', 'early_adopters'],
-      environments: ['production'],
-      startDate: '2024-03-01'
-    },
-    abTest: {
-      id: 'ab1',
-      name: 'AI Suggestions Placement',
-      variants: [
-        { id: 'control', name: 'Sidebar', percentage: 50 },
-        { id: 'variant_a', name: 'Inline', percentage: 50 }
-      ],
-      status: 'running',
-      metrics: [
-        { name: 'Task Completion', control: 65, variant: 78 },
-        { name: 'Time Saved', control: 12, variant: 23 }
-      ]
-    },
-    dependencies: ['feature_2', 'feature_3'],
-    linkedIssues: ['JIRA-1234', 'JIRA-1235'],
-    platforms: ['web', 'ios', 'android']
-  },
-  {
-    id: '2',
-    key: 'real_time_collab',
-    name: 'Real-Time Collaboration',
-    description: 'Enable multiple users to work on the same document simultaneously with live cursors and presence indicators.',
-    status: 'testing',
-    priority: 'high',
-    category: 'Collaboration',
-    tags: ['collaboration', 'real-time', 'core'],
-    owner: mockOwners[1],
-    team: 'Frontend',
-    createdAt: '2024-02-01',
-    updatedAt: '2024-03-19',
-    targetRelease: 'Q2 2024',
-    votes: Array(89).fill({ id: '1', userId: '1', userName: 'User', createdAt: '2024-01-01' }),
-    comments: [],
-    rice: { reach: 80, impact: 3, confidence: 90, effort: 6, score: 36 },
-    metrics: { adoption: 62, usage: 85, satisfaction: 88, errorRate: 1.2, latency: 45 },
-    rollout: {
-      stage: 'beta',
-      percentage: 50,
-      targetSegments: ['teams'],
-      environments: ['production', 'staging'],
-      startDate: '2024-02-15'
-    },
-    dependencies: [],
-    linkedIssues: ['JIRA-1240'],
-    platforms: ['web']
-  },
-  {
-    id: '3',
-    key: 'advanced_analytics',
-    name: 'Advanced Analytics Dashboard',
-    description: 'Comprehensive analytics with custom reports, cohort analysis, and predictive insights.',
-    status: 'planned',
-    priority: 'high',
-    category: 'Analytics',
-    tags: ['analytics', 'reporting', 'enterprise'],
-    owner: mockOwners[2],
-    team: 'Data',
-    createdAt: '2024-01-20',
-    updatedAt: '2024-03-15',
-    targetRelease: 'Q3 2024',
-    votes: Array(134).fill({ id: '1', userId: '1', userName: 'User', createdAt: '2024-01-01' }),
-    comments: [],
-    rice: { reach: 70, impact: 2, confidence: 85, effort: 5, score: 23.8 },
-    dependencies: ['feature_2'],
-    linkedIssues: ['JIRA-1250', 'JIRA-1251'],
-    platforms: ['web', 'api']
-  },
-  {
-    id: '4',
-    key: 'mobile_offline',
-    name: 'Offline Mobile Support',
-    description: 'Full offline functionality for mobile apps with smart sync and conflict resolution.',
-    status: 'idea',
-    priority: 'medium',
-    category: 'Mobile',
-    tags: ['mobile', 'offline', 'sync'],
-    owner: mockOwners[3],
-    team: 'Mobile',
-    createdAt: '2024-03-01',
-    updatedAt: '2024-03-18',
-    votes: Array(67).fill({ id: '1', userId: '1', userName: 'User', createdAt: '2024-01-01' }),
-    comments: [],
-    rice: { reach: 40, impact: 2, confidence: 70, effort: 7, score: 8 },
-    dependencies: [],
-    linkedIssues: [],
-    platforms: ['ios', 'android']
-  },
-  {
-    id: '5',
-    key: 'sso_saml',
-    name: 'SSO & SAML Integration',
-    description: 'Enterprise-grade single sign-on with SAML 2.0 and OIDC support.',
-    status: 'released',
-    priority: 'critical',
-    category: 'Security',
-    tags: ['security', 'enterprise', 'auth'],
-    owner: mockOwners[0],
-    team: 'Security',
-    createdAt: '2023-11-01',
-    updatedAt: '2024-02-28',
-    votes: Array(203).fill({ id: '1', userId: '1', userName: 'User', createdAt: '2024-01-01' }),
-    comments: [],
-    rice: { reach: 60, impact: 3, confidence: 95, effort: 4, score: 42.75 },
-    metrics: { adoption: 78, usage: 95, satisfaction: 94, errorRate: 0.1, latency: 200 },
-    rollout: {
-      stage: 'full',
-      percentage: 100,
-      targetSegments: ['enterprise'],
-      environments: ['production'],
-      startDate: '2024-01-01',
-      endDate: '2024-02-28'
-    },
-    dependencies: [],
-    linkedIssues: ['JIRA-1100', 'JIRA-1101'],
-    platforms: ['web', 'api']
-  },
-  {
-    id: '6',
-    key: 'webhooks_v2',
-    name: 'Webhooks 2.0',
-    description: 'Redesigned webhook system with retry logic, filtering, and real-time debugging.',
-    status: 'in_progress',
-    priority: 'medium',
-    category: 'Integrations',
-    tags: ['api', 'integrations', 'developer'],
-    owner: mockOwners[1],
-    team: 'Platform',
-    createdAt: '2024-02-10',
-    updatedAt: '2024-03-17',
-    targetRelease: 'Q2 2024',
-    votes: Array(45).fill({ id: '1', userId: '1', userName: 'User', createdAt: '2024-01-01' }),
-    comments: [],
-    rice: { reach: 35, impact: 2, confidence: 90, effort: 3, score: 21 },
-    rollout: {
-      stage: 'canary',
-      percentage: 5,
-      targetSegments: ['developers'],
-      environments: ['staging'],
-      startDate: '2024-03-10'
-    },
-    dependencies: [],
-    linkedIssues: ['JIRA-1300'],
-    platforms: ['api']
-  }
-]
-
-const mockSegments: Segment[] = [
-  {
-    id: '1',
-    name: 'Power Users',
-    description: 'Users with high engagement',
-    rules: [{ attribute: 'sessions_per_week', operator: '>', value: '10' }],
-    userCount: 12500
-  },
-  {
-    id: '2',
-    name: 'Enterprise',
-    description: 'Enterprise plan customers',
-    rules: [{ attribute: 'plan', operator: '=', value: 'enterprise' }],
-    userCount: 850
-  },
-  {
-    id: '3',
-    name: 'Early Adopters',
-    description: 'Users who opted into beta features',
-    rules: [{ attribute: 'beta_opt_in', operator: '=', value: 'true' }],
-    userCount: 5200
-  },
-  {
-    id: '4',
-    name: 'Mobile Users',
-    description: 'Users primarily on mobile',
-    rules: [{ attribute: 'primary_platform', operator: 'in', value: 'ios,android' }],
-    userCount: 34000
-  }
-]
+// Empty data arrays (connect to real data sources)
+const features: Feature[] = []
+const segments: Segment[] = []
 
 const categories = ['All', 'AI & ML', 'Collaboration', 'Analytics', 'Mobile', 'Security', 'Integrations']
 
-// Enhanced Competitive Upgrade Mock Data
-const mockFeaturesAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Feature Adoption', description: 'AI features showing 45% higher adoption than projected.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Adoption' },
-  { id: '2', type: 'info' as const, title: 'Rollout Progress', description: '3 features in beta with 92% positive feedback.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Rollout' },
-  { id: '3', type: 'warning' as const, title: 'Low Usage Feature', description: 'Advanced Analytics feature has <5% adoption. Consider improvements.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Usage' },
-]
+// Empty data arrays for competitive upgrade components (connect to real data sources)
+const featuresAIInsights: { id: string; type: 'success' | 'info' | 'warning' | 'error'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
 
-const mockFeaturesCollaborators = [
-  { id: '1', name: 'Product Manager', avatar: '/avatars/pm.jpg', status: 'online' as const, role: 'PM' },
-  { id: '2', name: 'Engineering Lead', avatar: '/avatars/eng.jpg', status: 'online' as const, role: 'Engineering' },
-  { id: '3', name: 'UX Designer', avatar: '/avatars/ux.jpg', status: 'away' as const, role: 'Design' },
-]
+const featuresCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }[] = []
 
-const mockFeaturesPredictions = [
-  { id: '1', title: 'Feature Completion', prediction: '2 major features on track for Q1 release', confidence: 85, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'User Requests', prediction: 'Dark mode most requested - priority recommendation', confidence: 94, trend: 'up' as const, impact: 'medium' as const },
-]
+const featuresPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: 'high' | 'medium' | 'low' }[] = []
 
-const mockFeaturesActivities = [
-  { id: '1', user: 'Product', action: 'Released', target: 'AI Assistant to 100% of users', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Engineering', action: 'Started', target: 'development on Real-time Collaboration', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'QA', action: 'Approved', target: 'Mobile App v2 for beta', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
-]
+const featuresActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'update' | 'warning' }[] = []
 
 // Quick actions will be defined inside the component to access state
 
 export default function FeaturesClient() {
-  const [features] = useState<Feature[]>(mockFeatures)
-  const [segments] = useState<Segment[]>(mockSegments)
+  const [featuresState] = useState<Feature[]>(features)
+  const [segmentsState] = useState<Segment[]>(segments)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('All')
   const [selectedStatus, setSelectedStatus] = useState<FeatureStatus | 'all'>('all')
@@ -467,7 +235,7 @@ export default function FeaturesClient() {
 
   // Filtered and sorted features
   const filteredFeatures = useMemo(() => {
-    let result = features
+    let result = featuresState
 
     if (searchQuery) {
       const query = searchQuery.toLowerCase()
@@ -498,16 +266,16 @@ export default function FeaturesClient() {
     })
 
     return result
-  }, [features, searchQuery, selectedCategory, selectedStatus, selectedPriority, sortBy])
+  }, [featuresState, searchQuery, selectedCategory, selectedStatus, selectedPriority, sortBy])
 
   // Stats
   const stats = useMemo(() => ({
-    totalFeatures: features.length,
-    inProgress: features.filter(f => f.status === 'in_progress').length,
-    released: features.filter(f => f.status === 'released').length,
-    totalVotes: features.reduce((sum, f) => sum + f.votes.length, 0),
-    avgRICE: features.reduce((sum, f) => sum + f.rice.score, 0) / features.length
-  }), [features])
+    totalFeatures: featuresState.length,
+    inProgress: featuresState.filter(f => f.status === 'in_progress').length,
+    released: featuresState.filter(f => f.status === 'released').length,
+    totalVotes: featuresState.reduce((sum, f) => sum + f.votes.length, 0),
+    avgRICE: featuresState.length > 0 ? featuresState.reduce((sum, f) => sum + f.rice.score, 0) / featuresState.length : 0
+  }), [featuresState])
 
   // Real handlers for feature operations
   const handleCreateFeatureRequest = useCallback(() => {
@@ -526,7 +294,7 @@ export default function FeaturesClient() {
   }, [])
 
   const handleExportFeatures = useCallback(() => {
-    const exportData = features.map(f => ({
+    const exportData = featuresState.map(f => ({
       id: f.id,
       key: f.key,
       name: f.name,
@@ -545,7 +313,7 @@ export default function FeaturesClient() {
       updated_at: f.updatedAt
     }))
     downloadAsCsv(exportData, `features-export-${new Date().toISOString().split('T')[0]}.csv`)
-  }, [features])
+  }, [featuresState])
 
   const handleVoteForFeature = useCallback(async (featureId: string, featureName: string) => {
     const result = await apiPost(`/api/features/${featureId}/vote`, { vote: 1 }, {
@@ -604,7 +372,7 @@ export default function FeaturesClient() {
       })
       return
     }
-    const selectedFeatureName = features.find(f => f.id === experimentForm.featureId)?.name
+    const selectedFeatureName = featuresState.find(f => f.id === experimentForm.featureId)?.name
     toast.success('A/B Experiment created successfully', {
       description: `"${experimentForm.name}" experiment started for ${selectedFeatureName} with ${experimentForm.controlPercentage}% / ${100 - experimentForm.controlPercentage}% split`
     })
@@ -617,7 +385,7 @@ export default function FeaturesClient() {
       controlPercentage: 50,
       metricName: ''
     })
-  }, [experimentForm, features])
+  }, [experimentForm, featuresState])
 
   // Handler for configuring rollout
   const handleSubmitRollout = useCallback(() => {
@@ -1160,7 +928,7 @@ export default function FeaturesClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{features.filter(f => f.targetRelease).length}</p>
+                    <p className="text-3xl font-bold">{featuresState.filter(f => f.targetRelease).length}</p>
                     <p className="text-sm text-blue-200">Planned</p>
                   </div>
                   <div className="text-center">
@@ -1178,7 +946,7 @@ export default function FeaturesClient() {
               <CardContent>
                 <div className="space-y-6">
                   {['Q1 2024', 'Q2 2024', 'Q3 2024', 'Q4 2024'].map(quarter => {
-                    const quarterFeatures = features.filter(f => f.targetRelease === quarter)
+                    const quarterFeatures = featuresState.filter(f => f.targetRelease === quarter)
                     return (
                       <div key={quarter} className="space-y-3">
                         <h3 className="font-semibold text-lg flex items-center gap-2">
@@ -1228,11 +996,11 @@ export default function FeaturesClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{segments.length}</p>
+                    <p className="text-3xl font-bold">{segmentsState.length}</p>
                     <p className="text-sm text-green-200">Segments</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{segments.reduce((sum, s) => sum + s.userCount, 0).toLocaleString()}</p>
+                    <p className="text-3xl font-bold">{segmentsState.reduce((sum, s) => sum + s.userCount, 0).toLocaleString()}</p>
                     <p className="text-sm text-green-200">Total Users</p>
                   </div>
                 </div>
@@ -1247,7 +1015,7 @@ export default function FeaturesClient() {
               </Button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {segments.map(segment => (
+              {segmentsState.map(segment => (
                 <Card key={segment.id}>
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-4">
@@ -1291,11 +1059,11 @@ export default function FeaturesClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{features.filter(f => f.abTest).length}</p>
+                    <p className="text-3xl font-bold">{featuresState.filter(f => f.abTest).length}</p>
                     <p className="text-sm text-orange-200">Active Tests</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{features.filter(f => f.abTest?.status === 'running').length}</p>
+                    <p className="text-3xl font-bold">{featuresState.filter(f => f.abTest?.status === 'running').length}</p>
                     <p className="text-sm text-orange-200">Running</p>
                   </div>
                 </div>
@@ -1310,7 +1078,7 @@ export default function FeaturesClient() {
               </Button>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {features.filter(f => f.abTest).map(feature => (
+              {featuresState.filter(f => f.abTest).map(feature => (
                 <Card key={feature.id}>
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-4">
@@ -1832,18 +1600,18 @@ export default function FeaturesClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockFeaturesAIInsights}
+              insights={featuresAIInsights}
               title="Feature Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockFeaturesCollaborators}
+              collaborators={featuresCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockFeaturesPredictions}
+              predictions={featuresPredictions}
               title="Feature Forecasts"
             />
           </div>
@@ -1851,7 +1619,7 @@ export default function FeaturesClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockFeaturesActivities}
+            activities={featuresActivities}
             title="Feature Activity"
             maxItems={5}
           />
@@ -2240,7 +2008,7 @@ export default function FeaturesClient() {
                   <SelectValue placeholder="Select a feature to test" />
                 </SelectTrigger>
                 <SelectContent>
-                  {features.filter(f => !f.abTest).map(feature => (
+                  {featuresState.filter(f => !f.abTest).map(feature => (
                     <SelectItem key={feature.id} value={feature.id}>
                       {feature.name}
                     </SelectItem>
@@ -2348,7 +2116,7 @@ export default function FeaturesClient() {
             <div className="space-y-2">
               <Label>Target Segments</Label>
               <div className="flex flex-wrap gap-2">
-                {segments.map(segment => (
+                {segmentsState.map(segment => (
                   <Badge
                     key={segment.id}
                     variant={rolloutForm.targetSegments.includes(segment.name.toLowerCase().replace(/\s+/g, '_')) ? 'default' : 'outline'}

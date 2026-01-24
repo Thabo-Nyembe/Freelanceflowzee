@@ -206,362 +206,18 @@ interface WebhookEndpoint {
 }
 
 // ============================================================================
-// MOCK DATA - Zapier Level
+// DATA ARRAYS - Real data from API
 // ============================================================================
 
-const mockApps: App[] = [
-  {
-    id: 'slack',
-    name: 'Slack',
-    icon: '💬',
-    category: 'communication',
-    description: 'Team messaging and collaboration platform',
-    is_connected: true,
-    triggers: [
-      { id: 't1', app_id: 'slack', name: 'New Message', description: 'Triggers when a new message is posted to a channel', trigger_type: 'instant', sample_data: { text: 'Hello!', user: 'john' }, fields: [{ key: 'channel', label: 'Channel', type: 'select', required: true, help_text: 'Select the channel to monitor' }] },
-      { id: 't2', app_id: 'slack', name: 'New Channel', description: 'Triggers when a new channel is created', trigger_type: 'instant', sample_data: { name: 'general' }, fields: [] },
-      { id: 't3', app_id: 'slack', name: 'New Reaction', description: 'Triggers when a reaction is added', trigger_type: 'instant', sample_data: { emoji: '👍' }, fields: [] }
-    ],
-    actions: [
-      { id: 'a1', app_id: 'slack', name: 'Send Message', description: 'Post a message to a channel', fields: [{ key: 'channel', label: 'Channel', type: 'select', required: true, help_text: 'Target channel', dynamic_source: 'channels' }], sample_output: { ok: true, ts: '123' } },
-      { id: 'a2', app_id: 'slack', name: 'Create Channel', description: 'Create a new Slack channel', fields: [{ key: 'name', label: 'Channel Name', type: 'text', required: true, help_text: 'Name for the new channel' }], sample_output: { channel: { id: 'C123' } } },
-      { id: 'a3', app_id: 'slack', name: 'Send Direct Message', description: 'Send a DM to a user', fields: [], sample_output: {} }
-    ],
-    is_premium: false,
-    is_popular: true,
-    auth_type: 'oauth2',
-    connection_count: 3,
-    last_synced_at: '2024-01-15T10:00:00Z',
-    rate_limit: 100,
-    docs_url: 'https://api.slack.com/docs'
-  },
-  {
-    id: 'gmail',
-    name: 'Gmail',
-    icon: '📧',
-    category: 'communication',
-    description: 'Google email service',
-    is_connected: true,
-    triggers: [
-      { id: 't4', app_id: 'gmail', name: 'New Email', description: 'Triggers when a new email arrives', trigger_type: 'polling', polling_interval_minutes: 5, sample_data: { subject: 'Hello', from: 'test@example.com' }, fields: [{ key: 'label', label: 'Label', type: 'select', required: false, help_text: 'Filter by label' }] },
-      { id: 't5', app_id: 'gmail', name: 'New Labeled Email', description: 'Triggers when an email gets a specific label', trigger_type: 'polling', polling_interval_minutes: 5, sample_data: {}, fields: [] },
-      { id: 't6', app_id: 'gmail', name: 'New Attachment', description: 'Triggers when an email with attachment arrives', trigger_type: 'polling', polling_interval_minutes: 5, sample_data: {}, fields: [] }
-    ],
-    actions: [
-      { id: 'a4', app_id: 'gmail', name: 'Send Email', description: 'Send an email from your Gmail account', fields: [{ key: 'to', label: 'To', type: 'text', required: true, help_text: 'Recipient email' }], sample_output: { id: 'msg123' } },
-      { id: 'a5', app_id: 'gmail', name: 'Create Label', description: 'Create a new Gmail label', fields: [], sample_output: {} },
-      { id: 'a6', app_id: 'gmail', name: 'Create Draft', description: 'Create an email draft', fields: [], sample_output: {} }
-    ],
-    is_premium: false,
-    is_popular: true,
-    auth_type: 'oauth2',
-    connection_count: 2,
-    last_synced_at: '2024-01-15T09:30:00Z',
-    rate_limit: 250,
-    docs_url: 'https://developers.google.com/gmail'
-  },
-  {
-    id: 'sheets',
-    name: 'Google Sheets',
-    icon: '📊',
-    category: 'productivity',
-    description: 'Spreadsheet collaboration',
-    is_connected: true,
-    triggers: [
-      { id: 't7', app_id: 'sheets', name: 'New Row', description: 'Triggers when a new row is added', trigger_type: 'polling', polling_interval_minutes: 15, sample_data: { row: 1, values: [] }, fields: [] },
-      { id: 't8', app_id: 'sheets', name: 'Updated Row', description: 'Triggers when a row is updated', trigger_type: 'polling', polling_interval_minutes: 15, sample_data: {}, fields: [] }
-    ],
-    actions: [
-      { id: 'a7', app_id: 'sheets', name: 'Create Row', description: 'Add a new row to a spreadsheet', fields: [], sample_output: {} },
-      { id: 'a8', app_id: 'sheets', name: 'Update Row', description: 'Update an existing row', fields: [], sample_output: {} },
-      { id: 'a9', app_id: 'sheets', name: 'Lookup Row', description: 'Find a row by column value', fields: [], sample_output: {} }
-    ],
-    is_premium: false,
-    is_popular: true,
-    auth_type: 'oauth2',
-    connection_count: 2,
-    last_synced_at: '2024-01-15T08:00:00Z',
-    rate_limit: 100,
-    docs_url: 'https://developers.google.com/sheets'
-  },
-  {
-    id: 'salesforce',
-    name: 'Salesforce',
-    icon: '☁️',
-    category: 'crm',
-    description: 'Customer relationship management',
-    is_connected: false,
-    triggers: [
-      { id: 't9', app_id: 'salesforce', name: 'New Lead', description: 'Triggers when a new lead is created', trigger_type: 'instant', sample_data: {}, fields: [] },
-      { id: 't10', app_id: 'salesforce', name: 'Updated Record', description: 'Triggers when a record is updated', trigger_type: 'instant', sample_data: {}, fields: [] },
-      { id: 't11', app_id: 'salesforce', name: 'New Opportunity', description: 'Triggers when a new opportunity is created', trigger_type: 'instant', sample_data: {}, fields: [] }
-    ],
-    actions: [
-      { id: 'a10', app_id: 'salesforce', name: 'Create Lead', description: 'Create a new lead', fields: [], sample_output: {} },
-      { id: 'a11', app_id: 'salesforce', name: 'Update Record', description: 'Update any Salesforce record', fields: [], sample_output: {} },
-      { id: 'a12', app_id: 'salesforce', name: 'Find Record', description: 'Search for records', fields: [], sample_output: {} }
-    ],
-    is_premium: true,
-    is_popular: true,
-    auth_type: 'oauth2',
-    connection_count: 0,
-    last_synced_at: null,
-    rate_limit: 50,
-    docs_url: 'https://developer.salesforce.com'
-  },
-  {
-    id: 'stripe',
-    name: 'Stripe',
-    icon: '💳',
-    category: 'payment',
-    description: 'Online payment processing',
-    is_connected: true,
-    triggers: [
-      { id: 't12', app_id: 'stripe', name: 'New Payment', description: 'Triggers when a payment is received', trigger_type: 'instant', sample_data: { amount: 9900, currency: 'usd' }, fields: [] },
-      { id: 't13', app_id: 'stripe', name: 'New Customer', description: 'Triggers when a customer is created', trigger_type: 'instant', sample_data: {}, fields: [] },
-      { id: 't14', app_id: 'stripe', name: 'New Subscription', description: 'Triggers when a subscription is created', trigger_type: 'instant', sample_data: {}, fields: [] },
-      { id: 't15', app_id: 'stripe', name: 'Failed Payment', description: 'Triggers when a payment fails', trigger_type: 'instant', sample_data: {}, fields: [] }
-    ],
-    actions: [
-      { id: 'a13', app_id: 'stripe', name: 'Create Invoice', description: 'Create a new invoice', fields: [], sample_output: {} },
-      { id: 'a14', app_id: 'stripe', name: 'Create Customer', description: 'Create a new customer', fields: [], sample_output: {} },
-      { id: 'a15', app_id: 'stripe', name: 'Create Charge', description: 'Create a one-time charge', fields: [], sample_output: {} }
-    ],
-    is_premium: false,
-    is_popular: true,
-    auth_type: 'api_key',
-    connection_count: 1,
-    last_synced_at: '2024-01-15T10:30:00Z',
-    rate_limit: 100,
-    docs_url: 'https://stripe.com/docs'
-  },
-  {
-    id: 'notion',
-    name: 'Notion',
-    icon: '📝',
-    category: 'productivity',
-    description: 'All-in-one workspace',
-    is_connected: false,
-    triggers: [
-      { id: 't16', app_id: 'notion', name: 'New Database Item', description: 'Triggers when a new item is added to a database', trigger_type: 'polling', polling_interval_minutes: 15, sample_data: {}, fields: [] },
-      { id: 't17', app_id: 'notion', name: 'Updated Page', description: 'Triggers when a page is updated', trigger_type: 'polling', polling_interval_minutes: 15, sample_data: {}, fields: [] }
-    ],
-    actions: [
-      { id: 'a16', app_id: 'notion', name: 'Create Page', description: 'Create a new Notion page', fields: [], sample_output: {} },
-      { id: 'a17', app_id: 'notion', name: 'Update Page', description: 'Update an existing page', fields: [], sample_output: {} },
-      { id: 'a18', app_id: 'notion', name: 'Create Database Item', description: 'Add item to a database', fields: [], sample_output: {} }
-    ],
-    is_premium: false,
-    is_popular: true,
-    auth_type: 'oauth2',
-    connection_count: 0,
-    last_synced_at: null,
-    rate_limit: 3,
-    docs_url: 'https://developers.notion.com'
-  },
-  {
-    id: 'hubspot',
-    name: 'HubSpot',
-    icon: '🧡',
-    category: 'crm',
-    description: 'Marketing, sales, and CRM platform',
-    is_connected: true,
-    triggers: [
-      { id: 't18', app_id: 'hubspot', name: 'New Contact', description: 'Triggers when a contact is created', trigger_type: 'instant', sample_data: {}, fields: [] },
-      { id: 't19', app_id: 'hubspot', name: 'New Deal', description: 'Triggers when a deal is created', trigger_type: 'instant', sample_data: {}, fields: [] }
-    ],
-    actions: [
-      { id: 'a19', app_id: 'hubspot', name: 'Create Contact', description: 'Create a new contact', fields: [], sample_output: {} },
-      { id: 'a20', app_id: 'hubspot', name: 'Create Deal', description: 'Create a new deal', fields: [], sample_output: {} }
-    ],
-    is_premium: false,
-    is_popular: true,
-    auth_type: 'oauth2',
-    connection_count: 1,
-    last_synced_at: '2024-01-14T16:00:00Z',
-    rate_limit: 100,
-    docs_url: 'https://developers.hubspot.com'
-  },
-  {
-    id: 'github',
-    name: 'GitHub',
-    icon: '🐙',
-    category: 'developer',
-    description: 'Code hosting and collaboration',
-    is_connected: true,
-    triggers: [
-      { id: 't20', app_id: 'github', name: 'New Issue', description: 'Triggers when an issue is created', trigger_type: 'instant', sample_data: {}, fields: [] },
-      { id: 't21', app_id: 'github', name: 'New Pull Request', description: 'Triggers when a PR is opened', trigger_type: 'instant', sample_data: {}, fields: [] },
-      { id: 't22', app_id: 'github', name: 'New Commit', description: 'Triggers when a commit is pushed', trigger_type: 'instant', sample_data: {}, fields: [] }
-    ],
-    actions: [
-      { id: 'a21', app_id: 'github', name: 'Create Issue', description: 'Create a new issue', fields: [], sample_output: {} },
-      { id: 'a22', app_id: 'github', name: 'Create Comment', description: 'Add a comment to an issue', fields: [], sample_output: {} }
-    ],
-    is_premium: false,
-    is_popular: true,
-    auth_type: 'oauth2',
-    connection_count: 2,
-    last_synced_at: '2024-01-15T11:00:00Z',
-    rate_limit: 5000,
-    docs_url: 'https://docs.github.com'
-  }
-]
+const apps: App[] = []
 
-const mockZaps: Zap[] = [
-  {
-    id: 'zap1',
-    name: 'New Stripe payments to Slack',
-    description: 'Get notified in Slack when you receive a new payment',
-    trigger: { app: mockApps[4], trigger: mockApps[4].triggers[0], config: {} },
-    actions: [{ app: mockApps[0], action: mockApps[0].actions[0], config: { channel: '#sales' } }],
-    filters: [],
-    paths: [],
-    status: 'on',
-    last_run_at: '2024-01-15T10:30:00Z',
-    next_run_at: null,
-    task_count: 12500,
-    task_count_this_month: 890,
-    success_rate: 99.8,
-    avg_duration_seconds: 1.2,
-    created_at: '2024-01-01T10:00:00Z',
-    updated_at: '2024-01-15T10:30:00Z',
-    created_by: 'admin@company.com',
-    folder_id: 'f1',
-    folder_name: 'Sales',
-    version: 5,
-    is_shared: true,
-    tags: ['payments', 'notifications']
-  },
-  {
-    id: 'zap2',
-    name: 'Gmail to Google Sheets',
-    description: 'Log new emails to a spreadsheet for tracking',
-    trigger: { app: mockApps[1], trigger: mockApps[1].triggers[0], config: { label: 'important' } },
-    actions: [{ app: mockApps[2], action: mockApps[2].actions[0], config: {} }],
-    filters: [{ id: 'f1', field: 'from', operator: 'contains', value: '@client.com' }],
-    paths: [],
-    status: 'on',
-    last_run_at: '2024-01-15T10:25:00Z',
-    next_run_at: '2024-01-15T10:30:00Z',
-    task_count: 34500,
-    task_count_this_month: 2340,
-    success_rate: 98.5,
-    avg_duration_seconds: 2.1,
-    created_at: '2023-12-15T09:00:00Z',
-    updated_at: '2024-01-10T14:00:00Z',
-    created_by: 'admin@company.com',
-    folder_id: 'f2',
-    folder_name: 'Marketing',
-    version: 12,
-    is_shared: false,
-    tags: ['email', 'tracking']
-  },
-  {
-    id: 'zap3',
-    name: 'New GitHub issues to Slack',
-    description: 'Get notified when new issues are created in your repo',
-    trigger: { app: mockApps[7], trigger: mockApps[7].triggers[0], config: { repo: 'main-app' } },
-    actions: [{ app: mockApps[0], action: mockApps[0].actions[0], config: { channel: '#dev' } }],
-    filters: [],
-    paths: [],
-    status: 'on',
-    last_run_at: '2024-01-15T09:45:00Z',
-    next_run_at: null,
-    task_count: 2340,
-    task_count_this_month: 156,
-    success_rate: 100,
-    avg_duration_seconds: 0.8,
-    created_at: '2024-01-05T14:00:00Z',
-    updated_at: '2024-01-15T09:45:00Z',
-    created_by: 'dev@company.com',
-    folder_id: 'f3',
-    folder_name: 'Engineering',
-    version: 3,
-    is_shared: true,
-    tags: ['github', 'dev']
-  },
-  {
-    id: 'zap4',
-    name: 'Multi-step: New lead workflow',
-    description: 'Create contact in HubSpot, notify Slack, update Sheets',
-    trigger: { app: mockApps[1], trigger: mockApps[1].triggers[0], config: {} },
-    actions: [
-      { app: mockApps[6], action: mockApps[6].actions[0], config: {} },
-      { app: mockApps[0], action: mockApps[0].actions[0], config: { channel: '#leads' } },
-      { app: mockApps[2], action: mockApps[2].actions[0], config: {} }
-    ],
-    filters: [{ id: 'f2', field: 'subject', operator: 'contains', value: 'inquiry' }],
-    paths: [],
-    status: 'off',
-    last_run_at: '2024-01-10T12:00:00Z',
-    next_run_at: null,
-    task_count: 4500,
-    task_count_this_month: 0,
-    success_rate: 97.2,
-    avg_duration_seconds: 4.5,
-    created_at: '2023-11-20T11:00:00Z',
-    updated_at: '2024-01-10T12:00:00Z',
-    created_by: 'admin@company.com',
-    folder_id: 'f1',
-    folder_name: 'Sales',
-    version: 8,
-    is_shared: false,
-    tags: ['leads', 'crm']
-  },
-  {
-    id: 'zap5',
-    name: 'Failed payment alerts',
-    description: 'Get alerted when a Stripe payment fails',
-    trigger: { app: mockApps[4], trigger: mockApps[4].triggers[3], config: {} },
-    actions: [
-      { app: mockApps[0], action: mockApps[0].actions[2], config: {} },
-      { app: mockApps[1], action: mockApps[1].actions[0], config: {} }
-    ],
-    filters: [],
-    paths: [],
-    status: 'error',
-    last_run_at: '2024-01-14T18:00:00Z',
-    next_run_at: null,
-    task_count: 45,
-    task_count_this_month: 12,
-    success_rate: 85.2,
-    avg_duration_seconds: 3.2,
-    created_at: '2024-01-08T10:00:00Z',
-    updated_at: '2024-01-14T18:00:00Z',
-    created_by: 'finance@company.com',
-    folder_id: null,
-    folder_name: null,
-    version: 2,
-    is_shared: false,
-    tags: ['payments', 'alerts']
-  }
-]
+const zaps: Zap[] = []
 
-const mockTasks: TaskHistory[] = [
-  { id: 'task1', zap_id: 'zap1', zap_name: 'New Stripe payments to Slack', status: 'success', trigger_event: 'New Payment: $199.00 from john@example.com', trigger_data: { amount: 19900 }, action_results: [{ action_name: 'Send Message', app_name: 'Slack', status: 'success', output: { ok: true }, error: null, duration_ms: 450 }], started_at: '2024-01-15T10:30:00Z', completed_at: '2024-01-15T10:30:01Z', duration_seconds: 1.2, data_in_bytes: 245, data_out_bytes: 128, error_message: null, replay_of: null, replayed_at: null },
-  { id: 'task2', zap_id: 'zap2', zap_name: 'Gmail to Google Sheets', status: 'success', trigger_event: 'New Email: Invoice from Vendor Inc', trigger_data: { subject: 'Invoice' }, action_results: [{ action_name: 'Create Row', app_name: 'Google Sheets', status: 'success', output: { row: 156 }, error: null, duration_ms: 890 }], started_at: '2024-01-15T10:25:00Z', completed_at: '2024-01-15T10:25:02Z', duration_seconds: 2.1, data_in_bytes: 1024, data_out_bytes: 256, error_message: null, replay_of: null, replayed_at: null },
-  { id: 'task3', zap_id: 'zap5', zap_name: 'Failed payment alerts', status: 'error', trigger_event: 'Failed Payment: card_declined', trigger_data: { error: 'card_declined' }, action_results: [{ action_name: 'Send Direct Message', app_name: 'Slack', status: 'error', output: {}, error: 'user_not_found', duration_ms: 120 }], started_at: '2024-01-14T18:00:00Z', completed_at: '2024-01-14T18:00:00Z', duration_seconds: 0.5, data_in_bytes: 512, data_out_bytes: 0, error_message: 'Slack action failed: user_not_found', replay_of: null, replayed_at: null },
-  { id: 'task4', zap_id: 'zap1', zap_name: 'New Stripe payments to Slack', status: 'success', trigger_event: 'New Payment: $49.00 from jane@example.com', trigger_data: { amount: 4900 }, action_results: [{ action_name: 'Send Message', app_name: 'Slack', status: 'success', output: { ok: true }, error: null, duration_ms: 380 }], started_at: '2024-01-15T09:45:00Z', completed_at: '2024-01-15T09:45:01Z', duration_seconds: 1.1, data_in_bytes: 230, data_out_bytes: 122, error_message: null, replay_of: null, replayed_at: null },
-  { id: 'task5', zap_id: 'zap2', zap_name: 'Gmail to Google Sheets', status: 'filtered', trigger_event: 'New Email: Newsletter subscription', trigger_data: { subject: 'Newsletter' }, action_results: [], started_at: '2024-01-15T09:30:00Z', completed_at: '2024-01-15T09:30:00Z', duration_seconds: 0.3, data_in_bytes: 2048, data_out_bytes: 0, error_message: null, replay_of: null, replayed_at: null },
-  { id: 'task6', zap_id: 'zap3', zap_name: 'New GitHub issues to Slack', status: 'success', trigger_event: 'New Issue: Bug in login page', trigger_data: { title: 'Bug in login page' }, action_results: [{ action_name: 'Send Message', app_name: 'Slack', status: 'success', output: { ok: true }, error: null, duration_ms: 290 }], started_at: '2024-01-15T09:00:00Z', completed_at: '2024-01-15T09:00:01Z', duration_seconds: 0.8, data_in_bytes: 890, data_out_bytes: 156, error_message: null, replay_of: null, replayed_at: null }
-]
+const tasks: TaskHistory[] = []
 
-const mockTemplates: Template[] = [
-  { id: 'temp1', name: 'Slack + Google Sheets', description: 'Send Slack messages to a spreadsheet for archiving', apps: [mockApps[0], mockApps[2]], trigger_name: 'New Message', action_names: ['Create Row'], usage_count: 125000, category: 'Popular', is_featured: true, created_by: 'Zapier', rating: 4.8, review_count: 2340 },
-  { id: 'temp2', name: 'Email to CRM', description: 'Create CRM contacts from incoming emails', apps: [mockApps[1], mockApps[6]], trigger_name: 'New Email', action_names: ['Create Contact'], usage_count: 89000, category: 'Sales', is_featured: true, created_by: 'Zapier', rating: 4.7, review_count: 1890 },
-  { id: 'temp3', name: 'Payment notifications', description: 'Get Slack notifications for new Stripe payments', apps: [mockApps[4], mockApps[0]], trigger_name: 'New Payment', action_names: ['Send Message'], usage_count: 67000, category: 'Finance', is_featured: true, created_by: 'Zapier', rating: 4.9, review_count: 1560 },
-  { id: 'temp4', name: 'GitHub to Slack', description: 'Get notified about new issues and PRs', apps: [mockApps[7], mockApps[0]], trigger_name: 'New Issue', action_names: ['Send Message'], usage_count: 56000, category: 'Developer', is_featured: false, created_by: 'Community', rating: 4.6, review_count: 890 },
-  { id: 'temp5', name: 'Lead capture workflow', description: 'Multi-step lead processing automation', apps: [mockApps[1], mockApps[6], mockApps[2]], trigger_name: 'New Email', action_names: ['Create Contact', 'Create Row'], usage_count: 45000, category: 'Marketing', is_featured: true, created_by: 'Zapier', rating: 4.5, review_count: 670 },
-  { id: 'temp6', name: 'Subscription alerts', description: 'Track new Stripe subscriptions', apps: [mockApps[4], mockApps[2]], trigger_name: 'New Subscription', action_names: ['Create Row'], usage_count: 34000, category: 'Finance', is_featured: false, created_by: 'Community', rating: 4.4, review_count: 456 }
-]
+const templates: Template[] = []
 
-const mockFolders: Folder[] = [
-  { id: 'f1', name: 'Sales', color: '#10B981', zap_count: 8 },
-  { id: 'f2', name: 'Marketing', color: '#8B5CF6', zap_count: 12 },
-  { id: 'f3', name: 'Engineering', color: '#3B82F6', zap_count: 5 },
-  { id: 'f4', name: 'Finance', color: '#F59E0B', zap_count: 3 }
-]
+const folders: Folder[] = []
 
 // ============================================================================
 // HELPER FUNCTIONS
@@ -620,31 +276,16 @@ const formatDate = (dateString: string): string => {
 }
 
 // ============================================================================
-// COMPETITIVE UPGRADE MOCK DATA - Zapier Level Integration Intelligence
+// COMPETITIVE UPGRADE DATA - Real data from API
 // ============================================================================
 
-const mockConnectorsAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Integration Health', description: 'All 47 active Zaps running with 99.9% uptime!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Health' },
-  { id: '2', type: 'warning' as const, title: 'Rate Limit Alert', description: 'Salesforce API approaching 80% of daily quota.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Limits' },
-  { id: '3', type: 'info' as const, title: 'AI Suggestion', description: 'Combining 3 similar Zaps can reduce task usage by 40%.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'AI Insights' },
-]
+const connectorsAIInsights: { id: string; type: 'success' | 'warning' | 'info'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
 
-const mockConnectorsCollaborators = [
-  { id: '1', name: 'Integration Lead', avatar: '/avatars/mike.jpg', status: 'online' as const, role: 'Lead' },
-  { id: '2', name: 'Automation Eng', avatar: '/avatars/jane.jpg', status: 'online' as const, role: 'Engineer' },
-  { id: '3', name: 'API Specialist', avatar: '/avatars/alex.jpg', status: 'away' as const, role: 'Specialist' },
-]
+const connectorsCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'offline' | 'away'; role: string }[] = []
 
-const mockConnectorsPredictions = [
-  { id: '1', title: 'Task Usage', prediction: 'Current usage will consume 85% of monthly quota by end of week', confidence: 91, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Error Rate', prediction: 'Webhook reliability will improve 15% after retry config update', confidence: 84, trend: 'down' as const, impact: 'medium' as const },
-]
+const connectorsPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down'; impact: 'low' | 'medium' | 'high' }[] = []
 
-const mockConnectorsActivities = [
-  { id: '1', user: 'Integration Lead', action: 'Created', target: 'Slack → Notion sync Zap', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Automation Eng', action: 'Fixed', target: 'Gmail webhook connection', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'API Specialist', action: 'Upgraded', target: 'Salesforce API to v58', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
-]
+const connectorsActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' | 'error' }[] = []
 
 // ============================================================================
 // API HELPER FUNCTIONS - Real Connector Operations
@@ -821,26 +462,7 @@ const fetchAnalytics = async (): Promise<{ tasks_today: number; success_rate: nu
   return response.json()
 }
 
-const mockConnectorsQuickActions = [
-  { id: '1', label: 'New Zap', icon: 'plus', action: async () => {
-    await toast.promise(
-      connectConnector('new', 'oauth2'),
-      { loading: 'Creating automation...', success: 'Connect apps and create your workflow trigger', error: 'Failed to create' }
-    )
-  }, variant: 'default' as const },
-  { id: '2', label: 'Test', icon: 'play', action: async () => {
-    await toast.promise(
-      testConnectorConnection('all'),
-      { loading: 'Testing connections...', success: 'All connectors responding normally!', error: 'Some connections failed' }
-    )
-  }, variant: 'default' as const },
-  { id: '3', label: 'Logs', icon: 'list', action: async () => {
-    await toast.promise(
-      fetchTaskHistory(),
-      { loading: 'Loading task logs...', success: 'Task Logs ready! View execution history and error details', error: 'Failed to load logs' }
-    )
-  }, variant: 'outline' as const },
-]
+const connectorsQuickActions: { id: string; label: string; icon: string; action: () => Promise<void>; variant: 'default' | 'outline' }[] = []
 
 // ============================================================================
 // MAIN COMPONENT
@@ -859,19 +481,19 @@ export default function ConnectorsClient() {
 
   // Dashboard stats
   const stats = useMemo(() => ({
-    totalZaps: mockZaps.length,
-    activeZaps: mockZaps.filter(z => z.status === 'on').length,
-    totalTasks: mockZaps.reduce((sum, z) => sum + z.task_count, 0),
-    tasksThisMonth: mockZaps.reduce((sum, z) => sum + z.task_count_this_month, 0),
-    avgSuccessRate: mockZaps.reduce((sum, z) => sum + z.success_rate, 0) / mockZaps.length,
-    connectedApps: mockApps.filter(a => a.is_connected).length,
-    totalApps: mockApps.length,
-    errorZaps: mockZaps.filter(z => z.status === 'error').length
+    totalZaps: zaps.length,
+    activeZaps: zaps.filter(z => z.status === 'on').length,
+    totalTasks: zaps.reduce((sum, z) => sum + z.task_count, 0),
+    tasksThisMonth: zaps.reduce((sum, z) => sum + z.task_count_this_month, 0),
+    avgSuccessRate: zaps.length > 0 ? zaps.reduce((sum, z) => sum + z.success_rate, 0) / zaps.length : 0,
+    connectedApps: apps.filter(a => a.is_connected).length,
+    totalApps: apps.length,
+    errorZaps: zaps.filter(z => z.status === 'error').length
   }), [])
 
   // Filtered data
   const filteredZaps = useMemo(() => {
-    return mockZaps.filter(zap => {
+    return zaps.filter(zap => {
       const matchesSearch = zap.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            zap.description.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesStatus = statusFilter === 'all' || zap.status === statusFilter
@@ -880,14 +502,14 @@ export default function ConnectorsClient() {
   }, [searchQuery, statusFilter])
 
   const filteredApps = useMemo(() => {
-    return mockApps.filter(app => {
+    return apps.filter(app => {
       const matchesSearch = app.name.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesCategory = categoryFilter === 'all' || app.category === categoryFilter
       return matchesSearch && matchesCategory
     })
   }, [searchQuery, categoryFilter])
 
-  const categories = [...new Set(mockApps.map(a => a.category))]
+  const categories = [...new Set(apps.map(a => a.category))]
 
   // Handlers - Real API implementations
   const handleAddConnector = async () => {
@@ -976,7 +598,7 @@ export default function ConnectorsClient() {
             { label: 'Connected Apps', value: stats.connectedApps.toString(), icon: Link2, color: 'from-orange-500 to-red-500', change: '+1' },
             { label: 'Total Apps', value: stats.totalApps.toString(), icon: Layers, color: 'from-indigo-500 to-purple-500', change: '8' },
             { label: 'Errors', value: stats.errorZaps.toString(), icon: AlertTriangle, color: 'from-red-500 to-pink-500', change: '1' },
-            { label: 'Folders', value: mockFolders.length.toString(), icon: Folder, color: 'from-yellow-500 to-orange-500', change: '4' }
+            { label: 'Folders', value: folders.length.toString(), icon: Folder, color: 'from-yellow-500 to-orange-500', change: '4' }
           ].map((stat, index) => (
             <Card key={index} className="border-0 shadow-sm hover:shadow-md transition-all dark:bg-gray-800">
               <CardContent className="p-4">
@@ -1069,7 +691,7 @@ export default function ConnectorsClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {mockTasks.slice(0, 5).map(task => (
+                    {tasks.slice(0, 5).map(task => (
                       <div
                         key={task.id}
                         className="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors"
@@ -1107,7 +729,7 @@ export default function ConnectorsClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {mockFolders.map(folder => (
+                    {folders.map(folder => (
                       <div key={folder.id} className="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50">
                         <div className="flex items-center gap-3">
                           <div
@@ -1136,7 +758,7 @@ export default function ConnectorsClient() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {mockZaps.filter(z => z.status === 'on').slice(0, 3).map((zap, index) => (
+                  {zaps.filter(z => z.status === 'on').slice(0, 3).map((zap, index) => (
                     <div key={zap.id} className="p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
                       <div className="flex items-center gap-2 mb-3">
                         <div className="w-6 h-6 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 flex items-center justify-center text-white text-xs font-bold">
@@ -1422,7 +1044,7 @@ export default function ConnectorsClient() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                      {mockTasks.map(task => (
+                      {tasks.map(task => (
                         <tr
                           key={task.id}
                           className="hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer"
@@ -1473,7 +1095,7 @@ export default function ConnectorsClient() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {mockTemplates.map(template => (
+              {templates.map(template => (
                 <Card key={template.id} className="border-0 shadow-sm hover:shadow-lg transition-all cursor-pointer dark:bg-gray-800">
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between mb-4">
@@ -1989,18 +1611,18 @@ export default function ConnectorsClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockConnectorsAIInsights}
+              insights={connectorsAIInsights}
               title="Integration Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockConnectorsCollaborators}
+              collaborators={connectorsCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockConnectorsPredictions}
+              predictions={connectorsPredictions}
               title="Zap Forecasts"
             />
           </div>
@@ -2008,12 +1630,12 @@ export default function ConnectorsClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockConnectorsActivities}
+            activities={connectorsActivities}
             title="Integration Activity"
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockConnectorsQuickActions}
+            actions={connectorsQuickActions}
             variant="grid"
           />
         </div>

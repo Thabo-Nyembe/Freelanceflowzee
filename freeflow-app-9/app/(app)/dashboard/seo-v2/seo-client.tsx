@@ -202,250 +202,112 @@ const formatNumber = (num: number): string => {
   return num.toString()
 }
 
-// Mock data
-const mockKeywords: Keyword[] = [
-  {
-    id: 'k1',
-    keyword: 'project management software',
-    currentPosition: 3,
-    previousPosition: 5,
-    bestPosition: 2,
-    searchVolume: 74000,
-    difficulty: 67,
-    difficultyLabel: 'hard',
-    cpc: 15.50,
-    trend: 'up',
-    traffic: 12500,
-    trafficValue: 193750,
-    url: '/project-management',
-    serpFeatures: ['featured_snippet', 'people_also_ask', 'sitelinks'],
-    lastUpdated: '2024-01-15',
-    isTracked: true
-  },
-  {
-    id: 'k2',
-    keyword: 'team collaboration tools',
-    currentPosition: 7,
-    previousPosition: 7,
-    bestPosition: 5,
-    searchVolume: 33100,
-    difficulty: 54,
-    difficultyLabel: 'medium',
-    cpc: 12.30,
-    trend: 'stable',
-    traffic: 4200,
-    trafficValue: 51660,
-    url: '/collaboration',
-    serpFeatures: ['people_also_ask', 'reviews'],
-    lastUpdated: '2024-01-15',
-    isTracked: true
-  },
-  {
-    id: 'k3',
-    keyword: 'free project tracking',
-    currentPosition: 12,
-    previousPosition: 18,
-    bestPosition: 10,
-    searchVolume: 14800,
-    difficulty: 35,
-    difficultyLabel: 'easy',
-    cpc: 8.20,
-    trend: 'up',
-    traffic: 890,
-    trafficValue: 7298,
-    url: '/free-tracking',
-    serpFeatures: ['people_also_ask'],
-    lastUpdated: '2024-01-15',
-    isTracked: true
-  },
-  {
-    id: 'k4',
-    keyword: 'agile project management',
-    currentPosition: 15,
-    previousPosition: 12,
-    bestPosition: 8,
-    searchVolume: 27100,
-    difficulty: 72,
-    difficultyLabel: 'hard',
-    cpc: 18.90,
-    trend: 'down',
-    traffic: 1200,
-    trafficValue: 22680,
-    url: '/agile',
-    serpFeatures: ['featured_snippet', 'knowledge_panel'],
-    lastUpdated: '2024-01-15',
-    isTracked: true
-  },
-  {
-    id: 'k5',
-    keyword: 'kanban board online',
-    currentPosition: 5,
-    previousPosition: 8,
-    bestPosition: 4,
-    searchVolume: 22200,
-    difficulty: 48,
-    difficultyLabel: 'medium',
-    cpc: 10.40,
-    trend: 'up',
-    traffic: 3800,
-    trafficValue: 39520,
-    url: '/kanban',
-    serpFeatures: ['sitelinks', 'image_pack'],
-    lastUpdated: '2024-01-15',
-    isTracked: true
-  },
-  {
-    id: 'k6',
-    keyword: 'task management app',
-    currentPosition: 9,
-    previousPosition: 11,
-    bestPosition: 6,
-    searchVolume: 49500,
-    difficulty: 61,
-    difficultyLabel: 'hard',
-    cpc: 14.80,
-    trend: 'up',
-    traffic: 5500,
-    trafficValue: 81400,
-    url: '/task-management',
-    serpFeatures: ['app_pack', 'people_also_ask'],
-    lastUpdated: '2024-01-15',
-    isTracked: true
-  },
-  {
-    id: 'k7',
-    keyword: 'work management platform',
-    currentPosition: 21,
-    previousPosition: 25,
-    bestPosition: 18,
-    searchVolume: 8100,
-    difficulty: 55,
-    difficultyLabel: 'medium',
-    cpc: 16.20,
-    trend: 'up',
-    traffic: 320,
-    trafficValue: 5184,
-    url: '/work-management',
-    serpFeatures: [],
-    lastUpdated: '2024-01-15',
-    isTracked: true
-  },
-  {
-    id: 'k8',
-    keyword: 'remote team software',
-    currentPosition: null,
-    previousPosition: 48,
-    bestPosition: 35,
-    searchVolume: 5400,
-    difficulty: 42,
-    difficultyLabel: 'medium',
-    cpc: 11.50,
-    trend: 'new',
-    traffic: 0,
-    trafficValue: 0,
-    url: '/remote-teams',
-    serpFeatures: [],
-    lastUpdated: '2024-01-15',
-    isTracked: true
-  }
-]
-
-const mockBacklinks: Backlink[] = [
-  { id: 'b1', sourceDomain: 'techcrunch.com', sourceUrl: 'https://techcrunch.com/best-pm-tools', targetUrl: '/project-management', anchorText: 'top project management software', domainRating: 93, pageRating: 45, traffic: 125000, type: 'dofollow', status: 'active', firstSeen: '2023-08-15', lastChecked: '2024-01-15', isNew: false },
-  { id: 'b2', sourceDomain: 'forbes.com', sourceUrl: 'https://forbes.com/business-tools', targetUrl: '/', anchorText: 'leading collaboration platform', domainRating: 95, pageRating: 52, traffic: 89000, type: 'dofollow', status: 'active', firstSeen: '2023-09-22', lastChecked: '2024-01-15', isNew: false },
-  { id: 'b3', sourceDomain: 'g2.com', sourceUrl: 'https://g2.com/categories/pm-software', targetUrl: '/reviews', anchorText: 'read reviews', domainRating: 91, pageRating: 61, traffic: 45000, type: 'dofollow', status: 'active', firstSeen: '2023-06-10', lastChecked: '2024-01-15', isNew: false },
-  { id: 'b4', sourceDomain: 'capterra.com', sourceUrl: 'https://capterra.com/project-management', targetUrl: '/', anchorText: 'project management', domainRating: 88, pageRating: 55, traffic: 38000, type: 'dofollow', status: 'active', firstSeen: '2023-07-05', lastChecked: '2024-01-15', isNew: false },
-  { id: 'b5', sourceDomain: 'producthunt.com', sourceUrl: 'https://producthunt.com/posts/app', targetUrl: '/', anchorText: 'check it out', domainRating: 90, pageRating: 42, traffic: 28000, type: 'nofollow', status: 'active', firstSeen: '2024-01-10', lastChecked: '2024-01-15', isNew: true },
-  { id: 'b6', sourceDomain: 'medium.com', sourceUrl: 'https://medium.com/@author/pm-guide', targetUrl: '/blog/guide', anchorText: 'comprehensive guide', domainRating: 85, pageRating: 32, traffic: 5200, type: 'dofollow', status: 'new', firstSeen: '2024-01-12', lastChecked: '2024-01-15', isNew: true },
-  { id: 'b7', sourceDomain: 'entrepreneur.com', sourceUrl: 'https://entrepreneur.com/tools', targetUrl: '/', anchorText: 'startup tools', domainRating: 92, pageRating: 48, traffic: 62000, type: 'dofollow', status: 'lost', firstSeen: '2023-05-20', lastChecked: '2024-01-15', isNew: false },
-  { id: 'b8', sourceDomain: 'hackernews.com', sourceUrl: 'https://news.ycombinator.com/item', targetUrl: '/', anchorText: 'link', domainRating: 91, pageRating: 28, traffic: 3500, type: 'nofollow', status: 'broken', firstSeen: '2023-11-08', lastChecked: '2024-01-15', isNew: false }
-]
-
-const mockCompetitors: Competitor[] = [
-  { id: 'c1', domain: 'asana.com', organicTraffic: 2450000, organicKeywords: 145000, paidTraffic: 89000, paidKeywords: 2100, domainRating: 91, commonKeywords: 8500, keywordGap: 42000, backlinks: 1250000, trafficTrend: 12.5 },
-  { id: 'c2', domain: 'monday.com', organicTraffic: 1890000, organicKeywords: 98000, paidTraffic: 125000, paidKeywords: 3200, domainRating: 89, commonKeywords: 7200, keywordGap: 35000, backlinks: 890000, trafficTrend: 18.2 },
-  { id: 'c3', domain: 'trello.com', organicTraffic: 3200000, organicKeywords: 187000, paidTraffic: 45000, paidKeywords: 890, domainRating: 92, commonKeywords: 12000, keywordGap: 58000, backlinks: 2100000, trafficTrend: -5.3 },
-  { id: 'c4', domain: 'notion.so', organicTraffic: 4100000, organicKeywords: 225000, paidTraffic: 32000, paidKeywords: 650, domainRating: 90, commonKeywords: 9800, keywordGap: 72000, backlinks: 1850000, trafficTrend: 25.8 },
-  { id: 'c5', domain: 'clickup.com', organicTraffic: 980000, organicKeywords: 65000, paidTraffic: 156000, paidKeywords: 4500, domainRating: 85, commonKeywords: 5400, keywordGap: 28000, backlinks: 520000, trafficTrend: 32.1 }
-]
-
-const mockContent: ContentPage[] = [
-  { id: 'p1', url: '/project-management', title: 'Project Management Software', traffic: 45000, keywords: 850, position: 3, backlinks: 245, wordCount: 3500, lastUpdated: '2024-01-10', status: 'performing', score: 92, opportunities: ['Add FAQ section', 'Update screenshots'] },
-  { id: 'p2', url: '/kanban', title: 'Online Kanban Board', traffic: 28000, keywords: 420, position: 5, backlinks: 156, wordCount: 2800, lastUpdated: '2024-01-08', status: 'performing', score: 88, opportunities: ['Add video tutorial'] },
-  { id: 'p3', url: '/collaboration', title: 'Team Collaboration Tools', traffic: 15000, keywords: 310, position: 7, backlinks: 98, wordCount: 2200, lastUpdated: '2023-12-15', status: 'declining', score: 72, opportunities: ['Update content', 'Add internal links', 'Improve meta description'] },
-  { id: 'p4', url: '/agile', title: 'Agile Project Management', traffic: 8500, keywords: 180, position: 15, backlinks: 67, wordCount: 1800, lastUpdated: '2023-11-20', status: 'underperforming', score: 58, opportunities: ['Expand content', 'Add case studies', 'Target featured snippet'] },
-  { id: 'p5', url: '/blog/guide', title: 'Complete PM Guide', traffic: 12000, keywords: 250, position: 8, backlinks: 89, wordCount: 5200, lastUpdated: '2024-01-05', status: 'performing', score: 85, opportunities: ['Add infographics'] },
-  { id: 'p6', url: '/pricing', title: 'Pricing Plans', traffic: 35000, keywords: 45, position: 2, backlinks: 34, wordCount: 1200, lastUpdated: '2024-01-12', status: 'performing', score: 90, opportunities: [] }
-]
-
-const mockAuditIssues: AuditIssue[] = [
-  { id: 'a1', category: 'Performance', issue: 'Slow page load time', severity: 'critical', affectedPages: 12, description: 'Pages taking more than 4 seconds to load', howToFix: 'Optimize images, enable compression, use CDN', priority: 1 },
-  { id: 'a2', category: 'SEO', issue: 'Missing meta descriptions', severity: 'warning', affectedPages: 45, description: 'Pages without meta descriptions', howToFix: 'Add unique meta descriptions to all pages', priority: 2 },
-  { id: 'a3', category: 'SEO', issue: 'Duplicate title tags', severity: 'warning', affectedPages: 8, description: 'Multiple pages with identical titles', howToFix: 'Create unique titles for each page', priority: 3 },
-  { id: 'a4', category: 'Links', issue: 'Broken internal links', severity: 'critical', affectedPages: 23, description: 'Internal links pointing to 404 pages', howToFix: 'Fix or remove broken links', priority: 1 },
-  { id: 'a5', category: 'Images', issue: 'Missing alt text', severity: 'warning', affectedPages: 67, description: 'Images without alt attributes', howToFix: 'Add descriptive alt text to all images', priority: 4 },
-  { id: 'a6', category: 'Mobile', issue: 'Viewport not set', severity: 'notice', affectedPages: 3, description: 'Pages missing viewport meta tag', howToFix: 'Add viewport meta tag', priority: 5 },
-  { id: 'a7', category: 'Security', issue: 'HTTPS enabled', severity: 'passed', affectedPages: 0, description: 'All pages served over HTTPS', howToFix: '', priority: 0 },
-  { id: 'a8', category: 'Structured Data', issue: 'Schema markup errors', severity: 'notice', affectedPages: 5, description: 'Invalid structured data on some pages', howToFix: 'Fix schema markup validation errors', priority: 6 }
-]
+// Empty arrays (no mock data)
+const emptyKeywords: Keyword[] = []
+const emptyBacklinks: Backlink[] = []
+const emptyCompetitors: Competitor[] = []
+const emptyContentPages: ContentPage[] = []
+const emptyAuditIssues: AuditIssue[] = []
 
 interface SEOClientProps {
   initialKeywords?: Keyword[]
   initialBacklinks?: Backlink[]
 }
 
-// Enhanced Competitive Upgrade Mock Data
-const mockSEOAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Rankings Up', description: '15 keywords moved to page 1 this month. Organic traffic +32%.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Rankings' },
-  { id: '2', type: 'info' as const, title: 'Content Gap', description: '8 high-value keywords identified. Competitors ranking, you are not.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Opportunity' },
-  { id: '3', type: 'warning' as const, title: 'Lost Backlinks', description: '5 high-DA backlinks lost this week. Outreach recommended.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Backlinks' },
-]
+// Empty arrays for competitive upgrade components (no mock data)
+interface AIInsight {
+  id: string
+  type: 'recommendation' | 'alert' | 'opportunity' | 'prediction' | 'success' | 'info' | 'warning' | 'error'
+  title: string
+  description: string
+  impact?: 'high' | 'medium' | 'low'
+  priority?: 'high' | 'medium' | 'low'
+  metric?: string
+  change?: number
+  confidence?: number
+  action?: string
+  category?: string
+  timestamp?: string | Date
+  createdAt?: Date
+}
 
-const mockSEOCollaborators = [
-  { id: '1', name: 'SEO Lead', avatar: '/avatars/seo.jpg', status: 'online' as const, role: 'Lead' },
-  { id: '2', name: 'Content Writer', avatar: '/avatars/content.jpg', status: 'online' as const, role: 'Writer' },
-  { id: '3', name: 'Link Builder', avatar: '/avatars/links.jpg', status: 'busy' as const, role: 'Outreach' },
-]
+interface Collaborator {
+  id: string
+  name: string
+  avatar?: string
+  color?: string
+  status: 'online' | 'away' | 'offline'
+  role?: string
+  isTyping?: boolean
+  lastSeen?: Date
+  lastActive?: string | Date
+  cursor?: { x: number; y: number }
+}
 
-const mockSEOPredictions = [
-  { id: '1', title: 'Traffic Growth', prediction: '+45% organic traffic by Q2', confidence: 72, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Domain Authority', prediction: 'DA 55 achievable in 6 months', confidence: 68, trend: 'up' as const, impact: 'medium' as const },
-]
+interface Prediction {
+  id?: string
+  label?: string
+  title?: string
+  prediction?: string
+  current?: number
+  target?: number
+  currentValue?: number
+  predictedValue?: number
+  predicted?: number
+  confidence: number
+  trend?: 'up' | 'down' | 'stable'
+  impact?: 'high' | 'medium' | 'low'
+}
 
-const mockSEOActivities = [
-  { id: '1', user: 'Rank Tracker', action: 'Keyword ranked #1', target: '"best project management"', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Backlink Monitor', action: 'New backlink from', target: 'TechCrunch (DA 94)', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'Content Team', action: 'Published article', target: '15 Best Tools Guide', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
-]
+interface ActivityItem {
+  id: string
+  type: 'comment' | 'update' | 'create' | 'delete' | 'mention' | 'assignment' | 'status_change' | 'milestone' | 'integration'
+  title?: string
+  action?: string
+  description?: string
+  user: {
+    id: string
+    name: string
+    avatar?: string
+  }
+  target?: {
+    type: string
+    name: string
+    url?: string
+  }
+  metadata?: Record<string, unknown>
+  timestamp: Date | string
+  isRead?: boolean
+  isPinned?: boolean
+  actions?: Array<{
+    label: string
+    action: () => void
+    variant?: 'default' | 'destructive'
+  }>
+}
 
-const mockSEOQuickActions = [
-  { id: '1', label: 'Add Keyword', icon: 'plus', action: async () => {
-    toast.promise(
-      fetch('/api/seo/keywords', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'openForm' }) }).then(res => { if (!res.ok) throw new Error('Failed'); return res.json(); }),
-      { loading: 'Opening keyword form...', success: 'Enter keywords to track rankings', error: 'Failed to open' }
-    )
-  }, variant: 'default' as const },
-  { id: '2', label: 'Site Audit', icon: 'search', action: async () => {
-    toast.promise(
-      fetch('/api/seo/audit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'full' }) }).then(res => { if (!res.ok) throw new Error('Failed'); return res.json(); }),
-      { loading: 'Running site audit...', success: (data) => `${data?.score || 85}/100 SEO score - ${data?.issues || 12} issues found`, error: 'Audit failed' }
-    )
-  }, variant: 'default' as const },
-  { id: '3', label: 'Competitor Analysis', icon: 'users', action: async () => {
-    toast.promise(
-      fetch('/api/seo/competitors/analyze', { method: 'POST', headers: { 'Content-Type': 'application/json' } }).then(res => { if (!res.ok) throw new Error('Failed'); return res.json(); }),
-      { loading: 'Analyzing competitors...', success: 'Competitor analysis complete - view gaps report', error: 'Analysis failed' }
-    )
-  }, variant: 'outline' as const },
-]
+interface QuickAction {
+  id: string
+  label: string
+  icon: string
+  action: () => void
+  variant?: 'default' | 'secondary' | 'outline' | 'ghost' | 'destructive'
+  disabled?: boolean
+}
+
+const seoAIInsights: AIInsight[] = []
+const seoCollaborators: Collaborator[] = []
+const seoPredictions: Prediction[] = []
+const seoActivities: ActivityItem[] = []
+const seoQuickActions: QuickAction[] = []
 
 export default function SEOClient({ initialKeywords, initialBacklinks }: SEOClientProps) {
   const [activeTab, setActiveTab] = useState('overview')
-  const [keywords, setKeywords] = useState<Keyword[]>(mockKeywords)
-  const [backlinks] = useState<Backlink[]>(mockBacklinks)
-  const [competitors] = useState<Competitor[]>(mockCompetitors)
-  const [content] = useState<ContentPage[]>(mockContent)
-  const [auditIssues] = useState<AuditIssue[]>(mockAuditIssues)
+  const [keywords, setKeywords] = useState<Keyword[]>(emptyKeywords)
+  const [backlinks] = useState<Backlink[]>(emptyBacklinks)
+  const [competitors] = useState<Competitor[]>(emptyCompetitors)
+  const [content] = useState<ContentPage[]>(emptyContentPages)
+  const [auditIssues] = useState<AuditIssue[]>(emptyAuditIssues)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedKeyword, setSelectedKeyword] = useState<Keyword | null>(null)
   const [showKeywordDialog, setShowKeywordDialog] = useState(false)
@@ -2125,18 +1987,18 @@ export default function SEOClient({ initialKeywords, initialBacklinks }: SEOClie
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockSEOAIInsights}
+              insights={seoAIInsights}
               title="SEO Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockSEOCollaborators}
+              collaborators={seoCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockSEOPredictions}
+              predictions={seoPredictions}
               title="SEO Forecasts"
             />
           </div>
@@ -2144,12 +2006,12 @@ export default function SEOClient({ initialKeywords, initialBacklinks }: SEOClie
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockSEOActivities}
+            activities={seoActivities}
             title="SEO Activity"
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockSEOQuickActions}
+            actions={seoQuickActions}
             variant="grid"
           />
         </div>

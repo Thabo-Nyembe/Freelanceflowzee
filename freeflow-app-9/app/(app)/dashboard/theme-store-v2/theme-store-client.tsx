@@ -141,99 +141,21 @@ interface ThemeStoreClientProps {
   initialStats: any
 }
 
-// Mock Data
-const mockDesigners: Designer[] = [
-  { id: 'd1', name: 'Sarah Chen', avatar: '/avatars/sarah.jpg', verified: true, themesCount: 24, totalDownloads: 156000, rating: 4.9, bio: 'UI/UX designer specializing in clean, modern interfaces', social: { twitter: '@sarahchen', dribbble: 'sarahchen' } },
-  { id: 'd2', name: 'Alex Rivera', avatar: '/avatars/alex.jpg', verified: true, themesCount: 18, totalDownloads: 89000, rating: 4.8, bio: 'Full-stack developer creating powerful dashboard themes', social: { github: 'alexrivera' } },
-  { id: 'd3', name: 'Maya Patel', avatar: '/avatars/maya.jpg', verified: true, themesCount: 31, totalDownloads: 234000, rating: 4.9, bio: 'Award-winning designer with focus on accessibility', social: { twitter: '@mayapatel', dribbble: 'mayapatel' } },
-]
+// Empty arrays - data will come from real API/database
+const mockDesigners: Designer[] = []
 
-const mockThemes: ThemeExtended[] = [
-  {
-    id: 't1', name: 'Aurora Dashboard', slug: 'aurora-dashboard', description: 'A stunning gradient-based dashboard theme with glass morphism effects',
-    longDescription: 'Aurora Dashboard brings the beauty of the northern lights to your application. Featuring carefully crafted gradient backgrounds, glass morphism cards, and smooth animations that create an immersive user experience. Perfect for SaaS applications, admin panels, and data-heavy interfaces.',
-    thumbnail: '/themes/aurora-thumb.jpg', screenshots: ['/themes/aurora-1.jpg', '/themes/aurora-2.jpg', '/themes/aurora-3.jpg'], demoUrl: 'https://demo.aurora.theme',
-    status: 'available', category: 'dashboard', pricing: 'premium', price: 79, discountPrice: 59, designer: mockDesigners[0], framework: 'nextjs',
-    version: '2.4.0', versionHistory: [
-      { version: '2.4.0', releaseDate: '2024-01-15', changelog: ['Added 5 new chart components', 'Improved dark mode colors', 'Fixed sidebar collapse animation'], breaking: false },
-      { version: '2.3.0', releaseDate: '2024-01-01', changelog: ['New notification center', 'RTL support added'], breaking: false },
-    ],
-    rating: 4.9, reviewsCount: 247, reviews: [
-      { id: 'r1', user: { name: 'John D.', avatar: '/avatars/john.jpg' }, rating: 5, title: 'Best dashboard theme ever!', content: 'The attention to detail is incredible. Every component is perfectly designed and the documentation is excellent.', date: '2024-01-10', helpful: 42, verified: true },
-      { id: 'r2', user: { name: 'Emma S.', avatar: '/avatars/emma.jpg' }, rating: 5, title: 'Worth every penny', content: 'We switched from another theme and the difference is night and day. Support is amazing too.', date: '2024-01-08', helpful: 28, verified: true },
-    ],
-    downloads: 12400, favorites: 2840, features: ['100+ Components', 'Dark/Light Mode', 'RTL Support', 'TypeScript', 'Figma Files', '6 Months Support'],
-    colors: { primary: '#6366f1', secondary: '#8b5cf6', accent: '#ec4899', background: '#0f172a', foreground: '#f8fafc', muted: '#475569' },
-    typography: { headingFont: 'Inter', bodyFont: 'Inter', codeFont: 'JetBrains Mono' },
-    responsive: true, darkMode: true, rtlSupport: true, wcagCompliant: true, components: 156, layouts: 12, pages: 45, fileSize: '24.5 MB',
-    lastUpdated: '2024-01-15', compatibility: ['Next.js 14', 'React 18', 'Tailwind 3.4'], tags: ['dashboard', 'admin', 'saas', 'analytics'], license: 'extended'
-  },
-  {
-    id: 't2', name: 'Minimal Portfolio', slug: 'minimal-portfolio', description: 'Clean and elegant portfolio theme for creative professionals',
-    longDescription: 'Showcase your work with style using Minimal Portfolio. This theme emphasizes your content with generous whitespace, subtle animations, and typography-focused design. Ideal for designers, photographers, and artists who want their work to speak for itself.',
-    thumbnail: '/themes/minimal-thumb.jpg', screenshots: ['/themes/minimal-1.jpg', '/themes/minimal-2.jpg'], demoUrl: 'https://demo.minimal.theme',
-    status: 'installed', category: 'portfolio', pricing: 'free', price: 0, designer: mockDesigners[1], framework: 'react',
-    version: '1.8.2', versionHistory: [
-      { version: '1.8.2', releaseDate: '2024-01-12', changelog: ['Bug fixes', 'Performance improvements'], breaking: false },
-    ],
-    rating: 4.7, reviewsCount: 892, reviews: [
-      { id: 'r3', user: { name: 'Lisa M.', avatar: '/avatars/lisa.jpg' }, rating: 5, title: 'Perfect for my portfolio', content: 'Simple, elegant, and exactly what I needed. The setup was incredibly easy.', date: '2024-01-05', helpful: 67, verified: true },
-    ],
-    downloads: 45600, favorites: 5230, features: ['Responsive Design', 'SEO Optimized', 'Fast Loading', 'Easy Customization', 'Blog Support'],
-    colors: { primary: '#18181b', secondary: '#27272a', accent: '#f59e0b', background: '#ffffff', foreground: '#18181b', muted: '#a1a1aa' },
-    typography: { headingFont: 'Playfair Display', bodyFont: 'Source Sans Pro', codeFont: 'Fira Code' },
-    responsive: true, darkMode: true, rtlSupport: false, wcagCompliant: true, components: 42, layouts: 8, pages: 12, fileSize: '8.2 MB',
-    lastUpdated: '2024-01-12', compatibility: ['React 18', 'Gatsby 5', 'Tailwind 3.4'], tags: ['portfolio', 'minimal', 'creative', 'photography'], license: 'standard'
-  },
-  {
-    id: 't3', name: 'Commerce Pro', slug: 'commerce-pro', description: 'Full-featured e-commerce theme with conversion-optimized design',
-    longDescription: 'Commerce Pro is built for serious online businesses. Every element is designed with conversion optimization in mind - from the product cards to the checkout flow. Includes advanced filtering, wishlist functionality, and seamless payment integrations.',
-    thumbnail: '/themes/commerce-thumb.jpg', screenshots: ['/themes/commerce-1.jpg', '/themes/commerce-2.jpg', '/themes/commerce-3.jpg', '/themes/commerce-4.jpg'], demoUrl: 'https://demo.commerce.theme',
-    status: 'active', category: 'e-commerce', pricing: 'premium', price: 149, designer: mockDesigners[2], framework: 'nextjs',
-    version: '3.1.0', versionHistory: [
-      { version: '3.1.0', releaseDate: '2024-01-18', changelog: ['New checkout flow', 'Apple Pay support', 'Improved mobile experience'], breaking: false },
-      { version: '3.0.0', releaseDate: '2024-01-01', changelog: ['Complete redesign', 'New product gallery', 'Breaking: Updated API'], breaking: true },
-    ],
-    rating: 4.8, reviewsCount: 456, reviews: [
-      { id: 'r4', user: { name: 'Mike T.', avatar: '/avatars/mike.jpg' }, rating: 5, title: 'Our conversion rate went up 40%', content: 'After implementing Commerce Pro, our sales increased significantly. The checkout flow is seamless.', date: '2024-01-16', helpful: 89, verified: true },
-    ],
-    downloads: 8900, favorites: 1890, features: ['Product Quick View', 'Advanced Filters', 'Wishlist', 'Multi-Currency', 'Payment Gateways', 'Inventory Management', '12 Months Support'],
-    colors: { primary: '#059669', secondary: '#10b981', accent: '#f97316', background: '#fafafa', foreground: '#171717', muted: '#737373' },
-    typography: { headingFont: 'DM Sans', bodyFont: 'DM Sans', codeFont: 'IBM Plex Mono' },
-    responsive: true, darkMode: true, rtlSupport: true, wcagCompliant: true, components: 234, layouts: 18, pages: 67, fileSize: '38.6 MB',
-    lastUpdated: '2024-01-18', compatibility: ['Next.js 14', 'Shopify', 'Stripe', 'PayPal'], tags: ['e-commerce', 'shop', 'store', 'retail'], license: 'unlimited'
-  },
-]
+const mockThemes: ThemeExtended[] = []
 
-const mockCollections: Collection[] = [
-  { id: 'c1', name: 'Staff Picks', description: 'Hand-picked themes by our design team', themes: ['t1', 't3'], featured: true, curator: 'FreeFlow Team' },
-  { id: 'c2', name: 'Best for Startups', description: 'Launch your MVP with these proven themes', themes: ['t1', 't2'], featured: true, curator: 'Sarah Chen' },
-  { id: 'c3', name: 'Dark Mode Excellence', description: 'Themes with exceptional dark mode implementation', themes: ['t1'], featured: false, curator: 'Alex Rivera' },
-]
+const mockCollections: Collection[] = []
 
-// Competitive Upgrade Mock Data - Envato/ThemeForest Level Theme Marketplace Intelligence
-const mockThemeStoreAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Top Seller', description: 'Aurora Pro theme reached 10K downloads—trending in dashboard category!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Sales' },
-  { id: '2', type: 'warning' as const, title: 'Compatibility Alert', description: 'React 19 released—3 themes need compatibility updates.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Updates' },
-  { id: '3', type: 'info' as const, title: 'AI Suggestion', description: 'Dark mode themes have 40% higher conversion—consider theme variant.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'AI Insights' },
-]
+// Empty arrays for competitive upgrade components
+const mockThemeStoreAIInsights: { id: string; type: 'success' | 'warning' | 'info'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
 
-const mockThemeStoreCollaborators = [
-  { id: '1', name: 'Theme Author', avatar: '/avatars/designer.jpg', status: 'online' as const, role: 'Author' },
-  { id: '2', name: 'UI Reviewer', avatar: '/avatars/reviewer.jpg', status: 'online' as const, role: 'Reviewer' },
-  { id: '3', name: 'Support Lead', avatar: '/avatars/support.jpg', status: 'away' as const, role: 'Support' },
-]
+const mockThemeStoreCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }[] = []
 
-const mockThemeStorePredictions = [
-  { id: '1', title: 'Monthly Revenue', prediction: 'Theme sales projected to exceed $12K this month (+18%)', confidence: 87, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Download Trend', prediction: 'SaaS templates expected to dominate Q1 2025 demand', confidence: 82, trend: 'up' as const, impact: 'medium' as const },
-]
+const mockThemeStorePredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: 'low' | 'medium' | 'high' }[] = []
 
-const mockThemeStoreActivities = [
-  { id: '1', user: 'Theme Author', action: 'Published', target: 'Velocity Dashboard Pro v2.0', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Buyer', action: 'Purchased', target: 'Aurora Pro Extended License', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'UI Reviewer', action: 'Approved', target: 'Minimal Blog Theme submission', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
-]
+const mockThemeStoreActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' | 'error' }[] = []
 
 // Quick actions will be defined inside the component to use real handlers
 
@@ -1040,37 +962,39 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
                 </Card>
 
                 {/* Featured Designer */}
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm">Featured Designer</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center gap-3 mb-3">
-                      <Avatar>
-                        <AvatarImage src={mockDesigners[2].avatar} alt="User avatar" />
-                        <AvatarFallback>MP</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="font-medium flex items-center gap-1">
-                          {mockDesigners[2].name}
-                          {mockDesigners[2].verified && <Check className="h-4 w-4 text-blue-500" />}
-                        </p>
-                        <p className="text-xs text-gray-500">{mockDesigners[2].themesCount} themes</p>
+                {mockDesigners.length > 0 && (
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-sm">Featured Designer</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-center gap-3 mb-3">
+                        <Avatar>
+                          <AvatarImage src={mockDesigners[0].avatar} alt="User avatar" />
+                          <AvatarFallback>{mockDesigners[0].name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-medium flex items-center gap-1">
+                            {mockDesigners[0].name}
+                            {mockDesigners[0].verified && <Check className="h-4 w-4 text-blue-500" />}
+                          </p>
+                          <p className="text-xs text-gray-500">{mockDesigners[0].themesCount} themes</p>
+                        </div>
                       </div>
-                    </div>
-                    <p className="text-sm text-gray-600 mb-3">{mockDesigners[2].bio}</p>
-                    <div className="flex items-center gap-4 text-sm">
-                      <span className="flex items-center gap-1">
-                        <Download className="h-4 w-4 text-gray-400" />
-                        {(mockDesigners[2].totalDownloads / 1000).toFixed(0)}K
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Star className="h-4 w-4 text-yellow-500" />
-                        {mockDesigners[2].rating}
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
+                      <p className="text-sm text-gray-600 mb-3">{mockDesigners[0].bio}</p>
+                      <div className="flex items-center gap-4 text-sm">
+                        <span className="flex items-center gap-1">
+                          <Download className="h-4 w-4 text-gray-400" />
+                          {(mockDesigners[0].totalDownloads / 1000).toFixed(0)}K
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Star className="h-4 w-4 text-yellow-500" />
+                          {mockDesigners[0].rating}
+                        </span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
               </div>
 
               {/* Main Content */}

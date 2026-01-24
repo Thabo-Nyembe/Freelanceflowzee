@@ -4,11 +4,14 @@
 
 import { createClient } from '@/lib/supabase/client'
 // MIGRATED: Batch #18 - Verified database hook integration
-// Hooks used: useTrainingPrograms, useTrainingMutations
+// Hooks used: useTrainingPrograms, useTrainingMutations, useCourses, useLearning, useUserProgress, useCertifications
 
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
 import { useTrainingPrograms, useTrainingMutations, TrainingProgram } from '@/lib/hooks/use-training'
+import { useCourses, useLearning, useUserProgress } from '@/lib/hooks/use-learning'
+import { useCertifications } from '@/lib/hooks/use-certifications'
+import { useAuth } from '@/lib/hooks/use-auth'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -218,231 +221,38 @@ interface LearningStats {
   rank: number
 }
 
-// Mock data
-const mockInstructors: Instructor[] = [
-  { id: 'i1', name: 'Dr. Sarah Chen', title: 'Senior Technical Lead', courses: 12, rating: 4.9, students: 2456 },
-  { id: 'i2', name: 'Michael Foster', title: 'Leadership Coach', courses: 8, rating: 4.8, students: 1823 },
-  { id: 'i3', name: 'Emily Rodriguez', title: 'Compliance Expert', courses: 5, rating: 4.7, students: 3421 },
-]
+// Default instructor for course transformation
+const defaultInstructor: Instructor = {
+  id: 'default',
+  name: 'Training Team',
+  title: 'Instructor',
+  courses: 0,
+  rating: 0,
+  students: 0
+}
 
-const mockCourses: Course[] = [
-  {
-    id: 'c1',
-    title: 'Advanced TypeScript Development',
-    description: 'Master TypeScript with advanced patterns, generics, and best practices for enterprise applications.',
-    category: 'technical',
-    status: 'published',
-    difficulty: 'advanced',
-    instructor: mockInstructors[0],
-    duration: '12h 30m',
-    modules: [
-      { id: 'm1', title: 'TypeScript Fundamentals Review', lessons: [], duration: '2h', order: 1 },
-      { id: 'm2', title: 'Advanced Generics', lessons: [], duration: '3h', order: 2 },
-      { id: 'm3', title: 'Design Patterns in TypeScript', lessons: [], duration: '4h', order: 3 },
-    ],
-    enrollments: 856,
-    rating: 4.9,
-    reviews: 234,
-    tags: ['typescript', 'programming', 'frontend'],
-    isFeatured: true,
-    isMandatory: false,
-    prerequisites: ['JavaScript Fundamentals'],
-    skills: ['TypeScript', 'Software Design', 'Code Quality'],
-    certificationId: 'cert1',
-    createdAt: '2024-08-15',
-    updatedAt: '2024-12-20'
-  },
-  {
-    id: 'c2',
-    title: 'Leadership Excellence Program',
-    description: 'Develop essential leadership skills including communication, delegation, and team management.',
-    category: 'leadership',
-    status: 'published',
-    difficulty: 'intermediate',
-    instructor: mockInstructors[1],
-    duration: '8h 15m',
-    modules: [
-      { id: 'm4', title: 'Leadership Foundations', lessons: [], duration: '2h', order: 1 },
-      { id: 'm5', title: 'Effective Communication', lessons: [], duration: '3h', order: 2 },
-      { id: 'm6', title: 'Team Building', lessons: [], duration: '3h', order: 3 },
-    ],
-    enrollments: 1243,
-    rating: 4.8,
-    reviews: 456,
-    tags: ['leadership', 'management', 'soft-skills'],
-    isFeatured: true,
-    isMandatory: false,
-    prerequisites: [],
-    skills: ['Leadership', 'Communication', 'Team Management'],
-    createdAt: '2024-06-10',
-    updatedAt: '2024-12-18'
-  },
-  {
-    id: 'c3',
-    title: 'Data Privacy & Compliance 2024',
-    description: 'Annual compliance training covering GDPR, CCPA, and company data handling policies.',
-    category: 'compliance',
-    status: 'published',
-    difficulty: 'beginner',
-    instructor: mockInstructors[2],
-    duration: '2h 45m',
-    modules: [
-      { id: 'm7', title: 'Introduction to Data Privacy', lessons: [], duration: '45m', order: 1 },
-      { id: 'm8', title: 'GDPR Requirements', lessons: [], duration: '1h', order: 2 },
-      { id: 'm9', title: 'Company Policies', lessons: [], duration: '1h', order: 3 },
-    ],
-    enrollments: 4521,
-    rating: 4.5,
-    reviews: 892,
-    tags: ['compliance', 'gdpr', 'privacy', 'mandatory'],
-    isFeatured: false,
-    isMandatory: true,
-    dueDate: '2025-01-31',
-    prerequisites: [],
-    skills: ['Data Privacy', 'Compliance', 'Risk Management'],
-    certificationId: 'cert2',
-    createdAt: '2024-01-05',
-    updatedAt: '2024-12-01'
-  },
-  {
-    id: 'c4',
-    title: 'New Employee Onboarding',
-    description: 'Welcome to the team! Learn about our culture, tools, and processes to get started.',
-    category: 'onboarding',
-    status: 'published',
-    difficulty: 'beginner',
-    instructor: mockInstructors[1],
-    duration: '4h 00m',
-    modules: [
-      { id: 'm10', title: 'Company Overview', lessons: [], duration: '1h', order: 1 },
-      { id: 'm11', title: 'Tools & Systems', lessons: [], duration: '1.5h', order: 2 },
-      { id: 'm12', title: 'Team & Culture', lessons: [], duration: '1.5h', order: 3 },
-    ],
-    enrollments: 2341,
-    rating: 4.7,
-    reviews: 567,
-    tags: ['onboarding', 'new-hire', 'culture'],
-    isFeatured: false,
-    isMandatory: true,
-    prerequisites: [],
-    skills: ['Company Knowledge', 'Tools Proficiency'],
-    createdAt: '2024-01-01',
-    updatedAt: '2024-11-15'
-  },
-  {
-    id: 'c5',
-    title: 'Effective Communication Skills',
-    description: 'Master the art of professional communication in various workplace scenarios.',
-    category: 'soft_skills',
-    status: 'published',
-    difficulty: 'intermediate',
-    instructor: mockInstructors[1],
-    duration: '6h 00m',
-    modules: [],
-    enrollments: 1567,
-    rating: 4.6,
-    reviews: 321,
-    tags: ['communication', 'soft-skills', 'presentation'],
-    isFeatured: false,
-    isMandatory: false,
-    prerequisites: [],
-    skills: ['Communication', 'Presentation', 'Writing'],
-    createdAt: '2024-03-20',
-    updatedAt: '2024-10-10'
-  },
-]
+// Helper to format duration from minutes to readable string
+const formatDuration = (minutes: number): string => {
+  if (!minutes || minutes === 0) return '0m'
+  const hours = Math.floor(minutes / 60)
+  const mins = minutes % 60
+  if (hours === 0) return `${mins}m`
+  if (mins === 0) return `${hours}h`
+  return `${hours}h ${mins}m`
+}
 
-const mockLearningPaths: LearningPath[] = [
-  {
-    id: 'lp1',
-    title: 'Full-Stack Developer Path',
-    description: 'Become a proficient full-stack developer with this comprehensive learning track.',
-    courses: mockCourses.filter(c => c.category === 'technical'),
-    duration: '45h',
-    enrollments: 456,
-    completionRate: 34,
-    skills: ['Frontend', 'Backend', 'Database', 'DevOps'],
-    level: 'intermediate',
-    certificationId: 'cert3'
-  },
-  {
-    id: 'lp2',
-    title: 'Management Track',
-    description: 'Prepare for leadership roles with essential management and leadership skills.',
-    courses: mockCourses.filter(c => c.category === 'leadership'),
-    duration: '24h',
-    enrollments: 234,
-    completionRate: 45,
-    skills: ['Leadership', 'Management', 'Strategy'],
-    level: 'advanced'
-  },
-]
-
-const mockEnrollments: Enrollment[] = [
-  {
-    id: 'e1',
-    userId: 'u1',
-    courseId: 'c1',
-    course: mockCourses[0],
-    status: 'in_progress',
-    progress: 65,
-    startedAt: '2024-11-15',
-    lastAccessedAt: '2024-12-22',
-    timeSpent: '8h 15m',
-    score: 87
-  },
-  {
-    id: 'e2',
-    userId: 'u1',
-    courseId: 'c3',
-    course: mockCourses[2],
-    status: 'completed',
-    progress: 100,
-    startedAt: '2024-12-01',
-    completedAt: '2024-12-15',
-    lastAccessedAt: '2024-12-15',
-    timeSpent: '2h 45m',
-    score: 95,
-    certificateUrl: '/certificates/cert2.pdf'
-  },
-  {
-    id: 'e3',
-    userId: 'u1',
-    courseId: 'c4',
-    course: mockCourses[3],
-    status: 'not_started',
-    progress: 0,
-    startedAt: '2024-12-20',
-    lastAccessedAt: '2024-12-20',
-    timeSpent: '0m'
-  },
-]
-
-const mockCertifications: Certification[] = [
-  { id: 'cert1', name: 'TypeScript Professional', description: 'Demonstrates advanced TypeScript proficiency', requirements: ['Complete Advanced TypeScript Development', 'Pass final exam with 85%+'], validityPeriod: '2 years', earnedCount: 234 },
-  { id: 'cert2', name: 'Data Privacy Certified', description: 'Certified in data privacy compliance', requirements: ['Complete Data Privacy & Compliance 2024', 'Pass compliance exam'], validityPeriod: '1 year', earnedCount: 3421 },
-  { id: 'cert3', name: 'Full-Stack Developer', description: 'Certified full-stack development skills', requirements: ['Complete Full-Stack Developer Path', 'Submit portfolio project'], validityPeriod: '3 years', earnedCount: 156 },
-]
-
-const mockLeaderboard: LeaderboardEntry[] = [
-  { rank: 1, userId: 'u2', name: 'Alex Thompson', points: 12450, coursesCompleted: 24, badges: 15, streak: 45 },
-  { rank: 2, userId: 'u3', name: 'Sarah Miller', points: 11230, coursesCompleted: 22, badges: 13, streak: 32 },
-  { rank: 3, userId: 'u4', name: 'James Wilson', points: 10890, coursesCompleted: 20, badges: 12, streak: 28 },
-  { rank: 4, userId: 'u1', name: 'You', points: 8750, coursesCompleted: 15, badges: 9, streak: 12 },
-  { rank: 5, userId: 'u5', name: 'Emily Chen', points: 8230, coursesCompleted: 14, badges: 8, streak: 18 },
-]
-
-const mockStats: LearningStats = {
-  totalCourses: mockCourses.length,
-  enrolledCourses: mockEnrollments.length,
-  completedCourses: mockEnrollments.filter(e => e.status === 'completed').length,
-  inProgressCourses: mockEnrollments.filter(e => e.status === 'in_progress').length,
-  totalLearningTime: '28h 45m',
-  averageScore: 91,
-  certificationsEarned: 2,
-  currentStreak: 12,
-  points: 8750,
-  rank: 4
+// Default empty stats
+const defaultStats: LearningStats = {
+  totalCourses: 0,
+  enrolledCourses: 0,
+  completedCourses: 0,
+  inProgressCourses: 0,
+  totalLearningTime: '0h',
+  averageScore: 0,
+  certificationsEarned: 0,
+  currentStreak: 0,
+  points: 0,
+  rank: 0
 }
 
 // Helper functions
@@ -541,6 +351,10 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
   const trainingActivities: any[] = []
   const trainingQuickActions: any[] = []
 
+  // Get user authentication
+  const { user } = useAuth()
+  const userId = user?.id
+
   // Hooks for real data
   const { programs: dbPrograms, stats: dbStats, isLoading, refetch } = useTrainingPrograms(initialPrograms || [])
   const {
@@ -550,6 +364,199 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
     enrollTrainee, isEnrolling,
     updateEnrollment, isUpdatingEnrollment
   } = useTrainingMutations()
+
+  // Additional hooks for courses, learning paths, user progress, certifications
+  const { courses: dbCourses, loading: coursesLoading } = useCourses()
+  const { paths: dbLearningPaths, loading: pathsLoading } = useLearning()
+  const { progress: dbUserProgress, loading: progressLoading } = useUserProgress()
+  const { certifications: dbCertifications, loading: certificationsLoading } = useCertifications()
+
+  // State for leaderboard (fetched from database)
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
+  const [leaderboardLoading, setLeaderboardLoading] = useState(true)
+
+  // Fetch leaderboard data
+  useEffect(() => {
+    const fetchLeaderboard = async () => {
+      if (!userId) return
+      setLeaderboardLoading(true)
+      try {
+        const { data, error } = await supabase
+          .from('training_leaderboard')
+          .select('*')
+          .order('points', { ascending: false })
+          .limit(10)
+
+        if (error) throw error
+
+        const leaderboardData: LeaderboardEntry[] = (data || []).map((entry: any, index: number) => ({
+          rank: index + 1,
+          userId: entry.user_id,
+          name: entry.user_id === userId ? 'You' : entry.user_name || 'Learner',
+          avatar: entry.avatar_url,
+          points: entry.points || 0,
+          coursesCompleted: entry.courses_completed || 0,
+          badges: entry.badges || 0,
+          streak: entry.streak || 0
+        }))
+
+        setLeaderboard(leaderboardData)
+      } catch (error) {
+        console.error('Failed to fetch leaderboard:', error)
+        // Use empty leaderboard on error
+        setLeaderboard([])
+      } finally {
+        setLeaderboardLoading(false)
+      }
+    }
+
+    fetchLeaderboard()
+  }, [userId])
+
+  // Transform database courses to Course type
+  const courses: Course[] = useMemo(() => {
+    if (!dbCourses || dbCourses.length === 0) return []
+    return dbCourses.map((course: any) => ({
+      id: course.id,
+      title: course.title || 'Untitled Course',
+      description: course.description || '',
+      category: (course.category as CourseCategory) || 'technical',
+      status: (course.status as CourseStatus) || 'published',
+      difficulty: (course.level as DifficultyLevel) || 'beginner',
+      instructor: {
+        id: course.instructor_id || 'default',
+        name: course.instructor_name || 'Training Team',
+        title: 'Instructor',
+        courses: 0,
+        rating: 0,
+        students: 0
+      },
+      duration: formatDuration(course.total_duration || 0),
+      modules: [],
+      enrollments: course.enrolled_count || 0,
+      rating: course.rating || 0,
+      reviews: course.reviews_count || 0,
+      tags: course.skills || [],
+      isFeatured: course.is_featured || false,
+      isMandatory: false,
+      prerequisites: [],
+      skills: course.skills || [],
+      certificationId: course.has_certificate ? course.id : undefined,
+      createdAt: course.created_at || new Date().toISOString(),
+      updatedAt: course.updated_at || new Date().toISOString()
+    }))
+  }, [dbCourses])
+
+  // Transform database learning paths to LearningPath type
+  const learningPaths: LearningPath[] = useMemo(() => {
+    if (!dbLearningPaths || dbLearningPaths.length === 0) return []
+    return dbLearningPaths.map((path: any) => ({
+      id: path.id,
+      title: path.title || 'Learning Path',
+      description: path.description || '',
+      courses: [],
+      duration: formatDuration(path.total_duration || 0),
+      enrollments: path.enrolled_count || 0,
+      completionRate: 0,
+      skills: path.skills || [],
+      level: (path.level as DifficultyLevel) || 'intermediate',
+      certificationId: undefined
+    }))
+  }, [dbLearningPaths])
+
+  // Transform database user progress to Enrollment type
+  const enrollments: Enrollment[] = useMemo(() => {
+    if (!dbUserProgress || dbUserProgress.length === 0) return []
+    return dbUserProgress.map((progress: any) => {
+      const course = courses.find(c => c.id === progress.course_id) || {
+        id: progress.course_id,
+        title: 'Course',
+        description: '',
+        category: 'technical' as CourseCategory,
+        status: 'published' as CourseStatus,
+        difficulty: 'beginner' as DifficultyLevel,
+        instructor: defaultInstructor,
+        duration: '0h',
+        modules: [],
+        enrollments: 0,
+        rating: 0,
+        reviews: 0,
+        tags: [],
+        isFeatured: false,
+        isMandatory: false,
+        prerequisites: [],
+        skills: [],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }
+
+      const progressPercent = progress.progress || 0
+      let status: EnrollmentStatus = 'not_started'
+      if (progress.completed_at) {
+        status = 'completed'
+      } else if (progressPercent > 0) {
+        status = 'in_progress'
+      }
+
+      return {
+        id: progress.id,
+        userId: progress.user_id,
+        courseId: progress.course_id,
+        course,
+        status,
+        progress: progressPercent,
+        startedAt: progress.created_at || new Date().toISOString(),
+        completedAt: progress.completed_at,
+        lastAccessedAt: progress.last_accessed_at || new Date().toISOString(),
+        timeSpent: formatDuration(progress.time_spent || 0),
+        score: progress.score,
+        certificateUrl: progress.certificate_url
+      }
+    })
+  }, [dbUserProgress, courses])
+
+  // Transform database certifications to Certification type
+  const certifications: Certification[] = useMemo(() => {
+    if (!dbCertifications || dbCertifications.length === 0) return []
+    return dbCertifications.map((cert: any) => ({
+      id: cert.id,
+      name: cert.certification_name || 'Certification',
+      description: cert.scope || '',
+      requirements: cert.renewal_requirements || [],
+      validityPeriod: cert.expiry_date ? 'Until ' + new Date(cert.expiry_date).toLocaleDateString() : 'No expiry',
+      earnedCount: 0,
+      badgeUrl: cert.digital_badge_url
+    }))
+  }, [dbCertifications])
+
+  // Compute stats from real data
+  const learningStats: LearningStats = useMemo(() => {
+    const completedEnrollments = enrollments.filter(e => e.status === 'completed')
+    const inProgressEnrollments = enrollments.filter(e => e.status === 'in_progress')
+
+    // Calculate total learning time from enrollments
+    const totalMinutes = dbUserProgress?.reduce((sum: number, p: any) => sum + (p.time_spent || 0), 0) || 0
+
+    // Calculate average score from completed enrollments
+    const scoresSum = completedEnrollments.reduce((sum, e) => sum + (e.score || 0), 0)
+    const avgScore = completedEnrollments.length > 0 ? Math.round(scoresSum / completedEnrollments.length) : 0
+
+    // Find user's position in leaderboard
+    const userEntry = leaderboard.find(e => e.userId === userId)
+
+    return {
+      totalCourses: courses.length,
+      enrolledCourses: enrollments.length,
+      completedCourses: completedEnrollments.length,
+      inProgressCourses: inProgressEnrollments.length,
+      totalLearningTime: formatDuration(totalMinutes),
+      averageScore: avgScore,
+      certificationsEarned: certifications.filter((c: any) => c.status === 'active').length,
+      currentStreak: userEntry?.streak || 0,
+      points: userEntry?.points || 0,
+      rank: userEntry?.rank || 0
+    }
+  }, [courses, enrollments, certifications, leaderboard, userId, dbUserProgress])
 
 
   // UI state
@@ -602,7 +609,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
 
   // Filter courses
   const filteredCourses = useMemo(() => {
-    let result = [...mockCourses]
+    let result = [...courses]
 
     if (searchQuery) {
       const query = searchQuery.toLowerCase()
@@ -623,7 +630,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
     }
 
     return result
-  }, [searchQuery, categoryFilter, difficultyFilter])
+  }, [courses, searchQuery, categoryFilter, difficultyFilter])
 
   // CRUD Handlers
   const handleCreateCourse = useCallback(async () => {
@@ -1135,11 +1142,11 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-orange-100 text-orange-700">
               <Flame className="w-4 h-4" />
-              <span className="font-medium">{mockStats.currentStreak} day streak</span>
+              <span className="font-medium">{learningStats.currentStreak} day streak</span>
             </div>
             <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-yellow-100 text-yellow-700">
               <Trophy className="w-4 h-4" />
-              <span className="font-medium">{mockStats.points.toLocaleString()} pts</span>
+              <span className="font-medium">{learningStats.points.toLocaleString()} pts</span>
             </div>
             <Button
               className="bg-emerald-600 hover:bg-emerald-700 text-white"
@@ -1163,7 +1170,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
                 <BookOpen className="w-4 h-4 text-emerald-600" />
                 <span className="text-xs text-gray-500">Enrolled</span>
               </div>
-              <div className="text-2xl font-bold text-gray-900 dark:text-white">{mockStats.enrolledCourses}</div>
+              <div className="text-2xl font-bold text-gray-900 dark:text-white">{learningStats.enrolledCourses}</div>
             </CardContent>
           </Card>
 
@@ -1173,7 +1180,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
                 <Play className="w-4 h-4 text-blue-600" />
                 <span className="text-xs text-gray-500">In Progress</span>
               </div>
-              <div className="text-2xl font-bold text-gray-900 dark:text-white">{mockStats.inProgressCourses}</div>
+              <div className="text-2xl font-bold text-gray-900 dark:text-white">{learningStats.inProgressCourses}</div>
             </CardContent>
           </Card>
 
@@ -1183,7 +1190,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
                 <CheckCircle2 className="w-4 h-4 text-green-600" />
                 <span className="text-xs text-gray-500">Completed</span>
               </div>
-              <div className="text-2xl font-bold text-gray-900 dark:text-white">{mockStats.completedCourses}</div>
+              <div className="text-2xl font-bold text-gray-900 dark:text-white">{learningStats.completedCourses}</div>
             </CardContent>
           </Card>
 
@@ -1193,7 +1200,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
                 <Clock className="w-4 h-4 text-purple-600" />
                 <span className="text-xs text-gray-500">Learning Time</span>
               </div>
-              <div className="text-2xl font-bold text-gray-900 dark:text-white">{mockStats.totalLearningTime}</div>
+              <div className="text-2xl font-bold text-gray-900 dark:text-white">{learningStats.totalLearningTime}</div>
             </CardContent>
           </Card>
 
@@ -1203,7 +1210,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
                 <Target className="w-4 h-4 text-orange-600" />
                 <span className="text-xs text-gray-500">Avg Score</span>
               </div>
-              <div className="text-2xl font-bold text-gray-900 dark:text-white">{mockStats.averageScore}%</div>
+              <div className="text-2xl font-bold text-gray-900 dark:text-white">{learningStats.averageScore}%</div>
             </CardContent>
           </Card>
 
@@ -1213,7 +1220,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
                 <Award className="w-4 h-4 text-yellow-600" />
                 <span className="text-xs text-gray-500">Certificates</span>
               </div>
-              <div className="text-2xl font-bold text-gray-900 dark:text-white">{mockStats.certificationsEarned}</div>
+              <div className="text-2xl font-bold text-gray-900 dark:text-white">{learningStats.certificationsEarned}</div>
             </CardContent>
           </Card>
 
@@ -1223,7 +1230,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
                 <Medal className="w-4 h-4 text-indigo-600" />
                 <span className="text-xs text-gray-500">Rank</span>
               </div>
-              <div className="text-2xl font-bold text-gray-900 dark:text-white">#{mockStats.rank}</div>
+              <div className="text-2xl font-bold text-gray-900 dark:text-white">#{learningStats.rank}</div>
             </CardContent>
           </Card>
 
@@ -1233,7 +1240,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
                 <Flame className="w-4 h-4 text-red-600" />
                 <span className="text-xs text-gray-500">Streak</span>
               </div>
-              <div className="text-2xl font-bold text-gray-900 dark:text-white">{mockStats.currentStreak}d</div>
+              <div className="text-2xl font-bold text-gray-900 dark:text-white">{learningStats.currentStreak}d</div>
             </CardContent>
           </Card>
         </div>
@@ -1513,7 +1520,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
           <TabsContent value="my-learning" className="space-y-4">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Continue Learning</h3>
             <div className="space-y-3">
-              {mockEnrollments.map((enrollment) => (
+              {enrollments.map((enrollment) => (
                 <Card key={enrollment.id} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm">
                   <CardContent className="p-4">
                     <div className="flex items-center gap-4">
@@ -1559,7 +1566,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
           {/* Learning Paths Tab */}
           <TabsContent value="paths" className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {mockLearningPaths.map((path) => (
+              {learningPaths.map((path) => (
                 <Card key={path.id} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm">
                   <CardContent className="p-6">
                     <div className="flex items-center gap-2 mb-3">
@@ -1610,7 +1617,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
           {/* Certifications Tab */}
           <TabsContent value="certifications" className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {mockCertifications.map((cert) => (
+              {certifications.map((cert) => (
                 <Card key={cert.id} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm">
                   <CardContent className="p-6 text-center">
                     <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center">
@@ -1640,7 +1647,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {mockLeaderboard.map((entry) => (
+                  {leaderboard.map((entry) => (
                     <div
                       key={entry.userId}
                       className={`flex items-center gap-4 p-4 rounded-lg ${
@@ -2416,7 +2423,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
                             </div>
                             <div>
                               <div className="font-medium">Current Streak</div>
-                              <div className="text-sm text-gray-500">{mockStats.currentStreak} days</div>
+                              <div className="text-sm text-gray-500">{learningStats.currentStreak} days</div>
                             </div>
                           </div>
                           <Badge className="bg-orange-100 text-orange-700">Active</Badge>
@@ -2471,11 +2478,11 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
                       <CardContent className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                           <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
-                            <div className="text-2xl font-bold">{mockStats.enrolledCourses}</div>
+                            <div className="text-2xl font-bold">{learningStats.enrolledCourses}</div>
                             <div className="text-sm text-gray-500">Enrollments</div>
                           </div>
                           <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
-                            <div className="text-2xl font-bold">{mockStats.completedCourses}</div>
+                            <div className="text-2xl font-bold">{learningStats.completedCourses}</div>
                             <div className="text-sm text-gray-500">Completed</div>
                           </div>
                           <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
@@ -3650,7 +3657,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
             <div className="py-4">
               <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200">
                 <p className="text-sm text-red-800 dark:text-red-200">
-                  Warning: This will revoke all {mockStats.certificationsEarned} certificates you have earned.
+                  Warning: This will revoke all {learningStats.certificationsEarned} certificates you have earned.
                   You will need to complete the courses again to re-earn them.
                 </p>
               </div>

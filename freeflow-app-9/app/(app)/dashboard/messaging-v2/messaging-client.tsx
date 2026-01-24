@@ -54,9 +54,7 @@ import {
   Circle,
   Square,
   ScreenShare,
-  ScreenShareOff,
-  Users2,
-  Settings2
+  ScreenShareOff
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -79,8 +77,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
-import { useConversations, useMessagingMutations } from '@/lib/hooks/use-messaging'
+import { useConversations, useMessagingMutations, useDirectMessages as useDirectMessagesHook } from '@/lib/hooks/use-messaging'
 import { useVoiceVideo, useActiveCall } from '@/lib/hooks/use-voice-video'
+import { useAuth } from '@/lib/hooks/use-auth'
+import { useUsers } from '@/lib/hooks/use-users-extended'
 
 // Initialize Supabase client once at module level
 const supabase = createClient()
@@ -197,145 +197,118 @@ interface SearchResult {
 }
 
 // ============================================================================
-// MOCK DATA
+// HELPER FUNCTIONS
 // ============================================================================
 
-const mockUsers: User[] = [
-  { id: 'user-1', name: 'John Smith', displayName: 'john', avatar: '/avatars/john.jpg', email: 'john@company.com', status: 'online', statusMessage: 'Working on the new feature', role: 'admin', lastSeen: '2024-12-23T10:30:00Z' },
-  { id: 'user-2', name: 'Sarah Chen', displayName: 'sarah', avatar: '/avatars/sarah.jpg', email: 'sarah@company.com', status: 'online', statusMessage: null, role: 'member', lastSeen: '2024-12-23T10:28:00Z' },
-  { id: 'user-3', name: 'Mike Johnson', displayName: 'mike', avatar: '/avatars/mike.jpg', email: 'mike@company.com', status: 'away', statusMessage: 'In a meeting', role: 'member', lastSeen: '2024-12-23T09:45:00Z' },
-  { id: 'user-4', name: 'Emily Davis', displayName: 'emily', avatar: '/avatars/emily.jpg', email: 'emily@company.com', status: 'dnd', statusMessage: 'Deep work - no interruptions', role: 'member', lastSeen: '2024-12-23T08:00:00Z' },
-  { id: 'user-5', name: 'Alex Wilson', displayName: 'alex', avatar: '/avatars/alex.jpg', email: 'alex@company.com', status: 'offline', statusMessage: null, role: 'guest', lastSeen: '2024-12-22T18:30:00Z' }
-]
-
-const currentUser = mockUsers[0]
-
-const mockChannels: Channel[] = [
-  { id: 'ch-1', name: 'general', description: 'General discussion for the team', type: 'public', categoryId: 'cat-1', memberCount: 45, unreadCount: 3, mentionCount: 1, lastMessageAt: '2024-12-23T10:30:00Z', lastMessage: 'Hey team, quick update on the project...', isPinned: false, isMuted: false, isArchived: false, topic: 'Company-wide announcements and general discussion', createdBy: mockUsers[0], createdAt: '2024-01-01T00:00:00Z' },
-  { id: 'ch-2', name: 'engineering', description: 'Engineering team discussions', type: 'public', categoryId: 'cat-1', memberCount: 28, unreadCount: 12, mentionCount: 2, lastMessageAt: '2024-12-23T10:25:00Z', lastMessage: 'The PR is ready for review', isPinned: true, isMuted: false, isArchived: false, topic: 'Technical discussions, code reviews, and architecture decisions', createdBy: mockUsers[0], createdAt: '2024-01-15T00:00:00Z' },
-  { id: 'ch-3', name: 'design', description: 'Design team channel', type: 'public', categoryId: 'cat-1', memberCount: 15, unreadCount: 0, mentionCount: 0, lastMessageAt: '2024-12-23T09:00:00Z', lastMessage: 'New mockups are in Figma!', isPinned: false, isMuted: false, isArchived: false, topic: 'UI/UX design discussions and feedback', createdBy: mockUsers[1], createdAt: '2024-02-01T00:00:00Z' },
-  { id: 'ch-4', name: 'project-alpha', description: 'Project Alpha team', type: 'private', categoryId: 'cat-2', memberCount: 8, unreadCount: 5, mentionCount: 0, lastMessageAt: '2024-12-23T10:15:00Z', lastMessage: 'Sprint planning at 2pm', isPinned: false, isMuted: false, isArchived: false, topic: 'Project Alpha development and planning', createdBy: mockUsers[0], createdAt: '2024-06-01T00:00:00Z' },
-  { id: 'ch-5', name: 'random', description: 'Random fun stuff', type: 'public', categoryId: 'cat-3', memberCount: 40, unreadCount: 8, mentionCount: 0, lastMessageAt: '2024-12-23T10:20:00Z', lastMessage: 'Check out this meme 😂', isPinned: false, isMuted: true, isArchived: false, topic: 'Off-topic conversations and fun', createdBy: mockUsers[2], createdAt: '2024-01-01T00:00:00Z' },
-  { id: 'ch-6', name: 'announcements', description: 'Official announcements', type: 'public', categoryId: 'cat-1', memberCount: 50, unreadCount: 1, mentionCount: 1, lastMessageAt: '2024-12-22T15:00:00Z', lastMessage: 'Holiday schedule update', isPinned: true, isMuted: false, isArchived: false, topic: 'Company announcements - please keep discussions minimal', createdBy: mockUsers[0], createdAt: '2024-01-01T00:00:00Z' }
-]
-
-const mockCategories: ChannelCategory[] = [
-  { id: 'cat-1', name: 'Work', channels: mockChannels.filter(c => ['ch-1', 'ch-2', 'ch-3', 'ch-6'].includes(c.id)), isCollapsed: false },
-  { id: 'cat-2', name: 'Projects', channels: mockChannels.filter(c => c.id === 'ch-4'), isCollapsed: false },
-  { id: 'cat-3', name: 'Social', channels: mockChannels.filter(c => c.id === 'ch-5'), isCollapsed: true }
-]
-
-const mockMessages: Message[] = [
-  {
-    id: 'msg-1',
-    channelId: 'ch-1',
-    threadId: null,
-    parentId: null,
-    author: mockUsers[1],
-    content: 'Hey team! Just pushed the new feature to staging. Can someone take a look? 🚀',
-    timestamp: '2024-12-23T10:30:00Z',
-    editedAt: null,
-    reactions: [
-      { emoji: '👍', count: 3, users: ['user-1', 'user-3', 'user-4'], reacted: true },
-      { emoji: '🚀', count: 2, users: ['user-1', 'user-2'], reacted: true },
-      { emoji: '👀', count: 1, users: ['user-5'], reacted: false }
-    ],
-    attachments: [],
-    mentions: [],
-    isPinned: false,
-    isBookmarked: false,
-    replyCount: 5,
-    isEdited: false,
-    isDeleted: false
-  },
-  {
-    id: 'msg-2',
-    channelId: 'ch-1',
-    threadId: null,
-    parentId: null,
-    author: mockUsers[0],
-    content: 'Looking great! I\'ll review it after lunch. @sarah can you pair with me?',
-    timestamp: '2024-12-23T10:32:00Z',
-    editedAt: null,
-    reactions: [{ emoji: '✅', count: 1, users: ['user-2'], reacted: false }],
-    attachments: [],
-    mentions: ['user-2'],
-    isPinned: false,
-    isBookmarked: true,
-    replyCount: 0,
-    isEdited: false,
-    isDeleted: false
-  },
-  {
-    id: 'msg-3',
-    channelId: 'ch-1',
-    threadId: null,
-    parentId: null,
-    author: mockUsers[2],
-    content: 'Here\'s the design spec for the new dashboard:\n\n```typescript\ninterface Dashboard {\n  widgets: Widget[]\n  layout: GridLayout\n  theme: ThemeConfig\n}\n```\n\nLet me know if you have questions!',
-    timestamp: '2024-12-23T10:35:00Z',
-    editedAt: '2024-12-23T10:36:00Z',
-    reactions: [{ emoji: '🔥', count: 4, users: ['user-1', 'user-2', 'user-4', 'user-5'], reacted: true }],
-    attachments: [
-      { id: 'att-1', type: 'file', name: 'dashboard-spec.pdf', url: '/files/dashboard-spec.pdf', size: 2450000, mimeType: 'application/pdf' }
-    ],
-    mentions: [],
-    isPinned: true,
-    isBookmarked: false,
-    replyCount: 3,
-    isEdited: true,
-    isDeleted: false
-  },
-  {
-    id: 'msg-4',
-    channelId: 'ch-1',
-    threadId: null,
-    parentId: null,
-    author: mockUsers[3],
-    content: 'Quick reminder: Team standup in 15 minutes! Join here: https://meet.google.com/abc-defg-hij',
-    timestamp: '2024-12-23T10:40:00Z',
-    editedAt: null,
-    reactions: [{ emoji: '👋', count: 6, users: ['user-1', 'user-2', 'user-3', 'user-4', 'user-5', 'user-6'], reacted: true }],
-    attachments: [
-      { id: 'att-2', type: 'link', name: 'Google Meet', url: 'https://meet.google.com/abc-defg-hij', size: 0, mimeType: 'text/html', preview: { title: 'Google Meet', description: 'Video conferencing by Google', image: '/previews/meet.png' } }
-    ],
-    mentions: [],
-    isPinned: false,
-    isBookmarked: false,
-    replyCount: 0,
-    isEdited: false,
-    isDeleted: false
-  },
-  {
-    id: 'msg-5',
-    channelId: 'ch-1',
-    threadId: null,
-    parentId: null,
-    author: mockUsers[4],
-    content: 'Check out this progress on the new UI! 🎨',
-    timestamp: '2024-12-23T10:45:00Z',
-    editedAt: null,
-    reactions: [
-      { emoji: '😍', count: 5, users: ['user-1', 'user-2', 'user-3', 'user-4', 'user-5'], reacted: true },
-      { emoji: '🎉', count: 3, users: ['user-1', 'user-3', 'user-5'], reacted: true }
-    ],
-    attachments: [
-      { id: 'att-3', type: 'image', name: 'ui-progress.png', url: '/images/ui-progress.png', size: 1250000, mimeType: 'image/png', thumbnail: '/thumbnails/ui-progress.png' }
-    ],
-    mentions: [],
-    isPinned: false,
-    isBookmarked: false,
-    replyCount: 8,
-    isEdited: false,
-    isDeleted: false
+// Transform DB user to messaging User type
+function transformDbUserToUser(dbUser: any): User {
+  return {
+    id: dbUser.id,
+    name: dbUser.full_name || dbUser.email?.split('@')[0] || 'Unknown',
+    displayName: dbUser.full_name?.toLowerCase().replace(/\s/g, '') || dbUser.email?.split('@')[0] || 'unknown',
+    avatar: dbUser.avatar_url || '',
+    email: dbUser.email || '',
+    status: 'online' as const,
+    statusMessage: null,
+    role: (dbUser.role as 'admin' | 'member' | 'guest') || 'member',
+    lastSeen: dbUser.updated_at || dbUser.created_at || new Date().toISOString()
   }
-]
+}
 
-const mockDirectMessages: DirectMessage[] = [
-  { id: 'dm-1', participants: [mockUsers[0], mockUsers[1]], lastMessage: mockMessages[0], unreadCount: 2, isPinned: true, isMuted: false },
-  { id: 'dm-2', participants: [mockUsers[0], mockUsers[2]], lastMessage: null, unreadCount: 0, isPinned: false, isMuted: false },
-  { id: 'dm-3', participants: [mockUsers[0], mockUsers[3], mockUsers[4]], lastMessage: mockMessages[1], unreadCount: 5, isPinned: false, isMuted: true }
-]
+// Transform conversation to Channel type
+function transformConversationToChannel(conv: any, defaultUser: User): Channel {
+  return {
+    id: conv.id,
+    name: conv.conversation_name || 'unnamed',
+    description: conv.metadata?.description || '',
+    type: conv.conversation_type === 'channel' ? 'public' : conv.metadata?.is_private ? 'private' : 'public',
+    categoryId: conv.metadata?.category_id || 'cat-1',
+    memberCount: conv.participant_count || 1,
+    unreadCount: conv.unread_count || 0,
+    mentionCount: 0,
+    lastMessageAt: conv.last_message_at || conv.updated_at,
+    lastMessage: conv.last_message_preview || null,
+    isPinned: conv.is_pinned || false,
+    isMuted: conv.is_muted || false,
+    isArchived: conv.status === 'archived',
+    topic: conv.metadata?.topic || '',
+    createdBy: defaultUser,
+    createdAt: conv.created_at
+  }
+}
+
+// Transform DB message to Message type
+function transformDbMessageToMessage(dbMsg: any, users: User[]): Message {
+  const author = users.find(u => u.id === dbMsg.sender_id) || {
+    id: dbMsg.sender_id || 'unknown',
+    name: dbMsg.sender_name || 'Unknown',
+    displayName: dbMsg.sender_name?.toLowerCase().replace(/\s/g, '') || 'unknown',
+    avatar: dbMsg.sender_avatar || '',
+    email: dbMsg.sender_email || '',
+    status: 'offline' as const,
+    statusMessage: null,
+    role: 'member' as const,
+    lastSeen: dbMsg.sent_at
+  }
+
+  return {
+    id: dbMsg.id,
+    channelId: dbMsg.conversation_id || '',
+    threadId: null,
+    parentId: dbMsg.reply_to_id || null,
+    author,
+    content: dbMsg.content || '',
+    timestamp: dbMsg.sent_at || dbMsg.created_at,
+    editedAt: dbMsg.edited_at || null,
+    reactions: dbMsg.reactions ? Object.entries(dbMsg.reactions).map(([emoji, data]: [string, any]) => ({
+      emoji,
+      count: data.count || 1,
+      users: data.users || [],
+      reacted: false
+    })) : [],
+    attachments: dbMsg.attachments || [],
+    mentions: [],
+    isPinned: dbMsg.metadata?.is_pinned || false,
+    isBookmarked: dbMsg.metadata?.is_bookmarked || false,
+    replyCount: 0,
+    isEdited: dbMsg.is_edited || false,
+    isDeleted: dbMsg.deleted_at !== null
+  }
+}
+
+// Transform DM conversation to DirectMessage type
+function transformDmConversationToDirectMessage(conv: any, users: User[], currentUserId: string): DirectMessage {
+  const participantIds = conv.participant_ids || []
+  const participants = participantIds
+    .map((id: string) => users.find(u => u.id === id))
+    .filter(Boolean) as User[]
+
+  // If no participants found, create placeholder from participant_emails
+  if (participants.length === 0 && conv.participant_emails) {
+    conv.participant_emails.forEach((email: string, idx: number) => {
+      participants.push({
+        id: participantIds[idx] || `temp-${idx}`,
+        name: email.split('@')[0],
+        displayName: email.split('@')[0].toLowerCase(),
+        avatar: '',
+        email,
+        status: 'offline',
+        statusMessage: null,
+        role: 'member',
+        lastSeen: conv.updated_at
+      })
+    })
+  }
+
+  return {
+    id: conv.id,
+    participants,
+    lastMessage: null,
+    unreadCount: conv.unread_count || 0,
+    isPinned: conv.is_pinned || false,
+    isMuted: conv.is_muted || false
+  }
+}
 
 // ============================================================================
 // EMOJI PICKER DATA
@@ -355,9 +328,17 @@ export default function MessagingClient() {
   const messagingActivities: any[] = []
   const messagingQuickActions: any[] = []
 
+  // Auth hook for current user
+  const { user: authUser, loading: authLoading } = useAuth()
+  const currentUserId = authUser?.id || null
+
+  // Users hook for team members
+  const { users: dbUsers, isLoading: usersLoading, refresh: refetchUsers } = useUsers({ is_active: true, limit: 100 })
+
   // Supabase hooks for real data
   const { conversations, loading: conversationsLoading, refetch: refetchConversations } = useConversations({ type: 'channel' })
   const { conversations: dmConversations, loading: dmsLoading, refetch: refetchDMs } = useConversations({ type: 'direct' })
+  const { messages: dbDirectMessages, loading: messagesLoading, refetch: refetchMessages } = useDirectMessagesHook({})
   const {
     createConversation,
     updateConversation,
@@ -366,6 +347,76 @@ export default function MessagingClient() {
     updateMessage,
     deleteMessage
   } = useMessagingMutations()
+
+  // Transform DB users to messaging User type
+  const users: User[] = useMemo(() => {
+    return dbUsers.map(transformDbUserToUser)
+  }, [dbUsers])
+
+  // Create currentUser from authenticated user
+  const currentUser: User = useMemo(() => {
+    if (authUser) {
+      return {
+        id: authUser.id,
+        name: authUser.user_metadata?.full_name || authUser.email?.split('@')[0] || 'You',
+        displayName: authUser.user_metadata?.full_name?.toLowerCase().replace(/\s/g, '') || authUser.email?.split('@')[0] || 'you',
+        avatar: authUser.user_metadata?.avatar_url || '',
+        email: authUser.email || '',
+        status: 'online' as const,
+        statusMessage: null,
+        role: 'member' as const,
+        lastSeen: new Date().toISOString()
+      }
+    }
+    // Fallback for unauthenticated state
+    return {
+      id: 'guest',
+      name: 'Guest',
+      displayName: 'guest',
+      avatar: '',
+      email: '',
+      status: 'online' as const,
+      statusMessage: null,
+      role: 'guest' as const,
+      lastSeen: new Date().toISOString()
+    }
+  }, [authUser])
+
+  // Transform conversations to channels
+  const channels: Channel[] = useMemo(() => {
+    return conversations.map(conv => transformConversationToChannel(conv, currentUser))
+  }, [conversations, currentUser])
+
+  // Transform DM conversations to DirectMessage type
+  const directMessages: DirectMessage[] = useMemo(() => {
+    return dmConversations.map(conv => transformDmConversationToDirectMessage(conv, users, currentUserId || ''))
+  }, [dmConversations, users, currentUserId])
+
+  // Transform DB messages to Message type
+  const transformedMessages: Message[] = useMemo(() => {
+    return dbDirectMessages.map(msg => transformDbMessageToMessage(msg, users))
+  }, [dbDirectMessages, users])
+
+  // Build categories from channels
+  const initialCategories: ChannelCategory[] = useMemo(() => {
+    // Group channels by category
+    const workChannels = channels.filter(c =>
+      ['general', 'engineering', 'design', 'announcements'].includes(c.name.toLowerCase()) ||
+      c.type === 'public'
+    )
+    const projectChannels = channels.filter(c =>
+      c.name.toLowerCase().includes('project') || c.type === 'private'
+    )
+    const socialChannels = channels.filter(c =>
+      ['random', 'social', 'fun'].includes(c.name.toLowerCase())
+    )
+
+    return [
+      { id: 'cat-1', name: 'Work', channels: workChannels.length > 0 ? workChannels : channels, isCollapsed: false },
+      { id: 'cat-2', name: 'Projects', channels: projectChannels, isCollapsed: false },
+      { id: 'cat-3', name: 'Social', channels: socialChannels, isCollapsed: true }
+    ].filter(cat => cat.channels.length > 0 || cat.id === 'cat-1')
+  }, [channels])
 
   // Voice/Video Calling Hooks
   const voiceVideo = useVoiceVideo()
@@ -377,12 +428,10 @@ export default function MessagingClient() {
 
   // UI State
   const [activeView, setActiveView] = useState<'channels' | 'dms' | 'threads' | 'search' | 'settings' | 'analytics'>('channels')
-  const [selectedChannel, setSelectedChannel] = useState<Channel | null>(mockChannels[0])
+  const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null)
   const [selectedDM, setSelectedDM] = useState<DirectMessage | null>(null)
-  const [messages, setMessages] = useState<Message[]>(mockMessages)
-  const [channels] = useState<Channel[]>(mockChannels)
-  const [categories, setCategories] = useState<ChannelCategory[]>(mockCategories)
-  const [directMessages] = useState<DirectMessage[]>(mockDirectMessages)
+  const [messages, setMessages] = useState<Message[]>([])
+  const [categories, setCategories] = useState<ChannelCategory[]>([])
   const [messageInput, setMessageInput] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
   const [isSearching, setIsSearching] = useState(false)
@@ -393,7 +442,7 @@ export default function MessagingClient() {
   const [showEmojiPicker, setShowEmojiPicker] = useState<string | null>(null)
   const [editingMessage, setEditingMessage] = useState<string | null>(null)
   const [editContent, setEditContent] = useState('')
-  const [typingUsers] = useState<User[]>([mockUsers[1]])
+  const [typingUsers, setTypingUsers] = useState<User[]>([])
   const [showNewChannel, setShowNewChannel] = useState(false)
   const [activeTab, setActiveTab] = useState('messages')
   const [settingsTab, setSettingsTab] = useState('general')
@@ -408,19 +457,26 @@ export default function MessagingClient() {
   // Message editing state
   const [isSavingEdit, setIsSavingEdit] = useState(false)
 
-  // Current user state
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
-
-  // Get current user on mount
+  // Sync categories when initialCategories change
   useEffect(() => {
-    const getCurrentUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user) {
-        setCurrentUserId(user.id)
-      }
+    if (initialCategories.length > 0 && categories.length === 0) {
+      setCategories(initialCategories)
     }
-    getCurrentUser()
-  }, [])
+  }, [initialCategories, categories.length])
+
+  // Sync messages when transformedMessages change
+  useEffect(() => {
+    if (transformedMessages.length > 0) {
+      setMessages(transformedMessages)
+    }
+  }, [transformedMessages])
+
+  // Select first channel when channels load
+  useEffect(() => {
+    if (channels.length > 0 && !selectedChannel) {
+      setSelectedChannel(channels[0])
+    }
+  }, [channels, selectedChannel])
 
   const currentChannelMessages = useMemo(() => {
     if (!selectedChannel) return []
@@ -2411,7 +2467,7 @@ export default function MessagingClient() {
             </TabsContent>
             <TabsContent value="members">
               <div className="space-y-2">
-                {mockUsers.map(user => (
+                {users.map(user => (
                   <div key={user.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
                     <div className="flex items-center gap-3">
                       <div className="relative">

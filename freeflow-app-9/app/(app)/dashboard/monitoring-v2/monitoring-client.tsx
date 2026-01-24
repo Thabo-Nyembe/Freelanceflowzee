@@ -2,6 +2,8 @@
 
 import { createClient } from '@/lib/supabase/client'
 
+const supabase = createClient()
+
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -189,188 +191,20 @@ interface SLO {
 }
 
 // ============================================================================
-// MOCK DATA GENERATION
+// EMPTY DATA ARRAYS (No mock data - use real database data)
 // ============================================================================
 
-const mockHosts: Host[] = [
-  {
-    id: 'host-001',
-    name: 'web-prod-01',
-    hostname: 'ip-10-0-1-101.ec2.internal',
-    ip_address: '10.0.1.101',
-    os: 'Ubuntu 22.04 LTS',
-    status: 'healthy',
-    cpu_usage: 42,
-    memory_usage: 68,
-    disk_usage: 55,
-    network_in: 245.6,
-    network_out: 123.4,
-    load_avg: 2.34,
-    uptime_seconds: 2592000,
-    processes: 156,
-    containers: 12,
-    region: 'us-west-2',
-    availability_zone: 'us-west-2a',
-    instance_type: 'c5.2xlarge',
-    tags: ['env:production', 'service:web', 'team:platform'],
-    last_seen_at: '2024-01-15T10:30:00Z',
-    agent_version: '7.45.0'
-  },
-  {
-    id: 'host-002',
-    name: 'web-prod-02',
-    hostname: 'ip-10-0-1-102.ec2.internal',
-    ip_address: '10.0.1.102',
-    os: 'Ubuntu 22.04 LTS',
-    status: 'healthy',
-    cpu_usage: 38,
-    memory_usage: 62,
-    disk_usage: 48,
-    network_in: 198.3,
-    network_out: 98.7,
-    load_avg: 1.87,
-    uptime_seconds: 2592000,
-    processes: 142,
-    containers: 10,
-    region: 'us-west-2',
-    availability_zone: 'us-west-2b',
-    instance_type: 'c5.2xlarge',
-    tags: ['env:production', 'service:web', 'team:platform'],
-    last_seen_at: '2024-01-15T10:30:00Z',
-    agent_version: '7.45.0'
-  },
-  {
-    id: 'host-003',
-    name: 'api-prod-01',
-    hostname: 'ip-10-0-2-101.ec2.internal',
-    ip_address: '10.0.2.101',
-    os: 'Amazon Linux 2',
-    status: 'warning',
-    cpu_usage: 78,
-    memory_usage: 85,
-    disk_usage: 72,
-    network_in: 567.8,
-    network_out: 234.5,
-    load_avg: 4.56,
-    uptime_seconds: 1728000,
-    processes: 234,
-    containers: 18,
-    region: 'us-west-2',
-    availability_zone: 'us-west-2a',
-    instance_type: 'c5.4xlarge',
-    tags: ['env:production', 'service:api', 'team:backend'],
-    last_seen_at: '2024-01-15T10:30:00Z',
-    agent_version: '7.45.0'
-  },
-  {
-    id: 'host-004',
-    name: 'db-prod-01',
-    hostname: 'ip-10-0-3-101.ec2.internal',
-    ip_address: '10.0.3.101',
-    os: 'Ubuntu 20.04 LTS',
-    status: 'healthy',
-    cpu_usage: 25,
-    memory_usage: 78,
-    disk_usage: 67,
-    network_in: 89.4,
-    network_out: 456.7,
-    load_avg: 1.23,
-    uptime_seconds: 5184000,
-    processes: 89,
-    containers: 0,
-    region: 'us-west-2',
-    availability_zone: 'us-west-2a',
-    instance_type: 'r5.2xlarge',
-    tags: ['env:production', 'service:database', 'team:data'],
-    last_seen_at: '2024-01-15T10:30:00Z',
-    agent_version: '7.44.1'
-  },
-  {
-    id: 'host-005',
-    name: 'cache-prod-01',
-    hostname: 'ip-10-0-4-101.ec2.internal',
-    ip_address: '10.0.4.101',
-    os: 'Amazon Linux 2',
-    status: 'critical',
-    cpu_usage: 92,
-    memory_usage: 95,
-    disk_usage: 45,
-    network_in: 789.2,
-    network_out: 654.3,
-    load_avg: 8.76,
-    uptime_seconds: 864000,
-    processes: 67,
-    containers: 3,
-    region: 'us-west-2',
-    availability_zone: 'us-west-2b',
-    instance_type: 'r5.xlarge',
-    tags: ['env:production', 'service:cache', 'team:platform'],
-    last_seen_at: '2024-01-15T10:30:00Z',
-    agent_version: '7.45.0'
-  },
-  {
-    id: 'host-006',
-    name: 'worker-prod-01',
-    hostname: 'ip-10-0-5-101.ec2.internal',
-    ip_address: '10.0.5.101',
-    os: 'Ubuntu 22.04 LTS',
-    status: 'healthy',
-    cpu_usage: 55,
-    memory_usage: 45,
-    disk_usage: 32,
-    network_in: 45.6,
-    network_out: 23.4,
-    load_avg: 2.12,
-    uptime_seconds: 432000,
-    processes: 45,
-    containers: 8,
-    region: 'us-west-2',
-    availability_zone: 'us-west-2c',
-    instance_type: 'c5.xlarge',
-    tags: ['env:production', 'service:worker', 'team:backend'],
-    last_seen_at: '2024-01-15T10:30:00Z',
-    agent_version: '7.45.0'
-  }
-]
+const mockHosts: Host[] = []
 
-const mockServices: Service[] = [
-  { id: 's1', name: 'web-frontend', status: 'operational', type: 'web', hosts_count: 4, requests_per_sec: 1250, error_rate: 0.12, latency_p50: 45, latency_p95: 120, latency_p99: 250, apdex_score: 0.95, dependencies: ['api-gateway', 'cdn'], last_deploy_at: '2024-01-14T16:00:00Z', version: '2.4.1' },
-  { id: 's2', name: 'api-gateway', status: 'operational', type: 'api', hosts_count: 3, requests_per_sec: 8500, error_rate: 0.08, latency_p50: 12, latency_p95: 45, latency_p99: 120, apdex_score: 0.98, dependencies: ['user-service', 'order-service', 'inventory-service'], last_deploy_at: '2024-01-15T09:00:00Z', version: '3.1.0' },
-  { id: 's3', name: 'user-service', status: 'operational', type: 'api', hosts_count: 2, requests_per_sec: 2100, error_rate: 0.05, latency_p50: 8, latency_p95: 25, latency_p99: 60, apdex_score: 0.99, dependencies: ['postgres-primary', 'redis-cluster'], last_deploy_at: '2024-01-12T14:00:00Z', version: '1.8.2' },
-  { id: 's4', name: 'postgres-primary', status: 'operational', type: 'database', hosts_count: 2, requests_per_sec: 5600, error_rate: 0.01, latency_p50: 2, latency_p95: 8, latency_p99: 15, apdex_score: 0.99, dependencies: [], last_deploy_at: '2024-01-01T00:00:00Z', version: '15.2' },
-  { id: 's5', name: 'redis-cluster', status: 'degraded', type: 'cache', hosts_count: 3, requests_per_sec: 45000, error_rate: 2.5, latency_p50: 0.5, latency_p95: 2, latency_p99: 8, apdex_score: 0.85, dependencies: [], last_deploy_at: '2024-01-10T08:00:00Z', version: '7.0.5' },
-  { id: 's6', name: 'worker-queue', status: 'operational', type: 'queue', hosts_count: 2, requests_per_sec: 890, error_rate: 0.15, latency_p50: 150, latency_p95: 500, latency_p99: 1200, apdex_score: 0.92, dependencies: ['postgres-primary', 'redis-cluster'], last_deploy_at: '2024-01-13T11:00:00Z', version: '2.1.0' }
-]
+const mockServices: Service[] = []
 
-const mockAlerts: Alert[] = [
-  { id: 'a1', title: 'High CPU Usage', message: 'CPU usage exceeded 90% on cache-prod-01', severity: 'critical', status: 'triggered', source: 'system.cpu', host_id: 'host-005', host_name: 'cache-prod-01', service_name: 'redis-cluster', metric_name: 'system.cpu.user', threshold: 90, current_value: 92, triggered_at: '2024-01-15T10:25:00Z', acknowledged_at: null, acknowledged_by: null, resolved_at: null, escalation_level: 1, notification_sent: true },
-  { id: 'a2', title: 'High Memory Usage', message: 'Memory usage exceeded 90% on cache-prod-01', severity: 'critical', status: 'triggered', source: 'system.memory', host_id: 'host-005', host_name: 'cache-prod-01', service_name: 'redis-cluster', metric_name: 'system.mem.used', threshold: 90, current_value: 95, triggered_at: '2024-01-15T10:26:00Z', acknowledged_at: null, acknowledged_by: null, resolved_at: null, escalation_level: 1, notification_sent: true },
-  { id: 'a3', title: 'API Error Rate Elevated', message: 'Error rate exceeded 2% on api-gateway', severity: 'high', status: 'acknowledged', source: 'apm.error_rate', host_id: null, host_name: null, service_name: 'api-gateway', metric_name: 'trace.error_rate', threshold: 2, current_value: 2.5, triggered_at: '2024-01-15T09:45:00Z', acknowledged_at: '2024-01-15T09:50:00Z', acknowledged_by: 'Sarah Chen', resolved_at: null, escalation_level: 0, notification_sent: true },
-  { id: 'a4', title: 'High Load Average', message: 'Load average exceeded threshold on api-prod-01', severity: 'medium', status: 'resolved', source: 'system.load', host_id: 'host-003', host_name: 'api-prod-01', service_name: 'api-gateway', metric_name: 'system.load.1', threshold: 4, current_value: 4.56, triggered_at: '2024-01-15T08:30:00Z', acknowledged_at: '2024-01-15T08:35:00Z', acknowledged_by: 'Mike Wilson', resolved_at: '2024-01-15T09:00:00Z', escalation_level: 0, notification_sent: true },
-  { id: 'a5', title: 'Disk Usage Warning', message: 'Disk usage approaching threshold on db-prod-01', severity: 'low', status: 'muted', source: 'system.disk', host_id: 'host-004', host_name: 'db-prod-01', service_name: 'postgres-primary', metric_name: 'system.disk.used', threshold: 75, current_value: 67, triggered_at: '2024-01-15T07:00:00Z', acknowledged_at: null, acknowledged_by: null, resolved_at: null, escalation_level: 0, notification_sent: false }
-]
+const mockAlerts: Alert[] = []
 
-const mockLogs: LogEntry[] = [
-  { id: 'log-001', timestamp: '2024-01-15T10:30:45Z', level: 'error', service: 'redis-cluster', host: 'cache-prod-01', message: 'Out of memory - killing process', trace_id: null, span_id: null, attributes: { pid: 12345, memory_used: '95%' } },
-  { id: 'log-002', timestamp: '2024-01-15T10:30:30Z', level: 'warn', service: 'api-gateway', host: 'api-prod-01', message: 'Request timeout after 30s', trace_id: 'trace-abc123', span_id: 'span-xyz789', attributes: { endpoint: '/api/v1/orders', method: 'POST' } },
-  { id: 'log-003', timestamp: '2024-01-15T10:30:15Z', level: 'info', service: 'user-service', host: 'web-prod-01', message: 'User login successful', trace_id: 'trace-def456', span_id: 'span-uvw123', attributes: { user_id: 'u-12345', ip: '192.168.1.100' } },
-  { id: 'log-004', timestamp: '2024-01-15T10:30:00Z', level: 'debug', service: 'worker-queue', host: 'worker-prod-01', message: 'Processing job batch', trace_id: 'trace-ghi789', span_id: 'span-rst456', attributes: { batch_size: 100, queue: 'emails' } },
-  { id: 'log-005', timestamp: '2024-01-15T10:29:45Z', level: 'error', service: 'api-gateway', host: 'api-prod-01', message: 'Database connection failed', trace_id: 'trace-jkl012', span_id: 'span-opq789', attributes: { error_code: 'ECONNREFUSED', attempts: 3 } }
-]
+const mockLogs: LogEntry[] = []
 
-const mockSLOs: SLO[] = [
-  { id: 'slo-001', name: 'API Availability', target: 99.9, current: 99.95, status: 'met', time_window: '30d', service: 'api-gateway', metric_type: 'availability' },
-  { id: 'slo-002', name: 'API Latency P95', target: 100, current: 120, status: 'breached', time_window: '7d', service: 'api-gateway', metric_type: 'latency_p95' },
-  { id: 'slo-003', name: 'Error Rate', target: 0.5, current: 0.35, status: 'met', time_window: '30d', service: 'user-service', metric_type: 'error_rate' },
-  { id: 'slo-004', name: 'Database Availability', target: 99.99, current: 99.98, status: 'at_risk', time_window: '30d', service: 'postgres-primary', metric_type: 'availability' }
-]
+const mockSLOs: SLO[] = []
 
-const mockDashboards: Dashboard[] = [
-  { id: 'dash-001', name: 'Infrastructure Overview', description: 'High-level view of all infrastructure', widgets_count: 12, created_by: 'Sarah Chen', is_shared: true, last_modified_at: '2024-01-14T10:00:00Z' },
-  { id: 'dash-002', name: 'API Performance', description: 'API latency and error rates', widgets_count: 8, created_by: 'Mike Wilson', is_shared: true, last_modified_at: '2024-01-15T09:00:00Z' },
-  { id: 'dash-003', name: 'Database Metrics', description: 'PostgreSQL performance metrics', widgets_count: 10, created_by: 'Alex Johnson', is_shared: false, last_modified_at: '2024-01-13T14:00:00Z' },
-  { id: 'dash-004', name: 'Cache Performance', description: 'Redis cluster monitoring', widgets_count: 6, created_by: 'Emma Davis', is_shared: true, last_modified_at: '2024-01-15T08:00:00Z' }
-]
+const mockDashboards: Dashboard[] = []
 
 // ============================================================================
 // HELPER FUNCTIONS
@@ -450,30 +284,14 @@ const getMetricColor = (value: number, threshold: number): string => {
   return 'text-green-600'
 }
 
-// Enhanced Monitoring Mock Data
-const mockMonitoringAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Infrastructure Health', description: 'All 24 hosts healthy. Zero critical alerts in 48 hours.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Health' },
-  { id: '2', type: 'info' as const, title: 'Cost Optimization', description: '3 instances underutilized. Consider downsizing to save $450/mo.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Costs' },
-  { id: '3', type: 'warning' as const, title: 'Disk Space', description: 'prod-db-01 at 85% disk usage. Cleanup recommended.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Resources' },
-]
+// Empty arrays for competitive upgrade components (no mock data)
+const mockMonitoringAIInsights: { id: string; type: 'success' | 'info' | 'warning' | 'error'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
 
-const mockMonitoringCollaborators = [
-  { id: '1', name: 'Infra Lead', avatar: '/avatars/infra.jpg', status: 'online' as const, role: 'Infrastructure', lastActive: 'Now' },
-  { id: '2', name: 'Cloud Architect', avatar: '/avatars/cloud.jpg', status: 'online' as const, role: 'Architecture', lastActive: '5m ago' },
-  { id: '3', name: 'SysAdmin', avatar: '/avatars/sys.jpg', status: 'away' as const, role: 'Operations', lastActive: '20m ago' },
-]
+const mockMonitoringCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string; lastActive: string }[] = []
 
-const mockMonitoringPredictions = [
-  { id: '1', label: 'Uptime', current: 99.95, target: 99.99, predicted: 99.97, confidence: 90, trend: 'up' as const },
-  { id: '2', label: 'CPU Usage', current: 45, target: 70, predicted: 52, confidence: 82, trend: 'up' as const },
-  { id: '3', label: 'Memory', current: 62, target: 80, predicted: 68, confidence: 85, trend: 'up' as const },
-]
+const mockMonitoringPredictions: { id: string; label: string; current: number; target: number; predicted: number; confidence: number; trend: 'up' | 'down' | 'stable' }[] = []
 
-const mockMonitoringActivities = [
-  { id: '1', user: 'Infra Lead', action: 'provisioned', target: '2 new app servers', timestamp: '30m ago', type: 'success' as const },
-  { id: '2', user: 'Cloud Architect', action: 'updated', target: 'auto-scaling policies', timestamp: '1h ago', type: 'info' as const },
-  { id: '3', user: 'SysAdmin', action: 'patched', target: '8 servers', timestamp: '3h ago', type: 'info' as const },
-]
+const mockMonitoringActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' | 'error' }[] = []
 
 // Quick actions are defined inside the component to access state setters
 
@@ -770,8 +588,8 @@ export default function MonitoringClient() {
     const healthy = mockHosts.filter(h => h.status === 'healthy').length
     const warning = mockHosts.filter(h => h.status === 'warning').length
     const critical = mockHosts.filter(h => h.status === 'critical').length
-    const avgCpu = Math.round(mockHosts.reduce((acc, h) => acc + h.cpu_usage, 0) / total)
-    const avgMemory = Math.round(mockHosts.reduce((acc, h) => acc + h.memory_usage, 0) / total)
+    const avgCpu = total > 0 ? Math.round(mockHosts.reduce((acc, h) => acc + h.cpu_usage, 0) / total) : 0
+    const avgMemory = total > 0 ? Math.round(mockHosts.reduce((acc, h) => acc + h.memory_usage, 0) / total) : 0
     const totalContainers = mockHosts.reduce((acc, h) => acc + h.containers, 0)
     const activeAlerts = mockAlerts.filter(a => a.status === 'triggered').length
 

@@ -2,7 +2,7 @@
 
 import { createClient } from '@/lib/supabase/client'
 
-import { useState, useMemo, useEffect } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { useExpenses, useCreateExpense, useUpdateExpense, useDeleteExpense } from '@/lib/hooks/use-expenses'
 import { toast } from 'sonner'
 import DeductionSuggestionWidget from '@/components/tax/deduction-suggestion-widget'
@@ -119,35 +119,113 @@ interface ExpensesClientProps {
   initialExpenses: any[]
 }
 
-// MIGRATED: Batch #13 - Removed mock data, using database hooks
-const mockEmployees = []
+// Types for employees
+interface Employee {
+  id: string
+  name: string
+  avatar: string
+  department: string
+}
 
-// MIGRATED: Batch #13 - Removed mock data, using database hooks
+// Types for AI Insights
+interface AIInsight {
+  id: string
+  type: 'recommendation' | 'alert' | 'opportunity' | 'prediction' | 'success' | 'info' | 'warning' | 'error'
+  title: string
+  description: string
+  impact?: 'high' | 'medium' | 'low'
+  priority?: 'high' | 'medium' | 'low'
+  metric?: string
+  change?: number
+  confidence?: number
+  action?: string
+  category?: string
+  timestamp?: string | Date
+  createdAt?: Date
+}
+
+// Types for Collaborators
+interface Collaborator {
+  id: string
+  name: string
+  avatar?: string
+  color?: string
+  status: 'online' | 'away' | 'offline'
+  role?: string
+  isTyping?: boolean
+  lastSeen?: Date
+  lastActive?: string | Date
+  cursor?: { x: number; y: number }
+}
+
+// Types for Predictions
+interface Prediction {
+  id?: string
+  label?: string
+  title?: string
+  prediction?: string
+  current?: number
+  target?: number
+  currentValue?: number
+  predictedValue?: number
+  predicted?: number
+  confidence: number
+  trend: 'up' | 'down' | 'stable'
+  timeframe?: string
+  impact?: string
+  factors?: Array<{ name: string; impact: 'positive' | 'negative' | 'neutral'; weight: number }> | string[]
+}
+
+// Types for Activity Items
+interface ActivityItem {
+  id: string
+  type: 'comment' | 'update' | 'create' | 'delete' | 'mention' | 'assignment' | 'status_change' | 'milestone' | 'integration'
+  title: string
+  action?: string
+  description?: string
+  user: {
+    id: string
+    name: string
+    avatar?: string
+  }
+  target?: {
+    type: string
+    name: string
+    url?: string
+  }
+  metadata?: Record<string, unknown>
+  timestamp: Date | string
+  isRead?: boolean
+  isPinned?: boolean
+  actions?: Array<{
+    label: string
+    action: () => void
+    variant?: 'default' | 'destructive'
+  }>
+}
+
+// Types for Quick Actions
+interface QuickActionItem {
+  id: string
+  label: string
+  icon: React.ReactNode
+  shortcut?: string
+  action: () => void
+  category?: string
+  description?: string
+}
+
+// Empty arrays - no mock data, using database hooks
+const mockEmployees: Employee[] = []
 const mockReports: ExpenseReport[] = []
-
-// MIGRATED: Batch #13 - Removed mock data, using database hooks
 const mockPolicies: Policy[] = []
-
-// MIGRATED: Batch #13 - Removed mock data, using database hooks
 const mockMileage: MileageEntry[] = []
-
-// MIGRATED: Batch #13 - Removed mock data, using database hooks
 const mockPerDiems: PerDiem[] = []
-
-// MIGRATED: Batch #13 - Removed mock data, using database hooks
-const mockExpensesAIInsights = []
-
-// MIGRATED: Batch #13 - Removed mock data, using database hooks
-const mockExpensesCollaborators = []
-
-// MIGRATED: Batch #13 - Removed mock data, using database hooks
-const mockExpensesPredictions = []
-
-// MIGRATED: Batch #13 - Removed mock data, using database hooks
-const mockExpensesActivities = []
-
-// MIGRATED: Batch #13 - Removed mock data, using database hooks
-const mockExpensesQuickActions = []
+const mockExpensesAIInsights: AIInsight[] = []
+const mockExpensesCollaborators: Collaborator[] = []
+const mockExpensesPredictions: Prediction[] = []
+const mockExpensesActivities: ActivityItem[] = []
+const mockExpensesQuickActions: QuickActionItem[] = []
 
 // Quick actions will be defined inside the component to access state setters
 const getExpensesQuickActions = (

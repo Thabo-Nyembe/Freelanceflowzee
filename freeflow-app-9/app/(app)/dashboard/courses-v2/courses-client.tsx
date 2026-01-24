@@ -188,370 +188,16 @@ interface Review {
   instructorResponseAt: string | null
 }
 
-// Mock data
-const courses: Course[] = [
-  {
-    id: '1',
-    title: 'Complete Web Development Bootcamp 2024',
-    slug: 'complete-web-development-bootcamp-2024',
-    description: 'Learn HTML, CSS, JavaScript, React, Node.js, MongoDB and more to become a full-stack web developer',
-    shortDescription: 'Become a full-stack web developer from scratch',
-    thumbnail: '💻',
-    previewVideo: 'https://example.com/preview.mp4',
-    instructor: {
-      id: 'i1',
-      name: 'Dr. Angela Yu',
-      avatar: '👩‍💻',
-      title: 'Lead Instructor',
-      bio: '10+ years of experience teaching programming',
-      rating: 4.9,
-      studentCount: 1500000,
-      courseCount: 12
-    },
-    category: 'Development',
-    subcategory: 'Web Development',
-    level: 'all_levels',
-    language: 'English',
-    subtitles: ['English', 'Spanish', 'Portuguese', 'German', 'French'],
-    status: 'published',
-    pricing: {
-      type: 'paid',
-      price: 84.99,
-      originalPrice: 199.99,
-      currency: 'USD',
-      discount: 58,
-      discountEndsAt: '2024-12-31'
-    },
-    curriculum: [
-      {
-        id: 's1',
-        title: 'Introduction to Web Development',
-        description: 'Get started with the basics',
-        order: 1,
-        duration: 120,
-        lectures: [
-          { id: 'l1', title: 'Welcome to the Course', type: 'video', duration: 5, isPreview: true, content: {}, order: 1, completionRate: 98 },
-          { id: 'l2', title: 'How the Internet Works', type: 'video', duration: 15, isPreview: true, content: {}, order: 2, completionRate: 95 },
-          { id: 'l3', title: 'Setting Up Your Environment', type: 'video', duration: 20, isPreview: false, content: {}, order: 3, completionRate: 92 },
-          { id: 'l4', title: 'Quiz: Web Basics', type: 'quiz', duration: 10, isPreview: false, content: {}, order: 4, completionRate: 88 }
-        ]
-      },
-      {
-        id: 's2',
-        title: 'HTML Fundamentals',
-        description: 'Master the structure of web pages',
-        order: 2,
-        duration: 180,
-        lectures: [
-          { id: 'l5', title: 'HTML Document Structure', type: 'video', duration: 25, isPreview: false, content: {}, order: 1, completionRate: 85 },
-          { id: 'l6', title: 'HTML Tags Deep Dive', type: 'video', duration: 35, isPreview: false, content: {}, order: 2, completionRate: 82 },
-          { id: 'l7', title: 'Forms and Inputs', type: 'video', duration: 30, isPreview: false, content: {}, order: 3, completionRate: 78 },
-          { id: 'l8', title: 'Project: Personal Portfolio', type: 'assignment', duration: 60, isPreview: false, content: {}, order: 4, completionRate: 65 }
-        ]
-      }
-    ],
-    requirements: ['No programming experience needed', 'A computer with internet access', 'Eagerness to learn'],
-    objectives: ['Build websites from scratch', 'Master HTML, CSS, JavaScript', 'Create React applications', 'Work with databases'],
-    targetAudience: ['Beginners with no experience', 'Career changers', 'Students looking to learn coding'],
-    stats: {
-      enrollments: 245000,
-      completions: 89000,
-      rating: 4.8,
-      reviewCount: 78500,
-      totalHours: 65,
-      lectureCount: 450,
-      quizCount: 45,
-      assignmentCount: 32,
-      resourceCount: 120
-    },
-    engagement: {
-      avgWatchTime: 42,
-      completionRate: 36.3,
-      discussionPosts: 125000,
-      questionsAsked: 45000
-    },
-    revenue: {
-      totalRevenue: 8500000,
-      thisMonth: 245000,
-      lastMonth: 228000,
-      refunds: 12500
-    },
-    seo: {
-      metaTitle: 'Complete Web Development Bootcamp | Learn Coding',
-      metaDescription: 'Become a full-stack web developer with this comprehensive bootcamp',
-      keywords: ['web development', 'coding', 'programming', 'javascript', 'react']
-    },
-    createdAt: '2023-01-15',
-    updatedAt: '2024-12-20',
-    publishedAt: '2023-02-01'
-  },
-  {
-    id: '2',
-    title: 'Machine Learning A-Z: AI, Python & R',
-    slug: 'machine-learning-az',
-    description: 'Learn to create Machine Learning Algorithms in Python and R from two Data Science experts',
-    shortDescription: 'Master Machine Learning with Python and R',
-    thumbnail: '🤖',
-    previewVideo: null,
-    instructor: {
-      id: 'i2',
-      name: 'Kirill Eremenko',
-      avatar: '👨‍🔬',
-      title: 'Data Scientist',
-      bio: 'Data Science expert with real-world experience',
-      rating: 4.7,
-      studentCount: 890000,
-      courseCount: 8
-    },
-    category: 'Data Science',
-    subcategory: 'Machine Learning',
-    level: 'intermediate',
-    language: 'English',
-    subtitles: ['English', 'Spanish', 'Japanese'],
-    status: 'published',
-    pricing: {
-      type: 'paid',
-      price: 94.99,
-      originalPrice: 189.99,
-      currency: 'USD',
-      discount: 50,
-      discountEndsAt: null
-    },
-    curriculum: [
-      {
-        id: 's1',
-        title: 'Data Preprocessing',
-        description: 'Prepare data for ML models',
-        order: 1,
-        duration: 90,
-        lectures: [
-          { id: 'l1', title: 'Importing Libraries', type: 'video', duration: 15, isPreview: true, content: {}, order: 1, completionRate: 96 },
-          { id: 'l2', title: 'Handling Missing Data', type: 'video', duration: 25, isPreview: false, content: {}, order: 2, completionRate: 89 }
-        ]
-      }
-    ],
-    requirements: ['Basic Python knowledge', 'Basic math understanding'],
-    objectives: ['Build ML models', 'Understand algorithms', 'Make predictions'],
-    targetAudience: ['Data analysts', 'Python developers', 'Students'],
-    stats: {
-      enrollments: 156000,
-      completions: 45000,
-      rating: 4.7,
-      reviewCount: 42000,
-      totalHours: 44,
-      lectureCount: 310,
-      quizCount: 28,
-      assignmentCount: 15,
-      resourceCount: 85
-    },
-    engagement: {
-      avgWatchTime: 38,
-      completionRate: 28.8,
-      discussionPosts: 78000,
-      questionsAsked: 32000
-    },
-    revenue: {
-      totalRevenue: 4200000,
-      thisMonth: 125000,
-      lastMonth: 118000,
-      refunds: 8200
-    },
-    seo: {
-      metaTitle: 'Machine Learning A-Z | Python & R',
-      metaDescription: 'Learn ML from scratch with hands-on projects',
-      keywords: ['machine learning', 'python', 'data science', 'AI']
-    },
-    createdAt: '2022-06-10',
-    updatedAt: '2024-12-15',
-    publishedAt: '2022-07-01'
-  },
-  {
-    id: '3',
-    title: 'iOS App Development with Swift',
-    slug: 'ios-app-development-swift',
-    description: 'Build iOS apps from scratch using Swift and SwiftUI',
-    shortDescription: 'Create beautiful iOS apps with Swift',
-    thumbnail: '📱',
-    previewVideo: null,
-    instructor: {
-      id: 'i3',
-      name: 'Chris Ching',
-      avatar: '👨‍💻',
-      title: 'iOS Developer',
-      bio: 'Apple developer with 15+ years experience',
-      rating: 4.8,
-      studentCount: 320000,
-      courseCount: 5
-    },
-    category: 'Development',
-    subcategory: 'Mobile Development',
-    level: 'beginner',
-    language: 'English',
-    subtitles: ['English'],
-    status: 'draft',
-    pricing: {
-      type: 'paid',
-      price: 0,
-      originalPrice: 149.99,
-      currency: 'USD',
-      discount: 0,
-      discountEndsAt: null
-    },
-    curriculum: [],
-    requirements: ['Mac computer', 'Xcode installed'],
-    objectives: ['Build iOS apps', 'Publish to App Store'],
-    targetAudience: ['Aspiring iOS developers'],
-    stats: {
-      enrollments: 0,
-      completions: 0,
-      rating: 0,
-      reviewCount: 0,
-      totalHours: 35,
-      lectureCount: 180,
-      quizCount: 0,
-      assignmentCount: 0,
-      resourceCount: 0
-    },
-    engagement: {
-      avgWatchTime: 0,
-      completionRate: 0,
-      discussionPosts: 0,
-      questionsAsked: 0
-    },
-    revenue: {
-      totalRevenue: 0,
-      thisMonth: 0,
-      lastMonth: 0,
-      refunds: 0
-    },
-    seo: {
-      metaTitle: 'iOS Development with Swift',
-      metaDescription: 'Learn iOS app development from scratch',
-      keywords: ['ios', 'swift', 'app development', 'mobile']
-    },
-    createdAt: '2024-12-01',
-    updatedAt: '2024-12-22',
-    publishedAt: null
-  }
-]
+// Empty arrays for launch - data comes from Supabase hooks
+const quizzes: Quiz[] = []
+const studentProgress: StudentProgress[] = []
+const reviews: Review[] = []
 
-const mockQuizzes: Quiz[] = [
-  {
-    id: 'q1',
-    title: 'Web Basics Quiz',
-    description: 'Test your understanding of web fundamentals',
-    courseId: '1',
-    sectionId: 's1',
-    questions: [
-      { id: 'qq1', type: 'multiple_choice', question: 'What does HTML stand for?', options: ['Hyper Text Markup Language', 'High Tech Modern Language', 'Home Tool Markup Language'], correctAnswer: 'Hyper Text Markup Language', explanation: 'HTML = Hyper Text Markup Language', points: 10 },
-      { id: 'qq2', type: 'true_false', question: 'CSS is used for styling web pages', correctAnswer: 'true', explanation: 'CSS handles presentation and layout', points: 10 }
-    ],
-    passingScore: 70,
-    timeLimit: 15,
-    attempts: 12500,
-    avgScore: 82,
-    completions: 11200
-  }
-]
-
-const mockStudentProgress: StudentProgress[] = [
-  {
-    id: 'sp1',
-    studentId: 's1',
-    studentName: 'John Smith',
-    studentAvatar: '👨‍🎓',
-    enrolledAt: '2024-11-15',
-    lastAccessedAt: '2024-12-22',
-    progress: 78,
-    completedLectures: 351,
-    totalLectures: 450,
-    quizScores: [{ quizId: 'q1', score: 95, attempts: 1 }],
-    certificateEarned: false,
-    certificateId: null
-  },
-  {
-    id: 'sp2',
-    studentId: 's2',
-    studentName: 'Sarah Johnson',
-    studentAvatar: '👩‍🎓',
-    enrolledAt: '2024-10-01',
-    lastAccessedAt: '2024-12-21',
-    progress: 100,
-    completedLectures: 450,
-    totalLectures: 450,
-    quizScores: [{ quizId: 'q1', score: 100, attempts: 1 }],
-    certificateEarned: true,
-    certificateId: 'cert-12345'
-  },
-  {
-    id: 'sp3',
-    studentId: 's3',
-    studentName: 'Mike Chen',
-    studentAvatar: '👨‍💻',
-    enrolledAt: '2024-12-01',
-    lastAccessedAt: '2024-12-22',
-    progress: 25,
-    completedLectures: 112,
-    totalLectures: 450,
-    quizScores: [],
-    certificateEarned: false,
-    certificateId: null
-  }
-]
-
-const mockReviews: Review[] = [
-  {
-    id: 'r1',
-    studentId: 's2',
-    studentName: 'Sarah Johnson',
-    studentAvatar: '👩‍🎓',
-    rating: 5,
-    title: 'Best course I ever took!',
-    content: 'This course completely changed my career. The instructor explains everything clearly and the projects are amazing.',
-    createdAt: '2024-12-15',
-    helpfulCount: 234,
-    instructorResponse: 'Thank you Sarah! So happy to hear about your success!',
-    instructorResponseAt: '2024-12-16'
-  },
-  {
-    id: 'r2',
-    studentId: 's1',
-    studentName: 'John Smith',
-    studentAvatar: '👨‍🎓',
-    rating: 4,
-    title: 'Great content, could use more examples',
-    content: 'Overall excellent course. Would love to see more real-world project examples.',
-    createdAt: '2024-12-10',
-    helpfulCount: 89,
-    instructorResponse: null,
-    instructorResponseAt: null
-  }
-]
-
-// Enhanced Courses Mock Data
-const coursesAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Course Performance', description: 'Python Masterclass completion rate up 18% this month. Students love the new exercises.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Analytics' },
-  { id: '2', type: 'info' as const, title: 'Engagement Alert', description: 'Module 4 has highest drop-off rate. Consider adding more interactive content.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Content' },
-  { id: '3', type: 'warning' as const, title: 'Q&A Backlog', description: '15 student questions unanswered for more than 48 hours.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Support' },
-]
-
-const coursesCollaborators = [
-  { id: '1', name: 'Lead Instructor', avatar: '/avatars/instructor.jpg', status: 'online' as const, role: 'Course Creator', lastActive: 'Now' },
-  { id: '2', name: 'TA Sarah', avatar: '/avatars/ta.jpg', status: 'online' as const, role: 'Teaching Assistant', lastActive: '5m ago' },
-  { id: '3', name: 'Content Editor', avatar: '/avatars/editor.jpg', status: 'away' as const, role: 'Video Production', lastActive: '1h ago' },
-]
-
-const coursesPredictions = [
-  { id: '1', label: 'Enrollments', current: 2847, target: 3500, predicted: 3200, confidence: 82, trend: 'up' as const },
-  { id: '2', label: 'Completion Rate', current: 68, target: 75, predicted: 72, confidence: 78, trend: 'up' as const },
-  { id: '3', label: 'Revenue', current: 28450, target: 35000, predicted: 32000, confidence: 85, trend: 'up' as const },
-]
-
-const coursesActivities = [
-  { id: '1', user: 'Lead Instructor', action: 'published', target: 'new lecture in Python Advanced', timestamp: '15m ago', type: 'success' as const },
-  { id: '2', user: 'TA Sarah', action: 'answered', target: '8 student questions', timestamp: '30m ago', type: 'info' as const },
-  { id: '3', user: 'Content Editor', action: 'uploaded', target: '3 new video lessons', timestamp: '2h ago', type: 'info' as const },
-]
+// Empty arrays for competitive upgrade components - will be populated from real data
+const coursesAIInsights: { id: string; type: 'success' | 'info' | 'warning'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
+const coursesCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string; lastActive: string }[] = []
+const coursesPredictions: { id: string; label: string; current: number; target: number; predicted: number; confidence: number; trend: 'up' | 'down' | 'stable' }[] = []
+const coursesActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' }[] = []
 
 // Quick actions are defined inside the component to access state setters
 const getCoursesQuickActions = (
@@ -599,6 +245,7 @@ const getCoursesQuickActions = (
 ]
 
 export default function CoursesClient() {
+  const supabase = createClient()
   const [activeView, setActiveView] = useState<'courses' | 'curriculum' | 'students' | 'analytics' | 'reviews'>('courses')
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null)
   const [statusFilter, setStatusFilter] = useState<string>('all')
@@ -706,16 +353,19 @@ export default function CoursesClient() {
     setLectureForm({ title: '', type: 'video', duration: 0, isPreview: false })
   }
 
-  // Stats
+  // Stats - uses flat DB fields from the courses table
   const stats = useMemo(() => {
     const totalCourses = courses.length
-    const publishedCourses = courses.filter(c => c.status === 'published').length
-    const totalStudents = courses.reduce((sum, c) => sum + c.stats.enrollments, 0)
-    const totalRevenue = courses.reduce((sum, c) => sum + c.revenue.totalRevenue, 0)
-    const avgRating = courses.filter(c => c.stats.rating > 0).reduce((sum, c) => sum + c.stats.rating, 0) / courses.filter(c => c.stats.rating > 0).length || 0
-    const totalCompletions = courses.reduce((sum, c) => sum + c.stats.completions, 0)
-    const totalHours = courses.reduce((sum, c) => sum + c.stats.totalHours, 0)
-    const totalReviews = courses.reduce((sum, c) => sum + c.stats.reviewCount, 0)
+    const publishedCourses = courses.filter((c: any) => c.status === 'published').length
+    const totalStudents = courses.reduce((sum: number, c: any) => sum + (c.enrolled_count || c.student_count || 0), 0)
+    const totalRevenue = courses.reduce((sum: number, c: any) => sum + (c.total_revenue || 0), 0)
+    const coursesWithRating = courses.filter((c: any) => (c.rating || 0) > 0)
+    const avgRating = coursesWithRating.length > 0
+      ? coursesWithRating.reduce((sum: number, c: any) => sum + (c.rating || 0), 0) / coursesWithRating.length
+      : 0
+    const totalCompletions = courses.reduce((sum: number, c: any) => sum + (c.completed_students || 0), 0)
+    const totalHours = courses.reduce((sum: number, c: any) => sum + (c.total_duration_hours || 0), 0)
+    const totalReviews = courses.reduce((sum: number, c: any) => sum + (c.review_count || 0), 0)
 
     return { totalCourses, publishedCourses, totalStudents, totalRevenue, avgRating, totalCompletions, totalHours, totalReviews }
   }, [courses])
@@ -870,31 +520,31 @@ export default function CoursesClient() {
     }
   }
 
-  const handleEditCourse = (course: Course) => {
+  const handleEditCourse = (course: any) => {
     setCourseForm({
-      course_name: course.title,
-      description: course.description,
-      course_category: course.category.toLowerCase().replace(' ', '-') as DBCourseCategory,
-      level: course.level,
-      status: course.status,
-      instructor_name: course.instructor.name,
-      instructor_email: '',
-      instructor_bio: course.instructor.bio,
-      price: course.pricing.price,
-      original_price: course.pricing.originalPrice,
-      discount_percentage: course.pricing.discount,
-      currency: course.pricing.currency,
-      language: course.language,
-      has_certificates: true,
-      has_downloadable_resources: true,
-      has_lifetime_access: true,
-      has_mobile_access: true,
-      requirements: course.requirements,
-      learning_outcomes: course.objectives,
-      target_audience: course.targetAudience.join(', '),
-      meta_title: course.seo.metaTitle,
-      meta_description: course.seo.metaDescription,
-      keywords: course.seo.keywords
+      course_name: course.course_name || course.title || '',
+      description: course.description || '',
+      course_category: (course.course_category || 'development') as DBCourseCategory,
+      level: (course.level || 'beginner') as DBCourseLevel,
+      status: (course.status || 'draft') as DBCourseStatus,
+      instructor_name: course.instructor_name || '',
+      instructor_email: course.instructor_email || '',
+      instructor_bio: course.instructor_bio || '',
+      price: course.price || 0,
+      original_price: course.original_price || 0,
+      discount_percentage: course.discount_percentage || 0,
+      currency: course.currency || 'USD',
+      language: course.language || 'English',
+      has_certificates: course.has_certificates ?? true,
+      has_downloadable_resources: course.has_downloadable_resources ?? true,
+      has_lifetime_access: course.has_lifetime_access ?? true,
+      has_mobile_access: course.has_mobile_access ?? true,
+      requirements: course.requirements || [],
+      learning_outcomes: course.learning_outcomes || [],
+      target_audience: course.target_audience || '',
+      meta_title: course.meta_title || '',
+      meta_description: course.meta_description || '',
+      keywords: course.keywords || []
     })
     setSelectedCourse(course)
     setShowEditCourseDialog(true)
@@ -970,7 +620,7 @@ export default function CoursesClient() {
     setShowDeleteCourseDialog(true)
   }
 
-  const handlePublishCourse = async (course: Course) => {
+  const handlePublishCourse = async (course: any) => {
     setIsSubmitting(true)
     try {
       await updateCourseMutation.mutateAsync({
@@ -980,7 +630,7 @@ export default function CoursesClient() {
         publish_date: new Date().toISOString()
       } as any)
 
-      toast.success(`Course published: ${course.course_name} is now live`)
+      toast.success(`Course published: ${course.course_name || course.title || 'Course'} is now live`)
       refreshCourses()
     } catch (error: any) {
       toast.error('Failed to publish course')
@@ -989,7 +639,7 @@ export default function CoursesClient() {
     }
   }
 
-  const handleArchiveCourse = async (course: Course) => {
+  const handleArchiveCourse = async (course: any) => {
     setIsSubmitting(true)
     try {
       await updateCourseMutation.mutateAsync({
@@ -998,7 +648,7 @@ export default function CoursesClient() {
         is_published: false
       } as any)
 
-      toast.success(`Course archived: ${course.course_name} has been archived`)
+      toast.success(`Course archived: ${course.course_name || course.title || 'Course'} has been archived`)
       refreshCourses()
     } catch (error: any) {
       toast.error('Failed to archive course')
@@ -1007,7 +657,7 @@ export default function CoursesClient() {
     }
   }
 
-  const handleEnrollCourse = async (course: Course) => {
+  const handleEnrollCourse = async (course: any) => {
     setIsSubmitting(true)
     try {
       const { data: { user } } = await supabase.auth.getUser()
@@ -1122,7 +772,7 @@ export default function CoursesClient() {
 
       if (error) throw error
 
-      toast.success(`Section added: ${sectionForm.name} to the course`)
+      toast.success(`Section added: ${sectionForm.title} to the course`)
       setShowAddSectionDialog(false)
       resetSectionForm()
       refreshCourses()
@@ -1312,7 +962,20 @@ export default function CoursesClient() {
             </div>
 
             <div className="grid gap-4">
-              {filteredCourses.map(course => (
+              {filteredCourses.length === 0 ? (
+                <div className="bg-white dark:bg-gray-800 rounded-xl p-12 shadow-sm border dark:border-gray-700 text-center">
+                  <BookOpen className="w-16 h-16 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
+                  <h3 className="text-lg font-semibold dark:text-white mb-2">No courses yet</h3>
+                  <p className="text-gray-500 dark:text-gray-400 mb-4">Create your first course to get started.</p>
+                  <Button
+                    onClick={() => setShowCreateCourseDialog(true)}
+                    className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create Course
+                  </Button>
+                </div>
+              ) : filteredCourses.map((course: any) => (
                 <Dialog key={course.id}>
                   <DialogTrigger asChild>
                     <div
@@ -1320,48 +983,49 @@ export default function CoursesClient() {
                       onClick={() => setSelectedCourse(course)}
                     >
                       <div className="flex items-start gap-4">
-                        <div className="text-5xl">{course.thumbnail}</div>
+                        <div className="text-5xl">{course.thumbnail_url || '📚'}</div>
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2">
                             <span className={`px-2 py-1 rounded text-xs ${getStatusColor(course.status)}`}>
-                              {course.status.replace('_', ' ')}
+                              {(course.status || 'draft').replace('_', ' ')}
                             </span>
                             <span className={`px-2 py-1 rounded text-xs ${getLevelColor(course.level)}`}>
-                              {course.level.replace('_', ' ')}
+                              {(course.level || 'all_levels').replace('_', ' ')}
                             </span>
                             <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs dark:text-gray-300">
-                              {course.category}
+                              {course.course_category || course.category || 'General'}
                             </span>
                           </div>
-                          <h3 className="text-lg font-semibold dark:text-white">{course.title}</h3>
-                          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{course.shortDescription}</p>
+                          <h3 className="text-lg font-semibold dark:text-white">{course.course_name || course.title}</h3>
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{course.description || 'No description'}</p>
                           <div className="flex items-center gap-4 mt-3 text-sm text-gray-500 dark:text-gray-400">
-                            <span className="flex items-center gap-1">
-                              {course.instructor.avatar} {course.instructor.name}
-                            </span>
-                            <span>{course.stats.totalHours}h total</span>
-                            <span>{course.stats.lectureCount} lectures</span>
-                            {course.stats.rating > 0 && (
+                            {course.instructor_name && (
+                              <span className="flex items-center gap-1">
+                                <GraduationCap className="w-4 h-4" /> {course.instructor_name}
+                              </span>
+                            )}
+                            <span>{course.total_duration_hours || 0}h total</span>
+                            <span>{course.lecture_count || 0} lectures</span>
+                            {(course.rating || 0) > 0 && (
                               <span className="flex items-center gap-1 text-yellow-600">
-                                ★ {course.stats.rating.toFixed(1)} ({formatNumber(course.stats.reviewCount)})
+                                {(course.rating || 0).toFixed(1)} ({formatNumber(course.review_count || 0)})
                               </span>
                             )}
                           </div>
                         </div>
                         <div className="text-right">
-                          {course.pricing.type === 'paid' && (
+                          {(course.price || 0) > 0 ? (
                             <div>
-                              <div className="text-xl font-bold text-green-600">{formatCurrency(course.pricing.price)}</div>
-                              {course.pricing.discount > 0 && (
-                                <div className="text-sm text-gray-500 line-through">{formatCurrency(course.pricing.originalPrice)}</div>
+                              <div className="text-xl font-bold text-green-600">{formatCurrency(course.price)}</div>
+                              {(course.discount_percentage || 0) > 0 && course.original_price && (
+                                <div className="text-sm text-gray-500 line-through">{formatCurrency(course.original_price)}</div>
                               )}
                             </div>
-                          )}
-                          {course.pricing.type === 'free' && (
+                          ) : (
                             <div className="text-xl font-bold text-green-600">Free</div>
                           )}
                           <div className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                            {formatNumber(course.stats.enrollments)} students
+                            {formatNumber(course.enrolled_count || course.student_count || 0)} students
                           </div>
                         </div>
                       </div>
@@ -1370,88 +1034,77 @@ export default function CoursesClient() {
                   <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                       <DialogTitle className="flex items-center gap-3">
-                        <span className="text-3xl">{course.thumbnail}</span>
-                        {course.title}
+                        <span className="text-3xl">{course.thumbnail_url || '📚'}</span>
+                        {course.course_name || course.title}
                       </DialogTitle>
                     </DialogHeader>
                     <div className="space-y-6">
                       {/* Course Stats */}
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                         <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg text-center">
-                          <div className="text-2xl font-bold text-indigo-600">{formatNumber(course.stats.enrollments)}</div>
+                          <div className="text-2xl font-bold text-indigo-600">{formatNumber(course.enrolled_count || course.student_count || 0)}</div>
                           <div className="text-sm text-gray-500 dark:text-gray-400">Enrollments</div>
                         </div>
                         <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg text-center">
-                          <div className="text-2xl font-bold text-green-600">{course.engagement.completionRate}%</div>
+                          <div className="text-2xl font-bold text-green-600">{course.completion_rate || 0}%</div>
                           <div className="text-sm text-gray-500 dark:text-gray-400">Completion</div>
                         </div>
                         <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg text-center">
-                          <div className="text-2xl font-bold text-yellow-600">{course.stats.rating.toFixed(1)} ★</div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400">{formatNumber(course.stats.reviewCount)} reviews</div>
+                          <div className="text-2xl font-bold text-yellow-600">{(course.rating || 0).toFixed(1)}</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">{formatNumber(course.review_count || 0)} reviews</div>
                         </div>
                         <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg text-center">
-                          <div className="text-2xl font-bold text-purple-600">{formatCurrency(course.revenue.totalRevenue)}</div>
+                          <div className="text-2xl font-bold text-purple-600">{formatCurrency(course.total_revenue || 0)}</div>
                           <div className="text-sm text-gray-500 dark:text-gray-400">Total Revenue</div>
                         </div>
                       </div>
 
                       {/* Instructor */}
-                      <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-                        <div className="flex items-center gap-4">
-                          <span className="text-4xl">{course.instructor.avatar}</span>
-                          <div>
-                            <div className="font-semibold dark:text-white">{course.instructor.name}</div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">{course.instructor.title}</div>
-                            <div className="flex items-center gap-4 mt-1 text-sm text-gray-500 dark:text-gray-400">
-                              <span>★ {course.instructor.rating}</span>
-                              <span>{formatNumber(course.instructor.studentCount)} students</span>
-                              <span>{course.instructor.courseCount} courses</span>
+                      {course.instructor_name && (
+                        <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                          <div className="flex items-center gap-4">
+                            <span className="text-4xl"><GraduationCap className="w-10 h-10 text-indigo-500" /></span>
+                            <div>
+                              <div className="font-semibold dark:text-white">{course.instructor_name}</div>
+                              {course.instructor_bio && (
+                                <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">{course.instructor_bio}</div>
+                              )}
                             </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Curriculum Preview */}
-                      {course.curriculum.length > 0 && (
-                        <div>
-                          <div className="font-semibold mb-3 dark:text-white">Curriculum Preview</div>
-                          <div className="space-y-2">
-                            {course.curriculum.map(section => (
-                              <div key={section.id} className="border dark:border-gray-700 rounded-lg overflow-hidden">
-                                <div className="bg-gray-50 dark:bg-gray-800 px-4 py-3 flex items-center justify-between">
-                                  <span className="font-medium dark:text-white">{section.title}</span>
-                                  <span className="text-sm text-gray-500 dark:text-gray-400">
-                                    {section.lectures.length} lectures • {formatDuration(section.duration)}
-                                  </span>
-                                </div>
-                                <div className="p-2">
-                                  {section.lectures.slice(0, 3).map(lecture => (
-                                    <div key={lecture.id} className="flex items-center justify-between px-2 py-1.5 text-sm">
-                                      <div className="flex items-center gap-2">
-                                        <span>{lecture.type === 'video' ? '🎬' : lecture.type === 'quiz' ? '📝' : '📄'}</span>
-                                        <span className="dark:text-gray-300">{lecture.title}</span>
-                                        {lecture.isPreview && (
-                                          <span className="px-1.5 py-0.5 bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-300 rounded text-xs">Preview</span>
-                                        )}
-                                      </div>
-                                      <span className="text-gray-500 dark:text-gray-400">{formatDuration(lecture.duration)}</span>
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            ))}
                           </div>
                         </div>
                       )}
 
-                      {/* Objectives */}
-                      {course.objectives.length > 0 && (
+                      {/* Course Details */}
+                      <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                        <div className="font-semibold mb-3 dark:text-white">Course Details</div>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                          <div>
+                            <div className="text-gray-500 dark:text-gray-400">Duration</div>
+                            <div className="font-medium dark:text-white">{course.total_duration_hours || 0} hours</div>
+                          </div>
+                          <div>
+                            <div className="text-gray-500 dark:text-gray-400">Lectures</div>
+                            <div className="font-medium dark:text-white">{course.lecture_count || 0}</div>
+                          </div>
+                          <div>
+                            <div className="text-gray-500 dark:text-gray-400">Quizzes</div>
+                            <div className="font-medium dark:text-white">{course.quiz_count || 0}</div>
+                          </div>
+                          <div>
+                            <div className="text-gray-500 dark:text-gray-400">Assignments</div>
+                            <div className="font-medium dark:text-white">{course.assignment_count || 0}</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Learning Outcomes */}
+                      {course.learning_outcomes && course.learning_outcomes.length > 0 && (
                         <div>
                           <div className="font-semibold mb-2 dark:text-white">What You'll Learn</div>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-6">
-                            {course.objectives.map((obj, i) => (
+                            {course.learning_outcomes.map((obj: string, i: number) => (
                               <div key={i} className="flex items-start gap-2 text-sm">
-                                <span className="text-green-500">✓</span>
+                                <span className="text-green-500"><CheckCircle className="w-4 h-4" /></span>
                                 <span className="dark:text-gray-300">{obj}</span>
                               </div>
                             ))}
@@ -1490,7 +1143,7 @@ export default function CoursesClient() {
                                 })(),
                                 {
                                   loading: 'Opening preview...',
-                                  success: `Previewing "${course.title}"`,
+                                  success: `Previewing "${course.course_name || course.title}"`,
                                   error: 'Failed to open preview'
                                 }
                               )
@@ -1546,50 +1199,27 @@ export default function CoursesClient() {
                   Add Section
                 </Button>
               </div>
-              {courses[0].curriculum.map((section, sIdx) => (
-                <div key={section.id} className="mb-4 border dark:border-gray-700 rounded-lg overflow-hidden">
-                  <div className="bg-gray-50 dark:bg-gray-800 px-4 py-3 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <span className="text-gray-400 cursor-move">⋮⋮</span>
-                      <span className="font-medium dark:text-white">Section {sIdx + 1}: {section.title}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">
-                        {section.lectures.length} lectures • {formatDuration(section.duration)}
-                      </span>
-                      <button className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded">✏️</button>
-                      <button className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded">🗑️</button>
-                    </div>
-                  </div>
-                  <div className="p-2 space-y-1">
-                    {section.lectures.map((lecture, lIdx) => (
-                      <div key={lecture.id} className="flex items-center justify-between px-3 py-2 bg-white dark:bg-gray-900 rounded border dark:border-gray-700">
-                        <div className="flex items-center gap-3">
-                          <span className="text-gray-400 cursor-move">⋮⋮</span>
-                          <span>{lecture.type === 'video' ? '🎬' : lecture.type === 'quiz' ? '📝' : lecture.type === 'assignment' ? '📋' : '📄'}</span>
-                          <span className="dark:text-white">{lecture.title}</span>
-                          {lecture.isPreview && (
-                            <span className="px-1.5 py-0.5 bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-300 rounded text-xs">Preview</span>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <span className="text-sm text-gray-500 dark:text-gray-400">{formatDuration(lecture.duration)}</span>
-                          <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded">✏️</button>
-                        </div>
-                      </div>
-                    ))}
-                    <Button
-                      variant="outline"
-                      onClick={() => setShowAddLectureDialog(true)}
-                      className="w-full py-2 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded text-gray-500 dark:text-gray-400 hover:border-purple-400 hover:text-purple-500 text-sm"
-                      disabled={isSubmitting}
-                    >
-                      <Plus className="w-4 h-4 mr-2" />
-                      Add Lecture
-                    </Button>
-                  </div>
+              {!selectedCourse ? (
+                <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                  <FileText className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                  <h3 className="text-lg font-semibold dark:text-white mb-2">Select a course to edit curriculum</h3>
+                  <p className="text-sm">Click on a course from the Courses tab to start building its curriculum.</p>
                 </div>
-              ))}
+              ) : (
+                <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                  <FileText className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                  <h3 className="text-lg font-semibold dark:text-white mb-2">No modules yet</h3>
+                  <p className="text-sm mb-4">Start building your course curriculum by adding sections and lectures.</p>
+                  <Button
+                    onClick={() => setShowAddSectionDialog(true)}
+                    className="bg-purple-600 text-white hover:bg-purple-700"
+                    disabled={isSubmitting}
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add First Section
+                  </Button>
+                </div>
+              )}
             </div>
           </TabsContent>
 
@@ -1598,7 +1228,13 @@ export default function CoursesClient() {
             <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border dark:border-gray-700">
               <h3 className="text-lg font-semibold mb-4 dark:text-white">Student Progress</h3>
               <div className="space-y-4">
-                {mockStudentProgress.map(student => (
+                {studentProgress.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                    <Users className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                    <p>No student progress data available yet.</p>
+                    <p className="text-sm mt-1">Student enrollments will appear here.</p>
+                  </div>
+                ) : studentProgress.map(student => (
                   <div key={student.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
                     <div className="flex items-center gap-4">
                       <span className="text-3xl">{student.studentAvatar}</span>
@@ -1638,21 +1274,27 @@ export default function CoursesClient() {
               <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border dark:border-gray-700">
                 <h3 className="text-lg font-semibold mb-4 dark:text-white">Revenue Overview</h3>
                 <div className="space-y-4">
-                  {courses.filter(c => c.status === 'published').map(course => (
+                  {courses.filter((c: any) => c.status === 'published').length === 0 ? (
+                    <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                      <DollarSign className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                      <p>No published courses yet.</p>
+                      <p className="text-sm mt-1">Revenue data will appear here once courses are published.</p>
+                    </div>
+                  ) : courses.filter((c: any) => c.status === 'published').map((course: any) => (
                     <div key={course.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
                       <div className="flex items-center gap-3">
-                        <span className="text-2xl">{course.thumbnail}</span>
+                        <span className="text-2xl">{course.thumbnail_url || '📚'}</span>
                         <div>
-                          <div className="font-medium text-sm dark:text-white">{course.title}</div>
+                          <div className="font-medium text-sm dark:text-white">{course.course_name || course.title}</div>
                           <div className="text-xs text-gray-500 dark:text-gray-400">
-                            {formatNumber(course.stats.enrollments)} students
+                            {formatNumber(course.enrolled_count || course.student_count || 0)} students
                           </div>
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="font-semibold text-green-600">{formatCurrency(course.revenue.totalRevenue)}</div>
+                        <div className="font-semibold text-green-600">{formatCurrency(course.total_revenue || 0)}</div>
                         <div className="text-xs text-gray-500 dark:text-gray-400">
-                          {formatCurrency(course.revenue.thisMonth)} this month
+                          Total revenue
                         </div>
                       </div>
                     </div>
@@ -1662,21 +1304,27 @@ export default function CoursesClient() {
               <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border dark:border-gray-700">
                 <h3 className="text-lg font-semibold mb-4 dark:text-white">Engagement Metrics</h3>
                 <div className="space-y-4">
-                  {courses.filter(c => c.status === 'published').map(course => (
+                  {courses.filter((c: any) => c.status === 'published').length === 0 ? (
+                    <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                      <BarChart3 className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                      <p>No engagement data yet.</p>
+                      <p className="text-sm mt-1">Metrics will appear once students enroll in courses.</p>
+                    </div>
+                  ) : courses.filter((c: any) => c.status === 'published').map((course: any) => (
                     <div key={course.id} className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="font-medium text-sm dark:text-white">{course.title}</span>
-                        <span className="text-sm text-gray-500 dark:text-gray-400">{course.engagement.completionRate}% completion</span>
+                        <span className="font-medium text-sm dark:text-white">{course.course_name || course.title}</span>
+                        <span className="text-sm text-gray-500 dark:text-gray-400">{course.completion_rate || 0}% completion</span>
                       </div>
                       <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
                         <div
                           className="h-full bg-indigo-500 rounded-full"
-                          style={{ width: `${course.engagement.completionRate}%` }}
+                          style={{ width: `${course.completion_rate || 0}%` }}
                         />
                       </div>
                       <div className="flex items-center justify-between mt-2 text-xs text-gray-500 dark:text-gray-400">
-                        <span>{course.engagement.avgWatchTime}m avg watch time</span>
-                        <span>{formatNumber(course.engagement.discussionPosts)} discussions</span>
+                        <span>{course.video_watch_rate || 0}% video watch rate</span>
+                        <span>{course.engagement_score || 0} engagement score</span>
                       </div>
                     </div>
                   ))}
@@ -1697,7 +1345,13 @@ export default function CoursesClient() {
                 </div>
               </div>
               <div className="space-y-4">
-                {mockReviews.map(review => (
+                {reviews.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                    <MessageSquare className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                    <p>No reviews yet.</p>
+                    <p className="text-sm mt-1">Student reviews will appear here once courses are published.</p>
+                  </div>
+                ) : reviews.map(review => (
                   <div key={review.id} className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center gap-3">

@@ -168,272 +168,7 @@ interface ScoringRule {
   isActive: boolean
 }
 
-// Mock Data
-const mockLeads: Lead[] = [
-  {
-    id: '1',
-    firstName: 'Sarah',
-    lastName: 'Johnson',
-    email: 'sarah.johnson@acmecorp.com',
-    phone: '+1 (555) 123-4567',
-    company: 'Acme Corporation',
-    title: 'VP of Engineering',
-    status: 'qualified',
-    stage: 'sql',
-    source: 'website',
-    priority: 'hot',
-    score: 92,
-    behavioralScore: 45,
-    demographicScore: 47,
-    estimatedValue: 150000,
-    owner: { id: '1', name: 'Mike Wilson', avatar: '' },
-    lastContactDate: new Date('2024-12-20'),
-    nextFollowUp: new Date('2024-12-26'),
-    tags: ['enterprise', 'decision-maker', 'high-value'],
-    industry: 'Technology',
-    companySize: '500-1000',
-    website: 'https://acmecorp.com',
-    linkedinUrl: 'https://linkedin.com/in/sarahjohnson',
-    activities: [
-      { id: 'a1', type: 'email', title: 'Sent pricing proposal', description: 'Detailed enterprise pricing', outcome: 'positive', performedBy: 'Mike Wilson', createdAt: new Date('2024-12-20') },
-      { id: 'a2', type: 'call', title: 'Discovery call', description: 'Discussed requirements and timeline', outcome: 'positive', performedBy: 'Mike Wilson', createdAt: new Date('2024-12-18') },
-      { id: 'a3', type: 'form_submit', title: 'Demo request', description: 'Submitted demo request form', performedBy: 'System', createdAt: new Date('2024-12-15') }
-    ],
-    notes: [
-      { id: 'n1', content: 'Looking to replace their current solution. Budget approved for Q1.', author: 'Mike Wilson', createdAt: new Date('2024-12-18') }
-    ],
-    engagementScore: 85,
-    emailOpens: 12,
-    emailClicks: 5,
-    pageViews: 34,
-    formSubmissions: 2,
-    createdAt: new Date('2024-12-01'),
-    updatedAt: new Date('2024-12-20')
-  },
-  {
-    id: '2',
-    firstName: 'James',
-    lastName: 'Chen',
-    email: 'jchen@techstart.io',
-    phone: '+1 (555) 234-5678',
-    company: 'TechStart Inc',
-    title: 'CTO',
-    status: 'contacted',
-    stage: 'mql',
-    source: 'linkedin',
-    priority: 'warm',
-    score: 68,
-    behavioralScore: 35,
-    demographicScore: 33,
-    estimatedValue: 45000,
-    owner: { id: '2', name: 'Emma Davis', avatar: '' },
-    lastContactDate: new Date('2024-12-15'),
-    nextFollowUp: new Date('2024-12-28'),
-    tags: ['startup', 'tech-savvy'],
-    industry: 'SaaS',
-    companySize: '50-100',
-    website: 'https://techstart.io',
-    activities: [
-      { id: 'a4', type: 'linkedin', title: 'LinkedIn connection', description: 'Connected on LinkedIn', outcome: 'positive', performedBy: 'Emma Davis', createdAt: new Date('2024-12-15') },
-      { id: 'a5', type: 'email', title: 'Introduction email', description: 'Sent intro and resources', performedBy: 'Emma Davis', createdAt: new Date('2024-12-16') }
-    ],
-    notes: [],
-    engagementScore: 55,
-    emailOpens: 4,
-    emailClicks: 1,
-    pageViews: 12,
-    formSubmissions: 1,
-    createdAt: new Date('2024-12-10'),
-    updatedAt: new Date('2024-12-16')
-  },
-  {
-    id: '3',
-    firstName: 'Emily',
-    lastName: 'Rodriguez',
-    email: 'emily.r@globalent.com',
-    company: 'Global Enterprises',
-    title: 'Director of Operations',
-    status: 'proposal',
-    stage: 'opportunity',
-    source: 'referral',
-    priority: 'hot',
-    score: 88,
-    behavioralScore: 42,
-    demographicScore: 46,
-    estimatedValue: 280000,
-    owner: { id: '1', name: 'Mike Wilson', avatar: '' },
-    lastContactDate: new Date('2024-12-22'),
-    nextFollowUp: new Date('2024-12-27'),
-    tags: ['enterprise', 'referral', 'multi-year'],
-    industry: 'Manufacturing',
-    companySize: '1000+',
-    website: 'https://globalent.com',
-    activities: [
-      { id: 'a6', type: 'meeting', title: 'Executive presentation', description: 'Presented to leadership team', outcome: 'positive', performedBy: 'Mike Wilson', createdAt: new Date('2024-12-22') },
-      { id: 'a7', type: 'email', title: 'Proposal sent', description: '3-year enterprise agreement', performedBy: 'Mike Wilson', createdAt: new Date('2024-12-22') }
-    ],
-    notes: [
-      { id: 'n2', content: 'Referred by Acme Corp. Very interested in 3-year deal.', author: 'Mike Wilson', createdAt: new Date('2024-12-20') }
-    ],
-    engagementScore: 92,
-    emailOpens: 18,
-    emailClicks: 8,
-    pageViews: 56,
-    formSubmissions: 3,
-    createdAt: new Date('2024-11-15'),
-    updatedAt: new Date('2024-12-22')
-  },
-  {
-    id: '4',
-    firstName: 'David',
-    lastName: 'Kim',
-    email: 'dkim@startup.co',
-    company: 'Startup Co',
-    title: 'Founder & CEO',
-    status: 'new',
-    stage: 'lead',
-    source: 'paid_ads',
-    priority: 'cold',
-    score: 35,
-    behavioralScore: 15,
-    demographicScore: 20,
-    estimatedValue: 12000,
-    owner: { id: '2', name: 'Emma Davis', avatar: '' },
-    tags: ['early-stage', 'bootstrap'],
-    industry: 'Fintech',
-    companySize: '1-10',
-    activities: [
-      { id: 'a8', type: 'page_view', title: 'Pricing page visit', description: 'Viewed pricing page 3 times', performedBy: 'System', createdAt: new Date('2024-12-21') }
-    ],
-    notes: [],
-    engagementScore: 25,
-    emailOpens: 1,
-    emailClicks: 0,
-    pageViews: 5,
-    formSubmissions: 1,
-    createdAt: new Date('2024-12-21'),
-    updatedAt: new Date('2024-12-21')
-  },
-  {
-    id: '5',
-    firstName: 'Lisa',
-    lastName: 'Wang',
-    email: 'lwang@megacorp.com',
-    phone: '+1 (555) 345-6789',
-    company: 'MegaCorp Industries',
-    title: 'Head of Procurement',
-    status: 'negotiation',
-    stage: 'opportunity',
-    source: 'event',
-    priority: 'hot',
-    score: 95,
-    behavioralScore: 48,
-    demographicScore: 47,
-    estimatedValue: 520000,
-    owner: { id: '1', name: 'Mike Wilson', avatar: '' },
-    lastContactDate: new Date('2024-12-23'),
-    nextFollowUp: new Date('2024-12-26'),
-    tags: ['enterprise', 'fortune-500', 'procurement'],
-    industry: 'Manufacturing',
-    companySize: '5000+',
-    website: 'https://megacorp.com',
-    linkedinUrl: 'https://linkedin.com/in/lisawang',
-    activities: [
-      { id: 'a9', type: 'meeting', title: 'Contract negotiation', description: 'Negotiating final terms', outcome: 'positive', performedBy: 'Mike Wilson', createdAt: new Date('2024-12-23') }
-    ],
-    notes: [
-      { id: 'n3', content: 'Met at SaaS Connect conference. Very impressed with platform.', author: 'Mike Wilson', createdAt: new Date('2024-12-10') }
-    ],
-    engagementScore: 98,
-    emailOpens: 25,
-    emailClicks: 12,
-    pageViews: 78,
-    formSubmissions: 4,
-    createdAt: new Date('2024-12-10'),
-    updatedAt: new Date('2024-12-23')
-  },
-  {
-    id: '6',
-    firstName: 'Mark',
-    lastName: 'Thompson',
-    email: 'mark@lostdeal.com',
-    company: 'Lost Deal Corp',
-    title: 'Product Manager',
-    status: 'lost',
-    stage: 'sql',
-    source: 'organic',
-    priority: 'cold',
-    score: 45,
-    behavioralScore: 25,
-    demographicScore: 20,
-    estimatedValue: 35000,
-    owner: { id: '2', name: 'Emma Davis', avatar: '' },
-    lastContactDate: new Date('2024-12-01'),
-    tags: ['lost', 'competitor'],
-    industry: 'Retail',
-    companySize: '100-500',
-    activities: [],
-    notes: [
-      { id: 'n4', content: 'Went with competitor due to existing integration.', author: 'Emma Davis', createdAt: new Date('2024-12-01') }
-    ],
-    engagementScore: 15,
-    emailOpens: 2,
-    emailClicks: 0,
-    pageViews: 8,
-    formSubmissions: 1,
-    createdAt: new Date('2024-10-15'),
-    updatedAt: new Date('2024-12-01')
-  }
-]
-
-const mockCampaigns: Campaign[] = [
-  {
-    id: 'c1',
-    name: 'Q1 Enterprise Outreach',
-    type: 'sequence',
-    status: 'active',
-    leads: 245,
-    sent: 890,
-    opened: 356,
-    clicked: 124,
-    converted: 18,
-    startDate: new Date('2024-12-01')
-  },
-  {
-    id: 'c2',
-    name: 'Product Launch Announcement',
-    type: 'email',
-    status: 'completed',
-    leads: 1250,
-    sent: 1250,
-    opened: 625,
-    clicked: 312,
-    converted: 45,
-    startDate: new Date('2024-11-15'),
-    endDate: new Date('2024-11-30')
-  },
-  {
-    id: 'c3',
-    name: 'Re-engagement Campaign',
-    type: 'workflow',
-    status: 'active',
-    leads: 180,
-    sent: 540,
-    opened: 162,
-    clicked: 54,
-    converted: 8,
-    startDate: new Date('2024-12-10')
-  }
-]
-
-const mockScoringRules: ScoringRule[] = [
-  { id: 's1', name: 'Demo request', category: 'behavioral', condition: 'Submitted demo form', points: 20, isActive: true },
-  { id: 's2', name: 'Pricing page visit', category: 'behavioral', condition: 'Visited pricing page', points: 10, isActive: true },
-  { id: 's3', name: 'Email opened', category: 'behavioral', condition: 'Opened marketing email', points: 2, isActive: true },
-  { id: 's4', name: 'Enterprise company', category: 'demographic', condition: 'Company size 500+', points: 15, isActive: true },
-  { id: 's5', name: 'Decision maker title', category: 'demographic', condition: 'VP, Director, C-level', points: 20, isActive: true },
-  { id: 's6', name: 'Target industry', category: 'demographic', condition: 'Tech, SaaS, Finance', points: 10, isActive: true }
-]
+// Empty arrays - no mock data, data loaded from API/database
 
 // Helper Functions
 const getStatusColor = (status: LeadStatus): string => {
@@ -539,29 +274,14 @@ interface LeadGenerationClientProps {
   initialStats?: any
 }
 
-// Competitive Upgrade Mock Data - HubSpot/Marketo-level Lead Gen Intelligence
-const mockLeadGenAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Conversion Rate', description: 'Lead-to-MQL conversion up 25% this month!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Conversion' },
-  { id: '2', type: 'warning' as const, title: 'Lead Decay', description: '45 leads inactive for 14+ days - nurture recommended.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Engagement' },
-  { id: '3', type: 'info' as const, title: 'AI Scoring', description: 'LinkedIn leads have 3x higher close rate than cold email.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'AI Insights' },
-]
+// Empty arrays for competitive upgrade components - data loaded from API/database
+const mockLeadGenAIInsights: Array<{ id: string; type: 'success' | 'warning' | 'info' | 'error'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }> = []
 
-const mockLeadGenCollaborators = [
-  { id: '1', name: 'Growth Lead', avatar: '/avatars/growth.jpg', status: 'online' as const, role: 'Lead' },
-  { id: '2', name: 'SDR Manager', avatar: '/avatars/sdr.jpg', status: 'online' as const, role: 'Manager' },
-  { id: '3', name: 'Marketing Ops', avatar: '/avatars/mops.jpg', status: 'away' as const, role: 'Ops' },
-]
+const mockLeadGenCollaborators: Array<{ id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }> = []
 
-const mockLeadGenPredictions = [
-  { id: '1', title: 'Pipeline Value', prediction: 'Current leads will generate $450K pipeline this quarter', confidence: 87, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'SQL Velocity', prediction: 'Lead-to-SQL time will decrease to 5 days with automation', confidence: 81, trend: 'down' as const, impact: 'medium' as const },
-]
+const mockLeadGenPredictions: Array<{ id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: 'high' | 'medium' | 'low' }> = []
 
-const mockLeadGenActivities = [
-  { id: '1', user: 'Growth Lead', action: 'Qualified', target: '12 new MQLs', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'SDR Manager', action: 'Assigned', target: 'leads to SDR team', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'Marketing Ops', action: 'Launched', target: 'email nurture sequence', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
-]
+const mockLeadGenActivities: Array<{ id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' | 'error' }> = []
 
 // Quick actions will be defined inside the component to access state setters
 
@@ -639,8 +359,8 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
     updateScore
   } = useLeads(initialLeads || [], initialStats || defaultStats)
 
-  // Convert hook leads to the component's Lead type for display (use mock data as fallback)
-  const displayLeads = (hookLeads || []).length > 0 ? (hookLeads || []).map(hl => ({
+  // Convert hook leads to the component's Lead type for display
+  const displayLeads: Lead[] = (hookLeads || []).map(hl => ({
     id: hl.id,
     firstName: hl.name.split(' ')[0] || hl.name,
     lastName: hl.name.split(' ').slice(1).join(' ') || '',
@@ -664,8 +384,8 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
     companySize: (hl.metadata as any)?.companySize || 'Unknown',
     website: (hl.metadata as any)?.website,
     linkedinUrl: (hl.metadata as any)?.linkedinUrl,
-    activities: [],
-    notes: hl.notes ? [{ id: '1', content: hl.notes, author: 'System', createdAt: new Date(hl.created_at) }] : [],
+    activities: [] as LeadActivity[],
+    notes: hl.notes ? [{ id: '1', content: hl.notes, author: 'System', createdAt: new Date(hl.created_at) }] : [] as LeadNote[],
     engagementScore: hl.score,
     emailOpens: 0,
     emailClicks: 0,
@@ -673,11 +393,11 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
     formSubmissions: 0,
     createdAt: new Date(hl.created_at),
     updatedAt: new Date(hl.updated_at)
-  })) : mockLeads
+  }))
 
   const leads = displayLeads
-  const campaigns = mockCampaigns
-  const scoringRules = mockScoringRules
+  const campaigns: Campaign[] = []
+  const scoringRules: ScoringRule[] = []
 
   // Computed Statistics
   const stats = useMemo(() => {

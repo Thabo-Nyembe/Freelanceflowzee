@@ -152,168 +152,17 @@ interface ProductsClientProps {
   initialProducts: Product[]
 }
 
-// Mock Stripe-level data
-const mockProducts: StripeProduct[] = [
-  {
-    id: 'prod_1',
-    name: 'Pro Plan',
-    description: 'Advanced features for growing teams',
-    images: ['/products/pro-plan.png'],
-    status: 'active',
-    prices: [
-      { id: 'price_1', productId: 'prod_1', nickname: 'Monthly', unitAmount: 4900, currency: 'usd', type: 'recurring', billingInterval: 'month', intervalCount: 1, trialDays: 14, taxBehavior: 'exclusive', active: true, metadata: {} },
-      { id: 'price_2', productId: 'prod_1', nickname: 'Yearly', unitAmount: 47900, currency: 'usd', type: 'recurring', billingInterval: 'year', intervalCount: 1, trialDays: 14, taxBehavior: 'exclusive', active: true, metadata: {} }
-    ],
-    category: 'subscription',
-    metadata: { tier: 'pro', popular: 'true' },
-    features: ['Unlimited projects', 'Team collaboration', 'Priority support', 'Advanced analytics', 'Custom integrations'],
-    taxCode: 'txcd_10000000',
-    shippable: false,
-    createdAt: '2024-01-01',
-    updatedAt: '2024-01-15',
-    revenue: 245000,
-    subscribers: 512,
-    mrr: 24500,
-    churnRate: 2.3,
-    conversionRate: 8.5,
-    averageOrderValue: 478
-  },
-  {
-    id: 'prod_2',
-    name: 'Enterprise Plan',
-    description: 'Custom solutions for large organizations',
-    images: ['/products/enterprise.png'],
-    status: 'active',
-    prices: [
-      { id: 'price_3', productId: 'prod_2', nickname: 'Monthly', unitAmount: 19900, currency: 'usd', type: 'recurring', billingInterval: 'month', intervalCount: 1, taxBehavior: 'exclusive', active: true, metadata: {} },
-      { id: 'price_4', productId: 'prod_2', nickname: 'Yearly', unitAmount: 199000, currency: 'usd', type: 'recurring', billingInterval: 'year', intervalCount: 1, taxBehavior: 'exclusive', active: true, metadata: {} }
-    ],
-    category: 'subscription',
-    metadata: { tier: 'enterprise' },
-    features: ['Everything in Pro', 'SSO/SAML', 'Dedicated support', 'SLA guarantee', 'Custom contracts', 'Audit logs'],
-    taxCode: 'txcd_10000000',
-    shippable: false,
-    createdAt: '2024-01-01',
-    updatedAt: '2024-01-15',
-    revenue: 598000,
-    subscribers: 45,
-    mrr: 89550,
-    churnRate: 0.8,
-    conversionRate: 15.2,
-    averageOrderValue: 13289
-  },
-  {
-    id: 'prod_3',
-    name: 'Starter Plan',
-    description: 'Perfect for individuals and small teams',
-    images: ['/products/starter.png'],
-    status: 'active',
-    prices: [
-      { id: 'price_5', productId: 'prod_3', nickname: 'Monthly', unitAmount: 1900, currency: 'usd', type: 'recurring', billingInterval: 'month', intervalCount: 1, trialDays: 7, taxBehavior: 'exclusive', active: true, metadata: {} }
-    ],
-    category: 'subscription',
-    metadata: { tier: 'starter' },
-    features: ['5 projects', 'Basic analytics', 'Email support'],
-    taxCode: 'txcd_10000000',
-    shippable: false,
-    createdAt: '2024-01-01',
-    updatedAt: '2024-01-15',
-    revenue: 45200,
-    subscribers: 1250,
-    mrr: 23750,
-    churnRate: 5.2,
-    conversionRate: 12.3,
-    averageOrderValue: 36
-  },
-  {
-    id: 'prod_4',
-    name: 'API Credits Pack',
-    description: '10,000 API credits for metered usage',
-    images: ['/products/api-credits.png'],
-    status: 'active',
-    prices: [
-      { id: 'price_6', productId: 'prod_4', nickname: 'Credits Pack', unitAmount: 9900, currency: 'usd', type: 'one_time', taxBehavior: 'exclusive', active: true, metadata: {} }
-    ],
-    category: 'credits',
-    metadata: { credits: '10000' },
-    features: ['10,000 API calls', 'Never expires', 'Priority processing'],
-    taxCode: 'txcd_10000000',
-    shippable: false,
-    createdAt: '2024-02-01',
-    updatedAt: '2024-02-15',
-    revenue: 89100,
-    subscribers: 0,
-    mrr: 0,
-    churnRate: 0,
-    conversionRate: 25.4,
-    averageOrderValue: 99
-  },
-  {
-    id: 'prod_5',
-    name: 'Premium Support',
-    description: '24/7 dedicated support add-on',
-    images: ['/products/support.png'],
-    status: 'active',
-    prices: [
-      { id: 'price_7', productId: 'prod_5', nickname: 'Monthly', unitAmount: 29900, currency: 'usd', type: 'recurring', billingInterval: 'month', intervalCount: 1, taxBehavior: 'exclusive', active: true, metadata: {} }
-    ],
-    category: 'add-on',
-    metadata: { type: 'support' },
-    features: ['24/7 phone support', 'Dedicated account manager', '1-hour response SLA', 'Onboarding assistance'],
-    taxCode: 'txcd_10000000',
-    shippable: false,
-    createdAt: '2024-01-15',
-    updatedAt: '2024-02-01',
-    revenue: 35880,
-    subscribers: 12,
-    mrr: 3588,
-    churnRate: 1.5,
-    conversionRate: 4.8,
-    averageOrderValue: 299
-  }
-]
+// Empty typed arrays - real data should come from API/database
+const emptyProducts: StripeProduct[] = []
+const emptyCoupons: Coupon[] = []
+const emptyTaxRates: TaxRate[] = []
+const emptyInventory: InventoryItem[] = []
 
-const mockCoupons: Coupon[] = [
-  { id: 'coupon_1', name: 'LAUNCH20', percentOff: 20, duration: 'once', maxRedemptions: 1000, timesRedeemed: 342, valid: true, expiresAt: '2024-12-31' },
-  { id: 'coupon_2', name: 'ENTERPRISE50', percentOff: 50, duration: 'repeating', durationMonths: 3, maxRedemptions: 50, timesRedeemed: 12, valid: true },
-  { id: 'coupon_3', name: 'FRIEND10', amountOff: 1000, currency: 'usd', duration: 'forever', timesRedeemed: 856, valid: true },
-  { id: 'coupon_4', name: 'SUMMER25', percentOff: 25, duration: 'once', maxRedemptions: 500, timesRedeemed: 500, valid: false }
-]
-
-const mockTaxRates: TaxRate[] = [
-  { id: 'tax_1', displayName: 'US Sales Tax', description: 'Standard US sales tax', percentage: 8.25, inclusive: false, country: 'US', active: true },
-  { id: 'tax_2', displayName: 'EU VAT', description: 'European Union VAT', percentage: 20, inclusive: true, country: 'EU', active: true },
-  { id: 'tax_3', displayName: 'UK VAT', description: 'United Kingdom VAT', percentage: 20, inclusive: true, country: 'GB', active: true },
-  { id: 'tax_4', displayName: 'CA GST', description: 'Canadian GST', percentage: 5, inclusive: false, country: 'CA', active: true }
-]
-
-const mockInventory: InventoryItem[] = [
-  { productId: 'prod_4', productName: 'API Credits Pack', sku: 'SKU-API-10K', quantity: 9999, reservedQuantity: 0, reorderPoint: 0, reorderQuantity: 0, location: 'Digital', lastRestocked: '2024-01-01', status: 'in_stock' }
-]
-
-// Enhanced Competitive Upgrade Mock Data
-const mockProductsAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Best Seller', description: 'Pro Plan revenue up 45% this quarter. Consider feature expansion.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Sales' },
-  { id: '2', type: 'info' as const, title: 'Pricing Opportunity', description: 'Enterprise tier underpriced vs competitors by 15%.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Pricing' },
-  { id: '3', type: 'warning' as const, title: 'Low Stock', description: 'API Credits Pack approaching inventory threshold.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Inventory' },
-]
-
-const mockProductsCollaborators = [
-  { id: '1', name: 'Product Manager', avatar: '/avatars/pm.jpg', status: 'online' as const, role: 'Manager' },
-  { id: '2', name: 'Pricing Analyst', avatar: '/avatars/pricing.jpg', status: 'online' as const, role: 'Analyst' },
-  { id: '3', name: 'Sales Lead', avatar: '/avatars/sales.jpg', status: 'busy' as const, role: 'Sales' },
-]
-
-const mockProductsPredictions = [
-  { id: '1', title: 'Q2 Revenue', prediction: '$450K product revenue projected', confidence: 82, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'New Launches', prediction: '2 new products ready for launch', confidence: 90, trend: 'stable' as const, impact: 'medium' as const },
-]
-
-const mockProductsActivities = [
-  { id: '1', user: 'System', action: 'Product sold', target: 'Enterprise Plan ($999)', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Product Team', action: 'Updated pricing for', target: 'Pro Plan', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'Inventory', action: 'Restocked', target: 'API Credits Pack', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
-]
+// Empty typed arrays for competitive upgrade components
+const emptyAIInsights: { id: string; type: 'success' | 'info' | 'warning' | 'error'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
+const emptyCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'offline' | 'busy'; role: string }[] = []
+const emptyPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: 'low' | 'medium' | 'high' }[] = []
+const emptyActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' | 'error' | 'update' }[] = []
 
 // Quick actions are defined inside component to access state setters
 
@@ -340,6 +189,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
   const [showBulkEditDialog, setShowBulkEditDialog] = useState(false)
   const [localProducts, setLocalProducts] = useState<StripeProduct[]>([])
   const [localCoupons, setLocalCoupons] = useState<Coupon[]>([])
+  const [localTaxRates, setLocalTaxRates] = useState<TaxRate[]>([])
 
   const { data: apiProducts } = useProducts({
     status: selectedCategory === 'all' ? undefined : selectedCategory,
@@ -520,7 +370,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
     const data = {
       products: localProducts,
       coupons: localCoupons,
-      taxRates: mockTaxRates,
+      taxRates: emptyTaxRates,
       exportedAt: new Date().toISOString()
     }
     const json = JSON.stringify(data, null, 2)
@@ -537,8 +387,8 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
   }
 
   const handleSyncAll = () => {
-    setLocalProducts(mockProducts)
-    setLocalCoupons(mockCoupons)
+    setLocalProducts(emptyProducts)
+    setLocalCoupons(emptyCoupons)
     toast.success('All data synced successfully')
   }
 
@@ -918,11 +768,11 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                   </div>
                   <div className="flex items-center gap-6">
                     <div className="text-center">
-                      <div className="text-2xl font-bold">{mockProducts.flatMap(p => p.prices).length}</div>
+                      <div className="text-2xl font-bold">{localProducts.flatMap(p => p.prices).length}</div>
                       <div className="text-sm text-green-100">Prices</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold">{mockProducts.flatMap(p => p.prices).filter(p => p.type === 'recurring').length}</div>
+                      <div className="text-2xl font-bold">{localProducts.flatMap(p => p.prices).filter(p => p.type === 'recurring').length}</div>
                       <div className="text-sm text-green-100">Recurring</div>
                     </div>
                     <div className="text-center">
@@ -946,7 +796,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                 <Card>
                   <CardContent className="p-0">
                     <div className="divide-y">
-                      {mockProducts.flatMap(product =>
+                      {localProducts.flatMap(product =>
                         product.prices.map(price => ({ ...price, productName: product.name }))
                       ).map((price) => (
                         <div key={price.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
@@ -1004,19 +854,19 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-gray-500">Total Prices</span>
-                        <span className="font-semibold">{mockProducts.flatMap(p => p.prices).length}</span>
+                        <span className="font-semibold">{localProducts.flatMap(p => p.prices).length}</span>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-gray-500">Recurring</span>
-                        <span className="font-semibold">{mockProducts.flatMap(p => p.prices).filter(p => p.type === 'recurring').length}</span>
+                        <span className="font-semibold">{localProducts.flatMap(p => p.prices).filter(p => p.type === 'recurring').length}</span>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-gray-500">One-time</span>
-                        <span className="font-semibold">{mockProducts.flatMap(p => p.prices).filter(p => p.type === 'one_time').length}</span>
+                        <span className="font-semibold">{localProducts.flatMap(p => p.prices).filter(p => p.type === 'one_time').length}</span>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-gray-500">Active</span>
-                        <span className="font-semibold text-green-600">{mockProducts.flatMap(p => p.prices).filter(p => p.active).length}</span>
+                        <span className="font-semibold text-green-600">{localProducts.flatMap(p => p.prices).filter(p => p.active).length}</span>
                       </div>
                     </div>
                   </CardContent>
@@ -1058,15 +908,15 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                   </div>
                   <div className="flex items-center gap-6">
                     <div className="text-center">
-                      <div className="text-2xl font-bold">{mockCoupons.length}</div>
+                      <div className="text-2xl font-bold">{localCoupons.length}</div>
                       <div className="text-sm text-orange-100">Coupons</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold">{mockCoupons.filter(c => c.valid).length}</div>
+                      <div className="text-2xl font-bold">{localCoupons.filter(c => c.valid).length}</div>
                       <div className="text-sm text-orange-100">Active</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold">{mockCoupons.reduce((sum, c) => sum + c.timesRedeemed, 0)}</div>
+                      <div className="text-2xl font-bold">{localCoupons.reduce((sum, c) => sum + c.timesRedeemed, 0)}</div>
                       <div className="text-sm text-orange-100">Redeemed</div>
                     </div>
                   </div>
@@ -1084,7 +934,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {mockCoupons.map((coupon) => (
+                {localCoupons.map((coupon) => (
                   <Card key={coupon.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setSelectedCoupon(coupon)}>
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between mb-3">
@@ -1147,15 +997,15 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                   </div>
                   <div className="flex items-center gap-6">
                     <div className="text-center">
-                      <div className="text-2xl font-bold">{mockTaxRates.length}</div>
+                      <div className="text-2xl font-bold">{localTaxRates.length}</div>
                       <div className="text-sm text-blue-100">Tax Rates</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold">{mockTaxRates.filter(t => t.active).length}</div>
+                      <div className="text-2xl font-bold">{localTaxRates.filter(t => t.active).length}</div>
                       <div className="text-sm text-blue-100">Active</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold">{new Set(mockTaxRates.map(t => t.country)).size}</div>
+                      <div className="text-2xl font-bold">{new Set(localTaxRates.map(t => t.country)).size}</div>
                       <div className="text-sm text-blue-100">Countries</div>
                     </div>
                   </div>
@@ -1175,7 +1025,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                 <Card>
                   <CardContent className="p-0">
                     <div className="divide-y">
-                      {mockTaxRates.map((tax) => (
+                      {localTaxRates.map((tax) => (
                         <div key={tax.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-4">
@@ -1292,8 +1142,8 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {mockProducts.sort((a, b) => b.revenue - a.revenue).map((product, idx) => {
-                        const maxRevenue = Math.max(...mockProducts.map(p => p.revenue))
+                      {localProducts.sort((a, b) => b.revenue - a.revenue).map((product, idx) => {
+                        const maxRevenue = Math.max(...localProducts.map(p => p.revenue), 1)
                         const percent = (product.revenue / maxRevenue) * 100
                         return (
                           <div key={product.id} className="space-y-2">
@@ -1322,7 +1172,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-3">
-                        {mockProducts.filter(p => p.mrr > 0).map((product) => (
+                        {localProducts.filter(p => p.mrr > 0).map((product) => (
                           <div key={product.id} className="flex items-center justify-between">
                             <span className="text-sm">{product.name}</span>
                             <span className="font-semibold">{formatCurrency(product.mrr * 100)}</span>
@@ -1338,7 +1188,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-3">
-                        {mockProducts.filter(p => p.churnRate > 0).map((product) => (
+                        {localProducts.filter(p => p.churnRate > 0).map((product) => (
                           <div key={product.id} className="flex items-center justify-between">
                             <span className="text-sm">{product.name}</span>
                             <span className={`font-semibold ${product.churnRate > 3 ? 'text-red-500' : 'text-green-500'}`}>
@@ -1434,7 +1284,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                       <div className="text-sm text-violet-100">Products</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-3xl font-bold">{mockProducts.flatMap(p => p.prices).length}</div>
+                      <div className="text-3xl font-bold">{localProducts.flatMap(p => p.prices).length}</div>
                       <div className="text-sm text-violet-100">Prices</div>
                     </div>
                     <div className="text-center">
@@ -1880,18 +1730,18 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockProductsAIInsights}
+              insights={emptyAIInsights}
               title="Product Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockProductsCollaborators}
+              collaborators={emptyCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockProductsPredictions}
+              predictions={emptyPredictions}
               title="Product Forecasts"
             />
           </div>
@@ -1899,7 +1749,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockProductsActivities}
+            activities={emptyActivities}
             title="Product Activity"
             maxItems={5}
           />

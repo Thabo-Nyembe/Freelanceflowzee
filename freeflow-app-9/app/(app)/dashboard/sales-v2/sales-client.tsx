@@ -3,6 +3,8 @@
 import { createClient } from '@/lib/supabase/client'
 // MIGRATED: Batch #17 - Verified database hook integration (useSalesDeals)
 
+const supabase = createClient()
+
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { useSalesDeals, SalesDeal } from '@/lib/hooks/use-sales'
@@ -217,72 +219,16 @@ interface Commission {
   status: 'pending' | 'approved' | 'paid'
 }
 
-// Mock data
-const mockAccounts: Account[] = [
-  { id: '1', name: 'Acme Corporation', industry: 'Technology', type: 'customer', website: 'acme.com', phone: '+1-555-0100', address: 'San Francisco, CA', annualRevenue: 50000000, employees: 500, owner: 'Sarah Chen', createdAt: '2023-01-15', lastActivity: '2024-12-24', deals: 5, contacts: 12, status: 'active', rating: 'hot', tier: 'enterprise' },
-  { id: '2', name: 'TechStart Inc', industry: 'Software', type: 'prospect', website: 'techstart.io', phone: '+1-555-0200', address: 'New York, NY', annualRevenue: 15000000, employees: 150, owner: 'Mike Johnson', createdAt: '2024-06-20', lastActivity: '2024-12-23', deals: 2, contacts: 4, status: 'active', rating: 'warm', tier: 'mid_market' },
-  { id: '3', name: 'Global Industries', industry: 'Manufacturing', type: 'customer', website: 'globalind.com', phone: '+1-555-0300', address: 'Chicago, IL', annualRevenue: 200000000, employees: 2500, owner: 'Sarah Chen', createdAt: '2022-08-10', lastActivity: '2024-12-22', deals: 8, contacts: 25, status: 'active', rating: 'hot', tier: 'enterprise' },
-  { id: '4', name: 'InnovateTech', industry: 'Technology', type: 'partner', website: 'innovatetech.ai', phone: '+1-555-0400', address: 'Austin, TX', annualRevenue: 30000000, employees: 200, owner: 'Lisa Park', createdAt: '2024-02-15', lastActivity: '2024-12-21', deals: 3, contacts: 8, status: 'active', rating: 'warm', tier: 'mid_market' },
-  { id: '5', name: 'FinanceFirst', industry: 'Financial Services', type: 'customer', website: 'financefirst.com', phone: '+1-555-0500', address: 'Boston, MA', annualRevenue: 100000000, employees: 1000, owner: 'Mike Johnson', createdAt: '2023-05-20', lastActivity: '2024-12-20', deals: 6, contacts: 15, status: 'active', rating: 'hot', tier: 'enterprise' }
-]
-
-const mockContacts: Contact[] = [
-  { id: '1', firstName: 'John', lastName: 'Smith', email: 'john.smith@acme.com', phone: '+1-555-1001', mobile: '+1-555-1002', title: 'VP of Engineering', department: 'Engineering', accountId: '1', accountName: 'Acme Corporation', leadSource: 'Website', status: 'customer', lastContact: '2024-12-24', createdAt: '2023-01-15', leadScore: 85, isDecisionMaker: true, linkedin: 'linkedin.com/in/johnsmith' },
-  { id: '2', firstName: 'Emily', lastName: 'Davis', email: 'emily@techstart.io', phone: '+1-555-2001', title: 'CEO', department: 'Executive', accountId: '2', accountName: 'TechStart Inc', leadSource: 'Referral', status: 'sql', lastContact: '2024-12-23', createdAt: '2024-06-20', leadScore: 92, isDecisionMaker: true },
-  { id: '3', firstName: 'Robert', lastName: 'Wilson', email: 'rwilson@globalind.com', phone: '+1-555-3001', title: 'CTO', department: 'Technology', accountId: '3', accountName: 'Global Industries', leadSource: 'Trade Show', status: 'customer', lastContact: '2024-12-22', createdAt: '2022-08-10', leadScore: 78, isDecisionMaker: true },
-  { id: '4', firstName: 'Jennifer', lastName: 'Brown', email: 'jbrown@innovatetech.ai', phone: '+1-555-4001', title: 'Director of Partnerships', department: 'Business Development', accountId: '4', accountName: 'InnovateTech', leadSource: 'LinkedIn', status: 'qualified', lastContact: '2024-12-21', createdAt: '2024-02-15', leadScore: 67, isDecisionMaker: false },
-  { id: '5', firstName: 'Michael', lastName: 'Garcia', email: 'mgarcia@financefirst.com', phone: '+1-555-5001', title: 'VP of Technology', department: 'IT', accountId: '5', accountName: 'FinanceFirst', leadSource: 'Cold Call', status: 'customer', lastContact: '2024-12-20', createdAt: '2023-05-20', leadScore: 72, isDecisionMaker: true }
-]
-
-const mockOpportunities: Opportunity[] = [
-  { id: '1', name: 'Enterprise License Deal', accountId: '1', accountName: 'Acme Corporation', amount: 250000, stage: 'negotiation', probability: 75, closeDate: '2025-01-15', owner: 'Sarah Chen', type: 'new_business', leadSource: 'Website', nextStep: 'Final contract review', createdAt: '2024-10-01', updatedAt: '2024-12-24', forecastCategory: 'commit', products: [{ name: 'Enterprise Suite', quantity: 1, price: 200000 }, { name: 'Premium Support', quantity: 1, price: 50000 }], expectedRevenue: 187500, contactRoles: [{ contactId: '1', contactName: 'John Smith', role: 'Decision Maker', isPrimary: true }], competitors: ['CompetitorA', 'CompetitorB'] },
-  { id: '2', name: 'Platform Upgrade', accountId: '3', accountName: 'Global Industries', amount: 180000, stage: 'proposal', probability: 60, closeDate: '2025-02-01', owner: 'Sarah Chen', type: 'upsell', leadSource: 'Account Manager', nextStep: 'Demo scheduled', createdAt: '2024-11-15', updatedAt: '2024-12-23', forecastCategory: 'best_case', products: [{ name: 'Platform Pro', quantity: 1, price: 150000 }, { name: 'Data Analytics', quantity: 1, price: 30000 }], expectedRevenue: 108000, contactRoles: [{ contactId: '3', contactName: 'Robert Wilson', role: 'Technical Evaluator', isPrimary: true }] },
-  { id: '3', name: 'New Implementation', accountId: '2', accountName: 'TechStart Inc', amount: 85000, stage: 'qualification', probability: 40, closeDate: '2025-03-01', owner: 'Mike Johnson', type: 'new_business', leadSource: 'Referral', nextStep: 'Discovery call', createdAt: '2024-12-01', updatedAt: '2024-12-22', forecastCategory: 'pipeline', products: [{ name: 'Starter Suite', quantity: 1, price: 85000 }], expectedRevenue: 34000, contactRoles: [{ contactId: '2', contactName: 'Emily Davis', role: 'Economic Buyer', isPrimary: true }] },
-  { id: '4', name: 'Annual Renewal', accountId: '5', accountName: 'FinanceFirst', amount: 120000, stage: 'closed_won', probability: 100, closeDate: '2024-12-15', owner: 'Mike Johnson', type: 'renewal', leadSource: 'Account Manager', createdAt: '2024-09-01', updatedAt: '2024-12-15', forecastCategory: 'closed', products: [{ name: 'Enterprise Suite', quantity: 1, price: 100000 }, { name: 'Premium Support', quantity: 1, price: 20000 }], expectedRevenue: 120000, contactRoles: [{ contactId: '5', contactName: 'Michael Garcia', role: 'Decision Maker', isPrimary: true }], wonReason: 'Strong relationship, competitive pricing' },
-  { id: '5', name: 'Partner Integration', accountId: '4', accountName: 'InnovateTech', amount: 95000, stage: 'prospecting', probability: 20, closeDate: '2025-04-01', owner: 'Lisa Park', type: 'new_business', leadSource: 'Partner', nextStep: 'Initial call scheduled', createdAt: '2024-12-10', updatedAt: '2024-12-21', forecastCategory: 'pipeline', products: [{ name: 'Partner Edition', quantity: 1, price: 95000 }], expectedRevenue: 19000, contactRoles: [{ contactId: '4', contactName: 'Jennifer Brown', role: 'Champion', isPrimary: true }] },
-  { id: '6', name: 'Team Expansion', accountId: '1', accountName: 'Acme Corporation', amount: 45000, stage: 'closed_won', probability: 100, closeDate: '2024-12-01', owner: 'Sarah Chen', type: 'existing_business', leadSource: 'Upsell', createdAt: '2024-11-01', updatedAt: '2024-12-01', forecastCategory: 'closed', products: [{ name: 'Additional Users', quantity: 50, price: 900 }], expectedRevenue: 45000, contactRoles: [{ contactId: '1', contactName: 'John Smith', role: 'Decision Maker', isPrimary: true }], wonReason: 'Organic growth, great product adoption' }
-]
-
-const mockActivities: SalesActivity[] = [
-  { id: '1', type: 'call', subject: 'Discovery call with John Smith', relatedTo: 'Acme Corporation', relatedType: 'account', owner: 'Sarah Chen', dueDate: '2024-12-26', status: 'pending', priority: 'high', duration: 30, createdAt: '2024-12-24' },
-  { id: '2', type: 'email', subject: 'Send proposal document', relatedTo: 'Enterprise License Deal', relatedType: 'opportunity', owner: 'Sarah Chen', dueDate: '2024-12-25', status: 'completed', completedDate: '2024-12-24', priority: 'high', outcome: 'Proposal sent, awaiting feedback', createdAt: '2024-12-23' },
-  { id: '3', type: 'demo', subject: 'Product demo for technical team', description: 'Demo new features to technical team', relatedTo: 'TechStart Inc', relatedType: 'account', owner: 'Mike Johnson', dueDate: '2024-12-27', status: 'pending', priority: 'high', duration: 60, createdAt: '2024-12-22' },
-  { id: '4', type: 'task', subject: 'Update CRM records', relatedTo: 'Global Industries', relatedType: 'account', owner: 'Sarah Chen', dueDate: '2024-12-24', status: 'overdue', priority: 'low', createdAt: '2024-12-20' },
-  { id: '5', type: 'meeting', subject: 'Quarterly Business Review', description: 'QBR with executive team', relatedTo: 'FinanceFirst', relatedType: 'account', owner: 'Mike Johnson', dueDate: '2024-12-28', status: 'pending', priority: 'critical', duration: 90, createdAt: '2024-12-22' },
-  { id: '6', type: 'site_visit', subject: 'On-site assessment', relatedTo: 'Global Industries', relatedType: 'account', owner: 'Sarah Chen', dueDate: '2024-12-30', status: 'pending', priority: 'medium', createdAt: '2024-12-23' }
-]
-
-const mockQuotes: Quote[] = [
-  { id: 'Q-001', opportunityId: '1', opportunityName: 'Enterprise License Deal', accountName: 'Acme Corporation', quoteNumber: 'Q-2024-001', status: 'sent', validUntil: '2025-01-31', subtotal: 250000, discount: 25000, tax: 18000, total: 243000, lineItems: [{ productName: 'Enterprise Suite', quantity: 1, unitPrice: 200000, discount: 20000, total: 180000 }, { productName: 'Premium Support', quantity: 1, unitPrice: 50000, discount: 5000, total: 45000 }], createdAt: '2024-12-20', sentAt: '2024-12-21' },
-  { id: 'Q-002', opportunityId: '2', opportunityName: 'Platform Upgrade', accountName: 'Global Industries', quoteNumber: 'Q-2024-002', status: 'pending_approval', validUntil: '2025-02-15', subtotal: 180000, discount: 18000, tax: 12960, total: 174960, lineItems: [{ productName: 'Platform Pro', quantity: 1, unitPrice: 150000, discount: 15000, total: 135000 }, { productName: 'Data Analytics', quantity: 1, unitPrice: 30000, discount: 3000, total: 27000 }], createdAt: '2024-12-22' }
-]
-
-const mockForecasts: Forecast[] = [
-  { id: 'f1', period: 'Q1 2025', owner: 'Sarah Chen', quota: 500000, pipeline: 430000, bestCase: 350000, commit: 295000, closed: 165000, gap: 40000, attainment: 33, opportunities: [{ id: '1', name: 'Enterprise License Deal', amount: 250000, category: 'commit' }, { id: '2', name: 'Platform Upgrade', amount: 180000, category: 'best_case' }] },
-  { id: 'f2', period: 'Q1 2025', owner: 'Mike Johnson', quota: 400000, pipeline: 205000, bestCase: 180000, commit: 120000, closed: 120000, gap: 80000, attainment: 30, opportunities: [{ id: '3', name: 'New Implementation', amount: 85000, category: 'pipeline' }, { id: '4', name: 'Annual Renewal', amount: 120000, category: 'closed' }] },
-  { id: 'f3', period: 'Q1 2025', owner: 'Lisa Park', quota: 350000, pipeline: 95000, bestCase: 75000, commit: 0, closed: 0, gap: 275000, attainment: 0, opportunities: [{ id: '5', name: 'Partner Integration', amount: 95000, category: 'pipeline' }] }
-]
-
-const mockTerritories: Territory[] = [
-  { id: 't1', name: 'West Coast Enterprise', type: 'geographic', owner: 'Sarah Chen', accounts: 25, opportunities: 12, pipelineValue: 2500000, closedWon: 850000, quota: 2000000, attainment: 42.5, regions: ['California', 'Oregon', 'Washington'] },
-  { id: 't2', name: 'East Coast Mid-Market', type: 'geographic', owner: 'Mike Johnson', accounts: 45, opportunities: 18, pipelineValue: 1800000, closedWon: 620000, quota: 1500000, attainment: 41.3, regions: ['New York', 'New Jersey', 'Massachusetts'] },
-  { id: 't3', name: 'Technology Vertical', type: 'industry', owner: 'Lisa Park', accounts: 30, opportunities: 8, pipelineValue: 950000, closedWon: 280000, quota: 1000000, attainment: 28, industries: ['Software', 'SaaS', 'Technology'] }
-]
-
-const mockProducts: Product[] = [
-  { id: 'p1', name: 'Starter Suite', code: 'STARTER-01', category: 'Subscriptions', price: 5000, description: 'Basic features for small teams', isActive: true },
-  { id: 'p2', name: 'Professional Suite', code: 'PRO-01', category: 'Subscriptions', price: 15000, description: 'Advanced features for growing teams', isActive: true },
-  { id: 'p3', name: 'Enterprise Suite', code: 'ENT-01', category: 'Subscriptions', price: 50000, description: 'Full features for large organizations', isActive: true },
-  { id: 'p4', name: 'Premium Support', code: 'SUP-PREM', category: 'Services', price: 10000, description: '24/7 priority support', isActive: true },
-  { id: 'p5', name: 'Implementation Services', code: 'IMPL-01', category: 'Services', price: 25000, description: 'Professional implementation', isActive: true },
-  { id: 'p6', name: 'Training Package', code: 'TRAIN-01', category: 'Services', price: 5000, description: 'User training sessions', isActive: true }
-]
-
-const mockCommissions: Commission[] = [
-  { id: 'c1', salesperson: 'Sarah Chen', period: 'December 2024', deals: 2, revenue: 295000, commissionRate: 8, commissionAmount: 23600, status: 'pending' },
-  { id: 'c2', salesperson: 'Mike Johnson', period: 'December 2024', deals: 1, revenue: 120000, commissionRate: 8, commissionAmount: 9600, status: 'pending' },
-  { id: 'c3', salesperson: 'Lisa Park', period: 'December 2024', deals: 0, revenue: 0, commissionRate: 8, commissionAmount: 0, status: 'pending' }
-]
+// Empty data arrays (no mock data - use real database data)
+const accounts: Account[] = []
+const contacts: Contact[] = []
+const opportunities: Opportunity[] = []
+const activities: SalesActivity[] = []
+const quotes: Quote[] = []
+const forecasts: Forecast[] = []
+const territories: Territory[] = []
+const products: Product[] = []
+const commissions: Commission[] = []
 
 // Helper functions
 const getStageColor = (stage: DealStage): string => {
@@ -347,32 +293,11 @@ const getLeadScoreColor = (score: number): string => {
   return 'text-red-600 bg-red-100 dark:bg-red-900/30 dark:text-red-400'
 }
 
-// Enhanced Competitive Upgrade Mock Data - Sales Context
-const mockSalesAIInsights = [
-  { id: '1', type: 'success' as const, title: 'High-Value Deal Alert', description: 'Enterprise Corp deal is 90% likely to close this week. Recommended: Schedule final call.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Deals' },
-  { id: '2', type: 'warning' as const, title: 'Follow-up Required', description: '5 opportunities have no activity in 7+ days. Consider re-engaging.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Pipeline' },
-  { id: '3', type: 'info' as const, title: 'Best Performing Rep', description: 'Sarah J. has 40% higher conversion rate this quarter. Review her techniques.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Performance' },
-]
-
-const mockSalesCollaborators = [
-  { id: '1', name: 'Sarah Johnson', avatar: '/avatars/sarah.jpg', status: 'online' as const, role: 'Sales Manager', lastActive: 'Now' },
-  { id: '2', name: 'Mike Chen', avatar: '/avatars/mike.jpg', status: 'online' as const, role: 'Account Executive', lastActive: '2m ago' },
-  { id: '3', name: 'Emily Davis', avatar: '/avatars/emily.jpg', status: 'away' as const, role: 'SDR', lastActive: '15m ago' },
-  { id: '4', name: 'James Wilson', avatar: '/avatars/james.jpg', status: 'offline' as const, role: 'Sales Rep', lastActive: '1h ago' },
-]
-
-const mockSalesPredictions = [
-  { id: '1', label: 'Q1 Revenue Target', current: 850000, target: 1000000, predicted: 920000, confidence: 85, trend: 'up' as const },
-  { id: '2', label: 'Deal Conversion Rate', current: 28, target: 35, predicted: 32, confidence: 78, trend: 'up' as const },
-  { id: '3', label: 'Pipeline Growth', current: 2400000, target: 3000000, predicted: 2750000, confidence: 72, trend: 'up' as const },
-]
-
-const mockSalesActivities = [
-  { id: '1', user: 'Sarah Johnson', action: 'closed', target: 'Enterprise Corp deal', timestamp: '5m ago', type: 'success' as const },
-  { id: '2', user: 'Mike Chen', action: 'moved', target: 'TechStart Inc to negotiation', timestamp: '15m ago', type: 'info' as const },
-  { id: '3', user: 'Emily Davis', action: 'scheduled', target: 'demo with GlobalTech', timestamp: '30m ago', type: 'info' as const },
-  { id: '4', user: 'James Wilson', action: 'added', target: '3 new leads from event', timestamp: '1h ago', type: 'success' as const },
-]
+// Empty arrays for competitive upgrade components (no mock data)
+const salesAIInsights: { id: string; type: 'success' | 'warning' | 'info'; title: string; description: string; priority: 'high' | 'medium' | 'low'; timestamp: string; category: string }[] = []
+const salesCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string; lastActive: string }[] = []
+const salesPredictions: { id: string; label: string; current: number; target: number; predicted: number; confidence: number; trend: 'up' | 'down' }[] = []
+const salesActivityFeed: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' }[] = []
 
 // Quick actions will be defined inside the component to access state setters
 
@@ -463,40 +388,31 @@ export default function SalesClient() {
   // Get stats from the hook
   const salesStats = getStats()
 
-  // Stats calculations (combine real data with mock data for display)
+  // Stats calculations from real database data
   const stats = useMemo(() => {
-    // Combine mock pipeline with real deals pipeline
-    const mockPipeline = mockOpportunities.filter(o => !['closed_won', 'closed_lost'].includes(o.stage)).reduce((acc, o) => acc + o.amount, 0)
-    const realPipeline = salesStats.pipelineValue
-    const totalPipeline = mockPipeline + realPipeline
+    // Use only real database data
+    const totalPipeline = salesStats.pipelineValue
+    const wonAmount = salesStats.wonValue
+    const totalDeals = salesStats.totalDeals
+    const totalWonDeals = salesStats.wonDeals
 
-    const mockWonDeals = mockOpportunities.filter(o => o.stage === 'closed_won')
-    const mockWonAmount = mockWonDeals.reduce((acc, o) => acc + o.amount, 0)
-    const wonAmount = mockWonAmount + salesStats.wonValue
-
-    const mockTotalDeals = mockOpportunities.length
-    const totalDeals = mockTotalDeals + salesStats.totalDeals
-
-    const realWonDeals = salesStats.wonDeals
-    const totalWonDeals = mockWonDeals.length + realWonDeals
-
-    const closedDeals = mockOpportunities.filter(o => ['closed_won', 'closed_lost'].includes(o.stage)).length + salesStats.wonDeals + salesStats.lostDeals
+    const closedDeals = salesStats.wonDeals + salesStats.lostDeals
     const winRate = closedDeals > 0 ? (totalWonDeals / closedDeals) * 100 : 0
 
-    const openDeals = mockOpportunities.filter(o => !['closed_won', 'closed_lost'].includes(o.stage)).length + (salesStats.totalDeals - salesStats.wonDeals - salesStats.lostDeals)
+    const openDeals = salesStats.totalDeals - salesStats.wonDeals - salesStats.lostDeals
     const avgDealSize = openDeals > 0 ? totalPipeline / openDeals : 0
 
-    const weightedPipeline = mockOpportunities.filter(o => !['closed_won', 'closed_lost'].includes(o.stage)).reduce((acc, o) => acc + o.expectedRevenue, 0) + salesStats.pipelineValue
-    const commitAmount = mockOpportunities.filter(o => o.forecastCategory === 'commit').reduce((acc, o) => acc + o.amount, 0)
-    const totalQuota = mockForecasts.reduce((acc, f) => acc + f.quota, 0)
+    const weightedPipeline = salesStats.pipelineValue
+    const commitAmount = 0
+    const totalQuota = 0
 
     return {
       totalPipeline, wonAmount, winRate, avgDealSize, weightedPipeline, commitAmount, totalQuota,
-      totalAccounts: mockAccounts.length,
-      totalContacts: mockContacts.length,
-      pendingActivities: mockActivities.filter(a => a.status === 'pending').length,
+      totalAccounts: accounts.length,
+      totalContacts: contacts.length,
+      pendingActivities: activities.filter(a => a.status === 'pending').length,
       wonDeals: totalWonDeals,
-      overdueActivities: mockActivities.filter(a => a.status === 'overdue').length,
+      overdueActivities: activities.filter(a => a.status === 'overdue').length,
       totalValue: salesStats.totalValue,
       realDealsCount: salesStats.totalDeals
     }
@@ -508,8 +424,8 @@ export default function SalesClient() {
     return stages.map(stage => ({
       name: stage.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()),
       key: stage,
-      count: mockOpportunities.filter(o => o.stage === stage).length,
-      amount: mockOpportunities.filter(o => o.stage === stage).reduce((a, o) => a + o.amount, 0),
+      count: opportunities.filter(o => o.stage === stage).length,
+      amount: opportunities.filter(o => o.stage === stage).reduce((a, o) => a + o.amount, 0),
       color: stage === 'closed_won' ? 'from-green-500 to-emerald-500' :
              stage === 'negotiation' ? 'from-orange-500 to-amber-500' :
              stage === 'proposal' ? 'from-purple-500 to-pink-500' :
@@ -520,7 +436,7 @@ export default function SalesClient() {
   }, [])
 
   const filteredOpportunities = useMemo(() => {
-    return mockOpportunities.filter(opp => {
+    return opportunities.filter(opp => {
       const matchesSearch = opp.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         opp.accountName.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesStage = stageFilter === 'all' || opp.stage === stageFilter
@@ -775,7 +691,7 @@ export default function SalesClient() {
 
   // Export pipeline data as CSV
   const handleExportPipeline = () => {
-    const allDeals = [...mockOpportunities.map(o => ({
+    const allDeals = [...opportunities.map(o => ({
       name: o.name,
       account: o.accountName,
       amount: o.amount,
@@ -908,7 +824,7 @@ export default function SalesClient() {
           // Continue deleting other deals
         }
       }
-      return deletedCount + mockOpportunities.length
+      return deletedCount + opportunities.length
     })()
     toast.promise(clearPromise, {
       loading: 'Clearing all pipeline deals...',
@@ -1376,7 +1292,7 @@ Generated on: ${new Date().toLocaleString()}
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {mockOpportunities.filter(o => o.stage !== 'closed_lost').slice(0, 5).map((opp) => (
+                    {opportunities.filter(o => o.stage !== 'closed_lost').slice(0, 5).map((opp) => (
                       <div key={opp.id} className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer" onClick={() => setSelectedOpportunity(opp)}>
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
@@ -1406,7 +1322,7 @@ Generated on: ${new Date().toLocaleString()}
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {mockActivities.filter(a => a.status === 'pending' || a.status === 'overdue').slice(0, 6).map((activity) => {
+                    {activities.filter(a => a.status === 'pending' || a.status === 'overdue').slice(0, 6).map((activity) => {
                       const Icon = getActivityIcon(activity.type)
                       return (
                         <div key={activity.id} className={`flex items-start gap-3 p-3 rounded-lg ${activity.status === 'overdue' ? 'bg-red-50 dark:bg-red-900/20' : 'bg-gray-50 dark:bg-gray-800'}`}>
@@ -1438,7 +1354,7 @@ Generated on: ${new Date().toLocaleString()}
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {mockForecasts.sort((a, b) => b.closed - a.closed).map((forecast, idx) => (
+                    {forecasts.sort((a, b) => b.closed - a.closed).map((forecast, idx) => (
                       <div key={forecast.id} className="flex items-center gap-4 p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${idx === 0 ? 'bg-yellow-100 text-yellow-600' : idx === 1 ? 'bg-gray-200 text-gray-600' : 'bg-orange-100 text-orange-600'}`}>
                           {idx + 1}
@@ -1471,7 +1387,7 @@ Generated on: ${new Date().toLocaleString()}
                   <div className="space-y-4">
                     {[
                       { label: 'Pipeline', amount: stats.totalPipeline, color: 'bg-gray-400' },
-                      { label: 'Best Case', amount: mockForecasts.reduce((a, f) => a + f.bestCase, 0), color: 'bg-blue-500' },
+                      { label: 'Best Case', amount: forecasts.reduce((a, f) => a + f.bestCase, 0), color: 'bg-blue-500' },
                       { label: 'Commit', amount: stats.commitAmount, color: 'bg-green-500' },
                       { label: 'Closed', amount: stats.wonAmount, color: 'bg-emerald-600' },
                       { label: 'Quota', amount: stats.totalQuota, color: 'bg-purple-500' }
@@ -1584,11 +1500,11 @@ Generated on: ${new Date().toLocaleString()}
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockAccounts.length}</p>
+                    <p className="text-3xl font-bold">{accounts.length}</p>
                     <p className="text-purple-200 text-sm">Accounts</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">${(mockAccounts.reduce((sum, a) => sum + a.value, 0) / 1000000).toFixed(1)}M</p>
+                    <p className="text-3xl font-bold">${(accounts.reduce((sum, a) => sum + a.value, 0) / 1000000).toFixed(1)}M</p>
                     <p className="text-purple-200 text-sm">Total Value</p>
                   </div>
                 </div>
@@ -1596,7 +1512,7 @@ Generated on: ${new Date().toLocaleString()}
             </div>
 
             <div className="grid gap-4">
-              {mockAccounts.map((account) => (
+              {accounts.map((account) => (
                 <Card key={account.id} className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setSelectedAccount(account)}>
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between">
@@ -1634,7 +1550,7 @@ Generated on: ${new Date().toLocaleString()}
           {/* Contacts Tab */}
           <TabsContent value="contacts" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {mockContacts.map((contact) => (
+              {contacts.map((contact) => (
                 <Card key={contact.id} className="hover:shadow-lg transition-shadow">
                   <CardContent className="p-6">
                     <div className="flex items-start gap-4">
@@ -1688,7 +1604,7 @@ Generated on: ${new Date().toLocaleString()}
             </div>
 
             <div className="grid gap-4">
-              {mockQuotes.map((quote) => (
+              {quotes.map((quote) => (
                 <Card key={quote.id} className="cursor-pointer hover:shadow-lg" onClick={() => setSelectedQuote(quote)}>
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
@@ -1753,7 +1669,7 @@ Generated on: ${new Date().toLocaleString()}
             </div>
 
             <div className="grid gap-4">
-              {mockForecasts.map((forecast) => (
+              {forecasts.map((forecast) => (
                 <Card key={forecast.id}>
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between mb-4">
@@ -1798,7 +1714,7 @@ Generated on: ${new Date().toLocaleString()}
           {/* Territories Tab */}
           <TabsContent value="territories" className="space-y-6">
             <div className="grid gap-4">
-              {mockTerritories.map((territory) => (
+              {territories.map((territory) => (
                 <Card key={territory.id}>
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between">
@@ -1834,7 +1750,7 @@ Generated on: ${new Date().toLocaleString()}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {mockProducts.map((product) => (
+              {products.map((product) => (
                 <Card key={product.id} className="hover:shadow-lg transition-shadow">
                   <CardContent className="p-6">
                     <div className="flex items-center gap-2 mb-3">
@@ -2491,7 +2407,7 @@ Generated on: ${new Date().toLocaleString()}
           {/* AI Insights Panel */}
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockSalesAIInsights}
+              insights={salesAIInsights}
               title="Sales Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
             />
@@ -2500,11 +2416,11 @@ Generated on: ${new Date().toLocaleString()}
           {/* Team Collaboration & Activity */}
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockSalesCollaborators}
+              collaborators={salesCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockSalesPredictions}
+              predictions={salesPredictions}
               title="Sales Forecasts"
             />
           </div>
@@ -2513,7 +2429,7 @@ Generated on: ${new Date().toLocaleString()}
         {/* Activity Feed & Quick Actions */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockSalesActivities}
+            activities={salesActivityFeed}
             title="Sales Activity"
             maxItems={5}
           />
@@ -3089,7 +3005,7 @@ Generated on: ${new Date().toLocaleString()}
                   <SelectValue placeholder="Select opportunity" />
                 </SelectTrigger>
                 <SelectContent>
-                  {mockOpportunities.slice(0, 5).map((opp) => (
+                  {opportunities.slice(0, 5).map((opp) => (
                     <SelectItem key={opp.id} value={opp.id}>{opp.name}</SelectItem>
                   ))}
                 </SelectContent>

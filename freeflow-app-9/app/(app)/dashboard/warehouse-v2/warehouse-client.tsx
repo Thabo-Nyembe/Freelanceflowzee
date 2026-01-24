@@ -242,197 +242,27 @@ interface CycleCount {
   accuracy_percent: number
 }
 
-// Mock data
-const mockInventory: InventoryItem[] = [
-  {
-    id: '1',
-    sku: 'SKU-001',
-    name: 'Industrial Bearing 6205',
-    description: 'Deep groove ball bearing 25x52x15mm',
-    category: 'Bearings',
-    quantity_on_hand: 1250,
-    quantity_available: 980,
-    quantity_reserved: 270,
-    quantity_incoming: 500,
-    reorder_point: 300,
-    reorder_quantity: 1000,
-    unit_cost: 12.50,
-    bin_location: 'A-01-03-02',
-    zone: 'Zone A - Storage',
-    lot_number: 'LOT-2024-001',
-    expiry_date: null,
-    last_counted: '2024-01-10',
-    status: 'in_stock',
-    weight_kg: 0.12,
-    dimensions: { l: 52, w: 52, h: 15 },
-    is_serialized: false,
-    requires_cold_storage: false,
-    is_hazmat: false
-  },
-  {
-    id: '2',
-    sku: 'SKU-002',
-    name: 'Hydraulic Fluid AW46',
-    description: 'Premium anti-wear hydraulic oil 5L',
-    category: 'Lubricants',
-    quantity_on_hand: 85,
-    quantity_available: 85,
-    quantity_reserved: 0,
-    quantity_incoming: 200,
-    reorder_point: 100,
-    reorder_quantity: 200,
-    unit_cost: 45.00,
-    bin_location: 'C-02-01-01',
-    zone: 'Zone C - Hazmat',
-    lot_number: 'LOT-2024-015',
-    expiry_date: '2026-06-15',
-    last_counted: '2024-01-08',
-    status: 'low_stock',
-    weight_kg: 4.5,
-    dimensions: { l: 200, w: 150, h: 250 },
-    is_serialized: false,
-    requires_cold_storage: false,
-    is_hazmat: true
-  },
-  {
-    id: '3',
-    sku: 'SKU-003',
-    name: 'Temperature Sensor PT100',
-    description: 'RTD temperature sensor -50 to 500°C',
-    category: 'Sensors',
-    quantity_on_hand: 0,
-    quantity_available: 0,
-    quantity_reserved: 0,
-    quantity_incoming: 150,
-    reorder_point: 25,
-    reorder_quantity: 100,
-    unit_cost: 89.00,
-    bin_location: 'B-03-02-04',
-    zone: 'Zone B - Electronics',
-    lot_number: '',
-    expiry_date: null,
-    last_counted: '2024-01-05',
-    status: 'out_of_stock',
-    weight_kg: 0.05,
-    dimensions: { l: 100, w: 10, h: 10 },
-    is_serialized: true,
-    requires_cold_storage: false,
-    is_hazmat: false
-  },
-  {
-    id: '4',
-    sku: 'SKU-004',
-    name: 'Pharmaceutical Grade Enzyme',
-    description: 'Industrial lipase enzyme 1kg',
-    category: 'Chemicals',
-    quantity_on_hand: 45,
-    quantity_available: 30,
-    quantity_reserved: 15,
-    quantity_incoming: 0,
-    reorder_point: 20,
-    reorder_quantity: 50,
-    unit_cost: 450.00,
-    bin_location: 'D-01-01-01',
-    zone: 'Zone D - Cold Storage',
-    lot_number: 'LOT-2024-022',
-    expiry_date: '2024-04-30',
-    last_counted: '2024-01-12',
-    status: 'in_stock',
-    weight_kg: 1.0,
-    dimensions: { l: 150, w: 150, h: 200 },
-    is_serialized: false,
-    requires_cold_storage: true,
-    is_hazmat: false
-  },
-  {
-    id: '5',
-    sku: 'SKU-005',
-    name: 'Stainless Steel Valve DN50',
-    description: 'Ball valve 2" SS316 flanged',
-    category: 'Valves',
-    quantity_on_hand: 180,
-    quantity_available: 120,
-    quantity_reserved: 60,
-    quantity_incoming: 0,
-    reorder_point: 50,
-    reorder_quantity: 100,
-    unit_cost: 285.00,
-    bin_location: 'A-05-02-03',
-    zone: 'Zone A - Storage',
-    lot_number: 'LOT-2023-089',
-    expiry_date: null,
-    last_counted: '2024-01-09',
-    status: 'reserved',
-    weight_kg: 3.2,
-    dimensions: { l: 180, w: 130, h: 130 },
-    is_serialized: false,
-    requires_cold_storage: false,
-    is_hazmat: false
-  }
-]
+// Empty data arrays - connect to real data source
+const mockInventory: InventoryItem[] = []
 
-const mockZones: Zone[] = [
-  { id: '1', name: 'Zone A - Storage', code: 'ZONE-A', type: 'storage', capacity_units: 10000, used_units: 7850, bin_count: 250, temperature_min: null, temperature_max: null, is_active: true, last_activity: '2024-01-15T14:30:00' },
-  { id: '2', name: 'Zone B - Electronics', code: 'ZONE-B', type: 'storage', capacity_units: 3000, used_units: 2100, bin_count: 80, temperature_min: 15, temperature_max: 25, is_active: true, last_activity: '2024-01-15T14:25:00' },
-  { id: '3', name: 'Zone C - Hazmat', code: 'ZONE-C', type: 'hazmat', capacity_units: 1500, used_units: 890, bin_count: 40, temperature_min: null, temperature_max: null, is_active: true, last_activity: '2024-01-15T13:45:00' },
-  { id: '4', name: 'Zone D - Cold Storage', code: 'ZONE-D', type: 'cold_storage', capacity_units: 2000, used_units: 1450, bin_count: 60, temperature_min: 2, temperature_max: 8, is_active: true, last_activity: '2024-01-15T14:28:00' },
-  { id: '5', name: 'Receiving Dock', code: 'RECV', type: 'receiving', capacity_units: 500, used_units: 120, bin_count: 10, temperature_min: null, temperature_max: null, is_active: true, last_activity: '2024-01-15T14:32:00' },
-  { id: '6', name: 'Shipping Dock', code: 'SHIP', type: 'shipping', capacity_units: 500, used_units: 85, bin_count: 10, temperature_min: null, temperature_max: null, is_active: true, last_activity: '2024-01-15T14:20:00' },
-  { id: '7', name: 'Pick Zone', code: 'PICK', type: 'picking', capacity_units: 1200, used_units: 980, bin_count: 150, temperature_min: null, temperature_max: null, is_active: true, last_activity: '2024-01-15T14:31:00' },
-  { id: '8', name: 'Pack Station', code: 'PACK', type: 'packing', capacity_units: 200, used_units: 45, bin_count: 20, temperature_min: null, temperature_max: null, is_active: true, last_activity: '2024-01-15T14:29:00' }
-]
+const mockZones: Zone[] = []
 
-const mockInboundShipments: InboundShipment[] = [
-  { id: '1', shipment_number: 'INB-2024-001', po_number: 'PO-5001', supplier: 'Industrial Supplies Co', carrier: 'FedEx Freight', tracking_number: '794644790132', expected_date: '2024-01-16', received_date: null, status: 'in_transit', total_items: 15, received_items: 0, total_units: 2500, received_units: 0, dock_door: null, assigned_to: null },
-  { id: '2', shipment_number: 'INB-2024-002', po_number: 'PO-5002', supplier: 'Tech Components Ltd', carrier: 'UPS Freight', tracking_number: '1Z999AA10123456784', expected_date: '2024-01-15', received_date: null, status: 'receiving', total_items: 8, received_items: 5, total_units: 150, received_units: 95, dock_door: 'Dock 3', assigned_to: 'Mike Johnson' },
-  { id: '3', shipment_number: 'INB-2024-003', po_number: 'PO-4998', supplier: 'Chemical Solutions Inc', carrier: 'Hazmat Express', tracking_number: 'HM789456123', expected_date: '2024-01-15', received_date: '2024-01-15', status: 'putaway', total_items: 4, received_items: 4, total_units: 200, received_units: 200, dock_door: 'Dock 1', assigned_to: 'Sarah Williams' },
-  { id: '4', shipment_number: 'INB-2024-004', po_number: 'PO-5003', supplier: 'Bearing World', carrier: 'XPO Logistics', tracking_number: 'XPO456789012', expected_date: '2024-01-17', received_date: null, status: 'pending', total_items: 12, received_items: 0, total_units: 5000, received_units: 0, dock_door: null, assigned_to: null }
-]
+const mockInboundShipments: InboundShipment[] = []
 
-const mockOutboundOrders: OutboundOrder[] = [
-  { id: '1', order_number: 'ORD-2024-1001', customer: 'Acme Manufacturing', priority: 'high', status: 'picking', order_date: '2024-01-14', ship_by_date: '2024-01-15', shipped_date: null, total_lines: 8, picked_lines: 5, total_units: 125, picked_units: 78, carrier: 'FedEx Ground', tracking_number: null, assigned_to: 'John Smith', wave_id: 'WAVE-001' },
-  { id: '2', order_number: 'ORD-2024-1002', customer: 'Global Tech Corp', priority: 'urgent', status: 'packing', order_date: '2024-01-14', ship_by_date: '2024-01-15', shipped_date: null, total_lines: 3, picked_lines: 3, total_units: 45, picked_units: 45, carrier: 'FedEx Express', tracking_number: null, assigned_to: 'Emily Chen', wave_id: 'WAVE-001' },
-  { id: '3', order_number: 'ORD-2024-1003', customer: 'Pacific Industries', priority: 'normal', status: 'allocated', order_date: '2024-01-15', ship_by_date: '2024-01-17', shipped_date: null, total_lines: 12, picked_lines: 0, total_units: 280, picked_units: 0, carrier: 'UPS Ground', tracking_number: null, assigned_to: null, wave_id: null },
-  { id: '4', order_number: 'ORD-2024-1004', customer: 'Northern Electric', priority: 'low', status: 'pending', order_date: '2024-01-15', ship_by_date: '2024-01-20', shipped_date: null, total_lines: 5, picked_lines: 0, total_units: 60, picked_units: 0, carrier: 'UPS Ground', tracking_number: null, assigned_to: null, wave_id: null },
-  { id: '5', order_number: 'ORD-2024-0998', customer: 'Summit Solutions', priority: 'normal', status: 'shipped', order_date: '2024-01-12', ship_by_date: '2024-01-14', shipped_date: '2024-01-14', total_lines: 6, picked_lines: 6, total_units: 150, picked_units: 150, carrier: 'FedEx Ground', tracking_number: '794644790145', assigned_to: 'John Smith', wave_id: 'WAVE-098' }
-]
+const mockOutboundOrders: OutboundOrder[] = []
 
-const mockTasks: WarehouseTask[] = [
-  { id: '1', task_number: 'TSK-001', type: 'pick', priority: 'high', status: 'in_progress', from_location: 'A-01-03-02', to_location: 'PICK-CART-05', item_sku: 'SKU-001', item_name: 'Industrial Bearing 6205', quantity: 50, assigned_to: 'John Smith', assigned_to_avatar: null, created_at: '2024-01-15T14:00:00', started_at: '2024-01-15T14:15:00', completed_at: null, estimated_minutes: 15 },
-  { id: '2', task_number: 'TSK-002', type: 'putaway', priority: 'normal', status: 'assigned', from_location: 'RECV-STAGE-01', to_location: 'C-02-01-01', item_sku: 'SKU-002', item_name: 'Hydraulic Fluid AW46', quantity: 100, assigned_to: 'Sarah Williams', assigned_to_avatar: null, created_at: '2024-01-15T13:30:00', started_at: null, completed_at: null, estimated_minutes: 20 },
-  { id: '3', task_number: 'TSK-003', type: 'pack', priority: 'urgent', status: 'in_progress', from_location: 'PICK-CART-03', to_location: 'PACK-STN-02', item_sku: 'MULTI', item_name: 'Order ORD-2024-1002', quantity: 45, assigned_to: 'Emily Chen', assigned_to_avatar: null, created_at: '2024-01-15T14:20:00', started_at: '2024-01-15T14:25:00', completed_at: null, estimated_minutes: 25 },
-  { id: '4', task_number: 'TSK-004', type: 'replenish', priority: 'normal', status: 'pending', from_location: 'A-05-02-03', to_location: 'PICK-A-15', item_sku: 'SKU-005', item_name: 'Stainless Steel Valve DN50', quantity: 20, assigned_to: null, assigned_to_avatar: null, created_at: '2024-01-15T14:30:00', started_at: null, completed_at: null, estimated_minutes: 10 },
-  { id: '5', task_number: 'TSK-005', type: 'count', priority: 'low', status: 'pending', from_location: 'B-03-02-04', to_location: 'B-03-02-04', item_sku: 'SKU-003', item_name: 'Temperature Sensor PT100', quantity: 0, assigned_to: null, assigned_to_avatar: null, created_at: '2024-01-15T10:00:00', started_at: null, completed_at: null, estimated_minutes: 15 },
-  { id: '6', task_number: 'TSK-006', type: 'receive', priority: 'high', status: 'in_progress', from_location: 'DOCK-03', to_location: 'RECV-STAGE-02', item_sku: 'MULTI', item_name: 'Shipment INB-2024-002', quantity: 150, assigned_to: 'Mike Johnson', assigned_to_avatar: null, created_at: '2024-01-15T12:00:00', started_at: '2024-01-15T13:00:00', completed_at: null, estimated_minutes: 45 }
-]
+const mockTasks: WarehouseTask[] = []
 
-const mockCycleCounts: CycleCount[] = [
-  { id: '1', count_number: 'CC-2024-001', zone: 'Zone A - Storage', bin_locations: ['A-01-01-01', 'A-01-01-02', 'A-01-02-01'], status: 'in_progress', scheduled_date: '2024-01-15', completed_date: null, total_bins: 25, counted_bins: 18, variance_items: 2, variance_value: 125.50, assigned_to: 'Tom Wilson', accuracy_percent: 97.5 },
-  { id: '2', count_number: 'CC-2024-002', zone: 'Zone B - Electronics', bin_locations: ['B-01-01-01'], status: 'scheduled', scheduled_date: '2024-01-16', completed_date: null, total_bins: 15, counted_bins: 0, variance_items: 0, variance_value: 0, assigned_to: 'Lisa Brown', accuracy_percent: 0 },
-  { id: '3', count_number: 'CC-2023-089', zone: 'Zone D - Cold Storage', bin_locations: ['D-01-01-01', 'D-01-02-01'], status: 'completed', scheduled_date: '2024-01-10', completed_date: '2024-01-10', total_bins: 12, counted_bins: 12, variance_items: 0, variance_value: 0, assigned_to: 'Tom Wilson', accuracy_percent: 100 }
-]
+const mockCycleCounts: CycleCount[] = []
 
-// Enhanced Competitive Upgrade Mock Data
-const mockWarehouseAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Inventory Accuracy', description: 'Warehouse inventory accuracy is at 99.2% this month.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Performance' },
-  { id: '2', type: 'warning' as const, title: 'Low Stock Alert', description: '5 items are below reorder point in Zone A.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Alerts' },
-  { id: '3', type: 'info' as const, title: 'Space Optimization', description: 'Moving slow-movers to back racks could free up 15% picking space.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'AI Insights' },
-]
+// Empty competitive upgrade data arrays - connect to real data source
+const mockWarehouseAIInsights: Array<{ id: string; type: 'success' | 'warning' | 'info' | 'error' | 'recommendation' | 'alert' | 'opportunity' | 'prediction'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }> = []
 
-const mockWarehouseCollaborators = [
-  { id: '1', name: 'Warehouse Team', avatar: '', role: 'Team', status: 'online' as const },
-  { id: '2', name: 'Tom Wilson', avatar: '', role: 'Supervisor', status: 'online' as const },
-]
+const mockWarehouseCollaborators: Array<{ id: string; name: string; avatar: string; role: string; status: 'online' | 'away' | 'offline' }> = []
 
-const mockWarehousePredictions = [
-  { id: '1', title: 'Inbound Volume', prediction: 'Expected 25% increase next week', confidence: 82, trend: 'up' as const, timeframe: 'Next 7 days' },
-  { id: '2', title: 'Space Utilization', prediction: 'Zone B approaching 90% capacity', confidence: 78, trend: 'up' as const, timeframe: 'Next 14 days' },
-]
+const mockWarehousePredictions: Array<{ id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; timeframe: string }> = []
 
-const mockWarehouseActivities = [
-  { id: '1', user: 'System', action: 'Completed', target: '32 pick tasks today', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Tom', action: 'Received', target: 'shipment PO-2024-156', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-]
+const mockWarehouseActivities: Array<{ id: string; user: { id: string; name: string; avatar?: string }; action?: string; target?: { type: string; name: string; url?: string }; timestamp: string; type: 'comment' | 'update' | 'create' | 'delete' | 'mention' | 'assignment' | 'status_change' | 'milestone' | 'integration' }> = []
 
 // Quick actions are now defined inside the component to use dialog state
 
@@ -1225,7 +1055,9 @@ export default function WarehouseClient() {
     const pendingOutbound = mockOutboundOrders.filter(o => o.status !== 'shipped').length
     const activeTasks = mockTasks.filter(t => t.status === 'in_progress').length
     const pendingTasks = mockTasks.filter(t => t.status === 'pending').length
-    const avgZoneUtilization = mockZones.reduce((sum, z) => sum + (z.used_units / z.capacity_units * 100), 0) / mockZones.length
+    const avgZoneUtilization = mockZones.length > 0
+      ? mockZones.reduce((sum, z) => sum + (z.used_units / z.capacity_units * 100), 0) / mockZones.length
+      : 0
 
     return {
       totalItems,

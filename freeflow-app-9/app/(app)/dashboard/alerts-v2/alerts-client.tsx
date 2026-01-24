@@ -155,196 +155,19 @@ interface Integration {
   lastAlert: string
 }
 
-// Mock data
-const mockAlerts: Alert[] = [
-  {
-    id: '1',
-    title: 'High CPU Usage on Production API',
-    description: 'CPU utilization exceeded 90% threshold on prod-api-01 for more than 5 minutes',
-    severity: 'critical',
-    status: 'triggered',
-    service: 'API Gateway',
-    source: 'Datadog',
-    triggeredAt: '2024-01-15T14:30:00Z',
-    incidentNumber: 'INC-2024-001',
-    deduplicationKey: 'cpu-high-prod-api-01',
-    occurrences: 3,
-    escalationLevel: 2,
-    tags: ['infrastructure', 'cpu', 'production'],
-    impactedUsers: 1500,
-    runbook: 'https://wiki.company.com/runbooks/high-cpu'
-  },
-  {
-    id: '2',
-    title: 'Database Connection Pool Exhausted',
-    description: 'PostgreSQL connection pool has reached maximum capacity',
-    severity: 'high',
-    status: 'acknowledged',
-    service: 'Database',
-    source: 'CloudWatch',
-    triggeredAt: '2024-01-15T14:15:00Z',
-    acknowledgedAt: '2024-01-15T14:18:00Z',
-    acknowledgedBy: 'Sarah Chen',
-    incidentNumber: 'INC-2024-002',
-    occurrences: 1,
-    escalationLevel: 1,
-    tags: ['database', 'postgres', 'connections'],
-    impactedUsers: 800
-  },
-  {
-    id: '3',
-    title: 'SSL Certificate Expiring Soon',
-    description: 'SSL certificate for api.company.com expires in 7 days',
-    severity: 'medium',
-    status: 'triggered',
-    service: 'Load Balancer',
-    source: 'CertManager',
-    triggeredAt: '2024-01-15T10:00:00Z',
-    occurrences: 1,
-    escalationLevel: 0,
-    tags: ['ssl', 'certificate', 'security']
-  },
-  {
-    id: '4',
-    title: 'Memory Leak Detected in Worker Service',
-    description: 'Memory usage growing consistently without release in background-worker',
-    severity: 'high',
-    status: 'resolved',
-    service: 'Background Workers',
-    source: 'New Relic',
-    triggeredAt: '2024-01-15T08:00:00Z',
-    acknowledgedAt: '2024-01-15T08:05:00Z',
-    resolvedAt: '2024-01-15T09:30:00Z',
-    acknowledgedBy: 'Mike Johnson',
-    resolvedBy: 'Mike Johnson',
-    incidentNumber: 'INC-2024-003',
-    occurrences: 5,
-    escalationLevel: 1,
-    tags: ['memory', 'worker', 'performance']
-  },
-  {
-    id: '5',
-    title: 'Payment Gateway Timeout',
-    description: 'Stripe API requests timing out with 30s+ response times',
-    severity: 'critical',
-    status: 'triggered',
-    service: 'Payment Service',
-    source: 'PagerDuty',
-    triggeredAt: '2024-01-15T14:45:00Z',
-    incidentNumber: 'INC-2024-004',
-    occurrences: 8,
-    escalationLevel: 3,
-    tags: ['payments', 'stripe', 'timeout'],
-    impactedUsers: 350
-  },
-  {
-    id: '6',
-    title: 'CDN Cache Hit Ratio Below Threshold',
-    description: 'CloudFront cache hit ratio dropped to 45% (threshold: 80%)',
-    severity: 'low',
-    status: 'suppressed',
-    service: 'CDN',
-    source: 'CloudWatch',
-    triggeredAt: '2024-01-15T12:00:00Z',
-    occurrences: 2,
-    escalationLevel: 0,
-    tags: ['cdn', 'cache', 'performance']
-  }
-]
+// Data arrays - empty by default, populated from database
+const alerts: Alert[] = []
 
-const mockOnCallSchedules: OnCallSchedule[] = [
-  {
-    id: '1',
-    name: 'Platform Team',
-    currentOnCall: { name: 'Sarah Chen', avatar: '/avatars/1.png', phone: '+1-555-0101', email: 'sarah@company.com' },
-    nextOnCall: { name: 'Mike Johnson', avatar: '/avatars/2.png', shiftStart: '2024-01-16T09:00:00Z' },
-    rotationType: 'weekly',
-    escalationPolicy: 'Platform Critical'
-  },
-  {
-    id: '2',
-    name: 'Backend Team',
-    currentOnCall: { name: 'Alex Wong', avatar: '/avatars/3.png', phone: '+1-555-0102', email: 'alex@company.com' },
-    nextOnCall: { name: 'Emily Davis', avatar: '/avatars/4.png', shiftStart: '2024-01-16T09:00:00Z' },
-    rotationType: 'daily',
-    escalationPolicy: 'Backend Standard'
-  },
-  {
-    id: '3',
-    name: 'Frontend Team',
-    currentOnCall: { name: 'Jordan Lee', avatar: '/avatars/5.png', phone: '+1-555-0103', email: 'jordan@company.com' },
-    nextOnCall: { name: 'Casey Smith', avatar: '/avatars/6.png', shiftStart: '2024-01-17T09:00:00Z' },
-    rotationType: 'weekly',
-    escalationPolicy: 'Frontend Standard'
-  }
-]
+const onCallSchedules: OnCallSchedule[] = []
+const services: Service[] = []
+const escalationPolicies: EscalationPolicy[] = []
+const integrations: Integration[] = []
 
-const mockServices: Service[] = [
-  { id: '1', name: 'API Gateway', description: 'Main API entry point for all services', status: 'critical', owner: 'Sarah Chen', team: 'Platform', alertCount: 3, lastIncident: '2 min ago', integrations: ['Datadog', 'PagerDuty'], uptime: 99.2 },
-  { id: '2', name: 'Database', description: 'PostgreSQL primary database cluster', status: 'degraded', owner: 'Mike Johnson', team: 'Backend', alertCount: 1, lastIncident: '15 min ago', integrations: ['CloudWatch', 'PagerDuty'], uptime: 99.8 },
-  { id: '3', name: 'Payment Service', description: 'Payment processing and Stripe integration', status: 'critical', owner: 'Emily Davis', team: 'Backend', alertCount: 2, lastIncident: 'Just now', integrations: ['New Relic', 'PagerDuty'], uptime: 98.5 },
-  { id: '4', name: 'Background Workers', description: 'Async job processing with Sidekiq', status: 'operational', owner: 'Alex Wong', team: 'Backend', alertCount: 0, integrations: ['New Relic', 'Datadog'], uptime: 99.9 },
-  { id: '5', name: 'CDN', description: 'CloudFront content delivery network', status: 'operational', owner: 'Jordan Lee', team: 'Platform', alertCount: 0, integrations: ['CloudWatch'], uptime: 99.99 }
-]
-
-const mockEscalationPolicies: EscalationPolicy[] = [
-  {
-    id: '1',
-    name: 'Platform Critical',
-    description: 'Critical alerts for platform infrastructure',
-    levels: [
-      { level: 1, targets: ['On-Call Engineer'], timeout: 5 },
-      { level: 2, targets: ['Team Lead', 'On-Call Engineer'], timeout: 10 },
-      { level: 3, targets: ['VP Engineering', 'Team Lead'], timeout: 15 }
-    ],
-    services: 3,
-    isDefault: false
-  },
-  {
-    id: '2',
-    name: 'Backend Standard',
-    description: 'Standard escalation for backend services',
-    levels: [
-      { level: 1, targets: ['On-Call Engineer'], timeout: 10 },
-      { level: 2, targets: ['Team Lead'], timeout: 20 }
-    ],
-    services: 5,
-    isDefault: true
-  }
-]
-
-const mockIntegrations: Integration[] = [
-  { id: '1', name: 'Datadog', type: 'monitoring', icon: '📊', status: 'active', alertsReceived: 1245, lastAlert: '5 min ago' },
-  { id: '2', name: 'New Relic', type: 'apm', icon: '🔍', status: 'active', alertsReceived: 892, lastAlert: '12 min ago' },
-  { id: '3', name: 'CloudWatch', type: 'cloud', icon: '☁️', status: 'active', alertsReceived: 456, lastAlert: '1 hour ago' },
-  { id: '4', name: 'Slack', type: 'notification', icon: '💬', status: 'active', alertsReceived: 0, lastAlert: 'N/A' },
-  { id: '5', name: 'Jira', type: 'ticketing', icon: '🎫', status: 'inactive', alertsReceived: 234, lastAlert: '2 days ago' }
-]
-
-// Enhanced Alerts Mock Data
-const mockAlertsAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Alert Volume', description: 'Critical alerts down 40% this week. Great incident response!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Trends' },
-  { id: '2', type: 'info' as const, title: 'Common Pattern', description: 'Memory alerts peak at 3 AM. Consider auto-scaling during off-hours.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Patterns' },
-  { id: '3', type: 'warning' as const, title: 'Pending Action', description: '3 critical alerts require immediate attention.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Action' },
-]
-
-const mockAlertsCollaborators = [
-  { id: '1', name: 'On-Call Lead', avatar: '/avatars/oncall.jpg', status: 'online' as const, role: 'Incident Response', lastActive: 'Now' },
-  { id: '2', name: 'NOC Analyst', avatar: '/avatars/noc.jpg', status: 'online' as const, role: 'Monitoring', lastActive: '2m ago' },
-  { id: '3', name: 'Escalation Mgr', avatar: '/avatars/esc.jpg', status: 'away' as const, role: 'Escalations', lastActive: '20m ago' },
-]
-
-const mockAlertsPredictions = [
-  { id: '1', label: 'Daily Alerts', current: 45, target: 30, predicted: 38, confidence: 82, trend: 'up' as const },
-  { id: '2', label: 'MTTR (min)', current: 12, target: 8, predicted: 10, confidence: 78, trend: 'up' as const },
-  { id: '3', label: 'Resolution %', current: 94, target: 98, predicted: 96, confidence: 85, trend: 'up' as const },
-]
-
-const mockAlertsActivities = [
-  { id: '1', user: 'On-Call Lead', action: 'acknowledged', target: 'CPU spike alert', timestamp: '5m ago', type: 'success' as const },
-  { id: '2', user: 'NOC Analyst', action: 'escalated', target: 'database connectivity issue', timestamp: '20m ago', type: 'info' as const },
-  { id: '3', user: 'Escalation Mgr', action: 'resolved', target: 'P1 incident #4521', timestamp: '1h ago', type: 'success' as const },
-]
+// Enhanced Alerts Data - empty by default
+const alertsAIInsights: { id: string; type: 'success' | 'info' | 'warning' | 'error'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
+const alertsCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string; lastActive: string }[] = []
+const alertsPredictions: { id: string; label: string; current: number; target: number; predicted: number; confidence: number; trend: 'up' | 'down' | 'stable' }[] = []
+const alertsActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' | 'error' }[] = []
 
 // Quick actions will be defined inside the component to access state
 
@@ -386,7 +209,7 @@ export default function AlertsClient() {
   // State for integration toggles
   const [integrationStates, setIntegrationStates] = useState<Record<string, boolean>>(() => {
     const initial: Record<string, boolean> = {}
-    mockIntegrations.forEach(i => { initial[i.id] = i.status === 'active' })
+    integrations.forEach(i => { initial[i.id] = i.status === 'active' })
     return initial
   })
 
@@ -554,7 +377,7 @@ export default function AlertsClient() {
     { label: 'Critical', value: alertStats.critical.toString(), change: '+1', icon: AlertOctagon, color: 'from-rose-500 to-rose-600' },
     { label: 'MTTR', value: '12m', change: '-3m', icon: Timer, color: 'from-purple-500 to-purple-600' },
     { label: 'On-Call', value: '3', change: '', icon: UserCheck, color: 'from-cyan-500 to-cyan-600' },
-    { label: 'Services', value: mockServices.length.toString(), change: '', icon: Server, color: 'from-indigo-500 to-indigo-600' }
+    { label: 'Services', value: services.length.toString(), change: '', icon: Server, color: 'from-indigo-500 to-indigo-600' }
   ]
 
   const getSeverityColor = (severity: AlertSeverity): string => {
@@ -1048,7 +871,7 @@ export default function AlertsClient() {
           {/* On-Call Tab */}
           <TabsContent value="oncall" className="mt-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6">
-              {mockOnCallSchedules.map(schedule => (
+              {onCallSchedules.map(schedule => (
                 <Card key={schedule.id} className="border-gray-200 dark:border-gray-700">
                   <CardHeader>
                     <div className="flex items-center justify-between">
@@ -1124,7 +947,7 @@ export default function AlertsClient() {
               </CardHeader>
               <CardContent className="p-0">
                 <div className="divide-y divide-gray-100 dark:divide-gray-800">
-                  {mockServices.map(service => (
+                  {services.map(service => (
                     <div key={service.id} className="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-800">
                       <div className={`w-3 h-3 rounded-full ${
                         service.status === 'operational' ? 'bg-green-500' :
@@ -1171,7 +994,7 @@ export default function AlertsClient() {
           {/* Escalations Tab */}
           <TabsContent value="escalations" className="mt-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
-              {mockEscalationPolicies.map(policy => (
+              {escalationPolicies.map(policy => (
                 <Card key={policy.id} className="border-gray-200 dark:border-gray-700">
                   <CardHeader>
                     <div className="flex items-center justify-between">
@@ -1230,7 +1053,7 @@ export default function AlertsClient() {
               </CardHeader>
               <CardContent className="p-0">
                 <div className="divide-y divide-gray-100 dark:divide-gray-800">
-                  {mockIntegrations.map(integration => (
+                  {integrations.map(integration => (
                     <div key={integration.id} className="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-800">
                       <div className="w-12 h-12 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-2xl">
                         {integration.icon}
@@ -2217,7 +2040,7 @@ export default function AlertsClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockAlertsAIInsights}
+              insights={alertsAIInsights}
               title="Alert Intelligence"
               onInsightAction={(_insight) => {
                 toast.success(`Insight: ${insight.title}`, { description: insight.description })
@@ -2226,11 +2049,11 @@ export default function AlertsClient() {
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockAlertsCollaborators}
+              collaborators={alertsCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockAlertsPredictions}
+              predictions={alertsPredictions}
               title="Alert Forecasts"
             />
           </div>
@@ -2238,7 +2061,7 @@ export default function AlertsClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockAlertsActivities}
+            activities={alertsActivities}
             title="Alert Activity"
             maxItems={5}
           />

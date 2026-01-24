@@ -142,310 +142,24 @@ interface Agent {
   email: string
   avatar?: string
   team: string
-  status: 'online' | 'away' | 'offline'
+  status: 'online' | 'away' | 'offline' | 'busy'
   openTickets: number
   resolvedToday: number
   avgResponseTime: string
   satisfaction: number
+  ticketsToday?: number
 }
 
-// Mock Data
-const mockTickets: SupportTicket[] = [
-  {
-    id: '1',
-    ticketNumber: 'TKT-2024-001',
-    subject: 'Unable to access dashboard after password reset',
-    description: 'I reset my password yesterday but now I cannot log into the dashboard. Getting "Invalid credentials" error.',
-    status: 'open',
-    priority: 'high',
-    channel: 'email',
-    category: 'Account Access',
-    tags: ['login-issue', 'password', 'urgent'],
-    customer: {
-      id: 'c1',
-      name: 'John Smith',
-      email: 'john.smith@company.com',
-      company: 'Acme Corp',
-      tier: 'enterprise',
-      totalTickets: 12
-    },
-    assignee: {
-      id: 'a1',
-      name: 'Sarah Chen',
-      team: 'Technical Support'
-    },
-    sla: {
-      status: 'at-risk',
-      firstResponseDue: '2024-02-15T14:00:00Z',
-      resolutionDue: '2024-02-16T18:00:00Z',
-      firstResponseAt: '2024-02-15T13:30:00Z'
-    },
-    messages: [
-      {
-        id: 'm1',
-        sender: 'customer',
-        senderName: 'John Smith',
-        content: 'I reset my password yesterday but now I cannot log into the dashboard. Getting "Invalid credentials" error.',
-        isInternal: false,
-        createdAt: '2024-02-15T10:00:00Z'
-      },
-      {
-        id: 'm2',
-        sender: 'agent',
-        senderName: 'Sarah Chen',
-        content: 'Hi John, I understand how frustrating this must be. Let me look into your account right away. Could you confirm the email address you\'re using to log in?',
-        isInternal: false,
-        createdAt: '2024-02-15T13:30:00Z'
-      },
-      {
-        id: 'm3',
-        sender: 'system',
-        senderName: 'System',
-        content: 'Status changed from New to Open',
-        isInternal: true,
-        createdAt: '2024-02-15T13:30:00Z'
-      }
-    ],
-    createdAt: '2024-02-15T10:00:00Z',
-    updatedAt: '2024-02-15T13:30:00Z'
-  },
-  {
-    id: '2',
-    ticketNumber: 'TKT-2024-002',
-    subject: 'Feature request: Export to CSV',
-    description: 'Would love to have the ability to export reports to CSV format for further analysis in Excel.',
-    status: 'pending',
-    priority: 'normal',
-    channel: 'web',
-    category: 'Feature Request',
-    tags: ['feature-request', 'export', 'reporting'],
-    customer: {
-      id: 'c2',
-      name: 'Emily Davis',
-      email: 'emily@startup.io',
-      company: 'StartupIO',
-      tier: 'pro',
-      totalTickets: 5
-    },
-    assignee: {
-      id: 'a2',
-      name: 'Mike Johnson',
-      team: 'Product Support'
-    },
-    sla: {
-      status: 'on-track',
-      firstResponseDue: '2024-02-16T12:00:00Z',
-      resolutionDue: '2024-02-20T18:00:00Z',
-      firstResponseAt: '2024-02-15T16:00:00Z'
-    },
-    messages: [
-      {
-        id: 'm4',
-        sender: 'customer',
-        senderName: 'Emily Davis',
-        content: 'Would love to have the ability to export reports to CSV format for further analysis in Excel.',
-        isInternal: false,
-        createdAt: '2024-02-15T14:00:00Z'
-      },
-      {
-        id: 'm5',
-        sender: 'agent',
-        senderName: 'Mike Johnson',
-        content: 'Thanks for the suggestion, Emily! I\'ve forwarded this to our product team for consideration. We\'ll update you once we have more information.',
-        isInternal: false,
-        createdAt: '2024-02-15T16:00:00Z'
-      }
-    ],
-    createdAt: '2024-02-15T14:00:00Z',
-    updatedAt: '2024-02-15T16:00:00Z',
-    satisfaction: 'good'
-  },
-  {
-    id: '3',
-    ticketNumber: 'TKT-2024-003',
-    subject: 'Billing discrepancy on last invoice',
-    description: 'I was charged $299 instead of the agreed $199/month on my enterprise plan.',
-    status: 'new',
-    priority: 'urgent',
-    channel: 'phone',
-    category: 'Billing',
-    tags: ['billing', 'invoice', 'overcharge'],
-    customer: {
-      id: 'c3',
-      name: 'Michael Chen',
-      email: 'mchen@bigcorp.com',
-      company: 'BigCorp Inc',
-      tier: 'enterprise',
-      totalTickets: 3
-    },
-    sla: {
-      status: 'on-track',
-      firstResponseDue: '2024-02-15T16:00:00Z',
-      resolutionDue: '2024-02-15T20:00:00Z'
-    },
-    messages: [
-      {
-        id: 'm6',
-        sender: 'customer',
-        senderName: 'Michael Chen',
-        content: 'I was charged $299 instead of the agreed $199/month on my enterprise plan. This needs to be fixed ASAP.',
-        isInternal: false,
-        createdAt: '2024-02-15T15:00:00Z'
-      }
-    ],
-    createdAt: '2024-02-15T15:00:00Z',
-    updatedAt: '2024-02-15T15:00:00Z'
-  },
-  {
-    id: '4',
-    ticketNumber: 'TKT-2024-004',
-    subject: 'API rate limiting questions',
-    description: 'Need clarification on the rate limits for the v2 API endpoints.',
-    status: 'solved',
-    priority: 'low',
-    channel: 'chat',
-    category: 'API Support',
-    tags: ['api', 'rate-limiting', 'documentation'],
-    customer: {
-      id: 'c4',
-      name: 'Lisa Wong',
-      email: 'lisa@devshop.com',
-      company: 'DevShop',
-      tier: 'pro',
-      totalTickets: 8
-    },
-    assignee: {
-      id: 'a3',
-      name: 'Alex Thompson',
-      team: 'Technical Support'
-    },
-    sla: {
-      status: 'on-track',
-      firstResponseDue: '2024-02-14T12:00:00Z',
-      resolutionDue: '2024-02-15T18:00:00Z',
-      firstResponseAt: '2024-02-14T11:00:00Z',
-      resolvedAt: '2024-02-14T15:00:00Z'
-    },
-    messages: [
-      {
-        id: 'm7',
-        sender: 'customer',
-        senderName: 'Lisa Wong',
-        content: 'Need clarification on the rate limits for the v2 API endpoints.',
-        isInternal: false,
-        createdAt: '2024-02-14T10:00:00Z'
-      },
-      {
-        id: 'm8',
-        sender: 'agent',
-        senderName: 'Alex Thompson',
-        content: 'Hi Lisa! The v2 API has the following rate limits:\n- Free tier: 100 requests/min\n- Pro tier: 1000 requests/min\n- Enterprise: 10000 requests/min\n\nYou can also check our docs at docs.example.com/api/rate-limits',
-        isInternal: false,
-        createdAt: '2024-02-14T11:00:00Z'
-      }
-    ],
-    createdAt: '2024-02-14T10:00:00Z',
-    updatedAt: '2024-02-14T15:00:00Z',
-    satisfaction: 'good'
-  },
-  {
-    id: '5',
-    ticketNumber: 'TKT-2024-005',
-    subject: 'Integration with Salesforce not syncing',
-    description: 'Our Salesforce integration stopped syncing contacts two days ago.',
-    status: 'on-hold',
-    priority: 'high',
-    channel: 'email',
-    category: 'Integrations',
-    tags: ['integration', 'salesforce', 'sync-issue'],
-    customer: {
-      id: 'c5',
-      name: 'David Park',
-      email: 'dpark@salesteam.com',
-      company: 'SalesTeam Pro',
-      tier: 'enterprise',
-      totalTickets: 15
-    },
-    assignee: {
-      id: 'a1',
-      name: 'Sarah Chen',
-      team: 'Technical Support'
-    },
-    sla: {
-      status: 'breached',
-      firstResponseDue: '2024-02-13T12:00:00Z',
-      resolutionDue: '2024-02-14T18:00:00Z',
-      firstResponseAt: '2024-02-13T14:00:00Z'
-    },
-    messages: [
-      {
-        id: 'm9',
-        sender: 'customer',
-        senderName: 'David Park',
-        content: 'Our Salesforce integration stopped syncing contacts two days ago. This is critical for our sales team.',
-        isInternal: false,
-        createdAt: '2024-02-13T10:00:00Z'
-      },
-      {
-        id: 'm10',
-        sender: 'agent',
-        senderName: 'Sarah Chen',
-        content: 'Hi David, I\'m looking into this now. Can you confirm if you made any changes to your Salesforce OAuth settings recently?',
-        isInternal: false,
-        createdAt: '2024-02-13T14:00:00Z'
-      },
-      {
-        id: 'm11',
-        sender: 'agent',
-        senderName: 'Sarah Chen',
-        content: 'Escalated to engineering team - awaiting response on OAuth token refresh bug',
-        isInternal: true,
-        createdAt: '2024-02-13T16:00:00Z'
-      }
-    ],
-    createdAt: '2024-02-13T10:00:00Z',
-    updatedAt: '2024-02-15T09:00:00Z'
-  }
-]
+// Empty typed arrays - no mock data
+const tickets: SupportTicket[] = []
+const agents: Agent[] = []
 
-const mockAgents: Agent[] = [
-  { id: 'a1', name: 'Sarah Chen', email: 'sarah@company.com', team: 'Technical Support', status: 'online', openTickets: 8, resolvedToday: 12, avgResponseTime: '15m', satisfaction: 96 },
-  { id: 'a2', name: 'Mike Johnson', email: 'mike@company.com', team: 'Product Support', status: 'online', openTickets: 5, resolvedToday: 8, avgResponseTime: '22m', satisfaction: 92 },
-  { id: 'a3', name: 'Alex Thompson', email: 'alex@company.com', team: 'Technical Support', status: 'away', openTickets: 3, resolvedToday: 15, avgResponseTime: '12m', satisfaction: 98 },
-  { id: 'a4', name: 'Emma Wilson', email: 'emma@company.com', team: 'Billing Support', status: 'online', openTickets: 6, resolvedToday: 10, avgResponseTime: '18m', satisfaction: 94 },
-  { id: 'a5', name: 'James Lee', email: 'james@company.com', team: 'Product Support', status: 'offline', openTickets: 2, resolvedToday: 7, avgResponseTime: '25m', satisfaction: 89 }
-]
-
-// Enhanced Competitive Upgrade Mock Data
-const mockTicketsAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Resolution Time', description: 'Average resolution down to 4.2 hours. 25% faster than last month.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Performance' },
-  { id: '2', type: 'info' as const, title: 'Ticket Patterns', description: 'Login issues spiking - consider knowledge base article.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Patterns' },
-  { id: '3', type: 'warning' as const, title: 'SLA Risk', description: '3 tickets approaching SLA breach in next 2 hours.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'SLA' },
-]
-
-const mockTicketsCollaborators = [
-  { id: '1', name: 'Support Lead', avatar: '/avatars/support.jpg', status: 'online' as const, role: 'Lead' },
-  { id: '2', name: 'Senior Agent', avatar: '/avatars/agent.jpg', status: 'online' as const, role: 'Agent' },
-  { id: '3', name: 'Escalation Mgr', avatar: '/avatars/escalation.jpg', status: 'busy' as const, role: 'Manager' },
-]
-
-const mockTicketsPredictions = [
-  { id: '1', title: 'Volume Forecast', prediction: '120 tickets expected today', confidence: 85, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'CSAT Score', prediction: '94% satisfaction projected', confidence: 88, trend: 'up' as const, impact: 'medium' as const },
-]
-
-const mockTicketsActivities = [
-  { id: '1', user: 'Sarah Chen', action: 'Resolved ticket', target: '#TKT-1234', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Auto-Router', action: 'Assigned ticket to', target: 'Technical Team', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'Mike Johnson', action: 'Escalated', target: '#TKT-1235 to Tier 2', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
-]
-
-const mockTicketsQuickActions = [
-  { id: '1', label: 'New Ticket', icon: 'Plus', action: () => {}, shortcut: 'N' },
-  { id: '2', label: 'Assign', icon: 'Users', action: () => {}, shortcut: 'A' },
-  { id: '3', label: 'Resolve', icon: 'CheckCircle', action: () => {}, shortcut: 'R' },
-  { id: '4', label: 'Settings', icon: 'Settings', action: () => {}, shortcut: 'S' },
-]
+// Empty typed arrays for competitive upgrade components
+const ticketsAIInsights: { id: string; type: 'success' | 'info' | 'warning' | 'error'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
+const ticketsCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'offline' | 'busy'; role: string }[] = []
+const ticketsPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: 'low' | 'medium' | 'high' }[] = []
+const ticketsActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'update' | 'warning' | 'error' }[] = []
+const ticketsQuickActions: { id: string; label: string; icon: string; action: () => void; shortcut: string }[] = []
 
 export default function TicketsClient() {
   const [activeTab, setActiveTab] = useState('tickets')
@@ -478,7 +192,7 @@ export default function TicketsClient() {
   const { createTicket, updateTicket, deleteTicket, assignTicket, isCreating, isUpdating, isDeleting } = useTicketMutations()
   const { createMessage, isCreating: isCreatingMessage } = useTicketMessageMutations()
 
-  // Merge mock data with real DB data for display
+  // Convert DB tickets to display format
   const allTickets = useMemo(() => {
     // Convert DB tickets to display format if available
     if (dbTickets && dbTickets.length > 0) {
@@ -511,12 +225,12 @@ export default function TicketsClient() {
           firstResponseAt: t.first_response_at || undefined,
           resolvedAt: t.resolved_at || undefined
         },
-        messages: [],
+        messages: [] as TicketMessage[],
         createdAt: t.created_at,
         updatedAt: t.updated_at
       }))
     }
-    return mockTickets
+    return [] as SupportTicket[]
   }, [dbTickets])
 
   // Stats calculations - uses real data when available
@@ -533,7 +247,7 @@ export default function TicketsClient() {
     const avgResponseTime = '18 min'
     const avgResolutionTime = '4.2 hrs'
     const csatScore = 94
-    const onlineAgents = mockAgents.filter(a => a.status === 'online').length
+    const onlineAgents = agents.filter(a => a.status === 'online').length
 
     return {
       total,
@@ -548,7 +262,7 @@ export default function TicketsClient() {
       avgResolutionTime,
       csatScore,
       onlineAgents,
-      totalAgents: mockAgents.length
+      totalAgents: agents.length
     }
   }, [allTickets])
 
@@ -1682,23 +1396,23 @@ export default function TicketsClient() {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
                   <div className="bg-white/20 rounded-lg p-3 text-center">
-                    <p className="text-2xl font-bold">{mockAgents.length}</p>
+                    <p className="text-2xl font-bold">{agents.length}</p>
                     <p className="text-xs text-blue-100">Total Agents</p>
                   </div>
                   <div className="bg-white/20 rounded-lg p-3 text-center">
-                    <p className="text-2xl font-bold">{mockAgents.filter(a => a.status === 'online').length}</p>
+                    <p className="text-2xl font-bold">{agents.filter(a => a.status === 'online').length}</p>
                     <p className="text-xs text-blue-100">Online</p>
                   </div>
                   <div className="bg-white/20 rounded-lg p-3 text-center">
-                    <p className="text-2xl font-bold">{mockAgents.filter(a => a.status === 'busy').length}</p>
+                    <p className="text-2xl font-bold">{agents.filter(a => a.status === 'busy').length}</p>
                     <p className="text-xs text-blue-100">Busy</p>
                   </div>
                   <div className="bg-white/20 rounded-lg p-3 text-center">
-                    <p className="text-2xl font-bold">{Math.round(mockAgents.reduce((sum, a) => sum + a.satisfaction, 0) / mockAgents.length)}%</p>
+                    <p className="text-2xl font-bold">{Math.round(agents.reduce((sum, a) => sum + a.satisfaction, 0) / agents.length)}%</p>
                     <p className="text-xs text-blue-100">Avg CSAT</p>
                   </div>
                   <div className="bg-white/20 rounded-lg p-3 text-center">
-                    <p className="text-2xl font-bold">{mockAgents.reduce((sum, a) => sum + a.ticketsToday, 0)}</p>
+                    <p className="text-2xl font-bold">{agents.reduce((sum, a) => sum + a.ticketsToday, 0)}</p>
                     <p className="text-xs text-blue-100">Tickets Today</p>
                   </div>
                 </div>
@@ -1707,10 +1421,10 @@ export default function TicketsClient() {
               {/* Agent Status Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mb-4">
                 {[
-                  { status: 'Online', count: mockAgents.filter(a => a.status === 'online').length, color: 'green' },
-                  { status: 'Busy', count: mockAgents.filter(a => a.status === 'busy').length, color: 'yellow' },
-                  { status: 'Away', count: mockAgents.filter(a => a.status === 'away').length, color: 'orange' },
-                  { status: 'Offline', count: mockAgents.filter(a => a.status === 'offline').length, color: 'gray' },
+                  { status: 'Online', count: agents.filter(a => a.status === 'online').length, color: 'green' },
+                  { status: 'Busy', count: agents.filter(a => a.status === 'busy').length, color: 'yellow' },
+                  { status: 'Away', count: agents.filter(a => a.status === 'away').length, color: 'orange' },
+                  { status: 'Offline', count: agents.filter(a => a.status === 'offline').length, color: 'gray' },
                 ].map((item, i) => (
                   <Card key={i} className={`border-${item.color}-200 bg-${item.color}-50 dark:bg-${item.color}-900/20`}>
                     <CardContent className="p-4 text-center">
@@ -1723,7 +1437,7 @@ export default function TicketsClient() {
               </div>
 
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {mockAgents.map(agent => (
+                {agents.map(agent => (
                   <Card key={agent.id} className="bg-white dark:bg-gray-800">
                     <CardContent className="p-6">
                       <div className="flex items-start gap-4 mb-4">
@@ -1984,7 +1698,7 @@ export default function TicketsClient() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      {mockAgents
+                      {agents
                         .sort((a, b) => b.satisfaction - a.satisfaction)
                         .slice(0, 4)
                         .map((agent, i) => (
@@ -2364,18 +2078,18 @@ export default function TicketsClient() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
             <div className="lg:col-span-2">
               <AIInsightsPanel
-                insights={mockTicketsAIInsights}
+                insights={ticketsAIInsights}
                 title="Ticket Intelligence"
                 onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
               />
             </div>
             <div className="space-y-6">
               <CollaborationIndicator
-                collaborators={mockTicketsCollaborators}
+                collaborators={ticketsCollaborators}
                 maxVisible={4}
               />
               <PredictiveAnalytics
-                predictions={mockTicketsPredictions}
+                predictions={ticketsPredictions}
                 title="Support Forecasts"
               />
             </div>
@@ -2383,12 +2097,12 @@ export default function TicketsClient() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
             <ActivityFeed
-              activities={mockTicketsActivities}
+              activities={ticketsActivities}
               title="Ticket Activity"
               maxItems={5}
             />
             <QuickActionsToolbar
-              actions={mockTicketsQuickActions}
+              actions={ticketsQuickActions}
               variant="grid"
             />
           </div>
@@ -2497,7 +2211,7 @@ export default function TicketsClient() {
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
-            {mockAgents.filter(a => a.status === 'online').map(agent => (
+            {agents.filter(a => a.status === 'online').map(agent => (
               <div
                 key={agent.id}
                 className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer"

@@ -209,172 +209,13 @@ interface WebinarStats {
   avgDuration: number
 }
 
-// Mock Data
-const mockWebinars: Webinar[] = [
-  {
-    id: 'w1',
-    title: 'Product Launch: AI Features 2024',
-    description: 'Join us for the unveiling of our new AI-powered features',
-    type: 'webinar',
-    status: 'scheduled',
-    scheduledDate: '2024-03-15T14:00:00Z',
-    duration: 60,
-    timezone: 'America/New_York',
-    host: { id: 'h1', name: 'Sarah Chen', email: 'sarah@example.com', role: 'host' },
-    panelists: [
-      { id: 'p1', name: 'Mike Johnson', email: 'mike@example.com', role: 'speaker' },
-      { id: 'p2', name: 'Emily Davis', email: 'emily@example.com', role: 'panelist' }
-    ],
-    registeredCount: 234,
-    attendedCount: 0,
-    maxParticipants: 500,
-    registrationRequired: true,
-    approvalRequired: false,
-    recordingEnabled: true,
-    qnaEnabled: true,
-    pollsEnabled: true,
-    chatEnabled: true,
-    waitingRoomEnabled: true,
-    meetingId: '123-456-789',
-    joinUrl: 'https://zoom.us/j/123456789',
-    registrationUrl: 'https://zoom.us/webinar/register/123456789',
-    createdAt: '2024-03-01'
-  },
-  {
-    id: 'w2',
-    title: 'Customer Success Workshop',
-    description: 'Best practices for maximizing customer value',
-    type: 'training',
-    status: 'live',
-    scheduledDate: '2024-03-12T10:00:00Z',
-    duration: 90,
-    timezone: 'America/New_York',
-    host: { id: 'h2', name: 'Alex Rivera', email: 'alex@example.com', role: 'host' },
-    panelists: [],
-    registeredCount: 156,
-    attendedCount: 134,
-    maxParticipants: 200,
-    registrationRequired: true,
-    approvalRequired: false,
-    recordingEnabled: true,
-    qnaEnabled: true,
-    pollsEnabled: false,
-    chatEnabled: true,
-    waitingRoomEnabled: false,
-    createdAt: '2024-02-28'
-  },
-  {
-    id: 'w3',
-    title: 'Q1 Product Demo',
-    description: 'Live demonstration of our latest features',
-    type: 'demo',
-    status: 'ended',
-    scheduledDate: '2024-03-05T15:00:00Z',
-    duration: 45,
-    timezone: 'America/New_York',
-    host: { id: 'h1', name: 'Sarah Chen', email: 'sarah@example.com', role: 'host' },
-    panelists: [
-      { id: 'p3', name: 'James Wilson', email: 'james@example.com', role: 'speaker' }
-    ],
-    registeredCount: 312,
-    attendedCount: 267,
-    maxParticipants: 500,
-    registrationRequired: true,
-    approvalRequired: false,
-    recordingEnabled: true,
-    qnaEnabled: true,
-    pollsEnabled: true,
-    chatEnabled: true,
-    waitingRoomEnabled: true,
-    createdAt: '2024-02-20'
-  },
-  {
-    id: 'w4',
-    title: 'Annual User Conference 2024',
-    description: 'Our biggest event of the year with keynotes and sessions',
-    type: 'conference',
-    status: 'scheduled',
-    scheduledDate: '2024-04-01T09:00:00Z',
-    duration: 480,
-    timezone: 'America/New_York',
-    host: { id: 'h3', name: 'Lisa Brown', email: 'lisa@example.com', role: 'host' },
-    panelists: [
-      { id: 'p1', name: 'Mike Johnson', email: 'mike@example.com', role: 'speaker' },
-      { id: 'p2', name: 'Emily Davis', email: 'emily@example.com', role: 'speaker' },
-      { id: 'p4', name: 'David Lee', email: 'david@example.com', role: 'panelist' }
-    ],
-    registeredCount: 892,
-    attendedCount: 0,
-    maxParticipants: 1000,
-    registrationRequired: true,
-    approvalRequired: true,
-    recordingEnabled: true,
-    qnaEnabled: true,
-    pollsEnabled: true,
-    chatEnabled: true,
-    waitingRoomEnabled: true,
-    createdAt: '2024-02-01'
-  },
-  {
-    id: 'w5',
-    title: 'Weekly Team Sync',
-    description: 'Internal team meeting',
-    type: 'meeting',
-    status: 'draft',
-    scheduledDate: '2024-03-18T11:00:00Z',
-    duration: 30,
-    timezone: 'America/New_York',
-    host: { id: 'h2', name: 'Alex Rivera', email: 'alex@example.com', role: 'host' },
-    panelists: [],
-    registeredCount: 0,
-    attendedCount: 0,
-    maxParticipants: 50,
-    registrationRequired: false,
-    approvalRequired: false,
-    recordingEnabled: false,
-    qnaEnabled: false,
-    pollsEnabled: false,
-    chatEnabled: true,
-    waitingRoomEnabled: false,
-    createdAt: '2024-03-10'
-  }
-]
-
-const mockRegistrations: Registration[] = [
-  { id: 'r1', webinarId: 'w1', name: 'John Smith', email: 'john@company.com', company: 'Acme Inc', jobTitle: 'CTO', status: 'approved', registeredAt: '2024-03-05', source: 'landing_page' },
-  { id: 'r2', webinarId: 'w1', name: 'Jane Doe', email: 'jane@startup.io', company: 'Startup.io', jobTitle: 'Product Manager', status: 'approved', registeredAt: '2024-03-06', source: 'email_campaign' },
-  { id: 'r3', webinarId: 'w1', name: 'Bob Wilson', email: 'bob@enterprise.com', company: 'Enterprise Corp', jobTitle: 'VP Engineering', status: 'pending', registeredAt: '2024-03-08', source: 'organic' },
-  { id: 'r4', webinarId: 'w2', name: 'Alice Brown', email: 'alice@tech.co', company: 'Tech Co', status: 'attended', registeredAt: '2024-03-01', attendedAt: '2024-03-12T10:02:00Z', leftAt: '2024-03-12T11:28:00Z', duration: 86 },
-  { id: 'r5', webinarId: 'w2', name: 'Charlie Davis', email: 'charlie@agency.com', status: 'attended', registeredAt: '2024-03-02', attendedAt: '2024-03-12T10:05:00Z', duration: 85 },
-  { id: 'r6', webinarId: 'w3', name: 'Diana Lee', email: 'diana@company.com', status: 'attended', registeredAt: '2024-02-25', attendedAt: '2024-03-05T15:00:00Z', leftAt: '2024-03-05T15:45:00Z', duration: 45 },
-  { id: 'r7', webinarId: 'w3', name: 'Edward King', email: 'edward@firm.com', status: 'no_show', registeredAt: '2024-02-26' }
-]
-
-const mockRecordings: Recording[] = [
-  { id: 'rec1', webinarId: 'w3', webinarTitle: 'Q1 Product Demo', type: 'video', status: 'ready', duration: 2700, size: 456000000, views: 189, downloadCount: 45, url: 'https://example.com/recording1.mp4', createdAt: '2024-03-05', expiresAt: '2024-06-05' },
-  { id: 'rec2', webinarId: 'w3', webinarTitle: 'Q1 Product Demo', type: 'audio', status: 'ready', duration: 2700, size: 45000000, views: 23, downloadCount: 12, url: 'https://example.com/recording1.mp3', createdAt: '2024-03-05', expiresAt: '2024-06-05' },
-  { id: 'rec3', webinarId: 'w3', webinarTitle: 'Q1 Product Demo', type: 'transcript', status: 'ready', duration: 0, size: 125000, views: 56, downloadCount: 34, url: 'https://example.com/transcript1.txt', createdAt: '2024-03-05' },
-  { id: 'rec4', webinarId: 'w2', webinarTitle: 'Customer Success Workshop', type: 'video', status: 'processing', duration: 5400, size: 0, views: 0, downloadCount: 0, createdAt: '2024-03-12' }
-]
-
-const mockTemplates: EmailTemplate[] = [
-  { id: 't1', name: 'Registration Confirmation', type: 'confirmation', subject: 'You\'re registered for {{webinar_title}}!', enabled: true },
-  { id: 't2', name: '24 Hour Reminder', type: 'reminder', subject: 'Reminder: {{webinar_title}} starts tomorrow', enabled: true, sendTime: '24h' },
-  { id: 't3', name: '1 Hour Reminder', type: 'reminder', subject: '{{webinar_title}} starts in 1 hour', enabled: true, sendTime: '1h' },
-  { id: 't4', name: 'Follow Up Email', type: 'follow_up', subject: 'Thank you for attending {{webinar_title}}', enabled: true },
-  { id: 't5', name: 'Cancellation Notice', type: 'cancellation', subject: '{{webinar_title}} has been cancelled', enabled: true }
-]
-
-const mockPolls: Poll[] = [
-  { id: 'poll1', question: 'What feature are you most excited about?', options: [{ id: 'o1', text: 'AI Assistant', votes: 45 }, { id: 'o2', text: 'Automation', votes: 32 }, { id: 'o3', text: 'Analytics', votes: 28 }], status: 'ended', createdAt: '2024-03-05' },
-  { id: 'poll2', question: 'How would you rate this webinar?', options: [{ id: 'o1', text: 'Excellent', votes: 78 }, { id: 'o2', text: 'Good', votes: 45 }, { id: 'o3', text: 'Average', votes: 12 }, { id: 'o4', text: 'Poor', votes: 3 }], status: 'ended', createdAt: '2024-03-05' }
-]
-
-const mockQA: QAItem[] = [
-  { id: 'qa1', question: 'When will this feature be available?', askedBy: 'John S.', askedAt: '2024-03-05T15:15:00Z', answer: 'We expect to release it by end of Q2.', answeredBy: 'Sarah Chen', answeredAt: '2024-03-05T15:17:00Z', upvotes: 23, status: 'answered' },
-  { id: 'qa2', question: 'Does this integrate with Salesforce?', askedBy: 'Jane D.', askedAt: '2024-03-05T15:20:00Z', answer: 'Yes, we have native Salesforce integration.', answeredBy: 'Mike Johnson', answeredAt: '2024-03-05T15:22:00Z', upvotes: 18, status: 'answered' },
-  { id: 'qa3', question: 'What about enterprise pricing?', askedBy: 'Bob W.', askedAt: '2024-03-05T15:25:00Z', upvotes: 12, status: 'pending' }
-]
+// Empty data arrays - real data comes from API
+const webinarsData: Webinar[] = []
+const registrationsData: Registration[] = []
+const recordingsData: Recording[] = []
+const templatesData: EmailTemplate[] = []
+const pollsData: Poll[] = []
+const qaData: QAItem[] = []
 
 // Helper Functions
 const getStatusColor = (status: WebinarStatus) => {
@@ -434,31 +275,11 @@ const formatBytes = (bytes: number) => {
   return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`
 }
 
-// Competitive Upgrade Mock Data - Zoom/Hopin Level Webinar Intelligence
-const mockWebinarsAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Attendance Record', description: 'Product Launch webinar hit 2,500 live attendees—your highest ever!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Attendance' },
-  { id: '2', type: 'warning' as const, title: 'Engagement Drop', description: 'Q&A participation down 25% in last 3 webinars. Consider breakout rooms.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Engagement' },
-  { id: '3', type: 'info' as const, title: 'AI Suggestion', description: 'Optimal webinar length is 45-60 mins—your 90-min sessions show 30% drop-off.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'AI Insights' },
-]
-
-const mockWebinarsCollaborators = [
-  { id: '1', name: 'Event Host', avatar: '/avatars/host.jpg', status: 'online' as const, role: 'Host' },
-  { id: '2', name: 'Producer', avatar: '/avatars/producer.jpg', status: 'online' as const, role: 'Producer' },
-  { id: '3', name: 'Panelist', avatar: '/avatars/speaker.jpg', status: 'away' as const, role: 'Panelist' },
-]
-
-const mockWebinarsPredictions = [
-  { id: '1', title: 'Registration Conversion', prediction: '72% of registrants expected to attend live based on email engagement', confidence: 84, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Lead Generation', prediction: 'Next webinar projected to generate 450+ qualified leads', confidence: 78, trend: 'up' as const, impact: 'medium' as const },
-]
-
-const mockWebinarsActivities = [
-  { id: '1', user: 'Event Host', action: 'Scheduled', target: 'Q1 Product Roadmap Webinar', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Producer', action: 'Uploaded', target: 'Customer Success Story recording', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'Marketing', action: 'Sent', target: 'Reminder emails to 1,200 registrants', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
-]
-
-// Note: mockWebinarsQuickActions are defined inside the component to access state setters
+// Empty arrays for competitive upgrade components - real data comes from API
+const webinarsAIInsights: { id: string; type: 'success' | 'warning' | 'info'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
+const webinarsCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }[] = []
+const webinarsPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: 'low' | 'medium' | 'high' }[] = []
+const webinarsActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' | 'error' }[] = []
 
 export default function WebinarsClient() {
 
@@ -536,17 +357,17 @@ export default function WebinarsClient() {
 
   // Enhanced stats from API
   const enhancedWebinarStats = useMemo(() => ({
-    totalWebinars: apiWebinars.length || mockWebinars.length,
-    scheduledWebinars: apiWebinars.filter(w => w.status === 'scheduled').length || mockWebinars.filter(w => w.status === 'scheduled').length,
-    liveWebinars: apiWebinars.filter(w => w.status === 'live').length || mockWebinars.filter(w => w.status === 'live').length,
-    totalRegistrations: apiRegistrations.length || mockRegistrations.length,
-    totalAttendees: apiRegistrations.filter(r => r.attended).length || mockRegistrations.filter(r => r.status === 'attended').length,
-    totalRecordings: mockRecordings.length
+    totalWebinars: apiWebinars.length,
+    scheduledWebinars: apiWebinars.filter(w => w.status === 'scheduled').length,
+    liveWebinars: apiWebinars.filter(w => w.status === 'live').length,
+    totalRegistrations: apiRegistrations.length,
+    totalAttendees: apiRegistrations.filter(r => r.attended).length,
+    totalRecordings: recordingsData.length
   }), [apiWebinars, apiRegistrations])
 
-  // Use API data with fallback to mock data
-  const effectiveWebinars = apiWebinars.length > 0 ? apiWebinars : mockWebinars
-  const effectiveRegistrations = apiRegistrations.length > 0 ? apiRegistrations : mockRegistrations
+  // Use API data directly
+  const effectiveWebinars = apiWebinars
+  const effectiveRegistrations = apiRegistrations
 
   // Create webinar using API hook
   const handleCreateWebinarWithAPI = useCallback(async (webinarData: Partial<Webinar>) => {
@@ -572,7 +393,7 @@ export default function WebinarsClient() {
         startTime: webinarData.startTime || new Date(Date.now() + 86400000).toISOString(),
         endTime: webinarData.endTime || new Date(Date.now() + 86400000 + 3600000).toISOString(),
         duration: 60,
-        host: mockWebinars[0]?.host || { id: '1', name: 'Host', avatar: '' },
+        host: { id: '1', name: 'Host', email: 'host@example.com', role: 'host' as const },
         presenters: [],
         maxAttendees: 1000,
         currentAttendees: 0,
@@ -632,10 +453,12 @@ export default function WebinarsClient() {
   const [showTemplateDialog, setShowTemplateDialog] = useState(false)
   const [emailForm, setEmailForm] = useState({ subject: '', body: '', recipients: 'all' })
   const [isRecording, setIsRecording] = useState(false)
-  const [webinars, setWebinars] = useState<Webinar[]>(mockWebinars)
-  const [recordings, setRecordings] = useState<Recording[]>(mockRecordings)
-  const [registrations, setRegistrations] = useState<Registration[]>(mockRegistrations)
-  const [templates, setTemplates] = useState<EmailTemplate[]>(mockTemplates)
+  const [webinars, setWebinars] = useState<Webinar[]>([])
+  const [recordings, setRecordings] = useState<Recording[]>([])
+  const [registrations, setRegistrations] = useState<Registration[]>([])
+  const [templates, setTemplates] = useState<EmailTemplate[]>([])
+  const [polls, setPolls] = useState<Poll[]>([])
+  const [qaItems, setQaItems] = useState<QAItem[]>([])
   const [showEditDialog, setShowEditDialog] = useState(false)
   const [editingWebinar, setEditingWebinar] = useState<Webinar | null>(null)
 
@@ -853,27 +676,32 @@ export default function WebinarsClient() {
   ]
 
   // Calculate stats
-  const stats: WebinarStats = useMemo(() => ({
-    totalWebinars: mockWebinars.length,
-    scheduledWebinars: mockWebinars.filter(w => w.status === 'scheduled').length,
-    liveNow: mockWebinars.filter(w => w.status === 'live').length,
-    endedWebinars: mockWebinars.filter(w => w.status === 'ended').length,
-    totalRegistrations: mockWebinars.reduce((sum, w) => sum + w.registeredCount, 0),
-    totalAttendees: mockWebinars.reduce((sum, w) => sum + w.attendedCount, 0),
-    avgAttendanceRate: mockWebinars.filter(w => w.registeredCount > 0).reduce((sum, w) => sum + (w.attendedCount / w.registeredCount * 100), 0) / mockWebinars.filter(w => w.registeredCount > 0).length || 0,
-    avgDuration: mockWebinars.reduce((sum, w) => sum + w.duration, 0) / mockWebinars.length
-  }), [])
+  const stats: WebinarStats = useMemo(() => {
+    const webinarsWithRegistrations = webinars.filter(w => w.registeredCount > 0)
+    return {
+      totalWebinars: webinars.length,
+      scheduledWebinars: webinars.filter(w => w.status === 'scheduled').length,
+      liveNow: webinars.filter(w => w.status === 'live').length,
+      endedWebinars: webinars.filter(w => w.status === 'ended').length,
+      totalRegistrations: webinars.reduce((sum, w) => sum + w.registeredCount, 0),
+      totalAttendees: webinars.reduce((sum, w) => sum + w.attendedCount, 0),
+      avgAttendanceRate: webinarsWithRegistrations.length > 0
+        ? webinarsWithRegistrations.reduce((sum, w) => sum + (w.attendedCount / w.registeredCount * 100), 0) / webinarsWithRegistrations.length
+        : 0,
+      avgDuration: webinars.length > 0 ? webinars.reduce((sum, w) => sum + w.duration, 0) / webinars.length : 0
+    }
+  }, [webinars])
 
   // Filter webinars
   const filteredWebinars = useMemo(() => {
-    return mockWebinars.filter(webinar => {
+    return webinars.filter(webinar => {
       const matchesSearch = webinar.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         webinar.description.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesStatus = statusFilter === 'all' || webinar.status === statusFilter
       const matchesType = typeFilter === 'all' || webinar.type === typeFilter
       return matchesSearch && matchesStatus && matchesType
     })
-  }, [searchQuery, statusFilter, typeFilter])
+  }, [webinars, searchQuery, statusFilter, typeFilter])
 
   // Handlers with real functionality
   const handleCreateWebinar = () => {
@@ -1349,8 +1177,8 @@ export default function WebinarsClient() {
                 }},
                 { icon: Filter, label: 'Filter', color: 'bg-pink-500', action: () => setShowFilterDialog(true) },
                 { icon: RefreshCw, label: 'Refresh', color: 'bg-gray-500', action: () => {
-                  // Simulate refresh - in real app would fetch from API
-                  setRegistrations([...mockRegistrations])
+                  // Refresh from API - registrations will be empty until API provides data
+                  setRegistrations([])
                   toast.success('Registrations refreshed!')
                 }}
               ].map((action, idx) => (
@@ -1375,7 +1203,7 @@ export default function WebinarsClient() {
               </div>
               <select className="px-3 py-2 border rounded-lg text-sm bg-white dark:bg-gray-800">
                 <option value="all">All Webinars</option>
-                {mockWebinars.map(w => (
+                {webinars.map(w => (
                   <option key={w.id} value={w.id}>{w.title}</option>
                 ))}
               </select>
@@ -1407,7 +1235,7 @@ export default function WebinarsClient() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                      {mockRegistrations.map((reg) => (
+                      {registrations.map((reg) => (
                         <tr key={reg.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
@@ -1520,16 +1348,16 @@ export default function WebinarsClient() {
                 }},
                 { icon: Users, label: 'Attendees', color: 'bg-orange-500', action: () => setActiveTab('registrations') },
                 { icon: MessageSquare, label: 'Q&A Stats', color: 'bg-pink-500', action: () => {
-                  const answered = mockQA.filter(q => q.status === 'answered').length
-                  const total = mockQA.length
-                  toast.success(`Q&A: ${answered}/${total} questions answered (${((answered/total)*100).toFixed(0)}%)`)
+                  const answered = qaItems.filter(q => q.status === 'answered').length
+                  const total = qaItems.length
+                  toast.success(`Q&A: ${answered}/${total} questions answered (${total > 0 ? ((answered/total)*100).toFixed(0) : 0}%)`)
                 }},
                 { icon: ListChecks, label: 'Polls', color: 'bg-indigo-500', action: () => {
-                  const totalVotes = mockPolls.reduce((sum, p) => sum + p.options.reduce((s, o) => s + o.votes, 0), 0)
-                  toast.success(`Polls: ${mockPolls.length} polls with ${totalVotes} total votes`)
+                  const totalVotes = polls.reduce((sum, p) => sum + p.options.reduce((s, o) => s + o.votes, 0), 0)
+                  toast.success(`Polls: ${polls.length} polls with ${totalVotes} total votes`)
                 }},
                 { icon: Download, label: 'Export', color: 'bg-teal-500', action: () => {
-                  const analyticsData = JSON.stringify({ webinars, registrations, polls: mockPolls, qa: mockQA }, null, 2)
+                  const analyticsData = JSON.stringify({ webinars, registrations, polls, qa: qaItems }, null, 2)
                   const blob = new Blob([analyticsData], { type: 'application/json' })
                   const url = window.URL.createObjectURL(blob)
                   const link = document.createElement('a')
@@ -1567,8 +1395,8 @@ export default function WebinarsClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {mockWebinars.filter(w => w.status === 'ended').map((webinar) => {
-                      const rate = (webinar.attendedCount / webinar.registeredCount) * 100
+                    {webinars.filter(w => w.status === 'ended').map((webinar) => {
+                      const rate = webinar.registeredCount > 0 ? (webinar.attendedCount / webinar.registeredCount) * 100 : 0
                       return (
                         <div key={webinar.id} className="space-y-2">
                           <div className="flex items-center justify-between">
@@ -1594,13 +1422,13 @@ export default function WebinarsClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-6">
-                    {mockPolls.map((poll) => (
+                    {polls.map((poll) => (
                       <div key={poll.id}>
                         <p className="font-medium mb-3">{poll.question}</p>
                         <div className="space-y-2">
                           {poll.options.map((option) => {
                             const totalVotes = poll.options.reduce((sum, o) => sum + o.votes, 0)
-                            const percentage = (option.votes / totalVotes) * 100
+                            const percentage = totalVotes > 0 ? (option.votes / totalVotes) * 100 : 0
                             return (
                               <div key={option.id}>
                                 <div className="flex items-center justify-between text-sm mb-1">
@@ -1630,7 +1458,7 @@ export default function WebinarsClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {mockQA.map((qa) => (
+                    {qaItems.map((qa) => (
                       <div key={qa.id} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                         <div className="flex items-start justify-between mb-2">
                           <p className="font-medium">{qa.question}</p>
@@ -1700,15 +1528,15 @@ export default function WebinarsClient() {
                   </div>
                   <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6 text-center">
                     <div>
-                      <p className="text-2xl font-bold">{mockRecordings.length}</p>
+                      <p className="text-2xl font-bold">{recordings.length}</p>
                       <p className="text-sm text-white/80">Recordings</p>
                     </div>
                     <div>
-                      <p className="text-2xl font-bold">{mockRecordings.reduce((sum, r) => sum + r.views, 0)}</p>
+                      <p className="text-2xl font-bold">{recordings.reduce((sum, r) => sum + r.views, 0)}</p>
                       <p className="text-sm text-white/80">Views</p>
                     </div>
                     <div>
-                      <p className="text-2xl font-bold">{mockRecordings.reduce((sum, r) => sum + r.downloadCount, 0)}</p>
+                      <p className="text-2xl font-bold">{recordings.reduce((sum, r) => sum + r.downloadCount, 0)}</p>
                       <p className="text-sm text-white/80">Downloads</p>
                     </div>
                   </div>
@@ -1799,7 +1627,7 @@ export default function WebinarsClient() {
             </div>
 
             <div className="grid gap-4">
-              {mockRecordings.map((recording) => (
+              {recordings.map((recording) => (
                 <Card key={recording.id}>
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
@@ -1878,11 +1706,11 @@ export default function WebinarsClient() {
                   </div>
                   <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6 text-center">
                     <div>
-                      <p className="text-2xl font-bold">{mockTemplates.length}</p>
+                      <p className="text-2xl font-bold">{templates.length}</p>
                       <p className="text-sm text-white/80">Templates</p>
                     </div>
                     <div>
-                      <p className="text-2xl font-bold">{mockTemplates.filter(t => t.enabled).length}</p>
+                      <p className="text-2xl font-bold">{templates.filter(t => t.enabled).length}</p>
                       <p className="text-sm text-white/80">Enabled</p>
                     </div>
                     <div>
@@ -1962,7 +1790,7 @@ export default function WebinarsClient() {
             </div>
 
             <div className="grid gap-4">
-              {mockTemplates.map((template) => (
+              {templates.map((template) => (
                 <Card key={template.id}>
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
@@ -2573,18 +2401,18 @@ export default function WebinarsClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockWebinarsAIInsights}
+              insights={webinarsAIInsights}
               title="Webinar Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockWebinarsCollaborators}
+              collaborators={webinarsCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockWebinarsPredictions}
+              predictions={webinarsPredictions}
               title="Webinar Forecasts"
             />
           </div>
@@ -2592,7 +2420,7 @@ export default function WebinarsClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockWebinarsActivities}
+            activities={webinarsActivities}
             title="Webinar Activity"
             maxItems={5}
           />

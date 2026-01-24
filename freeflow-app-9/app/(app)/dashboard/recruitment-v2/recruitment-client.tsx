@@ -19,8 +19,18 @@ import {
   useJobPostings,
   useJobApplications,
   useRecruitmentMutations,
-  type JobPosting
+  useInterviews,
+  useInterviewMutations,
+  useJobOffers,
+  useOfferMutations,
+  useTalentPool,
+  useTalentPoolMutations,
+  type JobPosting,
+  type Interview as DBInterview,
+  type JobOffer as DBJobOffer,
+  type TalentPoolCandidate as DBTalentPoolCandidate
 } from '@/lib/hooks/use-recruitment'
+import { useAuth } from '@/lib/hooks/use-auth'
 import {
   Briefcase,
   Users,
@@ -203,482 +213,15 @@ interface TalentPoolCandidate {
   tags: string[]
 }
 
-// Mock Data
-const mockJobs: JobRequisition[] = [
-  {
-    id: '1',
-    title: 'Senior Software Engineer',
-    jobCode: 'ENG-2024-001',
-    department: 'Engineering',
-    location: 'San Francisco, CA',
-    type: 'full-time',
-    status: 'open',
-    priority: 'high',
-    hiringManager: 'Sarah Chen',
-    recruiter: 'Mike Johnson',
-    salaryMin: 150000,
-    salaryMax: 200000,
-    currency: 'USD',
-    description: 'We are looking for a Senior Software Engineer to join our platform team...',
-    requirements: ['5+ years experience', 'React/TypeScript', 'System Design', 'AWS'],
-    benefits: ['Health Insurance', '401k Match', 'Unlimited PTO', 'Remote Work'],
-    applicationsCount: 145,
-    screenedCount: 42,
-    interviewingCount: 18,
-    offersCount: 3,
-    postedDate: '2024-01-15',
-    closingDate: '2024-03-15',
-    targetHireDate: '2024-04-01',
-    headcount: 3,
-    filledCount: 1
-  },
-  {
-    id: '2',
-    title: 'Product Manager',
-    jobCode: 'PM-2024-003',
-    department: 'Product',
-    location: 'New York, NY',
-    type: 'full-time',
-    status: 'open',
-    priority: 'urgent',
-    hiringManager: 'David Kim',
-    recruiter: 'Lisa Park',
-    salaryMin: 130000,
-    salaryMax: 180000,
-    currency: 'USD',
-    description: 'Join our product team to drive product strategy and roadmap...',
-    requirements: ['3+ years PM experience', 'B2B SaaS', 'Data-driven', 'Agile'],
-    benefits: ['Health Insurance', 'Stock Options', 'Learning Budget', 'Gym Membership'],
-    applicationsCount: 89,
-    screenedCount: 28,
-    interviewingCount: 12,
-    offersCount: 2,
-    postedDate: '2024-01-20',
-    closingDate: '2024-02-28',
-    targetHireDate: '2024-03-15',
-    headcount: 2,
-    filledCount: 0
-  },
-  {
-    id: '3',
-    title: 'UX Designer',
-    jobCode: 'DES-2024-002',
-    department: 'Design',
-    location: 'Remote',
-    type: 'full-time',
-    status: 'open',
-    priority: 'medium',
-    hiringManager: 'Emma Wilson',
-    recruiter: 'Mike Johnson',
-    salaryMin: 100000,
-    salaryMax: 140000,
-    currency: 'USD',
-    description: 'Design beautiful and intuitive user experiences...',
-    requirements: ['4+ years UX', 'Figma', 'User Research', 'Design Systems'],
-    benefits: ['Health Insurance', 'Remote Work', 'Equipment Budget', 'Sabbatical'],
-    applicationsCount: 234,
-    screenedCount: 56,
-    interviewingCount: 8,
-    offersCount: 1,
-    postedDate: '2024-01-10',
-    closingDate: '2024-03-01',
-    targetHireDate: '2024-03-20',
-    headcount: 1,
-    filledCount: 0
-  },
-  {
-    id: '4',
-    title: 'Data Scientist',
-    jobCode: 'DATA-2024-001',
-    department: 'Data',
-    location: 'Austin, TX',
-    type: 'full-time',
-    status: 'on-hold',
-    priority: 'low',
-    hiringManager: 'Alex Thompson',
-    recruiter: 'Lisa Park',
-    salaryMin: 140000,
-    salaryMax: 190000,
-    currency: 'USD',
-    description: 'Build ML models and drive data-driven decisions...',
-    requirements: ['PhD or MS', 'Python', 'ML/AI', 'Statistics'],
-    benefits: ['Health Insurance', '401k Match', 'Conference Budget', 'Relocation'],
-    applicationsCount: 67,
-    screenedCount: 15,
-    interviewingCount: 4,
-    offersCount: 0,
-    postedDate: '2024-01-05',
-    closingDate: '2024-04-01',
-    targetHireDate: '2024-05-01',
-    headcount: 2,
-    filledCount: 0
-  },
-  {
-    id: '5',
-    title: 'Marketing Intern',
-    jobCode: 'MKT-2024-INT',
-    department: 'Marketing',
-    location: 'San Francisco, CA',
-    type: 'internship',
-    status: 'open',
-    priority: 'low',
-    hiringManager: 'Jennifer Lee',
-    recruiter: 'Mike Johnson',
-    salaryMin: 25,
-    salaryMax: 35,
-    currency: 'USD/hr',
-    description: 'Join our marketing team for a summer internship...',
-    requirements: ['Current student', 'Social Media', 'Content Creation', 'Analytics'],
-    benefits: ['Mentorship', 'Project Ownership', 'Full-time potential'],
-    applicationsCount: 312,
-    screenedCount: 78,
-    interviewingCount: 15,
-    offersCount: 5,
-    postedDate: '2024-02-01',
-    closingDate: '2024-03-31',
-    targetHireDate: '2024-06-01',
-    headcount: 5,
-    filledCount: 2
-  }
-]
+// Mock data removed - using real Supabase hooks
 
-const mockCandidates: Candidate[] = [
-  {
-    id: '1',
-    name: 'John Martinez',
-    email: 'john.martinez@email.com',
-    phone: '+1 (555) 123-4567',
-    avatar: '',
-    jobId: '1',
-    jobTitle: 'Senior Software Engineer',
-    stage: 'onsite',
-    source: 'linkedin',
-    matchScore: 92,
-    experienceYears: 7,
-    currentCompany: 'Google',
-    currentTitle: 'Software Engineer III',
-    location: 'San Francisco, CA',
-    skills: ['React', 'TypeScript', 'Node.js', 'AWS', 'Python'],
-    education: 'MS Computer Science, Stanford',
-    linkedinUrl: 'linkedin.com/in/johnmartinez',
-    portfolioUrl: 'johnmartinez.dev',
-    resumeUrl: '/resumes/john-martinez.pdf',
-    appliedDate: '2024-01-18',
-    lastActivity: '2024-02-10',
-    notes: ['Strong technical background', 'Great communication'],
-    rating: 5,
-    tags: ['top-candidate', 'referred']
-  },
-  {
-    id: '2',
-    name: 'Sarah Williams',
-    email: 'sarah.w@email.com',
-    phone: '+1 (555) 234-5678',
-    jobId: '1',
-    jobTitle: 'Senior Software Engineer',
-    stage: 'technical',
-    source: 'referral',
-    matchScore: 88,
-    experienceYears: 6,
-    currentCompany: 'Meta',
-    currentTitle: 'Senior Frontend Engineer',
-    location: 'Menlo Park, CA',
-    skills: ['React', 'JavaScript', 'GraphQL', 'CSS', 'Testing'],
-    education: 'BS Computer Science, MIT',
-    linkedinUrl: 'linkedin.com/in/sarahwilliams',
-    resumeUrl: '/resumes/sarah-williams.pdf',
-    appliedDate: '2024-01-20',
-    lastActivity: '2024-02-08',
-    notes: ['Excellent problem-solving', 'Frontend expert'],
-    rating: 4,
-    tags: ['strong-frontend']
-  },
-  {
-    id: '3',
-    name: 'Michael Chen',
-    email: 'mchen@email.com',
-    phone: '+1 (555) 345-6789',
-    jobId: '2',
-    jobTitle: 'Product Manager',
-    stage: 'offer',
-    source: 'linkedin',
-    matchScore: 95,
-    experienceYears: 5,
-    currentCompany: 'Stripe',
-    currentTitle: 'Senior Product Manager',
-    location: 'San Francisco, CA',
-    skills: ['Product Strategy', 'Data Analysis', 'Agile', 'SQL', 'Figma'],
-    education: 'MBA, Harvard Business School',
-    linkedinUrl: 'linkedin.com/in/michaelchen',
-    resumeUrl: '/resumes/michael-chen.pdf',
-    appliedDate: '2024-01-22',
-    lastActivity: '2024-02-12',
-    notes: ['Exceptional product sense', 'Strong leader'],
-    rating: 5,
-    tags: ['top-candidate', 'fast-track']
-  },
-  {
-    id: '4',
-    name: 'Emily Rodriguez',
-    email: 'emily.r@email.com',
-    phone: '+1 (555) 456-7890',
-    jobId: '3',
-    jobTitle: 'UX Designer',
-    stage: 'screening',
-    source: 'website',
-    matchScore: 75,
-    experienceYears: 4,
-    currentCompany: 'Airbnb',
-    currentTitle: 'Product Designer',
-    location: 'Los Angeles, CA',
-    skills: ['Figma', 'User Research', 'Prototyping', 'Design Systems'],
-    education: 'BFA Design, RISD',
-    portfolioUrl: 'emilyrodriguez.design',
-    resumeUrl: '/resumes/emily-rodriguez.pdf',
-    appliedDate: '2024-02-01',
-    lastActivity: '2024-02-05',
-    notes: ['Beautiful portfolio'],
-    rating: 4,
-    tags: ['creative']
-  },
-  {
-    id: '5',
-    name: 'David Park',
-    email: 'david.park@email.com',
-    phone: '+1 (555) 567-8901',
-    jobId: '1',
-    jobTitle: 'Senior Software Engineer',
-    stage: 'rejected',
-    source: 'indeed',
-    matchScore: 45,
-    experienceYears: 3,
-    currentCompany: 'Startup XYZ',
-    currentTitle: 'Junior Developer',
-    location: 'Seattle, WA',
-    skills: ['JavaScript', 'HTML', 'CSS', 'React'],
-    education: 'BS Computer Science, UW',
-    resumeUrl: '/resumes/david-park.pdf',
-    appliedDate: '2024-01-25',
-    lastActivity: '2024-01-28',
-    notes: ['Not enough experience for senior role'],
-    rating: 2,
-    tags: []
-  },
-  {
-    id: '6',
-    name: 'Amanda Foster',
-    email: 'amanda.f@email.com',
-    phone: '+1 (555) 678-9012',
-    jobId: '2',
-    jobTitle: 'Product Manager',
-    stage: 'phone-interview',
-    source: 'agency',
-    matchScore: 82,
-    experienceYears: 4,
-    currentCompany: 'Salesforce',
-    currentTitle: 'Product Manager',
-    location: 'New York, NY',
-    skills: ['Product Roadmap', 'Stakeholder Management', 'Analytics', 'Jira'],
-    education: 'BS Business, NYU',
-    linkedinUrl: 'linkedin.com/in/amandafoster',
-    resumeUrl: '/resumes/amanda-foster.pdf',
-    appliedDate: '2024-01-28',
-    lastActivity: '2024-02-09',
-    notes: ['Strong B2B background'],
-    rating: 4,
-    tags: ['b2b-experience']
-  }
-]
+// mockCandidates removed - using dbApplications from useJobApplications hook
 
-const mockInterviews: Interview[] = [
-  {
-    id: '1',
-    candidateId: '1',
-    candidateName: 'John Martinez',
-    jobId: '1',
-    jobTitle: 'Senior Software Engineer',
-    type: 'onsite',
-    status: 'scheduled',
-    scheduledDate: '2024-02-15',
-    scheduledTime: '10:00 AM',
-    duration: 240,
-    location: 'SF Office - Room 301',
-    interviewers: [
-      { name: 'Sarah Chen', role: 'Hiring Manager' },
-      { name: 'Alex Kim', role: 'Tech Lead' },
-      { name: 'Maria Garcia', role: 'Senior Engineer' }
-    ],
-    createdAt: '2024-02-08'
-  },
-  {
-    id: '2',
-    candidateId: '2',
-    candidateName: 'Sarah Williams',
-    jobId: '1',
-    jobTitle: 'Senior Software Engineer',
-    type: 'technical',
-    status: 'scheduled',
-    scheduledDate: '2024-02-14',
-    scheduledTime: '2:00 PM',
-    duration: 90,
-    location: 'Virtual',
-    interviewers: [
-      { name: 'Alex Kim', role: 'Tech Lead' },
-      { name: 'James Wilson', role: 'Principal Engineer' }
-    ],
-    meetingLink: 'https://zoom.us/j/123456789',
-    createdAt: '2024-02-06'
-  },
-  {
-    id: '3',
-    candidateId: '6',
-    candidateName: 'Amanda Foster',
-    jobId: '2',
-    jobTitle: 'Product Manager',
-    type: 'phone',
-    status: 'completed',
-    scheduledDate: '2024-02-09',
-    scheduledTime: '11:00 AM',
-    duration: 45,
-    location: 'Phone Call',
-    interviewers: [
-      { name: 'Lisa Park', role: 'Recruiter' }
-    ],
-    feedback: {
-      rating: 4,
-      strengths: ['Clear communication', 'Relevant experience', 'Enthusiastic'],
-      concerns: ['Limited B2B SaaS exposure'],
-      recommendation: 'yes',
-      notes: 'Good candidate, recommend moving to next round.'
-    },
-    createdAt: '2024-02-05'
-  },
-  {
-    id: '4',
-    candidateId: '3',
-    candidateName: 'Michael Chen',
-    jobId: '2',
-    jobTitle: 'Product Manager',
-    type: 'panel',
-    status: 'completed',
-    scheduledDate: '2024-02-08',
-    scheduledTime: '1:00 PM',
-    duration: 180,
-    location: 'NY Office - Conference A',
-    interviewers: [
-      { name: 'David Kim', role: 'VP Product' },
-      { name: 'Jennifer Lee', role: 'Director Marketing' },
-      { name: 'Tom Brown', role: 'CTO' }
-    ],
-    feedback: {
-      rating: 5,
-      strengths: ['Exceptional product sense', 'Data-driven', 'Leadership qualities', 'Strategic thinking'],
-      concerns: [],
-      recommendation: 'strong-yes',
-      notes: 'Outstanding candidate. Ready to extend offer immediately.'
-    },
-    createdAt: '2024-02-01'
-  }
-]
+// mockInterviews removed - using dbInterviews from useInterviews hook
 
-const mockOffers: Offer[] = [
-  {
-    id: '1',
-    candidateId: '3',
-    candidateName: 'Michael Chen',
-    jobId: '2',
-    jobTitle: 'Product Manager',
-    status: 'sent',
-    baseSalary: 165000,
-    bonus: 20000,
-    equity: '0.1% over 4 years',
-    currency: 'USD',
-    startDate: '2024-03-15',
-    expiryDate: '2024-02-20',
-    benefits: ['Health Insurance', 'Stock Options', 'Unlimited PTO', '$5k Learning Budget'],
-    approvers: [
-      { name: 'David Kim', status: 'approved', date: '2024-02-10' },
-      { name: 'HR Director', status: 'approved', date: '2024-02-11' },
-      { name: 'Finance', status: 'approved', date: '2024-02-11' }
-    ],
-    sentDate: '2024-02-12',
-    createdAt: '2024-02-09'
-  },
-  {
-    id: '2',
-    candidateId: '1',
-    candidateName: 'John Martinez',
-    jobId: '1',
-    jobTitle: 'Senior Software Engineer',
-    status: 'pending-approval',
-    baseSalary: 185000,
-    bonus: 25000,
-    equity: '0.05% over 4 years',
-    currency: 'USD',
-    startDate: '2024-04-01',
-    expiryDate: '2024-02-25',
-    benefits: ['Health Insurance', 'Stock Options', 'Unlimited PTO', 'Remote Work'],
-    approvers: [
-      { name: 'Sarah Chen', status: 'approved', date: '2024-02-13' },
-      { name: 'HR Director', status: 'pending' },
-      { name: 'Finance', status: 'pending' }
-    ],
-    createdAt: '2024-02-13'
-  }
-]
+// mockOffers removed - using dbOffers from useJobOffers hook
 
-const mockTalentPool: TalentPoolCandidate[] = [
-  {
-    id: '1',
-    name: 'Rachel Green',
-    email: 'rachel.g@email.com',
-    skills: ['Python', 'Machine Learning', 'TensorFlow', 'Data Science'],
-    experienceYears: 8,
-    currentTitle: 'ML Engineer',
-    currentCompany: 'OpenAI',
-    location: 'San Francisco, CA',
-    source: 'linkedin',
-    addedDate: '2024-01-10',
-    lastContactedDate: '2024-02-01',
-    notes: 'Reached out for ML Engineer role. Interested but not ready to move.',
-    interestedRoles: ['Staff ML Engineer', 'AI Research'],
-    availability: '3-months',
-    tags: ['ml-expert', 'passive']
-  },
-  {
-    id: '2',
-    name: 'James Wilson',
-    email: 'james.w@email.com',
-    skills: ['Go', 'Kubernetes', 'DevOps', 'AWS'],
-    experienceYears: 10,
-    currentTitle: 'Principal Engineer',
-    currentCompany: 'Netflix',
-    location: 'Los Gatos, CA',
-    source: 'referral',
-    addedDate: '2023-12-15',
-    notes: 'Silver medalist candidate from previous search. Keep warm.',
-    interestedRoles: ['Staff Engineer', 'Engineering Manager'],
-    availability: 'not-looking',
-    tags: ['silver-medalist', 'infrastructure']
-  },
-  {
-    id: '3',
-    name: 'Lisa Thompson',
-    email: 'lisa.t@email.com',
-    skills: ['Product Strategy', 'Growth', 'Analytics', 'SQL'],
-    experienceYears: 6,
-    currentTitle: 'Senior PM',
-    currentCompany: 'Uber',
-    location: 'New York, NY',
-    source: 'career-fair',
-    addedDate: '2024-01-20',
-    lastContactedDate: '2024-01-25',
-    notes: 'Met at tech conference. Strong growth background.',
-    interestedRoles: ['Director of Product', 'Group PM'],
-    availability: '1-month',
-    tags: ['growth-pm', 'active']
-  }
-]
+// mockTalentPool removed - using dbTalentPool from useTalentPool hook
 
 export default function RecruitmentClient() {
   // Define adapter variables locally (removed mock data imports)
@@ -731,7 +274,14 @@ export default function RecruitmentClient() {
     notes: ''
   })
 
-  // Real Supabase hooks
+  // Auth hook for user ID
+  const { user, loading: authLoading } = useAuth()
+  const userId = user?.id
+
+  // Supabase client for direct queries
+  const supabase = createClient()
+
+  // Real Supabase hooks for jobs and applications
   const { jobs: dbJobs, stats: dbStats, isLoading: isLoadingJobs, refetch: refetchJobs } = useJobPostings()
   const { applications: dbApplications, isLoading: isLoadingApplications, refetch: refetchApplications } = useJobApplications()
   const {
@@ -749,20 +299,28 @@ export default function RecruitmentClient() {
     isAdvancingStage
   } = useRecruitmentMutations()
 
-  // Stats calculations
+  // Real Supabase hooks for interviews, offers, and talent pool
+  const { interviews: dbInterviews, isLoading: isLoadingInterviews, refetch: refetchInterviews } = useInterviews()
+  const { createInterview, updateInterview, submitFeedback, isCreatingInterview } = useInterviewMutations()
+  const { offers: dbOffers, isLoading: isLoadingOffers, refetch: refetchOffers } = useJobOffers()
+  const { createOffer, updateOffer, sendOffer, isCreatingOffer, isSendingOffer } = useOfferMutations()
+  const { candidates: dbTalentPool, isLoading: isLoadingTalentPool, refetch: refetchTalentPool } = useTalentPool()
+  const { addToPool, updateCandidate: updateTalentCandidate, recordContact, isAddingToPool } = useTalentPoolMutations()
+
+  // Stats calculations - using real data from hooks
   const stats = useMemo(() => {
-    const activeJobs = mockJobs.filter(j => j.status === 'open').length
-    const totalApplications = mockJobs.reduce((sum, j) => sum + j.applicationsCount, 0)
-    const totalInterviewing = mockCandidates.filter(c =>
-      ['phone-interview', 'technical', 'onsite'].includes(c.stage)
+    const activeJobs = dbJobs.filter(j => j.status === 'active' || j.status === 'open').length
+    const totalApplications = dbStats.totalApplications || dbApplications.length
+    const totalInterviewing = dbApplications.filter(a =>
+      ['Phone Interview', 'Technical', 'Onsite', 'phone-interview', 'technical', 'onsite'].includes(a.stage)
     ).length
-    const pendingOffers = mockOffers.filter(o =>
-      ['pending-approval', 'sent', 'negotiating'].includes(o.status)
+    const pendingOffers = dbOffers.filter(o =>
+      ['pending-approval', 'sent', 'negotiating', 'pending'].includes(o.status)
     ).length
-    const upcomingInterviews = mockInterviews.filter(i => i.status === 'scheduled').length
-    const avgTimeToHire = 28
-    const offerAcceptanceRate = 85
-    const talentPoolSize = mockTalentPool.length
+    const upcomingInterviews = dbInterviews.filter(i => i.status === 'scheduled').length
+    const avgTimeToHire = dbStats.avgTimeToHire || 28
+    const offerAcceptanceRate = 85 // Calculate from real data when available
+    const talentPoolSize = dbTalentPool.length
 
     return {
       activeJobs,
@@ -774,28 +332,168 @@ export default function RecruitmentClient() {
       offerAcceptanceRate,
       talentPoolSize
     }
-  }, [])
+  }, [dbJobs, dbStats, dbApplications, dbOffers, dbInterviews, dbTalentPool])
 
-  // Filtered data
+  // Transform DB jobs to local JobRequisition format for display
+  const transformedJobs: JobRequisition[] = useMemo(() => {
+    return dbJobs.map(job => ({
+      id: job.id,
+      title: job.title,
+      jobCode: job.job_code,
+      department: job.department || 'General',
+      location: job.location || 'Remote',
+      type: (job.job_type || 'full-time') as JobType,
+      status: (job.status === 'active' ? 'open' : job.status) as JobStatus,
+      priority: 'medium' as JobPriority,
+      hiringManager: job.hiring_manager || 'Not Assigned',
+      recruiter: job.recruiter || 'Not Assigned',
+      salaryMin: job.salary_min || 0,
+      salaryMax: job.salary_max || 0,
+      currency: job.salary_currency || 'USD',
+      description: job.description || '',
+      requirements: (job.requirements as string[]) || [],
+      benefits: (job.benefits as string[]) || [],
+      applicationsCount: job.applications_count || 0,
+      screenedCount: job.shortlisted_count || 0,
+      interviewingCount: job.interviews_count || 0,
+      offersCount: job.offers_count || 0,
+      postedDate: job.posted_date || job.created_at,
+      closingDate: job.closing_date || '',
+      targetHireDate: job.closing_date || '',
+      headcount: 1,
+      filledCount: job.hired_count || 0
+    }))
+  }, [dbJobs])
+
+  // Transform DB applications to local Candidate format for display
+  const transformedCandidates: Candidate[] = useMemo(() => {
+    return dbApplications.map(app => {
+      const job = dbJobs.find(j => j.id === app.job_id)
+      return {
+        id: app.id,
+        name: app.candidate_name,
+        email: app.candidate_email || '',
+        phone: app.candidate_phone || '',
+        avatar: '',
+        jobId: app.job_id,
+        jobTitle: job?.title || 'Unknown Position',
+        stage: (app.stage?.toLowerCase().replace(' ', '-') || 'applied') as CandidateStage,
+        source: 'website' as SourceType,
+        matchScore: app.match_score || 0,
+        experienceYears: app.experience_years || 0,
+        currentCompany: (app.configuration as any)?.current_company || 'Unknown',
+        currentTitle: (app.configuration as any)?.current_title || 'Unknown',
+        location: (app.configuration as any)?.location || 'Unknown',
+        skills: (app.configuration as any)?.skills || [],
+        education: (app.configuration as any)?.education || '',
+        linkedinUrl: app.linkedin_url || undefined,
+        portfolioUrl: app.portfolio_url || undefined,
+        resumeUrl: app.resume_url || '',
+        coverLetter: app.cover_letter || undefined,
+        appliedDate: app.applied_date,
+        lastActivity: app.updated_at,
+        notes: app.notes ? [app.notes] : [],
+        rating: (app.configuration as any)?.rating || 3,
+        tags: (app.configuration as any)?.tags || []
+      }
+    })
+  }, [dbApplications, dbJobs])
+
+  // Transform DB interviews to local Interview format
+  const transformedInterviews: Interview[] = useMemo(() => {
+    return dbInterviews.map(int => ({
+      id: int.id,
+      candidateId: int.candidate_id,
+      candidateName: int.candidate_name,
+      candidateAvatar: int.candidate_avatar,
+      jobId: int.job_id,
+      jobTitle: int.job_title,
+      type: (int.interview_type || 'phone') as InterviewType,
+      status: (int.status || 'scheduled') as InterviewStatus,
+      scheduledDate: int.scheduled_date,
+      scheduledTime: int.scheduled_time || '10:00 AM',
+      duration: int.duration || 60,
+      location: int.location || 'Virtual',
+      interviewers: int.interviewers || [],
+      meetingLink: int.meeting_link,
+      feedback: int.feedback ? {
+        rating: int.feedback.rating || 0,
+        strengths: int.feedback.strengths || [],
+        concerns: int.feedback.concerns || [],
+        recommendation: (int.feedback.recommendation || 'neutral') as 'strong-yes' | 'yes' | 'neutral' | 'no' | 'strong-no',
+        notes: int.feedback.notes || ''
+      } : undefined,
+      createdAt: int.created_at
+    }))
+  }, [dbInterviews])
+
+  // Transform DB offers to local Offer format
+  const transformedOffers: Offer[] = useMemo(() => {
+    return dbOffers.map(offer => ({
+      id: offer.id,
+      candidateId: offer.candidate_id,
+      candidateName: offer.candidate_name,
+      candidateAvatar: offer.candidate_avatar,
+      jobId: offer.job_id,
+      jobTitle: offer.job_title,
+      status: (offer.status || 'draft') as OfferStatus,
+      baseSalary: offer.base_salary || 0,
+      bonus: offer.bonus,
+      equity: offer.equity,
+      currency: offer.currency || 'USD',
+      startDate: offer.start_date,
+      expiryDate: offer.expiry_date,
+      benefits: offer.benefits || [],
+      approvers: offer.approvers || [],
+      sentDate: offer.sent_date,
+      responseDate: offer.response_date,
+      negotiationNotes: offer.negotiation_notes,
+      createdAt: offer.created_at
+    }))
+  }, [dbOffers])
+
+  // Transform DB talent pool to local TalentPoolCandidate format
+  const transformedTalentPool: TalentPoolCandidate[] = useMemo(() => {
+    return dbTalentPool.map(tp => ({
+      id: tp.id,
+      name: tp.name,
+      email: tp.email,
+      avatar: tp.avatar,
+      skills: tp.skills || [],
+      experienceYears: tp.experience_years || 0,
+      currentTitle: tp.current_title || 'Unknown',
+      currentCompany: tp.current_company || 'Unknown',
+      location: tp.location || 'Unknown',
+      source: (tp.source || 'other') as SourceType,
+      addedDate: tp.added_date || tp.created_at,
+      lastContactedDate: tp.last_contacted_date,
+      notes: tp.notes || '',
+      interestedRoles: tp.interested_roles || [],
+      availability: (tp.availability || 'not-looking') as 'immediate' | '2-weeks' | '1-month' | '3-months' | 'not-looking',
+      tags: tp.tags || []
+    }))
+  }, [dbTalentPool])
+
+  // Filtered data using transformed data
   const filteredJobs = useMemo(() => {
-    return mockJobs.filter(job => {
+    return transformedJobs.filter(job => {
       const matchesSearch = job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         job.jobCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
         job.department.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesFilter = jobFilter === 'all' || job.status === jobFilter
       return matchesSearch && matchesFilter
     })
-  }, [searchQuery, jobFilter])
+  }, [transformedJobs, searchQuery, jobFilter])
 
   const filteredCandidates = useMemo(() => {
-    return mockCandidates.filter(candidate => {
+    return transformedCandidates.filter(candidate => {
       const matchesSearch = candidate.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         candidate.jobTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
         candidate.skills.some(s => s.toLowerCase().includes(searchQuery.toLowerCase()))
       const matchesFilter = stageFilter === 'all' || candidate.stage === stageFilter
       return matchesSearch && matchesFilter
     })
-  }, [searchQuery, stageFilter])
+  }, [transformedCandidates, searchQuery, stageFilter])
 
   // Helper functions
   const getJobStatusColor = (status: JobStatus) => {
@@ -1665,7 +1363,7 @@ export default function RecruitmentClient() {
               <ScrollArea className="w-full">
                 <div className="flex gap-4 pb-4 min-w-max">
                   {pipelineStages.map(({ stage, label, color }) => {
-                    const stageCandidates = mockCandidates.filter(c => c.stage === stage)
+                    const stageCandidates = transformedCandidates.filter(c => c.stage === stage)
                     return (
                       <div key={stage} className={`w-72 flex-shrink-0 border-t-4 ${color} rounded-lg bg-gray-50 dark:bg-gray-800/50`}>
                         <div className="p-4 border-b dark:border-gray-700">
@@ -1742,7 +1440,7 @@ export default function RecruitmentClient() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {mockInterviews.filter(i => i.status === 'scheduled').map(interview => (
+                      {transformedInterviews.filter(i => i.status === 'scheduled').map(interview => (
                         <div
                           key={interview.id}
                           className="p-4 border rounded-lg dark:border-gray-700 hover:shadow-sm transition-shadow cursor-pointer"
@@ -1804,7 +1502,7 @@ export default function RecruitmentClient() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {mockInterviews.filter(i => i.status === 'completed' && i.feedback).map(interview => (
+                      {transformedInterviews.filter(i => i.status === 'completed' && i.feedback).map(interview => (
                         <div
                           key={interview.id}
                           className="p-4 border rounded-lg dark:border-gray-700 hover:shadow-sm transition-shadow cursor-pointer"
@@ -1865,7 +1563,7 @@ export default function RecruitmentClient() {
             {/* Offers Tab */}
             <TabsContent value="offers" className="space-y-4">
               <div className="grid gap-4">
-                {mockOffers.map(offer => (
+                {transformedOffers.map(offer => (
                   <Card
                     key={offer.id}
                     className="bg-white dark:bg-gray-800 hover:shadow-md transition-shadow cursor-pointer"
@@ -1981,7 +1679,7 @@ export default function RecruitmentClient() {
               </div>
 
               <div className="grid gap-4">
-                {mockTalentPool.map(candidate => (
+                {transformedTalentPool.map((candidate: TalentPoolCandidate) => (
                   <Card key={candidate.id} className="bg-white dark:bg-gray-800 hover:shadow-md transition-shadow">
                     <CardContent className="p-6">
                       <div className="flex items-start justify-between">

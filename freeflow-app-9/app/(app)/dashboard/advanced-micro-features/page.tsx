@@ -142,179 +142,130 @@ export default function AdvancedMicroFeaturesPage() {
     loadAdvancedMicroFeaturesData()
   }, [userId, announce]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // A++++ MEMOIZED MOCK DATA - Prevent re-creation on every render
-  const mockUsers = useMemo(() => [
-    { id: '1', name: 'Sarah Chen', avatar: '/avatars/sarah.jpg', status: 'online' as const, role: 'Designer' },
-    { id: '2', name: 'Mike Johnson', avatar: '/avatars/mike.jpg', status: 'away' as const, role: 'Developer', isTyping: true },
-    { id: '3', name: 'Emily Davis', avatar: '/avatars/emily.jpg', status: 'busy' as const, role: 'Manager' },
-    { id: '4', name: 'Alex Kumar', avatar: '/avatars/alex.jpg', status: 'online' as const, role: 'Analyst' },
-    { id: '5', name: 'Lisa Wong', avatar: '/avatars/lisa.jpg', status: 'offline' as const, role: 'Writer', lastSeen: new Date(Date.now() - 30 * 60 * 1000) }
-  ], [])
+  // A++++ TYPED EMPTY ARRAYS - No mock data, ready for real data integration
+  const mockUsers = useMemo(() => [] as Array<{
+    id: string
+    name: string
+    avatar?: string
+    status?: 'online' | 'away' | 'busy' | 'offline'
+    role?: string
+    isTyping?: boolean
+    lastSeen?: Date
+  }>, [])
 
   const mockWidgetData = useMemo(() => ({
-    id: 'revenue',
-    title: 'Monthly Revenue',
-    value: '$45,230',
-    change: { value: 12.5, type: 'increase' as const, period: 'last month' },
-    progress: 75,
-    status: 'success' as const,
-    trend: [
-      { label: 'Week 1', value: 8500 },
-      { label: 'Week 2', value: 12300 },
-      { label: 'Week 3', value: 15200 },
-      { label: 'Week 4', value: 9230 }
-    ]
+    id: '',
+    title: '',
+    value: '',
+    change: undefined as { value: number; type: 'increase' | 'decrease'; period: string } | undefined,
+    progress: undefined as number | undefined,
+    status: undefined as 'success' | 'warning' | 'error' | 'info' | undefined,
+    trend: [] as Array<{ label: string; value: number }>
   }), [])
 
-  const mockQuickActions = useMemo(() => [
-    { id: '1', label: 'New Project', icon: Zap, onClick: () => toast.promise(Promise.resolve(router.push('/dashboard/projects-hub-v2?action=new')), { loading: 'Opening new project...', success: 'New project opened', error: 'Failed to open' }), variant: 'primary' as const, shortcut: '⌘N' },
-    { id: '2', label: 'Upload Files', icon: Download, onClick: () => toast.promise(Promise.resolve(router.push('/dashboard/files-hub-v2?action=upload')), { loading: 'Opening file upload...', success: 'File upload opened', error: 'Failed to open' }), badge: '5' },
-    { id: '3', label: 'Team Chat', icon: MessageSquare, onClick: () => toast.promise(Promise.resolve(router.push('/dashboard/messages-v2')), { loading: 'Opening team chat...', success: 'Team chat opened', error: 'Failed to open' }), badge: 3 },
-    { id: '4', label: 'Analytics', icon: BarChart3, onClick: () => toast.promise(Promise.resolve(router.push('/dashboard/analytics-v2')), { loading: 'Opening analytics...', success: 'Analytics opened', error: 'Failed to open' }) },
-    { id: '5', label: 'Settings', icon: Settings, onClick: () => toast.promise(Promise.resolve(router.push('/dashboard/settings-v2')), { loading: 'Opening settings...', success: 'Settings opened', error: 'Failed to open' }) },
-    { id: '6', label: 'Share', icon: Share2, onClick: () => toast.promise(Promise.resolve(navigator.clipboard.writeText(window.location.href)), { loading: 'Copying link...', success: 'Link copied to clipboard!', error: 'Failed to copy' }), disabled: false }
-  ], [router])
+  const mockQuickActions = useMemo(() => [] as Array<{
+    id: string
+    label: string
+    icon: React.ComponentType<{ className?: string }>
+    onClick: () => void
+    badge?: string | number
+    variant?: 'default' | 'primary' | 'secondary' | 'destructive'
+    disabled?: boolean
+    shortcut?: string
+  }>, [])
 
-  const mockNotifications = useMemo(() => [
-    {
-      id: '1',
-      title: 'New project assigned',
-      message: 'You have been assigned to the KAZI redesign project',
-      type: 'info' as const,
-      timestamp: new Date(Date.now() - 5 * 60 * 1000),
-      actions: [
-        { label: 'View Project', onClick: () => toast.promise(Promise.resolve(router.push('/dashboard/projects-hub-v2')), { loading: 'Opening project...', success: 'Project opened', error: 'Failed to open' }), variant: 'primary' as const },
-        { label: 'Dismiss', onClick: () => toast.promise(Promise.resolve(), { loading: 'Dismissing...', success: 'Notification dismissed', error: 'Failed to dismiss' }) }
-      ]
-    },
-    {
-      id: '2',
-      title: 'Payment received',
-      message: 'Client payment of $2,500 has been processed',
-      type: 'success' as const,
-      timestamp: new Date(Date.now() - 15 * 60 * 1000),
-      read: true
-    },
-    {
-      id: '3',
-      title: 'Deadline approaching',
-      message: 'Project "Mobile App Design" is due in 2 days',
-      type: 'warning' as const,
-      timestamp: new Date(Date.now() - 60 * 60 * 1000)
+  const mockNotifications = useMemo(() => [] as Array<{
+    id: string
+    title: string
+    message: string
+    type: 'info' | 'success' | 'warning' | 'error'
+    timestamp: Date | string
+    read?: boolean
+    actions?: Array<{
+      label: string
+      onClick: () => void
+      variant?: 'default' | 'primary' | 'destructive'
+    }>
+  }>, [])
+
+  const mockActivities = useMemo(() => [] as Array<{
+    id: string
+    user: {
+      id: string
+      name: string
+      avatar?: string
+      status?: 'online' | 'away' | 'busy' | 'offline'
+      role?: string
     }
-  ], [router])
+    type: 'comment' | 'edit' | 'share' | 'mention' | 'like' | 'join' | 'leave'
+    content: string
+    target?: string
+    timestamp: Date
+    metadata?: Record<string, unknown>
+  }>, [])
 
-  const mockActivities = useMemo(() => [
-    {
-      id: '1',
-      user: mockUsers[0],
-      type: 'comment' as const,
-      content: 'commented on',
-      target: 'Homepage Design',
-      timestamp: new Date(Date.now() - 10 * 60 * 1000)
-    },
-    {
-      id: '2',
-      user: mockUsers[1],
-      type: 'edit' as const,
-      content: 'updated',
-      target: 'User Dashboard',
-      timestamp: new Date(Date.now() - 25 * 60 * 1000)
-    },
-    {
-      id: '3',
-      user: mockUsers[2],
-      type: 'share' as const,
-      content: 'shared',
-      target: 'Project Files',
-      timestamp: new Date(Date.now() - 45 * 60 * 1000)
+  type CommentUser = {
+    id: string
+    name: string
+    avatar?: string
+    role?: string
+    status?: 'online' | 'away' | 'busy' | 'offline'
+  }
+
+  type Comment = {
+    id: string
+    user: CommentUser
+    content: string
+    timestamp: Date
+    replies?: Comment[]
+    likes?: number
+    isLiked?: boolean
+    isPinned?: boolean
+    mentions?: string[]
+    attachments?: Array<{ name: string; url: string; type: string }>
+  }
+
+  const mockComments = useMemo(() => [] as Comment[], [])
+
+  // Default empty user for comment system (required prop)
+  const defaultCurrentUser = useMemo(() => ({
+    id: '',
+    name: '',
+    avatar: undefined as string | undefined,
+    role: undefined as string | undefined,
+    status: undefined as 'online' | 'away' | 'busy' | 'offline' | undefined
+  }), [])
+
+  const mockTableData = useMemo(() => [] as Array<Record<string, unknown>>, [])
+
+  const tableColumns = useMemo(() => [] as Array<{
+    key: string
+    label: string
+    sortable?: boolean
+    formatter?: (value: unknown) => React.ReactNode
+    width?: string
+  }>, [])
+
+  const mockSettingsCategories = useMemo(() => [] as Array<{
+    id: string
+    label: string
+    icon: React.ComponentType<{ className?: string }>
+    description?: string
+    badge?: string | number
+  }>, [])
+
+  const mockThemes = useMemo(() => [] as Array<{
+    id: string
+    name: string
+    description: string
+    colors: {
+      primary: string
+      secondary: string
+      background: string
+      foreground: string
     }
-  ], [mockUsers])
-
-  const mockComments = useMemo(() => [
-    {
-      id: '1',
-      user: mockUsers[0],
-      content: 'This looks great! I love the new color scheme and the improved typography. The user experience feels much more intuitive now.',
-      timestamp: new Date(Date.now() - 30 * 60 * 1000),
-      likes: 5,
-      isLiked: true,
-      replies: [
-        {
-          id: '1-1',
-          user: mockUsers[1],
-          content: 'Thanks Sarah! I spent a lot of time on the typography pairing.',
-          timestamp: new Date(Date.now() - 20 * 60 * 1000),
-          likes: 2
-        }
-      ]
-    },
-    {
-      id: '2',
-      user: mockUsers[2],
-      content: 'Should we consider adding more interactive elements to increase engagement?',
-      timestamp: new Date(Date.now() - 60 * 60 * 1000),
-      likes: 3,
-      isPinned: true
-    }
-  ], [mockUsers])
-
-  const mockTableData = useMemo(() => [
-    { id: 1, project: 'KAZI Redesign', client: 'TechCorp', status: 'Active', revenue: '$15,000', completion: '75%' },
-    { id: 2, project: 'Mobile App', client: 'StartupXYZ', status: 'Review', revenue: '$8,500', completion: '90%' },
-    { id: 3, project: 'Website Refresh', client: 'LocalBiz', status: 'Planning', revenue: '$5,200', completion: '25%' },
-    { id: 4, project: 'Brand Identity', client: 'Creative Co', status: 'Complete', revenue: '$12,000', completion: '100%' }
-  ], [])
-
-  const tableColumns = useMemo(() => [
-    { key: 'project', label: 'Project', sortable: true },
-    { key: 'client', label: 'Client', sortable: true },
-    { 
-      key: 'status', 
-      label: 'Status', 
-      formatter: (value: string) => (
-        <Badge variant={value === 'Active' ? 'default' : value === 'Complete' ? 'secondary' : 'outline'}>
-          {value}
-        </Badge>
-      )
-    },
-    { key: 'revenue', label: 'Revenue', sortable: true },
-    { key: 'completion', label: 'Progress' }
-  ], [])
-
-  const mockSettingsCategories = useMemo(() => [
-    { id: 'general', label: 'General', icon: Settings, description: 'Basic app settings' },
-    { id: 'theme', label: 'Appearance', icon: Palette, description: 'Themes and display', badge: 'New' },
-    { id: 'notifications', label: 'Notifications', icon: Bell, description: 'Alerts and sounds', badge: 3 },
-    { id: 'shortcuts', label: 'Shortcuts', icon: Zap, description: 'Keyboard shortcuts' }
-  ], [])
-
-  const mockThemes = useMemo(() => [
-    {
-      id: 'default',
-      name: 'KAZI Default',
-      description: 'Professional blue theme',
-      colors: { primary: '#3b82f6', secondary: '#6366f1', background: '#ffffff', foreground: '#000000' }
-    },
-    {
-      id: 'dark',
-      name: 'Dark Mode',
-      description: 'Easy on the eyes',
-      colors: { primary: '#3b82f6', secondary: '#6366f1', background: '#000000', foreground: '#ffffff' }
-    },
-    {
-      id: 'purple',
-      name: 'Purple Accent',
-      description: 'Creative and modern',
-      colors: { primary: '#8b5cf6', secondary: '#a855f7', background: '#ffffff', foreground: '#000000' }
-    },
-    {
-      id: 'green',
-      name: 'Nature Green',
-      description: 'Calm and focused',
-      colors: { primary: '#10b981', secondary: '#059669', background: '#ffffff', foreground: '#000000' }
-    }
-  ], [])
+    preview?: string
+  }>, [])
 
   const breadcrumbItems = useMemo(() => [
     { title: 'Dashboard', href: '/dashboard' },
@@ -581,7 +532,7 @@ export default function AdvancedMicroFeaturesPage() {
                   <h3 className="text-lg font-semibold">Enhanced Comment System</h3>
                   <EnhancedCommentSystem
                     comments={mockComments}
-                    currentUser={mockUsers[0]}
+                    currentUser={defaultCurrentUser}
                     onAddComment={(content, mentions, attachments) => {
                       logger.info('Adding comment', { contentLength: content.length, mentionsCount: mentions?.length || 0, attachmentsCount: attachments?.length || 0 })
                       toast.success('Comment posted successfully')

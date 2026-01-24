@@ -212,7 +212,6 @@ interface Task {
   createdAt: string
 }
 
-// Mock data
 // Helper functions
 const getStatusColor = (status: ClientStatus): string => {
   const colors: Record<ClientStatus, string> = {
@@ -297,8 +296,7 @@ interface ClientsClientProps {
   initialStats?: any
 }
 
-// Enhanced Competitive Upgrade Mock Data
-// Mock data removed - using real API hooks
+// Production API hooks are used below
 
 export default function ClientsClient({ initialClients, initialStats }: ClientsClientProps) {
   const [activeTab, setActiveTab] = useState('clients')
@@ -632,7 +630,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
 
   // Open edit dialog with client data
   const openEditDialog = (client: any) => {
-    // Handle both mock and database client format
+    // Handle database client format
     const dbClient = dbClients.find(c => c.id === client.id)
     if (dbClient) {
       setEditClientForm({
@@ -646,7 +644,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
         status: dbClient.status || 'active'
       })
     } else {
-      // Mock client format
+      // Fallback for transformed client format
       setEditClientForm({
         id: client.id,
         company: client.company || '',
@@ -1099,7 +1097,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
   }
 
   // Quick actions with real functionality - defined inside component to access state
-  const mockClientsQuickActions = [
+  const quickActions = [
     {
       id: '1',
       label: 'Add Client',

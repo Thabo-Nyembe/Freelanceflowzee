@@ -1,7 +1,7 @@
 'use client'
 
 import { createClient } from '@/lib/supabase/client'
-// MIGRATED: Batch #12 - Removed mock data, using database hooks
+// MIGRATED: Batch #12 - Removed mock data, using database hooks with properly typed empty arrays
 import { useState, useMemo, useCallback } from 'react'
 import {
   CreditCard, Receipt, DollarSign, Users, Plus, BarChart3, Settings, RefreshCw, Download, AlertCircle, AlertTriangle, Clock, Trash2, Edit, Eye,
@@ -16,11 +16,16 @@ import {
   AIInsightsPanel,
   CollaborationIndicator,
   PredictiveAnalytics,
+  type AIInsight,
+  type Collaborator,
+  type Prediction,
 } from '@/components/ui/competitive-upgrades'
 
 import {
   ActivityFeed,
   QuickActionsToolbar,
+  type ActivityItem,
+  type QuickAction,
 } from '@/components/ui/competitive-upgrades-extended'
 
 
@@ -191,14 +196,14 @@ interface PricingPlan {
   subscribers: number
 }
 
-// Competitive Upgrade AI Insights - Database driven
-const mockBillingAIInsights: any[] = []
+// Empty arrays for competitive upgrade components - data driven from database
+const billingAIInsights: AIInsight[] = []
 
-const mockBillingCollaborators: any[] = []
+const billingCollaborators: Collaborator[] = []
 
-const mockBillingPredictions: any[] = []
+const billingPredictions: Prediction[] = []
 
-const mockBillingActivities: any[] = []
+const billingActivities: ActivityItem[] = []
 
 // Quick actions are defined inside the component to access state setters and handlers
 
@@ -524,7 +529,7 @@ ${invoice.paid_at ? `PAID ON: ${new Date(invoice.paid_at).toLocaleDateString()}`
   }, [])
 
   // Handle AI insight action
-  const handleInsightAction = useCallback((insight: typeof mockBillingAIInsights[0]) => {
+  const handleInsightAction = useCallback((insight: AIInsight) => {
     switch (insight.category) {
       case 'Revenue':
         setActiveTab('dashboard')
@@ -1138,33 +1143,30 @@ ${invoice.paid_at ? `PAID ON: ${new Date(invoice.paid_at).toLocaleDateString()}`
     }
   }, [updateSubscription])
 
-  // Quick actions with real functionality
-  const mockBillingQuickActions = [
+  // Quick actions with real functionality - properly typed
+  const billingQuickActions: QuickAction[] = [
     {
       id: '1',
       label: 'New Invoice',
-      icon: 'plus',
+      icon: <Plus className="h-4 w-4" />,
       action: () => setShowNewInvoiceModal(true),
-      variant: 'default' as const
     },
     {
       id: '2',
       label: 'Refund',
-      icon: 'rotate-ccw',
+      icon: <RotateCcw className="h-4 w-4" />,
       action: () => {
         // Open refund dialog or navigate to refunds section
         setActiveTab('settings')
         setSettingsTab('advanced')
         toast.info('Navigate to a transaction to process a refund')
       },
-      variant: 'default' as const
     },
     {
       id: '3',
       label: 'Export',
-      icon: 'download',
+      icon: <Download className="h-4 w-4" />,
       action: handleExportBilling,
-      variant: 'outline' as const
     },
   ]
 
@@ -2822,18 +2824,18 @@ ${invoice.paid_at ? `PAID ON: ${new Date(invoice.paid_at).toLocaleDateString()}`
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockBillingAIInsights}
+              insights={billingAIInsights}
               title="Billing Intelligence"
               onInsightAction={handleInsightAction}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockBillingCollaborators}
+              collaborators={billingCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockBillingPredictions}
+              predictions={billingPredictions}
               title="Revenue Forecasts"
             />
           </div>
@@ -2841,12 +2843,12 @@ ${invoice.paid_at ? `PAID ON: ${new Date(invoice.paid_at).toLocaleDateString()}`
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockBillingActivities}
+            activities={billingActivities}
             title="Billing Activity"
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockBillingQuickActions}
+            actions={billingQuickActions}
             variant="grid"
           />
         </div>

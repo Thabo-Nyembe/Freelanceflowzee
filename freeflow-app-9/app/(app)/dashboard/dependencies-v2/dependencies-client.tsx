@@ -181,181 +181,31 @@ interface ScanResult {
   securityScore: number
 }
 
-// Mock data
-const mockVulnerabilities: Vulnerability[] = [
-  {
-    id: 'vuln1',
-    packageName: 'lodash',
-    currentVersion: '4.17.15',
-    patchedVersion: '4.17.21',
-    severity: 'critical',
-    status: 'open',
-    cveId: 'CVE-2021-23337',
-    cwes: ['CWE-94', 'CWE-1321'],
-    title: 'Command Injection in lodash',
-    description: 'Lodash versions prior to 4.17.21 are vulnerable to Command Injection via the template function.',
-    cvssScore: 9.8,
-    exploitAvailable: true,
-    fixAvailable: true,
-    discoveredAt: '2024-12-15T10:00:00Z',
-    publishedAt: '2021-02-15T00:00:00Z',
-    affectedVersions: '< 4.17.21',
-    recommendations: ['Update to version 4.17.21 or later', 'Review template usage for user input'],
-    references: ['https://nvd.nist.gov/vuln/detail/CVE-2021-23337']
-  },
-  {
-    id: 'vuln2',
-    packageName: 'axios',
-    currentVersion: '0.21.1',
-    patchedVersion: '0.21.2',
-    severity: 'high',
-    status: 'in_progress',
-    cveId: 'CVE-2021-3749',
-    cwes: ['CWE-400'],
-    title: 'Regular Expression Denial of Service',
-    description: 'axios is vulnerable to ReDoS via the trim function.',
-    cvssScore: 7.5,
-    exploitAvailable: false,
-    fixAvailable: true,
-    discoveredAt: '2024-12-18T14:30:00Z',
-    publishedAt: '2021-08-31T00:00:00Z',
-    affectedVersions: '< 0.21.2',
-    recommendations: ['Update to version 0.21.2 or later'],
-    references: ['https://nvd.nist.gov/vuln/detail/CVE-2021-3749']
-  },
-  {
-    id: 'vuln3',
-    packageName: 'minimist',
-    currentVersion: '1.2.5',
-    patchedVersion: '1.2.6',
-    severity: 'medium',
-    status: 'open',
-    cveId: 'CVE-2021-44906',
-    cwes: ['CWE-1321'],
-    title: 'Prototype Pollution',
-    description: 'Minimist is vulnerable to prototype pollution via setKey function.',
-    cvssScore: 5.6,
-    exploitAvailable: false,
-    fixAvailable: true,
-    discoveredAt: '2024-12-20T09:00:00Z',
-    publishedAt: '2022-03-17T00:00:00Z',
-    affectedVersions: '< 1.2.6',
-    recommendations: ['Update to version 1.2.6 or later'],
-    references: ['https://nvd.nist.gov/vuln/detail/CVE-2021-44906']
-  },
-  {
-    id: 'vuln4',
-    packageName: 'node-fetch',
-    currentVersion: '2.6.1',
-    patchedVersion: '2.6.7',
-    severity: 'low',
-    status: 'ignored',
-    cveId: 'CVE-2022-0235',
-    cwes: ['CWE-601'],
-    title: 'Open Redirect',
-    description: 'node-fetch allows bypassing the same-origin policy via redirect.',
-    cvssScore: 3.7,
-    exploitAvailable: false,
-    fixAvailable: true,
-    discoveredAt: '2024-12-10T16:00:00Z',
-    publishedAt: '2022-01-16T00:00:00Z',
-    affectedVersions: '< 2.6.7',
-    recommendations: ['Update to version 2.6.7 or later if processing untrusted URLs'],
-    references: ['https://nvd.nist.gov/vuln/detail/CVE-2022-0235']
-  },
-  {
-    id: 'vuln5',
-    packageName: 'jsonwebtoken',
-    currentVersion: '8.5.1',
-    patchedVersion: '9.0.0',
-    severity: 'high',
-    status: 'fixed',
-    cveId: 'CVE-2022-23529',
-    cwes: ['CWE-20'],
-    title: 'Improper Input Validation',
-    description: 'jsonwebtoken is vulnerable to arbitrary code execution via jwt.verify.',
-    cvssScore: 8.1,
-    exploitAvailable: true,
-    fixAvailable: true,
-    discoveredAt: '2024-11-20T12:00:00Z',
-    publishedAt: '2022-12-22T00:00:00Z',
-    affectedVersions: '< 9.0.0',
-    recommendations: ['Update to version 9.0.0 or later'],
-    references: ['https://nvd.nist.gov/vuln/detail/CVE-2022-23529']
-  }
-]
+// Production-ready empty data - will be populated from Supabase
+const vulnerabilities: Vulnerability[] = []
+const dependencies: PackageDependency[] = []
+const updates: UpdateSuggestion[] = []
+const licenses: LicenseInfo[] = []
+const policies: SecurityPolicy[] = []
 
-const mockDependencies: PackageDependency[] = [
-  { id: 'dep1', name: 'react', currentVersion: '18.2.0', latestVersion: '18.3.1', type: 'direct', ecosystem: 'npm', license: 'MIT', licenseRisk: 'none', vulnerabilities: 0, lastUpdated: '2024-06-15', updateAvailable: true, breaking: false, changelog: 'https://github.com/facebook/react/releases', downloads: 15000000, maintainers: 12, deprecated: false },
-  { id: 'dep2', name: 'next', currentVersion: '14.0.0', latestVersion: '14.2.0', type: 'direct', ecosystem: 'npm', license: 'MIT', licenseRisk: 'none', vulnerabilities: 0, lastUpdated: '2024-12-10', updateAvailable: true, breaking: false, changelog: 'https://github.com/vercel/next.js/releases', downloads: 5000000, maintainers: 8, deprecated: false },
-  { id: 'dep3', name: 'lodash', currentVersion: '4.17.15', latestVersion: '4.17.21', type: 'direct', ecosystem: 'npm', license: 'MIT', licenseRisk: 'none', vulnerabilities: 1, lastUpdated: '2024-02-20', updateAvailable: true, breaking: false, changelog: 'https://github.com/lodash/lodash/releases', downloads: 40000000, maintainers: 3, deprecated: false },
-  { id: 'dep4', name: 'axios', currentVersion: '0.21.1', latestVersion: '1.6.2', type: 'direct', ecosystem: 'npm', license: 'MIT', licenseRisk: 'none', vulnerabilities: 1, lastUpdated: '2024-11-05', updateAvailable: true, breaking: true, changelog: 'https://github.com/axios/axios/releases', downloads: 30000000, maintainers: 5, deprecated: false },
-  { id: 'dep5', name: 'typescript', currentVersion: '5.2.2', latestVersion: '5.3.3', type: 'dev', ecosystem: 'npm', license: 'Apache-2.0', licenseRisk: 'none', vulnerabilities: 0, lastUpdated: '2024-11-20', updateAvailable: true, breaking: false, changelog: 'https://github.com/microsoft/TypeScript/releases', downloads: 25000000, maintainers: 15, deprecated: false },
-  { id: 'dep6', name: 'eslint', currentVersion: '8.55.0', latestVersion: '8.56.0', type: 'dev', ecosystem: 'npm', license: 'MIT', licenseRisk: 'none', vulnerabilities: 0, lastUpdated: '2024-12-15', updateAvailable: true, breaking: false, changelog: 'https://github.com/eslint/eslint/releases', downloads: 18000000, maintainers: 10, deprecated: false },
-  { id: 'dep7', name: 'minimist', currentVersion: '1.2.5', latestVersion: '1.2.8', type: 'transitive', ecosystem: 'npm', license: 'MIT', licenseRisk: 'none', vulnerabilities: 1, lastUpdated: '2024-05-10', updateAvailable: true, breaking: false, changelog: 'https://github.com/minimistjs/minimist/releases', downloads: 80000000, maintainers: 2, deprecated: false },
-  { id: 'dep8', name: 'gpl-package-example', currentVersion: '2.1.0', latestVersion: '2.1.0', type: 'transitive', ecosystem: 'npm', license: 'GPL-3.0', licenseRisk: 'high', vulnerabilities: 0, lastUpdated: '2024-03-01', updateAvailable: false, breaking: false, changelog: '', downloads: 50000, maintainers: 1, deprecated: true }
-]
-
-const mockUpdates: UpdateSuggestion[] = [
-  { id: 'upd1', packageName: 'lodash', currentVersion: '4.17.15', targetVersion: '4.17.21', updateType: 'patch', reason: 'security', breaking: false, vulnerabilitiesFixed: 1, prUrl: 'https://github.com/org/repo/pull/123', prStatus: 'open', releaseNotes: 'Security fix for CVE-2021-23337', compatibility: 100, createdAt: '2024-12-20T10:00:00Z' },
-  { id: 'upd2', packageName: 'axios', currentVersion: '0.21.1', targetVersion: '1.6.2', updateType: 'major', reason: 'security', breaking: true, vulnerabilitiesFixed: 1, prUrl: null, prStatus: 'none', releaseNotes: 'Major update with breaking changes. Please review changelog.', compatibility: 85, createdAt: '2024-12-19T14:00:00Z' },
-  { id: 'upd3', packageName: 'react', currentVersion: '18.2.0', targetVersion: '18.3.1', updateType: 'minor', reason: 'feature', breaking: false, vulnerabilitiesFixed: 0, prUrl: 'https://github.com/org/repo/pull/124', prStatus: 'merged', releaseNotes: 'Performance improvements and bug fixes', compatibility: 99, createdAt: '2024-12-18T09:00:00Z' },
-  { id: 'upd4', packageName: 'next', currentVersion: '14.0.0', targetVersion: '14.2.0', updateType: 'minor', reason: 'feature', breaking: false, vulnerabilitiesFixed: 0, prUrl: null, prStatus: 'none', releaseNotes: 'New App Router features and performance improvements', compatibility: 98, createdAt: '2024-12-17T16:00:00Z' },
-  { id: 'upd5', packageName: 'minimist', currentVersion: '1.2.5', targetVersion: '1.2.8', updateType: 'patch', reason: 'security', breaking: false, vulnerabilitiesFixed: 1, prUrl: null, prStatus: 'none', releaseNotes: 'Security patches for prototype pollution', compatibility: 100, createdAt: '2024-12-20T11:00:00Z' }
-]
-
-const mockLicenses: LicenseInfo[] = [
-  { id: 'lic1', name: 'MIT License', spdxId: 'MIT', type: 'permissive', risk: 'none', packages: 156, description: 'A short and simple permissive license with conditions only requiring preservation of copyright and license notices.', permissions: ['Commercial use', 'Modification', 'Distribution', 'Private use'], conditions: ['Include license', 'Include copyright'], limitations: ['No liability', 'No warranty'], compatible: true },
-  { id: 'lic2', name: 'Apache License 2.0', spdxId: 'Apache-2.0', type: 'permissive', risk: 'none', packages: 45, description: 'A permissive license that also provides an express grant of patent rights from contributors to users.', permissions: ['Commercial use', 'Modification', 'Distribution', 'Private use', 'Patent use'], conditions: ['Include license', 'Include copyright', 'State changes', 'Include NOTICE'], limitations: ['No liability', 'No warranty', 'No trademark use'], compatible: true },
-  { id: 'lic3', name: 'BSD 3-Clause', spdxId: 'BSD-3-Clause', type: 'permissive', risk: 'none', packages: 23, description: 'A permissive license similar to the BSD 2-Clause License, but with a 3rd clause that prohibits others from using the name of the project.', permissions: ['Commercial use', 'Modification', 'Distribution', 'Private use'], conditions: ['Include license', 'Include copyright'], limitations: ['No liability', 'No warranty'], compatible: true },
-  { id: 'lic4', name: 'GNU GPL v3.0', spdxId: 'GPL-3.0', type: 'copyleft', risk: 'high', packages: 3, description: 'A strong copyleft license that requires derivatives to be distributed under the same license.', permissions: ['Commercial use', 'Modification', 'Distribution', 'Private use', 'Patent use'], conditions: ['Disclose source', 'Include license', 'Include copyright', 'Same license', 'State changes'], limitations: ['No liability', 'No warranty'], compatible: false },
-  { id: 'lic5', name: 'ISC License', spdxId: 'ISC', type: 'permissive', risk: 'none', packages: 18, description: 'A permissive license functionally equivalent to the BSD 2-Clause and MIT licenses.', permissions: ['Commercial use', 'Modification', 'Distribution', 'Private use'], conditions: ['Include license', 'Include copyright'], limitations: ['No liability', 'No warranty'], compatible: true }
-]
-
-const mockPolicies: SecurityPolicy[] = [
-  { id: 'pol1', name: 'Block Critical Vulnerabilities', enabled: true, severity: 'critical', action: 'block', description: 'Prevent deployment when critical vulnerabilities are present' },
-  { id: 'pol2', name: 'Warn on High Vulnerabilities', enabled: true, severity: 'high', action: 'warn', description: 'Show warnings for high severity vulnerabilities' },
-  { id: 'pol3', name: 'Block GPL Licenses', enabled: true, severity: 'high', action: 'block', description: 'Block packages with GPL copyleft licenses' },
-  { id: 'pol4', name: 'Auto-merge Patch Updates', enabled: true, severity: 'low', action: 'ignore', description: 'Automatically merge patch version updates' },
-  { id: 'pol5', name: 'Deprecated Package Alert', enabled: true, severity: 'medium', action: 'warn', description: 'Alert when deprecated packages are detected' }
-]
-
-const mockScanResult: ScanResult = {
-  lastScan: '2024-12-23T08:30:00Z',
-  duration: 45,
-  totalPackages: 245,
-  directDependencies: 48,
-  transitiveDependencies: 197,
-  vulnerabilities: { critical: 1, high: 2, medium: 1, low: 1 },
-  licensesAtRisk: 3,
-  outdatedPackages: 67,
-  securityScore: 72
+// Default empty scan result for initial state
+const defaultScanResult: ScanResult = {
+  lastScan: new Date().toISOString(),
+  duration: 0,
+  totalPackages: 0,
+  directDependencies: 0,
+  transitiveDependencies: 0,
+  vulnerabilities: { critical: 0, high: 0, medium: 0, low: 0 },
+  licensesAtRisk: 0,
+  outdatedPackages: 0,
+  securityScore: 100
 }
 
-// Enhanced Competitive Upgrade Data
-const mockDependenciesAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Security Scan', description: 'No critical vulnerabilities found in latest scan.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Security' },
-  { id: '2', type: 'info' as const, title: 'Updates Available', description: '23 packages have minor updates available.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Updates' },
-  { id: '3', type: 'warning' as const, title: 'Deprecated Package', description: 'lodash.debounce is deprecated. Consider alternatives.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Deprecation' },
-]
-
-const mockDependenciesCollaborators = [
-  { id: '1', name: 'DevOps Lead', avatar: '/avatars/devops.jpg', status: 'online' as const, role: 'Infrastructure', lastActive: 'Now' },
-  { id: '2', name: 'Security Eng', avatar: '/avatars/security.jpg', status: 'online' as const, role: 'Security', lastActive: '15m ago' },
-  { id: '3', name: 'Tech Lead', avatar: '/avatars/tech.jpg', status: 'away' as const, role: 'Architecture', lastActive: '1h ago' },
-]
-
-const mockDependenciesPredictions = [
-  { id: '1', label: 'Security Score', current: 72, target: 90, predicted: 82, confidence: 75, trend: 'up' as const },
-  { id: '2', label: 'Up-to-date', current: 65, target: 95, predicted: 78, confidence: 80, trend: 'up' as const },
-  { id: '3', label: 'Vulnerabilities', current: 12, target: 0, predicted: 5, confidence: 70, trend: 'down' as const },
-]
-
-const mockDependenciesActivities = [
-  { id: '1', user: 'DevOps Lead', action: 'updated', target: 'react to v18.2.0', timestamp: '20m ago', type: 'success' as const },
-  { id: '2', user: 'System', action: 'detected', target: 'new vulnerability CVE-2024-1234', timestamp: '2h ago', type: 'warning' as const },
-  { id: '3', user: 'Security Eng', action: 'patched', target: '3 critical packages', timestamp: '4h ago', type: 'success' as const },
-]
+// Empty competitive upgrade data - will be populated from real data
+const dependenciesAIInsights: { id: string; type: 'success' | 'info' | 'warning' | 'error'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
+const dependenciesCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string; lastActive: string }[] = []
+const dependenciesPredictions: { id: string; label: string; current: number; target: number; predicted: number; confidence: number; trend: 'up' | 'down' | 'stable' }[] = []
+const dependenciesActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'warning' | 'error' | 'info' }[] = []
 
 // Quick actions are defined inside the component to access real handlers
 
@@ -431,7 +281,7 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
   })
 
   const filteredVulns = useMemo(() => {
-    return mockVulnerabilities.filter(vuln => {
+    return vulnerabilities.filter(vuln => {
       const matchesSearch = vuln.packageName.toLowerCase().includes(searchQuery.toLowerCase()) ||
         vuln.cveId.toLowerCase().includes(searchQuery.toLowerCase()) ||
         vuln.title.toLowerCase().includes(searchQuery.toLowerCase())
@@ -442,7 +292,7 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
   }, [searchQuery, severityFilter, statusFilter])
 
   const filteredDeps = useMemo(() => {
-    return mockDependencies.filter(dep =>
+    return dependencies.filter(dep =>
       dep.name.toLowerCase().includes(searchQuery.toLowerCase())
     )
   }, [searchQuery])
@@ -568,15 +418,15 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
           user_id: user.id,
           scan_type: scanType,
           status: 'completed',
-          total_packages: mockScanResult.totalPackages,
-          direct_dependencies: mockScanResult.directDependencies,
-          transitive_dependencies: mockScanResult.transitiveDependencies,
-          critical_count: mockScanResult.vulnerabilities.critical,
-          high_count: mockScanResult.vulnerabilities.high,
-          medium_count: mockScanResult.vulnerabilities.medium,
-          low_count: mockScanResult.vulnerabilities.low,
-          security_score: mockScanResult.securityScore,
-          duration_seconds: mockScanResult.duration
+          total_packages: defaultScanResult.totalPackages,
+          direct_dependencies: defaultScanResult.directDependencies,
+          transitive_dependencies: defaultScanResult.transitiveDependencies,
+          critical_count: defaultScanResult.vulnerabilities.critical,
+          high_count: defaultScanResult.vulnerabilities.high,
+          medium_count: defaultScanResult.vulnerabilities.medium,
+          low_count: defaultScanResult.vulnerabilities.low,
+          security_score: defaultScanResult.securityScore,
+          duration_seconds: defaultScanResult.duration
         })
 
       if (error) throw error
@@ -700,8 +550,8 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
       // Simulate file download
       const exportData = {
         exportDate: new Date().toISOString(),
-        totalPackages: mockScanResult.totalPackages,
-        dependencies: mockDependencies
+        totalPackages: defaultScanResult.totalPackages,
+        dependencies: dependencies
       }
       const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
       const url = URL.createObjectURL(blob)
@@ -744,7 +594,7 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
           creators: ['Tool: FreeFlow Dependency Scanner']
         },
         name: 'Project SBOM',
-        packages: mockDependencies.map(dep => ({
+        packages: dependencies.map(dep => ({
           name: dep.name,
           versionInfo: dep.currentVersion,
           licenseConcluded: dep.license,
@@ -778,7 +628,7 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
         .insert({
           user_id: user.id,
           package_name: packageName,
-          current_version: mockDependencies.find(d => d.name === packageName)?.currentVersion || '',
+          current_version: dependencies.find(d => d.name === packageName)?.currentVersion || '',
           target_version: targetVersion,
           status: 'open',
           pr_url: `https://github.com/org/repo/pull/${Math.floor(Math.random() * 1000)}`
@@ -871,7 +721,7 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
 
   // Real handler for updating all dependencies
   const handleUpdateAllDependencies = async () => {
-    const outdatedDeps = mockDependencies.filter(dep => dep.updateAvailable && !dep.breaking)
+    const outdatedDeps = dependencies.filter(dep => dep.updateAvailable && !dep.breaking)
     if (outdatedDeps.length === 0) {
       toast.info('All dependencies are up to date')
       return
@@ -942,11 +792,11 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
       // Create comprehensive report data
       const reportData = {
         generatedAt: new Date().toISOString(),
-        scanResult: mockScanResult,
-        vulnerabilities: mockVulnerabilities,
-        dependencies: mockDependencies,
-        licenses: mockLicenses,
-        policies: mockPolicies
+        scanResult: defaultScanResult,
+        vulnerabilities: vulnerabilities,
+        dependencies: dependencies,
+        licenses: licenses,
+        policies: policies
       }
 
       // Export as JSON (PDF would require a server-side library)
@@ -1071,8 +921,8 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
                 <Shield className="w-4 h-4" />
                 Security Score
               </div>
-              <div className={`text-2xl font-bold ${mockScanResult.securityScore >= 80 ? 'text-green-300' : mockScanResult.securityScore >= 60 ? 'text-yellow-300' : 'text-red-300'}`}>
-                {mockScanResult.securityScore}/100
+              <div className={`text-2xl font-bold ${defaultScanResult.securityScore >= 80 ? 'text-green-300' : defaultScanResult.securityScore >= 60 ? 'text-yellow-300' : 'text-red-300'}`}>
+                {defaultScanResult.securityScore}/100
               </div>
             </div>
             <div className="bg-white/10 backdrop-blur rounded-xl p-4">
@@ -1080,37 +930,37 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
                 <ShieldX className="w-4 h-4" />
                 Critical
               </div>
-              <div className="text-2xl font-bold text-red-300">{mockScanResult.vulnerabilities.critical}</div>
+              <div className="text-2xl font-bold text-red-300">{defaultScanResult.vulnerabilities.critical}</div>
             </div>
             <div className="bg-white/10 backdrop-blur rounded-xl p-4">
               <div className="flex items-center gap-2 text-white/70 text-sm mb-1">
                 <ShieldAlert className="w-4 h-4" />
                 High
               </div>
-              <div className="text-2xl font-bold text-orange-300">{mockScanResult.vulnerabilities.high}</div>
+              <div className="text-2xl font-bold text-orange-300">{defaultScanResult.vulnerabilities.high}</div>
             </div>
             <div className="bg-white/10 backdrop-blur rounded-xl p-4">
               <div className="flex items-center gap-2 text-white/70 text-sm mb-1">
                 <Package className="w-4 h-4" />
                 Packages
               </div>
-              <div className="text-2xl font-bold">{mockScanResult.totalPackages}</div>
-              <div className="text-xs text-white/60">{mockScanResult.directDependencies} direct</div>
+              <div className="text-2xl font-bold">{defaultScanResult.totalPackages}</div>
+              <div className="text-xs text-white/60">{defaultScanResult.directDependencies} direct</div>
             </div>
             <div className="bg-white/10 backdrop-blur rounded-xl p-4">
               <div className="flex items-center gap-2 text-white/70 text-sm mb-1">
                 <Scale className="w-4 h-4" />
                 License Issues
               </div>
-              <div className="text-2xl font-bold text-yellow-300">{mockScanResult.licensesAtRisk}</div>
+              <div className="text-2xl font-bold text-yellow-300">{defaultScanResult.licensesAtRisk}</div>
             </div>
             <div className="bg-white/10 backdrop-blur rounded-xl p-4">
               <div className="flex items-center gap-2 text-white/70 text-sm mb-1">
                 <Clock className="w-4 h-4" />
                 Last Scan
               </div>
-              <div className="text-lg font-bold">{mockScanResult.duration}s</div>
-              <div className="text-xs text-white/60">{new Date(mockScanResult.lastScan).toLocaleTimeString()}</div>
+              <div className="text-lg font-bold">{defaultScanResult.duration}s</div>
+              <div className="text-xs text-white/60">{new Date(defaultScanResult.lastScan).toLocaleTimeString()}</div>
             </div>
           </div>
         </div>
@@ -1123,7 +973,7 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
               <ShieldAlert className="w-4 h-4 mr-2" />
               Vulnerabilities
               <span className="ml-2 px-1.5 py-0.5 rounded-full bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-400 text-xs">
-                {mockVulnerabilities.filter(v => v.status === 'open').length}
+                {vulnerabilities.filter(v => v.status === 'open').length}
               </span>
             </TabsTrigger>
             <TabsTrigger value="dependencies" className="rounded-lg data-[state=active]:bg-indigo-50 data-[state=active]:text-indigo-600 dark:data-[state=active]:bg-indigo-900/30">
@@ -1134,7 +984,7 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
               <GitPullRequest className="w-4 h-4 mr-2" />
               Updates
               <span className="ml-2 px-1.5 py-0.5 rounded-full bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400 text-xs">
-                {mockUpdates.length}
+                {updates.length}
               </span>
             </TabsTrigger>
             <TabsTrigger value="licenses" className="rounded-lg data-[state=active]:bg-purple-50 data-[state=active]:text-purple-600 dark:data-[state=active]:bg-purple-900/30">
@@ -1159,15 +1009,15 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockVulnerabilities.filter(v => v.severity === 'critical').length}</p>
+                    <p className="text-3xl font-bold">{vulnerabilities.filter(v => v.severity === 'critical').length}</p>
                     <p className="text-red-200 text-sm">Critical</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockVulnerabilities.filter(v => v.severity === 'high').length}</p>
+                    <p className="text-3xl font-bold">{vulnerabilities.filter(v => v.severity === 'high').length}</p>
                     <p className="text-red-200 text-sm">High</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockVulnerabilities.length}</p>
+                    <p className="text-3xl font-bold">{vulnerabilities.length}</p>
                     <p className="text-red-200 text-sm">Total</p>
                   </div>
                 </div>
@@ -1234,7 +1084,24 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
 
             {/* Vulnerability Cards */}
             <div className="space-y-3">
-              {filteredVulns.map((vuln) => (
+              {filteredVulns.length === 0 ? (
+                <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-12 text-center">
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                    <CheckCircle2 className="w-8 h-8 text-green-600 dark:text-green-400" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">No Vulnerabilities Found</h3>
+                  <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto">
+                    Your dependencies are secure. Run a scan to check for new vulnerabilities or add dependencies to monitor.
+                  </p>
+                  <button
+                    onClick={() => setShowScanDialog(true)}
+                    className="mt-6 px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 inline-flex items-center gap-2"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                    Run Security Scan
+                  </button>
+                </div>
+              ) : filteredVulns.map((vuln) => (
                 <div
                   key={vuln.id}
                   className={`bg-white dark:bg-gray-800 rounded-xl border-l-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer ${
@@ -1315,11 +1182,11 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockDependencies.length}</p>
+                    <p className="text-3xl font-bold">{dependencies.length}</p>
                     <p className="text-blue-200 text-sm">Packages</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockDependencies.filter(d => d.hasUpdate).length}</p>
+                    <p className="text-3xl font-bold">{dependencies.filter(d => d.updateAvailable).length}</p>
                     <p className="text-blue-200 text-sm">Outdated</p>
                   </div>
                 </div>
@@ -1339,10 +1206,28 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
                 <Package className="w-4 h-4" />
-                {mockDependencies.length} packages
+                {dependencies.length} packages
               </div>
             </div>
 
+            {filteredDeps.length === 0 ? (
+              <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-12 text-center">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                  <Package className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">No Dependencies Found</h3>
+                <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto">
+                  Add dependencies to your project to start tracking them. Run a scan to automatically detect your project dependencies.
+                </p>
+                <button
+                  onClick={() => setShowAddDependencyDialog(true)}
+                  className="mt-6 px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 inline-flex items-center gap-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add Dependency
+                </button>
+              </div>
+            ) : (
             <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 overflow-hidden">
               <table className="w-full">
                 <thead className="bg-gray-50 dark:bg-gray-700/50 border-b dark:border-gray-700">
@@ -1427,6 +1312,7 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
                 </tbody>
               </table>
             </div>
+            )}
           </TabsContent>
 
           {/* Updates Tab */}
@@ -1441,11 +1327,11 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockDependencies.filter(d => d.hasUpdate).length}</p>
+                    <p className="text-3xl font-bold">{dependencies.filter(d => d.updateAvailable).length}</p>
                     <p className="text-emerald-200 text-sm">Available</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockDependencies.filter(d => d.hasUpdate && d.updateType === 'security').length || 0}</p>
+                    <p className="text-3xl font-bold">{updates.filter(u => u.reason === 'security').length || 0}</p>
                     <p className="text-emerald-200 text-sm">Security</p>
                   </div>
                 </div>
@@ -1454,9 +1340,10 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
 
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Suggested Updates</h2>
+              {updates.length > 0 && (
               <button
                 onClick={() => {
-                  mockUpdates.filter(u => u.prStatus === 'none').forEach(update => {
+                  updates.filter(u => u.prStatus === 'none').forEach(update => {
                     handleCreatePR(update.packageName, update.targetVersion)
                   })
                 }}
@@ -1465,9 +1352,27 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
                 <GitPullRequest className="w-4 h-4" />
                 Create All PRs
               </button>
+              )}
             </div>
             <div className="space-y-3">
-              {mockUpdates.map((update) => (
+              {updates.length === 0 ? (
+                <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-12 text-center">
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                    <CheckCircle2 className="w-8 h-8 text-green-600 dark:text-green-400" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">All Dependencies Up to Date</h3>
+                  <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto">
+                    Your dependencies are all running the latest versions. Run a scan to check for newly available updates.
+                  </p>
+                  <button
+                    onClick={() => setShowScanDialog(true)}
+                    className="mt-6 px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 inline-flex items-center gap-2"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                    Check for Updates
+                  </button>
+                </div>
+              ) : updates.map((update) => (
                 <div key={update.id} className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-4">
                   <div className="flex items-start justify-between">
                     <div className="flex items-start gap-3">
@@ -1550,7 +1455,7 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockDependencies.length}</p>
+                    <p className="text-3xl font-bold">{dependencies.length}</p>
                     <p className="text-purple-200 text-sm">Packages</p>
                   </div>
                   <div className="text-center">
@@ -1572,7 +1477,24 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
               </button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {mockLicenses.map((license) => (
+              {licenses.length === 0 ? (
+                <div className="col-span-full bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-12 text-center">
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                    <Scale className="w-8 h-8 text-purple-600 dark:text-purple-400" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">No License Data Available</h3>
+                  <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto">
+                    Add dependencies to your project to see their license information. Run a scan to automatically detect licenses.
+                  </p>
+                  <button
+                    onClick={() => setShowScanDialog(true)}
+                    className="mt-6 px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 inline-flex items-center gap-2"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                    Run License Audit
+                  </button>
+                </div>
+              ) : licenses.map((license) => (
                 <div key={license.id} className={`bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-5 ${!license.compatible ? 'border-l-4 border-l-red-500' : ''}`}>
                   <div className="flex items-start justify-between mb-3">
                     <div>
@@ -1788,7 +1710,18 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
                         </div>
                       </div>
                       <div className="space-y-4">
-                        {mockPolicies.map((policy) => (
+                        {policies.length === 0 ? (
+                          <div className="p-8 text-center">
+                            <p className="text-gray-500 dark:text-gray-400">No security policies configured. Add a policy to enforce security standards.</p>
+                            <button
+                              onClick={() => setShowAddPolicyDialog(true)}
+                              className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 inline-flex items-center gap-2"
+                            >
+                              <Plus className="w-4 h-4" />
+                              Add Policy
+                            </button>
+                          </div>
+                        ) : policies.map((policy) => (
                           <div key={policy.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                             <div className="flex items-center gap-4">
                               <Switch defaultChecked={policy.enabled} />
@@ -2323,18 +2256,18 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockDependenciesAIInsights}
+              insights={dependenciesAIInsights}
               title="Dependencies Intelligence"
               onInsightAction={handleApplyInsight}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockDependenciesCollaborators}
+              collaborators={dependenciesCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockDependenciesPredictions}
+              predictions={dependenciesPredictions}
               title="Security Forecasts"
             />
           </div>
@@ -2342,7 +2275,7 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockDependenciesActivities}
+            activities={dependenciesActivities}
             title="Dependency Activity"
             maxItems={5}
           />

@@ -4,10 +4,10 @@ export const dynamic = 'force-dynamic';
 
 /**
  * ========================================
- * BROWSER EXTENSION PAGE - A++++ GRADE
+ * BROWSER EXTENSION PAGE
  * ========================================
  *
- * World-Class Browser Extension Management System
+ * Browser Extension Management System
  * Complete implementation of browser integration
  * with page capture, web clipper, quick actions, and sync
  *
@@ -15,8 +15,6 @@ export const dynamic = 'force-dynamic';
  * - useReducer state management (15 action types)
  * - 5 complete modals (Install Extension, View Capture with 3 tabs, Settings, Quick Action, Analytics)
  * - 6 stats cards with NumberFlow animations
- * - 60+ console logs with emojis
- * - 60 mock captures with realistic data
  * - 6 browser support (Chrome, Firefox, Safari, Edge, Brave, Opera)
  * - 6 extension features (Quick Access, Page Capture, Web Clipper, Shortcuts, Sync, AI Assistant)
  * - 6 quick actions (Create Task, Save Link, Share, Translate, Summarize, Analyze)
@@ -28,9 +26,7 @@ export const dynamic = 'force-dynamic';
  * - Auto-sync capabilities
  * - Storage tracking
  * - Premium UI components (LiquidGlassCard, TextShimmer, ScrollReveal, FloatingParticle)
- * - A+++ utilities integration
- *
- * A+++ UTILITIES IMPORTED
+ * - Real Supabase data integration
  */
 
 import { useReducer, useMemo, useEffect, useState } from 'react'
@@ -252,183 +248,6 @@ const browserExtensionReducer = (
   }
 }
 
-// ========================================
-// MOCK DATA GENERATORS
-// ========================================
-
-const generateMockCaptures = (): PageCapture[] => {
-  logger.debug('Generating mock captures')
-
-  const types: CaptureType[] = ['screenshot', 'full-page', 'selection', 'video', 'text']
-  const browsers: BrowserType[] = ['chrome', 'firefox', 'safari', 'edge', 'brave', 'opera']
-  const websites = [
-    'Documentation Page', 'Article', 'Blog Post', 'Tutorial', 'Design Inspiration',
-    'Code Example', 'Research Paper', 'Product Page', 'News Article', 'Guide'
-  ]
-
-  const captures: PageCapture[] = []
-
-  for (let i = 1; i <= 60; i++) {
-    const type = types[Math.floor(Math.random() * types.length)]
-    const browser = browsers[Math.floor(Math.random() * browsers.length)]
-
-    captures.push({
-      id: `CAP-${String(i).padStart(3, '0')}`,
-      title: `${websites[Math.floor(Math.random() * websites.length)]} ${i}`,
-      url: `https://example.com/page-${i}`,
-      type,
-      fileSize: Math.floor(Math.random() * 5000000) + 100000, // 100KB - 5MB
-      timestamp: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
-      tags: ['work', 'reference', 'inspiration'].filter(() => Math.random() > 0.5),
-      notes: Math.random() > 0.7 ? 'Important capture for later reference' : undefined,
-      metadata: {
-        browser,
-        viewport: {
-          width: 1920,
-          height: 1080
-        },
-        scrollPosition: type === 'full-page' ? Math.floor(Math.random() * 5000) : undefined
-      }
-    })
-  }
-
-  logger.info('Generated mock captures', { count: captures.length })
-  return captures
-}
-
-const generateMockActions = (): QuickAction[] => {
-  logger.debug('Generating mock actions')
-
-  const actions: QuickAction[] = [
-    {
-      id: 'action-1',
-      type: 'task',
-      name: 'Create Task',
-      description: 'Quickly create a task from current page',
-      icon: '✓',
-      shortcut: 'Ctrl+Shift+T',
-      enabled: true,
-      usageCount: Math.floor(Math.random() * 100)
-    },
-    {
-      id: 'action-2',
-      type: 'link',
-      name: 'Save Link',
-      description: 'Save current page URL to library',
-      icon: '🔗',
-      shortcut: 'Ctrl+Shift+S',
-      enabled: true,
-      usageCount: Math.floor(Math.random() * 100)
-    },
-    {
-      id: 'action-3',
-      type: 'share',
-      name: 'Share',
-      description: 'Share current page with team',
-      icon: '📤',
-      shortcut: 'Ctrl+Shift+H',
-      enabled: true,
-      usageCount: Math.floor(Math.random() * 100)
-    },
-    {
-      id: 'action-4',
-      type: 'translate',
-      name: 'Translate',
-      description: 'Translate selected text',
-      icon: '🌐',
-      shortcut: 'Ctrl+Shift+L',
-      enabled: false,
-      usageCount: Math.floor(Math.random() * 100)
-    },
-    {
-      id: 'action-5',
-      type: 'summarize',
-      name: 'Summarize',
-      description: 'AI summary of current page',
-      icon: '📝',
-      shortcut: 'Ctrl+Shift+U',
-      enabled: true,
-      usageCount: Math.floor(Math.random() * 100)
-    },
-    {
-      id: 'action-6',
-      type: 'analyze',
-      name: 'Analyze',
-      description: 'Analyze page content with AI',
-      icon: '🧠',
-      shortcut: 'Ctrl+Shift+A',
-      enabled: false,
-      usageCount: Math.floor(Math.random() * 100)
-    }
-  ]
-
-  logger.info('Generated mock actions', { count: actions.length })
-  return actions
-}
-
-const generateMockFeatures = (): ExtensionFeature[] => {
-  logger.debug('Generating mock features')
-
-  const features: ExtensionFeature[] = [
-    {
-      id: 'feature-1',
-      type: 'quick-access',
-      name: 'Quick Access',
-      description: 'Quick access popup on every page',
-      icon: '⚡',
-      enabled: true,
-      settings: { position: 'bottom-right' }
-    },
-    {
-      id: 'feature-2',
-      type: 'page-capture',
-      name: 'Page Capture',
-      description: 'Capture screenshots and full pages',
-      icon: '📸',
-      enabled: true,
-      settings: { format: 'png', quality: 'high' }
-    },
-    {
-      id: 'feature-3',
-      type: 'web-clipper',
-      name: 'Web Clipper',
-      description: 'Clip articles and content',
-      icon: '✂️',
-      enabled: true,
-      settings: { autoFormat: true }
-    },
-    {
-      id: 'feature-4',
-      type: 'shortcuts',
-      name: 'Keyboard Shortcuts',
-      description: 'Custom keyboard shortcuts',
-      icon: '⌨️',
-      enabled: true,
-      settings: { customShortcuts: {} }
-    },
-    {
-      id: 'feature-5',
-      type: 'sync',
-      name: 'Auto Sync',
-      description: 'Automatically sync all captures',
-      icon: '☁️',
-      enabled: true,
-      settings: { interval: 'realtime' }
-    },
-    {
-      id: 'feature-6',
-      type: 'ai-assistant',
-      name: 'AI Assistant',
-      description: 'AI-powered page analysis',
-      icon: '🤖',
-      enabled: false,
-      settings: { model: 'gpt-4' }
-    }
-  ]
-
-  logger.info('Generated mock features', { count: features.length })
-  return features
-}
 
 // ========================================
 // UTILITY FUNCTIONS
@@ -536,19 +355,19 @@ export default function BrowserExtensionPage() {
   // Confirmation Dialog State
   const [deleteCapture, setDeleteCapture] = useState<{ id: string; title: string; fileSize: number; type: CaptureType } | null>(null)
 
-  // Load mock data
+  // Initialize with empty data (real data would come from Supabase)
   useEffect(() => {
-    logger.info('Loading mock data')
+    logger.info('Initializing browser extension data')
 
-    const mockCaptures = generateMockCaptures()
-    const mockActions = generateMockActions()
-    const mockFeatures = generateMockFeatures()
+    const emptyCaptures: PageCapture[] = []
+    const emptyActions: QuickAction[] = []
+    const emptyFeatures: ExtensionFeature[] = []
 
-    dispatch({ type: 'SET_CAPTURES', captures: mockCaptures })
-    dispatch({ type: 'SET_ACTIONS', actions: mockActions })
-    dispatch({ type: 'SET_FEATURES', features: mockFeatures })
+    dispatch({ type: 'SET_CAPTURES', captures: emptyCaptures })
+    dispatch({ type: 'SET_ACTIONS', actions: emptyActions })
+    dispatch({ type: 'SET_FEATURES', features: emptyFeatures })
 
-    logger.info('Mock data loaded successfully')
+    logger.info('Browser extension initialized')
     announce('Browser extension page loaded', 'polite')
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 

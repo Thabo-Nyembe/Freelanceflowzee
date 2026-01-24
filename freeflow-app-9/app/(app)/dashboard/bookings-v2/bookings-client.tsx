@@ -27,14 +27,16 @@ import {
   AIInsightsPanel,
   CollaborationIndicator,
   PredictiveAnalytics,
+  type AIInsight,
+  type Collaborator,
+  type Prediction,
 } from '@/components/ui/competitive-upgrades'
 
 import {
   ActivityFeed,
   QuickActionsToolbar,
+  type ActivityItem,
 } from '@/components/ui/competitive-upgrades-extended'
-
-// Import mock data from centralized adapters
 
 
 
@@ -71,12 +73,11 @@ interface TeamMember {
   bookingsToday: number
 }
 
-// MIGRATED: Batch #12 - Removed mock data, using database hooks
-// Mock data for AI-powered competitive upgrade components (replaced with empty arrays)
-const mockBookingsAIInsights: any[] = []
-const mockBookingsCollaborators: any[] = []
-const mockBookingsPredictions: any[] = []
-const mockBookingsActivities: any[] = []
+// Properly typed empty arrays for AI-powered competitive upgrade components
+const mockBookingsAIInsights: AIInsight[] = []
+const mockBookingsCollaborators: Collaborator[] = []
+const mockBookingsPredictions: Prediction[] = []
+const mockBookingsActivities: ActivityItem[] = []
 
 // Quick actions are defined inside the component to access state setters
 

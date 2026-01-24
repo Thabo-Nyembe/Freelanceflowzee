@@ -251,6 +251,7 @@ interface Analytics {
   outOfStockCount: number
   pendingOrders: number
   warehouses: number
+  stockAccuracy: number
   topMovers: { productId: string; name: string; quantity: number }[]
   slowMovers: { productId: string; name: string; daysInStock: number }[]
   valueByCategory: { category: ProductCategory; value: number; percentage: number }[]
@@ -259,349 +260,34 @@ interface Analytics {
 }
 
 // ============================================================================
-// MOCK DATA
+// EMPTY DATA ARRAYS - Real data comes from database hooks
 // ============================================================================
 
-const mockWarehouses: Warehouse[] = [
-  {
-    id: 'wh-1',
-    name: 'Main Distribution Center',
-    code: 'MDC-001',
-    address: '1234 Industrial Blvd',
-    city: 'Los Angeles',
-    state: 'CA',
-    type: 'distribution',
-    capacity: 50000,
-    utilization: 72,
-    zones: 12,
-    bins: 480,
-    productCount: 1247,
-    totalValue: 2450000,
-    manager: 'John Smith'
-  },
-  {
-    id: 'wh-2',
-    name: 'East Coast Fulfillment',
-    code: 'ECF-001',
-    address: '567 Commerce Drive',
-    city: 'Newark',
-    state: 'NJ',
-    type: 'fulfillment',
-    capacity: 35000,
-    utilization: 85,
-    zones: 8,
-    bins: 320,
-    productCount: 892,
-    totalValue: 1780000,
-    manager: 'Sarah Chen'
-  },
-  {
-    id: 'wh-3',
-    name: 'Retail Store Backroom',
-    code: 'RSB-001',
-    address: '890 Main Street',
-    city: 'San Francisco',
-    state: 'CA',
-    type: 'retail',
-    capacity: 5000,
-    utilization: 65,
-    zones: 4,
-    bins: 80,
-    productCount: 234,
-    totalValue: 156000,
-    manager: 'Mike Johnson'
-  }
-]
+const warehouses: Warehouse[] = []
 
-const mockProducts: Product[] = [
-  {
-    id: 'prod-1',
-    sku: 'ELEC-001',
-    name: 'Wireless Bluetooth Earbuds Pro',
-    description: 'Premium wireless earbuds with active noise cancellation',
-    category: 'electronics',
-    brand: 'TechSound',
-    supplier: { id: 'sup-1', name: 'TechWholesale Inc', email: 'orders@techwholesale.com', phone: '+1 (555) 123-4567', leadTime: 7, minOrderQuantity: 50, rating: 4.8 },
-    unitCost: 45.00,
-    sellingPrice: 89.99,
-    margin: 50,
-    quantity: 1250,
-    reservedQuantity: 87,
-    availableQuantity: 1163,
-    reorderPoint: 200,
-    reorderQuantity: 500,
-    leadTimeDays: 7,
-    status: 'in_stock',
-    locations: [
-      { warehouseId: 'wh-1', warehouseName: 'Main Distribution Center', zone: 'A', bin: 'A-12-3', quantity: 800, reservedQuantity: 50 },
-      { warehouseId: 'wh-2', warehouseName: 'East Coast Fulfillment', zone: 'B', bin: 'B-05-1', quantity: 450, reservedQuantity: 37 }
-    ],
-    batchTracking: true,
-    serialTracking: false,
-    weight: 0.15,
-    dimensions: { length: 8, width: 6, height: 4 },
-    barcode: '1234567890123',
-    lastRestocked: '2024-12-15T10:00:00Z',
-    lastSold: '2024-12-23T14:30:00Z',
-    createdAt: '2024-01-15T09:00:00Z'
-  },
-  {
-    id: 'prod-2',
-    sku: 'ELEC-002',
-    name: 'Smart Watch Series X',
-    description: 'Advanced smartwatch with health monitoring',
-    category: 'electronics',
-    brand: 'TechWear',
-    supplier: { id: 'sup-2', name: 'SmartGadgets Co', email: 'supply@smartgadgets.com', phone: '+1 (555) 234-5678', leadTime: 14, minOrderQuantity: 25, rating: 4.5 },
-    unitCost: 120.00,
-    sellingPrice: 249.99,
-    margin: 52,
-    quantity: 145,
-    reservedQuantity: 23,
-    availableQuantity: 122,
-    reorderPoint: 100,
-    reorderQuantity: 200,
-    leadTimeDays: 14,
-    status: 'low_stock',
-    locations: [
-      { warehouseId: 'wh-1', warehouseName: 'Main Distribution Center', zone: 'A', bin: 'A-08-2', quantity: 100, reservedQuantity: 15 },
-      { warehouseId: 'wh-3', warehouseName: 'Retail Store Backroom', zone: 'C', bin: 'C-01-1', quantity: 45, reservedQuantity: 8 }
-    ],
-    batchTracking: true,
-    serialTracking: true,
-    weight: 0.08,
-    dimensions: { length: 5, width: 5, height: 3 },
-    barcode: '2345678901234',
-    lastRestocked: '2024-12-01T09:00:00Z',
-    lastSold: '2024-12-23T16:45:00Z',
-    createdAt: '2024-02-20T11:00:00Z'
-  },
-  {
-    id: 'prod-3',
-    sku: 'APP-001',
-    name: 'Premium Cotton T-Shirt',
-    description: '100% organic cotton t-shirt, multiple colors available',
-    category: 'apparel',
-    brand: 'EcoWear',
-    supplier: { id: 'sup-3', name: 'GreenTextile Ltd', email: 'orders@greentextile.com', phone: '+1 (555) 345-6789', leadTime: 21, minOrderQuantity: 100, rating: 4.2 },
-    unitCost: 8.50,
-    sellingPrice: 24.99,
-    margin: 66,
-    quantity: 3500,
-    reservedQuantity: 245,
-    availableQuantity: 3255,
-    reorderPoint: 500,
-    reorderQuantity: 1000,
-    leadTimeDays: 21,
-    status: 'in_stock',
-    locations: [
-      { warehouseId: 'wh-1', warehouseName: 'Main Distribution Center', zone: 'C', bin: 'C-22-1', quantity: 2500, reservedQuantity: 180 },
-      { warehouseId: 'wh-2', warehouseName: 'East Coast Fulfillment', zone: 'A', bin: 'A-15-3', quantity: 1000, reservedQuantity: 65 }
-    ],
-    batchTracking: true,
-    serialTracking: false,
-    weight: 0.2,
-    barcode: '3456789012345',
-    lastRestocked: '2024-12-10T14:00:00Z',
-    lastSold: '2024-12-23T11:20:00Z',
-    createdAt: '2024-03-05T10:00:00Z'
-  },
-  {
-    id: 'prod-4',
-    sku: 'RAW-001',
-    name: 'Aluminum Sheets 4x8',
-    description: 'Industrial grade aluminum sheets for manufacturing',
-    category: 'raw_materials',
-    supplier: { id: 'sup-4', name: 'MetalWorks Inc', email: 'sales@metalworks.com', phone: '+1 (555) 456-7890', leadTime: 10, minOrderQuantity: 50, rating: 4.6 },
-    unitCost: 75.00,
-    sellingPrice: 125.00,
-    margin: 40,
-    quantity: 0,
-    reservedQuantity: 0,
-    availableQuantity: 0,
-    reorderPoint: 100,
-    reorderQuantity: 500,
-    leadTimeDays: 10,
-    status: 'out_of_stock',
-    locations: [],
-    batchTracking: true,
-    serialTracking: false,
-    weight: 15,
-    dimensions: { length: 96, width: 48, height: 0.125 },
-    barcode: '4567890123456',
-    lastRestocked: '2024-11-20T08:00:00Z',
-    createdAt: '2024-01-10T08:00:00Z'
-  },
-  {
-    id: 'prod-5',
-    sku: 'PKG-001',
-    name: 'Corrugated Shipping Boxes (Medium)',
-    description: '12x10x8 inch shipping boxes, pack of 25',
-    category: 'packaging',
-    supplier: { id: 'sup-5', name: 'PackRight Solutions', email: 'order@packright.com', phone: '+1 (555) 567-8901', leadTime: 5, minOrderQuantity: 10, rating: 4.9 },
-    unitCost: 18.00,
-    sellingPrice: 32.99,
-    margin: 45,
-    quantity: 2800,
-    reservedQuantity: 150,
-    availableQuantity: 2650,
-    reorderPoint: 300,
-    reorderQuantity: 500,
-    leadTimeDays: 5,
-    status: 'in_stock',
-    locations: [
-      { warehouseId: 'wh-1', warehouseName: 'Main Distribution Center', zone: 'D', bin: 'D-01-1', quantity: 1800, reservedQuantity: 100 },
-      { warehouseId: 'wh-2', warehouseName: 'East Coast Fulfillment', zone: 'D', bin: 'D-02-1', quantity: 1000, reservedQuantity: 50 }
-    ],
-    batchTracking: false,
-    serialTracking: false,
-    barcode: '5678901234567',
-    lastRestocked: '2024-12-18T11:00:00Z',
-    lastSold: '2024-12-23T09:15:00Z',
-    createdAt: '2024-04-12T09:00:00Z'
-  }
-]
+const products: Product[] = []
 
-const mockMovements: StockMovement[] = [
-  {
-    id: 'mov-1',
-    movementNumber: 'MOV-2024-001',
-    type: 'inbound',
-    status: 'completed',
-    product: { id: 'prod-1', sku: 'ELEC-001', name: 'Wireless Bluetooth Earbuds Pro' },
-    quantity: 500,
-    unitCost: 45.00,
-    totalValue: 22500,
-    toLocation: { warehouseId: 'wh-1', warehouseName: 'Main Distribution Center', zone: 'A', bin: 'A-12-3' },
-    reference: 'PO-2024-1234',
-    purchaseOrderId: 'po-1',
-    batchNumber: 'BATCH-2024-12-001',
-    operator: 'John Smith',
-    approvedBy: 'Sarah Manager',
-    movementDate: '2024-12-15T10:00:00Z',
-    completedDate: '2024-12-15T14:30:00Z',
-    createdAt: '2024-12-15T10:00:00Z'
-  },
-  {
-    id: 'mov-2',
-    movementNumber: 'MOV-2024-002',
-    type: 'outbound',
-    status: 'completed',
-    product: { id: 'prod-3', sku: 'APP-001', name: 'Premium Cotton T-Shirt' },
-    quantity: 150,
-    unitCost: 8.50,
-    totalValue: 1275,
-    fromLocation: { warehouseId: 'wh-1', warehouseName: 'Main Distribution Center', zone: 'C', bin: 'C-22-1' },
-    reference: 'SO-2024-5678',
-    salesOrderId: 'so-1',
-    operator: 'Mike Warehouse',
-    movementDate: '2024-12-20T09:00:00Z',
-    completedDate: '2024-12-20T09:45:00Z',
-    createdAt: '2024-12-20T09:00:00Z'
-  },
-  {
-    id: 'mov-3',
-    movementNumber: 'MOV-2024-003',
-    type: 'transfer',
-    status: 'in_transit',
-    product: { id: 'prod-2', sku: 'ELEC-002', name: 'Smart Watch Series X' },
-    quantity: 50,
-    unitCost: 120.00,
-    totalValue: 6000,
-    fromLocation: { warehouseId: 'wh-1', warehouseName: 'Main Distribution Center', zone: 'A', bin: 'A-08-2' },
-    toLocation: { warehouseId: 'wh-3', warehouseName: 'Retail Store Backroom', zone: 'C', bin: 'C-01-1' },
-    notes: 'Restocking retail location',
-    operator: 'Sarah Chen',
-    movementDate: '2024-12-22T11:00:00Z',
-    createdAt: '2024-12-22T11:00:00Z'
-  },
-  {
-    id: 'mov-4',
-    movementNumber: 'MOV-2024-004',
-    type: 'adjustment',
-    status: 'completed',
-    product: { id: 'prod-5', sku: 'PKG-001', name: 'Corrugated Shipping Boxes (Medium)' },
-    quantity: -25,
-    unitCost: 18.00,
-    totalValue: -450,
-    fromLocation: { warehouseId: 'wh-1', warehouseName: 'Main Distribution Center', zone: 'D', bin: 'D-01-1' },
-    reason: 'Damaged in storage - water leak',
-    notes: 'Damaged boxes disposed, incident report filed',
-    operator: 'John Smith',
-    approvedBy: 'Sarah Manager',
-    movementDate: '2024-12-21T16:00:00Z',
-    completedDate: '2024-12-21T16:30:00Z',
-    createdAt: '2024-12-21T16:00:00Z'
-  },
-  {
-    id: 'mov-5',
-    movementNumber: 'MOV-2024-005',
-    type: 'inbound',
-    status: 'pending',
-    product: { id: 'prod-4', sku: 'RAW-001', name: 'Aluminum Sheets 4x8' },
-    quantity: 200,
-    unitCost: 75.00,
-    totalValue: 15000,
-    toLocation: { warehouseId: 'wh-1', warehouseName: 'Main Distribution Center', zone: 'E', bin: 'E-01-1' },
-    reference: 'PO-2024-1890',
-    purchaseOrderId: 'po-5',
-    notes: 'Expected delivery Dec 26',
-    operator: 'System',
-    movementDate: '2024-12-26T09:00:00Z',
-    createdAt: '2024-12-23T08:00:00Z'
-  }
-]
+const stockMovements: StockMovement[] = []
 
-const mockAlerts: Alert[] = [
-  { id: 'alert-1', type: 'low_stock', severity: 'warning', productId: 'prod-2', productName: 'Smart Watch Series X', sku: 'ELEC-002', message: 'Stock below reorder point', currentQuantity: 145, threshold: 100, createdAt: '2024-12-23T08:00:00Z', acknowledged: false },
-  { id: 'alert-2', type: 'out_of_stock', severity: 'critical', productId: 'prod-4', productName: 'Aluminum Sheets 4x8', sku: 'RAW-001', message: 'Product out of stock', currentQuantity: 0, createdAt: '2024-12-20T10:00:00Z', acknowledged: false },
-  { id: 'alert-3', type: 'reorder', severity: 'info', productId: 'prod-4', productName: 'Aluminum Sheets 4x8', sku: 'RAW-001', message: 'Reorder placed - PO-2024-1890', currentQuantity: 0, createdAt: '2024-12-23T08:30:00Z', acknowledged: true }
-]
+const stockAlerts: Alert[] = []
 
-const mockStockCounts: StockCount[] = [
-  { id: 'count-1', countNumber: 'CNT-2024-001', warehouseId: 'wh-1', warehouseName: 'Main Distribution Center', type: 'cycle', status: 'completed', scheduledDate: '2024-12-15', startedAt: '2024-12-15T06:00:00Z', completedAt: '2024-12-15T18:00:00Z', assignedTo: ['John Smith', 'Mike Johnson'], productsCounted: 1247, totalProducts: 1247, varianceValue: -2340, variancePercentage: -0.1 },
-  { id: 'count-2', countNumber: 'CNT-2024-002', warehouseId: 'wh-2', warehouseName: 'East Coast Fulfillment', type: 'spot', status: 'in_progress', scheduledDate: '2024-12-23', startedAt: '2024-12-23T07:00:00Z', assignedTo: ['Sarah Chen'], productsCounted: 234, totalProducts: 892, varianceValue: 0, variancePercentage: 0 }
-]
+const stockCounts: StockCount[] = []
 
-const mockAnalytics: Analytics = {
-  totalProducts: 5,
-  totalValue: 4386000,
-  avgTurnoverRate: 8.4,
-  totalMovements: 5,
-  lowStockCount: 1,
-  outOfStockCount: 1,
-  pendingOrders: 1,
-  warehouses: 3,
-  topMovers: [
-    { productId: 'prod-3', name: 'Premium Cotton T-Shirt', quantity: 2450 },
-    { productId: 'prod-1', name: 'Wireless Bluetooth Earbuds Pro', quantity: 1890 },
-    { productId: 'prod-5', name: 'Corrugated Shipping Boxes', quantity: 1234 }
-  ],
-  slowMovers: [
-    { productId: 'prod-4', name: 'Aluminum Sheets 4x8', daysInStock: 33 },
-    { productId: 'prod-2', name: 'Smart Watch Series X', daysInStock: 22 }
-  ],
-  valueByCategory: [
-    { category: 'electronics', value: 1450000, percentage: 33 },
-    { category: 'apparel', value: 875000, percentage: 20 },
-    { category: 'raw_materials', value: 0, percentage: 0 },
-    { category: 'packaging', value: 896000, percentage: 20 },
-    { category: 'finished_goods', value: 1165000, percentage: 27 }
-  ],
-  movementTrend: [
-    { date: '2024-12-17', inbound: 45, outbound: 38 },
-    { date: '2024-12-18', inbound: 52, outbound: 41 },
-    { date: '2024-12-19', inbound: 38, outbound: 45 },
-    { date: '2024-12-20', inbound: 67, outbound: 52 },
-    { date: '2024-12-21', inbound: 23, outbound: 31 },
-    { date: '2024-12-22', inbound: 34, outbound: 28 },
-    { date: '2024-12-23', inbound: 41, outbound: 35 }
-  ],
-  turnoverByWarehouse: [
-    { warehouseId: 'wh-1', name: 'Main Distribution Center', rate: 9.2 },
-    { warehouseId: 'wh-2', name: 'East Coast Fulfillment', rate: 11.5 },
-    { warehouseId: 'wh-3', name: 'Retail Store Backroom', rate: 6.8 }
-  ]
+const defaultAnalytics: Analytics = {
+  totalProducts: 0,
+  totalValue: 0,
+  avgTurnoverRate: 0,
+  totalMovements: 0,
+  lowStockCount: 0,
+  outOfStockCount: 0,
+  pendingOrders: 0,
+  warehouses: 0,
+  stockAccuracy: 0,
+  topMovers: [],
+  slowMovers: [],
+  valueByCategory: [],
+  movementTrend: [],
+  turnoverByWarehouse: []
 }
 
 // ============================================================================
@@ -691,29 +377,14 @@ const formatDate = (dateString: string) => {
 // MAIN COMPONENT
 // ============================================================================
 
-// Mock data for AI-powered competitive upgrade components
-const mockStockAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Inventory Optimized', description: 'AI reorder points saved $25K in carrying costs this month.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Optimization' },
-  { id: '2', type: 'warning' as const, title: 'Low Stock Alert', description: '8 SKUs below safety stock level. Reorder recommended.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Inventory' },
-  { id: '3', type: 'info' as const, title: 'Turnover Improving', description: 'Inventory turnover ratio increased to 8.5 from 7.2.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Analytics' },
-]
+// Empty arrays for AI-powered competitive upgrade components - real data from hooks
+const stockAIInsights: { id: string; type: 'success' | 'warning' | 'info'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
 
-const mockStockCollaborators = [
-  { id: '1', name: 'Inventory Manager', avatar: '/avatars/inventory.jpg', status: 'online' as const, role: 'Manager' },
-  { id: '2', name: 'Warehouse Lead', avatar: '/avatars/warehouse.jpg', status: 'online' as const, role: 'Operations' },
-  { id: '3', name: 'Procurement', avatar: '/avatars/procurement.jpg', status: 'away' as const, role: 'Procurement' },
-]
+const stockCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'offline' | 'away'; role: string }[] = []
 
-const mockStockPredictions = [
-  { id: '1', title: 'Stockout Risk', prediction: 'SKU-5523 will stockout in 5 days based on current velocity', confidence: 92, trend: 'down' as const, impact: 'high' as const },
-  { id: '2', title: 'Seasonal Demand', prediction: 'Q4 demand surge expected - increase safety stock 20%', confidence: 84, trend: 'up' as const, impact: 'high' as const },
-]
+const stockPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down'; impact: 'low' | 'medium' | 'high' }[] = []
 
-const mockStockActivities = [
-  { id: '1', user: 'Warehouse Lead', action: 'Received', target: 'PO-8834 shipment (500 units)', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Inventory Manager', action: 'Adjusted', target: 'cycle count for Zone A', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'Procurement', action: 'Created', target: 'reorder for 12 low-stock items', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
-]
+const stockActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' }[] = []
 
 // QuickActions will be defined inside component to access state setters
 
@@ -731,14 +402,20 @@ export default function StockClient() {
   const [alerts] = useState<Alert[]>(lowStockItems || [])
   const [stockCounts] = useState<StockCount[]>([])
   const [analytics] = useState<Analytics>({
+    totalProducts: 0,
     totalValue: levelStats?.totalValue || 0,
-    totalItems: levelStats?.totalItems || 0,
+    avgTurnoverRate: movementStats?.averageValue || 0,
+    totalMovements: 0,
     lowStockCount: levelStats?.lowStockItems || 0,
     outOfStockCount: levelStats?.outOfStock || 0,
-    turnoverRate: movementStats?.averageValue || 0,
-    growthRate: 0,
-    topProducts: [],
-    categoryBreakdown: []
+    pendingOrders: 0,
+    warehouses: 0,
+    stockAccuracy: 0,
+    topMovers: [],
+    slowMovers: [],
+    valueByCategory: [],
+    movementTrend: [],
+    turnoverByWarehouse: []
   })
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<StockStatus | 'all'>('all')
@@ -1237,15 +914,15 @@ export default function StockClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockProducts.length}</p>
+                    <p className="text-3xl font-bold">{filteredProducts.length}</p>
                     <p className="text-emerald-200 text-sm">Products</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockProducts.filter(p => p.status === 'in_stock').length}</p>
+                    <p className="text-3xl font-bold">{filteredProducts.filter(p => p.status === 'in_stock').length}</p>
                     <p className="text-emerald-200 text-sm">In Stock</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockProducts.filter(p => p.status === 'low_stock').length}</p>
+                    <p className="text-3xl font-bold">{filteredProducts.filter(p => p.status === 'low_stock').length}</p>
                     <p className="text-emerald-200 text-sm">Low Stock</p>
                   </div>
                 </div>
@@ -1456,15 +1133,15 @@ export default function StockClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockMovements.length}</p>
+                    <p className="text-3xl font-bold">{filteredMovements.length}</p>
                     <p className="text-blue-200 text-sm">Movements</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockMovements.filter(m => m.type === 'in').length}</p>
+                    <p className="text-3xl font-bold">{filteredMovements.filter(m => m.type === 'inbound').length}</p>
                     <p className="text-blue-200 text-sm">Inbound</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockMovements.filter(m => m.type === 'out').length}</p>
+                    <p className="text-3xl font-bold">{filteredMovements.filter(m => m.type === 'outbound').length}</p>
                     <p className="text-blue-200 text-sm">Outbound</p>
                   </div>
                 </div>
@@ -2111,18 +1788,18 @@ export default function StockClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockStockAIInsights}
+              insights={stockAIInsights}
               title="Inventory Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockStockCollaborators}
+              collaborators={stockCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockStockPredictions}
+              predictions={stockPredictions}
               title="Stock Forecasts"
             />
           </div>
@@ -2130,7 +1807,7 @@ export default function StockClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockStockActivities}
+            activities={stockActivities}
             title="Inventory Activity"
             maxItems={5}
           />

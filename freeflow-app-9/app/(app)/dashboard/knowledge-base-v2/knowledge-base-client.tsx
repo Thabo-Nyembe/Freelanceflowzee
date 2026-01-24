@@ -238,436 +238,36 @@ interface Analytics {
   }[]
 }
 
-// Mock data
-const mockSpaces: Space[] = [
-  {
-    id: '1',
-    name: 'Engineering Documentation',
-    key: 'ENG',
-    description: 'Technical documentation, architecture decisions, and engineering guidelines',
-    type: 'documentation',
-    status: 'active',
-    icon: '⚙️',
-    color: 'from-blue-500 to-indigo-500',
-    owner: { id: '1', name: 'Alex Chen', avatar: '' },
-    members: 45,
-    pages: 234,
-    createdAt: '2024-01-15',
-    lastActivity: '2 hours ago',
-    isWatching: true,
-    permissions: 'admin'
-  },
-  {
-    id: '2',
-    name: 'Product Team',
-    key: 'PROD',
-    description: 'Product roadmaps, feature specs, and user research findings',
-    type: 'team',
-    status: 'active',
-    icon: '🚀',
-    color: 'from-purple-500 to-pink-500',
-    owner: { id: '2', name: 'Sarah Miller', avatar: '' },
-    members: 28,
-    pages: 156,
-    createdAt: '2024-02-10',
-    lastActivity: '1 hour ago',
-    isWatching: true,
-    permissions: 'edit'
-  },
-  {
-    id: '3',
-    name: 'Design System',
-    key: 'DS',
-    description: 'Component library documentation and design guidelines',
-    type: 'documentation',
-    status: 'active',
-    icon: '🎨',
-    color: 'from-pink-500 to-rose-500',
-    owner: { id: '3', name: 'Mike Johnson', avatar: '' },
-    members: 32,
-    pages: 89,
-    createdAt: '2024-03-01',
-    lastActivity: '4 hours ago',
-    isWatching: false,
-    permissions: 'view'
-  },
-  {
-    id: '4',
-    name: 'API Reference',
-    key: 'API',
-    description: 'Complete API documentation with examples and best practices',
-    type: 'documentation',
-    status: 'active',
-    icon: '📡',
-    color: 'from-green-500 to-emerald-500',
-    owner: { id: '1', name: 'Alex Chen', avatar: '' },
-    members: 52,
-    pages: 312,
-    createdAt: '2024-01-20',
-    lastActivity: '30 minutes ago',
-    isWatching: true,
-    permissions: 'admin'
-  },
-  {
-    id: '5',
-    name: 'Project Alpha',
-    key: 'ALPHA',
-    description: 'Project Alpha documentation and planning materials',
-    type: 'project',
-    status: 'active',
-    icon: '🔮',
-    color: 'from-violet-500 to-purple-500',
-    owner: { id: '4', name: 'Emma Wilson', avatar: '' },
-    members: 15,
-    pages: 67,
-    createdAt: '2024-06-01',
-    lastActivity: '6 hours ago',
-    isWatching: false,
-    permissions: 'edit'
-  },
-  {
-    id: '6',
-    name: 'Personal Notes',
-    key: 'PERSONAL',
-    description: 'Private workspace for personal notes and drafts',
-    type: 'personal',
-    status: 'private',
-    icon: '📝',
-    color: 'from-yellow-500 to-orange-500',
-    owner: { id: '5', name: 'Current User', avatar: '' },
-    members: 1,
-    pages: 23,
-    createdAt: '2024-04-15',
-    lastActivity: 'Just now',
-    isWatching: false,
-    permissions: 'admin'
-  }
-]
+// Empty data arrays (connected to Supabase)
+const spaces: Space[] = []
 
-const mockPages: Page[] = [
-  {
-    id: '1',
-    title: 'Getting Started with the Platform',
-    excerpt: 'A comprehensive guide to help new users get up and running quickly with all platform features.',
-    content: 'Full content here...',
-    spaceId: '1',
-    spaceName: 'Engineering Documentation',
-    spaceKey: 'ENG',
-    parentId: null,
-    type: 'how-to',
-    status: 'published',
-    author: { id: '1', name: 'Alex Chen', avatar: '' },
-    contributors: [
-      { id: '2', name: 'Sarah Miller', avatar: '' },
-      { id: '3', name: 'Mike Johnson', avatar: '' }
-    ],
-    labels: ['getting-started', 'onboarding', 'essential'],
-    version: 12,
-    views: 15420,
-    likes: 234,
-    comments: 45,
-    isLiked: true,
-    isWatching: true,
-    isBookmarked: true,
-    createdAt: '2024-01-20',
-    updatedAt: '2024-12-20',
-    publishedAt: '2024-01-25',
-    readTime: 8,
-    children: [],
-    restrictions: null
-  },
-  {
-    id: '2',
-    title: 'Architecture Decision Records',
-    excerpt: 'Collection of all architecture decisions made for the platform with context and rationale.',
-    content: 'Full content here...',
-    spaceId: '1',
-    spaceName: 'Engineering Documentation',
-    spaceKey: 'ENG',
-    parentId: null,
-    type: 'decision',
-    status: 'published',
-    author: { id: '1', name: 'Alex Chen', avatar: '' },
-    contributors: [{ id: '4', name: 'Emma Wilson', avatar: '' }],
-    labels: ['architecture', 'decisions', 'adr'],
-    version: 8,
-    views: 8750,
-    likes: 156,
-    comments: 32,
-    isLiked: false,
-    isWatching: true,
-    isBookmarked: false,
-    createdAt: '2024-02-15',
-    updatedAt: '2024-12-18',
-    publishedAt: '2024-02-20',
-    readTime: 15,
-    children: [],
-    restrictions: { view: ['engineering'], edit: ['senior-engineering'] }
-  },
-  {
-    id: '3',
-    title: 'API Authentication Guide',
-    excerpt: 'Complete guide to implementing authentication with OAuth 2.0, API keys, and JWT tokens.',
-    content: 'Full content here...',
-    spaceId: '4',
-    spaceName: 'API Reference',
-    spaceKey: 'API',
-    parentId: null,
-    type: 'page',
-    status: 'published',
-    author: { id: '2', name: 'Sarah Miller', avatar: '' },
-    contributors: [
-      { id: '1', name: 'Alex Chen', avatar: '' },
-      { id: '5', name: 'Current User', avatar: '' }
-    ],
-    labels: ['api', 'authentication', 'security', 'oauth'],
-    version: 23,
-    views: 24680,
-    likes: 412,
-    comments: 78,
-    isLiked: true,
-    isWatching: true,
-    isBookmarked: true,
-    createdAt: '2024-01-25',
-    updatedAt: '2024-12-22',
-    publishedAt: '2024-02-01',
-    readTime: 12,
-    children: [],
-    restrictions: null
-  },
-  {
-    id: '4',
-    title: 'Q4 Product Roadmap',
-    excerpt: 'Detailed roadmap for Q4 2024 including feature priorities, timelines, and dependencies.',
-    content: 'Full content here...',
-    spaceId: '2',
-    spaceName: 'Product Team',
-    spaceKey: 'PROD',
-    parentId: null,
-    type: 'page',
-    status: 'published',
-    author: { id: '2', name: 'Sarah Miller', avatar: '' },
-    contributors: [],
-    labels: ['roadmap', 'q4', 'planning', 'strategy'],
-    version: 5,
-    views: 3420,
-    likes: 89,
-    comments: 24,
-    isLiked: false,
-    isWatching: true,
-    isBookmarked: false,
-    createdAt: '2024-09-01',
-    updatedAt: '2024-12-15',
-    publishedAt: '2024-09-05',
-    readTime: 10,
-    children: [],
-    restrictions: { view: ['product', 'leadership'], edit: ['product-managers'] }
-  },
-  {
-    id: '5',
-    title: 'Weekly Standup Notes - Dec 20',
-    excerpt: 'Meeting notes from the weekly engineering standup covering sprint progress and blockers.',
-    content: 'Full content here...',
-    spaceId: '1',
-    spaceName: 'Engineering Documentation',
-    spaceKey: 'ENG',
-    parentId: null,
-    type: 'meeting-notes',
-    status: 'draft',
-    author: { id: '3', name: 'Mike Johnson', avatar: '' },
-    contributors: [],
-    labels: ['meeting', 'standup', 'weekly'],
-    version: 2,
-    views: 45,
-    likes: 3,
-    comments: 2,
-    isLiked: false,
-    isWatching: false,
-    isBookmarked: false,
-    createdAt: '2024-12-20',
-    updatedAt: '2024-12-20',
-    publishedAt: null,
-    readTime: 5,
-    children: [],
-    restrictions: null
-  },
-  {
-    id: '6',
-    title: 'Component Library Overview',
-    excerpt: 'Complete overview of the design system component library with usage examples.',
-    content: 'Full content here...',
-    spaceId: '3',
-    spaceName: 'Design System',
-    spaceKey: 'DS',
-    parentId: null,
-    type: 'page',
-    status: 'published',
-    author: { id: '3', name: 'Mike Johnson', avatar: '' },
-    contributors: [{ id: '2', name: 'Sarah Miller', avatar: '' }],
-    labels: ['components', 'design-system', 'ui', 'library'],
-    version: 18,
-    views: 9870,
-    likes: 178,
-    comments: 56,
-    isLiked: true,
-    isWatching: false,
-    isBookmarked: true,
-    createdAt: '2024-03-10',
-    updatedAt: '2024-12-19',
-    publishedAt: '2024-03-15',
-    readTime: 20,
-    children: [],
-    restrictions: null
-  },
-  {
-    id: '7',
-    title: 'Database Schema Documentation',
-    excerpt: 'Comprehensive documentation of database schemas, relationships, and migration patterns.',
-    content: 'Full content here...',
-    spaceId: '1',
-    spaceName: 'Engineering Documentation',
-    spaceKey: 'ENG',
-    parentId: '2',
-    type: 'page',
-    status: 'review',
-    author: { id: '4', name: 'Emma Wilson', avatar: '' },
-    contributors: [{ id: '1', name: 'Alex Chen', avatar: '' }],
-    labels: ['database', 'schema', 'postgresql', 'migrations'],
-    version: 6,
-    views: 2340,
-    likes: 67,
-    comments: 12,
-    isLiked: false,
-    isWatching: true,
-    isBookmarked: false,
-    createdAt: '2024-06-15',
-    updatedAt: '2024-12-21',
-    publishedAt: null,
-    readTime: 18,
-    children: [],
-    restrictions: { view: ['engineering'], edit: ['database-team'] }
-  },
-  {
-    id: '8',
-    title: 'User Research: Mobile Experience',
-    excerpt: 'Findings from user research sessions focused on mobile app experience and pain points.',
-    content: 'Full content here...',
-    spaceId: '2',
-    spaceName: 'Product Team',
-    spaceKey: 'PROD',
-    parentId: null,
-    type: 'page',
-    status: 'published',
-    author: { id: '2', name: 'Sarah Miller', avatar: '' },
-    contributors: [],
-    labels: ['research', 'mobile', 'ux', 'user-testing'],
-    version: 3,
-    views: 1890,
-    likes: 45,
-    comments: 18,
-    isLiked: true,
-    isWatching: false,
-    isBookmarked: false,
-    createdAt: '2024-10-01',
-    updatedAt: '2024-11-15',
-    publishedAt: '2024-10-05',
-    readTime: 14,
-    children: [],
-    restrictions: null
-  }
-]
+const templates: Template[] = []
+const comments: Comment[] = []
+const versions: PageVersion[] = []
 
-const mockTemplates: Template[] = [
-  { id: '1', name: 'How-To Guide', description: 'Step-by-step instructions for completing a task', category: 'Documentation', type: 'how-to', icon: '📋', preview: 'Preview content...', usageCount: 234, author: { id: '1', name: 'System' }, isGlobal: true, createdAt: '2024-01-01' },
-  { id: '2', name: 'Meeting Notes', description: 'Template for capturing meeting discussions and action items', category: 'Meetings', type: 'meeting-notes', icon: '📝', preview: 'Preview content...', usageCount: 567, author: { id: '1', name: 'System' }, isGlobal: true, createdAt: '2024-01-01' },
-  { id: '3', name: 'Decision Record', description: 'Document architecture and technical decisions', category: 'Documentation', type: 'decision', icon: '⚖️', preview: 'Preview content...', usageCount: 189, author: { id: '1', name: 'System' }, isGlobal: true, createdAt: '2024-01-01' },
-  { id: '4', name: 'API Endpoint', description: 'Document REST API endpoints with examples', category: 'Technical', type: 'page', icon: '🔌', preview: 'Preview content...', usageCount: 312, author: { id: '1', name: 'Alex Chen' }, isGlobal: false, createdAt: '2024-03-15' },
-  { id: '5', name: 'Sprint Retrospective', description: 'Template for sprint retrospective meetings', category: 'Agile', type: 'meeting-notes', icon: '🔄', preview: 'Preview content...', usageCount: 156, author: { id: '2', name: 'Sarah Miller' }, isGlobal: false, createdAt: '2024-04-01' },
-  { id: '6', name: 'Feature Specification', description: 'Detailed feature requirements and acceptance criteria', category: 'Product', type: 'page', icon: '✨', preview: 'Preview content...', usageCount: 278, author: { id: '2', name: 'Sarah Miller' }, isGlobal: true, createdAt: '2024-02-15' },
-  { id: '7', name: 'Troubleshooting Guide', description: 'Document common issues and their solutions', category: 'Support', type: 'how-to', icon: '🔧', preview: 'Preview content...', usageCount: 145, author: { id: '3', name: 'Mike Johnson' }, isGlobal: true, createdAt: '2024-05-01' },
-  { id: '8', name: 'Blog Post', description: 'Template for internal blog posts and announcements', category: 'Communication', type: 'blog', icon: '📰', preview: 'Preview content...', usageCount: 89, author: { id: '1', name: 'System' }, isGlobal: true, createdAt: '2024-01-01' }
-]
-
-const mockComments: Comment[] = [
-  { id: '1', pageId: '3', pageTitle: 'API Authentication Guide', content: 'Great explanation of the OAuth flow! Could you also add examples for refresh token handling?', author: { id: '3', name: 'Mike Johnson', avatar: '' }, status: 'active', isInline: false, lineRef: null, likes: 12, replies: [], createdAt: '2024-12-22T10:30:00Z', updatedAt: '2024-12-22T10:30:00Z' },
-  { id: '2', pageId: '1', pageTitle: 'Getting Started with the Platform', content: 'This section about environment setup could use more details for Windows users.', author: { id: '4', name: 'Emma Wilson', avatar: '' }, status: 'active', isInline: true, lineRef: 'line-45', likes: 8, replies: [], createdAt: '2024-12-21T14:15:00Z', updatedAt: '2024-12-21T14:15:00Z' },
-  { id: '3', pageId: '6', pageTitle: 'Component Library Overview', content: 'The Button component documentation is missing the loading state props.', author: { id: '1', name: 'Alex Chen', avatar: '' }, status: 'resolved', isInline: true, lineRef: 'line-120', likes: 5, replies: [], createdAt: '2024-12-20T09:00:00Z', updatedAt: '2024-12-20T16:30:00Z' },
-  { id: '4', pageId: '2', pageTitle: 'Architecture Decision Records', content: 'Should we add ADR-015 for the new caching strategy?', author: { id: '2', name: 'Sarah Miller', avatar: '' }, status: 'active', isInline: false, lineRef: null, likes: 15, replies: [], createdAt: '2024-12-19T11:45:00Z', updatedAt: '2024-12-19T11:45:00Z' },
-  { id: '5', pageId: '4', pageTitle: 'Q4 Product Roadmap', content: 'The timeline for Feature X might need to be adjusted based on the latest estimates.', author: { id: '1', name: 'Alex Chen', avatar: '' }, status: 'active', isInline: false, lineRef: null, likes: 7, replies: [], createdAt: '2024-12-18T16:20:00Z', updatedAt: '2024-12-18T16:20:00Z' }
-]
-
-const mockVersions: PageVersion[] = [
-  { id: '1', pageId: '3', pageTitle: 'API Authentication Guide', version: 23, author: { id: '2', name: 'Sarah Miller', avatar: '' }, changes: 'Updated OAuth 2.0 examples with new scopes', additions: 45, deletions: 12, createdAt: '2024-12-22T14:30:00Z', isCurrent: true },
-  { id: '2', pageId: '3', pageTitle: 'API Authentication Guide', version: 22, author: { id: '1', name: 'Alex Chen', avatar: '' }, changes: 'Added JWT token validation section', additions: 120, deletions: 5, createdAt: '2024-12-20T10:15:00Z', isCurrent: false },
-  { id: '3', pageId: '1', pageTitle: 'Getting Started with the Platform', version: 12, author: { id: '1', name: 'Alex Chen', avatar: '' }, changes: 'Updated installation instructions for v2.0', additions: 78, deletions: 34, createdAt: '2024-12-20T09:00:00Z', isCurrent: true },
-  { id: '4', pageId: '6', pageTitle: 'Component Library Overview', version: 18, author: { id: '3', name: 'Mike Johnson', avatar: '' }, changes: 'Added new DataTable component documentation', additions: 156, deletions: 0, createdAt: '2024-12-19T15:45:00Z', isCurrent: true },
-  { id: '5', pageId: '2', pageTitle: 'Architecture Decision Records', version: 8, author: { id: '4', name: 'Emma Wilson', avatar: '' }, changes: 'Added ADR-014 for microservices migration', additions: 234, deletions: 8, createdAt: '2024-12-18T11:30:00Z', isCurrent: true }
-]
-
-const mockAnalytics: Analytics = {
-  totalSpaces: 6,
-  totalPages: 892,
-  totalViews: 156420,
-  activeContributors: 45,
-  avgPageViews: 175,
-  avgEngagement: 78.5,
-  viewsTrend: 18.5,
-  pagesTrend: 12.3,
-  topPages: [
-    { id: '3', title: 'API Authentication Guide', views: 24680, trend: 15.2 },
-    { id: '1', title: 'Getting Started with the Platform', views: 15420, trend: 8.7 },
-    { id: '6', title: 'Component Library Overview', views: 9870, trend: 22.4 },
-    { id: '2', title: 'Architecture Decision Records', views: 8750, trend: 5.3 },
-    { id: '4', title: 'Q4 Product Roadmap', views: 3420, trend: -2.1 }
-  ],
-  topContributors: [
-    { id: '1', name: 'Alex Chen', avatar: '', pages: 45, edits: 234 },
-    { id: '2', name: 'Sarah Miller', avatar: '', pages: 38, edits: 189 },
-    { id: '3', name: 'Mike Johnson', avatar: '', pages: 29, edits: 156 },
-    { id: '4', name: 'Emma Wilson', avatar: '', pages: 23, edits: 98 },
-    { id: '5', name: 'Current User', avatar: '', pages: 12, edits: 67 }
-  ],
-  activityByDay: [
-    { day: 'Mon', views: 4520, edits: 45, comments: 23 },
-    { day: 'Tue', views: 5230, edits: 52, comments: 31 },
-    { day: 'Wed', views: 4890, edits: 48, comments: 28 },
-    { day: 'Thu', views: 5670, edits: 61, comments: 35 },
-    { day: 'Fri', views: 4120, edits: 38, comments: 19 },
-    { day: 'Sat', views: 1240, edits: 12, comments: 5 },
-    { day: 'Sun', views: 980, edits: 8, comments: 3 }
-  ],
-  contentByType: [
-    { type: 'Pages', count: 456, percentage: 51.1 },
-    { type: 'How-To Guides', count: 178, percentage: 19.9 },
-    { type: 'Meeting Notes', count: 134, percentage: 15.0 },
-    { type: 'Decisions', count: 67, percentage: 7.5 },
-    { type: 'Blog Posts', count: 57, percentage: 6.4 }
-  ]
+const analytics: Analytics = {
+  totalSpaces: 0,
+  totalPages: 0,
+  totalViews: 0,
+  activeContributors: 0,
+  avgPageViews: 0,
+  avgEngagement: 0,
+  viewsTrend: 0,
+  pagesTrend: 0,
+  topPages: [],
+  topContributors: [],
+  activityByDay: [],
+  contentByType: []
 }
 
-// Mock data for AI-powered competitive upgrade components
-const mockKnowledgeBaseAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Content Popular', description: 'API Documentation page viewed 500+ times this week.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Analytics' },
-  { id: '2', type: 'warning' as const, title: 'Outdated Content', description: '23 pages haven\'t been updated in 6+ months. Review needed.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Maintenance' },
-  { id: '3', type: 'info' as const, title: 'Search Trend', description: '"Integration guides" is the top search term this month.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Search' },
-]
+// Empty arrays for AI-powered competitive upgrade components
+const knowledgeBaseAIInsights: { id: string; type: 'success' | 'warning' | 'info'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
 
-const mockKnowledgeBaseCollaborators = [
-  { id: '1', name: 'Tech Writer', avatar: '/avatars/writer.jpg', status: 'online' as const, role: 'Writer' },
-  { id: '2', name: 'Editor', avatar: '/avatars/editor.jpg', status: 'online' as const, role: 'Editor' },
-  { id: '3', name: 'SME', avatar: '/avatars/sme.jpg', status: 'away' as const, role: 'Expert' },
-]
+const knowledgeBaseCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }[] = []
 
-const mockKnowledgeBasePredictions = [
-  { id: '1', title: 'Content Growth', prediction: 'Knowledge base will need restructuring at 1000+ pages', confidence: 78, trend: 'up' as const, impact: 'medium' as const },
-  { id: '2', title: 'User Adoption', prediction: 'Self-service resolution rate will hit 80% by Q2', confidence: 85, trend: 'up' as const, impact: 'high' as const },
-]
+const knowledgeBasePredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: 'low' | 'medium' | 'high' }[] = []
 
-const mockKnowledgeBaseActivities = [
-  { id: '1', user: 'Tech Writer', action: 'Published', target: 'new API authentication guide', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Editor', action: 'Reviewed', target: 'troubleshooting documentation', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'SME', action: 'Updated', target: 'integration specifications', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
-]
+const knowledgeBaseActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' }[] = []
 
 // Quick actions will be defined inside the component to access state setters
 
@@ -720,7 +320,7 @@ export default function KnowledgeBaseClient() {
   const [showCreateSpaceDialog, setShowCreateSpaceDialog] = useState(false)
 
   // Data State
-  const [pages, setPages] = useState<Page[]>(mockPages)
+  const [pages, setPages] = useState<Page[]>([])
   const [loading, setLoading] = useState(true)
 
   // Form State
@@ -800,7 +400,7 @@ export default function KnowledgeBaseClient() {
   }, [pages, searchQuery, selectedSpace, selectedStatus])
 
   const filteredSpaces = useMemo(() => {
-    return mockSpaces.filter(space =>
+    return spaces.filter(space =>
       space.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       space.key.toLowerCase().includes(searchQuery.toLowerCase())
     )
@@ -1096,8 +696,8 @@ export default function KnowledgeBaseClient() {
   const handleExportAllContent = async () => {
     const allContent = {
       pages,
-      spaces: mockSpaces,
-      templates: mockTemplates,
+      spaces: spaces,
+      templates: templates,
       exportedAt: new Date().toISOString()
     }
     const blob = new Blob([JSON.stringify(allContent, null, 2)], { type: 'application/json' })
@@ -1143,14 +743,14 @@ export default function KnowledgeBaseClient() {
   ]
 
   const stats = [
-    { label: 'Total Spaces', value: mockSpaces.length.toString(), icon: FolderOpen, change: '+2', trend: 'up', color: 'text-blue-600' },
-    { label: 'Total Pages', value: formatNumber(pages.length || mockAnalytics.totalPages), icon: FileText, change: '+12.3%', trend: 'up', color: 'text-indigo-600' },
-    { label: 'Total Views', value: formatNumber(mockAnalytics.totalViews), icon: Eye, change: '+18.5%', trend: 'up', color: 'text-green-600' },
-    { label: 'Contributors', value: mockAnalytics.activeContributors.toString(), icon: Users, change: '+8', trend: 'up', color: 'text-purple-600' },
-    { label: 'Avg Views/Page', value: mockAnalytics.avgPageViews.toString(), icon: TrendingUp, change: '+5.2%', trend: 'up', color: 'text-cyan-600' },
-    { label: 'Engagement', value: `${mockAnalytics.avgEngagement}%`, icon: ThumbsUp, change: '+3.8%', trend: 'up', color: 'text-pink-600' },
-    { label: 'Templates', value: mockTemplates.length.toString(), icon: Layout, change: '+3', trend: 'up', color: 'text-orange-600' },
-    { label: 'Comments', value: formatNumber(mockComments.length * 24), icon: MessageSquare, change: '+15.2%', trend: 'up', color: 'text-teal-600' }
+    { label: 'Total Spaces', value: spaces.length.toString(), icon: FolderOpen, change: '+2', trend: 'up', color: 'text-blue-600' },
+    { label: 'Total Pages', value: formatNumber(pages.length || analytics.totalPages), icon: FileText, change: '+12.3%', trend: 'up', color: 'text-indigo-600' },
+    { label: 'Total Views', value: formatNumber(analytics.totalViews), icon: Eye, change: '+18.5%', trend: 'up', color: 'text-green-600' },
+    { label: 'Contributors', value: analytics.activeContributors.toString(), icon: Users, change: '+8', trend: 'up', color: 'text-purple-600' },
+    { label: 'Avg Views/Page', value: analytics.avgPageViews.toString(), icon: TrendingUp, change: '+5.2%', trend: 'up', color: 'text-cyan-600' },
+    { label: 'Engagement', value: `${analytics.avgEngagement}%`, icon: ThumbsUp, change: '+3.8%', trend: 'up', color: 'text-pink-600' },
+    { label: 'Templates', value: templates.length.toString(), icon: Layout, change: '+3', trend: 'up', color: 'text-orange-600' },
+    { label: 'Comments', value: formatNumber(comments.length * 24), icon: MessageSquare, change: '+15.2%', trend: 'up', color: 'text-teal-600' }
   ]
 
   return (
@@ -1302,7 +902,7 @@ export default function KnowledgeBaseClient() {
                       className="w-full p-2 text-sm border rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600"
                     >
                       <option value="all">All Spaces</option>
-                      {mockSpaces.map(space => (
+                      {spaces.map(space => (
                         <option key={space.id} value={space.id}>{space.name}</option>
                       ))}
                     </select>
@@ -1529,7 +1129,7 @@ export default function KnowledgeBaseClient() {
           {/* Templates Tab */}
           <TabsContent value="templates" className="mt-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {mockTemplates.map(template => (
+              {templates.map(template => (
                 <Card key={template.id} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur hover:shadow-lg transition-all cursor-pointer group">
                   <CardContent className="p-5">
                     <div className="flex items-center justify-between mb-3">
@@ -1558,7 +1158,7 @@ export default function KnowledgeBaseClient() {
           {/* Comments Tab */}
           <TabsContent value="comments" className="mt-6">
             <div className="space-y-4">
-              {mockComments.map(comment => (
+              {comments.map(comment => (
                 <Card key={comment.id} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
                   <CardContent className="p-4">
                     <div className="flex items-start gap-4">
@@ -1621,7 +1221,7 @@ export default function KnowledgeBaseClient() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {mockVersions.map(version => (
+                  {versions.map(version => (
                     <div key={version.id} className="flex items-start gap-4 p-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                       <Avatar>
                         <AvatarFallback>{version.author.name.charAt(0)}</AvatarFallback>
@@ -1671,7 +1271,7 @@ export default function KnowledgeBaseClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {mockAnalytics.topPages.map((page, index) => (
+                    {analytics.topPages.map((page, index) => (
                       <div key={page.id} className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-blue-500 flex items-center justify-center text-white text-sm font-medium">
                           {index + 1}
@@ -1699,7 +1299,7 @@ export default function KnowledgeBaseClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {mockAnalytics.topContributors.map((contributor, index) => (
+                    {analytics.topContributors.map((contributor, index) => (
                       <div key={contributor.id} className="flex items-center gap-3">
                         <Avatar>
                           <AvatarFallback>{contributor.name.charAt(0)}</AvatarFallback>
@@ -1727,7 +1327,7 @@ export default function KnowledgeBaseClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {mockAnalytics.contentByType.map(type => (
+                    {analytics.contentByType.map(type => (
                       <div key={type.type}>
                         <div className="flex items-center justify-between text-sm mb-1">
                           <span className="text-gray-700 dark:text-gray-300">{type.type}</span>
@@ -1750,7 +1350,7 @@ export default function KnowledgeBaseClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-7 gap-4">
-                    {mockAnalytics.activityByDay.map(day => (
+                    {analytics.activityByDay.map(day => (
                       <div key={day.day} className="text-center">
                         <div className="text-sm font-medium text-gray-900 dark:text-white mb-2">{day.day}</div>
                         <div className="space-y-1">
@@ -2060,18 +1660,18 @@ export default function KnowledgeBaseClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockKnowledgeBaseAIInsights}
+              insights={knowledgeBaseAIInsights}
               title="Knowledge Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockKnowledgeBaseCollaborators}
+              collaborators={knowledgeBaseCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockKnowledgeBasePredictions}
+              predictions={knowledgeBasePredictions}
               title="Content Forecasts"
             />
           </div>
@@ -2079,7 +1679,7 @@ export default function KnowledgeBaseClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockKnowledgeBaseActivities}
+            activities={knowledgeBaseActivities}
             title="Knowledge Activity"
             maxItems={5}
           />

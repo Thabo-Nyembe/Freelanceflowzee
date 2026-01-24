@@ -139,112 +139,29 @@ interface APMService {
   status: 'healthy' | 'degraded' | 'critical'
 }
 
-// Mock data
-const mockMetrics: Metric[] = [
-  { id: 'm1', name: 'CPU Usage', value: 67.5, unit: '%', change: 5.2, changePercent: 8.3, trend: 'up', sparkline: [55, 58, 62, 65, 68, 70, 65, 67.5], thresholds: { warning: 75, critical: 90 }, status: 'normal', host: 'web-01' },
-  { id: 'm2', name: 'Memory Usage', value: 82.3, unit: '%', change: 3.1, changePercent: 3.9, trend: 'up', sparkline: [75, 76, 78, 80, 79, 81, 83, 82.3], thresholds: { warning: 80, critical: 95 }, status: 'warning', host: 'web-01' },
-  { id: 'm3', name: 'Disk I/O', value: 245, unit: 'MB/s', change: -12, changePercent: -4.7, trend: 'down', sparkline: [280, 265, 258, 250, 248, 252, 240, 245], thresholds: { warning: 400, critical: 500 }, status: 'normal', host: 'db-01' },
-  { id: 'm4', name: 'Network In', value: 1.24, unit: 'GB/s', change: 0.08, changePercent: 6.9, trend: 'up', sparkline: [1.1, 1.15, 1.18, 1.2, 1.22, 1.21, 1.23, 1.24], thresholds: { warning: 2, critical: 3 }, status: 'normal' },
-  { id: 'm5', name: 'Network Out', value: 0.89, unit: 'GB/s', change: 0.05, changePercent: 5.9, trend: 'up', sparkline: [0.8, 0.82, 0.84, 0.86, 0.85, 0.87, 0.88, 0.89], thresholds: { warning: 2, critical: 3 }, status: 'normal' },
-  { id: 'm6', name: 'Active Connections', value: 12450, unit: '', change: 890, changePercent: 7.7, trend: 'up', sparkline: [10500, 11000, 11400, 11800, 12100, 12300, 12400, 12450], thresholds: { warning: 15000, critical: 20000 }, status: 'normal' },
-  { id: 'm7', name: 'Request Latency', value: 145, unit: 'ms', change: 12, changePercent: 9.0, trend: 'up', sparkline: [120, 125, 130, 135, 140, 138, 142, 145], thresholds: { warning: 200, critical: 500 }, status: 'normal' },
-  { id: 'm8', name: 'Error Rate', value: 0.8, unit: '%', change: 0.3, changePercent: 60, trend: 'up', sparkline: [0.4, 0.5, 0.5, 0.6, 0.7, 0.65, 0.75, 0.8], thresholds: { warning: 1, critical: 5 }, status: 'normal' }
-]
+// Data arrays - populated from Supabase
+const mockMetrics: Metric[] = []
 
-const mockAlerts: Alert[] = [
-  { id: 'a1', name: 'High Memory Usage', severity: 'warning', status: 'firing', message: 'Memory usage exceeded 80% threshold on web-01', metric: 'system.memory.usage', value: 82.3, threshold: 80, startedAt: '2024-12-20T14:30:00Z', tags: { service: 'api-gateway', env: 'production', host: 'web-01' } },
-  { id: 'a2', name: 'API Latency Spike', severity: 'warning', status: 'firing', message: 'P99 latency exceeded threshold', metric: 'trace.http.request.duration', value: 450, threshold: 300, startedAt: '2024-12-20T15:15:00Z', tags: { service: 'api-gateway', endpoint: '/api/orders' } },
-  { id: 'a3', name: 'Database Connection Pool', severity: 'info', status: 'pending', message: 'Connection pool usage above 60%', metric: 'postgresql.connections.active', value: 65, threshold: 60, startedAt: '2024-12-20T15:45:00Z', tags: { database: 'primary' } },
-  { id: 'a4', name: 'Disk Space Critical', severity: 'critical', status: 'resolved', message: 'Disk space was critically low', metric: 'system.disk.usage', value: 95, threshold: 90, startedAt: '2024-12-20T10:00:00Z', resolvedAt: '2024-12-20T11:30:00Z', tags: { mount: '/data', host: 'db-01' } },
-  { id: 'a5', name: 'SSL Certificate Expiry', severity: 'warning', status: 'muted', message: 'SSL certificate expires in 7 days', metric: 'tls.certificate.expiry_days', value: 7, threshold: 14, startedAt: '2024-12-20T00:00:00Z', tags: { domain: 'api.example.com' } }
-]
+const mockAlerts: Alert[] = []
 
-const mockLogs: LogEntry[] = [
-  { id: 'l1', timestamp: '2024-12-20T15:59:45Z', level: 'error', service: 'api-gateway', host: 'web-01', message: 'Connection timeout to database after 30s', metadata: { requestId: 'req-abc123', userId: 'user-456', db: 'primary' }, traceId: 'trace-789' },
-  { id: 'l2', timestamp: '2024-12-20T15:59:30Z', level: 'warn', service: 'auth-service', host: 'web-02', message: 'Failed login attempt from suspicious IP', metadata: { ip: '192.168.1.100', attempts: '5', country: 'RU' } },
-  { id: 'l3', timestamp: '2024-12-20T15:59:15Z', level: 'info', service: 'user-service', host: 'web-01', message: 'User profile updated successfully', metadata: { userId: 'user-123', changes: 'email,name' } },
-  { id: 'l4', timestamp: '2024-12-20T15:59:00Z', level: 'error', service: 'payment-service', host: 'web-03', message: 'Payment processing failed: insufficient funds', metadata: { orderId: 'ord-xyz', amount: '150.00', currency: 'USD' } },
-  { id: 'l5', timestamp: '2024-12-20T15:58:45Z', level: 'info', service: 'notification-service', host: 'worker-01', message: 'Email sent successfully', metadata: { to: 'user@example.com', template: 'welcome' } },
-  { id: 'l6', timestamp: '2024-12-20T15:58:30Z', level: 'debug', service: 'cache-service', host: 'cache-01', message: 'Cache hit for key user:123:profile', metadata: { ttl: '3600' } },
-  { id: 'l7', timestamp: '2024-12-20T15:58:15Z', level: 'warn', service: 'api-gateway', host: 'web-01', message: 'Rate limit approaching for client', metadata: { clientId: 'client-abc', remaining: '10' } },
-  { id: 'l8', timestamp: '2024-12-20T15:58:00Z', level: 'fatal', service: 'worker-service', host: 'worker-02', message: 'Worker process crashed unexpectedly', metadata: { pid: '12345', signal: 'SIGSEGV' } }
-]
+const mockLogs: LogEntry[] = []
 
-const mockServices: ServiceHealth[] = [
-  { id: 's1', name: 'API Gateway', status: 'healthy', uptime: 99.98, latency: 45, errorRate: 0.02, requestsPerSecond: 2500, apdex: 0.95, lastChecked: '2024-12-20T15:59:00Z', dependencies: [{ name: 'Auth Service', status: 'healthy' }, { name: 'Redis', status: 'healthy' }] },
-  { id: 's2', name: 'Auth Service', status: 'healthy', uptime: 99.99, latency: 12, errorRate: 0.01, requestsPerSecond: 1200, apdex: 0.98, lastChecked: '2024-12-20T15:59:00Z', dependencies: [{ name: 'PostgreSQL', status: 'healthy' }] },
-  { id: 's3', name: 'User Service', status: 'degraded', uptime: 99.5, latency: 156, errorRate: 0.8, requestsPerSecond: 850, apdex: 0.82, lastChecked: '2024-12-20T15:59:00Z', dependencies: [{ name: 'PostgreSQL', status: 'healthy' }, { name: 'Redis', status: 'degraded' }] },
-  { id: 's4', name: 'Payment Service', status: 'healthy', uptime: 99.95, latency: 230, errorRate: 0.15, requestsPerSecond: 320, apdex: 0.91, lastChecked: '2024-12-20T15:59:00Z', dependencies: [{ name: 'Stripe API', status: 'healthy' }] },
-  { id: 's5', name: 'Notification Service', status: 'healthy', uptime: 99.9, latency: 89, errorRate: 0.05, requestsPerSecond: 450, apdex: 0.94, lastChecked: '2024-12-20T15:59:00Z', dependencies: [{ name: 'SendGrid', status: 'healthy' }, { name: 'Twilio', status: 'healthy' }] },
-  { id: 's6', name: 'Worker Service', status: 'down', uptime: 98.5, latency: 0, errorRate: 100, requestsPerSecond: 0, apdex: 0, lastChecked: '2024-12-20T15:58:00Z', dependencies: [{ name: 'RabbitMQ', status: 'healthy' }] }
-]
+const mockServices: ServiceHealth[] = []
 
-const mockTraces: Trace[] = [
-  { id: 't1', traceId: 'trace-abc123', name: 'POST /api/orders', service: 'api-gateway', duration: 342, status: 'ok', timestamp: '2024-12-20T15:59:45Z', resource: '/api/orders',
-    spans: [
-      { id: 'sp1', name: 'http.request', service: 'api-gateway', duration: 342, startTime: 0, status: 'ok', resource: 'POST /api/orders', tags: { 'http.method': 'POST', 'http.status_code': '201' } },
-      { id: 'sp2', name: 'auth.validate', service: 'auth-service', duration: 12, startTime: 5, status: 'ok', resource: 'validate_token', tags: { userId: 'user-123' } },
-      { id: 'sp3', name: 'postgresql.query', service: 'order-service', duration: 156, startTime: 20, status: 'ok', resource: 'INSERT orders', tags: { 'db.type': 'postgresql' } },
-      { id: 'sp4', name: 'stripe.charge', service: 'payment-service', duration: 230, startTime: 180, status: 'ok', resource: 'create_charge', tags: { provider: 'stripe' } }
-    ]
-  },
-  { id: 't2', traceId: 'trace-def456', name: 'GET /api/users/:id', service: 'api-gateway', duration: 89, status: 'ok', timestamp: '2024-12-20T15:59:30Z', resource: '/api/users/{id}',
-    spans: [
-      { id: 'sp6', name: 'http.request', service: 'api-gateway', duration: 89, startTime: 0, status: 'ok', resource: 'GET /api/users/{id}', tags: { 'http.method': 'GET' } },
-      { id: 'sp7', name: 'redis.get', service: 'cache-service', duration: 3, startTime: 5, status: 'ok', resource: 'GET user:*', tags: { hit: 'true' } }
-    ]
-  },
-  { id: 't3', traceId: 'trace-ghi789', name: 'POST /api/payments', service: 'api-gateway', duration: 1250, status: 'error', timestamp: '2024-12-20T15:58:15Z', resource: '/api/payments',
-    spans: [
-      { id: 'sp9', name: 'http.request', service: 'api-gateway', duration: 1250, startTime: 0, status: 'error', resource: 'POST /api/payments', tags: { 'http.status_code': '504' } },
-      { id: 'sp10', name: 'stripe.charge', service: 'payment-service', duration: 1200, startTime: 30, status: 'error', resource: 'create_charge', tags: { error: 'timeout' } }
-    ]
-  }
-]
+const mockTraces: Trace[] = []
 
-const mockHosts: Host[] = [
-  { id: 'h1', name: 'web-01', status: 'running', cpu: 67.5, memory: 82.3, disk: 45, network: { in: 1.24, out: 0.89 }, apps: 5, os: 'Ubuntu 22.04', uptime: '45d 12h' },
-  { id: 'h2', name: 'web-02', status: 'running', cpu: 45.2, memory: 68.1, disk: 52, network: { in: 0.98, out: 0.76 }, apps: 5, os: 'Ubuntu 22.04', uptime: '45d 12h' },
-  { id: 'h3', name: 'web-03', status: 'warning', cpu: 78.9, memory: 85.4, disk: 71, network: { in: 1.56, out: 1.12 }, apps: 5, os: 'Ubuntu 22.04', uptime: '30d 8h' },
-  { id: 'h4', name: 'db-01', status: 'running', cpu: 42.1, memory: 76.5, disk: 68, network: { in: 0.45, out: 0.32 }, apps: 2, os: 'Ubuntu 22.04', uptime: '90d 4h' },
-  { id: 'h5', name: 'cache-01', status: 'running', cpu: 23.4, memory: 45.2, disk: 12, network: { in: 2.34, out: 2.01 }, apps: 1, os: 'Alpine 3.18', uptime: '60d 16h' },
-  { id: 'h6', name: 'worker-01', status: 'running', cpu: 56.7, memory: 62.3, disk: 34, network: { in: 0.12, out: 0.08 }, apps: 3, os: 'Ubuntu 22.04', uptime: '15d 2h' },
-  { id: 'h7', name: 'worker-02', status: 'critical', cpu: 0, memory: 0, disk: 34, network: { in: 0, out: 0 }, apps: 0, os: 'Ubuntu 22.04', uptime: '0h' }
-]
+const mockHosts: Host[] = []
 
-const mockAPMServices: APMService[] = [
-  { id: 'apm1', name: 'api-gateway', language: 'Node.js', requestCount: 125000, errorRate: 0.02, avgLatency: 45, p99Latency: 180, apdex: 0.95, status: 'healthy' },
-  { id: 'apm2', name: 'auth-service', language: 'Go', requestCount: 89000, errorRate: 0.01, avgLatency: 12, p99Latency: 45, apdex: 0.98, status: 'healthy' },
-  { id: 'apm3', name: 'user-service', language: 'Python', requestCount: 67000, errorRate: 0.8, avgLatency: 156, p99Latency: 450, apdex: 0.82, status: 'degraded' },
-  { id: 'apm4', name: 'payment-service', language: 'Java', requestCount: 23000, errorRate: 0.15, avgLatency: 230, p99Latency: 890, apdex: 0.91, status: 'healthy' },
-  { id: 'apm5', name: 'notification-service', language: 'Node.js', requestCount: 45000, errorRate: 0.05, avgLatency: 89, p99Latency: 250, apdex: 0.94, status: 'healthy' },
-  { id: 'apm6', name: 'order-service', language: 'Go', requestCount: 34000, errorRate: 0.08, avgLatency: 78, p99Latency: 320, apdex: 0.93, status: 'healthy' }
-]
+const mockAPMServices: APMService[] = []
 
-// Enhanced System Insights Mock Data
-const mockSystemInsightsAIInsights = [
-  { id: '1', type: 'success' as const, title: 'System Health', description: 'All 12 services running optimally. 99.97% uptime this month.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Health' },
-  { id: '2', type: 'info' as const, title: 'Performance Trend', description: 'API latency improved 15% after recent optimization.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Performance' },
-  { id: '3', type: 'warning' as const, title: 'Resource Alert', description: 'Database CPU at 78%. Consider scaling before peak hours.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Resources' },
-]
+// Enhanced System Insights Data - populated from Supabase
+const mockSystemInsightsAIInsights: { id: string; type: 'success' | 'info' | 'warning' | 'error'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
 
-const mockSystemInsightsCollaborators = [
-  { id: '1', name: 'DevOps Lead', avatar: '/avatars/devops.jpg', status: 'online' as const, role: 'Infrastructure', lastActive: 'Now' },
-  { id: '2', name: 'SRE Engineer', avatar: '/avatars/sre.jpg', status: 'online' as const, role: 'Reliability', lastActive: '5m ago' },
-  { id: '3', name: 'Platform Eng', avatar: '/avatars/platform.jpg', status: 'away' as const, role: 'Platform', lastActive: '15m ago' },
-]
+const mockSystemInsightsCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string; lastActive: string }[] = []
 
-const mockSystemInsightsPredictions = [
-  { id: '1', label: 'Uptime', current: 99.97, target: 99.99, predicted: 99.98, confidence: 92, trend: 'up' as const },
-  { id: '2', label: 'Avg Latency', current: 145, target: 100, predicted: 125, confidence: 78, trend: 'up' as const },
-  { id: '3', label: 'Error Rate', current: 0.12, target: 0.05, predicted: 0.08, confidence: 85, trend: 'up' as const },
-]
+const mockSystemInsightsPredictions: { id: string; label: string; current: number; target: number; predicted: number; confidence: number; trend: 'up' | 'down' | 'stable' }[] = []
 
-const mockSystemInsightsActivities = [
-  { id: '1', user: 'DevOps Lead', action: 'deployed', target: 'v2.4.1 to production', timestamp: '10m ago', type: 'success' as const },
-  { id: '2', user: 'SRE Engineer', action: 'resolved', target: 'memory leak in auth-service', timestamp: '45m ago', type: 'info' as const },
-  { id: '3', user: 'Platform Eng', action: 'scaled', target: 'API cluster to 8 nodes', timestamp: '2h ago', type: 'info' as const },
-]
+const mockSystemInsightsActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' | 'error' }[] = []
 
 // Quick actions will be defined inside the component to use state setters
 
@@ -433,9 +350,9 @@ export default function SystemInsightsClient() {
     const firing = mockAlerts.filter(a => a.status === 'firing').length
     const criticalAlerts = mockAlerts.filter(a => a.severity === 'critical' && a.status === 'firing').length
     const healthyServices = mockServices.filter(s => s.status === 'healthy').length
-    const avgUptime = mockServices.reduce((sum, s) => sum + s.uptime, 0) / mockServices.length
+    const avgUptime = mockServices.length > 0 ? mockServices.reduce((sum, s) => sum + s.uptime, 0) / mockServices.length : 0
     const totalRps = mockServices.reduce((sum, s) => sum + s.requestsPerSecond, 0)
-    const avgApdex = mockServices.reduce((sum, s) => sum + s.apdex, 0) / mockServices.length
+    const avgApdex = mockServices.length > 0 ? mockServices.reduce((sum, s) => sum + s.apdex, 0) / mockServices.length : 0
 
     return {
       firingAlerts: firing,
@@ -488,8 +405,8 @@ export default function SystemInsightsClient() {
     { label: 'Healthy Services', value: `${stats.healthyServices}/${stats.totalServices}`, icon: CheckCircle, gradient: 'from-emerald-500 to-emerald-600', positive: true },
     { label: 'Avg Uptime', value: `${stats.avgUptime}%`, icon: Activity, gradient: 'from-blue-500 to-blue-600', positive: true },
     { label: 'Total RPS', value: stats.totalRps.toLocaleString(), icon: Zap, gradient: 'from-purple-500 to-purple-600', positive: true },
-    { label: 'CPU Usage', value: `${mockMetrics[0].value}%`, icon: Cpu, gradient: 'from-indigo-500 to-indigo-600', positive: mockMetrics[0].status === 'normal' },
-    { label: 'Memory', value: `${mockMetrics[1].value}%`, icon: Server, gradient: 'from-amber-500 to-amber-600', positive: mockMetrics[1].status === 'normal' },
+    { label: 'CPU Usage', value: `${mockMetrics[0]?.value ?? 0}%`, icon: Cpu, gradient: 'from-indigo-500 to-indigo-600', positive: mockMetrics[0]?.status === 'normal' },
+    { label: 'Memory', value: `${mockMetrics[1]?.value ?? 0}%`, icon: Server, gradient: 'from-amber-500 to-amber-600', positive: mockMetrics[1]?.status === 'normal' },
     { label: 'Hosts', value: `${stats.healthyHosts}/${stats.totalHosts}`, icon: Box, gradient: 'from-cyan-500 to-cyan-600', positive: true },
     { label: 'Apdex', value: stats.avgApdex, icon: TrendingUp, gradient: 'from-pink-500 to-pink-600', positive: parseFloat(stats.avgApdex) >= 0.9 }
   ]

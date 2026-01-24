@@ -263,287 +263,17 @@ interface ReleaseStats {
   releaseFrequency: number
 }
 
-// Mock data
-const mockReleases: Release[] = [
-  {
-    id: '1',
-    version: 'v2.5.0',
-    name: 'Aurora Release',
-    description: 'Major feature release with new dashboard and improved performance',
-    changelog: '## New Features\n- Redesigned dashboard with real-time metrics\n- Added dark mode support\n- Improved API response times by 40%\n\n## Bug Fixes\n- Fixed memory leak in worker process\n- Resolved authentication edge cases',
-    status: 'deployed',
-    type: 'major',
-    environment: 'production',
-    tagName: 'v2.5.0',
-    branch: 'main',
-    commitHash: 'abc123f',
-    author: { id: '1', name: 'Alex Chen', avatar: '' },
-    contributors: [
-      { id: '1', name: 'Alex Chen', avatar: '', commits: 24 },
-      { id: '2', name: 'Sarah Miller', avatar: '', commits: 18 },
-      { id: '3', name: 'Mike Johnson', avatar: '', commits: 12 }
-    ],
-    commits: 54,
-    additions: 8456,
-    deletions: 2341,
-    filesChanged: 89,
-    deployTime: 4.5,
-    coverage: 100,
-    isPrerelease: false,
-    isDraft: false,
-    isLatest: true,
-    assets: [
-      { id: '1', name: 'app-v2.5.0-linux.tar.gz', type: 'binary', size: 45678901, downloads: 1234, contentType: 'application/gzip', createdAt: '2024-12-20', uploadedBy: 'Alex Chen' },
-      { id: '2', name: 'app-v2.5.0-windows.zip', type: 'binary', size: 52345678, downloads: 2345, contentType: 'application/zip', createdAt: '2024-12-20', uploadedBy: 'Alex Chen' },
-      { id: '3', name: 'source-v2.5.0.tar.gz', type: 'source', size: 12345678, downloads: 567, contentType: 'application/gzip', createdAt: '2024-12-20', uploadedBy: 'Alex Chen' }
-    ],
-    deployments: [
-      { id: '1', environment: 'production', status: 'success', startedAt: '2024-12-20T10:00:00Z', completedAt: '2024-12-20T10:05:00Z', duration: 4.5, deployedBy: 'Alex Chen', servers: 12, coverage: 100 }
-    ],
-    createdAt: '2024-12-18T14:00:00Z',
-    publishedAt: '2024-12-20T10:00:00Z',
-    scheduledFor: null,
-    deployedAt: '2024-12-20T10:05:00Z',
-    downloads: 4156,
-    views: 12456
-  },
-  {
-    id: '2',
-    version: 'v2.5.1',
-    name: 'Aurora Patch',
-    description: 'Hotfix for critical security vulnerability',
-    changelog: '## Security Fixes\n- Patched XSS vulnerability in comment system\n- Updated dependencies with known vulnerabilities\n\n## Bug Fixes\n- Fixed date picker timezone issues',
-    status: 'rolling',
-    type: 'hotfix',
-    environment: 'production',
-    tagName: 'v2.5.1',
-    branch: 'hotfix/security-patch',
-    commitHash: 'def456a',
-    author: { id: '2', name: 'Sarah Miller', avatar: '' },
-    contributors: [
-      { id: '2', name: 'Sarah Miller', avatar: '', commits: 5 },
-      { id: '1', name: 'Alex Chen', avatar: '', commits: 3 }
-    ],
-    commits: 8,
-    additions: 234,
-    deletions: 156,
-    filesChanged: 12,
-    deployTime: 2.1,
-    coverage: 67,
-    isPrerelease: false,
-    isDraft: false,
-    isLatest: false,
-    assets: [
-      { id: '4', name: 'app-v2.5.1-linux.tar.gz', type: 'binary', size: 45789012, downloads: 234, contentType: 'application/gzip', createdAt: '2024-12-22', uploadedBy: 'Sarah Miller' }
-    ],
-    deployments: [
-      { id: '2', environment: 'production', status: 'in_progress', startedAt: '2024-12-24T09:00:00Z', completedAt: null, duration: 0, deployedBy: 'Sarah Miller', servers: 12, coverage: 67 }
-    ],
-    createdAt: '2024-12-22T11:00:00Z',
-    publishedAt: '2024-12-24T09:00:00Z',
-    scheduledFor: null,
-    deployedAt: null,
-    downloads: 234,
-    views: 567
-  },
-  {
-    id: '3',
-    version: 'v2.6.0-beta.1',
-    name: 'Nebula Beta',
-    description: 'Beta release for upcoming v2.6.0 with experimental features',
-    changelog: '## Experimental Features\n- AI-powered code suggestions\n- Real-time collaboration mode\n- WebSocket-based notifications\n\n## Known Issues\n- Performance may be slower than stable releases',
-    status: 'deployed',
-    type: 'prerelease',
-    environment: 'staging',
-    tagName: 'v2.6.0-beta.1',
-    branch: 'develop',
-    commitHash: 'ghi789b',
-    author: { id: '3', name: 'Mike Johnson', avatar: '' },
-    contributors: [
-      { id: '3', name: 'Mike Johnson', avatar: '', commits: 34 },
-      { id: '4', name: 'Emma Wilson', avatar: '', commits: 28 }
-    ],
-    commits: 62,
-    additions: 12345,
-    deletions: 4567,
-    filesChanged: 134,
-    deployTime: 6.2,
-    coverage: 100,
-    isPrerelease: true,
-    isDraft: false,
-    isLatest: false,
-    assets: [],
-    deployments: [
-      { id: '3', environment: 'staging', status: 'success', startedAt: '2024-12-21T14:00:00Z', completedAt: '2024-12-21T14:06:00Z', duration: 6.2, deployedBy: 'Mike Johnson', servers: 4, coverage: 100 }
-    ],
-    createdAt: '2024-12-19T09:00:00Z',
-    publishedAt: '2024-12-21T14:00:00Z',
-    scheduledFor: null,
-    deployedAt: '2024-12-21T14:06:00Z',
-    downloads: 89,
-    views: 234
-  },
-  {
-    id: '4',
-    version: 'v2.6.0',
-    name: 'Nebula Release',
-    description: 'Major feature release scheduled for next week',
-    changelog: '## Planned Features\n- AI-powered code suggestions (stable)\n- Real-time collaboration\n- New notification system\n- Performance improvements',
-    status: 'scheduled',
-    type: 'major',
-    environment: 'production',
-    tagName: 'v2.6.0',
-    branch: 'release/v2.6.0',
-    commitHash: 'jkl012c',
-    author: { id: '1', name: 'Alex Chen', avatar: '' },
-    contributors: [
-      { id: '1', name: 'Alex Chen', avatar: '', commits: 45 },
-      { id: '3', name: 'Mike Johnson', avatar: '', commits: 38 },
-      { id: '4', name: 'Emma Wilson', avatar: '', commits: 29 }
-    ],
-    commits: 112,
-    additions: 18567,
-    deletions: 6789,
-    filesChanged: 178,
-    deployTime: 0,
-    coverage: 0,
-    isPrerelease: false,
-    isDraft: false,
-    isLatest: false,
-    assets: [],
-    deployments: [],
-    createdAt: '2024-12-23T16:00:00Z',
-    publishedAt: null,
-    scheduledFor: '2024-12-30T10:00:00Z',
-    deployedAt: null,
-    downloads: 0,
-    views: 345
-  },
-  {
-    id: '5',
-    version: 'v2.4.3',
-    name: 'Legacy Patch',
-    description: 'Final patch for v2.4 branch',
-    changelog: '## Bug Fixes\n- Fixed edge case in payment processing\n- Resolved caching issues',
-    status: 'deployed',
-    type: 'patch',
-    environment: 'production',
-    tagName: 'v2.4.3',
-    branch: 'release/v2.4',
-    commitHash: 'mno345d',
-    author: { id: '4', name: 'Emma Wilson', avatar: '' },
-    contributors: [{ id: '4', name: 'Emma Wilson', avatar: '', commits: 6 }],
-    commits: 6,
-    additions: 145,
-    deletions: 89,
-    filesChanged: 8,
-    deployTime: 1.8,
-    coverage: 100,
-    isPrerelease: false,
-    isDraft: false,
-    isLatest: false,
-    assets: [],
-    deployments: [
-      { id: '4', environment: 'production', status: 'success', startedAt: '2024-12-15T11:00:00Z', completedAt: '2024-12-15T11:02:00Z', duration: 1.8, deployedBy: 'Emma Wilson', servers: 12, coverage: 100 }
-    ],
-    createdAt: '2024-12-14T10:00:00Z',
-    publishedAt: '2024-12-15T11:00:00Z',
-    scheduledFor: null,
-    deployedAt: '2024-12-15T11:02:00Z',
-    downloads: 567,
-    views: 890
-  },
-  {
-    id: '6',
-    version: 'v2.7.0',
-    name: 'Cosmos Draft',
-    description: 'Work in progress - next major release',
-    changelog: '## Planned\n- New features TBD\n- Performance improvements TBD',
-    status: 'draft',
-    type: 'major',
-    environment: 'development',
-    tagName: 'v2.7.0',
-    branch: 'develop',
-    commitHash: 'pqr678e',
-    author: { id: '1', name: 'Alex Chen', avatar: '' },
-    contributors: [],
-    commits: 23,
-    additions: 4567,
-    deletions: 1234,
-    filesChanged: 45,
-    deployTime: 0,
-    coverage: 0,
-    isPrerelease: false,
-    isDraft: true,
-    isLatest: false,
-    assets: [],
-    deployments: [],
-    createdAt: '2024-12-24T08:00:00Z',
-    publishedAt: null,
-    scheduledFor: null,
-    deployedAt: null,
-    downloads: 0,
-    views: 12
-  }
-]
+// Empty typed arrays (no mock data - uses real Supabase data)
+const emptyReleases: Release[] = []
+const emptyCommits: Commit[] = []
+const emptyRollbackEvents: RollbackEvent[] = []
 
-const mockCommits: Commit[] = [
-  { id: '1', hash: 'abc123f', message: 'feat: Add new dashboard components', author: { name: 'Alex Chen', avatar: '' }, additions: 456, deletions: 123, files: 12, createdAt: '2024-12-20T09:30:00Z' },
-  { id: '2', hash: 'bcd234g', message: 'fix: Resolve memory leak in worker', author: { name: 'Sarah Miller', avatar: '' }, additions: 23, deletions: 89, files: 3, createdAt: '2024-12-20T08:45:00Z' },
-  { id: '3', hash: 'cde345h', message: 'chore: Update dependencies', author: { name: 'Mike Johnson', avatar: '' }, additions: 567, deletions: 234, files: 5, createdAt: '2024-12-19T16:20:00Z' },
-  { id: '4', hash: 'def456i', message: 'feat: Implement dark mode', author: { name: 'Emma Wilson', avatar: '' }, additions: 234, deletions: 45, files: 8, createdAt: '2024-12-19T14:00:00Z' },
-  { id: '5', hash: 'efg567j', message: 'docs: Update API documentation', author: { name: 'Alex Chen', avatar: '' }, additions: 189, deletions: 67, files: 4, createdAt: '2024-12-18T11:30:00Z' }
-]
-
-const mockRollbacks: RollbackEvent[] = [
-  { id: '1', releaseId: '2', releaseVersion: 'v2.4.2', targetVersion: 'v2.4.1', reason: 'Critical bug in payment processing', initiatedBy: { name: 'Alex Chen', avatar: '' }, status: 'completed', startedAt: '2024-12-10T15:30:00Z', completedAt: '2024-12-10T15:32:00Z' },
-  { id: '2', releaseId: '3', releaseVersion: 'v2.5.0-beta.2', targetVersion: 'v2.5.0-beta.1', reason: 'Performance regression detected', initiatedBy: { name: 'Sarah Miller', avatar: '' }, status: 'completed', startedAt: '2024-12-05T10:00:00Z', completedAt: '2024-12-05T10:03:00Z' }
-]
-
-const mockStats: ReleaseStats = {
-  totalReleases: 45,
-  deployedReleases: 38,
-  scheduledReleases: 3,
-  rollingReleases: 1,
-  failedReleases: 2,
-  draftReleases: 1,
-  successRate: 95.5,
-  avgDeployTime: 3.8,
-  totalDownloads: 45678,
-  totalCommits: 1234,
-  releaseFrequency: 2.3
-}
-
-// Enhanced Competitive Upgrade Mock Data
-const mockReleasesAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Deployment Success', description: 'All recent deployments completed successfully. Zero rollbacks this month.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Deployment' },
-  { id: '2', type: 'info' as const, title: 'Release Cadence', description: 'Release frequency increased 23% compared to last quarter.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Metrics' },
-  { id: '3', type: 'warning' as const, title: 'Staging Bottleneck', description: 'Staging environment utilization at 89%. Consider scaling.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Infrastructure' },
-]
-
-const mockReleasesCollaborators = [
-  { id: '1', name: 'Release Manager', avatar: '/avatars/release.jpg', status: 'online' as const, role: 'Lead' },
-  { id: '2', name: 'DevOps Engineer', avatar: '/avatars/devops.jpg', status: 'online' as const, role: 'Engineer' },
-  { id: '3', name: 'QA Lead', avatar: '/avatars/qa.jpg', status: 'away' as const, role: 'QA' },
-]
-
-const mockReleasesPredictions = [
-  { id: '1', title: 'Next Major Release', prediction: 'v3.0 estimated ready in 2 weeks based on current velocity', confidence: 82, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Hotfix Likelihood', prediction: 'Low probability of emergency fixes this sprint', confidence: 91, trend: 'stable' as const, impact: 'medium' as const },
-]
-
-const mockReleasesActivities = [
-  { id: '1', user: 'DevOps', action: 'Deployed', target: 'v2.5.1 to production', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Release Manager', action: 'Scheduled', target: 'v2.6.0 for next Tuesday', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'QA Team', action: 'Approved', target: 'v2.5.1 release candidate', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
-]
-
-const mockReleasesQuickActions = [
-  { id: '1', label: 'New Release', icon: 'Plus', action: () => {}, shortcut: 'N' },
-  { id: '2', label: 'Deploy', icon: 'Rocket', action: () => {}, shortcut: 'D' },
-  { id: '3', label: 'Rollback', icon: 'RotateCcw', action: () => {}, shortcut: 'R' },
-  { id: '4', label: 'Settings', icon: 'Settings', action: () => {}, shortcut: 'S' },
-]
+// Empty typed arrays for competitive upgrade components
+const emptyAIInsights: { id: string; type: 'success' | 'info' | 'warning' | 'error'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
+const emptyCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }[] = []
+const emptyPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: 'low' | 'medium' | 'high' }[] = []
+const emptyActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' | 'error' | 'update' }[] = []
+const emptyQuickActions: { id: string; label: string; icon: string; action: () => void; shortcut: string }[] = []
 
 // Initial form state
 const initialFormData: ReleaseFormData = {
@@ -561,7 +291,7 @@ const initialFormData: ReleaseFormData = {
 }
 
 export default function ReleasesClient() {
-
+  const supabase = createClient()
 
   // UI State
   const [activeTab, setActiveTab] = useState('releases')
@@ -1031,8 +761,8 @@ export default function ReleasesClient() {
 
   // Filter releases based on search and filters
   const filteredReleases = useMemo(() => {
-    // Use mock data if no real data exists
-    const dataToFilter = (releases || []).length > 0 ? (releases || []).map(r => ({
+    // Map real data from Supabase to Release format
+    const dataToFilter: Release[] = (releases || []).map(r => ({
       id: r.id,
       version: r.version,
       name: r.release_name,
@@ -1063,7 +793,7 @@ export default function ReleasesClient() {
       deployedAt: r.deployed_at,
       downloads: r.downloads_count || 0,
       views: r.views_count || 0
-    })) : mockReleases
+    }))
 
     return dataToFilter.filter(release => {
       const matchesSearch = release.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -1625,7 +1355,7 @@ export default function ReleasesClient() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {mockReleases.flatMap(r => r.deployments).map(deployment => (
+                  {deployments.length > 0 ? deployments.map(deployment => (
                     <div key={deployment.id} className="flex items-center gap-4 p-4 rounded-lg border dark:border-gray-700">
                       <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
                         deployment.status === 'success' ? 'bg-green-100 text-green-600' :
@@ -1649,15 +1379,21 @@ export default function ReleasesClient() {
                           }>{deployment.status.replace('_', ' ')}</Badge>
                         </div>
                         <div className="text-sm text-gray-500 mt-1">
-                          {deployment.servers} servers • {deployment.coverage}% coverage • {deployment.duration}min
+                          {deployment.servers_count} servers • {deployment.health_percentage}% coverage • {deployment.duration_minutes || 0}min
                         </div>
                       </div>
                       <div className="text-right text-sm text-gray-500">
-                        <div>{formatDate(deployment.startedAt)}</div>
-                        <div>by {deployment.deployedBy}</div>
+                        <div>{deployment.started_at ? formatDate(deployment.started_at) : 'N/A'}</div>
+                        <div>by {deployment.deployed_by || 'Unknown'}</div>
                       </div>
                     </div>
-                  ))}
+                  )) : (
+                    <div className="text-center py-12">
+                      <Server className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                      <h3 className="font-semibold text-gray-900 dark:text-white mb-2">No Deployments</h3>
+                      <p className="text-gray-500">No deployment history available yet</p>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -1683,23 +1419,23 @@ export default function ReleasesClient() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6 mt-6">
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{formatNumber(mockStats.totalCommits)}</div>
+                  <div className="text-2xl font-bold">{formatNumber(stats.totalCommits)}</div>
                   <div className="text-sm text-blue-100">Total Commits</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">12</div>
+                  <div className="text-2xl font-bold">{releases.reduce((sum, r) => sum + (r.contributors_count || 0), 0)}</div>
                   <div className="text-sm text-blue-100">Contributors</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">8</div>
+                  <div className="text-2xl font-bold">{new Set(releases.map(r => r.git_branch)).size}</div>
                   <div className="text-sm text-blue-100">Branches</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold text-green-300">+45.6K</div>
+                  <div className="text-2xl font-bold text-green-300">+{formatNumber(releases.reduce((sum, r) => sum + (r.additions_count || 0), 0))}</div>
                   <div className="text-sm text-blue-100">Additions</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold text-red-300">-12.3K</div>
+                  <div className="text-2xl font-bold text-red-300">-{formatNumber(releases.reduce((sum, r) => sum + (r.deletions_count || 0), 0))}</div>
                   <div className="text-sm text-blue-100">Deletions</div>
                 </div>
               </div>
@@ -1711,7 +1447,7 @@ export default function ReleasesClient() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {mockCommits.map(commit => (
+                  {emptyCommits.length > 0 ? emptyCommits.map(commit => (
                     <div key={commit.id} className="flex items-start gap-4 p-4 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                       <Avatar>
                         <AvatarFallback>{commit.author.name.charAt(0)}</AvatarFallback>
@@ -1728,7 +1464,13 @@ export default function ReleasesClient() {
                       </div>
                       <div className="text-sm text-gray-500">{formatDate(commit.createdAt)}</div>
                     </div>
-                  ))}
+                  )) : (
+                    <div className="text-center py-12">
+                      <GitCommit className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                      <h3 className="font-semibold text-gray-900 dark:text-white mb-2">No Commits</h3>
+                      <p className="text-gray-500">No commit history available yet</p>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -1759,19 +1501,19 @@ export default function ReleasesClient() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mt-6">
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{rollbacks.length > 0 ? rollbacks.length : mockRollbacks.length}</div>
+                  <div className="text-2xl font-bold">{rollbacks.length}</div>
                   <div className="text-sm text-yellow-100">Total</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{rollbacks.length > 0 ? rollbacks.filter(r => r.status === 'completed').length : mockRollbacks.filter(r => r.status === 'completed').length}</div>
+                  <div className="text-2xl font-bold">{rollbacks.filter(r => r.status === 'completed').length}</div>
                   <div className="text-sm text-yellow-100">Completed</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">1.2m</div>
+                  <div className="text-2xl font-bold">{rollbacks.length > 0 ? '1.2m' : '0m'}</div>
                   <div className="text-sm text-yellow-100">Avg Time</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">100%</div>
+                  <div className="text-2xl font-bold">{rollbacks.length > 0 ? Math.round((rollbacks.filter(r => r.status === 'completed').length / rollbacks.length) * 100) : 0}%</div>
                   <div className="text-sm text-yellow-100">Success</div>
                 </div>
               </div>
@@ -1785,9 +1527,9 @@ export default function ReleasesClient() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {mockRollbacks.length > 0 ? (
+                {rollbacks.length > 0 ? (
                   <div className="space-y-4">
-                    {mockRollbacks.map(rollback => (
+                    {rollbacks.map(rollback => (
                       <div key={rollback.id} className="flex items-start gap-4 p-4 rounded-lg border dark:border-gray-700">
                         <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
                           rollback.status === 'completed' ? 'bg-green-100 text-green-600' :
@@ -1798,9 +1540,9 @@ export default function ReleasesClient() {
                         </div>
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
-                            <span className="font-medium">{rollback.releaseVersion}</span>
+                            <span className="font-medium">{rollback.release_version}</span>
                             <ChevronRight className="w-4 h-4 text-gray-400" />
-                            <span className="font-medium">{rollback.targetVersion}</span>
+                            <span className="font-medium">{rollback.target_version}</span>
                             <Badge className={
                               rollback.status === 'completed' ? 'bg-green-100 text-green-800' :
                               rollback.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
@@ -1810,14 +1552,14 @@ export default function ReleasesClient() {
                           <p className="text-sm text-gray-600 dark:text-gray-300">{rollback.reason}</p>
                           <div className="flex items-center gap-2 text-sm text-gray-500 mt-2">
                             <Avatar className="w-5 h-5">
-                              <AvatarFallback className="text-xs">{rollback.initiatedBy.name.charAt(0)}</AvatarFallback>
+                              <AvatarFallback className="text-xs">{(rollback.initiated_by || 'U').charAt(0)}</AvatarFallback>
                             </Avatar>
-                            <span>{rollback.initiatedBy.name}</span>
+                            <span>{rollback.initiated_by || 'Unknown'}</span>
                           </div>
                         </div>
                         <div className="text-right text-sm text-gray-500">
-                          <div>{formatDate(rollback.startedAt)}</div>
-                          {rollback.completedAt && (
+                          <div>{formatDate(rollback.started_at)}</div>
+                          {rollback.completed_at && (
                             <div className="text-green-600">Completed</div>
                           )}
                         </div>
@@ -1871,7 +1613,7 @@ export default function ReleasesClient() {
                   <div className="text-sm text-orange-100">Total Size</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{formatNumber(mockStats.totalDownloads)}</div>
+                  <div className="text-2xl font-bold">{formatNumber(stats.totalDownloads)}</div>
                   <div className="text-sm text-orange-100">Downloads</div>
                 </div>
               </div>
@@ -1883,35 +1625,43 @@ export default function ReleasesClient() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {mockReleases.filter(r => r.assets.length > 0).map(release => (
-                    <div key={release.id} className="p-4 rounded-lg border dark:border-gray-700">
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-2">
-                          <code className="font-mono bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-300 px-2 py-1 rounded text-sm">{release.version}</code>
-                          <span className="text-gray-500">{release.name}</span>
-                        </div>
-                        <span className="text-sm text-gray-500">{release.assets.length} assets</span>
-                      </div>
-                      <div className="space-y-2">
-                        {release.assets.map(asset => (
-                          <div key={asset.id} className="flex items-center gap-4 p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
-                            <Package className="w-5 h-5 text-gray-400" />
-                            <div className="flex-1">
-                              <div className="font-medium text-sm">{asset.name}</div>
-                              <div className="text-xs text-gray-500">{formatSize(asset.size)} • {asset.contentType}</div>
-                            </div>
-                            <div className="flex items-center gap-3">
-                              <span className="text-sm text-gray-500">{asset.downloads} downloads</span>
-                              <Button size="sm" variant="outline">
-                                <Download className="w-3 h-3 mr-1" />
-                                Download
-                              </Button>
-                            </div>
+                  {filteredReleases.filter(r => r.assets.length > 0).length > 0 ? (
+                    filteredReleases.filter(r => r.assets.length > 0).map(release => (
+                      <div key={release.id} className="p-4 rounded-lg border dark:border-gray-700">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-2">
+                            <code className="font-mono bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-300 px-2 py-1 rounded text-sm">{release.version}</code>
+                            <span className="text-gray-500">{release.name}</span>
                           </div>
-                        ))}
+                          <span className="text-sm text-gray-500">{release.assets.length} assets</span>
+                        </div>
+                        <div className="space-y-2">
+                          {release.assets.map(asset => (
+                            <div key={asset.id} className="flex items-center gap-4 p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
+                              <Package className="w-5 h-5 text-gray-400" />
+                              <div className="flex-1">
+                                <div className="font-medium text-sm">{asset.name}</div>
+                                <div className="text-xs text-gray-500">{formatSize(asset.size)} • {asset.contentType}</div>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <span className="text-sm text-gray-500">{asset.downloads} downloads</span>
+                                <Button size="sm" variant="outline">
+                                  <Download className="w-3 h-3 mr-1" />
+                                  Download
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
                       </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-12">
+                      <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                      <h3 className="font-semibold text-gray-900 dark:text-white mb-2">No Assets</h3>
+                      <p className="text-gray-500">No release assets available yet</p>
                     </div>
-                  ))}
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -1937,27 +1687,27 @@ export default function ReleasesClient() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6 mt-6">
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{mockStats.successRate}%</div>
+                  <div className="text-2xl font-bold">{stats.successRate}%</div>
                   <div className="text-sm text-purple-100">Success Rate</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{mockStats.avgDeployTime}m</div>
+                  <div className="text-2xl font-bold">{stats.avgDeployTime}m</div>
                   <div className="text-sm text-purple-100">Avg Deploy</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{mockStats.releaseFrequency}</div>
+                  <div className="text-2xl font-bold">{stats.releaseFrequency}</div>
                   <div className="text-sm text-purple-100">Per Week</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{formatNumber(mockStats.totalDownloads)}</div>
+                  <div className="text-2xl font-bold">{formatNumber(stats.totalDownloads)}</div>
                   <div className="text-sm text-purple-100">Downloads</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">2.1</div>
+                  <div className="text-2xl font-bold">{rollbacks.length}</div>
                   <div className="text-sm text-purple-100">Rollbacks</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">99.9%</div>
+                  <div className="text-2xl font-bold">{stats.totalReleases > 0 ? '99.9%' : '0%'}</div>
                   <div className="text-sm text-purple-100">Uptime</div>
                 </div>
               </div>
@@ -1974,16 +1724,16 @@ export default function ReleasesClient() {
                 <CardContent className="space-y-4">
                   <div className="flex justify-between items-center">
                     <span className="text-gray-500">Success Rate</span>
-                    <span className="font-semibold text-green-600">{mockStats.successRate}%</span>
+                    <span className="font-semibold text-green-600">{stats.successRate}%</span>
                   </div>
-                  <Progress value={mockStats.successRate} className="h-2" />
+                  <Progress value={parseFloat(stats.successRate.toString())} className="h-2" />
                   <div className="flex justify-between items-center">
                     <span className="text-gray-500">Avg Deploy Time</span>
-                    <span className="font-semibold">{mockStats.avgDeployTime} min</span>
+                    <span className="font-semibold">{stats.avgDeployTime} min</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-gray-500">Release Frequency</span>
-                    <span className="font-semibold">{mockStats.releaseFrequency}/week</span>
+                    <span className="font-semibold">{stats.releaseFrequency}/week</span>
                   </div>
                 </CardContent>
               </Card>
@@ -1996,15 +1746,17 @@ export default function ReleasesClient() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {mockReleases.slice(0, 5).map(release => (
+                  {filteredReleases.length > 0 ? filteredReleases.slice(0, 5).map(release => (
                     <div key={release.id} className="flex items-center gap-3">
                       <code className="font-mono text-sm bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded">{release.version}</code>
                       <div className="flex-1">
-                        <Progress value={(release.downloads / 5000) * 100} className="h-2" />
+                        <Progress value={stats.totalDownloads > 0 ? (release.downloads / stats.totalDownloads) * 100 : 0} className="h-2" />
                       </div>
                       <span className="text-sm font-medium">{formatNumber(release.downloads)}</span>
                     </div>
-                  ))}
+                  )) : (
+                    <div className="text-center py-4 text-gray-500">No download data available</div>
+                  )}
                 </CardContent>
               </Card>
 
@@ -2016,25 +1768,14 @@ export default function ReleasesClient() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {[
-                    { name: 'Alex Chen', commits: 45, avatar: '' },
-                    { name: 'Sarah Miller', commits: 38, avatar: '' },
-                    { name: 'Mike Johnson', commits: 29, avatar: '' },
-                    { name: 'Emma Wilson', commits: 23, avatar: '' }
-                  ].map((contributor, index) => (
-                    <div key={contributor.name} className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white text-sm font-medium">
-                        {index + 1}
-                      </div>
-                      <Avatar className="w-8 h-8">
-                        <AvatarFallback>{contributor.name.charAt(0)}</AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <div className="font-medium text-sm">{contributor.name}</div>
-                        <div className="text-xs text-gray-500">{contributor.commits} commits</div>
-                      </div>
+                  {releases.length > 0 ? (
+                    <div className="text-center py-4 text-gray-500">
+                      <p>Contributors data from releases</p>
+                      <p className="text-sm mt-2">{releases.reduce((sum, r) => sum + (r.contributors_count || 0), 0)} total contributors</p>
                     </div>
-                  ))}
+                  ) : (
+                    <div className="text-center py-4 text-gray-500">No contributor data available</div>
+                  )}
                 </CardContent>
               </Card>
             </div>
@@ -2367,18 +2108,18 @@ export default function ReleasesClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockReleasesAIInsights}
+              insights={emptyAIInsights}
               title="Release Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockReleasesCollaborators}
+              collaborators={emptyCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockReleasesPredictions}
+              predictions={emptyPredictions}
               title="Release Forecasts"
             />
           </div>
@@ -2386,12 +2127,12 @@ export default function ReleasesClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockReleasesActivities}
+            activities={emptyActivities}
             title="Release Activity"
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockReleasesQuickActions}
+            actions={emptyQuickActions}
             variant="grid"
           />
         </div>

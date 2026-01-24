@@ -186,168 +186,27 @@ interface Collaborator {
   lastActive: string
 }
 
-// Mock Data
-const mockProjects: VideoProject[] = [
-  {
-    id: '1',
-    title: 'Product Launch Video',
-    description: 'Official launch video for Q1 product release',
-    status: 'editing',
-    thumbnail: '/thumbnails/product-launch.jpg',
-    duration: 180,
-    fps: 30,
-    resolution: '1920x1080',
-    tracks: [],
-    lastEdited: '2024-01-15T10:30:00Z',
-    createdAt: '2024-01-10T09:00:00Z',
-    size: 2.5e9,
-    collaborators: [],
-    version: 5,
-    isLocked: false,
-    tags: ['product', 'launch', 'marketing']
-  },
-  {
-    id: '2',
-    title: 'Customer Testimonial',
-    description: 'Interview with key customer about success story',
-    status: 'ready',
-    thumbnail: '/thumbnails/testimonial.jpg',
-    duration: 240,
-    fps: 24,
-    resolution: '3840x2160',
-    tracks: [],
-    lastEdited: '2024-01-14T16:45:00Z',
-    createdAt: '2024-01-08T11:00:00Z',
-    size: 4.2e9,
-    collaborators: [],
-    version: 8,
-    isLocked: false,
-    tags: ['testimonial', 'interview', 'customer']
-  },
-  {
-    id: '3',
-    title: 'Tutorial Series Ep. 1',
-    description: 'Getting started with our platform',
-    status: 'published',
-    thumbnail: '/thumbnails/tutorial.jpg',
-    duration: 600,
-    fps: 30,
-    resolution: '1920x1080',
-    tracks: [],
-    lastEdited: '2024-01-12T14:20:00Z',
-    createdAt: '2024-01-05T08:00:00Z',
-    size: 1.8e9,
-    collaborators: [],
-    version: 12,
-    isLocked: true,
-    tags: ['tutorial', 'education', 'series']
-  },
-  {
-    id: '4',
-    title: 'Social Media Promo',
-    description: 'Short promotional video for social channels',
-    status: 'rendering',
-    thumbnail: '/thumbnails/promo.jpg',
-    duration: 30,
-    fps: 60,
-    resolution: '1080x1920',
-    tracks: [],
-    lastEdited: '2024-01-15T09:15:00Z',
-    createdAt: '2024-01-14T10:00:00Z',
-    size: 0.5e9,
-    collaborators: [],
-    version: 3,
-    isLocked: true,
-    tags: ['social', 'promo', 'short']
-  },
-  {
-    id: '5',
-    title: 'Company Overview',
-    description: 'Corporate introduction video',
-    status: 'draft',
-    thumbnail: '/thumbnails/overview.jpg',
-    duration: 0,
-    fps: 30,
-    resolution: '1920x1080',
-    tracks: [],
-    lastEdited: '2024-01-15T11:00:00Z',
-    createdAt: '2024-01-15T11:00:00Z',
-    size: 0,
-    collaborators: [],
-    version: 1,
-    isLocked: false,
-    tags: ['corporate', 'overview']
-  }
-]
+// Empty data arrays - data will be fetched from API/database
+const emptyProjects: VideoProject[] = []
+const emptyAssets: Asset[] = []
+const emptyTemplates: Template[] = []
+const emptyRenderJobs: RenderJob[] = []
+const emptyEffects: Effect[] = []
 
-const mockAssets: Asset[] = [
-  { id: '1', name: 'Interview Footage A', type: 'video', duration: 1200, size: 3.2e9, thumbnail: '/assets/interview-a.jpg', resolution: '4K', createdAt: '2024-01-10T09:00:00Z', usageCount: 5, tags: ['interview', 'footage'] },
-  { id: '2', name: 'Background Music', type: 'audio', duration: 180, size: 12e6, thumbnail: '/assets/music.jpg', resolution: 'N/A', createdAt: '2024-01-08T11:00:00Z', usageCount: 12, tags: ['music', 'background'] },
-  { id: '3', name: 'Logo Animation', type: 'graphic', duration: 5, size: 50e6, thumbnail: '/assets/logo.jpg', resolution: '1080p', createdAt: '2024-01-05T08:00:00Z', usageCount: 25, tags: ['logo', 'animation'] },
-  { id: '4', name: 'Product Photos', type: 'image', duration: 0, size: 25e6, thumbnail: '/assets/product.jpg', resolution: '4K', createdAt: '2024-01-12T14:20:00Z', usageCount: 8, tags: ['product', 'photos'] },
-  { id: '5', name: 'Lower Third Title', type: 'title', duration: 3, size: 2e6, thumbnail: '/assets/title.jpg', resolution: '1080p', createdAt: '2024-01-14T10:00:00Z', usageCount: 15, tags: ['title', 'lower-third'] },
-  { id: '6', name: 'Fade Transition', type: 'transition', duration: 1, size: 1e6, thumbnail: '/assets/fade.jpg', resolution: 'N/A', createdAt: '2024-01-13T16:00:00Z', usageCount: 30, tags: ['transition', 'fade'] },
-  { id: '7', name: 'Drone Footage B', type: 'video', duration: 600, size: 5.5e9, thumbnail: '/assets/drone.jpg', resolution: '4K', createdAt: '2024-01-11T10:00:00Z', usageCount: 3, tags: ['drone', 'aerial'] },
-  { id: '8', name: 'Voiceover Track', type: 'audio', duration: 300, size: 35e6, thumbnail: '/assets/voice.jpg', resolution: 'N/A', createdAt: '2024-01-09T12:00:00Z', usageCount: 7, tags: ['voiceover', 'narration'] }
-]
-
-const mockTemplates: Template[] = [
-  { id: '1', name: 'Corporate Intro', description: 'Professional company introduction', thumbnail: '/templates/corporate.jpg', category: 'Business', duration: 60, downloads: 1250, rating: 4.8, isPremium: false, tags: ['corporate', 'intro'] },
-  { id: '2', name: 'Social Story', description: 'Vertical story format for social media', thumbnail: '/templates/story.jpg', category: 'Social', duration: 15, downloads: 3500, rating: 4.6, isPremium: false, tags: ['social', 'story', 'vertical'] },
-  { id: '3', name: 'Product Showcase', description: 'Elegant product presentation', thumbnail: '/templates/product.jpg', category: 'Marketing', duration: 45, downloads: 890, rating: 4.9, isPremium: true, tags: ['product', 'showcase'] },
-  { id: '4', name: 'Event Highlights', description: 'Dynamic event recap template', thumbnail: '/templates/event.jpg', category: 'Events', duration: 120, downloads: 560, rating: 4.7, isPremium: true, tags: ['event', 'highlights'] },
-  { id: '5', name: 'Tutorial Opener', description: 'Educational video intro', thumbnail: '/templates/tutorial.jpg', category: 'Education', duration: 10, downloads: 2100, rating: 4.5, isPremium: false, tags: ['tutorial', 'education', 'opener'] },
-  { id: '6', name: 'Podcast Visual', description: 'Animated podcast video template', thumbnail: '/templates/podcast.jpg', category: 'Audio', duration: 0, downloads: 780, rating: 4.4, isPremium: false, tags: ['podcast', 'audio', 'visual'] }
-]
-
-const mockRenderJobs: RenderJob[] = [
-  { id: '1', projectId: '4', projectName: 'Social Media Promo', preset: 'instagram', status: 'rendering', progress: 67, startTime: '2024-01-15T09:20:00Z', estimatedTime: 120, outputSize: 45e6, outputPath: '/exports/promo-instagram.mp4' },
-  { id: '2', projectId: '1', projectName: 'Product Launch Video', preset: '1080p', status: 'queued', progress: 0, startTime: '', estimatedTime: 300, outputSize: 0, outputPath: '/exports/product-launch.mp4' },
-  { id: '3', projectId: '2', projectName: 'Customer Testimonial', preset: '4k', status: 'completed', progress: 100, startTime: '2024-01-14T16:00:00Z', estimatedTime: 0, outputSize: 850e6, outputPath: '/exports/testimonial-4k.mp4' },
-  { id: '4', projectId: '3', projectName: 'Tutorial Series Ep. 1', preset: 'youtube', status: 'completed', progress: 100, startTime: '2024-01-12T14:00:00Z', estimatedTime: 0, outputSize: 420e6, outputPath: '/exports/tutorial-ep1.mp4' }
-]
-
-const mockEffects: Effect[] = [
-  { id: '1', name: 'Color Correction', category: 'color', intensity: 75, enabled: true, parameters: { brightness: 10, contrast: 15, saturation: 5 } },
-  { id: '2', name: 'Gaussian Blur', category: 'blur', intensity: 50, enabled: false, parameters: { radius: 5 } },
-  { id: '3', name: 'Film Grain', category: 'stylize', intensity: 30, enabled: true, parameters: { amount: 20, size: 2 } },
-  { id: '4', name: 'Lens Distortion', category: 'distort', intensity: 25, enabled: false, parameters: { curvature: 10 } },
-  { id: '5', name: 'Cross Dissolve', category: 'transition', intensity: 100, enabled: true, parameters: { duration: 1 } },
-  { id: '6', name: 'Audio Fade', category: 'audio', intensity: 80, enabled: true, parameters: { fadeIn: 0.5, fadeOut: 1 } }
-]
-
-// Enhanced Competitive Upgrade Mock Data
-const mockVideoStudioAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Render Complete', description: '4K export finished in record time. GPU optimization working well.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Rendering' },
-  { id: '2', type: 'info' as const, title: 'AI Enhancement', description: 'Auto color grading improved viewer retention by 18%.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'AI' },
-  { id: '3', type: 'warning' as const, title: 'Storage Alert', description: 'Project storage at 85%. Archive old projects recommended.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Storage' },
-]
-
-const mockVideoStudioCollaborators = [
-  { id: '1', name: 'Video Editor', avatar: '/avatars/editor.jpg', status: 'online' as const, role: 'Editor' },
-  { id: '2', name: 'Colorist', avatar: '/avatars/colorist.jpg', status: 'online' as const, role: 'Colorist' },
-  { id: '3', name: 'Sound Designer', avatar: '/avatars/sound.jpg', status: 'busy' as const, role: 'Audio' },
-]
-
-const mockVideoStudioPredictions = [
-  { id: '1', title: 'Render Queue', prediction: 'All renders complete by 3 PM', confidence: 92, trend: 'stable' as const, impact: 'high' as const },
-  { id: '2', title: 'Project Deadline', prediction: 'Current project on track for Friday', confidence: 85, trend: 'stable' as const, impact: 'medium' as const },
-]
-
-const mockVideoStudioActivities = [
-  { id: '1', user: 'Render Engine', action: 'Completed render', target: 'Brand Video Final Cut', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'AI Assistant', action: 'Auto-enhanced', target: 'Audio levels in Scene 3', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'Editor', action: 'Saved version', target: 'v4.2 with new intro', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
-]
+// Empty competitive upgrade data arrays
+const emptyAIInsights: { id: string; type: 'success' | 'info' | 'warning' | 'error'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
+const emptyCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'offline' | 'busy'; role: string }[] = []
+const emptyPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: 'low' | 'medium' | 'high' }[] = []
+const emptyActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' | 'error' | 'update' }[] = []
 
 // Quick actions will be initialized in the component to access state setters
 
 export default function VideoStudioClient() {
-  const [projects] = useState<VideoProject[]>(mockProjects)
-  const [assets] = useState<Asset[]>(mockAssets)
-  const [templates] = useState<Template[]>(mockTemplates)
-  const [renderJobs] = useState<RenderJob[]>(mockRenderJobs)
-  const [effects] = useState<Effect[]>(mockEffects)
+  const [projects] = useState<VideoProject[]>(emptyProjects)
+  const [assets] = useState<Asset[]>(emptyAssets)
+  const [templates] = useState<Template[]>(emptyTemplates)
+  const [renderJobs] = useState<RenderJob[]>(emptyRenderJobs)
+  const [effects] = useState<Effect[]>(emptyEffects)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedProject, setSelectedProject] = useState<VideoProject | null>(null)
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null)
@@ -2283,18 +2142,18 @@ export default function VideoStudioClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockVideoStudioAIInsights}
+              insights={emptyAIInsights}
               title="Studio Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockVideoStudioCollaborators}
+              collaborators={emptyCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockVideoStudioPredictions}
+              predictions={emptyPredictions}
               title="Production Forecasts"
             />
           </div>
@@ -2302,7 +2161,7 @@ export default function VideoStudioClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockVideoStudioActivities}
+            activities={emptyActivities}
             title="Studio Activity"
             maxItems={5}
           />

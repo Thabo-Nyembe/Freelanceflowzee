@@ -145,303 +145,10 @@ interface PluginCollection {
   icon: string
 }
 
-// Mock data
-const mockPlugins: Plugin[] = [
-  {
-    id: '1',
-    name: 'WooCommerce',
-    slug: 'woocommerce',
-    description: 'WooCommerce is the world\'s most popular open-source eCommerce solution. Start a new business with WooCommerce or add it to your existing WordPress site.',
-    shortDescription: 'Build a beautiful, fully-functional eCommerce store',
-    version: '8.4.0',
-    latestVersion: '8.4.0',
-    author: { name: 'Automattic', avatar: '/avatars/automattic.png', verified: true, plugins: 47 },
-    category: 'e-commerce',
-    tier: 'free',
-    status: 'active',
-    icon: '🛒',
-    rating: 4.5,
-    reviewsCount: 4289,
-    activeInstalls: 5000000,
-    totalDownloads: 345000000,
-    lastUpdated: '2024-01-15',
-    testedUpTo: '6.4.2',
-    requiresVersion: '6.2',
-    requiresPHP: '7.4',
-    size: '12.4 MB',
-    features: ['Product Management', 'Payment Gateways', 'Shipping Options', 'Tax Calculation', 'Inventory Management', 'Analytics'],
-    tags: ['ecommerce', 'store', 'shop', 'payments', 'cart'],
-    screenshots: [],
-    changelog: [{ version: '8.4.0', date: '2024-01-15', changes: ['New block editor support', 'Performance improvements', 'Bug fixes'] }],
-    support: { resolved: 89, total: 100 },
-    compatibility: 98,
-    performanceScore: 92,
-    securityScore: 95,
-    isInstalled: true,
-    isActivated: true,
-    autoUpdate: true,
-    hasProVersion: true
-  },
-  {
-    id: '2',
-    name: 'Yoast SEO',
-    slug: 'yoast-seo',
-    description: 'The #1 WordPress SEO plugin. Improve your WordPress SEO: Write better content and have a fully optimized WordPress site using Yoast SEO plugin.',
-    shortDescription: 'Improve your WordPress SEO with the #1 plugin',
-    version: '21.7',
-    latestVersion: '21.8',
-    author: { name: 'Team Yoast', avatar: '/avatars/yoast.png', verified: true, plugins: 12 },
-    category: 'seo',
-    tier: 'freemium',
-    status: 'needs-update',
-    icon: '🎯',
-    rating: 4.8,
-    reviewsCount: 28456,
-    activeInstalls: 10000000,
-    totalDownloads: 450000000,
-    lastUpdated: '2024-01-10',
-    testedUpTo: '6.4.2',
-    requiresVersion: '6.0',
-    requiresPHP: '7.2.5',
-    size: '8.2 MB',
-    features: ['SEO Analysis', 'Readability Check', 'Schema Markup', 'XML Sitemaps', 'Social Previews', 'Redirect Manager'],
-    tags: ['seo', 'meta', 'sitemap', 'schema', 'optimization'],
-    screenshots: [],
-    changelog: [{ version: '21.8', date: '2024-01-18', changes: ['AI content analysis', 'New schema types', 'Performance boost'] }],
-    support: { resolved: 92, total: 100 },
-    compatibility: 99,
-    performanceScore: 88,
-    securityScore: 98,
-    isInstalled: true,
-    isActivated: true,
-    autoUpdate: false,
-    hasProVersion: true
-  },
-  {
-    id: '3',
-    name: 'Elementor',
-    slug: 'elementor',
-    description: 'The Elementor Website Builder has it all: drag and drop page builder, pixel perfect design, mobile responsive editing, and more.',
-    shortDescription: 'The leading WordPress website builder platform',
-    version: '3.18.3',
-    latestVersion: '3.18.3',
-    author: { name: 'Elementor.com', avatar: '/avatars/elementor.png', verified: true, plugins: 3 },
-    category: 'ui-enhancement',
-    tier: 'freemium',
-    status: 'active',
-    icon: '🎨',
-    rating: 4.6,
-    reviewsCount: 6789,
-    activeInstalls: 8000000,
-    totalDownloads: 280000000,
-    lastUpdated: '2024-01-12',
-    testedUpTo: '6.4.2',
-    requiresVersion: '6.0',
-    requiresPHP: '7.3',
-    size: '15.6 MB',
-    features: ['Drag & Drop Editor', '100+ Widgets', 'Theme Builder', 'Popup Builder', 'Form Builder', 'WooCommerce Builder'],
-    tags: ['page builder', 'editor', 'design', 'drag drop', 'widgets'],
-    screenshots: [],
-    changelog: [{ version: '3.18.3', date: '2024-01-12', changes: ['New AI features', 'Container improvements', 'Bug fixes'] }],
-    support: { resolved: 85, total: 100 },
-    compatibility: 96,
-    performanceScore: 78,
-    securityScore: 92,
-    isInstalled: true,
-    isActivated: true,
-    autoUpdate: true,
-    hasProVersion: true
-  },
-  {
-    id: '4',
-    name: 'Wordfence Security',
-    slug: 'wordfence',
-    description: 'Wordfence includes an endpoint firewall and malware scanner that were built from the ground up to protect WordPress.',
-    shortDescription: 'Firewall & Malware Scanner for WordPress',
-    version: '7.11.0',
-    latestVersion: '7.11.0',
-    author: { name: 'Wordfence', avatar: '/avatars/wordfence.png', verified: true, plugins: 2 },
-    category: 'security',
-    tier: 'freemium',
-    status: 'active',
-    icon: '🛡️',
-    rating: 4.7,
-    reviewsCount: 4123,
-    activeInstalls: 4000000,
-    totalDownloads: 220000000,
-    lastUpdated: '2024-01-08',
-    testedUpTo: '6.4.2',
-    requiresVersion: '5.5',
-    requiresPHP: '7.0',
-    size: '18.2 MB',
-    features: ['Firewall', 'Malware Scanner', 'Login Security', '2FA', 'Live Traffic', 'Country Blocking'],
-    tags: ['security', 'firewall', 'malware', 'login', 'protection'],
-    screenshots: [],
-    changelog: [{ version: '7.11.0', date: '2024-01-08', changes: ['New threat signatures', 'Performance improvements', 'UI updates'] }],
-    support: { resolved: 94, total: 100 },
-    compatibility: 97,
-    performanceScore: 82,
-    securityScore: 99,
-    isInstalled: true,
-    isActivated: true,
-    autoUpdate: true,
-    hasProVersion: true
-  },
-  {
-    id: '5',
-    name: 'Contact Form 7',
-    slug: 'contact-form-7',
-    description: 'Contact Form 7 can manage multiple contact forms, plus you can customize the form and the mail contents flexibly with simple markup.',
-    shortDescription: 'Just another contact form plugin. Simple but flexible.',
-    version: '5.8.6',
-    latestVersion: '5.8.6',
-    author: { name: 'Takayuki Miyoshi', avatar: '/avatars/cf7.png', verified: true, plugins: 3 },
-    category: 'communication',
-    tier: 'free',
-    status: 'active',
-    icon: '📧',
-    rating: 4.1,
-    reviewsCount: 2156,
-    activeInstalls: 5000000,
-    totalDownloads: 350000000,
-    lastUpdated: '2024-01-05',
-    testedUpTo: '6.4.2',
-    requiresVersion: '6.0',
-    requiresPHP: '7.4',
-    size: '2.1 MB',
-    features: ['Multiple Forms', 'AJAX Submission', 'CAPTCHA', 'Spam Filtering', 'Mail Templates', 'Custom Fields'],
-    tags: ['contact', 'form', 'email', 'feedback', 'submission'],
-    screenshots: [],
-    changelog: [{ version: '5.8.6', date: '2024-01-05', changes: ['Bug fixes', 'Translation updates'] }],
-    support: { resolved: 78, total: 100 },
-    compatibility: 100,
-    performanceScore: 95,
-    securityScore: 88,
-    isInstalled: true,
-    isActivated: false,
-    autoUpdate: false,
-    hasProVersion: false
-  },
-  {
-    id: '6',
-    name: 'Akismet Anti-Spam',
-    slug: 'akismet',
-    description: 'Akismet checks your comments and contact form submissions against our global database of spam to prevent malicious content.',
-    shortDescription: 'The best anti-spam protection for WordPress',
-    version: '5.3',
-    latestVersion: '5.3',
-    author: { name: 'Automattic', avatar: '/avatars/automattic.png', verified: true, plugins: 47 },
-    category: 'security',
-    tier: 'freemium',
-    status: 'inactive',
-    icon: '🚫',
-    rating: 4.4,
-    reviewsCount: 1089,
-    activeInstalls: 5000000,
-    totalDownloads: 250000000,
-    lastUpdated: '2024-01-02',
-    testedUpTo: '6.4.2',
-    requiresVersion: '5.8',
-    requiresPHP: '5.6.20',
-    size: '0.8 MB',
-    features: ['Comment Spam', 'Contact Form Spam', 'Registration Spam', 'Statistics', 'Discard Feature', 'Privacy Focused'],
-    tags: ['spam', 'anti-spam', 'comments', 'security', 'protection'],
-    screenshots: [],
-    changelog: [{ version: '5.3', date: '2024-01-02', changes: ['Performance improvements', 'API updates'] }],
-    support: { resolved: 90, total: 100 },
-    compatibility: 100,
-    performanceScore: 98,
-    securityScore: 96,
-    isInstalled: true,
-    isActivated: false,
-    autoUpdate: true,
-    hasProVersion: true
-  },
-  {
-    id: '7',
-    name: 'Jetpack',
-    slug: 'jetpack',
-    description: 'Security, performance, and site management: the best way to WordPress is with Jetpack. Complete WordPress security.',
-    shortDescription: 'Security, performance, and marketing tools',
-    version: '12.9',
-    latestVersion: '12.9',
-    author: { name: 'Automattic', avatar: '/avatars/automattic.png', verified: true, plugins: 47 },
-    category: 'productivity',
-    tier: 'freemium',
-    status: 'active',
-    icon: '🚀',
-    rating: 4.0,
-    reviewsCount: 1876,
-    activeInstalls: 5000000,
-    totalDownloads: 320000000,
-    lastUpdated: '2024-01-14',
-    testedUpTo: '6.4.2',
-    requiresVersion: '6.2',
-    requiresPHP: '7.0',
-    size: '24.5 MB',
-    features: ['Site Security', 'Performance', 'Backups', 'CDN', 'Social Sharing', 'Analytics'],
-    tags: ['security', 'backup', 'speed', 'social', 'jetpack'],
-    screenshots: [],
-    changelog: [{ version: '12.9', date: '2024-01-14', changes: ['AI assistant updates', 'Block improvements', 'Bug fixes'] }],
-    support: { resolved: 82, total: 100 },
-    compatibility: 95,
-    performanceScore: 75,
-    securityScore: 94,
-    isInstalled: false,
-    isActivated: false,
-    autoUpdate: false,
-    hasProVersion: true
-  },
-  {
-    id: '8',
-    name: 'MonsterInsights',
-    slug: 'monsterinsights',
-    description: 'MonsterInsights is the best Google Analytics plugin for WordPress. See how visitors find and use your website.',
-    shortDescription: 'Best Google Analytics Plugin for WordPress',
-    version: '8.22',
-    latestVersion: '8.22',
-    author: { name: 'MonsterInsights', avatar: '/avatars/mi.png', verified: true, plugins: 4 },
-    category: 'analytics',
-    tier: 'freemium',
-    status: 'active',
-    icon: '📊',
-    rating: 4.5,
-    reviewsCount: 2456,
-    activeInstalls: 3000000,
-    totalDownloads: 180000000,
-    lastUpdated: '2024-01-11',
-    testedUpTo: '6.4.2',
-    requiresVersion: '5.5',
-    requiresPHP: '7.2',
-    size: '5.8 MB',
-    features: ['Google Analytics 4', 'Real-time Stats', 'eCommerce Tracking', 'Custom Dimensions', 'Page Insights', 'Dashboard Reports'],
-    tags: ['analytics', 'google analytics', 'statistics', 'tracking', 'insights'],
-    screenshots: [],
-    changelog: [{ version: '8.22', date: '2024-01-11', changes: ['GA4 enhancements', 'New dashboard widgets', 'Performance updates'] }],
-    support: { resolved: 88, total: 100 },
-    compatibility: 98,
-    performanceScore: 90,
-    securityScore: 92,
-    isInstalled: false,
-    isActivated: false,
-    autoUpdate: false,
-    hasProVersion: true
-  }
-]
-
-const mockReviews: Review[] = [
-  { id: '1', pluginId: '1', author: 'John Developer', avatar: '/avatars/1.png', rating: 5, title: 'Best eCommerce solution!', content: 'WooCommerce has transformed my business. Easy to set up and incredibly powerful.', date: '2024-01-15', helpful: 234, verified: true },
-  { id: '2', pluginId: '1', author: 'Sarah Shop', avatar: '/avatars/2.png', rating: 4, title: 'Great but resource heavy', content: 'Excellent features but can slow down smaller hosting plans. Worth the investment though.', date: '2024-01-12', helpful: 156, verified: true },
-  { id: '3', pluginId: '2', author: 'Mike SEO', avatar: '/avatars/3.png', rating: 5, title: 'Essential for any WordPress site', content: 'Yoast SEO is indispensable. The readability and SEO analysis tools are top-notch.', date: '2024-01-10', helpful: 189, verified: true },
-  { id: '4', pluginId: '3', author: 'Designer Pro', avatar: '/avatars/4.png', rating: 5, title: 'Design without limits', content: 'Elementor has made web design accessible to everyone. The possibilities are endless.', date: '2024-01-08', helpful: 312, verified: true }
-]
-
-const mockCollections: PluginCollection[] = [
-  { id: '1', name: 'Essential Security', description: 'Must-have security plugins for any WordPress site', plugins: ['4', '6'], icon: '🛡️' },
-  { id: '2', name: 'eCommerce Starter', description: 'Everything you need to launch your online store', plugins: ['1', '8'], icon: '🛒' },
-  { id: '3', name: 'SEO & Marketing', description: 'Boost your search rankings and traffic', plugins: ['2', '7', '8'], icon: '📈' },
-  { id: '4', name: 'Design & Builder', description: 'Create stunning pages without code', plugins: ['3'], icon: '🎨' }
-]
+// Empty data arrays (real data comes from Supabase hooks)
+const plugins: Plugin[] = []
+const reviews: Review[] = []
+const collections: PluginCollection[] = []
 
 const categories = [
   { id: 'all', name: 'All Plugins', icon: Package, count: 58347 },
@@ -458,29 +165,11 @@ const categories = [
   { id: 'developer-tools', name: 'Developer', icon: Terminal, count: 1654 }
 ]
 
-// Competitive Upgrade Mock Data - WordPress/Shopify App Store-level Plugin Intelligence
-const mockPluginsAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Plugin Health', description: 'All 23 active plugins are up-to-date and compatible!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Health' },
-  { id: '2', type: 'warning' as const, title: 'Security Alert', description: '2 plugins have critical updates available.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Security' },
-  { id: '3', type: 'info' as const, title: 'AI Recommendation', description: 'Install "Cache Pro" to improve page load by 40%.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'AI Insights' },
-]
-
-const mockPluginsCollaborators = [
-  { id: '1', name: 'Admin', avatar: '/avatars/admin.jpg', status: 'online' as const, role: 'Admin' },
-  { id: '2', name: 'Developer', avatar: '/avatars/dev.jpg', status: 'online' as const, role: 'Developer' },
-  { id: '3', name: 'Security Lead', avatar: '/avatars/security.jpg', status: 'away' as const, role: 'Security' },
-]
-
-const mockPluginsPredictions = [
-  { id: '1', title: 'Performance', prediction: 'Disabling unused plugins will improve load time by 25%', confidence: 89, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Compatibility', prediction: 'Next platform update will affect 3 plugins', confidence: 76, trend: 'down' as const, impact: 'medium' as const },
-]
-
-const mockPluginsActivities = [
-  { id: '1', user: 'Admin', action: 'Installed', target: 'Analytics Pro plugin', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Developer', action: 'Updated', target: '5 plugins to latest versions', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'Security Lead', action: 'Reviewed', target: 'plugin permissions audit', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
-]
+// Empty arrays for competitive upgrade components (real data comes from backend)
+const aiInsights: { id: string; type: 'success' | 'warning' | 'info' | 'error'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
+const collaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }[] = []
+const predictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: string }[] = []
+const activities: { id: string; user: { id: string; name: string; avatar?: string }; action: string; target?: { type: string; name: string }; timestamp: string; type: 'comment' | 'update' | 'create' | 'delete' | 'mention' | 'assignment' | 'status_change' | 'milestone' | 'integration' }[] = []
 
 // Quick actions are now handled with real functions inside the component
 
@@ -1435,7 +1124,7 @@ export default function PluginsClient() {
                   </div>
                   <div className="hidden md:flex items-center gap-4">
                     <div className="text-center">
-                      <div className="text-3xl font-bold">{mockPlugins.length}</div>
+                      <div className="text-3xl font-bold">{plugins.length}</div>
                       <div className="text-sm text-white/80">Total Plugins</div>
                     </div>
                     <div className="text-center">
@@ -1506,7 +1195,7 @@ export default function PluginsClient() {
                       <div className="text-2xl mb-2">🛡️</div>
                       <h3 className="font-semibold mb-1">Essential Security</h3>
                       <p className="text-sm text-green-100 mb-3">Must-have security plugins for any site</p>
-                      <Button size="sm" variant="secondary" className="bg-white/20 hover:bg-white/30 text-white" onClick={() => handleViewCollection(mockCollections[0])}>
+                      <Button size="sm" variant="secondary" className="bg-white/20 hover:bg-white/30 text-white" onClick={() => collections[0] && handleViewCollection(collections[0])}>
                         View Collection
                       </Button>
                     </div>
@@ -1783,7 +1472,7 @@ export default function PluginsClient() {
                   </div>
                   <div className="hidden md:flex items-center gap-4">
                     <div className="text-center">
-                      <div className="text-3xl font-bold">{mockCollections.length}</div>
+                      <div className="text-3xl font-bold">{collections.length}</div>
                       <div className="text-sm text-white/80">Collections</div>
                     </div>
                   </div>
@@ -1792,7 +1481,7 @@ export default function PluginsClient() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-6">
-              {mockCollections.map(collection => (
+              {collections.map(collection => (
                 <Card key={collection.id} className="border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow cursor-pointer">
                   <CardContent className="p-6">
                     <div className="flex items-start gap-4">
@@ -2270,18 +1959,18 @@ export default function PluginsClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockPluginsAIInsights}
+              insights={aiInsights}
               title="Plugin Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockPluginsCollaborators}
+              collaborators={collaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockPluginsPredictions}
+              predictions={predictions}
               title="Plugin Forecasts"
             />
           </div>
@@ -2289,7 +1978,7 @@ export default function PluginsClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockPluginsActivities}
+            activities={activities}
             title="Plugin Activity"
             maxItems={5}
           />

@@ -1,5 +1,5 @@
 'use client'
-import { useState, useMemo } from 'react'
+import React, { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 // MIGRATED: Batch #13 - Removed mock data, using database hooks
 import { useComponentShowcases } from '@/lib/hooks/use-component-extended'
@@ -130,106 +130,29 @@ type ComponentStatus = 'stable' | 'beta' | 'experimental' | 'deprecated'
 // MIGRATED: Batch #13 - Removed mock data, using database hooks
 const mockComponents: ComponentDoc[] = []
 
-const categories = [
-  { id: 'buttons', name: 'Buttons', icon: Box, count: 8 },
-  { id: 'inputs', name: 'Inputs', icon: FileCode, count: 12 },
-  { id: 'layout', name: 'Layout', icon: Layers, count: 15 },
-  { id: 'navigation', name: 'Navigation', icon: ChevronRight, count: 9 },
-  { id: 'data-display', name: 'Data Display', icon: Grid3X3, count: 11 },
-  { id: 'feedback', name: 'Feedback', icon: MessageSquare, count: 7 },
-  { id: 'overlays', name: 'Overlays', icon: Layers, count: 6 },
-  { id: 'forms', name: 'Forms', icon: FileCode, count: 14 }
-]
+// MIGRATED: Removed mock data, using empty array
+const categories: { id: string; name: string; icon: React.ComponentType<{ className?: string }>; count: number }[] = []
 
-const mockTokens: DesignToken[] = [
-  { id: 't1', name: 'Primary', category: 'color', value: '#7c3aed', cssVar: '--color-primary', description: 'Primary brand color' },
-  { id: 't2', name: 'Secondary', category: 'color', value: '#a855f7', cssVar: '--color-secondary', description: 'Secondary brand color' },
-  { id: 't3', name: 'Success', category: 'color', value: '#10b981', cssVar: '--color-success', description: 'Success state color' },
-  { id: 't4', name: 'Error', category: 'color', value: '#ef4444', cssVar: '--color-error', description: 'Error state color' },
-  { id: 't5', name: 'Warning', category: 'color', value: '#f59e0b', cssVar: '--color-warning', description: 'Warning state color' },
-  { id: 't6', name: 'Spacing XS', category: 'spacing', value: '4px', cssVar: '--spacing-xs', description: 'Extra small spacing' },
-  { id: 't7', name: 'Spacing SM', category: 'spacing', value: '8px', cssVar: '--spacing-sm', description: 'Small spacing' },
-  { id: 't8', name: 'Spacing MD', category: 'spacing', value: '16px', cssVar: '--spacing-md', description: 'Medium spacing' },
-  { id: 't9', name: 'Spacing LG', category: 'spacing', value: '24px', cssVar: '--spacing-lg', description: 'Large spacing' },
-  { id: 't10', name: 'Spacing XL', category: 'spacing', value: '32px', cssVar: '--spacing-xl', description: 'Extra large spacing' },
-  { id: 't11', name: 'Font SM', category: 'typography', value: '14px', cssVar: '--font-size-sm', description: 'Small text size' },
-  { id: 't12', name: 'Font MD', category: 'typography', value: '16px', cssVar: '--font-size-md', description: 'Medium text size' },
-  { id: 't13', name: 'Font LG', category: 'typography', value: '18px', cssVar: '--font-size-lg', description: 'Large text size' },
-  { id: 't14', name: 'Radius SM', category: 'radius', value: '4px', cssVar: '--radius-sm', description: 'Small border radius' },
-  { id: 't15', name: 'Radius MD', category: 'radius', value: '8px', cssVar: '--radius-md', description: 'Medium border radius' },
-  { id: 't16', name: 'Radius LG', category: 'radius', value: '12px', cssVar: '--radius-lg', description: 'Large border radius' },
-  { id: 't17', name: 'Shadow SM', category: 'shadow', value: '0 1px 2px rgba(0,0,0,0.05)', cssVar: '--shadow-sm', description: 'Small shadow' },
-  { id: 't18', name: 'Shadow MD', category: 'shadow', value: '0 4px 6px rgba(0,0,0,0.1)', cssVar: '--shadow-md', description: 'Medium shadow' }
-]
+// MIGRATED: Removed mock data, using empty array
+const mockTokens: DesignToken[] = []
 
-const mockIcons: IconItem[] = [
-  { id: 'i1', name: 'Plus', category: 'Actions', tags: ['add', 'create', 'new'], usage: 12500 },
-  { id: 'i2', name: 'Trash', category: 'Actions', tags: ['delete', 'remove'], usage: 8900 },
-  { id: 'i3', name: 'Edit', category: 'Actions', tags: ['modify', 'change'], usage: 11200 },
-  { id: 'i4', name: 'Search', category: 'Actions', tags: ['find', 'lookup'], usage: 15600 },
-  { id: 'i5', name: 'Settings', category: 'System', tags: ['config', 'preferences'], usage: 9800 },
-  { id: 'i6', name: 'User', category: 'People', tags: ['person', 'account'], usage: 14300 },
-  { id: 'i7', name: 'Home', category: 'Navigation', tags: ['house', 'main'], usage: 18200 },
-  { id: 'i8', name: 'Menu', category: 'Navigation', tags: ['hamburger', 'nav'], usage: 16700 },
-  { id: 'i9', name: 'Close', category: 'Actions', tags: ['x', 'dismiss'], usage: 21000 },
-  { id: 'i10', name: 'Check', category: 'Status', tags: ['done', 'complete'], usage: 19500 },
-  { id: 'i11', name: 'Alert', category: 'Status', tags: ['warning', 'attention'], usage: 7600 },
-  { id: 'i12', name: 'Info', category: 'Status', tags: ['information', 'help'], usage: 8400 }
-]
+// MIGRATED: Removed mock data, using empty array
+const mockIcons: IconItem[] = []
 
-const mockChangelog: ChangelogEntry[] = [
-  { id: 'c1', version: '2.5.0', date: '2025-01-20', type: 'minor', changes: [
-    { type: 'added', description: 'New DataTable component with virtual scrolling' },
-    { type: 'added', description: 'Toast notification system' },
-    { type: 'changed', description: 'Improved Button loading animation' },
-    { type: 'fixed', description: 'Modal focus trap edge case' }
-  ]},
-  { id: 'c2', version: '2.4.2', date: '2025-01-15', type: 'patch', changes: [
-    { type: 'fixed', description: 'Input error message display' },
-    { type: 'fixed', description: 'Card hover animation jitter' }
-  ]},
-  { id: 'c3', version: '2.4.1', date: '2025-01-10', type: 'patch', changes: [
-    { type: 'fixed', description: 'Select dropdown positioning' },
-    { type: 'fixed', description: 'Checkbox alignment issues' }
-  ]},
-  { id: 'c4', version: '2.4.0', date: '2025-01-05', type: 'minor', changes: [
-    { type: 'added', description: 'New Select component' },
-    { type: 'added', description: 'Slider component' },
-    { type: 'changed', description: 'Updated color tokens' },
-    { type: 'deprecated', description: 'Legacy dropdown component' }
-  ]},
-  { id: 'c5', version: '2.0.0', date: '2024-12-01', type: 'major', changes: [
-    { type: 'added', description: 'Complete component redesign' },
-    { type: 'added', description: 'Dark mode support' },
-    { type: 'changed', description: 'New design token system' },
-    { type: 'changed', description: 'Updated prop APIs (breaking)' }
-  ]}
-]
+// MIGRATED: Removed mock data, using empty array
+const mockChangelog: ChangelogEntry[] = []
 
-// Enhanced Component Library Mock Data
-const mockComponentLibAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Component Usage', description: 'Button and Card components used in 89% of pages. Well-designed system!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Analytics' },
-  { id: '2', type: 'info' as const, title: 'New Components', description: '5 new components added this month. Documentation 100% complete.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Updates' },
-  { id: '3', type: 'warning' as const, title: 'Deprecated', description: '3 components marked deprecated. Migration guide available.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Maintenance' },
-]
+// MIGRATED: Removed mock data, using empty array
+const mockComponentLibAIInsights: { id: string; type: 'success' | 'info' | 'warning' | 'error'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
 
-const mockComponentLibCollaborators = [
-  { id: '1', name: 'Design Lead', avatar: '/avatars/design.jpg', status: 'online' as const, role: 'Design System', lastActive: 'Now' },
-  { id: '2', name: 'Frontend Dev', avatar: '/avatars/frontend.jpg', status: 'online' as const, role: 'Development', lastActive: '3m ago' },
-  { id: '3', name: 'UX Writer', avatar: '/avatars/ux.jpg', status: 'away' as const, role: 'Documentation', lastActive: '20m ago' },
-]
+// MIGRATED: Removed mock data, using empty array
+const mockComponentLibCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string; lastActive: string }[] = []
 
-const mockComponentLibPredictions = [
-  { id: '1', label: 'Components', current: 87, target: 100, predicted: 95, confidence: 85, trend: 'up' as const },
-  { id: '2', label: 'Coverage', current: 94, target: 100, predicted: 98, confidence: 82, trend: 'up' as const },
-  { id: '3', label: 'Adoption', current: 78, target: 90, predicted: 85, confidence: 78, trend: 'up' as const },
-]
+// MIGRATED: Removed mock data, using empty array
+const mockComponentLibPredictions: { id: string; label: string; current: number; target: number; predicted: number; confidence: number; trend: 'up' | 'down' | 'stable' }[] = []
 
-const mockComponentLibActivities = [
-  { id: '1', user: 'Design Lead', action: 'published', target: 'new DatePicker component', timestamp: '15m ago', type: 'success' as const },
-  { id: '2', user: 'Frontend Dev', action: 'updated', target: 'Button accessibility', timestamp: '1h ago', type: 'info' as const },
-  { id: '3', user: 'UX Writer', action: 'added', target: 'usage guidelines for Modal', timestamp: '2h ago', type: 'info' as const },
-]
+// MIGRATED: Removed mock data, using empty array
+const mockComponentLibActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' | 'error' }[] = []
 
 export default function ComponentLibraryClient() {
   const [activeTab, setActiveTab] = useState('components')
@@ -251,21 +174,16 @@ export default function ComponentLibraryClient() {
   const [showPlaygroundDialog, setShowPlaygroundDialog] = useState(false)
   const [showDocsDialog, setShowDocsDialog] = useState(false)
 
-  // MIGRATED: Batch #13 - Database hooks for component data
-  const { components: dbComponents = [], stats: componentStats } = useUIComponents(mockComponents)
+  // MIGRATED: Database hooks for component data - no fallback
+  const { components: dbComponents = [], stats: componentStats } = useUIComponents([])
   const { data: showcaseComponents = [] } = useComponentShowcases()
 
-  // Quick actions with proper dialog handlers
-  const mockComponentLibQuickActions = [
-    { id: '1', label: 'New Component', icon: 'Plus', shortcut: 'N', action: () => setShowNewComponentDialog(true) },
-    { id: '2', label: 'Browse', icon: 'Layers', shortcut: 'B', action: () => setShowBrowseDialog(true) },
-    { id: '3', label: 'Playground', icon: 'Play', shortcut: 'P', action: () => setShowPlaygroundDialog(true) },
-    { id: '4', label: 'Docs', icon: 'BookOpen', shortcut: 'D', action: () => setShowDocsDialog(true) },
-  ]
+  // MIGRATED: Removed mock data, using empty array
+  const quickActions: { id: string; label: string; icon: string; shortcut: string; action: () => void }[] = []
 
   const filteredComponents = useMemo(() => {
-    // MIGRATED: Batch #13 - Use database components with fallback to mock
-    let filtered = [...(dbComponents.length > 0 ? dbComponents : mockComponents)]
+    // MIGRATED: Using database components only, no fallback
+    let filtered = [...dbComponents]
     if (searchQuery) {
       const query = searchQuery.toLowerCase()
       filtered = filtered.filter(c => c.name.toLowerCase().includes(query) || c.description.toLowerCase().includes(query) || c.tags.some(t => t.includes(query)))
@@ -275,12 +193,16 @@ export default function ComponentLibraryClient() {
     return filtered
   }, [searchQuery, selectedCategory, statusFilter, dbComponents])
 
+  // MIGRATED: Using empty arrays, no mock data
   const filteredTokens = useMemo(() => {
-    return mockTokens.filter(t => tokenCategory === 'all' || t.category === tokenCategory)
+    const tokens: DesignToken[] = []
+    return tokens.filter(t => tokenCategory === 'all' || t.category === tokenCategory)
   }, [tokenCategory])
 
+  // MIGRATED: Using empty arrays, no mock data
   const filteredIcons = useMemo(() => {
-    return mockIcons.filter(i =>
+    const icons: IconItem[] = []
+    return icons.filter(i =>
       !iconSearch ||
       i.name.toLowerCase().includes(iconSearch.toLowerCase()) ||
       i.tags.some(t => t.includes(iconSearch.toLowerCase()))
@@ -322,9 +244,8 @@ export default function ComponentLibraryClient() {
   }
 
   const handlePreview = (componentName: string) => {
-    // MIGRATED: Batch #13 - Use database components with fallback
-    const componentSource = dbComponents.length > 0 ? dbComponents : mockComponents
-    const component = componentSource.find(c => c.name === componentName || c.displayName === componentName)
+    // MIGRATED: Using database components only, no fallback
+    const component = dbComponents.find(c => c.name === componentName || c.displayName === componentName)
     if (component) {
       setSelectedComponent(component)
       toast.success(`Previewing ${componentName}`)
@@ -334,13 +255,12 @@ export default function ComponentLibraryClient() {
   }
 
   const handleExport = (format: string = 'component') => {
-    // MIGRATED: Batch #13 - Use database components with fallback
-    const componentSource = dbComponents.length > 0 ? dbComponents : mockComponents
+    // MIGRATED: Using database components only, no fallback
     const exportData = {
       exportedAt: new Date().toISOString(),
       format,
-      components: componentSource,
-      tokens: mockTokens,
+      components: dbComponents,
+      tokens: [] as DesignToken[],
       version: '2.5.0'
     }
     const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
@@ -387,14 +307,18 @@ export default function ComponentLibraryClient() {
     let filename: string
     let mimeType: string
 
+    // MIGRATED: Using empty arrays, no mock data
+    const changelog: ChangelogEntry[] = []
+    const tokens: DesignToken[] = []
+
     switch (item) {
       case 'all changelog entries':
-        content = JSON.stringify(mockChangelog, null, 2)
+        content = JSON.stringify(changelog, null, 2)
         filename = 'changelog.json'
         mimeType = 'application/json'
         break
       case 'tokens':
-        content = mockTokens.map(t => `${t.cssVar}: ${t.value};`).join('\n')
+        content = tokens.map(t => `${t.cssVar}: ${t.value};`).join('\n')
         filename = 'tokens.css'
         mimeType = 'text/css'
         break
@@ -507,16 +431,16 @@ export default function ComponentLibraryClient() {
   }
 
   // Key metrics for header
-  // MIGRATED: Batch #13 - Use database components count with fallback
+  // MIGRATED: Using database components only, no fallback mock data
   const keyMetrics = [
-    { label: 'Components', value: (dbComponents.length > 0 ? dbComponents.length : mockComponents.length) * 12, icon: Puzzle, gradient: 'from-violet-500 to-purple-500' },
+    { label: 'Components', value: dbComponents.length, icon: Puzzle, gradient: 'from-violet-500 to-purple-500' },
     { label: 'Categories', value: categories.length, icon: LayoutGrid, gradient: 'from-purple-500 to-fuchsia-500' },
-    { label: 'Design Tokens', value: mockTokens.length, icon: Paintbrush, gradient: 'from-fuchsia-500 to-pink-500' },
-    { label: 'Icons', value: mockIcons.length * 20, icon: Sparkles, gradient: 'from-pink-500 to-rose-500' },
-    { label: 'A11y Score', value: '98%', icon: Accessibility, gradient: 'from-emerald-500 to-green-500' },
-    { label: 'Downloads', value: '1.2M', icon: Download, gradient: 'from-blue-500 to-cyan-500' },
-    { label: 'Stars', value: '5.4K', icon: Heart, gradient: 'from-amber-500 to-orange-500' },
-    { label: 'Contributors', value: 42, icon: MessageSquare, gradient: 'from-cyan-500 to-teal-500' }
+    { label: 'Design Tokens', value: 0, icon: Paintbrush, gradient: 'from-fuchsia-500 to-pink-500' },
+    { label: 'Icons', value: 0, icon: Sparkles, gradient: 'from-pink-500 to-rose-500' },
+    { label: 'A11y Score', value: '0%', icon: Accessibility, gradient: 'from-emerald-500 to-green-500' },
+    { label: 'Downloads', value: 0, icon: Download, gradient: 'from-blue-500 to-cyan-500' },
+    { label: 'Stars', value: 0, icon: Heart, gradient: 'from-amber-500 to-orange-500' },
+    { label: 'Contributors', value: 0, icon: MessageSquare, gradient: 'from-cyan-500 to-teal-500' }
   ]
 
   return (
@@ -769,7 +693,7 @@ export default function ComponentLibraryClient() {
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-2xl font-bold">Icon Library</h2>
-                <p className="text-gray-500">{mockIcons.length * 20} icons available</p>
+                <p className="text-gray-500">{filteredIcons.length} icons available</p>
               </div>
               <div className="relative w-64">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -885,7 +809,8 @@ export default function App() {
             </div>
 
             <div className="space-y-6">
-              {mockChangelog.map(entry => (
+              {/* MIGRATED: Using empty array, no mock data */}
+              {([] as ChangelogEntry[]).map(entry => (
                 <Card key={entry.id}>
                   <CardContent className="p-6">
                     <div className="flex items-center gap-4 mb-4">
@@ -1834,21 +1759,22 @@ export default function App() {
         </Tabs>
 
         {/* Enhanced Competitive Upgrade Components */}
+        {/* MIGRATED: Using empty arrays, no mock data */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockComponentLibAIInsights}
+              insights={[]}
               title="Component Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockComponentLibCollaborators}
+              collaborators={[]}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockComponentLibPredictions}
+              predictions={[]}
               title="Library Forecasts"
             />
           </div>
@@ -1856,12 +1782,12 @@ export default function App() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockComponentLibActivities}
+            activities={[]}
             title="Library Activity"
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockComponentLibQuickActions}
+            actions={quickActions}
             variant="grid"
           />
         </div>
@@ -2040,7 +1966,7 @@ export default function App() {
               <ScrollArea className="h-[400px]">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                   {/* MIGRATED: Batch #13 - Use database components */}
-                  {(dbComponents.length > 0 ? dbComponents : mockComponents).map(comp => (
+                  {dbComponents.map(comp => (
                     <div
                       key={comp.id}
                       className="p-4 border rounded-lg hover:border-violet-300 hover:bg-violet-50 dark:hover:bg-violet-900/20 cursor-pointer transition-all"
@@ -2086,7 +2012,7 @@ export default function App() {
                       </SelectTrigger>
                       <SelectContent>
                         {/* MIGRATED: Batch #13 - Use database components */}
-                        {(dbComponents.length > 0 ? dbComponents : mockComponents).map(comp => (
+                        {dbComponents.map(comp => (
                           <SelectItem key={comp.id} value={comp.id}>{comp.displayName}</SelectItem>
                         ))}
                       </SelectContent>
@@ -2190,8 +2116,8 @@ export default function App() {
                   <ScrollArea className="h-[400px]">
                     <div className="space-y-4">
                       {/* MIGRATED: Batch #13 - Use database components */}
-                      <p className="text-gray-600">Full API reference for all {(dbComponents.length > 0 ? dbComponents.length : mockComponents.length) * 12} components.</p>
-                      {(dbComponents.length > 0 ? dbComponents : mockComponents).slice(0, 3).map(comp => (
+                      <p className="text-gray-600">Full API reference for all {dbComponents.length} components.</p>
+                      {dbComponents.slice(0, 3).map(comp => (
                         <div key={comp.id} className="p-4 border rounded-lg">
                           <h4 className="font-semibold mb-2">{comp.displayName}</h4>
                           <table className="w-full text-sm">
@@ -2222,7 +2148,7 @@ export default function App() {
                     <div className="space-y-4">
                       <p className="text-gray-600">Interactive examples and code snippets.</p>
                       {/* MIGRATED: Batch #13 - Use database components */}
-                      {(dbComponents.length > 0 ? dbComponents : mockComponents).slice(0, 2).map(comp => (
+                      {dbComponents.slice(0, 2).map(comp => (
                         <div key={comp.id}>
                           {comp.examples.map(ex => (
                             <div key={ex.id} className="p-4 border rounded-lg mb-4">

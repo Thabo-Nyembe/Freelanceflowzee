@@ -164,342 +164,16 @@ interface VersionHistory {
 }
 
 // ============================================================================
-// MOCK DATA - Contentful Level
+// DATA ARRAYS - Ready for Supabase Integration
 // ============================================================================
 
-const mockEntries: ContentEntry[] = [
-  {
-    id: '1',
-    title: 'Welcome to Our Platform',
-    slug: 'welcome-to-our-platform',
-    content_type_id: '1',
-    content_type_name: 'Blog Post',
-    status: 'published',
-    created_at: '2024-01-01T00:00:00Z',
-    updated_at: '2024-01-15T10:30:00Z',
-    published_at: '2024-01-15T10:30:00Z',
-    scheduled_at: null,
-    created_by: 'admin@company.com',
-    updated_by: 'editor@company.com',
-    version: 12,
-    locale: 'en-US',
-    locales_completed: ['en-US', 'es-ES', 'fr-FR'],
-    tags: ['featured', 'announcement'],
-    fields: { body: '...', excerpt: '...', featuredImage: 'asset_1' },
-    references: ['2', '3'],
-    referenced_by: []
-  },
-  {
-    id: '2',
-    title: 'Product Launch 2024',
-    slug: 'product-launch-2024',
-    content_type_id: '1',
-    content_type_name: 'Blog Post',
-    status: 'draft',
-    created_at: '2024-01-10T00:00:00Z',
-    updated_at: '2024-01-14T16:45:00Z',
-    published_at: null,
-    scheduled_at: null,
-    created_by: 'writer@company.com',
-    updated_by: 'writer@company.com',
-    version: 5,
-    locale: 'en-US',
-    locales_completed: ['en-US'],
-    tags: ['product', 'launch'],
-    fields: { body: '...', excerpt: '...' },
-    references: [],
-    referenced_by: ['1']
-  },
-  {
-    id: '3',
-    title: 'About Our Team',
-    slug: 'about-our-team',
-    content_type_id: '2',
-    content_type_name: 'Page',
-    status: 'published',
-    created_at: '2024-01-05T00:00:00Z',
-    updated_at: '2024-01-12T09:00:00Z',
-    published_at: '2024-01-12T09:00:00Z',
-    scheduled_at: null,
-    created_by: 'admin@company.com',
-    updated_by: 'admin@company.com',
-    version: 8,
-    locale: 'en-US',
-    locales_completed: ['en-US', 'de-DE'],
-    tags: ['about', 'team'],
-    fields: { sections: [], hero: {} },
-    references: [],
-    referenced_by: ['1']
-  },
-  {
-    id: '4',
-    title: 'Privacy Policy',
-    slug: 'privacy-policy',
-    content_type_id: '2',
-    content_type_name: 'Page',
-    status: 'changed',
-    created_at: '2024-01-02T00:00:00Z',
-    updated_at: '2024-01-15T14:00:00Z',
-    published_at: '2024-01-08T10:00:00Z',
-    scheduled_at: null,
-    created_by: 'legal@company.com',
-    updated_by: 'legal@company.com',
-    version: 15,
-    locale: 'en-US',
-    locales_completed: ['en-US', 'es-ES', 'fr-FR', 'de-DE', 'ja-JP'],
-    tags: ['legal', 'policy'],
-    fields: { content: '...' },
-    references: [],
-    referenced_by: []
-  },
-  {
-    id: '5',
-    title: 'Holiday Promotion',
-    slug: 'holiday-promotion',
-    content_type_id: '3',
-    content_type_name: 'Campaign',
-    status: 'scheduled',
-    created_at: '2024-01-08T00:00:00Z',
-    updated_at: '2024-01-14T11:30:00Z',
-    published_at: null,
-    scheduled_at: '2024-12-20T00:00:00Z',
-    created_by: 'marketing@company.com',
-    updated_by: 'marketing@company.com',
-    version: 7,
-    locale: 'en-US',
-    locales_completed: ['en-US', 'es-ES'],
-    tags: ['holiday', 'promotion', 'campaign'],
-    fields: { banner: 'asset_2', cta: {} },
-    references: [],
-    referenced_by: []
-  },
-  {
-    id: '6',
-    title: 'Old Press Release',
-    slug: 'old-press-release',
-    content_type_id: '4',
-    content_type_name: 'Press Release',
-    status: 'archived',
-    created_at: '2023-06-15T00:00:00Z',
-    updated_at: '2024-01-01T00:00:00Z',
-    published_at: '2023-06-15T10:00:00Z',
-    scheduled_at: null,
-    created_by: 'pr@company.com',
-    updated_by: 'admin@company.com',
-    version: 3,
-    locale: 'en-US',
-    locales_completed: ['en-US'],
-    tags: ['press', 'archived'],
-    fields: { content: '...' },
-    references: [],
-    referenced_by: []
-  }
-]
+const entries: ContentEntry[] = []
 
-const mockContentTypes: ContentType[] = [
-  {
-    id: '1',
-    name: 'Blog Post',
-    description: 'Articles and blog content',
-    display_field: 'title',
-    fields: [
-      { id: 'title', name: 'Title', type: 'text', required: true, localized: true, unique: false, validation: { min: 1, max: 200 }, appearance: 'single-line', default_value: '', help_text: 'The title of the blog post' },
-      { id: 'slug', name: 'Slug', type: 'text', required: true, localized: false, unique: true, validation: { pattern: '^[a-z0-9-]+$' }, appearance: 'slug', default_value: '', help_text: 'URL-friendly identifier' },
-      { id: 'body', name: 'Body', type: 'richtext', required: true, localized: true, unique: false, validation: null, appearance: 'rich-text', default_value: '', help_text: 'Main content' },
-      { id: 'excerpt', name: 'Excerpt', type: 'text', required: false, localized: true, unique: false, validation: { max: 500 }, appearance: 'multi-line', default_value: '', help_text: 'Short summary' },
-      { id: 'featuredImage', name: 'Featured Image', type: 'media', required: false, localized: false, unique: false, validation: null, appearance: 'asset-picker', default_value: null, help_text: 'Main image for the post' },
-      { id: 'author', name: 'Author', type: 'reference', required: true, localized: false, unique: false, validation: { link_type: 'Author' }, appearance: 'entry-picker', default_value: null, help_text: 'Post author' },
-      { id: 'publishDate', name: 'Publish Date', type: 'date', required: false, localized: false, unique: false, validation: null, appearance: 'date-picker', default_value: null, help_text: 'Publication date' },
-      { id: 'tags', name: 'Tags', type: 'array', required: false, localized: false, unique: false, validation: null, appearance: 'tag-input', default_value: [], help_text: 'Content tags' }
-    ],
-    entries_count: 45,
-    created_at: '2023-01-01T00:00:00Z',
-    updated_at: '2024-01-10T00:00:00Z',
-    icon: 'FileText',
-    color: '#6366F1'
-  },
-  {
-    id: '2',
-    name: 'Page',
-    description: 'Static pages with flexible sections',
-    display_field: 'title',
-    fields: [
-      { id: 'title', name: 'Title', type: 'text', required: true, localized: true, unique: false, validation: null, appearance: 'single-line', default_value: '', help_text: '' },
-      { id: 'slug', name: 'Slug', type: 'text', required: true, localized: false, unique: true, validation: null, appearance: 'slug', default_value: '', help_text: '' },
-      { id: 'sections', name: 'Sections', type: 'array', required: false, localized: true, unique: false, validation: null, appearance: 'modular-content', default_value: [], help_text: '' },
-      { id: 'seo', name: 'SEO', type: 'json', required: false, localized: true, unique: false, validation: null, appearance: 'object', default_value: {}, help_text: '' }
-    ],
-    entries_count: 28,
-    created_at: '2023-01-01T00:00:00Z',
-    updated_at: '2024-01-08T00:00:00Z',
-    icon: 'Layout',
-    color: '#EC4899'
-  },
-  {
-    id: '3',
-    name: 'Campaign',
-    description: 'Marketing campaigns and promotions',
-    display_field: 'name',
-    fields: [
-      { id: 'name', name: 'Campaign Name', type: 'text', required: true, localized: true, unique: false, validation: null, appearance: 'single-line', default_value: '', help_text: '' },
-      { id: 'banner', name: 'Banner', type: 'media', required: true, localized: true, unique: false, validation: null, appearance: 'asset-picker', default_value: null, help_text: '' },
-      { id: 'startDate', name: 'Start Date', type: 'date', required: true, localized: false, unique: false, validation: null, appearance: 'date-picker', default_value: null, help_text: '' },
-      { id: 'endDate', name: 'End Date', type: 'date', required: true, localized: false, unique: false, validation: null, appearance: 'date-picker', default_value: null, help_text: '' },
-      { id: 'cta', name: 'Call to Action', type: 'json', required: false, localized: true, unique: false, validation: null, appearance: 'object', default_value: {}, help_text: '' }
-    ],
-    entries_count: 12,
-    created_at: '2023-06-01T00:00:00Z',
-    updated_at: '2024-01-12T00:00:00Z',
-    icon: 'Zap',
-    color: '#10B981'
-  },
-  {
-    id: '4',
-    name: 'Press Release',
-    description: 'Official press releases and announcements',
-    display_field: 'headline',
-    fields: [
-      { id: 'headline', name: 'Headline', type: 'text', required: true, localized: true, unique: false, validation: null, appearance: 'single-line', default_value: '', help_text: '' },
-      { id: 'content', name: 'Content', type: 'richtext', required: true, localized: true, unique: false, validation: null, appearance: 'rich-text', default_value: '', help_text: '' },
-      { id: 'releaseDate', name: 'Release Date', type: 'date', required: true, localized: false, unique: false, validation: null, appearance: 'date-picker', default_value: null, help_text: '' }
-    ],
-    entries_count: 8,
-    created_at: '2023-03-01T00:00:00Z',
-    updated_at: '2024-01-05T00:00:00Z',
-    icon: 'Send',
-    color: '#F59E0B'
-  },
-  {
-    id: '5',
-    name: 'Author',
-    description: 'Content authors and contributors',
-    display_field: 'name',
-    fields: [
-      { id: 'name', name: 'Full Name', type: 'text', required: true, localized: false, unique: false, validation: null, appearance: 'single-line', default_value: '', help_text: '' },
-      { id: 'bio', name: 'Biography', type: 'richtext', required: false, localized: true, unique: false, validation: null, appearance: 'rich-text', default_value: '', help_text: '' },
-      { id: 'avatar', name: 'Avatar', type: 'media', required: false, localized: false, unique: false, validation: null, appearance: 'asset-picker', default_value: null, help_text: '' },
-      { id: 'social', name: 'Social Links', type: 'json', required: false, localized: false, unique: false, validation: null, appearance: 'object', default_value: {}, help_text: '' }
-    ],
-    entries_count: 15,
-    created_at: '2023-01-01T00:00:00Z',
-    updated_at: '2024-01-10T00:00:00Z',
-    icon: 'User',
-    color: '#8B5CF6'
-  }
-]
+const contentTypes: ContentType[] = []
 
-const mockAssets: MediaAsset[] = [
-  {
-    id: '1',
-    filename: 'hero-banner.jpg',
-    title: 'Homepage Hero Banner',
-    description: 'Main banner image for the homepage',
-    content_type: 'image/jpeg',
-    asset_type: 'image',
-    size_bytes: 2456789,
-    width: 1920,
-    height: 1080,
-    url: '/images/hero-banner.jpg',
-    thumbnail_url: '/images/hero-banner-thumb.jpg',
-    created_at: '2024-01-01T00:00:00Z',
-    updated_at: '2024-01-10T00:00:00Z',
-    uploaded_by: 'designer@company.com',
-    tags: ['hero', 'homepage', 'banner'],
-    metadata: { photographer: 'John Doe', copyright: '2024 Company Inc.' },
-    locales: [
-      { locale: 'en-US', title: 'Homepage Hero Banner', description: 'Main banner for homepage' },
-      { locale: 'es-ES', title: 'Banner Principal', description: 'Banner principal de la página' }
-    ],
-    used_in: ['1', '3']
-  },
-  {
-    id: '2',
-    filename: 'product-demo.mp4',
-    title: 'Product Demo Video',
-    description: 'Product demonstration video',
-    content_type: 'video/mp4',
-    asset_type: 'video',
-    size_bytes: 45678901,
-    width: 1920,
-    height: 1080,
-    duration: 180,
-    url: '/videos/product-demo.mp4',
-    thumbnail_url: '/videos/product-demo-thumb.jpg',
-    created_at: '2024-01-05T00:00:00Z',
-    updated_at: '2024-01-05T00:00:00Z',
-    uploaded_by: 'video@company.com',
-    tags: ['product', 'demo', 'video'],
-    metadata: {},
-    locales: [{ locale: 'en-US', title: 'Product Demo', description: 'Demo video' }],
-    used_in: ['5']
-  },
-  {
-    id: '3',
-    filename: 'team-photo.png',
-    title: 'Team Photo 2024',
-    description: 'Company team photo',
-    content_type: 'image/png',
-    asset_type: 'image',
-    size_bytes: 3456789,
-    width: 2400,
-    height: 1600,
-    url: '/images/team-photo.png',
-    thumbnail_url: '/images/team-photo-thumb.png',
-    created_at: '2024-01-08T00:00:00Z',
-    updated_at: '2024-01-08T00:00:00Z',
-    uploaded_by: 'hr@company.com',
-    tags: ['team', 'company', 'about'],
-    metadata: {},
-    locales: [{ locale: 'en-US', title: 'Team Photo', description: 'Our team' }],
-    used_in: ['3']
-  },
-  {
-    id: '4',
-    filename: 'brand-guidelines.pdf',
-    title: 'Brand Guidelines 2024',
-    description: 'Official brand guidelines document',
-    content_type: 'application/pdf',
-    asset_type: 'document',
-    size_bytes: 8901234,
-    url: '/docs/brand-guidelines.pdf',
-    thumbnail_url: null,
-    created_at: '2024-01-02T00:00:00Z',
-    updated_at: '2024-01-12T00:00:00Z',
-    uploaded_by: 'design@company.com',
-    tags: ['brand', 'guidelines', 'document'],
-    metadata: { version: '2.0', pages: '45' },
-    locales: [{ locale: 'en-US', title: 'Brand Guidelines', description: 'Brand identity document' }],
-    used_in: []
-  },
-  {
-    id: '5',
-    filename: 'podcast-episode.mp3',
-    title: 'Podcast Episode 42',
-    description: 'Latest podcast episode',
-    content_type: 'audio/mpeg',
-    asset_type: 'audio',
-    size_bytes: 34567890,
-    duration: 2400,
-    url: '/audio/podcast-42.mp3',
-    thumbnail_url: null,
-    created_at: '2024-01-10T00:00:00Z',
-    updated_at: '2024-01-10T00:00:00Z',
-    uploaded_by: 'podcast@company.com',
-    tags: ['podcast', 'audio', 'episode'],
-    metadata: { episode: '42', season: '3' },
-    locales: [{ locale: 'en-US', title: 'Episode 42', description: 'Latest episode' }],
-    used_in: []
-  }
-]
+const assets: MediaAsset[] = []
 
-const mockLocales: Locale[] = [
-  { id: '1', code: 'en-US', name: 'English (US)', native_name: 'English', status: 'active', is_default: true, fallback_code: null, entries_count: 156, completion_percentage: 100, direction: 'ltr' },
-  { id: '2', code: 'es-ES', name: 'Spanish', native_name: 'Español', status: 'active', is_default: false, fallback_code: 'en-US', entries_count: 142, completion_percentage: 91, direction: 'ltr' },
-  { id: '3', code: 'fr-FR', name: 'French', native_name: 'Français', status: 'active', is_default: false, fallback_code: 'en-US', entries_count: 128, completion_percentage: 82, direction: 'ltr' },
-  { id: '4', code: 'de-DE', name: 'German', native_name: 'Deutsch', status: 'active', is_default: false, fallback_code: 'en-US', entries_count: 98, completion_percentage: 63, direction: 'ltr' },
-  { id: '5', code: 'ja-JP', name: 'Japanese', native_name: '日本語', status: 'active', is_default: false, fallback_code: 'en-US', entries_count: 76, completion_percentage: 49, direction: 'ltr' },
-  { id: '6', code: 'ar-SA', name: 'Arabic', native_name: 'العربية', status: 'inactive', is_default: false, fallback_code: 'en-US', entries_count: 0, completion_percentage: 0, direction: 'rtl' }
-]
+const locales: Locale[] = []
 
 // ============================================================================
 // HELPER FUNCTIONS
@@ -562,31 +236,16 @@ const formatDate = (dateString: string): string => {
 }
 
 // ============================================================================
-// ENHANCED COMPETITIVE UPGRADE MOCK DATA
+// COMPETITIVE UPGRADE DATA - Ready for Supabase Integration
 // ============================================================================
 
-const mockContentAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Content Performance', description: 'Published content engagement up 28% this week.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Performance' },
-  { id: '2', type: 'info' as const, title: 'SEO Optimization', description: '15 entries could benefit from keyword optimization.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'SEO' },
-  { id: '3', type: 'warning' as const, title: 'Draft Backlog', description: '23 drafts pending review for over 7 days.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Workflow' },
-]
+const contentAIInsights: { id: string; type: 'success' | 'info' | 'warning' | 'error'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
 
-const mockContentCollaborators = [
-  { id: '1', name: 'Content Manager', avatar: '/avatars/content.jpg', status: 'online' as const, role: 'Manager' },
-  { id: '2', name: 'Editor', avatar: '/avatars/editor.jpg', status: 'online' as const, role: 'Editor' },
-  { id: '3', name: 'Designer', avatar: '/avatars/design.jpg', status: 'away' as const, role: 'Designer' },
-]
+const contentCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }[] = []
 
-const mockContentPredictions = [
-  { id: '1', title: 'Publishing Velocity', prediction: 'On track to publish 40 entries this month', confidence: 85, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Content Gaps', prediction: 'Tutorial content category needs 8 more entries', confidence: 90, trend: 'stable' as const, impact: 'medium' as const },
-]
+const contentPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: 'low' | 'medium' | 'high' }[] = []
 
-const mockContentActivities = [
-  { id: '1', user: 'Editor', action: 'Published', target: 'Getting Started Guide v2', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Manager', action: 'Scheduled', target: '5 blog posts for next week', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'System', action: 'Archived', target: '12 outdated entries', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
-]
+const contentActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' | 'error' | 'update' }[] = []
 
 // NOTE: Quick actions are now handled via useState dialogs in the component
 
@@ -681,21 +340,21 @@ export default function ContentStudioClient() {
 
   // Dashboard stats
   const stats = useMemo(() => ({
-    totalEntries: mockEntries.length,
-    published: mockEntries.filter(e => e.status === 'published').length,
-    drafts: mockEntries.filter(e => e.status === 'draft').length,
-    scheduled: mockEntries.filter(e => e.status === 'scheduled').length,
-    contentTypes: mockContentTypes.length,
-    assets: mockAssets.length,
-    totalAssets: mockAssets.length,
-    locales: mockLocales.filter(l => l.status === 'active').length,
-    avgLocalization: Math.round(mockLocales.reduce((sum, l) => sum + l.completion_percentage, 0) / mockLocales.length),
+    totalEntries: entries.length,
+    published: entries.filter(e => e.status === 'published').length,
+    drafts: entries.filter(e => e.status === 'draft').length,
+    scheduled: entries.filter(e => e.status === 'scheduled').length,
+    contentTypes: contentTypes.length,
+    assets: assets.length,
+    totalAssets: assets.length,
+    locales: locales.filter(l => l.status === 'active').length,
+    avgLocalization: locales.length > 0 ? Math.round(locales.reduce((sum, l) => sum + l.completion_percentage, 0) / locales.length) : 0,
     apiCalls: '45.2K'
   }), [])
 
   // Filtered data
   const filteredEntries = useMemo(() => {
-    return mockEntries.filter(entry => {
+    return entries.filter(entry => {
       const matchesSearch = entry.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            entry.slug.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesStatus = statusFilter === 'all' || entry.status === statusFilter
@@ -704,7 +363,7 @@ export default function ContentStudioClient() {
   }, [searchQuery, statusFilter])
 
   const filteredAssets = useMemo(() => {
-    return mockAssets.filter(asset =>
+    return assets.filter(asset =>
       asset.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       asset.filename.toLowerCase().includes(searchQuery.toLowerCase())
     )
@@ -810,7 +469,7 @@ export default function ContentStudioClient() {
   }
 
   const handleAdvancedSearch = () => {
-    const results = mockEntries.filter(entry => {
+    const results = entries.filter(entry => {
       const matchesQuery = !advancedSearchQuery ||
         entry.title.toLowerCase().includes(advancedSearchQuery.toLowerCase()) ||
         entry.slug.toLowerCase().includes(advancedSearchQuery.toLowerCase())
@@ -831,7 +490,7 @@ export default function ContentStudioClient() {
   const handlePublishAll = async () => {
     setIsProcessing(true)
     try {
-      const drafts = mockEntries.filter(e => e.status === 'draft')
+      const drafts = entries.filter(e => e.status === 'draft')
       const res = await fetch('/api/content/entries/publish-all', { method: 'POST' })
       if (!res.ok) throw new Error('Failed to publish all entries')
       toast.success(`${drafts.length} entries published`, {
@@ -1171,7 +830,7 @@ export default function ContentStudioClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {mockEntries.slice(0, 5).map(entry => (
+                    {entries.slice(0, 5).map(entry => (
                       <div
                         key={entry.id}
                         className="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer transition-colors"
@@ -1213,7 +872,7 @@ export default function ContentStudioClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {mockContentTypes.map(type => (
+                    {contentTypes.map(type => (
                       <div
                         key={type.id}
                         className="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
@@ -1246,7 +905,7 @@ export default function ContentStudioClient() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                  {mockLocales.filter(l => l.status === 'active').map(locale => (
+                  {locales.filter(l => l.status === 'active').map(locale => (
                     <div key={locale.id} className="p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
@@ -1404,7 +1063,7 @@ export default function ContentStudioClient() {
                 <div className="flex items-center gap-3 mb-2">
                   <Boxes className="h-6 w-6" />
                   <h3 className="text-xl font-bold">Content Models</h3>
-                  <Badge className="bg-white/20 text-white border-0">{mockContentTypes.length} Types</Badge>
+                  <Badge className="bg-white/20 text-white border-0">{contentTypes.length} Types</Badge>
                 </div>
                 <p className="text-white/70 mb-4 max-w-2xl">
                   Define and manage your content structure. Create custom content types with flexible fields to model any type of content.
@@ -1452,7 +1111,7 @@ export default function ContentStudioClient() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {mockContentTypes.map(type => (
+              {contentTypes.map(type => (
                 <Card
                   key={type.id}
                   className="border-0 shadow-sm hover:shadow-lg transition-all cursor-pointer dark:bg-gray-800"
@@ -1498,7 +1157,7 @@ export default function ContentStudioClient() {
                 <div className="flex items-center gap-3 mb-2">
                   <ImageIcon className="h-6 w-6" />
                   <h3 className="text-xl font-bold">Media Library</h3>
-                  <Badge className="bg-white/20 text-white border-0">{mockAssets.length} Assets</Badge>
+                  <Badge className="bg-white/20 text-white border-0">{assets.length} Assets</Badge>
                 </div>
                 <p className="text-white/70 mb-4 max-w-2xl">
                   Upload, organize, and manage all your media assets. Support for images, videos, audio, and documents.
@@ -1598,14 +1257,14 @@ export default function ContentStudioClient() {
                 <div className="flex items-center gap-3 mb-2">
                   <Globe className="h-6 w-6" />
                   <h3 className="text-xl font-bold">Localization</h3>
-                  <Badge className="bg-white/20 text-white border-0">{mockLocales.length} Locales</Badge>
+                  <Badge className="bg-white/20 text-white border-0">{locales.length} Locales</Badge>
                 </div>
                 <p className="text-white/70 mb-4 max-w-2xl">
                   Manage translations and localized content. Track completion progress and ensure global readiness.
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
-                    <div className="text-2xl font-bold">{mockLocales.filter(l => l.status === 'active').length}</div>
+                    <div className="text-2xl font-bold">{locales.filter(l => l.status === 'active').length}</div>
                     <div className="text-xs text-white/70">Active Locales</div>
                   </div>
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
@@ -1664,7 +1323,7 @@ export default function ContentStudioClient() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {mockLocales.map(locale => (
+              {locales.map(locale => (
                 <Card key={locale.id} className="border-0 shadow-sm dark:bg-gray-800">
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-4">
@@ -2144,18 +1803,18 @@ export default function ContentStudioClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockContentAIInsights}
+              insights={contentAIInsights}
               title="Content Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockContentCollaborators}
+              collaborators={contentCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockContentPredictions}
+              predictions={contentPredictions}
               title="Content Forecasts"
             />
           </div>
@@ -2163,7 +1822,7 @@ export default function ContentStudioClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockContentActivities}
+            activities={contentActivities}
             title="Content Activity"
             maxItems={5}
           />
@@ -2437,7 +2096,7 @@ export default function ContentStudioClient() {
                     <SelectValue placeholder="Select content type" />
                   </SelectTrigger>
                   <SelectContent>
-                    {mockContentTypes.map(type => (
+                    {contentTypes.map(type => (
                       <SelectItem key={type.id} value={type.id}>{type.name}</SelectItem>
                     ))}
                   </SelectContent>
@@ -2592,7 +2251,7 @@ export default function ContentStudioClient() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Types</SelectItem>
-                    {mockContentTypes.map(type => (
+                    {contentTypes.map(type => (
                       <SelectItem key={type.id} value={type.id}>{type.name}</SelectItem>
                     ))}
                   </SelectContent>
@@ -2673,7 +2332,7 @@ export default function ContentStudioClient() {
             <div className="py-4">
               <div className="p-4 rounded-xl bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
                 <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                  You are about to publish {mockEntries.filter(e => e.status === 'draft').length} draft entries. This action will make them publicly available.
+                  You are about to publish {entries.filter(e => e.status === 'draft').length} draft entries. This action will make them publicly available.
                 </p>
               </div>
             </div>
@@ -2868,7 +2527,7 @@ export default function ContentStudioClient() {
                     <SelectValue placeholder="Select source" />
                   </SelectTrigger>
                   <SelectContent>
-                    {mockLocales.filter(l => l.status === 'active').map(locale => (
+                    {locales.filter(l => l.status === 'active').map(locale => (
                       <SelectItem key={locale.code} value={locale.code}>{locale.name}</SelectItem>
                     ))}
                   </SelectContent>
@@ -2881,7 +2540,7 @@ export default function ContentStudioClient() {
                     <SelectValue placeholder="Select target" />
                   </SelectTrigger>
                   <SelectContent>
-                    {mockLocales.filter(l => l.status === 'active' && l.code !== translateSourceLocale).map(locale => (
+                    {locales.filter(l => l.status === 'active' && l.code !== translateSourceLocale).map(locale => (
                       <SelectItem key={locale.code} value={locale.code}>{locale.name}</SelectItem>
                     ))}
                   </SelectContent>
@@ -2912,7 +2571,7 @@ export default function ContentStudioClient() {
                     <SelectValue placeholder="Select fallback" />
                   </SelectTrigger>
                   <SelectContent>
-                    {mockLocales.filter(l => l.status === 'active').map(locale => (
+                    {locales.filter(l => l.status === 'active').map(locale => (
                       <SelectItem key={locale.code} value={locale.code}>{locale.name}</SelectItem>
                     ))}
                   </SelectContent>
@@ -3041,7 +2700,7 @@ export default function ContentStudioClient() {
               <div className="space-y-2">
                 <Label>Target Locales</Label>
                 <div className="space-y-2">
-                  {mockLocales.filter(l => l.status === 'active' && !l.is_default).map(locale => (
+                  {locales.filter(l => l.status === 'active' && !l.is_default).map(locale => (
                     <label key={locale.code} className="flex items-center gap-2 p-2 rounded-lg bg-gray-50 dark:bg-gray-800">
                       <input type="checkbox" className="rounded" />
                       <span>{locale.name}</span>
@@ -3161,7 +2820,7 @@ export default function ContentStudioClient() {
                     <SelectValue placeholder="Select content type to clone" />
                   </SelectTrigger>
                   <SelectContent>
-                    {mockContentTypes.map(type => (
+                    {contentTypes.map(type => (
                       <SelectItem key={type.id} value={type.id}>{type.name}</SelectItem>
                     ))}
                   </SelectContent>
@@ -3201,7 +2860,7 @@ export default function ContentStudioClient() {
                     <SelectValue placeholder="Select content type to reference" />
                   </SelectTrigger>
                   <SelectContent>
-                    {mockContentTypes.map(type => (
+                    {contentTypes.map(type => (
                       <SelectItem key={type.id} value={type.id}>{type.name}</SelectItem>
                     ))}
                   </SelectContent>
@@ -3299,7 +2958,7 @@ export default function ContentStudioClient() {
             </DialogHeader>
             <ScrollArea className="max-h-96">
               <div className="space-y-4 py-4">
-                {mockContentTypes.slice(0, 3).map(type => (
+                {contentTypes.slice(0, 3).map(type => (
                   <div key={type.id} className="p-4 rounded-xl bg-gray-50 dark:bg-gray-800">
                     <h4 className="font-semibold text-gray-900 dark:text-white mb-2">{type.name}</h4>
                     <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">{type.description}</p>
@@ -3378,7 +3037,7 @@ export default function ContentStudioClient() {
               <DialogDescription>Track translation completion across locales</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              {mockLocales.filter(l => l.status === 'active').map(locale => (
+              {locales.filter(l => l.status === 'active').map(locale => (
                 <div key={locale.code} className="p-4 rounded-xl bg-gray-50 dark:bg-gray-800">
                   <div className="flex items-center justify-between mb-2">
                     <span className="font-medium text-gray-900 dark:text-white">{locale.name}</span>
@@ -3409,7 +3068,7 @@ export default function ContentStudioClient() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {mockLocales.filter(l => l.status === 'active').map(locale => (
+                    {locales.filter(l => l.status === 'active').map(locale => (
                       <SelectItem key={locale.code} value={locale.code}>{locale.name}</SelectItem>
                     ))}
                   </SelectContent>
@@ -3422,7 +3081,7 @@ export default function ContentStudioClient() {
                     <SelectValue placeholder="Select target" />
                   </SelectTrigger>
                   <SelectContent>
-                    {mockLocales.filter(l => l.status === 'active').map(locale => (
+                    {locales.filter(l => l.status === 'active').map(locale => (
                       <SelectItem key={locale.code} value={locale.code}>{locale.name}</SelectItem>
                     ))}
                   </SelectContent>
@@ -3517,7 +3176,7 @@ export default function ContentStudioClient() {
             <div className="py-4 space-y-4">
               <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
                 <p className="text-sm text-red-800 dark:text-red-300">
-                  Warning: This will delete {mockEntries.length} entries and {mockContentTypes.length} content types.
+                  Warning: This will delete {entries.length} entries and {contentTypes.length} content types.
                 </p>
               </div>
               <div className="space-y-2">

@@ -1,6 +1,11 @@
 'use client'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useCalendarEvents, type CalendarEvent, type EventType, type EventStatus } from '@/lib/hooks/use-calendar-events'
+import { useCalendars } from '@/lib/hooks/use-calendars-extended'
+import { useReminders } from '@/lib/hooks/use-reminders-extended'
+import { useSchedulingPreferences } from '@/lib/hooks/use-scheduling-extended'
+import { useBookingServices } from '@/lib/hooks/use-bookings-extended'
+import { useAuthUserId } from '@/lib/hooks/use-auth-user-id'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -137,40 +142,10 @@ const eventColors: Record<string, string> = {
 }
 
 // ============================================================================
-// MOCK DATA
+// DEFAULT VALUES (used as fallbacks when no data from backend)
 // ============================================================================
 
-const mockCalendars: CalendarSource[] = [
-  { id: '1', name: 'Personal', color: 'bg-blue-500', enabled: true, type: 'personal', eventCount: 45 },
-  { id: '2', name: 'Work', color: 'bg-green-500', enabled: true, type: 'work', email: 'work@company.com', eventCount: 128 },
-  { id: '3', name: 'Team Meetings', color: 'bg-purple-500', enabled: true, type: 'shared', owner: 'Team Lead', eventCount: 32 },
-  { id: '4', name: 'US Holidays', color: 'bg-red-500', enabled: false, type: 'holiday', eventCount: 12 },
-  { id: '5', name: 'Birthdays', color: 'bg-pink-500', enabled: false, type: 'birthday', eventCount: 24 },
-  { id: '6', name: 'NBA Schedule', color: 'bg-orange-500', enabled: false, type: 'subscribed', eventCount: 82 },
-]
-
-const mockSchedulingLinks: SchedulingLink[] = [
-  { id: '1', name: '30-min Meeting', duration: 30, url: 'https://cal.com/user/30min', isActive: true, bookingsCount: 45, availability: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'], buffer: 15 },
-  { id: '2', name: '1-hour Consultation', duration: 60, url: 'https://cal.com/user/1hour', isActive: true, bookingsCount: 23, availability: ['Tue', 'Thu'], buffer: 30 },
-  { id: '3', name: '15-min Quick Chat', duration: 15, url: 'https://cal.com/user/15min', isActive: true, bookingsCount: 67, availability: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'], buffer: 5 },
-  { id: '4', name: 'Team Sync', duration: 45, url: 'https://cal.com/user/team', isActive: false, bookingsCount: 12, availability: ['Wed'], buffer: 15 },
-]
-
-const mockReminders: Reminder[] = [
-  { id: '1', title: 'Review Q4 Reports', datetime: new Date(Date.now() + 1000 * 60 * 60 * 2), completed: false, type: 'notification' },
-  { id: '2', title: 'Send follow-up email', datetime: new Date(Date.now() + 1000 * 60 * 60 * 24), completed: false, type: 'email' },
-  { id: '3', title: 'Prepare presentation', datetime: new Date(Date.now() + 1000 * 60 * 60 * 48), completed: false, type: 'notification' },
-  { id: '4', title: 'Call client', datetime: new Date(Date.now() - 1000 * 60 * 60 * 2), completed: true, type: 'notification' },
-]
-
-const mockAttendees: Attendee[] = [
-  { id: '1', name: 'Sarah Chen', email: 'sarah@company.com', avatar: '', status: 'accepted', organizer: true },
-  { id: '2', name: 'Mike Johnson', email: 'mike@company.com', avatar: '', status: 'accepted' },
-  { id: '3', name: 'Emily Davis', email: 'emily@company.com', avatar: '', status: 'tentative' },
-  { id: '4', name: 'James Wilson', email: 'james@company.com', avatar: '', status: 'pending' },
-]
-
-const mockWorkingHours: WorkingHours[] = [
+const defaultWorkingHours: WorkingHours[] = [
   { day: 'Monday', enabled: true, start: '09:00', end: '17:00' },
   { day: 'Tuesday', enabled: true, start: '09:00', end: '17:00' },
   { day: 'Wednesday', enabled: true, start: '09:00', end: '17:00' },
@@ -233,6 +208,90 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
   const [searchQuery, setSearchQuery] = useState('')
 
   const { events, loading, error, createEvent, updateEvent, deleteEvent, refetch } = useCalendarEvents({ eventType: eventTypeFilter, status: statusFilter })
+
+  // Get authenticated user ID for backend queries
+  const { getUserId } = useAuthUserId()
+  const [userId, setUserId] = useState<string | null>(null)
+
+  useEffect(() => {
+    getUserId().then(id => setUserId(id))
+  }, [getUserId])
+
+  // Fetch real data from backend
+  const { calendars: userCalendars } = useCalendars(userId || undefined)
+  const { reminders: userReminders } = useReminders(userId ? { user_id: userId } : undefined)
+  const { preferences: schedulingPrefs } = useSchedulingPreferences(userId || undefined)
+  const { services: bookingServices } = useBookingServices(userId || undefined)
+
+  // Local state for UI interactions (synced from backend)
+  const [calendars, setCalendars] = useState<CalendarSource[]>([
+    { id: 'default', name: 'Personal', color: 'bg-blue-500', enabled: true, type: 'personal', eventCount: 0 }
+  ])
+  const [reminders, setReminders] = useState<Reminder[]>([])
+  const [schedulingLinks, setSchedulingLinks] = useState<SchedulingLink[]>([])
+  const [workingHours, setWorkingHours] = useState<WorkingHours[]>(defaultWorkingHours)
+
+  // Sync calendars from backend
+  useEffect(() => {
+    if (userCalendars?.length) {
+      setCalendars(userCalendars.map((cal: any) => ({
+        id: cal.id,
+        name: cal.name || 'Calendar',
+        color: cal.color || 'bg-blue-500',
+        enabled: cal.is_visible !== false,
+        type: (cal.calendar_type as CalendarSource['type']) || 'personal',
+        email: cal.email,
+        owner: cal.owner_name,
+        eventCount: cal.event_count || 0
+      })))
+    } else if (events?.length) {
+      setCalendars([{ id: 'default', name: 'Personal', color: 'bg-blue-500', enabled: true, type: 'personal', eventCount: events.length }])
+    }
+  }, [userCalendars, events])
+
+  // Sync reminders from backend
+  useEffect(() => {
+    if (userReminders?.length) {
+      setReminders(userReminders.map((r: any) => ({
+        id: r.id,
+        title: r.title || r.message || 'Reminder',
+        datetime: new Date(r.remind_at),
+        completed: r.status === 'completed',
+        eventId: r.entity_id,
+        type: (r.delivery_method as Reminder['type']) || 'notification'
+      })))
+    }
+  }, [userReminders])
+
+  // Sync scheduling links from backend
+  useEffect(() => {
+    if (bookingServices?.length && userId) {
+      setSchedulingLinks(bookingServices.map((s: any) => ({
+        id: s.id,
+        name: s.name || 'Booking',
+        duration: s.duration_minutes || 30,
+        url: `${window.location.origin}/book/${userId}/${s.id}`,
+        isActive: s.is_active !== false,
+        bookingsCount: s.booking_count || 0,
+        availability: s.available_days || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+        buffer: s.buffer_minutes || 15
+      })))
+    }
+  }, [bookingServices, userId])
+
+  // Sync working hours from backend
+  useEffect(() => {
+    if (schedulingPrefs?.working_hours) {
+      try {
+        const hours = typeof schedulingPrefs.working_hours === 'string'
+          ? JSON.parse(schedulingPrefs.working_hours)
+          : schedulingPrefs.working_hours
+        if (Array.isArray(hours)) setWorkingHours(hours)
+      } catch {
+        // Keep default
+      }
+    }
+  }, [schedulingPrefs])
 
   // Form state for new event
   const [newEventForm, setNewEventForm] = useState({
@@ -449,10 +508,6 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
   const [showSchedulingLink, setShowSchedulingLink] = useState(false)
   const [showAddReminder, setShowAddReminder] = useState(false)
   const [newCalendarColor, setNewCalendarColor] = useState('bg-teal-500')
-  const [calendars, setCalendars] = useState(mockCalendars)
-  const [reminders, setReminders] = useState(mockReminders)
-  const [schedulingLinks, setSchedulingLinks] = useState(mockSchedulingLinks)
-  const [workingHours, setWorkingHours] = useState(mockWorkingHours)
   const [connectedApps, setConnectedApps] = useState<Record<string, boolean>>({
     'Google Calendar': true,
     'Outlook Calendar': true,
@@ -467,14 +522,19 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
   const handleUpdateEvent = async () => {
     if (!selectedEvent || !editForm.title) return
     try {
-      await updateEvent({
+      const updateData: any = {
         id: selectedEvent.id,
         title: editForm.title,
-        start_time: editForm.startTime ? new Date(editForm.startTime).toISOString() : undefined,
-        end_time: editForm.endTime ? new Date(editForm.endTime).toISOString() : undefined,
         location: editForm.location || null,
         description: editForm.description || null
-      })
+      }
+      if (editForm.startTime) {
+        updateData.start_time = new Date(editForm.startTime).toISOString()
+      }
+      if (editForm.endTime) {
+        updateData.end_time = new Date(editForm.endTime).toISOString()
+      }
+      await updateEvent(updateData)
       setIsEditing(false)
       setSelectedEvent(null)
     } catch (err) {
@@ -628,7 +688,7 @@ END:VCALENDAR`
                         <div>
                           <label className="block text-sm font-medium mb-1">Calendar</label>
                           <select className="w-full px-4 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
-                            {mockCalendars.filter(c => c.enabled).map(cal => (
+                            {calendars.filter((c: CalendarSource) => c.enabled).map((cal: CalendarSource) => (
                               <option key={cal.id} value={cal.id}>{cal.name}</option>
                             ))}
                           </select>
@@ -825,21 +885,21 @@ END:VCALENDAR`
                   </div>
                   <div>
                     <h2 className="text-2xl font-bold">Calendar Dashboard</h2>
-                    <p className="text-teal-100">Your schedule at a glance • {stats.totalEvents} events, {stats.upcomingEvents} upcoming</p>
+                    <p className="text-teal-100">Your schedule at a glance • {stats.total} events, {stats.upcoming} upcoming</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{stats.todaysEvents}</p>
+                    <p className="text-3xl font-bold">{stats.meetingsToday}</p>
                     <p className="text-sm text-teal-200">Today</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{stats.upcomingEvents}</p>
+                    <p className="text-3xl font-bold">{stats.thisWeek}</p>
                     <p className="text-sm text-teal-200">This Week</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{stats.pendingRSVPs}</p>
-                    <p className="text-sm text-teal-200">Pending</p>
+                    <p className="text-3xl font-bold">{stats.confirmed}</p>
+                    <p className="text-sm text-teal-200">Confirmed</p>
                   </div>
                 </div>
               </div>
@@ -1332,7 +1392,8 @@ END:VCALENDAR`
                       </Card>
                     ) : upcomingEvents.map((event, i) => {
                       const eventDate = new Date(event.start_time)
-                      const showDateHeader = i === 0 || new Date(upcomingEvents[i - 1].start_time).toDateString() !== eventDate.toDateString()
+                      const prevEvent = i > 0 ? upcomingEvents[i - 1] : null
+                      const showDateHeader = i === 0 || (prevEvent && new Date(prevEvent.start_time).toDateString() !== eventDate.toDateString())
                       return (
                         <div key={event.id}>
                           {showDateHeader && (
@@ -1390,8 +1451,8 @@ END:VCALENDAR`
                     <p className="text-sm text-blue-200">Confirmed</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{displayEvents.filter(e => e.rsvp_required && e.status === 'pending').length}</p>
-                    <p className="text-sm text-blue-200">Pending</p>
+                    <p className="text-3xl font-bold">{displayEvents.filter(e => e.rsvp_required && e.status === 'tentative').length}</p>
+                    <p className="text-sm text-blue-200">Tentative</p>
                   </div>
                 </div>
               </div>
@@ -1544,15 +1605,15 @@ END:VCALENDAR`
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockReminders.length}</p>
+                    <p className="text-3xl font-bold">{reminders.length}</p>
                     <p className="text-sm text-orange-200">Total</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockReminders.filter(r => !r.completed).length}</p>
+                    <p className="text-3xl font-bold">{reminders.filter(r => !r.completed).length}</p>
                     <p className="text-sm text-orange-200">Pending</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockReminders.filter(r => r.completed).length}</p>
+                    <p className="text-3xl font-bold">{reminders.filter(r => r.completed).length}</p>
                     <p className="text-sm text-orange-200">Done</p>
                   </div>
                 </div>
@@ -2152,10 +2213,10 @@ END:VCALENDAR`
               insights={calendarAIInsights}
               title="Calendar Intelligence"
               onInsightAction={(insight) => {
-                if (insight.actionLabel?.toLowerCase().includes('schedule') || insight.actionLabel?.toLowerCase().includes('create')) {
+                if (insight.action?.toLowerCase().includes('schedule') || insight.action?.toLowerCase().includes('create')) {
                   setShowNewEvent(true)
                   toast.success(`AI Suggestion: ${insight.title}`)
-                } else if (insight.actionLabel?.toLowerCase().includes('view') || insight.actionLabel?.toLowerCase().includes('open')) {
+                } else if (insight.action?.toLowerCase().includes('view') || insight.action?.toLowerCase().includes('open')) {
                   setActiveTab('calendar')
                   toast.info(`Viewing: ${insight.title}`)
                 } else {

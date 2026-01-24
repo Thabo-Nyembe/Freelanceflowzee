@@ -101,26 +101,46 @@ interface BudgetItem {
   remaining: number
 }
 
-// Empty defaults for backward compatibility (data comes from Supabase hooks)
-const mockAIInsights: any[] = []
-const mockFinancialCollaborators: any[] = []
-const mockFinancialPredictions: any[] = []
-const mockFinancialActivities: any[] = []
-const mockFinancialQuickActions: any[] = []
+// Types for financial data structures
+interface ProfitLossData {
+  revenue: Record<string, number>
+  costOfRevenue: Record<string, number>
+  operatingExpenses: Record<string, number>
+}
+
+interface CashFlowData {
+  operating: Record<string, number>
+  investing: Record<string, number>
+  financing: Record<string, number>
+}
+
+// Empty defaults - data comes from Supabase hooks
+const aiInsights: { id: string; type: string; title: string; description: string; impact: string; priority: string }[] = []
+const financialCollaborators: { id: string; name: string; avatar: string; status: string }[] = []
+const financialPredictions: { id: string; metric: string; prediction: number; confidence: number; trend: string }[] = []
+const financialActivities: { id: string; type: string; description: string; timestamp: string; user: string }[] = []
+const financialQuickActions: { id: string; label: string; icon: string; action: () => void }[] = []
+
+// Empty profit/loss and cash flow data structures
+const profitLossData: ProfitLossData = {
+  revenue: {},
+  costOfRevenue: {},
+  operatingExpenses: {}
+}
+
+const cashFlowData: CashFlowData = {
+  operating: {},
+  investing: {},
+  financing: {}
+}
+
+// Empty budget items array
+const budgetItems: BudgetItem[] = []
+
+// Empty bank accounts array
+const bankAccounts: BankAccount[] = []
 
 export default function FinancialClient({ initialFinancial }: { initialFinancial: FinancialRecord[] }) {
-  // Define adapter variables locally (removed mock data imports)
-  const financialAccounts: any[] = []
-  const financialBankAccounts: any[] = []
-  const financialTransactions: any[] = []
-  const financialBudgetItems: any[] = []
-  const financialProfitLoss: any[] = []
-  const financialCashFlow: any[] = []
-  const financialAIInsights: any[] = []
-  const financialCollaborators: any[] = []
-  const financialPredictions: any[] = []
-  const financialActivities: any[] = []
-  const financialQuickActions: any[] = []
 
   const [activeTab, setActiveTab] = useState('overview')
   const [selectedPeriod, setSelectedPeriod] = useState('this-year')
@@ -191,8 +211,8 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
     return { accounts, transactions, totalIncome, totalExpenses, balance }
   }, [displayRecords])
 
-  const mockAccounts = financialData.accounts
-  const mockTransactions = financialData.transactions
+  const accounts = financialData.accounts
+  const transactions = financialData.transactions
 
   // Form state for new transaction
   const [newTransactionForm, setNewTransactionForm] = useState({
@@ -257,9 +277,9 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
   const totalOperatingExpenses = Object.values(profitLossData?.operatingExpenses || {}).reduce((a, b) => a + b, 0)
   const netIncome = grossProfit - totalOperatingExpenses
 
-  const totalAssets = (mockAccounts || []).filter(a => a.type === 'asset').reduce((sum, a) => sum + a.balance, 0)
-  const totalLiabilities = (mockAccounts || []).filter(a => a.type === 'liability').reduce((sum, a) => sum + a.balance, 0)
-  const totalEquity = (mockAccounts || []).filter(a => a.type === 'equity').reduce((sum, a) => sum + a.balance, 0)
+  const totalAssets = (accounts || []).filter(a => a.type === 'asset').reduce((sum, a) => sum + a.balance, 0)
+  const totalLiabilities = (accounts || []).filter(a => a.type === 'liability').reduce((sum, a) => sum + a.balance, 0)
+  const totalEquity = (accounts || []).filter(a => a.type === 'equity').reduce((sum, a) => sum + a.balance, 0)
 
   const operatingCashFlow = Object.values(cashFlowData?.operating || {}).reduce((a, b) => a + b, 0)
   const investingCashFlow = Object.values(cashFlowData?.investing || {}).reduce((a, b) => a + b, 0)
@@ -267,7 +287,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
   const netCashFlow = operatingCashFlow + investingCashFlow + financingCashFlow
 
   const filteredTransactions = useMemo(() => {
-    return mockTransactions.filter(t => {
+    return transactions.filter(t => {
       const matchesFilter = transactionFilter === 'all' || t.type === transactionFilter
       const matchesSearch = searchQuery === '' ||
         t.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -278,11 +298,11 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
 
   const accountsByType = useMemo(() => {
     return {
-      asset: mockAccounts.filter(a => a.type === 'asset'),
-      liability: mockAccounts.filter(a => a.type === 'liability'),
-      equity: mockAccounts.filter(a => a.type === 'equity'),
-      revenue: mockAccounts.filter(a => a.type === 'revenue'),
-      expense: mockAccounts.filter(a => a.type === 'expense'),
+      asset: accounts.filter(a => a.type === 'asset'),
+      liability: accounts.filter(a => a.type === 'liability'),
+      equity: accounts.filter(a => a.type === 'equity'),
+      revenue: accounts.filter(a => a.type === 'revenue'),
+      expense: accounts.filter(a => a.type === 'expense'),
     }
   }, [])
 
@@ -394,7 +414,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
     }
   }
 
-  const handleReconcileAccount = async (account: typeof mockAccounts[0]) => {
+  const handleReconcileAccount = async (account: typeof accounts[0]) => {
     setIsProcessing(true)
     toast.loading(`Reconciling "${account.name}"...`, { id: 'reconcile' })
 
@@ -482,7 +502,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
     }
   }
 
-  const handleApproveTransaction = async (transaction: typeof mockTransactions[0] | FinancialRecord) => {
+  const handleApproveTransaction = async (transaction: typeof transactions[0] | FinancialRecord) => {
     setIsProcessing(true)
     const transactionTitle = 'title' in transaction ? transaction.title : transaction.description
 
@@ -499,7 +519,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
         })
         refetch()
       } else {
-        // Mock transaction - just show toast
+        // Transaction not in database - just show toast
         toast.success('Transaction approved!', {
           description: `"${transactionTitle}" has been approved.`
         })
@@ -579,7 +599,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
           <div className="flex items-center gap-3">
             {/* Collaboration Indicator */}
             <CollaborationIndicator
-              collaborators={mockFinancialCollaborators}
+              collaborators={financialCollaborators}
               maxVisible={3}
             />
             <div className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
@@ -759,7 +779,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                 </div>
                 <ScrollArea className="h-[320px]">
                   <div className="divide-y divide-gray-100 dark:divide-gray-700">
-                    {mockTransactions.slice(0, 6).map((transaction) => (
+                    {transactions.slice(0, 6).map((transaction) => (
                       <div key={transaction.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
@@ -812,7 +832,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                 </div>
                 <ScrollArea className="h-[320px]">
                   <div className="p-4 space-y-4">
-                    {mockBudgetItems.map((item) => {
+                    {budgetItems.map((item) => {
                       const percentage = (item.actual / item.budgeted) * 100
                       const isOverBudget = item.actual > item.budgeted
                       return (
@@ -864,7 +884,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-gray-100 dark:divide-gray-700">
-                {mockBankAccounts.map((account) => (
+                {bankAccounts.map((account) => (
                   <div key={account.id} className="p-6">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-3">
@@ -1430,7 +1450,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
           <TabsContent value="banking" className="space-y-6">
             {/* Bank Accounts */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {mockBankAccounts.map((account) => (
+              {bankAccounts.map((account) => (
                 <div key={account.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
                   <div className="flex items-center justify-between mb-4">
                     <div className={`p-3 rounded-xl ${account.type === 'checking' ? 'bg-blue-100 dark:bg-blue-900/30' :
@@ -2442,23 +2462,23 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
         {/* AI-Powered Financial Insights */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
           <AIInsightsPanel
-            insights={mockAIInsights}
+            insights={aiInsights}
             onAskQuestion={(q) => toast.info('Question submitted', { description: q.substring(0, 50) + '...' })}
           />
-          <PredictiveAnalytics predictions={mockFinancialPredictions} />
+          <PredictiveAnalytics predictions={financialPredictions} />
         </div>
 
         {/* Activity Feed */}
         <div className="mt-6">
           <ActivityFeed
-            activities={mockFinancialActivities}
+            activities={financialActivities}
             maxItems={5}
             showFilters={true}
           />
         </div>
 
         {/* Quick Actions Toolbar */}
-        <QuickActionsToolbar actions={mockFinancialQuickActions} />
+        <QuickActionsToolbar actions={financialQuickActions} />
       </div>
     </div>
   )

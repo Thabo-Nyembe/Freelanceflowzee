@@ -356,17 +356,47 @@ const formatNumber = (num: number) => {
   return num.toString()
 }
 
-// MIGRATED: Competitive Upgrade Data - Empty arrays, using database hooks
+// MIGRATED: Using database hooks instead of mock data - All arrays properly typed as empty
 
+interface AIInsight {
+  id: string
+  title: string
+  description: string
+  type: string
+  priority: string
+  timestamp: string
+}
 
-const mockAICreateInsights: any[] = []
-const mockAICreateCollaborators: any[] = []
-const mockAICreatePredictions: any[] = []
-const mockAICreateActivities: any[] = []
-const mockModels: AIModel[] = [] // Kept empty or removed, using AVAILABLE_MODELS
-const mockTemplates: Template[] = [] // Kept empty, using AVAILABLE_TEMPLATES
-const mockGenerations: Generation[] = [] // Kept empty, using real data
-const mockUsageStats = { totalGenerations: 0, totalViews: 0, totalLikes: 0, totalDownloads: 0, totalCredits: 500 }
+interface Collaborator {
+  id: string
+  name: string
+  avatar: string
+  status: string
+  role: string
+}
+
+interface Prediction {
+  id: string
+  title: string
+  description: string
+  confidence: number
+  trend: string
+  value: string
+}
+
+interface ActivityItem {
+  id: string
+  type: string
+  title: string
+  description: string
+  timestamp: string
+  user: string
+}
+
+const aiCreateInsights: AIInsight[] = []
+const aiCreateCollaborators: Collaborator[] = []
+const aiCreatePredictions: Prediction[] = []
+const aiCreateActivities: ActivityItem[] = []
 
 // ============================================================================
 // MAIN COMPONENT
@@ -1617,23 +1647,21 @@ export default function AICreateClient() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {[
-                    { style: 'Fantasy', count: 345, percent: 28 },
-                    { style: 'Cyberpunk', count: 289, percent: 23 },
-                    { style: 'Realistic', count: 234, percent: 19 },
-                    { style: 'Anime', count: 198, percent: 16 },
-                    { style: 'Other', count: 179, percent: 14 }
-                  ].map((item, idx) => (
-                    <div key={idx}>
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-sm text-gray-600 dark:text-gray-400">{item.style}</span>
-                        <span className="text-sm font-semibold">{item.count}</span>
+                  {([] as { style: string; count: number; percent: number }[]).length === 0 ? (
+                    <p className="text-sm text-gray-500 text-center py-4">No style data available yet</p>
+                  ) : (
+                    ([] as { style: string; count: number; percent: number }[]).map((item, idx) => (
+                      <div key={idx}>
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-sm text-gray-600 dark:text-gray-400">{item.style}</span>
+                          <span className="text-sm font-semibold">{item.count}</span>
+                        </div>
+                        <div className="h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                          <div className="h-full bg-gradient-to-r from-purple-500 to-pink-500" style={{ width: `${item.percent}%` }} />
+                        </div>
                       </div>
-                      <div className="h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-                        <div className="h-full bg-gradient-to-r from-purple-500 to-pink-500" style={{ width: `${item.percent}%` }} />
-                      </div>
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </CardContent>
               </Card>
 
@@ -1646,20 +1674,19 @@ export default function AICreateClient() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {[
-                    { model: 'Midjourney V6', cost: 15.60, percent: 45 },
-                    { model: 'DALL-E 3', cost: 8.40, percent: 24 },
-                    { model: 'Stable Diffusion 3', cost: 6.80, percent: 20 },
-                    { model: 'SDXL Turbo', cost: 3.80, percent: 11 }
-                  ].map((item, idx) => (
-                    <div key={idx} className="flex items-center justify-between">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">{item.model}</span>
-                      <div className="flex items-center gap-2">
-                        <span className="font-semibold text-gray-900 dark:text-white">${item.cost.toFixed(2)}</span>
-                        <Badge variant="outline">{item.percent}%</Badge>
+                  {([] as { model: string; cost: number; percent: number }[]).length === 0 ? (
+                    <p className="text-sm text-gray-500 text-center py-4">No cost data available yet</p>
+                  ) : (
+                    ([] as { model: string; cost: number; percent: number }[]).map((item, idx) => (
+                      <div key={idx} className="flex items-center justify-between">
+                        <span className="text-sm text-gray-600 dark:text-gray-400">{item.model}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-gray-900 dark:text-white">${item.cost.toFixed(2)}</span>
+                          <Badge variant="outline">{item.percent}%</Badge>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </CardContent>
               </Card>
             </div>
@@ -1719,7 +1746,7 @@ export default function AICreateClient() {
                           <div>
                             <Label>Default Model</Label>
                             <select className="w-full mt-1.5 px-3 py-2 border rounded-lg dark:bg-gray-900 dark:border-gray-700">
-                              {mockModels.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+                              {AVAILABLE_MODELS.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
                             </select>
                           </div>
                           <div>
@@ -2129,18 +2156,18 @@ export default function AICreateClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockAICreateInsights}
+              insights={aiCreateInsights}
               title="AI Creation Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockAICreateCollaborators}
+              collaborators={aiCreateCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockAICreatePredictions}
+              predictions={aiCreatePredictions}
               title="Creative Forecasts"
             />
           </div>
@@ -2148,7 +2175,7 @@ export default function AICreateClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockAICreateActivities}
+            activities={aiCreateActivities}
             title="Creation Activity"
             maxItems={5}
           />

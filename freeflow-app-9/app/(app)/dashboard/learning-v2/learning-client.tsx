@@ -243,172 +243,24 @@ interface LearningStats {
 }
 
 // ============================================================================
-// MOCK DATA - MIGRATED
+// DEFAULT VALUES FOR DATABASE DATA
 // ============================================================================
-// MIGRATED: Batch #10 - Removed mock data, using database hooks
 
-const mockInstructors: Instructor[] = []
+// Default instructor for courses without instructor data
+const defaultInstructor: Instructor = {
+  id: 'default',
+  name: 'Course Instructor',
+  avatar: '/avatars/default.jpg',
+  title: 'Instructor',
+  company: 'Kazi Learning',
+  expertise: [],
+  courses: 0,
+  followers: 0,
+  rating: 0
+}
 
-const mockCourses: Course[] = []
-
-/* Removed in migration - use database hooks instead
-const mockInstructors_OLD: Instructor[] = [
-  {
-    id: 'inst-1',
-    name: 'Sarah Chen',
-    avatar: '/avatars/sarah.jpg',
-    title: 'Senior Engineering Manager',
-    company: 'Tech Corp',
-    expertise: ['Leadership', 'Project Management', 'Agile'],
-    courses: 28,
-    followers: 125000,
-    rating: 4.9
-  },
-  {
-    id: 'inst-2',
-    name: 'Michael Park',
-    avatar: '/avatars/michael.jpg',
-    title: 'Data Science Lead',
-    company: 'DataFlow Inc',
-    expertise: ['Python', 'Machine Learning', 'Data Analysis'],
-    courses: 15,
-    followers: 89000,
-    rating: 4.8
-  }
-]
-
-const mockCourses_OLD: Course[] = [
-  {
-    id: 'course-1',
-    title: 'Leadership Foundations: Building High-Performance Teams',
-    slug: 'leadership-foundations',
-    description: 'Master the essential skills needed to lead teams effectively in modern workplaces. Learn how to motivate, communicate, and drive results.',
-    shortDescription: 'Essential leadership skills for modern managers',
-    thumbnail: '/courses/leadership.jpg',
-    previewVideo: '/videos/leadership-preview.mp4',
-    instructor: mockInstructors[0],
-    category: 'Business',
-    subcategory: 'Leadership',
-    level: 'intermediate',
-    language: 'English',
-    skills: ['Team Leadership', 'Communication', 'Conflict Resolution', 'Strategic Thinking'],
-    sections: [
-      {
-        id: 'sec-1',
-        title: 'Introduction to Leadership',
-        duration: 45,
-        lessons: [
-          { id: 'les-1', title: 'What Makes a Great Leader?', duration: 8, type: 'video', completed: true, locked: false, hasTranscript: true, hasDownload: true },
-          { id: 'les-2', title: 'Leadership Styles Overview', duration: 12, type: 'video', completed: true, locked: false, hasTranscript: true, hasDownload: true },
-          { id: 'les-3', title: 'Quiz: Leadership Fundamentals', duration: 10, type: 'quiz', completed: false, locked: false, hasTranscript: false, hasDownload: false },
-          { id: 'les-4', title: 'Self-Assessment Exercise', duration: 15, type: 'exercise', completed: false, locked: false, hasTranscript: false, hasDownload: true }
-        ]
-      },
-      {
-        id: 'sec-2',
-        title: 'Building Trust and Communication',
-        duration: 60,
-        lessons: [
-          { id: 'les-5', title: 'The Trust Equation', duration: 10, type: 'video', completed: false, locked: false, hasTranscript: true, hasDownload: true },
-          { id: 'les-6', title: 'Active Listening Techniques', duration: 15, type: 'video', completed: false, locked: true, hasTranscript: true, hasDownload: true },
-          { id: 'les-7', title: 'Giving Effective Feedback', duration: 20, type: 'video', completed: false, locked: true, hasTranscript: true, hasDownload: true },
-          { id: 'les-8', title: 'Practice: Feedback Role-Play', duration: 15, type: 'exercise', completed: false, locked: true, hasTranscript: false, hasDownload: false }
-        ]
-      }
-    ],
-    totalDuration: 240,
-    lessonsCount: 28,
-    enrolledCount: 45230,
-    rating: 4.8,
-    reviewsCount: 3420,
-    completionRate: 78,
-    lastUpdated: '2024-12-15',
-    isBestseller: true,
-    isNew: false,
-    isFeatured: true,
-    hasExercises: true,
-    hasCertificate: true,
-    hasQuizzes: true
-  },
-  {
-    id: 'course-2',
-    title: 'Python for Data Science: Complete Bootcamp',
-    slug: 'python-data-science',
-    description: 'Learn Python programming from scratch and apply it to real-world data science projects. Covers pandas, numpy, matplotlib, and machine learning basics.',
-    shortDescription: 'From Python basics to data science mastery',
-    thumbnail: '/courses/python-ds.jpg',
-    previewVideo: '/videos/python-preview.mp4',
-    instructor: mockInstructors[1],
-    category: 'Technology',
-    subcategory: 'Data Science',
-    level: 'beginner',
-    language: 'English',
-    skills: ['Python', 'Data Analysis', 'Pandas', 'NumPy', 'Matplotlib'],
-    sections: [
-      {
-        id: 'sec-3',
-        title: 'Python Fundamentals',
-        duration: 90,
-        lessons: [
-          { id: 'les-9', title: 'Setting Up Your Environment', duration: 10, type: 'video', completed: true, locked: false, hasTranscript: true, hasDownload: true },
-          { id: 'les-10', title: 'Variables and Data Types', duration: 15, type: 'video', completed: true, locked: false, hasTranscript: true, hasDownload: true },
-          { id: 'les-11', title: 'Control Flow Statements', duration: 20, type: 'video', completed: true, locked: false, hasTranscript: true, hasDownload: true },
-          { id: 'les-12', title: 'Functions and Modules', duration: 25, type: 'video', completed: false, locked: false, hasTranscript: true, hasDownload: true },
-          { id: 'les-13', title: 'Coding Challenge', duration: 20, type: 'exercise', completed: false, locked: false, hasTranscript: false, hasDownload: true }
-        ]
-      }
-    ],
-    totalDuration: 480,
-    lessonsCount: 52,
-    enrolledCount: 89450,
-    rating: 4.9,
-    reviewsCount: 8920,
-    completionRate: 65,
-    lastUpdated: '2024-12-20',
-    isBestseller: true,
-    isNew: true,
-    isFeatured: true,
-    hasExercises: true,
-    hasCertificate: true,
-    hasQuizzes: true
-  },
-  {
-    id: 'course-3',
-    title: 'Agile Project Management Professional',
-    slug: 'agile-pm-professional',
-    description: 'Master Agile methodologies including Scrum, Kanban, and SAFe. Prepare for professional certification.',
-    shortDescription: 'Complete Agile and Scrum mastery course',
-    thumbnail: '/courses/agile.jpg',
-    previewVideo: null,
-    instructor: mockInstructors[0],
-    category: 'Business',
-    subcategory: 'Project Management',
-    level: 'intermediate',
-    language: 'English',
-    skills: ['Agile', 'Scrum', 'Kanban', 'SAFe', 'Sprint Planning'],
-    sections: [],
-    totalDuration: 360,
-    lessonsCount: 42,
-    enrolledCount: 34560,
-    rating: 4.7,
-    reviewsCount: 2890,
-    completionRate: 72,
-    lastUpdated: '2024-11-30',
-    isBestseller: false,
-    isNew: false,
-    isFeatured: false,
-    hasExercises: true,
-    hasCertificate: true,
-    hasQuizzes: true
-  }
-]
-*/
-
-// MIGRATED: Batch #10 - Removed mock data, using database hooks
-const mockLearningPaths: LearningPath[] = []
-const mockSkills: Skill[] = []
-const mockCollections: Collection[] = []
-const mockStats: LearningStats = {
+// Default stats (zeros for launch - will be populated from database)
+const defaultStats: LearningStats = {
   totalLearningHours: 0,
   coursesCompleted: 0,
   coursesInProgress: 0,
@@ -416,19 +268,14 @@ const mockStats: LearningStats = {
   certificatesEarned: 0,
   currentStreak: 0,
   longestStreak: 0,
-  weeklyGoal: 0,
+  weeklyGoal: 5,
   weeklyProgress: 0,
   averageRating: 0,
   totalNotes: 0,
   collectionsCount: 0
 }
-const mockProgress: UserProgress[] = []
-const mockLearningAIInsights = []
-const mockLearningCollaborators = []
-const mockLearningPredictions = []
-const mockLearningActivities = []
 
-// Note: mockLearningQuickActions moved inside component to access state setters
+// Note: learningQuickActions defined inside component to access state setters
 
 // ============================================================================
 // COMPONENT
@@ -481,41 +328,57 @@ export default function LearningClient() {
   const { progress: dbProgress, loading: progressLoading, updateProgress } = useUserProgress()
   const { collections: dbCollections, loading: collectionsLoading, createCollection, updateCollection, deleteCollection, mutating: collectionsMutating } = useCollections()
 
-  // Merge DB data with mock data as fallback
-  const courses = (dbCourses || []).map(c => ({
-    ...mockCourses[0],
+  // Map database data to component types with defaults
+  const courses: Course[] = (dbCourses || []).map(c => ({
     id: c.id,
     title: c.title,
+    slug: c.slug || c.id,
     description: c.description || '',
     shortDescription: c.short_description || '',
+    thumbnail: c.thumbnail_url || '/courses/default.jpg',
+    previewVideo: c.preview_video_url || null,
+    instructor: defaultInstructor,
     category: c.category,
+    subcategory: c.subcategory || '',
     level: c.level,
+    language: c.language || 'English',
+    skills: c.skills || [],
+    sections: [],
     totalDuration: c.total_duration,
     lessonsCount: c.lessons_count,
     enrolledCount: c.enrolled_count,
     rating: c.rating,
     reviewsCount: c.reviews_count,
+    completionRate: c.completion_rate || 0,
+    lastUpdated: c.last_updated || c.updated_at,
     isBestseller: c.is_bestseller,
     isNew: c.is_new,
     isFeatured: c.is_featured,
-    skills: c.skills || []
+    hasExercises: c.has_exercises || false,
+    hasCertificate: c.has_certificate || false,
+    hasQuizzes: c.has_quizzes || false
   }))
 
-  const learningPaths = (dbPaths || []).map(p => ({
-    ...mockLearningPaths[0],
+  const learningPaths: LearningPath[] = (dbPaths || []).map(p => ({
     id: p.id,
     title: p.title,
     description: p.description || '',
+    thumbnail: p.thumbnail_url || '/paths/default.jpg',
+    courses: [],
     totalDuration: p.total_duration,
     lessonsCount: p.lessons_count,
     enrolledCount: p.enrolled_count,
-    skills: p.skills || [],
-    level: p.level,
-    estimatedWeeks: p.estimated_weeks,
-    progress: 0,
     completedCourses: 0,
-    courses: [],
-    milestones: []
+    progress: 0,
+    skills: p.skills || [],
+    level: p.level as 'beginner' | 'intermediate' | 'advanced',
+    estimatedWeeks: p.estimated_weeks,
+    milestones: [],
+    curator: {
+      name: 'Kazi Learning',
+      avatar: '/avatars/default.jpg',
+      title: 'Learning Platform'
+    }
   }))
 
   const collections = (dbCollections || []).map(c => ({
@@ -541,8 +404,8 @@ export default function LearningClient() {
     certificateUrl: p.certificate_url
   }))
 
-  const [skills] = useState<Skill[]>(mockSkills)
-  const [stats] = useState<LearningStats>(mockStats)
+  const [skills] = useState<Skill[]>([])
+  const [stats] = useState<LearningStats>(defaultStats)
 
   const categories = useMemo(() => {
     const cats = new Set(courses.map(c => c.category))
@@ -1974,22 +1837,22 @@ export default function LearningClient() {
           </TabsContent>
         </Tabs>
 
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockLearningAIInsights}
+              insights={[]}
               title="Learning Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockLearningCollaborators}
+              collaborators={[]}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockLearningPredictions}
+              predictions={[]}
               title="Learning Progress Forecast"
             />
           </div>
@@ -1997,7 +1860,7 @@ export default function LearningClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockLearningActivities}
+            activities={[]}
             title="Learning Activity"
             maxItems={5}
           />

@@ -3,9 +3,13 @@
 import { createClient } from '@/lib/supabase/client'
 
 // MIGRATED: Batch #18 - Verified database hook integration
-// Hooks used: useUserManagement, useState, useMemo
+// Hooks used: useUserManagement, useState, useMemo, useAuthUserId, useDashboardInsights, useDashboardActivities, useDashboardQuickActions, useMLPredictions, useAICollaboration
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
+import { useAuthUserId } from '@/lib/hooks/use-auth-user-id'
+import { useDashboardInsights, useDashboardActivities, useDashboardQuickActions } from '@/lib/hooks/use-dashboard-extended'
+import { useMLPredictions } from '@/lib/hooks/use-ml-extended'
+import { useAICollaboration } from '@/lib/hooks/use-ai-extended'
 import { toast } from 'sonner'
 import {
   Users, Shield, Key, Link2, FileText, Settings, Search, Plus, MoreHorizontal,
@@ -85,42 +89,27 @@ interface AuditLog {
   details?: string
 }
 
-// Enhanced Competitive Upgrade Data
-const mockUserMgmtAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Access Review', description: 'Quarterly access review completed. 100% compliance.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Compliance' },
-  { id: '2', type: 'info' as const, title: 'Inactive Users', description: '15 users inactive for 30+ days. Consider deactivation.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Cleanup' },
-  { id: '3', type: 'warning' as const, title: 'MFA Required', description: '8 admin users without MFA enabled. Security risk.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Security' },
-]
-
-const mockUserMgmtCollaborators = [
-  { id: '1', name: 'IT Admin', avatar: '/avatars/it.jpg', status: 'online' as const, role: 'Administration', lastActive: 'Now' },
-  { id: '2', name: 'Security Mgr', avatar: '/avatars/secmgr.jpg', status: 'online' as const, role: 'Security', lastActive: '10m ago' },
-  { id: '3', name: 'HR Lead', avatar: '/avatars/hr.jpg', status: 'away' as const, role: 'HR', lastActive: '30m ago' },
-]
-
-const mockUserMgmtPredictions = [
-  { id: '1', label: 'Active Users', current: 450, target: 500, predicted: 475, confidence: 85, trend: 'up' as const },
-  { id: '2', label: 'MFA Adoption', current: 78, target: 100, predicted: 88, confidence: 80, trend: 'up' as const },
-  { id: '3', label: 'Tickets/Week', current: 25, target: 15, predicted: 20, confidence: 72, trend: 'down' as const },
-]
-
-const mockUserMgmtActivities = [
-  { id: '1', user: 'IT Admin', action: 'provisioned', target: '5 new users', timestamp: '15m ago', type: 'success' as const },
-  { id: '2', user: 'Security Mgr', action: 'enforced', target: 'password policy update', timestamp: '1h ago', type: 'info' as const },
-  { id: '3', user: 'System', action: 'flagged', target: 'suspicious login attempt', timestamp: '2h ago', type: 'warning' as const },
-]
-
-// Quick actions for the toolbar
-const mockUserMgmtQuickActions = [
-  { id: '1', label: 'Invite User', icon: 'UserPlus', variant: 'primary' as const, onClick: () => {} },
-  { id: '2', label: 'Export Users', icon: 'Download', variant: 'secondary' as const, onClick: () => {} },
-  { id: '3', label: 'Bulk Import', icon: 'Upload', variant: 'secondary' as const, onClick: () => {} },
-  { id: '4', label: 'Audit Report', icon: 'FileText', variant: 'secondary' as const, onClick: () => {} },
-]
-
-// Quick action handlers are set dynamically in the component to access state setters
+// MIGRATED: Mock data removed - now using real database hooks
+// - mockUserMgmtAIInsights -> useDashboardInsights
+// - mockUserMgmtCollaborators -> useAICollaboration
+// - mockUserMgmtPredictions -> useMLPredictions
+// - mockUserMgmtActivities -> useDashboardActivities
+// - mockUserMgmtQuickActions -> useDashboardQuickActions
 
 export default function UserManagementClient({ initialUsers }: { initialUsers: ManagedUser[] }) {
+  // Auth and user ID state
+  const { getUserId } = useAuthUserId()
+  const [userId, setUserId] = useState<string | null>(null)
+
+  // Fetch user ID on mount
+  useEffect(() => {
+    const fetchUserId = async () => {
+      const id = await getUserId()
+      setUserId(id)
+    }
+    fetchUserId()
+  }, [getUserId])
+
   const [activeView, setActiveView] = useState<'users' | 'roles' | 'connections' | 'security' | 'logs' | 'settings'>('users')
   const [searchQuery, setSearchQuery] = useState('')
   const [roleFilter, setRoleFilter] = useState<UserRole | 'all'>('all')
@@ -134,6 +123,125 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
 
   const { users, loading, error, createUser, updateUser, deleteUser, refetch } = useUserManagement({ role: roleFilter, status: statusFilter })
   const displayUsers = users
+
+  // Real database hooks for competitive upgrade components
+  const { data: rawInsights, isLoading: insightsLoading } = useDashboardInsights(userId || undefined)
+  const { data: rawCollaborators, isLoading: collaboratorsLoading } = useAICollaboration(userId || undefined)
+  const { data: rawPredictions, isLoading: predictionsLoading } = useMLPredictions(userId || undefined)
+  const { data: rawActivities, isLoading: activitiesLoading } = useDashboardActivities(userId || undefined)
+  const { data: rawQuickActions, isLoading: quickActionsLoading } = useDashboardQuickActions(userId || undefined)
+
+  // Transform database data to component-expected format with local state
+  const [aiInsights, setAIInsights] = useState<any[]>([])
+  const [collaborators, setCollaborators] = useState<any[]>([])
+  const [predictions, setPredictions] = useState<any[]>([])
+  const [activities, setActivities] = useState<any[]>([])
+  const [quickActions, setQuickActions] = useState<any[]>([])
+
+  // Sync insights from database
+  useEffect(() => {
+    if (rawInsights && rawInsights.length > 0) {
+      setAIInsights(rawInsights.map((insight: any) => ({
+        id: insight.id,
+        type: insight.type || insight.insight_type || 'info',
+        title: insight.title || insight.name || 'Insight',
+        description: insight.description || insight.content || '',
+        priority: insight.priority || 'medium',
+        timestamp: insight.created_at || new Date().toISOString(),
+        category: insight.category || 'General'
+      })))
+    } else {
+      // Default insights when no data
+      setAIInsights([
+        { id: '1', type: 'info', title: 'Getting Started', description: 'Configure your user management settings to get AI insights.', priority: 'low', timestamp: new Date().toISOString(), category: 'Setup' }
+      ])
+    }
+  }, [rawInsights])
+
+  // Sync collaborators from database
+  useEffect(() => {
+    if (rawCollaborators && rawCollaborators.length > 0) {
+      setCollaborators(rawCollaborators.map((collab: any) => ({
+        id: collab.id,
+        name: collab.name || collab.user_name || collab.collaborator_name || 'Team Member',
+        avatar: collab.avatar || collab.avatar_url || '/avatars/default.jpg',
+        status: collab.status || 'online',
+        role: collab.role || collab.collaboration_role || 'Member',
+        lastActive: collab.last_active || collab.updated_at || 'Recently'
+      })))
+    } else {
+      setCollaborators([])
+    }
+  }, [rawCollaborators])
+
+  // Sync predictions from database
+  useEffect(() => {
+    if (rawPredictions && rawPredictions.length > 0) {
+      setPredictions(rawPredictions.map((pred: any) => ({
+        id: pred.id,
+        label: pred.label || pred.name || pred.metric_name || 'Metric',
+        current: pred.current_value || pred.current || 0,
+        target: pred.target_value || pred.target || 100,
+        predicted: pred.predicted_value || pred.predicted || 0,
+        confidence: pred.confidence || pred.confidence_score || 75,
+        trend: pred.trend || (pred.predicted_value > pred.current_value ? 'up' : 'down')
+      })))
+    } else {
+      setPredictions([])
+    }
+  }, [rawPredictions])
+
+  // Sync activities from database
+  useEffect(() => {
+    if (rawActivities && rawActivities.length > 0) {
+      setActivities(rawActivities.map((activity: any) => ({
+        id: activity.id,
+        user: activity.user_name || activity.actor || 'System',
+        action: activity.action || activity.activity_type || 'performed action',
+        target: activity.target || activity.resource || activity.description || '',
+        timestamp: activity.created_at ? formatTimeAgo(activity.created_at) : 'Recently',
+        type: activity.type || activity.status || 'info'
+      })))
+    } else {
+      setActivities([])
+    }
+  }, [rawActivities])
+
+  // Sync quick actions from database
+  useEffect(() => {
+    if (rawQuickActions && rawQuickActions.length > 0) {
+      setQuickActions(rawQuickActions.map((action: any) => ({
+        id: action.id,
+        label: action.label || action.name || action.title || 'Action',
+        icon: action.icon || 'Zap',
+        variant: action.variant || 'secondary',
+        onClick: () => toast.info(`Action: ${action.label || action.name}`)
+      })))
+    } else {
+      // Default quick actions
+      setQuickActions([
+        { id: '1', label: 'Invite User', icon: 'UserPlus', variant: 'primary', onClick: () => setShowInviteModal(true) },
+        { id: '2', label: 'Export Users', icon: 'Download', variant: 'secondary', onClick: () => handleExportUsers() },
+        { id: '3', label: 'Bulk Import', icon: 'Upload', variant: 'secondary', onClick: () => toast.info('Bulk import coming soon') },
+        { id: '4', label: 'Audit Report', icon: 'FileText', variant: 'secondary', onClick: () => setActiveView('logs') },
+      ])
+    }
+  }, [rawQuickActions])
+
+  // Helper function to format time ago
+  const formatTimeAgo = useCallback((dateString: string) => {
+    const date = new Date(dateString)
+    const now = new Date()
+    const diffMs = now.getTime() - date.getTime()
+    const diffMins = Math.floor(diffMs / 60000)
+    const diffHours = Math.floor(diffMs / 3600000)
+    const diffDays = Math.floor(diffMs / 86400000)
+
+    if (diffMins < 1) return 'Just now'
+    if (diffMins < 60) return `${diffMins}m ago`
+    if (diffHours < 24) return `${diffHours}h ago`
+    return `${diffDays}d ago`
+  }, [])
 
 
   // Form state for inviting new user
@@ -2109,22 +2217,22 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
           )}
         </div>
 
-        {/* Enhanced Competitive Upgrade Components */}
+        {/* Enhanced Competitive Upgrade Components - Using Real Database Data */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockUserMgmtAIInsights}
+              insights={aiInsights}
               title="User Management Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockUserMgmtCollaborators}
+              collaborators={collaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockUserMgmtPredictions}
+              predictions={predictions}
               title="User Forecasts"
             />
           </div>
@@ -2132,12 +2240,12 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockUserMgmtActivities}
+            activities={activities}
             title="User Activity"
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockUserMgmtQuickActions}
+            actions={quickActions}
             variant="grid"
           />
         </div>

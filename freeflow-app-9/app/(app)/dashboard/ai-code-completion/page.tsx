@@ -224,19 +224,6 @@ export default function AICodeCompletionPage() {
     setIsCompleting(true)
     const startTime = Date.now()
 
-    const mockCompletion = '// AI-generated completion\n' +
-      codeInput + '\n' +
-      '  try {\n' +
-      '    // Implementation logic here\n' +
-      '    const result = await processData(data)\n' +
-      '    return result\n' +
-      '  } catch (error) {\n' +
-      '    console.error(\'Error:\', error)\n' +
-      '    throw new Error(\'Processing failed\')\n' +
-      '  }\n'
-
-    const completionSuggestions = ['Add error handling', 'Optimize performance', 'Add TypeScript types']
-
     // Save completion to database
     if (userId) {
       try {
@@ -246,13 +233,13 @@ export default function AICodeCompletionPage() {
         const { data: completionData, error } = await createCodeCompletion(userId, {
           language: selectedLanguage as ProgrammingLanguage,
           original_code: codeInput,
-          completed_code: mockCompletion,
+          completed_code: '',
           prompt: 'Auto-complete code',
           model: 'gpt-4',
-          confidence: 0.92,
-          tokens_used: Math.ceil(codeInput.length / 4) + Math.ceil(mockCompletion.length / 4),
+          confidence: 0,
+          tokens_used: 0,
           processing_time: processingTime,
-          suggestions: completionSuggestions
+          suggestions: [] as string[]
         })
 
         if (error) {
@@ -261,48 +248,44 @@ export default function AICodeCompletionPage() {
           // Update user stats
           await updateCodeStats(userId, {
             total_completions: 1,
-            total_tokens_used: Math.ceil(codeInput.length / 4) + Math.ceil(mockCompletion.length / 4)
+            total_tokens_used: 0
           })
           logger.info('Code completion saved to database', { completionId: completionData?.id })
         }
 
-        setCompletion(mockCompletion)
-        setSuggestions(completionSuggestions)
+        setCompletion('')
+        setSuggestions([] as string[])
         setIsCompleting(false)
 
-        toast.success('Code Completed', {
-          description: `${mockCompletion.split('\n').length} lines generated - ${completionSuggestions.length} suggestions`
+        toast.info('Code Completion', {
+          description: 'AI completion service not configured'
         })
-        announce('Code completion generated', 'polite')
+        announce('Code completion attempted', 'polite')
       } catch (err) {
         logger.error('Exception during completion', { error: err })
-        setCompletion(mockCompletion)
-        setSuggestions(completionSuggestions)
+        setCompletion('')
+        setSuggestions([] as string[])
         setIsCompleting(false)
-        toast.success('Code Completed', {
-          description: `${mockCompletion.split('\n').length} lines generated`
+        toast.info('Code Completion', {
+          description: 'AI completion service not configured'
         })
       }
     } else {
-      // Fallback for non-authenticated users
-      setTimeout(() => {
-        setCompletion(mockCompletion)
-        setSuggestions(completionSuggestions)
-        setIsCompleting(false)
-        toast.success('Code Completed', {
-          description: `${mockCompletion.split('\n').length} lines generated`
-        })
-      }, 1500)
+      // User not authenticated
+      setCompletion('')
+      setSuggestions([] as string[])
+      setIsCompleting(false)
+      toast.error('Please log in to use code completion')
     }
   }, [codeInput, userId, selectedLanguage, announce])
 
   const analyzeBugs = () => {
-    const mockBugs = [
-      { line: 5, type: 'warning', message: 'Variable declared but never used', severity: 'low' },
-      { line: 12, type: 'error', message: 'Possible null reference', severity: 'high' },
-      { line: 18, type: 'info', message: 'Consider using const instead of let', severity: 'low' }
-    ]
-    setBugs(mockBugs)
+    // Bug analysis requires AI service integration - setting empty array
+    const analyzedBugs: { line: number; type: string; message: string; severity: string }[] = []
+    setBugs(analyzedBugs)
+    toast.info('Bug Analysis', {
+      description: 'AI bug analysis service not configured'
+    })
   }
 
   const handleTemplateSelect = (template: any) => {

@@ -206,48 +206,6 @@ function filesReducer(state: FilesState, action: FilesAction): FilesState {
   }
 }
 
-// ============================================================================
-// MOCK DATA GENERATOR
-// ============================================================================
-
-const generateMockFiles = (): FileItem[] => {
-  logger.debug('Generating mock file data')
-
-  const fileTypes: Array<FileItem['type']> = ['pdf', 'excel', 'word', 'image', 'video', 'archive', 'code', 'figma']
-  const folders = ['Documents', 'Images', 'Videos', 'Design', 'Code', 'Archives']
-  const owners = ['Sarah Johnson', 'Mike Chen', 'Emma Wilson', 'David Kim', 'Lisa Brown', 'Alex Rivera']
-
-  const files: FileItem[] = []
-
-  for (let i = 1; i <= 50; i++) {
-    const type = fileTypes[Math.floor(Math.random() * fileTypes.length)]
-    const folder = folders[Math.floor(Math.random() * folders.length)]
-    const owner = owners[Math.floor(Math.random() * owners.length)]
-    const sizeBytes = Math.floor(Math.random() * 100000000) + 10000 // 10KB to 100MB
-    const sizeInMB = sizeBytes / (1024 * 1024)
-    const size = sizeInMB >= 1 ? `${sizeInMB.toFixed(1)} MB` : `${(sizeInMB * 1024).toFixed(0)} KB`
-
-    files.push({
-      id: `F-${String(i).padStart(3, '0')}`,
-      name: `${folder} File ${i}.${type}`,
-      type,
-      size,
-      sizeBytes,
-      dateModified: new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      owner,
-      folder,
-      starred: Math.random() > 0.8,
-      shared: Math.random() > 0.6,
-      thumbnail: (type === 'image' || type === 'video') ? `https://images.unsplash.com/photo-${1500000000000 + i}?w=150&h=150&fit=crop` : null,
-      tags: ['tag' + (i % 5), 'project' + (i % 3)],
-      locked: Math.random() > 0.9,
-      description: Math.random() > 0.7 ? `This is a ${type} file` : undefined
-    })
-  }
-
-  logger.info('Generated mock files', { count: files.length })
-  return files
-}
 
 // ============================================================================
 // MAIN COMPONENT
@@ -300,9 +258,29 @@ export default function FilesPage() {
     try {
       const response = await fetch('/api/files')
       const result = await response.json()
-      if (result.success) {
-        const mockFiles = generateMockFiles()
-        dispatch({ type: 'SET_FILES', files: mockFiles })
+      if (result.success && result.files) {
+        // Map API response to FileItem type
+        const files: FileItem[] = result.files.map((f: any) => ({
+          id: f.id || '',
+          name: f.name || '',
+          type: f.type || 'pdf',
+          size: f.size || '0 KB',
+          sizeBytes: f.sizeBytes || 0,
+          dateModified: f.dateModified || new Date().toISOString().split('T')[0],
+          owner: f.owner || '',
+          folder: f.folder || 'Documents',
+          starred: f.starred || false,
+          shared: f.shared || false,
+          thumbnail: f.thumbnail || null,
+          tags: f.tags || [],
+          locked: f.locked || false,
+          description: f.description
+        }))
+        dispatch({ type: 'SET_FILES', files })
+        announce('Files refreshed', 'polite')
+      } else {
+        // No files returned - use empty array
+        dispatch({ type: 'SET_FILES', files: [] as FileItem[] })
         announce('Files refreshed', 'polite')
       }
     } catch (err) {
@@ -321,11 +299,26 @@ export default function FilesPage() {
         const result = await response.json()
 
         if (result.success) {
-          // Use mock data for now since API returns minimal data
-          const mockFiles = generateMockFiles()
-          dispatch({ type: 'SET_FILES', files: mockFiles })
+          // Map API response to FileItem type - use empty array if no files
+          const files: FileItem[] = (result.files || []).map((f: any) => ({
+            id: f.id || '',
+            name: f.name || '',
+            type: f.type || 'pdf',
+            size: f.size || '0 KB',
+            sizeBytes: f.sizeBytes || 0,
+            dateModified: f.dateModified || new Date().toISOString().split('T')[0],
+            owner: f.owner || '',
+            folder: f.folder || 'Documents',
+            starred: f.starred || false,
+            shared: f.shared || false,
+            thumbnail: f.thumbnail || null,
+            tags: f.tags || [],
+            locked: f.locked || false,
+            description: f.description
+          }))
+          dispatch({ type: 'SET_FILES', files })
 
-          logger.info('Files loaded successfully from API', { count: result.files?.length || 0 })
+          logger.info('Files loaded successfully from API', { count: files.length })
           announce('Files loaded successfully', 'polite')
         } else {
           throw new Error(result.error || 'Failed to load files')

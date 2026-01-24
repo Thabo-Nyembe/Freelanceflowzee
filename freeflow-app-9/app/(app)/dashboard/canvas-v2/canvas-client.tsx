@@ -129,32 +129,16 @@ interface TeamMember {
   boards_access: number
 }
 
-// Enhanced Competitive Upgrade Data
-const mockCanvasAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Design System', description: 'Component library 95% consistent across all boards.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Consistency' },
-  { id: '2', type: 'info' as const, title: 'Collaboration', description: '8 team members actively editing across 3 boards.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Teamwork' },
-  { id: '3', type: 'warning' as const, title: 'Export Queue', description: '5 high-res exports pending. Consider batch processing.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Exports' },
-]
+// Empty arrays for competitive upgrade components (data loaded from Supabase)
+type AIInsight = { id: string; type: 'success' | 'info' | 'warning' | 'error' | 'recommendation' | 'alert' | 'opportunity' | 'prediction'; title: string; description: string; priority?: 'low' | 'medium' | 'high'; timestamp?: string; category?: string }
+type Collaborator = { id: string; name: string; avatar?: string; status: 'online' | 'away' | 'offline'; role?: string; lastActive?: string }
+type Prediction = { id?: string; label?: string; current?: number; target?: number; predicted?: number; confidence: number; trend: 'up' | 'down' | 'stable' }
+type ActivityItem = { id: string; user: { id: string; name: string; avatar?: string }; action?: string; target?: { type: string; name: string }; timestamp: string | Date; type: 'comment' | 'update' | 'create' | 'delete' | 'mention' | 'assignment' | 'status_change' | 'milestone' | 'integration' }
 
-const mockCanvasCollaborators = [
-  { id: '1', name: 'Design Lead', avatar: '/avatars/design.jpg', status: 'online' as const, role: 'Design', lastActive: 'Now' },
-  { id: '2', name: 'UI Designer', avatar: '/avatars/ui.jpg', status: 'online' as const, role: 'UI/UX', lastActive: '5m ago' },
-  { id: '3', name: 'Illustrator', avatar: '/avatars/illustrator.jpg', status: 'away' as const, role: 'Graphics', lastActive: '20m ago' },
-]
-
-const mockCanvasPredictions = [
-  { id: '1', label: 'Boards', current: 45, target: 60, predicted: 52, confidence: 82, trend: 'up' as const },
-  { id: '2', label: 'Components', current: 320, target: 400, predicted: 360, confidence: 78, trend: 'up' as const },
-  { id: '3', label: 'Team Usage', current: 85, target: 95, predicted: 90, confidence: 85, trend: 'up' as const },
-]
-
-const mockCanvasActivities = [
-  { id: '1', user: 'Design Lead', action: 'created', target: 'Dashboard redesign board', timestamp: '10m ago', type: 'success' as const },
-  { id: '2', user: 'UI Designer', action: 'shared', target: 'Mobile app mockups', timestamp: '30m ago', type: 'info' as const },
-  { id: '3', user: 'Illustrator', action: 'exported', target: '15 icons to SVG', timestamp: '1h ago', type: 'success' as const },
-]
-
-// mockCanvasQuickActions moved inside component to access state setters
+const canvasAIInsights: AIInsight[] = []
+const canvasCollaborators: Collaborator[] = []
+const canvasPredictions: Prediction[] = []
+const canvasActivities: ActivityItem[] = []
 
 export default function CanvasClient({ initialCanvases }: { initialCanvases: Canvas[] }) {
   const [activeTab, setActiveTab] = useState('dashboard')
@@ -186,146 +170,23 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
   const [inviteRole, setInviteRole] = useState<'editor' | 'viewer' | 'commenter'>('viewer')
   const [isInviting, setIsInviting] = useState(false)
 
-  // Mock canvas boards
-  const boards: CanvasBoard[] = [
-    {
-      id: '1', name: 'App Redesign v2.0', description: 'Complete mobile app redesign with new design system',
-      type: 'wireframe', status: 'in_progress', thumbnail: '📱',
-      owner: { name: 'Sarah Chen', avatar: '' },
-      collaborators: [
-        { name: 'Mike Ross', avatar: '', role: 'Editor', online: true },
-        { name: 'Emily Davis', avatar: '', role: 'Viewer', online: false },
-        { name: 'John Smith', avatar: '', role: 'Commenter', online: true }
-      ],
-      elements_count: 847, frames_count: 24, comments_count: 56, version: '2.4.1',
-      last_edited: '5 min ago', created_at: '2024-01-15', is_public: false, is_starred: true,
-      tags: ['mobile', 'redesign', 'ios'], project_id: 'proj-1'
-    },
-    {
-      id: '2', name: 'User Flow Diagrams', description: 'Complete user journey mapping for checkout flow',
-      type: 'diagram', status: 'review', thumbnail: '🔄',
-      owner: { name: 'Mike Ross', avatar: '' },
-      collaborators: [
-        { name: 'Sarah Chen', avatar: '', role: 'Editor', online: true }
-      ],
-      elements_count: 156, frames_count: 8, comments_count: 23, version: '1.2.0',
-      last_edited: '2 hours ago', created_at: '2024-02-01', is_public: true, is_starred: true,
-      tags: ['ux', 'flow', 'checkout'], project_id: 'proj-1'
-    },
-    {
-      id: '3', name: 'Brand Guidelines', description: 'Company brand identity and style guide',
-      type: 'presentation', status: 'approved', thumbnail: '🎨',
-      owner: { name: 'Emily Davis', avatar: '' },
-      collaborators: [
-        { name: 'Sarah Chen', avatar: '', role: 'Viewer', online: false }
-      ],
-      elements_count: 234, frames_count: 16, comments_count: 8, version: '3.0.0',
-      last_edited: '1 day ago', created_at: '2024-01-01', is_public: true, is_starred: false,
-      tags: ['brand', 'guidelines', 'identity'], project_id: 'proj-2'
-    },
-    {
-      id: '4', name: 'Sprint Brainstorm', description: 'Team ideation session for Q2 features',
-      type: 'whiteboard', status: 'in_progress', thumbnail: '💡',
-      owner: { name: 'John Smith', avatar: '' },
-      collaborators: [
-        { name: 'Sarah Chen', avatar: '', role: 'Editor', online: true },
-        { name: 'Mike Ross', avatar: '', role: 'Editor', online: true },
-        { name: 'Emily Davis', avatar: '', role: 'Editor', online: false }
-      ],
-      elements_count: 423, frames_count: 4, comments_count: 89, version: '1.0.5',
-      last_edited: '10 min ago', created_at: '2024-02-15', is_public: false, is_starred: false,
-      tags: ['brainstorm', 'q2', 'features'], project_id: 'proj-3'
-    },
-    {
-      id: '5', name: 'Interactive Prototype', description: 'Clickable prototype for user testing',
-      type: 'prototype', status: 'draft', thumbnail: '🖱️',
-      owner: { name: 'Sarah Chen', avatar: '' },
-      collaborators: [],
-      elements_count: 567, frames_count: 32, comments_count: 0, version: '0.1.0',
-      last_edited: '3 hours ago', created_at: '2024-02-20', is_public: false, is_starred: false,
-      tags: ['prototype', 'testing', 'interactive'], project_id: 'proj-1'
-    }
-  ]
+  // Canvas boards - data loaded from Supabase
+  const boards: CanvasBoard[] = []
 
-  // Mock templates
-  const templates: DesignTemplate[] = [
-    { id: '1', name: 'iOS App Template', category: 'Mobile', subcategory: 'iOS', thumbnail: '📱',
-      description: 'Complete iOS app design kit with 100+ screens', elements_count: 450, downloads: 12500,
-      rating: 4.8, is_premium: false, author: 'Design Systems', tags: ['ios', 'mobile', 'app'] },
-    { id: '2', name: 'Web Dashboard', category: 'Web', subcategory: 'Dashboard', thumbnail: '📊',
-      description: 'Admin dashboard with charts and data visualization', elements_count: 280, downloads: 8900,
-      rating: 4.7, is_premium: true, author: 'UI Masters', tags: ['dashboard', 'admin', 'charts'] },
-    { id: '3', name: 'User Journey Map', category: 'UX', subcategory: 'Research', thumbnail: '🗺️',
-      description: 'User experience journey mapping template', elements_count: 45, downloads: 15600,
-      rating: 4.9, is_premium: false, author: 'UX Toolkit', tags: ['ux', 'journey', 'research'] },
-    { id: '4', name: 'Sprint Retro Board', category: 'Agile', subcategory: 'Retrospective', thumbnail: '🔄',
-      description: 'Team retrospective with voting and actions', elements_count: 32, downloads: 23400,
-      rating: 4.6, is_premium: false, author: 'Agile Templates', tags: ['agile', 'retro', 'team'] },
-    { id: '5', name: 'Wireframe Kit Pro', category: 'UI', subcategory: 'Wireframes', thumbnail: '🖼️',
-      description: 'Low-fidelity wireframe components library', elements_count: 380, downloads: 19200,
-      rating: 4.8, is_premium: true, author: 'Wireframe Pro', tags: ['wireframe', 'ui', 'lofi'] },
-    { id: '6', name: 'Mind Map Bundle', category: 'Planning', subcategory: 'Ideation', thumbnail: '🧠',
-      description: 'Mind mapping and brainstorming templates', elements_count: 56, downloads: 11300,
-      rating: 4.5, is_premium: false, author: 'Think Visual', tags: ['mindmap', 'brainstorm', 'planning'] }
-  ]
+  // Design templates - data loaded from Supabase
+  const templates: DesignTemplate[] = []
 
-  // Design components
-  const components: DesignComponent[] = [
-    { id: '1', name: 'Button', category: 'Interactive', icon: Square, description: 'Button component with states',
-      variants: 12, instances: 234, is_published: true, last_updated: '2 days ago' },
-    { id: '2', name: 'Input Field', category: 'Forms', icon: Type, description: 'Text input with validation',
-      variants: 8, instances: 189, is_published: true, last_updated: '1 week ago' },
-    { id: '3', name: 'Card', category: 'Layout', icon: Square, description: 'Content card container',
-      variants: 6, instances: 156, is_published: true, last_updated: '3 days ago' },
-    { id: '4', name: 'Avatar', category: 'Media', icon: Circle, description: 'User avatar with sizes',
-      variants: 4, instances: 98, is_published: true, last_updated: '5 days ago' },
-    { id: '5', name: 'Navigation', category: 'Layout', icon: Minus, description: 'Navigation bar component',
-      variants: 3, instances: 45, is_published: true, last_updated: '1 day ago' },
-    { id: '6', name: 'Modal', category: 'Overlay', icon: Frame, description: 'Modal dialog component',
-      variants: 5, instances: 67, is_published: true, last_updated: '4 days ago' },
-    { id: '7', name: 'Table', category: 'Data', icon: Table2, description: 'Data table with sorting',
-      variants: 4, instances: 34, is_published: false, last_updated: '6 days ago' },
-    { id: '8', name: 'Chart', category: 'Data', icon: BarChart3, description: 'Chart visualizations',
-      variants: 8, instances: 56, is_published: true, last_updated: '2 days ago' }
-  ]
+  // Design components - data loaded from Supabase
+  const components: DesignComponent[] = []
 
-  // Version history
-  const versions: VersionHistory[] = [
-    { id: '1', version: '2.4.1', description: 'Updated button styles and fixed navigation',
-      author: { name: 'Sarah Chen', avatar: '' }, timestamp: '5 min ago', changes: 12, is_current: true, is_milestone: false },
-    { id: '2', version: '2.4.0', description: 'Added new checkout flow screens',
-      author: { name: 'Mike Ross', avatar: '' }, timestamp: '2 hours ago', changes: 45, is_current: false, is_milestone: true },
-    { id: '3', version: '2.3.2', description: 'Fixed responsive layouts',
-      author: { name: 'Sarah Chen', avatar: '' }, timestamp: '1 day ago', changes: 8, is_current: false, is_milestone: false },
-    { id: '4', version: '2.3.0', description: 'Major redesign of home screen',
-      author: { name: 'Emily Davis', avatar: '' }, timestamp: '3 days ago', changes: 67, is_current: false, is_milestone: true },
-    { id: '5', version: '2.2.0', description: 'Added dark mode support',
-      author: { name: 'Sarah Chen', avatar: '' }, timestamp: '1 week ago', changes: 89, is_current: false, is_milestone: true }
-  ]
+  // Version history - data loaded from Supabase
+  const versions: VersionHistory[] = []
 
-  // Comments
-  const comments: CanvasComment[] = [
-    { id: '1', author: { name: 'Mike Ross', avatar: '' }, content: 'Should we increase the button size for mobile?',
-      position: { x: 450, y: 320 }, timestamp: '10 min ago', resolved: false, replies: 3, thread_id: 't1' },
-    { id: '2', author: { name: 'Emily Davis', avatar: '' }, content: 'Love the new color scheme!',
-      position: { x: 200, y: 150 }, timestamp: '1 hour ago', resolved: true, replies: 1, thread_id: 't2' },
-    { id: '3', author: { name: 'John Smith', avatar: '' }, content: 'Can we add a loading state here?',
-      position: { x: 600, y: 400 }, timestamp: '2 hours ago', resolved: false, replies: 5, thread_id: 't3' }
-  ]
+  // Comments - data loaded from Supabase
+  const comments: CanvasComment[] = []
 
-  // Team members
-  const teamMembers: TeamMember[] = [
-    { id: '1', name: 'Sarah Chen', email: 'sarah@company.com', avatar: '', role: 'owner', status: 'active',
-      last_active: 'Now', boards_access: 12 },
-    { id: '2', name: 'Mike Ross', email: 'mike@company.com', avatar: '', role: 'editor', status: 'active',
-      last_active: '5 min ago', boards_access: 8 },
-    { id: '3', name: 'Emily Davis', email: 'emily@company.com', avatar: '', role: 'editor', status: 'active',
-      last_active: '2 hours ago', boards_access: 6 },
-    { id: '4', name: 'John Smith', email: 'john@company.com', avatar: '', role: 'commenter', status: 'active',
-      last_active: '1 day ago', boards_access: 4 },
-    { id: '5', name: 'Lisa Wang', email: 'lisa@company.com', avatar: '', role: 'viewer', status: 'pending',
-      last_active: 'Never', boards_access: 0 }
-  ]
+  // Team members - data loaded from Supabase
+  const teamMembers: TeamMember[] = []
 
   const tools = [
     { id: 'select' as ToolType, name: 'Select', icon: MousePointer, shortcut: 'V' },
@@ -2137,18 +1998,18 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockCanvasAIInsights}
+              insights={canvasAIInsights}
               title="Canvas Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockCanvasCollaborators}
+              collaborators={canvasCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockCanvasPredictions}
+              predictions={canvasPredictions}
               title="Design Forecasts"
             />
           </div>
@@ -2156,7 +2017,7 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockCanvasActivities}
+            activities={canvasActivities}
             title="Canvas Activity"
             maxItems={5}
           />

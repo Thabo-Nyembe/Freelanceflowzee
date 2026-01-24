@@ -170,81 +170,27 @@ interface PermissionsClientProps {
   initialPermissions: Permission[]
 }
 
-// Mock Okta-level data
-const mockUsers: User[] = [
-  { id: 'user_1', email: 'john@company.com', firstName: 'John', lastName: 'Doe', displayName: 'John Doe', status: 'active', roles: ['admin'], groups: ['Engineering', 'All Users'], lastLogin: new Date().toISOString(), createdAt: '2024-01-01', mfaEnabled: true, mfaFactors: ['totp', 'push'], department: 'Engineering', title: 'Senior Engineer' },
-  { id: 'user_2', email: 'jane@company.com', firstName: 'Jane', lastName: 'Smith', displayName: 'Jane Smith', status: 'active', roles: ['manager'], groups: ['Product', 'All Users'], lastLogin: new Date(Date.now() - 3600000).toISOString(), createdAt: '2024-01-05', mfaEnabled: true, mfaFactors: ['sms', 'email'], department: 'Product', title: 'Product Manager' },
-  { id: 'user_3', email: 'mike@company.com', firstName: 'Mike', lastName: 'Johnson', displayName: 'Mike Johnson', status: 'pending', roles: ['standard'], groups: ['Sales', 'All Users'], createdAt: '2024-01-20', mfaEnabled: false, mfaFactors: [], department: 'Sales', title: 'Account Executive' },
-  { id: 'user_4', email: 'sarah@company.com', firstName: 'Sarah', lastName: 'Williams', displayName: 'Sarah Williams', status: 'active', roles: ['standard'], groups: ['Marketing', 'All Users'], lastLogin: new Date(Date.now() - 86400000).toISOString(), createdAt: '2024-01-10', mfaEnabled: true, mfaFactors: ['webauthn'], department: 'Marketing', title: 'Marketing Lead' },
-  { id: 'user_5', email: 'admin@company.com', firstName: 'System', lastName: 'Admin', displayName: 'System Admin', status: 'active', roles: ['system'], groups: ['IT', 'All Users'], lastLogin: new Date(Date.now() - 1800000).toISOString(), createdAt: '2023-01-01', mfaEnabled: true, mfaFactors: ['totp', 'security_key'], department: 'IT', title: 'System Administrator' }
-]
+// Empty data arrays - real data comes from Supabase hooks
+const mockUsers: User[] = []
 
-const mockGroups: Group[] = [
-  { id: 'group_1', name: 'All Users', description: 'All organization users', type: 'built_in', memberCount: 156, applications: ['Slack', 'Google Workspace', 'Jira'], createdAt: '2023-01-01' },
-  { id: 'group_2', name: 'Engineering', description: 'Engineering team members', type: 'okta', memberCount: 42, applications: ['GitHub', 'AWS', 'Datadog'], createdAt: '2024-01-01' },
-  { id: 'group_3', name: 'Product', description: 'Product team members', type: 'okta', memberCount: 18, applications: ['Figma', 'Amplitude', 'Linear'], createdAt: '2024-01-01' },
-  { id: 'group_4', name: 'Sales', description: 'Sales team members', type: 'okta', memberCount: 35, applications: ['Salesforce', 'HubSpot', 'Gong'], createdAt: '2024-01-01' },
-  { id: 'group_5', name: 'IT', description: 'IT and operations', type: 'okta', memberCount: 8, applications: ['All Apps'], createdAt: '2023-01-01' }
-]
+const mockGroups: Group[] = []
 
-const mockRoles: OktaRole[] = [
-  { id: 'role_1', name: 'super_admin', displayName: 'Super Admin', description: 'Full system access with all permissions', level: 'system', permissions: ['*'], assignedUsers: 2, isSystem: true, isEditable: false, createdAt: '2023-01-01' },
-  { id: 'role_2', name: 'org_admin', displayName: 'Organization Admin', description: 'Administrative access to organization settings', level: 'admin', permissions: ['org:manage', 'users:manage', 'groups:manage', 'apps:manage'], assignedUsers: 5, isSystem: true, isEditable: false, createdAt: '2023-01-01' },
-  { id: 'role_3', name: 'user_admin', displayName: 'User Administrator', description: 'Manage user lifecycle and credentials', level: 'admin', permissions: ['users:manage', 'users:reset_password', 'users:unlock'], assignedUsers: 8, isSystem: true, isEditable: false, createdAt: '2023-01-01' },
-  { id: 'role_4', name: 'app_admin', displayName: 'Application Administrator', description: 'Manage application assignments and settings', level: 'admin', permissions: ['apps:manage', 'apps:assign'], assignedUsers: 6, isSystem: true, isEditable: false, createdAt: '2023-01-01' },
-  { id: 'role_5', name: 'helpdesk', displayName: 'Help Desk', description: 'Basic user support capabilities', level: 'manager', permissions: ['users:view', 'users:reset_password', 'users:unlock'], assignedUsers: 12, isSystem: true, isEditable: true, createdAt: '2023-01-01' },
-  { id: 'role_6', name: 'read_only', displayName: 'Read Only Admin', description: 'View-only access to all resources', level: 'standard', permissions: ['*:read'], assignedUsers: 15, isSystem: true, isEditable: false, createdAt: '2023-01-01' }
-]
+const mockRoles: OktaRole[] = []
 
-const mockPolicies: Policy[] = [
-  { id: 'policy_1', name: 'Default Sign-On Policy', description: 'Default authentication policy for all users', type: 'sign_on', priority: 1, status: 'active', conditions: [{ type: 'user_type', value: 'all' }], actions: [{ type: 'allow', value: 'mfa_required' }], assignedGroups: ['All Users'] },
-  { id: 'policy_2', name: 'Password Policy', description: 'Password complexity and rotation requirements', type: 'password', priority: 1, status: 'active', conditions: [], actions: [{ type: 'min_length', value: '12' }, { type: 'require_special', value: 'true' }], assignedGroups: ['All Users'] },
-  { id: 'policy_3', name: 'MFA Enrollment', description: 'Multi-factor authentication requirements', type: 'mfa', priority: 1, status: 'active', conditions: [], actions: [{ type: 'required_factors', value: '2' }], assignedGroups: ['All Users'] },
-  { id: 'policy_4', name: 'Session Policy', description: 'Session timeout and management', type: 'session', priority: 1, status: 'active', conditions: [], actions: [{ type: 'max_idle', value: '30m' }, { type: 'max_session', value: '24h' }], assignedGroups: ['All Users'] }
-]
+const mockPolicies: Policy[] = []
 
-const mockApplications: Application[] = [
-  { id: 'app_1', name: 'Slack', status: 'active', type: 'saml', assignedUsers: 156, assignedGroups: ['All Users'], ssoEnabled: true, provisioningEnabled: true, createdAt: '2023-06-01' },
-  { id: 'app_2', name: 'GitHub', status: 'active', type: 'saml', assignedUsers: 42, assignedGroups: ['Engineering'], ssoEnabled: true, provisioningEnabled: true, createdAt: '2023-06-15' },
-  { id: 'app_3', name: 'Salesforce', status: 'active', type: 'saml', assignedUsers: 35, assignedGroups: ['Sales'], ssoEnabled: true, provisioningEnabled: false, createdAt: '2023-07-01' },
-  { id: 'app_4', name: 'AWS Console', status: 'active', type: 'saml', assignedUsers: 42, assignedGroups: ['Engineering', 'IT'], ssoEnabled: true, provisioningEnabled: false, createdAt: '2023-08-01' },
-  { id: 'app_5', name: 'Google Workspace', status: 'active', type: 'saml', assignedUsers: 156, assignedGroups: ['All Users'], ssoEnabled: true, provisioningEnabled: true, createdAt: '2023-01-01' }
-]
+const mockApplications: Application[] = []
 
-const mockAuditEvents: AuditEvent[] = [
-  { id: 'event_1', action: 'user.login', actor: 'john@company.com', target: 'Slack', timestamp: new Date().toISOString(), result: 'success', ipAddress: '192.168.1.100' },
-  { id: 'event_2', action: 'user.password_reset', actor: 'admin@company.com', target: 'mike@company.com', timestamp: new Date(Date.now() - 3600000).toISOString(), result: 'success', ipAddress: '192.168.1.10' },
-  { id: 'event_3', action: 'user.mfa_challenge', actor: 'jane@company.com', target: 'AWS Console', timestamp: new Date(Date.now() - 7200000).toISOString(), result: 'success', ipAddress: '10.0.0.50' },
-  { id: 'event_4', action: 'user.login_failure', actor: 'unknown@attacker.com', target: 'Google Workspace', timestamp: new Date(Date.now() - 10800000).toISOString(), result: 'failure', ipAddress: '203.0.113.45' },
-  { id: 'event_5', action: 'group.member_added', actor: 'admin@company.com', target: 'Engineering', timestamp: new Date(Date.now() - 14400000).toISOString(), result: 'success', ipAddress: '192.168.1.10' }
-]
+const mockAuditEvents: AuditEvent[] = []
 
-// ============================================================================
-// ENHANCED COMPETITIVE UPGRADE MOCK DATA - Okta Level
-// ============================================================================
+// Empty arrays for competitive upgrade components
+const mockPermissionsAIInsights: { id: string; type: 'success' | 'warning' | 'info'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
 
-const mockPermissionsAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Compliance Met', description: 'All access policies comply with SOC2 and GDPR requirements.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Compliance' },
-  { id: '2', type: 'warning' as const, title: 'Unusual Access', description: '3 login attempts from new location detected for admin accounts.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Security' },
-  { id: '3', type: 'info' as const, title: 'Permission Review', description: '15 users have unused elevated permissions. Review recommended.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Optimization' },
-]
+const mockPermissionsCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'offline' | 'away'; role: string }[] = []
 
-const mockPermissionsCollaborators = [
-  { id: '1', name: 'Security Admin', avatar: '/avatars/security.jpg', status: 'online' as const, role: 'Security' },
-  { id: '2', name: 'IT Manager', avatar: '/avatars/it.jpg', status: 'online' as const, role: 'IT' },
-  { id: '3', name: 'Compliance Officer', avatar: '/avatars/compliance.jpg', status: 'away' as const, role: 'Compliance' },
-]
+const mockPermissionsPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: 'low' | 'medium' | 'high' }[] = []
 
-const mockPermissionsPredictions = [
-  { id: '1', title: 'Access Growth', prediction: 'User base expected to grow 20% requiring role expansion', confidence: 85, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Risk Reduction', prediction: 'MFA enforcement will reduce breach risk by 80%', confidence: 94, trend: 'up' as const, impact: 'medium' as const },
-]
-
-const mockPermissionsActivities = [
-  { id: '1', user: 'Security Admin', action: 'Enabled', target: 'MFA for Engineering group', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'IT Manager', action: 'Created', target: 'New Developer role with limited access', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'System', action: 'Blocked', target: 'Suspicious login attempt from unknown IP', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'warning' as const },
-]
+const mockPermissionsActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' | 'error' }[] = []
 
 // Quick actions are defined inside the component to access state setters
 

@@ -220,327 +220,21 @@ const formatBars = (seconds: number, bpm: number): string => {
   return `${bars}.${beats}`
 }
 
-// Mock data
-const mockTracks: Track[] = [
-  {
-    id: 't1',
-    name: 'Lead Vocals',
-    type: 'audio',
-    color: '#3B82F6',
-    volume: 0,
-    pan: 0,
-    muted: false,
-    solo: false,
-    armed: false,
-    locked: false,
-    visible: true,
-    regions: [
-      { id: 'r1', name: 'Verse 1', startTime: 0, endTime: 32, color: '#3B82F6', fadeIn: 0.5, fadeOut: 0.5, gain: 0, muted: false },
-      { id: 'r2', name: 'Chorus', startTime: 32, endTime: 64, color: '#3B82F6', fadeIn: 0, fadeOut: 0, gain: 2, muted: false }
-    ],
-    effects: ['Compressor', 'EQ', 'De-Esser', 'Reverb Send'],
-    sends: [{ busId: 'bus1', amount: -12 }],
-    automationEnabled: true,
-    inputSource: 'Input 1',
-    outputBus: 'master',
-    order: 1
-  },
-  {
-    id: 't2',
-    name: 'Backing Vocals',
-    type: 'audio',
-    color: '#8B5CF6',
-    volume: -6,
-    pan: -30,
-    muted: false,
-    solo: false,
-    armed: false,
-    locked: false,
-    visible: true,
-    regions: [
-      { id: 'r3', name: 'BV Chorus', startTime: 32, endTime: 64, color: '#8B5CF6', fadeIn: 0, fadeOut: 1, gain: 0, muted: false }
-    ],
-    effects: ['EQ', 'Chorus', 'Reverb Send'],
-    sends: [{ busId: 'bus1', amount: -8 }],
-    automationEnabled: false,
-    inputSource: 'Input 2',
-    outputBus: 'master',
-    order: 2
-  },
-  {
-    id: 't3',
-    name: 'Piano',
-    type: 'midi',
-    color: '#10B981',
-    volume: -3,
-    pan: 10,
-    muted: false,
-    solo: false,
-    armed: false,
-    locked: false,
-    visible: true,
-    regions: [
-      { id: 'r4', name: 'Piano Intro', startTime: 0, endTime: 16, color: '#10B981', fadeIn: 0, fadeOut: 0, gain: 0, muted: false },
-      { id: 'r5', name: 'Piano Verse', startTime: 16, endTime: 64, color: '#10B981', fadeIn: 0, fadeOut: 0, gain: 0, muted: false }
-    ],
-    effects: ['EQ', 'Compressor'],
-    sends: [{ busId: 'bus1', amount: -18 }],
-    automationEnabled: true,
-    outputBus: 'master',
-    order: 3
-  },
-  {
-    id: 't4',
-    name: 'Synth Lead',
-    type: 'midi',
-    color: '#F59E0B',
-    volume: -8,
-    pan: -20,
-    muted: false,
-    solo: false,
-    armed: true,
-    locked: false,
-    visible: true,
-    regions: [
-      { id: 'r6', name: 'Synth Hook', startTime: 48, endTime: 64, color: '#F59E0B', fadeIn: 0, fadeOut: 0, gain: 0, muted: false }
-    ],
-    effects: ['Filter', 'Delay', 'Reverb Send'],
-    sends: [{ busId: 'bus1', amount: -10 }],
-    automationEnabled: true,
-    outputBus: 'master',
-    order: 4
-  },
-  {
-    id: 't5',
-    name: 'Drums',
-    type: 'audio',
-    color: '#EF4444',
-    volume: -2,
-    pan: 0,
-    muted: false,
-    solo: false,
-    armed: false,
-    locked: true,
-    visible: true,
-    regions: [
-      { id: 'r7', name: 'Drum Loop', startTime: 0, endTime: 64, color: '#EF4444', fadeIn: 0, fadeOut: 0, gain: 0, muted: false }
-    ],
-    effects: ['Transient Shaper', 'EQ', 'Compressor', 'Limiter'],
-    sends: [],
-    automationEnabled: false,
-    outputBus: 'master',
-    order: 5
-  },
-  {
-    id: 't6',
-    name: 'Bass',
-    type: 'midi',
-    color: '#EC4899',
-    volume: -4,
-    pan: 0,
-    muted: false,
-    solo: false,
-    armed: false,
-    locked: false,
-    visible: true,
-    regions: [
-      { id: 'r8', name: 'Bass Line', startTime: 0, endTime: 64, color: '#EC4899', fadeIn: 0, fadeOut: 0, gain: 0, muted: false }
-    ],
-    effects: ['Saturation', 'EQ', 'Compressor'],
-    sends: [],
-    automationEnabled: true,
-    outputBus: 'master',
-    order: 6
-  },
-  {
-    id: 'bus1',
-    name: 'Reverb Bus',
-    type: 'bus',
-    color: '#6366F1',
-    volume: -6,
-    pan: 0,
-    muted: false,
-    solo: false,
-    armed: false,
-    locked: false,
-    visible: true,
-    regions: [],
-    effects: ['Plate Reverb', 'EQ'],
-    sends: [],
-    automationEnabled: false,
-    outputBus: 'master',
-    order: 7
-  },
-  {
-    id: 'master',
-    name: 'Master',
-    type: 'master',
-    color: '#DC2626',
-    volume: 0,
-    pan: 0,
-    muted: false,
-    solo: false,
-    armed: false,
-    locked: true,
-    visible: true,
-    regions: [],
-    effects: ['EQ', 'Multiband Compressor', 'Limiter', 'Meter'],
-    sends: [],
-    automationEnabled: false,
-    outputBus: 'output',
-    order: 8
-  }
-]
+// Empty data arrays (real data loaded from props or API)
+const emptyTracks: Track[] = []
 
-const mockEffects: Effect[] = [
-  {
-    id: 'e1',
-    name: 'Pro Compressor',
-    category: 'dynamics',
-    brand: 'StudioFX',
-    description: 'Professional dynamics processor with vintage character',
-    presets: ['Vocal', 'Drums', 'Bus Glue', 'Transparent', 'Aggressive'],
-    parameters: [
-      { name: 'Threshold', value: -18, min: -60, max: 0 },
-      { name: 'Ratio', value: 4, min: 1, max: 20 },
-      { name: 'Attack', value: 10, min: 0.1, max: 100 },
-      { name: 'Release', value: 100, min: 10, max: 1000 }
-    ],
-    active: true,
-    cpuUsage: 2.3
-  },
-  {
-    id: 'e2',
-    name: 'Parametric EQ',
-    category: 'eq',
-    brand: 'StudioFX',
-    description: '8-band parametric equalizer with spectrum analyzer',
-    presets: ['Vocal Presence', 'Kick Punch', 'High Pass', 'Low Shelf'],
-    parameters: [
-      { name: 'Low Cut', value: 80, min: 20, max: 500 },
-      { name: 'Low Shelf', value: 2, min: -12, max: 12 },
-      { name: 'Mid', value: 0, min: -12, max: 12 },
-      { name: 'High Shelf', value: 1, min: -12, max: 12 }
-    ],
-    active: true,
-    cpuUsage: 1.8
-  },
-  {
-    id: 'e3',
-    name: 'Plate Reverb',
-    category: 'reverb',
-    brand: 'VintageAudio',
-    description: 'Classic plate reverb with warm, musical decay',
-    presets: ['Small Room', 'Large Hall', 'Cathedral', 'Plate Classic'],
-    parameters: [
-      { name: 'Decay', value: 2.5, min: 0.1, max: 10 },
-      { name: 'Pre-delay', value: 20, min: 0, max: 200 },
-      { name: 'Damping', value: 5000, min: 1000, max: 20000 },
-      { name: 'Mix', value: 30, min: 0, max: 100 }
-    ],
-    active: true,
-    cpuUsage: 4.2
-  },
-  {
-    id: 'e4',
-    name: 'Tape Delay',
-    category: 'delay',
-    brand: 'VintageAudio',
-    description: 'Warm tape delay with modulation and saturation',
-    presets: ['Slapback', 'Ping Pong', 'Dotted Eighth', 'Ambient'],
-    parameters: [
-      { name: 'Time', value: 375, min: 1, max: 2000 },
-      { name: 'Feedback', value: 40, min: 0, max: 100 },
-      { name: 'Modulation', value: 20, min: 0, max: 100 },
-      { name: 'Mix', value: 25, min: 0, max: 100 }
-    ],
-    active: true,
-    cpuUsage: 3.1
-  },
-  {
-    id: 'e5',
-    name: 'Chorus Ensemble',
-    category: 'modulation',
-    brand: 'ModFX',
-    description: 'Lush chorus with multiple voice modes',
-    presets: ['Classic', 'Wide Stereo', 'Subtle', 'Thick'],
-    parameters: [
-      { name: 'Rate', value: 0.5, min: 0.01, max: 10 },
-      { name: 'Depth', value: 50, min: 0, max: 100 },
-      { name: 'Voices', value: 4, min: 2, max: 8 },
-      { name: 'Mix', value: 50, min: 0, max: 100 }
-    ],
-    active: false,
-    cpuUsage: 2.8
-  },
-  {
-    id: 'e6',
-    name: 'Tube Saturation',
-    category: 'distortion',
-    brand: 'VintageAudio',
-    description: 'Analog tube warmth and harmonic saturation',
-    presets: ['Warm', 'Crunch', 'Heavy', 'Subtle Grit'],
-    parameters: [
-      { name: 'Drive', value: 30, min: 0, max: 100 },
-      { name: 'Tone', value: 5000, min: 1000, max: 10000 },
-      { name: 'Output', value: 0, min: -12, max: 12 },
-      { name: 'Mix', value: 100, min: 0, max: 100 }
-    ],
-    active: true,
-    cpuUsage: 1.5
-  },
-  {
-    id: 'e7',
-    name: 'Limiter Pro',
-    category: 'dynamics',
-    brand: 'StudioFX',
-    description: 'Transparent mastering limiter with true peak detection',
-    presets: ['Mastering', 'Loud', 'Transparent', 'Broadcast'],
-    parameters: [
-      { name: 'Ceiling', value: -0.3, min: -6, max: 0 },
-      { name: 'Release', value: 100, min: 10, max: 1000 },
-      { name: 'Lookahead', value: 5, min: 0, max: 20 }
-    ],
-    active: true,
-    cpuUsage: 1.2
-  },
-  {
-    id: 'e8',
-    name: 'De-Esser',
-    category: 'dynamics',
-    brand: 'VocalTools',
-    description: 'Intelligent sibilance control for vocals',
-    presets: ['Male Vocal', 'Female Vocal', 'Aggressive', 'Gentle'],
-    parameters: [
-      { name: 'Frequency', value: 6000, min: 4000, max: 10000 },
-      { name: 'Threshold', value: -20, min: -40, max: 0 },
-      { name: 'Range', value: 6, min: 0, max: 12 }
-    ],
-    active: true,
-    cpuUsage: 0.8
-  }
-]
+const emptyEffects: Effect[] = []
+const emptyInstruments: Instrument[] = []
 
-const mockInstruments: Instrument[] = [
-  { id: 'i1', name: 'Analog Synth', category: 'synth', brand: 'SynthLab', description: 'Classic analog synthesizer with warm oscillators', presets: ['Lead', 'Pad', 'Bass', 'Arp'], polyphony: 16, cpuUsage: 5.2, icon: 'synth' },
-  { id: 'i2', name: 'Wavetable Pro', category: 'synth', brand: 'SynthLab', description: 'Modern wavetable synthesis with morphing', presets: ['Evolving', 'Digital', 'Hybrid'], polyphony: 32, cpuUsage: 8.1, icon: 'synth' },
-  { id: 'i3', name: 'Grand Piano', category: 'keys', brand: 'AcousticSamples', description: 'Concert grand piano with 88 velocity layers', presets: ['Concert', 'Intimate', 'Bright', 'Mellow'], polyphony: 64, cpuUsage: 12.5, icon: 'piano' },
-  { id: 'i4', name: 'Electric Piano', category: 'keys', brand: 'VintageKeys', description: 'Classic electric piano with tremolo', presets: ['Rhodes', 'Wurlitzer', 'DX7'], polyphony: 32, cpuUsage: 4.8, icon: 'piano' },
-  { id: 'i5', name: 'Drum Machine', category: 'drums', brand: 'BeatMaker', description: 'Classic drum machines and acoustic kits', presets: ['808', '909', 'Acoustic', 'Electronic'], polyphony: 16, cpuUsage: 6.2, icon: 'drums' },
-  { id: 'i6', name: 'Bass Station', category: 'synth', brand: 'SynthLab', description: 'Powerful bass synthesizer', presets: ['Sub Bass', 'Acid', 'Funk', 'Dubstep'], polyphony: 8, cpuUsage: 3.5, icon: 'synth' },
-  { id: 'i7', name: 'String Ensemble', category: 'strings', brand: 'OrchestralSounds', description: 'Full string orchestra with articulations', presets: ['Legato', 'Staccato', 'Pizzicato', 'Tremolo'], polyphony: 48, cpuUsage: 15.3, icon: 'strings' },
-  { id: 'i8', name: 'Sampler Pro', category: 'sampler', brand: 'SampleLab', description: 'Advanced sampler with time-stretching', presets: ['Custom'], polyphony: 128, cpuUsage: 7.8, icon: 'sampler' }
-]
-
-const mockStats: ProjectStats = {
-  totalTracks: 8,
-  totalRegions: 12,
-  projectLength: 240,
+const defaultStats: ProjectStats = {
+  totalTracks: 0,
+  totalRegions: 0,
+  projectLength: 0,
   sampleRate: 48000,
   bitDepth: 24,
-  cpuUsage: 32,
-  memoryUsage: 2.4,
-  diskUsage: 156
+  cpuUsage: 0,
+  memoryUsage: 0,
+  diskUsage: 0
 }
 
 interface AudioStudioClientProps {
@@ -548,38 +242,20 @@ interface AudioStudioClientProps {
   initialStats?: ProjectStats
 }
 
-// Competitive Upgrade Mock Data - Pro Tools/Logic Pro-level Audio Intelligence
-const mockAudioAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Mix Clarity', description: 'Frequency balance is optimal across all stems!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Mixing' },
-  { id: '2', type: 'warning' as const, title: 'Clipping Detected', description: 'Track 3 peaks at -0.1dB - add limiter to prevent distortion.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Mastering' },
-  { id: '3', type: 'info' as const, title: 'AI Suggestion', description: 'Adding subtle reverb to vocals can improve spatial depth.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'AI Assist' },
-]
-
-const mockAudioCollaborators = [
-  { id: '1', name: 'Mix Engineer', avatar: '/avatars/mix.jpg', status: 'online' as const, role: 'Engineer' },
-  { id: '2', name: 'Producer', avatar: '/avatars/producer.jpg', status: 'online' as const, role: 'Producer' },
-  { id: '3', name: 'Session Musician', avatar: '/avatars/musician.jpg', status: 'away' as const, role: 'Musician' },
-]
-
-const mockAudioPredictions = [
-  { id: '1', title: 'Master Completion', prediction: 'Final master will be ready for distribution in 2 hours', confidence: 88, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'LUFS Target', prediction: 'Current mix will hit -14 LUFS after mastering chain', confidence: 91, trend: 'up' as const, impact: 'medium' as const },
-]
-
-const mockAudioActivities = [
-  { id: '1', user: 'Mix Engineer', action: 'Applied', target: 'multiband compression to master bus', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Producer', action: 'Approved', target: 'vocal take #7', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'Session Musician', action: 'Recorded', target: 'guitar overdub', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
-]
+// Empty competitive upgrade data arrays (real data loaded from props or API)
+const emptyAudioAIInsights: { id: string; type: 'success' | 'warning' | 'info' | 'error'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
+const emptyAudioCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'offline' | 'away'; role: string }[] = []
+const emptyAudioPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: 'low' | 'medium' | 'high' }[] = []
+const emptyAudioActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' | 'error' }[] = []
 
 // Quick actions will be defined inside the component to access state setters
 
 export default function AudioStudioClient({ initialTracks, initialStats }: AudioStudioClientProps) {
   const [activeTab, setActiveTab] = useState('tracks')
-  const [tracks, setTracks] = useState<Track[]>(mockTracks)
-  const [effects] = useState<Effect[]>(mockEffects)
-  const [instruments] = useState<Instrument[]>(mockInstruments)
-  const [stats] = useState<ProjectStats>(mockStats)
+  const [tracks, setTracks] = useState<Track[]>(initialTracks ?? emptyTracks)
+  const [effects] = useState<Effect[]>(emptyEffects)
+  const [instruments] = useState<Instrument[]>(emptyInstruments)
+  const [stats] = useState<ProjectStats>(initialStats ?? defaultStats)
   const [selectedTrack, setSelectedTrack] = useState<Track | null>(null)
   const [showTrackDialog, setShowTrackDialog] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
@@ -2031,9 +1707,9 @@ export default function AudioStudioClient({ initialTracks, initialStats }: Audio
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockAudioAIInsights}
+              insights={emptyAudioAIInsights}
               title="Audio Intelligence"
-              onInsightAction={(_insight) => {
+              onInsightAction={(insight) => {
                 // Apply AI insight based on type
                 if (insight.type === 'warning') {
                   // For warnings like clipping, apply limiter
@@ -2050,11 +1726,11 @@ export default function AudioStudioClient({ initialTracks, initialStats }: Audio
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockAudioCollaborators}
+              collaborators={emptyAudioCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockAudioPredictions}
+              predictions={emptyAudioPredictions}
               title="Mix Forecasts"
             />
           </div>
@@ -2062,7 +1738,7 @@ export default function AudioStudioClient({ initialTracks, initialStats }: Audio
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockAudioActivities}
+            activities={emptyAudioActivities}
             title="Studio Activity"
             maxItems={5}
           />

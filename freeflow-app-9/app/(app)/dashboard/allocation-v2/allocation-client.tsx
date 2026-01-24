@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import React, { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { useAllocations, useAllocationMutations } from '@/lib/hooks/use-allocations'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -198,394 +198,16 @@ interface UtilizationData {
 }
 
 // ============================================================================
-// MOCK DATA GENERATION
+// DATA ARRAYS - Empty arrays for real data integration
 // ============================================================================
 
-const mockResources: Resource[] = [
-  {
-    id: 'r1',
-    name: 'Sarah Chen',
-    email: 'sarah.chen@company.com',
-    phone: '+1 (555) 123-4567',
-    avatar: '',
-    role: 'Senior Developer',
-    department: 'Engineering',
-    location: 'San Francisco, CA',
-    status: 'available',
-    hourly_rate: 150,
-    cost_rate: 85,
-    capacity_hours: 40,
-    allocated_hours: 32,
-    utilization: 80,
-    skills: [
-      { name: 'React', level: 'expert', years_experience: 6 },
-      { name: 'TypeScript', level: 'expert', years_experience: 5 },
-      { name: 'Node.js', level: 'advanced', years_experience: 4 }
-    ],
-    manager_id: 'm1',
-    manager_name: 'Mike Wilson',
-    start_date: '2021-03-15',
-    timezone: 'America/Los_Angeles',
-    is_billable: true
-  },
-  {
-    id: 'r2',
-    name: 'Mike Wilson',
-    email: 'mike.wilson@company.com',
-    phone: '+1 (555) 234-5678',
-    avatar: '',
-    role: 'Engineering Manager',
-    department: 'Engineering',
-    location: 'New York, NY',
-    status: 'partially_available',
-    hourly_rate: 200,
-    cost_rate: 120,
-    capacity_hours: 40,
-    allocated_hours: 45,
-    utilization: 112,
-    skills: [
-      { name: 'Leadership', level: 'expert', years_experience: 10 },
-      { name: 'System Design', level: 'expert', years_experience: 12 },
-      { name: 'Python', level: 'advanced', years_experience: 8 }
-    ],
-    manager_id: null,
-    manager_name: null,
-    start_date: '2019-01-10',
-    timezone: 'America/New_York',
-    is_billable: true
-  },
-  {
-    id: 'r3',
-    name: 'Emma Davis',
-    email: 'emma.davis@company.com',
-    phone: '+1 (555) 345-6789',
-    avatar: '',
-    role: 'UX Designer',
-    department: 'Design',
-    location: 'Austin, TX',
-    status: 'available',
-    hourly_rate: 125,
-    cost_rate: 70,
-    capacity_hours: 40,
-    allocated_hours: 36,
-    utilization: 90,
-    skills: [
-      { name: 'Figma', level: 'expert', years_experience: 5 },
-      { name: 'User Research', level: 'advanced', years_experience: 4 },
-      { name: 'Prototyping', level: 'expert', years_experience: 5 }
-    ],
-    manager_id: 'm2',
-    manager_name: 'Lisa Thompson',
-    start_date: '2022-06-01',
-    timezone: 'America/Chicago',
-    is_billable: true
-  },
-  {
-    id: 'r4',
-    name: 'James Brown',
-    email: 'james.brown@company.com',
-    phone: '+1 (555) 456-7890',
-    avatar: '',
-    role: 'Backend Developer',
-    department: 'Engineering',
-    location: 'Seattle, WA',
-    status: 'on_leave',
-    hourly_rate: 140,
-    cost_rate: 80,
-    capacity_hours: 40,
-    allocated_hours: 0,
-    utilization: 0,
-    skills: [
-      { name: 'Go', level: 'expert', years_experience: 5 },
-      { name: 'Kubernetes', level: 'advanced', years_experience: 3 },
-      { name: 'PostgreSQL', level: 'expert', years_experience: 6 }
-    ],
-    manager_id: 'm1',
-    manager_name: 'Mike Wilson',
-    start_date: '2020-08-20',
-    timezone: 'America/Los_Angeles',
-    is_billable: true
-  },
-  {
-    id: 'r5',
-    name: 'Alex Johnson',
-    email: 'alex.johnson@company.com',
-    phone: '+1 (555) 567-8901',
-    avatar: '',
-    role: 'DevOps Engineer',
-    department: 'Operations',
-    location: 'Denver, CO',
-    status: 'available',
-    hourly_rate: 160,
-    cost_rate: 95,
-    capacity_hours: 40,
-    allocated_hours: 40,
-    utilization: 100,
-    skills: [
-      { name: 'AWS', level: 'expert', years_experience: 7 },
-      { name: 'Terraform', level: 'expert', years_experience: 5 },
-      { name: 'Docker', level: 'advanced', years_experience: 6 }
-    ],
-    manager_id: 'm3',
-    manager_name: 'David Kim',
-    start_date: '2021-11-01',
-    timezone: 'America/Denver',
-    is_billable: true
-  }
-]
+const resources: Resource[] = []
 
-const mockProjects: Project[] = [
-  {
-    id: 'p1',
-    name: 'Platform Redesign',
-    code: 'PLAT-001',
-    client_name: 'Internal',
-    status: 'active',
-    priority: 'high',
-    start_date: '2024-01-01',
-    end_date: '2024-06-30',
-    budget_hours: 2400,
-    allocated_hours: 1800,
-    consumed_hours: 1200,
-    budget_amount: 360000,
-    spent_amount: 180000,
-    pm_name: 'Lisa Thompson',
-    pm_avatar: '',
-    color: '#8B5CF6',
-    team_size: 8
-  },
-  {
-    id: 'p2',
-    name: 'Mobile App V2',
-    code: 'MOB-002',
-    client_name: 'TechCorp Inc',
-    status: 'active',
-    priority: 'critical',
-    start_date: '2024-02-01',
-    end_date: '2024-08-31',
-    budget_hours: 3200,
-    allocated_hours: 2400,
-    consumed_hours: 1600,
-    budget_amount: 480000,
-    spent_amount: 240000,
-    pm_name: 'Mike Wilson',
-    pm_avatar: '',
-    color: '#EC4899',
-    team_size: 12
-  },
-  {
-    id: 'p3',
-    name: 'API Migration',
-    code: 'API-003',
-    client_name: 'DataFlow Systems',
-    status: 'planning',
-    priority: 'medium',
-    start_date: '2024-04-01',
-    end_date: '2024-09-30',
-    budget_hours: 1600,
-    allocated_hours: 800,
-    consumed_hours: 0,
-    budget_amount: 240000,
-    spent_amount: 0,
-    pm_name: 'Sarah Chen',
-    pm_avatar: '',
-    color: '#14B8A6',
-    team_size: 5
-  },
-  {
-    id: 'p4',
-    name: 'Security Audit',
-    code: 'SEC-004',
-    client_name: 'FinanceFirst',
-    status: 'active',
-    priority: 'high',
-    start_date: '2024-01-15',
-    end_date: '2024-03-31',
-    budget_hours: 400,
-    allocated_hours: 360,
-    consumed_hours: 320,
-    budget_amount: 64000,
-    spent_amount: 51200,
-    pm_name: 'David Kim',
-    pm_avatar: '',
-    color: '#F59E0B',
-    team_size: 3
-  },
-  {
-    id: 'p5',
-    name: 'Training Portal',
-    code: 'TRN-005',
-    client_name: 'Internal',
-    status: 'on_hold',
-    priority: 'low',
-    start_date: '2024-05-01',
-    end_date: '2024-10-31',
-    budget_hours: 800,
-    allocated_hours: 0,
-    consumed_hours: 0,
-    budget_amount: 120000,
-    spent_amount: 0,
-    pm_name: 'Emma Davis',
-    pm_avatar: '',
-    color: '#6366F1',
-    team_size: 0
-  }
-]
+const projects: Project[] = []
 
-const mockAllocations: Allocation[] = [
-  {
-    id: 'a1',
-    resource_id: 'r1',
-    resource_name: 'Sarah Chen',
-    resource_avatar: '',
-    resource_role: 'Senior Developer',
-    project_id: 'p1',
-    project_name: 'Platform Redesign',
-    project_code: 'PLAT-001',
-    project_color: '#8B5CF6',
-    status: 'active',
-    allocation_type: 'full-time',
-    priority: 'high',
-    hours_per_week: 32,
-    start_date: '2024-01-01',
-    end_date: '2024-06-30',
-    billable_rate: 150,
-    cost_rate: 85,
-    notes: 'Lead frontend development',
-    created_at: '2023-12-15T10:00:00Z',
-    updated_at: '2024-01-15T14:30:00Z',
-    approved_by: 'Mike Wilson',
-    approved_at: '2023-12-16T09:00:00Z'
-  },
-  {
-    id: 'a2',
-    resource_id: 'r2',
-    resource_name: 'Mike Wilson',
-    resource_avatar: '',
-    resource_role: 'Engineering Manager',
-    project_id: 'p2',
-    project_name: 'Mobile App V2',
-    project_code: 'MOB-002',
-    project_color: '#EC4899',
-    status: 'active',
-    allocation_type: 'part-time',
-    priority: 'critical',
-    hours_per_week: 20,
-    start_date: '2024-02-01',
-    end_date: '2024-08-31',
-    billable_rate: 200,
-    cost_rate: 120,
-    notes: 'Technical oversight and architecture review',
-    created_at: '2024-01-20T08:00:00Z',
-    updated_at: '2024-02-01T10:00:00Z',
-    approved_by: null,
-    approved_at: null
-  },
-  {
-    id: 'a3',
-    resource_id: 'r3',
-    resource_name: 'Emma Davis',
-    resource_avatar: '',
-    resource_role: 'UX Designer',
-    project_id: 'p1',
-    project_name: 'Platform Redesign',
-    project_code: 'PLAT-001',
-    project_color: '#8B5CF6',
-    status: 'active',
-    allocation_type: 'full-time',
-    priority: 'high',
-    hours_per_week: 36,
-    start_date: '2024-01-01',
-    end_date: '2024-04-30',
-    billable_rate: 125,
-    cost_rate: 70,
-    notes: 'Lead UX design and user research',
-    created_at: '2023-12-15T10:00:00Z',
-    updated_at: '2024-01-10T16:00:00Z',
-    approved_by: 'Lisa Thompson',
-    approved_at: '2023-12-16T11:00:00Z'
-  },
-  {
-    id: 'a4',
-    resource_id: 'r5',
-    resource_name: 'Alex Johnson',
-    resource_avatar: '',
-    resource_role: 'DevOps Engineer',
-    project_id: 'p2',
-    project_name: 'Mobile App V2',
-    project_code: 'MOB-002',
-    project_color: '#EC4899',
-    status: 'active',
-    allocation_type: 'full-time',
-    priority: 'critical',
-    hours_per_week: 40,
-    start_date: '2024-02-01',
-    end_date: '2024-08-31',
-    billable_rate: 160,
-    cost_rate: 95,
-    notes: 'CI/CD pipeline and infrastructure setup',
-    created_at: '2024-01-25T09:00:00Z',
-    updated_at: '2024-02-01T08:00:00Z',
-    approved_by: 'Mike Wilson',
-    approved_at: '2024-01-26T14:00:00Z'
-  },
-  {
-    id: 'a5',
-    resource_id: 'r2',
-    resource_name: 'Mike Wilson',
-    resource_avatar: '',
-    resource_role: 'Engineering Manager',
-    project_id: 'p4',
-    project_name: 'Security Audit',
-    project_code: 'SEC-004',
-    project_color: '#F59E0B',
-    status: 'active',
-    allocation_type: 'part-time',
-    priority: 'high',
-    hours_per_week: 25,
-    start_date: '2024-01-15',
-    end_date: '2024-03-31',
-    billable_rate: 200,
-    cost_rate: 120,
-    notes: 'Security review and compliance oversight',
-    created_at: '2024-01-10T10:00:00Z',
-    updated_at: '2024-01-15T09:00:00Z',
-    approved_by: 'David Kim',
-    approved_at: '2024-01-11T15:00:00Z'
-  },
-  {
-    id: 'a6',
-    resource_id: 'r1',
-    resource_name: 'Sarah Chen',
-    resource_avatar: '',
-    resource_role: 'Senior Developer',
-    project_id: 'p3',
-    project_name: 'API Migration',
-    project_code: 'API-003',
-    project_color: '#14B8A6',
-    status: 'pending',
-    allocation_type: 'part-time',
-    priority: 'medium',
-    hours_per_week: 8,
-    start_date: '2024-04-01',
-    end_date: '2024-09-30',
-    billable_rate: 150,
-    cost_rate: 85,
-    notes: 'API design consultation',
-    created_at: '2024-02-01T14:00:00Z',
-    updated_at: '2024-02-01T14:00:00Z',
-    approved_by: null,
-    approved_at: null
-  }
-]
+const allocations: Allocation[] = []
 
-const mockTimeOff: TimeOff[] = [
-  { id: 't1', resource_id: 'r4', resource_name: 'James Brown', resource_avatar: '', type: 'vacation', start_date: '2024-02-12', end_date: '2024-02-23', hours: 80, status: 'approved', notes: 'Annual vacation', approved_by: 'Mike Wilson' },
-  { id: 't2', resource_id: 'r1', resource_name: 'Sarah Chen', resource_avatar: '', type: 'sick', start_date: '2024-01-29', end_date: '2024-01-30', hours: 16, status: 'approved', notes: 'Doctor appointment', approved_by: 'Mike Wilson' },
-  { id: 't3', resource_id: 'r3', resource_name: 'Emma Davis', resource_avatar: '', type: 'remote', start_date: '2024-02-05', end_date: '2024-02-09', hours: 40, status: 'approved', notes: 'Working from home', approved_by: 'Lisa Thompson' },
-  { id: 't4', resource_id: 'r5', resource_name: 'Alex Johnson', resource_avatar: '', type: 'personal', start_date: '2024-03-01', end_date: '2024-03-01', hours: 8, status: 'pending', notes: 'Personal day', approved_by: null },
-  { id: 't5', resource_id: 'r2', resource_name: 'Mike Wilson', resource_avatar: '', type: 'holiday', start_date: '2024-02-19', end_date: '2024-02-19', hours: 8, status: 'approved', notes: 'Presidents Day', approved_by: null }
-]
+const timeOffData: TimeOff[] = []
 
 // ============================================================================
 // HELPER FUNCTIONS
@@ -660,33 +282,18 @@ const getUtilizationColor = (utilization: number): string => {
 }
 
 // ============================================================================
-// ENHANCED COMPETITIVE UPGRADE MOCK DATA - Resource Guru Level
+// COMPETITIVE UPGRADE DATA - Empty arrays for real data integration
 // ============================================================================
 
-const mockAllocationAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Optimal Balance', description: 'Team allocation at 85% utilization - healthy capacity buffer maintained.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Capacity' },
-  { id: '2', type: 'warning' as const, title: 'Overallocation Risk', description: '4 resources are allocated over 100% for next sprint.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Planning' },
-  { id: '3', type: 'info' as const, title: 'Skill Match', description: 'New project requires React expertise - 3 available resources identified.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Matching' },
-]
+const allocationAIInsights: { id: string; type: 'success' | 'warning' | 'info' | 'error'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
 
-const mockAllocationCollaborators = [
-  { id: '1', name: 'Resource Manager', avatar: '/avatars/rm.jpg', status: 'online' as const, role: 'Manager' },
-  { id: '2', name: 'Project Lead', avatar: '/avatars/pl.jpg', status: 'online' as const, role: 'Lead' },
-  { id: '3', name: 'Capacity Planner', avatar: '/avatars/cp.jpg', status: 'away' as const, role: 'Planner' },
-]
+const allocationCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }[] = []
 
-const mockAllocationPredictions = [
-  { id: '1', title: 'Capacity Forecast', prediction: 'Team will need 2 additional FTEs by Q2 based on pipeline', confidence: 88, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Utilization Trend', prediction: 'Billable hours trending 15% higher than last quarter', confidence: 92, trend: 'up' as const, impact: 'medium' as const },
-]
+const allocationPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: 'low' | 'medium' | 'high' }[] = []
 
-const mockAllocationActivities = [
-  { id: '1', user: 'Resource Manager', action: 'Allocated', target: 'Sarah Chen to Project Phoenix', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Project Lead', action: 'Requested', target: 'Extension for Mike Johnson', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'System', action: 'Flagged', target: 'Conflicting allocations for 2 resources', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'warning' as const },
-]
+const allocationActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' | 'error' }[] = []
 
-// Quick actions are now handled as callbacks in the component to access state
+const allocationQuickActions: { id: string; label: string; icon: React.ReactNode; shortcut?: string; action: () => void; category?: string; description?: string }[] = []
 
 // ============================================================================
 // MAIN COMPONENT
@@ -766,7 +373,7 @@ export default function AllocationClient() {
 
   // Filtered data
   const filteredAllocations = useMemo(() => {
-    return mockAllocations.filter(allocation => {
+    return allocations.filter(allocation => {
       const matchesSearch =
         allocation.resource_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         allocation.project_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -778,14 +385,16 @@ export default function AllocationClient() {
 
   // Stats calculations
   const stats = useMemo(() => {
-    const activeAllocations = mockAllocations.filter(a => a.status === 'active').length
-    const totalHours = mockAllocations.reduce((acc, a) => acc + a.hours_per_week, 0)
-    const totalBillable = mockAllocations.reduce((acc, a) => acc + (a.hours_per_week * a.billable_rate), 0)
-    const avgUtilization = mockResources.reduce((acc, r) => acc + r.utilization, 0) / mockResources.length
-    const availableResources = mockResources.filter(r => r.status === 'available').length
-    const overAllocated = mockResources.filter(r => r.utilization > 100).length
-    const pendingRequests = mockAllocations.filter(a => a.status === 'pending').length
-    const activeProjects = mockProjects.filter(p => p.status === 'active').length
+    const activeAllocations = allocations.filter(a => a.status === 'active').length
+    const totalHours = allocations.reduce((acc, a) => acc + a.hours_per_week, 0)
+    const totalBillable = allocations.reduce((acc, a) => acc + (a.hours_per_week * a.billable_rate), 0)
+    const avgUtilization = resources.length > 0
+      ? resources.reduce((acc, r) => acc + r.utilization, 0) / resources.length
+      : 0
+    const availableResources = resources.filter(r => r.status === 'available').length
+    const overAllocated = resources.filter(r => r.utilization > 100).length
+    const pendingRequests = allocations.filter(a => a.status === 'pending').length
+    const activeProjects = projects.filter(p => p.status === 'active').length
 
     return {
       activeAllocations,
@@ -793,7 +402,7 @@ export default function AllocationClient() {
       totalBillable,
       avgUtilization,
       availableResources,
-      totalResources: mockResources.length,
+      totalResources: resources.length,
       overAllocated,
       pendingRequests,
       activeProjects
@@ -1075,15 +684,15 @@ export default function AllocationClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockAllocations.length}</p>
+                    <p className="text-3xl font-bold">{allocations.length}</p>
                     <p className="text-fuchsia-200 text-sm">Total</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockAllocations.filter(a => a.status === 'active').length}</p>
+                    <p className="text-3xl font-bold">{allocations.filter(a => a.status === 'active').length}</p>
                     <p className="text-fuchsia-200 text-sm">Active</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockAllocations.filter(a => a.status === 'pending').length}</p>
+                    <p className="text-3xl font-bold">{allocations.filter(a => a.status === 'pending').length}</p>
                     <p className="text-fuchsia-200 text-sm">Pending</p>
                   </div>
                 </div>
@@ -1217,15 +826,15 @@ export default function AllocationClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockResources.length}</p>
+                    <p className="text-3xl font-bold">{resources.length}</p>
                     <p className="text-blue-200 text-sm">Total</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockResources.filter(r => r.status === 'available').length}</p>
+                    <p className="text-3xl font-bold">{resources.filter(r => r.status === 'available').length}</p>
                     <p className="text-blue-200 text-sm">Available</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{(mockResources.reduce((acc, r) => acc + r.utilization, 0) / mockResources.length).toFixed(0)}%</p>
+                    <p className="text-3xl font-bold">{resources.length > 0 ? (resources.reduce((acc, r) => acc + r.utilization, 0) / resources.length).toFixed(0) : 0}%</p>
                     <p className="text-blue-200 text-sm">Avg Util</p>
                   </div>
                 </div>
@@ -1257,7 +866,7 @@ export default function AllocationClient() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {mockResources.map(resource => (
+              {resources.map(resource => (
                 <Card
                   key={resource.id}
                   className="hover:shadow-md transition-shadow cursor-pointer"
@@ -1339,15 +948,15 @@ export default function AllocationClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockResources.reduce((acc, r) => acc + r.capacity_hours, 0)}h</p>
+                    <p className="text-3xl font-bold">{resources.reduce((acc, r) => acc + r.capacity_hours, 0)}h</p>
                     <p className="text-orange-200 text-sm">Total Capacity</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockResources.reduce((acc, r) => acc + r.allocated_hours, 0)}h</p>
+                    <p className="text-3xl font-bold">{resources.reduce((acc, r) => acc + r.allocated_hours, 0)}h</p>
                     <p className="text-orange-200 text-sm">Allocated</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{Math.max(0, mockResources.reduce((acc, r) => acc + (r.capacity_hours - r.allocated_hours), 0))}h</p>
+                    <p className="text-3xl font-bold">{Math.max(0, resources.reduce((acc, r) => acc + (r.capacity_hours - r.allocated_hours), 0))}h</p>
                     <p className="text-orange-200 text-sm">Available</p>
                   </div>
                 </div>
@@ -1386,7 +995,7 @@ export default function AllocationClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {mockResources.map(resource => (
+                    {resources.map(resource => (
                       <div key={resource.id} className="p-4 border rounded-lg">
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center gap-3">
@@ -1434,20 +1043,20 @@ export default function AllocationClient() {
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
                         <span className="text-gray-500">Total Capacity</span>
-                        <span className="font-bold">{mockResources.reduce((acc, r) => acc + r.capacity_hours, 0)}h/week</span>
+                        <span className="font-bold">{resources.reduce((acc, r) => acc + r.capacity_hours, 0)}h/week</span>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-gray-500">Allocated</span>
-                        <span className="font-bold">{mockResources.reduce((acc, r) => acc + r.allocated_hours, 0)}h/week</span>
+                        <span className="font-bold">{resources.reduce((acc, r) => acc + r.allocated_hours, 0)}h/week</span>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-gray-500">Available</span>
                         <span className="font-bold text-green-600">
-                          {Math.max(0, mockResources.reduce((acc, r) => acc + (r.capacity_hours - r.allocated_hours), 0))}h/week
+                          {Math.max(0, resources.reduce((acc, r) => acc + (r.capacity_hours - r.allocated_hours), 0))}h/week
                         </span>
                       </div>
                       <Progress
-                        value={(mockResources.reduce((acc, r) => acc + r.allocated_hours, 0) / mockResources.reduce((acc, r) => acc + r.capacity_hours, 0)) * 100}
+                        value={resources.reduce((acc, r) => acc + r.capacity_hours, 0) > 0 ? (resources.reduce((acc, r) => acc + r.allocated_hours, 0) / resources.reduce((acc, r) => acc + r.capacity_hours, 0)) * 100 : 0}
                         className="h-3"
                       />
                     </div>
@@ -1460,7 +1069,7 @@ export default function AllocationClient() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      {mockTimeOff.slice(0, 4).map(timeOff => (
+                      {timeOffData.slice(0, 4).map(timeOff => (
                         <div key={timeOff.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
                           <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
                             timeOff.type === 'vacation' ? 'bg-blue-100 text-blue-600' :
@@ -1497,15 +1106,15 @@ export default function AllocationClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockProjects.length}</p>
+                    <p className="text-3xl font-bold">{projects.length}</p>
                     <p className="text-green-200 text-sm">Projects</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockProjects.filter(p => p.status === 'active').length}</p>
+                    <p className="text-3xl font-bold">{projects.filter(p => p.status === 'active').length}</p>
                     <p className="text-green-200 text-sm">Active</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockProjects.reduce((acc, p) => acc + p.team_size, 0)}</p>
+                    <p className="text-3xl font-bold">{projects.reduce((acc, p) => acc + p.team_size, 0)}</p>
                     <p className="text-green-200 text-sm">Team Size</p>
                   </div>
                 </div>
@@ -1566,7 +1175,7 @@ export default function AllocationClient() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {mockProjects.filter(p => p.status === 'active').map(project => (
+                  {projects.filter(p => p.status === 'active').map(project => (
                     <div key={project.id} className="p-4 border rounded-lg">
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-3">
@@ -1673,7 +1282,7 @@ export default function AllocationClient() {
                 <CardContent>
                   <div className="space-y-4">
                     {['Engineering', 'Design', 'Operations'].map((dept, i) => {
-                      const deptResources = mockResources.filter(r => r.department === dept)
+                      const deptResources = resources.filter(r => r.department === dept)
                       const avgUtil = deptResources.length > 0
                         ? deptResources.reduce((acc, r) => acc + r.utilization, 0) / deptResources.length
                         : 0
@@ -1702,7 +1311,7 @@ export default function AllocationClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {mockProjects.slice(0, 4).map(project => (
+                    {projects.slice(0, 4).map(project => (
                       <div key={project.id} className="flex items-center gap-4">
                         <div
                           className="w-3 h-3 rounded-full flex-shrink-0"
@@ -1743,7 +1352,7 @@ export default function AllocationClient() {
                     </div>
                     <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <p className="text-sm text-gray-500 mb-1">Avg Bill Rate</p>
-                      <p className="text-2xl font-bold">{formatCurrency(mockResources.reduce((acc, r) => acc + r.hourly_rate, 0) / mockResources.length)}/hr</p>
+                      <p className="text-2xl font-bold">{formatCurrency(resources.length > 0 ? resources.reduce((acc, r) => acc + r.hourly_rate, 0) / resources.length : 0)}/hr</p>
                     </div>
                     <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <p className="text-sm text-gray-500 mb-1">Gross Margin</p>
@@ -1762,7 +1371,7 @@ export default function AllocationClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {mockResources
+                    {resources
                       .sort((a, b) => b.utilization - a.utilization)
                       .slice(0, 5)
                       .map((resource, i) => (
@@ -2027,18 +1636,18 @@ export default function AllocationClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockAllocationAIInsights}
+              insights={allocationAIInsights}
               title="Allocation Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockAllocationCollaborators}
+              collaborators={allocationCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockAllocationPredictions}
+              predictions={allocationPredictions}
               title="Capacity Forecasts"
             />
           </div>
@@ -2046,12 +1655,12 @@ export default function AllocationClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockAllocationActivities}
+            activities={allocationActivities}
             title="Allocation Activity"
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockAllocationQuickActions}
+            actions={allocationQuickActions}
             variant="grid"
           />
         </div>
@@ -2415,7 +2024,7 @@ export default function AllocationClient() {
                 >
                   <SelectTrigger><SelectValue placeholder="Choose a resource" /></SelectTrigger>
                   <SelectContent>
-                    {mockResources.filter(r => r.status === 'available').map(resource => (
+                    {resources.filter(r => r.status === 'available').map(resource => (
                       <SelectItem key={resource.id} value={resource.name}>{resource.name} - {resource.role}</SelectItem>
                     ))}
                   </SelectContent>
@@ -2429,7 +2038,7 @@ export default function AllocationClient() {
                 >
                   <SelectTrigger><SelectValue placeholder="Choose a project" /></SelectTrigger>
                   <SelectContent>
-                    {mockProjects.filter(p => p.status === 'active').map(project => (
+                    {projects.filter(p => p.status === 'active').map(project => (
                       <SelectItem key={project.id} value={project.name}>{project.name} ({project.code})</SelectItem>
                     ))}
                   </SelectContent>
@@ -2495,7 +2104,7 @@ export default function AllocationClient() {
                 >
                   <SelectTrigger><SelectValue placeholder="Select resource" /></SelectTrigger>
                   <SelectContent>
-                    {mockResources.map(resource => (
+                    {resources.map(resource => (
                       <SelectItem key={resource.id} value={resource.name}>{resource.name}</SelectItem>
                     ))}
                   </SelectContent>
@@ -2565,10 +2174,10 @@ export default function AllocationClient() {
             <div className="py-4">
               <ScrollArea className="h-[300px]">
                 <div className="space-y-3">
-                  {mockAllocations.filter(a => a.status === 'pending').length === 0 ? (
+                  {allocations.filter(a => a.status === 'pending').length === 0 ? (
                     <p className="text-center text-gray-500 py-8">No pending allocations to approve</p>
                   ) : (
-                    mockAllocations.filter(a => a.status === 'pending').map(allocation => (
+                    allocations.filter(a => a.status === 'pending').map(allocation => (
                       <div key={allocation.id} className="flex items-center justify-between p-4 border rounded-lg">
                         <div>
                           <p className="font-medium">{allocation.resource_name}</p>
@@ -2618,7 +2227,7 @@ export default function AllocationClient() {
                 <Select
                   value={formData.resource_name}
                   onValueChange={(v) => {
-                    const allocation = mockAllocations.find(a => a.resource_name === v)
+                    const allocation = allocations.find(a => a.resource_name === v)
                     if (allocation) {
                       setFormData(prev => ({
                         ...prev,
@@ -2630,7 +2239,7 @@ export default function AllocationClient() {
                 >
                   <SelectTrigger><SelectValue placeholder="Select allocation" /></SelectTrigger>
                   <SelectContent>
-                    {mockAllocations.filter(a => a.status === 'active').map(allocation => (
+                    {allocations.filter(a => a.status === 'active').map(allocation => (
                       <SelectItem key={allocation.id} value={allocation.resource_name}>
                         {allocation.resource_name} → {allocation.project_name}
                       </SelectItem>
@@ -2646,7 +2255,7 @@ export default function AllocationClient() {
                 >
                   <SelectTrigger><SelectValue placeholder="Select target project" /></SelectTrigger>
                   <SelectContent>
-                    {mockProjects.filter(p => p.status === 'active' && p.name !== formData.project_name).map(project => (
+                    {projects.filter(p => p.status === 'active' && p.name !== formData.project_name).map(project => (
                       <SelectItem key={project.id} value={project.name}>{project.name}</SelectItem>
                     ))}
                   </SelectContent>

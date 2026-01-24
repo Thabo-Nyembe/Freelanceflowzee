@@ -310,359 +310,28 @@ interface Analytics {
 }
 
 // ============================================================================
-// MOCK DATA
+// EMPTY DATA ARRAYS (Real data loaded from Supabase)
 // ============================================================================
 
-const mockEvents: Event[] = [
-  {
-    id: 'event-1',
-    name: 'Tech Innovation Summit 2025',
-    type: 'conference',
-    description: 'Annual technology conference featuring industry leaders',
-    date: '2025-03-15T09:00:00Z',
-    endDate: '2025-03-17T18:00:00Z',
-    location: 'San Francisco Convention Center',
-    isVirtual: false,
-    capacity: 500,
-    registrationCount: 347,
-    ticketTypes: [
-      { type: 'early_bird', name: 'Early Bird', price: 299, quantity: 100, sold: 100, benefits: ['All sessions', 'Lunch included', 'Swag bag'] },
-      { type: 'regular', name: 'Regular', price: 399, quantity: 300, sold: 197, benefits: ['All sessions', 'Lunch included', 'Swag bag'] },
-      { type: 'vip', name: 'VIP', price: 799, quantity: 50, sold: 35, benefits: ['All sessions', 'VIP lounge', 'Speaker dinner', 'Premium swag'] },
-      { type: 'student', name: 'Student', price: 99, quantity: 50, sold: 15, benefits: ['All sessions', 'Student networking'] }
-    ],
-    sessions: [
-      { id: 'sess-1', name: 'AI in Enterprise', track: 'AI/ML', speaker: 'Dr. Sarah Chen', time: '10:00 AM', duration: 60, capacity: 150, enrolled: 142, location: 'Main Hall' },
-      { id: 'sess-2', name: 'Cloud Architecture', track: 'Infrastructure', speaker: 'Mike Johnson', time: '11:30 AM', duration: 45, capacity: 100, enrolled: 87, location: 'Room A' }
-    ],
-    waitlistCount: 23,
-    revenue: 98750,
-    status: 'published'
-  },
-  {
-    id: 'event-2',
-    name: 'Product Management Workshop',
-    type: 'workshop',
-    description: 'Intensive workshop on modern product management techniques',
-    date: '2025-02-20T10:00:00Z',
-    location: 'Virtual',
-    isVirtual: true,
-    virtualLink: 'https://zoom.us/j/123456789',
-    capacity: 100,
-    registrationCount: 78,
-    ticketTypes: [
-      { type: 'regular', name: 'Standard', price: 199, quantity: 100, sold: 78, benefits: ['Live workshop', 'Recording access', 'Certificate'] }
-    ],
-    sessions: [],
-    waitlistCount: 12,
-    revenue: 15522,
-    status: 'published'
-  },
-  {
-    id: 'event-3',
-    name: 'Startup Networking Night',
-    type: 'meetup',
-    description: 'Monthly networking event for startup founders',
-    date: '2025-01-25T18:00:00Z',
-    location: 'TechHub Downtown',
-    isVirtual: false,
-    capacity: 75,
-    registrationCount: 68,
-    ticketTypes: [
-      { type: 'free', name: 'Free Entry', price: 0, quantity: 75, sold: 68, benefits: ['Networking', 'Refreshments'] }
-    ],
-    sessions: [],
-    waitlistCount: 7,
-    revenue: 0,
-    status: 'published'
-  }
-]
+const emptyEvents: Event[] = []
 
-const mockRegistrations: Registration[] = [
-  {
-    id: 'reg-1',
-    registrationNumber: 'REG-2025-001',
-    event: {
-      id: 'event-1',
-      name: 'Tech Innovation Summit 2025',
-      type: 'conference',
-      date: '2025-03-15T09:00:00Z',
-      location: 'San Francisco Convention Center',
-      isVirtual: false
-    },
-    attendee: {
-      id: 'att-1',
-      firstName: 'Sarah',
-      lastName: 'Chen',
-      email: 'sarah.chen@techcorp.com',
-      phone: '+1 (555) 123-4567',
-      company: 'TechCorp Inc',
-      jobTitle: 'VP of Engineering',
-      dietaryRequirements: 'Vegetarian',
-      accessibilityNeeds: undefined
-    },
-    ticketType: 'vip',
-    ticketPrice: 799,
-    discountAmount: 0,
-    totalPaid: 799,
-    paymentStatus: 'paid',
-    paymentMethod: 'credit_card',
-    status: 'confirmed',
-    sessions: [
-      { id: 'sess-1', sessionName: 'AI in Enterprise', track: 'AI/ML', time: '10:00 AM', capacity: 150, enrolled: 142, location: 'Main Hall' },
-      { id: 'sess-2', sessionName: 'Cloud Architecture', track: 'Infrastructure', time: '11:30 AM', capacity: 100, enrolled: 87, location: 'Room A' }
-    ],
-    qrCode: 'QR-SC-001',
-    badgePrinted: false,
-    communicationsSent: [
-      { id: 'comm-1', type: 'email', subject: 'Registration Confirmed', sentAt: '2024-12-15T10:00:00Z', opened: true, clicked: true },
-      { id: 'comm-2', type: 'email', subject: 'Event Reminder', sentAt: '2024-12-20T09:00:00Z', opened: true, clicked: false }
-    ],
-    customFields: { 'tshirt_size': 'M', 'dietary': 'Vegetarian' },
-    source: 'website',
-    isGroupLeader: false,
-    createdAt: '2024-12-15T10:00:00Z',
-    updatedAt: '2024-12-20T14:30:00Z'
-  },
-  {
-    id: 'reg-2',
-    registrationNumber: 'REG-2025-002',
-    event: {
-      id: 'event-1',
-      name: 'Tech Innovation Summit 2025',
-      type: 'conference',
-      date: '2025-03-15T09:00:00Z',
-      location: 'San Francisco Convention Center',
-      isVirtual: false
-    },
-    attendee: {
-      id: 'att-2',
-      firstName: 'Mike',
-      lastName: 'Johnson',
-      email: 'mike.j@startup.io',
-      phone: '+1 (555) 234-5678',
-      company: 'StartupIO',
-      jobTitle: 'Founder & CEO'
-    },
-    ticketType: 'regular',
-    ticketPrice: 399,
-    promoCode: 'EARLY20',
-    discountAmount: 79.80,
-    totalPaid: 319.20,
-    paymentStatus: 'paid',
-    paymentMethod: 'paypal',
-    status: 'checked_in',
-    sessions: [
-      { id: 'sess-1', sessionName: 'AI in Enterprise', track: 'AI/ML', time: '10:00 AM', capacity: 150, enrolled: 142, location: 'Main Hall' }
-    ],
-    checkedInAt: '2024-12-22T08:45:00Z',
-    checkedInBy: 'Staff - John',
-    qrCode: 'QR-MJ-002',
-    badgePrinted: true,
-    communicationsSent: [
-      { id: 'comm-3', type: 'email', subject: 'Registration Confirmed', sentAt: '2024-12-16T11:00:00Z', opened: true, clicked: true }
-    ],
-    customFields: { 'tshirt_size': 'L' },
-    source: 'referral',
-    referralCode: 'REF-SARAH',
-    isGroupLeader: false,
-    createdAt: '2024-12-16T11:00:00Z',
-    updatedAt: '2024-12-22T08:45:00Z'
-  },
-  {
-    id: 'reg-3',
-    registrationNumber: 'REG-2025-003',
-    event: {
-      id: 'event-1',
-      name: 'Tech Innovation Summit 2025',
-      type: 'conference',
-      date: '2025-03-15T09:00:00Z',
-      location: 'San Francisco Convention Center',
-      isVirtual: false
-    },
-    attendee: {
-      id: 'att-3',
-      firstName: 'Emily',
-      lastName: 'Davis',
-      email: 'emily.davis@enterprise.com',
-      company: 'Enterprise Solutions',
-      jobTitle: 'Product Manager'
-    },
-    ticketType: 'early_bird',
-    ticketPrice: 299,
-    discountAmount: 0,
-    totalPaid: 299,
-    paymentStatus: 'paid',
-    paymentMethod: 'credit_card',
-    status: 'confirmed',
-    sessions: [],
-    qrCode: 'QR-ED-003',
-    badgePrinted: false,
-    communicationsSent: [
-      { id: 'comm-4', type: 'email', subject: 'Registration Confirmed', sentAt: '2024-12-10T15:00:00Z', opened: true, clicked: false }
-    ],
-    customFields: {},
-    source: 'linkedin',
-    isGroupLeader: false,
-    createdAt: '2024-12-10T15:00:00Z',
-    updatedAt: '2024-12-10T15:00:00Z'
-  },
-  {
-    id: 'reg-4',
-    registrationNumber: 'REG-2025-004',
-    event: {
-      id: 'event-2',
-      name: 'Product Management Workshop',
-      type: 'workshop',
-      date: '2025-02-20T10:00:00Z',
-      location: 'Virtual',
-      isVirtual: true,
-      virtualLink: 'https://zoom.us/j/123456789'
-    },
-    attendee: {
-      id: 'att-4',
-      firstName: 'Alex',
-      lastName: 'Rivera',
-      email: 'alex.r@designco.com',
-      company: 'DesignCo',
-      jobTitle: 'Senior Designer'
-    },
-    ticketType: 'regular',
-    ticketPrice: 199,
-    discountAmount: 0,
-    totalPaid: 199,
-    paymentStatus: 'paid',
-    paymentMethod: 'stripe',
-    status: 'pending',
-    sessions: [],
-    qrCode: 'QR-AR-004',
-    badgePrinted: false,
-    communicationsSent: [
-      { id: 'comm-5', type: 'email', subject: 'Registration Pending', sentAt: '2024-12-22T09:00:00Z', opened: false, clicked: false }
-    ],
-    customFields: {},
-    source: 'twitter',
-    isGroupLeader: false,
-    createdAt: '2024-12-22T09:00:00Z',
-    updatedAt: '2024-12-22T09:00:00Z'
-  },
-  {
-    id: 'reg-5',
-    registrationNumber: 'REG-2025-005',
-    event: {
-      id: 'event-1',
-      name: 'Tech Innovation Summit 2025',
-      type: 'conference',
-      date: '2025-03-15T09:00:00Z',
-      location: 'San Francisco Convention Center',
-      isVirtual: false
-    },
-    attendee: {
-      id: 'att-5',
-      firstName: 'Jordan',
-      lastName: 'Taylor',
-      email: 'jordan.t@university.edu',
-      company: 'State University',
-      jobTitle: 'PhD Student'
-    },
-    ticketType: 'student',
-    ticketPrice: 99,
-    discountAmount: 0,
-    totalPaid: 99,
-    paymentStatus: 'paid',
-    paymentMethod: 'bank_transfer',
-    status: 'waitlist',
-    sessions: [],
-    qrCode: 'QR-JT-005',
-    badgePrinted: false,
-    communicationsSent: [
-      { id: 'comm-6', type: 'email', subject: 'Added to Waitlist', sentAt: '2024-12-21T14:00:00Z', opened: true, clicked: false }
-    ],
-    customFields: { 'student_id': 'STU-12345' },
-    source: 'website',
-    isGroupLeader: false,
-    createdAt: '2024-12-21T14:00:00Z',
-    updatedAt: '2024-12-21T14:00:00Z'
-  },
-  {
-    id: 'reg-6',
-    registrationNumber: 'REG-2025-006',
-    event: {
-      id: 'event-3',
-      name: 'Startup Networking Night',
-      type: 'meetup',
-      date: '2025-01-25T18:00:00Z',
-      location: 'TechHub Downtown',
-      isVirtual: false
-    },
-    attendee: {
-      id: 'att-6',
-      firstName: 'Chris',
-      lastName: 'Wong',
-      email: 'chris@foundershub.co',
-      company: 'FoundersHub',
-      jobTitle: 'Co-Founder'
-    },
-    ticketType: 'free',
-    ticketPrice: 0,
-    discountAmount: 0,
-    totalPaid: 0,
-    paymentStatus: 'waived',
-    status: 'confirmed',
-    sessions: [],
-    qrCode: 'QR-CW-006',
-    badgePrinted: false,
-    communicationsSent: [
-      { id: 'comm-7', type: 'email', subject: 'You\'re Registered!', sentAt: '2024-12-23T10:00:00Z', opened: true, clicked: true }
-    ],
-    customFields: {},
-    source: 'referral',
-    referralCode: 'REF-MIKE',
-    isGroupLeader: false,
-    createdAt: '2024-12-23T10:00:00Z',
-    updatedAt: '2024-12-23T10:00:00Z'
-  }
-]
+const emptyRegistrations: Registration[] = []
 
-const mockAnalytics: Analytics = {
-  totalRegistrations: 493,
-  confirmedCount: 358,
-  checkedInCount: 127,
-  noShowCount: 23,
-  cancelledCount: 42,
-  waitlistCount: 42,
-  totalRevenue: 114272,
-  avgTicketPrice: 231.79,
-  conversionRate: 72.6,
-  checkInRate: 35.5,
-  registrationsByDay: [
-    { date: '2024-12-17', count: 23 },
-    { date: '2024-12-18', count: 31 },
-    { date: '2024-12-19', count: 28 },
-    { date: '2024-12-20', count: 45 },
-    { date: '2024-12-21', count: 19 },
-    { date: '2024-12-22', count: 15 },
-    { date: '2024-12-23', count: 12 }
-  ],
-  registrationsByTicketType: [
-    { type: 'early_bird', count: 100, revenue: 29900 },
-    { type: 'regular', count: 275, revenue: 87725 },
-    { type: 'vip', count: 35, revenue: 27965 },
-    { type: 'student', count: 15, revenue: 1485 },
-    { type: 'free', count: 68, revenue: 0 }
-  ],
-  topReferralSources: [
-    { source: 'website', count: 187 },
-    { source: 'linkedin', count: 124 },
-    { source: 'referral', count: 89 },
-    { source: 'twitter', count: 52 },
-    { source: 'email', count: 41 }
-  ],
-  communicationStats: [
-    { type: 'Confirmation', sent: 493, opened: 421, clicked: 312 },
-    { type: 'Reminder', sent: 358, opened: 287, clicked: 156 },
-    { type: 'Update', sent: 127, opened: 98, clicked: 45 }
-  ]
+const emptyAnalytics: Analytics = {
+  totalRegistrations: 0,
+  confirmedCount: 0,
+  checkedInCount: 0,
+  noShowCount: 0,
+  cancelledCount: 0,
+  waitlistCount: 0,
+  totalRevenue: 0,
+  avgTicketPrice: 0,
+  conversionRate: 0,
+  checkInRate: 0,
+  registrationsByDay: [],
+  registrationsByTicketType: [],
+  topReferralSources: [],
+  communicationStats: []
 }
 
 // ============================================================================
@@ -749,32 +418,17 @@ const formatDate = (dateString: string) => {
   })
 }
 
-// Enhanced Competitive Upgrade Mock Data
-const mockRegistrationsAIInsights = [
-  { id: '1', type: 'success' as const, title: 'High Registration Rate', description: 'Tech Conference 2024 at 85% capacity. Trending to sell out.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Events' },
-  { id: '2', type: 'warning' as const, title: 'Pending Approvals', description: '12 VIP registrations awaiting manual approval.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Approvals' },
-  { id: '3', type: 'info' as const, title: 'Early Bird Ending', description: 'Early bird pricing ends in 3 days. Consider reminder campaign.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Pricing' },
-]
+// Empty arrays for competitive upgrade components (real data loaded from Supabase)
+const emptyAIInsights: { id: string; type: 'success' | 'warning' | 'info' | 'error'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
 
-const mockRegistrationsCollaborators = [
-  { id: '1', name: 'Event Manager', avatar: '/avatars/events.jpg', status: 'online' as const, role: 'Manager' },
-  { id: '2', name: 'Registration Lead', avatar: '/avatars/reg.jpg', status: 'online' as const, role: 'Lead' },
-  { id: '3', name: 'Marketing', avatar: '/avatars/marketing.jpg', status: 'away' as const, role: 'Marketing' },
-]
+const emptyCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }[] = []
 
-const mockRegistrationsPredictions = [
-  { id: '1', title: 'Attendance Forecast', prediction: 'Expecting 2,500 attendees based on current registrations', confidence: 88, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Revenue Projection', prediction: 'Total ticket revenue projected at $125K', confidence: 85, trend: 'up' as const, impact: 'high' as const },
-]
+const emptyPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: 'low' | 'medium' | 'high' }[] = []
 
-const mockRegistrationsActivities = [
-  { id: '1', user: 'Event Manager', action: 'Approved', target: '15 speaker registrations', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'System', action: 'Sent', target: 'confirmation emails to 50 registrants', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'Marketing', action: 'Created', target: 'early bird reminder campaign', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
-]
+const emptyActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' | 'error' }[] = []
 
-// Quick actions without New Event (defined inside component for state access)
-const mockRegistrationsQuickActionsBase = [
+// Quick actions base (defined outside component for reuse)
+const emptyQuickActionsBase: { id: string; label: string; icon: string; action: () => void; variant: 'default' | 'outline' | 'secondary' | 'ghost' | 'link' | 'destructive' }[] = [
   { id: '2', label: 'Import List', icon: 'upload', action: () => {
     const input = document.createElement('input')
     input.type = 'file'
@@ -788,17 +442,7 @@ const mockRegistrationsQuickActionsBase = [
     input.click()
   }, variant: 'default' as const },
   { id: '3', label: 'Export Data', icon: 'download', action: () => {
-    const exportData = mockRegistrations.map(r => ({
-      registrationNumber: r.registrationNumber,
-      firstName: r.attendee.firstName,
-      lastName: r.attendee.lastName,
-      email: r.attendee.email,
-      company: r.attendee.company || '',
-      ticketType: r.ticketType,
-      status: r.status,
-      totalPaid: r.totalPaid
-    }))
-    downloadAsCsv(exportData, `registrations-export-${new Date().toISOString().split('T')[0]}`)
+    toast.info('Export functionality available via Export button in header')
   }, variant: 'outline' as const },
 ]
 
@@ -833,11 +477,11 @@ export default function RegistrationsClient() {
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
 
-  // Data State - Mix of DB and mock for fallback
+  // Data State - Real data loaded from Supabase
   const [dbRegistrations, setDbRegistrations] = useState<DbRegistration[]>([])
-  const [registrations] = useState<Registration[]>(mockRegistrations)
-  const [events] = useState<Event[]>(mockEvents)
-  const [analytics] = useState<Analytics>(mockAnalytics)
+  const [registrations] = useState<Registration[]>(emptyRegistrations)
+  const [events] = useState<Event[]>(emptyEvents)
+  const [analytics] = useState<Analytics>(emptyAnalytics)
   const [registrationToEdit, setRegistrationToEdit] = useState<DbRegistration | null>(null)
   const [registrationToDelete, setRegistrationToDelete] = useState<DbRegistration | null>(null)
   const [showTemplateEditorDialog, setShowTemplateEditorDialog] = useState(false)
@@ -1063,7 +707,7 @@ export default function RegistrationsClient() {
   // Quick actions with state access
   const registrationsQuickActions = [
     { id: '1', label: 'New Event', icon: 'plus', action: () => setShowNewEventDialog(true), variant: 'default' as const },
-    ...mockRegistrationsQuickActionsBase
+    ...emptyQuickActionsBase
   ]
 
   // Check in attendee
@@ -1592,10 +1236,10 @@ export default function RegistrationsClient() {
               </Card>
             )}
 
-            {/* Mock Registrations List (Demo Data) */}
+            {/* Registrations List */}
             <Card className="dark:bg-gray-800/50">
               <CardHeader>
-                <CardTitle className="text-muted-foreground text-sm">Demo Registrations</CardTitle>
+                <CardTitle className="text-muted-foreground text-sm">Registrations</CardTitle>
               </CardHeader>
               <CardContent className="p-0">
                 <div className="divide-y dark:divide-gray-700">
@@ -2396,18 +2040,18 @@ export default function RegistrationsClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockRegistrationsAIInsights}
+              insights={emptyAIInsights}
               title="Registration Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockRegistrationsCollaborators}
+              collaborators={emptyCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockRegistrationsPredictions}
+              predictions={emptyPredictions}
               title="Registration Forecasts"
             />
           </div>
@@ -2415,7 +2059,7 @@ export default function RegistrationsClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockRegistrationsActivities}
+            activities={emptyActivities}
             title="Registration Activity"
             maxItems={5}
           />

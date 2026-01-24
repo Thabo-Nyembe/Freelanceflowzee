@@ -37,7 +37,7 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-// Import mock data from centralized adapters
+// Data hooks for real Supabase data
 
 
 import { useBudgets, type Budget, type BudgetType, type BudgetStatus, type BudgetPeriodType } from '@/lib/hooks/use-budgets'
@@ -62,7 +62,7 @@ interface BudgetCategory {
   carryover: boolean
 }
 
-// Local transaction interface for UI display (mock data format)
+// Local transaction interface for UI display
 interface LocalTransaction {
   id: string
   date: Date
@@ -126,72 +126,18 @@ interface MonthData {
 }
 
 // ============================================================================
-// MOCK DATA
+// EMPTY DATA ARRAYS (No mock data - use real Supabase data)
 // ============================================================================
 
-const mockCategories: BudgetCategory[] = [
-  // Needs Group
-  { id: 'needs', name: 'Immediate Obligations', icon: Home, color: 'blue', budgeted: 3500, spent: 2890, available: 610, isGroup: true, carryover: false },
-  { id: 'rent', name: 'Rent/Mortgage', icon: Home, color: 'blue', budgeted: 1800, spent: 1800, available: 0, isGroup: false, parentId: 'needs', carryover: false },
-  { id: 'utilities', name: 'Utilities', icon: Zap, color: 'blue', budgeted: 250, spent: 218, available: 32, isGroup: false, parentId: 'needs', carryover: true },
-  { id: 'groceries', name: 'Groceries', icon: ShoppingCart, color: 'blue', budgeted: 600, spent: 524, available: 76, isGroup: false, parentId: 'needs', carryover: true },
-  { id: 'transportation', name: 'Transportation', icon: Car, color: 'blue', budgeted: 400, spent: 348, available: 52, isGroup: false, parentId: 'needs', carryover: true },
-  { id: 'insurance', name: 'Insurance', icon: Heart, color: 'blue', budgeted: 450, spent: 0, available: 450, isGroup: false, parentId: 'needs', carryover: false, goalType: 'spending', goalTarget: 450 },
+const categories: BudgetCategory[] = []
 
-  // Wants Group
-  { id: 'wants', name: 'True Expenses', icon: Sparkles, color: 'purple', budgeted: 800, spent: 645, available: 155, isGroup: true, carryover: false },
-  { id: 'dining', name: 'Dining Out', icon: Utensils, color: 'purple', budgeted: 300, spent: 285, available: 15, isGroup: false, parentId: 'wants', carryover: true },
-  { id: 'entertainment', name: 'Entertainment', icon: Film, color: 'purple', budgeted: 200, spent: 160, available: 40, isGroup: false, parentId: 'wants', carryover: true },
-  { id: 'subscriptions', name: 'Subscriptions', icon: Music, color: 'purple', budgeted: 100, spent: 98, available: 2, isGroup: false, parentId: 'wants', carryover: false },
-  { id: 'shopping', name: 'Personal Shopping', icon: Gift, color: 'purple', budgeted: 200, spent: 102, available: 98, isGroup: false, parentId: 'wants', carryover: true },
+const localTransactions: LocalTransaction[] = []
 
-  // Savings Group
-  { id: 'savings', name: 'Savings Goals', icon: PiggyBank, color: 'green', budgeted: 1200, spent: 0, available: 1200, isGroup: true, carryover: false },
-  { id: 'emergency', name: 'Emergency Fund', icon: AlertCircle, color: 'green', budgeted: 500, spent: 0, available: 500, isGroup: false, parentId: 'savings', carryover: true, goalType: 'savings', goalTarget: 15000 },
-  { id: 'vacation', name: 'Vacation Fund', icon: Plane, color: 'green', budgeted: 300, spent: 0, available: 300, isGroup: false, parentId: 'savings', carryover: true, goalType: 'target', goalTarget: 3000 },
-  { id: 'education', name: 'Education', icon: GraduationCap, color: 'green', budgeted: 200, spent: 0, available: 200, isGroup: false, parentId: 'savings', carryover: true },
-  { id: 'retirement', name: 'Retirement', icon: Briefcase, color: 'green', budgeted: 200, spent: 0, available: 200, isGroup: false, parentId: 'savings', carryover: true },
+const accounts: Account[] = []
 
-  // Debt Group
-  { id: 'debt', name: 'Debt Payments', icon: CreditCard, color: 'red', budgeted: 800, spent: 800, available: 0, isGroup: true, carryover: false },
-  { id: 'student-loan', name: 'Student Loans', icon: GraduationCap, color: 'red', budgeted: 400, spent: 400, available: 0, isGroup: false, parentId: 'debt', carryover: false, goalType: 'target', goalTarget: 25000 },
-  { id: 'credit-card', name: 'Credit Card', icon: CreditCard, color: 'red', budgeted: 400, spent: 400, available: 0, isGroup: false, parentId: 'debt', carryover: false },
-]
+const goals: Goal[] = []
 
-const mockTransactions: Transaction[] = [
-  { id: '1', date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 0), payee: 'Whole Foods Market', category: 'Groceries', categoryId: 'groceries', amount: -124.56, type: 'outflow', cleared: true, approved: true, accountId: '1', accountName: 'Checking' },
-  { id: '2', date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 1), payee: 'Shell Gas Station', category: 'Transportation', categoryId: 'transportation', amount: -45.00, type: 'outflow', cleared: true, approved: true, accountId: '1', accountName: 'Checking' },
-  { id: '3', date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 1), payee: 'Netflix', category: 'Subscriptions', categoryId: 'subscriptions', amount: -15.99, type: 'outflow', cleared: true, approved: true, accountId: '1', accountName: 'Checking', recurring: true },
-  { id: '4', date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2), payee: 'Chipotle', category: 'Dining Out', categoryId: 'dining', amount: -18.50, type: 'outflow', cleared: true, approved: true, accountId: '2', accountName: 'Credit Card' },
-  { id: '5', date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2), payee: 'Amazon', category: 'Personal Shopping', categoryId: 'shopping', amount: -67.89, type: 'outflow', cleared: false, approved: true, accountId: '2', accountName: 'Credit Card' },
-  { id: '6', date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3), payee: 'Employer - Salary', category: 'Ready to Assign', categoryId: 'income', amount: 3500.00, type: 'inflow', cleared: true, approved: true, accountId: '1', accountName: 'Checking', recurring: true },
-  { id: '7', date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 4), payee: 'Electric Company', category: 'Utilities', categoryId: 'utilities', amount: -95.42, type: 'outflow', cleared: true, approved: true, accountId: '1', accountName: 'Checking' },
-  { id: '8', date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5), payee: "Trader Joe's", category: 'Groceries', categoryId: 'groceries', amount: -89.34, type: 'outflow', cleared: true, approved: true, accountId: '1', accountName: 'Checking' },
-  { id: '9', date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 6), payee: 'Landlord - Rent', category: 'Rent/Mortgage', categoryId: 'rent', amount: -1800.00, type: 'outflow', cleared: true, approved: true, accountId: '1', accountName: 'Checking', recurring: true },
-  { id: '10', date: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7), payee: 'Side Project Income', category: 'Ready to Assign', categoryId: 'income', amount: 500.00, type: 'inflow', cleared: true, approved: true, accountId: '1', accountName: 'Checking' },
-]
-
-const mockAccounts: Account[] = [
-  { id: '1', name: 'Primary Checking', type: 'checking', balance: 4523.45, cleared: 4523.45, uncleared: 0, institution: 'Chase Bank', lastSync: new Date(), onBudget: true, closed: false },
-  { id: '2', name: 'Rewards Credit Card', type: 'credit', balance: -1245.67, cleared: -1177.78, uncleared: -67.89, institution: 'Capital One', lastSync: new Date(), onBudget: true, closed: false },
-  { id: '3', name: 'High Yield Savings', type: 'savings', balance: 12500.00, cleared: 12500.00, uncleared: 0, institution: 'Ally Bank', lastSync: new Date(), onBudget: true, closed: false },
-  { id: '4', name: 'Emergency Fund', type: 'savings', balance: 8500.00, cleared: 8500.00, uncleared: 0, institution: 'Marcus', onBudget: false, closed: false },
-  { id: '5', name: 'Brokerage', type: 'investment', balance: 25000.00, cleared: 25000.00, uncleared: 0, institution: 'Fidelity', onBudget: false, closed: false },
-]
-
-const mockGoals: Goal[] = [
-  { id: '1', name: 'Emergency Fund', categoryId: 'emergency', categoryName: 'Emergency Fund', targetAmount: 15000, currentAmount: 8500, type: 'savings_balance', monthlyContribution: 500, priority: 'high' },
-  { id: '2', name: 'Summer Vacation', categoryId: 'vacation', categoryName: 'Vacation Fund', targetAmount: 3000, currentAmount: 1200, targetDate: new Date('2025-07-01'), type: 'needed_by_date', monthlyContribution: 300, priority: 'medium' },
-  { id: '3', name: 'Student Loan Payoff', categoryId: 'student-loan', categoryName: 'Student Loans', targetAmount: 25000, currentAmount: 7000, targetDate: new Date('2026-01-01'), type: 'debt_payoff', monthlyContribution: 400, priority: 'high' },
-  { id: '4', name: 'New Laptop', categoryId: 'shopping', categoryName: 'Personal Shopping', targetAmount: 2000, currentAmount: 800, targetDate: new Date('2025-03-01'), type: 'needed_by_date', monthlyContribution: 200, priority: 'low' },
-]
-
-const mockRecurring: RecurringTransaction[] = [
-  { id: '1', payee: 'Netflix', category: 'Subscriptions', amount: -15.99, frequency: 'monthly', nextDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 15), accountId: '1', active: true },
-  { id: '2', payee: 'Spotify', category: 'Subscriptions', amount: -9.99, frequency: 'monthly', nextDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 8), accountId: '1', active: true },
-  { id: '3', payee: 'Employer - Salary', category: 'Income', amount: 3500.00, frequency: 'biweekly', nextDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 5), accountId: '1', active: true },
-  { id: '4', payee: 'Rent', category: 'Rent/Mortgage', amount: -1800.00, frequency: 'monthly', nextDate: new Date(Date.now() + 1000 * 60 * 60 * 24 * 3), accountId: '1', active: true },
-]
+const recurringTransactions: RecurringTransaction[] = []
 
 // ============================================================================
 // HELPER FUNCTIONS
@@ -224,31 +170,16 @@ const getAccountIcon = (type: Account['type']) => {
 }
 
 // ============================================================================
-// ENHANCED COMPETITIVE UPGRADE MOCK DATA
+// EMPTY COMPETITIVE UPGRADE DATA (No mock data)
 // ============================================================================
 
-const mockBudgetsAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Under Budget', description: 'Operating 12% under budget this month. Savings allocated to reserves.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Spending' },
-  { id: '2', type: 'info' as const, title: 'Spending Trend', description: 'Marketing spend optimized. ROI improved by 18% this quarter.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Trends' },
-  { id: '3', type: 'warning' as const, title: 'Budget Alert', description: 'Travel category at 95% of monthly allocation.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Alerts' },
-]
+const budgetsAIInsights: { id: string; type: 'success' | 'info' | 'warning' | 'error'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
 
-const mockBudgetsCollaborators = [
-  { id: '1', name: 'CFO', avatar: '/avatars/cfo.jpg', status: 'online' as const, role: 'Executive' },
-  { id: '2', name: 'Finance Lead', avatar: '/avatars/finance.jpg', status: 'online' as const, role: 'Lead' },
-  { id: '3', name: 'Budget Analyst', avatar: '/avatars/analyst.jpg', status: 'busy' as const, role: 'Analyst' },
-]
+const budgetsCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'offline' | 'busy'; role: string }[] = []
 
-const mockBudgetsPredictions = [
-  { id: '1', label: 'Year-End Forecast', currentValue: 42500, predictedValue: 45000, confidence: 85, trend: 'up' as const, timeframe: 'Next Quarter', factors: [{ name: 'Reduced spending', impact: 'positive' as const, weight: 0.5 }, { name: 'Revenue growth', impact: 'positive' as const, weight: 0.5 }] },
-  { id: '2', label: 'Monthly Spending', currentValue: 8500, predictedValue: 8900, confidence: 78, trend: 'stable' as const, timeframe: 'Next Month', factors: [{ name: 'Seasonal patterns', impact: 'neutral' as const, weight: 0.6 }, { name: 'Fixed costs', impact: 'neutral' as const, weight: 0.4 }] },
-]
+const budgetsPredictions: { id: string; label: string; currentValue: number; predictedValue: number; confidence: number; trend: 'up' | 'down' | 'stable'; timeframe: string; factors: { name: string; impact: 'positive' | 'negative' | 'neutral'; weight: number }[] }[] = []
 
-const mockBudgetsActivities = [
-  { id: '1', type: 'update' as const, title: 'Auto-allocated funds to Emergency Reserve', user: { id: '1', name: 'Budget System', avatar: '' }, timestamp: new Date().toISOString() },
-  { id: '2', type: 'create' as const, title: 'Approved request for Equipment ($5,000)', user: { id: '2', name: 'Finance Team', avatar: '' }, timestamp: new Date(Date.now() - 3600000).toISOString() },
-  { id: '3', type: 'update' as const, title: 'Budget refresh for January 2024', user: { id: '3', name: 'System', avatar: '' }, timestamp: new Date(Date.now() - 7200000).toISOString() },
-]
+const budgetsActivities: { id: string; type: 'update' | 'create' | 'delete'; title: string; user: { id: string; name: string; avatar: string }; timestamp: string }[] = []
 
 // Note: Quick actions are generated dynamically inside the component to access state setters
 
@@ -356,7 +287,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
 
   const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 
-  // Calculate comprehensive stats - uses real data when available, falls back to mock
+  // Calculate comprehensive stats from real data
   const stats = useMemo(() => {
     // Use real budget data if available
     const realTotalBudgeted = displayBudgets.reduce((sum, b) => sum + (b.total_amount || 0), 0)
@@ -367,27 +298,18 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
     const realIncome = txStats?.totalIncome || 0
     const realExpenses = txStats?.totalExpenses || 0
 
-    // Fall back to mock data for categories display
-    const groups = mockCategories.filter(c => c.isGroup)
-    const mockTotalBudgeted = groups.reduce((sum, c) => sum + c.budgeted, 0)
-    const mockTotalSpent = groups.reduce((sum, c) => sum + c.spent, 0)
-    const mockTotalAvailable = groups.reduce((sum, c) => sum + c.available, 0)
-
-    const mockIncome = mockTransactions.filter(t => t.type === 'inflow').reduce((sum, t) => sum + t.amount, 0)
-    const mockExpenses = mockTransactions.filter(t => t.type === 'outflow').reduce((sum, t) => sum + Math.abs(t.amount), 0)
-
-    // Use real data if we have budgets, otherwise mock
+    // Use real data from budgets
     const totalBudgeted = realTotalBudgeted
     const totalSpent = realTotalSpent
     const totalAvailable = realTotalAvailable
     const income = realIncome
     const expenses = realExpenses
 
-    const onBudgetAccounts = mockAccounts.filter(a => a.onBudget)
-    const netWorth = mockAccounts.reduce((sum, a) => sum + a.balance, 0)
+    const onBudgetAccounts = accounts.filter(a => a.onBudget)
+    const netWorth = accounts.reduce((sum, a) => sum + a.balance, 0)
     const cashBalance = onBudgetAccounts.reduce((sum, a) => sum + a.balance, 0)
 
-    const goalsProgress = mockGoals.reduce((sum, g) => sum + (g.currentAmount / g.targetAmount), 0) / mockGoals.length * 100
+    const goalsProgress = goals.length > 0 ? goals.reduce((sum, g) => sum + (g.currentAmount / g.targetAmount), 0) / goals.length * 100 : 0
 
     return {
       totalBudgeted,
@@ -400,8 +322,8 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
       netWorth,
       cashBalance,
       goalsProgress: goalsProgress.toFixed(0),
-      accountsCount: mockAccounts.filter(a => !a.closed).length,
-      transactionsCount: dbTransactions?.length || mockTransactions.length,
+      accountsCount: accounts.filter(a => !a.closed).length,
+      transactionsCount: dbTransactions?.length || 0,
       budgetsCount: displayBudgets.length
     }
   }, [displayBudgets, dbTransactions, txStats])
@@ -994,7 +916,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                   <Badge variant="outline">{monthNames[currentMonth.getMonth()]}</Badge>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {mockCategories.filter(c => c.isGroup).map(group => {
+                  {categories.filter(c => c.isGroup).map(group => {
                     const progress = group.budgeted > 0 ? (group.spent / group.budgeted) * 100 : 0
                     return (
                       <div key={group.id}>
@@ -1031,7 +953,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                   <Button variant="ghost" size="sm" onClick={() => setActiveTab('accounts')}>View All</Button>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {mockAccounts.filter(a => !a.closed).slice(0, 4).map(account => {
+                  {accounts.filter(a => !a.closed).slice(0, 4).map(account => {
                     const Icon = getAccountIcon(account.type)
                     return (
                       <div key={account.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
@@ -1060,7 +982,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                   <Button variant="ghost" size="sm" onClick={() => setActiveTab('transactions')}>View All</Button>
                 </CardHeader>
                 <CardContent className="space-y-2">
-                  {mockTransactions.slice(0, 5).map(tx => (
+                  {localTransactions.slice(0, 5).map(tx => (
                     <div key={tx.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all cursor-pointer" onClick={() => setSelectedTransaction(tx)}>
                       <div className="flex items-center gap-3">
                         <div className={`p-2 rounded-lg ${tx.type === 'inflow' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600 dark:bg-gray-700'}`}>
@@ -1089,7 +1011,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                   <Button variant="ghost" size="sm" onClick={() => setActiveTab('goals')}>Manage</Button>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {mockGoals.slice(0, 3).map(goal => {
+                  {goals.slice(0, 3).map(goal => {
                     const progress = (goal.currentAmount / goal.targetAmount) * 100
                     return (
                       <div key={goal.id}>
@@ -1174,7 +1096,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {mockGoals.slice(0, 3).map(goal => (
+                  {goals.slice(0, 3).map(goal => (
                     <div key={goal.id} className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <div className="flex items-center justify-between mb-2">
                         <span className="font-medium text-gray-900 dark:text-white">{goal.name}</span>
@@ -1220,7 +1142,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                   </div>
                   <div className="space-y-3">
                     <h4 className="font-medium text-gray-900 dark:text-white">Top Spending Categories</h4>
-                    {mockCategories.filter(c => c.isGroup).sort((a, b) => b.spent - a.spent).slice(0, 4).map(cat => (
+                    {categories.filter(c => c.isGroup).sort((a, b) => b.spent - a.spent).slice(0, 4).map(cat => (
                       <div key={cat.id} className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <cat.icon className={`h-4 w-4 text-${cat.color}-600`} />
@@ -1455,8 +1377,8 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                 </Button>
               </CardHeader>
               <CardContent className="space-y-4">
-                {mockCategories.filter(c => c.isGroup).map(group => {
-                  const groupCategories = mockCategories.filter(c => c.parentId === group.id)
+                {categories.filter(c => c.isGroup).map(group => {
+                  const groupCategories = categories.filter(c => c.parentId === group.id)
                   const isExpanded = expandedGroups.includes(group.id)
 
                   return (
@@ -1555,7 +1477,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                 <div className="flex items-center gap-3">
                   <select className="px-4 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
                     <option value="all">All Accounts</option>
-                    {mockAccounts.map(account => (
+                    {accounts.map(account => (
                       <option key={account.id} value={account.id}>{account.name}</option>
                     ))}
                   </select>
@@ -1567,7 +1489,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  {mockTransactions.map(tx => (
+                  {localTransactions.map(tx => (
                     <div key={tx.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all cursor-pointer" onClick={() => setSelectedTransaction(tx)}>
                       <div className="flex items-center gap-4">
                         <div className={`p-2 rounded-lg ${tx.type === 'inflow' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600 dark:bg-gray-700'}`}>
@@ -1617,7 +1539,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {mockGoals.map(goal => {
+              {goals.map(goal => {
                 const progress = (goal.currentAmount / goal.targetAmount) * 100
                 const remaining = goal.targetAmount - goal.currentAmount
                 const monthsLeft = goal.monthlyContribution > 0 ? Math.ceil(remaining / goal.monthlyContribution) : 0
@@ -1781,7 +1703,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                   </Dialog>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {mockAccounts.filter(a => a.onBudget).map(account => {
+                  {accounts.filter(a => a.onBudget).map(account => {
                     const Icon = getAccountIcon(account.type)
                     return (
                       <div key={account.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all cursor-pointer" onClick={() => setSelectedAccount(account)}>
@@ -1813,7 +1735,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                   <CardTitle>Tracking Accounts</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {mockAccounts.filter(a => !a.onBudget).map(account => {
+                  {accounts.filter(a => !a.onBudget).map(account => {
                     const Icon = getAccountIcon(account.type)
                     return (
                       <div key={account.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
@@ -1959,7 +1881,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                         </Button>
                       </CardHeader>
                       <CardContent className="space-y-3">
-                        {mockCategories.filter(c => c.isGroup).map((group) => (
+                        {categories.filter(c => c.isGroup).map((group) => (
                           <div key={group.id} className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                             <div className="flex items-center justify-between mb-3">
                               <h4 className="font-semibold text-gray-900 dark:text-white">{group.name}</h4>
@@ -1970,7 +1892,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                               </Button>
                             </div>
                             <div className="space-y-2 pl-4 border-l-2 border-gray-200 dark:border-gray-600">
-                              {mockCategories.filter(c => c.group === group.name && !c.isGroup).map((cat) => (
+                              {categories.filter(c => c.group === group.name && !c.isGroup).map((cat) => (
                                 <div key={cat.id} className="flex items-center justify-between py-2">
                                   <span className="text-gray-600 dark:text-gray-400">{cat.name}</span>
                                   <div className="flex items-center gap-2">
@@ -2084,7 +2006,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                         <CardTitle>Connected Accounts</CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        {mockAccounts.map((account) => (
+                        {accounts.map((account) => (
                           <div key={account.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                             <div className="flex items-center gap-4">
                               <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
@@ -2392,7 +2314,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockBudgetsAIInsights}
+              insights={budgetsAIInsights}
               title="Budget Intelligence"
               onInsightAction={(_insight) => {
                 toast.success(_insight.title + ': ' + _insight.description)
@@ -2401,11 +2323,11 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockBudgetsCollaborators}
+              collaborators={budgetsCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockBudgetsPredictions}
+              predictions={budgetsPredictions}
               title="Budget Forecasts"
             />
           </div>
@@ -2413,7 +2335,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockBudgetsActivities}
+            activities={budgetsActivities}
             title="Budget Activity"
             maxItems={5}
           />
@@ -2524,7 +2446,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
               <div>
                 <label className="block text-sm font-medium mb-1">Category Group</label>
                 <select className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
-                  {mockCategories.filter(c => c.isGroup).map(group => (
+                  {categories.filter(c => c.isGroup).map(group => (
                     <option key={group.id} value={group.id}>{group.name}</option>
                   ))}
                 </select>
@@ -3127,7 +3049,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                     <SelectValue placeholder="Select source account" />
                   </SelectTrigger>
                   <SelectContent>
-                    {mockAccounts.filter(a => a.onBudget && !a.closed).map(account => (
+                    {accounts.filter(a => a.onBudget && !a.closed).map(account => (
                       <SelectItem key={account.id} value={account.name}>
                         {account.name} ({formatCurrency(account.balance)})
                       </SelectItem>
@@ -3146,7 +3068,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                     <SelectValue placeholder="Select destination account" />
                   </SelectTrigger>
                   <SelectContent>
-                    {mockAccounts.filter(a => a.onBudget && !a.closed).map(account => (
+                    {accounts.filter(a => a.onBudget && !a.closed).map(account => (
                       <SelectItem key={account.id} value={account.name}>
                         {account.name} ({formatCurrency(account.balance)})
                       </SelectItem>
@@ -3213,8 +3135,8 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
             </DialogHeader>
             <div className="py-4">
               <div className="space-y-3">
-                {mockTransactions.filter(t => t.recurring).length > 0 ? (
-                  mockTransactions.filter(t => t.recurring).map(tx => (
+                {localTransactions.filter(t => t.recurring).length > 0 ? (
+                  localTransactions.filter(t => t.recurring).map(tx => (
                     <div key={tx.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <div className="flex items-center gap-3">
                         <div className={'p-2 rounded-lg ' + (tx.type === 'inflow' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600')}>

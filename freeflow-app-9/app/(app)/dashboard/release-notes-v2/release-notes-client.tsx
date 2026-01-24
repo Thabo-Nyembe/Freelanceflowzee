@@ -131,184 +131,12 @@ interface ReleaseNotesClientProps {
   initialStats: ReleaseNotesStats
 }
 
-// Mock Data - ProductBoard Level
-const mockAuthors: Author[] = [
-  { id: 'a-1', name: 'Sarah Chen', avatar: 'SC', role: 'Product Manager' },
-  { id: 'a-2', name: 'Alex Rivera', avatar: 'AR', role: 'Engineering Lead' },
-  { id: 'a-3', name: 'Marcus Johnson', avatar: 'MJ', role: 'Release Manager' },
-]
+// Empty arrays - real data comes from props/hooks
+const mockAuthors: Author[] = []
 
-const mockReleases: Release[] = [
-  {
-    id: 'rel-1',
-    version: 'v3.0.0',
-    title: 'The AI Revolution Update',
-    description: 'Introducing AI-powered features across the entire platform with enhanced automation and smart insights.',
-    fullChangelog: '## What\'s New\n\nThis major release brings AI capabilities to every aspect of the platform...',
-    releaseType: 'major',
-    status: 'published',
-    platforms: [
-      { id: 'p-1', name: 'iOS', icon: 'ios', version: '3.0.0', minVersion: '14.0', status: 'available' },
-      { id: 'p-2', name: 'Android', icon: 'android', version: '3.0.0', minVersion: '10', status: 'available' },
-      { id: 'p-3', name: 'Web', icon: 'web', version: '3.0.0', status: 'available' },
-      { id: 'p-4', name: 'Desktop', icon: 'desktop', version: '3.0.0', status: 'available' },
-    ],
-    releaseDate: '2024-01-20',
-    author: mockAuthors[0],
-    highlights: [
-      'AI-powered smart suggestions across all workflows',
-      'New dashboard with real-time analytics',
-      'Enhanced collaboration features with live cursors',
-      '50% performance improvement on large datasets'
-    ],
-    features: [
-      { id: 'f-1', title: 'AI Smart Suggestions', description: 'Get intelligent recommendations based on your usage patterns', ticketId: 'PROD-1234', category: 'AI', impact: 'high' },
-      { id: 'f-2', title: 'Real-time Collaboration', description: 'See teammates\' cursors and edits in real-time', ticketId: 'PROD-1235', category: 'Collaboration', impact: 'high' },
-      { id: 'f-3', title: 'Advanced Analytics Dashboard', description: 'New visualization options and export capabilities', ticketId: 'PROD-1236', category: 'Analytics', impact: 'medium' },
-      { id: 'f-4', title: 'Custom Workflows', description: 'Build and automate your own workflows', ticketId: 'PROD-1237', category: 'Automation', impact: 'high' },
-    ],
-    improvements: [
-      { id: 'i-1', title: 'Search Performance', description: 'Search is now 3x faster with improved relevance', impact: 'high' },
-      { id: 'i-2', title: 'Mobile Navigation', description: 'Redesigned navigation for easier one-hand use', impact: 'medium' },
-      { id: 'i-3', title: 'Dark Mode Enhancement', description: 'Improved contrast and readability in dark mode', impact: 'low' },
-    ],
-    bugFixes: [
-      { id: 'b-1', title: 'Fixed login issues on Safari', ticketId: 'BUG-456' },
-      { id: 'b-2', title: 'Resolved data sync delays', ticketId: 'BUG-457' },
-      { id: 'b-3', title: 'Fixed notification delivery', ticketId: 'BUG-458' },
-    ],
-    breakingChanges: [
-      { id: 'bc-1', title: 'API v1 Deprecated', description: 'Please migrate to API v2 before March 2024' },
-      { id: 'bc-2', title: 'Legacy Export Format Removed', description: 'Use the new export format with enhanced options' },
-    ],
-    deprecations: [
-      { id: 'd-1', title: 'Old Dashboard', description: 'Will be removed in v3.2.0' },
-    ],
-    knownIssues: [
-      'Some users may experience slow initial load on first launch',
-      'PDF export may have formatting issues with complex tables'
-    ],
-    migrationGuide: '## Migration from v2.x\n\n1. Update your API calls to use v2 endpoints\n2. Review breaking changes above\n3. Test in staging before production deployment',
-    rolloutPercentage: 100,
-    downloadUrl: 'https://releases.example.com/v3.0.0',
-    metrics: { downloads: 125000, views: 450000, likes: 8420, comments: 1256, adoptionRate: 78, feedbackScore: 4.7, issuesReported: 45 },
-    tags: ['ai', 'major-release', 'collaboration', 'performance'],
-    relatedReleases: ['rel-2'],
-    featureFlags: [
-      { id: 'ff-1', name: 'AI Suggestions', key: 'ai_suggestions_v3', enabled: true, rolloutPercentage: 100, platforms: ['ios', 'android', 'web'], description: 'Enable AI-powered suggestions' },
-      { id: 'ff-2', name: 'Live Cursors', key: 'live_cursors', enabled: true, rolloutPercentage: 85, platforms: ['web', 'desktop'], description: 'Show live cursors in documents' },
-    ]
-  },
-  {
-    id: 'rel-2',
-    version: 'v2.9.5',
-    title: 'Security & Performance Patch',
-    description: 'Critical security updates and performance optimizations.',
-    fullChangelog: '## Security Patch\n\nThis release addresses several security vulnerabilities...',
-    releaseType: 'patch',
-    status: 'published',
-    platforms: [
-      { id: 'p-1', name: 'iOS', icon: 'ios', version: '2.9.5', status: 'available' },
-      { id: 'p-2', name: 'Android', icon: 'android', version: '2.9.5', status: 'available' },
-      { id: 'p-3', name: 'Web', icon: 'web', version: '2.9.5', status: 'available' },
-    ],
-    releaseDate: '2024-01-15',
-    author: mockAuthors[1],
-    highlights: ['Critical security patches', 'Memory leak fixes', 'Improved error handling'],
-    features: [],
-    improvements: [
-      { id: 'i-1', title: 'Memory Management', description: 'Fixed memory leaks in long-running sessions', impact: 'high' },
-    ],
-    bugFixes: [
-      { id: 'b-1', title: 'Fixed XSS vulnerability in comments', ticketId: 'SEC-101' },
-      { id: 'b-2', title: 'Patched CSRF vulnerability', ticketId: 'SEC-102' },
-      { id: 'b-3', title: 'Fixed session hijacking issue', ticketId: 'SEC-103' },
-    ],
-    breakingChanges: [],
-    deprecations: [],
-    knownIssues: [],
-    rolloutPercentage: 100,
-    metrics: { downloads: 98000, views: 156000, likes: 2100, comments: 342, adoptionRate: 95, feedbackScore: 4.2, issuesReported: 12 },
-    tags: ['security', 'patch', 'hotfix'],
-    relatedReleases: ['rel-1'],
-    featureFlags: []
-  },
-  {
-    id: 'rel-3',
-    version: 'v3.1.0',
-    title: 'Team Collaboration Suite',
-    description: 'Enhanced team features with new workspace management and permissions.',
-    fullChangelog: '## Collaboration Update\n\nNew features for team productivity...',
-    releaseType: 'minor',
-    status: 'rolling-out',
-    platforms: [
-      { id: 'p-1', name: 'iOS', icon: 'ios', version: '3.1.0', status: 'available' },
-      { id: 'p-2', name: 'Android', icon: 'android', version: '3.1.0', status: 'coming-soon' },
-      { id: 'p-3', name: 'Web', icon: 'web', version: '3.1.0', status: 'available' },
-    ],
-    releaseDate: '2024-01-22',
-    scheduledDate: '2024-01-25',
-    author: mockAuthors[2],
-    highlights: ['Team workspaces', 'Advanced permissions', 'Activity timeline'],
-    features: [
-      { id: 'f-1', title: 'Team Workspaces', description: 'Create dedicated spaces for your team', category: 'Collaboration', impact: 'high' },
-      { id: 'f-2', title: 'Role-based Permissions', description: 'Fine-grained access control', category: 'Security', impact: 'high' },
-      { id: 'f-3', title: 'Activity Timeline', description: 'See all team activity in one place', category: 'Productivity', impact: 'medium' },
-    ],
-    improvements: [],
-    bugFixes: [],
-    breakingChanges: [],
-    deprecations: [],
-    knownIssues: [],
-    rolloutPercentage: 45,
-    metrics: { downloads: 23000, views: 67000, likes: 890, comments: 156, adoptionRate: 45, feedbackScore: 4.5, issuesReported: 8 },
-    tags: ['collaboration', 'teams', 'permissions'],
-    relatedReleases: ['rel-1'],
-    featureFlags: [
-      { id: 'ff-1', name: 'Team Workspaces', key: 'team_workspaces_v1', enabled: true, rolloutPercentage: 45, platforms: ['ios', 'web'], description: 'Enable team workspace feature' },
-    ]
-  },
-  {
-    id: 'rel-4',
-    version: 'v3.2.0-beta',
-    title: 'Mobile Experience Overhaul',
-    description: 'Complete redesign of the mobile experience with new gestures and offline mode.',
-    fullChangelog: '## Beta Release\n\nTesting the new mobile experience...',
-    releaseType: 'beta',
-    status: 'draft',
-    platforms: [
-      { id: 'p-1', name: 'iOS', icon: 'ios', version: '3.2.0-beta', status: 'available' },
-      { id: 'p-2', name: 'Android', icon: 'android', version: '3.2.0-beta', status: 'available' },
-    ],
-    releaseDate: '',
-    scheduledDate: '2024-02-01',
-    author: mockAuthors[0],
-    highlights: ['New gesture navigation', 'Offline mode', 'Battery optimization'],
-    features: [
-      { id: 'f-1', title: 'Gesture Navigation', description: 'Swipe gestures for common actions', category: 'UX', impact: 'high' },
-      { id: 'f-2', title: 'Offline Mode', description: 'Work without internet connection', category: 'Productivity', impact: 'high' },
-      { id: 'f-3', title: 'Battery Saver', description: 'Reduced battery consumption by 40%', category: 'Performance', impact: 'medium' },
-    ],
-    improvements: [],
-    bugFixes: [],
-    breakingChanges: [],
-    deprecations: [],
-    knownIssues: ['Offline sync may take longer than expected', 'Some gestures conflict with system gestures on iOS'],
-    rolloutPercentage: 0,
-    metrics: { downloads: 5600, views: 12000, likes: 340, comments: 89, adoptionRate: 12, feedbackScore: 4.1, issuesReported: 34 },
-    tags: ['beta', 'mobile', 'offline'],
-    relatedReleases: [],
-    featureFlags: []
-  }
-]
+const mockReleases: Release[] = []
 
-const mockRoadmap: RoadmapItem[] = [
-  { id: 'r-1', title: 'AI Writing Assistant', description: 'AI-powered writing suggestions and grammar corrections', quarter: 'Q1 2024', status: 'in-progress', category: 'AI', votes: 1245 },
-  { id: 'r-2', title: 'Advanced Integrations', description: 'Connect with 100+ third-party tools', quarter: 'Q1 2024', status: 'planned', category: 'Integrations', votes: 890 },
-  { id: 'r-3', title: 'Custom Themes', description: 'Create and share custom themes', quarter: 'Q2 2024', status: 'planned', category: 'Customization', votes: 567 },
-  { id: 'r-4', title: 'Video Conferencing', description: 'Built-in video calls and screen sharing', quarter: 'Q2 2024', status: 'planned', category: 'Collaboration', votes: 2341 },
-  { id: 'r-5', title: 'Enterprise SSO', description: 'SAML and OIDC support for enterprise', quarter: 'Q1 2024', status: 'completed', category: 'Security', votes: 456 },
-]
+const mockRoadmap: RoadmapItem[] = []
 
 const platformIcons: Record<string, React.ReactNode> = {
   ios: <Smartphone className="w-4 h-4" />,
@@ -318,30 +146,14 @@ const platformIcons: Record<string, React.ReactNode> = {
   api: <Code className="w-4 h-4" />,
 }
 
-// Enhanced Release Notes Mock Data
-const mockReleaseNotesAIInsights = [
-  { id: '1', type: 'success' as const, title: 'User Engagement', description: 'Release v2.5 had 45% more views than average. Great reception!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Analytics' },
-  { id: '2', type: 'info' as const, title: 'Upcoming Release', description: 'v2.6 scheduled for next week. 12 features ready for announcement.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Planning' },
-  { id: '3', type: 'warning' as const, title: 'Feedback Pending', description: '8 user comments awaiting response on recent releases.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Engagement' },
-]
+// Empty arrays - real data comes from props/hooks
+const mockReleaseNotesAIInsights: { id: string; type: 'success' | 'warning' | 'info' | 'error'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
 
-const mockReleaseNotesCollaborators = [
-  { id: '1', name: 'Product Manager', avatar: '/avatars/pm.jpg', status: 'online' as const, role: 'Releases', lastActive: 'Now' },
-  { id: '2', name: 'Tech Writer', avatar: '/avatars/writer.jpg', status: 'online' as const, role: 'Documentation', lastActive: '5m ago' },
-  { id: '3', name: 'Marketing', avatar: '/avatars/marketing.jpg', status: 'away' as const, role: 'Communications', lastActive: '30m ago' },
-]
+const mockReleaseNotesCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string; lastActive: string }[] = []
 
-const mockReleaseNotesPredictions = [
-  { id: '1', label: 'Monthly Releases', current: 4, target: 4, predicted: 4, confidence: 95, trend: 'up' as const },
-  { id: '2', label: 'User Views', current: 12500, target: 15000, predicted: 14000, confidence: 82, trend: 'up' as const },
-  { id: '3', label: 'Engagement Rate', current: 34, target: 40, predicted: 38, confidence: 78, trend: 'up' as const },
-]
+const mockReleaseNotesPredictions: { id: string; label: string; current: number; target: number; predicted: number; confidence: number; trend: 'up' | 'down' | 'stable' }[] = []
 
-const mockReleaseNotesActivities = [
-  { id: '1', user: 'Product Manager', action: 'published', target: 'Release v2.5.1', timestamp: '2h ago', type: 'success' as const },
-  { id: '2', user: 'Tech Writer', action: 'drafted', target: 'v2.6 release notes', timestamp: '4h ago', type: 'info' as const },
-  { id: '3', user: 'Marketing', action: 'scheduled', target: 'email announcement', timestamp: '1d ago', type: 'info' as const },
-]
+const mockReleaseNotesActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'warning' | 'info' | 'error' }[] = []
 
 // Quick actions will be populated dynamically in the component
 

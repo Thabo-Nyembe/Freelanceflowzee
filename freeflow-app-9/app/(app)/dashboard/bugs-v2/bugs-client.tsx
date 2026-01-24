@@ -220,229 +220,11 @@ interface BugStats {
   resolvedThisWeek: number
 }
 
-// Mock Data
-const mockLabels: BugLabel[] = [
-  { id: 'l1', name: 'frontend', color: '#3b82f6' },
-  { id: 'l2', name: 'backend', color: '#10b981' },
-  { id: 'l3', name: 'api', color: '#f59e0b' },
-  { id: 'l4', name: 'database', color: '#8b5cf6' },
-  { id: 'l5', name: 'auth', color: '#ef4444' },
-  { id: 'l6', name: 'performance', color: '#ec4899' },
-  { id: 'l7', name: 'ui/ux', color: '#06b6d4' }
-]
+// Labels - empty array (real data from database)
+const labels: BugLabel[] = []
 
-const mockBugs: BugItem[] = [
-  {
-    id: 'bug-1',
-    key: 'BUG-1234',
-    title: 'Login form crashes when password contains special characters',
-    description: 'Users report that the login form crashes when entering passwords with special characters like @ or #. This is blocking multiple users from accessing the system.',
-    status: 'open',
-    severity: 'critical',
-    priority: 'blocker',
-    type: 'crash',
-    reporter: { id: 'u1', name: 'John Smith', avatar: 'JS' },
-    assignee: { id: 'u2', name: 'Sarah Chen', avatar: 'SC' },
-    labels: [mockLabels[0], mockLabels[4]],
-    affectedVersion: '2.4.1',
-    fixVersion: '2.4.2',
-    environment: 'Production',
-    stepsToReproduce: ['Navigate to login page', 'Enter username', 'Enter password with @ symbol', 'Click login button'],
-    expectedBehavior: 'User should be logged in successfully',
-    actualBehavior: 'Application crashes with white screen',
-    createdAt: '2024-01-15T10:30:00',
-    updatedAt: '2024-01-15T14:20:00',
-    dueDate: '2024-01-18',
-    timeEstimate: 4,
-    timeSpent: 2,
-    comments: [
-      { id: 'c1', author: 'Sarah Chen', content: 'Investigating this now. Seems related to regex validation.', createdAt: '2024-01-15T11:00:00', isEdited: false },
-      { id: 'c2', author: 'John Smith', content: 'Thanks for the quick response!', createdAt: '2024-01-15T11:15:00', isEdited: false }
-    ],
-    attachments: [
-      { id: 'a1', name: 'error_screenshot.png', type: 'image/png', size: 245000, uploadedBy: 'John Smith', uploadedAt: '2024-01-15T10:35:00', url: '#' },
-      { id: 'a2', name: 'console_log.txt', type: 'text/plain', size: 1200, uploadedBy: 'John Smith', uploadedAt: '2024-01-15T10:36:00', url: '#' }
-    ],
-    linkedIssues: [
-      { id: 'li1', key: 'BUG-1200', title: 'Input validation improvements', type: 'related', status: 'closed' }
-    ],
-    votes: 24,
-    watchers: 15,
-    sprint: 'Sprint 12',
-    component: 'Authentication'
-  },
-  {
-    id: 'bug-2',
-    key: 'BUG-1235',
-    title: 'Dashboard loads slowly with large datasets',
-    description: 'Dashboard takes over 30 seconds to load when displaying more than 1000 records. Users are experiencing timeouts and poor performance.',
-    status: 'in_progress',
-    severity: 'high',
-    priority: 'major',
-    type: 'performance',
-    reporter: { id: 'u3', name: 'Mike Johnson', avatar: 'MJ' },
-    assignee: { id: 'u4', name: 'Alex Rivera', avatar: 'AR' },
-    labels: [mockLabels[0], mockLabels[5]],
-    affectedVersion: '2.4.0',
-    fixVersion: '2.5.0',
-    environment: 'Production',
-    stepsToReproduce: ['Login as admin', 'Navigate to dashboard', 'Set date range to last year'],
-    expectedBehavior: 'Dashboard loads within 3 seconds',
-    actualBehavior: 'Dashboard takes 30+ seconds or times out',
-    createdAt: '2024-01-14T09:00:00',
-    updatedAt: '2024-01-15T16:00:00',
-    dueDate: '2024-01-20',
-    timeEstimate: 16,
-    timeSpent: 8,
-    comments: [
-      { id: 'c3', author: 'Alex Rivera', content: 'Implementing pagination and lazy loading. PR coming soon.', createdAt: '2024-01-15T15:00:00', isEdited: true }
-    ],
-    attachments: [],
-    linkedIssues: [],
-    votes: 18,
-    watchers: 22,
-    sprint: 'Sprint 12',
-    component: 'Dashboard'
-  },
-  {
-    id: 'bug-3',
-    key: 'BUG-1236',
-    title: 'Export to CSV missing some columns',
-    description: 'When exporting data to CSV, the "Created Date" and "Modified Date" columns are missing from the output file.',
-    status: 'in_review',
-    severity: 'medium',
-    priority: 'minor',
-    type: 'bug',
-    reporter: { id: 'u5', name: 'Emily Davis', avatar: 'ED' },
-    assignee: { id: 'u2', name: 'Sarah Chen', avatar: 'SC' },
-    labels: [mockLabels[1], mockLabels[2]],
-    affectedVersion: '2.4.1',
-    environment: 'Staging',
-    stepsToReproduce: ['Go to Reports', 'Select any report', 'Click Export to CSV'],
-    expectedBehavior: 'All columns including dates should be exported',
-    actualBehavior: 'Date columns are missing',
-    createdAt: '2024-01-12T14:30:00',
-    updatedAt: '2024-01-15T10:00:00',
-    timeEstimate: 2,
-    timeSpent: 1.5,
-    comments: [],
-    attachments: [
-      { id: 'a3', name: 'exported_file.csv', type: 'text/csv', size: 5000, uploadedBy: 'Emily Davis', uploadedAt: '2024-01-12T14:35:00', url: '#' }
-    ],
-    linkedIssues: [],
-    votes: 8,
-    watchers: 5,
-    sprint: 'Sprint 11',
-    component: 'Reporting'
-  },
-  {
-    id: 'bug-4',
-    key: 'BUG-1237',
-    title: 'Button color inconsistent in dark mode',
-    description: 'Primary action buttons appear with wrong color in dark mode theme.',
-    status: 'resolved',
-    severity: 'low',
-    priority: 'trivial',
-    type: 'ui',
-    reporter: { id: 'u6', name: 'Chris Brown', avatar: 'CB' },
-    assignee: { id: 'u7', name: 'Lisa Park', avatar: 'LP' },
-    labels: [mockLabels[0], mockLabels[6]],
-    affectedVersion: '2.4.0',
-    fixVersion: '2.4.1',
-    environment: 'Development',
-    stepsToReproduce: ['Enable dark mode', 'Navigate to settings page', 'Observe button colors'],
-    expectedBehavior: 'Buttons should have correct brand color',
-    actualBehavior: 'Buttons appear gray instead of blue',
-    createdAt: '2024-01-10T11:00:00',
-    updatedAt: '2024-01-14T09:00:00',
-    resolvedAt: '2024-01-14T09:00:00',
-    timeEstimate: 1,
-    timeSpent: 0.5,
-    comments: [
-      { id: 'c4', author: 'Lisa Park', content: 'Fixed in PR #456. Updated CSS variables for dark mode.', createdAt: '2024-01-14T09:00:00', isEdited: false }
-    ],
-    attachments: [],
-    linkedIssues: [],
-    votes: 3,
-    watchers: 2,
-    component: 'UI Components'
-  },
-  {
-    id: 'bug-5',
-    key: 'BUG-1238',
-    title: 'API rate limiting not working correctly',
-    description: 'Rate limiting is allowing more requests than configured. Set to 100 req/min but allowing 500+.',
-    status: 'open',
-    severity: 'high',
-    priority: 'critical',
-    type: 'security',
-    reporter: { id: 'u8', name: 'David Kim', avatar: 'DK' },
-    labels: [mockLabels[1], mockLabels[2]],
-    affectedVersion: '2.4.1',
-    environment: 'Production',
-    stepsToReproduce: ['Send 100+ requests in 1 minute', 'Observe no rate limiting'],
-    expectedBehavior: 'Requests should be blocked after 100/minute',
-    actualBehavior: 'No rate limiting is applied',
-    createdAt: '2024-01-15T08:00:00',
-    updatedAt: '2024-01-15T08:00:00',
-    dueDate: '2024-01-16',
-    timeEstimate: 8,
-    comments: [],
-    attachments: [],
-    linkedIssues: [
-      { id: 'li2', key: 'SEC-89', title: 'Security audit findings', type: 'related', status: 'open' }
-    ],
-    votes: 12,
-    watchers: 18,
-    sprint: 'Sprint 12',
-    component: 'API Gateway'
-  },
-  {
-    id: 'bug-6',
-    key: 'BUG-1239',
-    title: 'Duplicate email notifications',
-    description: 'Users receiving 2-3 copies of the same notification email.',
-    status: 'closed',
-    severity: 'medium',
-    priority: 'minor',
-    type: 'bug',
-    reporter: { id: 'u9', name: 'Rachel Green', avatar: 'RG' },
-    assignee: { id: 'u4', name: 'Alex Rivera', avatar: 'AR' },
-    labels: [mockLabels[1]],
-    affectedVersion: '2.3.5',
-    fixVersion: '2.4.0',
-    environment: 'Production',
-    stepsToReproduce: ['Trigger any notification', 'Check email inbox'],
-    expectedBehavior: 'One email per notification',
-    actualBehavior: 'Multiple duplicate emails received',
-    createdAt: '2024-01-05T16:00:00',
-    updatedAt: '2024-01-08T10:00:00',
-    resolvedAt: '2024-01-07T15:00:00',
-    timeEstimate: 4,
-    timeSpent: 3,
-    comments: [],
-    attachments: [],
-    linkedIssues: [],
-    votes: 45,
-    watchers: 32,
-    component: 'Notifications'
-  }
-]
-
-const _mockStats: BugStats = {
-  total: 156,
-  open: 42,
-  inProgress: 28,
-  resolved: 54,
-  closed: 32,
-  critical: 5,
-  high: 18,
-  medium: 45,
-  low: 88,
-  avgResolutionTime: 3.2,
-  openThisWeek: 12,
-  resolvedThisWeek: 18
-}
+// Static bugs - empty array (real data from database)
+const staticBugs: BugItem[] = []
 
 // Helper functions
 const getStatusColor = (status: BugStatus) => {
@@ -523,29 +305,17 @@ const formatFileSize = (bytes: number) => {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
-// Enhanced Competitive Upgrade Mock Data
-const mockBugsAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Bug Resolution', description: 'Resolution time improved 35% vs last month.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Performance' },
-  { id: '2', type: 'warning' as const, title: 'Critical Issues', description: '3 critical bugs need immediate attention.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Priority' },
-  { id: '3', type: 'info' as const, title: 'Pattern Detected', description: 'Authentication module has 40% of recent bugs.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Analysis' },
-]
+// AI Insights - empty array (real data from database)
+const bugsAIInsights: { id: string; type: 'success' | 'warning' | 'info'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
 
-const mockBugsCollaborators = [
-  { id: '1', name: 'QA Lead', avatar: '/avatars/qa.jpg', status: 'online' as const, role: 'QA' },
-  { id: '2', name: 'Developer', avatar: '/avatars/dev.jpg', status: 'online' as const, role: 'Dev' },
-  { id: '3', name: 'Product Manager', avatar: '/avatars/pm.jpg', status: 'away' as const, role: 'PM' },
-]
+// Collaborators - empty array (real data from database)
+const bugsCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }[] = []
 
-const mockBugsPredictions = [
-  { id: '1', title: 'Bug Forecast', prediction: 'Sprint velocity indicates 15 bugs resolvable this week', confidence: 82, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Quality Trend', prediction: 'Bug rate decreasing 12% with new testing strategy', confidence: 88, trend: 'down' as const, impact: 'medium' as const },
-]
+// Predictions - empty array (real data from database)
+const bugsPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down'; impact: 'low' | 'medium' | 'high' }[] = []
 
-const mockBugsActivities = [
-  { id: '1', user: 'Developer', action: 'Fixed', target: 'Authentication timeout bug', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'QA', action: 'Verified', target: 'Payment processing fix', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'System', action: 'Auto-assigned', target: '5 bugs to available developers', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
-]
+// Activities - empty array (real data from database)
+const bugsActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'update' }[] = []
 
 // Quick actions will be defined inside the component to access state setters
 
@@ -833,24 +603,11 @@ export default function BugsClient() {
     }
   }
 
-  // Team member list for assignment
-  const teamMembers = [
-    { name: 'Sarah Chen', role: 'Senior Developer' },
-    { name: 'Alex Rivera', role: 'Full Stack Developer' },
-    { name: 'Lisa Park', role: 'Frontend Developer' },
-    { name: 'David Kim', role: 'Backend Developer' },
-    { name: 'Mike Johnson', role: 'QA Engineer' },
-    { name: 'Emily Davis', role: 'Product Manager' }
-  ]
+  // Team member list for assignment - empty array (real data from database)
+  const teamMembers: { name: string; role: string }[] = []
 
-  // Activity history mock data
-  const activityHistory = [
-    { id: '1', action: 'Status changed to In Progress', user: 'Sarah Chen', time: '2 hours ago', bug: 'BUG-1234' },
-    { id: '2', action: 'Assigned to Alex Rivera', user: 'System', time: '3 hours ago', bug: 'BUG-1235' },
-    { id: '3', action: 'Comment added', user: 'Lisa Park', time: '5 hours ago', bug: 'BUG-1236' },
-    { id: '4', action: 'Bug resolved', user: 'David Kim', time: '1 day ago', bug: 'BUG-1237' },
-    { id: '5', action: 'Priority changed to Critical', user: 'Emily Davis', time: '2 days ago', bug: 'BUG-1238' },
-  ]
+  // Activity history - empty array (real data from database)
+  const activityHistory: { id: string; action: string; user: string; time: string; bug: string }[] = []
 
   // Quick Actions for toolbar (defined inside component to access setters)
   const bugsQuickActions = [
@@ -1068,9 +825,9 @@ export default function BugsClient() {
     fetchBugs()
   }, [fetchBugs])
 
-  // Computed values - merge DB bugs with mock for display
+  // Computed values - merge DB bugs for display
   const allBugs = useMemo(() => {
-    // Convert DB bugs to display format and combine with mock
+    // Convert DB bugs to display format
     const dbBugsFormatted: BugItem[] = bugs.map(b => ({
       id: b.id,
       key: b.bug_code,
@@ -1098,7 +855,7 @@ export default function BugsClient() {
       votes: b.votes,
       watchers: b.watchers
     }))
-    return [...dbBugsFormatted, ...mockBugs]
+    return [...dbBugsFormatted, ...staticBugs]
   }, [bugs])
 
   const filteredBugs = useMemo(() => {
@@ -1129,7 +886,7 @@ export default function BugsClient() {
     { id: 'resolved', label: 'Resolved', bugs: bugsByStatus.resolved, color: 'border-green-500' }
   ]
 
-  // Stats from DB + mock
+  // Stats from DB
   const stats = useMemo(() => ({
     total: allBugs.length,
     open: allBugs.filter(b => b.status === 'open').length,
@@ -1549,7 +1306,7 @@ export default function BugsClient() {
 
             <div className="grid gap-4">
               {['Sprint 12', 'Sprint 11', 'Backlog'].map(sprint => {
-                const sprintBugs = mockBugs.filter(b => b.sprint === sprint || (!b.sprint && sprint === 'Backlog'))
+                const sprintBugs = allBugs.filter(b => b.sprint === sprint || (!b.sprint && sprint === 'Backlog'))
                 return (
                   <Card key={sprint} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
                     <CardHeader className="pb-2">
@@ -1848,7 +1605,7 @@ export default function BugsClient() {
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
-                    <div className="text-2xl font-bold">{mockLabels.length}</div>
+                    <div className="text-2xl font-bold">{labels.length}</div>
                     <div className="text-xs text-white/70">Labels</div>
                   </div>
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
@@ -1957,7 +1714,7 @@ export default function BugsClient() {
                         <CardDescription>Manage bug labels and categories</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-3">
-                        {mockLabels.map(label => (
+                        {labels.map(label => (
                           <div key={label.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                             <div className="flex items-center gap-2">
                               <div className="w-4 h-4 rounded" style={{ backgroundColor: label.color }} />
@@ -2322,18 +2079,18 @@ export default function BugsClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockBugsAIInsights}
+              insights={bugsAIInsights}
               title="Bug Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockBugsCollaborators}
+              collaborators={bugsCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockBugsPredictions}
+              predictions={bugsPredictions}
               title="Bug Forecasts"
             />
           </div>
@@ -2341,7 +2098,7 @@ export default function BugsClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockBugsActivities}
+            activities={bugsActivities}
             title="Bug Activity"
             maxItems={5}
           />
@@ -3173,7 +2930,7 @@ export default function BugsClient() {
               <div className="grid gap-2">
                 <Label>Labels</Label>
                 <div className="flex flex-wrap gap-2">
-                  {mockLabels.map(label => (
+                  {labels.map(label => (
                     <Badge
                       key={label.id}
                       variant={selectedLabelFilters.includes(label.id) ? "default" : "outline"}

@@ -200,155 +200,25 @@ interface QAClientProps {
   initialTestCases: QATestCase[]
 }
 
-// Mock TestRail-level data
-const mockSuites: TestSuite[] = [
-  { id: 'suite_1', name: 'User Authentication', description: 'Login, logout, and session management tests', testCaseCount: 45, passRate: 94.2, createdAt: '2024-01-01' },
-  { id: 'suite_2', name: 'Dashboard Features', description: 'Main dashboard functionality tests', testCaseCount: 78, passRate: 89.7, createdAt: '2024-01-05' },
-  { id: 'suite_3', name: 'API Integration', description: 'REST API endpoint testing', testCaseCount: 120, passRate: 96.5, createdAt: '2024-01-10' },
-  { id: 'suite_4', name: 'Payment Processing', description: 'Checkout and payment flow tests', testCaseCount: 35, passRate: 97.8, createdAt: '2024-01-15' },
-  { id: 'suite_5', name: 'Mobile Responsive', description: 'Mobile device compatibility tests', testCaseCount: 62, passRate: 85.3, createdAt: '2024-01-20' }
-]
+// Empty arrays with proper types - data loaded from Supabase
+const mockSuites: TestSuite[] = []
 
-const mockTestCases: TestCase[] = [
-  {
-    id: 'tc_1',
-    suiteId: 'suite_1',
-    title: 'Verify user can login with valid credentials',
-    type: 'functional',
-    priority: 'critical',
-    status: 'passed',
-    preconditions: 'User has a valid account',
-    steps: [
-      { id: 's1', stepNumber: 1, action: 'Navigate to login page', expectedResult: 'Login page is displayed', status: 'passed' },
-      { id: 's2', stepNumber: 2, action: 'Enter valid email', expectedResult: 'Email is accepted', status: 'passed' },
-      { id: 's3', stepNumber: 3, action: 'Enter valid password', expectedResult: 'Password is masked', status: 'passed' },
-      { id: 's4', stepNumber: 4, action: 'Click Login button', expectedResult: 'User is redirected to dashboard', status: 'passed' }
-    ],
-    expectedResult: 'User successfully logs in and sees dashboard',
-    estimate: '2m',
-    automationStatus: 'automated',
-    refs: ['REQ-001', 'JIRA-1234'],
-    createdBy: 'john@company.com',
-    updatedAt: '2024-01-20'
-  },
-  {
-    id: 'tc_2',
-    suiteId: 'suite_1',
-    title: 'Verify error message for invalid credentials',
-    type: 'functional',
-    priority: 'high',
-    status: 'passed',
-    steps: [
-      { id: 's1', stepNumber: 1, action: 'Navigate to login page', expectedResult: 'Login page is displayed', status: 'passed' },
-      { id: 's2', stepNumber: 2, action: 'Enter invalid email', expectedResult: 'Email is accepted', status: 'passed' },
-      { id: 's3', stepNumber: 3, action: 'Enter any password', expectedResult: 'Password is masked', status: 'passed' },
-      { id: 's4', stepNumber: 4, action: 'Click Login button', expectedResult: 'Error message is displayed', status: 'passed' }
-    ],
-    expectedResult: 'User sees "Invalid credentials" error message',
-    estimate: '1m',
-    automationStatus: 'automated',
-    createdBy: 'jane@company.com',
-    updatedAt: '2024-01-21'
-  },
-  {
-    id: 'tc_3',
-    suiteId: 'suite_1',
-    title: 'Verify password reset flow',
-    type: 'functional',
-    priority: 'high',
-    status: 'failed',
-    steps: [
-      { id: 's1', stepNumber: 1, action: 'Click Forgot Password', expectedResult: 'Reset page opens', status: 'passed' },
-      { id: 's2', stepNumber: 2, action: 'Enter email address', expectedResult: 'Email is accepted', status: 'passed' },
-      { id: 's3', stepNumber: 3, action: 'Click Send Reset Link', expectedResult: 'Email is sent', status: 'failed', actualResult: 'Email not received' }
-    ],
-    expectedResult: 'User receives password reset email',
-    estimate: '3m',
-    automationStatus: 'manual',
-    refs: ['JIRA-5678'],
-    createdBy: 'mike@company.com',
-    updatedAt: '2024-01-22'
-  },
-  {
-    id: 'tc_4',
-    suiteId: 'suite_2',
-    title: 'Verify dashboard widgets load correctly',
-    type: 'smoke',
-    priority: 'critical',
-    status: 'passed',
-    steps: [
-      { id: 's1', stepNumber: 1, action: 'Login to application', expectedResult: 'Dashboard loads', status: 'passed' },
-      { id: 's2', stepNumber: 2, action: 'Verify all widgets visible', expectedResult: 'All widgets displayed', status: 'passed' }
-    ],
-    expectedResult: 'All dashboard widgets load with correct data',
-    estimate: '1m',
-    automationStatus: 'automated',
-    createdBy: 'sarah@company.com',
-    updatedAt: '2024-01-23'
-  },
-  {
-    id: 'tc_5',
-    suiteId: 'suite_3',
-    title: 'Verify GET /api/users returns correct data',
-    type: 'integration',
-    priority: 'high',
-    status: 'passed',
-    steps: [
-      { id: 's1', stepNumber: 1, action: 'Send GET request to /api/users', expectedResult: '200 OK response', status: 'passed' },
-      { id: 's2', stepNumber: 2, action: 'Verify response structure', expectedResult: 'Valid JSON schema', status: 'passed' }
-    ],
-    expectedResult: 'API returns user list with correct schema',
-    estimate: '30s',
-    automationStatus: 'automated',
-    refs: ['API-DOC-001'],
-    createdBy: 'dev@company.com',
-    updatedAt: '2024-01-24'
-  }
-]
+const mockTestCases: TestCase[] = []
 
-const mockRuns: TestRun[] = [
-  { id: 'run_1', name: 'Sprint 23 Regression', description: 'Full regression for Sprint 23', milestoneId: 'ms_1', assignedTo: 'qa_team', status: 'completed', config: 'Chrome, Windows', passedCount: 145, failedCount: 8, blockedCount: 2, untestedCount: 0, totalCount: 155, startedAt: '2024-01-15', completedAt: '2024-01-17' },
-  { id: 'run_2', name: 'Payment Flow Smoke Test', description: 'Quick smoke test for payment', assignedTo: 'john@company.com', status: 'active', config: 'Safari, MacOS', passedCount: 12, failedCount: 1, blockedCount: 0, untestedCount: 5, totalCount: 18, startedAt: '2024-01-22' },
-  { id: 'run_3', name: 'Mobile Compatibility', description: 'Cross-browser mobile testing', milestoneId: 'ms_2', assignedTo: 'mobile_team', status: 'active', config: 'iOS, Android', passedCount: 34, failedCount: 6, blockedCount: 3, untestedCount: 19, totalCount: 62, startedAt: '2024-01-20' },
-  { id: 'run_4', name: 'API Performance Test', description: 'Load and stress testing', assignedTo: 'perf_team', status: 'completed', config: 'Production', passedCount: 89, failedCount: 2, blockedCount: 0, untestedCount: 0, totalCount: 91, startedAt: '2024-01-10', completedAt: '2024-01-12' }
-]
+const mockRuns: TestRun[] = []
 
-const mockMilestones: Milestone[] = [
-  { id: 'ms_1', name: 'v2.5.0 Release', description: 'Major feature release', status: 'completed', dueDate: '2024-01-20', startDate: '2024-01-01', completedRuns: 5, totalRuns: 5, passRate: 94.5 },
-  { id: 'ms_2', name: 'v2.6.0 Release', description: 'Mobile optimization release', status: 'started', dueDate: '2024-02-15', startDate: '2024-01-21', completedRuns: 2, totalRuns: 8, passRate: 87.3 },
-  { id: 'ms_3', name: 'v3.0.0 Release', description: 'Major platform upgrade', status: 'open', dueDate: '2024-03-30', startDate: '2024-02-16', completedRuns: 0, totalRuns: 12, passRate: 0 }
-]
+const mockMilestones: Milestone[] = []
 
-const mockDefects: Defect[] = [
-  { id: 'def_1', title: 'Password reset email not sending', testCaseId: 'tc_3', severity: 'critical', status: 'open', assignedTo: 'dev@company.com', createdAt: '2024-01-22' },
-  { id: 'def_2', title: 'Dashboard widget alignment issue on Safari', testCaseId: 'tc_4', severity: 'minor', status: 'in_progress', assignedTo: 'frontend@company.com', createdAt: '2024-01-21' },
-  { id: 'def_3', title: 'API timeout on large dataset', testCaseId: 'tc_5', severity: 'major', status: 'resolved', assignedTo: 'backend@company.com', createdAt: '2024-01-20' }
-]
+const mockDefects: Defect[] = []
 
-// Enhanced Competitive Upgrade Data
-const mockQAAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Test Coverage', description: 'Code coverage reached 92%. Target exceeded!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Coverage' },
-  { id: '2', type: 'info' as const, title: 'Flaky Tests', description: '3 tests showing intermittent failures. Review recommended.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Stability' },
-  { id: '3', type: 'warning' as const, title: 'Critical Path', description: 'Payment flow tests failing. Blocking release.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Blockers' },
-]
+// Empty arrays for competitive upgrade components
+const mockQAAIInsights: { id: string; type: 'success' | 'info' | 'warning'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
 
-const mockQACollaborators = [
-  { id: '1', name: 'QA Lead', avatar: '/avatars/qa.jpg', status: 'online' as const, role: 'Testing', lastActive: 'Now' },
-  { id: '2', name: 'SDET', avatar: '/avatars/sdet.jpg', status: 'online' as const, role: 'Automation', lastActive: '10m ago' },
-  { id: '3', name: 'Test Analyst', avatar: '/avatars/analyst.jpg', status: 'away' as const, role: 'Manual', lastActive: '45m ago' },
-]
+const mockQACollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string; lastActive: string }[] = []
 
-const mockQAPredictions = [
-  { id: '1', label: 'Pass Rate', current: 94, target: 98, predicted: 96, confidence: 82, trend: 'up' as const },
-  { id: '2', label: 'Coverage %', current: 92, target: 95, predicted: 94, confidence: 88, trend: 'up' as const },
-  { id: '3', label: 'Bug Escape', current: 5, target: 2, predicted: 3, confidence: 75, trend: 'down' as const },
-]
+const mockQAPredictions: { id: string; label: string; current: number; target: number; predicted: number; confidence: number; trend: 'up' | 'down' }[] = []
 
-const mockQAActivities = [
-  { id: '1', user: 'QA Lead', action: 'completed', target: 'regression suite run', timestamp: '20m ago', type: 'success' as const },
-  { id: '2', user: 'SDET', action: 'fixed', target: 'flaky login test', timestamp: '1h ago', type: 'info' as const },
-  { id: '3', user: 'Test Analyst', action: 'reported', target: '2 new defects', timestamp: '2h ago', type: 'warning' as const },
-]
+const mockQAActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' }[] = []
 
 // Mock quick actions removed - using state-driven qaQuickActions instead
 

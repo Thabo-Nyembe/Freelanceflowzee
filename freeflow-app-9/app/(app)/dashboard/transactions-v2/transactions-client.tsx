@@ -171,141 +171,20 @@ interface BalanceTransaction {
   availableOn: string
 }
 
-// Mock Data
-const mockPayments: Payment[] = [
-  {
-    id: 'pi_3PxYz1234567890',
-    amount: 15000,
-    currency: 'USD',
-    status: 'succeeded',
-    description: 'Professional Plan - Annual',
-    customer: { name: 'John Smith', email: 'john@company.com', id: 'cus_abc123' },
-    paymentMethod: { type: 'card', brand: 'visa', last4: '4242', expMonth: 12, expYear: 2025 },
-    metadata: { plan: 'professional', interval: 'annual' },
-    created: '2024-12-23T10:30:00Z',
-    fees: 465,
-    net: 14535,
-    riskScore: 12,
-    refunded: false
-  },
-  {
-    id: 'pi_3PxYz0987654321',
-    amount: 29900,
-    currency: 'USD',
-    status: 'succeeded',
-    description: 'Enterprise Plan - Annual',
-    customer: { name: 'Sarah Johnson', email: 'sarah@enterprise.co', id: 'cus_def456' },
-    paymentMethod: { type: 'card', brand: 'mastercard', last4: '5555', expMonth: 8, expYear: 2026 },
-    metadata: { plan: 'enterprise', interval: 'annual' },
-    created: '2024-12-23T09:15:00Z',
-    fees: 897,
-    net: 29003,
-    riskScore: 8,
-    refunded: false
-  },
-  {
-    id: 'pi_3PxYz1122334455',
-    amount: 4900,
-    currency: 'USD',
-    status: 'pending',
-    description: 'Starter Plan - Monthly',
-    customer: { name: 'Mike Chen', email: 'mike@startup.io', id: 'cus_ghi789' },
-    paymentMethod: { type: 'bank_transfer', last4: '6789' },
-    metadata: { plan: 'starter', interval: 'monthly' },
-    created: '2024-12-23T08:45:00Z',
-    fees: 147,
-    net: 4753,
-    riskScore: 25,
-    refunded: false
-  },
-  {
-    id: 'pi_3PxYz5566778899',
-    amount: 9900,
-    currency: 'USD',
-    status: 'requires_action',
-    description: 'Professional Plan - Monthly',
-    customer: { name: 'Emily Davis', email: 'emily@design.studio', id: 'cus_jkl012' },
-    paymentMethod: { type: 'card', brand: 'amex', last4: '1234', expMonth: 3, expYear: 2025 },
-    metadata: { plan: 'professional', interval: 'monthly' },
-    created: '2024-12-22T16:30:00Z',
-    fees: 297,
-    net: 9603,
-    riskScore: 45,
-    refunded: false
-  },
-  {
-    id: 'pi_3PxYz9988776655',
-    amount: 15000,
-    currency: 'USD',
-    status: 'succeeded',
-    description: 'Professional Plan - Annual',
-    customer: { name: 'Alex Thompson', email: 'alex@agency.com', id: 'cus_mno345' },
-    paymentMethod: { type: 'card', brand: 'visa', last4: '0000', expMonth: 6, expYear: 2027 },
-    metadata: { plan: 'professional', interval: 'annual' },
-    created: '2024-12-22T14:00:00Z',
-    fees: 465,
-    net: 14535,
-    riskScore: 5,
-    refunded: true,
-    refundedAmount: 15000
-  },
-  {
-    id: 'pi_3PxYz4433221100',
-    amount: 4900,
-    currency: 'USD',
-    status: 'failed',
-    description: 'Starter Plan - Monthly',
-    customer: { name: 'Chris Wilson', email: 'chris@freelance.dev', id: 'cus_pqr678' },
-    paymentMethod: { type: 'card', brand: 'visa', last4: '9999', expMonth: 1, expYear: 2025 },
-    metadata: { plan: 'starter', interval: 'monthly' },
-    created: '2024-12-22T11:20:00Z',
-    fees: 0,
-    net: 0,
-    riskScore: 78,
-    refunded: false
-  },
-]
+// Empty typed arrays (no mock data)
+const mockPayments: Payment[] = []
 
-const mockRefunds: Refund[] = [
-  { id: 're_1234567890', paymentId: 'pi_3PxYz9988776655', amount: 15000, currency: 'USD', status: 'succeeded', reason: 'requested_by_customer', created: '2024-12-22T15:00:00Z' },
-  { id: 're_0987654321', paymentId: 'pi_3PxYz1111222233', amount: 4900, currency: 'USD', status: 'pending', reason: 'duplicate', created: '2024-12-21T10:00:00Z' },
-]
+const mockRefunds: Refund[] = []
 
-const mockDisputes: Dispute[] = [
-  { id: 'dp_1234567890', paymentId: 'pi_3PxYz8877665544', amount: 29900, currency: 'USD', status: 'needs_response', reason: 'fraudulent', dueBy: '2024-12-30T23:59:59Z', created: '2024-12-20T09:00:00Z' },
-  { id: 'dp_0987654321', paymentId: 'pi_3PxYz7766554433', amount: 9900, currency: 'USD', status: 'under_review', reason: 'product_not_received', dueBy: '2024-12-28T23:59:59Z', created: '2024-12-18T14:30:00Z' },
-  { id: 'dp_1122334455', paymentId: 'pi_3PxYz6655443322', amount: 4900, currency: 'USD', status: 'won', reason: 'duplicate', dueBy: '2024-12-15T23:59:59Z', created: '2024-12-10T11:00:00Z' },
-]
+const mockDisputes: Dispute[] = []
 
-const mockPayouts: Payout[] = [
-  { id: 'po_1234567890', amount: 125000, currency: 'USD', status: 'paid', arrivalDate: '2024-12-23', created: '2024-12-21T00:00:00Z', destination: { bank: 'Chase Bank', last4: '4521' }, automatic: true },
-  { id: 'po_0987654321', amount: 89500, currency: 'USD', status: 'in_transit', arrivalDate: '2024-12-24', created: '2024-12-22T00:00:00Z', destination: { bank: 'Chase Bank', last4: '4521' }, automatic: true },
-  { id: 'po_1122334455', amount: 156750, currency: 'USD', status: 'pending', arrivalDate: '2024-12-25', created: '2024-12-23T00:00:00Z', destination: { bank: 'Chase Bank', last4: '4521' }, automatic: true },
-]
+const mockPayouts: Payout[] = []
 
-const mockInvoices: Invoice[] = [
-  { id: 'in_1234567890', number: 'INV-0001', customer: { name: 'John Smith', email: 'john@company.com' }, amount: 15000, currency: 'USD', status: 'paid', dueDate: '2024-12-30', created: '2024-12-01T00:00:00Z', paidAt: '2024-12-15T00:00:00Z', items: [{ description: 'Professional Plan - Annual', quantity: 1, unitPrice: 15000 }] },
-  { id: 'in_0987654321', number: 'INV-0002', customer: { name: 'Sarah Johnson', email: 'sarah@enterprise.co' }, amount: 29900, currency: 'USD', status: 'open', dueDate: '2024-12-31', created: '2024-12-15T00:00:00Z', items: [{ description: 'Enterprise Plan - Annual', quantity: 1, unitPrice: 29900 }] },
-  { id: 'in_1122334455', number: 'INV-0003', customer: { name: 'Mike Chen', email: 'mike@startup.io' }, amount: 4900, currency: 'USD', status: 'draft', dueDate: '2025-01-15', created: '2024-12-20T00:00:00Z', items: [{ description: 'Starter Plan - Monthly', quantity: 1, unitPrice: 4900 }] },
-  { id: 'in_5566778899', number: 'INV-0004', customer: { name: 'Emily Davis', email: 'emily@design.studio' }, amount: 9900, currency: 'USD', status: 'void', dueDate: '2024-12-20', created: '2024-12-05T00:00:00Z', items: [{ description: 'Professional Plan - Monthly', quantity: 1, unitPrice: 9900 }] },
-]
+const mockInvoices: Invoice[] = []
 
-const mockCustomers: Customer[] = [
-  { id: 'cus_abc123', name: 'John Smith', email: 'john@company.com', created: '2024-01-15T00:00:00Z', totalSpent: 45000, paymentCount: 3, lastPayment: '2024-12-23T10:30:00Z', defaultPaymentMethod: { brand: 'visa', last4: '4242' }, subscriptions: 1 },
-  { id: 'cus_def456', name: 'Sarah Johnson', email: 'sarah@enterprise.co', created: '2024-03-20T00:00:00Z', totalSpent: 89700, paymentCount: 3, lastPayment: '2024-12-23T09:15:00Z', defaultPaymentMethod: { brand: 'mastercard', last4: '5555' }, subscriptions: 2 },
-  { id: 'cus_ghi789', name: 'Mike Chen', email: 'mike@startup.io', created: '2024-06-10T00:00:00Z', totalSpent: 14700, paymentCount: 3, lastPayment: '2024-12-23T08:45:00Z', defaultPaymentMethod: { brand: 'visa', last4: '6789' }, subscriptions: 1 },
-  { id: 'cus_jkl012', name: 'Emily Davis', email: 'emily@design.studio', created: '2024-08-05T00:00:00Z', totalSpent: 29700, paymentCount: 3, lastPayment: '2024-12-22T16:30:00Z', defaultPaymentMethod: { brand: 'amex', last4: '1234' }, subscriptions: 1 },
-  { id: 'cus_mno345', name: 'Alex Thompson', email: 'alex@agency.com', created: '2024-02-28T00:00:00Z', totalSpent: 60000, paymentCount: 4, lastPayment: '2024-12-22T14:00:00Z', defaultPaymentMethod: { brand: 'visa', last4: '0000' }, subscriptions: 1 },
-]
+const mockCustomers: Customer[] = []
 
-const mockBalanceTransactions: BalanceTransaction[] = [
-  { id: 'txn_001', type: 'charge', amount: 15000, fee: 465, net: 14535, currency: 'USD', description: 'Payment from John Smith', created: '2024-12-23T10:30:00Z', availableOn: '2024-12-25' },
-  { id: 'txn_002', type: 'charge', amount: 29900, fee: 897, net: 29003, currency: 'USD', description: 'Payment from Sarah Johnson', created: '2024-12-23T09:15:00Z', availableOn: '2024-12-25' },
-  { id: 'txn_003', type: 'refund', amount: -15000, fee: 0, net: -15000, currency: 'USD', description: 'Refund to Alex Thompson', created: '2024-12-22T15:00:00Z', availableOn: '2024-12-22' },
-  { id: 'txn_004', type: 'payout', amount: -125000, fee: 0, net: -125000, currency: 'USD', description: 'Payout to Chase Bank ••••4521', created: '2024-12-21T00:00:00Z', availableOn: '2024-12-23' },
-  { id: 'txn_005', type: 'charge', amount: 4900, fee: 147, net: 4753, currency: 'USD', description: 'Payment from Mike Chen', created: '2024-12-23T08:45:00Z', availableOn: '2024-12-25' },
-  { id: 'txn_006', type: 'fee', amount: 0, fee: 2500, net: -2500, currency: 'USD', description: 'Stripe monthly fee', created: '2024-12-01T00:00:00Z', availableOn: '2024-12-01' },
-]
+const mockBalanceTransactions: BalanceTransaction[] = []
 
 const statusColors: Record<string, string> = {
   succeeded: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
@@ -340,29 +219,14 @@ const cardBrandIcons: Record<string, string> = {
   discover: '💳 Discover',
 }
 
-// Mock data for AI-powered competitive upgrade components
-const mockTransactionsAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Revenue Up', description: 'Transaction volume increased 23% compared to last month.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Revenue' },
-  { id: '2', type: 'warning' as const, title: 'Failed Payments', description: '12 transactions failed due to expired cards. Send renewal reminders.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Payments' },
-  { id: '3', type: 'info' as const, title: 'Top Customer', description: 'Enterprise Corp processed $45K in transactions this week.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Customers' },
-]
+// Empty typed arrays for AI-powered competitive upgrade components
+const mockTransactionsAIInsights: { id: string; type: 'success' | 'warning' | 'info'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
 
-const mockTransactionsCollaborators = [
-  { id: '1', name: 'Finance Lead', avatar: '/avatars/finance.jpg', status: 'online' as const, role: 'Finance' },
-  { id: '2', name: 'Accountant', avatar: '/avatars/accountant.jpg', status: 'online' as const, role: 'Accounting' },
-  { id: '3', name: 'Treasury', avatar: '/avatars/treasury.jpg', status: 'away' as const, role: 'Treasury' },
-]
+const mockTransactionsCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }[] = []
 
-const mockTransactionsPredictions = [
-  { id: '1', title: 'Monthly Revenue', prediction: 'On track to hit $1.2M revenue target by month end', confidence: 94, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Churn Risk', prediction: '3 high-value customers showing payment decline patterns', confidence: 78, trend: 'down' as const, impact: 'high' as const },
-]
+const mockTransactionsPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: 'low' | 'medium' | 'high' }[] = []
 
-const mockTransactionsActivities = [
-  { id: '1', user: 'Finance Lead', action: 'Processed', target: 'bulk refund for $2,500', timestamp: new Date().toISOString(), type: 'info' as const },
-  { id: '2', user: 'System', action: 'Flagged', target: 'unusual transaction pattern', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'warning' as const },
-  { id: '3', user: 'Accountant', action: 'Reconciled', target: 'weekly settlement report', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
-]
+const mockTransactionsActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'info' | 'warning' | 'success' }[] = []
 
 // Quick actions will be defined inside the component with proper state access
 
@@ -416,13 +280,13 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
   const { transactions, createTransaction, deleteTransaction, refetch } = useTransactions({})
   const displayTransactions = transactions || []
 
-  // Calculate stats
+  // Calculate stats (handles empty arrays safely)
   const totalVolume = mockPayments.filter(p => p.status === 'succeeded').reduce((sum, p) => sum + p.amount, 0)
   const totalFees = mockPayments.filter(p => p.status === 'succeeded').reduce((sum, p) => sum + p.fees, 0)
-  const successRate = (mockPayments.filter(p => p.status === 'succeeded').length / mockPayments.length * 100).toFixed(1)
+  const successRate = mockPayments.length > 0 ? (mockPayments.filter(p => p.status === 'succeeded').length / mockPayments.length * 100).toFixed(1) : '0.0'
   const pendingPayouts = mockPayouts.filter(p => p.status === 'pending' || p.status === 'in_transit').reduce((sum, p) => sum + p.amount, 0)
 
-  // Balance calculations
+  // Balance calculations (handles empty arrays safely)
   const availableBalance = mockBalanceTransactions.filter(t => new Date(t.availableOn) <= new Date()).reduce((sum, t) => sum + t.net, 0)
   const pendingBalance = mockBalanceTransactions.filter(t => new Date(t.availableOn) > new Date()).reduce((sum, t) => sum + t.net, 0)
   const totalCustomers = mockCustomers.length

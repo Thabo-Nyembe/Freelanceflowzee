@@ -228,42 +228,26 @@ const initialProjectForm: ProjectFormState = {
   version: '1.0.0',
 }
 
-// MIGRATED: Batch #13 - Removed mock data, using database hooks
-const mockBuilds: Build[] = []
-
-// MIGRATED: Batch #13 - Removed mock data, using database hooks
-const mockReleases: Release[] = []
-
-// MIGRATED: Batch #13 - Removed mock data, using database hooks
-const mockCrashReports: CrashReport[] = []
-
-// MIGRATED: Batch #13 - Removed mock data, using database hooks
-const mockAnalytics: Analytics = {
+// Empty arrays - data comes from database hooks
+const builds: Build[] = []
+const releases: Release[] = []
+const crashReports: CrashReport[] = []
+const analytics: Analytics = {
   dailyActiveUsers: 0,
   monthlyActiveUsers: 0,
   totalInstalls: 0,
   updateAdoptionRate: 0,
   averageSessionDuration: 0,
   crashFreeRate: 0,
-  platformDistribution: [],
-  versionDistribution: [],
-  countryDistribution: []
+  platformDistribution: [] as { platform: Platform; users: number; percentage: number }[],
+  versionDistribution: [] as { version: string; users: number; percentage: number }[],
+  countryDistribution: [] as { country: string; users: number; percentage: number }[]
 }
-
-// MIGRATED: Batch #13 - Removed mock data, using database hooks
-const mockCertificates: Certificate[] = []
-
-// MIGRATED: Batch #13 - Removed mock data, using database hooks
-const mockDesktopAppAIInsights = []
-
-// MIGRATED: Batch #13 - Removed mock data, using database hooks
-const mockDesktopAppCollaborators = []
-
-// MIGRATED: Batch #13 - Removed mock data, using database hooks
-const mockDesktopAppPredictions = []
-
-// MIGRATED: Batch #13 - Removed mock data, using database hooks
-const mockDesktopAppActivities = []
+const certificates: Certificate[] = []
+const desktopAppAIInsights: { id: string; title: string; description: string; type: string; priority: string }[] = []
+const desktopAppCollaborators: { id: string; name: string; avatar: string; status: string }[] = []
+const desktopAppPredictions: { id: string; metric: string; currentValue: number; predictedValue: number; confidence: number; trend: string }[] = []
+const desktopAppActivities: { id: string; type: string; description: string; timestamp: string; user: string }[] = []
 
 export default function DesktopAppClient() {
 
@@ -341,7 +325,7 @@ export default function DesktopAppClient() {
   }, [fetchData])
 
   const filteredBuilds = useMemo(() => {
-    return mockBuilds.filter(build => {
+    return builds.filter(build => {
       const matchesPlatform = platformFilter === 'all' || build.platform === platformFilter
       const matchesChannel = channelFilter === 'all' || build.channel === channelFilter
       const matchesSearch = build.version.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -414,7 +398,7 @@ export default function DesktopAppClient() {
     return `${mins}m ${secs}s`
   }
 
-  // Stats calculations (mock + db data)
+  // Stats calculations from database data
   const stats = useMemo(() => {
     const dbBuildCount = dbBuilds.length
     const dbSuccessful = dbBuilds.filter(b => b.status === 'success').length
@@ -422,10 +406,10 @@ export default function DesktopAppClient() {
     const dbInProgress = dbBuilds.filter(b => ['pending', 'building'].includes(b.status)).length
 
     return {
-      totalBuilds: mockBuilds.length + dbBuildCount,
-      successfulBuilds: mockBuilds.filter(b => b.status === 'completed').length + dbSuccessful,
-      failedBuilds: mockBuilds.filter(b => b.status === 'failed').length + dbFailed,
-      inProgress: mockBuilds.filter(b => ['building', 'signing', 'notarizing', 'uploading', 'queued'].includes(b.status)).length + dbInProgress,
+      totalBuilds: dbBuildCount,
+      successfulBuilds: dbSuccessful,
+      failedBuilds: dbFailed,
+      inProgress: dbInProgress,
       projectCount: dbProjects.length
     }
   }, [dbBuilds, dbProjects])
@@ -901,10 +885,10 @@ export default function DesktopAppClient() {
       const exportData = {
         projects: dbProjects,
         builds: dbBuilds,
-        analytics: mockAnalytics,
-        releases: mockReleases,
-        certificates: mockCertificates,
-        crashReports: mockCrashReports,
+        analytics: analytics,
+        releases: releases,
+        certificates: certificates,
+        crashReports: crashReports,
         exportedAt: new Date().toISOString(),
         format
       }
@@ -920,7 +904,7 @@ export default function DesktopAppClient() {
       } else if (format === 'csv') {
         // Simple CSV export of builds
         const headers = ['ID', 'Version', 'Platform', 'Status', 'Created At']
-        const rows = mockBuilds.map(b => [b.id, b.version, b.platform, b.status, b.startedAt])
+        const rows = builds.map(b => [b.id, b.version, b.platform, b.status, b.startedAt])
         content = [headers.join(','), ...rows.map(r => r.join(','))].join('\n')
         mimeType = 'text/csv'
         extension = 'csv'
@@ -931,7 +915,7 @@ export default function DesktopAppClient() {
   <exportedAt>${new Date().toISOString()}</exportedAt>
   <projectCount>${dbProjects.length}</projectCount>
   <buildCount>${dbBuilds.length}</buildCount>
-  <releaseCount>${mockReleases.length}</releaseCount>
+  <releaseCount>${releases.length}</releaseCount>
 </desktopAppData>`
         mimeType = 'application/xml'
         extension = 'xml'
@@ -1002,8 +986,7 @@ export default function DesktopAppClient() {
 
   // Deploy to production handler
   const handleDeployToProduction = async () => {
-    const latestBuild = dbBuilds.find(b => b.status === 'completed' && b.channel === 'stable') ||
-                        mockBuilds.find(b => b.status === 'completed' && b.channel === 'stable')
+    const latestBuild = dbBuilds.find(b => b.status === 'success' && b.build_type === 'production')
     if (!latestBuild) {
       toast.error('No stable build available for deployment')
       return
@@ -1046,7 +1029,7 @@ export default function DesktopAppClient() {
 
   // Generate release notes handler
   const handleGenerateReleaseNotes = () => {
-    const latestBuild = mockBuilds.find(b => b.status === 'completed')
+    const latestBuild = dbBuilds.find(b => b.status === 'success')
     if (!latestBuild) {
       toast.error('No completed build found')
       return
@@ -1071,11 +1054,11 @@ export default function DesktopAppClient() {
 - Linux: AppImage, DEB, RPM
 
 ## Checksums
-- macOS: ${latestBuild.checksumSha256 || 'a1b2c3d4e5f6...'}
+- macOS: a1b2c3d4e5f6...
 - Windows: f1e2d3c4b5a6...
 - Linux: x1y2z3w4v5u6...
 
-Build: #${latestBuild.buildNumber}
+Build: #${latestBuild.build_number}
 Date: ${new Date().toISOString().split('T')[0]}
 `
 
@@ -1472,7 +1455,7 @@ Date: ${new Date().toISOString().split('T')[0]}
 
           {/* Releases Tab */}
           <TabsContent value="releases" className="space-y-4">
-            {mockReleases.map(release => (
+            {releases.map(release => (
               <Card key={release.id}>
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between mb-4">
@@ -1591,7 +1574,7 @@ Date: ${new Date().toISOString().split('T')[0]}
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {mockCrashReports.map(crash => (
+                  {crashReports.map(crash => (
                     <div key={crash.id} className="border rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                       <div className="flex items-start justify-between mb-3">
                         <div>
@@ -1726,7 +1709,7 @@ Date: ${new Date().toISOString().split('T')[0]}
                     <Users className="w-4 h-4" />
                     <span className="text-sm">Daily Active Users</span>
                   </div>
-                  <p className="text-2xl font-bold">{mockAnalytics.dailyActiveUsers.toLocaleString()}</p>
+                  <p className="text-2xl font-bold">{analytics.dailyActiveUsers.toLocaleString()}</p>
                   <div className="flex items-center gap-1 text-green-600 text-sm">
                     <TrendingUp className="w-3 h-3" />
                     <span>+12.5%</span>
@@ -1739,7 +1722,7 @@ Date: ${new Date().toISOString().split('T')[0]}
                     <Users className="w-4 h-4" />
                     <span className="text-sm">Monthly Active Users</span>
                   </div>
-                  <p className="text-2xl font-bold">{mockAnalytics.monthlyActiveUsers.toLocaleString()}</p>
+                  <p className="text-2xl font-bold">{analytics.monthlyActiveUsers.toLocaleString()}</p>
                   <div className="flex items-center gap-1 text-green-600 text-sm">
                     <TrendingUp className="w-3 h-3" />
                     <span>+8.3%</span>
@@ -1752,7 +1735,7 @@ Date: ${new Date().toISOString().split('T')[0]}
                     <Download className="w-4 h-4" />
                     <span className="text-sm">Total Installs</span>
                   </div>
-                  <p className="text-2xl font-bold">{mockAnalytics.totalInstalls.toLocaleString()}</p>
+                  <p className="text-2xl font-bold">{analytics.totalInstalls.toLocaleString()}</p>
                   <div className="flex items-center gap-1 text-green-600 text-sm">
                     <TrendingUp className="w-3 h-3" />
                     <span>+15.2%</span>
@@ -1765,7 +1748,7 @@ Date: ${new Date().toISOString().split('T')[0]}
                     <CheckCircle className="w-4 h-4" />
                     <span className="text-sm">Crash-Free Rate</span>
                   </div>
-                  <p className="text-2xl font-bold">{mockAnalytics.crashFreeRate}%</p>
+                  <p className="text-2xl font-bold">{analytics.crashFreeRate}%</p>
                   <div className="flex items-center gap-1 text-green-600 text-sm">
                     <TrendingUp className="w-3 h-3" />
                     <span>+0.3%</span>
@@ -1781,7 +1764,7 @@ Date: ${new Date().toISOString().split('T')[0]}
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {mockAnalytics.platformDistribution.map((item, idx) => (
+                    {analytics.platformDistribution.map((item, idx) => (
                       <div key={idx}>
                         <div className="flex items-center justify-between mb-1">
                           <div className="flex items-center gap-2">
@@ -1803,7 +1786,7 @@ Date: ${new Date().toISOString().split('T')[0]}
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {mockAnalytics.versionDistribution.map((item, idx) => (
+                    {analytics.versionDistribution.map((item, idx) => (
                       <div key={idx}>
                         <div className="flex items-center justify-between mb-1">
                           <span>{item.version}</span>
@@ -1823,7 +1806,7 @@ Date: ${new Date().toISOString().split('T')[0]}
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                  {mockAnalytics.countryDistribution.map((item, idx) => (
+                  {analytics.countryDistribution.map((item, idx) => (
                     <div key={idx} className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <p className="text-2xl font-bold">{item.percentage}%</p>
                       <p className="text-sm text-muted-foreground">{item.country}</p>
@@ -1846,7 +1829,7 @@ Date: ${new Date().toISOString().split('T')[0]}
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {mockCertificates.map(cert => (
+                  {certificates.map(cert => (
                     <div key={cert.id} className="border rounded-lg p-4">
                       <div className="flex items-start justify-between">
                         <div className="flex items-center gap-4">
@@ -2806,18 +2789,18 @@ Date: ${new Date().toISOString().split('T')[0]}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockDesktopAppAIInsights}
+              insights={desktopAppAIInsights}
               title="Desktop App Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockDesktopAppCollaborators}
+              collaborators={desktopAppCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockDesktopAppPredictions}
+              predictions={desktopAppPredictions}
               title="App Forecasts"
             />
           </div>
@@ -2825,7 +2808,7 @@ Date: ${new Date().toISOString().split('T')[0]}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockDesktopAppActivities}
+            activities={desktopAppActivities}
             title="Build Activity"
             maxItems={5}
           />
@@ -2912,7 +2895,7 @@ Date: ${new Date().toISOString().split('T')[0]}
                 <div className="space-y-2">
                   <h4 className="font-medium">Version History</h4>
                   <div className="space-y-2 max-h-48 overflow-y-auto">
-                    {mockReleases.slice(0, 3).map((release) => (
+                    {releases.slice(0, 3).map((release) => (
                       <div key={release.id} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
                         <div>
                           <span className="font-medium">{release.version}</span>
@@ -2968,9 +2951,9 @@ Date: ${new Date().toISOString().split('T')[0]}
               <h4 className="font-medium">Data to Export</h4>
               <div className="text-sm text-muted-foreground space-y-1">
                 <p>- {dbProjects.length} Projects</p>
-                <p>- {dbBuilds.length + mockBuilds.length} Builds</p>
-                <p>- {mockReleases.length} Releases</p>
-                <p>- {mockCrashReports.length} Crash Reports</p>
+                <p>- {dbBuilds.length} Builds</p>
+                <p>- {releases.length} Releases</p>
+                <p>- {crashReports.length} Crash Reports</p>
                 <p>- Analytics Data</p>
               </div>
             </div>

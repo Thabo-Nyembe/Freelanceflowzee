@@ -198,188 +198,21 @@ interface SurveyStats {
   responsesLastWeek: number
 }
 
-// Mock Data
-const mockSurveys: Survey[] = [
-  {
-    id: 'survey-1',
-    title: 'Customer Satisfaction Survey 2024',
-    description: 'Annual customer satisfaction and feedback collection',
-    status: 'active',
-    theme: { primaryColor: '#10b981', backgroundColor: '#ffffff', fontFamily: 'Inter' },
-    questions: [
-      { id: 'q1', type: 'nps', title: 'How likely are you to recommend us?', required: true, minValue: 0, maxValue: 10, hasLogicJump: true, logicRules: [{ condition: 'less_than', value: '7', jumpTo: 'q3' }], order: 1 },
-      { id: 'q2', type: 'long_text', title: 'What do you love most about our product?', required: false, hasLogicJump: false, order: 2 },
-      { id: 'q3', type: 'long_text', title: 'What can we improve?', required: true, hasLogicJump: false, order: 3 },
-      { id: 'q4', type: 'rating', title: 'Rate your overall experience', required: true, minValue: 1, maxValue: 5, hasLogicJump: false, order: 4 },
-      { id: 'q5', type: 'multiple_choice', title: 'How did you hear about us?', required: false, options: ['Social Media', 'Search Engine', 'Friend Referral', 'Advertisement', 'Other'], hasLogicJump: false, order: 5 }
-    ],
-    responses: 1247,
-    completionRate: 89.4,
-    avgTime: 4.2,
-    createdAt: '2024-01-01',
-    updatedAt: '2024-01-15',
-    publishedAt: '2024-01-02',
-    tags: ['customer', 'feedback', '2024'],
-    isTemplate: false,
-    createdBy: 'John Smith',
-    settings: { showProgressBar: true, showQuestionNumbers: true, allowMultipleResponses: false, requireLogin: false, customThankYou: 'Thank you for your feedback!' }
-  },
-  {
-    id: 'survey-2',
-    title: 'Employee Engagement Survey',
-    description: 'Quarterly employee satisfaction and engagement assessment',
-    status: 'active',
-    theme: { primaryColor: '#6366f1', backgroundColor: '#f8fafc', fontFamily: 'Plus Jakarta Sans' },
-    questions: [
-      { id: 'q1', type: 'rating', title: 'How satisfied are you with your work?', required: true, minValue: 1, maxValue: 5, hasLogicJump: false, order: 1 },
-      { id: 'q2', type: 'multiple_choice', title: 'What motivates you at work?', required: true, options: ['Career Growth', 'Compensation', 'Team Culture', 'Work-Life Balance', 'Learning Opportunities'], hasLogicJump: false, order: 2 },
-      { id: 'q3', type: 'long_text', title: 'Any suggestions for improvement?', required: false, hasLogicJump: false, order: 3 }
-    ],
-    responses: 892,
-    completionRate: 94.7,
-    avgTime: 3.8,
-    createdAt: '2024-01-05',
-    updatedAt: '2024-01-14',
-    publishedAt: '2024-01-06',
-    tags: ['hr', 'employee', 'engagement'],
-    isTemplate: false,
-    createdBy: 'HR Team',
-    settings: { showProgressBar: true, showQuestionNumbers: false, allowMultipleResponses: false, requireLogin: true, customThankYou: 'Your input helps us build a better workplace!' }
-  },
-  {
-    id: 'survey-3',
-    title: 'Product Feature Request',
-    description: 'Gather ideas for new product features',
-    status: 'draft',
-    theme: { primaryColor: '#f59e0b', backgroundColor: '#fffbeb', fontFamily: 'Inter' },
-    questions: [
-      { id: 'q1', type: 'short_text', title: 'What feature would you like to see?', required: true, hasLogicJump: false, order: 1 },
-      { id: 'q2', type: 'linear_scale', title: 'How important is this feature?', required: true, minValue: 1, maxValue: 10, hasLogicJump: false, order: 2 }
-    ],
-    responses: 0,
-    completionRate: 0,
-    avgTime: 0,
-    createdAt: '2024-01-14',
-    updatedAt: '2024-01-15',
-    tags: ['product', 'features'],
-    isTemplate: false,
-    createdBy: 'Product Team',
-    settings: { showProgressBar: true, showQuestionNumbers: true, allowMultipleResponses: true, requireLogin: false, customThankYou: 'Thanks for sharing your ideas!' }
-  },
-  {
-    id: 'survey-4',
-    title: 'Event Feedback Form',
-    description: 'Post-event satisfaction survey',
-    status: 'closed',
-    theme: { primaryColor: '#ec4899', backgroundColor: '#fdf2f8', fontFamily: 'Outfit' },
-    questions: [
-      { id: 'q1', type: 'nps', title: 'How likely are you to attend future events?', required: true, minValue: 0, maxValue: 10, hasLogicJump: false, order: 1 },
-      { id: 'q2', type: 'checkbox', title: 'What did you enjoy most?', required: false, options: ['Speakers', 'Networking', 'Content', 'Venue', 'Food'], hasLogicJump: false, order: 2 },
-      { id: 'q3', type: 'rating', title: 'Rate the event organization', required: true, minValue: 1, maxValue: 5, hasLogicJump: false, order: 3 }
-    ],
-    responses: 456,
-    completionRate: 78.3,
-    avgTime: 2.9,
-    createdAt: '2023-12-15',
-    updatedAt: '2024-01-10',
-    publishedAt: '2023-12-16',
-    closedAt: '2024-01-01',
-    tags: ['event', 'feedback'],
-    isTemplate: false,
-    createdBy: 'Events Team',
-    settings: { showProgressBar: true, showQuestionNumbers: true, allowMultipleResponses: false, requireLogin: false, customThankYou: 'See you at the next event!' }
-  },
-  {
-    id: 'survey-5',
-    title: 'Website Usability Study',
-    description: 'User experience research for website redesign',
-    status: 'paused',
-    theme: { primaryColor: '#0ea5e9', backgroundColor: '#f0f9ff', fontFamily: 'Inter' },
-    questions: [
-      { id: 'q1', type: 'rating', title: 'How easy is it to navigate our website?', required: true, minValue: 1, maxValue: 5, hasLogicJump: false, order: 1 },
-      { id: 'q2', type: 'multiple_choice', title: 'What device do you primarily use?', required: true, options: ['Desktop', 'Laptop', 'Tablet', 'Mobile'], hasLogicJump: false, order: 2 },
-      { id: 'q3', type: 'long_text', title: 'What would improve your experience?', required: false, hasLogicJump: false, order: 3 }
-    ],
-    responses: 234,
-    completionRate: 65.2,
-    avgTime: 5.1,
-    createdAt: '2024-01-08',
-    updatedAt: '2024-01-12',
-    publishedAt: '2024-01-09',
-    tags: ['ux', 'research', 'website'],
-    isTemplate: false,
-    createdBy: 'UX Team',
-    settings: { showProgressBar: true, showQuestionNumbers: true, allowMultipleResponses: false, requireLogin: false, customThankYou: 'Your feedback shapes our design!' }
-  }
-]
+// Empty arrays - real data comes from Supabase hooks
+const mockSurveys: Survey[] = []
 
-const mockResponses: Response[] = [
-  {
-    id: 'resp-1',
-    surveyId: 'survey-1',
-    respondentEmail: 'user1@example.com',
-    startedAt: '2024-01-15T10:30:00',
-    completedAt: '2024-01-15T10:34:15',
-    duration: 255,
-    answers: [
-      { questionId: 'q1', questionTitle: 'How likely are you to recommend us?', answer: 9 },
-      { questionId: 'q2', questionTitle: 'What do you love most about our product?', answer: 'The intuitive interface and excellent customer support' },
-      { questionId: 'q4', questionTitle: 'Rate your overall experience', answer: 5 },
-      { questionId: 'q5', questionTitle: 'How did you hear about us?', answer: 'Social Media' }
-    ],
-    metadata: { device: 'Desktop', browser: 'Chrome', location: 'New York, US' },
-    isComplete: true,
-    npsScore: 9
-  },
-  {
-    id: 'resp-2',
-    surveyId: 'survey-1',
-    respondentEmail: 'user2@example.com',
-    startedAt: '2024-01-15T11:00:00',
-    completedAt: '2024-01-15T11:05:30',
-    duration: 330,
-    answers: [
-      { questionId: 'q1', questionTitle: 'How likely are you to recommend us?', answer: 6 },
-      { questionId: 'q3', questionTitle: 'What can we improve?', answer: 'Faster response times from support team' },
-      { questionId: 'q4', questionTitle: 'Rate your overall experience', answer: 3 },
-      { questionId: 'q5', questionTitle: 'How did you hear about us?', answer: 'Friend Referral' }
-    ],
-    metadata: { device: 'Mobile', browser: 'Safari', location: 'London, UK' },
-    isComplete: true,
-    npsScore: 6
-  },
-  {
-    id: 'resp-3',
-    surveyId: 'survey-1',
-    startedAt: '2024-01-15T12:15:00',
-    duration: 45,
-    answers: [
-      { questionId: 'q1', questionTitle: 'How likely are you to recommend us?', answer: 8 }
-    ],
-    metadata: { device: 'Tablet', browser: 'Firefox', location: 'Toronto, CA' },
-    isComplete: false
-  }
-]
+const mockResponses: Response[] = []
 
-const mockTemplates: Template[] = [
-  { id: 'tpl-1', name: 'Customer Satisfaction (CSAT)', description: 'Measure customer satisfaction with your product or service', category: 'Customer Feedback', questions: 8, uses: 15420, rating: 4.8, thumbnail: '📊', isPremium: false },
-  { id: 'tpl-2', name: 'Net Promoter Score (NPS)', description: 'Gauge customer loyalty and likelihood to recommend', category: 'Customer Feedback', questions: 5, uses: 23150, rating: 4.9, thumbnail: '📈', isPremium: false },
-  { id: 'tpl-3', name: 'Employee Engagement', description: 'Assess workplace satisfaction and engagement levels', category: 'HR & Internal', questions: 15, uses: 8930, rating: 4.7, thumbnail: '👥', isPremium: false },
-  { id: 'tpl-4', name: 'Event Feedback', description: 'Collect feedback after events and conferences', category: 'Events', questions: 10, uses: 12340, rating: 4.6, thumbnail: '🎉', isPremium: false },
-  { id: 'tpl-5', name: 'Product Research', description: 'Validate product ideas and gather feature requests', category: 'Product', questions: 12, uses: 6780, rating: 4.5, thumbnail: '💡', isPremium: true },
-  { id: 'tpl-6', name: 'Market Research', description: 'Understand market trends and customer preferences', category: 'Research', questions: 20, uses: 5420, rating: 4.4, thumbnail: '🔍', isPremium: true },
-  { id: 'tpl-7', name: 'Website Usability', description: 'Evaluate website user experience and navigation', category: 'UX Research', questions: 12, uses: 7890, rating: 4.6, thumbnail: '🌐', isPremium: false },
-  { id: 'tpl-8', name: 'Course Evaluation', description: 'Get feedback on training and educational content', category: 'Education', questions: 8, uses: 9120, rating: 4.7, thumbnail: '📚', isPremium: false }
-]
+const mockTemplates: Template[] = []
 
 const mockStats: SurveyStats = {
-  totalSurveys: 5,
-  activeSurveys: 2,
-  totalResponses: 2829,
-  avgCompletionRate: 81.9,
-  avgNPS: 7.8,
-  responsesThisWeek: 342,
-  responsesLastWeek: 289
+  totalSurveys: 0,
+  activeSurveys: 0,
+  totalResponses: 0,
+  avgCompletionRate: 0,
+  avgNPS: 0,
+  responsesThisWeek: 0,
+  responsesLastWeek: 0
 }
 
 // Helper functions
@@ -438,29 +271,14 @@ const getNPSCategory = (score: number) => {
   return { label: 'Detractor', color: 'text-red-600' }
 }
 
-// Mock data for AI-powered competitive upgrade components
-const mockSurveysAIInsights = [
-  { id: '1', type: 'success' as const, title: 'High Engagement Survey', description: 'Customer Satisfaction survey has 89% completion rate - above industry average!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Engagement' },
-  { id: '2', type: 'warning' as const, title: 'Drop-off Detected', description: 'Product feedback survey loses 45% respondents at question 7. Consider splitting.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Optimization' },
-  { id: '3', type: 'info' as const, title: 'NPS Trending Up', description: 'Overall NPS score improved from 42 to 67 over last quarter.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Trends' },
-]
+// Empty arrays for AI-powered competitive upgrade components - real data comes from Supabase
+const mockSurveysAIInsights: { id: string; type: 'success' | 'warning' | 'info'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
 
-const mockSurveysCollaborators = [
-  { id: '1', name: 'Research Lead', avatar: '/avatars/sarah-chen.jpg', status: 'online' as const, role: 'Research' },
-  { id: '2', name: 'UX Designer', avatar: '/avatars/alice.jpg', status: 'online' as const, role: 'UX' },
-  { id: '3', name: 'Product Manager', avatar: '/avatars/marcus.jpg', status: 'away' as const, role: 'Product' },
-]
+const mockSurveysCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }[] = []
 
-const mockSurveysPredictions = [
-  { id: '1', title: 'Response Forecast', prediction: 'Employee engagement survey will reach target 500 responses by Friday', confidence: 91, trend: 'up' as const, impact: 'medium' as const },
-  { id: '2', title: 'Sentiment Analysis', prediction: 'Q4 satisfaction scores likely to improve 15% based on recent feedback', confidence: 84, trend: 'up' as const, impact: 'high' as const },
-]
+const mockSurveysPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: 'low' | 'medium' | 'high' }[] = []
 
-const mockSurveysActivities = [
-  { id: '1', user: 'Research Lead', action: 'Launched', target: 'Q4 customer satisfaction survey', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'UX Designer', action: 'Designed', target: 'new product feedback template', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'Product Manager', action: 'Analyzed', target: 'feature request survey results', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
-]
+const mockSurveysActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' }[] = []
 
 // Quick actions will be defined inside the component with proper handlers
 

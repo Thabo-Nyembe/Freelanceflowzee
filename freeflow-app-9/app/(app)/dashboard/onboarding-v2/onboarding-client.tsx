@@ -1,9 +1,14 @@
 'use client'
 
 import { createClient } from '@/lib/supabase/client'
-
 import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
+
+// Import backend hooks for real data
+import { useAuth } from '@/lib/hooks/use-auth'
+import { useOnboardingFlows, useUserOnboardingProgress } from '@/lib/hooks/use-onboarding-extended'
+import { useAnalyticsSegments, useAnalyticsDailyMetrics } from '@/lib/hooks/use-analytics-extended'
+import { useUserActivityLogs } from '@/lib/hooks/use-user-extended'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -192,175 +197,6 @@ interface OnboardingStats {
   usersOnboarded: number
 }
 
-// Mock Data
-const mockFlows: Flow[] = [
-  {
-    id: '1',
-    name: 'Welcome Tour',
-    description: 'Introduction to the platform for new users',
-    type: 'onboarding',
-    status: 'active',
-    steps: [
-      { id: 's1', type: 'modal', title: 'Welcome!', content: 'Welcome to our platform', order: 1 },
-      { id: 's2', type: 'tooltip', title: 'Dashboard', content: 'This is your main dashboard', target: '#dashboard', position: 'bottom', order: 2 },
-      { id: 's3', type: 'hotspot', title: 'Quick Actions', content: 'Access common actions here', target: '#actions', position: 'right', order: 3 }
-    ],
-    trigger: { type: 'page_load', value: '/dashboard' },
-    views: 4523,
-    completions: 3892,
-    completionRate: 86.1,
-    dropoffRate: 13.9,
-    avgTimeToComplete: 145,
-    createdAt: '2024-01-15',
-    updatedAt: '2024-03-10',
-    createdBy: 'Sarah Chen'
-  },
-  {
-    id: '2',
-    name: 'Feature Discovery: Reports',
-    description: 'Guide users through the reporting features',
-    type: 'feature_adoption',
-    status: 'active',
-    steps: [
-      { id: 's1', type: 'slideout', title: 'New Reports!', content: 'Check out our new reporting features', order: 1 },
-      { id: 's2', type: 'tooltip', title: 'Create Report', content: 'Click here to create your first report', target: '#create-report', position: 'bottom', order: 2 }
-    ],
-    trigger: { type: 'event', value: 'viewed_dashboard_3_times' },
-    segmentId: 'seg1',
-    views: 2341,
-    completions: 1876,
-    completionRate: 80.1,
-    dropoffRate: 19.9,
-    avgTimeToComplete: 89,
-    createdAt: '2024-02-01',
-    updatedAt: '2024-03-12',
-    createdBy: 'Mike Johnson'
-  },
-  {
-    id: '3',
-    name: 'NPS Survey',
-    description: 'Collect feedback from active users',
-    type: 'survey',
-    status: 'active',
-    steps: [
-      { id: 's1', type: 'modal', title: 'Quick Question', content: 'How likely are you to recommend us?', order: 1 }
-    ],
-    trigger: { type: 'delay', value: '30_days', delay: 30 },
-    segmentId: 'seg2',
-    views: 1892,
-    completions: 1234,
-    completionRate: 65.2,
-    dropoffRate: 34.8,
-    avgTimeToComplete: 35,
-    createdAt: '2024-02-15',
-    updatedAt: '2024-03-08',
-    createdBy: 'Sarah Chen'
-  },
-  {
-    id: '4',
-    name: 'New Feature Announcement',
-    description: 'Announce the new AI-powered assistant',
-    type: 'announcement',
-    status: 'paused',
-    steps: [
-      { id: 's1', type: 'banner', title: 'AI Assistant', content: 'Try our new AI-powered assistant!', order: 1 }
-    ],
-    trigger: { type: 'page_load', value: '/dashboard' },
-    views: 5621,
-    completions: 4532,
-    completionRate: 80.6,
-    dropoffRate: 19.4,
-    avgTimeToComplete: 12,
-    createdAt: '2024-03-01',
-    updatedAt: '2024-03-10',
-    createdBy: 'Alex Rivera'
-  },
-  {
-    id: '5',
-    name: 'Power User Onboarding',
-    description: 'Advanced features for power users',
-    type: 'onboarding',
-    status: 'draft',
-    steps: [
-      { id: 's1', type: 'modal', title: 'Advanced Features', content: 'Unlock your full potential', order: 1 },
-      { id: 's2', type: 'tooltip', title: 'API Access', content: 'Access our developer API', target: '#api', position: 'left', order: 2 },
-      { id: 's3', type: 'tooltip', title: 'Automations', content: 'Set up automated workflows', target: '#automations', position: 'bottom', order: 3 },
-      { id: 's4', type: 'modal', title: 'All Set!', content: 'You are ready to use advanced features', order: 4 }
-    ],
-    trigger: { type: 'segment', value: 'power_users' },
-    segmentId: 'seg3',
-    views: 0,
-    completions: 0,
-    completionRate: 0,
-    dropoffRate: 0,
-    avgTimeToComplete: 0,
-    createdAt: '2024-03-12',
-    updatedAt: '2024-03-12',
-    createdBy: 'Mike Johnson'
-  }
-]
-
-const mockChecklists: Checklist[] = [
-  {
-    id: 'c1',
-    name: 'Getting Started Checklist',
-    description: 'Complete these steps to set up your account',
-    items: [
-      { id: 'i1', title: 'Complete your profile', description: 'Add your photo and bio', completed: false, order: 1, actionUrl: '/settings/profile', isRequired: true },
-      { id: 'i2', title: 'Connect your calendar', description: 'Sync your calendar for scheduling', completed: false, order: 2, actionUrl: '/integrations/calendar', isRequired: false },
-      { id: 'i3', title: 'Invite team members', description: 'Add colleagues to your workspace', completed: false, order: 3, actionUrl: '/team/invite', isRequired: true },
-      { id: 'i4', title: 'Create your first project', description: 'Set up a project to get started', completed: false, order: 4, actionUrl: '/projects/new', isRequired: true },
-      { id: 'i5', title: 'Enable notifications', description: 'Stay updated on important events', completed: false, order: 5, actionUrl: '/settings/notifications', isRequired: false }
-    ],
-    status: 'active',
-    usersStarted: 2341,
-    usersCompleted: 1892,
-    completionRate: 80.8,
-    createdAt: '2024-01-01'
-  },
-  {
-    id: 'c2',
-    name: 'Advanced Setup',
-    description: 'Take your account to the next level',
-    items: [
-      { id: 'i1', title: 'Set up integrations', description: 'Connect third-party apps', completed: false, order: 1, actionUrl: '/integrations', isRequired: false },
-      { id: 'i2', title: 'Configure workflows', description: 'Automate your processes', completed: false, order: 2, actionUrl: '/workflows', isRequired: false },
-      { id: 'i3', title: 'Add custom fields', description: 'Customize your data structure', completed: false, order: 3, actionUrl: '/settings/fields', isRequired: false }
-    ],
-    status: 'active',
-    usersStarted: 892,
-    usersCompleted: 456,
-    completionRate: 51.1,
-    createdAt: '2024-01-15'
-  }
-]
-
-const mockUsers: UserJourney[] = [
-  { userId: 'u1', userName: 'Emily Watson', userEmail: 'emily@example.com', flowsCompleted: 3, totalFlows: 3, checklistProgress: 100, lastActive: '2024-03-12', signupDate: '2024-02-01', segment: 'Power Users', status: 'active' },
-  { userId: 'u2', userName: 'David Chen', userEmail: 'david@example.com', flowsCompleted: 2, totalFlows: 3, checklistProgress: 80, lastActive: '2024-03-11', signupDate: '2024-02-15', segment: 'Enterprise', status: 'active' },
-  { userId: 'u3', userName: 'Sarah Miller', userEmail: 'sarah@example.com', flowsCompleted: 1, totalFlows: 3, checklistProgress: 40, lastActive: '2024-03-05', signupDate: '2024-03-01', segment: 'Free Trial', status: 'at_risk' },
-  { userId: 'u4', userName: 'James Wilson', userEmail: 'james@example.com', flowsCompleted: 0, totalFlows: 3, checklistProgress: 20, lastActive: '2024-02-20', signupDate: '2024-02-10', segment: 'Free Trial', status: 'churned' },
-  { userId: 'u5', userName: 'Lisa Brown', userEmail: 'lisa@example.com', flowsCompleted: 1, totalFlows: 3, checklistProgress: 60, lastActive: '2024-03-12', signupDate: '2024-03-10', segment: 'Starter', status: 'new' }
-]
-
-const mockSegments: Segment[] = [
-  { id: 'seg1', name: 'Power Users', description: 'Users with high engagement', rules: [{ property: 'sessions_count', operator: 'greater_than', value: '50' }], userCount: 1234, flowsUsing: 3, createdAt: '2024-01-01' },
-  { id: 'seg2', name: 'Active 30 Days', description: 'Users active in the last 30 days', rules: [{ property: 'last_active', operator: 'greater_than', value: '30_days_ago' }], userCount: 4567, flowsUsing: 2, createdAt: '2024-01-15' },
-  { id: 'seg3', name: 'Enterprise', description: 'Enterprise plan users', rules: [{ property: 'plan', operator: 'is', value: 'enterprise' }], userCount: 234, flowsUsing: 1, createdAt: '2024-02-01' },
-  { id: 'seg4', name: 'Free Trial', description: 'Users on free trial', rules: [{ property: 'plan', operator: 'is', value: 'trial' }], userCount: 789, flowsUsing: 2, createdAt: '2024-02-15' },
-  { id: 'seg5', name: 'New Users', description: 'Users who signed up in the last 7 days', rules: [{ property: 'signup_date', operator: 'greater_than', value: '7_days_ago' }], userCount: 156, flowsUsing: 1, createdAt: '2024-03-01' }
-]
-
-const mockAnalytics: FlowAnalytics[] = [
-  { date: '2024-03-06', views: 423, starts: 398, completions: 356 },
-  { date: '2024-03-07', views: 456, starts: 421, completions: 389 },
-  { date: '2024-03-08', views: 512, starts: 478, completions: 432 },
-  { date: '2024-03-09', views: 389, starts: 356, completions: 312 },
-  { date: '2024-03-10', views: 478, starts: 445, completions: 401 },
-  { date: '2024-03-11', views: 534, starts: 502, completions: 456 },
-  { date: '2024-03-12', views: 567, starts: 534, completions: 489 }
-]
-
 // Helper Functions
 const getFlowStatusColor = (status: FlowStatus) => {
   switch (status) {
@@ -413,6 +249,9 @@ const formatDuration = (seconds: number) => {
 }
 
 export default function OnboardingClient() {
+  // Create supabase client for CRUD operations
+  const supabase = createClient()
+
   // Define adapter variables locally (removed mock data imports)
   const onboardingAIInsights: any[] = []
   const onboardingCollaborators: any[] = []
@@ -420,15 +259,135 @@ export default function OnboardingClient() {
   const onboardingActivities: any[] = []
   const onboardingQuickActions: any[] = []
 
-  const [userId, setUserId] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  // Get authenticated user from hook
+  const { user: authUser, loading: authLoading } = useAuth()
+  const userId = authUser?.id || null
+
+  // Use backend hooks for data fetching
+  const { data: onboardingFlowsData, isLoading: flowsLoading, refresh: refreshFlows } = useOnboardingFlows()
+  const { data: userProgressData, isLoading: progressLoading } = useUserOnboardingProgress(userId || undefined)
+  const { data: segmentsData, isLoading: segmentsLoading, refresh: refreshSegments } = useAnalyticsSegments(userId || undefined)
+  const { data: dailyMetricsData, isLoading: metricsLoading } = useAnalyticsDailyMetrics(userId || undefined, 7)
+  const { data: userActivityData, isLoading: activityLoading } = useUserActivityLogs(userId || undefined)
+
+  // Combine loading states
+  const isLoading = authLoading || flowsLoading || segmentsLoading
   const [isSaving, setIsSaving] = useState(false)
 
-  // Data state
-  const [flows, setFlows] = useState<Flow[]>(mockFlows)
-  const [checklists, setChecklists] = useState<Checklist[]>(mockChecklists)
-  const [users, setUsers] = useState<UserJourney[]>(mockUsers)
-  const [segments, setSegments] = useState<Segment[]>(mockSegments)
+  // Local state for data that syncs from hooks
+  const [flows, setFlows] = useState<Flow[]>([])
+  const [checklists, setChecklists] = useState<Checklist[]>([])
+  const [users, setUsers] = useState<UserJourney[]>([])
+  const [segments, setSegments] = useState<Segment[]>([])
+  const [analytics, setAnalytics] = useState<FlowAnalytics[]>([])
+
+  // Sync flows from hook data
+  useEffect(() => {
+    if (onboardingFlowsData && onboardingFlowsData.length > 0) {
+      setFlows(onboardingFlowsData.map((f: any) => ({
+        id: f.id,
+        name: f.name || 'Untitled Flow',
+        description: f.description || '',
+        type: f.flow_type || 'onboarding',
+        status: f.status || 'draft',
+        steps: f.steps || [],
+        trigger: f.trigger || { type: 'page_load', value: '/dashboard' },
+        segmentId: f.segment_id,
+        views: f.views || 0,
+        completions: f.completions || 0,
+        completionRate: f.completion_rate || 0,
+        dropoffRate: f.dropoff_rate || 0,
+        avgTimeToComplete: f.avg_time_to_complete || 0,
+        createdAt: f.created_at,
+        updatedAt: f.updated_at,
+        createdBy: f.created_by || 'System'
+      })))
+    }
+  }, [onboardingFlowsData])
+
+  // Sync segments from hook data
+  useEffect(() => {
+    if (segmentsData && segmentsData.length > 0) {
+      setSegments(segmentsData.map((s: any) => ({
+        id: s.id,
+        name: s.name || 'Untitled Segment',
+        description: s.description || '',
+        rules: s.rules || [],
+        userCount: s.user_count || 0,
+        flowsUsing: s.flows_using || 0,
+        createdAt: s.created_at
+      })))
+    }
+  }, [segmentsData])
+
+  // Sync analytics from daily metrics hook data
+  useEffect(() => {
+    if (dailyMetricsData && dailyMetricsData.length > 0) {
+      setAnalytics(dailyMetricsData.map((m: any) => ({
+        date: m.date || m.created_at,
+        views: m.page_views || m.views || 0,
+        starts: m.sessions || m.starts || 0,
+        completions: m.conversions || m.completions || 0
+      })))
+    }
+  }, [dailyMetricsData])
+
+  // Sync users from user activity hook data (convert to UserJourney format)
+  useEffect(() => {
+    if (userActivityData && userActivityData.length > 0) {
+      // Transform activity logs to user journey format
+      const userMap = new Map<string, UserJourney>()
+      userActivityData.forEach((activity: any) => {
+        if (!userMap.has(activity.user_id)) {
+          userMap.set(activity.user_id, {
+            userId: activity.user_id,
+            userName: activity.user_name || activity.user_email?.split('@')[0] || 'Unknown User',
+            userEmail: activity.user_email || '',
+            flowsCompleted: 0,
+            totalFlows: flows.length,
+            checklistProgress: 0,
+            lastActive: activity.created_at || new Date().toISOString(),
+            signupDate: activity.created_at || new Date().toISOString(),
+            segment: 'Default',
+            status: 'active'
+          })
+        }
+      })
+      setUsers(Array.from(userMap.values()))
+    }
+  }, [userActivityData, flows.length])
+
+  // Fetch checklists directly (no hook available)
+  useEffect(() => {
+    const fetchChecklists = async () => {
+      if (!userId) return
+      try {
+        const { data: checklistsData } = await supabase
+          .from('onboarding_checklists')
+          .select('*')
+          .eq('user_id', userId)
+          .order('created_at', { ascending: false })
+
+        if (checklistsData && checklistsData.length > 0) {
+          setChecklists(checklistsData.map((c: any) => ({
+            id: c.id,
+            name: c.name || 'Untitled Checklist',
+            description: c.description || '',
+            items: c.items || [],
+            segmentId: c.segment_id,
+            status: c.status || 'active',
+            usersStarted: c.users_started || 0,
+            usersCompleted: c.users_completed || 0,
+            completionRate: c.completion_rate || 0,
+            createdAt: c.created_at
+          })))
+        }
+      } catch (error) {
+        console.error('Error fetching checklists:', error)
+      }
+    }
+    fetchChecklists()
+  }, [userId, supabase])
 
   // UI state
   const [activeTab, setActiveTab] = useState('flows')
@@ -552,89 +511,8 @@ export default function OnboardingClient() {
     return response.json()
   }
 
-  // Fetch user and data on mount
-  useEffect(() => {
-    const fetchUserAndData = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) return
-        setUserId(user.id)
-
-        // Fetch onboarding flows
-        const { data: flowsData } = await supabase
-          .from('onboarding_flows')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-
-        if (flowsData && flowsData.length > 0) {
-          setFlows(flowsData.map(f => ({
-            id: f.id,
-            name: f.name,
-            description: f.description || '',
-            type: f.flow_type || 'onboarding',
-            status: f.status || 'draft',
-            steps: f.steps || [],
-            trigger: f.trigger || { type: 'page_load', value: '/dashboard' },
-            segmentId: f.segment_id,
-            views: f.views || 0,
-            completions: f.completions || 0,
-            completionRate: f.completion_rate || 0,
-            dropoffRate: f.dropoff_rate || 0,
-            avgTimeToComplete: f.avg_time_to_complete || 0,
-            createdAt: f.created_at,
-            updatedAt: f.updated_at,
-            createdBy: f.created_by || 'System'
-          })))
-        }
-
-        // Fetch checklists
-        const { data: checklistsData } = await supabase
-          .from('onboarding_checklists')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-
-        if (checklistsData && checklistsData.length > 0) {
-          setChecklists(checklistsData.map(c => ({
-            id: c.id,
-            name: c.name,
-            description: c.description || '',
-            items: c.items || [],
-            segmentId: c.segment_id,
-            status: c.status || 'active',
-            usersStarted: c.users_started || 0,
-            usersCompleted: c.users_completed || 0,
-            completionRate: c.completion_rate || 0,
-            createdAt: c.created_at
-          })))
-        }
-
-        // Fetch segments
-        const { data: segmentsData } = await supabase
-          .from('user_segments')
-          .select('*')
-          .eq('user_id', user.id)
-
-        if (segmentsData && segmentsData.length > 0) {
-          setSegments(segmentsData.map(s => ({
-            id: s.id,
-            name: s.name,
-            description: s.description || '',
-            rules: s.rules || [],
-            userCount: s.user_count || 0,
-            flowsUsing: s.flows_using || 0,
-            createdAt: s.created_at
-          })))
-        }
-      } catch (error) {
-        console.error('Error fetching onboarding data:', error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-    fetchUserAndData()
-  }, [])
+  // Data fetching is now handled by the backend hooks above
+  // useOnboardingFlows, useAnalyticsSegments, useAnalyticsDailyMetrics, useUserActivityLogs
 
   // Calculate stats
   const stats: OnboardingStats = useMemo(() => ({
@@ -667,7 +545,7 @@ export default function OnboardingClient() {
     )
   }, [users, searchQuery])
 
-  const maxViews = Math.max(...mockAnalytics.map(a => a.views))
+  const maxViews = analytics.length > 0 ? Math.max(...analytics.map(a => a.views)) : 1
 
   // CRUD Handlers
   const handleCreateFlow = async () => {
@@ -1006,7 +884,7 @@ export default function OnboardingClient() {
                 <Users className="w-4 h-4 text-pink-600" />
                 <span className="text-xs text-gray-500">Total Users</span>
               </div>
-              <p className="text-2xl font-bold">{mockUsers.length}</p>
+              <p className="text-2xl font-bold">{users.length}</p>
               <p className="text-xs text-pink-600">Active today</p>
             </CardContent>
           </Card>
@@ -1527,7 +1405,7 @@ export default function OnboardingClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {mockAnalytics.map((day) => (
+                    {analytics.map((day) => (
                       <div key={day.date} className="space-y-1">
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-gray-600">{new Date(day.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</span>
@@ -1556,7 +1434,7 @@ export default function OnboardingClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {mockFlows.sort((a, b) => b.completionRate - a.completionRate).slice(0, 5).map((flow, index) => (
+                    {flows.sort((a, b) => b.completionRate - a.completionRate).slice(0, 5).map((flow, index) => (
                       <div key={flow.id} className="flex items-center gap-4">
                         <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center font-bold text-sm">
                           {index + 1}
@@ -1582,7 +1460,7 @@ export default function OnboardingClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {mockFlows.filter(f => f.status === 'active').map((flow) => (
+                    {flows.filter(f => f.status === 'active').map((flow) => (
                       <div key={flow.id} className="space-y-2">
                         <div className="flex items-center justify-between">
                           <span className="text-sm font-medium">{flow.name}</span>
@@ -1607,7 +1485,7 @@ export default function OnboardingClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {mockFlows.filter(f => f.avgTimeToComplete > 0).map((flow) => (
+                    {flows.filter(f => f.avgTimeToComplete > 0).map((flow) => (
                       <div key={flow.id} className="flex items-center gap-4">
                         <Timer className="w-5 h-5 text-gray-400" />
                         <div className="flex-1">
@@ -1716,7 +1594,7 @@ export default function OnboardingClient() {
               </select>
               <select className="px-3 py-2 border rounded-lg text-sm bg-white dark:bg-gray-800">
                 <option value="all">All Segments</option>
-                {mockSegments.map(seg => (
+                {segments.map(seg => (
                   <option key={seg.id} value={seg.id}>{seg.name}</option>
                 ))}
               </select>
@@ -1805,7 +1683,7 @@ export default function OnboardingClient() {
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="text-right">
-                    <p className="text-3xl font-bold">{mockSegments.length}</p>
+                    <p className="text-3xl font-bold">{segments.length}</p>
                     <p className="text-cyan-200 text-sm">Active Segments</p>
                   </div>
                 </div>

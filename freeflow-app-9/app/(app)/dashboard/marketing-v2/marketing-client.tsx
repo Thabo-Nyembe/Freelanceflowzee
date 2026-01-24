@@ -3,7 +3,7 @@
 import React, { useState, useMemo, useEffect } from 'react'
 import dynamic from 'next/dynamic'
 import { toast } from 'sonner'
-// MIGRATED: Real database hooks instead of mock data
+// Real database hooks for marketing data
 import { useMarketingCampaigns, MarketingCampaign } from '@/lib/hooks/use-marketing'
 import { useCampaigns, Campaign as DBCampaign } from '@/lib/hooks/use-campaigns'
 import { useLeads as useLeadsExtended } from '@/lib/hooks/use-leads-extended'
@@ -253,576 +253,112 @@ interface MarketingAnalytics {
 }
 
 // ============================================================================
-// MOCK DATA
+// EMPTY DATA ARRAYS - Real data comes from database hooks
 // ============================================================================
 
-const mockCampaigns: Campaign[] = [
-  {
-    id: '1',
-    name: 'Summer Product Launch',
-    description: 'Multi-channel campaign for new product line launch',
-    type: 'email',
-    status: 'active',
-    startDate: '2024-06-01',
-    endDate: '2024-07-31',
-    budget: 50000,
-    spent: 32450,
-    reach: 245000,
-    impressions: 890000,
-    clicks: 45600,
-    conversions: 2340,
-    revenue: 187200,
-    roi: 477,
-    owner: 'Sarah Chen',
-    ownerAvatar: '',
-    channels: ['Email', 'Social', 'PPC'],
-    tags: ['product-launch', 'summer', 'priority'],
-    abTest: { variant: 'A', conversion: 5.2 }
-  },
-  {
-    id: '2',
-    name: 'Brand Awareness Q3',
-    description: 'Social media brand awareness campaign',
-    type: 'social',
-    status: 'active',
-    startDate: '2024-07-01',
-    endDate: '2024-09-30',
-    budget: 25000,
-    spent: 12800,
-    reach: 580000,
-    impressions: 1450000,
-    clicks: 28900,
-    conversions: 890,
-    revenue: 44500,
-    roi: 248,
-    owner: 'Mike Johnson',
-    ownerAvatar: '',
-    channels: ['Instagram', 'TikTok', 'LinkedIn'],
-    tags: ['brand', 'awareness', 'social']
-  },
-  {
-    id: '3',
-    name: 'Webinar Series - AI in Business',
-    description: 'Educational webinar series for lead generation',
-    type: 'event',
-    status: 'scheduled',
-    startDate: '2024-08-15',
-    endDate: '2024-10-15',
-    budget: 15000,
-    spent: 0,
-    reach: 0,
-    impressions: 0,
-    clicks: 0,
-    conversions: 0,
-    revenue: 0,
-    roi: 0,
-    owner: 'Emily Davis',
-    ownerAvatar: '',
-    channels: ['Email', 'LinkedIn', 'Website'],
-    tags: ['webinar', 'ai', 'education']
-  },
-  {
-    id: '4',
-    name: 'Holiday Sale Campaign',
-    description: 'Black Friday and Cyber Monday promotional campaign',
-    type: 'ppc',
-    status: 'draft',
-    startDate: '2024-11-20',
-    endDate: '2024-12-02',
-    budget: 75000,
-    spent: 0,
-    reach: 0,
-    impressions: 0,
-    clicks: 0,
-    conversions: 0,
-    revenue: 0,
-    roi: 0,
-    owner: 'Alex Thompson',
-    ownerAvatar: '',
-    channels: ['Google Ads', 'Facebook', 'Email'],
-    tags: ['holiday', 'sale', 'priority']
-  },
-  {
-    id: '5',
-    name: 'Influencer Partnership Q2',
-    description: 'Collaboration with industry influencers',
-    type: 'influencer',
-    status: 'completed',
-    startDate: '2024-04-01',
-    endDate: '2024-06-30',
-    budget: 40000,
-    spent: 38500,
-    reach: 1200000,
-    impressions: 3400000,
-    clicks: 89000,
-    conversions: 4560,
-    revenue: 273600,
-    roi: 610,
-    owner: 'Jordan Lee',
-    ownerAvatar: '',
-    channels: ['YouTube', 'Instagram', 'TikTok'],
-    tags: ['influencer', 'completed', 'success']
-  }
-]
+// Empty typed arrays for email sequences
+const emailSequences: EmailSequence[] = []
 
-const mockLeads: Lead[] = [
-  {
-    id: '1',
-    name: 'Jennifer Martinez',
-    email: 'jennifer@techcorp.com',
-    phone: '+1 (555) 123-4567',
-    company: 'TechCorp Industries',
-    title: 'VP of Marketing',
-    location: 'San Francisco, CA',
-    status: 'qualified',
-    source: 'website',
-    score: 85,
-    value: 125000,
-    assignedTo: 'Sarah Chen',
-    assignedAvatar: '',
-    lastActivity: '2 hours ago',
-    activities: 24,
-    emails: 8,
-    calls: 3,
-    meetings: 2,
-    createdAt: '2024-06-15',
-    tags: ['enterprise', 'high-value', 'ready']
-  },
-  {
-    id: '2',
-    name: 'Robert Wilson',
-    email: 'rwilson@innovate.io',
-    phone: '+1 (555) 234-5678',
-    company: 'Innovate.io',
-    title: 'CEO',
-    location: 'New York, NY',
-    status: 'proposal',
-    source: 'referral',
-    score: 92,
-    value: 250000,
-    assignedTo: 'Mike Johnson',
-    assignedAvatar: '',
-    lastActivity: '1 day ago',
-    activities: 42,
-    emails: 15,
-    calls: 6,
-    meetings: 4,
-    createdAt: '2024-05-20',
-    tags: ['startup', 'hot', 'priority']
-  },
-  {
-    id: '3',
-    name: 'Amanda Foster',
-    email: 'afoster@globalretail.com',
-    phone: '+1 (555) 345-6789',
-    company: 'Global Retail Group',
-    title: 'Marketing Director',
-    location: 'Chicago, IL',
-    status: 'contacted',
-    source: 'event',
-    score: 68,
-    value: 75000,
-    assignedTo: 'Emily Davis',
-    assignedAvatar: '',
-    lastActivity: '3 days ago',
-    activities: 12,
-    emails: 4,
-    calls: 1,
-    meetings: 0,
-    createdAt: '2024-07-01',
-    tags: ['retail', 'mid-market']
-  },
-  {
-    id: '4',
-    name: 'David Kim',
-    email: 'dkim@financeplus.com',
-    phone: '+1 (555) 456-7890',
-    company: 'FinancePlus',
-    title: 'CFO',
-    location: 'Boston, MA',
-    status: 'new',
-    source: 'ads',
-    score: 45,
-    value: 50000,
-    assignedTo: 'Alex Thompson',
-    assignedAvatar: '',
-    lastActivity: '1 hour ago',
-    activities: 3,
-    emails: 1,
-    calls: 0,
-    meetings: 0,
-    createdAt: '2024-07-10',
-    tags: ['finance', 'new']
-  }
-]
+// Empty typed arrays for content items
+const contentItems: ContentItem[] = []
 
-const mockEmailSequences: EmailSequence[] = [
-  {
-    id: '1',
-    name: 'Welcome Series',
-    description: 'Onboarding sequence for new subscribers',
-    status: 'sent',
-    emails: 5,
-    enrolled: 12500,
-    opened: 8750,
-    clicked: 3125,
-    replied: 625,
-    unsubscribed: 125,
-    openRate: 70,
-    clickRate: 25,
-    replyRate: 5,
-    sentDate: '2024-06-01',
-    createdBy: 'Sarah Chen',
-    createdAvatar: ''
-  },
-  {
-    id: '2',
-    name: 'Product Education',
-    description: 'Feature highlights and tutorials',
-    status: 'sending',
-    emails: 8,
-    enrolled: 8400,
-    opened: 5460,
-    clicked: 2184,
-    replied: 336,
-    unsubscribed: 84,
-    openRate: 65,
-    clickRate: 26,
-    replyRate: 4,
-    createdBy: 'Mike Johnson',
-    createdAvatar: ''
-  },
-  {
-    id: '3',
-    name: 'Re-engagement Campaign',
-    description: 'Win back inactive users',
-    status: 'scheduled',
-    emails: 4,
-    enrolled: 5600,
-    opened: 0,
-    clicked: 0,
-    replied: 0,
-    unsubscribed: 0,
-    openRate: 0,
-    clickRate: 0,
-    replyRate: 0,
-    scheduledDate: '2024-08-01',
-    createdBy: 'Emily Davis',
-    createdAvatar: ''
-  }
-]
+// Empty typed arrays for workflows
+const workflows: Workflow[] = []
 
-const mockContent: ContentItem[] = [
-  {
-    id: '1',
-    title: 'The Future of AI in Marketing',
-    type: 'blog',
-    status: 'published',
-    author: 'Sarah Chen',
-    authorAvatar: '',
-    scheduledDate: '2024-07-01',
-    publishedDate: '2024-07-01',
-    views: 12500,
-    engagement: 8.5,
-    shares: 450,
-    comments: 89,
-    platform: 'Blog',
-    tags: ['ai', 'marketing', 'trends']
-  },
-  {
-    id: '2',
-    title: 'Product Demo Video',
-    type: 'video',
-    status: 'published',
-    author: 'Mike Johnson',
-    authorAvatar: '',
-    scheduledDate: '2024-06-25',
-    publishedDate: '2024-06-25',
-    views: 45000,
-    engagement: 12.3,
-    shares: 1200,
-    comments: 234,
-    platform: 'YouTube',
-    tags: ['product', 'demo', 'video']
-  },
-  {
-    id: '3',
-    title: 'Q3 Marketing Strategy Guide',
-    type: 'ebook',
-    status: 'review',
-    author: 'Emily Davis',
-    authorAvatar: '',
-    scheduledDate: '2024-08-15',
-    views: 0,
-    engagement: 0,
-    shares: 0,
-    comments: 0,
-    platform: 'Website',
-    tags: ['strategy', 'guide', 'q3']
-  },
-  {
-    id: '4',
-    title: 'Weekly Industry Insights',
-    type: 'social',
-    status: 'scheduled',
-    author: 'Jordan Lee',
-    authorAvatar: '',
-    scheduledDate: '2024-07-15',
-    views: 0,
-    engagement: 0,
-    shares: 0,
-    comments: 0,
-    platform: 'LinkedIn',
-    tags: ['social', 'insights', 'weekly']
-  }
-]
-
-const mockWorkflows: Workflow[] = [
-  {
-    id: '1',
-    name: 'Lead Nurturing',
-    description: 'Automated lead nurturing sequence',
-    status: 'active',
-    trigger: 'Form submission',
-    enrolled: 2450,
-    completed: 1890,
-    active: 560,
-    conversions: 378,
-    conversionRate: 20,
-    steps: 12,
-    createdBy: 'Sarah Chen',
-    createdAvatar: '',
-    lastRun: '2 minutes ago'
-  },
-  {
-    id: '2',
-    name: 'Welcome Automation',
-    description: 'New subscriber welcome flow',
-    status: 'active',
-    trigger: 'Email subscription',
-    enrolled: 8900,
-    completed: 7120,
-    active: 1780,
-    conversions: 1424,
-    conversionRate: 20,
-    steps: 5,
-    createdBy: 'Mike Johnson',
-    createdAvatar: '',
-    lastRun: '5 minutes ago'
-  },
-  {
-    id: '3',
-    name: 'Cart Abandonment',
-    description: 'Recover abandoned shopping carts',
-    status: 'active',
-    trigger: 'Cart abandoned',
-    enrolled: 3200,
-    completed: 2560,
-    active: 640,
-    conversions: 768,
-    conversionRate: 30,
-    steps: 4,
-    createdBy: 'Emily Davis',
-    createdAvatar: '',
-    lastRun: '1 minute ago'
-  },
-  {
-    id: '4',
-    name: 'Upsell Campaign',
-    description: 'Cross-sell and upsell existing customers',
-    status: 'paused',
-    trigger: 'Purchase completed',
-    enrolled: 1500,
-    completed: 900,
-    active: 0,
-    conversions: 225,
-    conversionRate: 25,
-    steps: 6,
-    createdBy: 'Alex Thompson',
-    createdAvatar: ''
-  }
-]
-
-const mockAnalytics: MarketingAnalytics = {
-  totalLeads: 12450,
-  qualifiedLeads: 4980,
-  conversions: 2340,
-  revenue: 1870000,
-  cost: 245000,
-  roi: 663,
-  cpl: 19.68,
-  cac: 104.70,
-  ltv: 798,
-  websiteTraffic: 458000,
-  emailSubscribers: 89500,
-  socialFollowers: 125000
+// Default empty analytics
+const defaultAnalytics: MarketingAnalytics = {
+  totalLeads: 0,
+  qualifiedLeads: 0,
+  conversions: 0,
+  revenue: 0,
+  cost: 0,
+  roi: 0,
+  cpl: 0,
+  cac: 0,
+  ltv: 0,
+  websiteTraffic: 0,
+  emailSubscribers: 0,
+  socialFollowers: 0
 }
 
 // ============================================================================
-// COMPETITIVE UPGRADES MOCK DATA - Beats HubSpot, Salesforce, Monday.com
+// COMPETITIVE UPGRADES DATA TYPES - Beats HubSpot, Salesforce, Monday.com
 // ============================================================================
 
-const mockAIInsights = [
-  {
-    id: '1',
-    type: 'recommendation' as const,
-    title: 'Optimize Email Send Times',
-    description: 'Data shows 23% higher open rates when emails are sent at 10 AM on Tuesdays',
-    impact: 'high' as const,
-    confidence: 0.92,
-  },
-  {
-    id: '2',
-    type: 'opportunity' as const,
-    title: 'Untapped Market Segment',
-    description: 'Tech startups in Southeast Asia showing 40% higher engagement with your content',
-    impact: 'high' as const,
-    confidence: 0.87,
-  },
-  {
-    id: '3',
-    type: 'alert' as const,
-    title: 'Campaign Budget Alert',
-    description: 'Summer Product Launch campaign will exhaust budget in 5 days at current spend rate',
-    impact: 'medium' as const,
-    confidence: 0.99,
-  },
-]
+interface AIInsight {
+  id: string
+  type: 'recommendation' | 'alert' | 'opportunity' | 'prediction' | 'success' | 'info' | 'warning' | 'error'
+  title: string
+  description: string
+  impact?: 'high' | 'medium' | 'low'
+  priority?: 'high' | 'medium' | 'low'
+  metric?: string
+  change?: number
+  confidence?: number
+  action?: string
+  category?: string
+  timestamp?: string | Date
+  createdAt?: Date
+}
 
-const mockCollaborators = [
-  { id: '1', name: 'Sarah Chen', color: '#ec4899', status: 'online' as const, isTyping: false },
-  { id: '2', name: 'Mike Johnson', color: '#22c55e', status: 'online' as const, isTyping: true },
-  { id: '3', name: 'Emily Davis', color: '#f59e0b', status: 'away' as const },
-  { id: '4', name: 'Alex Kim', color: '#3b82f6', status: 'online' as const },
-]
+interface Collaborator {
+  id: string
+  name: string
+  color: string
+  status: 'online' | 'away' | 'offline'
+  isTyping?: boolean
+}
 
-const mockPredictions = [
-  {
-    label: 'Campaign Revenue',
-    currentValue: 187200,
-    predictedValue: 245000,
-    confidence: 0.89,
-    trend: 'up' as const,
-    timeframe: 'End of Q1',
-    factors: [
-      { name: 'Summer campaign momentum', impact: 'positive' as const, weight: 0.35 },
-      { name: 'Email sequence performance', impact: 'positive' as const, weight: 0.28 },
-      { name: 'Social engagement growth', impact: 'positive' as const, weight: 0.22 },
-      { name: 'Seasonal slowdown risk', impact: 'negative' as const, weight: 0.15 },
-    ],
-  },
-  {
-    label: 'Lead Conversion Rate',
-    currentValue: 18.8,
-    predictedValue: 22.5,
-    confidence: 0.84,
-    trend: 'up' as const,
-    timeframe: 'Next 30 Days',
-    factors: [
-      { name: 'Improved lead scoring', impact: 'positive' as const, weight: 0.4 },
-      { name: 'New nurturing workflow', impact: 'positive' as const, weight: 0.3 },
-      { name: 'Market competition', impact: 'negative' as const, weight: 0.2 },
-      { name: 'Content quality', impact: 'positive' as const, weight: 0.1 },
-    ],
-  },
-]
+interface PredictionFactor {
+  name: string
+  impact: 'positive' | 'negative'
+  weight: number
+}
 
-const mockStorySegments = [
-  {
-    id: '1',
-    type: 'headline' as const,
-    title: 'Marketing Performance Exceeds Targets',
-    content: 'This month delivered exceptional results with 477% ROI on the Summer Product Launch campaign, driven by strategic multi-channel approach.',
-    metric: 'Campaign ROI',
-    value: '477%',
-    change: 23,
-    data: [280, 320, 380, 420, 450, 460, 477],
-  },
-  {
-    id: '2',
-    type: 'insight' as const,
-    title: 'Email Sequences Driving Growth',
-    content: 'Welcome Series achieving 70% open rate - significantly above industry average of 21%. Recommend expanding to 7 emails.',
-    metric: 'Open Rate',
-    value: '70%',
-    change: 15,
-    data: [45, 52, 58, 62, 65, 68, 70],
-  },
-  {
-    id: '3',
-    type: 'recommendation' as const,
-    title: 'Scale Influencer Marketing',
-    content: 'Q2 Influencer Partnership delivered 610% ROI - highest performing channel. Recommend 50% budget increase for Q4.',
-    metric: 'Influencer ROI',
-    value: '610%',
-    change: 42,
-    data: [380, 420, 480, 520, 560, 590, 610],
-  },
-  {
-    id: '4',
-    type: 'warning' as const,
-    title: 'PPC Costs Rising',
-    description: 'Google Ads CPC increased 18% this month. Consider diversifying to LinkedIn and TikTok ads.',
-    metric: 'CPC Increase',
-    value: '+18%',
-    change: -18,
-    data: [2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.8],
-  },
-]
+interface Prediction {
+  label: string
+  currentValue: number
+  predictedValue: number
+  confidence: number
+  trend: 'up' | 'down' | 'stable'
+  timeframe: string
+  factors: PredictionFactor[]
+}
 
-const mockActivities = [
-  {
-    id: '1',
-    type: 'milestone' as const,
-    title: 'reached 2,000 conversions',
-    description: 'Summer Product Launch campaign hit a major milestone!',
-    user: { id: '1', name: 'Campaign Bot' },
-    target: { type: 'Campaign', name: 'Summer Product Launch' },
-    timestamp: new Date(Date.now() - 300000),
-    isRead: false,
-  },
-  {
-    id: '2',
-    type: 'update' as const,
-    title: 'updated lead score',
-    description: 'Jennifer Martinez score increased from 78 to 85 based on recent activity',
-    user: { id: '2', name: 'AI Assistant' },
-    target: { type: 'Lead', name: 'Jennifer Martinez' },
-    timestamp: new Date(Date.now() - 1800000),
-    isRead: false,
-  },
-  {
-    id: '3',
-    type: 'status_change' as const,
-    title: 'moved to "Sending"',
-    description: 'Product Education sequence started sending',
-    user: { id: '1', name: 'Sarah Chen' },
-    target: { type: 'Email Sequence', name: 'Product Education' },
-    timestamp: new Date(Date.now() - 3600000),
-    isRead: true,
-  },
-  {
-    id: '4',
-    type: 'comment' as const,
-    title: 'commented on campaign',
-    description: 'Great ROI numbers! Let\'s discuss scaling this approach.',
-    user: { id: '3', name: 'Mike Johnson' },
-    target: { type: 'Campaign', name: 'Brand Awareness Q3' },
-    timestamp: new Date(Date.now() - 7200000),
-    isRead: true,
-  },
-]
+interface StorySegment {
+  id: string
+  type: 'headline' | 'insight' | 'recommendation' | 'warning'
+  title: string
+  content?: string
+  description?: string
+  metric: string
+  value: string
+  change: number
+  data: number[]
+}
+
+interface ActivityItem {
+  id: string
+  type: 'milestone' | 'update' | 'status_change' | 'comment' | 'create' | 'delete' | 'share'
+  title: string
+  description: string
+  user: { id: string; name: string }
+  target: { type: string; name: string }
+  timestamp: Date
+  isRead: boolean
+}
+
+// Empty typed arrays for competitive upgrades
+const aiInsights: AIInsight[] = []
+const collaborators: Collaborator[] = []
+const predictions: Prediction[] = []
+const storySegments: StorySegment[] = []
+const activities: ActivityItem[] = []
 
 // Quick actions are now defined inside the component to access state setters
 
-// Sparkline data for campaigns
-const campaignSparklineData: Record<string, number[]> = {
-  '1': [120, 145, 168, 189, 210, 225, 234], // Summer Product Launch
-  '2': [45, 58, 72, 85, 89, 88, 89], // Brand Awareness
-  '3': [0, 0, 0, 0, 0, 0, 0], // Webinar (scheduled)
-  '4': [0, 0, 0, 0, 0, 0, 0], // Holiday Sale (draft)
-  '5': [380, 420, 445, 456, 458, 457, 456], // Influencer (completed)
-}
+// Empty sparkline data for campaigns
+const campaignSparklineData: Record<string, number[]> = {}
 
 // ============================================================================
 // HELPER FUNCTIONS
@@ -925,7 +461,7 @@ export default function MarketingClient() {
   const { campaigns: dbCampaigns, loading: campaignsLoading, fetchCampaigns } = useMarketingCampaigns()
   const { leads: dbLeads, isLoading: leadsLoading } = useLeadsExtended({ limit: 100 })
 
-  // Transform database data to local types (fallback to mock for display)
+  // Transform database data to local types (use empty array when no data)
   const campaigns: Campaign[] = useMemo(() => {
     if (dbCampaigns && dbCampaigns.length > 0) {
       return dbCampaigns.map(c => ({
@@ -950,7 +486,7 @@ export default function MarketingClient() {
         tags: c.tags || []
       }))
     }
-    return mockCampaigns // Fallback to mock for demo
+    return [] // No fallback - use empty array when no data
   }, [dbCampaigns])
 
   const leads: Lead[] = useMemo(() => {
@@ -978,7 +514,7 @@ export default function MarketingClient() {
         tags: l.tags || []
       }))
     }
-    return mockLeads // Fallback to mock for demo
+    return [] // No fallback - use empty array when no data
   }, [dbLeads])
 
   const [activeTab, setActiveTab] = useState('campaigns')
@@ -1155,12 +691,12 @@ export default function MarketingClient() {
   const handleExportAnalytics = () => {
     try {
       const analyticsData = {
-        summary: mockAnalytics,
-        campaigns: mockCampaigns,
-        leads: mockLeads,
-        emailSequences: mockEmailSequences,
-        content: mockContent,
-        workflows: mockWorkflows,
+        summary: defaultAnalytics,
+        campaigns: campaigns,
+        leads: leads,
+        emailSequences: emailSequences,
+        content: contentItems,
+        workflows: workflows,
         exportDate: new Date().toISOString()
       }
       const blob = new Blob([JSON.stringify(analyticsData, null, 2)], { type: 'application/json' })
@@ -1411,7 +947,7 @@ export default function MarketingClient() {
           </div>
           <div className="flex items-center gap-4">
             {/* Real-time Collaboration Indicator - Beats Notion/Figma */}
-            <CollaborationIndicator collaborators={mockCollaborators} showTyping />
+            <CollaborationIndicator collaborators={collaborators} showTyping />
 
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -1439,7 +975,7 @@ export default function MarketingClient() {
             { label: 'Conversions', value: stats.totalConversions.toLocaleString(), change: 18.9, icon: CheckCircle, color: 'from-orange-500 to-amber-500' },
             { label: 'Qualified Leads', value: stats.qualifiedLeads.toString(), change: 10.4, icon: Users, color: 'from-teal-500 to-cyan-500' },
             { label: 'Lead Value', value: `$${(stats.totalLeadValue / 1000).toFixed(0)}K`, change: 25.6, icon: Award, color: 'from-indigo-500 to-blue-500' },
-            { label: 'Email Subscribers', value: `${(mockAnalytics.emailSubscribers / 1000).toFixed(1)}K`, change: 5.8, icon: Mail, color: 'from-rose-500 to-pink-500' }
+            { label: 'Email Subscribers', value: `${(defaultAnalytics.emailSubscribers / 1000).toFixed(1)}K`, change: 5.8, icon: Mail, color: 'from-rose-500 to-pink-500' }
           ].map((stat, idx) => (
             <Card key={idx} className="relative overflow-hidden border-0 shadow-sm hover:shadow-md transition-shadow">
               <CardContent className="p-4">
@@ -1498,15 +1034,15 @@ export default function MarketingClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockCampaigns.length}</p>
+                    <p className="text-3xl font-bold">{campaigns.length}</p>
                     <p className="text-rose-200 text-sm">Campaigns</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockCampaigns.filter(c => c.status === 'active').length}</p>
+                    <p className="text-3xl font-bold">{campaigns.filter(c => c.status === 'active').length}</p>
                     <p className="text-rose-200 text-sm">Active</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{((mockCampaigns.reduce((sum, c) => sum + c.spent, 0) / mockCampaigns.reduce((sum, c) => sum + c.budget, 0)) * 100).toFixed(0)}%</p>
+                    <p className="text-3xl font-bold">{campaigns.length > 0 ? ((campaigns.reduce((sum, c) => sum + c.spent, 0) / campaigns.reduce((sum, c) => sum + c.budget, 0)) * 100).toFixed(0) : 0}%</p>
                     <p className="text-rose-200 text-sm">Budget Used</p>
                   </div>
                 </div>
@@ -1666,15 +1202,15 @@ export default function MarketingClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockLeads.length}</p>
+                    <p className="text-3xl font-bold">{leads.length}</p>
                     <p className="text-amber-200 text-sm">Total Leads</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockLeads.filter(l => l.status === 'new').length}</p>
+                    <p className="text-3xl font-bold">{leads.filter(l => l.status === 'new').length}</p>
                     <p className="text-amber-200 text-sm">New</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockLeads.filter(l => l.status === 'qualified').length}</p>
+                    <p className="text-3xl font-bold">{leads.filter(l => l.status === 'qualified').length}</p>
                     <p className="text-amber-200 text-sm">Qualified</p>
                   </div>
                 </div>
@@ -1811,15 +1347,15 @@ export default function MarketingClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockEmailSequences.length}</p>
+                    <p className="text-3xl font-bold">{emailSequences.length}</p>
                     <p className="text-violet-200 text-sm">Sequences</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockEmailSequences.reduce((sum, s) => sum + s.enrolled, 0).toLocaleString()}</p>
+                    <p className="text-3xl font-bold">{emailSequences.reduce((sum, s) => sum + s.enrolled, 0).toLocaleString()}</p>
                     <p className="text-violet-200 text-sm">Enrolled</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{(mockEmailSequences.reduce((sum, s) => sum + s.openRate, 0) / mockEmailSequences.length).toFixed(0)}%</p>
+                    <p className="text-3xl font-bold">{emailSequences.length > 0 ? (emailSequences.reduce((sum, s) => sum + s.openRate, 0) / emailSequences.length).toFixed(0) : 0}%</p>
                     <p className="text-violet-200 text-sm">Avg Open Rate</p>
                   </div>
                 </div>
@@ -1859,7 +1395,7 @@ export default function MarketingClient() {
             </div>
 
             <div className="grid gap-4">
-              {mockEmailSequences.map(sequence => (
+              {emailSequences.map(sequence => (
                 <Card key={sequence.id} className="hover:shadow-md transition-shadow">
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between">
@@ -1921,15 +1457,15 @@ export default function MarketingClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockContent.length}</p>
+                    <p className="text-3xl font-bold">{contentItems.length}</p>
                     <p className="text-cyan-200 text-sm">Content Items</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockContent.filter(c => c.status === 'published').length}</p>
+                    <p className="text-3xl font-bold">{contentItems.filter(c => c.status === 'published').length}</p>
                     <p className="text-cyan-200 text-sm">Published</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockContent.reduce((sum, c) => sum + c.views, 0).toLocaleString()}</p>
+                    <p className="text-3xl font-bold">{contentItems.reduce((sum, c) => sum + c.views, 0).toLocaleString()}</p>
                     <p className="text-cyan-200 text-sm">Total Views</p>
                   </div>
                 </div>
@@ -1969,7 +1505,7 @@ export default function MarketingClient() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {mockContent.map(content => (
+              {contentItems.map(content => (
                 <Card key={content.id} className="hover:shadow-md transition-shadow">
                   <CardContent className="p-4">
                     <div className="flex items-center gap-2 mb-3">
@@ -2021,15 +1557,15 @@ export default function MarketingClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockWorkflows.length}</p>
+                    <p className="text-3xl font-bold">{workflows.length}</p>
                     <p className="text-orange-200 text-sm">Workflows</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockWorkflows.filter(w => w.status === 'active').length}</p>
+                    <p className="text-3xl font-bold">{workflows.filter(w => w.status === 'active').length}</p>
                     <p className="text-orange-200 text-sm">Active</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockWorkflows.reduce((sum, w) => sum + w.conversions, 0).toLocaleString()}</p>
+                    <p className="text-3xl font-bold">{workflows.reduce((sum, w) => sum + w.conversions, 0).toLocaleString()}</p>
                     <p className="text-orange-200 text-sm">Conversions</p>
                   </div>
                 </div>
@@ -2069,7 +1605,7 @@ export default function MarketingClient() {
             </div>
 
             <div className="grid gap-4">
-              {mockWorkflows.map(workflow => (
+              {workflows.map(workflow => (
                 <Card key={workflow.id} className="hover:shadow-md transition-shadow">
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between">
@@ -2134,15 +1670,15 @@ export default function MarketingClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">${(mockAnalytics.revenue / 1000000).toFixed(2)}M</p>
+                    <p className="text-3xl font-bold">${(defaultAnalytics.revenue / 1000000).toFixed(2)}M</p>
                     <p className="text-indigo-200 text-sm">Revenue</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockAnalytics.roi}%</p>
+                    <p className="text-3xl font-bold">{defaultAnalytics.roi}%</p>
                     <p className="text-indigo-200 text-sm">ROI</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockAnalytics.conversions.toLocaleString()}</p>
+                    <p className="text-3xl font-bold">{defaultAnalytics.conversions.toLocaleString()}</p>
                     <p className="text-indigo-200 text-sm">Conversions</p>
                   </div>
                 </div>
@@ -2186,22 +1722,22 @@ export default function MarketingClient() {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-6">
                     <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <p className="text-sm text-gray-500">Total Revenue</p>
-                      <p className="text-2xl font-bold text-gray-900 dark:text-white">${(mockAnalytics.revenue / 1000000).toFixed(2)}M</p>
+                      <p className="text-2xl font-bold text-gray-900 dark:text-white">${(defaultAnalytics.revenue / 1000000).toFixed(2)}M</p>
                       <p className="text-xs text-green-600">+23.5% vs last period</p>
                     </div>
                     <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <p className="text-sm text-gray-500">Marketing Cost</p>
-                      <p className="text-2xl font-bold text-gray-900 dark:text-white">${(mockAnalytics.cost / 1000).toFixed(0)}K</p>
+                      <p className="text-2xl font-bold text-gray-900 dark:text-white">${(defaultAnalytics.cost / 1000).toFixed(0)}K</p>
                       <p className="text-xs text-red-600">+8.2% vs last period</p>
                     </div>
                     <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <p className="text-sm text-gray-500">ROI</p>
-                      <p className="text-2xl font-bold text-green-600">{mockAnalytics.roi}%</p>
+                      <p className="text-2xl font-bold text-green-600">{defaultAnalytics.roi}%</p>
                       <p className="text-xs text-green-600">+15.3% vs last period</p>
                     </div>
                     <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <p className="text-sm text-gray-500">LTV:CAC Ratio</p>
-                      <p className="text-2xl font-bold text-gray-900 dark:text-white">{(mockAnalytics.ltv / mockAnalytics.cac).toFixed(1)}:1</p>
+                      <p className="text-2xl font-bold text-gray-900 dark:text-white">{defaultAnalytics.cac > 0 ? (defaultAnalytics.ltv / defaultAnalytics.cac).toFixed(1) : 0}:1</p>
                       <p className="text-xs text-green-600">Healthy ratio</p>
                     </div>
                   </div>
@@ -2218,10 +1754,10 @@ export default function MarketingClient() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {[
-                    { stage: 'Total Leads', count: mockAnalytics.totalLeads, percent: 100, color: 'bg-blue-500' },
-                    { stage: 'Qualified', count: mockAnalytics.qualifiedLeads, percent: 40, color: 'bg-green-500' },
-                    { stage: 'Proposals', count: 1245, percent: 25, color: 'bg-purple-500' },
-                    { stage: 'Conversions', count: mockAnalytics.conversions, percent: 19, color: 'bg-orange-500' }
+                    { stage: 'Total Leads', count: defaultAnalytics.totalLeads, percent: 100, color: 'bg-blue-500' },
+                    { stage: 'Qualified', count: defaultAnalytics.qualifiedLeads, percent: 40, color: 'bg-green-500' },
+                    { stage: 'Proposals', count: 0, percent: 25, color: 'bg-purple-500' },
+                    { stage: 'Conversions', count: defaultAnalytics.conversions, percent: 19, color: 'bg-orange-500' }
                   ].map((item, idx) => (
                     <div key={idx}>
                       <div className="flex items-center justify-between mb-1">
@@ -2277,11 +1813,11 @@ export default function MarketingClient() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {[
-                    { label: 'Cost per Lead', value: `$${mockAnalytics.cpl.toFixed(2)}`, change: -12.5 },
-                    { label: 'Customer Acquisition Cost', value: `$${mockAnalytics.cac.toFixed(2)}`, change: -8.3 },
-                    { label: 'Customer Lifetime Value', value: `$${mockAnalytics.ltv.toFixed(0)}`, change: 15.7 },
-                    { label: 'Website Traffic', value: `${(mockAnalytics.websiteTraffic / 1000).toFixed(0)}K`, change: 22.4 },
-                    { label: 'Social Followers', value: `${(mockAnalytics.socialFollowers / 1000).toFixed(0)}K`, change: 18.9 }
+                    { label: 'Cost per Lead', value: `$${defaultAnalytics.cpl.toFixed(2)}`, change: -12.5 },
+                    { label: 'Customer Acquisition Cost', value: `$${defaultAnalytics.cac.toFixed(2)}`, change: -8.3 },
+                    { label: 'Customer Lifetime Value', value: `$${defaultAnalytics.ltv.toFixed(0)}`, change: 15.7 },
+                    { label: 'Website Traffic', value: `${(defaultAnalytics.websiteTraffic / 1000).toFixed(0)}K`, change: 22.4 },
+                    { label: 'Social Followers', value: `${(defaultAnalytics.socialFollowers / 1000).toFixed(0)}K`, change: 18.9 }
                   ].map((metric, idx) => (
                     <div key={idx} className="flex items-center justify-between">
                       <span className="text-sm text-gray-600 dark:text-gray-400">{metric.label}</span>
@@ -2305,13 +1841,13 @@ export default function MarketingClient() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
               {/* AI Insights Panel - Like ThoughtSpot/Salesforce Einstein */}
               <AIInsightsPanel
-                insights={mockAIInsights}
+                insights={aiInsights}
                 className="h-full"
               />
 
               {/* Predictive Analytics - Like Salesforce Einstein */}
               <PredictiveAnalytics
-                predictions={mockPredictions}
+                predictions={predictions}
                 className="h-full"
               />
             </div>
@@ -2320,14 +1856,14 @@ export default function MarketingClient() {
             <DataStory
               title="Marketing Performance Story"
               subtitle="AI-generated insights from your marketing data"
-              segments={mockStorySegments}
+              segments={storySegments}
               className="mt-6"
             />
 
             {/* Activity Feed - Like Slack + Notion Combined */}
             <div className="mt-6">
               <ActivityFeed
-                activities={mockActivities}
+                activities={activities}
                 onMarkRead={(id) => toast.success('Marked as read', { description: `Item ${id} marked as read` })}
                 onMarkAllRead={() => toast.success('All marked as read')}
                 onPin={(id) => toast.success('Pinned', { description: `Item ${id} pinned` })}
@@ -4302,7 +3838,7 @@ export default function MarketingClient() {
             </DialogHeader>
             <div className="py-4">
               <div className="space-y-4">
-                {mockAIInsights.map((insight: AIInsight) => (
+                {aiInsights.map((insight: AIInsight) => (
                   <div key={insight.id} className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
                     <div className="flex items-start gap-3">
                       <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-800 flex items-center justify-center">

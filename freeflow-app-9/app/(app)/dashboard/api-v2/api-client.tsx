@@ -265,159 +265,25 @@ interface MockServer {
   createdAt: string
 }
 
-// Mock Data
-const mockEndpoints: ApiEndpoint[] = [
-  { id: '1', name: 'Get Users', method: 'GET', path: '/api/v1/users', description: 'Retrieve all users with pagination', status: 'active', version: 'v1', totalRequests: 1250000, avgLatency: 45, p95Latency: 120, errorRate: 0.2, lastCalled: '2024-01-15T12:30:00Z', createdAt: '2023-06-15T09:00:00Z', tags: ['users', 'core'], rateLimit: 1000, authentication: 'Bearer Token' },
-  { id: '2', name: 'Create User', method: 'POST', path: '/api/v1/users', description: 'Create a new user account', status: 'active', version: 'v1', totalRequests: 89000, avgLatency: 120, p95Latency: 250, errorRate: 0.5, lastCalled: '2024-01-15T12:28:00Z', createdAt: '2023-06-15T09:00:00Z', tags: ['users', 'core'], rateLimit: 100, authentication: 'Bearer Token' },
-  { id: '3', name: 'Update User', method: 'PUT', path: '/api/v1/users/:id', description: 'Update user information', status: 'active', version: 'v1', totalRequests: 45000, avgLatency: 85, p95Latency: 180, errorRate: 0.3, lastCalled: '2024-01-15T12:25:00Z', createdAt: '2023-06-15T09:00:00Z', tags: ['users', 'core'], rateLimit: 500, authentication: 'Bearer Token' },
-  { id: '4', name: 'Delete User', method: 'DELETE', path: '/api/v1/users/:id', description: 'Soft delete a user account', status: 'active', version: 'v1', totalRequests: 12000, avgLatency: 65, p95Latency: 150, errorRate: 0.1, lastCalled: '2024-01-15T11:00:00Z', createdAt: '2023-06-15T09:00:00Z', tags: ['users', 'core'], rateLimit: 50, authentication: 'Bearer Token' },
-  { id: '5', name: 'Get Products', method: 'GET', path: '/api/v1/products', description: 'Retrieve product catalog', status: 'active', version: 'v1', totalRequests: 890000, avgLatency: 55, p95Latency: 140, errorRate: 0.15, lastCalled: '2024-01-15T12:29:00Z', createdAt: '2023-07-20T10:00:00Z', tags: ['products', 'catalog'], rateLimit: 2000, authentication: 'API Key' },
-  { id: '6', name: 'Create Order', method: 'POST', path: '/api/v1/orders', description: 'Place a new order', status: 'active', version: 'v1', totalRequests: 156000, avgLatency: 200, p95Latency: 450, errorRate: 0.8, lastCalled: '2024-01-15T12:27:00Z', createdAt: '2023-08-10T14:00:00Z', tags: ['orders', 'commerce'], rateLimit: 200, authentication: 'Bearer Token' },
-  { id: '7', name: 'Get Analytics', method: 'GET', path: '/api/v1/analytics', description: 'Retrieve analytics data', status: 'deprecated', version: 'v1', totalRequests: 34000, avgLatency: 350, p95Latency: 800, errorRate: 1.2, lastCalled: '2024-01-14T16:00:00Z', createdAt: '2023-05-01T08:00:00Z', tags: ['analytics'], rateLimit: 100, authentication: 'Bearer Token' },
-  { id: '8', name: 'Webhook Events', method: 'POST', path: '/api/v1/webhooks', description: 'Send webhook events', status: 'active', version: 'v1', totalRequests: 450000, avgLatency: 30, p95Latency: 80, errorRate: 0.05, lastCalled: '2024-01-15T12:30:00Z', createdAt: '2023-09-05T11:00:00Z', tags: ['webhooks', 'events'], rateLimit: 5000, authentication: 'HMAC' }
-]
+// Empty typed arrays (no mock data)
+const emptyEndpoints: ApiEndpoint[] = []
+const emptyApiKeys: ApiKey[] = []
+const emptyCollections: Collection[] = []
+const emptyHistory: RequestHistory[] = []
+const emptyMonitors: Monitor[] = []
+const emptyTestSuites: TestSuite[] = []
+const emptyTestCases: TestCase[] = []
+const emptyWebhooks: WebhookConfig[] = []
+const emptyMockServers: MockServer[] = []
 
-const mockApiKeys: ApiKey[] = [
-  { id: '1', name: 'Production API', keyPrefix: 'pk_live_abc123', environment: 'production', status: 'active', scopes: ['read', 'write', 'delete'], totalRequests: 2450000, rateLimit: 10000, lastUsed: '2024-01-15T12:30:00Z', createdAt: '2023-06-01T09:00:00Z', expiresAt: null, ipWhitelist: ['192.168.1.0/24'], createdBy: 'John Smith' },
-  { id: '2', name: 'Mobile App Key', keyPrefix: 'pk_live_def456', environment: 'production', status: 'active', scopes: ['read', 'write'], totalRequests: 890000, rateLimit: 5000, lastUsed: '2024-01-15T12:28:00Z', createdAt: '2023-08-15T10:00:00Z', expiresAt: '2024-12-31T23:59:59Z', ipWhitelist: [], createdBy: 'Sarah Johnson' },
-  { id: '3', name: 'Development Key', keyPrefix: 'pk_test_ghi789', environment: 'development', status: 'active', scopes: ['read', 'write', 'delete', 'admin'], totalRequests: 45000, rateLimit: 1000, lastUsed: '2024-01-15T11:00:00Z', createdAt: '2024-01-01T08:00:00Z', expiresAt: null, ipWhitelist: [], createdBy: 'Mike Chen' },
-  { id: '4', name: 'Legacy Integration', keyPrefix: 'pk_live_jkl012', environment: 'production', status: 'restricted', scopes: ['read'], totalRequests: 12000, rateLimit: 100, lastUsed: '2024-01-10T14:00:00Z', createdAt: '2022-03-20T09:00:00Z', expiresAt: '2024-03-20T23:59:59Z', ipWhitelist: ['10.0.0.0/8'], createdBy: 'Legacy System' },
-  { id: '5', name: 'Staging Key', keyPrefix: 'pk_stg_mno345', environment: 'staging', status: 'active', scopes: ['read', 'write'], totalRequests: 78000, rateLimit: 2000, lastUsed: '2024-01-15T10:00:00Z', createdAt: '2023-11-01T09:00:00Z', expiresAt: null, ipWhitelist: [], createdBy: 'QA Team' }
-]
+// Empty typed arrays for competitive upgrade components
+const emptyApiAIInsights: { id: string; type: 'success' | 'warning' | 'info' | 'error'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
+const emptyApiCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }[] = []
+const emptyApiPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: 'low' | 'medium' | 'high' }[] = []
+const emptyApiActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' | 'error' }[] = []
 
-const mockCollections: Collection[] = [
-  { id: '1', name: 'User Management', description: 'Complete user CRUD operations', requests: 15, folders: 4, environment: 'development', lastRun: '2024-01-15T10:00:00Z', createdBy: 'John Smith', isShared: true, tests: 25, passRate: 96 },
-  { id: '2', name: 'E-Commerce API', description: 'Product and order endpoints', requests: 28, folders: 6, environment: 'staging', lastRun: '2024-01-14T16:00:00Z', createdBy: 'Sarah Johnson', isShared: true, tests: 42, passRate: 89 },
-  { id: '3', name: 'Authentication Flow', description: 'OAuth and JWT endpoints', requests: 8, folders: 2, environment: 'production', lastRun: '2024-01-15T08:00:00Z', createdBy: 'Mike Chen', isShared: false, tests: 12, passRate: 100 },
-  { id: '4', name: 'Analytics API', description: 'Data and reporting endpoints', requests: 12, folders: 3, environment: 'development', lastRun: '2024-01-13T14:00:00Z', createdBy: 'Emily Davis', isShared: true, tests: 18, passRate: 78 }
-]
-
-const mockHistory: RequestHistory[] = [
-  { id: '1', method: 'GET', url: '/api/v1/users', status: 200, duration: 45, size: 12500, timestamp: '2024-01-15T12:30:00Z', environment: 'production' },
-  { id: '2', method: 'POST', url: '/api/v1/orders', status: 201, duration: 180, size: 2400, timestamp: '2024-01-15T12:28:00Z', environment: 'production' },
-  { id: '3', method: 'GET', url: '/api/v1/products?page=1', status: 200, duration: 65, size: 45000, timestamp: '2024-01-15T12:25:00Z', environment: 'production' },
-  { id: '4', method: 'PUT', url: '/api/v1/users/123', status: 200, duration: 95, size: 1200, timestamp: '2024-01-15T12:20:00Z', environment: 'staging' },
-  { id: '5', method: 'DELETE', url: '/api/v1/users/456', status: 204, duration: 35, size: 0, timestamp: '2024-01-15T12:15:00Z', environment: 'development' },
-  { id: '6', method: 'POST', url: '/api/v1/auth/login', status: 401, duration: 25, size: 150, timestamp: '2024-01-15T12:10:00Z', environment: 'development' },
-  { id: '7', method: 'GET', url: '/api/v1/analytics', status: 500, duration: 5000, size: 0, timestamp: '2024-01-15T12:05:00Z', environment: 'production' }
-]
-
-const mockMonitors: Monitor[] = [
-  { id: '1', name: 'API Health Check', endpoint: '/api/health', status: 'healthy', uptime: 99.98, avgResponseTime: 25, lastCheck: '2024-01-15T12:30:00Z', interval: 60, alerts: 0, region: 'us-east-1' },
-  { id: '2', name: 'User API', endpoint: '/api/v1/users', status: 'healthy', uptime: 99.95, avgResponseTime: 48, lastCheck: '2024-01-15T12:30:00Z', interval: 300, alerts: 2, region: 'us-west-2' },
-  { id: '3', name: 'Payment Gateway', endpoint: '/api/v1/payments', status: 'degraded', uptime: 98.5, avgResponseTime: 350, lastCheck: '2024-01-15T12:30:00Z', interval: 60, alerts: 5, region: 'eu-west-1' },
-  { id: '4', name: 'Analytics Service', endpoint: '/api/v1/analytics', status: 'down', uptime: 95.2, avgResponseTime: 0, lastCheck: '2024-01-15T12:25:00Z', interval: 300, alerts: 12, region: 'ap-southeast-1' }
-]
-
-const mockTestSuites: TestSuite[] = [
-  { id: '1', name: 'User API Tests', description: 'Complete user endpoint test suite', tests: 45, passed: 42, failed: 2, skipped: 1, duration: 12500, lastRun: '2024-01-15T10:30:00Z', status: 'passed', environment: 'staging', coverage: 92 },
-  { id: '2', name: 'Order Flow Tests', description: 'End-to-end order processing tests', tests: 28, passed: 28, failed: 0, skipped: 0, duration: 8200, lastRun: '2024-01-15T09:00:00Z', status: 'passed', environment: 'staging', coverage: 88 },
-  { id: '3', name: 'Authentication Tests', description: 'OAuth and JWT validation tests', tests: 18, passed: 15, failed: 3, skipped: 0, duration: 4500, lastRun: '2024-01-15T08:45:00Z', status: 'failed', environment: 'development', coverage: 78 },
-  { id: '4', name: 'Integration Tests', description: 'Third-party service integration', tests: 32, passed: 30, failed: 1, skipped: 1, duration: 25000, lastRun: '2024-01-14T22:00:00Z', status: 'passed', environment: 'production', coverage: 85 },
-  { id: '5', name: 'Performance Tests', description: 'Load and stress testing suite', tests: 12, passed: 10, failed: 2, skipped: 0, duration: 180000, lastRun: '2024-01-14T02:00:00Z', status: 'failed', environment: 'staging', coverage: 65 }
-]
-
-const mockTestCases: TestCase[] = [
-  { id: '1', name: 'Get all users returns 200', description: 'Verify GET /users returns success', status: 'passed', assertions: 5, passedAssertions: 5, duration: 125, method: 'GET', endpoint: '/api/v1/users', expectedStatus: 200, actualStatus: 200 },
-  { id: '2', name: 'Create user with valid data', description: 'POST /users creates new user', status: 'passed', assertions: 8, passedAssertions: 8, duration: 230, method: 'POST', endpoint: '/api/v1/users', expectedStatus: 201, actualStatus: 201 },
-  { id: '3', name: 'Update user returns updated data', description: 'PUT /users/:id updates user', status: 'passed', assertions: 6, passedAssertions: 6, duration: 180, method: 'PUT', endpoint: '/api/v1/users/:id', expectedStatus: 200, actualStatus: 200 },
-  { id: '4', name: 'Delete user returns 204', description: 'DELETE /users/:id soft deletes', status: 'passed', assertions: 3, passedAssertions: 3, duration: 95, method: 'DELETE', endpoint: '/api/v1/users/:id', expectedStatus: 204, actualStatus: 204 },
-  { id: '5', name: 'Invalid auth returns 401', description: 'Verify auth error handling', status: 'failed', assertions: 4, passedAssertions: 2, duration: 45, method: 'GET', endpoint: '/api/v1/users', expectedStatus: 401, actualStatus: 403 },
-  { id: '6', name: 'Rate limit returns 429', description: 'Verify rate limiting works', status: 'running', assertions: 3, passedAssertions: 0, duration: 0, method: 'GET', endpoint: '/api/v1/users', expectedStatus: 429, actualStatus: null }
-]
-
-const mockWebhooks: WebhookConfig[] = [
-  { id: '1', name: 'Order Notifications', url: 'https://webhook.example.com/orders', events: ['order.created', 'order.updated', 'order.completed'], isActive: true, lastTriggered: '2024-01-15T12:28:00Z', successRate: 99.5, totalDeliveries: 45000 },
-  { id: '2', name: 'User Events', url: 'https://webhook.example.com/users', events: ['user.created', 'user.updated'], isActive: true, lastTriggered: '2024-01-15T12:30:00Z', successRate: 98.2, totalDeliveries: 12000 },
-  { id: '3', name: 'Payment Callbacks', url: 'https://payments.example.com/callback', events: ['payment.success', 'payment.failed'], isActive: false, lastTriggered: '2024-01-10T14:00:00Z', successRate: 95.0, totalDeliveries: 8500 }
-]
-
-const mockMockServers: MockServer[] = [
-  { id: '1', name: 'User API Mock', url: 'https://mock.api.example.com/users', collection: 'User Management', isActive: true, requests: 15000, latency: 50, createdAt: '2024-01-01T00:00:00Z' },
-  { id: '2', name: 'Payment Mock', url: 'https://mock.api.example.com/payments', collection: 'E-Commerce API', isActive: true, requests: 8500, latency: 75, createdAt: '2024-01-05T00:00:00Z' },
-  { id: '3', name: 'Auth Mock', url: 'https://mock.api.example.com/auth', collection: 'Authentication Flow', isActive: false, requests: 2000, latency: 25, createdAt: '2024-01-10T00:00:00Z' }
-]
-
-// Enhanced Competitive Upgrade Mock Data
-const mockApiAIInsights = [
-  { id: '1', type: 'success' as const, title: 'API Performance', description: 'Average response time at 45ms. 20% faster than last week.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Performance' },
-  { id: '2', type: 'warning' as const, title: 'Rate Limit Alert', description: 'Production API key approaching 80% of daily quota.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Usage' },
-  { id: '3', type: 'info' as const, title: 'New Endpoint', description: 'GraphQL endpoint now available in production.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Updates' },
-]
-
-const mockApiCollaborators = [
-  { id: '1', name: 'API Lead', avatar: '/avatars/alex.jpg', status: 'online' as const, role: 'Lead' },
-  { id: '2', name: 'Backend Dev', avatar: '/avatars/john.jpg', status: 'online' as const, role: 'Developer' },
-  { id: '3', name: 'DevOps', avatar: '/avatars/mike-manager.jpg', status: 'away' as const, role: 'DevOps' },
-]
-
-const mockApiPredictions = [
-  { id: '1', title: 'Traffic Forecast', prediction: 'API traffic expected to increase 30% during holiday season', confidence: 82, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Error Rate', prediction: 'Error rate projected to stay below 0.1%', confidence: 90, trend: 'stable' as const, impact: 'low' as const },
-]
-
-const mockApiActivities = [
-  { id: '1', user: 'API Lead', action: 'Deployed', target: 'v2.3.0 to production', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Backend Dev', action: 'Created', target: 'new payment endpoint', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'System', action: 'Regenerated', target: 'API documentation', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
-]
-
-// Real API Quick Actions with actual functionality
-const mockApiQuickActions = [
-  {
-    id: '1',
-    label: 'New Endpoint',
-    icon: 'plus',
-    action: async () => {
-      // This will be handled by the component's setShowCreateEndpointDialog
-      toast.info('Opening endpoint builder...')
-    },
-    variant: 'default' as const
-  },
-  {
-    id: '2',
-    label: 'Test API',
-    icon: 'play',
-    action: async () => {
-      toast.promise(
-        (async () => {
-          // Run actual health checks against all active endpoints
-          const testResults = await Promise.all(
-            mockEndpoints.filter(e => e.status === 'active').map(async (endpoint) => {
-              try {
-                const response = await fetch(`/api/health-check`, {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ path: endpoint.path, method: endpoint.method })
-                })
-                return response.ok
-              } catch {
-                return true // Assume pass if health-check endpoint doesn't exist
-              }
-            })
-          )
-          const passed = testResults.filter(Boolean).length
-          return { passed, total: testResults.length }
-        })(),
-        {
-          loading: 'Running API health checks...',
-          success: (data) => `${data.passed}/${data.total} endpoints passed health checks!`,
-          error: 'Failed to run API tests'
-        }
-      )
-    },
-    variant: 'default' as const
-  },
-  {
-    id: '3',
-    label: 'View Docs',
-    icon: 'book',
-    action: async () => {
-      window.open('/api-docs', '_blank')
-    },
-    variant: 'outline' as const
-  },
-]
+// Empty quick actions array
+const emptyApiQuickActions: { id: string; label: string; icon: string; action: () => Promise<void>; variant: 'default' | 'outline' }[] = []
 
 // Form state types
 interface EndpointFormData {
@@ -482,13 +348,13 @@ export default function ApiClient() {
     fetchWebhooks()
   }, [fetchEndpoints, fetchKeys, fetchWebhooks])
 
-  // Mock data fallback for collections, history, etc.
-  const [collections] = useState<Collection[]>(mockCollections)
-  const [history] = useState<RequestHistory[]>(mockHistory)
-  const [monitors] = useState<Monitor[]>(mockMonitors)
-  const [testSuites] = useState<TestSuite[]>(mockTestSuites)
-  const [testCases] = useState<TestCase[]>(mockTestCases)
-  const [mockServersState] = useState<MockServer[]>(mockMockServers)
+  // Empty arrays for collections, history, etc. (no mock data)
+  const [collections] = useState<Collection[]>(emptyCollections)
+  const [history] = useState<RequestHistory[]>(emptyHistory)
+  const [monitors] = useState<Monitor[]>(emptyMonitors)
+  const [testSuites] = useState<TestSuite[]>(emptyTestSuites)
+  const [testCases] = useState<TestCase[]>(emptyTestCases)
+  const [mockServersState] = useState<MockServer[]>(emptyMockServers)
 
   // Combined webhooks: DB data + mock data fallback
   const webhooks: WebhookConfig[] = useMemo(() => {
@@ -504,7 +370,7 @@ export default function ApiClient() {
         totalDeliveries: w.total_deliveries
       }))
     }
-    return mockWebhooks
+    return emptyWebhooks
   }, [dbWebhooks])
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedEndpoint, setSelectedEndpoint] = useState<ApiEndpoint | null>(null)
@@ -607,7 +473,7 @@ export default function ApiClient() {
         authentication: e.requires_auth ? 'Bearer Token' : 'None'
       }))
     }
-    return mockEndpoints
+    return emptyEndpoints
   }, [dbEndpoints])
 
   // Combined API keys: DB data + mock data fallback
@@ -629,7 +495,7 @@ export default function ApiClient() {
         createdBy: k.created_by || 'Unknown'
       }))
     }
-    return mockApiKeys
+    return emptyApiKeys
   }, [dbApiKeys])
 
   // Stats - use real data if available
@@ -3065,7 +2931,7 @@ export default KaziApiClient;`
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockApiAIInsights}
+              insights={emptyApiAIInsights}
               title="API Intelligence"
               onInsightAction={async (insight) => {
                 // Real insight action - based on insight type
@@ -3083,11 +2949,11 @@ export default KaziApiClient;`
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockApiCollaborators}
+              collaborators={emptyApiCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockApiPredictions}
+              predictions={emptyApiPredictions}
               title="API Forecasts"
             />
           </div>
@@ -3095,12 +2961,12 @@ export default KaziApiClient;`
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockApiActivities}
+            activities={emptyApiActivities}
             title="API Activity"
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockApiQuickActions}
+            actions={emptyApiQuickActions}
             variant="grid"
           />
         </div>

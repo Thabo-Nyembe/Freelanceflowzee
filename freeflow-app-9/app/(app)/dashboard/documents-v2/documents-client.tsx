@@ -165,69 +165,29 @@ interface RecentActivity {
 }
 
 // ============================================================================
-// MOCK DATA
+// EMPTY DATA ARRAYS - Real data comes from Supabase hooks
 // ============================================================================
 
-const mockDocuments: DocumentFile[] = [
-  { id: '1', name: 'Product Roadmap 2024', type: 'document', extension: 'docx', size: 245000, ownerId: '1', ownerName: 'John Developer', status: 'published', starred: true, shared: true, sharingType: 'team', permissions: [], version: 12, createdAt: new Date('2024-01-15'), updatedAt: new Date(Date.now() - 1000 * 60 * 30), tags: ['roadmap', 'product'], comments: 8 },
-  { id: '2', name: 'Q4 Financial Report', type: 'spreadsheet', extension: 'xlsx', size: 890000, ownerId: '2', ownerName: 'Sarah Finance', status: 'approved', starred: true, shared: true, sharingType: 'organization', permissions: [], version: 5, createdAt: new Date('2024-02-01'), updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 2), tags: ['finance', 'quarterly'], comments: 3 },
-  { id: '3', name: 'Team Presentation', type: 'presentation', extension: 'pptx', size: 4500000, ownerId: '3', ownerName: 'Mike Designer', status: 'review', starred: false, shared: true, sharingType: 'team', permissions: [], version: 8, createdAt: new Date('2024-02-15'), updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 5), tags: ['presentation', 'team'], comments: 12 },
-  { id: '4', name: 'API Documentation', type: 'document', extension: 'md', size: 125000, ownerId: '1', ownerName: 'John Developer', status: 'published', starred: false, shared: true, sharingType: 'public', permissions: [], version: 25, createdAt: new Date('2024-01-01'), updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 24), tags: ['api', 'docs'], comments: 0 },
-  { id: '5', name: 'Design System Guide', type: 'document', extension: 'docx', size: 1200000, ownerId: '3', ownerName: 'Mike Designer', status: 'draft', starred: false, shared: false, sharingType: 'private', permissions: [], version: 3, createdAt: new Date('2024-03-01'), updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 8), tags: ['design', 'guide'], comments: 5 },
-  { id: '6', name: 'Meeting Notes - March', type: 'document', extension: 'docx', size: 45000, ownerId: '4', ownerName: 'Emily PM', status: 'published', starred: false, shared: true, sharingType: 'team', permissions: [], version: 2, createdAt: new Date('2024-03-10'), updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2), tags: ['meetings', 'notes'], comments: 1 },
-  { id: '7', name: 'Brand Assets', type: 'archive', extension: 'zip', size: 15000000, ownerId: '3', ownerName: 'Mike Designer', status: 'approved', starred: true, shared: true, sharingType: 'organization', permissions: [], version: 1, createdAt: new Date('2024-02-20'), updatedAt: new Date('2024-02-20'), tags: ['brand', 'assets'], comments: 0 },
-  { id: '8', name: 'User Research Results', type: 'spreadsheet', extension: 'xlsx', size: 560000, ownerId: '4', ownerName: 'Emily PM', status: 'review', starred: false, shared: true, sharingType: 'team', permissions: [], version: 4, createdAt: new Date('2024-03-05'), updatedAt: new Date(Date.now() - 1000 * 60 * 60 * 48), tags: ['research', 'ux'], comments: 7 },
-]
+const documentFiles: DocumentFile[] = []
 
-const mockFolders: DocumentFolder[] = [
-  { id: '1', name: 'Projects', color: 'bg-blue-500', documentCount: 24, size: 45000000, createdAt: new Date('2024-01-01'), shared: true, ownerId: '1', ownerName: 'John Developer' },
-  { id: '2', name: 'Marketing', color: 'bg-pink-500', documentCount: 18, size: 32000000, createdAt: new Date('2024-01-15'), shared: true, ownerId: '2', ownerName: 'Sarah Finance' },
-  { id: '3', name: 'Engineering', color: 'bg-emerald-500', documentCount: 42, size: 78000000, createdAt: new Date('2024-02-01'), shared: true, ownerId: '1', ownerName: 'John Developer' },
-  { id: '4', name: 'Design', color: 'bg-purple-500', documentCount: 35, size: 125000000, createdAt: new Date('2024-01-20'), shared: true, ownerId: '3', ownerName: 'Mike Designer' },
-  { id: '5', name: 'Finance', color: 'bg-amber-500', documentCount: 12, size: 15000000, createdAt: new Date('2024-02-15'), shared: false, ownerId: '2', ownerName: 'Sarah Finance' },
-  { id: '6', name: 'Archive', color: 'bg-gray-500', documentCount: 156, size: 890000000, createdAt: new Date('2024-01-01'), shared: false, ownerId: '1', ownerName: 'John Developer' },
-]
+const folders: DocumentFolder[] = []
 
-const mockTemplates: DocTemplate[] = [
-  { id: '1', name: 'Meeting Notes', description: 'Capture discussion points and action items', category: 'Meetings', icon: '📝', type: 'document', uses: 12400, isPremium: false },
-  { id: '2', name: 'Project Brief', description: 'Define project scope and timeline', category: 'Projects', icon: '📋', type: 'document', uses: 8900, isPremium: false },
-  { id: '3', name: 'Budget Tracker', description: 'Track expenses and income', category: 'Finance', icon: '💰', type: 'spreadsheet', uses: 6500, isPremium: false },
-  { id: '4', name: 'Pitch Deck', description: 'Impress investors and stakeholders', category: 'Business', icon: '🎯', type: 'presentation', uses: 4200, isPremium: true },
-  { id: '5', name: 'Product Spec', description: 'Document product requirements', category: 'Product', icon: '📦', type: 'document', uses: 5600, isPremium: false },
-  { id: '6', name: 'Design Doc', description: 'Outline design decisions', category: 'Design', icon: '🎨', type: 'document', uses: 3400, isPremium: false },
-  { id: '7', name: 'Sprint Planning', description: 'Plan and track sprints', category: 'Engineering', icon: '🏃', type: 'spreadsheet', uses: 7800, isPremium: false },
-  { id: '8', name: 'OKR Template', description: 'Set and track objectives', category: 'Planning', icon: '🎯', type: 'spreadsheet', uses: 9200, isPremium: true },
-]
+const templates: DocTemplate[] = []
 
-const mockVersionHistory: VersionEntry[] = [
-  { id: '1', version: 12, userId: '1', userName: 'John Developer', changes: 'Updated timeline section', size: 245000, createdAt: new Date(Date.now() - 1000 * 60 * 30) },
-  { id: '2', version: 11, userId: '3', userName: 'Mike Designer', changes: 'Added new graphics', size: 243000, createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2) },
-  { id: '3', version: 10, userId: '4', userName: 'Emily PM', changes: 'Fixed formatting issues', size: 240000, createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24) },
-  { id: '4', version: 9, userId: '1', userName: 'John Developer', changes: 'Added Q2 milestones', size: 238000, createdAt: new Date(Date.now() - 1000 * 60 * 60 * 48) },
-]
+const versionHistory: VersionEntry[] = []
 
-const mockComments: Comment[] = [
-  { id: '1', documentId: '1', userId: '2', userName: 'Sarah Finance', content: 'Can we add more details about the budget allocation?', resolved: false, replies: [], createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2) },
-  { id: '2', documentId: '1', userId: '4', userName: 'Emily PM', content: 'Great progress! The timeline looks solid.', resolved: true, replies: [], createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24) },
-  { id: '3', documentId: '1', userId: '3', userName: 'Mike Designer', content: 'I\'ll update the design section by EOD', resolved: false, replies: [], createdAt: new Date(Date.now() - 1000 * 60 * 60 * 5) },
-]
+const comments: Comment[] = []
 
-const mockRecentActivity: RecentActivity[] = [
-  { id: '1', action: 'edited', documentId: '1', documentName: 'Product Roadmap 2024', userId: '1', userName: 'John Developer', timestamp: new Date(Date.now() - 1000 * 60 * 30) },
-  { id: '2', action: 'shared', documentId: '2', documentName: 'Q4 Financial Report', userId: '2', userName: 'Sarah Finance', timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2), details: 'with Marketing team' },
-  { id: '3', action: 'commented', documentId: '3', documentName: 'Team Presentation', userId: '4', userName: 'Emily PM', timestamp: new Date(Date.now() - 1000 * 60 * 60 * 5) },
-  { id: '4', action: 'created', documentId: '5', documentName: 'Design System Guide', userId: '3', userName: 'Mike Designer', timestamp: new Date(Date.now() - 1000 * 60 * 60 * 8) },
-  { id: '5', action: 'moved', documentId: '6', documentName: 'Meeting Notes', userId: '4', userName: 'Emily PM', timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24), details: 'to Archive folder' },
-]
+const recentActivity: RecentActivity[] = []
 
 const storageInfo: StorageInfo = {
-  used: 2.4 * 1024 * 1024 * 1024,
+  used: 0,
   total: 15 * 1024 * 1024 * 1024,
   breakdown: {
-    documents: 0.8 * 1024 * 1024 * 1024,
-    images: 1.2 * 1024 * 1024 * 1024,
-    videos: 0.3 * 1024 * 1024 * 1024,
-    other: 0.1 * 1024 * 1024 * 1024,
+    documents: 0,
+    images: 0,
+    videos: 0,
+    other: 0,
   }
 }
 
@@ -296,29 +256,14 @@ const getActionIcon = (action: RecentActivity['action']) => {
 // MAIN COMPONENT
 // ============================================================================
 
-// Mock data for AI-powered competitive upgrade components
-const mockDocumentsAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Storage Optimized', description: 'Smart compression saved 8GB across 2,500 documents this month.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Storage' },
-  { id: '2', type: 'warning' as const, title: 'Stale Documents', description: '45 documents haven\'t been accessed in 90+ days. Consider archiving.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Cleanup' },
-  { id: '3', type: 'info' as const, title: 'Popular Content', description: 'Q4 Strategy Doc viewed 150 times this week - most accessed file!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Analytics' },
-]
+// Empty arrays for AI-powered competitive upgrade components - real data from API
+const documentsAIInsights: { id: string; type: 'success' | 'warning' | 'info'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
 
-const mockDocumentsCollaborators = [
-  { id: '1', name: 'Content Lead', avatar: '/avatars/content.jpg', status: 'online' as const, role: 'Editor' },
-  { id: '2', name: 'Legal Team', avatar: '/avatars/legal.jpg', status: 'online' as const, role: 'Reviewer' },
-  { id: '3', name: 'Marketing', avatar: '/avatars/marketing.jpg', status: 'away' as const, role: 'Contributor' },
-]
+const documentsCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }[] = []
 
-const mockDocumentsPredictions = [
-  { id: '1', title: 'Storage Forecast', prediction: 'Document storage will reach 85% capacity by end of quarter', confidence: 89, trend: 'up' as const, impact: 'medium' as const },
-  { id: '2', title: 'Collaboration Trend', prediction: 'Real-time editing sessions up 40% - consider upgrading plan', confidence: 92, trend: 'up' as const, impact: 'high' as const },
-]
+const documentsPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: 'low' | 'medium' | 'high' }[] = []
 
-const mockDocumentsActivities = [
-  { id: '1', user: 'Content Lead', action: 'Created', target: 'Q4 Marketing Strategy', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Legal Team', action: 'Approved', target: 'Vendor Contract v2', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'success' as const },
-  { id: '3', user: 'Marketing', action: 'Shared', target: 'Brand Guidelines', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'info' as const },
-]
+const documentsActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' | 'error' }[] = []
 
 // Quick actions initialized inside component to access state setters
 
@@ -347,7 +292,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
   const [folderOrder, setFolderOrder] = useState<DocumentFolder[]>([])
 
   // Quick actions with real functionality
-  const mockDocumentsQuickActions = [
+  const documentsQuickActions = [
     { id: '1', label: 'New Document', icon: 'plus', action: () => setShowCreateDialog(true), variant: 'default' as const },
     { id: '2', label: 'Upload Files', icon: 'upload', action: () => setShowUploadDialog(true), variant: 'default' as const },
     { id: '3', label: 'Create Folder', icon: 'folder', action: () => handleCreateDocument('folder'), variant: 'outline' as const },
@@ -478,7 +423,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
   // Handle move to folder - REAL SUPABASE OPERATION
   const handleMoveToFolder = async (doc: DocumentFile, folderId: string) => {
     try {
-      const folder = mockFolders.find(f => f.id === folderId)
+      const folder = folders.find(f => f.id === folderId)
       await moveToFolder(doc.id, folderId, folder?.name)
       toast.success('Document moved', {
         description: `"${doc.name}" moved to ${folder?.name || 'folder'}`
@@ -519,13 +464,13 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
 
   // Calculate comprehensive stats
   const stats = useMemo(() => {
-    const totalDocs = mockDocuments.length
-    const sharedDocs = mockDocuments.filter(d => d.shared).length
-    const starredDocs = mockDocuments.filter(d => d.starred).length
-    const draftDocs = mockDocuments.filter(d => d.status === 'draft').length
-    const reviewDocs = mockDocuments.filter(d => d.status === 'review').length
-    const totalComments = mockDocuments.reduce((sum, d) => sum + d.comments, 0)
-    const totalFolders = mockFolders.length
+    const totalDocs = documentFiles.length
+    const sharedDocs = documentFiles.filter(d => d.shared).length
+    const starredDocs = documentFiles.filter(d => d.starred).length
+    const draftDocs = documentFiles.filter(d => d.status === 'draft').length
+    const reviewDocs = documentFiles.filter(d => d.status === 'review').length
+    const totalComments = documentFiles.reduce((sum, d) => sum + d.comments, 0)
+    const totalFolders = folders.length
     const storageUsedGB = storageInfo.used / (1024 * 1024 * 1024)
 
     return {
@@ -542,7 +487,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
 
   // Filter documents
   const filteredDocuments = useMemo(() => {
-    return mockDocuments.filter(doc => {
+    return documentFiles.filter(doc => {
       const matchesSearch = !searchQuery ||
         doc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         doc.tags.some(t => t.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -552,9 +497,9 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
     })
   }, [searchQuery, statusFilter, typeFilter])
 
-  const starredDocuments = useMemo(() => mockDocuments.filter(d => d.starred), [])
+  const starredDocuments = useMemo(() => documentFiles.filter(d => d.starred), [])
   const recentDocuments = useMemo(() =>
-    [...mockDocuments].sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime()).slice(0, 6),
+    [...documentFiles].sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime()).slice(0, 6),
     []
   )
 
@@ -623,7 +568,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
     toast.loading('Preparing export...')
     try {
       // Create a text file with document list as JSON
-      const exportData = JSON.stringify(mockDocuments, null, 2)
+      const exportData = JSON.stringify(documentFiles, null, 2)
       const blob = new Blob([exportData], { type: 'application/json' })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
@@ -646,9 +591,9 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
     toast.loading('Preparing backup...')
     try {
       const backupData = {
-        documents: mockDocuments,
-        folders: mockFolders,
-        templates: mockTemplates,
+        documents: documentFiles,
+        folders: folders,
+        templates: templates,
         exportedAt: new Date().toISOString()
       }
       const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' })
@@ -829,17 +774,17 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
 
   // Filtered templates based on templateFilter
   const filteredTemplates = useMemo(() => {
-    if (templateFilter === 'all') return mockTemplates
-    return mockTemplates.filter(t => t.type === templateFilter)
+    if (templateFilter === 'all') return templates
+    return templates.filter(t => t.type === templateFilter)
   }, [templateFilter])
 
   // Filtered shared documents based on sharingFilter
   const sharedDocuments = useMemo(() => {
-    const shared = mockDocuments.filter(d => d.shared)
+    const shared = documentFiles.filter(d => d.shared)
     if (sharingFilter === 'all') return shared
     if (sharingFilter === 'team') return shared.filter(d => d.sharingType === 'team')
     if (sharingFilter === 'public') return shared.filter(d => d.sharingType === 'public' || d.sharingType === 'organization')
-    if (sharingFilter === 'private') return mockDocuments.filter(d => d.sharingType === 'private')
+    if (sharingFilter === 'private') return documentFiles.filter(d => d.sharingType === 'private')
     return shared
   }, [sharingFilter])
 
@@ -1046,11 +991,11 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockDocuments.length}</p>
+                    <p className="text-3xl font-bold">{documentFiles.length}</p>
                     <p className="text-blue-200 text-sm">Documents</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockFolders.length}</p>
+                    <p className="text-3xl font-bold">{folders.length}</p>
                     <p className="text-blue-200 text-sm">Folders</p>
                   </div>
                   <div className="text-center">
@@ -1206,7 +1151,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                   }}>View All</Button>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {mockRecentActivity.map(activity => (
+                  {recentActivity.map(activity => (
                     <div key={activity.id} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <div className="p-2 rounded-full bg-white dark:bg-gray-700">
                         {getActionIcon(activity.action)}
@@ -1261,7 +1206,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                     <p className="text-emerald-200 text-sm">Files</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockDocuments.filter(d => d.starred).length}</p>
+                    <p className="text-3xl font-bold">{documentFiles.filter(d => d.starred).length}</p>
                     <p className="text-emerald-200 text-sm">Starred</p>
                   </div>
                 </div>
@@ -1465,11 +1410,11 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockFolders.length}</p>
+                    <p className="text-3xl font-bold">{folders.length}</p>
                     <p className="text-amber-200 text-sm">Folders</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockFolders.filter(f => f.shared).length}</p>
+                    <p className="text-3xl font-bold">{folders.filter(f => f.shared).length}</p>
                     <p className="text-amber-200 text-sm">Shared</p>
                   </div>
                 </div>
@@ -1530,7 +1475,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {mockFolders.map(folder => (
+              {folders.map(folder => (
                 <Card key={folder.id} className="hover:shadow-md transition-all cursor-pointer" onClick={() => setSelectedFolder(folder)}>
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-4">
@@ -1588,11 +1533,11 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockTemplates.length}</p>
+                    <p className="text-3xl font-bold">{templates.length}</p>
                     <p className="text-violet-200 text-sm">Templates</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockTemplates.filter(t => t.isPremium).length}</p>
+                    <p className="text-3xl font-bold">{templates.filter(t => t.isPremium).length}</p>
                     <p className="text-violet-200 text-sm">Premium</p>
                   </div>
                 </div>
@@ -1667,7 +1612,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {mockTemplates.map(template => (
+              {templates.map(template => (
                 <Card key={template.id} className="hover:shadow-md transition-all cursor-pointer relative">
                   {template.isPremium && (
                     <Badge className="absolute top-3 right-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0">
@@ -1699,11 +1644,11 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockDocuments.filter(d => d.shared).length}</p>
+                    <p className="text-3xl font-bold">{documentFiles.filter(d => d.shared).length}</p>
                     <p className="text-cyan-200 text-sm">Shared</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockDocuments.filter(d => d.sharingType === 'team').length}</p>
+                    <p className="text-3xl font-bold">{documentFiles.filter(d => d.sharingType === 'team').length}</p>
                     <p className="text-cyan-200 text-sm">Team</p>
                   </div>
                 </div>
@@ -1747,7 +1692,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  {mockDocuments.filter(d => d.shared).map(doc => (
+                  {documentFiles.filter(d => d.shared).map(doc => (
                     <div key={doc.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all cursor-pointer" onClick={() => setSelectedDocument(doc)}>
                       <div className="flex items-center gap-4">
                         {getFileIcon(doc.type)}
@@ -2443,7 +2388,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockDocumentsAIInsights}
+              insights={documentsAIInsights}
               title="Document Intelligence"
               onInsightAction={(insight) => {
                 // Store insight action in localStorage and navigate based on insight type
@@ -2468,11 +2413,11 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockDocumentsCollaborators}
+              collaborators={documentsCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockDocumentsPredictions}
+              predictions={documentsPredictions}
               title="Storage Forecasts"
             />
           </div>
@@ -2480,12 +2425,12 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockDocumentsActivities}
+            activities={documentsActivities}
             title="Document Activity"
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockDocumentsQuickActions}
+            actions={documentsQuickActions}
             variant="grid"
           />
         </div>
@@ -2539,7 +2484,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                     </div>
                   </TabsContent>
                   <TabsContent value="history" className="mt-4 space-y-2">
-                    {mockVersionHistory.map((version, i) => (
+                    {versionHistory.map((version, i) => (
                       <div key={version.id} className={`flex items-start gap-3 p-3 rounded-lg ${i === 0 ? 'bg-cyan-50 dark:bg-cyan-900/20' : 'bg-gray-50 dark:bg-gray-800'}`}>
                         <Avatar className="h-8 w-8">
                           <AvatarImage src={`https://avatar.vercel.sh/${version.userName}`} />
@@ -2555,7 +2500,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                     ))}
                   </TabsContent>
                   <TabsContent value="comments" className="mt-4 space-y-3">
-                    {mockComments.map(comment => (
+                    {comments.map(comment => (
                       <div key={comment.id} className={`flex gap-3 p-3 rounded-lg ${comment.resolved ? 'bg-green-50 dark:bg-green-900/20' : 'bg-gray-50 dark:bg-gray-800'}`}>
                         <Avatar className="h-8 w-8">
                           <AvatarImage src={`https://avatar.vercel.sh/${comment.userName}`} />
@@ -2682,7 +2627,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-2 py-4">
-              {mockFolders.map(folder => (
+              {folders.map(folder => (
                 <button
                   key={folder.id}
                   onClick={() => documentToAction && handleMoveToFolder(documentToAction, folder.id)}
@@ -2841,7 +2786,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
               <Button
                 variant="outline"
                 onClick={() => {
-                  setFolderOrder(mockFolders)
+                  setFolderOrder(folders)
                   setShowOrganizeDialog(false)
                 }}
               >

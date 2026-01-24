@@ -2,9 +2,13 @@
 
 import { createClient } from '@/lib/supabase/client'
 
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
 import { useAccessLogs } from '@/lib/hooks/use-access-logs'
+import { useAuthUserId } from '@/lib/hooks/use-auth-user-id'
+import { useAlerts } from '@/lib/hooks/use-alerts'
+import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
+import { useTeam } from '@/lib/hooks/use-team'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -183,291 +187,16 @@ interface LogStats {
   bytesTransferred: number
 }
 
-// Mock data - available for development/testing
-const _mockLogs: AccessLog[] = [
-  {
-    id: '1',
-    timestamp: '2024-12-24T10:30:45.123Z',
-    status: 'success',
-    level: 'info',
-    accessType: 'login',
-    user: { id: '1', name: 'Alex Chen', email: 'alex@company.com', avatar: '' },
-    resource: '/api/auth/login',
-    method: 'POST',
-    statusCode: 200,
-    ipAddress: '192.168.1.100',
-    location: { city: 'San Francisco', country: 'USA', coordinates: '37.7749,-122.4194' },
-    device: { type: 'desktop', browser: 'Chrome', os: 'macOS', version: '120.0' },
-    duration: 145,
-    requestSize: 256,
-    responseSize: 1024,
-    userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
-    referrer: 'https://app.company.com/login',
-    sessionId: 'sess_abc123',
-    requestId: 'req_xyz789',
-    errorMessage: null,
-    stackTrace: null,
-    tags: ['auth', 'user-login'],
-    isSuspicious: false,
-    isBot: false,
-    message: 'User login successful'
-  },
-  {
-    id: '2',
-    timestamp: '2024-12-24T10:28:30.456Z',
-    status: 'failed',
-    level: 'warn',
-    accessType: 'login',
-    user: null,
-    resource: '/api/auth/login',
-    method: 'POST',
-    statusCode: 401,
-    ipAddress: '203.45.67.89',
-    location: { city: 'Unknown', country: 'Russia', coordinates: '55.7558,37.6173' },
-    device: { type: 'desktop', browser: 'Firefox', os: 'Windows', version: '119.0' },
-    duration: 89,
-    requestSize: 128,
-    responseSize: 64,
-    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
-    referrer: null,
-    sessionId: 'sess_def456',
-    requestId: 'req_uvw123',
-    errorMessage: 'Invalid credentials',
-    stackTrace: null,
-    tags: ['auth', 'failed-login'],
-    isSuspicious: true,
-    isBot: false,
-    message: 'Failed login attempt - invalid credentials'
-  },
-  {
-    id: '3',
-    timestamp: '2024-12-24T10:25:15.789Z',
-    status: 'success',
-    level: 'info',
-    accessType: 'api',
-    user: { id: '2', name: 'Sarah Miller', email: 'sarah@company.com', avatar: '' },
-    resource: '/api/v2/users/profile',
-    method: 'GET',
-    statusCode: 200,
-    ipAddress: '10.0.0.55',
-    location: { city: 'New York', country: 'USA', coordinates: '40.7128,-74.0060' },
-    device: { type: 'mobile', browser: 'Safari', os: 'iOS', version: '17.0' },
-    duration: 234,
-    requestSize: 64,
-    responseSize: 2048,
-    userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0)',
-    referrer: 'https://app.company.com/dashboard',
-    sessionId: 'sess_ghi789',
-    requestId: 'req_rst456',
-    errorMessage: null,
-    stackTrace: null,
-    tags: ['api', 'user-data'],
-    isSuspicious: false,
-    isBot: false,
-    message: 'User profile data retrieved'
-  },
-  {
-    id: '4',
-    timestamp: '2024-12-24T10:22:00.012Z',
-    status: 'blocked',
-    level: 'error',
-    accessType: 'api',
-    user: null,
-    resource: '/api/admin/users',
-    method: 'DELETE',
-    statusCode: 403,
-    ipAddress: '45.67.89.123',
-    location: { city: 'Beijing', country: 'China', coordinates: '39.9042,116.4074' },
-    device: { type: 'bot', browser: 'Unknown', os: 'Linux', version: '' },
-    duration: 12,
-    requestSize: 32,
-    responseSize: 48,
-    userAgent: 'Python-urllib/3.9',
-    referrer: null,
-    sessionId: '',
-    requestId: 'req_opq789',
-    errorMessage: 'Blocked by WAF: Suspicious activity',
-    stackTrace: null,
-    tags: ['security', 'blocked', 'bot'],
-    isSuspicious: true,
-    isBot: true,
-    message: 'Request blocked by WAF - suspicious bot activity detected'
-  },
-  {
-    id: '5',
-    timestamp: '2024-12-24T10:18:45.345Z',
-    status: 'success',
-    level: 'info',
-    accessType: 'admin',
-    user: { id: '3', name: 'Mike Johnson', email: 'mike@company.com', avatar: '' },
-    resource: '/api/admin/settings',
-    method: 'PUT',
-    statusCode: 200,
-    ipAddress: '192.168.1.50',
-    location: { city: 'Austin', country: 'USA', coordinates: '30.2672,-97.7431' },
-    device: { type: 'desktop', browser: 'Chrome', os: 'Windows', version: '120.0' },
-    duration: 567,
-    requestSize: 4096,
-    responseSize: 512,
-    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
-    referrer: 'https://app.company.com/admin/settings',
-    sessionId: 'sess_jkl012',
-    requestId: 'req_mno345',
-    errorMessage: null,
-    stackTrace: null,
-    tags: ['admin', 'settings-update'],
-    isSuspicious: false,
-    isBot: false,
-    message: 'Admin settings updated successfully'
-  },
-  {
-    id: '6',
-    timestamp: '2024-12-24T10:15:30.678Z',
-    status: 'warning',
-    level: 'warn',
-    accessType: 'database',
-    user: { id: '4', name: 'Emma Wilson', email: 'emma@company.com', avatar: '' },
-    resource: '/api/db/query',
-    method: 'POST',
-    statusCode: 200,
-    ipAddress: '10.0.0.88',
-    location: { city: 'Seattle', country: 'USA', coordinates: '47.6062,-122.3321' },
-    device: { type: 'desktop', browser: 'Chrome', os: 'macOS', version: '120.0' },
-    duration: 2345,
-    requestSize: 512,
-    responseSize: 65536,
-    userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
-    referrer: 'https://app.company.com/analytics',
-    sessionId: 'sess_pqr678',
-    requestId: 'req_stu901',
-    errorMessage: 'Query took longer than expected',
-    stackTrace: null,
-    tags: ['database', 'slow-query'],
-    isSuspicious: false,
-    isBot: false,
-    message: 'Database query completed with performance warning'
-  },
-  {
-    id: '7',
-    timestamp: '2024-12-24T10:12:15.901Z',
-    status: 'failed',
-    level: 'error',
-    accessType: 'api',
-    user: { id: '1', name: 'Alex Chen', email: 'alex@company.com', avatar: '' },
-    resource: '/api/v2/payments/process',
-    method: 'POST',
-    statusCode: 500,
-    ipAddress: '192.168.1.100',
-    location: { city: 'San Francisco', country: 'USA', coordinates: '37.7749,-122.4194' },
-    device: { type: 'desktop', browser: 'Chrome', os: 'macOS', version: '120.0' },
-    duration: 1234,
-    requestSize: 1024,
-    responseSize: 256,
-    userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
-    referrer: 'https://app.company.com/checkout',
-    sessionId: 'sess_abc123',
-    requestId: 'req_vwx234',
-    errorMessage: 'Payment gateway timeout',
-    stackTrace: 'Error: Gateway timeout at PaymentService.process (/app/services/payment.ts:145:12)...',
-    tags: ['api', 'payment', 'error'],
-    isSuspicious: false,
-    isBot: false,
-    message: 'Payment processing failed - gateway timeout'
-  },
-  {
-    id: '8',
-    timestamp: '2024-12-24T10:08:45.234Z',
-    status: 'success',
-    level: 'info',
-    accessType: 'file',
-    user: { id: '2', name: 'Sarah Miller', email: 'sarah@company.com', avatar: '' },
-    resource: '/api/files/download/report-2024.pdf',
-    method: 'GET',
-    statusCode: 200,
-    ipAddress: '10.0.0.55',
-    location: { city: 'New York', country: 'USA', coordinates: '40.7128,-74.0060' },
-    device: { type: 'desktop', browser: 'Safari', os: 'macOS', version: '17.2' },
-    duration: 789,
-    requestSize: 64,
-    responseSize: 2097152,
-    userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
-    referrer: 'https://app.company.com/reports',
-    sessionId: 'sess_ghi789',
-    requestId: 'req_yza567',
-    errorMessage: null,
-    stackTrace: null,
-    tags: ['file', 'download', 'report'],
-    isSuspicious: false,
-    isBot: false,
-    message: 'File download completed - report-2024.pdf'
-  }
-]
+// Data is now fetched from Supabase hooks:
+// - logs -> useAccessLogs() hook
+// - alerts -> useAlerts() hook
+// - savedViews -> local state (user preferences)
+// - insights -> derived from stats
+// - collaborators -> useTeam() hook
+// - predictions -> derived from stats
+// - activities -> useActivityLogs() hook
 
-const mockPatterns: LogPattern[] = [
-  { id: '1', pattern: 'Failed login attempts from same IP', occurrences: 23, status: 'failed', firstSeen: '2024-12-20', lastSeen: '2024-12-24', affectedResources: ['/api/auth/login'] },
-  { id: '2', pattern: 'Slow database queries (>2s)', occurrences: 15, status: 'warning', firstSeen: '2024-12-22', lastSeen: '2024-12-24', affectedResources: ['/api/db/query', '/api/analytics/report'] },
-  { id: '3', pattern: 'Bot traffic blocked', occurrences: 156, status: 'blocked', firstSeen: '2024-12-01', lastSeen: '2024-12-24', affectedResources: ['/api/admin/*', '/api/users/*'] },
-  { id: '4', pattern: '500 errors in payment service', occurrences: 8, status: 'failed', firstSeen: '2024-12-23', lastSeen: '2024-12-24', affectedResources: ['/api/v2/payments/*'] }
-]
-
-const mockAlerts: AlertRule[] = [
-  { id: '1', name: 'High Error Rate', condition: 'error_rate > 5%', threshold: 5, timeWindow: '5 minutes', status: 'active', lastTriggered: '2024-12-24T08:30:00Z', notifyChannels: ['slack', 'email'], enabled: true },
-  { id: '2', name: 'Suspicious Login Activity', condition: 'failed_logins > 10', threshold: 10, timeWindow: '1 minute', status: 'triggered', lastTriggered: '2024-12-24T10:28:00Z', notifyChannels: ['pagerduty', 'slack'], enabled: true },
-  { id: '3', name: 'Slow Response Time', condition: 'avg_duration > 2000ms', threshold: 2000, timeWindow: '5 minutes', status: 'paused', lastTriggered: '2024-12-23T15:45:00Z', notifyChannels: ['slack'], enabled: false },
-  { id: '4', name: 'Bot Traffic Spike', condition: 'bot_requests > 100', threshold: 100, timeWindow: '1 minute', status: 'active', lastTriggered: null, notifyChannels: ['email'], enabled: true }
-]
-
-const mockSavedViews: SavedView[] = [
-  { id: '1', name: 'All Errors', filters: { level: ['error', 'critical'] }, isDefault: false, createdAt: '2024-12-01' },
-  { id: '2', name: 'Login Activity', filters: { accessType: ['login', 'logout'] }, isDefault: false, createdAt: '2024-12-10' },
-  { id: '3', name: 'Suspicious Traffic', filters: { status: ['blocked', 'failed'] }, isDefault: false, createdAt: '2024-12-15' },
-  { id: '4', name: 'Admin Actions', filters: { accessType: ['admin'] }, isDefault: true, createdAt: '2024-12-20' }
-]
-
-const _mockStats: LogStats = {
-  total: 45678,
-  success: 42156,
-  failed: 2345,
-  blocked: 1089,
-  suspicious: 234,
-  avgDuration: 234,
-  successRate: 92.3,
-  errorRate: 5.1,
-  requestsPerMinute: 156,
-  uniqueUsers: 1234,
-  uniqueIPs: 2567,
-  bytesTransferred: 12345678901
-}
-
-// Suppress unused warnings for development mock data
-void _mockLogs
-void _mockStats
-
-// Enhanced Competitive Upgrade Mock Data
-const mockLogsAIInsights = [
-  { id: '1', type: 'opportunity' as const, title: 'Security Status', description: 'No suspicious activity detected in last 24 hours.', impact: 'low' as const, createdAt: new Date() },
-  { id: '2', type: 'alert' as const, title: 'Failed Logins', description: '15 failed login attempts from unknown IPs. Review needed.', impact: 'high' as const, createdAt: new Date() },
-  { id: '3', type: 'prediction' as const, title: 'Traffic Pattern', description: 'API usage 40% higher during business hours.', impact: 'medium' as const, createdAt: new Date() },
-]
-
-const mockLogsCollaborators = [
-  { id: '1', name: 'Security Admin', avatar: '/avatars/security.jpg', color: '#ef4444', status: 'online' as const },
-  { id: '2', name: 'DevOps Engineer', avatar: '/avatars/devops.jpg', color: '#f97316', status: 'online' as const },
-  { id: '3', name: 'Compliance Officer', avatar: '/avatars/compliance.jpg', color: '#8b5cf6', status: 'away' as const },
-]
-
-const mockLogsPredictions = [
-  { label: 'Traffic Forecast', currentValue: 1200, predictedValue: 1800, confidence: 91, trend: 'up' as const, timeframe: 'Monday 9-11 AM', factors: [{ name: 'Weekly pattern', impact: 'positive' as const, weight: 0.6 }, { name: 'User growth', impact: 'positive' as const, weight: 0.4 }] },
-  { label: 'Storage Usage', currentValue: 65, predictedValue: 80, confidence: 85, trend: 'up' as const, timeframe: '2 weeks', factors: [{ name: 'Log retention policy', impact: 'negative' as const, weight: 0.5 }, { name: 'Traffic increase', impact: 'negative' as const, weight: 0.5 }] },
-]
-
-const mockLogsActivities = [
-  { id: '1', type: 'update' as const, title: 'Blocked 3 suspicious IP addresses', user: { id: '1', name: 'System' }, timestamp: new Date() },
-  { id: '2', type: 'comment' as const, title: 'Reviewed authentication logs', user: { id: '2', name: 'Admin' }, timestamp: new Date(Date.now() - 3600000) },
-  { id: '3', type: 'delete' as const, title: 'Archived logs older than 90 days', user: { id: '3', name: 'DevOps' }, timestamp: new Date(Date.now() - 7200000) },
-]
-
-// mockLogsQuickActions is defined inside the component with real handlers
+// Quick actions defined inside the component with real handlers
 
 // Database type for access_logs table
 interface DbAccessLog {
@@ -495,8 +224,29 @@ interface DbAccessLog {
 }
 
 export default function AccessLogsClient() {
-  // Use hook for data fetching
+  // Auth and user ID
+  const { getUserId } = useAuthUserId()
+  const [userId, setUserId] = useState<string | null>(null)
+
+  // Initialize user ID
+  useEffect(() => {
+    const initUserId = async () => {
+      const id = await getUserId()
+      setUserId(id)
+    }
+    initUserId()
+  }, [getUserId])
+
+  // Use hooks for data fetching
   const { logs: hookLogs, stats: hookStats, isLoading, refetch } = useAccessLogs()
+  const { alerts: dbAlerts, fetchAlerts } = useAlerts()
+  const { logs: activityLogs } = useActivityLogs()
+  const { members: teamMembers } = useTeam()
+
+  // Fetch alerts on mount
+  useEffect(() => {
+    fetchAlerts()
+  }, [fetchAlerts])
 
   const [activeTab, setActiveTab] = useState('logs')
   const [searchQuery, setSearchQuery] = useState('')
@@ -604,6 +354,192 @@ export default function AccessLogsClient() {
       bytesTransferred: logs.reduce((sum, l) => sum + (l.requestSize || 0) + (l.responseSize || 0), 0)
     }
   }, [hookStats, logs])
+
+  // Derived data from hooks - replaces mock data
+  // Patterns derived from logs aggregation
+  const mockPatterns: LogPattern[] = useMemo(() => {
+    const patternMap = new Map<string, { count: number; status: LogStatus; firstSeen: string; lastSeen: string; resources: Set<string> }>()
+
+    // Group failed logins by IP
+    const failedLogins = logs.filter(l => l.status === 'failed' && l.accessType === 'login')
+    if (failedLogins.length > 0) {
+      patternMap.set('Failed login attempts', {
+        count: failedLogins.length,
+        status: 'failed',
+        firstSeen: failedLogins[failedLogins.length - 1]?.timestamp || new Date().toISOString(),
+        lastSeen: failedLogins[0]?.timestamp || new Date().toISOString(),
+        resources: new Set(failedLogins.map(l => l.resource))
+      })
+    }
+
+    // Slow queries (duration > 2000ms)
+    const slowQueries = logs.filter(l => l.duration > 2000)
+    if (slowQueries.length > 0) {
+      patternMap.set('Slow queries (>2s)', {
+        count: slowQueries.length,
+        status: 'warning',
+        firstSeen: slowQueries[slowQueries.length - 1]?.timestamp || new Date().toISOString(),
+        lastSeen: slowQueries[0]?.timestamp || new Date().toISOString(),
+        resources: new Set(slowQueries.map(l => l.resource))
+      })
+    }
+
+    // Bot traffic
+    const botTraffic = logs.filter(l => l.isBot || l.device.type === 'bot')
+    if (botTraffic.length > 0) {
+      patternMap.set('Bot traffic', {
+        count: botTraffic.length,
+        status: 'blocked',
+        firstSeen: botTraffic[botTraffic.length - 1]?.timestamp || new Date().toISOString(),
+        lastSeen: botTraffic[0]?.timestamp || new Date().toISOString(),
+        resources: new Set(botTraffic.map(l => l.resource))
+      })
+    }
+
+    // Server errors (5xx)
+    const serverErrors = logs.filter(l => l.statusCode >= 500)
+    if (serverErrors.length > 0) {
+      patternMap.set('Server errors (5xx)', {
+        count: serverErrors.length,
+        status: 'failed',
+        firstSeen: serverErrors[serverErrors.length - 1]?.timestamp || new Date().toISOString(),
+        lastSeen: serverErrors[0]?.timestamp || new Date().toISOString(),
+        resources: new Set(serverErrors.map(l => l.resource))
+      })
+    }
+
+    return Array.from(patternMap.entries()).map(([pattern, data], index) => ({
+      id: String(index + 1),
+      pattern,
+      occurrences: data.count,
+      status: data.status,
+      firstSeen: data.firstSeen.split('T')[0],
+      lastSeen: data.lastSeen.split('T')[0],
+      affectedResources: Array.from(data.resources)
+    }))
+  }, [logs])
+
+  // Alert rules from alerts hook
+  const mockAlerts: AlertRule[] = useMemo(() => {
+    return dbAlerts.slice(0, 10).map(alert => ({
+      id: alert.id,
+      name: alert.title,
+      condition: alert.description || `${alert.category} alert`,
+      threshold: alert.priority * 10,
+      timeWindow: '5 minutes',
+      status: alert.status === 'active' ? 'active' : alert.status === 'acknowledged' ? 'triggered' : 'paused' as 'active' | 'paused' | 'triggered',
+      lastTriggered: alert.triggered_at,
+      notifyChannels: alert.notification_channels,
+      enabled: alert.status === 'active'
+    }))
+  }, [dbAlerts])
+
+  // Saved views - local state with persistence
+  const [mockSavedViews, setMockSavedViews] = useState<SavedView[]>([])
+
+  // AI Insights derived from alerts and stats
+  const mockLogsAIInsights = useMemo(() => {
+    const insights: { id: string; type: 'opportunity' | 'alert' | 'prediction'; title: string; description: string; impact: 'low' | 'medium' | 'high'; createdAt: Date }[] = []
+
+    // Security status insight
+    if (stats.suspicious === 0) {
+      insights.push({
+        id: '1',
+        type: 'opportunity',
+        title: 'Security Status',
+        description: 'No suspicious activity detected in recent logs.',
+        impact: 'low',
+        createdAt: new Date()
+      })
+    } else {
+      insights.push({
+        id: '1',
+        type: 'alert',
+        title: 'Security Alert',
+        description: `${stats.suspicious} suspicious activities detected. Review recommended.`,
+        impact: 'high',
+        createdAt: new Date()
+      })
+    }
+
+    // Failed logins insight
+    if (stats.failed > 10) {
+      insights.push({
+        id: '2',
+        type: 'alert',
+        title: 'Failed Logins',
+        description: `${stats.failed} failed requests detected. Review needed.`,
+        impact: 'high',
+        createdAt: new Date()
+      })
+    }
+
+    // Traffic pattern insight
+    insights.push({
+      id: '3',
+      type: 'prediction',
+      title: 'Traffic Pattern',
+      description: `Current rate: ${stats.requestsPerMinute} req/min. Success rate: ${stats.successRate.toFixed(1)}%`,
+      impact: 'medium',
+      createdAt: new Date()
+    })
+
+    return insights
+  }, [stats])
+
+  // Collaborators from team members
+  const mockLogsCollaborators = useMemo(() => {
+    const statusColors = ['#ef4444', '#f97316', '#8b5cf6', '#22c55e', '#3b82f6']
+    return teamMembers.slice(0, 5).map((member, index) => ({
+      id: member.id,
+      name: member.name,
+      avatar: member.avatar_url || `/avatars/default.jpg`,
+      color: statusColors[index % statusColors.length],
+      status: member.status === 'active' ? 'online' : member.status === 'on_leave' ? 'away' : 'offline' as 'online' | 'away' | 'offline'
+    }))
+  }, [teamMembers])
+
+  // Predictions derived from stats
+  const mockLogsPredictions = useMemo(() => [
+    {
+      label: 'Traffic Forecast',
+      currentValue: stats.requestsPerMinute * 60,
+      predictedValue: Math.round(stats.requestsPerMinute * 60 * 1.5),
+      confidence: 91,
+      trend: 'up' as const,
+      timeframe: 'Next hour',
+      factors: [
+        { name: 'Historical pattern', impact: 'positive' as const, weight: 0.6 },
+        { name: 'Current trend', impact: 'positive' as const, weight: 0.4 }
+      ]
+    },
+    {
+      label: 'Error Rate',
+      currentValue: stats.errorRate,
+      predictedValue: Math.max(0, stats.errorRate - 1),
+      confidence: 85,
+      trend: 'down' as const,
+      timeframe: 'Next 2 hours',
+      factors: [
+        { name: 'Fix deployments', impact: 'positive' as const, weight: 0.5 },
+        { name: 'Traffic normalization', impact: 'positive' as const, weight: 0.5 }
+      ]
+    }
+  ], [stats])
+
+  // Activities from activity logs
+  const mockLogsActivities = useMemo(() => {
+    return activityLogs.slice(0, 10).map(log => ({
+      id: log.id,
+      type: log.activity_type === 'create' ? 'create' :
+            log.activity_type === 'update' ? 'update' :
+            log.activity_type === 'delete' ? 'delete' : 'comment' as 'create' | 'update' | 'delete' | 'comment',
+      title: log.action || `${log.activity_type} on ${log.resource_type || 'resource'}`,
+      user: { id: log.user_id || '0', name: log.user_name || 'System' },
+      timestamp: new Date(log.created_at)
+    }))
+  }, [activityLogs])
+
   const [showWebhookDialog, setShowWebhookDialog] = useState(false)
   const [showCustomFieldsDialog, setShowCustomFieldsDialog] = useState(false)
   const [showContextDialog, setShowContextDialog] = useState(false)
@@ -1582,13 +1518,7 @@ export default function AccessLogsClient() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {[
-                    { location: 'San Francisco, USA', count: 12456, percentage: 27.3 },
-                    { location: 'New York, USA', count: 8934, percentage: 19.5 },
-                    { location: 'London, UK', count: 6789, percentage: 14.8 },
-                    { location: 'Austin, USA', count: 5678, percentage: 12.4 },
-                    { location: 'Seattle, USA', count: 4567, percentage: 10.0 }
-                  ].map((item, index) => (
+                  {([] as { location: string; count: number; percentage: number }[]).map((item, index) => (
                     <div key={item.location} className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center text-white text-sm font-medium">
                         {index + 1}
@@ -1600,6 +1530,9 @@ export default function AccessLogsClient() {
                       <Badge variant="outline">{item.percentage}%</Badge>
                     </div>
                   ))}
+                  {logs.length === 0 && (
+                    <p className="text-sm text-gray-500 text-center py-4">No location data available</p>
+                  )}
                 </CardContent>
               </Card>
 
@@ -1611,12 +1544,7 @@ export default function AccessLogsClient() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {[
-                    { device: 'Desktop', icon: Monitor, count: 28456, percentage: 62.3, color: 'text-blue-500' },
-                    { device: 'Mobile', icon: Smartphone, count: 12345, percentage: 27.0, color: 'text-green-500' },
-                    { device: 'Tablet', icon: Tablet, count: 3456, percentage: 7.6, color: 'text-purple-500' },
-                    { device: 'Bot', icon: Code, count: 1421, percentage: 3.1, color: 'text-red-500' }
-                  ].map(item => (
+                  {([] as { device: string; icon: typeof Monitor; count: number; percentage: number; color: string }[]).map(item => (
                     <div key={item.device} className="flex items-center gap-3">
                       <item.icon className={`w-5 h-5 ${item.color}`} />
                       <div className="flex-1">
@@ -1628,6 +1556,9 @@ export default function AccessLogsClient() {
                       </div>
                     </div>
                   ))}
+                  {logs.length === 0 && (
+                    <p className="text-sm text-gray-500 text-center py-4">No device data available</p>
+                  )}
                 </CardContent>
               </Card>
             </div>
@@ -2432,13 +2363,7 @@ export default function AccessLogsClient() {
             <div className="relative">
               <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200 dark:bg-gray-700" />
               <div className="space-y-4 ml-8">
-                {selectedLog && [
-                  { time: '2 min ago', action: 'Session started', icon: '🔐' },
-                  { time: '1 min ago', action: 'Authenticated successfully', icon: '✅' },
-                  { time: '45 sec ago', action: selectedLog.message, icon: '📝', current: true },
-                  { time: '30 sec ago', action: 'Page view: Dashboard', icon: '👁️' },
-                  { time: '15 sec ago', action: 'API call: /api/data', icon: '🔄' },
-                ].map((event, index) => (
+                {selectedLog && ([] as { time: string; action: string; icon: string; current?: boolean }[]).map((event, index) => (
                   <div key={index} className={`relative ${event.current ? 'bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg -ml-3' : ''}`}>
                     <div className="absolute -left-10 w-6 h-6 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-full flex items-center justify-center text-sm">
                       {event.icon}
@@ -2446,10 +2371,13 @@ export default function AccessLogsClient() {
                     <div>
                       <p className="text-sm font-medium">{event.action}</p>
                       <p className="text-xs text-gray-500">{event.time}</p>
-                      {event.current && <span className="text-xs text-blue-600">← Current event</span>}
+                      {event.current && <span className="text-xs text-blue-600">Current event</span>}
                     </div>
                   </div>
                 ))}
+                {selectedLog && (
+                  <p className="text-sm text-gray-500 text-center py-4">No session timeline data available</p>
+                )}
               </div>
             </div>
           </ScrollArea>

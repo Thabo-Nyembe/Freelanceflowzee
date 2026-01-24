@@ -71,10 +71,6 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-// Import mock data from centralized adapters
-
-
-
 import { useAutomation, type Automation, type AutomationType, type AutomationStatus } from '@/lib/hooks/use-automation'
 
 // Initialize Supabase client once at module level
@@ -146,23 +142,25 @@ interface AutomationVersion {
 }
 
 // ============================================================================
-// MOCK DATA - ZAPIER-LEVEL INTEGRATIONS & TEMPLATES
+// TYPE DEFINITIONS FOR EMPTY ARRAYS
 // ============================================================================
 
-const INTEGRATIONS = [] // MIGRATED: Batch #12 - Removed mock data
+// Type aliases for competitive upgrade components
+type AIInsight = { id: string; type: 'success' | 'info' | 'warning' | 'error' | 'recommendation' | 'alert' | 'opportunity' | 'prediction'; title: string; description: string; priority?: 'low' | 'medium' | 'high'; timestamp?: string; category?: string }
+type Collaborator = { id: string; name: string; avatar?: string; status: 'online' | 'away' | 'offline'; role?: string; lastActive?: string }
+type Prediction = { id?: string; label?: string; current?: number; target?: number; predicted?: number; confidence: number; trend: 'up' | 'down' | 'stable' }
+type ActivityItem = { id: string; user: { id: string; name: string; avatar?: string }; action?: string; target?: { type: string; name: string }; timestamp: string | Date; type: 'comment' | 'update' | 'create' | 'delete' | 'mention' | 'assignment' | 'status_change' | 'milestone' | 'integration' }
 
-const TEMPLATES = [] // MIGRATED: Batch #12 - Removed mock data
+// Empty typed arrays - data loaded from Supabase
+const INTEGRATIONS: Integration[] = []
+const TEMPLATES: AutomationTemplate[] = []
+const RUN_LOGS: RunLog[] = []
 
-const RUN_LOGS = [] // MIGRATED: Batch #12 - Removed mock data
-
-// Enhanced Automation Mock Data
-const mockAutomationAIInsights = [] // MIGRATED: Batch #12 - Removed mock data
-
-const mockAutomationCollaborators = [] // MIGRATED: Batch #12 - Removed mock data
-
-const mockAutomationPredictions = [] // MIGRATED: Batch #12 - Removed mock data
-
-const mockAutomationActivities = [] // MIGRATED: Batch #12 - Removed mock data
+// Empty arrays for competitive upgrade components
+const automationAIInsights: AIInsight[] = []
+const automationCollaborators: Collaborator[] = []
+const automationPredictions: Prediction[] = []
+const automationActivities: ActivityItem[] = []
 
 // Quick actions will be defined inside the component to access state setters
 
@@ -2003,18 +2001,18 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockAutomationAIInsights}
+              insights={automationAIInsights}
               title="Automation Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockAutomationCollaborators}
+              collaborators={automationCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockAutomationPredictions}
+              predictions={automationPredictions}
               title="Workflow Forecasts"
             />
           </div>
@@ -2022,7 +2020,7 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockAutomationActivities}
+            activities={automationActivities}
             title="Automation Activity"
             maxItems={5}
           />

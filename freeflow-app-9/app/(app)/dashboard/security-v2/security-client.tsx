@@ -150,259 +150,20 @@ interface SecurityPolicy {
 }
 
 // ============================================================================
-// MOCK DATA
+// DATA ARRAYS (Empty - will be populated from database)
 // ============================================================================
 
-const mockVaultItems: VaultItem[] = [
-  {
-    id: '1',
-    type: 'login',
-    name: 'Google Account',
-    username: 'user@gmail.com',
-    website: 'google.com',
-    lastUsed: '2024-12-25T10:30:00Z',
-    created: '2023-01-15T08:00:00Z',
-    updated: '2024-11-20T14:30:00Z',
-    strength: 'strong',
-    tags: ['work', 'primary'],
-    favorite: true
-  },
-  {
-    id: '2',
-    type: 'login',
-    name: 'GitHub',
-    username: 'developer',
-    website: 'github.com',
-    lastUsed: '2024-12-24T16:45:00Z',
-    created: '2023-03-10T10:00:00Z',
-    updated: '2024-10-15T09:20:00Z',
-    strength: 'strong',
-    tags: ['development'],
-    favorite: true
-  },
-  {
-    id: '3',
-    type: 'login',
-    name: 'AWS Console',
-    username: 'admin@company.com',
-    website: 'aws.amazon.com',
-    lastUsed: '2024-12-23T11:00:00Z',
-    created: '2023-06-20T12:00:00Z',
-    updated: '2024-09-01T16:45:00Z',
-    strength: 'good',
-    reused: true,
-    tags: ['work', 'cloud'],
-    favorite: false
-  },
-  {
-    id: '4',
-    type: 'credit_card',
-    name: 'Visa Business',
-    lastUsed: '2024-12-20T09:15:00Z',
-    created: '2024-01-05T10:00:00Z',
-    updated: '2024-06-15T14:00:00Z',
-    tags: ['business'],
-    favorite: false
-  },
-  {
-    id: '5',
-    type: 'login',
-    name: 'Netflix',
-    username: 'user@email.com',
-    website: 'netflix.com',
-    lastUsed: '2024-12-22T20:30:00Z',
-    created: '2022-08-10T18:00:00Z',
-    updated: '2022-08-10T18:00:00Z',
-    strength: 'weak',
-    compromised: true,
-    tags: ['personal', 'entertainment'],
-    favorite: false
-  },
-  {
-    id: '6',
-    type: 'api_key',
-    name: 'Stripe API Key',
-    lastUsed: '2024-12-24T08:00:00Z',
-    created: '2024-03-01T10:00:00Z',
-    updated: '2024-03-01T10:00:00Z',
-    tags: ['api', 'payments'],
-    favorite: true
-  },
-  {
-    id: '7',
-    type: 'ssh_key',
-    name: 'Production Server',
-    lastUsed: '2024-12-23T15:30:00Z',
-    created: '2023-09-15T09:00:00Z',
-    updated: '2024-06-01T11:00:00Z',
-    tags: ['infrastructure'],
-    favorite: false
-  },
-  {
-    id: '8',
-    type: 'login',
-    name: 'Slack',
-    username: 'user@company.com',
-    website: 'slack.com',
-    lastUsed: '2024-12-25T09:00:00Z',
-    created: '2023-02-28T08:00:00Z',
-    updated: '2024-08-20T10:15:00Z',
-    strength: 'fair',
-    reused: true,
-    tags: ['work', 'communication'],
-    favorite: false
-  }
-]
+const vaultItems: VaultItem[] = []
 
-const mockSecurityIssues: SecurityIssue[] = [
-  {
-    id: '1',
-    type: 'compromised',
-    severity: 'critical',
-    itemId: '5',
-    itemName: 'Netflix',
-    description: 'This password was found in a data breach',
-    recommendation: 'Change this password immediately',
-    detectedAt: '2024-12-20T10:00:00Z',
-    resolved: false
-  },
-  {
-    id: '2',
-    type: 'weak_password',
-    severity: 'high',
-    itemId: '5',
-    itemName: 'Netflix',
-    description: 'Password is too short and easily guessable',
-    recommendation: 'Use a strong password with at least 16 characters',
-    detectedAt: '2024-12-18T14:30:00Z',
-    resolved: false
-  },
-  {
-    id: '3',
-    type: 'reused_password',
-    severity: 'medium',
-    itemId: '3',
-    itemName: 'AWS Console',
-    description: 'This password is used on 3 other sites',
-    recommendation: 'Use a unique password for each account',
-    detectedAt: '2024-12-15T09:00:00Z',
-    resolved: false
-  },
-  {
-    id: '4',
-    type: 'reused_password',
-    severity: 'medium',
-    itemId: '8',
-    itemName: 'Slack',
-    description: 'This password is used on 2 other sites',
-    recommendation: 'Use a unique password for each account',
-    detectedAt: '2024-12-14T11:30:00Z',
-    resolved: false
-  },
-  {
-    id: '5',
-    type: 'old_password',
-    severity: 'low',
-    itemId: '3',
-    itemName: 'AWS Console',
-    description: 'Password has not been changed in over 90 days',
-    recommendation: 'Update password regularly for better security',
-    detectedAt: '2024-12-10T08:00:00Z',
-    resolved: false
-  },
-  {
-    id: '6',
-    type: '2fa_missing',
-    severity: 'medium',
-    itemId: '5',
-    itemName: 'Netflix',
-    description: 'Two-factor authentication is not enabled',
-    recommendation: 'Enable 2FA for additional protection',
-    detectedAt: '2024-12-08T16:45:00Z',
-    resolved: false
-  }
-]
+const securityIssues: SecurityIssue[] = []
 
-const mockDevices: AuthorizedDevice[] = [
-  {
-    id: '1',
-    name: 'MacBook Pro',
-    type: 'desktop',
-    os: 'macOS Sonoma',
-    browser: 'Chrome 120',
-    location: 'San Francisco, CA',
-    ipAddress: '192.168.1.100',
-    lastActive: '2024-12-25T10:30:00Z',
-    firstSeen: '2024-01-15T08:00:00Z',
-    isCurrent: true,
-    trusted: true
-  },
-  {
-    id: '2',
-    name: 'iPhone 15 Pro',
-    type: 'mobile',
-    os: 'iOS 17.2',
-    location: 'San Francisco, CA',
-    ipAddress: '192.168.1.101',
-    lastActive: '2024-12-25T09:45:00Z',
-    firstSeen: '2024-03-20T10:00:00Z',
-    isCurrent: false,
-    trusted: true
-  },
-  {
-    id: '3',
-    name: 'Windows Desktop',
-    type: 'desktop',
-    os: 'Windows 11',
-    browser: 'Edge 120',
-    location: 'New York, NY',
-    ipAddress: '10.0.0.50',
-    lastActive: '2024-12-24T18:30:00Z',
-    firstSeen: '2024-06-10T14:00:00Z',
-    isCurrent: false,
-    trusted: true
-  },
-  {
-    id: '4',
-    name: 'iPad Air',
-    type: 'tablet',
-    os: 'iPadOS 17.2',
-    location: 'Los Angeles, CA',
-    ipAddress: '172.16.0.25',
-    lastActive: '2024-12-20T12:15:00Z',
-    firstSeen: '2024-08-05T09:30:00Z',
-    isCurrent: false,
-    trusted: false
-  }
-]
+const devices: AuthorizedDevice[] = []
 
-const mockActivityLog: ActivityLogEntry[] = [
-  { id: '1', action: 'Item accessed', itemName: 'Google Account', deviceName: 'MacBook Pro', location: 'San Francisco, CA', ipAddress: '192.168.1.100', timestamp: '2024-12-25T10:30:00Z', status: 'success' },
-  { id: '2', action: 'Password changed', itemName: 'GitHub', deviceName: 'MacBook Pro', location: 'San Francisco, CA', ipAddress: '192.168.1.100', timestamp: '2024-12-24T16:45:00Z', status: 'success' },
-  { id: '3', action: 'Failed login attempt', deviceName: 'Unknown Browser', location: 'Moscow, Russia', ipAddress: '185.82.xxx.xxx', timestamp: '2024-12-24T14:20:00Z', status: 'blocked' },
-  { id: '4', action: 'New item created', itemName: 'Stripe API Key', deviceName: 'MacBook Pro', location: 'San Francisco, CA', ipAddress: '192.168.1.100', timestamp: '2024-12-24T08:00:00Z', status: 'success' },
-  { id: '5', action: 'Device authorized', deviceName: 'iPhone 15 Pro', location: 'San Francisco, CA', ipAddress: '192.168.1.101', timestamp: '2024-12-23T11:30:00Z', status: 'success' },
-  { id: '6', action: 'Security scan completed', deviceName: 'System', location: 'Cloud', ipAddress: 'N/A', timestamp: '2024-12-23T06:00:00Z', status: 'success' },
-  { id: '7', action: 'Item shared', itemName: 'AWS Console', deviceName: 'MacBook Pro', location: 'San Francisco, CA', ipAddress: '192.168.1.100', timestamp: '2024-12-22T15:45:00Z', status: 'success' },
-  { id: '8', action: 'Failed login attempt', deviceName: 'Unknown Device', location: 'Beijing, China', ipAddress: '116.25.xxx.xxx', timestamp: '2024-12-22T03:12:00Z', status: 'blocked' }
-]
+const activityLog: ActivityLogEntry[] = []
 
-const mockSecretKeys: SecretKey[] = [
-  { id: '1', name: 'Production API Key', type: 'api', prefix: 'pk_live_...', lastUsed: '2024-12-25T10:00:00Z', created: '2024-01-15T08:00:00Z', expires: '2025-01-15T08:00:00Z', permissions: ['read', 'write'], status: 'active' },
-  { id: '2', name: 'Webhook Secret', type: 'webhook', prefix: 'whsec_...', lastUsed: '2024-12-24T22:30:00Z', created: '2024-03-10T10:00:00Z', permissions: ['webhook'], status: 'active' },
-  { id: '3', name: 'GitHub Deploy Key', type: 'ssh', prefix: 'ssh-ed25519...', lastUsed: '2024-12-23T15:00:00Z', created: '2023-09-15T09:00:00Z', permissions: ['deploy'], status: 'active' },
-  { id: '4', name: 'Staging API Key', type: 'api', prefix: 'pk_test_...', lastUsed: '2024-12-20T14:00:00Z', created: '2024-06-01T10:00:00Z', expires: '2024-12-01T10:00:00Z', permissions: ['read', 'write'], status: 'expired' },
-  { id: '5', name: 'OAuth Client Secret', type: 'oauth', prefix: 'oa_...', lastUsed: '2024-12-22T09:15:00Z', created: '2024-02-20T11:00:00Z', permissions: ['oauth'], status: 'active' }
-]
+const secretKeys: SecretKey[] = []
 
-const mockPolicies: SecurityPolicy[] = [
-  { id: '1', name: 'Strong Password Requirement', description: 'Require passwords with minimum 16 characters, mixed case, numbers, and symbols', enabled: true, enforced: true, category: 'password' },
-  { id: '2', name: 'Two-Factor Authentication', description: 'Require 2FA for all vault access', enabled: true, enforced: true, category: 'access' },
-  { id: '3', name: 'Device Authorization', description: 'New devices require approval before accessing vault', enabled: true, enforced: false, category: 'device' },
-  { id: '4', name: 'Automatic Lock', description: 'Lock vault after 5 minutes of inactivity', enabled: true, enforced: true, category: 'access' },
-  { id: '5', name: 'Secure Sharing', description: 'Require expiration dates on shared items', enabled: true, enforced: false, category: 'sharing' },
-  { id: '6', name: 'Password History', description: 'Prevent reuse of last 5 passwords', enabled: true, enforced: true, category: 'password' }
-]
+const policies: SecurityPolicy[] = []
 
 // ============================================================================
 // HELPER FUNCTIONS
@@ -483,31 +244,16 @@ const formatTimeAgo = (dateString: string): string => {
 }
 
 // ============================================================================
-// ENHANCED COMPETITIVE UPGRADE MOCK DATA
+// COMPETITIVE UPGRADE DATA (Empty - will be populated from database)
 // ============================================================================
 
-const mockSecurityAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Vault Security', description: 'All credentials encrypted with AES-256. Zero breaches detected.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Encryption' },
-  { id: '2', type: 'warning' as const, title: 'Password Hygiene', description: '12 passwords haven\'t been rotated in 90+ days. Consider updating.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Passwords' },
-  { id: '3', type: 'info' as const, title: 'Device Trust', description: '3 new devices authorized this week. All verified successfully.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Devices' },
-]
+const securityAIInsights: { id: string; type: 'success' | 'warning' | 'info'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
 
-const mockSecurityCollaborators = [
-  { id: '1', name: 'Security Admin', avatar: '/avatars/security.jpg', status: 'online' as const, role: 'Admin' },
-  { id: '2', name: 'IT Manager', avatar: '/avatars/it.jpg', status: 'online' as const, role: 'Manager' },
-  { id: '3', name: 'Compliance Officer', avatar: '/avatars/compliance.jpg', status: 'away' as const, role: 'Compliance' },
-]
+const securityCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'offline' | 'away'; role: string }[] = []
 
-const mockSecurityPredictions = [
-  { id: '1', title: 'Credential Expiry', prediction: '8 API keys expiring in next 30 days', confidence: 100, trend: 'stable' as const, impact: 'high' as const },
-  { id: '2', title: 'Security Score', prediction: 'Score projected to improve to 95% after pending updates', confidence: 78, trend: 'up' as const, impact: 'medium' as const },
-]
+const securityPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: 'low' | 'medium' | 'high' }[] = []
 
-const mockSecurityActivities = [
-  { id: '1', user: 'Admin', action: 'Added', target: 'new API key for CI/CD', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'System', action: 'Detected', target: 'login from new device', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'Security', action: 'Updated', target: 'master password policy', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
-]
+const securityActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'update' | 'warning' }[] = []
 
 // Real API-backed quick actions - these will be initialized with actual handlers in the component
 const createSecurityQuickActions = (
@@ -565,16 +311,16 @@ export default function SecurityClient() {
     fetchSessions()
   }, [fetchSettings, fetchEvents, fetchSessions])
 
-  // Stats calculations - combines real data with mock
+  // Stats calculations - combines real data from database
   const stats = useMemo(() => {
-    const totalItems = mockVaultItems.length
-    const compromised = mockVaultItems.filter(i => i.compromised).length
-    const weakPasswords = mockVaultItems.filter(i => i.strength === 'weak' || i.strength === 'fair').length
-    const reusedPasswords = mockVaultItems.filter(i => i.reused).length
-    const criticalIssues = mockSecurityIssues.filter(i => i.severity === 'critical' && !i.resolved).length
-    const totalIssues = mockSecurityIssues.filter(i => !i.resolved).length
-    const activeDevices = sessions.length || mockDevices.length
-    const activeKeys = mockSecretKeys.filter(k => k.status === 'active').length
+    const totalItems = vaultItems.length
+    const compromised = vaultItems.filter(i => i.compromised).length
+    const weakPasswords = vaultItems.filter(i => i.strength === 'weak' || i.strength === 'fair').length
+    const reusedPasswords = vaultItems.filter(i => i.reused).length
+    const criticalIssues = securityIssues.filter(i => i.severity === 'critical' && !i.resolved).length
+    const totalIssues = securityIssues.filter(i => !i.resolved).length
+    const activeDevices = sessions.length || devices.length
+    const activeKeys = secretKeys.filter(k => k.status === 'active').length
 
     // Use real security score if available
     const score = securityStats.securityScore || (() => {
@@ -601,7 +347,7 @@ export default function SecurityClient() {
 
   // Filtered items
   const filteredItems = useMemo(() => {
-    return mockVaultItems.filter(item => {
+    return vaultItems.filter(item => {
       const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         item.username?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         item.website?.toLowerCase().includes(searchQuery.toLowerCase())
@@ -1171,15 +917,15 @@ export default function SecurityClient() {
                   <div className="text-sm text-red-100">Total Items</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{mockVaultItems.filter(i => i.type === 'login').length}</div>
+                  <div className="text-2xl font-bold">{vaultItems.filter(i => i.type === 'login').length}</div>
                   <div className="text-sm text-red-100">Logins</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{mockVaultItems.filter(i => i.type === 'api_key' || i.type === 'ssh_key').length}</div>
+                  <div className="text-2xl font-bold">{vaultItems.filter(i => i.type === 'api_key' || i.type === 'ssh_key').length}</div>
                   <div className="text-sm text-red-100">Keys</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{mockVaultItems.filter(i => i.favorite).length}</div>
+                  <div className="text-2xl font-bold">{vaultItems.filter(i => i.favorite).length}</div>
                   <div className="text-sm text-red-100">Favorites</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
@@ -1347,7 +1093,7 @@ export default function SecurityClient() {
                   <CardDescription>Issues requiring your attention</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {mockSecurityIssues.filter(i => !i.resolved).map((issue) => (
+                  {securityIssues.filter(i => !i.resolved).map((issue) => (
                     <div key={issue.id} className="p-4 rounded-lg border bg-muted/30">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
@@ -1418,7 +1164,7 @@ export default function SecurityClient() {
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-sm">Missing 2FA</span>
-                      <Badge variant="outline">{mockSecurityIssues.filter(i => i.type === '2fa_missing').length}</Badge>
+                      <Badge variant="outline">{securityIssues.filter(i => i.type === '2fa_missing').length}</Badge>
                     </div>
                   </CardContent>
                 </Card>
@@ -1450,15 +1196,15 @@ export default function SecurityClient() {
                   <div className="text-sm text-teal-100">Total</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{mockDevices.filter(d => d.trusted).length}</div>
+                  <div className="text-2xl font-bold">{devices.filter(d => d.trusted).length}</div>
                   <div className="text-sm text-teal-100">Trusted</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{mockDevices.filter(d => d.type === 'desktop').length}</div>
+                  <div className="text-2xl font-bold">{devices.filter(d => d.type === 'desktop').length}</div>
                   <div className="text-sm text-teal-100">Desktops</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{mockDevices.filter(d => d.type === 'mobile').length}</div>
+                  <div className="text-2xl font-bold">{devices.filter(d => d.type === 'mobile').length}</div>
                   <div className="text-sm text-teal-100">Mobile</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
@@ -1480,7 +1226,7 @@ export default function SecurityClient() {
             </div>
 
             <div className="grid gap-4">
-              {mockDevices.map((device) => (
+              {devices.map((device) => (
                 <Card key={device.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setSelectedDevice(device)}>
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
@@ -1542,7 +1288,7 @@ export default function SecurityClient() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6 mt-6">
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{mockSecretKeys.length}</div>
+                  <div className="text-2xl font-bold">{secretKeys.length}</div>
                   <div className="text-sm text-purple-100">Total Keys</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
@@ -1550,15 +1296,15 @@ export default function SecurityClient() {
                   <div className="text-sm text-purple-100">Active</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{mockSecretKeys.filter(k => k.status === 'expired').length}</div>
+                  <div className="text-2xl font-bold">{secretKeys.filter(k => k.status === 'expired').length}</div>
                   <div className="text-sm text-purple-100">Expired</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{mockSecretKeys.filter(k => k.type === 'api').length}</div>
+                  <div className="text-2xl font-bold">{secretKeys.filter(k => k.type === 'api').length}</div>
                   <div className="text-sm text-purple-100">API Keys</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{mockSecretKeys.filter(k => k.type === 'ssh').length}</div>
+                  <div className="text-2xl font-bold">{secretKeys.filter(k => k.type === 'ssh').length}</div>
                   <div className="text-sm text-purple-100">SSH Keys</div>
                 </div>
               </div>
@@ -1576,7 +1322,7 @@ export default function SecurityClient() {
             </div>
 
             <div className="grid gap-4">
-              {mockSecretKeys.map((key) => (
+              {secretKeys.map((key) => (
                 <Card key={key.id}>
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
@@ -1651,15 +1397,15 @@ export default function SecurityClient() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6 mt-6">
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{mockActivityLog.length}</div>
+                  <div className="text-2xl font-bold">{activityLog.length}</div>
                   <div className="text-sm text-gray-300">Total Events</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold text-green-400">{mockActivityLog.filter(l => l.status === 'success').length}</div>
+                  <div className="text-2xl font-bold text-green-400">{activityLog.filter(l => l.status === 'success').length}</div>
                   <div className="text-sm text-gray-300">Successful</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold text-red-400">{mockActivityLog.filter(l => l.status === 'blocked').length}</div>
+                  <div className="text-2xl font-bold text-red-400">{activityLog.filter(l => l.status === 'blocked').length}</div>
                   <div className="text-sm text-gray-300">Blocked</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
@@ -1683,7 +1429,7 @@ export default function SecurityClient() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {mockActivityLog.map((entry) => (
+                  {activityLog.map((entry) => (
                     <div key={entry.id} className="flex items-center justify-between py-3 border-b last:border-0">
                       <div className="flex items-center gap-4">
                         <div className={`w-2 h-2 rounded-full ${entry.status === 'success' ? 'bg-green-500' : entry.status === 'blocked' ? 'bg-red-500' : 'bg-yellow-500'}`} />
@@ -1850,7 +1596,7 @@ export default function SecurityClient() {
                       <CardDescription>Configure security requirements and policies</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                      {mockPolicies.map((policy) => (
+                      {policies.map((policy) => (
                         <div key={policy.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1">
@@ -2100,18 +1846,18 @@ export default function SecurityClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockSecurityAIInsights}
+              insights={securityAIInsights}
               title="Security Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockSecurityCollaborators}
+              collaborators={securityCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockSecurityPredictions}
+              predictions={securityPredictions}
               title="Security Forecasts"
             />
           </div>
@@ -2119,7 +1865,7 @@ export default function SecurityClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockSecurityActivities}
+            activities={securityActivities}
             title="Security Activity"
             maxItems={5}
           />

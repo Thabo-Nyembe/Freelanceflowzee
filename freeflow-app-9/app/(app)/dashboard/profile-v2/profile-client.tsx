@@ -319,194 +319,78 @@ interface CareerInterest {
   visibility: VisibilityLevel
 }
 
-// Mock Data
-const mockProfile: Profile = {
-  id: '1',
-  userId: 'user-1',
-  firstName: 'John',
-  lastName: 'Smith',
-  pronouns: 'he/him',
-  headline: 'Senior Software Engineer | React | TypeScript | Node.js | Building Products That Matter',
-  summary: 'Passionate software engineer with 10+ years of experience building scalable web applications. I specialize in React, TypeScript, and Node.js, with a focus on creating exceptional user experiences. Currently leading frontend architecture at TechCorp.\n\nI love mentoring junior developers, contributing to open source, and speaking at tech conferences. Always excited to connect with fellow developers and discuss new opportunities.\n\n🚀 Featured in Top 100 Tech Influencers 2024\n📚 Author of "Modern React Patterns" (10K+ copies sold)\n🎤 Speaker at ReactConf, NodeConf, JSConf',
-  location: 'San Francisco Bay Area',
-  email: 'john.smith@email.com',
-  phone: '+1 (555) 123-4567',
-  website: 'https://johnsmith.dev',
-  avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=John',
-  banner: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1200&h=300&fit=crop',
-  isVerified: true,
-  isPremium: true,
-  isCreatorMode: true,
+// Empty data arrays (no mock data)
+const emptyProfile: Profile = {
+  id: '',
+  userId: '',
+  firstName: '',
+  lastName: '',
+  pronouns: '',
+  headline: '',
+  summary: '',
+  location: '',
+  email: '',
+  phone: '',
+  website: '',
+  avatar: '',
+  banner: '',
+  isVerified: false,
+  isPremium: false,
+  isCreatorMode: false,
   isOpenToWork: false,
-  isHiring: true,
-  profileViews: 1247,
-  profileViewsChange: 23.5,
-  searchAppearances: 856,
-  searchAppearancesChange: 15.2,
-  postImpressions: 45600,
-  postImpressionsChange: 42.8,
-  followers: 12500,
-  following: 890,
-  connections: 2847,
-  profileStrength: 92,
-  industry: 'Technology',
-  currentCompany: 'TechCorp',
-  currentTitle: 'Senior Software Engineer',
-  createdAt: '2018-03-15T00:00:00Z',
-  lastActive: '2024-12-25T10:30:00Z',
-  customUrl: 'linkedin.com/in/johnsmith',
-  coverStory: 'https://example.com/cover-story.mp4',
-  topVoice: true,
-  topVoiceBadge: 'Software Engineering',
-  socialLinks: [
-    { platform: 'Twitter', url: 'https://twitter.com/johnsmith', icon: 'twitter' },
-    { platform: 'GitHub', url: 'https://github.com/johnsmith', icon: 'github' },
-    { platform: 'YouTube', url: 'https://youtube.com/@johnsmith', icon: 'youtube' }
-  ],
-  featuredCount: 6,
-  articlesCount: 24,
-  newsletterSubscribers: 8500
+  isHiring: false,
+  profileViews: 0,
+  profileViewsChange: 0,
+  searchAppearances: 0,
+  searchAppearancesChange: 0,
+  postImpressions: 0,
+  postImpressionsChange: 0,
+  followers: 0,
+  following: 0,
+  connections: 0,
+  profileStrength: 0,
+  industry: '',
+  currentCompany: '',
+  currentTitle: '',
+  createdAt: '',
+  lastActive: '',
+  customUrl: '',
+  coverStory: null,
+  topVoice: false,
+  topVoiceBadge: null,
+  socialLinks: [],
+  featuredCount: 0,
+  articlesCount: 0,
+  newsletterSubscribers: 0
 }
 
-const mockExperiences: Experience[] = [
-  {
-    id: '1',
-    company: 'TechCorp',
-    companyLogo: 'https://api.dicebear.com/7.x/shapes/svg?seed=TechCorp',
-    companyUrl: 'https://techcorp.com',
-    title: 'Senior Software Engineer',
-    location: 'San Francisco, CA',
-    locationType: 'hybrid',
-    employmentType: 'full-time',
-    startDate: '2021-06-01',
-    isCurrent: true,
-    description: 'Leading frontend architecture for the main product. Implemented micro-frontend architecture that improved deployment velocity by 300%. Mentoring a team of 5 junior developers.',
-    skills: ['React', 'TypeScript', 'Node.js', 'AWS', 'GraphQL'],
-    media: [{ type: 'image', url: '/media/project1.jpg', title: 'Architecture Diagram' }],
-    achievements: ['Promoted to Senior in 18 months', 'Led migration to TypeScript', 'Reduced bundle size by 40%']
-  },
-  {
-    id: '2',
-    company: 'StartupXYZ',
-    companyLogo: 'https://api.dicebear.com/7.x/shapes/svg?seed=StartupXYZ',
-    title: 'Full Stack Developer',
-    location: 'New York, NY',
-    locationType: 'onsite',
-    employmentType: 'full-time',
-    startDate: '2018-03-01',
-    endDate: '2021-05-31',
-    isCurrent: false,
-    description: 'Built the entire frontend from scratch using React and Redux. Developed RESTful APIs with Node.js and PostgreSQL. Reduced page load time by 60%.',
-    skills: ['React', 'Redux', 'Node.js', 'PostgreSQL', 'Docker'],
-    media: [],
-    achievements: ['Employee of the Year 2020', 'Built MVP in 3 months']
-  }
-]
+const emptyExperiences: Experience[] = []
 
-const mockEducation: Education[] = [
-  {
-    id: '1',
-    school: 'Stanford University',
-    schoolLogo: 'https://api.dicebear.com/7.x/shapes/svg?seed=Stanford',
-    degree: 'Master of Science',
-    field: 'Computer Science',
-    startYear: 2013,
-    endYear: 2015,
-    grade: '3.9 GPA',
-    activities: 'Teaching Assistant, ACM Club President, Hackathon Organizer',
-    description: 'Focus on distributed systems and machine learning. Thesis on "Scalable Real-time Data Processing".',
-    societies: ['Phi Beta Kappa', 'ACM', 'IEEE']
-  },
-  {
-    id: '2',
-    school: 'UC Berkeley',
-    schoolLogo: 'https://api.dicebear.com/7.x/shapes/svg?seed=Berkeley',
-    degree: 'Bachelor of Science',
-    field: 'Computer Science',
-    startYear: 2009,
-    endYear: 2013,
-    grade: '3.7 GPA',
-    activities: 'Hackathon Team Captain, CS Club, Debate Society',
-    description: 'Minor in Mathematics. Dean\'s List all semesters.',
-    societies: ['Tau Beta Pi', 'UPE']
-  }
-]
+const emptyEducation: Education[] = []
 
-const mockSkills: Skill[] = [
-  { id: '1', name: 'React', level: 'expert', endorsements: 156, endorsers: [{ id: '1', name: 'Jane Doe', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Jane', title: 'Engineering Manager' }], isTopSkill: true, isPinned: true, assessmentStatus: 'passed', assessmentScore: 95, category: 'Frontend' },
-  { id: '2', name: 'TypeScript', level: 'expert', endorsements: 142, endorsers: [{ id: '2', name: 'Mike Wilson', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Mike', title: 'CTO' }], isTopSkill: true, isPinned: true, assessmentStatus: 'passed', assessmentScore: 92, category: 'Languages' },
-  { id: '3', name: 'Node.js', level: 'advanced', endorsements: 98, endorsers: [{ id: '3', name: 'Sarah Chen', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah', title: 'Tech Lead' }], isTopSkill: true, isPinned: true, assessmentStatus: 'passed', assessmentScore: 88, category: 'Backend' },
-  { id: '4', name: 'GraphQL', level: 'advanced', endorsements: 76, endorsers: [], isTopSkill: false, isPinned: false, assessmentStatus: 'not-taken', category: 'API' },
-  { id: '5', name: 'AWS', level: 'intermediate', endorsements: 54, endorsers: [], isTopSkill: false, isPinned: false, assessmentStatus: 'passed', assessmentScore: 78, category: 'Cloud' },
-  { id: '6', name: 'Docker', level: 'intermediate', endorsements: 45, endorsers: [], isTopSkill: false, isPinned: false, assessmentStatus: 'not-taken', category: 'DevOps' },
-  { id: '7', name: 'PostgreSQL', level: 'advanced', endorsements: 67, endorsers: [], isTopSkill: false, isPinned: false, assessmentStatus: 'passed', assessmentScore: 85, category: 'Databases' },
-  { id: '8', name: 'Python', level: 'intermediate', endorsements: 38, endorsers: [], isTopSkill: false, isPinned: false, assessmentStatus: 'in-progress', category: 'Languages' },
-  { id: '9', name: 'System Design', level: 'advanced', endorsements: 89, endorsers: [], isTopSkill: false, isPinned: false, assessmentStatus: 'passed', assessmentScore: 91, category: 'Architecture' },
-  { id: '10', name: 'Team Leadership', level: 'advanced', endorsements: 72, endorsers: [], isTopSkill: false, isPinned: false, assessmentStatus: 'not-taken', category: 'Soft Skills' }
-]
+const emptySkills: Skill[] = []
 
-const mockCertifications: Certification[] = [
-  { id: '1', name: 'AWS Solutions Architect - Associate', issuingOrg: 'Amazon Web Services', issuingOrgLogo: 'https://api.dicebear.com/7.x/shapes/svg?seed=AWS', issueDate: '2023-06-15', credentialId: 'AWS-SAA-123456', credentialUrl: 'https://aws.amazon.com/verify', skills: ['AWS', 'Cloud Architecture'] },
-  { id: '2', name: 'Google Cloud Professional Developer', issuingOrg: 'Google Cloud', issuingOrgLogo: 'https://api.dicebear.com/7.x/shapes/svg?seed=GCP', issueDate: '2022-11-20', credentialId: 'GCP-PD-789012', credentialUrl: 'https://cloud.google.com/verify', skills: ['GCP', 'Cloud Development'] },
-  { id: '3', name: 'Meta React Developer', issuingOrg: 'Meta', issuingOrgLogo: 'https://api.dicebear.com/7.x/shapes/svg?seed=Meta', issueDate: '2023-09-01', credentialId: 'META-RD-345678', credentialUrl: 'https://meta.com/verify', skills: ['React', 'JavaScript'] }
-]
+const emptyCertifications: Certification[] = []
 
-const mockRecommendations: Recommendation[] = [
-  { id: '1', recommender: { id: '1', name: 'Jane Doe', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Jane', title: 'Engineering Manager', company: 'TechCorp', connectionDegree: 1 }, relationship: 'Managed John directly', text: 'John is an exceptional engineer. His technical skills are top-notch, and he has a unique ability to break down complex problems into manageable solutions. He\'s also a great mentor who has helped many junior developers grow. I would highly recommend him for any senior engineering role.', createdAt: '2024-01-15T00:00:00Z', isReceived: true, isVisible: true },
-  { id: '2', recommender: { id: '2', name: 'Mike Wilson', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Mike', title: 'CTO', company: 'StartupXYZ', connectionDegree: 1 }, relationship: 'Worked with John at StartupXYZ', text: 'Working with John was a pleasure. He took ownership of our entire frontend and delivered exceptional results. His attention to detail and commitment to quality are remarkable.', createdAt: '2023-08-20T00:00:00Z', isReceived: true, isVisible: true }
-]
+const emptyRecommendations: Recommendation[] = []
 
-const mockPosts: Post[] = [
-  { id: '1', type: 'text', content: '🚀 Excited to share that our team just launched a new feature that reduced load times by 50%!\n\nThe key was implementing proper code splitting and lazy loading. Here are the techniques we used:\n\n1. Dynamic imports for route-based splitting\n2. React.lazy for component-level splitting\n3. Prefetching critical resources\n4. Image optimization with next/image\n\nWould love to hear about your optimization strategies!\n\n#WebPerformance #React #JavaScript', likes: 234, comments: 45, reposts: 12, impressions: 5600, engagementRate: 5.2, createdAt: '2024-12-20T10:00:00Z', hashtags: ['WebPerformance', 'React', 'JavaScript'], mentions: [], isPinned: true },
-  { id: '2', type: 'article', content: '📚 Just published: "10 TypeScript Tips Every React Developer Should Know"\n\nA comprehensive guide covering advanced patterns and best practices that will level up your TypeScript game.', likes: 456, comments: 78, reposts: 89, impressions: 12400, engagementRate: 5.0, createdAt: '2024-12-15T14:30:00Z', hashtags: ['TypeScript', 'React', 'WebDev'], mentions: [], isPinned: false },
-  { id: '3', type: 'text', content: '💼 Looking to hire 2 senior frontend developers for my team at TechCorp!\n\nWhat we offer:\n• Work with React, TypeScript, and GraphQL\n• Remote-friendly environment\n• Competitive salary + equity\n• Great benefits & learning budget\n\nDM me if interested!\n\n#Hiring #Jobs #TechJobs', likes: 178, comments: 34, reposts: 56, impressions: 8900, engagementRate: 3.0, createdAt: '2024-12-10T09:00:00Z', hashtags: ['Hiring', 'Jobs', 'TechJobs'], mentions: [], isPinned: false }
-]
+const emptyPosts: Post[] = []
 
-const mockFeatured: Featured[] = [
-  { id: '1', type: 'article', title: '10 TypeScript Tips Every React Developer Should Know', description: 'A comprehensive guide to advanced TypeScript patterns', url: 'https://medium.com/@johnsmith/typescript-tips', createdAt: '2024-12-15', stats: { views: 12400, likes: 456, comments: 78 } },
-  { id: '2', type: 'post', title: 'Web Performance Optimization Success', description: 'How we reduced load times by 50%', createdAt: '2024-12-20', stats: { views: 5600, likes: 234, comments: 45 } },
-  { id: '3', type: 'newsletter', title: 'The Weekly Dev Digest', description: '8,500 subscribers - Weekly insights on web development', url: 'https://johnsmith.substack.com', createdAt: '2024-01-01', stats: { views: 85000 } },
-  { id: '4', type: 'link', title: 'Modern React Patterns - Book', description: 'My book on advanced React patterns (10K+ copies sold)', url: 'https://amazon.com/modern-react-patterns', media: '/book-cover.jpg', createdAt: '2023-06-01' }
-]
+const emptyFeatured: Featured[] = []
 
-const mockConnections: Connection[] = [
-  { id: '1', name: 'Jane Doe', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Jane', headline: 'Engineering Manager at TechCorp', company: 'TechCorp', location: 'San Francisco', mutualConnections: 45, status: 'connected', connectedAt: '2022-01-15' },
-  { id: '2', name: 'Mike Wilson', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Mike', headline: 'CTO at StartupXYZ', company: 'StartupXYZ', location: 'New York', mutualConnections: 32, status: 'connected', connectedAt: '2018-03-01' },
-  { id: '3', name: 'Sarah Chen', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah', headline: 'Tech Lead at Google', company: 'Google', location: 'Seattle', mutualConnections: 28, status: 'pending' },
-  { id: '4', name: 'Alex Rivera', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Alex', headline: 'Senior Developer at Meta', company: 'Meta', location: 'Austin', mutualConnections: 15, status: 'following' }
-]
+const emptyConnections: Connection[] = []
 
-const mockJobs: Job[] = [
-  { id: '1', title: 'Staff Software Engineer', company: 'Stripe', companyLogo: 'https://api.dicebear.com/7.x/shapes/svg?seed=Stripe', location: 'San Francisco, CA', locationType: 'hybrid', type: 'full-time', salary: { min: 250000, max: 350000, currency: 'USD' }, postedAt: '2024-12-20', applicants: 45, isSaved: true, isEasyApply: true, matchScore: 95, skills: ['React', 'TypeScript', 'Node.js'] },
-  { id: '2', title: 'Principal Engineer', company: 'Netflix', companyLogo: 'https://api.dicebear.com/7.x/shapes/svg?seed=Netflix', location: 'Los Gatos, CA', locationType: 'hybrid', type: 'full-time', salary: { min: 300000, max: 450000, currency: 'USD' }, postedAt: '2024-12-18', applicants: 120, isSaved: false, isEasyApply: false, matchScore: 88, skills: ['React', 'System Design', 'Leadership'] },
-  { id: '3', title: 'Senior Frontend Engineer', company: 'Airbnb', companyLogo: 'https://api.dicebear.com/7.x/shapes/svg?seed=Airbnb', location: 'Remote', locationType: 'remote', type: 'full-time', salary: { min: 200000, max: 280000, currency: 'USD' }, postedAt: '2024-12-22', applicants: 78, isSaved: true, isEasyApply: true, matchScore: 92, skills: ['React', 'TypeScript', 'GraphQL'] }
-]
+const emptyJobs: Job[] = []
 
-const mockLanguages: Language[] = [
-  { id: '1', name: 'English', proficiency: 'native-bilingual' },
-  { id: '2', name: 'Spanish', proficiency: 'professional-working' },
-  { id: '3', name: 'Japanese', proficiency: 'limited-working' }
-]
+const emptyLanguages: Language[] = []
 
-const mockProjects: Project[] = [
-  { id: '1', name: 'React Component Library', description: 'Open-source UI component library with 5K+ GitHub stars', url: 'https://github.com/johnsmith/react-ui', startDate: '2022-01-01', isCurrent: true, skills: ['React', 'TypeScript', 'Storybook'], media: [], collaborators: [{ name: 'Jane Doe', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Jane' }] },
-  { id: '2', name: 'Performance Monitoring Tool', description: 'Internal tool for real-time performance monitoring', startDate: '2023-06-01', endDate: '2023-12-01', isCurrent: false, skills: ['Node.js', 'GraphQL', 'TimescaleDB'], media: [], collaborators: [] }
-]
+const emptyProjects: Project[] = []
 
-const mockVolunteer: VolunteerExperience[] = [
-  { id: '1', organization: 'Code.org', organizationLogo: 'https://api.dicebear.com/7.x/shapes/svg?seed=CodeOrg', role: 'Volunteer Instructor', cause: 'Education', startDate: '2020-01-01', isCurrent: true, description: 'Teaching programming to underserved high school students' }
-]
+const emptyVolunteer: VolunteerExperience[] = []
 
-const mockHonors: HonorAward[] = [
-  { id: '1', title: 'Top 100 Tech Influencers 2024', issuer: 'TechCrunch', issueDate: '2024-01-15', description: 'Recognized for contributions to web development community', associatedWith: 'TechCorp' },
-  { id: '2', title: 'Employee of the Year', issuer: 'StartupXYZ', issueDate: '2020-12-01', description: 'Awarded for exceptional performance and leadership', associatedWith: 'StartupXYZ' }
-]
+const emptyHonors: HonorAward[] = []
 
-const mockProfileViewers: ProfileViewer[] = [
-  { id: '1', name: 'Recruiter at Google', headline: 'Technical Recruiter', company: 'Google', viewedAt: '2024-12-25T09:00:00Z', isAnonymous: false, source: 'Search' },
-  { id: '2', isAnonymous: true, viewedAt: '2024-12-24T15:30:00Z', source: 'Profile recommendation' },
-  { id: '3', name: 'Sarah Chen', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah', headline: 'Tech Lead at Google', company: 'Google', viewedAt: '2024-12-24T10:00:00Z', isAnonymous: false, source: 'Your post' }
-]
+const emptyProfileViewers: ProfileViewer[] = []
 
 // Helper functions
 const getSkillLevelColor = (level: SkillLevel): string => {
@@ -577,29 +461,14 @@ const formatTimeAgo = (date: string) => {
   return formatDate(date)
 }
 
-// Enhanced Competitive Upgrade Mock Data
-const mockProfileAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Profile Strength', description: 'Profile 95% complete. Top 10% in your industry.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Profile' },
-  { id: '2', type: 'info' as const, title: 'Skill Suggestion', description: 'Adding React.js would increase profile visibility 25%.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Skills' },
-  { id: '3', type: 'warning' as const, title: 'Update Needed', description: 'Work experience not updated in 6 months.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Updates' },
-]
+// Empty competitive upgrade data arrays
+const emptyProfileAIInsights: { id: string; type: 'success' | 'info' | 'warning'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
 
-const mockProfileCollaborators = [
-  { id: '1', name: 'HR Manager', avatar: '/avatars/hr.jpg', status: 'online' as const, role: 'HR' },
-  { id: '2', name: 'Team Lead', avatar: '/avatars/lead.jpg', status: 'online' as const, role: 'Lead' },
-  { id: '3', name: 'Mentor', avatar: '/avatars/mentor.jpg', status: 'away' as const, role: 'Mentor' },
-]
+const emptyProfileCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }[] = []
 
-const mockProfilePredictions = [
-  { id: '1', title: 'Career Growth', prediction: 'On track for senior role within 6 months', confidence: 78, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Skill Demand', prediction: 'Your top skills growing 30% in job market', confidence: 85, trend: 'up' as const, impact: 'medium' as const },
-]
+const emptyProfilePredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: 'high' | 'medium' | 'low' }[] = []
 
-const mockProfileActivities = [
-  { id: '1', user: 'You', action: 'Updated', target: 'profile headline', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'System', action: 'Verified', target: 'email address', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'HR', action: 'Viewed', target: 'your profile', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
-]
+const emptyProfileActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'update' }[] = []
 
 // Quick actions will be defined inside component to access state/handlers
 
@@ -1101,13 +970,13 @@ export default function ProfileClient() {
 
   const skillCategories = useMemo(() => {
     const dbCategories = [...new Set(skills.map(s => s.category))]
-    const mockCategories = [...new Set(mockSkills.map(s => s.category))]
-    const allCategories = [...new Set([...dbCategories, ...mockCategories])]
+    const emptyCategories = [...new Set(emptySkills.map(s => s.category))]
+    const allCategories = [...new Set([...dbCategories, ...emptyCategories])]
     return ['all', ...allCategories]
   }, [skills])
 
   const filteredSkills = useMemo(() => {
-    // Merge DB skills with mock for display
+    // Merge DB skills for display
     const dbSkills = (skills || []).map(s => ({
       ...s,
       level: s.level as SkillLevel,
@@ -1126,20 +995,20 @@ export default function ProfileClient() {
   }, [selectedSkillCategory, searchQuery, skills])
 
   const stats = useMemo(() => ({
-    profileViews: mockProfile.profileViews,
-    profileViewsChange: mockProfile.profileViewsChange,
-    searchAppearances: mockProfile.searchAppearances,
-    searchAppearancesChange: mockProfile.searchAppearancesChange,
-    postImpressions: mockProfile.postImpressions,
-    postImpressionsChange: mockProfile.postImpressionsChange,
-    connections: mockProfile.connections,
-    followers: mockProfile.followers,
-    skills: skills.length > 0 ? skills.length : mockSkills.length,
+    profileViews: emptyProfile.profileViews,
+    profileViewsChange: emptyProfile.profileViewsChange,
+    searchAppearances: emptyProfile.searchAppearances,
+    searchAppearancesChange: emptyProfile.searchAppearancesChange,
+    postImpressions: emptyProfile.postImpressions,
+    postImpressionsChange: emptyProfile.postImpressionsChange,
+    connections: emptyProfile.connections,
+    followers: emptyProfile.followers,
+    skills: skills.length > 0 ? skills.length : emptySkills.length,
     endorsements: skills.length > 0
       ? skills.reduce((sum, s) => sum + s.endorsements, 0)
-      : mockSkills.reduce((sum, s) => sum + s.endorsements, 0),
-    recommendations: mockRecommendations.filter(r => r.isReceived).length,
-    assessmentsPassed: mockSkills.filter(s => s.assessmentStatus === 'passed').length
+      : emptySkills.reduce((sum, s) => sum + s.endorsements, 0),
+    recommendations: emptyRecommendations.filter(r => r.isReceived).length,
+    assessmentsPassed: emptySkills.filter(s => s.assessmentStatus === 'passed').length
   }), [skills])
 
   const statCards = [
@@ -1153,22 +1022,22 @@ export default function ProfileClient() {
     { label: 'Assessments', value: stats.assessmentsPassed.toString(), change: null, icon: CheckCircle, gradient: 'from-indigo-500 to-purple-600' }
   ]
 
-  // Display profile - use DB data if available, otherwise mock
+  // Display profile - use DB data if available, otherwise empty profile
   const displayProfile = profile ? {
-    ...mockProfile,
+    ...emptyProfile,
     firstName: profile.first_name,
     lastName: profile.last_name,
-    headline: profile.title || mockProfile.headline,
-    summary: profile.bio || mockProfile.summary,
-    location: profile.location || mockProfile.location,
+    headline: profile.title || emptyProfile.headline,
+    summary: profile.bio || emptyProfile.summary,
+    location: profile.location || emptyProfile.location,
     email: profile.email,
-    phone: profile.phone || mockProfile.phone,
-    website: profile.website || mockProfile.website,
-    avatar: profile.avatar || mockProfile.avatar,
-    banner: profile.cover_image || mockProfile.banner,
-    currentCompany: profile.company || mockProfile.currentCompany,
-    currentTitle: profile.title || mockProfile.currentTitle
-  } : mockProfile
+    phone: profile.phone || emptyProfile.phone,
+    website: profile.website || emptyProfile.website,
+    avatar: profile.avatar || emptyProfile.avatar,
+    banner: profile.cover_image || emptyProfile.banner,
+    currentCompany: profile.company || emptyProfile.currentCompany,
+    currentTitle: profile.title || emptyProfile.currentTitle
+  } : emptyProfile
 
   // Display experiences - use DB data if available
   const dbExperiences = (experiences || []).map(exp => ({
@@ -1424,7 +1293,7 @@ export default function ProfileClient() {
                       <p className="text-sm text-blue-100">Skills</p>
                     </div>
                     <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                      <p className="text-2xl font-bold">{mockProfile.profileStrength}%</p>
+                      <p className="text-2xl font-bold">{emptyProfile.profileStrength}%</p>
                       <p className="text-sm text-blue-100">Profile Strength</p>
                     </div>
                   </div>
@@ -1488,7 +1357,7 @@ export default function ProfileClient() {
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-3">
-                        {mockProfileViewers.slice(0, 3).map((viewer) => (
+                        {emptyProfileViewers.slice(0, 3).map((viewer) => (
                           <div key={viewer.id} className="flex items-center gap-3">
                             {viewer.isAnonymous ? (
                               <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
@@ -1527,7 +1396,7 @@ export default function ProfileClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {mockSkills.filter(s => s.isTopSkill).map((skill) => (
+                    {emptySkills.filter(s => s.isTopSkill).map((skill) => (
                       <div key={skill.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                         <div>
                           <div className="flex items-center gap-2">
@@ -1592,7 +1461,7 @@ export default function ProfileClient() {
                       <p className="text-sm text-purple-100">Positions</p>
                     </div>
                     <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                      <p className="text-2xl font-bold">{mockCertifications.length}</p>
+                      <p className="text-2xl font-bold">{emptyCertifications.length}</p>
                       <p className="text-sm text-purple-100">Certifications</p>
                     </div>
                     <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
@@ -1600,7 +1469,7 @@ export default function ProfileClient() {
                       <p className="text-sm text-purple-100">Degrees</p>
                     </div>
                     <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                      <p className="text-2xl font-bold">{mockHonors.length}</p>
+                      <p className="text-2xl font-bold">{emptyHonors.length}</p>
                       <p className="text-sm text-purple-100">Awards</p>
                     </div>
                   </div>
@@ -1698,7 +1567,7 @@ export default function ProfileClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {mockCertifications.map((cert) => (
+                    {emptyCertifications.map((cert) => (
                       <div key={cert.id} className="flex items-start justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
                         <div className="flex gap-4">
                           <Avatar className="w-12 h-12">
@@ -1781,7 +1650,7 @@ export default function ProfileClient() {
                       <p className="text-sm text-green-100">Assessments Passed</p>
                     </div>
                     <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                      <p className="text-2xl font-bold">{mockSkills.filter(s => s.isTopSkill).length}</p>
+                      <p className="text-2xl font-bold">{emptySkills.filter(s => s.isTopSkill).length}</p>
                       <p className="text-sm text-green-100">Top Skills</p>
                     </div>
                   </div>
@@ -1933,19 +1802,19 @@ export default function ProfileClient() {
                   </div>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
                     <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                      <p className="text-2xl font-bold">{mockFeatured.length}</p>
+                      <p className="text-2xl font-bold">{emptyFeatured.length}</p>
                       <p className="text-sm text-yellow-100">Featured Items</p>
                     </div>
                     <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                      <p className="text-2xl font-bold">{mockProfile.articlesCount}</p>
+                      <p className="text-2xl font-bold">{emptyProfile.articlesCount}</p>
                       <p className="text-sm text-yellow-100">Articles</p>
                     </div>
                     <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                      <p className="text-2xl font-bold">{formatNumber(mockProfile.newsletterSubscribers)}</p>
+                      <p className="text-2xl font-bold">{formatNumber(emptyProfile.newsletterSubscribers)}</p>
                       <p className="text-sm text-yellow-100">Subscribers</p>
                     </div>
                     <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                      <p className="text-2xl font-bold">{mockProjects.length}</p>
+                      <p className="text-2xl font-bold">{emptyProjects.length}</p>
                       <p className="text-sm text-yellow-100">Projects</p>
                     </div>
                   </div>
@@ -1996,7 +1865,7 @@ export default function ProfileClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {mockFeatured.map((item) => (
+                    {emptyFeatured.map((item) => (
                       <Card key={item.id} className="border hover:shadow-md transition-shadow cursor-pointer">
                         <CardContent className="p-4">
                           <div className="flex items-start gap-3">
@@ -2050,11 +1919,11 @@ export default function ProfileClient() {
                       <p className="text-sm text-cyan-100">Followers</p>
                     </div>
                     <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                      <p className="text-2xl font-bold">{mockProfile.following}</p>
+                      <p className="text-2xl font-bold">{emptyProfile.following}</p>
                       <p className="text-sm text-cyan-100">Following</p>
                     </div>
                     <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                      <p className="text-2xl font-bold">{mockConnections.filter(c => c.status === 'pending').length}</p>
+                      <p className="text-2xl font-bold">{emptyConnections.filter(c => c.status === 'pending').length}</p>
                       <p className="text-sm text-cyan-100">Pending</p>
                     </div>
                   </div>
@@ -2094,7 +1963,7 @@ export default function ProfileClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {mockConnections.map((connection) => (
+                    {emptyConnections.map((connection) => (
                       <div key={connection.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
                         <div className="flex items-center gap-4">
                           <Avatar className="w-12 h-12">
@@ -2138,19 +2007,19 @@ export default function ProfileClient() {
                   </div>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
                     <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                      <p className="text-2xl font-bold">{mockJobs.length}</p>
+                      <p className="text-2xl font-bold">{emptyJobs.length}</p>
                       <p className="text-sm text-indigo-100">Recommended</p>
                     </div>
                     <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                      <p className="text-2xl font-bold">{mockJobs.filter(j => j.isSaved).length}</p>
+                      <p className="text-2xl font-bold">{emptyJobs.filter(j => j.isSaved).length}</p>
                       <p className="text-sm text-indigo-100">Saved Jobs</p>
                     </div>
                     <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                      <p className="text-2xl font-bold">{mockJobs.filter(j => j.isEasyApply).length}</p>
+                      <p className="text-2xl font-bold">{emptyJobs.filter(j => j.isEasyApply).length}</p>
                       <p className="text-sm text-indigo-100">Easy Apply</p>
                     </div>
                     <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                      <p className="text-2xl font-bold">{Math.round(mockJobs.reduce((a, j) => a + j.matchScore, 0) / mockJobs.length)}%</p>
+                      <p className="text-2xl font-bold">{Math.round(emptyJobs.reduce((a, j) => a + j.matchScore, 0) / emptyJobs.length)}%</p>
                       <p className="text-sm text-indigo-100">Avg Match</p>
                     </div>
                   </div>
@@ -2194,7 +2063,7 @@ export default function ProfileClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {mockJobs.map((job) => (
+                    {emptyJobs.map((job) => (
                       <div key={job.id} className="flex items-start justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
                         <div className="flex items-start gap-4">
                           <Avatar className="w-12 h-12">
@@ -2250,15 +2119,15 @@ export default function ProfileClient() {
                   </div>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
                     <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                      <p className="text-2xl font-bold">{mockPosts.length}</p>
+                      <p className="text-2xl font-bold">{emptyPosts.length}</p>
                       <p className="text-sm text-pink-100">Posts</p>
                     </div>
                     <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                      <p className="text-2xl font-bold">{formatNumber(mockPosts.reduce((a, p) => a + p.likes, 0))}</p>
+                      <p className="text-2xl font-bold">{formatNumber(emptyPosts.reduce((a, p) => a + p.likes, 0))}</p>
                       <p className="text-sm text-pink-100">Total Likes</p>
                     </div>
                     <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                      <p className="text-2xl font-bold">{mockPosts.reduce((a, p) => a + p.comments, 0)}</p>
+                      <p className="text-2xl font-bold">{emptyPosts.reduce((a, p) => a + p.comments, 0)}</p>
                       <p className="text-sm text-pink-100">Comments</p>
                     </div>
                     <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
@@ -2302,16 +2171,16 @@ export default function ProfileClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {mockPosts.map((post) => (
+                    {emptyPosts.map((post) => (
                       <div key={post.id} className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
                         <div className="flex items-start gap-4">
                           <Avatar>
-                            <AvatarImage src={mockProfile.avatar} alt="User avatar" />
-                            <AvatarFallback>{mockProfile.firstName[0]}{mockProfile.lastName[0]}</AvatarFallback>
+                            <AvatarImage src={emptyProfile.avatar} alt="User avatar" />
+                            <AvatarFallback>{emptyProfile.firstName[0]}{emptyProfile.lastName[0]}</AvatarFallback>
                           </Avatar>
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-2">
-                              <span className="font-semibold">{mockProfile.firstName} {mockProfile.lastName}</span>
+                              <span className="font-semibold">{emptyProfile.firstName} {emptyProfile.lastName}</span>
                               {post.isPinned && <Badge variant="outline" className="text-xs">Pinned</Badge>}
                               <Badge variant="outline" className="text-xs">{post.type}</Badge>
                               <span className="text-xs text-gray-500">{formatTimeAgo(post.createdAt)}</span>
@@ -2354,7 +2223,7 @@ export default function ProfileClient() {
                       <p className="text-sm text-gray-300">Settings Areas</p>
                     </div>
                     <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                      <p className="text-2xl font-bold">{mockProfile.profileStrength}%</p>
+                      <p className="text-2xl font-bold">{emptyProfile.profileStrength}%</p>
                       <p className="text-sm text-gray-300">Completeness</p>
                     </div>
                     <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
@@ -2868,18 +2737,18 @@ export default function ProfileClient() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
             <div className="lg:col-span-2">
               <AIInsightsPanel
-                insights={mockProfileAIInsights}
+                insights={emptyProfileAIInsights}
                 title="Profile Intelligence"
                 onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
               />
             </div>
             <div className="space-y-6">
               <CollaborationIndicator
-                collaborators={mockProfileCollaborators}
+                collaborators={emptyProfileCollaborators}
                 maxVisible={4}
               />
               <PredictiveAnalytics
-                predictions={mockProfilePredictions}
+                predictions={emptyProfilePredictions}
                 title="Career Forecasts"
               />
             </div>
@@ -2887,7 +2756,7 @@ export default function ProfileClient() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
             <ActivityFeed
-              activities={mockProfileActivities}
+              activities={emptyProfileActivities}
               title="Profile Activity"
               maxItems={5}
             />
@@ -2939,7 +2808,7 @@ export default function ProfileClient() {
               <div className="mt-4">
                 <h4 className="font-medium mb-3">Recent Profile Viewers</h4>
                 <div className="space-y-3">
-                  {mockProfileViewers.map((viewer) => (
+                  {emptyProfileViewers.map((viewer) => (
                     <div key={viewer.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <div className="flex items-center gap-3">
                         {viewer.isAnonymous ? (

@@ -205,310 +205,20 @@ interface Dashboard {
 }
 
 // ============================================================================
-// MOCK DATA
+// DATA ARRAYS (Empty - populated from Supabase)
 // ============================================================================
 
-const mockFunnels: Funnel[] = [
-  {
-    id: '1',
-    name: 'Signup to Purchase',
-    description: 'Track user journey from signup to first purchase',
-    steps: [
-      { id: 's1', name: 'Page View', event: 'page_view', users: 45000, conversionRate: 100, dropoffRate: 0, avgTimeToNext: '0s' },
-      { id: 's2', name: 'Sign Up', event: 'sign_up', users: 12500, conversionRate: 27.8, dropoffRate: 72.2, avgTimeToNext: '2m 34s' },
-      { id: 's3', name: 'Add to Cart', event: 'add_to_cart', users: 8200, conversionRate: 65.6, dropoffRate: 34.4, avgTimeToNext: '5m 12s' },
-      { id: 's4', name: 'Checkout', event: 'checkout', users: 5100, conversionRate: 62.2, dropoffRate: 37.8, avgTimeToNext: '1m 45s' },
-      { id: 's5', name: 'Purchase', event: 'purchase', users: 4200, conversionRate: 82.4, dropoffRate: 17.6, avgTimeToNext: '0s' },
-    ],
-    totalConversion: 9.3,
-    totalUsers: 45000,
-    period: 'Last 30 days',
-    createdAt: '2024-01-15',
-    updatedAt: '2024-12-20',
-    owner: 'Sarah Chen',
-    isShared: true
-  },
-  {
-    id: '2',
-    name: 'Onboarding Flow',
-    description: 'New user onboarding completion funnel',
-    steps: [
-      { id: 's1', name: 'Account Created', event: 'account_created', users: 8500, conversionRate: 100, dropoffRate: 0, avgTimeToNext: '0s' },
-      { id: 's2', name: 'Profile Setup', event: 'profile_completed', users: 7200, conversionRate: 84.7, dropoffRate: 15.3, avgTimeToNext: '3m 20s' },
-      { id: 's3', name: 'First Action', event: 'first_action', users: 5800, conversionRate: 80.6, dropoffRate: 19.4, avgTimeToNext: '8m 45s' },
-      { id: 's4', name: 'Feature Discovery', event: 'feature_discovered', users: 4100, conversionRate: 70.7, dropoffRate: 29.3, avgTimeToNext: '12m 10s' },
-    ],
-    totalConversion: 48.2,
-    totalUsers: 8500,
-    period: 'Last 7 days',
-    createdAt: '2024-02-10',
-    updatedAt: '2024-12-19',
-    owner: 'Mike Johnson',
-    isShared: false
-  },
-  {
-    id: '3',
-    name: 'Feature Adoption',
-    description: 'Track adoption of new AI features',
-    steps: [
-      { id: 's1', name: 'Feature Viewed', event: 'ai_feature_viewed', users: 15000, conversionRate: 100, dropoffRate: 0, avgTimeToNext: '0s' },
-      { id: 's2', name: 'Feature Tried', event: 'ai_feature_tried', users: 9200, conversionRate: 61.3, dropoffRate: 38.7, avgTimeToNext: '45s' },
-      { id: 's3', name: 'Feature Used', event: 'ai_feature_used', users: 6800, conversionRate: 73.9, dropoffRate: 26.1, avgTimeToNext: '2m 30s' },
-    ],
-    totalConversion: 45.3,
-    totalUsers: 15000,
-    period: 'Last 14 days',
-    createdAt: '2024-03-01',
-    updatedAt: '2024-12-18',
-    owner: 'Lisa Park',
-    isShared: true
-  }
-]
+const mockFunnels: Funnel[] = []
 
-const mockCohorts: Cohort[] = [
-  {
-    id: '1',
-    name: 'Power Users',
-    description: 'Users with 10+ sessions in the last 30 days',
-    type: 'behavioral',
-    size: 12500,
-    growth: 15.2,
-    createdAt: '2024-01-10',
-    updatedAt: '2024-12-20',
-    definition: 'session_count >= 10 AND last_30_days',
-    members: [],
-    status: 'active'
-  },
-  {
-    id: '2',
-    name: 'At-Risk Users',
-    description: 'Active users with declining engagement',
-    type: 'predictive',
-    size: 3200,
-    growth: -8.5,
-    createdAt: '2024-02-15',
-    updatedAt: '2024-12-19',
-    definition: 'churn_probability > 0.6',
-    members: [],
-    status: 'active'
-  },
-  {
-    id: '3',
-    name: 'Premium Subscribers',
-    description: 'Users on premium or enterprise plans',
-    type: 'property',
-    size: 8900,
-    growth: 22.3,
-    createdAt: '2024-01-20',
-    updatedAt: '2024-12-18',
-    definition: 'plan IN (premium, enterprise)',
-    members: [],
-    status: 'active'
-  },
-  {
-    id: '4',
-    name: 'Feature Champions',
-    description: 'Users who adopted 5+ features',
-    type: 'computed',
-    size: 5600,
-    growth: 18.7,
-    createdAt: '2024-03-01',
-    updatedAt: '2024-12-17',
-    definition: 'features_adopted >= 5',
-    members: [],
-    status: 'active'
-  },
-  {
-    id: '5',
-    name: 'Mobile-First Users',
-    description: 'Users primarily using mobile apps',
-    type: 'behavioral',
-    size: 15200,
-    growth: 28.4,
-    createdAt: '2024-02-28',
-    updatedAt: '2024-12-16',
-    definition: 'mobile_sessions / total_sessions > 0.7',
-    members: [],
-    status: 'active'
-  }
-]
+const mockCohorts: Cohort[] = []
 
-const mockRetentionAnalyses: RetentionAnalysis[] = [
-  {
-    id: '1',
-    name: 'Weekly User Retention',
-    event: 'app_open',
-    period: 'week',
-    data: [
-      { cohortDate: '2024-12-01', cohortSize: 2500, retentionByDay: [100, 45, 32, 28, 25, 23, 21, 20] },
-      { cohortDate: '2024-12-08', cohortSize: 2800, retentionByDay: [100, 48, 35, 30, 27, 25, 23] },
-      { cohortDate: '2024-12-15', cohortSize: 3100, retentionByDay: [100, 52, 38, 33, 29, 26] },
-    ],
-    avgRetention: 24.5,
-    trend: 3.2,
-    createdAt: '2024-11-01'
-  },
-  {
-    id: '2',
-    name: 'Feature Usage Retention',
-    event: 'feature_used',
-    period: 'day',
-    data: [
-      { cohortDate: '2024-12-18', cohortSize: 1200, retentionByDay: [100, 62, 48, 41, 36, 32, 29, 27] },
-      { cohortDate: '2024-12-19', cohortSize: 1350, retentionByDay: [100, 65, 51, 44, 38, 34, 30] },
-      { cohortDate: '2024-12-20', cohortSize: 1100, retentionByDay: [100, 58, 45, 38, 33, 29] },
-    ],
-    avgRetention: 31.2,
-    trend: 5.8,
-    createdAt: '2024-12-01'
-  }
-]
+const mockRetentionAnalyses: RetentionAnalysis[] = []
 
-const mockExperiments: Experiment[] = [
-  {
-    id: '1',
-    name: 'New Checkout Flow',
-    description: 'Testing simplified checkout with fewer steps',
-    hypothesis: 'Reducing checkout steps from 5 to 3 will increase conversion by 15%',
-    status: 'running',
-    type: 'a/b',
-    startDate: '2024-12-01',
-    targetMetric: 'checkout_completion',
-    variants: [
-      { id: 'control', name: 'Control', allocation: 50, users: 15200, conversions: 2280, conversionRate: 15.0, revenue: 228000, confidence: 0 },
-      { id: 'variant-a', name: 'Simplified Flow', allocation: 50, users: 15400, conversions: 2772, conversionRate: 18.0, revenue: 277200, confidence: 94.2 }
-    ],
-    statisticalSignificance: 94.2,
-    totalUsers: 30600,
-    owner: 'Product Team'
-  },
-  {
-    id: '2',
-    name: 'AI Recommendations',
-    description: 'Testing AI-powered product recommendations',
-    hypothesis: 'AI recommendations will increase add-to-cart rate by 20%',
-    status: 'completed',
-    type: 'a/b',
-    startDate: '2024-11-01',
-    endDate: '2024-11-30',
-    targetMetric: 'add_to_cart',
-    variants: [
-      { id: 'control', name: 'Manual Recs', allocation: 50, users: 45000, conversions: 9000, conversionRate: 20.0, revenue: 450000, confidence: 0 },
-      { id: 'variant-a', name: 'AI Recs', allocation: 50, users: 44800, conversions: 10752, conversionRate: 24.0, revenue: 537600, confidence: 99.1 }
-    ],
-    winner: 'variant-a',
-    statisticalSignificance: 99.1,
-    totalUsers: 89800,
-    owner: 'AI Team'
-  },
-  {
-    id: '3',
-    name: 'Pricing Page Layout',
-    description: 'Testing different pricing page layouts',
-    hypothesis: 'Horizontal pricing layout will increase plan upgrades by 10%',
-    status: 'running',
-    type: 'multivariate',
-    startDate: '2024-12-10',
-    targetMetric: 'plan_upgrade',
-    variants: [
-      { id: 'control', name: 'Vertical Cards', allocation: 33, users: 8200, conversions: 410, conversionRate: 5.0, revenue: 41000, confidence: 0 },
-      { id: 'variant-a', name: 'Horizontal Cards', allocation: 33, users: 8100, conversions: 486, conversionRate: 6.0, revenue: 48600, confidence: 78.5 },
-      { id: 'variant-b', name: 'Comparison Table', allocation: 34, users: 8400, conversions: 546, conversionRate: 6.5, revenue: 54600, confidence: 89.2 }
-    ],
-    statisticalSignificance: 89.2,
-    totalUsers: 24700,
-    owner: 'Growth Team'
-  },
-  {
-    id: '4',
-    name: 'Dark Mode Default',
-    description: 'Testing dark mode as default theme',
-    hypothesis: 'Dark mode default will improve session duration by 15%',
-    status: 'draft',
-    type: 'feature-flag',
-    startDate: '2024-12-25',
-    targetMetric: 'session_duration',
-    variants: [
-      { id: 'control', name: 'Light Mode', allocation: 50, users: 0, conversions: 0, conversionRate: 0, revenue: 0, confidence: 0 },
-      { id: 'variant-a', name: 'Dark Mode', allocation: 50, users: 0, conversions: 0, conversionRate: 0, revenue: 0, confidence: 0 }
-    ],
-    statisticalSignificance: 0,
-    totalUsers: 0,
-    owner: 'Design Team'
-  }
-]
+const mockExperiments: Experiment[] = []
 
-const mockUserPaths: UserPath[] = [
-  {
-    id: '1',
-    name: 'Homepage to Purchase',
-    startEvent: 'homepage_view',
-    endEvent: 'purchase',
-    nodes: [
-      [{ event: 'homepage_view', users: 50000, percentage: 100 }],
-      [
-        { event: 'product_list_view', users: 32000, percentage: 64 },
-        { event: 'search', users: 12000, percentage: 24 },
-        { event: 'exit', users: 6000, percentage: 12 }
-      ],
-      [
-        { event: 'product_view', users: 28000, percentage: 56 },
-        { event: 'exit', users: 16000, percentage: 32 }
-      ],
-      [
-        { event: 'add_to_cart', users: 18000, percentage: 36 },
-        { event: 'exit', users: 10000, percentage: 20 }
-      ],
-      [
-        { event: 'checkout', users: 12000, percentage: 24 },
-        { event: 'exit', users: 6000, percentage: 12 }
-      ],
-      [
-        { event: 'purchase', users: 9500, percentage: 19 },
-        { event: 'exit', users: 2500, percentage: 5 }
-      ]
-    ],
-    totalUsers: 50000,
-    avgPathLength: 4.2,
-    createdAt: '2024-12-01'
-  }
-]
+const mockUserPaths: UserPath[] = []
 
-const mockDashboards: Dashboard[] = [
-  {
-    id: '1',
-    name: 'Growth Overview',
-    description: 'Key growth metrics and KPIs',
-    widgets: [],
-    isDefault: true,
-    createdAt: '2024-01-01',
-    updatedAt: '2024-12-20',
-    owner: 'Growth Team',
-    isShared: true
-  },
-  {
-    id: '2',
-    name: 'Conversion Analytics',
-    description: 'Funnel and conversion tracking',
-    widgets: [],
-    isDefault: false,
-    createdAt: '2024-02-15',
-    updatedAt: '2024-12-19',
-    owner: 'Product Team',
-    isShared: true
-  },
-  {
-    id: '3',
-    name: 'User Engagement',
-    description: 'User behavior and engagement metrics',
-    widgets: [],
-    isDefault: false,
-    createdAt: '2024-03-01',
-    updatedAt: '2024-12-18',
-    owner: 'Analytics Team',
-    isShared: false
-  }
-]
+const mockDashboards: Dashboard[] = []
 
 // ============================================================================
 // HELPER FUNCTIONS
@@ -543,36 +253,16 @@ const getRetentionCellColor = (value: number): string => {
   return 'bg-red-400 text-white'
 }
 
-// Enhanced Competitive Upgrade Mock Data
-const mockGrowthAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Conversion Spike', description: 'Trial-to-paid conversion up 18% this week. New onboarding flow working.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Conversion' },
-  { id: '2', type: 'warning' as const, title: 'Funnel Drop-off', description: 'Signup funnel showing 45% drop at email verification step.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Funnel' },
-  { id: '3', type: 'info' as const, title: 'A/B Test Ready', description: 'Pricing page experiment reached statistical significance.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Testing' },
-]
+// Enhanced Competitive Upgrade Data (Empty arrays - populated from Supabase)
+const mockGrowthAIInsights: { id: string; type: 'success' | 'warning' | 'info'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
 
-const mockGrowthCollaborators = [
-  { id: '1', name: 'Growth Lead', avatar: '/avatars/growth.jpg', status: 'online' as const, role: 'Lead' },
-  { id: '2', name: 'Data Analyst', avatar: '/avatars/data.jpg', status: 'online' as const, role: 'Analyst' },
-  { id: '3', name: 'Product Manager', avatar: '/avatars/pm.jpg', status: 'away' as const, role: 'PM' },
-]
+const mockGrowthCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }[] = []
 
-const mockGrowthPredictions = [
-  { id: '1', title: 'MRR Forecast', prediction: 'On track to hit $125K MRR by end of quarter', confidence: 85, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Churn Prediction', prediction: 'Monthly churn expected to decrease to 2.1%', confidence: 78, trend: 'down' as const, impact: 'high' as const },
-]
+const mockGrowthPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down'; impact: 'low' | 'medium' | 'high' }[] = []
 
-const mockGrowthActivities = [
-  { id: '1', user: 'Growth Lead', action: 'Launched', target: 'new pricing A/B test', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Data Analyst', action: 'Published', target: 'cohort retention report', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'System', action: 'Completed', target: 'weekly growth metrics sync', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
-]
+const mockGrowthActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' }[] = []
 
-const mockGrowthQuickActions = [
-  { id: '1', label: 'New Experiment', icon: 'Beaker', action: () => {}, shortcut: 'N' },
-  { id: '2', label: 'View Metrics', icon: 'BarChart3', action: () => {}, shortcut: 'M' },
-  { id: '3', label: 'Export Data', icon: 'Download', action: () => {}, shortcut: 'E' },
-  { id: '4', label: 'Settings', icon: 'Settings', action: () => {}, shortcut: 'S' },
-]
+const mockGrowthQuickActions: { id: string; label: string; icon: string; action: () => void; shortcut: string }[] = []
 
 // ============================================================================
 // MAIN COMPONENT

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -25,6 +25,14 @@ import {
   Loader2
 } from 'lucide-react'
 import { useSupabaseQuery, useSupabaseMutation, useRealtimeSubscription } from '@/lib/hooks/use-supabase-helpers'
+
+// Auth and data hooks for real backend integration
+import { useAuthUserId } from '@/lib/hooks/use-auth-user-id'
+import { useOrganizations } from '@/lib/hooks/use-organization-extended'
+import { useMyReports } from '@/lib/hooks/use-reports-extended'
+import { useAutomations, useAutomationStats } from '@/lib/hooks/use-automations-extended'
+import { useAIInsights, useAICollaboration } from '@/lib/hooks/use-ai-extended'
+import { useCollaborationTeamMembers } from '@/lib/hooks/use-collaboration-extended'
 
 // Competitive Upgrade Components
 import {
@@ -146,24 +154,147 @@ const PIPELINE_STAGES: { id: DealStage; label: string; color: string }[] = [
   { id: 'closed_lost', label: 'Closed Lost', color: 'red' }
 ]
 
-// Empty defaults for backward compatibility (data comes from Supabase hooks)
-const mockCompanies: Company[] = []
-const mockReports: Report[] = []
-const mockAutomations: Automation[] = []
-const mockAIInsights: any[] = []
-const mockCrmCollaborators: any[] = []
-const mockCrmPredictions: any[] = []
-const mockCrmQuickActions: any[] = []
+// Pipeline stages configuration is used below
 
 export default function CrmClient() {
-  // Define adapter variables locally (removed mock data imports)
-  const crmCompanies: any[] = []
-  const crmReports: any[] = []
-  const crmAutomations: any[] = []
-  const crmAIInsights: any[] = []
-  const crmCollaborators: any[] = []
-  const crmPredictions: any[] = []
-  const crmQuickActions: any[] = []
+  // Auth hook and userId state
+  const { getUserId } = useAuthUserId()
+  const [userId, setUserId] = useState<string | null>(null)
+
+  // Fetch user ID on mount
+  useEffect(() => {
+    const fetchUserId = async () => {
+      const id = await getUserId()
+      setUserId(id)
+    }
+    fetchUserId()
+  }, [getUserId])
+
+  // Real data hooks using userId
+  const { data: organizationsData, isLoading: orgsLoading, refresh: refreshOrgs } = useOrganizations(userId || undefined)
+  const { reports: reportsData, isLoading: reportsLoading, refresh: refreshReports } = useMyReports(userId || undefined)
+  const { data: automationsData, isLoading: automationsLoading, refresh: refreshAutomations } = useAutomations(userId || undefined)
+  const { stats: automationStatsData } = useAutomationStats(userId || undefined)
+  const { data: aiInsightsData, isLoading: insightsLoading, refresh: refreshInsights } = useAIInsights(userId || undefined)
+  const { data: aiCollaborationData, isLoading: collabLoading, refresh: refreshCollab } = useAICollaboration(userId || undefined)
+  const { data: teamMembersData, isLoading: teamLoading } = useCollaborationTeamMembers(undefined) // Uses first team
+
+  // Transform organizations to companies format
+  const companies: Company[] = useMemo(() => {
+    return (organizationsData || []).map((org: any) => ({
+      id: org.id,
+      name: org.name || 'Unknown Company',
+      industry: org.industry || 'Technology',
+      size: org.size || 'SMB',
+      revenue: org.annual_revenue || 0,
+      employees: org.employee_count || 0,
+      contacts: org.contact_count || 0,
+      deals: org.deal_count || 0,
+      dealValue: org.total_deal_value || 0,
+      website: org.website || '',
+      location: org.location || org.headquarters || '',
+      status: org.status || 'active'
+    }))
+  }, [organizationsData])
+
+  // Transform reports to CRM report format
+  const reports: Report[] = useMemo(() => {
+    return (reportsData || []).map((r: any) => ({
+      id: r.id,
+      name: r.name || 'Untitled Report',
+      type: r.type || 'pipeline',
+      lastRun: r.last_run || r.updated_at || r.created_at,
+      frequency: r.frequency || 'weekly',
+      recipients: r.recipients?.length || 0,
+      status: r.status || 'active'
+    }))
+  }, [reportsData])
+
+  // Transform automations to CRM automation format
+  const automations: Automation[] = useMemo(() => {
+    return (automationsData || []).map((a: any) => ({
+      id: a.id,
+      name: a.name || 'Untitled Automation',
+      type: a.type || a.trigger_type || 'workflow',
+      trigger: a.trigger_condition || a.trigger || 'Manual',
+      actions: a.action_count || a.actions?.length || 1,
+      executions: a.run_count || a.executions || 0,
+      successRate: a.success_rate || 100,
+      status: a.is_active ? 'active' : (a.status || 'draft'),
+      lastRun: a.last_run_at || a.updated_at || a.created_at
+    }))
+  }, [automationsData])
+
+  // Transform AI insights for CRM
+  const crmAIInsights: any[] = useMemo(() => {
+    return (aiInsightsData || []).map((insight: any) => ({
+      id: insight.id,
+      title: insight.title || insight.insight_type || 'AI Insight',
+      description: insight.description || insight.content || '',
+      priority: insight.priority || 'medium',
+      confidence: insight.confidence || insight.confidence_score || 0.85,
+      createdAt: insight.created_at
+    }))
+  }, [aiInsightsData])
+
+  // Transform collaborators for CRM
+  const crmCollaborators: any[] = useMemo(() => {
+    const collabUsers = (aiCollaborationData || []).map((c: any) => ({
+      id: c.user_id || c.id,
+      name: c.user_name || c.name || 'Team Member',
+      avatar: c.avatar_url || c.avatar || (c.user_name || 'T').charAt(0).toUpperCase(),
+      status: c.status || 'online',
+      role: c.role || 'member'
+    }))
+    const teamUsers = (teamMembersData || []).map((m: any) => ({
+      id: m.user_id || m.id,
+      name: m.users?.full_name || m.name || 'Team Member',
+      avatar: m.users?.avatar_url || (m.users?.full_name || 'T').charAt(0).toUpperCase(),
+      status: 'online',
+      role: m.role || 'member'
+    }))
+    // Combine and dedupe by id
+    const combined = [...collabUsers, ...teamUsers]
+    const seen = new Set()
+    return combined.filter(c => {
+      if (seen.has(c.id)) return false
+      seen.add(c.id)
+      return true
+    })
+  }, [aiCollaborationData, teamMembersData])
+
+  // CRM predictions derived from AI insights with high confidence
+  const crmPredictions: any[] = useMemo(() => {
+    return crmAIInsights
+      .filter((i: any) => i.confidence > 0.7)
+      .slice(0, 5)
+      .map((insight: any) => ({
+        id: insight.id,
+        type: 'prediction',
+        title: insight.title,
+        probability: Math.round(insight.confidence * 100),
+        impact: insight.priority === 'high' ? 'High Revenue Impact' : 'Moderate Impact'
+      }))
+  }, [crmAIInsights])
+
+  // Quick actions based on automation stats
+  const crmQuickActions: any[] = useMemo(() => {
+    const baseActions = [
+      { id: 'sync', label: 'Sync Data', icon: 'RefreshCw', action: 'sync' },
+      { id: 'export', label: 'Export CRM', icon: 'Download', action: 'export' },
+      { id: 'add-contact', label: 'Add Contact', icon: 'UserPlus', action: 'add-contact' },
+      { id: 'add-deal', label: 'New Deal', icon: 'Plus', action: 'add-deal' }
+    ]
+    if (automationStatsData?.total && automationStatsData.total > 0) {
+      baseActions.push({
+        id: 'run-automation',
+        label: `Run Automation (${automationStatsData.active} active)`,
+        icon: 'Play',
+        action: 'run-automation'
+      })
+    }
+    return baseActions
+  }, [automationStatsData])
 
   // Supabase queries
   const { data: dbContacts, isLoading: contactsLoading, refetch: refetchContacts } = useSupabaseQuery<any>({
@@ -282,9 +413,6 @@ export default function CrmClient() {
     }
   })
 
-  const [companies] = useState<Company[]>(mockCompanies)
-  const [reports] = useState<Report[]>(mockReports)
-  const [automations] = useState<Automation[]>(mockAutomations)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null)
   const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null)
@@ -362,7 +490,7 @@ export default function CrmClient() {
   })
 
   // Loading state
-  const isLoading = contactsLoading || dealsLoading || activitiesLoading
+  const isLoading = contactsLoading || dealsLoading || activitiesLoading || orgsLoading || reportsLoading || automationsLoading || insightsLoading || collabLoading || teamLoading
 
   // Stats
   const stats = useMemo(() => {
@@ -737,7 +865,12 @@ export default function CrmClient() {
     const syncPromise = Promise.all([
       refetchContacts(),
       refetchDeals(),
-      refetchActivities()
+      refetchActivities(),
+      refreshOrgs(),
+      refreshReports(),
+      refreshAutomations(),
+      refreshInsights(),
+      refreshCollab()
     ])
 
     toast.promise(syncPromise, {
@@ -890,7 +1023,7 @@ export default function CrmClient() {
           <div className="flex items-center gap-3">
             {/* Collaboration Indicator */}
             <CollaborationIndicator
-              collaborators={mockCrmCollaborators}
+              collaborators={crmCollaborators}
               maxVisible={3}
             />
             <div className="relative">
@@ -3139,10 +3272,10 @@ export default function CrmClient() {
         {/* AI-Powered CRM Insights */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
           <AIInsightsPanel
-            insights={mockAIInsights}
+            insights={crmAIInsights}
             onAskQuestion={(q) => toast.info('Question submitted', { description: q.substring(0, 50) + '...' })}
           />
-          <PredictiveAnalytics predictions={mockCrmPredictions} />
+          <PredictiveAnalytics predictions={crmPredictions} />
         </div>
 
         {/* Activity Feed */}
@@ -3155,7 +3288,7 @@ export default function CrmClient() {
         </div>
 
         {/* Quick Actions Toolbar */}
-        <QuickActionsToolbar actions={mockCrmQuickActions} />
+        <QuickActionsToolbar actions={crmQuickActions} />
       </div>
     </div>
   )

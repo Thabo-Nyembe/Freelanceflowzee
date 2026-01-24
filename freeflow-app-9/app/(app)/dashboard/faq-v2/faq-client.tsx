@@ -170,201 +170,21 @@ interface KnowledgeBaseStats {
 }
 
 // ============================================================================
-// MOCK DATA - MIGRATED
+// DEFAULT EMPTY DATA - For production (no mock data)
 // ============================================================================
-// MIGRATED: Batch #10 - Removed mock data, using database hooks
 
-const mockAuthors: Author[] = []
+const defaultAuthor: Author = {
+  id: 'system',
+  name: 'System',
+  avatar: '/avatars/default.png',
+  role: 'Content Author'
+}
 
-const mockCollections: Collection[] = []
+const emptyCollections: Collection[] = []
 
-const mockArticles: Article[] = []
-
-/* Removed in migration - use database hooks instead
-const mockAuthors_OLD: Author[] = [
-  { id: 'auth-1', name: 'Sarah Chen', avatar: '/avatars/sarah.jpg', role: 'Content Lead' },
-  { id: 'auth-2', name: 'John Smith', avatar: '/avatars/john.jpg', role: 'Support Manager' },
-  { id: 'auth-3', name: 'Emily Davis', avatar: '/avatars/emily.jpg', role: 'Technical Writer' }
-]
-
-const mockCollections_OLD: Collection[] = [
-  { id: 'col-1', name: 'Getting Started', description: 'Everything you need to begin using our platform', icon: '🚀', color: 'bg-blue-500', articleCount: 12, order: 1, parentId: null, isPublic: true, createdAt: '2024-01-01', updatedAt: '2024-12-20' },
-  { id: 'col-2', name: 'Account & Billing', description: 'Manage your account settings and billing information', icon: '💳', color: 'bg-green-500', articleCount: 8, order: 2, parentId: null, isPublic: true, createdAt: '2024-01-01', updatedAt: '2024-12-18' },
-  { id: 'col-3', name: 'Features & How-to', description: 'Learn how to use all features effectively', icon: '✨', color: 'bg-purple-500', articleCount: 24, order: 3, parentId: null, isPublic: true, createdAt: '2024-01-01', updatedAt: '2024-12-22' },
-  { id: 'col-4', name: 'Troubleshooting', description: 'Solutions to common problems and errors', icon: '🔧', color: 'bg-orange-500', articleCount: 15, order: 4, parentId: null, isPublic: true, createdAt: '2024-01-01', updatedAt: '2024-12-21' },
-  { id: 'col-5', name: 'API & Integrations', description: 'Developer documentation and API guides', icon: '🔗', color: 'bg-indigo-500', articleCount: 18, order: 5, parentId: null, isPublic: true, createdAt: '2024-01-01', updatedAt: '2024-12-19' },
-  { id: 'col-6', name: 'Security & Privacy', description: 'Security best practices and privacy settings', icon: '🔒', color: 'bg-red-500', articleCount: 6, order: 6, parentId: null, isPublic: true, createdAt: '2024-01-01', updatedAt: '2024-12-15' }
-]
-
-const mockArticles_OLD: Article[] = [
-  {
-    id: 'art-1',
-    title: 'How to create your first project',
-    slug: 'how-to-create-first-project',
-    content: 'Creating your first project is easy. Follow these steps...',
-    excerpt: 'Learn how to create and set up your first project in minutes.',
-    status: 'published',
-    collectionId: 'col-1',
-    author: mockAuthors[0],
-    tags: ['projects', 'getting-started', 'tutorial'],
-    viewCount: 15420,
-    helpfulCount: 892,
-    notHelpfulCount: 23,
-    commentCount: 45,
-    shareCount: 234,
-    searchCount: 3420,
-    avgReadTime: 5,
-    createdAt: '2024-06-15',
-    updatedAt: '2024-12-20',
-    publishedAt: '2024-06-20',
-    featured: true,
-    pinned: true,
-    language: 'en',
-    translations: [{ language: 'es', articleId: 'art-1-es' }, { language: 'fr', articleId: 'art-1-fr' }],
-    relatedArticles: ['art-2', 'art-3'],
-    versions: []
-  },
-  {
-    id: 'art-2',
-    title: 'Understanding your dashboard',
-    slug: 'understanding-dashboard',
-    content: 'Your dashboard provides an overview of all your activities...',
-    excerpt: 'A complete guide to navigating and using your dashboard.',
-    status: 'published',
-    collectionId: 'col-1',
-    author: mockAuthors[1],
-    tags: ['dashboard', 'overview', 'analytics'],
-    viewCount: 12350,
-    helpfulCount: 756,
-    notHelpfulCount: 18,
-    commentCount: 32,
-    shareCount: 189,
-    searchCount: 2890,
-    avgReadTime: 7,
-    createdAt: '2024-07-01',
-    updatedAt: '2024-12-18',
-    publishedAt: '2024-07-05',
-    featured: true,
-    pinned: false,
-    language: 'en',
-    translations: [],
-    relatedArticles: ['art-1'],
-    versions: []
-  },
-  {
-    id: 'art-3',
-    title: 'How to invite team members',
-    slug: 'invite-team-members',
-    content: 'Collaboration is key. Here is how to invite your team...',
-    excerpt: 'Step-by-step guide to adding team members to your workspace.',
-    status: 'published',
-    collectionId: 'col-2',
-    author: mockAuthors[2],
-    tags: ['team', 'collaboration', 'users'],
-    viewCount: 8920,
-    helpfulCount: 523,
-    notHelpfulCount: 12,
-    commentCount: 28,
-    shareCount: 145,
-    searchCount: 1890,
-    avgReadTime: 4,
-    createdAt: '2024-08-10',
-    updatedAt: '2024-12-15',
-    publishedAt: '2024-08-12',
-    featured: false,
-    pinned: false,
-    language: 'en',
-    translations: [{ language: 'de', articleId: 'art-3-de' }],
-    relatedArticles: ['art-2'],
-    versions: []
-  },
-  {
-    id: 'art-4',
-    title: 'Troubleshooting login issues',
-    slug: 'troubleshooting-login-issues',
-    content: 'Having trouble logging in? Try these solutions...',
-    excerpt: 'Common login problems and how to fix them quickly.',
-    status: 'published',
-    collectionId: 'col-4',
-    author: mockAuthors[0],
-    tags: ['login', 'troubleshooting', 'authentication'],
-    viewCount: 25680,
-    helpfulCount: 1245,
-    notHelpfulCount: 89,
-    commentCount: 156,
-    shareCount: 423,
-    searchCount: 8920,
-    avgReadTime: 6,
-    createdAt: '2024-05-01',
-    updatedAt: '2024-12-22',
-    publishedAt: '2024-05-03',
-    featured: false,
-    pinned: true,
-    language: 'en',
-    translations: [{ language: 'es', articleId: 'art-4-es' }, { language: 'fr', articleId: 'art-4-fr' }, { language: 'de', articleId: 'art-4-de' }],
-    relatedArticles: [],
-    versions: []
-  },
-  {
-    id: 'art-5',
-    title: 'API authentication guide',
-    slug: 'api-authentication-guide',
-    content: 'Learn how to authenticate your API requests...',
-    excerpt: 'Complete guide to API authentication methods and best practices.',
-    status: 'published',
-    collectionId: 'col-5',
-    author: mockAuthors[2],
-    tags: ['api', 'authentication', 'developer'],
-    viewCount: 6780,
-    helpfulCount: 445,
-    notHelpfulCount: 15,
-    commentCount: 67,
-    shareCount: 234,
-    searchCount: 2340,
-    avgReadTime: 12,
-    createdAt: '2024-09-15',
-    updatedAt: '2024-12-19',
-    publishedAt: '2024-09-20',
-    featured: false,
-    pinned: false,
-    language: 'en',
-    translations: [],
-    relatedArticles: [],
-    versions: []
-  },
-  {
-    id: 'art-6',
-    title: 'Setting up two-factor authentication',
-    slug: 'setup-two-factor-authentication',
-    content: 'Protect your account with 2FA...',
-    excerpt: 'How to enable and use two-factor authentication for enhanced security.',
-    status: 'draft',
-    collectionId: 'col-6',
-    author: mockAuthors[1],
-    tags: ['security', '2fa', 'authentication'],
-    viewCount: 0,
-    helpfulCount: 0,
-    notHelpfulCount: 0,
-    commentCount: 0,
-    shareCount: 0,
-    searchCount: 0,
-    avgReadTime: 5,
-    createdAt: '2024-12-20',
-    updatedAt: '2024-12-23',
-    publishedAt: null,
-    featured: false,
-    pinned: false,
-    language: 'en',
-    translations: [],
-    relatedArticles: [],
-    versions: []
-  }
-]
-*/
-
-// MIGRATED: Batch #10 - Removed mock data, using database hooks
-const mockSearchQueries: SearchQuery[] = []
-const mockStats: KnowledgeBaseStats = {
+// Production defaults - empty data structures
+const emptySearchQueries: SearchQuery[] = []
+const defaultStats: KnowledgeBaseStats = {
   totalArticles: 0,
   publishedArticles: 0,
   draftArticles: 0,
@@ -376,7 +196,7 @@ const mockStats: KnowledgeBaseStats = {
   totalCollections: 0,
   totalAuthors: 0
 }
-const mockHelpCenterSettings: HelpCenterSettings = {
+const defaultHelpCenterSettings: HelpCenterSettings = {
   title: 'FreeFlow Help Center',
   subtitle: 'Find answers to your questions',
   logoUrl: '/logo.png',
@@ -390,11 +210,6 @@ const mockHelpCenterSettings: HelpCenterSettings = {
   languages: ['en'],
   defaultLanguage: 'en'
 }
-const mockFAQAIInsights = []
-const mockFAQCollaborators = []
-const mockFAQPredictions = []
-const mockFAQActivities = []
-const mockFAQQuickActionsConfig = []
 
 // ============================================================================
 // COMPONENT
@@ -402,9 +217,9 @@ const mockFAQQuickActionsConfig = []
 
 export default function FAQClient() {
   const [activeTab, setActiveTab] = useState('articles')
-  const [collections] = useState<Collection[]>(mockCollections)
-  const [searchQueries] = useState<SearchQuery[]>(mockSearchQueries)
-  const [helpCenterSettings] = useState<HelpCenterSettings>(mockHelpCenterSettings)
+  const [collections] = useState<Collection[]>(emptyCollections)
+  const [searchQueries] = useState<SearchQuery[]>(emptySearchQueries)
+  const [helpCenterSettings] = useState<HelpCenterSettings>(defaultHelpCenterSettings)
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [collectionFilter, setCollectionFilter] = useState<string>('all')
@@ -424,7 +239,7 @@ export default function FAQClient() {
   const [editingCollection, setEditingCollection] = useState<Collection | null>(null)
   const [showImportDialog, setShowImportDialog] = useState(false)
   const [reorderMode, setReorderMode] = useState(false)
-  const [collectionsOrder, setCollectionsOrder] = useState<Collection[]>(mockCollections)
+  const [collectionsOrder, setCollectionsOrder] = useState<Collection[]>(emptyCollections)
   const [apiKey, setApiKey] = useState('sk_live_abc123xyz...')
   const [bulkSelectionMode, setBulkSelectionMode] = useState(false)
 
@@ -460,7 +275,7 @@ export default function FAQClient() {
       excerpt: faq.answer.slice(0, 150) + (faq.answer.length > 150 ? '...' : ''),
       status: faq.status,
       collectionId: faq.category || 'col-1',
-      author: mockAuthors[0],
+      author: faq.author ? { id: 'author', name: faq.author, avatar: '/avatars/default.png', role: 'Author' } : defaultAuthor,
       tags: faq.tags || [],
       viewCount: faq.views_count || 0,
       helpfulCount: faq.helpful_count || 0,
@@ -493,7 +308,7 @@ export default function FAQClient() {
       articlesNeedingReview: dbStats?.review || 0,
       unansweredQuestions: 0,
       totalCollections: collections.length,
-      totalAuthors: mockAuthors.length
+      totalAuthors: 0  // Will be computed from actual article authors when needed
     }
   }, [dbStats, collections.length])
 
@@ -830,8 +645,8 @@ export default function FAQClient() {
     setShowImportDialog(false)
   }, [])
 
-  // Quick actions with real functionality
-  const mockFAQQuickActions = useMemo(() => [
+  // Quick actions with real functionality (not mock data)
+  const faqQuickActions = useMemo(() => [
     {
       id: '1',
       label: 'New Article',
@@ -2207,21 +2022,22 @@ export default function FAQClient() {
         </Tabs>
 
         
+        {/* AI Insights and Analytics - Empty state handled by components */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockFAQAIInsights}
+              insights={[]}
               title="Knowledge Base Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockFAQCollaborators}
+              collaborators={[]}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockFAQPredictions}
+              predictions={[]}
               title="Content Metrics Forecast"
             />
           </div>
@@ -2229,12 +2045,12 @@ export default function FAQClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockFAQActivities}
+            activities={[]}
             title="Content Activity"
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockFAQQuickActions}
+            actions={faqQuickActions}
             variant="grid"
           />
         </div>

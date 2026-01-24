@@ -4,12 +4,18 @@ import { createClient } from '@/lib/supabase/client'
 
 import { useState, useCallback, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
+import { useAuth } from '@/lib/hooks/use-auth'
 import { useCommunity } from '@/lib/hooks/use-community'
 import {
   useCommunityEvents,
   useCommunityMembers,
   useCommunityPosts
 } from '@/lib/hooks/use-community-extended'
+import { useRoles } from '@/lib/hooks/use-role-extended'
+import { useDirectMessages } from '@/lib/hooks/use-messaging'
+import { useModerationLogs } from '@/lib/hooks/use-moderation-extended'
+import { useActiveIntegrations } from '@/lib/hooks/use-integrations-extended'
+import { usePresenceChannels } from '@/lib/hooks/use-presence-extended'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
@@ -294,129 +300,38 @@ interface ServerStats {
   boostLevel: BoostLevel
 }
 
-// ============== MOCK DATA ==============
+// ============== DEFAULT EMPTY DATA (replaced by hooks) ==============
 
-const mockChannelCategories: ChannelCategory[] = [
-  {
-    id: 'cat1', name: 'INFORMATION', position: 1, isCollapsed: false,
-    channels: [
-      { id: 'ch1', name: 'rules', type: 'rules', description: 'Server rules and guidelines', isPrivate: false, isNsfw: false, slowMode: 0, position: 1, parentId: 'cat1', memberCount: 1250, unreadCount: 0, mentionCount: 0, lastActivity: new Date(), permissions: [] },
-      { id: 'ch2', name: 'announcements', type: 'announcement', description: 'Important updates', isPrivate: false, isNsfw: false, slowMode: 0, position: 2, parentId: 'cat1', memberCount: 1250, unreadCount: 2, mentionCount: 0, lastActivity: new Date(), permissions: [] },
-      { id: 'ch3', name: 'welcome', type: 'text', description: 'Say hello!', isPrivate: false, isNsfw: false, slowMode: 0, position: 3, parentId: 'cat1', memberCount: 1250, unreadCount: 0, mentionCount: 0, lastActivity: new Date(), permissions: [] }
-    ]
-  },
-  {
-    id: 'cat2', name: 'GENERAL', position: 2, isCollapsed: false,
-    channels: [
-      { id: 'ch4', name: 'general', type: 'text', description: 'General discussion', isPrivate: false, isNsfw: false, slowMode: 0, position: 1, parentId: 'cat2', memberCount: 1250, unreadCount: 12, mentionCount: 3, lastActivity: new Date(), permissions: [] },
-      { id: 'ch5', name: 'off-topic', type: 'text', description: 'Random chatter', isPrivate: false, isNsfw: false, slowMode: 5, position: 2, parentId: 'cat2', memberCount: 980, unreadCount: 5, mentionCount: 0, lastActivity: new Date(), permissions: [] },
-      { id: 'ch6', name: 'media', type: 'text', description: 'Share images and videos', isPrivate: false, isNsfw: false, slowMode: 10, position: 3, parentId: 'cat2', memberCount: 750, unreadCount: 0, mentionCount: 0, lastActivity: new Date(), permissions: [] }
-    ]
-  },
-  {
-    id: 'cat3', name: 'COMMUNITY', position: 3, isCollapsed: false,
-    channels: [
-      { id: 'ch7', name: 'showcase', type: 'forum', description: 'Share your projects', isPrivate: false, isNsfw: false, slowMode: 0, position: 1, parentId: 'cat3', memberCount: 890, unreadCount: 3, mentionCount: 0, lastActivity: new Date(), permissions: [] },
-      { id: 'ch8', name: 'help', type: 'text', description: 'Get help from the community', isPrivate: false, isNsfw: false, slowMode: 0, position: 2, parentId: 'cat3', memberCount: 1100, unreadCount: 8, mentionCount: 1, lastActivity: new Date(), permissions: [] },
-      { id: 'ch9', name: 'feedback', type: 'forum', description: 'Submit feedback and suggestions', isPrivate: false, isNsfw: false, slowMode: 0, position: 3, parentId: 'cat3', memberCount: 650, unreadCount: 0, mentionCount: 0, lastActivity: new Date(), permissions: [] }
-    ]
-  },
-  {
-    id: 'cat4', name: 'VOICE CHANNELS', position: 4, isCollapsed: false,
-    channels: [
-      { id: 'ch10', name: 'Lounge', type: 'voice', description: 'Hang out', isPrivate: false, isNsfw: false, slowMode: 0, position: 1, parentId: 'cat4', memberCount: 8, unreadCount: 0, mentionCount: 0, lastActivity: new Date(), permissions: [] },
-      { id: 'ch11', name: 'Gaming', type: 'voice', description: 'Gaming voice chat', isPrivate: false, isNsfw: false, slowMode: 0, position: 2, parentId: 'cat4', memberCount: 4, unreadCount: 0, mentionCount: 0, lastActivity: new Date(), permissions: [] },
-      { id: 'ch12', name: 'Music', type: 'voice', description: 'Listen together', isPrivate: false, isNsfw: false, slowMode: 0, position: 3, parentId: 'cat4', memberCount: 2, unreadCount: 0, mentionCount: 0, lastActivity: new Date(), permissions: [] },
-      { id: 'ch13', name: 'Stage', type: 'stage', description: 'Community events', isPrivate: false, isNsfw: false, slowMode: 0, position: 4, parentId: 'cat4', memberCount: 0, unreadCount: 0, mentionCount: 0, lastActivity: new Date(), permissions: [] }
-    ]
-  },
-  {
-    id: 'cat5', name: 'STAFF', position: 5, isCollapsed: false,
-    channels: [
-      { id: 'ch14', name: 'staff-chat', type: 'text', description: 'Staff only', isPrivate: true, isNsfw: false, slowMode: 0, position: 1, parentId: 'cat5', memberCount: 12, unreadCount: 1, mentionCount: 0, lastActivity: new Date(), permissions: [] },
-      { id: 'ch15', name: 'mod-log', type: 'text', description: 'Moderation actions', isPrivate: true, isNsfw: false, slowMode: 0, position: 2, parentId: 'cat5', memberCount: 8, unreadCount: 0, mentionCount: 0, lastActivity: new Date(), permissions: [] }
-    ]
-  }
-]
+const defaultChannel: Channel = {
+  id: 'default',
+  name: 'general',
+  type: 'text',
+  description: 'Default channel',
+  isPrivate: false,
+  isNsfw: false,
+  slowMode: 0,
+  position: 0,
+  memberCount: 0,
+  unreadCount: 0,
+  mentionCount: 0,
+  lastActivity: new Date(),
+  permissions: []
+}
 
-const mockMessages: Message[] = [
-  {
-    id: 'm1', channelId: 'ch4', authorId: 'u1', authorName: 'John Developer', authorAvatar: 'john', authorRole: 'admin',
-    content: 'Hey everyone! Just shipped a new feature. Check it out! 🚀',
-    timestamp: new Date('2024-01-15T10:30:00'), reactions: [{ emoji: '🚀', count: 12, users: [], me: true }, { emoji: '👍', count: 8, users: [], me: false }],
-    isPinned: false, isSystemMessage: false, attachments: [], embeds: [], mentions: []
-  },
-  {
-    id: 'm2', channelId: 'ch4', authorId: 'u2', authorName: 'Sarah Designer', authorAvatar: 'sarah', authorRole: 'moderator',
-    content: 'That looks amazing! The new dashboard design is clean 🎨',
-    timestamp: new Date('2024-01-15T10:32:00'), reactions: [{ emoji: '❤️', count: 5, users: [], me: false }],
-    isPinned: false, isSystemMessage: false, attachments: [], embeds: [], mentions: [],
-    replyTo: { id: 'm1', authorName: 'John Developer', content: 'Hey everyone! Just shipped...' }
-  },
-  {
-    id: 'm3', channelId: 'ch4', authorId: 'u3', authorName: 'Mike Engineer', authorAvatar: 'mike', authorRole: 'vip',
-    content: 'Nice work! I found a small issue on mobile though. @John Developer check DMs',
-    timestamp: new Date('2024-01-15T10:35:00'), editedTimestamp: new Date('2024-01-15T10:36:00'),
-    reactions: [], isPinned: false, isSystemMessage: false, attachments: [], embeds: [], mentions: ['u1']
-  },
-  {
-    id: 'm4', channelId: 'ch4', authorId: 'u4', authorName: 'Emily PM', authorAvatar: 'emily', authorRole: 'member',
-    content: 'Great collaboration everyone! Let\'s schedule a sync to discuss next steps.',
-    timestamp: new Date('2024-01-15T10:40:00'), reactions: [{ emoji: '✅', count: 6, users: [], me: true }],
-    isPinned: true, isSystemMessage: false, attachments: [], embeds: [], mentions: []
-  },
-  {
-    id: 'm5', channelId: 'ch4', authorId: 'bot1', authorName: 'FreeFlow Bot', authorAvatar: 'bot', authorRole: 'member',
-    content: '📊 **Daily Stats Update**\n• New members: 23\n• Messages: 847\n• Active users: 156',
-    timestamp: new Date('2024-01-15T11:00:00'), reactions: [],
-    isPinned: false, isSystemMessage: true, attachments: [], embeds: [], mentions: []
-  }
-]
+const defaultChannelCategory: ChannelCategory = {
+  id: 'default',
+  name: 'GENERAL',
+  position: 1,
+  channels: [defaultChannel],
+  isCollapsed: false
+}
 
-const mockMembers: Member[] = [
-  { id: 'u1', username: 'john_dev', displayName: 'John Developer', avatar: 'john', status: 'online', roles: ['admin', 'vip'], highestRole: 'admin', joinedAt: new Date('2023-01-15'), isBot: false, isOwner: true, isBoosting: true, lastSeen: new Date(), messageCount: 2340, voiceMinutes: 12500 },
-  { id: 'u2', username: 'sarah_design', displayName: 'Sarah Designer', avatar: 'sarah', status: 'online', customStatus: 'Working on UI', roles: ['moderator', 'vip'], highestRole: 'moderator', joinedAt: new Date('2023-02-20'), isBot: false, isOwner: false, isBoosting: true, lastSeen: new Date(), messageCount: 1890, voiceMinutes: 8900 },
-  { id: 'u3', username: 'mike_eng', displayName: 'Mike Engineer', avatar: 'mike', status: 'idle', roles: ['vip'], highestRole: 'vip', joinedAt: new Date('2023-03-10'), isBot: false, isOwner: false, isBoosting: false, lastSeen: new Date(), messageCount: 1456, voiceMinutes: 5600 },
-  { id: 'u4', username: 'emily_pm', displayName: 'Emily PM', avatar: 'emily', status: 'dnd', customStatus: 'In a meeting', roles: ['member'], highestRole: 'member', joinedAt: new Date('2023-04-01'), isBot: false, isOwner: false, isBoosting: false, lastSeen: new Date(), messageCount: 890, voiceMinutes: 3400 },
-  { id: 'u5', username: 'alex_fe', displayName: 'Alex Frontend', avatar: 'alex', status: 'offline', roles: ['member'], highestRole: 'member', joinedAt: new Date('2023-05-15'), isBot: false, isOwner: false, isBoosting: false, lastSeen: new Date(), messageCount: 567, voiceMinutes: 1200 },
-  { id: 'u6', username: 'lisa_be', displayName: 'Lisa Backend', avatar: 'lisa', status: 'online', roles: ['member'], highestRole: 'member', joinedAt: new Date('2023-06-01'), isBot: false, isOwner: false, isBoosting: true, lastSeen: new Date(), messageCount: 678, voiceMinutes: 2300 },
-  { id: 'bot1', username: 'freeflow_bot', displayName: 'FreeFlow Bot', avatar: 'bot', status: 'online', roles: ['member'], highestRole: 'member', joinedAt: new Date('2023-01-01'), isBot: true, isOwner: false, isBoosting: false, lastSeen: new Date(), messageCount: 5670, voiceMinutes: 0 }
-]
-
-const mockRoles: Role[] = [
-  { id: 'r1', name: 'Owner', color: '#f59e0b', position: 5, memberCount: 1, permissions: ['all'], isHoisted: true, isMentionable: false, isManaged: false },
-  { id: 'r2', name: 'Admin', color: '#ef4444', position: 4, memberCount: 2, permissions: ['manage_server', 'manage_channels', 'manage_roles', 'ban_members'], isHoisted: true, isMentionable: true, isManaged: false },
-  { id: 'r3', name: 'Moderator', color: '#22c55e', position: 3, memberCount: 5, permissions: ['kick_members', 'mute_members', 'manage_messages'], isHoisted: true, isMentionable: true, isManaged: false },
-  { id: 'r4', name: 'VIP', color: '#a855f7', position: 2, memberCount: 15, permissions: ['create_instant_invite', 'embed_links', 'attach_files'], isHoisted: true, isMentionable: true, isManaged: false },
-  { id: 'r5', name: 'Booster', color: '#ec4899', position: 1, memberCount: 8, permissions: ['use_external_emojis', 'use_external_stickers'], isHoisted: true, isMentionable: false, isManaged: true },
-  { id: 'r6', name: 'Member', color: '#6b7280', position: 0, memberCount: 1219, permissions: ['read', 'send_messages', 'add_reactions'], isHoisted: false, isMentionable: false, isManaged: false }
-]
-
-const mockEvents: Event[] = [
-  { id: 'e1', name: 'Weekly Community Hangout', description: 'Join us for casual chat and games!', channelId: 'ch10', scheduledStart: new Date('2024-01-20T19:00:00'), scheduledEnd: new Date('2024-01-20T21:00:00'), entityType: 'voice', interestedCount: 45, creatorId: 'u1', creatorName: 'John Developer', status: 'scheduled' },
-  { id: 'e2', name: 'Product Launch Stream', description: 'Watch the live reveal of our new features', channelId: 'ch13', scheduledStart: new Date('2024-01-25T18:00:00'), entityType: 'stage', interestedCount: 234, creatorId: 'u2', creatorName: 'Sarah Designer', status: 'scheduled' },
-  { id: 'e3', name: 'Game Night: Among Us', description: 'Social deduction gaming night', scheduledStart: new Date('2024-01-22T20:00:00'), entityType: 'external', location: 'Among Us Lobby', interestedCount: 28, creatorId: 'u3', creatorName: 'Mike Engineer', status: 'scheduled' }
-]
-
-const mockBots: BotIntegration[] = [
-  { id: 'bot1', name: 'FreeFlow Bot', avatar: 'bot', description: 'Official server bot for moderation and utilities', prefix: '!', isEnabled: true, permissions: ['manage_messages', 'ban_members', 'manage_roles'], commands: 45, usageCount: 12340, addedBy: 'John Developer', addedAt: new Date('2023-01-01') },
-  { id: 'bot2', name: 'Music Bot', avatar: 'music', description: 'Play music in voice channels', prefix: '!m ', isEnabled: true, permissions: ['connect', 'speak'], commands: 15, usageCount: 5670, addedBy: 'Sarah Designer', addedAt: new Date('2023-03-15') },
-  { id: 'bot3', name: 'Level Bot', avatar: 'level', description: 'XP and leveling system', prefix: '!lv ', isEnabled: true, permissions: ['manage_roles', 'send_messages'], commands: 12, usageCount: 8900, addedBy: 'John Developer', addedAt: new Date('2023-02-01') }
-]
-
-const mockModActions: ModAction[] = [
-  { id: 'ma1', type: 'warn', targetId: 'u99', targetName: 'SpamUser123', moderatorId: 'u2', moderatorName: 'Sarah Designer', reason: 'Spamming in general chat', timestamp: new Date('2024-01-14T15:30:00') },
-  { id: 'ma2', type: 'timeout', targetId: 'u98', targetName: 'ToxicPlayer', moderatorId: 'u3', moderatorName: 'Mike Engineer', reason: 'Harassment', duration: 3600, timestamp: new Date('2024-01-14T12:00:00') },
-  { id: 'ma3', type: 'kick', targetId: 'u97', targetName: 'Advertiser', moderatorId: 'u2', moderatorName: 'Sarah Designer', reason: 'Unsolicited advertising', timestamp: new Date('2024-01-13T18:45:00') },
-  { id: 'ma4', type: 'ban', targetId: 'u96', targetName: 'HackerAccount', moderatorId: 'u1', moderatorName: 'John Developer', reason: 'Phishing links', timestamp: new Date('2024-01-12T09:00:00') }
-]
-
-const serverBoost: ServerBoost = {
-  level: 2,
-  boostCount: 8,
-  boostersCount: 6,
-  perks: ['Animated Icon', '1080p Streaming', '50 Emoji Slots', '150 Sticker Slots', '50MB Upload Limit'],
-  nextLevel: { required: 14, perks: ['Banner', 'Vanity URL', '100 Emoji Slots', '300 Sticker Slots'] }
+const defaultServerBoost: ServerBoost = {
+  level: 0,
+  boostCount: 0,
+  boostersCount: 0,
+  perks: [],
+  nextLevel: { required: 2, perks: ['Animated Icon', '1080p Streaming'] }
 }
 
 // ============== HELPER FUNCTIONS ==============
@@ -500,11 +415,13 @@ export default function CommunityClient() {
   const communityActivities: any[] = []
   const communityQuickActions: any[] = []
 
+  // Auth hook for user ID
+  const { user } = useAuth()
+  const userId = user?.id || null
+
   const [activeTab, setActiveTab] = useState('chat')
-  const [selectedChannel, setSelectedChannel] = useState<Channel>(mockChannelCategories[1].channels[0])
   const [messageInput, setMessageInput] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
-  const [expandedCategories, setExpandedCategories] = useState<string[]>(mockChannelCategories.map(c => c.id))
   const [showCreateChannel, setShowCreateChannel] = useState(false)
   const [showMemberProfile, setShowMemberProfile] = useState(false)
   const [showServerSettings, setShowServerSettings] = useState(false)
@@ -514,7 +431,6 @@ export default function CommunityClient() {
   const [selectedMember, setSelectedMember] = useState<Member | null>(null)
   const [settingsTab, setSettingsTab] = useState('general')
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [userId, setUserId] = useState<string | null>(null)
 
   // Audio/Media states
   const [isMicMuted, setIsMicMuted] = useState(false)
@@ -556,31 +472,250 @@ export default function CommunityClient() {
     isMentionable: false
   })
 
-  // Supabase hooks
-  const { communities, loading: communitiesLoading, createCommunity, updateCommunity, deleteCommunity, refetch: refetchCommunities } = useCommunity()
-  const { data: communityEvents, isLoading: eventsLoading, refresh: refreshEvents } = useCommunityEvents()
-  const { data: communityMembers, isLoading: membersLoading, refresh: refreshMembers } = useCommunityMembers(communities?.[0]?.id)
-  const { data: communityPosts, isLoading: postsLoading, refresh: refreshPosts } = useCommunityPosts()
+  // ============== REAL DATA HOOKS ==============
 
-  // Get current user
+  // Community hooks
+  const { communities, loading: communitiesLoading, createCommunity, updateCommunity, deleteCommunity, refetch: refetchCommunities } = useCommunity()
+  const { data: communityEventsData, isLoading: eventsLoading, refresh: refreshEvents } = useCommunityEvents()
+  const { data: communityMembersData, isLoading: membersLoading, refresh: refreshMembers } = useCommunityMembers(communities?.[0]?.id)
+  const { data: communityPostsData, isLoading: postsLoading, refresh: refreshPosts } = useCommunityPosts()
+
+  // Additional data hooks
+  const { data: rolesData, isLoading: rolesLoading, refresh: refreshRoles } = useRoles()
+  const { messages: directMessagesData, loading: messagesLoading } = useDirectMessages()
+  const { logs: modLogsData, isLoading: modLogsLoading, refresh: refreshModLogs } = useModerationLogs({ limit: 50 })
+  const { integrations: botsData, isLoading: botsLoading, refresh: refreshBots } = useActiveIntegrations(userId || undefined)
+  const { channels: presenceChannelsData, isLoading: channelsLoading, refresh: refreshChannels } = usePresenceChannels()
+
+  // ============== LOCAL STATE SYNCED FROM HOOKS ==============
+
+  // Channel categories state
+  const [channelCategories, setChannelCategories] = useState<ChannelCategory[]>([defaultChannelCategory])
+  const [selectedChannel, setSelectedChannel] = useState<Channel>(defaultChannel)
+  const [expandedCategories, setExpandedCategories] = useState<string[]>(['default'])
+
+  // Messages state
+  const [messages, setMessages] = useState<Message[]>([])
+
+  // Members state
+  const [members, setMembers] = useState<Member[]>([])
+
+  // Roles state
+  const [roles, setRoles] = useState<Role[]>([])
+
+  // Events state
+  const [events, setEvents] = useState<Event[]>([])
+
+  // Bots state
+  const [bots, setBots] = useState<BotIntegration[]>([])
+
+  // Mod actions state
+  const [modActions, setModActions] = useState<ModAction[]>([])
+
+  // Server boost state
+  const [serverBoost, setServerBoost] = useState<ServerBoost>(defaultServerBoost)
+
+  // ============== SYNC DATA FROM HOOKS TO LOCAL STATE ==============
+
+  // Sync channel categories from presence channels
   useEffect(() => {
-    const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user) setUserId(user.id)
+    if (presenceChannelsData && presenceChannelsData.length > 0) {
+      // Group channels by type/category
+      const categorized: Record<string, Channel[]> = {}
+      presenceChannelsData.forEach((ch: any) => {
+        const catName = ch.type?.toUpperCase() || 'GENERAL'
+        if (!categorized[catName]) categorized[catName] = []
+        categorized[catName].push({
+          id: ch.id,
+          name: ch.name || 'channel',
+          type: (ch.type as ChannelType) || 'text',
+          description: ch.description || '',
+          isPrivate: ch.is_private || false,
+          isNsfw: false,
+          slowMode: 0,
+          position: ch.position || 0,
+          parentId: ch.parent_id,
+          memberCount: ch.member_count || 0,
+          unreadCount: ch.unread_count || 0,
+          mentionCount: 0,
+          lastActivity: new Date(ch.last_activity_at || Date.now()),
+          permissions: []
+        })
+      })
+
+      const categories: ChannelCategory[] = Object.entries(categorized).map(([name, channels], idx) => ({
+        id: `cat-${idx}`,
+        name,
+        position: idx,
+        channels,
+        isCollapsed: false
+      }))
+
+      if (categories.length > 0) {
+        setChannelCategories(categories)
+        setExpandedCategories(categories.map(c => c.id))
+        if (categories[0].channels.length > 0) {
+          setSelectedChannel(categories[0].channels[0])
+        }
+      }
     }
-    getUser()
-  }, [])
+  }, [presenceChannelsData])
+
+  // Sync messages from direct messages / community posts
+  useEffect(() => {
+    if (communityPostsData && communityPostsData.length > 0) {
+      const mappedMessages: Message[] = communityPostsData.map((post: any) => ({
+        id: post.id,
+        channelId: post.channel_id || selectedChannel.id,
+        authorId: post.user_id,
+        authorName: post.author_name || 'User',
+        authorAvatar: post.author_avatar || 'default',
+        authorRole: 'member' as MemberRole,
+        content: post.content || '',
+        timestamp: new Date(post.created_at),
+        editedTimestamp: post.updated_at ? new Date(post.updated_at) : undefined,
+        reactions: [],
+        isPinned: post.is_pinned || false,
+        isSystemMessage: false,
+        attachments: [],
+        embeds: [],
+        mentions: []
+      }))
+      setMessages(mappedMessages)
+    }
+  }, [communityPostsData, selectedChannel.id])
+
+  // Sync members from community members
+  useEffect(() => {
+    if (communityMembersData && communityMembersData.length > 0) {
+      const mappedMembers: Member[] = communityMembersData.map((m: any) => ({
+        id: m.user_id || m.id,
+        username: m.username || m.user_id || 'user',
+        displayName: m.display_name || m.full_name || 'User',
+        avatar: m.avatar_url || 'default',
+        status: (m.status as MemberStatus) || 'offline',
+        customStatus: m.custom_status,
+        roles: m.roles || ['member'],
+        highestRole: (m.highest_role as MemberRole) || 'member',
+        joinedAt: new Date(m.joined_at || m.created_at || Date.now()),
+        premiumSince: m.premium_since ? new Date(m.premium_since) : undefined,
+        isBot: m.is_bot || false,
+        isOwner: m.is_owner || false,
+        isBoosting: m.is_boosting || false,
+        lastSeen: new Date(m.last_seen || Date.now()),
+        messageCount: m.message_count || 0,
+        voiceMinutes: m.voice_minutes || 0
+      }))
+      setMembers(mappedMembers)
+    }
+  }, [communityMembersData])
+
+  // Sync roles from roles hook
+  useEffect(() => {
+    if (rolesData && rolesData.length > 0) {
+      const mappedRoles: Role[] = rolesData.map((r: any) => ({
+        id: r.id,
+        name: r.name || 'Role',
+        color: r.color || '#6b7280',
+        position: r.position || 0,
+        memberCount: r.member_count || 0,
+        permissions: r.permissions || [],
+        isHoisted: r.is_hoisted || false,
+        isMentionable: r.is_mentionable || false,
+        isManaged: r.is_managed || false
+      }))
+      setRoles(mappedRoles)
+    }
+  }, [rolesData])
+
+  // Sync events from community events
+  useEffect(() => {
+    if (communityEventsData && communityEventsData.length > 0) {
+      const mappedEvents: Event[] = communityEventsData.map((e: any) => ({
+        id: e.id,
+        name: e.name || 'Event',
+        description: e.description || '',
+        channelId: e.channel_id,
+        scheduledStart: new Date(e.start_date || e.scheduled_start || Date.now()),
+        scheduledEnd: e.end_date ? new Date(e.end_date) : undefined,
+        entityType: (e.entity_type as 'voice' | 'stage' | 'external') || 'voice',
+        location: e.location,
+        image: e.image_url,
+        interestedCount: e.interested_count || 0,
+        creatorId: e.user_id || e.creator_id,
+        creatorName: e.creator_name || 'Creator',
+        status: (e.status as 'scheduled' | 'active' | 'completed' | 'cancelled') || 'scheduled'
+      }))
+      setEvents(mappedEvents)
+    }
+  }, [communityEventsData])
+
+  // Sync bots from integrations
+  useEffect(() => {
+    if (botsData && botsData.length > 0) {
+      const mappedBots: BotIntegration[] = botsData
+        .filter((b: any) => b.type === 'bot' || b.is_bot)
+        .map((b: any) => ({
+          id: b.id,
+          name: b.name || 'Bot',
+          avatar: b.avatar_url || 'bot',
+          description: b.description || '',
+          prefix: b.prefix || '!',
+          isEnabled: b.is_active || b.is_enabled || true,
+          permissions: b.permissions || [],
+          commands: b.commands_count || 0,
+          usageCount: b.usage_count || 0,
+          addedBy: b.added_by || 'Admin',
+          addedAt: new Date(b.created_at || Date.now())
+        }))
+      setBots(mappedBots)
+    }
+  }, [botsData])
+
+  // Sync mod actions from moderation logs
+  useEffect(() => {
+    if (modLogsData && modLogsData.length > 0) {
+      const mappedActions: ModAction[] = modLogsData.map((log: any) => ({
+        id: log.id,
+        type: (log.action_type as ModActionType) || 'warn',
+        targetId: log.target_user_id || log.target_id,
+        targetName: log.target_name || 'User',
+        moderatorId: log.moderator_id,
+        moderatorName: log.moderator_name || 'Moderator',
+        reason: log.reason || '',
+        duration: log.duration,
+        timestamp: new Date(log.created_at || Date.now())
+      }))
+      setModActions(mappedActions)
+    }
+  }, [modLogsData])
+
+  // Sync server boost from community data
+  useEffect(() => {
+    if (communities && communities.length > 0) {
+      const community = communities[0]
+      setServerBoost({
+        level: community.boost_level || 0,
+        boostCount: community.boost_count || 0,
+        boostersCount: community.boosters_count || 0,
+        perks: community.perks || [],
+        nextLevel: community.next_level_perks ? { required: community.next_level_required || 0, perks: community.next_level_perks } : undefined
+      })
+    }
+  }, [communities])
+
+  // ============== COMPUTED STATS ==============
 
   const stats: ServerStats = useMemo(() => ({
-    totalMembers: 1250,
-    onlineMembers: mockMembers.filter(m => m.status === 'online').length,
-    totalChannels: mockChannelCategories.reduce((sum, cat) => sum + cat.channels.length, 0),
-    totalMessages: mockMembers.reduce((sum, m) => sum + m.messageCount, 0),
-    messagesThisWeek: 2847,
-    newMembersThisWeek: 45,
-    activeMembers: 156,
+    totalMembers: members.length || communities?.[0]?.member_count || 0,
+    onlineMembers: members.filter(m => m.status === 'online').length,
+    totalChannels: channelCategories.reduce((sum, cat) => sum + cat.channels.length, 0),
+    totalMessages: messages.length || communityPostsData?.length || 0,
+    messagesThisWeek: communities?.[0]?.messages_this_week || 0,
+    newMembersThisWeek: communities?.[0]?.new_members_this_week || 0,
+    activeMembers: members.filter(m => m.status !== 'offline').length,
     boostLevel: serverBoost.level
-  }), [])
+  }), [members, channelCategories, messages, communityPostsData, communities, serverBoost.level])
 
   const toggleCategory = (categoryId: string) => {
     setExpandedCategories(prev =>
@@ -790,7 +925,7 @@ export default function CommunityClient() {
         color: roleForm.color,
         is_hoisted: roleForm.isHoisted,
         is_mentionable: roleForm.isMentionable,
-        position: mockRoles.length,
+        position: roles.length,
         member_count: 0,
         permissions: ['read', 'send_messages']
       })
@@ -1134,12 +1269,12 @@ export default function CommunityClient() {
         </div>
 
         {/* Events Banner */}
-        {mockEvents.filter(e => e.status === 'scheduled').length > 0 && (
+        {events.filter(e => e.status === 'scheduled').length > 0 && (
           <div className="p-2 bg-violet-100 dark:bg-violet-900/30 border-b cursor-pointer hover:bg-violet-200 dark:hover:bg-violet-900/50" onClick={() => setShowEventDialog(true)}>
             <div className="flex items-center gap-2 text-sm">
               <Calendar className="w-4 h-4 text-violet-600" />
               <span className="font-medium text-violet-700 dark:text-violet-400">
-                {mockEvents.filter(e => e.status === 'scheduled').length} Upcoming Events
+                {events.filter(e => e.status === 'scheduled').length} Upcoming Events
               </span>
             </div>
           </div>
@@ -1148,7 +1283,7 @@ export default function CommunityClient() {
         {/* Channel List */}
         <ScrollArea className="flex-1">
           <div className="p-2">
-            {mockChannelCategories.map(category => (
+            {channelCategories.map(category => (
               <div key={category.id} className="mb-2">
                 <button
                   onClick={() => toggleCategory(category.id)}
@@ -1263,7 +1398,7 @@ export default function CommunityClient() {
             <div className="flex-1 flex flex-col">
               <ScrollArea className="flex-1 p-4">
                 <div className="space-y-4">
-                  {mockMessages.map(message => (
+                  {messages.map(message => (
                     <div key={message.id} className="group flex gap-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 p-2 rounded-lg -mx-2">
                       <Avatar className="w-10 h-10">
                         <AvatarImage src={`https://avatar.vercel.sh/${message.authorAvatar}`} />
@@ -1327,9 +1462,9 @@ export default function CommunityClient() {
             {/* Member Sidebar */}
             <div className="w-56 border-l bg-gray-50 dark:bg-gray-800/50 hidden lg:block">
               <ScrollArea className="h-full p-3">
-                <h4 className="text-xs font-semibold text-gray-500 uppercase mb-2">Online — {mockMembers.filter(m => m.status === 'online').length}</h4>
+                <h4 className="text-xs font-semibold text-gray-500 uppercase mb-2">Online — {members.filter(m => m.status === 'online').length}</h4>
                 <div className="space-y-1 mb-4">
-                  {mockMembers.filter(m => m.status === 'online').map(member => (
+                  {members.filter(m => m.status === 'online').map(member => (
                     <button key={member.id} onClick={() => handleViewMember(member)} className="w-full flex items-center gap-2 p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
                       <div className="relative">
                         <Avatar className="w-7 h-7">
@@ -1343,9 +1478,9 @@ export default function CommunityClient() {
                     </button>
                   ))}
                 </div>
-                <h4 className="text-xs font-semibold text-gray-500 uppercase mb-2">Offline — {mockMembers.filter(m => m.status === 'offline').length}</h4>
+                <h4 className="text-xs font-semibold text-gray-500 uppercase mb-2">Offline — {members.filter(m => m.status === 'offline').length}</h4>
                 <div className="space-y-1 opacity-60">
-                  {mockMembers.filter(m => m.status === 'offline').map(member => (
+                  {members.filter(m => m.status === 'offline').map(member => (
                     <button key={member.id} onClick={() => handleViewMember(member)} className="w-full flex items-center gap-2 p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-700">
                       <Avatar className="w-7 h-7">
                         <AvatarImage src={`https://avatar.vercel.sh/${member.avatar}`} />
@@ -1371,11 +1506,11 @@ export default function CommunityClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockMembers.length}</p>
+                    <p className="text-3xl font-bold">{members.length}</p>
                     <p className="text-indigo-200 text-sm">Members</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockMembers.filter(m => m.status === 'online').length}</p>
+                    <p className="text-3xl font-bold">{members.filter(m => m.status === 'online').length}</p>
                     <p className="text-indigo-200 text-sm">Online</p>
                   </div>
                 </div>
@@ -1389,7 +1524,7 @@ export default function CommunityClient() {
               <Button onClick={handleInviteMember} disabled={isSubmitting}><UserPlus className="w-4 h-4 mr-2" />Invite Members</Button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {mockMembers.map(member => (
+              {members.map(member => (
                 <Card key={member.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleViewMember(member)}>
                   <CardContent className="p-4">
                     <div className="flex items-center gap-4">
@@ -1424,7 +1559,7 @@ export default function CommunityClient() {
               <Button onClick={() => setShowCreateEvent(true)} disabled={isSubmitting}><Plus className="w-4 h-4 mr-2" />Create Event</Button>
             </div>
             <div className="grid gap-4">
-              {mockEvents.map(event => (
+              {events.map(event => (
                 <Card key={event.id}>
                   <CardContent className="p-6">
                     <div className="flex items-start gap-6">
@@ -1462,7 +1597,7 @@ export default function CommunityClient() {
               <Button onClick={() => setShowCreateRole(true)} disabled={isSubmitting}><Plus className="w-4 h-4 mr-2" />Create Role</Button>
             </div>
             <div className="space-y-3">
-              {mockRoles.map(role => (
+              {roles.map(role => (
                 <Card key={role.id}>
                   <CardContent className="p-4 flex items-center justify-between">
                     <div className="flex items-center gap-4">
@@ -1493,7 +1628,7 @@ export default function CommunityClient() {
                 <div className="flex items-center gap-3">
                   <AlertTriangle className="w-8 h-8 text-yellow-500" />
                   <div>
-                    <p className="text-2xl font-bold">{mockModActions.filter(a => a.type === 'warn').length}</p>
+                    <p className="text-2xl font-bold">{modActions.filter(a => a.type === 'warn').length}</p>
                     <p className="text-sm text-gray-500">Warnings</p>
                   </div>
                 </div>
@@ -1502,7 +1637,7 @@ export default function CommunityClient() {
                 <div className="flex items-center gap-3">
                   <VolumeX className="w-8 h-8 text-orange-500" />
                   <div>
-                    <p className="text-2xl font-bold">{mockModActions.filter(a => a.type === 'mute' || a.type === 'timeout').length}</p>
+                    <p className="text-2xl font-bold">{modActions.filter(a => a.type === 'mute' || a.type === 'timeout').length}</p>
                     <p className="text-sm text-gray-500">Mutes</p>
                   </div>
                 </div>
@@ -1511,7 +1646,7 @@ export default function CommunityClient() {
                 <div className="flex items-center gap-3">
                   <UserX className="w-8 h-8 text-red-500" />
                   <div>
-                    <p className="text-2xl font-bold">{mockModActions.filter(a => a.type === 'kick').length}</p>
+                    <p className="text-2xl font-bold">{modActions.filter(a => a.type === 'kick').length}</p>
                     <p className="text-sm text-gray-500">Kicks</p>
                   </div>
                 </div>
@@ -1520,7 +1655,7 @@ export default function CommunityClient() {
                 <div className="flex items-center gap-3">
                   <Ban className="w-8 h-8 text-red-600" />
                   <div>
-                    <p className="text-2xl font-bold">{mockModActions.filter(a => a.type === 'ban').length}</p>
+                    <p className="text-2xl font-bold">{modActions.filter(a => a.type === 'ban').length}</p>
                     <p className="text-sm text-gray-500">Bans</p>
                   </div>
                 </div>
@@ -1531,7 +1666,7 @@ export default function CommunityClient() {
               <CardHeader><CardTitle>Recent Moderation Actions</CardTitle></CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {mockModActions.map(action => (
+                  {modActions.map(action => (
                     <div key={action.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <div className="flex items-center gap-4">
                         <Badge className={getModActionColor(action.type)}>{action.type}</Badge>
@@ -2100,7 +2235,7 @@ export default function CommunityClient() {
                         <CardDescription>Manage role permissions and order</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-3">
-                        {mockRoles.map(role => (
+                        {roles.map(role => (
                           <div key={role.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                             <div className="flex items-center gap-3">
                               <div className="w-4 h-4 rounded-full" style={{ backgroundColor: role.color }} />
@@ -2129,7 +2264,7 @@ export default function CommunityClient() {
                         <CardDescription>Manage server bots and integrations</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        {mockBots.map(bot => (
+                        {bots.map(bot => (
                           <div key={bot.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                             <div className="flex items-center gap-4">
                               <Avatar className="w-10 h-10">

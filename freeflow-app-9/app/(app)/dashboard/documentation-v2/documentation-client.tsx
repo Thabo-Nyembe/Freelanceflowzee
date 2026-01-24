@@ -37,11 +37,16 @@ import {
   AIInsightsPanel,
   CollaborationIndicator,
   PredictiveAnalytics,
+  type AIInsight,
+  type Collaborator,
+  type Prediction,
 } from '@/components/ui/competitive-upgrades'
 
 import {
   ActivityFeed,
   QuickActionsToolbar,
+  type ActivityItem,
+  type QuickAction,
 } from '@/components/ui/competitive-upgrades-extended'
 
 // Type definitions
@@ -156,202 +161,30 @@ interface DocLocale {
   status: 'active' | 'draft' | 'review'
 }
 
-// Mock data
-const mockSpaces: DocSpace[] = [
-  { id: 'space1', key: 'docs', name: 'Product Documentation', description: 'Official product documentation and guides',
-    icon: '📚', visibility: 'public', owner: { name: 'Sarah Chen', avatar: '' }, team_members: 8, pages_count: 156,
-    views: 45600, last_updated: '2024-01-15T10:30:00Z', created_at: '2023-06-01', is_starred: true, status: 'published',
-    git_sync: { enabled: true, repo: 'company/docs', branch: 'main' }, custom_domain: 'docs.company.com' },
-  { id: 'space2', key: 'api', name: 'API Reference', description: 'REST API documentation and examples',
-    icon: '🔌', visibility: 'public', owner: { name: 'Mike Ross', avatar: '' }, team_members: 5, pages_count: 89,
-    views: 32100, last_updated: '2024-01-15T09:45:00Z', created_at: '2023-08-15', is_starred: true, status: 'published',
-    git_sync: { enabled: true, repo: 'company/api-docs', branch: 'main' } },
-  { id: 'space3', key: 'internal', name: 'Engineering Wiki', description: 'Internal engineering documentation',
-    icon: '🔧', visibility: 'internal', owner: { name: 'Emily Davis', avatar: '' }, team_members: 24, pages_count: 234,
-    views: 18900, last_updated: '2024-01-15T11:00:00Z', created_at: '2023-03-01', is_starred: false, status: 'published' },
-  { id: 'space4', key: 'onboard', name: 'Onboarding Guide', description: 'New employee onboarding documentation',
-    icon: '👋', visibility: 'private', owner: { name: 'Alex Kim', avatar: '' }, team_members: 3, pages_count: 45,
-    views: 2340, last_updated: '2024-01-14T16:30:00Z', created_at: '2023-10-01', is_starred: false, status: 'published' },
-  { id: 'space5', key: 'changelog', name: 'Changelog', description: 'Product updates and release notes',
-    icon: '📝', visibility: 'public', owner: { name: 'Sarah Chen', avatar: '' }, team_members: 4, pages_count: 67,
-    views: 12500, last_updated: '2024-01-15T08:00:00Z', created_at: '2023-06-01', is_starred: false, status: 'published' }
-]
+// Empty arrays (real data comes from Supabase)
+const mockSpaces: DocSpace[] = []
 
-const mockPages: DocPage[] = [
-  { id: 'page1', space_id: 'space1', title: 'Getting Started', slug: 'getting-started',
-    content: '# Getting Started\n\nWelcome to our documentation...', excerpt: 'Quick start guide for new users',
-    status: 'published', author: { name: 'Sarah Chen', avatar: '' },
-    contributors: [{ name: 'Mike Ross', avatar: '' }, { name: 'Emily Davis', avatar: '' }],
-    created_at: '2024-01-01T10:00:00Z', updated_at: '2024-01-15T10:30:00Z', published_at: '2024-01-01T12:00:00Z',
-    version: 12, children: ['page2', 'page3'], order: 1, labels: ['guide', 'beginner'],
-    likes: 156, comments_count: 24, views: 8900, reading_time: '5 min', is_bookmarked: true },
-  { id: 'page2', space_id: 'space1', title: 'Installation', slug: 'installation', parent_id: 'page1',
-    content: '# Installation\n\nFollow these steps to install...', excerpt: 'Step-by-step installation guide',
-    status: 'published', author: { name: 'Mike Ross', avatar: '' }, contributors: [],
-    created_at: '2024-01-05T14:00:00Z', updated_at: '2024-01-14T16:00:00Z', published_at: '2024-01-05T15:00:00Z',
-    version: 5, children: [], order: 1, labels: ['installation', 'setup'],
-    likes: 89, comments_count: 12, views: 4500, reading_time: '8 min', is_bookmarked: false },
-  { id: 'page3', space_id: 'space1', title: 'Configuration', slug: 'configuration', parent_id: 'page1',
-    content: '# Configuration\n\nConfiguration options...', excerpt: 'Configure your environment',
-    status: 'draft', author: { name: 'Emily Davis', avatar: '' }, contributors: [{ name: 'Sarah Chen', avatar: '' }],
-    created_at: '2024-01-10T09:00:00Z', updated_at: '2024-01-15T09:00:00Z',
-    version: 3, children: [], order: 2, labels: ['configuration', 'advanced'],
-    likes: 34, comments_count: 8, views: 1200, reading_time: '12 min', is_bookmarked: true },
-  { id: 'page4', space_id: 'space2', title: 'Authentication', slug: 'authentication',
-    content: '# Authentication\n\nAPI authentication...', excerpt: 'Learn how to authenticate API requests',
-    status: 'published', author: { name: 'Mike Ross', avatar: '' }, contributors: [],
-    created_at: '2023-12-20T10:00:00Z', updated_at: '2024-01-10T14:00:00Z', published_at: '2023-12-20T12:00:00Z',
-    version: 8, children: [], order: 1, labels: ['api', 'auth', 'security'],
-    likes: 234, comments_count: 45, views: 12300, reading_time: '10 min', is_bookmarked: true },
-  { id: 'page5', space_id: 'space2', title: 'Endpoints', slug: 'endpoints',
-    content: '# API Endpoints\n\nComplete list...', excerpt: 'API endpoint reference',
-    status: 'published', author: { name: 'Mike Ross', avatar: '' }, contributors: [{ name: 'Sarah Chen', avatar: '' }],
-    created_at: '2023-12-25T10:00:00Z', updated_at: '2024-01-12T14:00:00Z', published_at: '2023-12-25T12:00:00Z',
-    version: 15, children: [], order: 2, labels: ['api', 'reference'],
-    likes: 189, comments_count: 32, views: 9800, reading_time: '25 min', is_bookmarked: false }
-]
+const mockPages: DocPage[] = []
 
-const mockVersions: DocVersion[] = [
-  { id: 'v1', page_id: 'page1', version: 12, author: { name: 'Sarah Chen', avatar: '' }, created_at: '2024-01-15T10:30:00Z',
-    message: 'Updated getting started section with new examples', changes: { additions: 45, deletions: 12 }, is_current: true },
-  { id: 'v2', page_id: 'page1', version: 11, author: { name: 'Mike Ross', avatar: '' }, created_at: '2024-01-14T15:00:00Z',
-    message: 'Fixed typos and formatting', changes: { additions: 5, deletions: 5 }, is_current: false },
-  { id: 'v3', page_id: 'page1', version: 10, author: { name: 'Sarah Chen', avatar: '' }, created_at: '2024-01-12T11:00:00Z',
-    message: 'Added troubleshooting section', changes: { additions: 120, deletions: 0 }, is_current: false },
-  { id: 'v4', page_id: 'page1', version: 9, author: { name: 'Emily Davis', avatar: '' }, created_at: '2024-01-10T09:00:00Z',
-    message: 'Updated screenshots', changes: { additions: 8, deletions: 8 }, is_current: false }
-]
+const mockVersions: DocVersion[] = []
 
-const mockTemplates: DocTemplate[] = [
-  { id: 't1', name: 'Getting Started Guide', description: 'Introductory guide for new users', category: 'Guides',
-    icon: '🚀', usage_count: 234, preview_content: '# Getting Started\n\n## Prerequisites\n...', is_official: true },
-  { id: 't2', name: 'API Endpoint', description: 'Document an API endpoint', category: 'API',
-    icon: '🔌', usage_count: 189, preview_content: '# Endpoint Name\n\n## Request\n...', is_official: true },
-  { id: 't3', name: 'Tutorial', description: 'Step-by-step tutorial', category: 'Guides',
-    icon: '📖', usage_count: 156, preview_content: '# Tutorial: Title\n\n## What you\'ll learn\n...', is_official: true },
-  { id: 't4', name: 'Changelog Entry', description: 'Release notes template', category: 'Updates',
-    icon: '📝', usage_count: 312, preview_content: '# Version X.X.X\n\n## New Features\n...', is_official: true },
-  { id: 't5', name: 'Troubleshooting', description: 'Common issues and solutions', category: 'Support',
-    icon: '🔧', usage_count: 98, preview_content: '# Troubleshooting\n\n## Common Issues\n...', is_official: true },
-  { id: 't6', name: 'Architecture Doc', description: 'System architecture documentation', category: 'Technical',
-    icon: '🏗️', usage_count: 67, preview_content: '# Architecture Overview\n\n## Components\n...', is_official: false }
-]
+const mockTemplates: DocTemplate[] = []
 
-const mockIntegrations: DocIntegration[] = [
-  { id: 'int1', name: 'GitHub', type: 'git', icon: GitBranch, status: 'connected', last_sync: '5 min ago',
-    config: { repo: 'company/docs', branch: 'main' } },
-  { id: 'int2', name: 'OpenAPI', type: 'api', icon: Code, status: 'connected', last_sync: '1 hour ago',
-    config: { spec_url: 'https://api.company.com/openapi.json' } },
-  { id: 'int3', name: 'Slack', type: 'webhook', icon: Webhook, status: 'connected' },
-  { id: 'int4', name: 'Okta SSO', type: 'sso', icon: Shield, status: 'connected' }
-]
+const mockIntegrations: DocIntegration[] = []
 
-const mockChangelogs: DocChangelog[] = [
-  {
-    id: 'cl1', version: '2.5.0', title: 'Enhanced Analytics Dashboard', date: '2025-01-20', type: 'minor',
-    status: 'published', author: { name: 'Sarah Chen', avatar: '' }, views: 1250,
-    changes: {
-      added: ['Real-time analytics dashboard', 'Custom metrics builder', 'Export to CSV/PDF'],
-      changed: ['Improved chart rendering performance', 'Updated UI for analytics cards'],
-      fixed: ['Fixed timezone issues in reports', 'Resolved chart tooltip overlap'],
-      deprecated: [], removed: [], security: []
-    }
-  },
-  {
-    id: 'cl2', version: '2.4.2', title: 'Security Patch', date: '2025-01-15', type: 'patch',
-    status: 'published', author: { name: 'Mike Ross', avatar: '' }, views: 890,
-    changes: {
-      added: [],
-      changed: ['Updated authentication flow'],
-      fixed: ['Fixed session handling vulnerability'],
-      deprecated: [], removed: [],
-      security: ['Patched XSS vulnerability in markdown renderer', 'Enhanced input sanitization']
-    }
-  },
-  {
-    id: 'cl3', version: '2.4.1', title: 'Bug Fixes', date: '2025-01-10', type: 'patch',
-    status: 'published', author: { name: 'Emily Davis', avatar: '' }, views: 650,
-    changes: {
-      added: [],
-      changed: ['Minor UI improvements'],
-      fixed: ['Fixed page navigation issue', 'Resolved search indexing delay', 'Fixed mobile menu toggle'],
-      deprecated: [], removed: [], security: []
-    }
-  },
-  {
-    id: 'cl4', version: '2.4.0', title: 'Multi-language Support', date: '2025-01-05', type: 'minor',
-    status: 'published', author: { name: 'Alex Kim', avatar: '' }, views: 2100,
-    changes: {
-      added: ['Multi-language documentation support', 'Automatic translation suggestions', 'Language switcher component'],
-      changed: ['Restructured content model for i18n', 'Updated editor for translation workflows'],
-      fixed: [], deprecated: [], removed: [], security: []
-    }
-  },
-  {
-    id: 'cl5', version: '3.0.0', title: 'Major Platform Update', date: '2025-02-01', type: 'major',
-    status: 'scheduled', scheduled_date: '2025-02-01', author: { name: 'Sarah Chen', avatar: '' }, views: 0,
-    changes: {
-      added: ['AI-powered content suggestions', 'Real-time collaboration', 'Custom branding options', 'API v2 with GraphQL'],
-      changed: ['Complete UI redesign', 'Improved performance across all pages'],
-      fixed: [],
-      deprecated: ['Legacy API v1 endpoints'],
-      removed: ['Deprecated markdown extensions'],
-      security: ['Enhanced encryption for sensitive content']
-    }
-  }
-]
+const mockChangelogs: DocChangelog[] = []
 
-const mockLocales: DocLocale[] = [
-  { id: 'l1', code: 'en', name: 'English', native_name: 'English', flag: '🇺🇸', is_default: true, completion: 100,
-    pages_translated: 156, pages_total: 156, last_updated: '2025-01-20', status: 'active',
-    contributors: [{ name: 'Sarah Chen', avatar: '' }, { name: 'Mike Ross', avatar: '' }] },
-  { id: 'l2', code: 'es', name: 'Spanish', native_name: 'Español', flag: '🇪🇸', is_default: false, completion: 87,
-    pages_translated: 136, pages_total: 156, last_updated: '2025-01-18', status: 'active',
-    contributors: [{ name: 'Carlos Garcia', avatar: '' }] },
-  { id: 'l3', code: 'de', name: 'German', native_name: 'Deutsch', flag: '🇩🇪', is_default: false, completion: 75,
-    pages_translated: 117, pages_total: 156, last_updated: '2025-01-15', status: 'active',
-    contributors: [{ name: 'Hans Mueller', avatar: '' }] },
-  { id: 'l4', code: 'fr', name: 'French', native_name: 'Français', flag: '🇫🇷', is_default: false, completion: 68,
-    pages_translated: 106, pages_total: 156, last_updated: '2025-01-12', status: 'active',
-    contributors: [{ name: 'Marie Dubois', avatar: '' }] },
-  { id: 'l5', code: 'ja', name: 'Japanese', native_name: '日本語', flag: '🇯🇵', is_default: false, completion: 45,
-    pages_translated: 70, pages_total: 156, last_updated: '2025-01-10', status: 'review',
-    contributors: [{ name: 'Yuki Tanaka', avatar: '' }] },
-  { id: 'l6', code: 'zh', name: 'Chinese', native_name: '中文', flag: '🇨🇳', is_default: false, completion: 32,
-    pages_translated: 50, pages_total: 156, last_updated: '2025-01-08', status: 'draft',
-    contributors: [{ name: 'Wei Zhang', avatar: '' }] }
-]
+const mockLocales: DocLocale[] = []
 
-// Enhanced Competitive Upgrade Mock Data
-const mockDocsAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Documentation Coverage', description: '94% of features documented. Above industry benchmark.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Coverage' },
-  { id: '2', type: 'info' as const, title: 'Popular Pages', description: 'Getting Started guide viewed 1.2k times this week.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Analytics' },
-  { id: '3', type: 'warning' as const, title: 'Outdated Content', description: '5 pages not updated in 90+ days. Review recommended.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Maintenance' },
-]
+const mockDocsAIInsights: AIInsight[] = []
 
-const mockDocsCollaborators = [
-  { id: '1', name: 'Tech Writer', avatar: '/avatars/writer.jpg', status: 'online' as const, role: 'Writer' },
-  { id: '2', name: 'Developer', avatar: '/avatars/dev.jpg', status: 'online' as const, role: 'Dev' },
-  { id: '3', name: 'Product Manager', avatar: '/avatars/pm.jpg', status: 'away' as const, role: 'PM' },
-]
+const mockDocsCollaborators: Collaborator[] = []
 
-const mockDocsPredictions = [
-  { id: '1', title: 'Content Gap', prediction: 'API v2 docs needed before Q1 release', confidence: 95, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Traffic Forecast', prediction: 'Documentation traffic expected to grow 20% next month', confidence: 78, trend: 'up' as const, impact: 'medium' as const },
-]
+const mockDocsPredictions: Prediction[] = []
 
-const mockDocsActivities = [
-  { id: '1', user: 'Tech Writer', action: 'Published', target: 'new API reference guide', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Developer', action: 'Updated', target: 'code examples in SDK docs', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'System', action: 'Generated', target: 'changelog from commits', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
-]
+const mockDocsActivities: ActivityItem[] = []
 
-const mockDocsQuickActions = [
-  { id: '1', label: 'New Page', icon: 'Plus', action: () => {}, shortcut: 'N' },
-  { id: '2', label: 'Search', icon: 'Search', action: () => {}, shortcut: 'S' },
-  { id: '3', label: 'Export', icon: 'Download', action: () => {}, shortcut: 'E' },
-  { id: '4', label: 'Settings', icon: 'Settings', action: () => {}, shortcut: 'T' },
-]
+const mockDocsQuickActions: QuickAction[] = []
 
 // Quick actions are defined as a function to allow access to component state
 const getDocsQuickActions = (

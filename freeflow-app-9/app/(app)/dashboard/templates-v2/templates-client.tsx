@@ -160,210 +160,10 @@ interface TemplateStats {
   teamTemplates: number
 }
 
-// Mock Data
-const mockTemplates: Template[] = [
-  {
-    id: '1',
-    name: 'Modern Instagram Post',
-    description: 'Clean and minimal design for Instagram posts',
-    category: 'social_media',
-    status: 'active',
-    accessLevel: 'public',
-    thumbnail: '/templates/instagram-modern.jpg',
-    size: 'instagram_post',
-    dimensions: { width: 1080, height: 1080 },
-    createdBy: 'Sarah Chen',
-    createdAt: '2024-03-01',
-    updatedAt: '2024-03-10',
-    usageCount: 1245,
-    downloads: 892,
-    rating: 4.8,
-    reviewsCount: 156,
-    isFavorite: true,
-    isPremium: false,
-    tags: ['minimal', 'modern', 'instagram', 'social'],
-    colors: ['#FF6B6B', '#4ECDC4', '#2C3E50'],
-    fonts: ['Inter', 'Poppins']
-  },
-  {
-    id: '2',
-    name: 'Business Pitch Deck',
-    description: 'Professional presentation template for startups',
-    category: 'presentation',
-    status: 'active',
-    accessLevel: 'team',
-    thumbnail: '/templates/pitch-deck.jpg',
-    size: 'presentation',
-    dimensions: { width: 1920, height: 1080 },
-    createdBy: 'Mike Johnson',
-    createdAt: '2024-02-15',
-    updatedAt: '2024-03-08',
-    usageCount: 567,
-    downloads: 423,
-    rating: 4.9,
-    reviewsCount: 89,
-    isFavorite: true,
-    isPremium: true,
-    tags: ['business', 'pitch', 'startup', 'professional'],
-    colors: ['#1A1A2E', '#16213E', '#E94560'],
-    fonts: ['Montserrat', 'Open Sans']
-  },
-  {
-    id: '3',
-    name: 'Instagram Story Gradient',
-    description: 'Eye-catching gradient story template',
-    category: 'social_media',
-    status: 'active',
-    accessLevel: 'public',
-    thumbnail: '/templates/story-gradient.jpg',
-    size: 'instagram_story',
-    dimensions: { width: 1080, height: 1920 },
-    createdBy: 'Emily Davis',
-    createdAt: '2024-03-05',
-    updatedAt: '2024-03-12',
-    usageCount: 2134,
-    downloads: 1567,
-    rating: 4.7,
-    reviewsCount: 234,
-    isFavorite: false,
-    isPremium: false,
-    tags: ['gradient', 'story', 'colorful', 'trendy'],
-    colors: ['#667EEA', '#764BA2', '#F093FB'],
-    fonts: ['Playfair Display', 'Lato']
-  },
-  {
-    id: '4',
-    name: 'YouTube Thumbnail',
-    description: 'Bold and attention-grabbing thumbnail design',
-    category: 'social_media',
-    status: 'active',
-    accessLevel: 'public',
-    thumbnail: '/templates/yt-thumbnail.jpg',
-    size: 'youtube_thumbnail',
-    dimensions: { width: 1280, height: 720 },
-    createdBy: 'Alex Rivera',
-    createdAt: '2024-02-20',
-    updatedAt: '2024-03-05',
-    usageCount: 876,
-    downloads: 654,
-    rating: 4.6,
-    reviewsCount: 112,
-    isFavorite: false,
-    isPremium: false,
-    tags: ['youtube', 'thumbnail', 'bold', 'clickbait'],
-    colors: ['#FF0000', '#FFFFFF', '#000000'],
-    fonts: ['Anton', 'Roboto']
-  },
-  {
-    id: '5',
-    name: 'Marketing Flyer',
-    description: 'Print-ready marketing flyer template',
-    category: 'print',
-    status: 'active',
-    accessLevel: 'team',
-    thumbnail: '/templates/marketing-flyer.jpg',
-    size: 'a4',
-    dimensions: { width: 2480, height: 3508 },
-    createdBy: 'Sarah Chen',
-    createdAt: '2024-01-15',
-    updatedAt: '2024-03-01',
-    usageCount: 432,
-    downloads: 321,
-    rating: 4.5,
-    reviewsCount: 67,
-    isFavorite: true,
-    isPremium: true,
-    tags: ['print', 'flyer', 'marketing', 'promotional'],
-    colors: ['#6C5CE7', '#A29BFE', '#FFEAA7'],
-    fonts: ['Bebas Neue', 'Source Sans Pro']
-  },
-  {
-    id: '6',
-    name: 'Email Newsletter',
-    description: 'Clean email newsletter template',
-    category: 'email',
-    status: 'active',
-    accessLevel: 'team',
-    thumbnail: '/templates/email-newsletter.jpg',
-    size: 'custom',
-    dimensions: { width: 600, height: 800 },
-    createdBy: 'Lisa Brown',
-    createdAt: '2024-02-01',
-    updatedAt: '2024-03-10',
-    usageCount: 789,
-    downloads: 567,
-    rating: 4.4,
-    reviewsCount: 98,
-    isFavorite: false,
-    isPremium: false,
-    tags: ['email', 'newsletter', 'marketing', 'clean'],
-    colors: ['#00B894', '#00CEC9', '#0984E3'],
-    fonts: ['Georgia', 'Arial']
-  },
-  {
-    id: '7',
-    name: 'Data Infographic',
-    description: 'Visual data presentation infographic',
-    category: 'infographic',
-    status: 'draft',
-    accessLevel: 'private',
-    thumbnail: '/templates/data-infographic.jpg',
-    size: 'custom',
-    dimensions: { width: 800, height: 2000 },
-    createdBy: 'Mike Johnson',
-    createdAt: '2024-03-10',
-    updatedAt: '2024-03-12',
-    usageCount: 0,
-    downloads: 0,
-    rating: 0,
-    reviewsCount: 0,
-    isFavorite: false,
-    isPremium: false,
-    tags: ['infographic', 'data', 'visualization', 'stats'],
-    colors: ['#2D3436', '#636E72', '#B2BEC3'],
-    fonts: ['Roboto Mono', 'Roboto']
-  },
-  {
-    id: '8',
-    name: 'LinkedIn Banner',
-    description: 'Professional LinkedIn cover banner',
-    category: 'social_media',
-    status: 'active',
-    accessLevel: 'public',
-    thumbnail: '/templates/linkedin-banner.jpg',
-    size: 'linkedin_post',
-    dimensions: { width: 1584, height: 396 },
-    createdBy: 'James Wilson',
-    createdAt: '2024-02-28',
-    updatedAt: '2024-03-08',
-    usageCount: 543,
-    downloads: 412,
-    rating: 4.7,
-    reviewsCount: 76,
-    isFavorite: false,
-    isPremium: false,
-    tags: ['linkedin', 'banner', 'professional', 'business'],
-    colors: ['#0077B5', '#FFFFFF', '#313335'],
-    fonts: ['Helvetica', 'Arial']
-  }
-]
+// Data arrays (empty - data comes from database)
+const collections: Collection[] = []
 
-const mockCollections: Collection[] = [
-  { id: 'c1', name: 'Social Media Pack', description: 'All social media templates', templateCount: 24, thumbnail: '/collections/social.jpg', createdAt: '2024-02-01', isPublic: true },
-  { id: 'c2', name: 'Brand Assets', description: 'Company branded templates', templateCount: 12, thumbnail: '/collections/brand.jpg', createdAt: '2024-01-15', isPublic: false },
-  { id: 'c3', name: 'Marketing Materials', description: 'Print and digital marketing', templateCount: 18, thumbnail: '/collections/marketing.jpg', createdAt: '2024-02-20', isPublic: true },
-  { id: 'c4', name: 'Presentations', description: 'Pitch decks and slideshows', templateCount: 8, thumbnail: '/collections/presentations.jpg', createdAt: '2024-03-01', isPublic: false }
-]
-
-const mockBrandAssets: BrandAsset[] = [
-  { id: 'b1', type: 'logo', name: 'Primary Logo', value: '/brand/logo-primary.svg', createdAt: '2024-01-01' },
-  { id: 'b2', type: 'logo', name: 'Logo Dark', value: '/brand/logo-dark.svg', createdAt: '2024-01-01' },
-  { id: 'b3', type: 'color', name: 'Primary', value: '#6366F1', createdAt: '2024-01-01' },
-  { id: 'b4', type: 'color', name: 'Secondary', value: '#EC4899', createdAt: '2024-01-01' },
-  { id: 'b5', type: 'color', name: 'Accent', value: '#10B981', createdAt: '2024-01-01' },
-  { id: 'b6', type: 'font', name: 'Heading', value: 'Inter', createdAt: '2024-01-01' },
-  { id: 'b7', type: 'font', name: 'Body', value: 'Open Sans', createdAt: '2024-01-01' }
-]
+const brandAssets: BrandAsset[] = []
 
 // Helper Functions
 const getCategoryIcon = (category: TemplateCategory) => {
@@ -407,31 +207,16 @@ const formatDimensions = (dimensions: { width: number; height: number }) => {
   return `${dimensions.width} × ${dimensions.height}px`
 }
 
-// Enhanced Competitive Upgrade Mock Data
-const mockTemplatesAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Template Usage', description: 'Social media templates 3x more popular this month.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Usage' },
-  { id: '2', type: 'info' as const, title: 'Brand Consistency', description: '98% of templates follow brand guidelines.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Brand' },
-  { id: '3', type: 'warning' as const, title: 'Low Performers', description: '12 templates have <10 uses. Consider retiring.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Optimization' },
-]
+// Typed empty arrays for competitive upgrade components
+const aiInsights: { id: string; type: 'success' | 'info' | 'warning' | 'error'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
 
-const mockTemplatesCollaborators = [
-  { id: '1', name: 'Design Lead', avatar: '/avatars/design.jpg', status: 'online' as const, role: 'Lead' },
-  { id: '2', name: 'Brand Manager', avatar: '/avatars/brand.jpg', status: 'online' as const, role: 'Brand' },
-  { id: '3', name: 'Marketing', avatar: '/avatars/marketing.jpg', status: 'away' as const, role: 'Marketing' },
-]
+const collaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }[] = []
 
-const mockTemplatesPredictions = [
-  { id: '1', title: 'Trending Templates', prediction: 'Video templates demand increasing 40% month-over-month', confidence: 87, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Seasonal Content', prediction: 'Holiday templates needed in 6 weeks', confidence: 100, trend: 'stable' as const, impact: 'medium' as const },
-]
+const predictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: 'high' | 'medium' | 'low' }[] = []
 
-const mockTemplatesActivities = [
-  { id: '1', user: 'Design', action: 'Created', target: '5 new Instagram templates', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Marketing', action: 'Approved', target: 'Q1 campaign templates', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'System', action: 'Updated', target: 'brand colors across 50 templates', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
-]
+const activities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'update' | 'warning' }[] = []
 
-// Note: mockTemplatesQuickActions is defined inside the component to access state setters
+// Note: quickActions is defined inside the component to access state setters
 
 export default function TemplatesClient() {
   const [activeTab, setActiveTab] = useState('gallery')
@@ -456,8 +241,8 @@ export default function TemplatesClient() {
   const [selectedTemplateToDuplicate, setSelectedTemplateToDuplicate] = useState<string>('')
   const [aiPrompt, setAiPrompt] = useState('')
   const [selectedFolder, setSelectedFolder] = useState('')
-  const [localCollections, setLocalCollections] = useState(mockCollections)
-  const [localBrandAssets, setLocalBrandAssets] = useState(mockBrandAssets)
+  const [localCollections, setLocalCollections] = useState<Collection[]>(collections)
+  const [localBrandAssets, setLocalBrandAssets] = useState<BrandAsset[]>(brandAssets)
   const [folders, setFolders] = useState(['Marketing', 'Social Media', 'Presentations', 'Archived'])
 
   // Supabase hooks for real database operations
@@ -506,10 +291,10 @@ export default function TemplatesClient() {
     }))
   }, [dbTemplates])
 
-  // Use DB templates if available, otherwise fall back to mock data
+  // Use DB templates
   const allTemplates = templatesFromDB
 
-  // Calculate stats from DB or mock data
+  // Calculate stats from DB
   const stats: TemplateStats = useMemo(() => {
     return {
       totalTemplates: dbStats?.total || 0,
@@ -518,7 +303,7 @@ export default function TemplatesClient() {
       totalDownloads: dbStats?.totalDownloads || 0,
       avgRating: dbStats?.avgRating || 0,
       favoritesCount: 0,
-      collectionsCount: mockCollections.length,
+      collectionsCount: localCollections.length,
       teamTemplates: (templatesFromDB || []).filter(t => t.accessLevel === 'team').length
     }
   }, [templatesFromDB, dbStats])
@@ -537,7 +322,7 @@ export default function TemplatesClient() {
   const favoriteTemplates = allTemplates.filter(t => t.isFavorite)
 
   // Real quick actions with functional handlers
-  const mockTemplatesQuickActions = useMemo(() => [
+  const quickActions = useMemo(() => [
     {
       id: '1',
       label: 'New Template',
@@ -1137,12 +922,12 @@ export default function TemplatesClient() {
                   </div>
                   <div>
                     <h2 className="text-2xl font-bold">Template Collections</h2>
-                    <p className="text-orange-100">{mockCollections.length} collections • {mockCollections.reduce((sum, c) => sum + c.templateCount, 0)} templates</p>
+                    <p className="text-orange-100">{localCollections.length} collections • {localCollections.reduce((sum, c) => sum + c.templateCount, 0)} templates</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="text-right">
-                    <p className="text-2xl font-bold">{mockCollections.filter(c => c.isPublic).length}</p>
+                    <p className="text-2xl font-bold">{localCollections.filter(c => c.isPublic).length}</p>
                     <p className="text-orange-100 text-sm">Public</p>
                   </div>
                   <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={() => {
@@ -1206,7 +991,7 @@ export default function TemplatesClient() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {mockCollections.map((collection) => (
+              {localCollections.map((collection) => (
                 <Card key={collection.id} className="cursor-pointer hover:shadow-lg transition-shadow">
                   <div className="aspect-video bg-gradient-to-br from-violet-100 to-purple-200 dark:from-violet-900 dark:to-purple-800 flex items-center justify-center">
                     <Folder className="w-12 h-12 text-violet-600" />
@@ -1248,12 +1033,12 @@ export default function TemplatesClient() {
                   </div>
                   <div>
                     <h2 className="text-2xl font-bold">Brand Kit</h2>
-                    <p className="text-pink-100">{mockBrandAssets.length} brand assets • Logos, colors, fonts</p>
+                    <p className="text-pink-100">{localBrandAssets.length} brand assets • Logos, colors, fonts</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="text-right">
-                    <p className="text-2xl font-bold">{mockBrandAssets.filter(a => a.type === 'color').length}</p>
+                    <p className="text-2xl font-bold">{localBrandAssets.filter(a => a.type === 'color').length}</p>
                     <p className="text-pink-100 text-sm">Brand Colors</p>
                   </div>
                   <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={() => {
@@ -1340,7 +1125,7 @@ export default function TemplatesClient() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {mockBrandAssets.filter(a => a.type === 'logo').map((asset) => (
+                  {localBrandAssets.filter(a => a.type === 'logo').map((asset) => (
                     <div key={asset.id} className="flex items-center justify-between p-3 rounded-lg border">
                       <div className="flex items-center gap-3">
                         <div className="w-12 h-12 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
@@ -1396,7 +1181,7 @@ export default function TemplatesClient() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {mockBrandAssets.filter(a => a.type === 'color').map((asset) => (
+                  {localBrandAssets.filter(a => a.type === 'color').map((asset) => (
                     <div key={asset.id} className="flex items-center justify-between p-3 rounded-lg border">
                       <div className="flex items-center gap-3">
                         <div
@@ -1449,7 +1234,7 @@ export default function TemplatesClient() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {mockBrandAssets.filter(a => a.type === 'font').map((asset) => (
+                  {localBrandAssets.filter(a => a.type === 'font').map((asset) => (
                     <div key={asset.id} className="flex items-center justify-between p-3 rounded-lg border">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center text-lg font-bold">
@@ -2169,18 +1954,18 @@ export default function TemplatesClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockTemplatesAIInsights}
+              insights={aiInsights}
               title="Template Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockTemplatesCollaborators}
+              collaborators={collaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockTemplatesPredictions}
+              predictions={predictions}
               title="Template Forecasts"
             />
           </div>
@@ -2188,12 +1973,12 @@ export default function TemplatesClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockTemplatesActivities}
+            activities={activities}
             title="Template Activity"
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockTemplatesQuickActions}
+            actions={quickActions}
             variant="grid"
           />
         </div>

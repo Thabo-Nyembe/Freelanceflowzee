@@ -346,3 +346,423 @@ export function getMatchScoreColor(score: number): string {
   if (score >= 50) return 'text-yellow-600'
   return 'text-red-600'
 }
+
+// ============================================================================
+// INTERVIEW TYPES AND HOOKS
+// ============================================================================
+
+export interface Interview {
+  id: string
+  user_id: string
+  candidate_id: string
+  candidate_name: string
+  candidate_avatar?: string
+  job_id: string
+  job_title: string
+  interview_type: string
+  status: string
+  scheduled_date: string
+  scheduled_time: string
+  duration: number
+  location: string
+  interviewers: { name: string; role: string; avatar?: string }[]
+  meeting_link?: string
+  feedback?: {
+    rating: number
+    strengths: string[]
+    concerns: string[]
+    recommendation: string
+    notes: string
+  }
+  created_at: string
+  updated_at: string
+}
+
+export interface InterviewFilters {
+  status?: string
+  jobId?: string
+  candidateId?: string
+  interviewType?: string
+}
+
+export function useInterviews(initialInterviews: Interview[] = [], filters: InterviewFilters = {}) {
+  const queryKey = ['interviews', JSON.stringify(filters)]
+
+  const queryFn = useCallback(async (supabase: any) => {
+    let query = supabase
+      .from('interviews')
+      .select('*')
+      .order('scheduled_date', { ascending: true })
+
+    if (filters.status) {
+      query = query.eq('status', filters.status)
+    }
+    if (filters.jobId) {
+      query = query.eq('job_id', filters.jobId)
+    }
+    if (filters.candidateId) {
+      query = query.eq('candidate_id', filters.candidateId)
+    }
+    if (filters.interviewType) {
+      query = query.eq('interview_type', filters.interviewType)
+    }
+
+    const { data, error } = await query.limit(100)
+    if (error) throw error
+    return data as Interview[]
+  }, [filters])
+
+  const { data: interviews, isLoading, error, refetch } = useSupabaseQuery<Interview[]>(
+    queryKey,
+    queryFn,
+    { initialData: initialInterviews }
+  )
+
+  return { interviews: interviews || [], isLoading, error, refetch }
+}
+
+// ============================================================================
+// OFFER TYPES AND HOOKS
+// ============================================================================
+
+export interface JobOffer {
+  id: string
+  user_id: string
+  candidate_id: string
+  candidate_name: string
+  candidate_avatar?: string
+  job_id: string
+  job_title: string
+  status: string
+  base_salary: number
+  bonus?: number
+  equity?: string
+  currency: string
+  start_date: string
+  expiry_date: string
+  benefits: string[]
+  approvers: { name: string; status: string; date?: string }[]
+  sent_date?: string
+  response_date?: string
+  negotiation_notes?: string
+  created_at: string
+  updated_at: string
+}
+
+export interface OfferFilters {
+  status?: string
+  jobId?: string
+  candidateId?: string
+}
+
+export function useJobOffers(initialOffers: JobOffer[] = [], filters: OfferFilters = {}) {
+  const queryKey = ['job-offers', JSON.stringify(filters)]
+
+  const queryFn = useCallback(async (supabase: any) => {
+    let query = supabase
+      .from('job_offers')
+      .select('*')
+      .order('created_at', { ascending: false })
+
+    if (filters.status) {
+      query = query.eq('status', filters.status)
+    }
+    if (filters.jobId) {
+      query = query.eq('job_id', filters.jobId)
+    }
+    if (filters.candidateId) {
+      query = query.eq('candidate_id', filters.candidateId)
+    }
+
+    const { data, error } = await query.limit(100)
+    if (error) throw error
+    return data as JobOffer[]
+  }, [filters])
+
+  const { data: offers, isLoading, error, refetch } = useSupabaseQuery<JobOffer[]>(
+    queryKey,
+    queryFn,
+    { initialData: initialOffers }
+  )
+
+  return { offers: offers || [], isLoading, error, refetch }
+}
+
+// ============================================================================
+// TALENT POOL TYPES AND HOOKS
+// ============================================================================
+
+export interface TalentPoolCandidate {
+  id: string
+  user_id: string
+  name: string
+  email: string
+  avatar?: string
+  skills: string[]
+  experience_years: number
+  current_title: string
+  current_company: string
+  location: string
+  source: string
+  added_date: string
+  last_contacted_date?: string
+  notes: string
+  interested_roles: string[]
+  availability: string
+  tags: string[]
+  created_at: string
+  updated_at: string
+}
+
+export interface TalentPoolFilters {
+  skills?: string[]
+  availability?: string
+  minExperience?: number
+  source?: string
+  search?: string
+}
+
+export function useTalentPool(initialCandidates: TalentPoolCandidate[] = [], filters: TalentPoolFilters = {}) {
+  const queryKey = ['talent-pool', JSON.stringify(filters)]
+
+  const queryFn = useCallback(async (supabase: any) => {
+    let query = supabase
+      .from('talent_pool')
+      .select('*')
+      .order('added_date', { ascending: false })
+
+    if (filters.availability) {
+      query = query.eq('availability', filters.availability)
+    }
+    if (filters.source) {
+      query = query.eq('source', filters.source)
+    }
+    if (filters.minExperience) {
+      query = query.gte('experience_years', filters.minExperience)
+    }
+    if (filters.search) {
+      query = query.or(`name.ilike.%${filters.search}%,current_title.ilike.%${filters.search}%`)
+    }
+
+    const { data, error } = await query.limit(100)
+    if (error) throw error
+    return data as TalentPoolCandidate[]
+  }, [filters])
+
+  const { data: candidates, isLoading, error, refetch } = useSupabaseQuery<TalentPoolCandidate[]>(
+    queryKey,
+    queryFn,
+    { initialData: initialCandidates }
+  )
+
+  return { candidates: candidates || [], isLoading, error, refetch }
+}
+
+// ============================================================================
+// EXTENDED MUTATIONS
+// ============================================================================
+
+export function useInterviewMutations() {
+  const createInterviewMutation = useSupabaseMutation<Partial<Interview>, Interview>(
+    async (supabase, interviewData) => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const { data, error } = await supabase
+        .from('interviews')
+        .insert({
+          ...interviewData,
+          user_id: user.id
+        })
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
+    },
+    { invalidateKeys: [['interviews'], ['job-applications']] }
+  )
+
+  const updateInterviewMutation = useSupabaseMutation<{ id: string; updates: Partial<Interview> }, Interview>(
+    async (supabase, { id, updates }) => {
+      const { data, error } = await supabase
+        .from('interviews')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
+    },
+    { invalidateKeys: [['interviews']] }
+  )
+
+  const submitFeedbackMutation = useSupabaseMutation<{ id: string; feedback: Interview['feedback'] }, Interview>(
+    async (supabase, { id, feedback }) => {
+      const { data, error } = await supabase
+        .from('interviews')
+        .update({ feedback, status: 'completed' })
+        .eq('id', id)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
+    },
+    { invalidateKeys: [['interviews']] }
+  )
+
+  return {
+    createInterview: createInterviewMutation.mutate,
+    updateInterview: updateInterviewMutation.mutate,
+    submitFeedback: submitFeedbackMutation.mutate,
+    isCreatingInterview: createInterviewMutation.isPending,
+    isUpdatingInterview: updateInterviewMutation.isPending,
+    isSubmittingFeedback: submitFeedbackMutation.isPending
+  }
+}
+
+export function useOfferMutations() {
+  const createOfferMutation = useSupabaseMutation<Partial<JobOffer>, JobOffer>(
+    async (supabase, offerData) => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const { data, error } = await supabase
+        .from('job_offers')
+        .insert({
+          ...offerData,
+          user_id: user.id
+        })
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
+    },
+    { invalidateKeys: [['job-offers'], ['job-applications']] }
+  )
+
+  const updateOfferMutation = useSupabaseMutation<{ id: string; updates: Partial<JobOffer> }, JobOffer>(
+    async (supabase, { id, updates }) => {
+      const { data, error } = await supabase
+        .from('job_offers')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
+    },
+    { invalidateKeys: [['job-offers']] }
+  )
+
+  const sendOfferMutation = useSupabaseMutation<string, JobOffer>(
+    async (supabase, id) => {
+      const { data, error } = await supabase
+        .from('job_offers')
+        .update({ status: 'sent', sent_date: new Date().toISOString() })
+        .eq('id', id)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
+    },
+    { invalidateKeys: [['job-offers']] }
+  )
+
+  return {
+    createOffer: createOfferMutation.mutate,
+    updateOffer: updateOfferMutation.mutate,
+    sendOffer: sendOfferMutation.mutate,
+    isCreatingOffer: createOfferMutation.isPending,
+    isUpdatingOffer: updateOfferMutation.isPending,
+    isSendingOffer: sendOfferMutation.isPending
+  }
+}
+
+export function useTalentPoolMutations() {
+  const addToPoolMutation = useSupabaseMutation<Partial<TalentPoolCandidate>, TalentPoolCandidate>(
+    async (supabase, candidateData) => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const { data, error } = await supabase
+        .from('talent_pool')
+        .insert({
+          ...candidateData,
+          user_id: user.id,
+          added_date: new Date().toISOString()
+        })
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
+    },
+    { invalidateKeys: [['talent-pool']] }
+  )
+
+  const updateCandidateMutation = useSupabaseMutation<{ id: string; updates: Partial<TalentPoolCandidate> }, TalentPoolCandidate>(
+    async (supabase, { id, updates }) => {
+      const { data, error } = await supabase
+        .from('talent_pool')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
+    },
+    { invalidateKeys: [['talent-pool']] }
+  )
+
+  const removeCandidateMutation = useSupabaseMutation<string, void>(
+    async (supabase, id) => {
+      const { error } = await supabase
+        .from('talent_pool')
+        .delete()
+        .eq('id', id)
+
+      if (error) throw error
+    },
+    { invalidateKeys: [['talent-pool']] }
+  )
+
+  const recordContactMutation = useSupabaseMutation<{ id: string; notes?: string }, TalentPoolCandidate>(
+    async (supabase, { id, notes }) => {
+      const updates: Partial<TalentPoolCandidate> = {
+        last_contacted_date: new Date().toISOString()
+      }
+      if (notes) {
+        updates.notes = notes
+      }
+
+      const { data, error } = await supabase
+        .from('talent_pool')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
+    },
+    { invalidateKeys: [['talent-pool']] }
+  )
+
+  return {
+    addToPool: addToPoolMutation.mutate,
+    updateCandidate: updateCandidateMutation.mutate,
+    removeCandidate: removeCandidateMutation.mutate,
+    recordContact: recordContactMutation.mutate,
+    isAddingToPool: addToPoolMutation.isPending,
+    isUpdatingCandidate: updateCandidateMutation.isPending,
+    isRemovingCandidate: removeCandidateMutation.isPending,
+    isRecordingContact: recordContactMutation.isPending
+  }
+}

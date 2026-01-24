@@ -184,229 +184,16 @@ interface UsageStats {
   byType: { type: FileType; count: number; size: number }[]
 }
 
-// Mock Data
-const mockAssets: MediaAsset[] = [
-  {
-    id: 'asset-1',
-    fileName: 'product-hero-banner.jpg',
-    fileType: 'image',
-    mimeType: 'image/jpeg',
-    fileSize: 2456789,
-    width: 1920,
-    height: 1080,
-    thumbnailUrl: '',
-    originalUrl: '',
-    status: 'ready',
-    tags: ['product', 'hero', 'banner', 'marketing'],
-    metadata: {
-      title: 'Product Hero Banner',
-      description: 'Main hero image for product landing page',
-      alt: 'FreeFlow product dashboard preview',
-      camera: 'Canon EOS R5',
-      copyright: '2025 FreeFlow Inc.'
-    },
-    aiTags: ['technology', 'software', 'dashboard', 'modern', 'blue'],
-    colors: ['#3B82F6', '#1E3A5F', '#FFFFFF', '#F3F4F6'],
-    license: 'royalty_free',
-    accessLevel: 'public',
-    uploadedBy: { id: 'user-1', name: 'Sarah Johnson' },
-    uploadedAt: '2025-01-15T10:30:00Z',
-    modifiedAt: '2025-01-18T14:20:00Z',
-    viewCount: 12450,
-    downloadCount: 345,
-    isStarred: true,
-    isFavorite: true,
-    versions: [
-      { id: 'v3', version: 3, createdAt: '2025-01-18T14:20:00Z', size: 2456789 },
-      { id: 'v2', version: 2, createdAt: '2025-01-16T09:15:00Z', size: 2345678 },
-      { id: 'v1', version: 1, createdAt: '2025-01-15T10:30:00Z', size: 2567890 }
-    ],
-    collections: ['col-1', 'col-2']
-  },
-  {
-    id: 'asset-2',
-    fileName: 'explainer-video.mp4',
-    fileType: 'video',
-    mimeType: 'video/mp4',
-    fileSize: 125456789,
-    width: 1920,
-    height: 1080,
-    duration: 180,
-    thumbnailUrl: '',
-    originalUrl: '',
-    status: 'ready',
-    tags: ['video', 'explainer', 'product', 'onboarding'],
-    metadata: {
-      title: 'Product Explainer Video',
-      description: 'Two-minute explainer video for new users',
-      copyright: '2025 FreeFlow Inc.'
-    },
-    aiTags: ['tutorial', 'demonstration', 'software'],
-    license: 'royalty_free',
-    accessLevel: 'public',
-    uploadedBy: { id: 'user-2', name: 'Michael Chen' },
-    uploadedAt: '2025-01-12T08:15:00Z',
-    modifiedAt: '2025-01-12T08:15:00Z',
-    viewCount: 8900,
-    downloadCount: 156,
-    isStarred: false,
-    isFavorite: true,
-    versions: [
-      { id: 'v1', version: 1, createdAt: '2025-01-12T08:15:00Z', size: 125456789 }
-    ],
-    collections: ['col-2']
-  },
-  {
-    id: 'asset-3',
-    fileName: 'background-music.mp3',
-    fileType: 'audio',
-    mimeType: 'audio/mpeg',
-    fileSize: 5678901,
-    duration: 240,
-    thumbnailUrl: '',
-    originalUrl: '',
-    status: 'ready',
-    tags: ['audio', 'music', 'background', 'ambient'],
-    metadata: {
-      title: 'Ambient Background Music',
-      description: 'Calm ambient music for videos',
-      copyright: 'Licensed from AudioStock'
-    },
-    license: 'rights_managed',
-    accessLevel: 'team',
-    uploadedBy: { id: 'user-3', name: 'Emma Wilson' },
-    uploadedAt: '2025-01-10T14:00:00Z',
-    modifiedAt: '2025-01-10T14:00:00Z',
-    viewCount: 456,
-    downloadCount: 89,
-    isStarred: false,
-    isFavorite: false,
-    versions: [
-      { id: 'v1', version: 1, createdAt: '2025-01-10T14:00:00Z', size: 5678901 }
-    ],
-    collections: ['col-3']
-  },
-  {
-    id: 'asset-4',
-    fileName: 'brand-guidelines.pdf',
-    fileType: 'document',
-    mimeType: 'application/pdf',
-    fileSize: 12345678,
-    thumbnailUrl: '',
-    originalUrl: '',
-    status: 'ready',
-    tags: ['document', 'brand', 'guidelines', 'design'],
-    metadata: {
-      title: 'Brand Guidelines 2025',
-      description: 'Complete brand guidelines and asset usage rules'
-    },
-    license: 'custom',
-    accessLevel: 'team',
-    uploadedBy: { id: 'user-1', name: 'Sarah Johnson' },
-    uploadedAt: '2025-01-08T11:30:00Z',
-    modifiedAt: '2025-01-14T16:45:00Z',
-    viewCount: 234,
-    downloadCount: 45,
-    isStarred: true,
-    isFavorite: false,
-    versions: [
-      { id: 'v2', version: 2, createdAt: '2025-01-14T16:45:00Z', size: 12345678 },
-      { id: 'v1', version: 1, createdAt: '2025-01-08T11:30:00Z', size: 11234567 }
-    ],
-    collections: ['col-1']
-  },
-  {
-    id: 'asset-5',
-    fileName: 'social-media-kit.zip',
-    fileType: 'archive',
-    mimeType: 'application/zip',
-    fileSize: 45678901,
-    thumbnailUrl: '',
-    originalUrl: '',
-    status: 'ready',
-    tags: ['archive', 'social', 'media', 'kit', 'templates'],
-    metadata: {
-      title: 'Social Media Kit',
-      description: 'Complete social media templates and assets'
-    },
-    license: 'royalty_free',
-    accessLevel: 'team',
-    uploadedBy: { id: 'user-2', name: 'Michael Chen' },
-    uploadedAt: '2025-01-05T09:00:00Z',
-    modifiedAt: '2025-01-05T09:00:00Z',
-    viewCount: 189,
-    downloadCount: 78,
-    isStarred: false,
-    isFavorite: false,
-    versions: [
-      { id: 'v1', version: 1, createdAt: '2025-01-05T09:00:00Z', size: 45678901 }
-    ],
-    collections: ['col-1', 'col-4']
-  },
-  {
-    id: 'asset-6',
-    fileName: 'team-photo.jpg',
-    fileType: 'image',
-    mimeType: 'image/jpeg',
-    fileSize: 3456789,
-    width: 4000,
-    height: 3000,
-    thumbnailUrl: '',
-    originalUrl: '',
-    status: 'ready',
-    tags: ['photo', 'team', 'people', 'office'],
-    metadata: {
-      title: 'Team Photo 2025',
-      description: 'Annual team photo at the office',
-      camera: 'Sony A7 III',
-      location: 'San Francisco, CA'
-    },
-    aiTags: ['people', 'group', 'professional', 'indoor'],
-    colors: ['#1E40AF', '#F97316', '#FAFAFA'],
-    license: 'editorial',
-    accessLevel: 'private',
-    uploadedBy: { id: 'user-4', name: 'James Rodriguez' },
-    uploadedAt: '2025-01-02T15:30:00Z',
-    modifiedAt: '2025-01-02T15:30:00Z',
-    viewCount: 567,
-    downloadCount: 23,
-    isStarred: false,
-    isFavorite: true,
-    versions: [
-      { id: 'v1', version: 1, createdAt: '2025-01-02T15:30:00Z', size: 3456789 }
-    ],
-    collections: ['col-5']
-  }
-]
-
-const mockCollections: Collection[] = [
-  { id: 'col-1', name: 'Brand Assets', description: 'Official brand images and guidelines', assetCount: 45, isPublic: false, createdBy: { id: 'user-1', name: 'Sarah Johnson' }, createdAt: '2024-06-15T00:00:00Z', tags: ['brand', 'official'] },
-  { id: 'col-2', name: 'Marketing Materials', description: 'Campaign images and videos', assetCount: 128, isPublic: true, createdBy: { id: 'user-2', name: 'Michael Chen' }, createdAt: '2024-08-20T00:00:00Z', tags: ['marketing', 'campaigns'] },
-  { id: 'col-3', name: 'Audio Library', description: 'Music and sound effects', assetCount: 67, isPublic: false, createdBy: { id: 'user-3', name: 'Emma Wilson' }, createdAt: '2024-09-10T00:00:00Z', tags: ['audio', 'music'] },
-  { id: 'col-4', name: 'Social Media', description: 'Social media templates and assets', assetCount: 89, isPublic: true, createdBy: { id: 'user-2', name: 'Michael Chen' }, createdAt: '2024-10-05T00:00:00Z', tags: ['social', 'templates'] },
-  { id: 'col-5', name: 'Team Photos', description: 'Team and event photography', assetCount: 34, isPublic: false, createdBy: { id: 'user-4', name: 'James Rodriguez' }, createdAt: '2024-11-15T00:00:00Z', tags: ['photos', 'team'] }
-]
-
-const mockFolders: MediaFolder[] = [
-  { id: 'folder-1', name: 'Product Images', path: '/Product Images', color: 'from-blue-500 to-cyan-500', assetCount: 234, totalSize: 567890123, createdAt: '2024-01-15T00:00:00Z', accessLevel: 'team' },
-  { id: 'folder-2', name: 'Marketing', path: '/Marketing', color: 'from-purple-500 to-pink-500', assetCount: 156, totalSize: 345678901, createdAt: '2024-02-20T00:00:00Z', accessLevel: 'team' },
-  { id: 'folder-3', name: 'Videos', path: '/Videos', color: 'from-red-500 to-orange-500', assetCount: 45, totalSize: 2345678901, createdAt: '2024-03-10T00:00:00Z', accessLevel: 'team' },
-  { id: 'folder-4', name: 'Documents', path: '/Documents', color: 'from-green-500 to-emerald-500', assetCount: 89, totalSize: 234567890, createdAt: '2024-04-05T00:00:00Z', accessLevel: 'private' },
-  { id: 'folder-5', name: 'Audio', path: '/Audio', color: 'from-amber-500 to-yellow-500', assetCount: 67, totalSize: 456789012, createdAt: '2024-05-15T00:00:00Z', accessLevel: 'team' }
-]
-
-const mockUsageStats: UsageStats = {
-  totalAssets: 1247,
-  totalSize: 45678901234,
-  storageLimit: 107374182400, // 100GB
-  bandwidth: { used: 234567890, limit: 1073741824 }, // 1GB
-  byType: [
-    { type: 'image', count: 678, size: 12345678901 },
-    { type: 'video', count: 145, size: 23456789012 },
-    { type: 'audio', count: 234, size: 3456789012 },
-    { type: 'document', count: 156, size: 4567890123 },
-    { type: 'archive', count: 34, size: 1852734186 }
-  ]
+// Empty typed arrays (real data comes from Supabase hooks)
+const emptyAssets: MediaAsset[] = []
+const emptyCollections: Collection[] = []
+const emptyFolders: MediaFolder[] = []
+const emptyUsageStats: UsageStats = {
+  totalAssets: 0,
+  totalSize: 0,
+  storageLimit: 0,
+  bandwidth: { used: 0, limit: 0 },
+  byType: []
 }
 
 // Helper Functions
@@ -480,30 +267,49 @@ const getAccessIcon = (level: AccessLevel) => {
   return icons[level]
 }
 
-// Enhanced Media Library Mock Data
-const mockMediaAIInsights = [
-  { id: '1', type: 'info' as const, title: 'Storage Usage', description: 'Using 78% of storage. Consider archiving old assets or upgrading plan.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Storage' },
-  { id: '2', type: 'success' as const, title: 'AI Tagging', description: '156 new assets auto-tagged this week. 98% accuracy rate.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Automation' },
-  { id: '3', type: 'warning' as const, title: 'License Expiring', description: '12 assets have licenses expiring in 30 days. Review and renew.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Compliance' },
-]
+// Empty typed arrays for enhanced components (real data comes from Supabase)
+interface AIInsight {
+  id: string
+  type: 'info' | 'success' | 'warning' | 'error'
+  title: string
+  description: string
+  priority: 'low' | 'medium' | 'high'
+  timestamp: string
+  category: string
+}
 
-const mockMediaCollaborators = [
-  { id: '1', name: 'Media Manager', avatar: '/avatars/media.jpg', status: 'online' as const, role: 'Asset Management', lastActive: 'Now' },
-  { id: '2', name: 'Photographer', avatar: '/avatars/photo.jpg', status: 'online' as const, role: 'Content Creator', lastActive: '5m ago' },
-  { id: '3', name: 'Video Editor', avatar: '/avatars/video.jpg', status: 'away' as const, role: 'Post Production', lastActive: '30m ago' },
-]
+interface Collaborator {
+  id: string
+  name: string
+  avatar: string
+  status: 'online' | 'away' | 'offline'
+  role: string
+  lastActive: string
+}
 
-const mockMediaPredictions = [
-  { id: '1', label: 'Storage Used', current: 78, target: 100, predicted: 85, confidence: 88, trend: 'up' as const },
-  { id: '2', label: 'Assets Added', current: 1247, target: 1500, predicted: 1380, confidence: 82, trend: 'up' as const },
-  { id: '3', label: 'Downloads', current: 3420, target: 4000, predicted: 3800, confidence: 85, trend: 'up' as const },
-]
+interface Prediction {
+  id: string
+  label: string
+  current: number
+  target: number
+  predicted: number
+  confidence: number
+  trend: 'up' | 'down' | 'stable'
+}
 
-const mockMediaActivities = [
-  { id: '1', user: 'Media Manager', action: 'organized', target: '45 assets into collections', timestamp: '10m ago', type: 'success' as const },
-  { id: '2', user: 'Photographer', action: 'uploaded', target: '28 new photos', timestamp: '25m ago', type: 'info' as const },
-  { id: '3', user: 'Video Editor', action: 'processed', target: '3 video files', timestamp: '1h ago', type: 'info' as const },
-]
+interface MediaActivity {
+  id: string
+  user: string
+  action: string
+  target: string
+  timestamp: string
+  type: 'success' | 'info' | 'warning' | 'error'
+}
+
+const emptyAIInsights: AIInsight[] = []
+const emptyCollaborators: Collaborator[] = []
+const emptyPredictions: Prediction[] = []
+const emptyActivities: MediaActivity[] = []
 
 // Quick actions are now defined inside the component to access state handlers
 // See mediaQuickActions useMemo below
@@ -569,8 +375,8 @@ const defaultCollectionForm: CollectionFormData = {
 }
 
 export default function MediaLibraryClient({
-  initialAssets = mockAssets,
-  initialFolders = mockFolders
+  initialAssets = emptyAssets,
+  initialFolders = emptyFolders
 }: MediaLibraryClientProps) {
 
 
@@ -589,7 +395,7 @@ export default function MediaLibraryClient({
     onSuccess: () => refetchFolders(),
   })
 
-  // Use Supabase data if available, otherwise fallback to mock data
+  // Use Supabase data (no fallback to mock data)
   const displayFiles = supabaseFiles
   const displayFolders = supabaseFolders
 
@@ -688,11 +494,11 @@ export default function MediaLibraryClient({
     const docCount = initialAssets.filter(a => a.fileType === 'document').length
 
     return {
-      totalAssets: mockUsageStats.totalAssets,
+      totalAssets: initialAssets.length,
       totalViews,
       totalDownloads,
-      totalSize: mockUsageStats.totalSize,
-      storageUsed: (mockUsageStats.totalSize / mockUsageStats.storageLimit) * 100,
+      totalSize,
+      storageUsed: emptyUsageStats.storageLimit > 0 ? (totalSize / emptyUsageStats.storageLimit) * 100 : 0,
       imageCount,
       videoCount,
       audioCount,
@@ -711,14 +517,14 @@ export default function MediaLibraryClient({
   }, [initialAssets, searchQuery, selectedType])
 
   const statCards = [
-    { label: 'Total Assets', value: stats.totalAssets.toLocaleString(), change: 18.5, icon: ImageIcon, color: 'from-indigo-500 to-purple-600' },
-    { label: 'Storage Used', value: formatSize(stats.totalSize), change: 12.3, icon: HardDrive, color: 'from-blue-500 to-cyan-600' },
-    { label: 'Total Views', value: stats.totalViews.toLocaleString(), change: 25.7, icon: Eye, color: 'from-green-500 to-emerald-600' },
-    { label: 'Downloads', value: stats.totalDownloads.toLocaleString(), change: 15.4, icon: Download, color: 'from-purple-500 to-pink-600' },
-    { label: 'Images', value: mockUsageStats.byType.find(t => t.type === 'image')?.count.toString() || '0', change: 8.2, icon: FileImage, color: 'from-blue-500 to-indigo-600' },
-    { label: 'Videos', value: mockUsageStats.byType.find(t => t.type === 'video')?.count.toString() || '0', change: 22.1, icon: FileVideo, color: 'from-red-500 to-rose-600' },
-    { label: 'Audio Files', value: mockUsageStats.byType.find(t => t.type === 'audio')?.count.toString() || '0', change: 5.8, icon: FileAudio, color: 'from-green-500 to-teal-600' },
-    { label: 'Documents', value: mockUsageStats.byType.find(t => t.type === 'document')?.count.toString() || '0', change: 10.5, icon: FileText, color: 'from-orange-500 to-amber-600' }
+    { label: 'Total Assets', value: stats.totalAssets.toLocaleString(), change: 0, icon: ImageIcon, color: 'from-indigo-500 to-purple-600' },
+    { label: 'Storage Used', value: formatSize(stats.totalSize), change: 0, icon: HardDrive, color: 'from-blue-500 to-cyan-600' },
+    { label: 'Total Views', value: stats.totalViews.toLocaleString(), change: 0, icon: Eye, color: 'from-green-500 to-emerald-600' },
+    { label: 'Downloads', value: stats.totalDownloads.toLocaleString(), change: 0, icon: Download, color: 'from-purple-500 to-pink-600' },
+    { label: 'Images', value: stats.imageCount.toString(), change: 0, icon: FileImage, color: 'from-blue-500 to-indigo-600' },
+    { label: 'Videos', value: stats.videoCount.toString(), change: 0, icon: FileVideo, color: 'from-red-500 to-rose-600' },
+    { label: 'Audio Files', value: stats.audioCount.toString(), change: 0, icon: FileAudio, color: 'from-green-500 to-teal-600' },
+    { label: 'Documents', value: stats.docCount.toString(), change: 0, icon: FileText, color: 'from-orange-500 to-amber-600' }
   ]
 
   // CRUD Handlers
@@ -2464,12 +2270,12 @@ export default function MediaLibraryClient({
                   </div>
                   <div>
                     <h2 className="text-2xl font-bold">Asset Collections</h2>
-                    <p className="text-purple-100">{mockCollections.length} collections • {mockCollections.reduce((sum, c) => sum + c.assetCount, 0)} total assets</p>
+                    <p className="text-purple-100">{emptyCollections.length} collections • {emptyCollections.reduce((sum, c) => sum + c.assetCount, 0)} total assets</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="text-right">
-                    <p className="text-2xl font-bold">{mockCollections.filter(c => c.isPublic).length}</p>
+                    <p className="text-2xl font-bold">{emptyCollections.filter(c => c.isPublic).length}</p>
                     <p className="text-purple-100 text-sm">Public Collections</p>
                   </div>
                   <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={handleOpenNewCollection}>
@@ -2509,7 +2315,12 @@ export default function MediaLibraryClient({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {mockCollections.map((collection) => (
+              {emptyCollections.length === 0 ? (
+                <div className="col-span-full text-center py-12">
+                  <Boxes className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-500">No collections found. Create your first collection to get started.</p>
+                </div>
+              ) : emptyCollections.map((collection) => (
                 <Card key={collection.id} className="border-0 shadow-sm hover:shadow-md transition-all cursor-pointer" onClick={() => setSelectedCollection(collection)}>
                   <CardContent className="p-0">
                     <div className="h-32 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-t-lg flex items-center justify-center">
@@ -2692,8 +2503,8 @@ export default function MediaLibraryClient({
                 <CardContent>
                   <div className="space-y-4">
                     <div className="text-center mb-4">
-                      <p className="text-4xl font-bold text-indigo-600">{formatSize(mockUsageStats.totalSize)}</p>
-                      <p className="text-sm text-gray-500">of {formatSize(mockUsageStats.storageLimit)}</p>
+                      <p className="text-4xl font-bold text-indigo-600">{formatSize(stats.totalSize)}</p>
+                      <p className="text-sm text-gray-500">of {formatSize(emptyUsageStats.storageLimit)}</p>
                     </div>
                     <Progress value={stats.storageUsed} className="h-3" />
                     <p className="text-sm text-gray-500 text-center">{stats.storageUsed.toFixed(1)}% used</p>
@@ -2707,7 +2518,9 @@ export default function MediaLibraryClient({
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {initialAssets
+                    {initialAssets.length === 0 ? (
+                      <p className="text-center text-gray-500 py-4">No assets yet</p>
+                    ) : initialAssets
                       .sort((a, b) => b.viewCount - a.viewCount)
                       .slice(0, 5)
                       .map((asset, idx) => (
@@ -2731,7 +2544,9 @@ export default function MediaLibraryClient({
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {mockUsageStats.byType.map((item) => (
+                    {emptyUsageStats.byType.length === 0 ? (
+                      <p className="text-center text-gray-500 py-4">No storage data available</p>
+                    ) : emptyUsageStats.byType.map((item) => (
                       <div key={item.type}>
                         <div className="flex items-center justify-between mb-1">
                           <div className="flex items-center gap-2">
@@ -2740,7 +2555,7 @@ export default function MediaLibraryClient({
                           </div>
                           <span className="text-sm text-gray-500">{formatSize(item.size)}</span>
                         </div>
-                        <Progress value={(item.size / mockUsageStats.totalSize) * 100} className="h-2" />
+                        <Progress value={stats.totalSize > 0 ? (item.size / stats.totalSize) * 100 : 0} className="h-2" />
                       </div>
                     ))}
                   </div>
@@ -2754,10 +2569,10 @@ export default function MediaLibraryClient({
                 <CardContent>
                   <div className="space-y-4">
                     <div className="text-center mb-4">
-                      <p className="text-3xl font-bold">{formatSize(mockUsageStats.bandwidth.used)}</p>
-                      <p className="text-sm text-gray-500">of {formatSize(mockUsageStats.bandwidth.limit)} this month</p>
+                      <p className="text-3xl font-bold">{formatSize(emptyUsageStats.bandwidth.used)}</p>
+                      <p className="text-sm text-gray-500">of {formatSize(emptyUsageStats.bandwidth.limit)} this month</p>
                     </div>
-                    <Progress value={(mockUsageStats.bandwidth.used / mockUsageStats.bandwidth.limit) * 100} className="h-3" />
+                    <Progress value={emptyUsageStats.bandwidth.limit > 0 ? (emptyUsageStats.bandwidth.used / emptyUsageStats.bandwidth.limit) * 100 : 0} className="h-3" />
                   </div>
                 </CardContent>
               </Card>
@@ -3226,7 +3041,7 @@ export default function MediaLibraryClient({
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockMediaAIInsights}
+              insights={emptyAIInsights}
               title="Media Intelligence"
               onInsightAction={(insight) => {
                 if (insight.category === 'Storage') {
@@ -3246,11 +3061,11 @@ export default function MediaLibraryClient({
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockMediaCollaborators}
+              collaborators={emptyCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockMediaPredictions}
+              predictions={emptyPredictions}
               title="Asset Forecasts"
             />
           </div>
@@ -3258,7 +3073,7 @@ export default function MediaLibraryClient({
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockMediaActivities}
+            activities={emptyActivities}
             title="Library Activity"
             maxItems={5}
           />
@@ -4090,7 +3905,9 @@ export default function MediaLibraryClient({
               <DialogDescription>Manage team members for this collection</DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
-              {mockMediaCollaborators.map(collab => (
+              {emptyCollaborators.length === 0 ? (
+                <p className="text-center text-gray-500 py-4">No collaborators yet. Invite team members below.</p>
+              ) : emptyCollaborators.map(collab => (
                 <div key={collab.id} className="flex items-center justify-between p-3 border rounded-lg">
                   <div className="flex items-center gap-3">
                     <Avatar className="w-8 h-8">
@@ -4338,7 +4155,9 @@ export default function MediaLibraryClient({
                 <span className="text-sm font-medium text-green-700 dark:text-green-400">Monitoring active - Live data streaming</span>
               </div>
               <div className="space-y-2">
-                {mockMediaActivities.map(activity => (
+                {emptyActivities.length === 0 ? (
+                  <p className="text-center text-gray-500 py-4">No recent activity</p>
+                ) : emptyActivities.map(activity => (
                   <div key={activity.id} className="flex items-center justify-between p-3 border rounded-lg">
                     <div>
                       <p className="font-medium text-sm">{activity.user}</p>
@@ -4442,7 +4261,7 @@ export default function MediaLibraryClient({
             <div className="space-y-4">
               <div className="text-center p-6 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
                 <p className="text-4xl font-bold text-amber-700 dark:text-amber-400">{formatSize(stats.totalSize)}</p>
-                <p className="text-sm text-amber-600">of {formatSize(mockUsageStats.storageLimit)} used</p>
+                <p className="text-sm text-amber-600">of {formatSize(emptyUsageStats.storageLimit)} used</p>
               </div>
               <div>
                 <div className="flex justify-between mb-2">
@@ -4453,7 +4272,9 @@ export default function MediaLibraryClient({
               </div>
               <div className="space-y-2">
                 <h4 className="font-medium">Usage by Type</h4>
-                {mockUsageStats.byType.map(item => (
+                {emptyUsageStats.byType.length === 0 ? (
+                  <p className="text-center text-gray-500 py-4">No storage data available</p>
+                ) : emptyUsageStats.byType.map(item => (
                   <div key={item.type} className="flex items-center justify-between p-2 border rounded-lg">
                     <div className="flex items-center gap-2">
                       {getFileTypeIcon(item.type)}

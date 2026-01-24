@@ -153,290 +153,16 @@ interface Objective {
   features: string[]
 }
 
-// Mock Data
-const mockFeatures: Feature[] = [
-  {
-    id: 'f1',
-    title: 'AI-Powered Search',
-    description: 'Implement semantic search with natural language processing',
-    status: 'in_progress',
-    priority: 'critical',
-    impact: 'transformational',
-    effort: 'large',
-    impactScore: 9,
-    effortScore: 7,
-    riceScore: 85,
-    progress: 65,
-    quarter: 'Q1',
-    year: 2025,
-    releaseId: 'r1',
-    theme: 'AI & Intelligence',
-    team: 'Platform',
-    owner: { id: '1', name: 'Sarah Chen', avatar: '' },
-    votes: 234,
-    comments: 45,
-    dependencies: ['f3'],
-    tags: ['ai', 'search', 'ux'],
-    customerRequests: 156,
-    createdAt: new Date('2024-10-01'),
-    updatedAt: new Date('2024-12-20'),
-    targetDate: new Date('2025-02-15')
-  },
-  {
-    id: 'f2',
-    title: 'Real-time Collaboration',
-    description: 'Enable multiple users to work on documents simultaneously',
-    status: 'planned',
-    priority: 'high',
-    impact: 'significant',
-    effort: 'xl',
-    impactScore: 8,
-    effortScore: 9,
-    riceScore: 72,
-    progress: 0,
-    quarter: 'Q2',
-    year: 2025,
-    releaseId: 'r2',
-    theme: 'Collaboration',
-    team: 'Core',
-    owner: { id: '2', name: 'Mike Johnson', avatar: '' },
-    votes: 189,
-    comments: 32,
-    dependencies: [],
-    tags: ['collaboration', 'realtime', 'multiplayer'],
-    customerRequests: 98,
-    createdAt: new Date('2024-11-15'),
-    updatedAt: new Date('2024-12-18'),
-    targetDate: new Date('2025-05-30')
-  },
-  {
-    id: 'f3',
-    title: 'API Gateway Redesign',
-    description: 'Rebuild API infrastructure for better scalability',
-    status: 'in_progress',
-    priority: 'high',
-    impact: 'significant',
-    effort: 'large',
-    impactScore: 7,
-    effortScore: 8,
-    riceScore: 68,
-    progress: 40,
-    quarter: 'Q1',
-    year: 2025,
-    releaseId: 'r1',
-    theme: 'Infrastructure',
-    team: 'Platform',
-    owner: { id: '3', name: 'Alex Rivera', avatar: '' },
-    votes: 67,
-    comments: 23,
-    dependencies: [],
-    tags: ['api', 'infrastructure', 'scalability'],
-    customerRequests: 34,
-    createdAt: new Date('2024-09-20'),
-    updatedAt: new Date('2024-12-15'),
-    targetDate: new Date('2025-01-31')
-  },
-  {
-    id: 'f4',
-    title: 'Mobile App Redesign',
-    description: 'Complete redesign of mobile experience with new UI',
-    status: 'review',
-    priority: 'high',
-    impact: 'significant',
-    effort: 'large',
-    impactScore: 8,
-    effortScore: 7,
-    riceScore: 76,
-    progress: 90,
-    quarter: 'Q1',
-    year: 2025,
-    releaseId: 'r1',
-    theme: 'Mobile',
-    team: 'Mobile',
-    owner: { id: '4', name: 'Emma Wilson', avatar: '' },
-    votes: 312,
-    comments: 67,
-    dependencies: ['f3'],
-    tags: ['mobile', 'ui', 'redesign'],
-    customerRequests: 245,
-    createdAt: new Date('2024-08-15'),
-    updatedAt: new Date('2024-12-22'),
-    targetDate: new Date('2025-01-15')
-  },
-  {
-    id: 'f5',
-    title: 'Advanced Analytics Dashboard',
-    description: 'Comprehensive analytics with custom report builder',
-    status: 'backlog',
-    priority: 'medium',
-    impact: 'moderate',
-    effort: 'medium',
-    impactScore: 6,
-    effortScore: 5,
-    riceScore: 58,
-    progress: 0,
-    quarter: 'Q2',
-    year: 2025,
-    theme: 'Analytics',
-    team: 'Data',
-    owner: { id: '5', name: 'James Park', avatar: '' },
-    votes: 145,
-    comments: 28,
-    dependencies: [],
-    tags: ['analytics', 'reporting', 'dashboard'],
-    customerRequests: 89,
-    createdAt: new Date('2024-11-01'),
-    updatedAt: new Date('2024-12-10')
-  },
-  {
-    id: 'f6',
-    title: 'SSO Integration',
-    description: 'Enterprise single sign-on with SAML and OIDC support',
-    status: 'released',
-    priority: 'high',
-    impact: 'significant',
-    effort: 'medium',
-    impactScore: 8,
-    effortScore: 5,
-    riceScore: 82,
-    progress: 100,
-    quarter: 'Q4',
-    year: 2024,
-    releaseId: 'r0',
-    theme: 'Enterprise',
-    team: 'Security',
-    owner: { id: '6', name: 'Olivia Brown', avatar: '' },
-    votes: 278,
-    comments: 41,
-    dependencies: [],
-    tags: ['enterprise', 'security', 'sso'],
-    customerRequests: 187,
-    createdAt: new Date('2024-07-01'),
-    updatedAt: new Date('2024-12-01')
-  }
-]
+// Empty data arrays (replace with real data from API)
+const mockFeatures: Feature[] = []
 
-const mockReleases: Release[] = [
-  {
-    id: 'r0',
-    name: 'Winter Release',
-    version: '2.4.0',
-    status: 'released',
-    targetDate: new Date('2024-12-01'),
-    features: ['f6'],
-    progress: 100,
-    description: 'Enterprise features and security improvements'
-  },
-  {
-    id: 'r1',
-    name: 'Spring Release',
-    version: '2.5.0',
-    status: 'development',
-    targetDate: new Date('2025-02-15'),
-    features: ['f1', 'f3', 'f4'],
-    progress: 65,
-    description: 'AI features and mobile redesign'
-  },
-  {
-    id: 'r2',
-    name: 'Summer Release',
-    version: '2.6.0',
-    status: 'planning',
-    targetDate: new Date('2025-05-30'),
-    features: ['f2', 'f5'],
-    progress: 10,
-    description: 'Collaboration and analytics'
-  }
-]
+const mockReleases: Release[] = []
 
-const mockInsights: CustomerInsight[] = [
-  {
-    id: 'i1',
-    title: 'Need better search functionality',
-    source: 'Support Ticket',
-    customer: 'Acme Corp',
-    votes: 45,
-    status: 'planned',
-    linkedFeatures: ['f1'],
-    createdAt: new Date('2024-11-15')
-  },
-  {
-    id: 'i2',
-    title: 'Mobile app crashes frequently',
-    source: 'App Store Review',
-    customer: 'Multiple',
-    votes: 89,
-    status: 'planned',
-    linkedFeatures: ['f4'],
-    createdAt: new Date('2024-10-20')
-  },
-  {
-    id: 'i3',
-    title: 'Need real-time editing like Google Docs',
-    source: 'Customer Interview',
-    customer: 'TechStart Inc',
-    votes: 67,
-    status: 'reviewing',
-    linkedFeatures: ['f2'],
-    createdAt: new Date('2024-12-01')
-  }
-]
+const mockInsights: CustomerInsight[] = []
 
-const mockIdeas: Idea[] = [
-  {
-    id: 'id1',
-    title: 'Dark mode for all pages',
-    description: 'Implement system-wide dark mode support',
-    submittedBy: 'John Smith',
-    votes: 234,
-    status: 'accepted',
-    category: 'UI/UX',
-    createdAt: new Date('2024-11-01')
-  },
-  {
-    id: 'id2',
-    title: 'Keyboard shortcuts',
-    description: 'Add comprehensive keyboard shortcuts for power users',
-    submittedBy: 'Lisa Chen',
-    votes: 156,
-    status: 'under_review',
-    category: 'Productivity',
-    createdAt: new Date('2024-11-20')
-  },
-  {
-    id: 'id3',
-    title: 'Export to PDF',
-    description: 'Allow exporting reports and documents to PDF',
-    submittedBy: 'Mike Wilson',
-    votes: 189,
-    status: 'new',
-    category: 'Export',
-    createdAt: new Date('2024-12-10')
-  }
-]
+const mockIdeas: Idea[] = []
 
-const mockObjectives: Objective[] = [
-  {
-    id: 'o1',
-    title: 'Become the AI-first platform in our category',
-    description: 'Lead the market with AI-powered features',
-    keyResults: ['Launch AI search', 'Achieve 50% AI feature adoption', 'Reduce task time by 40%'],
-    progress: 45,
-    quarter: 'Q1',
-    year: 2025,
-    features: ['f1']
-  },
-  {
-    id: 'o2',
-    title: 'Improve user collaboration',
-    description: 'Enable seamless team collaboration',
-    keyResults: ['Launch real-time editing', 'Increase team workspace usage by 60%', 'Reduce email attachments by 50%'],
-    progress: 20,
-    quarter: 'Q2',
-    year: 2025,
-    features: ['f2']
-  }
-]
+const mockObjectives: Objective[] = []
 
 // Helper Functions
 const getStatusColor = (status: InitiativeStatus): string => {
@@ -507,29 +233,14 @@ interface RoadmapClientProps {
   initialMilestones?: any[]
 }
 
-// Competitive Upgrade Mock Data - Productboard/Aha!-level Roadmap Intelligence
-const mockRoadmapAIInsights = [
-  { id: '1', type: 'success' as const, title: 'On Track', description: '85% of Q1 initiatives are on schedule!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Progress' },
-  { id: '2', type: 'warning' as const, title: 'Scope Creep', description: 'Mobile App v2 has grown 40% beyond original scope.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Risk' },
-  { id: '3', type: 'info' as const, title: 'AI Priority', description: 'Customer requests suggest API improvements should move up.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'AI Insights' },
-]
+// Empty competitive upgrade data arrays (replace with real data from API)
+const mockRoadmapAIInsights: { id: string; type: 'success' | 'warning' | 'info' | 'error'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
 
-const mockRoadmapCollaborators = [
-  { id: '1', name: 'Product Lead', avatar: '/avatars/product.jpg', status: 'online' as const, role: 'Lead' },
-  { id: '2', name: 'PM', avatar: '/avatars/pm.jpg', status: 'online' as const, role: 'PM' },
-  { id: '3', name: 'Engineering', avatar: '/avatars/eng.jpg', status: 'away' as const, role: 'Engineering' },
-]
+const mockRoadmapCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }[] = []
 
-const mockRoadmapPredictions = [
-  { id: '1', title: 'Q1 Delivery', prediction: '4 of 5 major features will ship on time', confidence: 86, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Resource Needs', prediction: 'Mobile initiative will require 2 additional engineers', confidence: 79, trend: 'up' as const, impact: 'medium' as const },
-]
+const mockRoadmapPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: 'high' | 'medium' | 'low' }[] = []
 
-const mockRoadmapActivities = [
-  { id: '1', user: 'Product Lead', action: 'Prioritized', target: 'Q2 feature backlog', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'PM', action: 'Updated', target: 'API v3 timeline', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'Engineering', action: 'Completed', target: 'infrastructure milestone', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
-]
+const mockRoadmapActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' | 'error' }[] = []
 
 export default function RoadmapClient({ initialInitiatives, initialMilestones }: RoadmapClientProps) {
   const [activeTab, setActiveTab] = useState('roadmap')
@@ -583,7 +294,7 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
     const totalFeatures = features.length
     const inProgress = features.filter(f => f.status === 'in_progress').length
     const released = features.filter(f => f.status === 'released').length
-    const avgProgress = features.reduce((sum, f) => sum + f.progress, 0) / totalFeatures
+    const avgProgress = totalFeatures > 0 ? features.reduce((sum, f) => sum + f.progress, 0) / totalFeatures : 0
     const totalVotes = features.reduce((sum, f) => sum + f.votes, 0)
     const totalCustomerRequests = features.reduce((sum, f) => sum + f.customerRequests, 0)
     const upcomingReleases = releases.filter(r => r.status !== 'released').length
@@ -1435,7 +1146,7 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {insights.map((insight: AIInsight) => (
+                    {insights.map((insight: CustomerInsight) => (
                       <div key={insight.id} className="p-4 rounded-lg border">
                         <div className="flex items-start justify-between mb-2">
                           <div>

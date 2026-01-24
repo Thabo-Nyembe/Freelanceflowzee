@@ -171,184 +171,25 @@ interface FeedbackAnalytics {
   categoryBreakdown: Record<IdeaCategory, number>
 }
 
-// Mock data
-const mockUsers: FeedbackUser[] = [
-  { id: 'u1', name: 'Sarah Chen', email: 'sarah@company.com', company: 'TechCorp', plan: 'enterprise', totalVotes: 47, ideasSubmitted: 12, joinedAt: '2024-01-15' },
-  { id: 'u2', name: 'Mike Johnson', email: 'mike@startup.io', company: 'Startup.io', plan: 'pro', totalVotes: 23, ideasSubmitted: 8, joinedAt: '2024-02-20' },
-  { id: 'u3', name: 'Emily Davis', email: 'emily@design.co', company: 'Design Co', plan: 'pro', totalVotes: 35, ideasSubmitted: 15, joinedAt: '2024-01-08' },
-  { id: 'u4', name: 'James Wilson', email: 'james@enterprise.com', company: 'Enterprise Inc', plan: 'enterprise', totalVotes: 89, ideasSubmitted: 22, joinedAt: '2023-11-30' },
-]
+// Empty data arrays (previously mock data - now using real data from Supabase)
+const mockUsers: FeedbackUser[] = []
 
-const mockIdeas: Idea[] = [
-  {
-    id: 'idea1',
-    title: 'Dark mode support across all pages',
-    description: 'Add a system-wide dark mode toggle that respects user preferences and provides a comfortable viewing experience in low-light environments. Should sync across devices.',
-    category: 'feature',
-    status: 'in_progress',
-    priority: 'critical',
-    votes: 342,
-    voters: ['u1', 'u2', 'u3'],
-    comments: 45,
-    author: mockUsers[0],
-    createdAt: '2024-06-15T10:00:00Z',
-    updatedAt: '2024-12-20T14:30:00Z',
-    plannedRelease: 'Q1 2025',
-    linkedIdeas: ['idea5'],
-    tags: ['accessibility', 'ui', 'theming'],
-    impactScore: 92,
-    effortScore: 65,
-    adminResponse: { message: 'Great suggestion! Currently in development.', respondedAt: '2024-12-01T09:00:00Z', respondedBy: 'Product Team' },
-    subscribers: 156,
-    views: 2341,
-    product: 'Core Platform'
-  },
-  {
-    id: 'idea2',
-    title: 'API webhook improvements',
-    description: 'Add retry logic, better error handling, and a webhook testing interface. Include delivery status tracking and historical logs for debugging.',
-    category: 'improvement',
-    status: 'planned',
-    priority: 'important',
-    votes: 187,
-    voters: ['u4'],
-    comments: 23,
-    author: mockUsers[3],
-    createdAt: '2024-08-10T11:00:00Z',
-    updatedAt: '2024-12-18T16:00:00Z',
-    plannedRelease: 'Q2 2025',
-    linkedIdeas: [],
-    tags: ['api', 'developer-experience', 'integrations'],
-    impactScore: 85,
-    effortScore: 78,
-    subscribers: 89,
-    views: 1567,
-    product: 'Developer API'
-  },
-  {
-    id: 'idea3',
-    title: 'Slack integration for notifications',
-    description: 'Native Slack integration to receive real-time notifications about important events, mentions, and updates directly in Slack channels.',
-    category: 'integration',
-    status: 'shipped',
-    priority: 'important',
-    votes: 256,
-    voters: ['u1', 'u2'],
-    comments: 67,
-    author: mockUsers[1],
-    createdAt: '2024-03-20T09:00:00Z',
-    updatedAt: '2024-11-01T10:00:00Z',
-    linkedIdeas: [],
-    tags: ['slack', 'notifications', 'productivity'],
-    impactScore: 88,
-    effortScore: 45,
-    adminResponse: { message: 'Shipped in v2.5! Check it out.', respondedAt: '2024-11-01T10:00:00Z', respondedBy: 'Engineering Team' },
-    subscribers: 234,
-    views: 4521,
-    product: 'Integrations'
-  },
-  {
-    id: 'idea4',
-    title: 'Mobile app for iOS and Android',
-    description: 'Native mobile applications with offline support, push notifications, and full feature parity with the web app.',
-    category: 'feature',
-    status: 'under_review',
-    priority: 'critical',
-    votes: 523,
-    voters: ['u1', 'u2', 'u3', 'u4'],
-    comments: 89,
-    author: mockUsers[2],
-    createdAt: '2024-01-05T08:00:00Z',
-    updatedAt: '2024-12-22T11:00:00Z',
-    linkedIdeas: [],
-    tags: ['mobile', 'ios', 'android', 'offline'],
-    impactScore: 95,
-    effortScore: 92,
-    subscribers: 312,
-    views: 6782,
-    product: 'Mobile'
-  },
-  {
-    id: 'idea5',
-    title: 'Custom color themes beyond dark/light',
-    description: 'Allow users to create and save custom color themes with their preferred color palette. Include theme marketplace for sharing.',
-    category: 'feature',
-    status: 'new',
-    priority: 'nice_to_have',
-    votes: 98,
-    voters: ['u3'],
-    comments: 12,
-    author: mockUsers[2],
-    createdAt: '2024-11-28T14:00:00Z',
-    updatedAt: '2024-12-15T09:00:00Z',
-    linkedIdeas: ['idea1'],
-    tags: ['theming', 'customization', 'ui'],
-    impactScore: 45,
-    effortScore: 55,
-    subscribers: 67,
-    views: 890,
-    product: 'Core Platform'
-  },
-  {
-    id: 'idea6',
-    title: 'Performance improvements for large datasets',
-    description: 'Optimize rendering and data fetching for users with 10k+ items. Include virtual scrolling and lazy loading.',
-    category: 'performance',
-    status: 'in_progress',
-    priority: 'critical',
-    votes: 189,
-    voters: ['u4'],
-    comments: 34,
-    author: mockUsers[3],
-    createdAt: '2024-09-12T16:00:00Z',
-    updatedAt: '2024-12-21T10:00:00Z',
-    plannedRelease: 'Q1 2025',
-    linkedIdeas: [],
-    tags: ['performance', 'scalability', 'enterprise'],
-    impactScore: 90,
-    effortScore: 80,
-    adminResponse: { message: 'Priority item for Q1. Virtual scrolling being implemented now.', respondedAt: '2024-12-10T15:00:00Z', respondedBy: 'Engineering Team' },
-    subscribers: 145,
-    views: 2156,
-    product: 'Core Platform'
-  },
-]
+const mockIdeas: Idea[] = []
 
-const mockNPSResponses: NPSResponse[] = [
-  { id: 'nps1', score: 10, category: 'promoter', feedback: 'Amazing product! Has transformed our workflow.', user: mockUsers[0], createdAt: '2024-12-20T10:00:00Z', followedUp: true, tags: ['workflow', 'positive'] },
-  { id: 'nps2', score: 8, category: 'passive', feedback: 'Good product but missing some features we need.', user: mockUsers[1], createdAt: '2024-12-19T11:00:00Z', followedUp: false, tags: ['features'] },
-  { id: 'nps3', score: 9, category: 'promoter', feedback: 'Great support team and solid product.', user: mockUsers[2], createdAt: '2024-12-18T09:00:00Z', followedUp: true, tags: ['support', 'positive'] },
-  { id: 'nps4', score: 6, category: 'detractor', feedback: 'Performance issues with large datasets.', user: mockUsers[3], createdAt: '2024-12-17T14:00:00Z', followedUp: true, tags: ['performance', 'enterprise'] },
-  { id: 'nps5', score: 10, category: 'promoter', feedback: 'Best tool weve used. Highly recommend!', user: mockUsers[0], createdAt: '2024-12-16T08:00:00Z', followedUp: false, tags: ['recommendation'] },
-]
+const mockNPSResponses: NPSResponse[] = []
 
-const mockSegments: Segment[] = [
-  { id: 's1', name: 'Enterprise Users', description: 'Users on enterprise plan', filters: [{ field: 'plan', operator: 'equals', value: 'enterprise' }], userCount: 156, color: 'purple', avgNPS: 8.5 },
-  { id: 's2', name: 'Power Users', description: 'Users with 20+ ideas', filters: [{ field: 'ideasSubmitted', operator: 'greater_than', value: '20' }], userCount: 45, color: 'blue', avgNPS: 9.1 },
-  { id: 's3', name: 'New Users', description: 'Joined in last 30 days', filters: [{ field: 'joinedAt', operator: 'within', value: '30d' }], userCount: 234, color: 'green', avgNPS: 7.8 },
-]
+const mockSegments: Segment[] = []
 
-const mockRoadmap: RoadmapItem[] = [
-  { id: 'r1', ideaId: 'idea1', title: 'Dark mode support', status: 'now', quarter: 'Q1 2025', votes: 342, progress: 65, team: 'Design' },
-  { id: 'r2', ideaId: 'idea6', title: 'Performance optimizations', status: 'now', quarter: 'Q1 2025', votes: 189, progress: 40, team: 'Engineering' },
-  { id: 'r3', ideaId: 'idea2', title: 'API webhook improvements', status: 'next', quarter: 'Q2 2025', votes: 187, progress: 0, team: 'Platform' },
-  { id: 'r4', ideaId: 'idea4', title: 'Mobile apps', status: 'later', quarter: 'Q3 2025', votes: 523, progress: 0, team: 'Mobile' },
-  { id: 'r5', ideaId: 'idea3', title: 'Slack integration', status: 'shipped', quarter: 'Q4 2024', votes: 256, progress: 100, team: 'Integrations' },
-]
+const mockRoadmap: RoadmapItem[] = []
 
 const mockAnalytics: FeedbackAnalytics = {
-  totalIdeas: 487,
-  totalVotes: 12453,
-  avgResponseTime: '4.2 hours',
-  implementationRate: 34,
-  topTrends: [
-    { term: 'mobile', count: 156, change: 23 },
-    { term: 'performance', count: 98, change: 15 },
-    { term: 'integrations', count: 87, change: -5 },
-    { term: 'dark mode', count: 76, change: 8 },
-  ],
-  sentimentBreakdown: { positive: 245, neutral: 156, negative: 67, mixed: 19 },
-  categoryBreakdown: { feature: 189, improvement: 134, bug: 67, integration: 45, ux: 32, performance: 15, other: 5 }
+  totalIdeas: 0,
+  totalVotes: 0,
+  avgResponseTime: '0 hours',
+  implementationRate: 0,
+  topTrends: [],
+  sentimentBreakdown: { positive: 0, neutral: 0, negative: 0, mixed: 0 },
+  categoryBreakdown: { feature: 0, improvement: 0, bug: 0, integration: 0, ux: 0, performance: 0, other: 0 }
 }
 
 // Helper functions
@@ -418,30 +259,14 @@ const formatRelativeTime = (dateString: string) => {
   return `${Math.floor(diffDays / 30)} months ago`
 }
 
-// Enhanced Feedback Mock Data
-const mockFeedbackAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Positive Trend', description: 'NPS score up 12 points this quarter. Users love new features!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Sentiment' },
-  { id: '2', type: 'info' as const, title: 'Top Request', description: 'Dark mode is most requested feature with 234 votes.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Ideas' },
-  { id: '3', type: 'warning' as const, title: 'Response Needed', description: '15 feedback items awaiting team response for 7+ days.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Action' },
-]
+// Enhanced Feedback Data (empty arrays - will be populated from real data)
+const mockFeedbackAIInsights: { id: string; type: 'success' | 'info' | 'warning'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
 
-const mockFeedbackCollaborators = [
-  { id: '1', name: 'Product Manager', avatar: '/avatars/pm.jpg', status: 'online' as const, role: 'Product', lastActive: 'Now' },
-  { id: '2', name: 'UX Researcher', avatar: '/avatars/ux.jpg', status: 'online' as const, role: 'Research', lastActive: '10m ago' },
-  { id: '3', name: 'Customer Success', avatar: '/avatars/cs.jpg', status: 'away' as const, role: 'Support', lastActive: '1h ago' },
-]
+const mockFeedbackCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string; lastActive: string }[] = []
 
-const mockFeedbackPredictions = [
-  { id: '1', label: 'NPS Score', current: 72, target: 80, predicted: 76, confidence: 82, trend: 'up' as const },
-  { id: '2', label: 'Response Rate', current: 85, target: 95, predicted: 90, confidence: 78, trend: 'up' as const },
-  { id: '3', label: 'Ideas Shipped', current: 12, target: 20, predicted: 16, confidence: 75, trend: 'up' as const },
-]
+const mockFeedbackPredictions: { id: string; label: string; current: number; target: number; predicted: number; confidence: number; trend: 'up' | 'down' | 'stable' }[] = []
 
-const mockFeedbackActivities = [
-  { id: '1', user: 'Product Manager', action: 'approved', target: 'dark mode feature request', timestamp: '15m ago', type: 'success' as const },
-  { id: '2', user: 'UX Researcher', action: 'analyzed', target: '50 user interviews', timestamp: '2h ago', type: 'info' as const },
-  { id: '3', user: 'Customer Success', action: 'responded', target: '12 feedback items', timestamp: '3h ago', type: 'info' as const },
-]
+const mockFeedbackActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' }[] = []
 
 // Quick actions will be defined inside component to access handlers
 
@@ -839,6 +664,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
     const promoters = mockNPSResponses.filter(r => r.category === 'promoter').length
     const detractors = mockNPSResponses.filter(r => r.category === 'detractor').length
     const total = mockNPSResponses.length
+    if (total === 0) return 0
     return Math.round(((promoters - detractors) / total) * 100)
   }, [])
 
@@ -1785,7 +1611,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                           <span className="capitalize">{category}</span>
                           <span className="font-medium">{count}</span>
                         </div>
-                        <Progress value={(count / mockAnalytics.totalIdeas) * 100} className="h-1.5" />
+                        <Progress value={mockAnalytics.totalIdeas > 0 ? (count / mockAnalytics.totalIdeas) * 100 : 0} className="h-1.5" />
                       </div>
                     ))}
                   </div>

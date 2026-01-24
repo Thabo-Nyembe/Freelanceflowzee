@@ -313,127 +313,17 @@ const NODE_DEFINITIONS: NodeDefinition[] = [
   { type: 'control_wait', name: 'Wait', displayName: 'Wait', description: 'Wait for webhook', category: 'control', icon: <Timer className="h-4 w-4" />, iconColor: 'text-gray-600', color: 'bg-gray-500', inputs: [{ name: 'main', type: 'main' }], outputs: [{ name: 'main', type: 'main' }], properties: [{ name: 'resume', displayName: 'Resume', type: 'options', options: [{ name: 'After Time Interval', value: 'timeInterval' }, { name: 'On Webhook Call', value: 'webhook' }] }], version: 1 },
 ]
 
-// ============== MOCK DATA ==============
+// ============== DATA ARRAYS (Empty - to be populated from Supabase) ==============
 
-const mockWorkflows: Workflow[] = [
-  {
-    id: 'wf1',
-    name: 'Lead Processing Pipeline',
-    description: 'Automatically process new leads from form submissions',
-    status: 'active',
-    nodes: [],
-    connections: [],
-    settings: { executionOrder: 'v1', saveExecutionProgress: true, saveManualExecutions: true, callerPolicy: 'any', timezone: 'America/New_York', executionTimeout: 3600, maxConcurrency: 1 },
-    tags: ['leads', 'crm', 'automation'],
-    createdAt: new Date('2024-01-01'),
-    updatedAt: new Date('2024-01-15'),
-    createdBy: 'user1',
-    lastExecutedAt: new Date('2024-01-15T10:30:00'),
-    executionCount: 1245,
-    successCount: 1230,
-    errorCount: 15,
-    avgExecutionTime: 2340,
-    isShared: true,
-    sharedWith: ['team'],
-    version: 5,
-    versionHistory: []
-  },
-  {
-    id: 'wf2',
-    name: 'Daily Report Generator',
-    description: 'Generate and send daily sales reports',
-    status: 'active',
-    nodes: [],
-    connections: [],
-    settings: { executionOrder: 'v1', saveExecutionProgress: true, saveManualExecutions: true, callerPolicy: 'any', timezone: 'America/New_York', executionTimeout: 3600, maxConcurrency: 1 },
-    tags: ['reports', 'scheduled', 'email'],
-    createdAt: new Date('2024-01-05'),
-    updatedAt: new Date('2024-01-14'),
-    createdBy: 'user1',
-    lastExecutedAt: new Date('2024-01-15T09:00:00'),
-    executionCount: 45,
-    successCount: 44,
-    errorCount: 1,
-    avgExecutionTime: 15670,
-    isShared: false,
-    sharedWith: [],
-    version: 3,
-    versionHistory: []
-  },
-  {
-    id: 'wf3',
-    name: 'Slack Notification Bot',
-    description: 'Send notifications to Slack on various events',
-    status: 'paused',
-    nodes: [],
-    connections: [],
-    settings: { executionOrder: 'v1', saveExecutionProgress: true, saveManualExecutions: true, callerPolicy: 'any', timezone: 'America/New_York', executionTimeout: 3600, maxConcurrency: 1 },
-    tags: ['notifications', 'slack'],
-    createdAt: new Date('2024-01-10'),
-    updatedAt: new Date('2024-01-12'),
-    createdBy: 'user2',
-    executionCount: 890,
-    successCount: 885,
-    errorCount: 5,
-    avgExecutionTime: 450,
-    isShared: true,
-    sharedWith: ['team'],
-    version: 2,
-    versionHistory: []
-  },
-  {
-    id: 'wf4',
-    name: 'Customer Onboarding',
-    description: 'Automated onboarding sequence for new customers',
-    status: 'draft',
-    nodes: [],
-    connections: [],
-    settings: { executionOrder: 'v1', saveExecutionProgress: true, saveManualExecutions: true, callerPolicy: 'any', timezone: 'America/New_York', executionTimeout: 3600, maxConcurrency: 1 },
-    tags: ['onboarding', 'customers'],
-    createdAt: new Date('2024-01-14'),
-    updatedAt: new Date('2024-01-15'),
-    createdBy: 'user1',
-    executionCount: 0,
-    successCount: 0,
-    errorCount: 0,
-    avgExecutionTime: 0,
-    isShared: false,
-    sharedWith: [],
-    version: 1,
-    versionHistory: []
-  }
-]
+const mockWorkflows: Workflow[] = []
 
-const mockExecutions: WorkflowExecution[] = [
-  { id: 'ex1', workflowId: 'wf1', workflowName: 'Lead Processing Pipeline', status: 'success', mode: 'trigger', startedAt: new Date('2024-01-15T10:30:00'), finishedAt: new Date('2024-01-15T10:30:02'), duration: 2340, nodesExecuted: 8, totalNodes: 8 },
-  { id: 'ex2', workflowId: 'wf1', workflowName: 'Lead Processing Pipeline', status: 'success', mode: 'trigger', startedAt: new Date('2024-01-15T10:25:00'), finishedAt: new Date('2024-01-15T10:25:02'), duration: 2100, nodesExecuted: 8, totalNodes: 8 },
-  { id: 'ex3', workflowId: 'wf2', workflowName: 'Daily Report Generator', status: 'error', mode: 'trigger', startedAt: new Date('2024-01-15T09:00:00'), finishedAt: new Date('2024-01-15T09:00:05'), duration: 5000, nodesExecuted: 4, totalNodes: 6, error: { message: 'Connection timeout', node: 'HTTP Request' } },
-  { id: 'ex4', workflowId: 'wf1', workflowName: 'Lead Processing Pipeline', status: 'running', mode: 'webhook', startedAt: new Date('2024-01-15T10:35:00'), nodesExecuted: 3, totalNodes: 8 },
-  { id: 'ex5', workflowId: 'wf3', workflowName: 'Slack Notification Bot', status: 'success', mode: 'trigger', startedAt: new Date('2024-01-15T10:20:00'), finishedAt: new Date('2024-01-15T10:20:01'), duration: 450, nodesExecuted: 3, totalNodes: 3 }
-]
+const mockExecutions: WorkflowExecution[] = []
 
-const mockTemplates: WorkflowTemplate[] = [
-  { id: 't1', name: 'Slack Alert on Form Submit', description: 'Send Slack notification when a form is submitted', category: 'Notifications', difficulty: 'beginner', nodes: [], connections: [], usageCount: 2340, rating: 4.8, author: 'n8n', tags: ['slack', 'forms'], iconEmoji: '📬', estimatedTime: '5 min', createdAt: new Date(), featured: true },
-  { id: 't2', name: 'Daily Report Generator', description: 'Generate and email daily reports automatically', category: 'Reporting', difficulty: 'intermediate', nodes: [], connections: [], usageCount: 1890, rating: 4.7, author: 'n8n', tags: ['reports', 'email'], iconEmoji: '📊', estimatedTime: '15 min', createdAt: new Date(), featured: true },
-  { id: 't3', name: 'Lead Scoring Workflow', description: 'Score leads based on their actions and update CRM', category: 'Sales', difficulty: 'advanced', nodes: [], connections: [], usageCount: 1234, rating: 4.6, author: 'n8n', tags: ['crm', 'leads'], iconEmoji: '🎯', estimatedTime: '30 min', createdAt: new Date(), featured: false },
-  { id: 't4', name: 'GitHub to Jira Sync', description: 'Create Jira tickets from GitHub issues', category: 'Development', difficulty: 'intermediate', nodes: [], connections: [], usageCount: 987, rating: 4.5, author: 'community', tags: ['github', 'jira'], iconEmoji: '🔄', estimatedTime: '20 min', createdAt: new Date(), featured: false },
-  { id: 't5', name: 'Customer Onboarding', description: 'Automated welcome sequence for new customers', category: 'Customer Success', difficulty: 'intermediate', nodes: [], connections: [], usageCount: 1567, rating: 4.9, author: 'n8n', tags: ['onboarding', 'email'], iconEmoji: '👋', estimatedTime: '25 min', createdAt: new Date(), featured: true },
-  { id: 't6', name: 'Invoice Processing', description: 'Extract data from invoices and update accounting', category: 'Finance', difficulty: 'advanced', nodes: [], connections: [], usageCount: 876, rating: 4.4, author: 'community', tags: ['invoices', 'ocr'], iconEmoji: '🧾', estimatedTime: '45 min', createdAt: new Date(), featured: false }
-]
+const mockTemplates: WorkflowTemplate[] = []
 
-const mockCredentials: WorkflowCredential[] = [
-  { id: 'cred1', name: 'Slack Bot', type: 'oauth2', nodeTypes: ['action_slack'], createdAt: new Date(), updatedAt: new Date(), data: {}, isShared: true, usageCount: 12 },
-  { id: 'cred2', name: 'SendGrid API', type: 'api_key', nodeTypes: ['action_sendgrid', 'action_email'], createdAt: new Date(), updatedAt: new Date(), data: {}, isShared: false, usageCount: 8 },
-  { id: 'cred3', name: 'Postgres Production', type: 'custom', nodeTypes: ['action_database'], createdAt: new Date(), updatedAt: new Date(), data: {}, isShared: true, usageCount: 15 },
-  { id: 'cred4', name: 'Google Sheets', type: 'oauth2', nodeTypes: ['action_google_sheets'], createdAt: new Date(), updatedAt: new Date(), data: {}, isShared: true, usageCount: 6 }
-]
+const mockCredentials: WorkflowCredential[] = []
 
-const mockVariables: WorkflowVariable[] = [
-  { id: 'var1', key: 'API_BASE_URL', value: 'https://api.example.com', type: 'string', description: 'Base URL for API calls', isSecret: false },
-  { id: 'var2', key: 'NOTIFICATION_EMAIL', value: 'alerts@company.com', type: 'string', description: 'Email for notifications', isSecret: false },
-  { id: 'var3', key: 'STRIPE_API_KEY', value: '••••••••••••', type: 'string', description: 'Stripe API Key', isSecret: true },
-  { id: 'var4', key: 'MAX_RETRIES', value: '3', type: 'number', description: 'Maximum retry attempts', isSecret: false }
-]
+const mockVariables: WorkflowVariable[] = []
 
 // ============== HELPER FUNCTIONS ==============
 
@@ -488,66 +378,16 @@ const getDifficultyColor = (difficulty: string): string => {
 
 // ============== MAIN COMPONENT ==============
 
-// Competitive Upgrade Mock Data - n8n/Zapier Level Workflow Intelligence
-const mockWorkflowAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Automation Savings', description: 'Workflows saved 124 hours of manual work this month—$6,200 value!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'ROI' },
-  { id: '2', type: 'warning' as const, title: 'Error Rate Spike', description: 'Salesforce → Slack workflow failing 15% of executions. Check API limits.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Errors' },
-  { id: '3', type: 'info' as const, title: 'AI Suggestion', description: 'Merging 4 similar email workflows could reduce complexity by 60%.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'AI Insights' },
-]
+// Competitive Upgrade Data Arrays (Empty - to be populated from Supabase)
+const mockWorkflowAIInsights: { id: string; type: 'success' | 'warning' | 'info'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
 
-const mockWorkflowCollaborators = [
-  { id: '1', name: 'Automation Lead', avatar: '/avatars/automation.jpg', status: 'online' as const, role: 'Lead' },
-  { id: '2', name: 'Integration Eng', avatar: '/avatars/engineer.jpg', status: 'online' as const, role: 'Engineer' },
-  { id: '3', name: 'Ops Manager', avatar: '/avatars/ops.jpg', status: 'away' as const, role: 'Operations' },
-]
+const mockWorkflowCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }[] = []
 
-const mockWorkflowPredictions = [
-  { id: '1', title: 'Execution Volume', prediction: 'Monthly workflow executions projected to hit 50K (+35% MoM)', confidence: 89, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Error Reduction', prediction: 'New retry logic expected to reduce failures by 40%', confidence: 81, trend: 'down' as const, impact: 'medium' as const },
-]
+const mockWorkflowPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: 'low' | 'medium' | 'high' }[] = []
 
-const mockWorkflowActivities = [
-  { id: '1', user: 'Automation Lead', action: 'Deployed', target: 'Customer onboarding automation', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Integration Eng', action: 'Fixed', target: 'HubSpot webhook connection', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'System', action: 'Executed', target: '2,340 workflow runs today', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
-]
+const mockWorkflowActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' | 'error' }[] = []
 
-const mockWorkflowQuickActions = [
-  { id: '1', label: 'New Flow', icon: 'plus', action: async () => {
-    try {
-      const response = await fetch('/api/workflows', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: 'New Workflow', description: '', tags: [] })
-      })
-      if (!response.ok) throw new Error('Failed to create workflow')
-      const data = await response.json()
-      toast.success(`New workflow created! ID: ${data.id || 'workflow'}`)
-    } catch (error) {
-      toast.error('Failed to create workflow')
-    }
-  }, variant: 'default' as const },
-  { id: '2', label: 'Test', icon: 'play', action: async () => {
-    try {
-      const response = await fetch('/api/workflows/test', { method: 'POST' })
-      if (!response.ok) throw new Error('Test failed')
-      const data = await response.json()
-      toast.success(`Workflow test passed! ${data.stepsCompleted || 5} steps completed successfully`)
-    } catch (error) {
-      toast.error('Test failed - check workflow configuration')
-    }
-  }, variant: 'default' as const },
-  { id: '3', label: 'Logs', icon: 'list', action: async () => {
-    try {
-      const response = await fetch('/api/workflows/logs')
-      if (!response.ok) throw new Error('Failed to load logs')
-      const data = await response.json()
-      toast.success(`Workflow Logs: ${data.executionsToday || 156} executions today - ${data.successRate || 98}% success rate`)
-    } catch (error) {
-      toast.error('Failed to load logs')
-    }
-  }, variant: 'outline' as const },
-]
+const mockWorkflowQuickActions: { id: string; label: string; icon: string; action: () => Promise<void>; variant: 'default' | 'outline' }[] = []
 
 export default function WorkflowBuilderClient() {
   const [activeTab, setActiveTab] = useState('workflows')

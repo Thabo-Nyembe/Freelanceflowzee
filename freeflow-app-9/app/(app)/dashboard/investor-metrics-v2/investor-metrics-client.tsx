@@ -67,11 +67,15 @@ import {
   AIInsightsPanel,
   CollaborationIndicator,
   PredictiveAnalytics,
+  type AIInsight,
+  type Collaborator,
+  type Prediction,
 } from '@/components/ui/competitive-upgrades'
 
 import {
   ActivityFeed,
   QuickActionsToolbar,
+  type ActivityItem,
 } from '@/components/ui/competitive-upgrades-extended'
 
 // MIGRATED: Batch #13 - Removed mock data, using database hooks
@@ -167,184 +171,20 @@ interface KPIMetric {
   description?: string
 }
 
-// Mock Data
-const mockFundingRounds: FundingRound[] = [
-  {
-    id: '1',
-    name: 'Series A',
-    stage: 'series-a',
-    targetAmount: 10000000,
-    raisedAmount: 10000000,
-    preMoneyValuation: 40000000,
-    postMoneyValuation: 50000000,
-    pricePerShare: 12.50,
-    sharesIssued: 800000,
-    leadInvestor: 'Sequoia Capital',
-    closeDate: '2024-01-15',
-    status: 'closed',
-    documents: [
-      { name: 'Term Sheet', status: 'executed' },
-      { name: 'Stock Purchase Agreement', status: 'executed' },
-      { name: 'Investor Rights Agreement', status: 'executed' }
-    ]
-  },
-  {
-    id: '2',
-    name: 'Seed Round',
-    stage: 'seed',
-    targetAmount: 3000000,
-    raisedAmount: 3000000,
-    preMoneyValuation: 12000000,
-    postMoneyValuation: 15000000,
-    pricePerShare: 5.00,
-    sharesIssued: 600000,
-    leadInvestor: 'Y Combinator',
-    closeDate: '2023-06-01',
-    status: 'closed',
-    documents: [
-      { name: 'SAFE Agreement', status: 'executed' },
-      { name: 'Pro Rata Side Letter', status: 'executed' }
-    ]
-  },
-  {
-    id: '3',
-    name: 'Series B',
-    stage: 'series-b',
-    targetAmount: 30000000,
-    raisedAmount: 18500000,
-    preMoneyValuation: 120000000,
-    postMoneyValuation: 150000000,
-    pricePerShare: 25.00,
-    sharesIssued: 0,
-    leadInvestor: 'Andreessen Horowitz',
-    closeDate: '2024-06-30',
-    status: 'open',
-    documents: [
-      { name: 'Term Sheet', status: 'pending' },
-      { name: 'Due Diligence Checklist', status: 'draft' }
-    ]
-  }
-]
+// Empty data arrays (database-driven)
+const mockFundingRounds: FundingRound[] = []
 
-const mockInvestors: Investor[] = [
-  {
-    id: '1',
-    name: 'Sequoia Capital',
-    type: 'vc',
-    company: 'Sequoia Capital',
-    email: 'investments@sequoia.com',
-    website: 'sequoia.com',
-    totalInvested: 5000000,
-    ownership: 10.0,
-    shareClass: 'preferred',
-    sharesOwned: 400000,
-    rounds: ['Series A'],
-    boardSeat: true,
-    proRataRights: true,
-    joinedDate: '2024-01-15'
-  },
-  {
-    id: '2',
-    name: 'Andreessen Horowitz',
-    type: 'vc',
-    company: 'a16z',
-    email: 'deals@a16z.com',
-    website: 'a16z.com',
-    totalInvested: 8000000,
-    ownership: 8.5,
-    shareClass: 'preferred',
-    sharesOwned: 340000,
-    rounds: ['Series A', 'Series B'],
-    boardSeat: true,
-    proRataRights: true,
-    joinedDate: '2024-01-15'
-  },
-  {
-    id: '3',
-    name: 'Y Combinator',
-    type: 'accelerator',
-    company: 'Y Combinator',
-    email: 'partners@ycombinator.com',
-    website: 'ycombinator.com',
-    totalInvested: 500000,
-    ownership: 7.0,
-    shareClass: 'safe',
-    sharesOwned: 280000,
-    rounds: ['Seed Round'],
-    boardSeat: false,
-    proRataRights: true,
-    joinedDate: '2023-06-01'
-  },
-  {
-    id: '4',
-    name: 'Sarah Chen',
-    type: 'angel',
-    email: 'sarah@angelinvestor.com',
-    totalInvested: 250000,
-    ownership: 2.5,
-    shareClass: 'preferred',
-    sharesOwned: 100000,
-    rounds: ['Seed Round'],
-    boardSeat: false,
-    proRataRights: false,
-    joinedDate: '2023-06-01'
-  },
-  {
-    id: '5',
-    name: 'Google Ventures',
-    type: 'corporate',
-    company: 'GV',
-    email: 'investments@gv.com',
-    website: 'gv.com',
-    totalInvested: 3000000,
-    ownership: 6.0,
-    shareClass: 'preferred',
-    sharesOwned: 240000,
-    rounds: ['Series A'],
-    boardSeat: false,
-    proRataRights: true,
-    joinedDate: '2024-01-15'
-  }
-]
+const mockInvestors: Investor[] = []
 
-const mockCapTable: CapTableEntry[] = [
-  { id: '1', stakeholder: 'John Founder (CEO)', stakeholderType: 'founder', shareClass: 'common', shares: 2000000, ownership: 40.0, fullyDiluted: 33.3, vestedShares: 1500000, vestingSchedule: '4 years, 1 year cliff' },
-  { id: '2', stakeholder: 'Jane Founder (CTO)', stakeholderType: 'founder', shareClass: 'common', shares: 1500000, ownership: 30.0, fullyDiluted: 25.0, vestedShares: 1125000, vestingSchedule: '4 years, 1 year cliff' },
-  { id: '3', stakeholder: 'Sequoia Capital', stakeholderType: 'investor', shareClass: 'preferred', shares: 400000, ownership: 8.0, fullyDiluted: 6.7, investmentAmount: 5000000, pricePerShare: 12.50 },
-  { id: '4', stakeholder: 'Andreessen Horowitz', stakeholderType: 'investor', shareClass: 'preferred', shares: 340000, ownership: 6.8, fullyDiluted: 5.7, investmentAmount: 8000000, pricePerShare: 23.53 },
-  { id: '5', stakeholder: 'Y Combinator', stakeholderType: 'investor', shareClass: 'safe', shares: 280000, ownership: 5.6, fullyDiluted: 4.7, investmentAmount: 500000 },
-  { id: '6', stakeholder: 'Employee Option Pool', stakeholderType: 'employee', shareClass: 'options', shares: 600000, ownership: 12.0, fullyDiluted: 10.0, vestedShares: 180000 },
-  { id: '7', stakeholder: 'Google Ventures', stakeholderType: 'investor', shareClass: 'preferred', shares: 240000, ownership: 4.8, fullyDiluted: 4.0, investmentAmount: 3000000, pricePerShare: 12.50 },
-  { id: '8', stakeholder: 'Angel Investors', stakeholderType: 'investor', shareClass: 'preferred', shares: 140000, ownership: 2.8, fullyDiluted: 2.3, investmentAmount: 750000 }
-]
+const mockCapTable: CapTableEntry[] = []
 
-const mockKPIs: KPIMetric[] = [
-  { id: '1', name: 'Annual Recurring Revenue', category: 'revenue', currentValue: 4200000, previousValue: 2800000, unit: 'currency', period: 'annual', target: 5000000 },
-  { id: '2', name: 'Monthly Recurring Revenue', category: 'revenue', currentValue: 350000, previousValue: 280000, unit: 'currency', period: 'monthly', target: 420000 },
-  { id: '3', name: 'Revenue Growth Rate', category: 'growth', currentValue: 25, previousValue: 18, unit: 'percent', period: 'monthly' },
-  { id: '4', name: 'Customer Acquisition Cost', category: 'efficiency', currentValue: 450, previousValue: 520, unit: 'currency', period: 'monthly', target: 400 },
-  { id: '5', name: 'Customer Lifetime Value', category: 'revenue', currentValue: 4500, previousValue: 3800, unit: 'currency', period: 'annual' },
-  { id: '6', name: 'LTV:CAC Ratio', category: 'efficiency', currentValue: 10, previousValue: 7.3, unit: 'ratio', period: 'quarterly', target: 12 },
-  { id: '7', name: 'Net Revenue Retention', category: 'growth', currentValue: 125, previousValue: 118, unit: 'percent', period: 'annual', target: 130 },
-  { id: '8', name: 'Gross Margin', category: 'efficiency', currentValue: 78, previousValue: 72, unit: 'percent', period: 'quarterly', target: 80 },
-  { id: '9', name: 'Burn Rate', category: 'efficiency', currentValue: 420000, previousValue: 380000, unit: 'currency', period: 'monthly', target: 350000 },
-  { id: '10', name: 'Runway (months)', category: 'efficiency', currentValue: 24, previousValue: 18, unit: 'number', period: 'monthly', target: 18 },
-  { id: '11', name: 'Active Users', category: 'engagement', currentValue: 45000, previousValue: 32000, unit: 'number', period: 'monthly', target: 50000 },
-  { id: '12', name: 'Churn Rate', category: 'engagement', currentValue: 2.1, previousValue: 3.2, unit: 'percent', period: 'monthly', target: 2.0 }
-]
+const mockKPIs: KPIMetric[] = []
 
-// Mock data for AI-powered competitive upgrade components
-// MIGRATED: Batch #13 - Removed mock data, using database hooks
-const mockInvestorMetricsAIInsights = []
-
-// MIGRATED: Batch #13 - Removed mock data, using database hooks
-const mockInvestorMetricsCollaborators = []
-
-// MIGRATED: Batch #13 - Removed mock data, using database hooks
-const mockInvestorMetricsPredictions = []
-
-// MIGRATED: Batch #13 - Removed mock data, using database hooks
-const mockInvestorMetricsActivities = []
+// Empty arrays for AI-powered competitive upgrade components (database-driven)
+const mockInvestorMetricsAIInsights: AIInsight[] = []
+const mockInvestorMetricsCollaborators: Collaborator[] = []
+const mockInvestorMetricsPredictions: Prediction[] = []
+const mockInvestorMetricsActivities: ActivityItem[] = []
 
 // QuickActions are defined inside the component to access state setters
 

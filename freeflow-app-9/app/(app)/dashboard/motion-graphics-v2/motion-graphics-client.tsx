@@ -227,7 +227,7 @@ const getTypeColor = (type: AnimationType): string => {
 const getLayerIcon = (type: LayerType) => {
   const icons: Record<LayerType, JSX.Element> = {
     video: <FileVideo className="w-4 h-4" />,
-    image: <Image className="w-4 h-4"  loading="lazy"/>,
+    image: <Image className="w-4 h-4" />,
     text: <Type className="w-4 h-4" />,
     shape: <Shapes className="w-4 h-4" />,
     audio: <Volume2 className="w-4 h-4" />,
@@ -369,10 +369,10 @@ export default function MotionGraphicsClient({
 
   // Quick actions with proper dialog handlers
   const quickActions = useMemo(() => [
-    { ...mockMotionGraphicsQuickActionsBase[0], action: () => setShowCreateDialog(true) },
-    { ...mockMotionGraphicsQuickActionsBase[1], action: () => setShowRenderDialog(true) },
-    { ...mockMotionGraphicsQuickActionsBase[2], action: () => setShowAssetsDialog(true) },
-    { ...mockMotionGraphicsQuickActionsBase[3], action: () => setShowTemplatesDialog(true) },
+    { id: '1', icon: 'Plus', label: 'New Project', description: 'Create animation', action: () => setShowCreateDialog(true) },
+    { id: '2', icon: 'Play', label: 'Render', description: 'Start render', action: () => setShowRenderDialog(true) },
+    { id: '3', icon: 'Folder', label: 'Assets', description: 'Manage assets', action: () => setShowAssetsDialog(true) },
+    { id: '4', icon: 'LayoutTemplate', label: 'Templates', description: 'Browse templates', action: () => setShowTemplatesDialog(true) },
   ], [])
 
   const stats = useMemo(() => {
@@ -395,15 +395,24 @@ export default function MotionGraphicsClient({
     })
   }, [initialAnimations, searchQuery, statusFilter])
 
+  // Presets - empty for launch (loaded from database later)
+  const presets: EffectPreset[] = []
+
+  // Layers - empty for launch (loaded from database later)
+  const layers: Layer[] = []
+
+  // Render queue - empty for launch (loaded from database later)
+  const renderQueue: RenderJob[] = []
+
   const statCards = [
-    { label: 'Total Projects', value: stats.total.toString(), change: 25.3, icon: Film, color: 'from-cyan-500 to-blue-600' },
-    { label: 'Rendered', value: stats.ready.toString(), change: 18.7, icon: CheckCircle2, color: 'from-green-500 to-emerald-600' },
-    { label: 'In Queue', value: stats.rendering.toString(), change: -5.2, icon: RefreshCw, color: 'from-blue-500 to-indigo-600' },
-    { label: 'Total Views', value: stats.totalViews.toLocaleString(), change: 32.1, icon: Eye, color: 'from-purple-500 to-pink-600' },
-    { label: 'Likes', value: stats.totalLikes.toLocaleString(), change: 28.4, icon: Heart, color: 'from-red-500 to-rose-600' },
-    { label: 'Downloads', value: stats.totalDownloads.toLocaleString(), change: 15.6, icon: Download, color: 'from-amber-500 to-orange-600' },
-    { label: 'Templates', value: initialAnimations.filter(a => a.type === 'template').length.toString(), change: 12.5, icon: Layers, color: 'from-indigo-500 to-violet-600' },
-    { label: 'Presets', value: mockPresets.length.toString(), change: 8.3, icon: Wand2, color: 'from-teal-500 to-cyan-600' }
+    { label: 'Total Projects', value: stats.total.toString(), change: 0, icon: Film, color: 'from-cyan-500 to-blue-600' },
+    { label: 'Rendered', value: stats.ready.toString(), change: 0, icon: CheckCircle2, color: 'from-green-500 to-emerald-600' },
+    { label: 'In Queue', value: stats.rendering.toString(), change: 0, icon: RefreshCw, color: 'from-blue-500 to-indigo-600' },
+    { label: 'Total Views', value: stats.totalViews.toLocaleString(), change: 0, icon: Eye, color: 'from-purple-500 to-pink-600' },
+    { label: 'Likes', value: stats.totalLikes.toLocaleString(), change: 0, icon: Heart, color: 'from-red-500 to-rose-600' },
+    { label: 'Downloads', value: stats.totalDownloads.toLocaleString(), change: 0, icon: Download, color: 'from-amber-500 to-orange-600' },
+    { label: 'Templates', value: initialAnimations.filter(a => a.type === 'template').length.toString(), change: 0, icon: Layers, color: 'from-indigo-500 to-violet-600' },
+    { label: 'Presets', value: presets.length.toString(), change: 0, icon: Wand2, color: 'from-teal-500 to-cyan-600' }
   ]
 
   // Fetch projects from Supabase
@@ -513,7 +522,7 @@ export default function MotionGraphicsClient({
 
       if (error) throw error
 
-      toast.info(`Rendering started: "${project.name}" added to render queue`)
+      toast.info(`Rendering started: "${projectName}" added to render queue`)
       fetchExports()
     } catch (error) {
       console.error('Error starting render:', error)
@@ -943,7 +952,7 @@ export default function MotionGraphicsClient({
                   </div>
                   <div>
                     <h2 className="text-2xl font-bold">Animation Timeline</h2>
-                    <p className="text-purple-100">{mockLayers.length} layers • {formatDuration(8.5)} duration</p>
+                    <p className="text-purple-100">{layers.length} layers • {formatDuration(8.5)} duration</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
@@ -1036,7 +1045,7 @@ export default function MotionGraphicsClient({
                     </div>
 
                     <div className="space-y-1">
-                      {mockLayers.map((layer) => (
+                      {layers.length > 0 ? layers.map((layer) => (
                         <div key={layer.id} className="flex items-center gap-2 h-10">
                           <div className="w-40 flex items-center gap-2 text-sm">
                             <Button size="icon" variant="ghost" className="w-6 h-6" onClick={() => {
@@ -1068,7 +1077,12 @@ export default function MotionGraphicsClient({
                             />
                           </div>
                         </div>
-                      ))}
+                      )) : (
+                        <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                          <Layers className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                          <p className="text-sm">No layers yet. Add a layer to get started.</p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </CardContent>
@@ -1133,7 +1147,7 @@ export default function MotionGraphicsClient({
                   </div>
                   <div>
                     <h2 className="text-2xl font-bold">Effect Presets</h2>
-                    <p className="text-green-100">{mockPresets.length} presets • Ready to use</p>
+                    <p className="text-green-100">{presets.length} presets • Ready to use</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
@@ -1178,7 +1192,7 @@ export default function MotionGraphicsClient({
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {mockPresets.map((preset) => (
+              {presets.length > 0 ? presets.map((preset) => (
                 <Card key={preset.id} className="border-0 shadow-sm hover:shadow-md transition-all cursor-pointer">
                   <CardContent className="p-4">
                     <div className="aspect-video bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg mb-3 flex items-center justify-center">
@@ -1192,7 +1206,19 @@ export default function MotionGraphicsClient({
                     </div>
                   </CardContent>
                 </Card>
-              ))}
+              )) : (
+                <Card className="col-span-full border-0 shadow-sm">
+                  <CardContent className="p-8 text-center">
+                    <Wand2 className="w-12 h-12 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No presets yet</h3>
+                    <p className="text-gray-500 dark:text-gray-400 mb-4">Create your first effect preset to get started</p>
+                    <Button onClick={() => setShowCreatePresetDialog(true)}>
+                      <Plus className="w-4 h-4 mr-2" />
+                      Create Preset
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           </TabsContent>
 
@@ -1207,12 +1233,12 @@ export default function MotionGraphicsClient({
                   </div>
                   <div>
                     <h2 className="text-2xl font-bold">Render Queue</h2>
-                    <p className="text-orange-100">{mockRenderQueue.length} jobs • {mockRenderQueue.filter(j => j.status === 'rendering').length} rendering</p>
+                    <p className="text-orange-100">{renderQueue.length} jobs • {renderQueue.filter(j => j.status === 'rendering').length} rendering</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="text-right">
-                    <p className="text-2xl font-bold">{mockRenderQueue.filter(j => j.status === 'completed').length}</p>
+                    <p className="text-2xl font-bold">{renderQueue.filter(j => j.status === 'completed').length}</p>
                     <p className="text-orange-100 text-sm">Completed</p>
                   </div>
                   <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={() => {
@@ -1275,89 +1301,101 @@ export default function MotionGraphicsClient({
 
             <Card className="border-0 shadow-sm">
               <CardContent className="p-0">
-                <div className="divide-y">
-                  {mockRenderQueue.map((job) => (
-                    <div key={job.id} className="p-4 flex items-center gap-4">
-                      <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
-                        job.status === 'rendering' ? 'bg-blue-100 text-blue-600' :
-                        job.status === 'completed' ? 'bg-green-100 text-green-600' :
-                        job.status === 'failed' ? 'bg-red-100 text-red-600' :
-                        'bg-gray-100 text-gray-600'
-                      }`}>
-                        {job.status === 'rendering' ? <RefreshCw className="w-6 h-6 animate-spin" /> :
-                         job.status === 'completed' ? <CheckCircle2 className="w-6 h-6" /> :
-                         job.status === 'failed' ? <XCircle className="w-6 h-6" /> :
-                         <Clock className="w-6 h-6" />}
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="font-medium">{job.animationTitle}</h4>
-                        <div className="flex items-center gap-4 text-sm text-gray-500">
-                          <span className="uppercase">{job.format}</span>
-                          <span>{job.resolution}</span>
-                          {job.outputSize && <span>{formatFileSize(job.outputSize)}</span>}
+                {renderQueue.length > 0 ? (
+                  <div className="divide-y">
+                    {renderQueue.map((job) => (
+                      <div key={job.id} className="p-4 flex items-center gap-4">
+                        <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
+                          job.status === 'rendering' ? 'bg-blue-100 text-blue-600' :
+                          job.status === 'completed' ? 'bg-green-100 text-green-600' :
+                          job.status === 'failed' ? 'bg-red-100 text-red-600' :
+                          'bg-gray-100 text-gray-600'
+                        }`}>
+                          {job.status === 'rendering' ? <RefreshCw className="w-6 h-6 animate-spin" /> :
+                           job.status === 'completed' ? <CheckCircle2 className="w-6 h-6" /> :
+                           job.status === 'failed' ? <XCircle className="w-6 h-6" /> :
+                           <Clock className="w-6 h-6" />}
                         </div>
-                        {job.status === 'rendering' && (
-                          <div className="mt-2">
-                            <div className="flex items-center justify-between text-xs mb-1">
-                              <span>Rendering...</span>
-                              <span>{job.progress}%</span>
-                            </div>
-                            <Progress value={job.progress} className="h-2" />
+                        <div className="flex-1">
+                          <h4 className="font-medium">{job.animationTitle}</h4>
+                          <div className="flex items-center gap-4 text-sm text-gray-500">
+                            <span className="uppercase">{job.format}</span>
+                            <span>{job.resolution}</span>
+                            {job.outputSize && <span>{formatFileSize(job.outputSize)}</span>}
                           </div>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {job.status === 'queued' && (
-                          <Button size="sm" variant="outline" onClick={() => {
-                            toast.promise(
-                              fetch(`/api/motion-graphics/render-queue/${job.id}/start`, { method: 'POST' }).then(res => {
-                                if (!res.ok) throw new Error('Failed')
-                              }),
-                              {
-                                loading: `Starting render for "${job.animationTitle}"...`,
-                                success: `Render started for "${job.animationTitle}"`,
-                                error: 'Failed to start render'
-                              }
-                            )
-                          }}>
-                            <Play className="w-4 h-4" />
-                          </Button>
-                        )}
-                        {job.status === 'rendering' && (
-                          <Button size="sm" variant="outline" onClick={() => {
-                            toast.promise(
-                              fetch(`/api/motion-graphics/render-queue/${job.id}/pause`, { method: 'POST' }).then(res => {
-                                if (!res.ok) throw new Error('Failed')
-                              }),
-                              {
-                                loading: `Pausing render for "${job.animationTitle}"...`,
-                                success: `Render paused for "${job.animationTitle}"`,
-                                error: 'Failed to pause render'
-                              }
-                            )
-                          }}>
-                            <Pause className="w-4 h-4" />
-                          </Button>
-                        )}
-                        {job.status === 'completed' && (
-                          <Button size="sm" onClick={() => {
+                          {job.status === 'rendering' && (
+                            <div className="mt-2">
+                              <div className="flex items-center justify-between text-xs mb-1">
+                                <span>Rendering...</span>
+                                <span>{job.progress}%</span>
+                              </div>
+                              <Progress value={job.progress} className="h-2" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {job.status === 'queued' && (
+                            <Button size="sm" variant="outline" onClick={() => {
+                              toast.promise(
+                                fetch(`/api/motion-graphics/render-queue/${job.id}/start`, { method: 'POST' }).then(res => {
+                                  if (!res.ok) throw new Error('Failed')
+                                }),
+                                {
+                                  loading: `Starting render for "${job.animationTitle}"...`,
+                                  success: `Render started for "${job.animationTitle}"`,
+                                  error: 'Failed to start render'
+                                }
+                              )
+                            }}>
+                              <Play className="w-4 h-4" />
+                            </Button>
+                          )}
+                          {job.status === 'rendering' && (
+                            <Button size="sm" variant="outline" onClick={() => {
+                              toast.promise(
+                                fetch(`/api/motion-graphics/render-queue/${job.id}/pause`, { method: 'POST' }).then(res => {
+                                  if (!res.ok) throw new Error('Failed')
+                                }),
+                                {
+                                  loading: `Pausing render for "${job.animationTitle}"...`,
+                                  success: `Render paused for "${job.animationTitle}"`,
+                                  error: 'Failed to pause render'
+                                }
+                              )
+                            }}>
+                              <Pause className="w-4 h-4" />
+                            </Button>
+                          )}
+                          {job.status === 'completed' && (
+                            <Button size="sm" onClick={() => {
+                              setSelectedRenderJobId(job.id)
+                              setShowDownloadDialog(true)
+                            }}>
+                              <Download className="w-4 h-4 mr-2" />
+                              Download
+                            </Button>
+                          )}
+                          <Button size="sm" variant="ghost" onClick={() => {
                             setSelectedRenderJobId(job.id)
-                            setShowDownloadDialog(true)
+                            setShowDeleteJobDialog(true)
                           }}>
-                            <Download className="w-4 h-4 mr-2" />
-                            Download
+                            <Trash2 className="w-4 h-4" />
                           </Button>
-                        )}
-                        <Button size="sm" variant="ghost" onClick={() => {
-                          setSelectedRenderJobId(job.id)
-                          setShowDeleteJobDialog(true)
-                        }}>
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-8 text-center">
+                    <Clapperboard className="w-12 h-12 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
+                    <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No render jobs</h3>
+                    <p className="text-gray-500 dark:text-gray-400 mb-4">Add a project to the render queue to get started</p>
+                    <Button onClick={() => setShowRenderDialog(true)}>
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add to Queue
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -1973,18 +2011,18 @@ export default function MotionGraphicsClient({
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockMotionGraphicsAIInsights}
+              insights={[]}
               title="Motion Graphics Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockMotionGraphicsCollaborators}
+              collaborators={[]}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockMotionGraphicsPredictions}
+              predictions={[]}
               title="Production Forecasts"
             />
           </div>
@@ -1992,7 +2030,7 @@ export default function MotionGraphicsClient({
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockMotionGraphicsActivities}
+            activities={[]}
             title="Studio Activity"
             maxItems={5}
           />
@@ -2358,7 +2396,7 @@ export default function MotionGraphicsClient({
                 </select>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 max-h-[400px] overflow-y-auto">
-                {mockPresets.map((preset) => (
+                {presets.length > 0 ? presets.map((preset) => (
                   <div
                     key={preset.id}
                     className="border rounded-lg overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group"
@@ -2371,7 +2409,12 @@ export default function MotionGraphicsClient({
                       <p className="text-xs text-gray-500">{preset.category}</p>
                     </div>
                   </div>
-                ))}
+                )) : (
+                  <div className="col-span-full text-center py-8">
+                    <LayoutTemplate className="w-12 h-12 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
+                    <p className="text-gray-500 dark:text-gray-400">No templates available yet</p>
+                  </div>
+                )}
               </div>
             </div>
             <div className="flex justify-between">

@@ -129,32 +129,48 @@ interface LineItem {
   amount: number
 }
 
-// Enhanced Competitive Upgrade Mock Data - Invoices Context
-const mockInvoicesAIInsights = [
-  { id: '1', type: 'warning' as const, title: 'Overdue Invoices', description: '5 invoices are past due totaling $12,450. Consider sending reminders.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Collections' },
-  { id: '2', type: 'success' as const, title: 'Payment Trend', description: 'Average payment time reduced by 3 days this month. Great improvement!', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Performance' },
-  { id: '3', type: 'info' as const, title: 'Revenue Forecast', description: 'Projected monthly revenue: $45,000 based on pending invoices.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Forecast' },
-]
+// Production-ready empty arrays - data will come from real API/database
+// AI Insights will be populated by real AI analysis of invoice data
+const invoicesAIInsights: Array<{
+  id: string
+  type: 'warning' | 'success' | 'info' | 'error'
+  title: string
+  description: string
+  priority: 'high' | 'medium' | 'low'
+  timestamp: string
+  category: string
+}> = []
 
-const mockInvoicesCollaborators = [
-  { id: '1', name: 'Jennifer Park', avatar: '/avatars/jennifer.jpg', status: 'online' as const, role: 'Finance Manager', lastActive: 'Now' },
-  { id: '2', name: 'Robert Taylor', avatar: '/avatars/robert.jpg', status: 'online' as const, role: 'Accountant', lastActive: '5m ago' },
-  { id: '3', name: 'Maria Santos', avatar: '/avatars/maria.jpg', status: 'away' as const, role: 'Billing Specialist', lastActive: '25m ago' },
-  { id: '4', name: 'Kevin O\'Brien', avatar: '/avatars/kevin.jpg', status: 'offline' as const, role: 'Controller', lastActive: '2h ago' },
-]
+// Collaborators will come from real team/user data
+const invoicesCollaborators: Array<{
+  id: string
+  name: string
+  avatar: string
+  status: 'online' | 'away' | 'offline'
+  role: string
+  lastActive: string
+}> = []
 
-const mockInvoicesPredictions = [
-  { id: '1', label: 'Collection Rate', current: 87, target: 95, predicted: 92, confidence: 82, trend: 'up' as const },
-  { id: '2', label: 'Avg Payment Days', current: 18, target: 14, predicted: 15, confidence: 75, trend: 'down' as const },
-  { id: '3', label: 'Monthly Revenue', current: 38500, target: 45000, predicted: 42000, confidence: 80, trend: 'up' as const },
-]
+// Predictions will be generated from real invoice analytics
+const invoicesPredictions: Array<{
+  id: string
+  label: string
+  current: number
+  target: number
+  predicted: number
+  confidence: number
+  trend: 'up' | 'down' | 'stable'
+}> = []
 
-const mockInvoicesActivities = [
-  { id: '1', user: 'Jennifer Park', action: 'approved', target: 'Invoice INV-2024-089', timestamp: '5m ago', type: 'success' as const },
-  { id: '2', user: 'Robert Taylor', action: 'sent', target: 'payment reminder to 3 clients', timestamp: '15m ago', type: 'info' as const },
-  { id: '3', user: 'Maria Santos', action: 'created', target: 'Invoice INV-2024-090', timestamp: '40m ago', type: 'info' as const },
-  { id: '4', user: 'System', action: 'received', target: 'payment of $4,500 from TechCorp', timestamp: '1h ago', type: 'success' as const },
-]
+// Activities will come from real audit log/activity tracking
+const invoicesActivities: Array<{
+  id: string
+  user: string
+  action: string
+  target: string
+  timestamp: string
+  type: 'success' | 'info' | 'warning' | 'error'
+}> = []
 
 // Quick actions will be defined inside the component to access handlers
 
@@ -2146,7 +2162,7 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
           {/* AI Insights Panel */}
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockInvoicesAIInsights}
+              insights={invoicesAIInsights}
               title="Invoice Intelligence"
               onInsightAction={(insight) => {
                 // Handle insight actions based on type
@@ -2169,11 +2185,11 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
           {/* Team Collaboration & Activity */}
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockInvoicesCollaborators}
+              collaborators={invoicesCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockInvoicesPredictions}
+              predictions={invoicesPredictions}
               title="Revenue Forecasts"
             />
           </div>
@@ -2182,7 +2198,7 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
         {/* Activity Feed & Quick Actions */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockInvoicesActivities}
+            activities={invoicesActivities}
             title="Billing Activity"
             maxItems={5}
           />

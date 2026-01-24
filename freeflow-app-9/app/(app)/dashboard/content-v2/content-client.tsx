@@ -1,8 +1,7 @@
 'use client'
 
-import { createClient } from '@/lib/supabase/client'
-
 import { useState, useMemo, useEffect } from 'react'
+import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -30,6 +29,13 @@ import {
   ActivityFeed,
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
+
+// Import types for properly typed empty arrays
+import type { AIInsight, Collaborator, Prediction } from '@/components/ui/competitive-upgrades'
+import type { ActivityItem as ExtendedActivityItem } from '@/components/ui/competitive-upgrades-extended'
+
+// Initialize Supabase client
+const supabase = createClient()
 
 
 
@@ -225,14 +231,14 @@ const defaultWebhookForm: WebhookFormState = {
   isActive: true
 }
 
-// MIGRATED: Batch #13 - Removed mock data, using database hooks
-// Content types, locales, and other data now managed by database hooks
-const mockContentTypes: ContentTypeModel[] = []
-const mockLocales: Locale[] = []
-const mockContentAIInsights: any[] = []
-const mockContentCollaborators: any[] = []
-const mockContentPredictions: any[] = []
-const mockContentActivities: any[] = []
+// MIGRATED: All mock data removed - using database hooks for real data
+// Content types, locales, and other configuration data managed by database
+const contentTypes: ContentTypeModel[] = []
+const locales: Locale[] = []
+const contentAIInsights: AIInsight[] = []
+const contentCollaborators: Collaborator[] = []
+const contentPredictions: Prediction[] = []
+const contentActivities: ExtendedActivityItem[] = []
 
 export default function ContentClient() {
 
@@ -383,8 +389,8 @@ export default function ContentClient() {
     const scheduledEntries = entries.filter(e => e.status === 'scheduled').length
     const totalAssets = assets.length
     const totalAssetSize = assets.reduce((sum, a) => sum + a.size, 0)
-    const contentTypes = mockContentTypes.length
-    const locales = mockLocales.length
+    const totalContentTypes = contentTypes.length
+    const totalLocales = locales.length
     const webhooksActive = webhooks.filter(w => w.isActive).length
     const totalViews = entries.reduce((sum, e) => sum + (e.view_count || 0), 0)
 
@@ -395,8 +401,8 @@ export default function ContentClient() {
       scheduledEntries,
       totalAssets,
       totalAssetSize,
-      contentTypes,
-      locales,
+      contentTypes: totalContentTypes,
+      locales: totalLocales,
       webhooksActive,
       totalViews
     }
@@ -1228,7 +1234,7 @@ export default function ContentClient() {
             </div>
 
             <div className="grid gap-4">
-              {mockContentTypes.length === 0 ? (
+              {contentTypes.length === 0 ? (
                 <div className="text-center py-12">
                   <Layers className="w-12 h-12 mx-auto text-gray-400 mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No content types configured</h3>
@@ -1239,7 +1245,7 @@ export default function ContentClient() {
                   </Button>
                 </div>
               ) : (
-                mockContentTypes.map(ct => (
+                contentTypes.map(ct => (
                   <div key={ct.id} className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border dark:border-gray-700">
                     <div className="flex items-start justify-between">
                       <div className="flex items-start gap-4">
@@ -1299,7 +1305,7 @@ export default function ContentClient() {
             </div>
 
             <div className="grid gap-4">
-              {mockLocales.length === 0 ? (
+              {locales.length === 0 ? (
                 <div className="text-center py-12">
                   <GlobeIcon className="w-12 h-12 mx-auto text-gray-400 mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No locales configured</h3>
@@ -1310,7 +1316,7 @@ export default function ContentClient() {
                   </Button>
                 </div>
               ) : (
-                mockLocales.map(locale => (
+                locales.map(locale => (
                   <div key={locale.code} className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border dark:border-gray-700">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
@@ -1576,18 +1582,18 @@ export default function ContentClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockContentAIInsights}
+              insights={contentAIInsights}
               title="Content Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockContentCollaborators}
+              collaborators={contentCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockContentPredictions}
+              predictions={contentPredictions}
               title="Content Forecasts"
             />
           </div>
@@ -1595,7 +1601,7 @@ export default function ContentClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockContentActivities}
+            activities={contentActivities}
             title="Content Activity"
             maxItems={5}
           />

@@ -176,17 +176,12 @@ interface Registration {
   createdAt: string
 }
 
-// MIGRATED: Batch #13 - Removed mock data, using database hooks
-// Mock Data - now empty, using database hooks for real data
-const mockEvents: Event[] = []
-
-// MIGRATED: Batch #13 - Empty mock data arrays, using database hooks
-const mockAttendees: Attendee[] = []
-
-const mockRegistrations: Registration[] = []
+// Empty typed arrays - using database hooks for real data
+const attendees: Attendee[] = []
+const registrations: Registration[] = []
 
 export default function EventsClient() {
-  // Define adapter variables locally (removed mock data imports)
+  // Define adapter variables locally
   const eventsAIInsights: any[] = []
   const eventsCollaborators: any[] = []
   const eventsPredictions: any[] = []
@@ -441,7 +436,6 @@ export default function EventsClient() {
     }
   }
 
-  // MIGRATED: Batch #13 - Use database hooks instead of mock data
   // Stats calculations
   const stats = useMemo(() => {
     const totalEvents = supabaseEvents?.length || 0
@@ -465,7 +459,6 @@ export default function EventsClient() {
     }
   }, [supabaseEvents])
 
-  // MIGRATED: Batch #13 - Use database hooks instead of mock data
   // Filtered events
   const filteredEvents = useMemo(() => {
     return (supabaseEvents || []).filter(event => {
@@ -509,11 +502,10 @@ export default function EventsClient() {
   }
 
   const handleExportAttendees = () => {
-    // MIGRATED: Batch #13 - Use database hooks instead of mock data
     // Export attendees as CSV
     const csvContent = [
       ['Name', 'Email', 'Ticket Type', 'Price', 'Status', 'Order Number', 'Registered At'].join(','),
-      ...(mockAttendees || []).map(a => [
+      ...attendees.map(a => [
         `"${a.name}"`,
         a.email,
         `"${a.ticketType}"`,
@@ -1138,7 +1130,7 @@ export default function EventsClient() {
                       <p className="text-sm text-purple-100">Checked In</p>
                     </div>
                     <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                      <p className="text-2xl font-bold">{(mockAttendees || []).filter(a => a.status === 'cancelled').length}</p>
+                      <p className="text-2xl font-bold">{attendees.filter(a => a.status === 'cancelled').length}</p>
                       <p className="text-sm text-purple-100">Cancelled</p>
                     </div>
                     <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
@@ -1207,8 +1199,7 @@ export default function EventsClient() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                      {/* MIGRATED: Batch #13 - Use database hooks instead of mock data */}
-                      {(mockAttendees || []).map(attendee => (
+                                            {attendees.map(attendee => (
                         <tr key={attendee.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center gap-3">
@@ -1263,8 +1254,7 @@ export default function EventsClient() {
             {/* Orders Tab */}
             <TabsContent value="orders" className="space-y-4">
               <div className="grid gap-4">
-                {/* MIGRATED: Batch #13 - Use database hooks instead of mock data */}
-                {(mockRegistrations || []).map(order => (
+                                {registrations.map(order => (
                   <Card key={order.id} className="bg-white dark:bg-gray-800 hover:shadow-md transition-shadow">
                     <CardContent className="p-6">
                       <div className="flex items-start justify-between">
@@ -1412,8 +1402,7 @@ export default function EventsClient() {
                       +23% vs last month
                     </div>
                     <div className="mt-4 space-y-2">
-                      {/* MIGRATED: Batch #13 - Use database hooks instead of mock data */}
-                      {(supabaseEvents || []).slice(0, 3).map(event => (
+                                            {(supabaseEvents || []).slice(0, 3).map(event => (
                         <div key={event.id} className="flex items-center justify-between text-sm">
                           <span className="text-gray-600 dark:text-gray-400 truncate">{event.name}</span>
                           <span className="font-medium">--</span>
@@ -1439,18 +1428,17 @@ export default function EventsClient() {
                       +18% vs last month
                     </div>
                     <div className="mt-4 space-y-3">
-                      {/* MIGRATED: Batch #13 - Use database hooks instead of mock data */}
-                      <div className="flex items-center justify-between">
+                                            <div className="flex items-center justify-between">
                         <span className="text-sm text-gray-500">Registered</span>
-                        <span className="font-medium">{(mockAttendees || []).filter(a => a.status === 'registered').length}</span>
+                        <span className="font-medium">{attendees.filter(a => a.status === 'registered').length}</span>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-gray-500">Checked In</span>
-                        <span className="font-medium">{(mockAttendees || []).filter(a => a.status === 'checked-in').length}</span>
+                        <span className="font-medium">{attendees.filter(a => a.status === 'checked-in').length}</span>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-gray-500">Cancelled</span>
-                        <span className="font-medium">{(mockAttendees || []).filter(a => a.status === 'cancelled').length}</span>
+                        <span className="font-medium">{attendees.filter(a => a.status === 'cancelled').length}</span>
                       </div>
                     </div>
                   </CardContent>
@@ -1465,8 +1453,7 @@ export default function EventsClient() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {/* MIGRATED: Batch #13 - Use database hooks instead of mock data */}
-                      {(supabaseEvents?.[0]?.id ? [{ id: 't1', name: 'Loading...', sold: 0, quantity: 1 }] : []).map(ticket => (
+                                            {(supabaseEvents?.[0]?.id ? [{ id: 't1', name: 'Loading...', sold: 0, quantity: 1 }] : []).map(ticket => (
                         <div key={ticket.id}>
                           <div className="flex items-center justify-between mb-1">
                             <span className="text-sm font-medium">{ticket.name}</span>
@@ -1513,8 +1500,7 @@ export default function EventsClient() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      {/* MIGRATED: Batch #13 - Use database hooks instead of mock data */}
-                      {['conference', 'workshop', 'networking', 'webinar', 'festival'].map(type => {
+                                            {['conference', 'workshop', 'networking', 'webinar', 'festival'].map(type => {
                         const count = (supabaseEvents || []).filter(e => e.event_type === type).length
                         return (
                           <div key={type} className="flex items-center gap-3">
@@ -1537,8 +1523,7 @@ export default function EventsClient() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      {/* MIGRATED: Batch #13 - Use database hooks instead of mock data */}
-                      {(supabaseEvents || [])
+                                            {(supabaseEvents || [])
                         .sort((a, b) => (b.current_attendees || 0) - (a.current_attendees || 0))
                         .slice(0, 4)
                         .map((event, i) => (
@@ -2689,8 +2674,7 @@ export default function EventsClient() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {/* MIGRATED: Batch #13 - Use database hooks instead of mock data */}
-                  <SelectItem value="all">All Attendees ({(mockAttendees || []).length})</SelectItem>
+                                    <SelectItem value="all">All Attendees ({attendees.length})</SelectItem>
                   <SelectItem value="selected">Selected Only</SelectItem>
                 </SelectContent>
               </Select>
@@ -2721,8 +2705,8 @@ export default function EventsClient() {
                 return
               }
               const recipientEmails = emailRecipients === 'all'
-                ? (mockAttendees || []).map(a => a.email)
-                : [mockAttendees[0]?.email].filter(Boolean)
+                ? attendees.map(a => a.email)
+                : [attendees[0]?.email].filter(Boolean)
 
               // Try API first, fallback to mailto
               toast.loading(`Sending email to ${recipientEmails.length} recipient(s)...`)
@@ -2857,8 +2841,7 @@ export default function EventsClient() {
                 <Card className="p-4">
                   <h4 className="font-semibold mb-3">Event Performance</h4>
                   <div className="space-y-3">
-                    {/* MIGRATED: Batch #13 - Use database hooks instead of mock data */}
-                    {(supabaseEvents || []).slice(0, 5).map(event => (
+                                        {(supabaseEvents || []).slice(0, 5).map(event => (
                       <div key={event.id} className="flex items-center justify-between">
                         <span className="text-sm truncate flex-1">{event.name}</span>
                         <span className="text-sm font-medium">{event.current_attendees} registrations</span>
@@ -2952,7 +2935,7 @@ export default function EventsClient() {
                   ['Registrations', stats.totalRegistrations],
                   ['Revenue', stats.totalRevenue],
                   ['Check-in Rate', `${Math.round((stats.checkedIn / stats.totalAttendees) * 100) || 0}%`],
-                  ...mockEvents.map(e => [e.title, `${e.totalRegistrations} registrations`])
+                  ...(supabaseEvents || []).map(e => [e.name, `${e.current_attendees || 0} registrations`])
                 ],
                 trends: [
                   ['Period', 'Growth'],

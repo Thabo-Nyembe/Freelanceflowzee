@@ -168,79 +168,22 @@ interface SystemMetric {
   status: 'good' | 'warning' | 'critical'
 }
 
-// Mock Data
-const mockResources: SystemResource[] = [
-  { id: '1', name: 'Primary Database', type: 'database', status: 'healthy', endpoint: 'postgres://db.freeflow.io:5432', latency: 12, uptime: 99.99, lastChecked: '2024-12-23T10:30:00Z' },
-  { id: '2', name: 'Redis Cache', type: 'cache', status: 'healthy', endpoint: 'redis://cache.freeflow.io:6379', latency: 2, uptime: 99.95, lastChecked: '2024-12-23T10:30:00Z' },
-  { id: '3', name: 'API Gateway', type: 'api', status: 'healthy', endpoint: 'https://api.freeflow.io', latency: 45, uptime: 99.98, lastChecked: '2024-12-23T10:30:00Z' },
-  { id: '4', name: 'File Storage', type: 'storage', status: 'warning', endpoint: 's3://freeflow-assets', latency: 85, uptime: 99.85, lastChecked: '2024-12-23T10:28:00Z' },
-  { id: '5', name: 'Message Queue', type: 'queue', status: 'healthy', endpoint: 'amqp://mq.freeflow.io:5672', latency: 8, uptime: 99.92, lastChecked: '2024-12-23T10:30:00Z' },
-  { id: '6', name: 'Analytics DB', type: 'database', status: 'healthy', endpoint: 'clickhouse://analytics.freeflow.io:8123', latency: 25, uptime: 99.90, lastChecked: '2024-12-23T10:30:00Z' },
-]
+// Empty data arrays - real data should be fetched from Supabase
+const mockResources: SystemResource[] = []
 
-const mockAdminUsers: AdminUser[] = [
-  { id: '1', name: 'John Smith', email: 'john@freeflow.io', role: 'super_admin', status: 'active', lastLogin: '2024-12-23T09:15:00Z', mfaEnabled: true, permissions: ['all'] },
-  { id: '2', name: 'Sarah Johnson', email: 'sarah@freeflow.io', role: 'admin', status: 'active', lastLogin: '2024-12-23T08:45:00Z', mfaEnabled: true, permissions: ['users', 'settings', 'reports'] },
-  { id: '3', name: 'Mike Chen', email: 'mike@freeflow.io', role: 'moderator', status: 'active', lastLogin: '2024-12-22T16:30:00Z', mfaEnabled: false, permissions: ['users.read', 'content.moderate'] },
-  { id: '4', name: 'Emily Davis', email: 'emily@freeflow.io', role: 'viewer', status: 'pending', lastLogin: '', mfaEnabled: false, permissions: ['dashboard.view', 'reports.view'] },
-  { id: '5', name: 'Alex Thompson', email: 'alex@freeflow.io', role: 'admin', status: 'suspended', lastLogin: '2024-12-20T11:00:00Z', mfaEnabled: true, permissions: ['users', 'settings'] },
-]
+const mockAdminUsers: AdminUser[] = []
 
-const mockAuditLogs: AuditLog[] = [
-  { id: '1', action: 'user.login', actor: 'john@freeflow.io', resource: 'auth', details: 'Successful login via SSO', ipAddress: '192.168.1.100', timestamp: '2024-12-23T10:25:00Z', severity: 'info' },
-  { id: '2', action: 'settings.update', actor: 'sarah@freeflow.io', resource: 'billing.stripe_key', details: 'Updated Stripe API key', ipAddress: '192.168.1.105', timestamp: '2024-12-23T10:20:00Z', severity: 'warning' },
-  { id: '3', action: 'user.create', actor: 'john@freeflow.io', resource: 'users', details: 'Created new admin user: emily@freeflow.io', ipAddress: '192.168.1.100', timestamp: '2024-12-23T10:15:00Z', severity: 'info' },
-  { id: '4', action: 'permission.revoke', actor: 'system', resource: 'users.alex', details: 'Auto-suspended due to failed MFA attempts', ipAddress: 'system', timestamp: '2024-12-23T10:10:00Z', severity: 'critical' },
-  { id: '5', action: 'backup.complete', actor: 'system', resource: 'database', details: 'Daily backup completed successfully', ipAddress: 'system', timestamp: '2024-12-23T06:00:00Z', severity: 'info' },
-  { id: '6', action: 'api.rate_limit', actor: 'api-key-xyz123', resource: 'api/v2/users', details: 'Rate limit exceeded (1000/min)', ipAddress: '203.45.67.89', timestamp: '2024-12-23T05:45:00Z', severity: 'warning' },
-  { id: '7', action: 'deploy.success', actor: 'ci/cd', resource: 'production', details: 'Deployed v2.4.1 to production', ipAddress: 'github-actions', timestamp: '2024-12-23T04:00:00Z', severity: 'info' },
-]
+const mockAuditLogs: AuditLog[] = []
 
-const mockMetrics: SystemMetric[] = [
-  { name: 'CPU Usage', value: 42, unit: '%', trend: 'stable', status: 'good' },
-  { name: 'Memory Usage', value: 68, unit: '%', trend: 'up', status: 'warning' },
-  { name: 'Disk Usage', value: 55, unit: '%', trend: 'up', status: 'good' },
-  { name: 'Network I/O', value: 125, unit: 'MB/s', trend: 'stable', status: 'good' },
-  { name: 'Active Connections', value: 1247, unit: '', trend: 'up', status: 'good' },
-  { name: 'Request Rate', value: 3420, unit: 'req/min', trend: 'up', status: 'good' },
-]
+const mockMetrics: SystemMetric[] = []
 
-const mockJobs: ScheduledJob[] = [
-  { id: '1', name: 'Database Backup', description: 'Daily automated database backup', schedule: '0 2 * * *', lastRun: '2024-12-23T02:00:00Z', nextRun: '2024-12-24T02:00:00Z', status: 'completed', duration: 245, successRate: 99.8, type: 'cron' },
-  { id: '2', name: 'Report Generation', description: 'Weekly analytics report', schedule: '0 6 * * 1', lastRun: '2024-12-23T06:00:00Z', nextRun: '2024-12-30T06:00:00Z', status: 'completed', duration: 180, successRate: 100, type: 'cron' },
-  { id: '3', name: 'Cache Cleanup', description: 'Hourly cache invalidation', schedule: '0 * * * *', lastRun: '2024-12-23T10:00:00Z', nextRun: '2024-12-23T11:00:00Z', status: 'running', duration: 15, successRate: 99.5, type: 'cron' },
-  { id: '4', name: 'Email Queue Processor', description: 'Process pending emails', schedule: '*/5 * * * *', lastRun: '2024-12-23T10:25:00Z', nextRun: '2024-12-23T10:30:00Z', status: 'completed', duration: 8, successRate: 98.2, type: 'cron' },
-  { id: '5', name: 'Webhook Sync', description: 'Sync data from external services', schedule: 'webhook', lastRun: '2024-12-23T09:45:00Z', nextRun: '-', status: 'scheduled', duration: 45, successRate: 97.5, type: 'webhook' },
-  { id: '6', name: 'Data Migration', description: 'Manual data migration task', schedule: 'manual', lastRun: '2024-12-22T14:30:00Z', nextRun: '-', status: 'paused', duration: 3600, successRate: 100, type: 'manual' },
-]
+const mockJobs: ScheduledJob[] = []
 
-const mockFeatureFlags: FeatureFlag[] = [
-  { id: '1', key: 'new_dashboard', name: 'New Dashboard UI', description: 'Enable the redesigned dashboard', enabled: true, environment: 'production', rolloutPercentage: 100, createdAt: '2024-11-01T00:00:00Z', updatedAt: '2024-12-20T00:00:00Z' },
-  { id: '2', key: 'ai_assistant_v2', name: 'AI Assistant V2', description: 'New AI-powered assistant features', enabled: true, environment: 'production', rolloutPercentage: 50, createdAt: '2024-12-01T00:00:00Z', updatedAt: '2024-12-23T00:00:00Z' },
-  { id: '3', key: 'dark_mode_auto', name: 'Auto Dark Mode', description: 'Automatic dark mode based on system preference', enabled: true, environment: 'production', rolloutPercentage: 100, createdAt: '2024-10-15T00:00:00Z', updatedAt: '2024-10-15T00:00:00Z' },
-  { id: '4', key: 'real_time_collab', name: 'Real-time Collaboration', description: 'Enable real-time collaboration features', enabled: false, environment: 'staging', rolloutPercentage: 0, createdAt: '2024-12-15T00:00:00Z', updatedAt: '2024-12-23T00:00:00Z' },
-  { id: '5', key: 'advanced_analytics', name: 'Advanced Analytics', description: 'Premium analytics dashboard', enabled: true, environment: 'staging', rolloutPercentage: 25, createdAt: '2024-12-10T00:00:00Z', updatedAt: '2024-12-22T00:00:00Z' },
-  { id: '6', key: 'beta_exports', name: 'Beta Export Formats', description: 'New export format options', enabled: true, environment: 'development', rolloutPercentage: 100, createdAt: '2024-12-20T00:00:00Z', updatedAt: '2024-12-23T00:00:00Z' },
-]
+const mockFeatureFlags: FeatureFlag[] = []
 
-const mockDeployments: Deployment[] = [
-  { id: '1', version: 'v2.4.1', environment: 'production', status: 'success', commit: 'abc123f', branch: 'main', deployedBy: 'ci/cd', deployedAt: '2024-12-23T04:00:00Z', duration: 245, changes: 12 },
-  { id: '2', version: 'v2.4.1', environment: 'staging', status: 'success', commit: 'abc123f', branch: 'main', deployedBy: 'ci/cd', deployedAt: '2024-12-23T02:00:00Z', duration: 180, changes: 12 },
-  { id: '3', version: 'v2.4.0', environment: 'production', status: 'success', commit: 'def456a', branch: 'main', deployedBy: 'john@freeflow.io', deployedAt: '2024-12-22T16:00:00Z', duration: 320, changes: 45 },
-  { id: '4', version: 'v2.4.1-rc1', environment: 'staging', status: 'failed', commit: 'ghi789b', branch: 'release/2.4.1', deployedBy: 'ci/cd', deployedAt: '2024-12-22T14:00:00Z', duration: 120, changes: 8 },
-  { id: '5', version: 'v2.5.0-dev', environment: 'development', status: 'in_progress', commit: 'jkl012c', branch: 'develop', deployedBy: 'sarah@freeflow.io', deployedAt: '2024-12-23T10:30:00Z', duration: 0, changes: 23 },
-]
+const mockDeployments: Deployment[] = []
 
-const mockDatabaseTables: DatabaseTable[] = [
-  { name: 'users', schema: 'public', rows: 125847, size: '256 MB', lastModified: '2024-12-23T10:25:00Z' },
-  { name: 'projects', schema: 'public', rows: 45230, size: '128 MB', lastModified: '2024-12-23T10:20:00Z' },
-  { name: 'tasks', schema: 'public', rows: 892145, size: '1.2 GB', lastModified: '2024-12-23T10:28:00Z' },
-  { name: 'files', schema: 'public', rows: 234567, size: '512 MB', lastModified: '2024-12-23T10:15:00Z' },
-  { name: 'audit_logs', schema: 'public', rows: 5678901, size: '4.5 GB', lastModified: '2024-12-23T10:30:00Z' },
-  { name: 'sessions', schema: 'auth', rows: 12456, size: '32 MB', lastModified: '2024-12-23T10:30:00Z' },
-  { name: 'invoices', schema: 'billing', rows: 78934, size: '96 MB', lastModified: '2024-12-23T09:00:00Z' },
-  { name: 'notifications', schema: 'public', rows: 456789, size: '256 MB', lastModified: '2024-12-23T10:28:00Z' },
-]
+const mockDatabaseTables: DatabaseTable[] = []
 
 const jobStatusColors: Record<JobStatus, string> = {
   running: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
@@ -281,29 +224,14 @@ const statusColors = {
   pending: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300',
 }
 
-// Enhanced Competitive Upgrade Mock Data
-const mockAdminAIInsights = [
-  { id: '1', type: 'recommendation' as const, title: 'System Health Excellent', description: 'All 12 resources running optimally with 99.9% uptime.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Health' },
-  { id: '2', type: 'alert' as const, title: 'Permission Audit Due', description: 'Quarterly access review recommended for 15 admin users.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Security' },
-  { id: '3', type: 'opportunity' as const, title: 'Feature Flag Opportunity', description: '3 feature flags have 100% rollout. Consider cleanup.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Optimization' },
-]
+// Empty competitive upgrade data arrays - real data should be fetched from Supabase
+const mockAdminAIInsights: { id: string; type: 'recommendation' | 'alert' | 'opportunity'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
 
-const mockAdminCollaborators = [
-  { id: '1', name: 'System Admin', avatar: '/avatars/admin.jpg', status: 'online' as const, role: 'Admin' },
-  { id: '2', name: 'DevOps Lead', avatar: '/avatars/devops.jpg', status: 'online' as const, role: 'DevOps' },
-  { id: '3', name: 'Security Officer', avatar: '/avatars/security.jpg', status: 'away' as const, role: 'Security' },
-]
+const mockAdminCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }[] = []
 
-const mockAdminPredictions = [
-  { id: '1', title: 'Resource Usage', prediction: 'Database storage will need expansion in 3 weeks', confidence: 85, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Job Success Rate', prediction: 'Scheduled jobs maintaining 98% success rate', confidence: 92, trend: 'stable' as const, impact: 'low' as const },
-]
+const mockAdminPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: 'low' | 'medium' | 'high' }[] = []
 
-const mockAdminActivities = [
-  { id: '1', user: { id: 'admin-1', name: 'System Admin', avatar: '/avatars/admin.jpg' }, action: 'Deployed', target: 'v2.4.1 to production', timestamp: new Date().toISOString(), type: 'create' as const },
-  { id: '2', user: { id: 'devops-1', name: 'DevOps Lead', avatar: '/avatars/devops.jpg' }, action: 'Enabled', target: 'new-checkout-flow feature flag', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'update' as const },
-  { id: '3', user: { id: 'system-1', name: 'System' }, action: 'Completed', target: 'daily backup job', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'status_change' as const },
-]
+const mockAdminActivities: { id: string; user: { id: string; name: string; avatar?: string }; action: string; target: string; timestamp: string; type: 'create' | 'update' | 'delete' | 'status_change' }[] = []
 
 // Quick actions with real functionality - handlers passed from component
 const getAdminQuickActions = (handlers: {

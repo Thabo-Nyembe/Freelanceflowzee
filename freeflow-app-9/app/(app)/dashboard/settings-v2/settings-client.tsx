@@ -222,11 +222,85 @@ const emptyBilling: BillingInfo = {
 // ENHANCED COMPETITIVE UPGRADE - Settings Level
 // ============================================================================
 
-// AI Insights will be fetched from useRevenueIntelligence or similar hooks
-const mockSettingsAIInsights: any[] = []
-const mockSettingsCollaborators: any[] = []
-const mockSettingsPredictions: any[] = []
-const mockSettingsActivities: any[] = []
+// Types for competitive upgrade components
+interface AIInsight {
+  id: string
+  type: 'recommendation' | 'alert' | 'opportunity' | 'prediction' | 'success' | 'info' | 'warning' | 'error'
+  title: string
+  description: string
+  impact?: 'high' | 'medium' | 'low'
+  priority?: 'high' | 'medium' | 'low'
+  metric?: string
+  change?: number
+  confidence?: number
+  action?: string
+  category?: string
+  timestamp?: string | Date
+  createdAt?: Date
+}
+
+interface Collaborator {
+  id: string
+  name: string
+  avatar?: string
+  color?: string
+  status: 'online' | 'away' | 'offline'
+  role?: string
+  isTyping?: boolean
+  lastSeen?: Date
+  lastActive?: string | Date
+  cursor?: { x: number; y: number }
+}
+
+interface Prediction {
+  id?: string
+  label?: string
+  title?: string
+  prediction?: string
+  current?: number
+  target?: number
+  currentValue?: number
+  predictedValue?: number
+  predicted?: number
+  confidence: number
+  trend: 'up' | 'down' | 'stable'
+  timeframe?: string
+  impact?: string
+  factors?: Array<{ name: string; impact: 'positive' | 'negative' | 'neutral'; weight: number }> | string[]
+}
+
+interface ActivityItem {
+  id: string
+  type: 'comment' | 'update' | 'create' | 'delete' | 'mention' | 'assignment' | 'status_change' | 'milestone' | 'integration'
+  title: string
+  action?: string
+  description?: string
+  user: {
+    id: string
+    name: string
+    avatar?: string
+  }
+  target?: {
+    type: string
+    name: string
+    url?: string
+  }
+  metadata?: Record<string, unknown>
+  timestamp: Date | string
+  isRead?: boolean
+  isPinned?: boolean
+  actions?: Array<{
+    label: string
+    action: () => void
+    variant?: 'default' | 'destructive'
+  }>
+}
+
+// Empty arrays for competitive upgrade components - data will come from hooks/API
+const settingsAIInsights: AIInsight[] = []
+const settingsCollaborators: Collaborator[] = []
+const settingsPredictions: Prediction[] = []
+const settingsActivities: ActivityItem[] = []
 
 // Quick actions will be defined inside component to access handlers
 const getSettingsQuickActions = (handleExportData: () => Promise<void>) => [
@@ -3424,17 +3498,16 @@ export default function SettingsClient() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    {[
-                      { action: 'API key regenerated', time: '2 hours ago' },
-                      { action: 'Settings updated', time: '1 day ago' },
-                      { action: 'Backup created', time: '3 days ago' },
-                      { action: 'Cache cleared', time: '1 week ago' }
-                    ].map((item, i) => (
-                      <div key={i} className="flex justify-between items-center text-sm">
-                        <span>{item.action}</span>
-                        <span className="text-muted-foreground">{item.time}</span>
-                      </div>
-                    ))}
+                    {([] as Array<{ action: string; time: string }>).length === 0 ? (
+                      <p className="text-sm text-muted-foreground text-center py-4">No recent activity</p>
+                    ) : (
+                      ([] as Array<{ action: string; time: string }>).map((item, i) => (
+                        <div key={i} className="flex justify-between items-center text-sm">
+                          <span>{item.action}</span>
+                          <span className="text-muted-foreground">{item.time}</span>
+                        </div>
+                      ))
+                    )}
                   </CardContent>
                 </Card>
               </div>
@@ -3446,18 +3519,18 @@ export default function SettingsClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockSettingsAIInsights}
+              insights={settingsAIInsights}
               title="Account Intelligence"
               onInsightAction={handleInsightAction}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockSettingsCollaborators}
+              collaborators={settingsCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockSettingsPredictions}
+              predictions={settingsPredictions}
               title="Account Forecasts"
             />
           </div>
@@ -3465,7 +3538,7 @@ export default function SettingsClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockSettingsActivities}
+            activities={settingsActivities}
             title="Account Activity"
             maxItems={5}
           />

@@ -4,6 +4,13 @@ import { createClient } from '@/lib/supabase/client'
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
+
+// Data hooks
+import { useAuthUserId } from '@/lib/hooks/use-auth-user-id'
+import { usePayrollRuns as usePayrollRunsExtended } from '@/lib/hooks/use-payroll-extended'
+import { useEmployees } from '@/lib/hooks/use-employee-extended'
+import { useTaxFilings } from '@/lib/hooks/use-taxes-extended'
+import { useTimeTracking } from '@/lib/hooks/use-time-tracking'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -220,369 +227,12 @@ const initialFormState: PayrollFormState = {
   notes: '',
 }
 
-// Mock data
-const mockPayRuns: PayRun[] = [
-  {
-    id: '1',
-    period: 'December 1-15, 2024',
-    payDate: '2024-12-20',
-    frequency: 'semi_monthly',
-    status: 'completed',
-    totalGross: 485000,
-    totalNet: 342000,
-    totalTaxes: 108000,
-    totalDeductions: 35000,
-    employeeCount: 156,
-    processedCount: 156,
-    pendingCount: 0,
-    failedCount: 0,
-    approvedBy: 'Sarah Chen',
-    approvedAt: '2024-12-18T14:30:00Z',
-    createdAt: '2024-12-16T09:00:00Z'
-  },
-  {
-    id: '2',
-    period: 'December 16-31, 2024',
-    payDate: '2024-12-31',
-    frequency: 'semi_monthly',
-    status: 'pending_approval',
-    totalGross: 492000,
-    totalNet: 347000,
-    totalTaxes: 110000,
-    totalDeductions: 35000,
-    employeeCount: 158,
-    processedCount: 0,
-    pendingCount: 158,
-    failedCount: 0,
-    createdAt: '2024-12-20T09:00:00Z'
-  },
-  {
-    id: '3',
-    period: 'November 16-30, 2024',
-    payDate: '2024-12-05',
-    frequency: 'semi_monthly',
-    status: 'completed',
-    totalGross: 478000,
-    totalNet: 338000,
-    totalTaxes: 106000,
-    totalDeductions: 34000,
-    employeeCount: 154,
-    processedCount: 154,
-    pendingCount: 0,
-    failedCount: 0,
-    approvedBy: 'Michael Ross',
-    approvedAt: '2024-12-03T10:15:00Z',
-    createdAt: '2024-11-28T09:00:00Z'
-  },
-  {
-    id: '4',
-    period: 'Q4 2024 Bonuses',
-    payDate: '2024-12-22',
-    frequency: 'monthly',
-    status: 'processing',
-    totalGross: 125000,
-    totalNet: 87500,
-    totalTaxes: 31250,
-    totalDeductions: 6250,
-    employeeCount: 45,
-    processedCount: 28,
-    pendingCount: 17,
-    failedCount: 0,
-    approvedBy: 'Sarah Chen',
-    approvedAt: '2024-12-20T16:00:00Z',
-    createdAt: '2024-12-15T09:00:00Z'
-  },
-  {
-    id: '5',
-    period: 'Contractor Payments - December',
-    payDate: '2024-12-28',
-    frequency: 'monthly',
-    status: 'draft',
-    totalGross: 68000,
-    totalNet: 68000,
-    totalTaxes: 0,
-    totalDeductions: 0,
-    employeeCount: 12,
-    processedCount: 0,
-    pendingCount: 12,
-    failedCount: 0,
-    createdAt: '2024-12-18T11:00:00Z'
-  }
-]
-
-const mockEmployees: Employee[] = [
-  {
-    id: '1',
-    name: 'Alex Thompson',
-    email: 'alex.t@company.com',
-    avatar: '/avatars/alex.jpg',
-    department: 'Engineering',
-    role: 'Senior Software Engineer',
-    employeeType: 'full_time',
-    paymentMethod: 'direct_deposit',
-    salary: 145000,
-    grossPay: 6041.67,
-    netPay: 4270.00,
-    taxes: 1328.00,
-    deductions: 443.67,
-    benefits: 850,
-    startDate: '2021-03-15',
-    lastPayDate: '2024-12-20',
-    status: 'active',
-    bankAccount: '****4521'
-  },
-  {
-    id: '2',
-    name: 'Emma Rodriguez',
-    email: 'emma.r@company.com',
-    department: 'Product',
-    role: 'Product Manager',
-    employeeType: 'full_time',
-    paymentMethod: 'direct_deposit',
-    salary: 135000,
-    grossPay: 5625.00,
-    netPay: 3975.00,
-    taxes: 1237.50,
-    deductions: 412.50,
-    benefits: 780,
-    startDate: '2020-08-01',
-    lastPayDate: '2024-12-20',
-    status: 'active',
-    bankAccount: '****7892'
-  },
-  {
-    id: '3',
-    name: 'James Wilson',
-    email: 'james.w@company.com',
-    department: 'Sales',
-    role: 'Account Executive',
-    employeeType: 'full_time',
-    paymentMethod: 'direct_deposit',
-    salary: 95000,
-    grossPay: 3958.33,
-    netPay: 2798.00,
-    taxes: 870.83,
-    deductions: 289.50,
-    benefits: 650,
-    startDate: '2022-01-10',
-    lastPayDate: '2024-12-20',
-    status: 'active',
-    bankAccount: '****3345'
-  },
-  {
-    id: '4',
-    name: 'Sofia Martinez',
-    email: 'sofia.m@company.com',
-    department: 'Design',
-    role: 'UX Designer',
-    employeeType: 'full_time',
-    paymentMethod: 'direct_deposit',
-    salary: 110000,
-    grossPay: 4583.33,
-    netPay: 3238.00,
-    taxes: 1008.33,
-    deductions: 337.00,
-    benefits: 720,
-    startDate: '2021-06-20',
-    lastPayDate: '2024-12-20',
-    status: 'active'
-  },
-  {
-    id: '5',
-    name: 'David Chen',
-    email: 'david.c@company.com',
-    department: 'Engineering',
-    role: 'DevOps Engineer',
-    employeeType: 'full_time',
-    paymentMethod: 'direct_deposit',
-    salary: 130000,
-    grossPay: 5416.67,
-    netPay: 3825.00,
-    taxes: 1191.67,
-    deductions: 400.00,
-    benefits: 780,
-    startDate: '2020-11-15',
-    lastPayDate: '2024-12-20',
-    status: 'active'
-  },
-  {
-    id: '6',
-    name: 'Lisa Park',
-    email: 'lisa.p@company.com',
-    department: 'Marketing',
-    role: 'Marketing Manager',
-    employeeType: 'full_time',
-    paymentMethod: 'direct_deposit',
-    salary: 105000,
-    grossPay: 4375.00,
-    netPay: 3090.00,
-    taxes: 962.50,
-    deductions: 322.50,
-    benefits: 700,
-    startDate: '2021-09-01',
-    lastPayDate: '2024-12-20',
-    status: 'on_leave'
-  },
-  {
-    id: '7',
-    name: 'Ryan Foster',
-    email: 'ryan.f@company.com',
-    department: 'Engineering',
-    role: 'Frontend Developer',
-    employeeType: 'contractor',
-    paymentMethod: 'wire_transfer',
-    hourlyRate: 85,
-    hoursWorked: 160,
-    salary: 0,
-    grossPay: 13600,
-    netPay: 13600,
-    taxes: 0,
-    deductions: 0,
-    benefits: 0,
-    startDate: '2024-01-15',
-    lastPayDate: '2024-12-15',
-    status: 'active'
-  }
-]
-
-const mockTaxFilings: TaxFiling[] = [
-  {
-    id: '1',
-    type: 'Form 941 - Quarterly Federal Tax',
-    period: 'Q4 2024',
-    dueDate: '2025-01-31',
-    amount: 324500,
-    status: 'pending',
-    agency: 'IRS'
-  },
-  {
-    id: '2',
-    type: 'State Unemployment Tax',
-    period: 'Q4 2024',
-    dueDate: '2025-01-31',
-    amount: 12800,
-    status: 'pending',
-    agency: 'CA EDD'
-  },
-  {
-    id: '3',
-    type: 'Form 941 - Quarterly Federal Tax',
-    period: 'Q3 2024',
-    dueDate: '2024-10-31',
-    filedDate: '2024-10-28',
-    amount: 298000,
-    status: 'accepted',
-    agency: 'IRS',
-    confirmationNumber: 'IRS-2024-Q3-78451'
-  },
-  {
-    id: '4',
-    type: 'W-2 Forms',
-    period: '2024',
-    dueDate: '2025-01-31',
-    amount: 0,
-    status: 'pending',
-    agency: 'SSA'
-  },
-  {
-    id: '5',
-    type: '1099-NEC Forms',
-    period: '2024',
-    dueDate: '2025-01-31',
-    amount: 0,
-    status: 'pending',
-    agency: 'IRS'
-  }
-]
-
-const mockBenefits: Benefit[] = [
-  {
-    id: '1',
-    name: 'Medical Insurance - PPO',
-    type: 'health',
-    provider: 'Blue Cross Blue Shield',
-    coverage: 'Employee + Family',
-    employerContribution: 850,
-    employeeContribution: 350,
-    enrolledCount: 142,
-    totalCost: 170400,
-    effectiveDate: '2024-01-01',
-    renewalDate: '2024-12-31'
-  },
-  {
-    id: '2',
-    name: 'Dental Insurance',
-    type: 'dental',
-    provider: 'Delta Dental',
-    coverage: 'Employee + Family',
-    employerContribution: 80,
-    employeeContribution: 30,
-    enrolledCount: 138,
-    totalCost: 15180,
-    effectiveDate: '2024-01-01',
-    renewalDate: '2024-12-31'
-  },
-  {
-    id: '3',
-    name: 'Vision Insurance',
-    type: 'vision',
-    provider: 'VSP',
-    coverage: 'Employee + Family',
-    employerContribution: 25,
-    employeeContribution: 10,
-    enrolledCount: 125,
-    totalCost: 4375,
-    effectiveDate: '2024-01-01',
-    renewalDate: '2024-12-31'
-  },
-  {
-    id: '4',
-    name: '401(k) Retirement Plan',
-    type: '401k',
-    provider: 'Fidelity',
-    coverage: '6% Match',
-    employerContribution: 450,
-    employeeContribution: 650,
-    enrolledCount: 148,
-    totalCost: 162800,
-    effectiveDate: '2024-01-01',
-    renewalDate: '2024-12-31'
-  },
-  {
-    id: '5',
-    name: 'Life Insurance',
-    type: 'life',
-    provider: 'MetLife',
-    coverage: '2x Annual Salary',
-    employerContribution: 45,
-    employeeContribution: 0,
-    enrolledCount: 156,
-    totalCost: 7020,
-    effectiveDate: '2024-01-01',
-    renewalDate: '2024-12-31'
-  },
-  {
-    id: '6',
-    name: 'HSA Account',
-    type: 'hsa',
-    provider: 'HealthEquity',
-    coverage: '$1,500 Annual Contribution',
-    employerContribution: 125,
-    employeeContribution: 200,
-    enrolledCount: 89,
-    totalCost: 28925,
-    effectiveDate: '2024-01-01',
-    renewalDate: '2024-12-31'
-  }
-]
-
-const mockTimeEntries: TimeEntry[] = [
-  { id: '1', employeeId: '1', employeeName: 'Alex Thompson', date: '2024-12-20', regularHours: 8, overtimeHours: 0, ptoHours: 0, totalHours: 8, status: 'approved' },
-  { id: '2', employeeId: '2', employeeName: 'Emma Rodriguez', date: '2024-12-20', regularHours: 8, overtimeHours: 2, ptoHours: 0, totalHours: 10, status: 'approved' },
-  { id: '3', employeeId: '3', employeeName: 'James Wilson', date: '2024-12-20', regularHours: 6, overtimeHours: 0, ptoHours: 2, totalHours: 8, status: 'pending' },
-  { id: '4', employeeId: '4', employeeName: 'Sofia Martinez', date: '2024-12-20', regularHours: 8, overtimeHours: 1, ptoHours: 0, totalHours: 9, status: 'approved' },
-  { id: '5', employeeId: '5', employeeName: 'David Chen', date: '2024-12-20', regularHours: 8, overtimeHours: 0, ptoHours: 0, totalHours: 8, status: 'pending' }
-]
+// Default empty arrays (will be populated from backend hooks)
+const defaultPayRuns: PayRun[] = []
+const defaultEmployees: Employee[] = []
+const defaultTaxFilings: TaxFiling[] = []
+const defaultBenefits: Benefit[] = []
+const defaultTimeEntries: TimeEntry[] = []
 
 // Helper functions
 const getStatusColor = (status: PayRunStatus) => {
@@ -659,6 +309,118 @@ export default function PayrollClient() {
   const payrollPredictions: any[] = []
   const payrollActivities: any[] = []
   const payrollQuickActions: any[] = []
+
+  // Auth and User ID
+  const { getUserId } = useAuthUserId()
+  const [userId, setUserId] = useState<string | null>(null)
+
+  // Fetch user ID on mount
+  useEffect(() => {
+    getUserId().then(setUserId)
+  }, [getUserId])
+
+  // Backend data hooks
+  const { runs: payrollRunsData, isLoading: payrollRunsLoading } = usePayrollRunsExtended({ user_id: userId || undefined })
+  const { data: employeesData, isLoading: employeesLoading } = useEmployees(userId || undefined)
+  const { filings: taxFilingsData, isLoading: taxFilingsLoading } = useTaxFilings()
+  const { timeEntries: timeEntriesData, loading: timeEntriesLoading } = useTimeTracking()
+
+  // Local state synced from backend hooks
+  const [payRuns, setPayRuns] = useState<PayRun[]>(defaultPayRuns)
+  const [employees, setEmployees] = useState<Employee[]>(defaultEmployees)
+  const [taxFilings, setTaxFilings] = useState<TaxFiling[]>(defaultTaxFilings)
+  const [benefits, setBenefits] = useState<Benefit[]>(defaultBenefits)
+  const [timeEntries, setTimeEntries] = useState<TimeEntry[]>(defaultTimeEntries)
+
+  // Sync payroll runs from backend
+  useEffect(() => {
+    if (payrollRunsData && payrollRunsData.length > 0) {
+      const mapped: PayRun[] = payrollRunsData.map((run: any) => ({
+        id: run.id,
+        period: run.period || '',
+        payDate: run.pay_date || '',
+        frequency: 'semi_monthly' as PayFrequency,
+        status: (run.status || 'draft') as PayRunStatus,
+        totalGross: run.total_amount || 0,
+        totalNet: (run.total_amount || 0) * 0.7,
+        totalTaxes: (run.total_amount || 0) * 0.22,
+        totalDeductions: (run.total_amount || 0) * 0.08,
+        employeeCount: run.total_employees || 0,
+        processedCount: run.processed_count || 0,
+        pendingCount: run.pending_count || 0,
+        failedCount: run.failed_count || 0,
+        approvedBy: run.approved_by || undefined,
+        approvedAt: run.approved_date || undefined,
+        createdAt: run.created_at || new Date().toISOString()
+      }))
+      setPayRuns(mapped)
+    }
+  }, [payrollRunsData])
+
+  // Sync employees from backend
+  useEffect(() => {
+    if (employeesData && employeesData.length > 0) {
+      const mapped: Employee[] = employeesData.map((emp: any) => ({
+        id: emp.id,
+        name: emp.name || 'Unknown',
+        email: emp.email || '',
+        avatar: emp.avatar_url,
+        department: emp.department || 'General',
+        role: emp.position || emp.role || 'Employee',
+        employeeType: (emp.employment_type || 'full_time') as EmployeeType,
+        paymentMethod: (emp.payment_method || 'direct_deposit') as PaymentMethod,
+        salary: emp.salary || 0,
+        hourlyRate: emp.hourly_rate,
+        hoursWorked: emp.hours_worked,
+        grossPay: (emp.salary || 0) / 24,
+        netPay: ((emp.salary || 0) / 24) * 0.7,
+        taxes: ((emp.salary || 0) / 24) * 0.22,
+        deductions: ((emp.salary || 0) / 24) * 0.08,
+        benefits: emp.benefits_cost || 0,
+        startDate: emp.start_date || emp.hire_date || '',
+        lastPayDate: emp.last_pay_date,
+        status: (emp.status || 'active') as 'active' | 'on_leave' | 'terminated',
+        bankAccount: emp.bank_account
+      }))
+      setEmployees(mapped)
+    }
+  }, [employeesData])
+
+  // Sync tax filings from backend
+  useEffect(() => {
+    if (taxFilingsData && taxFilingsData.length > 0) {
+      const mapped: TaxFiling[] = taxFilingsData.map((filing: any) => ({
+        id: filing.id,
+        type: filing.filing_type || filing.type || 'Tax Filing',
+        period: filing.period || `${filing.period_start || ''} - ${filing.period_end || ''}`,
+        dueDate: filing.due_date || '',
+        filedDate: filing.filed_date,
+        amount: filing.amount || filing.total_amount || 0,
+        status: (filing.status || 'pending') as TaxFilingStatus,
+        agency: filing.agency || filing.jurisdiction || 'IRS',
+        confirmationNumber: filing.confirmation_number
+      }))
+      setTaxFilings(mapped)
+    }
+  }, [taxFilingsData])
+
+  // Sync time entries from backend
+  useEffect(() => {
+    if (timeEntriesData && timeEntriesData.length > 0) {
+      const mapped: TimeEntry[] = timeEntriesData.map((entry: any) => ({
+        id: entry.id,
+        employeeId: entry.user_id || '',
+        employeeName: entry.title || 'Employee',
+        date: entry.start_time ? new Date(entry.start_time).toISOString().split('T')[0] : '',
+        regularHours: entry.duration_hours || 8,
+        overtimeHours: 0,
+        ptoHours: 0,
+        totalHours: entry.duration_hours || 8,
+        status: (entry.status === 'approved' ? 'approved' : 'pending') as 'pending' | 'approved' | 'rejected'
+      }))
+      setTimeEntries(mapped)
+    }
+  }, [timeEntriesData])
 
   // UI State
   const [activeTab, setActiveTab] = useState('pay-runs')
@@ -952,32 +714,32 @@ export default function PayrollClient() {
     }
   }
 
-  // Stats
+  // Stats - computed from real data
   const stats: PayrollStats = useMemo(() => ({
-    totalPayroll: mockPayRuns.reduce((sum, run) => sum + run.totalGross, 0),
-    totalEmployees: 158,
-    avgSalary: 115000,
-    monthlyGross: 977000,
-    monthlyTaxes: 218000,
-    monthlyDeductions: 70000,
-    pendingApprovals: mockPayRuns.filter(r => r.status === 'pending_approval').length,
-    upcomingPayRuns: mockPayRuns.filter(r => ['draft', 'pending_approval', 'approved', 'processing'].includes(r.status)).length
-  }), [])
+    totalPayroll: payRuns.reduce((sum, run) => sum + run.totalGross, 0),
+    totalEmployees: employees.length || 0,
+    avgSalary: employees.length > 0 ? employees.reduce((sum, emp) => sum + emp.salary, 0) / employees.length : 0,
+    monthlyGross: payRuns.reduce((sum, run) => sum + run.totalGross, 0) / 12 || 0,
+    monthlyTaxes: payRuns.reduce((sum, run) => sum + run.totalTaxes, 0) / 12 || 0,
+    monthlyDeductions: payRuns.reduce((sum, run) => sum + run.totalDeductions, 0) / 12 || 0,
+    pendingApprovals: payRuns.filter(r => r.status === 'pending_approval').length,
+    upcomingPayRuns: payRuns.filter(r => ['draft', 'pending_approval', 'approved', 'processing'].includes(r.status)).length
+  }), [payRuns, employees])
 
-  // Filtered data
+  // Filtered data - using real data from hooks
   const filteredPayRuns = useMemo(() => {
-    return mockPayRuns.filter(run =>
+    return payRuns.filter(run =>
       run.period.toLowerCase().includes(searchQuery.toLowerCase())
     )
-  }, [searchQuery])
+  }, [searchQuery, payRuns])
 
   const filteredEmployees = useMemo(() => {
-    return mockEmployees.filter(emp =>
+    return employees.filter(emp =>
       emp.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       emp.department.toLowerCase().includes(searchQuery.toLowerCase()) ||
       emp.role.toLowerCase().includes(searchQuery.toLowerCase())
     )
-  }, [searchQuery])
+  }, [searchQuery, employees])
 
   // Handlers
   const handleExportReport = () => {
@@ -1808,15 +1570,15 @@ export default function PayrollClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockTaxFilings.length}</p>
+                    <p className="text-3xl font-bold">{taxFilings.length}</p>
                     <p className="text-amber-200 text-sm">Tax Types</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockTaxFilings.filter(t => t.status === 'filed' || t.status === 'accepted').length}</p>
+                    <p className="text-3xl font-bold">{taxFilings.filter(t => t.status === 'filed' || t.status === 'accepted').length}</p>
                     <p className="text-amber-200 text-sm">Filed</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockTaxFilings.filter(t => t.status === 'pending').length}</p>
+                    <p className="text-3xl font-bold">{taxFilings.filter(t => t.status === 'pending').length}</p>
                     <p className="text-amber-200 text-sm">Pending</p>
                   </div>
                 </div>
@@ -1902,7 +1664,7 @@ export default function PayrollClient() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      {mockTaxFilings.map((filing) => (
+                      {taxFilings.map((filing) => (
                         <div key={filing.id} className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1">
@@ -2007,15 +1769,15 @@ export default function PayrollClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockBenefits.length}</p>
+                    <p className="text-3xl font-bold">{benefits.length}</p>
                     <p className="text-pink-200 text-sm">Total Plans</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockBenefits.filter(b => b.enrolledCount > 0).length}</p>
+                    <p className="text-3xl font-bold">{benefits.filter(b => b.enrolledCount > 0).length}</p>
                     <p className="text-pink-200 text-sm">Active</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockBenefits.reduce((sum, b) => sum + b.enrolledCount, 0)}</p>
+                    <p className="text-3xl font-bold">{benefits.reduce((sum, b) => sum + b.enrolledCount, 0)}</p>
                     <p className="text-pink-200 text-sm">Enrolled</p>
                   </div>
                 </div>
@@ -2091,7 +1853,7 @@ export default function PayrollClient() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {mockBenefits.map((benefit) => {
+              {benefits.map((benefit) => {
                 const BenefitIcon = getBenefitIcon(benefit.type)
                 return (
                   <Card key={benefit.id} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
@@ -2147,15 +1909,15 @@ export default function PayrollClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockTimeEntries.length}</p>
+                    <p className="text-3xl font-bold">{timeEntries.length}</p>
                     <p className="text-cyan-200 text-sm">Entries</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockTimeEntries.reduce((sum, t) => sum + t.totalHours, 0)}</p>
+                    <p className="text-3xl font-bold">{timeEntries.reduce((sum, t) => sum + t.totalHours, 0)}</p>
                     <p className="text-cyan-200 text-sm">Total Hours</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockTimeEntries.filter(t => t.status === 'approved').length}</p>
+                    <p className="text-3xl font-bold">{timeEntries.filter(t => t.status === 'approved').length}</p>
                     <p className="text-cyan-200 text-sm">Approved</p>
                   </div>
                 </div>
@@ -2239,7 +2001,7 @@ export default function PayrollClient() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {mockTimeEntries.map((entry) => (
+                  {timeEntries.map((entry) => (
                     <div key={entry.id} className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50">
                       <div className="flex items-center gap-4">
                         <Avatar className="w-10 h-10">

@@ -4,6 +4,11 @@ import { createClient } from '@/lib/supabase/client'
 import { useState, useMemo, useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
 import { useBroadcasts, type Broadcast, type BroadcastType, type BroadcastStatus } from '@/lib/hooks/use-broadcasts'
+import { useCampaigns, type Campaign as DbCampaign } from '@/lib/hooks/use-campaigns'
+import { useTemplates, type Template as DbTemplate } from '@/lib/hooks/use-templates'
+import { useAutomations, type AutomationWorkflow } from '@/lib/hooks/use-automations'
+import { useEvents, type Event as DbEvent } from '@/lib/hooks/use-events'
+import { useAuthUserId } from '@/lib/hooks/use-auth-user-id'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -175,229 +180,112 @@ interface EventTracking {
   automations: number
 }
 
-// Mock data for Intercom level features
-const mockCampaigns: Campaign[] = [
-  {
-    id: 'camp-1',
-    name: 'Product Launch Announcement',
-    subject: 'Introducing our biggest update yet! 🚀',
-    previewText: 'New features to supercharge your workflow',
-    content: '<h1>Big news!</h1><p>We\'ve launched something incredible...</p>',
-    type: 'email',
-    status: 'sent',
-    audience: { id: 'seg-1', name: 'All Active Users', count: 15420, filters: [{ field: 'status', operator: 'equals', value: 'active' }] },
-    schedule: { type: 'scheduled', scheduledFor: '2024-12-18T10:00:00Z', timezone: 'America/New_York' },
-    metrics: { sent: 15420, delivered: 15108, opened: 6845, clicked: 2456, converted: 892, unsubscribed: 45, bounced: 312, complained: 8, deliveryRate: 98.0, openRate: 45.3, clickRate: 16.3, conversionRate: 5.9, revenue: 45680 },
-    createdAt: '2024-12-15T09:00:00Z',
-    updatedAt: '2024-12-18T10:00:00Z',
-    sentAt: '2024-12-18T10:00:00Z',
-    author: { name: 'Sarah Chen', avatar: 'SC' },
-    tags: ['Product', 'Launch', 'Major'],
-    abTest: { enabled: true, variants: [{ id: 'a', name: 'Emoji Subject', subject: '🚀 Big news!', percentage: 50 }, { id: 'b', name: 'Plain Subject', subject: 'Big news!', percentage: 50 }], winner: 'a' }
-  },
-  {
-    id: 'camp-2',
-    name: 'Weekly Digest',
-    subject: 'Your weekly summary is here',
-    previewText: 'See what you accomplished this week',
-    content: '<h1>Weekly Summary</h1><p>Here\'s what happened...</p>',
-    type: 'email',
-    status: 'sent',
-    audience: { id: 'seg-2', name: 'Engaged Users', count: 8750, filters: [{ field: 'last_activity', operator: 'within', value: '7d' }] },
-    schedule: { type: 'recurring', frequency: 'weekly', timezone: 'UTC' },
-    metrics: { sent: 8750, delivered: 8625, opened: 4890, clicked: 1456, converted: 234, unsubscribed: 12, bounced: 125, complained: 2, deliveryRate: 98.6, openRate: 56.7, clickRate: 16.9, conversionRate: 2.7, revenue: 12340 },
-    createdAt: '2024-12-01T09:00:00Z',
-    updatedAt: '2024-12-20T09:00:00Z',
-    sentAt: '2024-12-20T09:00:00Z',
-    author: { name: 'Emily Rodriguez', avatar: 'ER' },
-    tags: ['Digest', 'Recurring']
-  },
-  {
-    id: 'camp-3',
-    name: 'Black Friday Sale',
-    subject: '50% OFF - Today Only! 🔥',
-    previewText: 'Don\'t miss our biggest sale of the year',
-    content: '<h1>Black Friday Sale</h1><p>50% off everything...</p>',
-    type: 'email',
-    status: 'sent',
-    audience: { id: 'seg-3', name: 'All Subscribers', count: 24560, filters: [] },
-    schedule: { type: 'scheduled', scheduledFor: '2024-11-29T00:00:00Z', timezone: 'America/New_York' },
-    metrics: { sent: 24560, delivered: 24012, opened: 14890, clicked: 8456, converted: 3456, unsubscribed: 234, bounced: 548, complained: 45, deliveryRate: 97.8, openRate: 62.0, clickRate: 35.2, conversionRate: 14.4, revenue: 234567 },
-    createdAt: '2024-11-25T09:00:00Z',
-    updatedAt: '2024-11-29T00:00:00Z',
-    sentAt: '2024-11-29T00:00:00Z',
-    author: { name: 'Marcus Johnson', avatar: 'MJ' },
-    tags: ['Sales', 'Holiday', 'Promo']
-  },
-  {
-    id: 'camp-4',
-    name: 'New Feature Notification',
-    subject: '',
-    previewText: '',
-    content: 'Check out our new AI features!',
-    type: 'push',
-    status: 'sent',
-    audience: { id: 'seg-4', name: 'Mobile Users', count: 12340, filters: [{ field: 'platform', operator: 'in', value: 'ios,android' }] },
-    schedule: { type: 'immediate' },
-    metrics: { sent: 12340, delivered: 11890, opened: 4567, clicked: 2345, converted: 567, unsubscribed: 0, bounced: 450, complained: 0, deliveryRate: 96.4, openRate: 38.4, clickRate: 19.7, conversionRate: 4.8, revenue: 23450 },
-    createdAt: '2024-12-19T14:00:00Z',
-    updatedAt: '2024-12-19T14:00:00Z',
-    sentAt: '2024-12-19T14:00:00Z',
-    author: { name: 'David Kim', avatar: 'DK' },
-    tags: ['Push', 'Feature']
-  },
-  {
-    id: 'camp-5',
-    name: 'Holiday Greeting',
-    subject: 'Happy Holidays from our team! 🎄',
-    previewText: 'Wishing you joy and peace this holiday season',
-    content: '<h1>Happy Holidays!</h1><p>Thank you for being part of our community...</p>',
-    type: 'email',
-    status: 'scheduled',
-    audience: { id: 'seg-1', name: 'All Active Users', count: 15420, filters: [{ field: 'status', operator: 'equals', value: 'active' }] },
-    schedule: { type: 'scheduled', scheduledFor: '2024-12-25T09:00:00Z', timezone: 'America/New_York' },
-    metrics: { sent: 0, delivered: 0, opened: 0, clicked: 0, converted: 0, unsubscribed: 0, bounced: 0, complained: 0, deliveryRate: 0, openRate: 0, clickRate: 0, conversionRate: 0, revenue: 0 },
-    createdAt: '2024-12-20T09:00:00Z',
-    updatedAt: '2024-12-20T09:00:00Z',
-    author: { name: 'Sarah Chen', avatar: 'SC' },
-    tags: ['Holiday', 'Greeting']
-  },
-  {
-    id: 'camp-6',
-    name: 'Welcome Banner',
-    subject: '',
-    previewText: '',
-    content: 'Welcome to the platform! Click here to take a tour.',
-    type: 'in_app',
-    status: 'sending',
-    audience: { id: 'seg-5', name: 'New Users (7 days)', count: 890, filters: [{ field: 'created_at', operator: 'within', value: '7d' }] },
-    schedule: null,
-    metrics: { sent: 650, delivered: 648, opened: 580, clicked: 456, converted: 234, unsubscribed: 0, bounced: 2, complained: 0, deliveryRate: 99.7, openRate: 89.5, clickRate: 70.4, conversionRate: 36.1, revenue: 0 },
-    createdAt: '2024-12-01T09:00:00Z',
-    updatedAt: '2024-12-20T09:00:00Z',
-    author: { name: 'Lisa Thompson', avatar: 'LT' },
-    tags: ['Onboarding', 'In-App']
+// Helper function to convert database campaigns to UI Campaign format
+function convertDbCampaignToUiCampaign(dbCampaign: DbCampaign): Campaign {
+  return {
+    id: dbCampaign.id,
+    name: dbCampaign.campaign_name,
+    subject: dbCampaign.content?.subject || '',
+    previewText: dbCampaign.content?.preview_text || '',
+    content: dbCampaign.content?.html || '',
+    type: (dbCampaign.campaign_type === 'email' ? 'email' :
+           dbCampaign.campaign_type === 'sms' ? 'sms' :
+           dbCampaign.campaign_type === 'social' ? 'push' : 'email') as Campaign['type'],
+    status: (dbCampaign.status === 'running' ? 'sending' :
+             dbCampaign.status === 'completed' ? 'sent' :
+             dbCampaign.status) as Campaign['status'],
+    audience: {
+      id: `seg-${dbCampaign.id}`,
+      name: dbCampaign.target_audience || 'All Users',
+      count: dbCampaign.audience_size || 0,
+      filters: dbCampaign.segment_criteria?.filters || []
+    },
+    schedule: dbCampaign.start_date ? {
+      type: dbCampaign.is_automated ? 'recurring' : 'scheduled',
+      scheduledFor: dbCampaign.start_date,
+      timezone: 'UTC'
+    } : null,
+    metrics: {
+      sent: dbCampaign.emails_sent || 0,
+      delivered: dbCampaign.emails_delivered || 0,
+      opened: dbCampaign.emails_opened || 0,
+      clicked: dbCampaign.emails_clicked || 0,
+      converted: dbCampaign.conversions || 0,
+      unsubscribed: Math.round((dbCampaign.unsubscribe_rate || 0) * dbCampaign.emails_sent / 100),
+      bounced: Math.round((dbCampaign.bounce_rate || 0) * dbCampaign.emails_sent / 100),
+      complained: 0,
+      deliveryRate: dbCampaign.emails_sent > 0 ? (dbCampaign.emails_delivered / dbCampaign.emails_sent) * 100 : 0,
+      openRate: dbCampaign.open_rate || 0,
+      clickRate: dbCampaign.click_rate || 0,
+      conversionRate: dbCampaign.conversion_rate || 0,
+      revenue: dbCampaign.revenue_generated || 0
+    },
+    createdAt: dbCampaign.created_at,
+    updatedAt: dbCampaign.updated_at,
+    sentAt: dbCampaign.launched_at || undefined,
+    author: { name: dbCampaign.created_by || 'Unknown', avatar: (dbCampaign.created_by || 'U').slice(0, 2).toUpperCase() },
+    tags: dbCampaign.tags || [],
+    abTest: dbCampaign.is_ab_test ? {
+      enabled: true,
+      variants: dbCampaign.ab_test_config?.variants || [],
+      winner: dbCampaign.winning_variant || undefined
+    } : undefined
   }
-]
+}
 
-const mockTemplates: Template[] = [
-  { id: 't1', name: 'Welcome Email', category: 'Onboarding', thumbnail: '📧', usageCount: 45 },
-  { id: 't2', name: 'Product Update', category: 'Product', thumbnail: '🚀', usageCount: 32 },
-  { id: 't3', name: 'Weekly Digest', category: 'Engagement', thumbnail: '📊', usageCount: 89 },
-  { id: 't4', name: 'Sale Announcement', category: 'Promotions', thumbnail: '🔥', usageCount: 23 },
-  { id: 't5', name: 'Feature Release', category: 'Product', thumbnail: '✨', usageCount: 56 },
-  { id: 't6', name: 'Re-engagement', category: 'Engagement', thumbnail: '💌', usageCount: 18 }
-]
-
-const mockAutomations: Automation[] = [
-  {
-    id: 'auto-1',
-    name: 'Welcome Series',
-    description: 'Automatically onboard new users with a multi-step email sequence',
-    trigger: { type: 'event', event: 'user.created', conditions: [] },
-    actions: [
-      { type: 'send_email', config: { template: 'welcome' } },
-      { type: 'wait', config: {}, delay: '2d' },
-      { type: 'send_email', config: { template: 'getting_started' } }
-    ],
-    status: 'active',
-    stats: { triggered: 4580, completed: 4123, failed: 45 },
-    createdAt: '2024-01-15T09:00:00Z',
-    lastTriggered: '2024-12-20T14:32:00Z'
-  },
-  {
-    id: 'auto-2',
-    name: 'Re-engagement Campaign',
-    description: 'Win back inactive users after 30 days of inactivity',
-    trigger: { type: 'segment_entry', segment: 'Inactive 30+ days', conditions: [{ field: 'last_activity', operator: 'older_than', value: '30d' }] },
-    actions: [
-      { type: 'send_email', config: { template: 're_engage' } },
-      { type: 'wait', config: {}, delay: '7d' },
-      { type: 'send_push', config: { message: 'We miss you!' } }
-    ],
-    status: 'active',
-    stats: { triggered: 2340, completed: 1890, failed: 12 },
-    createdAt: '2024-03-10T09:00:00Z',
-    lastTriggered: '2024-12-19T08:15:00Z'
-  },
-  {
-    id: 'auto-3',
-    name: 'Purchase Follow-up',
-    description: 'Send thank you and upsell after purchase',
-    trigger: { type: 'event', event: 'purchase.completed', conditions: [] },
-    actions: [
-      { type: 'send_email', config: { template: 'thank_you' } },
-      { type: 'add_tag', config: { tag: 'customer' } },
-      { type: 'wait', config: {}, delay: '5d' },
-      { type: 'send_email', config: { template: 'upsell' } }
-    ],
-    status: 'active',
-    stats: { triggered: 8920, completed: 8456, failed: 23 },
-    createdAt: '2024-02-20T09:00:00Z',
-    lastTriggered: '2024-12-20T16:45:00Z'
-  },
-  {
-    id: 'auto-4',
-    name: 'Trial Expiration Warning',
-    description: 'Notify users before trial ends',
-    trigger: { type: 'time_based', schedule: '3 days before trial_end', conditions: [] },
-    actions: [
-      { type: 'send_email', config: { template: 'trial_ending' } },
-      { type: 'send_push', config: { message: 'Your trial ends soon!' } }
-    ],
-    status: 'paused',
-    stats: { triggered: 1234, completed: 1189, failed: 8 },
-    createdAt: '2024-04-05T09:00:00Z',
-    lastTriggered: '2024-12-15T12:00:00Z'
+// Helper function to convert database templates to UI Template format
+function convertDbTemplateToUiTemplate(dbTemplate: DbTemplate): Template {
+  return {
+    id: dbTemplate.id,
+    name: dbTemplate.name,
+    category: dbTemplate.category || 'General',
+    thumbnail: dbTemplate.category === 'email' ? '📧' :
+               dbTemplate.category === 'product' ? '🚀' :
+               dbTemplate.category === 'engagement' ? '📊' :
+               dbTemplate.category === 'promotions' ? '🔥' : '📄',
+    usageCount: dbTemplate.usage_count || 0
   }
-]
+}
 
-const mockSeries: Series[] = [
-  {
-    id: 'series-1',
-    name: 'Onboarding Journey',
-    description: '7-day onboarding sequence for new users',
-    steps: [
-      { id: 's1-1', type: 'email', name: 'Welcome', content: 'Welcome to the platform!' },
-      { id: 's1-2', type: 'wait', name: 'Wait 1 day', delay: '1d' },
-      { id: 's1-3', type: 'email', name: 'Setup Guide', content: 'Complete your profile setup' },
-      { id: 's1-4', type: 'wait', name: 'Wait 2 days', delay: '2d' },
-      { id: 's1-5', type: 'condition', name: 'Check Profile', condition: { field: 'profile_complete', operator: 'equals', value: 'true' } },
-      { id: 's1-6', type: 'email', name: 'Pro Tips', content: 'Advanced features guide' }
-    ],
-    status: 'active',
-    enrolledCount: 3450,
-    completedCount: 2890,
-    exitRate: 16.2,
-    createdAt: '2024-01-01T09:00:00Z'
-  },
-  {
-    id: 'series-2',
-    name: 'Feature Education',
-    description: 'Educate users about key features',
-    steps: [
-      { id: 's2-1', type: 'email', name: 'Feature 1', content: 'Discover Project Management' },
-      { id: 's2-2', type: 'wait', name: 'Wait 3 days', delay: '3d' },
-      { id: 's2-3', type: 'email', name: 'Feature 2', content: 'Explore Analytics' },
-      { id: 's2-4', type: 'wait', name: 'Wait 3 days', delay: '3d' },
-      { id: 's2-5', type: 'email', name: 'Feature 3', content: 'Master Automation' }
-    ],
-    status: 'active',
-    enrolledCount: 2100,
-    completedCount: 1560,
-    exitRate: 25.7,
-    createdAt: '2024-02-15T09:00:00Z'
+// Helper function to convert database automations to UI Automation format
+function convertDbAutomationToUiAutomation(dbAutomation: AutomationWorkflow): Automation {
+  return {
+    id: dbAutomation.id,
+    name: dbAutomation.workflow_name,
+    description: dbAutomation.description || '',
+    trigger: {
+      type: (dbAutomation.trigger_type as AutomationTrigger['type']) || 'event',
+      event: dbAutomation.trigger_config?.event,
+      segment: dbAutomation.trigger_config?.segment,
+      schedule: dbAutomation.schedule_config?.schedule,
+      conditions: dbAutomation.trigger_config?.conditions || []
+    },
+    actions: (dbAutomation.steps || []).map((step: any) => ({
+      type: step.type || 'send_email',
+      config: step.config || {},
+      delay: step.delay
+    })),
+    status: (dbAutomation.status === 'running' ? 'active' :
+             dbAutomation.status === 'paused' ? 'paused' : 'draft') as Automation['status'],
+    stats: {
+      triggered: dbAutomation.total_executions || 0,
+      completed: dbAutomation.successful_executions || 0,
+      failed: dbAutomation.failed_executions || 0
+    },
+    createdAt: dbAutomation.created_at,
+    lastTriggered: dbAutomation.last_execution_at || dbAutomation.created_at
   }
-]
+}
 
-const mockEvents: EventTracking[] = [
-  { name: 'user.created', count: 4580, lastSeen: '2024-12-20T14:32:00Z', automations: 2 },
-  { name: 'purchase.completed', count: 8920, lastSeen: '2024-12-20T16:45:00Z', automations: 3 },
-  { name: 'subscription.upgraded', count: 1234, lastSeen: '2024-12-20T11:20:00Z', automations: 1 },
-  { name: 'feature.used', count: 45670, lastSeen: '2024-12-20T17:00:00Z', automations: 0 },
-  { name: 'support.ticket.created', count: 890, lastSeen: '2024-12-20T15:30:00Z', automations: 1 },
-  { name: 'profile.updated', count: 12340, lastSeen: '2024-12-20T16:55:00Z', automations: 0 }
-]
+// Helper function to convert database events to UI EventTracking format
+function convertDbEventToUiEvent(dbEvent: DbEvent): EventTracking {
+  return {
+    name: dbEvent.name,
+    count: dbEvent.registrations || dbEvent.current_attendees || 0,
+    lastSeen: dbEvent.updated_at,
+    automations: 0 // Would need a join to get actual count
+  }
+}
 
 export default function BroadcastsClient({ initialBroadcasts }: { initialBroadcasts: Broadcast[] }) {
   // Define adapter variables locally (removed mock data imports)
@@ -407,6 +295,15 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
   const broadcastsActivities: any[] = []
   const broadcastsQuickActions: any[] = []
 
+  // Auth hooks for user identification
+  const { getUserId } = useAuthUserId()
+  const [userId, setUserId] = useState<string | null>(null)
+
+  // Initialize userId on mount
+  useEffect(() => {
+    getUserId().then(setUserId)
+  }, [getUserId])
+
   const [activeTab, setActiveTab] = useState('campaigns')
   const [broadcastTypeFilter, setBroadcastTypeFilter] = useState<BroadcastType | 'all'>('all')
   const [statusFilter, setStatusFilter] = useState<BroadcastStatus | 'all'>('all')
@@ -415,6 +312,56 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
   const [settingsTab, setSettingsTab] = useState('general')
   const { broadcasts, loading, error, refetch } = useBroadcasts({ broadcastType: broadcastTypeFilter, status: statusFilter })
   const _displayBroadcasts = broadcasts.length > 0 ? broadcasts : initialBroadcasts
+
+  // Fetch campaigns, templates, automations, and events from database
+  const { campaigns: dbCampaigns, loading: campaignsLoading } = useCampaigns()
+  const { templates: dbTemplates, isLoading: templatesLoading } = useTemplates()
+  const { workflows: dbAutomations, loading: automationsLoading } = useAutomations()
+  const { events: dbEvents, loading: eventsLoading } = useEvents()
+
+  // Convert database data to UI format
+  const campaigns: Campaign[] = useMemo(() => {
+    return (dbCampaigns || []).map(convertDbCampaignToUiCampaign)
+  }, [dbCampaigns])
+
+  const templates: Template[] = useMemo(() => {
+    return (dbTemplates || []).map(convertDbTemplateToUiTemplate)
+  }, [dbTemplates])
+
+  const automations: Automation[] = useMemo(() => {
+    return (dbAutomations || []).map(convertDbAutomationToUiAutomation)
+  }, [dbAutomations])
+
+  const events: EventTracking[] = useMemo(() => {
+    return (dbEvents || []).map(convertDbEventToUiEvent)
+  }, [dbEvents])
+
+  // Series data - derived from automations with sequential type
+  const series: Series[] = useMemo(() => {
+    return (dbAutomations || [])
+      .filter(a => a.workflow_type === 'sequential')
+      .map(automation => ({
+        id: automation.id,
+        name: automation.workflow_name,
+        description: automation.description || '',
+        steps: (automation.steps || []).map((step: any, idx: number) => ({
+          id: `${automation.id}-step-${idx}`,
+          type: step.type || 'email',
+          name: step.name || `Step ${idx + 1}`,
+          delay: step.delay,
+          content: step.content,
+          condition: step.condition
+        })),
+        status: (automation.status === 'running' || automation.status === 'active' ? 'active' :
+                 automation.status === 'paused' ? 'paused' : 'draft') as Series['status'],
+        enrolledCount: automation.total_executions || 0,
+        completedCount: automation.successful_executions || 0,
+        exitRate: automation.total_executions > 0
+          ? ((automation.total_executions - automation.successful_executions) / automation.total_executions) * 100
+          : 0,
+        createdAt: automation.created_at
+      }))
+  }, [dbAutomations])
 
   // Database broadcasts state
   const [_dbBroadcasts, setDbBroadcasts] = useState<Broadcast[]>([])
@@ -949,7 +896,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
 
   // Calculate stats
   const stats = useMemo(() => {
-    const sent = mockCampaigns.filter(c => c.status === 'sent')
+    const sent = campaigns.filter(c => c.status === 'sent')
     const totalSent = sent.reduce((sum, c) => sum + c.metrics.sent, 0)
     const totalDelivered = sent.reduce((sum, c) => sum + c.metrics.delivered, 0)
     const totalOpened = sent.reduce((sum, c) => sum + c.metrics.opened, 0)
@@ -957,10 +904,10 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
     const totalRevenue = sent.reduce((sum, c) => sum + c.metrics.revenue, 0)
 
     return {
-      totalCampaigns: mockCampaigns.length,
+      totalCampaigns: campaigns.length,
       sent: sent.length,
-      scheduled: mockCampaigns.filter(c => c.status === 'scheduled').length,
-      draft: mockCampaigns.filter(c => c.status === 'draft').length,
+      scheduled: campaigns.filter(c => c.status === 'scheduled').length,
+      draft: campaigns.filter(c => c.status === 'draft').length,
       totalSent,
       totalDelivered,
       totalOpened,
@@ -969,16 +916,16 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
       avgClickRate: totalOpened > 0 ? ((totalClicked / totalOpened) * 100).toFixed(1) : '0',
       totalRevenue
     }
-  }, [])
+  }, [campaigns])
 
   // Filter campaigns
   const filteredCampaigns = useMemo(() => {
-    return mockCampaigns.filter(campaign => {
+    return campaigns.filter(campaign => {
       if (broadcastTypeFilter !== 'all' && campaign.type !== broadcastTypeFilter) return false
       if (statusFilter !== 'all' && campaign.status !== statusFilter) return false
       return true
     })
-  }, [broadcastTypeFilter, statusFilter])
+  }, [campaigns, broadcastTypeFilter, statusFilter])
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -1326,7 +1273,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
           <TabsContent value="automations" className="space-y-6">
             <div className="flex items-center justify-between mb-4">
               <div className="text-sm text-gray-600 dark:text-gray-400">
-                {mockAutomations.length} automations • {mockAutomations.filter(a => a.status === 'active').length} active
+                {automations.length} automations • {automations.filter(a => a.status === 'active').length} active
               </div>
               <button
                 onClick={handleCreateAutomation}
@@ -1336,7 +1283,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
               </button>
             </div>
             <div className="space-y-4">
-              {mockAutomations.map(automation => (
+              {automations.map(automation => (
                 <div key={automation.id} className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
                   <div className="flex items-start justify-between">
                     <div className="flex items-start gap-4">
@@ -1429,7 +1376,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
           <TabsContent value="series" className="space-y-6">
             <div className="flex items-center justify-between mb-4">
               <div className="text-sm text-gray-600 dark:text-gray-400">
-                {mockSeries.length} series • {mockSeries.reduce((sum, s) => sum + s.enrolledCount, 0).toLocaleString()} enrolled
+                {series.length} series • {series.reduce((sum, s) => sum + s.enrolledCount, 0).toLocaleString()} enrolled
               </div>
               <button
                 onClick={handleCreateSeries}
@@ -1438,29 +1385,29 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                 + Create Series
               </button>
             </div>
-            {mockSeries.map(series => (
-              <div key={series.id} className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+            {series.map(seriesItem => (
+              <div key={seriesItem.id} className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
                 <div className="flex items-start justify-between mb-4">
                   <div>
                     <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-semibold text-gray-900 dark:text-white">{series.name}</h3>
-                      <span className={`px-2 py-0.5 rounded text-xs font-medium ${series.status === 'active' ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400' : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'}`}>
-                        {series.status}
+                      <h3 className="font-semibold text-gray-900 dark:text-white">{seriesItem.name}</h3>
+                      <span className={`px-2 py-0.5 rounded text-xs font-medium ${seriesItem.status === 'active' ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400' : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'}`}>
+                        {seriesItem.status}
                       </span>
                     </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">{series.description}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">{seriesItem.description}</p>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6 text-center">
                     <div>
-                      <div className="text-lg font-semibold text-gray-900 dark:text-white">{series.enrolledCount.toLocaleString()}</div>
+                      <div className="text-lg font-semibold text-gray-900 dark:text-white">{seriesItem.enrolledCount.toLocaleString()}</div>
                       <div className="text-xs text-gray-500 dark:text-gray-400">Enrolled</div>
                     </div>
                     <div>
-                      <div className="text-lg font-semibold text-green-600">{series.completedCount.toLocaleString()}</div>
+                      <div className="text-lg font-semibold text-green-600">{seriesItem.completedCount.toLocaleString()}</div>
                       <div className="text-xs text-gray-500 dark:text-gray-400">Completed</div>
                     </div>
                     <div>
-                      <div className="text-lg font-semibold text-amber-600">{series.exitRate}%</div>
+                      <div className="text-lg font-semibold text-amber-600">{seriesItem.exitRate}%</div>
                       <div className="text-xs text-gray-500 dark:text-gray-400">Exit Rate</div>
                     </div>
                   </div>
@@ -1468,7 +1415,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                 <div className="relative">
                   <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gray-200 dark:bg-gray-700" />
                   <div className="space-y-4">
-                    {series.steps.map((step, idx) => (
+                    {seriesItem.steps.map((step, idx) => (
                       <div key={step.id} className="relative flex items-center gap-4 pl-4">
                         <div className={`w-5 h-5 rounded-full z-10 flex items-center justify-center text-xs
                           ${step.type === 'email' ? 'bg-blue-500 text-white' :
@@ -1496,7 +1443,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                     variant="outline"
                     size="sm"
                     onClick={() => {
-                      toast.info(`Opening series editor for "${series.name}"`)
+                      toast.info(`Opening series editor for "${seriesItem.name}"`)
                     }}
                   >
                     Edit Steps
@@ -1505,17 +1452,17 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                     variant="outline"
                     size="sm"
                     onClick={() => {
-                      const action = series.status === 'active' ? 'paused' : 'activated'
-                      toast.success(`Series "${series.name}" is now ${action}`)
+                      const action = seriesItem.status === 'active' ? 'paused' : 'activated'
+                      toast.success(`Series "${seriesItem.name}" is now ${action}`)
                     }}
                   >
-                    {series.status === 'active' ? 'Pause' : 'Activate'}
+                    {seriesItem.status === 'active' ? 'Pause' : 'Activate'}
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => {
-                      toast.info(`Opening enrollment settings for "${series.name}"`)
+                      toast.info(`Opening enrollment settings for "${seriesItem.name}"`)
                     }}
                   >
                     Enrollment Settings
@@ -1528,7 +1475,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
           {/* Templates Tab */}
           <TabsContent value="templates" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {mockTemplates.map(template => (
+              {templates.map(template => (
                 <div
                   key={template.id}
                   onClick={() => {

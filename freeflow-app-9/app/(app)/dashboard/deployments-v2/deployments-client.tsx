@@ -260,17 +260,11 @@ const mockEdgeConfigs: EdgeConfig[] = []
 // MIGRATED: Batch #13 - Removed mock data, using database hooks
 const mockBlobs: StorageBlob[] = []
 
-const mockProtections: DeploymentProtection[] = [
-  { id: '1', name: 'Password Protection', type: 'password', enabled: true, config: { password: '••••••' } },
-  { id: '2', name: 'Vercel Authentication', type: 'vercel_auth', enabled: false, config: {} },
-  { id: '3', name: 'Trusted IPs', type: 'trusted_ips', enabled: true, config: { ips: ['192.168.1.0/24', '10.0.0.0/8'] } }
-]
+// MIGRATED: Removed mock data, using database hooks
+const mockProtections: DeploymentProtection[] = []
 
-const mockWebhooks: DeploymentWebhook[] = [
-  { id: '1', name: 'Slack Notifications', url: 'https://hooks.slack.com/services/xxx', events: ['deployment.created', 'deployment.succeeded', 'deployment.failed'], status: 'active', lastTriggered: '2024-01-16 09:23', successRate: 100, secret: 'whsec_xxxxxx' },
-  { id: '2', name: 'Discord Bot', url: 'https://discord.com/api/webhooks/xxx', events: ['deployment.succeeded'], status: 'active', lastTriggered: '2024-01-16 09:00', successRate: 98.5, secret: 'whsec_yyyyyy' },
-  { id: '3', name: 'CI/CD Trigger', url: 'https://api.internal.io/webhooks/deploy', events: ['deployment.promoted', 'deployment.rolled_back'], status: 'failed', lastTriggered: '2024-01-14 15:30', successRate: 78.0, secret: 'whsec_zzzzzz' }
-]
+// MIGRATED: Removed mock data, using database hooks
+const mockWebhooks: DeploymentWebhook[] = []
 
 // MIGRATED: Batch #13 - Removed mock data, using database hooks
 const mockIntegrations: Integration[] = []
@@ -281,29 +275,76 @@ const mockTeamMembers: TeamMember[] = []
 // MIGRATED: Batch #13 - Removed mock data, using database hooks
 const mockBuildPlugins: BuildPlugin[] = []
 
-// Enhanced Competitive Upgrade Mock Data
-const mockDeploymentsAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Deploy Success', description: '100% deployment success rate this week. Zero rollbacks needed.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Reliability' },
-  { id: '2', type: 'info' as const, title: 'Build Time', description: 'Average build time reduced to 45 seconds with new caching.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Performance' },
-  { id: '3', type: 'warning' as const, title: 'Resource Usage', description: 'Production memory at 82%. Consider scaling before next deploy.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Resources' },
-]
+// MIGRATED: Removed mock data - using empty arrays
+// Type definitions for AI Insights
+interface AIInsight {
+  id: string
+  type: 'recommendation' | 'alert' | 'opportunity' | 'prediction' | 'success' | 'info' | 'warning' | 'error'
+  title: string
+  description: string
+  impact?: 'high' | 'medium' | 'low'
+  priority?: 'high' | 'medium' | 'low'
+  metric?: string
+  change?: number
+  confidence?: number
+  action?: string
+  category?: string
+  timestamp?: string | Date
+  createdAt?: Date
+}
 
-const mockDeploymentsCollaborators = [
-  { id: '1', name: 'DevOps Lead', avatar: '/avatars/devops.jpg', status: 'online' as const, role: 'Lead' },
-  { id: '2', name: 'SRE', avatar: '/avatars/sre.jpg', status: 'online' as const, role: 'SRE' },
-  { id: '3', name: 'Developer', avatar: '/avatars/dev.jpg', status: 'busy' as const, role: 'Dev' },
-]
+interface Collaborator {
+  id: string
+  name: string
+  avatar?: string
+  color?: string
+  status: 'online' | 'away' | 'offline'
+  role?: string
+  isTyping?: boolean
+  lastSeen?: Date
+  lastActive?: string | Date
+  cursor?: { x: number; y: number }
+}
 
-const mockDeploymentsPredictions = [
-  { id: '1', title: 'Deploy Window', prediction: 'Next safe deploy window: 2 PM', confidence: 92, trend: 'stable' as const, impact: 'high' as const },
-  { id: '2', title: 'Uptime Goal', prediction: '99.99% uptime achievable this month', confidence: 88, trend: 'up' as const, impact: 'medium' as const },
-]
+interface Prediction {
+  id?: string
+  label?: string
+  title?: string
+  prediction?: string
+  current?: number
+  target?: number
+  currentValue?: number
+  predictedValue?: number
+  predicted?: number
+  confidence: number
+  trend: 'up' | 'down' | 'stable'
+  timeframe?: string
+  impact?: string
+  factors?: Array<{ name: string; impact: 'positive' | 'negative' | 'neutral'; weight: number }> | string[]
+}
 
-const mockDeploymentsActivities = [
-  { id: '1', user: 'CI/CD Pipeline', action: 'Deployed to', target: 'Production v2.4.1', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Auto-Scale', action: 'Scaled up', target: 'API servers (3 → 5)', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'Monitor', action: 'Health check passed for', target: 'All endpoints', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
-]
+interface ActivityItem {
+  id: string
+  type: 'comment' | 'update' | 'create' | 'delete' | 'mention' | 'assignment' | 'status_change' | 'milestone' | 'integration' | 'success' | 'info'
+  title?: string
+  action?: string
+  description?: string
+  user: string | { id: string; name: string; avatar?: string }
+  target?: string | { type: string; name: string; url?: string }
+  metadata?: Record<string, unknown>
+  timestamp: Date | string
+  isRead?: boolean
+  isPinned?: boolean
+  actions?: Array<{ label: string; action: () => void; variant?: 'default' | 'destructive' }>
+}
+
+const mockDeploymentsAIInsights: AIInsight[] = []
+
+const mockDeploymentsCollaborators: Collaborator[] = []
+
+const mockDeploymentsPredictions: Prediction[] = []
+
+const mockDeploymentsActivities: ActivityItem[] = []
 
 // Quick actions are defined inside the component to access state setters and handlers
 

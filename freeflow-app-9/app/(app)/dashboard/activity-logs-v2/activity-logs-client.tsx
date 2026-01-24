@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import {
+  useActivityLogs,
   type ActivityLog
 } from '@/lib/hooks/use-activity-logs'
 import {
@@ -165,51 +166,152 @@ interface ActivityLogsClientProps {
   initialLogs: ActivityLog[]
 }
 
-// Mock stats for display - will be replaced with real data from API
-const mockStats: LogStats = {
-  totalLogs: 2456789,
-  logsPerMinute: 15234,
-  errorRate: 2.3,
-  avgLatency: 156,
-  uniqueUsers: 12456,
-  uniqueSessions: 34567,
-  byLevel: {
-    debug: 456789,
-    info: 1567890,
-    warn: 234567,
-    error: 178901,
-    critical: 18642
-  },
-  bySource: {
-    api: 1234567,
-    web: 567890,
-    mobile: 345678,
-    worker: 189012,
-    cron: 78901,
-    webhook: 40741
-  },
-  byService: {
-    'auth-service': 345678,
-    'api-gateway': 567890,
-    'user-service': 234567,
-    'payment-service': 123456
-  },
-  topErrors: [
-    { message: 'Connection timeout', count: 12345 },
-    { message: 'Rate limit exceeded', count: 8765 },
-    { message: 'Invalid token', count: 5432 }
-  ],
-  timeline: [
-    { time: '10:00', count: 12345, errors: 234 },
-    { time: '11:00', count: 15678, errors: 345 },
-    { time: '12:00', count: 18901, errors: 456 }
-  ]
-}
+// Empty patterns placeholder - will be computed from real data
+const emptyPatterns: LogPattern[] = []
+
+// Empty saved queries placeholder - will be loaded from localStorage or API
+const emptySavedQueries: SavedQuery[] = []
+
+// Empty AI insights placeholder for competitive upgrades
+const emptyAIInsights: Array<{
+  id: string
+  type: 'suggestion' | 'warning' | 'insight' | 'opportunity'
+  title: string
+  description: string
+  impact?: 'high' | 'medium' | 'low'
+  actionLabel?: string
+}> = []
+
+// Empty collaborators placeholder for competitive upgrades
+const emptyCollaborators: Array<{
+  id: string
+  name: string
+  avatar?: string
+  status: 'online' | 'away' | 'offline'
+  activity?: string
+}> = []
+
+// Empty predictions placeholder for competitive upgrades
+const emptyPredictions: Array<{
+  id: string
+  metric: string
+  currentValue: number
+  predictedValue: number
+  change: number
+  trend: 'up' | 'down' | 'stable'
+  confidence: number
+  timeframe: string
+}> = []
+
+// Empty activities placeholder for competitive upgrades
+const emptyActivities: Array<{
+  id: string
+  type: string
+  message: string
+  timestamp: string
+  user?: {
+    name: string
+    avatar?: string
+  }
+}> = []
 
 // Quick actions are now defined inside the component to access state setters
 
-export default function ActivityLogsClient({ initialLogs: _initialLogs }: ActivityLogsClientProps) {
-  void _initialLogs // Props available for future API integration
+export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientProps) {
+  // Use the activity logs hook for real data
+  const { logs: activityLogs, isLoading, refetch } = useActivityLogs(initialLogs)
+
+  // Convert ActivityLog[] to LogEntry[] for display
+  const logsAsLogEntries: LogEntry[] = useMemo(() => {
+    return activityLogs.map((log) => ({
+      id: log.id,
+      timestamp: log.created_at,
+      level: (log.status === 'failed' ? 'error' : log.status === 'success' ? 'info' : 'warn') as LogLevel,
+      source: 'api' as LogSource,
+      service: log.category || 'system',
+      host: 'app-server',
+      message: `${log.action} ${log.resource_type || ''} ${log.resource_name || ''}`.trim(),
+      traceId: log.activity_code || null,
+      spanId: null,
+      userId: log.user_id,
+      userName: log.user_name,
+      userEmail: log.user_email,
+      sessionId: null,
+      requestId: log.id,
+      method: log.activity_type?.toUpperCase() || null,
+      path: log.resource_type ? `/${log.resource_type}/${log.resource_id || ''}` : null,
+      statusCode: log.status === 'success' ? 200 : log.status === 'failed' ? 500 : 202,
+      duration: log.duration || null,
+      ip: log.ip_address,
+      userAgent: log.user_agent,
+      country: null,
+      tags: [log.category, log.activity_type].filter(Boolean) as string[],
+      attributes: log.metadata || {},
+      stackTrace: null
+    }))
+  }, [activityLogs])
+
+  // Calculate stats from real data
+  const calculatedStats: LogStats = useMemo(() => {
+    const total = activityLogs.length
+    const errorCount = activityLogs.filter(l => l.status === 'failed').length
+    const successCount = activityLogs.filter(l => l.status === 'success').length
+    const pendingCount = activityLogs.filter(l => l.status === 'pending').length
+
+    // Get unique users
+    const uniqueUserIds = new Set(activityLogs.map(l => l.user_id).filter(Boolean))
+
+    // Calculate average duration
+    const durations = activityLogs.filter(l => l.duration > 0).map(l => l.duration)
+    const avgDuration = durations.length > 0 ? durations.reduce((a, b) => a + b, 0) / durations.length : 0
+
+    // Group by category for service breakdown
+    const byService: Record<string, number> = {}
+    activityLogs.forEach(l => {
+      const service = l.category || 'other'
+      byService[service] = (byService[service] || 0) + 1
+    })
+
+    // Get top errors
+    const errorLogs = activityLogs.filter(l => l.status === 'failed')
+    const errorMessages: Record<string, number> = {}
+    errorLogs.forEach(l => {
+      const msg = l.action || 'Unknown error'
+      errorMessages[msg] = (errorMessages[msg] || 0) + 1
+    })
+    const topErrors = Object.entries(errorMessages)
+      .map(([message, count]) => ({ message, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5)
+
+    return {
+      totalLogs: total,
+      logsPerMinute: 0, // Would need time-series data to calculate
+      errorRate: total > 0 ? (errorCount / total) * 100 : 0,
+      avgLatency: Math.round(avgDuration),
+      uniqueUsers: uniqueUserIds.size,
+      uniqueSessions: uniqueUserIds.size, // Approximation
+      byLevel: {
+        debug: 0,
+        info: successCount,
+        warn: pendingCount,
+        error: errorCount,
+        critical: 0
+      },
+      bySource: {
+        api: total,
+        web: 0,
+        mobile: 0,
+        worker: 0,
+        cron: 0,
+        webhook: 0
+      },
+      byService,
+      topErrors,
+      timeline: []
+    }
+  }, [activityLogs])
+
   const [activeTab, setActiveTab] = useState('logs')
   const [searchQuery, setSearchQuery] = useState('')
   const [levelFilter, setLevelFilter] = useState<LogLevel | 'all'>('all')
@@ -248,8 +350,31 @@ export default function ActivityLogsClient({ initialLogs: _initialLogs }: Activi
   const [alertLevel, setAlertLevel] = useState<LogLevel>('error')
 
   const filteredLogs = useMemo((): LogEntry[] => {
-    return [] as LogEntry[]
-  }, [searchQuery, levelFilter, sourceFilter])
+    return logsAsLogEntries.filter((log) => {
+      // Filter by search query
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase()
+        const matchesMessage = log.message.toLowerCase().includes(query)
+        const matchesService = log.service.toLowerCase().includes(query)
+        const matchesTraceId = log.traceId?.toLowerCase().includes(query)
+        if (!matchesMessage && !matchesService && !matchesTraceId) {
+          return false
+        }
+      }
+
+      // Filter by level
+      if (levelFilter !== 'all' && log.level !== levelFilter) {
+        return false
+      }
+
+      // Filter by source
+      if (sourceFilter !== 'all' && log.source !== sourceFilter) {
+        return false
+      }
+
+      return true
+    })
+  }, [logsAsLogEntries, searchQuery, levelFilter, sourceFilter])
 
   const getLevelColor = (level: LogLevel) => {
     switch (level) {
@@ -463,21 +588,7 @@ export default function ActivityLogsClient({ initialLogs: _initialLogs }: Activi
 
   const handleRefreshLogs = async () => {
     await toast.promise(
-      (async () => {
-        const params = new URLSearchParams()
-        if (levelFilter !== 'all') params.append('level', levelFilter)
-        if (sourceFilter !== 'all') params.append('source', sourceFilter)
-        if (searchQuery) params.append('search', searchQuery)
-        params.append('limit', '50')
-
-        const response = await fetch(`/api/logs?${params.toString()}`)
-
-        if (!response.ok) {
-          throw new Error('Failed to refresh logs')
-        }
-
-        return response.json()
-      })(),
+      refetch(),
       {
         loading: 'Refreshing logs...',
         success: 'Logs refreshed',
@@ -883,7 +994,7 @@ export default function ActivityLogsClient({ initialLogs: _initialLogs }: Activi
                 <BarChart3 className="w-4 h-4" />
                 Total Logs
               </div>
-              <div className="text-2xl font-bold">{(mockStats.totalLogs / 1000000).toFixed(2)}M</div>
+              <div className="text-2xl font-bold">{calculatedStats.totalLogs >= 1000000 ? (calculatedStats.totalLogs / 1000000).toFixed(2) + 'M' : calculatedStats.totalLogs >= 1000 ? (calculatedStats.totalLogs / 1000).toFixed(1) + 'K' : calculatedStats.totalLogs}</div>
               <div className="text-xs text-white/60">{timeRange} window</div>
             </div>
             <div className="bg-white/10 backdrop-blur rounded-xl p-4">
@@ -891,7 +1002,7 @@ export default function ActivityLogsClient({ initialLogs: _initialLogs }: Activi
                 <TrendingUp className="w-4 h-4" />
                 Logs/Min
               </div>
-              <div className="text-2xl font-bold">{(mockStats.logsPerMinute / 1000).toFixed(1)}K</div>
+              <div className="text-2xl font-bold">{calculatedStats.logsPerMinute >= 1000 ? (calculatedStats.logsPerMinute / 1000).toFixed(1) + 'K' : calculatedStats.logsPerMinute}</div>
               <div className="text-xs text-white/60">Current rate</div>
             </div>
             <div className="bg-white/10 backdrop-blur rounded-xl p-4">
@@ -899,15 +1010,15 @@ export default function ActivityLogsClient({ initialLogs: _initialLogs }: Activi
                 <AlertCircle className="w-4 h-4" />
                 Error Rate
               </div>
-              <div className="text-2xl font-bold text-red-300">{mockStats.errorRate}%</div>
-              <div className="text-xs text-white/60">{mockStats.byLevel.error + mockStats.byLevel.critical} errors</div>
+              <div className="text-2xl font-bold text-red-300">{calculatedStats.errorRate.toFixed(1)}%</div>
+              <div className="text-xs text-white/60">{calculatedStats.byLevel.error + calculatedStats.byLevel.critical} errors</div>
             </div>
             <div className="bg-white/10 backdrop-blur rounded-xl p-4">
               <div className="flex items-center gap-2 text-white/70 text-sm mb-1">
                 <Clock className="w-4 h-4" />
                 Avg Latency
               </div>
-              <div className="text-2xl font-bold">{mockStats.avgLatency}ms</div>
+              <div className="text-2xl font-bold">{calculatedStats.avgLatency}ms</div>
               <div className="text-xs text-white/60">p50 response</div>
             </div>
             <div className="bg-white/10 backdrop-blur rounded-xl p-4">
@@ -915,7 +1026,7 @@ export default function ActivityLogsClient({ initialLogs: _initialLogs }: Activi
                 <User className="w-4 h-4" />
                 Users
               </div>
-              <div className="text-2xl font-bold">{(mockStats.uniqueUsers / 1000).toFixed(1)}K</div>
+              <div className="text-2xl font-bold">{calculatedStats.uniqueUsers >= 1000 ? (calculatedStats.uniqueUsers / 1000).toFixed(1) + 'K' : calculatedStats.uniqueUsers}</div>
               <div className="text-xs text-white/60">Unique users</div>
             </div>
             <div className="bg-white/10 backdrop-blur rounded-xl p-4">
@@ -923,7 +1034,7 @@ export default function ActivityLogsClient({ initialLogs: _initialLogs }: Activi
                 <Layers className="w-4 h-4" />
                 Sessions
               </div>
-              <div className="text-2xl font-bold">{(mockStats.uniqueSessions / 1000).toFixed(1)}K</div>
+              <div className="text-2xl font-bold">{calculatedStats.uniqueSessions >= 1000 ? (calculatedStats.uniqueSessions / 1000).toFixed(1) + 'K' : calculatedStats.uniqueSessions}</div>
               <div className="text-xs text-white/60">Active sessions</div>
             </div>
           </div>
@@ -1053,7 +1164,7 @@ export default function ActivityLogsClient({ initialLogs: _initialLogs }: Activi
               {/* Quick Filters */}
               <div className="flex items-center gap-2 mt-3 pt-3 border-t dark:border-gray-700">
                 <span className="text-xs text-gray-500 dark:text-gray-400">Quick filters:</span>
-                {Object.entries(mockStats.byLevel).map(([level, count]) => (
+                {Object.entries(calculatedStats.byLevel).map(([level, count]) => (
                   <button
                     key={level}
                     onClick={() => setLevelFilter(level as LogLevel)}
@@ -1072,7 +1183,13 @@ export default function ActivityLogsClient({ initialLogs: _initialLogs }: Activi
               <div className="p-2 border-b border-gray-800 flex items-center justify-between">
                 <div className="flex items-center gap-4 text-gray-400 text-xs">
                   <span>Showing {filteredLogs.length} logs</span>
-                  {isLiveMode && (
+                  {isLoading && (
+                    <span className="flex items-center gap-1 text-blue-400">
+                      <RefreshCw className="w-3 h-3 animate-spin" />
+                      Loading...
+                    </span>
+                  )}
+                  {isLiveMode && !isLoading && (
                     <span className="flex items-center gap-1 text-green-400">
                       <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
                       Live
@@ -1088,6 +1205,25 @@ export default function ActivityLogsClient({ initialLogs: _initialLogs }: Activi
               </div>
               <ScrollArea className="h-[500px]">
                 <div className="divide-y divide-gray-800">
+                  {filteredLogs.length === 0 && (
+                    <div className="p-12 text-center">
+                      <Terminal className="w-12 h-12 mx-auto text-gray-600 mb-4" />
+                      <h3 className="text-lg font-semibold text-gray-300 mb-2">No Logs Found</h3>
+                      <p className="text-gray-500 mb-4">
+                        {searchQuery || levelFilter !== 'all' || sourceFilter !== 'all'
+                          ? 'Try adjusting your filters or search query.'
+                          : 'Activity logs will appear here as events occur in the system.'}
+                      </p>
+                      {(searchQuery || levelFilter !== 'all' || sourceFilter !== 'all') && (
+                        <button
+                          onClick={handleClearFilters}
+                          className="px-4 py-2 text-purple-400 hover:text-purple-300"
+                        >
+                          Clear Filters
+                        </button>
+                      )}
+                    </div>
+                  )}
                   {filteredLogs.map((log) => (
                     <div key={log.id} className="hover:bg-gray-800/50">
                       <div
@@ -1191,7 +1327,7 @@ export default function ActivityLogsClient({ initialLogs: _initialLogs }: Activi
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockPatterns.length}</p>
+                    <p className="text-3xl font-bold">{emptyPatterns.length}</p>
                     <p className="text-purple-200 text-sm">Patterns</p>
                   </div>
                 </div>
@@ -1203,7 +1339,14 @@ export default function ActivityLogsClient({ initialLogs: _initialLogs }: Activi
               <span className="text-sm text-gray-500 dark:text-gray-400">Auto-detected patterns from your logs</span>
             </div>
             <div className="space-y-3">
-              {mockPatterns.map((pattern) => (
+              {emptyPatterns.length === 0 && (
+                <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-8 text-center">
+                  <Layers className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No Patterns Detected</h3>
+                  <p className="text-gray-500 dark:text-gray-400">Patterns will be automatically detected as logs accumulate in the system.</p>
+                </div>
+              )}
+              {emptyPatterns.map((pattern) => (
                 <div key={pattern.id} className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-4">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-start gap-3">
@@ -1287,8 +1430,8 @@ export default function ActivityLogsClient({ initialLogs: _initialLogs }: Activi
               <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Logs by Level</h3>
                 <div className="space-y-3">
-                  {Object.entries(mockStats.byLevel).map(([level, count]) => {
-                    const percentage = (count / mockStats.totalLogs) * 100
+                  {Object.entries(calculatedStats.byLevel).map(([level, count]) => {
+                    const percentage = (count / calculatedStats.totalLogs) * 100
                     return (
                       <div key={level} className="space-y-1">
                         <div className="flex items-center justify-between text-sm">
@@ -1319,8 +1462,8 @@ export default function ActivityLogsClient({ initialLogs: _initialLogs }: Activi
               <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Logs by Source</h3>
                 <div className="space-y-3">
-                  {Object.entries(mockStats.bySource).map(([source, count]) => {
-                    const percentage = (count / mockStats.totalLogs) * 100
+                  {Object.entries(calculatedStats.bySource).map(([source, count]) => {
+                    const percentage = (count / calculatedStats.totalLogs) * 100
                     return (
                       <div key={source} className="space-y-1">
                         <div className="flex items-center justify-between text-sm">
@@ -1343,7 +1486,7 @@ export default function ActivityLogsClient({ initialLogs: _initialLogs }: Activi
               <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Top Errors</h3>
                 <div className="space-y-3">
-                  {mockStats.topErrors.map((error, idx) => (
+                  {calculatedStats.topErrors.map((error, idx) => (
                     <div key={idx} className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
                       <span className="text-sm text-red-700 dark:text-red-400">{error.message}</span>
                       <span className="font-bold text-red-600 dark:text-red-400">{error.count}</span>
@@ -1356,7 +1499,7 @@ export default function ActivityLogsClient({ initialLogs: _initialLogs }: Activi
               <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-6">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Logs by Service</h3>
                 <div className="space-y-2">
-                  {Object.entries(mockStats.byService).slice(0, 5).map(([service, count]) => (
+                  {Object.entries(calculatedStats.byService).slice(0, 5).map(([service, count]) => (
                     <div key={service} className="flex items-center justify-between text-sm">
                       <span className="text-gray-700 dark:text-gray-300">{service}</span>
                       <span className="font-medium text-gray-900 dark:text-white">{(count / 1000).toFixed(0)}K</span>
@@ -1379,7 +1522,7 @@ export default function ActivityLogsClient({ initialLogs: _initialLogs }: Activi
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockSavedQueries.length}</p>
+                    <p className="text-3xl font-bold">{emptySavedQueries.length}</p>
                     <p className="text-amber-200 text-sm">Saved</p>
                   </div>
                 </div>
@@ -1397,7 +1540,20 @@ export default function ActivityLogsClient({ initialLogs: _initialLogs }: Activi
               </button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {mockSavedQueries.map((query) => (
+              {emptySavedQueries.length === 0 && (
+                <div className="col-span-2 bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-8 text-center">
+                  <Bookmark className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No Saved Queries</h3>
+                  <p className="text-gray-500 dark:text-gray-400 mb-4">Save your frequently used search queries for quick access.</p>
+                  <button
+                    onClick={() => setShowQueryDialog(true)}
+                    className="px-4 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700"
+                  >
+                    Create Your First Query
+                  </button>
+                </div>
+              )}
+              {emptySavedQueries.map((query) => (
                 <div key={query.id} className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-5">
                   <div className="flex items-start justify-between mb-3">
                     <div>
@@ -2142,18 +2298,18 @@ export default function ActivityLogsClient({ initialLogs: _initialLogs }: Activi
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockLogsAIInsights}
+              insights={emptyAIInsights}
               title="Logs Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockLogsCollaborators}
+              collaborators={emptyCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockLogsPredictions}
+              predictions={emptyPredictions}
               title="System Metrics Forecast"
             />
           </div>
@@ -2161,7 +2317,7 @@ export default function ActivityLogsClient({ initialLogs: _initialLogs }: Activi
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockLogsActivities}
+            activities={emptyActivities}
             title="System Activity"
             maxItems={5}
           />
@@ -2795,7 +2951,7 @@ export default function ActivityLogsClient({ initialLogs: _initialLogs }: Activi
               </p>
             </div>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              You are about to purge <strong>{mockStats.totalLogs.toLocaleString()}</strong> log entries.
+              You are about to purge <strong>{calculatedStats.totalLogs.toLocaleString()}</strong> log entries.
             </p>
           </div>
           <div className="flex items-center justify-end gap-3 pt-4 border-t dark:border-gray-700">

@@ -199,512 +199,23 @@ interface Analytics {
 }
 
 // ============================================================================
-// MOCK DATA
+// EMPTY DATA ARRAYS - Real data loaded from Supabase via hooks
 // ============================================================================
 
-const mockCategories: Category[] = [
-  {
-    id: 'cat-1',
-    name: 'Getting Started',
-    slug: 'getting-started',
-    description: 'Everything you need to begin your journey',
-    icon: '🚀',
-    color: 'from-blue-500 to-cyan-500',
-    articleCount: 24,
-    subcategories: [
-      { id: 'sub-1', name: 'Quick Start', slug: 'quick-start', articleCount: 8 },
-      { id: 'sub-2', name: 'Installation', slug: 'installation', articleCount: 6 },
-      { id: 'sub-3', name: 'First Steps', slug: 'first-steps', articleCount: 10 }
-    ],
-    order: 1,
-    visibility: 'public'
-  },
-  {
-    id: 'cat-2',
-    name: 'Features & Guides',
-    slug: 'features-guides',
-    description: 'Deep dive into all platform capabilities',
-    icon: '📚',
-    color: 'from-purple-500 to-pink-500',
-    articleCount: 89,
-    subcategories: [
-      { id: 'sub-4', name: 'Core Features', slug: 'core-features', articleCount: 32 },
-      { id: 'sub-5', name: 'Advanced Features', slug: 'advanced-features', articleCount: 28 },
-      { id: 'sub-6', name: 'Integrations', slug: 'integrations', articleCount: 29 }
-    ],
-    order: 2,
-    visibility: 'public'
-  },
-  {
-    id: 'cat-3',
-    name: 'Billing & Payments',
-    slug: 'billing-payments',
-    description: 'Manage subscriptions, invoices, and payments',
-    icon: '💳',
-    color: 'from-green-500 to-emerald-500',
-    articleCount: 34,
-    subcategories: [
-      { id: 'sub-7', name: 'Pricing Plans', slug: 'pricing-plans', articleCount: 12 },
-      { id: 'sub-8', name: 'Invoices', slug: 'invoices', articleCount: 10 },
-      { id: 'sub-9', name: 'Payment Methods', slug: 'payment-methods', articleCount: 12 }
-    ],
-    order: 3,
-    visibility: 'public'
-  },
-  {
-    id: 'cat-4',
-    name: 'Troubleshooting',
-    slug: 'troubleshooting',
-    description: 'Solutions to common problems and issues',
-    icon: '🔧',
-    color: 'from-orange-500 to-red-500',
-    articleCount: 56,
-    subcategories: [
-      { id: 'sub-10', name: 'Common Issues', slug: 'common-issues', articleCount: 24 },
-      { id: 'sub-11', name: 'Error Messages', slug: 'error-messages', articleCount: 18 },
-      { id: 'sub-12', name: 'Performance', slug: 'performance', articleCount: 14 }
-    ],
-    order: 4,
-    visibility: 'public'
-  },
-  {
-    id: 'cat-5',
-    name: 'API & Developers',
-    slug: 'api-developers',
-    description: 'Technical documentation for developers',
-    icon: '⚡',
-    color: 'from-indigo-500 to-purple-500',
-    articleCount: 78,
-    subcategories: [
-      { id: 'sub-13', name: 'API Reference', slug: 'api-reference', articleCount: 35 },
-      { id: 'sub-14', name: 'SDKs', slug: 'sdks', articleCount: 23 },
-      { id: 'sub-15', name: 'Webhooks', slug: 'webhooks', articleCount: 20 }
-    ],
-    order: 5,
-    visibility: 'public'
-  },
-  {
-    id: 'cat-6',
-    name: 'Account & Security',
-    slug: 'account-security',
-    description: 'Manage your account and security settings',
-    icon: '🔒',
-    color: 'from-gray-600 to-gray-800',
-    articleCount: 42,
-    subcategories: [
-      { id: 'sub-16', name: 'Account Settings', slug: 'account-settings', articleCount: 16 },
-      { id: 'sub-17', name: 'Security', slug: 'security', articleCount: 14 },
-      { id: 'sub-18', name: 'Privacy', slug: 'privacy', articleCount: 12 }
-    ],
-    order: 6,
-    visibility: 'public'
-  }
-]
-
-const mockCollections: Collection[] = [
-  {
-    id: 'col-1',
-    name: 'New User Onboarding',
-    description: 'Essential guides for new users to get started quickly',
-    icon: '🎯',
-    color: 'from-blue-500 to-indigo-500',
-    articleIds: ['art-1', 'art-2', 'art-3', 'art-4'],
-    views: 12450,
-    audience: 'customers',
-    order: 1
-  },
-  {
-    id: 'col-2',
-    name: 'Best Practices',
-    description: 'Expert tips and recommendations for optimal usage',
-    icon: '⭐',
-    color: 'from-yellow-500 to-orange-500',
-    articleIds: ['art-5', 'art-6', 'art-7'],
-    views: 8920,
-    audience: 'all',
-    order: 2
-  },
-  {
-    id: 'col-3',
-    name: 'Developer Resources',
-    description: 'Technical documentation and API guides',
-    icon: '💻',
-    color: 'from-purple-500 to-pink-500',
-    articleIds: ['art-8', 'art-9', 'art-10'],
-    views: 15670,
-    audience: 'developers',
-    order: 3
-  },
-  {
-    id: 'col-4',
-    name: 'Enterprise Setup',
-    description: 'Configuration guides for enterprise deployments',
-    icon: '🏢',
-    color: 'from-green-500 to-teal-500',
-    articleIds: ['art-11', 'art-12'],
-    views: 5430,
-    audience: 'enterprise',
-    order: 4
-  }
-]
-
-const mockArticles: Article[] = [
-  {
-    id: 'art-1',
-    title: 'Getting Started with FreeFlow Kazi',
-    slug: 'getting-started-freeflow-kazi',
-    excerpt: 'Learn how to set up your account and start using FreeFlow Kazi in minutes.',
-    content: 'Complete guide to getting started with the platform...',
-    type: 'guide',
-    status: 'published',
-    format: 'text',
-    categoryId: 'cat-1',
-    subcategoryId: 'sub-1',
-    collectionId: 'col-1',
-    author: { id: 'auth-1', name: 'Sarah Chen', avatar: '/avatars/sarah.jpg', role: 'Documentation Lead' },
-    language: 'en',
-    translations: ['es', 'fr', 'de'],
-    audience: 'all',
-    tags: ['getting-started', 'basics', 'onboarding'],
-    views: 45230,
-    helpfulCount: 3842,
-    notHelpfulCount: 156,
-    avgRating: 4.8,
-    readTime: 5,
-    relatedArticles: ['art-2', 'art-3', 'art-4'],
-    version: 12,
-    publishedAt: '2024-10-15T10:00:00Z',
-    updatedAt: '2024-12-20T14:30:00Z',
-    createdAt: '2024-08-01T09:00:00Z',
-    seoTitle: 'Getting Started Guide - FreeFlow Kazi Help Center',
-    seoDescription: 'Learn how to set up and use FreeFlow Kazi with our comprehensive getting started guide.',
-    featured: true,
-    pinned: true
-  },
-  {
-    id: 'art-2',
-    title: 'How to Create Your First Project',
-    slug: 'create-first-project',
-    excerpt: 'Step-by-step guide to creating and managing your first project.',
-    content: 'Detailed instructions for project creation...',
-    type: 'tutorial',
-    status: 'published',
-    format: 'interactive',
-    categoryId: 'cat-1',
-    subcategoryId: 'sub-3',
-    collectionId: 'col-1',
-    author: { id: 'auth-2', name: 'Mike Johnson', avatar: '/avatars/mike.jpg', role: 'Product Specialist' },
-    language: 'en',
-    translations: ['es', 'pt'],
-    audience: 'customers',
-    tags: ['projects', 'tutorial', 'basics'],
-    views: 32150,
-    helpfulCount: 2890,
-    notHelpfulCount: 98,
-    avgRating: 4.9,
-    readTime: 8,
-    relatedArticles: ['art-1', 'art-5'],
-    version: 8,
-    publishedAt: '2024-09-20T11:00:00Z',
-    updatedAt: '2024-12-18T09:15:00Z',
-    createdAt: '2024-08-15T14:00:00Z',
-    featured: true,
-    pinned: false
-  },
-  {
-    id: 'art-3',
-    title: 'Understanding Billing and Invoices',
-    slug: 'understanding-billing-invoices',
-    excerpt: 'Everything you need to know about billing cycles, invoices, and payments.',
-    content: 'Comprehensive billing documentation...',
-    type: 'article',
-    status: 'published',
-    format: 'text',
-    categoryId: 'cat-3',
-    subcategoryId: 'sub-8',
-    author: { id: 'auth-3', name: 'Emily Davis', avatar: '/avatars/emily.jpg', role: 'Support Manager' },
-    language: 'en',
-    translations: ['es', 'fr', 'de', 'pt', 'ja'],
-    audience: 'all',
-    tags: ['billing', 'invoices', 'payments'],
-    views: 28450,
-    helpfulCount: 2456,
-    notHelpfulCount: 187,
-    avgRating: 4.6,
-    readTime: 6,
-    relatedArticles: ['art-4'],
-    version: 15,
-    publishedAt: '2024-07-10T08:00:00Z',
-    updatedAt: '2024-12-15T16:45:00Z',
-    createdAt: '2024-06-01T10:00:00Z',
-    featured: false,
-    pinned: false
-  },
-  {
-    id: 'art-4',
-    title: 'Video: Platform Overview Tour',
-    slug: 'platform-overview-tour-video',
-    excerpt: 'Watch our comprehensive video tour of the entire platform.',
-    content: 'Video transcript and key points...',
-    type: 'video',
-    status: 'published',
-    format: 'video',
-    categoryId: 'cat-1',
-    subcategoryId: 'sub-1',
-    collectionId: 'col-1',
-    author: { id: 'auth-1', name: 'Sarah Chen', avatar: '/avatars/sarah.jpg', role: 'Documentation Lead' },
-    language: 'en',
-    translations: ['es'],
-    audience: 'all',
-    tags: ['video', 'overview', 'tour'],
-    views: 67890,
-    helpfulCount: 5234,
-    notHelpfulCount: 89,
-    avgRating: 4.9,
-    readTime: 12,
-    videoUrl: 'https://videos.example.com/platform-tour.mp4',
-    videoDuration: 720,
-    relatedArticles: ['art-1', 'art-2'],
-    version: 4,
-    publishedAt: '2024-11-01T12:00:00Z',
-    updatedAt: '2024-12-10T11:00:00Z',
-    createdAt: '2024-10-15T09:00:00Z',
-    featured: true,
-    pinned: true
-  },
-  {
-    id: 'art-5',
-    title: 'API Authentication Guide',
-    slug: 'api-authentication-guide',
-    excerpt: 'Learn how to authenticate with our REST API using OAuth 2.0 and API keys.',
-    content: 'Technical API authentication documentation...',
-    type: 'guide',
-    status: 'published',
-    format: 'text',
-    categoryId: 'cat-5',
-    subcategoryId: 'sub-13',
-    collectionId: 'col-3',
-    author: { id: 'auth-4', name: 'Alex Rivera', avatar: '/avatars/alex.jpg', role: 'Developer Advocate' },
-    language: 'en',
-    translations: ['ja', 'zh'],
-    audience: 'developers',
-    tags: ['api', 'authentication', 'oauth', 'security'],
-    views: 41230,
-    helpfulCount: 3567,
-    notHelpfulCount: 145,
-    avgRating: 4.7,
-    readTime: 10,
-    relatedArticles: ['art-8', 'art-9'],
-    version: 20,
-    publishedAt: '2024-06-15T14:00:00Z',
-    updatedAt: '2024-12-22T10:30:00Z',
-    createdAt: '2024-05-01T08:00:00Z',
-    featured: false,
-    pinned: false
-  },
-  {
-    id: 'art-6',
-    title: 'Troubleshooting Login Issues',
-    slug: 'troubleshooting-login-issues',
-    excerpt: 'Solutions to common login and authentication problems.',
-    content: 'Step-by-step troubleshooting guide...',
-    type: 'troubleshooting',
-    status: 'published',
-    format: 'checklist',
-    categoryId: 'cat-4',
-    subcategoryId: 'sub-10',
-    author: { id: 'auth-3', name: 'Emily Davis', avatar: '/avatars/emily.jpg', role: 'Support Manager' },
-    language: 'en',
-    translations: ['es', 'fr', 'de', 'pt'],
-    audience: 'all',
-    tags: ['troubleshooting', 'login', 'authentication', 'errors'],
-    views: 54320,
-    helpfulCount: 4890,
-    notHelpfulCount: 234,
-    avgRating: 4.5,
-    readTime: 4,
-    relatedArticles: ['art-7'],
-    version: 18,
-    publishedAt: '2024-04-20T09:00:00Z',
-    updatedAt: '2024-12-21T15:00:00Z',
-    createdAt: '2024-03-10T11:00:00Z',
-    featured: false,
-    pinned: false
-  },
-  {
-    id: 'art-7',
-    title: 'Password Reset FAQ',
-    slug: 'password-reset-faq',
-    excerpt: 'Frequently asked questions about resetting your password.',
-    content: 'FAQ content...',
-    type: 'faq',
-    status: 'published',
-    format: 'text',
-    categoryId: 'cat-6',
-    subcategoryId: 'sub-16',
-    author: { id: 'auth-2', name: 'Mike Johnson', avatar: '/avatars/mike.jpg', role: 'Product Specialist' },
-    language: 'en',
-    translations: ['es', 'fr'],
-    audience: 'all',
-    tags: ['faq', 'password', 'account', 'security'],
-    views: 38670,
-    helpfulCount: 3234,
-    notHelpfulCount: 156,
-    avgRating: 4.6,
-    readTime: 3,
-    relatedArticles: ['art-6'],
-    version: 9,
-    publishedAt: '2024-05-10T10:00:00Z',
-    updatedAt: '2024-12-19T12:00:00Z',
-    createdAt: '2024-04-01T09:00:00Z',
-    featured: false,
-    pinned: false
-  },
-  {
-    id: 'art-8',
-    title: 'Webhook Integration Setup',
-    slug: 'webhook-integration-setup',
-    excerpt: 'Configure webhooks to receive real-time event notifications.',
-    content: 'Webhook setup instructions...',
-    type: 'tutorial',
-    status: 'published',
-    format: 'interactive',
-    categoryId: 'cat-5',
-    subcategoryId: 'sub-15',
-    collectionId: 'col-3',
-    author: { id: 'auth-4', name: 'Alex Rivera', avatar: '/avatars/alex.jpg', role: 'Developer Advocate' },
-    language: 'en',
-    translations: ['ja'],
-    audience: 'developers',
-    tags: ['webhooks', 'api', 'integration', 'events'],
-    views: 23450,
-    helpfulCount: 2156,
-    notHelpfulCount: 78,
-    avgRating: 4.8,
-    readTime: 15,
-    relatedArticles: ['art-5', 'art-9'],
-    version: 11,
-    publishedAt: '2024-08-05T11:00:00Z',
-    updatedAt: '2024-12-17T14:00:00Z',
-    createdAt: '2024-07-01T10:00:00Z',
-    featured: false,
-    pinned: false
-  },
-  {
-    id: 'art-9',
-    title: 'Best Practices for Team Collaboration',
-    slug: 'best-practices-team-collaboration',
-    excerpt: 'Learn how to effectively collaborate with your team using our platform.',
-    content: 'Collaboration best practices...',
-    type: 'guide',
-    status: 'draft',
-    format: 'text',
-    categoryId: 'cat-2',
-    subcategoryId: 'sub-4',
-    collectionId: 'col-2',
-    author: { id: 'auth-1', name: 'Sarah Chen', avatar: '/avatars/sarah.jpg', role: 'Documentation Lead' },
-    language: 'en',
-    translations: [],
-    audience: 'team',
-    tags: ['collaboration', 'teams', 'best-practices'],
-    views: 0,
-    helpfulCount: 0,
-    notHelpfulCount: 0,
-    avgRating: 0,
-    readTime: 7,
-    relatedArticles: [],
-    version: 1,
-    publishedAt: '',
-    updatedAt: '2024-12-23T09:00:00Z',
-    createdAt: '2024-12-20T10:00:00Z',
-    featured: false,
-    pinned: false
-  },
-  {
-    id: 'art-10',
-    title: 'Enterprise SSO Configuration',
-    slug: 'enterprise-sso-configuration',
-    excerpt: 'Set up Single Sign-On for your enterprise organization.',
-    content: 'SSO configuration guide...',
-    type: 'guide',
-    status: 'review',
-    format: 'text',
-    categoryId: 'cat-6',
-    subcategoryId: 'sub-17',
-    collectionId: 'col-4',
-    author: { id: 'auth-4', name: 'Alex Rivera', avatar: '/avatars/alex.jpg', role: 'Developer Advocate' },
-    language: 'en',
-    translations: [],
-    audience: 'enterprise',
-    tags: ['enterprise', 'sso', 'security', 'authentication'],
-    views: 0,
-    helpfulCount: 0,
-    notHelpfulCount: 0,
-    avgRating: 0,
-    readTime: 12,
-    relatedArticles: ['art-5'],
-    version: 3,
-    publishedAt: '',
-    updatedAt: '2024-12-22T16:00:00Z',
-    createdAt: '2024-12-15T11:00:00Z',
-    featured: false,
-    pinned: false
-  }
-]
-
-const mockFeedback: Feedback[] = [
-  { id: 'fb-1', articleId: 'art-1', type: 'helpful', comment: 'Very clear instructions!', userId: 'user-1', createdAt: '2024-12-23T10:00:00Z' },
-  { id: 'fb-2', articleId: 'art-1', type: 'helpful', createdAt: '2024-12-23T09:30:00Z' },
-  { id: 'fb-3', articleId: 'art-6', type: 'not_helpful', comment: 'Steps didnt work for me', userEmail: 'user@example.com', createdAt: '2024-12-22T15:00:00Z' },
-  { id: 'fb-4', articleId: 'art-3', type: 'needs_update', comment: 'Pricing info is outdated', createdAt: '2024-12-21T11:00:00Z' },
-  { id: 'fb-5', articleId: 'art-5', type: 'helpful', createdAt: '2024-12-23T08:00:00Z' }
-]
-
-const mockAnalytics: Analytics = {
-  totalViews: 458920,
-  totalArticles: 323,
-  publishedArticles: 289,
-  draftArticles: 34,
-  avgHelpfulRate: 92.4,
-  searchVolume: 12450,
-  topSearchQueries: [
-    { query: 'password reset', count: 1245, hasResults: true },
-    { query: 'billing', count: 987, hasResults: true },
-    { query: 'api authentication', count: 756, hasResults: true },
-    { query: 'integrations', count: 654, hasResults: true },
-    { query: 'webhook setup', count: 543, hasResults: true },
-    { query: 'sso configuration', count: 432, hasResults: true },
-    { query: 'export data', count: 321, hasResults: false },
-    { query: 'mobile app', count: 298, hasResults: false }
-  ],
-  viewsByDay: [
-    { date: '2024-12-17', views: 12450 },
-    { date: '2024-12-18', views: 14230 },
-    { date: '2024-12-19', views: 13890 },
-    { date: '2024-12-20', views: 15670 },
-    { date: '2024-12-21', views: 8920 },
-    { date: '2024-12-22', views: 9450 },
-    { date: '2024-12-23', views: 11230 }
-  ],
-  topArticles: [
-    { articleId: 'art-4', title: 'Video: Platform Overview Tour', views: 67890 },
-    { articleId: 'art-6', title: 'Troubleshooting Login Issues', views: 54320 },
-    { articleId: 'art-1', title: 'Getting Started with FreeFlow Kazi', views: 45230 },
-    { articleId: 'art-5', title: 'API Authentication Guide', views: 41230 },
-    { articleId: 'art-7', title: 'Password Reset FAQ', views: 38670 }
-  ],
-  feedbackTrends: [
-    { date: '2024-12-17', helpful: 234, notHelpful: 18 },
-    { date: '2024-12-18', helpful: 267, notHelpful: 21 },
-    { date: '2024-12-19', helpful: 245, notHelpful: 15 },
-    { date: '2024-12-20', helpful: 289, notHelpful: 23 },
-    { date: '2024-12-21', helpful: 156, notHelpful: 12 },
-    { date: '2024-12-22', helpful: 178, notHelpful: 14 },
-    { date: '2024-12-23', helpful: 198, notHelpful: 16 }
-  ],
-  selfServiceRate: 76.8,
-  avgReadTime: 4.2,
-  bounceRate: 23.5
+const emptyAnalytics: Analytics = {
+  totalViews: 0,
+  totalArticles: 0,
+  publishedArticles: 0,
+  draftArticles: 0,
+  avgHelpfulRate: 0,
+  searchVolume: 0,
+  topSearchQueries: [],
+  viewsByDay: [],
+  topArticles: [],
+  feedbackTrends: [],
+  selfServiceRate: 0,
+  avgReadTime: 0,
+  bounceRate: 0
 }
 
 // ============================================================================
@@ -774,31 +285,16 @@ const getHelpfulRate = (helpful: number, notHelpful: number) => {
 }
 
 // ============================================================================
-// COMPETITIVE UPGRADE MOCK DATA - Intercom/Zendesk Guide Level Intelligence
+// EMPTY ARRAYS FOR COMPETITIVE UPGRADE COMPONENTS - Real data loaded from Supabase
 // ============================================================================
 
-const mockHelpCenterAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Self-Service Rate', description: '78% of users find answers without contacting support!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Metrics' },
-  { id: '2', type: 'warning' as const, title: 'Outdated Content', description: '12 articles need review - last updated 90+ days ago.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Quality' },
-  { id: '3', type: 'info' as const, title: 'AI Suggestion', description: '"API authentication" is trending - create a guide.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'AI Insights' },
-]
+const helpCenterAIInsights: { id: string; type: 'success' | 'warning' | 'info'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
 
-const mockHelpCenterCollaborators = [
-  { id: '1', name: 'Content Lead', avatar: '/avatars/content.jpg', status: 'online' as const, role: 'Lead' },
-  { id: '2', name: 'Tech Writer', avatar: '/avatars/writer.jpg', status: 'online' as const, role: 'Writer' },
-  { id: '3', name: 'Support Lead', avatar: '/avatars/support.jpg', status: 'away' as const, role: 'Support' },
-]
+const helpCenterCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }[] = []
 
-const mockHelpCenterPredictions = [
-  { id: '1', title: 'Ticket Deflection', prediction: 'New FAQ articles will reduce tickets by 20%', confidence: 86, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Search Success', prediction: 'Search improvements will boost find rate to 85%', confidence: 79, trend: 'up' as const, impact: 'medium' as const },
-]
+const helpCenterPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: 'low' | 'medium' | 'high' }[] = []
 
-const mockHelpCenterActivities = [
-  { id: '1', user: 'Content Lead', action: 'Published', target: 'Getting Started guide v2', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Tech Writer', action: 'Updated', target: 'API troubleshooting article', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'Support Lead', action: 'Flagged', target: '3 articles for review', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
-]
+const helpCenterActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' }[] = []
 
 // Quick actions will be defined inside the component to access state setters
 
@@ -822,9 +318,9 @@ export default function HelpCenterClient() {
   const [categories, setCategories] = useState<Category[]>([])
   const [collections, setCollections] = useState<Collection[]>([])
 
-  // Mock data kept for now (will be migrated with dedicated hooks later)
-  const [analytics] = useState<Analytics>(mockAnalytics)
-  const [feedback, setFeedback] = useState<Feedback[]>(mockFeedback)
+  // Analytics and feedback state - real data loaded from Supabase
+  const [analytics] = useState<Analytics>(emptyAnalytics)
+  const [feedback, setFeedback] = useState<Feedback[]>([])
 
   // UI state
   const [activeTab, setActiveTab] = useState('articles')
@@ -872,12 +368,8 @@ export default function HelpCenterClient() {
   const [newCollectionIcon, setNewCollectionIcon] = useState('')
   const [newCollectionAudience, setNewCollectionAudience] = useState<AudienceType>('all')
 
-  // Tags management state
-  const [allTags, setAllTags] = useState<string[]>(() => {
-    const tags = new Set<string>()
-    mockArticles.forEach(a => a.tags.forEach(t => tags.add(t)))
-    return Array.from(tags)
-  })
+  // Tags management state - populated from articles data
+  const [allTags, setAllTags] = useState<string[]>([])
   const [newTagName, setNewTagName] = useState('')
 
   // Schedule state
@@ -2519,18 +2011,18 @@ export default function HelpCenterClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockHelpCenterAIInsights}
+              insights={helpCenterAIInsights}
               title="Help Center Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockHelpCenterCollaborators}
+              collaborators={helpCenterCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockHelpCenterPredictions}
+              predictions={helpCenterPredictions}
               title="Content Forecasts"
             />
           </div>
@@ -2538,7 +2030,7 @@ export default function HelpCenterClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockHelpCenterActivities}
+            activities={helpCenterActivities}
             title="Help Center Activity"
             maxItems={5}
           />

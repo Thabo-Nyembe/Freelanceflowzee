@@ -218,49 +218,55 @@ const getDefaultIcon = (category: string) => {
   return icons[category] || 'plug'
 }
 
-// Enhanced Competitive Upgrade Data
-const mockIntegrationsAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Sync Status', description: 'All integrations syncing successfully.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Status' },
-  { id: '2', type: 'info' as const, title: 'API Usage', description: '85% of monthly API quota used. 5 days remaining.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Usage' },
-  { id: '3', type: 'warning' as const, title: 'Auth Expiring', description: '3 OAuth tokens expire in 7 days. Re-auth required.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Authentication' },
-]
+// Integration AI Insights - empty array (no mock data)
+const integrationsAIInsights: Array<{
+  id: string
+  type: 'success' | 'info' | 'warning' | 'error' | 'recommendation' | 'alert' | 'opportunity' | 'prediction'
+  title: string
+  description: string
+  priority: 'high' | 'medium' | 'low'
+  timestamp: string
+  category: string
+}> = []
 
-const mockIntegrationsCollaborators = [
-  { id: '1', name: 'Integration Lead', avatar: '/avatars/mike.jpg', status: 'online' as const, role: 'Engineering', lastActive: 'Now' },
-  { id: '2', name: 'API Developer', avatar: '/avatars/alex.jpg', status: 'online' as const, role: 'Development', lastActive: '15m ago' },
-  { id: '3', name: 'Solutions Arch', avatar: '/avatars/marcus.jpg', status: 'away' as const, role: 'Architecture', lastActive: '1h ago' },
-]
+// Integration Collaborators - empty array (no mock data)
+const integrationsCollaborators: Array<{
+  id: string
+  name: string
+  avatar?: string
+  status: 'online' | 'away' | 'offline'
+  role?: string
+  lastActive?: string
+}> = []
 
-const mockIntegrationsPredictions = [
-  { id: '1', label: 'Active Zaps', current: 48, target: 60, predicted: 55, confidence: 82, trend: 'up' as const },
-  { id: '2', label: 'Success Rate', current: 97, target: 99, predicted: 98, confidence: 88, trend: 'up' as const },
-  { id: '3', label: 'Latency (ms)', current: 250, target: 200, predicted: 220, confidence: 75, trend: 'down' as const },
-]
+// Integration Predictions - empty array (no mock data)
+const integrationsPredictions: Array<{
+  id: string
+  label: string
+  current: number
+  target: number
+  predicted: number
+  confidence: number
+  trend: 'up' | 'down' | 'stable'
+}> = []
 
-const mockIntegrationsActivities = [
-  { id: '1', user: 'Integration Lead', action: 'connected', target: 'Salesforce CRM', timestamp: '20m ago', type: 'success' as const },
-  { id: '2', user: 'API Developer', action: 'debugged', target: 'Slack webhook failure', timestamp: '1h ago', type: 'info' as const },
-  { id: '3', user: 'System', action: 'triggered', target: '150 automation tasks', timestamp: '3h ago', type: 'success' as const },
-]
+// Integration Activities - empty array (no mock data)
+const integrationsActivities: Array<{
+  id: string
+  type: 'comment' | 'update' | 'create' | 'delete' | 'mention' | 'assignment' | 'status_change' | 'milestone' | 'integration'
+  action?: string
+  target?: string
+  timestamp: string | Date
+  user: {
+    id: string
+    name: string
+    avatar?: string
+  }
+  isRead?: boolean
+}> = []
 
-// Mock tasks for history (will be replaced with real data when workflow_executions table is available)
-const mockTasks: Task[] = [
-  {
-    id: 'task-1',
-    zapId: 'zap-1',
-    zapName: 'New Lead to Slack + Sheets',
-    status: 'success',
-    startedAt: new Date().toISOString(),
-    completedAt: new Date().toISOString(),
-    duration: 1.8,
-    steps: [
-      { stepId: 'step-1', stepName: 'Trigger: New Lead', status: 'success', data: { leadId: 'LD-001' } },
-      { stepId: 'step-2', stepName: 'Slack: Send Message', status: 'success', data: { messageTs: '123456' } },
-    ],
-    dataIn: { leadId: 'LD-001', name: 'John Smith', email: 'john@example.com' },
-    dataOut: { slackMessageId: '123456' }
-  },
-]
+// Tasks for history - empty array (no mock data)
+const tasks: Task[] = []
 
 export default function IntegrationsClient() {
   const [activeTab, setActiveTab] = useState('zaps')
@@ -383,7 +389,7 @@ export default function IntegrationsClient() {
   }, [workflows, searchTerm, zapFilter])
 
   const filteredTasks = useMemo(() => {
-    return mockTasks.filter(task => {
+    return tasks.filter(task => {
       return task.zapName.toLowerCase().includes(searchTerm.toLowerCase())
     })
   }, [searchTerm])
@@ -636,13 +642,14 @@ export default function IntegrationsClient() {
     })
   }
 
-  // Quick actions
-  const mockIntegrationsQuickActions = [
-    { id: '1', label: 'New Zap', icon: 'Zap', shortcut: 'N', action: () => setShowCreateZapDialog(true) },
-    { id: '2', label: 'Apps', icon: 'Grid', shortcut: 'A', action: () => setShowCreateIntegrationDialog(true) },
-    { id: '3', label: 'Webhooks', icon: 'Webhook', shortcut: 'W', action: () => setShowCreateWebhookDialog(true) },
-    { id: '4', label: 'Refresh', icon: 'RefreshCw', shortcut: 'R', action: () => { fetchIntegrations(); fetchWorkflows(); fetchWebhooks() } },
-  ]
+  // Quick actions - empty array (no mock data)
+  const integrationsQuickActions: Array<{
+    id: string
+    label: string
+    icon: string
+    shortcut?: string
+    action: () => void
+  }> = []
 
   const isLoading = integrationsLoading || workflowsLoading || webhooksLoading
 
@@ -1204,7 +1211,7 @@ export default function IntegrationsClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
                 { icon: RefreshCw, label: 'Retry Failed', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: () => {
-                  const failedTasks = mockTasks.filter(t => t.status === 'failed')
+                  const failedTasks = tasks.filter(t => t.status === 'failed')
                   if (failedTasks.length === 0) {
                     toast.info('No failed tasks to retry')
                     return
@@ -1214,8 +1221,8 @@ export default function IntegrationsClient() {
                   }
                 } },
                 { icon: Play, label: 'Replay', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => {
-                  if (mockTasks.length > 0) {
-                    setSelectedTask(mockTasks[0])
+                  if (tasks.length > 0) {
+                    setSelectedTask(tasks[0])
                     toast.info('Select a task below to replay')
                   } else {
                     toast.info('No tasks available to replay')
@@ -1236,8 +1243,8 @@ export default function IntegrationsClient() {
                   }
                 } },
                 { icon: Eye, label: 'Details', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => {
-                  if (mockTasks[0]) {
-                    setSelectedTask(mockTasks[0])
+                  if (tasks[0]) {
+                    setSelectedTask(tasks[0])
                   } else {
                     toast.info('No tasks available')
                   }
@@ -1245,7 +1252,7 @@ export default function IntegrationsClient() {
                 { icon: BarChart3, label: 'Analytics', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => setActiveTab('analytics') },
                 { icon: Download, label: 'Export', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => {
                   try {
-                    const data = JSON.stringify(mockTasks, null, 2)
+                    const data = JSON.stringify(tasks, null, 2)
                     const blob = new Blob([data], { type: 'application/json' })
                     const url = URL.createObjectURL(blob)
                     const a = document.createElement('a')
@@ -1261,7 +1268,7 @@ export default function IntegrationsClient() {
                   }
                 } },
                 { icon: Trash2, label: 'Clear', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', onClick: () => {
-                  if (mockTasks.length === 0) {
+                  if (tasks.length === 0) {
                     toast.info('Task history is already empty')
                     return
                   }
@@ -1919,18 +1926,18 @@ export default function IntegrationsClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockIntegrationsAIInsights}
+              insights={integrationsAIInsights}
               title="Integrations Intelligence"
               onInsightAction={(_insight) => toast.info(`Processing: ${insight.title}`)}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockIntegrationsCollaborators}
+              collaborators={integrationsCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockIntegrationsPredictions}
+              predictions={integrationsPredictions}
               title="Integration Forecasts"
             />
           </div>
@@ -1938,12 +1945,12 @@ export default function IntegrationsClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockIntegrationsActivities}
+            activities={integrationsActivities}
             title="Integration Activity"
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockIntegrationsQuickActions}
+            actions={integrationsQuickActions}
             variant="grid"
           />
         </div>

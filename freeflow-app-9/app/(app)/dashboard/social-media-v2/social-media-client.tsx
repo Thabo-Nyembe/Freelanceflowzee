@@ -174,207 +174,122 @@ interface Hashtag {
   competitors: number
 }
 
-// Mock Data
-const mockPosts: SocialPost[] = [
-  {
-    id: '1',
-    content: 'Excited to announce our new product launch! 🚀 Stay tuned for more updates. #innovation #tech #launch',
-    contentType: 'image',
-    platforms: ['twitter', 'facebook', 'instagram', 'linkedin'],
-    status: 'published',
-    scheduledAt: null,
-    publishedAt: '2024-01-15T10:00:00Z',
-    mediaUrls: ['/posts/product-launch.jpg'],
-    hashtags: ['innovation', 'tech', 'launch'],
-    mentions: ['@techcrunch', '@producthunt'],
-    link: 'https://example.com/launch',
-    likes: 1523,
-    comments: 234,
-    shares: 156,
-    saves: 89,
-    views: 25400,
-    clicks: 1245,
-    engagementRate: 8.5,
-    reach: 45000,
-    impressions: 78000,
-    isTrending: true,
-    createdBy: 'Sarah Johnson',
-    approvedBy: 'Mike Chen'
-  },
-  {
-    id: '2',
-    content: 'Behind the scenes look at our team working on the next big thing! 👀 #teamwork #behindthescenes',
-    contentType: 'video',
-    platforms: ['instagram', 'tiktok', 'youtube'],
-    status: 'published',
-    scheduledAt: null,
-    publishedAt: '2024-01-14T15:30:00Z',
-    mediaUrls: ['/posts/bts-video.mp4'],
-    hashtags: ['teamwork', 'behindthescenes'],
-    mentions: [],
-    link: null,
-    likes: 2890,
-    comments: 445,
-    shares: 234,
-    saves: 178,
-    views: 45600,
-    clicks: 890,
-    engagementRate: 9.2,
-    reach: 52000,
-    impressions: 89000,
-    isTrending: true,
-    createdBy: 'Alex Rivera',
-    approvedBy: 'Sarah Johnson'
-  },
-  {
-    id: '3',
-    content: 'Join us for our upcoming webinar on digital transformation. Link in bio! 📅',
-    contentType: 'carousel',
-    platforms: ['linkedin', 'twitter', 'facebook'],
-    status: 'scheduled',
-    scheduledAt: '2024-01-20T14:00:00Z',
-    publishedAt: null,
-    mediaUrls: ['/posts/webinar-1.jpg', '/posts/webinar-2.jpg', '/posts/webinar-3.jpg'],
-    hashtags: ['webinar', 'digital', 'transformation'],
-    mentions: ['@microsoft', '@google'],
-    link: 'https://example.com/webinar',
-    likes: 0,
-    comments: 0,
-    shares: 0,
-    saves: 0,
-    views: 0,
-    clicks: 0,
-    engagementRate: 0,
-    reach: 0,
-    impressions: 0,
-    isTrending: false,
-    createdBy: 'Jordan Lee',
-    approvedBy: null
-  },
-  {
-    id: '4',
-    content: 'Customer success story: How Company X increased their revenue by 200%! 📈',
-    contentType: 'text',
-    platforms: ['twitter', 'linkedin'],
-    status: 'pending_approval',
-    scheduledAt: '2024-01-18T09:00:00Z',
-    publishedAt: null,
-    mediaUrls: [],
-    hashtags: ['success', 'casestudy', 'growth'],
-    mentions: ['@companyx'],
-    link: 'https://example.com/case-study',
-    likes: 0,
-    comments: 0,
-    shares: 0,
-    saves: 0,
-    views: 0,
-    clicks: 0,
-    engagementRate: 0,
-    reach: 0,
-    impressions: 0,
-    isTrending: false,
-    createdBy: 'Emily Davis',
-    approvedBy: null
-  },
-  {
-    id: '5',
-    content: 'Happy Friday! What are your plans for the weekend? Drop a comment below! 🎉',
-    contentType: 'poll',
-    platforms: ['twitter', 'instagram'],
-    status: 'draft',
-    scheduledAt: null,
-    publishedAt: null,
-    mediaUrls: [],
-    hashtags: ['fridayvibes', 'weekend'],
-    mentions: [],
-    link: null,
-    likes: 0,
-    comments: 0,
-    shares: 0,
-    saves: 0,
-    views: 0,
-    clicks: 0,
-    engagementRate: 0,
-    reach: 0,
-    impressions: 0,
-    isTrending: false,
-    createdBy: 'Chris Taylor',
-    approvedBy: null
+// Supabase client
+const supabase = createClient()
+
+// Types for competitive upgrade components
+interface AIInsight {
+  id: string
+  type: 'recommendation' | 'alert' | 'opportunity' | 'prediction' | 'success' | 'info' | 'warning' | 'error'
+  title: string
+  description: string
+  impact?: 'high' | 'medium' | 'low'
+  priority?: 'high' | 'medium' | 'low'
+  metric?: string
+  change?: number
+  confidence?: number
+  action?: string
+  category?: string
+  timestamp?: string | Date
+  createdAt?: Date
+}
+
+interface Collaborator {
+  id: string
+  name: string
+  avatar?: string
+  color?: string
+  status: 'online' | 'away' | 'offline'
+  role?: string
+  isTyping?: boolean
+  lastSeen?: Date
+  lastActive?: string | Date
+  cursor?: { x: number; y: number }
+}
+
+interface Prediction {
+  id?: string
+  label?: string
+  title?: string
+  prediction?: string
+  current?: number
+  target?: number
+  currentValue?: number
+  predictedValue?: number
+  predicted?: number
+  confidence: number
+  trend: 'up' | 'down' | 'stable'
+  timeframe?: string
+  impact?: string
+  factors?: Array<{ name: string; impact: 'positive' | 'negative' | 'neutral'; weight: number }> | string[]
+}
+
+interface ActivityItem {
+  id: string
+  type: 'comment' | 'update' | 'create' | 'delete' | 'mention' | 'assignment' | 'status_change' | 'milestone' | 'integration'
+  title?: string
+  action?: string
+  description?: string
+  user: {
+    id: string
+    name: string
+    avatar?: string
   }
-]
+  target?: {
+    type: string
+    name: string
+    url?: string
+  }
+  metadata?: Record<string, unknown>
+  timestamp: Date | string
+  isRead?: boolean
+  isPinned?: boolean
+  actions?: Array<{
+    label: string
+    action: () => void
+    variant?: 'default' | 'destructive'
+  }>
+}
 
-const mockAccounts: SocialAccount[] = [
-  { id: '1', platform: 'twitter', username: '@ourcompany', displayName: 'Our Company', avatar: '/avatars/twitter.png', followers: 45200, following: 1200, posts: 3450, isVerified: true, isConnected: true, lastSync: '2024-01-15T12:00:00Z', engagementRate: 4.5 },
-  { id: '2', platform: 'facebook', username: 'ourcompany', displayName: 'Our Company', avatar: '/avatars/facebook.png', followers: 125000, following: 0, posts: 2100, isVerified: true, isConnected: true, lastSync: '2024-01-15T12:00:00Z', engagementRate: 3.2 },
-  { id: '3', platform: 'instagram', username: '@our.company', displayName: 'Our Company', avatar: '/avatars/instagram.png', followers: 89500, following: 450, posts: 1890, isVerified: true, isConnected: true, lastSync: '2024-01-15T12:00:00Z', engagementRate: 6.8 },
-  { id: '4', platform: 'linkedin', username: 'our-company', displayName: 'Our Company', avatar: '/avatars/linkedin.png', followers: 35000, following: 200, posts: 890, isVerified: false, isConnected: true, lastSync: '2024-01-15T12:00:00Z', engagementRate: 5.1 },
-  { id: '5', platform: 'tiktok', username: '@ourcompany', displayName: 'Our Company', avatar: '/avatars/tiktok.png', followers: 156000, following: 50, posts: 245, isVerified: true, isConnected: true, lastSync: '2024-01-15T12:00:00Z', engagementRate: 12.3 },
-  { id: '6', platform: 'youtube', username: 'OurCompanyOfficial', displayName: 'Our Company', avatar: '/avatars/youtube.png', followers: 78000, following: 0, posts: 180, isVerified: true, isConnected: true, lastSync: '2024-01-15T12:00:00Z', engagementRate: 7.5 }
-]
+interface Notification {
+  id: string
+  title: string
+  message: string
+  time: string
+  type: 'success' | 'warning' | 'info' | 'error'
+  read: boolean
+}
 
-const mockCampaigns: Campaign[] = [
-  { id: '1', name: 'Product Launch 2024', description: 'Q1 product launch campaign', status: 'active', startDate: '2024-01-01', endDate: '2024-01-31', budget: 10000, spent: 6500, posts: 25, reach: 450000, engagement: 45000, conversions: 1250, hashtags: ['launch2024', 'newproduct'] },
-  { id: '2', name: 'Brand Awareness', description: 'Ongoing brand awareness initiative', status: 'active', startDate: '2024-01-01', endDate: '2024-03-31', budget: 25000, spent: 8500, posts: 45, reach: 890000, engagement: 78000, conversions: 3200, hashtags: ['brandawareness', 'ourcompany'] },
-  { id: '3', name: 'Holiday Promo', description: 'End of year holiday promotion', status: 'completed', startDate: '2023-12-01', endDate: '2023-12-31', budget: 15000, spent: 14500, posts: 35, reach: 650000, engagement: 52000, conversions: 2800, hashtags: ['holiday', 'promo'] },
-  { id: '4', name: 'Q2 Content Plan', description: 'Q2 content strategy', status: 'draft', startDate: '2024-04-01', endDate: '2024-06-30', budget: 20000, spent: 0, posts: 0, reach: 0, engagement: 0, conversions: 0, hashtags: ['Q2', 'content'] }
-]
+interface Integration {
+  id: string
+  name: string
+  description: string
+  category: string
+  connected: boolean
+  icon: React.ElementType
+}
 
-const mockMentions: Mention[] = [
-  { id: '1', platform: 'twitter', username: '@happycustomer', avatar: '/mentions/user1.jpg', content: 'Just tried @ourcompany product and absolutely love it! Best purchase ever! 💯', sentiment: 'positive', followers: 12500, timestamp: '2024-01-15T11:30:00Z', isReplied: true, postUrl: 'https://twitter.com/status/1' },
-  { id: '2', platform: 'instagram', username: '@influencer_jane', avatar: '/mentions/user2.jpg', content: 'Partnering with @our.company for this amazing giveaway! Stay tuned 🎁', sentiment: 'positive', followers: 89000, timestamp: '2024-01-15T10:15:00Z', isReplied: false, postUrl: 'https://instagram.com/p/2' },
-  { id: '3', platform: 'twitter', username: '@techreviewer', avatar: '/mentions/user3.jpg', content: 'The new update from @ourcompany has some issues. Hoping they fix it soon.', sentiment: 'negative', followers: 45000, timestamp: '2024-01-15T09:00:00Z', isReplied: true, postUrl: 'https://twitter.com/status/3' },
-  { id: '4', platform: 'linkedin', username: 'industry_expert', avatar: '/mentions/user4.jpg', content: 'Great insights from the Our Company team on digital transformation.', sentiment: 'neutral', followers: 25000, timestamp: '2024-01-14T16:45:00Z', isReplied: false, postUrl: 'https://linkedin.com/post/4' },
-  { id: '5', platform: 'facebook', username: 'Local Business', avatar: '/mentions/user5.jpg', content: 'We highly recommend Our Company for all your needs!', sentiment: 'positive', followers: 5600, timestamp: '2024-01-14T14:20:00Z', isReplied: true, postUrl: 'https://facebook.com/post/5' }
-]
-
-const mockAssets: ContentAsset[] = [
-  { id: '1', name: 'Product Hero Image', type: 'image', url: '/assets/hero.jpg', thumbnail: '/assets/hero-thumb.jpg', size: 2.5e6, dimensions: '1920x1080', createdAt: '2024-01-10T09:00:00Z', usageCount: 12, tags: ['product', 'hero', 'launch'] },
-  { id: '2', name: 'Team Video', type: 'video', url: '/assets/team.mp4', thumbnail: '/assets/team-thumb.jpg', size: 45e6, dimensions: '1920x1080', createdAt: '2024-01-08T11:00:00Z', usageCount: 5, tags: ['team', 'culture', 'bts'] },
-  { id: '3', name: 'Logo Pack', type: 'graphic', url: '/assets/logo-pack.zip', thumbnail: '/assets/logo-thumb.png', size: 8e6, dimensions: 'Various', createdAt: '2024-01-05T08:00:00Z', usageCount: 25, tags: ['logo', 'branding'] },
-  { id: '4', name: 'Podcast Intro', type: 'audio', url: '/assets/intro.mp3', thumbnail: '/assets/audio-thumb.png', size: 3.5e6, dimensions: 'N/A', createdAt: '2024-01-12T14:00:00Z', usageCount: 8, tags: ['podcast', 'audio', 'intro'] }
-]
-
-const mockHashtags: Hashtag[] = [
-  { id: '1', tag: '#innovation', posts: 125, reach: 450000, engagement: 45000, trend: 'up', competitors: 8 },
-  { id: '2', tag: '#tech', posts: 89, reach: 320000, engagement: 28000, trend: 'stable', competitors: 12 },
-  { id: '3', tag: '#launch2024', posts: 45, reach: 180000, engagement: 15000, trend: 'up', competitors: 3 },
-  { id: '4', tag: '#digital', posts: 67, reach: 250000, engagement: 22000, trend: 'down', competitors: 15 },
-  { id: '5', tag: '#success', posts: 34, reach: 120000, engagement: 9500, trend: 'stable', competitors: 6 }
-]
-
-// Enhanced Competitive Upgrade Mock Data
-const mockSocialMediaAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Engagement Spike', description: 'Instagram engagement up 45% this week. Carousel posts performing best.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Engagement' },
-  { id: '2', type: 'info' as const, title: 'Optimal Posting', description: 'Best time to post: 9 AM and 6 PM for your audience.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Timing' },
-  { id: '3', type: 'warning' as const, title: 'Competitor Alert', description: 'Competitor launched similar campaign. Consider differentiation.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Competition' },
-]
-
-const mockSocialMediaCollaborators = [
-  { id: '1', name: 'Content Lead', avatar: '/avatars/content.jpg', status: 'online' as const, role: 'Lead' },
-  { id: '2', name: 'Designer', avatar: '/avatars/design.jpg', status: 'online' as const, role: 'Designer' },
-  { id: '3', name: 'Copywriter', avatar: '/avatars/copy.jpg', status: 'busy' as const, role: 'Writer' },
-]
-
-const mockSocialMediaPredictions = [
-  { id: '1', title: 'Follower Growth', prediction: '+5,000 followers projected this month', confidence: 85, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Viral Potential', prediction: 'Scheduled reel has 40% viral potential', confidence: 68, trend: 'up' as const, impact: 'medium' as const },
-]
-
-const mockSocialMediaActivities = [
-  { id: '1', user: 'AI Assistant', action: 'Optimized hashtags for', target: 'Campaign #Launch2024', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Scheduler', action: 'Published post to', target: 'Instagram, Twitter', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'Analytics', action: 'Report generated for', target: 'Weekly Performance', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
-]
+// Empty arrays with proper typing (no mock data)
+const emptyPosts: SocialPost[] = []
+const emptyAccounts: SocialAccount[] = []
+const emptyCampaigns: Campaign[] = []
+const emptyMentions: Mention[] = []
+const emptyAssets: ContentAsset[] = []
+const emptyHashtags: Hashtag[] = []
+const emptyAIInsights: AIInsight[] = []
+const emptyCollaborators: Collaborator[] = []
+const emptyPredictions: Prediction[] = []
+const emptyActivities: ActivityItem[] = []
 
 // Quick actions are defined inside the component to access state setters
 
 export default function SocialMediaClient() {
-  const [posts, setPosts] = useState<SocialPost[]>(mockPosts)
-  const [accounts, setAccounts] = useState<SocialAccount[]>(mockAccounts)
-  const [campaigns, setCampaigns] = useState<Campaign[]>(mockCampaigns)
-  const [mentions, setMentions] = useState<Mention[]>(mockMentions)
-  const [assets] = useState<ContentAsset[]>(mockAssets)
-  const [hashtags] = useState<Hashtag[]>(mockHashtags)
+  const [posts, setPosts] = useState<SocialPost[]>(emptyPosts)
+  const [accounts, setAccounts] = useState<SocialAccount[]>(emptyAccounts)
+  const [campaigns, setCampaigns] = useState<Campaign[]>(emptyCampaigns)
+  const [mentions, setMentions] = useState<Mention[]>(emptyMentions)
+  const [assets] = useState<ContentAsset[]>(emptyAssets)
+  const [hashtags] = useState<Hashtag[]>(emptyHashtags)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedPost, setSelectedPost] = useState<SocialPost | null>(null)
   const [selectedAccount, setSelectedAccount] = useState<SocialAccount | null>(null)
@@ -409,26 +324,11 @@ export default function SocialMediaClient() {
   const [inviteEmail, setInviteEmail] = useState('')
   const [inviteRole, setInviteRole] = useState('publisher')
 
-  // Notifications mock data
-  const notifications = [
-    { id: '1', title: 'Post went viral!', message: 'Your product launch post reached 50K impressions', time: '5 min ago', type: 'success' as const, read: false },
-    { id: '2', title: 'Pending approval', message: '3 posts are waiting for review', time: '1 hour ago', type: 'warning' as const, read: false },
-    { id: '3', title: 'New mention', message: '@techreviewer mentioned you in a tweet', time: '2 hours ago', type: 'info' as const, read: true },
-    { id: '4', title: 'Scheduled post published', message: 'Your webinar announcement is now live', time: '3 hours ago', type: 'success' as const, read: true },
-    { id: '5', title: 'Account sync complete', message: 'All social accounts synced successfully', time: '5 hours ago', type: 'info' as const, read: true },
-  ]
+  // Notifications - empty array with proper typing
+  const notifications: Notification[] = []
 
-  // Available integrations
-  const availableIntegrations = [
-    { id: '1', name: 'Canva', description: 'Design graphics and visuals', category: 'Design', connected: true, icon: PenTool },
-    { id: '2', name: 'Google Analytics', description: 'Track website traffic from social', category: 'Analytics', connected: true, icon: BarChart3 },
-    { id: '3', name: 'Slack', description: 'Get notifications in Slack channels', category: 'Communication', connected: false, icon: MessageSquare },
-    { id: '4', name: 'Shopify', description: 'Sync products for social commerce', category: 'E-commerce', connected: false, icon: Link2 },
-    { id: '5', name: 'Zapier', description: 'Connect with 5000+ apps', category: 'Automation', connected: false, icon: Zap },
-    { id: '6', name: 'HubSpot', description: 'CRM integration for leads', category: 'CRM', connected: false, icon: Users },
-    { id: '7', name: 'Mailchimp', description: 'Email marketing integration', category: 'Marketing', connected: false, icon: Send },
-    { id: '8', name: 'Unsplash', description: 'Free stock photos', category: 'Media', connected: false, icon: Image },
-  ]
+  // Available integrations - empty array with proper typing
+  const availableIntegrations: Integration[] = []
 
   // Stats
   const stats = useMemo(() => {
@@ -2313,18 +2213,18 @@ export default function SocialMediaClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockSocialMediaAIInsights}
+              insights={emptyAIInsights}
               title="Social Media Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockSocialMediaCollaborators}
+              collaborators={emptyCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockSocialMediaPredictions}
+              predictions={emptyPredictions}
               title="Social Forecasts"
             />
           </div>
@@ -2332,7 +2232,7 @@ export default function SocialMediaClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockSocialMediaActivities}
+            activities={emptyActivities}
             title="Social Activity"
             maxItems={5}
           />

@@ -166,322 +166,27 @@ interface AuditClientProps {
   initialComplianceChecks: ComplianceCheck[]
 }
 
-// Mock enhanced data
-const mockLogEvents: LogEvent[] = [
-  {
-    id: '1',
-    action: 'access',
-    resource: 'user_data',
-    resource_id: 'user_12345',
-    actor_id: 'admin_001',
-    actor_email: 'admin@company.com',
-    actor_ip_address: '192.168.1.100',
-    event_timestamp: new Date().toISOString(),
-    severity: 'info',
-    status: 'success',
-    changes: {},
-    source: 'web_app',
-    sourcetype: 'access_log',
-    host: 'web-server-01',
-    index: 'main',
-    raw: '2024-01-15 10:23:45 INFO admin@company.com accessed user_data user_12345',
-    fields: { user_agent: 'Chrome/120', session_id: 'sess_abc123' }
-  },
-  {
-    id: '2',
-    action: 'update',
-    resource: 'settings',
-    resource_id: 'sys_config',
-    actor_id: 'admin_002',
-    actor_email: 'security@company.com',
-    actor_ip_address: '192.168.1.105',
-    event_timestamp: new Date(Date.now() - 300000).toISOString(),
-    severity: 'high',
-    status: 'success',
-    changes: { mfa_required: { old: false, new: true } },
-    source: 'admin_console',
-    sourcetype: 'config_change',
-    host: 'admin-server-01',
-    index: 'security',
-    raw: '2024-01-15 10:18:45 WARN security@company.com updated settings sys_config mfa_required=true',
-    fields: { change_type: 'security_policy' }
-  },
-  {
-    id: '3',
-    action: 'delete',
-    resource: 'api_key',
-    resource_id: 'key_xyz789',
-    actor_id: 'dev_003',
-    actor_email: 'developer@company.com',
-    actor_ip_address: '10.0.0.50',
-    event_timestamp: new Date(Date.now() - 600000).toISOString(),
-    severity: 'medium',
-    status: 'success',
-    changes: {},
-    source: 'api_gateway',
-    sourcetype: 'api_audit',
-    host: 'api-server-02',
-    index: 'api',
-    raw: '2024-01-15 10:13:45 INFO developer@company.com deleted api_key key_xyz789',
-    fields: { key_type: 'service_account' }
-  },
-  {
-    id: '4',
-    action: 'create',
-    resource: 'user',
-    resource_id: 'user_67890',
-    actor_id: 'hr_001',
-    actor_email: 'hr@company.com',
-    actor_ip_address: '192.168.1.200',
-    event_timestamp: new Date(Date.now() - 900000).toISOString(),
-    severity: 'low',
-    status: 'success',
-    changes: {},
-    source: 'hr_system',
-    sourcetype: 'user_management',
-    host: 'hr-server-01',
-    index: 'main',
-    raw: '2024-01-15 10:08:45 INFO hr@company.com created user user_67890',
-    fields: { department: 'Engineering', role: 'Developer' }
-  },
-  {
-    id: '5',
-    action: 'access',
-    resource: 'financial_report',
-    resource_id: 'report_q4_2024',
-    actor_id: 'exec_001',
-    actor_email: 'cfo@company.com',
-    actor_ip_address: '192.168.1.10',
-    event_timestamp: new Date(Date.now() - 1200000).toISOString(),
-    severity: 'info',
-    status: 'success',
-    changes: {},
-    source: 'reporting_service',
-    sourcetype: 'report_access',
-    host: 'report-server-01',
-    index: 'finance',
-    raw: '2024-01-15 10:03:45 INFO cfo@company.com accessed financial_report report_q4_2024',
-    fields: { report_type: 'quarterly', classification: 'confidential' }
-  }
-]
+// Empty typed arrays - no mock data
+const mockLogEvents: LogEvent[] = []
 
-const mockAlerts: Alert[] = [
-  {
-    id: 'alert_1',
-    name: 'Multiple Failed Logins',
-    description: 'Detects more than 5 failed login attempts within 10 minutes',
-    query: 'action=login status=failure | stats count by actor_email | where count > 5',
-    condition: 'count > 5',
-    priority: 'high',
-    status: 'active',
-    triggeredAt: new Date(Date.now() - 1800000).toISOString(),
-    eventCount: 12,
-    lastTriggered: new Date(Date.now() - 1800000).toISOString(),
-    schedule: '*/5 * * * *',
-    actions: ['email', 'slack', 'pagerduty']
-  },
-  {
-    id: 'alert_2',
-    name: 'Privileged Access Outside Hours',
-    description: 'Admin access detected outside business hours (6 PM - 8 AM)',
-    query: 'role=admin action=access | where hour < 8 OR hour > 18',
-    condition: 'any match',
-    priority: 'critical',
-    status: 'acknowledged',
-    triggeredAt: new Date(Date.now() - 7200000).toISOString(),
-    acknowledgedBy: 'security@company.com',
-    eventCount: 3,
-    lastTriggered: new Date(Date.now() - 7200000).toISOString(),
-    schedule: '0 * * * *',
-    actions: ['email', 'sms']
-  },
-  {
-    id: 'alert_3',
-    name: 'Mass Data Export',
-    description: 'Large data export detected (>1000 records)',
-    query: 'action=export | where record_count > 1000',
-    condition: 'record_count > 1000',
-    priority: 'medium',
-    status: 'resolved',
-    triggeredAt: new Date(Date.now() - 86400000).toISOString(),
-    eventCount: 1,
-    lastTriggered: new Date(Date.now() - 86400000).toISOString(),
-    schedule: '*/15 * * * *',
-    actions: ['email']
-  },
-  {
-    id: 'alert_4',
-    name: 'API Rate Limit Exceeded',
-    description: 'API calls exceeding rate limit threshold',
-    query: 'sourcetype=api_audit | stats count by api_key | where count > 1000',
-    condition: 'requests > 1000/min',
-    priority: 'low',
-    status: 'suppressed',
-    triggeredAt: new Date(Date.now() - 172800000).toISOString(),
-    eventCount: 45,
-    lastTriggered: new Date(Date.now() - 172800000).toISOString(),
-    schedule: '*/1 * * * *',
-    actions: ['webhook']
-  }
-]
+const mockAlerts: Alert[] = []
 
-const mockSavedSearches: SavedSearch[] = [
-  {
-    id: 'search_1',
-    name: 'Failed Login Attempts',
-    description: 'All failed authentication events',
-    query: 'action=login status=failure',
-    timeRange: '24h',
-    isScheduled: true,
-    schedule: '0 */6 * * *',
-    lastRun: new Date(Date.now() - 3600000).toISOString(),
-    owner: 'security@company.com',
-    shared: true,
-    starred: true
-  },
-  {
-    id: 'search_2',
-    name: 'High Severity Events',
-    description: 'Events with high or critical severity',
-    query: 'severity IN (high, critical)',
-    timeRange: '4h',
-    isScheduled: false,
-    owner: 'admin@company.com',
-    shared: true,
-    starred: false
-  },
-  {
-    id: 'search_3',
-    name: 'Configuration Changes',
-    description: 'All system configuration modifications',
-    query: 'action=update resource=settings OR resource=config',
-    timeRange: '7d',
-    isScheduled: true,
-    schedule: '0 8 * * *',
-    lastRun: new Date(Date.now() - 28800000).toISOString(),
-    owner: 'admin@company.com',
-    shared: false,
-    starred: true
-  },
-  {
-    id: 'search_4',
-    name: 'User Provisioning Activity',
-    description: 'User creation, modification, and deletion',
-    query: 'resource=user action IN (create, update, delete)',
-    timeRange: '30d',
-    isScheduled: false,
-    owner: 'hr@company.com',
-    shared: true,
-    starred: false
-  }
-]
+const mockSavedSearches: SavedSearch[] = []
 
-const mockReports: Report[] = [
-  {
-    id: 'report_1',
-    name: 'Weekly Security Summary',
-    description: 'Comprehensive security events overview',
-    query: 'severity IN (medium, high, critical) | stats count by action, severity',
-    schedule: '0 8 * * 1',
-    format: 'pdf',
-    recipients: ['security@company.com', 'ciso@company.com'],
-    lastGenerated: new Date(Date.now() - 604800000).toISOString(),
-    nextRun: new Date(Date.now() + 259200000).toISOString(),
-    status: 'active'
-  },
-  {
-    id: 'report_2',
-    name: 'Daily Compliance Report',
-    description: 'Daily compliance check results',
-    query: 'index=compliance | stats count by check_name, status',
-    schedule: '0 6 * * *',
-    format: 'html',
-    recipients: ['compliance@company.com'],
-    lastGenerated: new Date(Date.now() - 86400000).toISOString(),
-    nextRun: new Date(Date.now() + 43200000).toISOString(),
-    status: 'active'
-  },
-  {
-    id: 'report_3',
-    name: 'Monthly Access Audit',
-    description: 'Monthly user access patterns and anomalies',
-    query: 'action=access | stats count by actor_email, resource | sort -count',
-    schedule: '0 0 1 * *',
-    format: 'csv',
-    recipients: ['audit@company.com', 'security@company.com'],
-    lastGenerated: new Date(Date.now() - 2592000000).toISOString(),
-    nextRun: new Date(Date.now() + 604800000).toISOString(),
-    status: 'active'
-  }
-]
+const mockReports: Report[] = []
 
-const mockFieldStats: FieldStats[] = [
-  {
-    field: 'action',
-    count: 15234,
-    distinctValues: 4,
-    topValues: [
-      { value: 'access', count: 8542, percent: 56.1 },
-      { value: 'update', count: 3821, percent: 25.1 },
-      { value: 'create', count: 2156, percent: 14.2 },
-      { value: 'delete', count: 715, percent: 4.7 }
-    ]
-  },
-  {
-    field: 'severity',
-    count: 15234,
-    distinctValues: 5,
-    topValues: [
-      { value: 'info', count: 9140, percent: 60.0 },
-      { value: 'low', count: 3047, percent: 20.0 },
-      { value: 'medium', count: 2285, percent: 15.0 },
-      { value: 'high', count: 610, percent: 4.0 },
-      { value: 'critical', count: 152, percent: 1.0 }
-    ]
-  },
-  {
-    field: 'source',
-    count: 15234,
-    distinctValues: 8,
-    topValues: [
-      { value: 'web_app', count: 6094, percent: 40.0 },
-      { value: 'api_gateway', count: 4570, percent: 30.0 },
-      { value: 'admin_console', count: 2285, percent: 15.0 },
-      { value: 'mobile_app', count: 1523, percent: 10.0 }
-    ]
-  }
-]
+const mockFieldStats: FieldStats[] = []
 
-// Competitive Upgrade Mock Data - Splunk-level Audit Intelligence
-const mockAuditAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Compliance Score', description: 'All systems passing SOC2 audit requirements!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Compliance' },
-  { id: '2', type: 'warning' as const, title: 'Anomaly Detected', description: 'Unusual login pattern from IP 192.168.1.x - review recommended.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Security' },
-  { id: '3', type: 'info' as const, title: 'AI Pattern', description: 'Similar audit events clustered - possible automation opportunity.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'AI Insights' },
-]
+// Typed empty arrays for competitive upgrade components
+const mockAuditAIInsights: Array<{ id: string; type: 'success' | 'warning' | 'info' | 'error'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }> = []
 
-const mockAuditCollaborators = [
-  { id: '1', name: 'Audit Lead', avatar: '/avatars/audit.jpg', status: 'online' as const, role: 'Lead' },
-  { id: '2', name: 'Compliance Officer', avatar: '/avatars/compliance.jpg', status: 'online' as const, role: 'Officer' },
-  { id: '3', name: 'Security Analyst', avatar: '/avatars/security.jpg', status: 'away' as const, role: 'Analyst' },
-]
+const mockAuditCollaborators: Array<{ id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }> = []
 
-const mockAuditPredictions = [
-  { id: '1', title: 'Audit Completion', prediction: 'Q1 audit will complete 2 days ahead of schedule', confidence: 87, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Risk Reduction', prediction: 'Implementing recommendations will reduce risk score by 25%', confidence: 82, trend: 'up' as const, impact: 'medium' as const },
-]
+const mockAuditPredictions: Array<{ id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact?: string }> = []
 
-const mockAuditActivities = [
-  { id: '1', user: 'Audit Lead', action: 'Completed', target: 'access control review', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Compliance Officer', action: 'Flagged', target: 'policy exception', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'Security Analyst', action: 'Investigated', target: 'failed login attempts', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
-]
+const mockAuditActivities: Array<{ id: string; user: { id: string; name: string; avatar?: string }; action?: string; target?: { type: string; name: string }; timestamp: string | Date; type: 'comment' | 'update' | 'create' | 'delete' | 'mention' | 'assignment' | 'status_change' | 'milestone' | 'integration'; title?: string }> = []
 
-const mockAuditQuickActions = [
-  { id: '1', label: 'Run Audit', icon: 'Play', action: () => {}, shortcut: 'A' },
-  { id: '2', label: 'Generate Report', icon: 'FileText', action: () => {}, shortcut: 'R' },
-  { id: '3', label: 'View Alerts', icon: 'Bell', action: () => {}, shortcut: 'L' },
-  { id: '4', label: 'Settings', icon: 'Settings', action: () => {}, shortcut: 'S' },
-]
+const mockAuditQuickActions: Array<{ id: string; label: string; icon: React.ReactNode; action: () => void; shortcut?: string }> = []
 
 export default function AuditClient({ initialEvents, initialComplianceChecks }: AuditClientProps) {
   const [activeTab, setActiveTab] = useState('events')
@@ -501,14 +206,14 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
 
   const displayEvents = useMemo(() => {
     const events = (auditEvents?.length || 0) > 0 ? auditEvents : (initialEvents || [])
-    return events.map((e, i) => ({
+    return events.map((e) => ({
       ...e,
-      source: mockLogEvents[i % mockLogEvents.length]?.source || 'unknown',
-      sourcetype: mockLogEvents[i % mockLogEvents.length]?.sourcetype || 'generic',
-      host: mockLogEvents[i % mockLogEvents.length]?.host || 'server-01',
-      index: mockLogEvents[i % mockLogEvents.length]?.index || 'main',
+      source: 'unknown',
+      sourcetype: 'generic',
+      host: 'server-01',
+      index: 'main',
       raw: `${new Date(e.event_timestamp).toISOString()} ${e.severity?.toUpperCase()} ${e.actor_email} ${e.action} ${e.resource} ${e.resource_id}`,
-      fields: mockLogEvents[i % mockLogEvents.length]?.fields || {}
+      fields: {}
     })) as LogEvent[]
   }, [auditEvents, initialEvents])
 

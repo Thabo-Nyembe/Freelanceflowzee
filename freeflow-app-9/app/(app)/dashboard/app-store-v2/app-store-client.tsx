@@ -190,314 +190,6 @@ interface Analytics {
   downloadsTrend: { date: string; downloads: number }[]
 }
 
-// ============================================================================
-// MOCK DATA
-// ============================================================================
-
-const mockDevelopers: Developer[] = [
-  { id: 'dev-1', name: 'Productivity Labs', website: 'productivitylabs.io', email: 'support@productivitylabs.io', verified: true, appCount: 12, totalDownloads: 2500000, avgRating: 4.7 },
-  { id: 'dev-2', name: 'Creative Suite Co', website: 'creativesuite.co', email: 'hello@creativesuite.co', verified: true, appCount: 8, totalDownloads: 1800000, avgRating: 4.5 },
-  { id: 'dev-3', name: 'DataFlow Inc', website: 'dataflow.io', email: 'support@dataflow.io', verified: true, appCount: 5, totalDownloads: 950000, avgRating: 4.8 },
-  { id: 'dev-4', name: 'CommTools', website: 'commtools.app', email: 'team@commtools.app', verified: false, appCount: 3, totalDownloads: 340000, avgRating: 4.3 }
-]
-
-const mockApps: App[] = [
-  {
-    id: 'app-1',
-    name: 'TaskFlow Pro',
-    slug: 'taskflow-pro',
-    tagline: 'The ultimate project management solution',
-    description: 'TaskFlow Pro helps teams organize, track, and manage their work in one place. Features include Kanban boards, Gantt charts, time tracking, and real-time collaboration.',
-    developer: mockDevelopers[0],
-    category: 'productivity',
-    subcategory: 'Project Management',
-    pricing: 'subscription',
-    price: 12.99,
-    billingCycle: 'monthly',
-    status: 'installed',
-    version: '5.2.1',
-    releaseDate: '2023-01-15',
-    lastUpdated: '2024-12-20',
-    size: 45000000,
-    platforms: ['web', 'desktop', 'mobile'],
-    screenshots: ['/screenshots/taskflow-1.png', '/screenshots/taskflow-2.png'],
-    icon: '/icons/taskflow.png',
-    rating: 4.8,
-    reviewCount: 12450,
-    downloadCount: 890000,
-    activeUsers: 245000,
-    features: ['Kanban Boards', 'Gantt Charts', 'Time Tracking', 'Team Collaboration', 'Custom Workflows', 'API Access'],
-    requirements: ['Modern browser', '2GB RAM minimum'],
-    permissions: ['Calendar access', 'Notifications', 'File storage'],
-    languages: ['English', 'Spanish', 'French', 'German', 'Japanese'],
-    trialDays: 14,
-    trialActive: false,
-    installedAt: '2024-06-15T10:00:00Z',
-    featured: true,
-    editorChoice: true,
-    trending: true,
-    inAppPurchases: true,
-    tags: ['productivity', 'project-management', 'team', 'collaboration']
-  },
-  {
-    id: 'app-2',
-    name: 'DesignStudio Max',
-    slug: 'designstudio-max',
-    tagline: 'Professional design tools for everyone',
-    description: 'DesignStudio Max provides professional-grade design tools including vector graphics, photo editing, prototyping, and collaborative design features.',
-    developer: mockDevelopers[1],
-    category: 'creative',
-    subcategory: 'Design Tools',
-    pricing: 'subscription',
-    price: 24.99,
-    billingCycle: 'monthly',
-    status: 'trial',
-    version: '3.8.0',
-    releaseDate: '2022-08-20',
-    lastUpdated: '2024-12-18',
-    size: 120000000,
-    platforms: ['web', 'desktop'],
-    screenshots: ['/screenshots/designstudio-1.png'],
-    icon: '/icons/designstudio.png',
-    rating: 4.6,
-    reviewCount: 8920,
-    downloadCount: 567000,
-    activeUsers: 123000,
-    features: ['Vector Graphics', 'Photo Editing', 'Prototyping', 'Collaborative Design', 'Asset Library', 'Export to Multiple Formats'],
-    requirements: ['8GB RAM recommended', 'GPU acceleration supported'],
-    permissions: ['File access', 'Cloud storage sync'],
-    languages: ['English', 'Spanish', 'Portuguese', 'Chinese'],
-    trialDays: 14,
-    trialActive: true,
-    trialEndsAt: '2025-01-05T00:00:00Z',
-    featured: true,
-    editorChoice: false,
-    trending: true,
-    inAppPurchases: true,
-    tags: ['design', 'creative', 'graphics', 'prototyping']
-  },
-  {
-    id: 'app-3',
-    name: 'DataViz Analytics',
-    slug: 'dataviz-analytics',
-    tagline: 'Transform data into insights',
-    description: 'DataViz Analytics provides powerful data visualization and business intelligence tools. Connect to any data source and create stunning dashboards in minutes.',
-    developer: mockDevelopers[2],
-    category: 'analytics',
-    subcategory: 'Business Intelligence',
-    pricing: 'enterprise',
-    price: 99.99,
-    billingCycle: 'monthly',
-    status: 'available',
-    version: '2.5.0',
-    releaseDate: '2023-06-10',
-    lastUpdated: '2024-12-15',
-    size: 85000000,
-    platforms: ['web', 'api'],
-    screenshots: [],
-    icon: '/icons/dataviz.png',
-    rating: 4.9,
-    reviewCount: 3240,
-    downloadCount: 234000,
-    activeUsers: 89000,
-    features: ['50+ Data Connectors', 'Real-time Dashboards', 'AI-Powered Insights', 'Custom Visualizations', 'Scheduled Reports', 'Team Workspaces'],
-    requirements: ['Enterprise SSO compatible', 'API rate limits apply'],
-    permissions: ['Data source access', 'Export permissions'],
-    languages: ['English', 'German', 'French'],
-    trialDays: 30,
-    trialActive: false,
-    featured: true,
-    editorChoice: true,
-    trending: false,
-    inAppPurchases: false,
-    tags: ['analytics', 'data', 'business-intelligence', 'dashboards']
-  },
-  {
-    id: 'app-4',
-    name: 'TeamChat',
-    slug: 'teamchat',
-    tagline: 'Real-time team communication',
-    description: 'TeamChat brings your team together with instant messaging, video calls, screen sharing, and integrations with your favorite tools.',
-    developer: mockDevelopers[3],
-    category: 'communication',
-    pricing: 'freemium',
-    price: 0,
-    status: 'installed',
-    version: '4.1.2',
-    releaseDate: '2022-03-01',
-    lastUpdated: '2024-12-22',
-    size: 35000000,
-    platforms: ['web', 'desktop', 'mobile'],
-    screenshots: [],
-    icon: '/icons/teamchat.png',
-    rating: 4.4,
-    reviewCount: 45670,
-    downloadCount: 2340000,
-    activeUsers: 890000,
-    features: ['Instant Messaging', 'Video Calls', 'Screen Sharing', 'File Sharing', 'Channels', 'Integrations'],
-    requirements: ['Stable internet connection'],
-    permissions: ['Camera', 'Microphone', 'Notifications'],
-    languages: ['English', 'Spanish', 'French', 'German', 'Italian', 'Portuguese', 'Japanese', 'Korean', 'Chinese'],
-    trialDays: 0,
-    trialActive: false,
-    installedAt: '2024-01-10T09:00:00Z',
-    featured: false,
-    editorChoice: false,
-    trending: true,
-    inAppPurchases: true,
-    tags: ['communication', 'team', 'messaging', 'video']
-  },
-  {
-    id: 'app-5',
-    name: 'FinanceHub',
-    slug: 'financehub',
-    tagline: 'Complete financial management',
-    description: 'FinanceHub provides comprehensive financial management including invoicing, expense tracking, budgeting, and financial reporting.',
-    developer: mockDevelopers[2],
-    category: 'finance',
-    subcategory: 'Accounting',
-    pricing: 'subscription',
-    price: 19.99,
-    billingCycle: 'monthly',
-    status: 'installed',
-    version: '6.0.3',
-    releaseDate: '2021-11-15',
-    lastUpdated: '2024-12-19',
-    size: 55000000,
-    platforms: ['web', 'mobile'],
-    screenshots: [],
-    icon: '/icons/financehub.png',
-    rating: 4.7,
-    reviewCount: 7890,
-    downloadCount: 445000,
-    activeUsers: 156000,
-    features: ['Invoicing', 'Expense Tracking', 'Budgeting', 'Financial Reports', 'Tax Preparation', 'Multi-Currency'],
-    requirements: ['Bank-level encryption'],
-    permissions: ['Financial data access', 'Bank connections'],
-    languages: ['English', 'Spanish', 'French', 'German'],
-    trialDays: 14,
-    trialActive: false,
-    installedAt: '2024-03-20T14:00:00Z',
-    featured: false,
-    editorChoice: true,
-    trending: false,
-    inAppPurchases: false,
-    tags: ['finance', 'accounting', 'invoicing', 'budgeting']
-  },
-  {
-    id: 'app-6',
-    name: 'CodeEditor Pro',
-    slug: 'codeeditor-pro',
-    tagline: 'The developers choice IDE',
-    description: 'CodeEditor Pro is a powerful integrated development environment with syntax highlighting, debugging, Git integration, and AI-powered code completion.',
-    developer: mockDevelopers[0],
-    category: 'developer',
-    subcategory: 'IDE',
-    pricing: 'freemium',
-    price: 0,
-    status: 'available',
-    version: '8.2.1',
-    releaseDate: '2020-06-01',
-    lastUpdated: '2024-12-21',
-    size: 180000000,
-    platforms: ['desktop'],
-    screenshots: [],
-    icon: '/icons/codeeditor.png',
-    rating: 4.8,
-    reviewCount: 23450,
-    downloadCount: 1890000,
-    activeUsers: 567000,
-    features: ['Syntax Highlighting', 'Debugging', 'Git Integration', 'AI Code Completion', 'Extensions Marketplace', 'Remote Development'],
-    requirements: ['4GB RAM minimum', '64-bit OS'],
-    permissions: ['File system access', 'Terminal access'],
-    languages: ['English'],
-    trialDays: 0,
-    trialActive: false,
-    featured: true,
-    editorChoice: true,
-    trending: true,
-    inAppPurchases: true,
-    tags: ['developer', 'ide', 'coding', 'programming']
-  }
-]
-
-const mockReviews: Review[] = [
-  {
-    id: 'rev-1',
-    appId: 'app-1',
-    userId: 'user-1',
-    userName: 'Sarah Johnson',
-    rating: 5,
-    title: 'Best project management tool ever!',
-    content: 'TaskFlow Pro has completely transformed how our team works. The Kanban boards and time tracking features are incredibly intuitive.',
-    helpful: 234,
-    notHelpful: 12,
-    version: '5.2.0',
-    createdAt: '2024-12-18T10:00:00Z',
-    developerResponse: {
-      content: 'Thank you for your wonderful review! We\'re thrilled to hear TaskFlow Pro is helping your team succeed.',
-      respondedAt: '2024-12-19T09:00:00Z'
-    }
-  },
-  {
-    id: 'rev-2',
-    appId: 'app-1',
-    userId: 'user-2',
-    userName: 'Mike Chen',
-    rating: 4,
-    title: 'Great app, minor improvements needed',
-    content: 'Overall excellent experience. Would love to see better mobile app performance and more customization options for Gantt charts.',
-    helpful: 89,
-    notHelpful: 5,
-    version: '5.1.8',
-    createdAt: '2024-12-15T14:00:00Z'
-  }
-]
-
-const mockCollections: AppCollection[] = [
-  { id: 'col-1', name: 'Essential Productivity', description: 'Must-have apps for getting things done', icon: '⚡', apps: ['app-1', 'app-4'], featured: true },
-  { id: 'col-2', name: 'Creative Suite', description: 'Tools for designers and creators', icon: '🎨', apps: ['app-2'], featured: true },
-  { id: 'col-3', name: 'Developer Tools', description: 'Build amazing software', icon: '💻', apps: ['app-6'], featured: false },
-  { id: 'col-4', name: 'Business Essentials', description: 'Run your business efficiently', icon: '📊', apps: ['app-3', 'app-5'], featured: true }
-]
-
-const mockUpdates: AppUpdate[] = [
-  { id: 'upd-1', appId: 'app-1', appName: 'TaskFlow Pro', currentVersion: '5.2.0', newVersion: '5.2.1', releaseNotes: 'Bug fixes and performance improvements', size: 12000000, availableAt: '2024-12-20T08:00:00Z', autoUpdate: true },
-  { id: 'upd-2', appId: 'app-4', appName: 'TeamChat', currentVersion: '4.1.1', newVersion: '4.1.2', releaseNotes: 'New emoji reactions, improved video quality', size: 8000000, availableAt: '2024-12-22T10:00:00Z', autoUpdate: false }
-]
-
-const mockAnalytics: Analytics = {
-  totalApps: 156,
-  installedApps: 12,
-  trialApps: 2,
-  pendingUpdates: 3,
-  totalSpend: 2450.00,
-  monthlySpend: 287.00,
-  storageUsed: 2.4,
-  apiCalls: 45670,
-  topCategories: [
-    { category: 'productivity', count: 5 },
-    { category: 'communication', count: 3 },
-    { category: 'developer', count: 2 },
-    { category: 'creative', count: 1 },
-    { category: 'finance', count: 1 }
-  ],
-  recentActivity: [
-    { action: 'Updated', appName: 'TaskFlow Pro', time: '2 hours ago' },
-    { action: 'Installed', appName: 'SmartNotes', time: '1 day ago' },
-    { action: 'Started trial', appName: 'DesignStudio Max', time: '3 days ago' },
-    { action: 'Renewed subscription', appName: 'FinanceHub', time: '1 week ago' }
-  ],
-  downloadsTrend: [
-    { date: '2024-12-17', downloads: 12 },
-    { date: '2024-12-18', downloads: 8 },
-    { date: '2024-12-19', downloads: 15 },
-    { date: '2024-12-20', downloads: 23 },
-    { date: '2024-12-21', downloads: 11 },
-    { date: '2024-12-22', downloads: 18 },
-    { date: '2024-12-23', downloads: 14 }
-  ]
-}
 
 // ============================================================================
 // HELPER FUNCTIONS
@@ -573,31 +265,24 @@ const formatDate = (dateString: string) => {
 }
 
 // ============================================================================
-// ENHANCED COMPETITIVE UPGRADE MOCK DATA - App Store Connect Level
+// EMPTY COMPETITIVE UPGRADE DATA - For real Supabase integration
 // ============================================================================
 
-const mockAppStoreAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Top Performer', description: 'Analytics Pro has 98% positive reviews and 50K+ downloads this month.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Performance' },
-  { id: '2', type: 'warning' as const, title: 'Update Available', description: '12 installed apps have pending updates with security patches.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Security' },
-  { id: '3', type: 'info' as const, title: 'New Arrivals', description: '8 new productivity apps added to the marketplace this week.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Discovery' },
-]
+// AI Insights type
+type AIInsight = { id: string; type: 'success' | 'warning' | 'info'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }
+const emptyAppStoreAIInsights: AIInsight[] = []
 
-const mockAppStoreCollaborators = [
-  { id: '1', name: 'App Curator', avatar: '/avatars/curator.jpg', status: 'online' as const, role: 'Curator' },
-  { id: '2', name: 'Developer Lead', avatar: '/avatars/dev.jpg', status: 'online' as const, role: 'Developer' },
-  { id: '3', name: 'Security Team', avatar: '/avatars/security.jpg', status: 'away' as const, role: 'Security' },
-]
+// Collaborators type
+type Collaborator = { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }
+const emptyAppStoreCollaborators: Collaborator[] = []
 
-const mockAppStorePredictions = [
-  { id: '1', title: 'Usage Forecast', prediction: 'App adoption expected to increase 35% next quarter', confidence: 89, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Cost Savings', prediction: 'Bundled apps could save $5K/month vs individual licenses', confidence: 92, trend: 'up' as const, impact: 'medium' as const },
-]
+// Predictions type
+type Prediction = { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: 'low' | 'medium' | 'high' }
+const emptyAppStorePredictions: Prediction[] = []
 
-const mockAppStoreActivities = [
-  { id: '1', user: 'System', action: 'Auto-updated', target: 'Slack integration to v4.2', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Admin', action: 'Approved', target: 'Notion integration for all teams', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'success' as const },
-  { id: '3', user: 'Security', action: 'Flagged', target: 'Unknown app for review', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'warning' as const },
-]
+// Activities type
+type Activity = { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'warning' | 'info' }
+const emptyAppStoreActivities: Activity[] = []
 
 // Quick actions are defined inside the component to have access to state setters
 const getAppStoreQuickActions = (setActiveTab: (tab: string) => void, setSearchQuery: (query: string) => void) => [
@@ -618,7 +303,19 @@ export default function AppStoreClient() {
   const [reviews, setReviews] = useState<Review[]>([])
   const [collections, setCollections] = useState<AppCollection[]>([])
   const [updates, setUpdates] = useState<AppUpdate[]>([])
-  const [analytics, setAnalytics] = useState<Analytics>({ totalInstalls: 0, activeApps: 0, totalReviews: 0, averageRating: 0 })
+  const [analytics, setAnalytics] = useState<Analytics>({
+    totalApps: 0,
+    installedApps: 0,
+    trialApps: 0,
+    pendingUpdates: 0,
+    totalSpend: 0,
+    monthlySpend: 0,
+    storageUsed: 0,
+    apiCalls: 0,
+    topCategories: [],
+    recentActivity: [],
+    downloadsTrend: []
+  })
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<AppStatus | 'all'>('all')
   const [categoryFilter, setCategoryFilter] = useState<AppCategory | 'all'>('all')
@@ -1062,7 +759,7 @@ export default function AppStoreClient() {
   }
 
   // Generate quick actions with current state
-  const mockAppStoreQuickActions = getAppStoreQuickActions(setActiveTab, setSearchQuery)
+  const appStoreQuickActions = getAppStoreQuickActions(setActiveTab, setSearchQuery)
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50/30 to-pink-50/40 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 dark:bg-none dark:bg-gray-900">
@@ -2101,18 +1798,18 @@ export default function AppStoreClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockAppStoreAIInsights}
+              insights={emptyAppStoreAIInsights}
               title="App Store Intelligence"
               onInsightAction={handleInsightAction}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockAppStoreCollaborators}
+              collaborators={emptyAppStoreCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockAppStorePredictions}
+              predictions={emptyAppStorePredictions}
               title="App Store Forecasts"
             />
           </div>
@@ -2120,12 +1817,12 @@ export default function AppStoreClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockAppStoreActivities}
+            activities={emptyAppStoreActivities}
             title="App Store Activity"
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockAppStoreQuickActions}
+            actions={appStoreQuickActions}
             variant="grid"
           />
         </div>

@@ -2,10 +2,16 @@
 
 import { createClient } from '@/lib/supabase/client'
 
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { toast } from 'sonner'
 import { useMessages } from '@/lib/hooks/use-messages'
 import { useConversations } from '@/lib/hooks/use-conversations'
+import { useAuth } from '@/lib/hooks/use-auth'
+import { useTeam } from '@/lib/hooks/use-team'
+import { useUserThreads, useUnreadThreadsCount } from '@/lib/hooks/use-threads-extended'
+import { useUserFiles, useRecentFiles } from '@/lib/hooks/use-files-extended'
+import { useMentions, useUnreadMentionCount } from '@/lib/hooks/use-mentions-extended'
+import { useRecentCalls } from '@/lib/hooks/use-phones-extended'
 
 // Real-time API hooks for messaging
 import {
@@ -177,71 +183,164 @@ interface Mention {
   mentionedAt: string
 }
 
-// Mock Data
-const currentUser: User = {
-  id: 'u0',
-  name: 'you',
-  displayName: 'You',
-  email: 'you@example.com',
+// Helper to create default User for current user
+const createDefaultUser = (userId: string | null, userEmail: string | null): User => ({
+  id: userId || 'u0',
+  name: userEmail?.split('@')[0] || 'you',
+  displayName: userEmail?.split('@')[0] || 'You',
+  email: userEmail || 'you@example.com',
   status: 'online',
-  title: 'Software Engineer'
-}
-
-const mockUsers: User[] = [
-  { id: 'u1', name: 'sarah.chen', displayName: 'Sarah Chen', email: 'sarah@example.com', status: 'online', title: 'Product Manager', statusText: 'In a meeting' },
-  { id: 'u2', name: 'mike.johnson', displayName: 'Mike Johnson', email: 'mike@example.com', status: 'away', title: 'Senior Developer' },
-  { id: 'u3', name: 'emily.davis', displayName: 'Emily Davis', email: 'emily@example.com', status: 'online', title: 'Designer' },
-  { id: 'u4', name: 'alex.kim', displayName: 'Alex Kim', email: 'alex@example.com', status: 'dnd', title: 'DevOps Engineer', statusText: 'Focusing' },
-  { id: 'u5', name: 'slackbot', displayName: 'Slackbot', email: 'bot@slack.com', status: 'online', isBot: true },
-  { id: 'u6', name: 'github', displayName: 'GitHub', email: 'github@slack.com', status: 'online', isBot: true }
-]
-
-const mockChannels: Channel[] = [
-  { id: 'c1', name: 'general', type: 'public', description: 'Company-wide announcements', topic: 'Welcome to the team!', members: mockUsers, memberCount: 156, unreadCount: 3, isMuted: false, isStarred: true, isPinned: true, lastActivity: '2024-01-15T14:30:00Z', createdAt: '2023-01-01T00:00:00Z', createdBy: mockUsers[0] },
-  { id: 'c2', name: 'engineering', type: 'public', description: 'Engineering team discussions', topic: 'Sprint 24 planning', members: [mockUsers[1], mockUsers[3]], memberCount: 42, unreadCount: 12, isMuted: false, isStarred: true, isPinned: false, lastActivity: '2024-01-15T14:28:00Z', createdAt: '2023-01-15T00:00:00Z', createdBy: mockUsers[1] },
-  { id: 'c3', name: 'design-team', type: 'private', description: 'Private design channel', members: [mockUsers[2]], memberCount: 8, unreadCount: 0, isMuted: true, isStarred: false, isPinned: false, lastActivity: '2024-01-15T12:00:00Z', createdAt: '2023-02-01T00:00:00Z', createdBy: mockUsers[2] },
-  { id: 'c4', name: 'random', type: 'public', description: 'Non-work banter', topic: 'Share memes!', members: mockUsers, memberCount: 134, unreadCount: 0, isMuted: false, isStarred: false, isPinned: false, lastActivity: '2024-01-15T10:00:00Z', createdAt: '2023-01-01T00:00:00Z', createdBy: mockUsers[0] },
-  { id: 'c5', name: 'product', type: 'public', description: 'Product discussions', members: mockUsers, memberCount: 28, unreadCount: 5, isMuted: false, isStarred: false, isPinned: false, lastActivity: '2024-01-15T13:00:00Z', createdAt: '2023-03-01T00:00:00Z', createdBy: mockUsers[0] },
-  { id: 'dm1', name: 'Sarah Chen', type: 'direct', members: [mockUsers[0]], memberCount: 2, unreadCount: 1, isMuted: false, isStarred: false, isPinned: false, lastActivity: '2024-01-15T14:25:00Z', createdAt: '2023-06-15T00:00:00Z', createdBy: currentUser },
-  { id: 'dm2', name: 'Mike Johnson', type: 'direct', members: [mockUsers[1]], memberCount: 2, unreadCount: 0, isMuted: false, isStarred: false, isPinned: false, lastActivity: '2024-01-14T16:00:00Z', createdAt: '2023-07-01T00:00:00Z', createdBy: currentUser }
-]
-
-const mockMessages: Message[] = [
-  { id: 'm1', channelId: 'c1', content: 'Hey team! Quick update on the Q1 roadmap - check out the attached doc.', author: mockUsers[0], createdAt: '2024-01-15T14:30:00Z', status: 'read', reactions: [{ type: 'thumbsup', count: 5, users: mockUsers.slice(0, 5), hasReacted: true }], threadCount: 3, threadParticipants: [mockUsers[1], mockUsers[2]], attachments: [{ id: 'a1', type: 'file', name: 'Q1_Roadmap.pdf', url: '#', size: 2500000 }], mentions: [], isPinned: true, isBookmarked: false },
-  { id: 'm2', channelId: 'c1', content: '@sarah.chen Looks great! Questions about the timeline.', author: mockUsers[1], createdAt: '2024-01-15T14:28:00Z', status: 'read', reactions: [], threadCount: 0, threadParticipants: [], attachments: [], mentions: [mockUsers[0]], isPinned: false, isBookmarked: false, parentId: 'm1' },
-  { id: 'm3', channelId: 'c2', content: '```javascript\nconst feature = { name: "Dark Mode", status: "done" };\n```\nJust pushed!', author: mockUsers[3], createdAt: '2024-01-15T14:20:00Z', status: 'read', reactions: [{ type: 'fire', count: 8, users: mockUsers, hasReacted: true }], threadCount: 5, threadParticipants: [mockUsers[0], mockUsers[1]], attachments: [], mentions: [], isPinned: false, isBookmarked: true },
-  { id: 'm4', channelId: 'c2', content: 'New deployment completed successfully!', author: mockUsers[5], createdAt: '2024-01-15T14:15:00Z', status: 'read', reactions: [{ type: 'celebrate', count: 12, users: mockUsers, hasReacted: true }], threadCount: 0, threadParticipants: [], attachments: [], mentions: [], isPinned: false, isBookmarked: false },
-  { id: 'm5', channelId: 'dm1', content: 'Hey! Are you free for a quick sync at 3pm?', author: mockUsers[0], createdAt: '2024-01-15T14:25:00Z', status: 'delivered', reactions: [], threadCount: 0, threadParticipants: [], attachments: [], mentions: [], isPinned: false, isBookmarked: false }
-]
-
-const mockThreads: Thread[] = [
-  { id: 't1', parentMessage: mockMessages[0], channel: 'general', replies: 3, participants: [mockUsers[0], mockUsers[1], mockUsers[2]], lastReply: '2024-01-15T14:35:00Z', isFollowing: true, isUnread: true },
-  { id: 't2', parentMessage: mockMessages[2], channel: 'engineering', replies: 5, participants: [mockUsers[0], mockUsers[1], mockUsers[3]], lastReply: '2024-01-15T14:25:00Z', isFollowing: true, isUnread: false },
-  { id: 't3', parentMessage: mockMessages[0], channel: 'general', replies: 2, participants: [mockUsers[2], mockUsers[3]], lastReply: '2024-01-15T13:00:00Z', isFollowing: false, isUnread: false }
-]
-
-const mockCalls: Call[] = [
-  { id: 'call1', type: 'huddle', status: 'ongoing', channelId: 'c2', channelName: '#engineering', participants: [mockUsers[1], mockUsers[3]], startTime: '2024-01-15T14:00:00Z', isRecorded: false },
-  { id: 'call2', type: 'video', status: 'scheduled', channelId: 'c1', channelName: '#general', participants: mockUsers.slice(0, 4), startTime: '2024-01-16T10:00:00Z', isRecorded: true },
-  { id: 'call3', type: 'audio', status: 'ended', channelId: 'dm1', channelName: 'Sarah Chen', participants: [mockUsers[0]], startTime: '2024-01-15T11:00:00Z', endTime: '2024-01-15T11:30:00Z', duration: 1800, isRecorded: false },
-  { id: 'call4', type: 'video', status: 'missed', channelId: 'dm2', channelName: 'Mike Johnson', participants: [mockUsers[1]], startTime: '2024-01-15T09:00:00Z', isRecorded: false }
-]
-
-const mockFiles: SharedFile[] = [
-  { id: 'f1', name: 'Q1_Roadmap.pdf', type: 'application/pdf', size: 2500000, uploadedBy: mockUsers[0], uploadedAt: '2024-01-15T14:30:00Z', channelId: 'c1', channelName: '#general', downloads: 45 },
-  { id: 'f2', name: 'design-system.figma', type: 'application/figma', size: 15000000, uploadedBy: mockUsers[2], uploadedAt: '2024-01-14T10:00:00Z', channelId: 'c3', channelName: '#design-team', downloads: 12 },
-  { id: 'f3', name: 'architecture.png', type: 'image/png', size: 850000, uploadedBy: mockUsers[3], uploadedAt: '2024-01-13T16:00:00Z', channelId: 'c2', channelName: '#engineering', downloads: 28 },
-  { id: 'f4', name: 'demo-video.mp4', type: 'video/mp4', size: 125000000, uploadedBy: mockUsers[0], uploadedAt: '2024-01-12T09:00:00Z', channelId: 'c5', channelName: '#product', downloads: 67 },
-  { id: 'f5', name: 'meeting-notes.docx', type: 'application/docx', size: 45000, uploadedBy: mockUsers[1], uploadedAt: '2024-01-11T14:00:00Z', channelId: 'c1', channelName: '#general', downloads: 23 }
-]
-
-const mockMentions: Mention[] = [
-  { id: 'men1', message: mockMessages[1], channel: '#general', isRead: false, mentionedAt: '2024-01-15T14:28:00Z' },
-  { id: 'men2', message: { ...mockMessages[0], content: '@you Great work on the feature!' } as Message, channel: '#engineering', isRead: false, mentionedAt: '2024-01-15T13:00:00Z' },
-  { id: 'men3', message: { ...mockMessages[0], content: '@you Can you review this PR?' } as Message, channel: '#engineering', isRead: true, mentionedAt: '2024-01-14T16:00:00Z' }
-]
+  title: 'Team Member'
+})
 
 export default function MessagesClient() {
+  // ==========================================================================
+  // AUTH & USER HOOKS - Get current authenticated user
+  // ==========================================================================
+  const { user: authUser, loading: authLoading } = useAuth()
+  const userId = authUser?.id || null
+
+  // Current user derived from auth
+  const currentUser: User = useMemo(() =>
+    createDefaultUser(authUser?.id || null, authUser?.email || null),
+    [authUser]
+  )
+
+  // ==========================================================================
+  // TEAM MEMBERS HOOK - Replace mockUsers with real data
+  // ==========================================================================
+  const { members: teamMembers, loading: teamLoading, fetchMembers } = useTeam()
+
+  // Convert team members to User format for display
+  const users: User[] = useMemo(() => {
+    if (teamMembers.length === 0) return []
+    return teamMembers.map(member => ({
+      id: member.id,
+      name: member.name || member.email?.split('@')[0] || 'unknown',
+      displayName: member.name || 'Unknown User',
+      email: member.email || '',
+      status: member.status === 'active' ? 'online' : member.status === 'on_leave' ? 'away' : 'offline' as UserStatus,
+      title: member.role || member.department || undefined,
+      avatar: member.avatar_url || undefined,
+      isBot: false
+    }))
+  }, [teamMembers])
+
+  // ==========================================================================
+  // THREADS HOOK - Replace mockThreads with real data
+  // ==========================================================================
+  const { threads: userThreadsData, isLoading: threadsLoading, refresh: refreshThreads } = useUserThreads(userId || undefined)
+  const { count: unreadThreadsCount } = useUnreadThreadsCount(userId || undefined)
+
+  // Convert threads to Thread format
+  const threads: Thread[] = useMemo(() => {
+    if (!userThreadsData || userThreadsData.length === 0) return []
+    return userThreadsData.map((thread: any) => ({
+      id: thread.id,
+      parentMessage: {
+        id: thread.id,
+        channelId: thread.context_id || '',
+        content: thread.title || thread.description || 'Thread',
+        author: currentUser,
+        createdAt: thread.created_at,
+        status: 'read' as MessageStatus,
+        reactions: [],
+        threadCount: thread.message_count || 0,
+        threadParticipants: [],
+        attachments: [],
+        mentions: [],
+        isPinned: false,
+        isBookmarked: false
+      },
+      channel: thread.context_type || 'general',
+      replies: thread.message_count || 0,
+      participants: [],
+      lastReply: thread.last_message_at || thread.updated_at,
+      isFollowing: true,
+      isUnread: false
+    }))
+  }, [userThreadsData, currentUser])
+
+  // ==========================================================================
+  // FILES HOOK - Replace mockFiles with real data
+  // ==========================================================================
+  const { files: userFilesData, isLoading: filesLoading, refresh: refreshFiles } = useRecentFiles(userId || undefined, 50)
+
+  // Convert files to SharedFile format
+  const sharedFiles: SharedFile[] = useMemo(() => {
+    if (!userFilesData || userFilesData.length === 0) return []
+    return userFilesData.map((file: any) => ({
+      id: file.id,
+      name: file.name || 'Untitled',
+      type: file.mime_type || 'application/octet-stream',
+      size: file.size || 0,
+      uploadedBy: currentUser,
+      uploadedAt: file.created_at,
+      channelId: file.folder_id || '',
+      channelName: file.folder_name || 'Files',
+      downloads: file.download_count || 0
+    }))
+  }, [userFilesData, currentUser])
+
+  // ==========================================================================
+  // MENTIONS HOOK - Replace mockMentions with real data
+  // ==========================================================================
+  const { mentions: userMentionsData, isLoading: mentionsLoading, refresh: refreshMentions } = useMentions(userId || undefined)
+  const { count: unreadMentionsCount } = useUnreadMentionCount(userId || undefined)
+
+  // Convert mentions to Mention format
+  const mentions: Mention[] = useMemo(() => {
+    if (!userMentionsData || userMentionsData.length === 0) return []
+    return userMentionsData.map((mention: any) => ({
+      id: mention.id,
+      message: {
+        id: mention.content_id || mention.id,
+        channelId: '',
+        content: mention.content_preview || `You were mentioned`,
+        author: currentUser,
+        createdAt: mention.created_at,
+        status: 'read' as MessageStatus,
+        reactions: [],
+        threadCount: 0,
+        threadParticipants: [],
+        attachments: [],
+        mentions: [],
+        isPinned: false,
+        isBookmarked: false
+      },
+      channel: mention.content_type || '#general',
+      isRead: mention.status === 'read',
+      mentionedAt: mention.created_at
+    }))
+  }, [userMentionsData, currentUser])
+
+  // ==========================================================================
+  // CALLS HOOK - Replace mockCalls with real data
+  // ==========================================================================
+  const { calls: recentCallsData, isLoading: callsLoading, refresh: refreshCalls } = useRecentCalls(userId || undefined, { limit: 20 })
+
+  // Convert calls to Call format
+  const calls: Call[] = useMemo(() => {
+    if (!recentCallsData || recentCallsData.length === 0) return []
+    return recentCallsData.map((call: any) => ({
+      id: call.id,
+      type: call.call_type || 'audio' as CallType,
+      status: call.status === 'completed' ? 'ended' : call.status === 'in_progress' ? 'ongoing' : call.status as CallStatus,
+      channelId: call.phone_id || '',
+      channelName: call.caller_name || call.phone_numbers?.number || 'Unknown',
+      participants: [],
+      startTime: call.started_at || call.created_at,
+      endTime: call.ended_at,
+      duration: call.duration,
+      isRecorded: call.is_recorded || false
+    }))
+  }, [recentCallsData])
+
+  // ==========================================================================
+  // CHANNELS STATE - Initialized from conversations hook, not mock data
+  // ==========================================================================
+  const [channelsList, setChannelsList] = useState<Channel[]>([])
+
   // Define adapter variables locally (removed mock data imports)
   const messagesAIInsights: any[] = []
   const messagesCollaborators: any[] = []
@@ -249,7 +348,7 @@ export default function MessagesClient() {
   const messagesActivities: any[] = []
   const messagesQuickActions: any[] = []
 
-  const [selectedChannel, setSelectedChannel] = useState<Channel | null>(mockChannels[0])
+  const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [messageInput, setMessageInput] = useState('')
   const [showThreadPanel, setShowThreadPanel] = useState(false)
@@ -258,6 +357,13 @@ export default function MessagesClient() {
   const [activeCall, setActiveCall] = useState<Call | null>(null)
   const [recipientId, setRecipientId] = useState('')
   const [messageSubject, setMessageSubject] = useState('')
+
+  // Fetch team members on mount
+  useEffect(() => {
+    if (userId) {
+      fetchMembers()
+    }
+  }, [userId, fetchMembers])
 
   // Real Supabase hook for messages (legacy)
   const {
@@ -326,7 +432,7 @@ export default function MessagesClient() {
     totalConversations: messagingStatsData?.data?.totalConversations ?? supabaseChats?.length ?? 0,
     directMessages: directChats?.length ?? 0,
     groupChats: groupChats?.length ?? 0,
-    channels: supabaseChannels?.length ?? mockChannels.length,
+    channels: supabaseChannels?.length ?? 0,
     unreadNotifications: notificationsData?.data?.filter((n: any) => !n.is_read).length ?? 0
   }), [messagingStatsData, totalUnread, supabaseChats, directChats, groupChats, supabaseChannels, notificationsData])
 
@@ -430,45 +536,35 @@ export default function MessagesClient() {
   const [searchResults, setSearchResults] = useState<Message[]>([])
   const [isSearching, setIsSearching] = useState(false)
 
-  // Stats - now uses real Supabase data when available
+  // Stats - now uses real Supabase data from hooks
   const stats = useMemo(() => {
-    // Use real data from Supabase when available, fallback to mock data
-    const hasRealData = supabaseChats.length > 0 || (supabaseMessages && supabaseMessages.length > 0)
+    // Determine if we have real data from any source
+    const hasRealData = supabaseChats.length > 0 || (supabaseMessages && supabaseMessages.length > 0) || threads.length > 0 || sharedFiles.length > 0
 
     // Calculate real message counts
     const realMessageCount = chatMessages.length + (supabaseMessages?.length || 0)
-    const totalMessages = hasRealData ? realMessageCount : mockMessages.length * 150
+    const totalMessages = realMessageCount || 0
 
     // Calculate real channel counts (direct + group + channels)
-    const totalChannels = hasRealData
-      ? directChats.length + groupChats.length + supabaseChannels.length
-      : mockChannels.length
+    const totalChannels = directChats.length + groupChats.length + supabaseChannels.length
 
     // Calculate real unread count
-    const unreadMessages = hasRealData
-      ? totalUnread
-      : mockChannels.reduce((sum, c) => sum + c.unreadCount, 0)
+    const unreadMessages = totalUnread
 
-    // Calculate active threads from pinned messages (as proxy for threads)
-    const activeThreads = hasRealData
-      ? pinnedMessages.length
-      : mockThreads.filter(t => t.isUnread).length
+    // Calculate active threads from real threads data
+    const activeThreads = threads.length > 0 ? threads.length : pinnedMessages.length
 
-    // Files count - would need a separate hook for real data
-    const totalFiles = mockFiles.length * 25
+    // Files count from real hook data
+    const totalFiles = sharedFiles.length
 
-    // Calls count - would need a separate hook for real data
-    const totalCalls = mockCalls.length * 12
+    // Calls count from real hook data
+    const totalCalls = calls.length
 
-    // Online members - use typing users as proxy for online activity
-    const onlineMembers = hasRealData
-      ? typingUsers.length + (currentUserId ? 1 : 0)
-      : mockUsers.filter(u => u.status === 'online').length
+    // Online members from team data
+    const onlineMembers = users.filter(u => u.status === 'online').length + (typingUsers.length) + (currentUserId ? 1 : 0)
 
-    // Mentions count from unread messages
-    const mentions = hasRealData
-      ? supabaseMessages?.filter(m => !m.is_read).length || 0
-      : mockMentions.filter(m => !m.isRead).length
+    // Mentions count from real hook data
+    const mentionsCount = unreadMentionsCount || mentions.filter(m => !m.isRead).length
 
     return {
       totalMessages,
@@ -478,43 +574,36 @@ export default function MessagesClient() {
       totalFiles,
       totalCalls,
       onlineMembers,
-      mentions,
+      mentions: mentionsCount,
       hasRealData
     }
-  }, [supabaseChats, chatMessages, supabaseMessages, totalUnread, directChats, groupChats, supabaseChannels, pinnedMessages, typingUsers, currentUserId])
+  }, [supabaseChats, chatMessages, supabaseMessages, totalUnread, directChats, groupChats, supabaseChannels, pinnedMessages, typingUsers, currentUserId, threads, sharedFiles, calls, users, mentions, unreadMentionsCount])
 
-  // Filtered channels - merges real Supabase data with mock data
+  // Filtered channels - uses real Supabase data
   const filteredChannels = useMemo(() => {
-    // Start with mock channels as fallback
-    let channels = mockChannels
-
-    // If we have real Supabase chats, convert them to Channel format
-    if (supabaseChats.length > 0) {
-      const supabaseAsChannels: Channel[] = supabaseChats.map(chat => ({
-        id: chat.id,
-        name: chat.name,
-        type: chat.type === 'channel' ? 'public' : chat.type === 'group' ? 'private' : 'direct',
-        description: chat.description || undefined,
-        topic: '',
-        members: [],
-        memberCount: chat.member_count || 0,
-        unreadCount: chat.unread_count || 0,
-        isMuted: false,
-        isStarred: false,
-        isPinned: false,
-        lastActivity: chat.last_message_at || chat.updated_at,
-        createdAt: chat.created_at,
-        createdBy: currentUser
-      }))
-      // Merge: real data first, then mock data
-      channels = [...supabaseAsChannels, ...mockChannels]
-    }
+    // Convert Supabase chats to Channel format
+    let channels: Channel[] = supabaseChats.map(chat => ({
+      id: chat.id,
+      name: chat.name,
+      type: chat.type === 'channel' ? 'public' : chat.type === 'group' ? 'private' : 'direct',
+      description: chat.description || undefined,
+      topic: '',
+      members: [],
+      memberCount: chat.member_count || 0,
+      unreadCount: chat.unread_count || 0,
+      isMuted: false,
+      isStarred: false,
+      isPinned: false,
+      lastActivity: chat.last_message_at || chat.updated_at,
+      createdAt: chat.created_at,
+      createdBy: currentUser
+    }))
 
     if (channelFilter === 'unread') channels = channels.filter(c => c.unreadCount > 0)
     else if (channelFilter === 'starred') channels = channels.filter(c => c.isStarred)
     if (searchQuery) channels = channels.filter(c => c.name.toLowerCase().includes(searchQuery.toLowerCase()))
     return channels
-  }, [channelFilter, searchQuery, supabaseChats])
+  }, [channelFilter, searchQuery, supabaseChats, currentUser])
 
   // Messages for selected channel - uses real Supabase messages when available
   const channelMessages = useMemo(() => {
@@ -559,8 +648,8 @@ export default function MessagesClient() {
       })) as Message[]
     }
 
-    // Fallback to mock messages
-    return mockMessages.filter(m => m.channelId === selectedChannel.id && !m.parentId)
+    // Return empty array if no messages (no mock fallback)
+    return []
   }, [selectedChannel, chatMessages, supabaseChats, currentUserId])
 
   const publicChannels = filteredChannels.filter(c => c.type === 'public')
@@ -967,11 +1056,6 @@ export default function MessagesClient() {
         m.subject?.toLowerCase().includes(searchQuery.toLowerCase())
       ) || []
 
-      // Also search in mock messages for demo
-      const mockResults = mockMessages.filter(m =>
-        m.content.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-
       // Convert Supabase results to Message format
       const convertedResults: Message[] = results.map(m => ({
         id: m.id,
@@ -995,8 +1079,8 @@ export default function MessagesClient() {
         isBookmarked: m.is_starred || false
       }))
 
-      setSearchResults([...convertedResults, ...mockResults])
-      toast.success(`Search complete: ${convertedResults.length + mockResults.length} matching messages`)
+      setSearchResults(convertedResults)
+      toast.success(`Search complete: ${convertedResults.length} matching messages`)
     } catch (error) {
       toast.error('Search failed')
     } finally {
@@ -1369,7 +1453,7 @@ export default function MessagesClient() {
                 { icon: Star, label: 'Starred', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => { setChannelFilter('starred'); toast.success('Showing starred channels') } },
                 { icon: Bot, label: 'Apps', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', action: () => window.open('/dashboard/integrations', '_blank') },
                 { icon: Workflow, label: 'Workflows', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', action: () => window.open('/dashboard/automations', '_blank') },
-                { icon: Archive, label: 'Archive', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => { const archived = mockChannels.filter(c => c.isMuted); toast.success(`Archived: ${archived.length} channels in archive`) } },
+                { icon: Archive, label: 'Archive', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => { const archived = filteredChannels.filter(c => c.isMuted); toast.success(`Archived: ${archived.length} channels in archive`) } },
                 { icon: Settings, label: 'Settings', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', action: () => { setSettingsTab('general'); const settingsTabEl = document.querySelector('[value="settings"]') as HTMLElement; if (settingsTabEl) settingsTabEl.click() } },
               ].map((action, idx) => (
                 <Button
@@ -1554,8 +1638,8 @@ export default function MessagesClient() {
                         </div>
                       </div>
                     ))}
-                    {/* Show mock users as fallback if no real-time data */}
-                    {typingUsers.length === 0 && mockUsers.filter(u => u.status === 'online' && !u.isBot).map(user => (
+                    {/* Show team members when no typing activity */}
+                    {typingUsers.length === 0 && users.filter(u => u.status === 'online' && !u.isBot).map(user => (
                       <div key={user.id} className="flex items-center gap-3">
                         <div className="relative">
                           <Avatar className="w-8 h-8">
@@ -1569,7 +1653,7 @@ export default function MessagesClient() {
                         </div>
                       </div>
                     ))}
-                    {typingUsers.length === 0 && mockUsers.filter(u => u.status === 'online' && !u.isBot).length === 0 && (
+                    {typingUsers.length === 0 && users.filter(u => u.status === 'online' && !u.isBot).length === 0 && (
                       <p className="text-sm text-gray-500 text-center py-4">No one online</p>
                     )}
                   </CardContent>

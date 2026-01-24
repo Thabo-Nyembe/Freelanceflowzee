@@ -169,32 +169,100 @@ interface DocSpace {
   lastUpdated: string
 }
 
-// Mock Data
-// MIGRATED: Batch #13 - Removed mock data, using database hooks
-const mockAuthors: Author[] = []
+// Types for competitive upgrade components
+interface AIInsight {
+  id: string
+  type: 'recommendation' | 'alert' | 'opportunity' | 'prediction' | 'success' | 'info' | 'warning' | 'error'
+  title: string
+  description: string
+  impact?: 'high' | 'medium' | 'low'
+  priority?: 'high' | 'medium' | 'low'
+  metric?: string
+  change?: number
+  confidence?: number
+  action?: string
+  category?: string
+  timestamp?: string | Date
+  createdAt?: Date
+}
 
-// MIGRATED: Batch #13 - Removed mock data, using database hooks
-const mockSpaces: DocSpace[] = []
+interface Collaborator {
+  id: string
+  name: string
+  avatar?: string
+  color?: string
+  status: 'online' | 'away' | 'offline'
+  role?: string
+  isTyping?: boolean
+  lastSeen?: Date
+  lastActive?: string | Date
+  cursor?: { x: number; y: number }
+}
 
-// MIGRATED: Batch #13 - Removed mock data, using database hooks
-const mockDocs: Doc[] = []
+interface Prediction {
+  id?: string
+  label?: string
+  title?: string
+  prediction?: string
+  current?: number
+  target?: number
+  currentValue?: number
+  predictedValue?: number
+  predicted?: number
+  confidence: number
+  trend: 'up' | 'down' | 'stable'
+  timeframe?: string
+  impact?: string
+  factors?: Array<{ name: string; impact: 'positive' | 'negative' | 'neutral'; weight: number }> | string[]
+}
 
+interface ActivityItem {
+  id: string
+  type: 'comment' | 'update' | 'create' | 'delete' | 'mention' | 'assignment' | 'status_change' | 'milestone' | 'integration'
+  title?: string
+  action?: string
+  description?: string
+  user: {
+    id: string
+    name: string
+    avatar?: string
+  }
+  target?: {
+    type: string
+    name: string
+    url?: string
+  }
+  metadata?: Record<string, unknown>
+  timestamp: Date | string
+  isRead?: boolean
+  isPinned?: boolean
+  actions?: Array<{
+    label: string
+    action: () => void
+    variant?: 'default' | 'destructive'
+  }>
+}
+
+interface QuickAction {
+  id: string
+  label: string
+  icon: React.ReactNode
+  shortcut?: string
+  action: () => void
+  category?: string
+  description?: string
+}
+
+// Empty arrays with proper types - no mock data
+const emptyAuthors: Author[] = []
+const emptySpaces: DocSpace[] = []
+const emptyDocs: Doc[] = []
 const languages = ['All', 'JavaScript', 'Python', 'Ruby', 'Go', 'cURL']
-
-// MIGRATED: Batch #13 - Removed mock data, using database hooks
-const mockDocsAIInsights = []
-
-// MIGRATED: Batch #13 - Removed mock data, using database hooks
-const mockDocsCollaborators = []
-
-// MIGRATED: Batch #13 - Removed mock data, using database hooks
-const mockDocsPredictions = []
-
-// MIGRATED: Batch #13 - Removed mock data, using database hooks
-const mockDocsActivities = []
-
-// MIGRATED: Batch #13 - Removed mock data, using database hooks
-const mockDocsQuickActions = []
+const emptyAIInsights: AIInsight[] = []
+const emptyCollaborators: Collaborator[] = []
+const emptyPredictions: Prediction[] = []
+const emptyActivities: ActivityItem[] = []
+const emptyQuickActions: QuickAction[] = []
 
 export default function DocsClient() {
   // MIGRATED: Batch #13 - Using database hooks instead of mock data
@@ -206,8 +274,8 @@ export default function DocsClient() {
     limit: 100
   })
 
-  const [docs] = useState<Doc[]>(dbDocs || mockDocs)
-  const [spaces] = useState<DocSpace[]>(mockSpaces)
+  const [docs] = useState<Doc[]>(dbDocs || emptyDocs)
+  const [spaces] = useState<DocSpace[]>(emptySpaces)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<DocCategory | 'all'>('all')
   const [selectedLanguage, setSelectedLanguage] = useState('All')
@@ -414,7 +482,7 @@ export default function DocsClient() {
                     <p className="text-blue-200 text-sm">Documents</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockSpaces.length}</p>
+                    <p className="text-3xl font-bold">{spaces.length}</p>
                     <p className="text-blue-200 text-sm">Spaces</p>
                   </div>
                 </div>
@@ -636,7 +704,7 @@ export default function DocsClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockDocs.filter(d => d.apiEndpoint).length}</p>
+                    <p className="text-3xl font-bold">{docs.filter(d => d.apiEndpoint).length}</p>
                     <p className="text-orange-200 text-sm">Endpoints</p>
                   </div>
                 </div>
@@ -1346,7 +1414,7 @@ export default function DocsClient() {
                         <div className="flex gap-3">
                           <Button variant="outline" className="flex-1" onClick={() => {
                             // Export all docs as JSON
-                            const docsData = JSON.stringify(mockDocs, null, 2)
+                            const docsData = JSON.stringify(docs, null, 2)
                             const blob = new Blob([docsData], { type: 'application/json' })
                             const url = URL.createObjectURL(blob)
                             const a = document.createElement('a')
@@ -1495,18 +1563,18 @@ export default function DocsClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockDocsAIInsights}
+              insights={emptyAIInsights}
               title="Documentation Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockDocsCollaborators}
+              collaborators={emptyCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockDocsPredictions}
+              predictions={emptyPredictions}
               title="Content Forecasts"
             />
           </div>
@@ -1514,12 +1582,12 @@ export default function DocsClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockDocsActivities}
+            activities={emptyActivities}
             title="Docs Activity"
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockDocsQuickActions}
+            actions={emptyQuickActions}
             variant="grid"
           />
         </div>

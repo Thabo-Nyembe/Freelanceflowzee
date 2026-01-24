@@ -186,120 +186,25 @@ interface Workspace {
   createdAt: string
 }
 
-// Mock Data
-const mockProjects: Project[] = [
-  { id: '1', name: 'Website Redesign', client: 'Acme Corp', color: 'indigo', status: 'active', billable: true, hourlyRate: 150, budget: 20000, spent: 12500, totalHours: 83.3 },
-  { id: '2', name: 'Mobile App Dev', client: 'TechStart', color: 'purple', status: 'active', billable: true, hourlyRate: 175, budget: 35000, spent: 28000, totalHours: 160 },
-  { id: '3', name: 'Brand Strategy', client: 'Global Inc', color: 'pink', status: 'active', billable: true, hourlyRate: 200, budget: 15000, spent: 8000, totalHours: 40 },
-  { id: '4', name: 'Internal Training', client: 'Internal', color: 'gray', status: 'active', billable: false, hourlyRate: 0, totalHours: 24, spent: 0 },
-  { id: '5', name: 'Marketing Campaign', client: 'Acme Corp', color: 'emerald', status: 'completed', billable: true, hourlyRate: 125, budget: 10000, spent: 9500, totalHours: 76 }
-]
+// Data - empty until wired to real APIs
+const mockProjects: Project[] = []
+const mockEntries: TimeEntry[] = []
+const mockTeam: TeamMember[] = []
+const mockInvoices: Invoice[] = []
+const mockGoals: Goal[] = []
+const mockClients: Client[] = []
+const mockTags: Tag[] = []
+const mockTimeOff: TimeOffRequest[] = []
+const mockSavedReports: SavedReport[] = []
+const mockAutomations: Automation[] = []
+const mockIntegrations: Integration[] = []
+const mockWorkspaces: Workspace[] = []
 
-const mockEntries: TimeEntry[] = [
-  { id: '1', title: 'Homepage design review', projectId: '1', projectName: 'Website Redesign', startTime: '2024-01-16T09:00:00', endTime: '2024-01-16T11:30:00', durationSeconds: 9000, durationHours: 2.5, status: 'stopped', isBillable: true, billableAmount: 375, hourlyRate: 150, tags: ['design', 'review'] },
-  { id: '2', title: 'API integration work', projectId: '2', projectName: 'Mobile App Dev', startTime: '2024-01-16T13:00:00', endTime: '2024-01-16T17:00:00', durationSeconds: 14400, durationHours: 4, status: 'stopped', isBillable: true, billableAmount: 700, hourlyRate: 175, tags: ['development', 'api'] },
-  { id: '3', title: 'Client meeting', projectId: '3', projectName: 'Brand Strategy', startTime: '2024-01-16T10:00:00', endTime: '2024-01-16T11:00:00', durationSeconds: 3600, durationHours: 1, status: 'approved', isBillable: true, billableAmount: 200, hourlyRate: 200, tags: ['meeting'] },
-  { id: '4', title: 'Bug fixing session', projectId: '2', projectName: 'Mobile App Dev', startTime: '2024-01-15T14:00:00', endTime: '2024-01-15T18:00:00', durationSeconds: 14400, durationHours: 4, status: 'stopped', isBillable: true, billableAmount: 700, hourlyRate: 175, tags: ['bug-fix'] },
-  { id: '5', title: 'Working on feature X', projectId: '1', projectName: 'Website Redesign', startTime: '2024-01-16T14:00:00', durationSeconds: 3600, durationHours: 1, status: 'running', isBillable: true, billableAmount: 150, hourlyRate: 150, tags: ['feature'] }
-]
-
-const mockTeam: TeamMember[] = [
-  { id: '1', name: 'Sarah Chen', email: 'sarah@company.com', role: 'Lead Developer', todayHours: 6.5, weekHours: 32, activeProject: 'Website Redesign', isOnline: true },
-  { id: '2', name: 'Mike Johnson', email: 'mike@company.com', role: 'Designer', todayHours: 4.2, weekHours: 28, activeProject: 'Brand Strategy', isOnline: true },
-  { id: '3', name: 'Emily Davis', email: 'emily@company.com', role: 'Developer', todayHours: 7.0, weekHours: 35, activeProject: 'Mobile App Dev', isOnline: false },
-  { id: '4', name: 'Alex Kim', email: 'alex@company.com', role: 'Project Manager', todayHours: 5.5, weekHours: 30, isOnline: true }
-]
-
-const mockInvoices: Invoice[] = [
-  { id: '1', number: 'INV-001', client: 'Acme Corp', project: 'Website Redesign', amount: 12500, hours: 83.3, status: 'paid', dueDate: '2024-01-15', createdAt: '2024-01-01' },
-  { id: '2', number: 'INV-002', client: 'TechStart', project: 'Mobile App Dev', amount: 28000, hours: 160, status: 'sent', dueDate: '2024-02-01', createdAt: '2024-01-16' },
-  { id: '3', number: 'INV-003', client: 'Global Inc', project: 'Brand Strategy', amount: 8000, hours: 40, status: 'draft', dueDate: '2024-02-15', createdAt: '2024-01-16' },
-  { id: '4', number: 'INV-004', client: 'Acme Corp', project: 'Marketing Campaign', amount: 9500, hours: 76, status: 'overdue', dueDate: '2024-01-10', createdAt: '2023-12-15' }
-]
-
-const mockGoals: Goal[] = [
-  { id: '1', label: 'Daily Hours', target: 8, current: 6.5, unit: 'h' },
-  { id: '2', label: 'Weekly Hours', target: 40, current: 32, unit: 'h' },
-  { id: '3', label: 'Billable %', target: 80, current: 75, unit: '%' },
-  { id: '4', label: 'Monthly Revenue', target: 15000, current: 12500, unit: '$' }
-]
-
-const mockClients: Client[] = [
-  { id: '1', name: 'Acme Corp', email: 'billing@acme.com', phone: '+1 555-0101', address: '123 Business Ave, NYC', currency: 'USD', projects: 3, totalBilled: 125000, outstandingBalance: 12500, status: 'active', createdAt: '2023-01-15', color: 'blue' },
-  { id: '2', name: 'TechStart', email: 'finance@techstart.io', phone: '+1 555-0102', address: '456 Innovation Blvd, SF', currency: 'USD', projects: 2, totalBilled: 85000, outstandingBalance: 28000, status: 'active', createdAt: '2023-03-22', color: 'purple' },
-  { id: '3', name: 'Global Inc', email: 'accounts@global.com', phone: '+1 555-0103', address: '789 Enterprise Dr, LA', currency: 'USD', projects: 1, totalBilled: 45000, outstandingBalance: 8000, status: 'active', createdAt: '2023-06-10', color: 'green' },
-  { id: '4', name: 'StartupXYZ', email: 'hello@startupxyz.com', phone: '+1 555-0104', address: '321 Launch St, Austin', currency: 'USD', projects: 1, totalBilled: 15000, outstandingBalance: 0, status: 'inactive', createdAt: '2022-11-05', color: 'orange' }
-]
-
-const mockTags: Tag[] = [
-  { id: '1', name: 'design', color: 'pink', usageCount: 45, createdAt: '2023-01-10' },
-  { id: '2', name: 'development', color: 'blue', usageCount: 128, createdAt: '2023-01-10' },
-  { id: '3', name: 'meeting', color: 'purple', usageCount: 67, createdAt: '2023-01-10' },
-  { id: '4', name: 'review', color: 'amber', usageCount: 34, createdAt: '2023-01-15' },
-  { id: '5', name: 'bug-fix', color: 'red', usageCount: 89, createdAt: '2023-02-01' },
-  { id: '6', name: 'research', color: 'green', usageCount: 23, createdAt: '2023-02-15' },
-  { id: '7', name: 'planning', color: 'indigo', usageCount: 56, createdAt: '2023-03-01' },
-  { id: '8', name: 'documentation', color: 'cyan', usageCount: 41, createdAt: '2023-03-10' }
-]
-
-const mockTimeOff: TimeOffRequest[] = [
-  { id: '1', userId: '1', userName: 'Sarah Chen', type: 'vacation', startDate: '2024-02-15', endDate: '2024-02-20', hours: 40, status: 'approved', notes: 'Family vacation', createdAt: '2024-01-10' },
-  { id: '2', userId: '2', userName: 'Mike Johnson', type: 'sick', startDate: '2024-01-18', endDate: '2024-01-19', hours: 16, status: 'approved', notes: 'Medical appointment', createdAt: '2024-01-17' },
-  { id: '3', userId: '3', userName: 'Emily Davis', type: 'personal', startDate: '2024-02-01', endDate: '2024-02-01', hours: 8, status: 'pending', notes: 'Personal matter', createdAt: '2024-01-16' },
-  { id: '4', userId: '4', userName: 'Alex Kim', type: 'holiday', startDate: '2024-02-19', endDate: '2024-02-19', hours: 8, status: 'approved', notes: 'Presidents Day', createdAt: '2024-01-05' }
-]
-
-const mockSavedReports: SavedReport[] = [
-  { id: '1', name: 'Weekly Team Summary', type: 'weekly', dateRange: 'week', filters: ['all-projects'], schedule: 'Monday 9am', lastRun: '2024-01-15', createdAt: '2023-06-01', createdBy: 'Admin' },
-  { id: '2', name: 'Monthly Client Billing', type: 'client', dateRange: 'month', filters: ['billable-only'], schedule: '1st of month', lastRun: '2024-01-01', createdAt: '2023-07-15', createdBy: 'Admin' },
-  { id: '3', name: 'Project Budget Analysis', type: 'project', dateRange: 'quarter', filters: ['active-projects'], lastRun: '2024-01-10', createdAt: '2023-08-20', createdBy: 'Sarah Chen' },
-  { id: '4', name: 'Team Utilization Report', type: 'team', dateRange: 'month', filters: ['all-members'], lastRun: '2024-01-12', createdAt: '2023-09-01', createdBy: 'Alex Kim' }
-]
-
-const mockAutomations: Automation[] = [
-  { id: '1', name: 'Auto-stop timer at midnight', trigger: 'daily', actions: ['Stop running timers', 'Send notification'], conditions: ['Timer running > 8 hours'], isActive: true, lastTriggered: '2024-01-15', createdAt: '2023-06-15' },
-  { id: '2', name: 'Weekly reminder to submit hours', trigger: 'weekly', actions: ['Email reminder', 'Slack notification'], conditions: ['Friday 4pm'], isActive: true, lastTriggered: '2024-01-12', createdAt: '2023-07-01' },
-  { id: '3', name: 'Auto-tag based on project', trigger: 'on_entry', actions: ['Add project default tags'], conditions: ['New time entry created'], isActive: false, createdAt: '2023-08-10' },
-  { id: '4', name: 'Monthly invoice generation', trigger: 'monthly', actions: ['Generate draft invoices', 'Notify admin'], conditions: ['Last day of month'], isActive: true, lastTriggered: '2024-01-31', createdAt: '2023-09-20' }
-]
-
-const mockIntegrations: Integration[] = [
-  { id: '1', name: 'Google Calendar', type: 'calendar', icon: 'calendar', status: 'connected', lastSync: '2024-01-16 09:00', syncedItems: 156 },
-  { id: '2', name: 'Jira', type: 'project', icon: 'folder', status: 'connected', lastSync: '2024-01-16 08:45', syncedItems: 89 },
-  { id: '3', name: 'QuickBooks', type: 'accounting', icon: 'receipt', status: 'connected', lastSync: '2024-01-15 18:00', syncedItems: 234 },
-  { id: '4', name: 'Slack', type: 'communication', icon: 'message', status: 'connected', lastSync: '2024-01-16 09:15', syncedItems: 45 },
-  { id: '5', name: 'Salesforce', type: 'crm', icon: 'users', status: 'disconnected', lastSync: '2024-01-10 12:00', syncedItems: 0 },
-  { id: '6', name: 'Asana', type: 'project', icon: 'check', status: 'error', lastSync: '2024-01-14 15:30', syncedItems: 67 }
-]
-
-const mockWorkspaces: Workspace[] = [
-  { id: '1', name: 'Main Workspace', slug: 'main', members: 12, projects: 8, totalHours: 4560, plan: 'premium', createdAt: '2023-01-01' },
-  { id: '2', name: 'Design Team', slug: 'design', members: 4, projects: 3, totalHours: 1200, plan: 'starter', createdAt: '2023-03-15' }
-]
-
-// Competitive Upgrade Mock Data - Toggl/Harvest Level Time Tracking Intelligence
-const mockTimeTrackingAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Productivity Peak', description: 'Team logged 156 billable hours this week—highest this quarter!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Productivity' },
-  { id: '2', type: 'warning' as const, title: 'Overtime Alert', description: '3 team members approaching 45+ hour threshold this week.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Compliance' },
-  { id: '3', type: 'info' as const, title: 'AI Suggestion', description: 'Auto-categorization could save 2.5 hours/week in time entry admin.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'AI Insights' },
-]
-
-const mockTimeTrackingCollaborators = [
-  { id: '1', name: 'Project Manager', avatar: '/avatars/pm.jpg', status: 'online' as const, role: 'Manager' },
-  { id: '2', name: 'Senior Dev', avatar: '/avatars/dev.jpg', status: 'online' as const, role: 'Developer' },
-  { id: '3', name: 'Designer', avatar: '/avatars/design.jpg', status: 'away' as const, role: 'Designer' },
-]
-
-const mockTimeTrackingPredictions = [
-  { id: '1', title: 'Billable Utilization', prediction: 'Team utilization rate on track for 85% this month', confidence: 88, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Project Hours', prediction: 'Client X project will exceed budget by 12 hours at current pace', confidence: 79, trend: 'up' as const, impact: 'medium' as const },
-]
-
-const mockTimeTrackingActivities = [
-  { id: '1', user: 'Project Manager', action: 'Approved', target: 'Weekly timesheet for Design Team', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Senior Dev', action: 'Logged', target: '6.5 hours on API Development', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'Designer', action: 'Started', target: 'Timer for UI mockups task', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
-]
+// Competitive upgrade data - empty until wired to real APIs
+const mockTimeTrackingAIInsights: { id: string; type: 'success' | 'warning' | 'info'; title: string; description: string; priority: 'low' | 'high' | 'medium'; timestamp: string; category: string }[] = []
+const mockTimeTrackingCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }[] = []
+const mockTimeTrackingPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down'; impact: 'high' | 'medium' | 'low' }[] = []
+const mockTimeTrackingActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' }[] = []
 
 // Quick actions will be defined inside the component to access state
 

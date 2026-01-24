@@ -249,236 +249,20 @@ const formatTimeAgo = (date: string): string => {
   return formatDate(date)
 }
 
-// Mock data
-const mockAuthors: Author[] = [
-  { id: 'a1', name: 'Sarah Chen', avatar: '/avatars/sarah.jpg', role: 'Technical Writer' },
-  { id: 'a2', name: 'Mike Johnson', avatar: '/avatars/mike.jpg', role: 'Developer' },
-  { id: 'a3', name: 'Emily Davis', avatar: '/avatars/emily.jpg', role: 'Product Manager' },
-  { id: 'a4', name: 'Alex Thompson', avatar: '/avatars/alex.jpg', role: 'Designer' }
-]
-
-const mockSpaces: Space[] = [
-  { id: 's1', name: 'Engineering', key: 'ENG', description: 'Technical documentation and guides', icon: 'code', color: '#6366F1', articlesCount: 156, membersCount: 24, isPublic: false, isFavorite: true, createdAt: '2023-01-15', owner: mockAuthors[1] },
-  { id: 's2', name: 'Product', key: 'PROD', description: 'Product specs and roadmaps', icon: 'package', color: '#F59E0B', articlesCount: 89, membersCount: 18, isPublic: false, isFavorite: true, createdAt: '2023-02-20', owner: mockAuthors[2] },
-  { id: 's3', name: 'Design', key: 'DES', description: 'Design system and guidelines', icon: 'palette', color: '#EC4899', articlesCount: 67, membersCount: 12, isPublic: false, isFavorite: false, createdAt: '2023-03-10', owner: mockAuthors[3] },
-  { id: 's4', name: 'Company Wiki', key: 'WIKI', description: 'Company policies and procedures', icon: 'building', color: '#10B981', articlesCount: 234, membersCount: 150, isPublic: true, isFavorite: true, createdAt: '2023-01-01', owner: mockAuthors[0] },
-  { id: 's5', name: 'Help Center', key: 'HELP', description: 'Customer-facing documentation', icon: 'help-circle', color: '#3B82F6', articlesCount: 128, membersCount: 8, isPublic: true, isFavorite: false, createdAt: '2023-04-05', owner: mockAuthors[0] }
-]
-
-const mockArticles: Article[] = [
-  {
-    id: 'art1',
-    title: 'Getting Started with Our Platform',
-    slug: 'getting-started',
-    excerpt: 'A comprehensive guide to help you get up and running quickly with our platform.',
-    content: 'Full article content here...',
-    status: 'published',
-    type: 'tutorial',
-    level: 'beginner',
-    spaceId: 's4',
-    spaceName: 'Company Wiki',
-    author: mockAuthors[0],
-    contributors: [mockAuthors[0], mockAuthors[1]],
-    labels: ['onboarding', 'getting-started', 'tutorial'],
-    readTime: 8,
-    views: 12450,
-    likes: 342,
-    bookmarks: 156,
-    shares: 89,
-    rating: 4.8,
-    totalRatings: 127,
-    commentsCount: 23,
-    versions: [
-      { id: 'v1', version: 3, author: mockAuthors[0], changes: 'Updated screenshots', createdAt: '2024-01-15' },
-      { id: 'v2', version: 2, author: mockAuthors[1], changes: 'Added new section', createdAt: '2024-01-10' }
-    ],
-    comments: [],
-    relatedArticles: ['art2', 'art3'],
-    permissions: [],
-    isStarred: true,
-    isPinned: true,
-    createdAt: '2023-06-15',
-    updatedAt: '2024-01-15',
-    publishedAt: '2023-06-20'
-  },
-  {
-    id: 'art2',
-    title: 'API Authentication Best Practices',
-    slug: 'api-auth-best-practices',
-    excerpt: 'Learn how to properly implement authentication in your API integrations.',
-    content: 'Full article content here...',
-    status: 'published',
-    type: 'how-to',
-    level: 'advanced',
-    spaceId: 's1',
-    spaceName: 'Engineering',
-    author: mockAuthors[1],
-    contributors: [mockAuthors[1]],
-    labels: ['api', 'security', 'authentication'],
-    readTime: 12,
-    views: 8920,
-    likes: 256,
-    bookmarks: 198,
-    shares: 67,
-    rating: 4.9,
-    totalRatings: 89,
-    commentsCount: 15,
-    versions: [],
-    comments: [],
-    relatedArticles: ['art1'],
-    permissions: [],
-    isStarred: true,
-    isPinned: false,
-    createdAt: '2023-09-10',
-    updatedAt: '2024-01-12',
-    publishedAt: '2023-09-15'
-  },
-  {
-    id: 'art3',
-    title: 'Design System Components Guide',
-    slug: 'design-system-components',
-    excerpt: 'Complete reference for all design system components and usage guidelines.',
-    content: 'Full article content here...',
-    status: 'published',
-    type: 'reference',
-    level: 'intermediate',
-    spaceId: 's3',
-    spaceName: 'Design',
-    author: mockAuthors[3],
-    contributors: [mockAuthors[3], mockAuthors[0]],
-    labels: ['design', 'components', 'ui'],
-    readTime: 15,
-    views: 6780,
-    likes: 189,
-    bookmarks: 234,
-    shares: 45,
-    rating: 4.7,
-    totalRatings: 56,
-    commentsCount: 8,
-    versions: [],
-    comments: [],
-    relatedArticles: [],
-    permissions: [],
-    isStarred: false,
-    isPinned: false,
-    createdAt: '2023-11-20',
-    updatedAt: '2024-01-08',
-    publishedAt: '2023-11-25'
-  },
-  {
-    id: 'art4',
-    title: 'Q1 2024 Product Roadmap',
-    slug: 'q1-2024-roadmap',
-    excerpt: 'Detailed overview of planned features and improvements for Q1 2024.',
-    content: 'Full article content here...',
-    status: 'draft',
-    type: 'page',
-    level: 'intermediate',
-    spaceId: 's2',
-    spaceName: 'Product',
-    author: mockAuthors[2],
-    contributors: [mockAuthors[2], mockAuthors[1]],
-    labels: ['roadmap', 'planning', 'q1-2024'],
-    readTime: 10,
-    views: 0,
-    likes: 0,
-    bookmarks: 0,
-    shares: 0,
-    rating: 0,
-    totalRatings: 0,
-    commentsCount: 5,
-    versions: [],
-    comments: [],
-    relatedArticles: [],
-    permissions: [],
-    isStarred: false,
-    isPinned: false,
-    createdAt: '2024-01-10',
-    updatedAt: '2024-01-14'
-  },
-  {
-    id: 'art5',
-    title: 'Deployment Pipeline Documentation',
-    slug: 'deployment-pipeline',
-    excerpt: 'Step-by-step guide for setting up and managing deployment pipelines.',
-    content: 'Full article content here...',
-    status: 'review',
-    type: 'how-to',
-    level: 'advanced',
-    spaceId: 's1',
-    spaceName: 'Engineering',
-    author: mockAuthors[1],
-    contributors: [mockAuthors[1]],
-    labels: ['devops', 'ci-cd', 'deployment'],
-    readTime: 20,
-    views: 0,
-    likes: 0,
-    bookmarks: 0,
-    shares: 0,
-    rating: 0,
-    totalRatings: 0,
-    commentsCount: 12,
-    versions: [],
-    comments: [],
-    relatedArticles: ['art2'],
-    permissions: [],
-    isStarred: false,
-    isPinned: false,
-    createdAt: '2024-01-05',
-    updatedAt: '2024-01-13'
-  },
-  {
-    id: 'art6',
-    title: 'Customer FAQ: Billing & Subscriptions',
-    slug: 'faq-billing',
-    excerpt: 'Answers to common questions about billing, payments, and subscriptions.',
-    content: 'Full article content here...',
-    status: 'published',
-    type: 'faq',
-    level: 'beginner',
-    spaceId: 's5',
-    spaceName: 'Help Center',
-    author: mockAuthors[0],
-    contributors: [mockAuthors[0]],
-    labels: ['faq', 'billing', 'support'],
-    readTime: 5,
-    views: 15670,
-    likes: 423,
-    bookmarks: 89,
-    shares: 34,
-    rating: 4.6,
-    totalRatings: 234,
-    commentsCount: 45,
-    versions: [],
-    comments: [],
-    relatedArticles: [],
-    permissions: [],
-    isStarred: false,
-    isPinned: true,
-    createdAt: '2023-05-10',
-    updatedAt: '2024-01-10',
-    publishedAt: '2023-05-12'
-  }
-]
-
-const mockTemplates: Template[] = [
-  { id: 't1', name: 'How-To Guide', description: 'Step-by-step tutorial format', type: 'how-to', category: 'Documentation', usageCount: 156, preview: '', isGlobal: true, createdBy: mockAuthors[0] },
-  { id: 't2', name: 'API Reference', description: 'API endpoint documentation', type: 'reference', category: 'Technical', usageCount: 89, preview: '', isGlobal: true, createdBy: mockAuthors[1] },
-  { id: 't3', name: 'Meeting Notes', description: 'Meeting minutes template', type: 'page', category: 'General', usageCount: 234, preview: '', isGlobal: true, createdBy: mockAuthors[2] },
-  { id: 't4', name: 'Product Spec', description: 'Product requirements document', type: 'page', category: 'Product', usageCount: 67, preview: '', isGlobal: true, createdBy: mockAuthors[2] },
-  { id: 't5', name: 'FAQ Page', description: 'Frequently asked questions', type: 'faq', category: 'Support', usageCount: 45, preview: '', isGlobal: true, createdBy: mockAuthors[0] },
-  { id: 't6', name: 'Tutorial', description: 'Interactive tutorial format', type: 'tutorial', category: 'Learning', usageCount: 78, preview: '', isGlobal: true, createdBy: mockAuthors[3] }
-]
-
-const mockStats: ContentStats = {
-  totalArticles: 674,
-  publishedArticles: 498,
-  draftArticles: 89,
-  totalViews: 156780,
-  totalContributors: 45,
-  avgReadTime: 8,
-  topLabel: 'tutorial',
-  growthRate: 23.5
+// Empty data arrays (to be populated from real data sources)
+const emptyAuthors: Author[] = []
+const emptySpaces: Space[] = []
+const emptyArticles: Article[] = []
+const emptyTemplates: Template[] = []
+const emptyStats: ContentStats = {
+  totalArticles: 0,
+  publishedArticles: 0,
+  draftArticles: 0,
+  totalViews: 0,
+  totalContributors: 0,
+  avgReadTime: 0,
+  topLabel: '',
+  growthRate: 0
 }
 
 interface KnowledgeArticlesClientProps {
@@ -486,31 +270,16 @@ interface KnowledgeArticlesClientProps {
   initialStats?: ContentStats
 }
 
-// Mock data for AI-powered competitive upgrade components
-const mockKnowledgeArticlesAIInsights = [
-  { id: '1', type: 'success' as const, title: 'High Engagement', description: 'Getting Started guide has 95% completion rate!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Engagement' },
-  { id: '2', type: 'warning' as const, title: 'Content Gap', description: 'No articles covering "API rate limits" - top search term.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Content' },
-  { id: '3', type: 'info' as const, title: 'SEO Performance', description: 'Documentation driving 40% of organic traffic.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'SEO' },
-]
+// Empty data arrays for AI-powered competitive upgrade components (to be populated from real data sources)
+const emptyKnowledgeArticlesAIInsights: { id: string; type: 'success' | 'warning' | 'info'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
 
-const mockKnowledgeArticlesCollaborators = [
-  { id: '1', name: 'Documentation Lead', avatar: '/avatars/docs-lead.jpg', status: 'online' as const, role: 'Lead' },
-  { id: '2', name: 'Technical Writer', avatar: '/avatars/writer.jpg', status: 'online' as const, role: 'Writer' },
-  { id: '3', name: 'Product Expert', avatar: '/avatars/expert.jpg', status: 'away' as const, role: 'SME' },
-]
+const emptyKnowledgeArticlesCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }[] = []
 
-const mockKnowledgeArticlesPredictions = [
-  { id: '1', title: 'Search Trend', prediction: 'Integration docs will see 50% more traffic after API launch', confidence: 88, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Update Needed', prediction: '8 articles will need updates after next release', confidence: 82, trend: 'up' as const, impact: 'medium' as const },
-]
+const emptyKnowledgeArticlesPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down'; impact: 'low' | 'medium' | 'high' }[] = []
 
-const mockKnowledgeArticlesActivities = [
-  { id: '1', user: 'Technical Writer', action: 'Published', target: 'OAuth 2.0 integration guide', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Documentation Lead', action: 'Reviewed', target: 'API reference documentation', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'Product Expert', action: 'Updated', target: 'troubleshooting guide', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
-]
+const emptyKnowledgeArticlesActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' }[] = []
 
-// Note: mockKnowledgeArticlesQuickActions is now defined inside the component to access state setters
+// Note: knowledgeArticlesQuickActions is defined inside the component to access state setters
 
 // Helper function for exporting data as JSON
 const downloadAsJson = (data: unknown, filename: string) => {
@@ -527,10 +296,10 @@ const downloadAsJson = (data: unknown, filename: string) => {
 
 export default function KnowledgeArticlesClient({ initialArticles, initialStats }: KnowledgeArticlesClientProps) {
   const [activeTab, setActiveTab] = useState('articles')
-  const [articles, setArticles] = useState<Article[]>(mockArticles)
-  const [spaces] = useState<Space[]>(mockSpaces)
-  const [templates] = useState<Template[]>(mockTemplates)
-  const [stats] = useState<ContentStats>(mockStats)
+  const [articles, setArticles] = useState<Article[]>(emptyArticles)
+  const [spaces] = useState<Space[]>(emptySpaces)
+  const [templates] = useState<Template[]>(emptyTemplates)
+  const [stats] = useState<ContentStats>(emptyStats)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null)
   const [showArticleDialog, setShowArticleDialog] = useState(false)
@@ -1431,7 +1200,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                       <label className="text-sm font-medium mb-1 block">Author</label>
                       <select className="w-full border rounded-md p-2">
                         <option>All Authors</option>
-                        {mockAuthors.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+                        {emptyAuthors.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
                       </select>
                     </div>
                     <div>
@@ -1519,7 +1288,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {mockAuthors.map((author, i) => (
+                    {emptyAuthors.map((author, i) => (
                       <div key={author.id} className="flex items-center gap-3">
                         <Avatar>
                           <AvatarImage src={author.avatar} alt="User avatar" />
@@ -1530,7 +1299,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                           <p className="text-xs text-muted-foreground">{author.role}</p>
                         </div>
                         <div className="text-right">
-                          <p className="text-sm font-bold">{[45, 38, 27, 19][i]}</p>
+                          <p className="text-sm font-bold">{[45, 38, 27, 19][i] || 0}</p>
                           <p className="text-xs text-muted-foreground">articles</p>
                         </div>
                       </div>
@@ -1952,18 +1721,18 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockKnowledgeArticlesAIInsights}
+              insights={emptyKnowledgeArticlesAIInsights}
               title="Knowledge Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockKnowledgeArticlesCollaborators}
+              collaborators={emptyKnowledgeArticlesCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockKnowledgeArticlesPredictions}
+              predictions={emptyKnowledgeArticlesPredictions}
               title="Article Forecasts"
             />
           </div>
@@ -1971,7 +1740,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockKnowledgeArticlesActivities}
+            activities={emptyKnowledgeArticlesActivities}
             title="Knowledge Activity"
             maxItems={5}
           />

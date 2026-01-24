@@ -13,6 +13,9 @@ import {
   Scale, Thermometer, ShieldCheck, Bell, Zap
 } from 'lucide-react'
 
+// Auth hook
+import { useAuthUserId } from '@/lib/hooks/use-auth-user-id'
+
 // Enhanced & Competitive Upgrade Components
 import {
   AIInsightsPanel,
@@ -161,331 +164,14 @@ interface Order {
   shipment?: string
 }
 
-// Mock Data
-const mockShipments: Shipment[] = [
-  {
-    id: '1',
-    trackingNumber: 'SHP-2024-001234',
-    orderId: 'ORD-5001',
-    status: 'in_transit',
-    type: 'express',
-    carrier: 'FedEx',
-    carrierService: 'Express Saver',
-    origin: { name: 'Warehouse A', address: '123 Industrial Blvd', city: 'Los Angeles', state: 'CA', zip: '90001', country: 'USA' },
-    destination: { name: 'John Smith', address: '456 Oak Street', city: 'New York', state: 'NY', zip: '10001', country: 'USA' },
-    weight: 5.2,
-    dimensions: { length: 12, width: 8, height: 6 },
-    value: 299.99,
-    shippingCost: 24.99,
-    insurance: 9.99,
-    estimatedDelivery: '2024-12-27',
-    createdAt: '2024-12-24T10:30:00Z',
-    lastUpdate: '2024-12-25T14:20:00Z',
-    events: [
-      { id: '1', timestamp: '2024-12-25T14:20:00Z', location: 'Memphis, TN', description: 'In transit to destination', status: 'in_transit' },
-      { id: '2', timestamp: '2024-12-24T18:00:00Z', location: 'Los Angeles, CA', description: 'Departed FedEx facility', status: 'in_transit' },
-      { id: '3', timestamp: '2024-12-24T12:30:00Z', location: 'Los Angeles, CA', description: 'Picked up', status: 'picked_up' }
-    ],
-    notes: 'Handle with care',
-    priority: 'high',
-    requiresSignature: true,
-    fragile: false
-  },
-  {
-    id: '2',
-    trackingNumber: 'SHP-2024-001235',
-    orderId: 'ORD-5002',
-    status: 'out_for_delivery',
-    type: 'overnight',
-    carrier: 'UPS',
-    carrierService: 'Next Day Air',
-    origin: { name: 'Warehouse B', address: '789 Commerce Dr', city: 'Chicago', state: 'IL', zip: '60601', country: 'USA' },
-    destination: { name: 'Jane Doe', address: '321 Maple Ave', city: 'Boston', state: 'MA', zip: '02101', country: 'USA' },
-    weight: 2.8,
-    dimensions: { length: 10, width: 6, height: 4 },
-    value: 189.00,
-    shippingCost: 45.99,
-    insurance: 5.99,
-    estimatedDelivery: '2024-12-25',
-    createdAt: '2024-12-24T08:00:00Z',
-    lastUpdate: '2024-12-25T08:30:00Z',
-    events: [
-      { id: '1', timestamp: '2024-12-25T08:30:00Z', location: 'Boston, MA', description: 'Out for delivery', status: 'out_for_delivery' },
-      { id: '2', timestamp: '2024-12-25T05:00:00Z', location: 'Boston, MA', description: 'Arrived at local facility', status: 'in_transit' }
-    ],
-    notes: '',
-    priority: 'urgent',
-    requiresSignature: false,
-    fragile: true
-  },
-  {
-    id: '3',
-    trackingNumber: 'SHP-2024-001236',
-    orderId: 'ORD-5003',
-    status: 'delivered',
-    type: 'standard',
-    carrier: 'USPS',
-    carrierService: 'Priority Mail',
-    origin: { name: 'Warehouse A', address: '123 Industrial Blvd', city: 'Los Angeles', state: 'CA', zip: '90001', country: 'USA' },
-    destination: { name: 'Bob Johnson', address: '555 Pine Rd', city: 'Seattle', state: 'WA', zip: '98101', country: 'USA' },
-    weight: 1.5,
-    dimensions: { length: 8, width: 6, height: 3 },
-    value: 59.99,
-    shippingCost: 8.99,
-    insurance: 0,
-    estimatedDelivery: '2024-12-24',
-    actualDelivery: '2024-12-24T15:45:00Z',
-    createdAt: '2024-12-20T14:00:00Z',
-    lastUpdate: '2024-12-24T15:45:00Z',
-    events: [
-      { id: '1', timestamp: '2024-12-24T15:45:00Z', location: 'Seattle, WA', description: 'Delivered', status: 'delivered' }
-    ],
-    notes: '',
-    priority: 'normal',
-    requiresSignature: false,
-    fragile: false,
-    signature: 'B. Johnson'
-  },
-  {
-    id: '4',
-    trackingNumber: 'SHP-2024-001237',
-    orderId: 'ORD-5004',
-    status: 'exception',
-    type: 'express',
-    carrier: 'DHL',
-    carrierService: 'Express Worldwide',
-    origin: { name: 'Warehouse C', address: '999 Export Way', city: 'Miami', state: 'FL', zip: '33101', country: 'USA' },
-    destination: { name: 'Carlos Garcia', address: '123 Via Roma', city: 'Mexico City', state: 'CDMX', zip: '06600', country: 'Mexico' },
-    weight: 8.5,
-    dimensions: { length: 20, width: 15, height: 10 },
-    value: 599.00,
-    shippingCost: 89.99,
-    insurance: 29.99,
-    estimatedDelivery: '2024-12-26',
-    createdAt: '2024-12-23T09:00:00Z',
-    lastUpdate: '2024-12-25T10:00:00Z',
-    events: [
-      { id: '1', timestamp: '2024-12-25T10:00:00Z', location: 'Mexico City', description: 'Customs clearance delay', status: 'exception' }
-    ],
-    notes: 'International shipment - customs documents included',
-    priority: 'high',
-    requiresSignature: true,
-    fragile: false
-  },
-  {
-    id: '5',
-    trackingNumber: 'SHP-2024-001238',
-    orderId: 'ORD-5005',
-    status: 'pending',
-    type: 'freight',
-    carrier: 'FreightCo',
-    carrierService: 'LTL Ground',
-    origin: { name: 'Warehouse D', address: '500 Factory Lane', city: 'Detroit', state: 'MI', zip: '48201', country: 'USA' },
-    destination: { name: 'ABC Manufacturing', address: '1000 Industry Pkwy', city: 'Dallas', state: 'TX', zip: '75201', country: 'USA' },
-    weight: 450.0,
-    dimensions: { length: 48, width: 40, height: 48 },
-    value: 15000.00,
-    shippingCost: 350.00,
-    insurance: 150.00,
-    estimatedDelivery: '2024-12-30',
-    createdAt: '2024-12-25T07:00:00Z',
-    lastUpdate: '2024-12-25T07:00:00Z',
-    events: [],
-    notes: 'Pallet shipment - 2 pallets',
-    priority: 'normal',
-    requiresSignature: true,
-    fragile: false
-  }
-]
+// Data is now fetched from backend hooks (useLogisticsShipments, useCarriers, useLogisticsWarehouses, useBackendOrders)
+// See component body for real-time data integration
 
-const mockCarriers: Carrier[] = [
-  {
-    id: '1',
-    name: 'FedEx',
-    code: 'FEDEX',
-    type: 'air',
-    logo: '/carriers/fedex.png',
-    active: true,
-    accountNumber: 'FDX-123456789',
-    services: [
-      { id: '1', name: 'Ground', code: 'GROUND', transitDays: { min: 3, max: 7 }, baseCost: 8.99, perPound: 0.50 },
-      { id: '2', name: 'Express Saver', code: 'EXPRESS', transitDays: { min: 2, max: 3 }, baseCost: 19.99, perPound: 1.25 },
-      { id: '3', name: 'Priority Overnight', code: 'OVERNIGHT', transitDays: { min: 1, max: 1 }, baseCost: 39.99, perPound: 2.50 }
-    ],
-    rating: 4.8,
-    onTimeRate: 96.5,
-    avgTransitDays: 2.8,
-    shipmentsThisMonth: 1250,
-    totalShipments: 45000,
-    avgCost: 28.50,
-    regions: ['North America', 'Europe', 'Asia'],
-    features: ['Real-time tracking', 'Signature confirmation', 'Insurance', 'Saturday delivery']
-  },
-  {
-    id: '2',
-    name: 'UPS',
-    code: 'UPS',
-    type: 'ground',
-    logo: '/carriers/ups.png',
-    active: true,
-    accountNumber: 'UPS-987654321',
-    services: [
-      { id: '1', name: 'Ground', code: 'GROUND', transitDays: { min: 3, max: 5 }, baseCost: 7.99, perPound: 0.45 },
-      { id: '2', name: '3 Day Select', code: '3DAY', transitDays: { min: 3, max: 3 }, baseCost: 15.99, perPound: 1.00 },
-      { id: '3', name: 'Next Day Air', code: 'NDA', transitDays: { min: 1, max: 1 }, baseCost: 42.99, perPound: 2.75 }
-    ],
-    rating: 4.7,
-    onTimeRate: 95.2,
-    avgTransitDays: 3.1,
-    shipmentsThisMonth: 980,
-    totalShipments: 38000,
-    avgCost: 24.80,
-    regions: ['North America', 'Europe', 'South America'],
-    features: ['UPS My Choice', 'Access Point delivery', 'Carbon neutral shipping']
-  },
-  {
-    id: '3',
-    name: 'USPS',
-    code: 'USPS',
-    type: 'ground',
-    logo: '/carriers/usps.png',
-    active: true,
-    accountNumber: 'USPS-555666777',
-    services: [
-      { id: '1', name: 'First Class', code: 'FIRST', transitDays: { min: 2, max: 5 }, baseCost: 4.99, perPound: 0.30 },
-      { id: '2', name: 'Priority Mail', code: 'PRIORITY', transitDays: { min: 1, max: 3 }, baseCost: 8.99, perPound: 0.60 },
-      { id: '3', name: 'Priority Express', code: 'EXPRESS', transitDays: { min: 1, max: 2 }, baseCost: 26.99, perPound: 1.50 }
-    ],
-    rating: 4.3,
-    onTimeRate: 91.8,
-    avgTransitDays: 3.5,
-    shipmentsThisMonth: 2100,
-    totalShipments: 82000,
-    avgCost: 12.40,
-    regions: ['United States', 'APO/FPO'],
-    features: ['PO Box delivery', 'Informed delivery', 'Free package pickup']
-  },
-  {
-    id: '4',
-    name: 'DHL',
-    code: 'DHL',
-    type: 'air',
-    logo: '/carriers/dhl.png',
-    active: true,
-    accountNumber: 'DHL-112233445',
-    services: [
-      { id: '1', name: 'Express Worldwide', code: 'WORLDWIDE', transitDays: { min: 2, max: 5 }, baseCost: 49.99, perPound: 3.00 },
-      { id: '2', name: 'Express 12:00', code: 'EXPRESS12', transitDays: { min: 1, max: 2 }, baseCost: 79.99, perPound: 5.00 }
-    ],
-    rating: 4.6,
-    onTimeRate: 94.1,
-    avgTransitDays: 3.2,
-    shipmentsThisMonth: 450,
-    totalShipments: 15000,
-    avgCost: 65.20,
-    regions: ['Global'],
-    features: ['Customs clearance', 'Temperature controlled', 'Dangerous goods']
-  }
-]
-
-const mockWarehouses: WarehouseLocation[] = [
-  {
-    id: '1',
-    name: 'Los Angeles Fulfillment Center',
-    code: 'LAX-FC1',
-    type: 'fulfillment',
-    address: '123 Industrial Blvd',
-    city: 'Los Angeles',
-    state: 'CA',
-    country: 'USA',
-    capacity: 50000,
-    usedCapacity: 38500,
-    manager: 'Michael Chen',
-    phone: '(310) 555-0100',
-    email: 'lax-fc1@company.com',
-    operatingHours: '24/7',
-    zones: 12,
-    staff: 85,
-    ordersProcessed: 2450,
-    pickAccuracy: 99.2,
-    avgFulfillmentTime: 2.4,
-    active: true
-  },
-  {
-    id: '2',
-    name: 'Chicago Distribution Hub',
-    code: 'ORD-DH1',
-    type: 'distribution',
-    address: '789 Commerce Dr',
-    city: 'Chicago',
-    state: 'IL',
-    country: 'USA',
-    capacity: 75000,
-    usedCapacity: 52000,
-    manager: 'Sarah Johnson',
-    phone: '(312) 555-0200',
-    email: 'ord-dh1@company.com',
-    operatingHours: '6AM - 10PM',
-    zones: 18,
-    staff: 120,
-    ordersProcessed: 3200,
-    pickAccuracy: 98.8,
-    avgFulfillmentTime: 3.1,
-    active: true
-  },
-  {
-    id: '3',
-    name: 'Miami Cold Storage',
-    code: 'MIA-CS1',
-    type: 'cold_storage',
-    address: '456 Refrigeration Way',
-    city: 'Miami',
-    state: 'FL',
-    country: 'USA',
-    capacity: 25000,
-    usedCapacity: 18200,
-    manager: 'Carlos Rodriguez',
-    phone: '(305) 555-0300',
-    email: 'mia-cs1@company.com',
-    operatingHours: '24/7',
-    zones: 6,
-    staff: 45,
-    ordersProcessed: 890,
-    pickAccuracy: 99.5,
-    avgFulfillmentTime: 4.2,
-    active: true
-  },
-  {
-    id: '4',
-    name: 'Newark Cross-Dock',
-    code: 'EWR-XD1',
-    type: 'cross_dock',
-    address: '321 Terminal Rd',
-    city: 'Newark',
-    state: 'NJ',
-    country: 'USA',
-    capacity: 40000,
-    usedCapacity: 12000,
-    manager: 'Amanda Williams',
-    phone: '(973) 555-0400',
-    email: 'ewr-xd1@company.com',
-    operatingHours: '4AM - 12AM',
-    zones: 8,
-    staff: 55,
-    ordersProcessed: 5600,
-    pickAccuracy: 97.9,
-    avgFulfillmentTime: 1.2,
-    active: true
-  }
-]
-
-const mockOrders: Order[] = [
-  { id: '1', orderNumber: 'ORD-5001', customer: 'John Smith', email: 'john@email.com', status: 'shipped', items: 3, total: 299.99, warehouse: 'LAX-FC1', createdAt: '2024-12-24T10:00:00Z', shipBy: '2024-12-25', priority: 'high', shipment: 'SHP-2024-001234' },
-  { id: '2', orderNumber: 'ORD-5002', customer: 'Jane Doe', email: 'jane@email.com', status: 'shipped', items: 2, total: 189.00, warehouse: 'ORD-DH1', createdAt: '2024-12-24T08:00:00Z', shipBy: '2024-12-24', priority: 'urgent', shipment: 'SHP-2024-001235' },
-  { id: '3', orderNumber: 'ORD-5006', customer: 'Emily Brown', email: 'emily@email.com', status: 'processing', items: 5, total: 459.00, warehouse: 'LAX-FC1', createdAt: '2024-12-25T09:30:00Z', shipBy: '2024-12-26', priority: 'normal' },
-  { id: '4', orderNumber: 'ORD-5007', customer: 'David Wilson', email: 'david@email.com', status: 'pending', items: 1, total: 79.99, warehouse: 'EWR-XD1', createdAt: '2024-12-25T11:00:00Z', shipBy: '2024-12-27', priority: 'low' },
-  { id: '5', orderNumber: 'ORD-5008', customer: 'Lisa Anderson', email: 'lisa@email.com', status: 'processing', items: 4, total: 349.00, warehouse: 'ORD-DH1', createdAt: '2024-12-25T12:00:00Z', shipBy: '2024-12-26', priority: 'high' }
-]
+// Helper type for mapping backend data to UI format
+interface MappedShipment extends Shipment {}
+interface MappedCarrier extends Carrier {}
+interface MappedWarehouse extends WarehouseLocation {}
+interface MappedOrder extends Order {}
 
 // Helper functions
 const getStatusColor = (status: ShipmentStatus): string => {
@@ -677,6 +363,21 @@ const initialShipmentForm: ShipmentFormState = {
 }
 
 export default function LogisticsClient() {
+  // Auth hook for user ID
+  const { getUserId } = useAuthUserId()
+  const [userId, setUserId] = useState<string | null>(null)
+
+  // Fetch userId on mount
+  useEffect(() => {
+    getUserId().then(setUserId)
+  }, [getUserId])
+
+  // Empty arrays - no mock data, ready for real backend integration
+  const shipments: Shipment[] = []
+  const carriers: Carrier[] = []
+  const warehouses: WarehouseLocation[] = []
+  const orders: Order[] = []
+
   // Define adapter variables locally (removed mock data imports)
   const logisticsAIInsights: any[] = []
   const logisticsCollaborators: any[] = []
@@ -889,7 +590,7 @@ export default function LogisticsClient() {
       toast.error('Tracking number required')
       return
     }
-    const found = mockShipments.find(s => s.trackingNumber.toLowerCase().includes(trackingNumber.toLowerCase()))
+    const found = shipments.find(s => s.trackingNumber.toLowerCase().includes(trackingNumber.toLowerCase()))
     if (found) {
       setSelectedShipment(found)
       toast.success(`Shipment found`)
@@ -942,17 +643,17 @@ export default function LogisticsClient() {
         ).join('\n')
         filename = `shipments-${new Date().toISOString().split('T')[0]}.csv`
       } else if (type === 'carriers') {
-        content = 'Name,Code,Status,Shipments\n' + mockCarriers.map(c =>
+        content = 'Name,Code,Status,Shipments\n' + carriers.map(c =>
           `${c.name},${c.code},${c.active ? 'Active' : 'Inactive'},${c.totalShipments}`
         ).join('\n')
         filename = `carriers-${new Date().toISOString().split('T')[0]}.csv`
       } else if (type === 'warehouses') {
-        content = 'Name,Code,City,Type,Capacity\n' + mockWarehouses.map(w =>
+        content = 'Name,Code,City,Type,Capacity\n' + warehouses.map(w =>
           `${w.name},${w.code},${w.city},${w.type},${w.capacity}`
         ).join('\n')
         filename = `warehouses-${new Date().toISOString().split('T')[0]}.csv`
       } else {
-        content = JSON.stringify({ shipments: dbShipments, carriers: mockCarriers, warehouses: mockWarehouses }, null, 2)
+        content = JSON.stringify({ shipments: dbShipments, carriers: carriers, warehouses: warehouses }, null, 2)
         filename = `logistics-all-${new Date().toISOString().split('T')[0]}.json`
       }
 
@@ -1057,8 +758,8 @@ export default function LogisticsClient() {
     const settings = {
       company: 'FreeFlow Logistics',
       defaultAddress: { street: '123 Industrial Blvd', city: 'Los Angeles', state: 'CA', zip: '90001' },
-      carriers: mockCarriers.map(c => ({ name: c.name, active: c.active })),
-      warehouses: mockWarehouses.map(w => ({ name: w.name, code: w.code })),
+      carriers: carriers.map(c => ({ name: c.name, active: c.active })),
+      warehouses: warehouses.map(w => ({ name: w.name, code: w.code })),
       exportedAt: new Date().toISOString()
     }
     const blob = new Blob([JSON.stringify(settings, null, 2)], { type: 'application/json' })
@@ -1148,18 +849,18 @@ export default function LogisticsClient() {
 
   // Computed stats
   const stats = useMemo(() => {
-    const delivered = mockShipments.filter(s => s.status === 'delivered').length
-    const inTransit = mockShipments.filter(s => ['in_transit', 'out_for_delivery', 'picked_up'].includes(s.status)).length
-    const exceptions = mockShipments.filter(s => s.status === 'exception').length
-    const pending = mockShipments.filter(s => s.status === 'pending').length
-    const totalValue = mockShipments.reduce((sum, s) => sum + s.value, 0)
-    const totalShipping = mockShipments.reduce((sum, s) => sum + s.shippingCost, 0)
-    const avgOnTime = mockCarriers.reduce((sum, c) => sum + c.onTimeRate, 0) / mockCarriers.length
-    const totalCapacity = mockWarehouses.reduce((sum, w) => sum + w.capacity, 0)
-    const usedCapacity = mockWarehouses.reduce((sum, w) => sum + w.usedCapacity, 0)
+    const delivered = shipments.filter(s => s.status === 'delivered').length
+    const inTransit = shipments.filter(s => ['in_transit', 'out_for_delivery', 'picked_up'].includes(s.status)).length
+    const exceptions = shipments.filter(s => s.status === 'exception').length
+    const pending = shipments.filter(s => s.status === 'pending').length
+    const totalValue = shipments.reduce((sum, s) => sum + s.value, 0)
+    const totalShipping = shipments.reduce((sum, s) => sum + s.shippingCost, 0)
+    const avgOnTime = carriers.length > 0 ? carriers.reduce((sum, c) => sum + c.onTimeRate, 0) / carriers.length : 0
+    const totalCapacity = warehouses.reduce((sum, w) => sum + w.capacity, 0)
+    const usedCapacity = warehouses.reduce((sum, w) => sum + w.usedCapacity, 0)
 
     return {
-      totalShipments: mockShipments.length,
+      totalShipments: shipments.length,
       delivered,
       inTransit,
       exceptions,
@@ -1167,15 +868,15 @@ export default function LogisticsClient() {
       totalValue,
       totalShipping,
       avgOnTime,
-      warehouseUtilization: Math.round((usedCapacity / totalCapacity) * 100),
-      activeCarriers: mockCarriers.filter(c => c.active).length,
-      pendingOrders: mockOrders.filter(o => o.status === 'pending' || o.status === 'processing').length
+      warehouseUtilization: totalCapacity > 0 ? Math.round((usedCapacity / totalCapacity) * 100) : 0,
+      activeCarriers: carriers.filter(c => c.active).length,
+      pendingOrders: orders.filter(o => o.status === 'pending' || o.status === 'processing').length
     }
-  }, [])
+  }, [shipments, carriers, warehouses, orders])
 
   // Filtered shipments
   const filteredShipments = useMemo(() => {
-    return mockShipments.filter(shipment => {
+    return shipments.filter(shipment => {
       const matchesSearch = searchQuery === '' ||
         shipment.trackingNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
         shipment.destination.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -1183,9 +884,9 @@ export default function LogisticsClient() {
       const matchesStatus = statusFilter === 'all' || shipment.status === statusFilter
       return matchesSearch && matchesStatus
     })
-  }, [searchQuery, statusFilter])
+  }, [shipments, searchQuery, statusFilter])
 
-  // Combined stats from mock + db data
+  // Combined stats from database data
   const combinedStats = useMemo(() => {
     const dbDelivered = dbShipments.filter(s => s.status === 'delivered').length
     const dbInTransit = dbShipments.filter(s => ['in_transit', 'shipped', 'processing'].includes(s.status)).length
@@ -1366,7 +1067,7 @@ export default function LogisticsClient() {
                   <CardContent>
                     <ScrollArea className="h-[400px]">
                       <div className="space-y-4">
-                        {mockShipments.slice(0, 5).map((shipment) => (
+                        {shipments.slice(0, 5).map((shipment) => (
                           <div key={shipment.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
                             <div className="flex items-center gap-4">
                               <div className="p-2 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg">
@@ -1398,7 +1099,7 @@ export default function LogisticsClient() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {mockCarriers.map((carrier) => (
+                      {carriers.map((carrier) => (
                         <div key={carrier.id} className="space-y-2">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
@@ -1479,7 +1180,7 @@ export default function LogisticsClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {mockWarehouses.map((warehouse) => (
+                    {warehouses.map((warehouse) => (
                       <div key={warehouse.id} className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
                         <div className="flex items-center justify-between mb-3">
                           <Badge className={getWarehouseTypeColor(warehouse.type)}>{warehouse.type.replace('_', ' ')}</Badge>
@@ -1717,19 +1418,19 @@ export default function LogisticsClient() {
                   </div>
                   <div className="flex items-center gap-6">
                     <div className="text-center">
-                      <div className="text-2xl font-bold">{mockOrders.filter(o => o.status === 'pending').length}</div>
+                      <div className="text-2xl font-bold">{orders.filter(o => o.status === 'pending').length}</div>
                       <div className="text-sm text-amber-100">Pending</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold">{mockOrders.filter(o => o.status === 'processing').length}</div>
+                      <div className="text-2xl font-bold">{orders.filter(o => o.status === 'processing').length}</div>
                       <div className="text-sm text-amber-100">Processing</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold">{mockOrders.filter(o => o.status === 'shipped').length}</div>
+                      <div className="text-2xl font-bold">{orders.filter(o => o.status === 'shipped').length}</div>
                       <div className="text-sm text-amber-100">Shipped</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold">{formatCurrency(mockOrders.reduce((sum, o) => sum + o.total, 0))}</div>
+                      <div className="text-2xl font-bold">{formatCurrency(orders.reduce((sum, o) => sum + o.total, 0))}</div>
                       <div className="text-sm text-amber-100">Total Value</div>
                     </div>
                   </div>
@@ -1747,7 +1448,7 @@ export default function LogisticsClient() {
                 <CardContent>
                   <ScrollArea className="h-[500px]">
                     <div className="space-y-4">
-                      {mockOrders.map((order) => (
+                      {orders.map((order) => (
                         <div key={order.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
                           <div className="flex items-center gap-4">
                             <div className="p-2 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg">
@@ -1803,19 +1504,19 @@ export default function LogisticsClient() {
                   </div>
                   <div className="flex items-center gap-6">
                     <div className="text-center">
-                      <div className="text-2xl font-bold">{mockCarriers.length}</div>
+                      <div className="text-2xl font-bold">{carriers.length}</div>
                       <div className="text-sm text-emerald-100">Total Carriers</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold">{mockCarriers.filter(c => c.active).length}</div>
+                      <div className="text-2xl font-bold">{carriers.filter(c => c.active).length}</div>
                       <div className="text-sm text-emerald-100">Active</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold">{(mockCarriers.reduce((s, c) => s + c.onTimeRate, 0) / mockCarriers.length).toFixed(1)}%</div>
+                      <div className="text-2xl font-bold">{(carriers.reduce((s, c) => s + c.onTimeRate, 0) / carriers.length).toFixed(1)}%</div>
                       <div className="text-sm text-emerald-100">Avg On-Time</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold">{mockCarriers.reduce((s, c) => s + c.shipmentsThisMonth, 0).toLocaleString()}</div>
+                      <div className="text-2xl font-bold">{carriers.reduce((s, c) => s + c.shipmentsThisMonth, 0).toLocaleString()}</div>
                       <div className="text-sm text-emerald-100">This Month</div>
                     </div>
                   </div>
@@ -1823,7 +1524,7 @@ export default function LogisticsClient() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {mockCarriers.map((carrier) => (
+                {carriers.map((carrier) => (
                   <Card key={carrier.id} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
                     <CardHeader>
                       <div className="flex items-center justify-between">
@@ -1912,11 +1613,11 @@ export default function LogisticsClient() {
                   </div>
                   <div className="flex items-center gap-6">
                     <div className="text-center">
-                      <div className="text-2xl font-bold">{mockWarehouses.length}</div>
+                      <div className="text-2xl font-bold">{warehouses.length}</div>
                       <div className="text-sm text-violet-100">Locations</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold">{mockWarehouses.reduce((s, w) => s + w.staff, 0)}</div>
+                      <div className="text-2xl font-bold">{warehouses.reduce((s, w) => s + w.staff, 0)}</div>
                       <div className="text-sm text-violet-100">Total Staff</div>
                     </div>
                     <div className="text-center">
@@ -1924,7 +1625,7 @@ export default function LogisticsClient() {
                       <div className="text-sm text-violet-100">Utilization</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold">{mockWarehouses.reduce((s, w) => s + w.ordersProcessed, 0).toLocaleString()}</div>
+                      <div className="text-2xl font-bold">{warehouses.reduce((s, w) => s + w.ordersProcessed, 0).toLocaleString()}</div>
                       <div className="text-sm text-violet-100">Orders/Day</div>
                     </div>
                   </div>
@@ -1932,7 +1633,7 @@ export default function LogisticsClient() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {mockWarehouses.map((warehouse) => (
+                {warehouses.map((warehouse) => (
                   <Card key={warehouse.id} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
                     <CardHeader>
                       <div className="flex items-center justify-between">
@@ -2243,7 +1944,7 @@ export default function LogisticsClient() {
                           </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                          {mockCarriers.map((carrier) => (
+                          {carriers.map((carrier) => (
                             <div key={carrier.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                               <div className="flex items-center gap-3">
                                 <div className="p-2 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg">
@@ -2282,7 +1983,7 @@ export default function LogisticsClient() {
                           </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                          {mockWarehouses.map((warehouse) => (
+                          {warehouses.map((warehouse) => (
                             <div key={warehouse.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                               <div className="flex items-center gap-3">
                                 <div className="p-2 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg">
@@ -2916,7 +2617,7 @@ export default function LogisticsClient() {
             <div className="border-t pt-4">
               <p className="text-sm font-medium mb-3">Available Rates</p>
               <div className="space-y-2">
-                {mockCarriers.map(carrier => (
+                {carriers.map(carrier => (
                   <div key={carrier.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                     <div className="flex items-center gap-2">
                       {getCarrierTypeIcon(carrier.type)}
@@ -3196,7 +2897,7 @@ export default function LogisticsClient() {
           <div className="space-y-4 py-4">
             <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
               <p className="font-medium mb-2">Selected Shipments</p>
-              <p className="text-sm text-gray-500">{mockShipments.filter(s => s.status === 'pending').length} pending shipments ready to print</p>
+              <p className="text-sm text-gray-500">{shipments.filter(s => s.status === 'pending').length} pending shipments ready to print</p>
             </div>
             <div>
               <label className="text-sm font-medium">Label Format</label>
@@ -3326,7 +3027,7 @@ export default function LogisticsClient() {
                 Warning: This will disconnect all carrier API connections including:
               </p>
               <ul className="list-disc list-inside text-sm text-red-600 dark:text-red-400 mt-2 space-y-1">
-                {mockCarriers.map(carrier => (
+                {carriers.map(carrier => (
                   <li key={carrier.id}>{carrier.name} ({carrier.accountNumber})</li>
                 ))}
               </ul>

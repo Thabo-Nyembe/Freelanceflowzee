@@ -136,22 +136,29 @@ interface MyDayClientProps {
   initialSessions?: FocusSession[]
 }
 
-// Competitive Upgrade Mock Data - Sunsama/Todoist-level Daily Planning Intelligence
+// Types for competitive upgrade components
+type Collaborator = {
+  id: string
+  name: string
+  avatar?: string
+  status: 'online' | 'away' | 'offline'
+  role?: string
+}
 
+type ActivityItem = {
+  id: string
+  type: 'comment' | 'update' | 'create' | 'delete' | 'mention' | 'assignment' | 'status_change' | 'milestone' | 'integration'
+  user: {
+    id: string
+    name: string
+    avatar?: string
+  }
+  timestamp: Date | string
+}
 
-const mockMyDayCollaborators = [
-  { id: '1', name: 'Team Lead', avatar: '/avatars/lead.jpg', status: 'online' as const, role: 'Lead' },
-  { id: '2', name: 'Project Manager', avatar: '/avatars/pm.jpg', status: 'online' as const, role: 'PM' },
-  { id: '3', name: 'Designer', avatar: '/avatars/designer.jpg', status: 'away' as const, role: 'Designer' },
-]
-
-
-
-const mockMyDayActivities = [
-  { id: '1', user: 'You', action: 'Completed', target: 'Q4 planning doc', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Team Lead', action: 'Assigned', target: 'design review task', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'You', action: 'Started', target: 'focus session (2 hrs)', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
-]
+// Empty arrays - no mock data
+const collaborators: Collaborator[] = []
+const activities: ActivityItem[] = []
 
 export default function MyDayClient({ initialTasks, initialSessions }: MyDayClientProps) {
   // Data Fetching
@@ -1745,7 +1752,7 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockMyDayCollaborators}
+              collaborators={collaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
@@ -1766,7 +1773,7 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockMyDayActivities}
+            activities={activities}
             title="Today's Activity"
             maxItems={5}
           />

@@ -75,11 +75,16 @@ import {
   AIInsightsPanel,
   CollaborationIndicator,
   PredictiveAnalytics,
+  type AIInsight,
+  type Collaborator,
+  type Prediction,
 } from '@/components/ui/competitive-upgrades'
 
 import {
   ActivityFeed,
   QuickActionsToolbar,
+  type ActivityItem,
+  type QuickAction,
 } from '@/components/ui/competitive-upgrades-extended'
 
 // Import mock data from centralized adapters
@@ -237,341 +242,18 @@ interface GeoDistribution {
 }
 
 // ============================================================================
-// MOCK DATA GENERATION
+// EMPTY DATA ARRAYS (Real data comes from Supabase)
 // ============================================================================
 
-const mockLogs: AuditLog[] = [
-  {
-    id: 'log-001',
-    timestamp: '2024-01-15T10:30:45Z',
-    log_type: 'authentication',
-    severity: 'info',
-    status: 'success',
-    action: 'user.login',
-    description: 'User successfully authenticated via SSO',
-    user_id: 'u-001',
-    user_email: 'sarah.chen@company.com',
-    user_name: 'Sarah Chen',
-    user_role: 'Admin',
-    ip_address: '192.168.1.100',
-    user_agent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
-    device_type: 'desktop',
-    location: 'San Francisco, CA',
-    country: 'United States',
-    city: 'San Francisco',
-    resource_type: 'session',
-    resource_id: 'sess-12345',
-    resource_name: 'Web Session',
-    request_id: 'req-abc123',
-    session_id: 'sess-12345',
-    duration_ms: 245,
-    metadata: { auth_method: 'sso', provider: 'okta' },
-    tags: ['sso', 'admin'],
-    is_anomaly: false,
-    risk_score: 5
-  },
-  {
-    id: 'log-002',
-    timestamp: '2024-01-15T10:28:30Z',
-    log_type: 'security',
-    severity: 'warning',
-    status: 'blocked',
-    action: 'security.rate_limit_exceeded',
-    description: 'Rate limit exceeded for API endpoint /api/v1/users',
-    user_id: null,
-    user_email: null,
-    user_name: null,
-    user_role: null,
-    ip_address: '45.33.32.156',
-    user_agent: 'python-requests/2.28.0',
-    device_type: 'api',
-    location: 'Unknown',
-    country: 'Russia',
-    city: 'Moscow',
-    resource_type: 'api_endpoint',
-    resource_id: '/api/v1/users',
-    resource_name: 'Users API',
-    request_id: 'req-def456',
-    session_id: null,
-    duration_ms: 12,
-    metadata: { requests_count: 1500, limit: 100, window: '1m' },
-    tags: ['rate-limit', 'api', 'suspicious'],
-    is_anomaly: true,
-    risk_score: 75
-  },
-  {
-    id: 'log-003',
-    timestamp: '2024-01-15T10:25:15Z',
-    log_type: 'data_modification',
-    severity: 'info',
-    status: 'success',
-    action: 'record.update',
-    description: 'Customer record updated',
-    user_id: 'u-002',
-    user_email: 'mike.wilson@company.com',
-    user_name: 'Mike Wilson',
-    user_role: 'Manager',
-    ip_address: '192.168.1.105',
-    user_agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
-    device_type: 'desktop',
-    location: 'New York, NY',
-    country: 'United States',
-    city: 'New York',
-    resource_type: 'customer',
-    resource_id: 'cust-789',
-    resource_name: 'Acme Corp',
-    request_id: 'req-ghi789',
-    session_id: 'sess-67890',
-    duration_ms: 156,
-    metadata: { fields_changed: ['email', 'phone'], old_email: 'old@acme.com', new_email: 'new@acme.com' },
-    tags: ['customer', 'pii'],
-    is_anomaly: false,
-    risk_score: 20
-  },
-  {
-    id: 'log-004',
-    timestamp: '2024-01-15T10:22:00Z',
-    log_type: 'authentication',
-    severity: 'error',
-    status: 'failed',
-    action: 'user.login_failed',
-    description: 'Failed login attempt - invalid password',
-    user_id: null,
-    user_email: 'admin@company.com',
-    user_name: null,
-    user_role: null,
-    ip_address: '203.0.113.50',
-    user_agent: 'Mozilla/5.0 (Linux; Android 11)',
-    device_type: 'mobile',
-    location: 'Beijing, China',
-    country: 'China',
-    city: 'Beijing',
-    resource_type: 'authentication',
-    resource_id: 'auth-001',
-    resource_name: 'Login Form',
-    request_id: 'req-jkl012',
-    session_id: null,
-    duration_ms: 89,
-    metadata: { attempt_number: 3, lockout_threshold: 5 },
-    tags: ['failed-login', 'suspicious'],
-    is_anomaly: true,
-    risk_score: 60
-  },
-  {
-    id: 'log-005',
-    timestamp: '2024-01-15T10:20:00Z',
-    log_type: 'admin',
-    severity: 'warning',
-    status: 'success',
-    action: 'user.permissions_changed',
-    description: 'User role elevated to Admin',
-    user_id: 'u-001',
-    user_email: 'sarah.chen@company.com',
-    user_name: 'Sarah Chen',
-    user_role: 'Admin',
-    ip_address: '192.168.1.100',
-    user_agent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
-    device_type: 'desktop',
-    location: 'San Francisco, CA',
-    country: 'United States',
-    city: 'San Francisco',
-    resource_type: 'user',
-    resource_id: 'u-003',
-    resource_name: 'Emma Davis',
-    request_id: 'req-mno345',
-    session_id: 'sess-12345',
-    duration_ms: 234,
-    metadata: { old_role: 'User', new_role: 'Admin', reason: 'Promotion' },
-    tags: ['privilege-escalation', 'admin'],
-    is_anomaly: false,
-    risk_score: 45
-  },
-  {
-    id: 'log-006',
-    timestamp: '2024-01-15T10:15:00Z',
-    log_type: 'security',
-    severity: 'critical',
-    status: 'blocked',
-    action: 'security.sql_injection_attempt',
-    description: 'SQL injection attempt detected and blocked',
-    user_id: null,
-    user_email: null,
-    user_name: null,
-    user_role: null,
-    ip_address: '198.51.100.23',
-    user_agent: 'sqlmap/1.7',
-    device_type: 'api',
-    location: 'Unknown',
-    country: 'Netherlands',
-    city: 'Amsterdam',
-    resource_type: 'api_endpoint',
-    resource_id: '/api/v1/search',
-    resource_name: 'Search API',
-    request_id: 'req-pqr678',
-    session_id: null,
-    duration_ms: 5,
-    metadata: { payload: "'; DROP TABLE users; --", blocked_by: 'WAF' },
-    tags: ['attack', 'sql-injection', 'blocked'],
-    is_anomaly: true,
-    risk_score: 95
-  },
-  {
-    id: 'log-007',
-    timestamp: '2024-01-15T10:10:00Z',
-    log_type: 'data_access',
-    severity: 'info',
-    status: 'success',
-    action: 'data.export',
-    description: 'Customer data exported to CSV',
-    user_id: 'u-002',
-    user_email: 'mike.wilson@company.com',
-    user_name: 'Mike Wilson',
-    user_role: 'Manager',
-    ip_address: '192.168.1.105',
-    user_agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
-    device_type: 'desktop',
-    location: 'New York, NY',
-    country: 'United States',
-    city: 'New York',
-    resource_type: 'export',
-    resource_id: 'exp-001',
-    resource_name: 'Customer Export',
-    request_id: 'req-stu901',
-    session_id: 'sess-67890',
-    duration_ms: 4567,
-    metadata: { records_count: 1500, format: 'csv', includes_pii: true },
-    tags: ['export', 'pii', 'bulk'],
-    is_anomaly: false,
-    risk_score: 35
-  },
-  {
-    id: 'log-008',
-    timestamp: '2024-01-15T10:05:00Z',
-    log_type: 'system',
-    severity: 'info',
-    status: 'success',
-    action: 'system.backup_completed',
-    description: 'Scheduled database backup completed successfully',
-    user_id: null,
-    user_email: null,
-    user_name: null,
-    user_role: null,
-    ip_address: '10.0.0.50',
-    user_agent: 'BackupService/2.0',
-    device_type: 'api',
-    location: 'AWS us-west-2',
-    country: 'United States',
-    city: 'Oregon',
-    resource_type: 'database',
-    resource_id: 'db-prod-001',
-    resource_name: 'Production Database',
-    request_id: 'req-vwx234',
-    session_id: null,
-    duration_ms: 125000,
-    metadata: { backup_size: '45.2GB', tables_count: 156, compressed: true },
-    tags: ['backup', 'scheduled', 'database'],
-    is_anomaly: false,
-    risk_score: 0
-  }
-]
+const mockLogs: AuditLog[] = []
 
-const mockAlertRules: AlertRule[] = [
-  {
-    id: 'rule-001',
-    name: 'Failed Login Threshold',
-    description: 'Alert when failed login attempts exceed threshold',
-    condition: 'count(action:user.login_failed) > threshold',
-    severity: 'high',
-    is_active: true,
-    threshold: 5,
-    window_minutes: 15,
-    notification_channels: ['slack', 'email'],
-    last_triggered_at: '2024-01-15T09:45:00Z',
-    trigger_count_24h: 3,
-    created_at: '2023-06-01T00:00:00Z',
-    updated_at: '2024-01-10T14:00:00Z'
-  },
-  {
-    id: 'rule-002',
-    name: 'SQL Injection Detection',
-    description: 'Alert on any SQL injection attempt',
-    condition: 'action:security.sql_injection_attempt',
-    severity: 'critical',
-    is_active: true,
-    threshold: 1,
-    window_minutes: 1,
-    notification_channels: ['pagerduty', 'slack', 'email'],
-    last_triggered_at: '2024-01-15T10:15:00Z',
-    trigger_count_24h: 1,
-    created_at: '2023-06-01T00:00:00Z',
-    updated_at: '2023-12-15T10:00:00Z'
-  },
-  {
-    id: 'rule-003',
-    name: 'Bulk Data Export',
-    description: 'Alert when large data exports occur',
-    condition: 'action:data.export AND metadata.records_count > threshold',
-    severity: 'medium',
-    is_active: true,
-    threshold: 1000,
-    window_minutes: 60,
-    notification_channels: ['slack'],
-    last_triggered_at: '2024-01-15T10:10:00Z',
-    trigger_count_24h: 2,
-    created_at: '2023-08-15T00:00:00Z',
-    updated_at: '2024-01-05T09:00:00Z'
-  },
-  {
-    id: 'rule-004',
-    name: 'Privilege Escalation',
-    description: 'Alert on any role/permission changes',
-    condition: 'action:user.permissions_changed AND metadata.new_role:Admin',
-    severity: 'high',
-    is_active: true,
-    threshold: 1,
-    window_minutes: 1,
-    notification_channels: ['slack', 'email'],
-    last_triggered_at: '2024-01-15T10:20:00Z',
-    trigger_count_24h: 1,
-    created_at: '2023-06-01T00:00:00Z',
-    updated_at: '2023-11-20T16:00:00Z'
-  },
-  {
-    id: 'rule-005',
-    name: 'Rate Limit Exceeded',
-    description: 'Alert when rate limiting is triggered',
-    condition: 'action:security.rate_limit_exceeded',
-    severity: 'medium',
-    is_active: true,
-    threshold: 1,
-    window_minutes: 5,
-    notification_channels: ['slack'],
-    last_triggered_at: '2024-01-15T10:28:30Z',
-    trigger_count_24h: 5,
-    created_at: '2023-07-01T00:00:00Z',
-    updated_at: '2024-01-08T11:00:00Z'
-  }
-]
+const mockAlertRules: AlertRule[] = []
 
-const mockAlerts: Alert[] = [
-  { id: 'alert-001', rule_id: 'rule-002', rule_name: 'SQL Injection Detection', severity: 'critical', status: 'active', message: 'SQL injection attempt detected from 198.51.100.23', triggered_at: '2024-01-15T10:15:00Z', acknowledged_at: null, resolved_at: null, acknowledged_by: null, resolved_by: null, affected_resources: 1, sample_logs: ['log-006'] },
-  { id: 'alert-002', rule_id: 'rule-005', rule_name: 'Rate Limit Exceeded', severity: 'medium', status: 'acknowledged', message: 'Rate limit exceeded for /api/v1/users from 45.33.32.156', triggered_at: '2024-01-15T10:28:30Z', acknowledged_at: '2024-01-15T10:30:00Z', resolved_at: null, acknowledged_by: 'Sarah Chen', resolved_by: null, affected_resources: 1, sample_logs: ['log-002'] },
-  { id: 'alert-003', rule_id: 'rule-001', rule_name: 'Failed Login Threshold', severity: 'high', status: 'resolved', message: '5 failed login attempts for admin@company.com', triggered_at: '2024-01-15T09:45:00Z', acknowledged_at: '2024-01-15T09:50:00Z', resolved_at: '2024-01-15T10:00:00Z', acknowledged_by: 'Mike Wilson', resolved_by: 'Mike Wilson', affected_resources: 1, sample_logs: ['log-004'] }
-]
+const mockAlerts: Alert[] = []
 
-const mockComplianceReports: ComplianceReport[] = [
-  { id: 'comp-001', framework: 'SOC2', period: '2024-Q1', status: 'compliant', score: 94, total_controls: 116, passed_controls: 109, failed_controls: 7, findings: 3, generated_at: '2024-01-15T00:00:00Z' },
-  { id: 'comp-002', framework: 'GDPR', period: '2024-Q1', status: 'compliant', score: 98, total_controls: 72, passed_controls: 71, failed_controls: 1, findings: 1, generated_at: '2024-01-15T00:00:00Z' },
-  { id: 'comp-003', framework: 'HIPAA', period: '2024-Q1', status: 'partial', score: 87, total_controls: 89, passed_controls: 77, failed_controls: 12, findings: 8, generated_at: '2024-01-15T00:00:00Z' },
-  { id: 'comp-004', framework: 'PCI-DSS', period: '2024-Q1', status: 'compliant', score: 96, total_controls: 256, passed_controls: 246, failed_controls: 10, findings: 4, generated_at: '2024-01-15T00:00:00Z' },
-  { id: 'comp-005', framework: 'ISO27001', period: '2024-Q1', status: 'compliant', score: 92, total_controls: 114, passed_controls: 105, failed_controls: 9, findings: 5, generated_at: '2024-01-15T00:00:00Z' }
-]
+const mockComplianceReports: ComplianceReport[] = []
 
-const mockSessions: UserSession[] = [
-  { id: 'sess-001', user_id: 'u-001', user_email: 'sarah.chen@company.com', user_name: 'Sarah Chen', started_at: '2024-01-15T08:00:00Z', last_activity_at: '2024-01-15T10:30:45Z', ip_address: '192.168.1.100', location: 'San Francisco, CA', device_type: 'desktop', browser: 'Chrome 120', os: 'macOS 14.2', is_active: true, actions_count: 156, risk_level: 'low' },
-  { id: 'sess-002', user_id: 'u-002', user_email: 'mike.wilson@company.com', user_name: 'Mike Wilson', started_at: '2024-01-15T09:15:00Z', last_activity_at: '2024-01-15T10:25:15Z', ip_address: '192.168.1.105', location: 'New York, NY', device_type: 'desktop', browser: 'Firefox 121', os: 'Windows 11', is_active: true, actions_count: 89, risk_level: 'low' },
-  { id: 'sess-003', user_id: 'u-003', user_email: 'emma.davis@company.com', user_name: 'Emma Davis', started_at: '2024-01-15T07:30:00Z', last_activity_at: '2024-01-15T09:45:00Z', ip_address: '192.168.1.110', location: 'Austin, TX', device_type: 'mobile', browser: 'Safari 17', os: 'iOS 17.2', is_active: false, actions_count: 45, risk_level: 'low' }
-]
+const mockSessions: UserSession[] = []
 
 // ============================================================================
 // HELPER FUNCTIONS
@@ -639,36 +321,16 @@ const formatDuration = (ms: number): string => {
   return `${Math.floor(ms / 60000)}m ${Math.floor((ms % 60000) / 1000)}s`
 }
 
-// Enhanced Competitive Upgrade Mock Data
-const mockAuditAIInsights = [
-  { id: '1', type: 'warning' as const, title: 'Unusual Activity', description: '15 failed login attempts from IP 192.168.1.50 in last hour.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Security' },
-  { id: '2', type: 'success' as const, title: 'Compliance Status', description: 'All audit retention policies are compliant. No issues detected.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Compliance' },
-  { id: '3', type: 'info' as const, title: 'Data Export Complete', description: 'Monthly audit report exported and archived successfully.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Reports' },
-]
+// Empty arrays for competitive upgrade components (real data comes from Supabase)
+const mockAuditAIInsights: AIInsight[] = []
 
-const mockAuditCollaborators = [
-  { id: '1', name: 'Security Lead', avatar: '/avatars/security.jpg', status: 'online' as const, role: 'Security' },
-  { id: '2', name: 'Compliance Officer', avatar: '/avatars/compliance.jpg', status: 'online' as const, role: 'Compliance' },
-  { id: '3', name: 'IT Admin', avatar: '/avatars/admin.jpg', status: 'away' as const, role: 'IT Admin' },
-]
+const mockAuditCollaborators: Collaborator[] = []
 
-const mockAuditPredictions = [
-  { id: '1', title: 'Log Volume', prediction: 'Log volume expected to increase 20% during Q4 audit season', confidence: 85, trend: 'up' as const, impact: 'medium' as const },
-  { id: '2', title: 'Anomaly Detection', prediction: 'ML model accuracy improving to 98.5%', confidence: 92, trend: 'up' as const, impact: 'high' as const },
-]
+const mockAuditPredictions: Prediction[] = []
 
-const mockAuditActivities = [
-  { id: '1', user: 'Security Lead', action: 'Investigated', target: 'suspicious login pattern', timestamp: new Date().toISOString(), type: 'warning' as const },
-  { id: '2', user: 'System', action: 'Archived', target: '500K log entries to cold storage', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'success' as const },
-  { id: '3', user: 'Compliance', action: 'Generated', target: 'quarterly compliance report', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'info' as const },
-]
+const mockAuditActivities: ActivityItem[] = []
 
-const mockAuditQuickActions = [
-  { id: '1', label: 'Search Logs', icon: 'Search', action: () => {}, shortcut: 'S' },
-  { id: '2', label: 'Export Logs', icon: 'Download', action: () => {}, shortcut: 'E' },
-  { id: '3', label: 'Create Alert', icon: 'Bell', action: () => {}, shortcut: 'A' },
-  { id: '4', label: 'Settings', icon: 'Settings', action: () => {}, shortcut: 'T' },
-]
+const mockAuditQuickActions: QuickAction[] = []
 
 // ============================================================================
 // MAIN COMPONENT

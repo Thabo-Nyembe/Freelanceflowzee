@@ -144,241 +144,14 @@ interface ExtensionCategory {
 }
 
 // ============================================================================
-// MOCK DATA
+// EMPTY DATA ARRAYS (no mock data)
 // ============================================================================
 
-const initialExtensions: Extension[] = [
-  {
-    id: '1',
-    name: 'Dark Mode Pro',
-    description: 'Enable dark mode on any website with one click',
-    longDescription: 'Dark Mode Pro automatically converts any website to a beautiful dark theme. Reduce eye strain, save battery, and enjoy a consistent dark experience across the web.',
-    version: '3.2.1',
-    developer: 'NightOwl Labs',
-    developerVerified: true,
-    category: 'utilities',
-    status: 'published',
-    installStatus: 'installed',
-    icon: '🌙',
-    screenshots: [],
-    rating: 4.8,
-    reviewCount: 12450,
-    installCount: 2500000,
-    weeklyUsers: 890000,
-    size: '1.2 MB',
-    permissions: ['Read and change all your data on websites you visit'],
-    features: ['Auto dark mode', 'Custom themes', 'Scheduled switching', 'Site exceptions'],
-    lastUpdated: '2024-12-20',
-    createdAt: '2022-03-15',
-    website: 'https://darkmodepro.io',
-    isFeatured: true,
-    isEditorsPick: true,
-    tags: ['dark mode', 'accessibility', 'themes']
-  },
-  {
-    id: '2',
-    name: 'Grammar Guardian',
-    description: 'AI-powered grammar and spell checker for better writing',
-    longDescription: 'Grammar Guardian uses advanced AI to check your spelling, grammar, and writing style in real-time. Works on Gmail, Docs, social media, and more.',
-    version: '5.1.0',
-    developer: 'WriteRight Inc',
-    developerVerified: true,
-    category: 'productivity',
-    status: 'published',
-    installStatus: 'installed',
-    icon: '✍️',
-    screenshots: [],
-    rating: 4.7,
-    reviewCount: 34560,
-    installCount: 5800000,
-    weeklyUsers: 2100000,
-    size: '3.8 MB',
-    permissions: ['Read and change all your data on websites you visit', 'Display notifications'],
-    features: ['Grammar checking', 'Spell check', 'Style suggestions', 'Tone detector'],
-    lastUpdated: '2024-12-22',
-    createdAt: '2021-08-10',
-    website: 'https://grammarguardian.com',
-    isFeatured: true,
-    isEditorsPick: false,
-    tags: ['writing', 'grammar', 'productivity']
-  },
-  {
-    id: '3',
-    name: 'Password Vault',
-    description: 'Secure password manager with auto-fill',
-    longDescription: 'Password Vault securely stores all your passwords and auto-fills them when needed. Features include password generator, breach alerts, and secure sharing.',
-    version: '8.0.2',
-    developer: 'SecureKey Technologies',
-    developerVerified: true,
-    category: 'security',
-    status: 'published',
-    installStatus: 'not_installed',
-    icon: '🔐',
-    screenshots: [],
-    rating: 4.9,
-    reviewCount: 89230,
-    installCount: 12000000,
-    weeklyUsers: 4500000,
-    size: '5.2 MB',
-    permissions: ['Read and change all your data on websites you visit', 'Manage your apps'],
-    features: ['Password storage', 'Auto-fill', 'Password generator', 'Breach monitoring'],
-    lastUpdated: '2024-12-24',
-    createdAt: '2019-05-20',
-    website: 'https://passwordvault.io',
-    isFeatured: true,
-    isEditorsPick: true,
-    tags: ['security', 'passwords', 'privacy']
-  },
-  {
-    id: '4',
-    name: 'Tab Manager Plus',
-    description: 'Organize, save, and manage browser tabs efficiently',
-    longDescription: 'Tab Manager Plus helps you organize hundreds of tabs with ease. Features include tab groups, session saving, tab search, and memory optimization.',
-    version: '2.4.0',
-    developer: 'ProductivityTools',
-    developerVerified: false,
-    category: 'productivity',
-    status: 'published',
-    installStatus: 'installed',
-    icon: '📑',
-    screenshots: [],
-    rating: 4.5,
-    reviewCount: 8920,
-    installCount: 890000,
-    weeklyUsers: 320000,
-    size: '0.8 MB',
-    permissions: ['Read your browsing history', 'Manage your tabs'],
-    features: ['Tab groups', 'Session save', 'Tab search', 'Memory saver'],
-    lastUpdated: '2024-12-18',
-    createdAt: '2023-01-10',
-    isFeatured: false,
-    isEditorsPick: false,
-    tags: ['tabs', 'productivity', 'organization']
-  },
-  {
-    id: '5',
-    name: 'AdBlock Ultimate',
-    description: 'Block ads, trackers, and malware across the web',
-    longDescription: 'AdBlock Ultimate removes all types of ads including video ads, banners, and pop-ups. Also blocks trackers and protects against malware.',
-    version: '4.8.1',
-    developer: 'AdFree Foundation',
-    developerVerified: true,
-    category: 'security',
-    status: 'published',
-    installStatus: 'disabled',
-    icon: '🛡️',
-    screenshots: [],
-    rating: 4.6,
-    reviewCount: 156780,
-    installCount: 25000000,
-    weeklyUsers: 8900000,
-    size: '2.1 MB',
-    permissions: ['Read and change all your data on websites you visit', 'Block content on any page'],
-    features: ['Ad blocking', 'Tracker blocking', 'Malware protection', 'Custom filters'],
-    lastUpdated: '2024-12-21',
-    createdAt: '2018-11-05',
-    website: 'https://adblockultimate.org',
-    isFeatured: true,
-    isEditorsPick: true,
-    tags: ['ads', 'privacy', 'security']
-  },
-  {
-    id: '6',
-    name: 'Screenshot Master',
-    description: 'Capture, annotate, and share screenshots instantly',
-    longDescription: 'Screenshot Master lets you capture full pages, visible area, or selected regions. Annotate with arrows, text, and shapes, then share instantly.',
-    version: '3.1.0',
-    developer: 'CaptureTech',
-    developerVerified: true,
-    category: 'utilities',
-    status: 'published',
-    installStatus: 'not_installed',
-    icon: '📸',
-    screenshots: [],
-    rating: 4.4,
-    reviewCount: 5670,
-    installCount: 450000,
-    weeklyUsers: 180000,
-    size: '1.5 MB',
-    permissions: ['Capture visible content', 'Store data locally'],
-    features: ['Full page capture', 'Annotations', 'Cloud sync', 'Quick share'],
-    lastUpdated: '2024-12-15',
-    createdAt: '2023-06-20',
-    isFeatured: false,
-    isEditorsPick: false,
-    tags: ['screenshot', 'capture', 'productivity']
-  },
-  {
-    id: '7',
-    name: 'Video Speed Controller',
-    description: 'Control video playback speed on any website',
-    longDescription: 'Video Speed Controller lets you speed up, slow down, or skip through videos on any website. Perfect for learning, entertainment, and productivity.',
-    version: '1.8.0',
-    developer: 'MediaTools',
-    developerVerified: false,
-    category: 'entertainment',
-    status: 'published',
-    installStatus: 'not_installed',
-    icon: '⏩',
-    screenshots: [],
-    rating: 4.7,
-    reviewCount: 23450,
-    installCount: 1200000,
-    weeklyUsers: 560000,
-    size: '0.3 MB',
-    permissions: ['Access video content'],
-    features: ['Speed control', 'Keyboard shortcuts', 'Skip silence', 'Loop sections'],
-    lastUpdated: '2024-12-10',
-    createdAt: '2022-09-15',
-    isFeatured: false,
-    isEditorsPick: true,
-    tags: ['video', 'speed', 'media']
-  },
-  {
-    id: '8',
-    name: 'Color Picker Pro',
-    description: 'Pick colors from any webpage with precision',
-    longDescription: 'Color Picker Pro is the ultimate tool for designers. Pick any color from a webpage, view color palettes, and export in multiple formats.',
-    version: '2.0.5',
-    developer: 'DesignTools Studio',
-    developerVerified: true,
-    category: 'developer',
-    status: 'published',
-    installStatus: 'installed',
-    icon: '🎨',
-    screenshots: [],
-    rating: 4.8,
-    reviewCount: 7890,
-    installCount: 680000,
-    weeklyUsers: 290000,
-    size: '0.5 MB',
-    permissions: ['Read page content'],
-    features: ['Eyedropper', 'Color palettes', 'Format conversion', 'Color history'],
-    lastUpdated: '2024-12-19',
-    createdAt: '2023-02-28',
-    website: 'https://colorpickerpro.dev',
-    isFeatured: false,
-    isEditorsPick: false,
-    tags: ['design', 'colors', 'developer']
-  }
-]
+const initialExtensions: Extension[] = []
 
-const mockReviews: Review[] = [
-  { id: 'r1', userId: 'u1', userName: 'John D.', rating: 5, title: 'Best dark mode extension!', content: 'Works perfectly on every site I visit. Love the scheduling feature.', createdAt: '2024-12-20', helpful: 234 },
-  { id: 'r2', userId: 'u2', userName: 'Sarah M.', rating: 4, title: 'Great but needs improvement', content: 'Overall excellent but sometimes breaks on complex sites.', createdAt: '2024-12-18', helpful: 89, developerReply: 'Thanks for the feedback! We\'re working on better compatibility.' },
-  { id: 'r3', userId: 'u3', userName: 'Mike R.', rating: 5, title: 'Life changing!', content: 'My eyes thank me every day. Can\'t browse without it now.', createdAt: '2024-12-15', helpful: 156 }
-]
+const reviews: Review[] = []
 
-const mockCategories: ExtensionCategory[] = [
-  { id: '1', name: 'Productivity', icon: '⚡', count: 2450, color: 'from-blue-500 to-cyan-500' },
-  { id: '2', name: 'Developer Tools', icon: '🛠️', count: 1890, color: 'from-purple-500 to-pink-500' },
-  { id: '3', name: 'Security', icon: '🔒', count: 980, color: 'from-green-500 to-emerald-500' },
-  { id: '4', name: 'Social & Communication', icon: '💬', count: 1560, color: 'from-orange-500 to-amber-500' },
-  { id: '5', name: 'Entertainment', icon: '🎮', count: 2100, color: 'from-pink-500 to-rose-500' },
-  { id: '6', name: 'Utilities', icon: '🔧', count: 3200, color: 'from-teal-500 to-cyan-500' },
-  { id: '7', name: 'Shopping', icon: '🛒', count: 780, color: 'from-indigo-500 to-purple-500' },
-  { id: '8', name: 'Themes', icon: '🎨', count: 1450, color: 'from-rose-500 to-pink-500' }
-]
+const categories: ExtensionCategory[] = []
 
 // ============================================================================
 // HELPER FUNCTIONS
@@ -799,35 +572,16 @@ export default function ExtensionsClient() {
   const featuredExtensions = extensions.filter(e => e.isFeatured)
   const editorsPickExtensions = extensions.filter(e => e.isEditorsPick)
 
-  // Enhanced Competitive Upgrade Mock Data
-  const mockExtensionsAIInsights = [
-    { id: '1', type: 'success' as const, title: 'Popular Extension', description: 'Analytics Pro became most installed extension this week.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Trending' },
-    { id: '2', type: 'warning' as const, title: 'Update Available', description: '3 installed extensions have security updates available.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Security' },
-    { id: '3', type: 'info' as const, title: 'New Category', description: 'AI & Automation category added with 12 new extensions.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Discovery' },
-  ]
+  // Empty arrays for competitive upgrade components (no mock data)
+  const extensionsAIInsights: { id: string; type: 'success' | 'warning' | 'info' | 'error' | 'recommendation' | 'alert' | 'opportunity' | 'prediction'; title: string; description: string; priority: 'high' | 'medium' | 'low'; timestamp: string; category: string }[] = []
 
-  const mockExtensionsCollaborators = [
-    { id: '1', name: 'Extensions Lead', avatar: '/avatars/ext.jpg', status: 'online' as const, role: 'Lead' },
-    { id: '2', name: 'Developer', avatar: '/avatars/dev.jpg', status: 'online' as const, role: 'Dev' },
-    { id: '3', name: 'QA Engineer', avatar: '/avatars/qa.jpg', status: 'away' as const, role: 'QA' },
-  ]
+  const extensionsCollaborators: { id: string; name: string; avatar?: string; status: 'online' | 'away' | 'offline'; role?: string }[] = []
 
-  const mockExtensionsPredictions = [
-    { id: '1', title: 'Extension Adoption', prediction: 'AI extensions projected to grow 40% next quarter', confidence: 82, trend: 'up' as const, impact: 'high' as const },
-    { id: '2', title: 'Compatibility', prediction: 'All extensions compatible with next platform version', confidence: 95, trend: 'stable' as const, impact: 'medium' as const },
-  ]
+  const extensionsPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: string }[] = []
 
-  const mockExtensionsActivities = [
-    { id: '1', user: 'Admin', action: 'Installed', target: 'Advanced Reporting extension', timestamp: new Date().toISOString(), type: 'success' as const },
-    { id: '2', user: 'Developer', action: 'Updated', target: 'API Connector to v2.1', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-    { id: '3', user: 'System', action: 'Disabled', target: 'deprecated Theme Pack', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'warning' as const },
-  ]
+  const extensionsActivities: { id: string; type: 'comment' | 'update' | 'create' | 'delete' | 'mention' | 'assignment' | 'status_change' | 'milestone' | 'integration'; title: string; user: { id: string; name: string; avatar?: string }; timestamp: string }[] = []
 
-  const mockExtensionsQuickActions = [
-    { id: '1', label: 'Browse All', icon: 'grid', action: () => setActiveTab('discover'), variant: 'default' as const },
-    { id: '2', label: 'Check Updates', icon: 'refresh', action: handleCheckUpdates, variant: 'default' as const },
-    { id: '3', label: 'Manage', icon: 'settings', action: () => setActiveTab('installed'), variant: 'outline' as const },
-  ]
+  const extensionsQuickActions: { id: string; label: string; icon: React.ReactNode; action: () => void }[] = []
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50/30 to-blue-50/40 dark:bg-none dark:bg-gray-900">
@@ -966,7 +720,7 @@ export default function ExtensionsClient() {
               >
                 All
               </Button>
-              {mockCategories.map((cat) => (
+              {categories.map((cat) => (
                 <Button
                   key={cat.id}
                   variant={categoryFilter === cat.name.toLowerCase().replace(' & ', '_').replace(' ', '_') ? 'default' : 'outline'}
@@ -1225,7 +979,7 @@ export default function ExtensionsClient() {
           {/* Categories Tab */}
           <TabsContent value="categories" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {mockCategories.map((cat) => (
+              {categories.map((cat) => (
                 <Card key={cat.id} className="cursor-pointer hover:shadow-md transition-shadow group">
                   <CardContent className="p-6">
                     <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${cat.color} flex items-center justify-center text-3xl mb-4 group-hover:scale-110 transition-transform`}>
@@ -2110,18 +1864,18 @@ export default function ExtensionsClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockExtensionsAIInsights}
+              insights={extensionsAIInsights}
               title="Extensions Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockExtensionsCollaborators}
+              collaborators={extensionsCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockExtensionsPredictions}
+              predictions={extensionsPredictions}
               title="Extension Forecasts"
             />
           </div>
@@ -2129,12 +1883,12 @@ export default function ExtensionsClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockExtensionsActivities}
+            activities={extensionsActivities}
             title="Extension Activity"
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockExtensionsQuickActions}
+            actions={extensionsQuickActions}
             variant="grid"
           />
         </div>
@@ -2220,7 +1974,7 @@ export default function ExtensionsClient() {
                 <div>
                   <h3 className="font-semibold mb-3">Reviews</h3>
                   <div className="space-y-4">
-                    {mockReviews.map((review) => (
+                    {reviews.map((review) => (
                       <div key={review.id} className="p-4 border rounded-lg">
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-2">

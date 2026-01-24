@@ -5,6 +5,9 @@ import { createClient } from '@/lib/supabase/client'
 import React, { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 
+// Auth hooks
+import { useAuthUserId } from '@/lib/hooks/use-auth-user-id'
+
 // Real-time team collaboration API hooks
 import {
   useTeamMembers,
@@ -21,6 +24,13 @@ import {
   useEvents,
   useCreateEvent
 } from '@/lib/api-clients'
+
+// Extended hooks for additional data
+import { useTeamActivity, useTeamMeetings } from '@/lib/hooks/use-team-extended'
+import { useCollaborationChannels, useCollaborationMessages } from '@/lib/hooks/use-collaboration-extended'
+import { useWorkflows } from '@/lib/hooks/use-workflows'
+import { useIntegrationMarketplace } from '@/lib/hooks/use-integration-extended'
+import { useNotificationQueue } from '@/lib/hooks/use-notification-extended'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -463,6 +473,16 @@ export default function TeamHubClient() {
   const teamHubQuickActions: any[] = []
 
   // ==========================================================================
+  // AUTHENTICATION - Get user ID for backend queries
+  // ==========================================================================
+  const { getUserId } = useAuthUserId()
+  const [userId, setUserId] = useState<string | null>(null)
+
+  useEffect(() => {
+    getUserId().then(id => setUserId(id))
+  }, [getUserId])
+
+  // ==========================================================================
   // REAL-TIME TEAM COLLABORATION HOOKS - Wired to Supabase APIs
   // ==========================================================================
 
@@ -487,69 +507,241 @@ export default function TeamHubClient() {
   // Notifications for real-time updates
   const { data: notificationsData } = useNotifications()
 
-  // Transform API team members to match mock member structure
+  // Extended hooks for additional data (using userId)
+  const { data: teamActivityData } = useTeamActivity(userId || undefined)
+  const { data: teamMeetingsData } = useTeamMeetings(userId || undefined)
+  const { data: collaborationChannelsData } = useCollaborationChannels(userId || undefined)
+  const { workflows: backendWorkflows, loading: workflowsLoading } = useWorkflows()
+  const { data: integrationAppsData } = useIntegrationMarketplace()
+  const { data: notificationQueueData } = useNotificationQueue(userId || undefined)
+
+  // Transform API team members to match member structure
   const apiTeamMembers = useMemo(() => {
     const members = apiTeamMembersData?.data || []
     return members.map((member: any) => ({
       id: member.id,
       name: member.name || member.full_name || 'Team Member',
       email: member.email || '',
-      avatar: member.avatar_url || '',
-      displayName: member.display_name || member.name || 'user',
-      role: member.role || 'member',
+      avatar: member.avatar_url || member.avatar || '',
+      displayName: member.display_name || member.name?.split(' ')[0]?.toLowerCase() || 'user',
+      role: (member.role || 'member') as MemberRole,
+      jobTitle: member.title || member.job_title || member.role || 'Team Member',
       department: member.department || 'General',
-      status: member.status === 'active' ? 'online' : 'offline',
+      status: (member.status === 'active' || member.status === 'online') ? 'online' as MemberStatus : 'offline' as MemberStatus,
+      statusMessage: member.status_message || '',
+      statusEmoji: member.status_emoji || '',
+      statusExpiry: member.status_expiry || null,
       timezone: member.timezone || 'UTC',
       localTime: new Date().toLocaleTimeString(),
-      slackConnect: false,
-      title: member.title || member.role || 'Team Member'
+      joinedAt: member.created_at || member.joined_at || new Date().toISOString(),
+      lastActive: member.last_active || member.updated_at || new Date().toISOString(),
+      tasksCompleted: member.tasks_completed || 0,
+      projectsCount: member.projects_count || 0,
+      performanceScore: member.performance_score || member.rating || 80,
+      isLead: member.is_lead || member.role === 'admin' || member.role === 'owner',
+      phone: member.phone || '',
+      slackConnect: member.slack_connect || false,
+      customFields: member.custom_fields || []
     }))
   }, [apiTeamMembersData])
 
   // Transform API conversations to channels format
   const apiChannels = useMemo(() => {
-    const conversations = conversationsData?.data || []
-    return conversations.map((conv: any) => ({
+    // Use collaboration channels first, then fall back to conversations
+    const channels = collaborationChannelsData || conversationsData?.data || []
+    return channels.map((conv: any) => ({
       id: conv.id,
-      name: conv.title || 'general',
-      type: conv.type === 'channel' ? 'channel' : (conv.type === 'group' ? 'group' : 'dm') as ChannelType,
+      name: conv.name || conv.title || 'general',
+      type: (conv.type === 'public' ? 'public' : conv.type === 'private' ? 'private' : conv.type === 'dm' ? 'direct' : 'public') as ChannelType,
       description: conv.description || '',
       topic: conv.topic || '',
-      memberCount: conv.participants?.length || 1,
+      memberCount: conv.member_count || conv.participants?.length || 1,
       unreadCount: conv.unread_count || 0,
-      isPrivate: conv.is_private || false,
-      isStarred: false,
-      isMuted: false,
-      createdAt: conv.created_at || new Date().toISOString()
+      mentionCount: conv.mention_count || 0,
+      isPinned: conv.is_pinned || false,
+      isMuted: conv.is_muted || false,
+      isArchived: conv.is_archived || false,
+      isStarred: conv.is_starred || false,
+      lastMessage: conv.last_message || '',
+      lastMessageAt: conv.last_message_at || conv.updated_at || new Date().toISOString(),
+      createdBy: conv.created_by || '',
+      createdAt: conv.created_at || new Date().toISOString(),
+      retentionDays: conv.retention_days || null,
+      canvasCount: conv.canvas_count || 0,
+      bookmarkCount: conv.bookmark_count || 0,
+      notificationLevel: (conv.notification_level || 'all') as NotificationLevel,
+      externalConnections: conv.external_connections || []
     }))
-  }, [conversationsData])
+  }, [collaborationChannelsData, conversationsData])
+
+  // Transform activities from backend
+  const apiActivities = useMemo(() => {
+    const activities = teamActivityData || []
+    return activities.map((act: any) => ({
+      id: act.id,
+      type: (act.activity_type || act.type || 'message') as ActivityType,
+      userId: act.user_id || '',
+      userName: act.user_name || 'User',
+      userAvatar: act.user_avatar || '',
+      content: act.description || act.content || '',
+      timestamp: act.created_at || new Date().toISOString(),
+      channelName: act.channel_name || '',
+      channelId: act.channel_id || '',
+      metadata: act.metadata || {}
+    }))
+  }, [teamActivityData])
+
+  // Transform huddles/meetings from backend
+  const apiHuddles = useMemo(() => {
+    const meetings = teamMeetingsData || eventsData?.data?.filter((e: any) => e.type === 'huddle' || e.type === 'meeting') || []
+    return meetings.map((meeting: any) => ({
+      id: meeting.id,
+      channelId: meeting.channel_id || '',
+      channelName: meeting.channel_name || meeting.title || 'Huddle',
+      status: (meeting.status === 'in_progress' ? 'active' : meeting.status === 'scheduled' ? 'scheduled' : 'ended') as HuddleStatus,
+      startedAt: meeting.started_at || meeting.scheduled_at || new Date().toISOString(),
+      duration: meeting.duration || 0,
+      participants: meeting.participants || [],
+      isRecording: meeting.is_recording || false,
+      hasScreenShare: meeting.has_screen_share || false
+    }))
+  }, [teamMeetingsData, eventsData])
+
+  // Transform apps from backend
+  const apiApps = useMemo(() => {
+    const apps = integrationAppsData || []
+    return apps.map((app: any) => ({
+      id: app.id,
+      name: app.name || 'App',
+      icon: app.icon || app.logo_url || '',
+      category: (app.category || 'productivity') as AppCategory,
+      description: app.description || '',
+      developer: app.developer || app.vendor || '',
+      isInstalled: app.is_installed || false,
+      isEnabled: app.is_enabled !== false,
+      permissions: app.permissions || [],
+      webhookCount: app.webhook_count || 0,
+      lastActivity: app.last_activity || app.updated_at || '',
+      rating: app.rating || 4.0,
+      installCount: app.install_count || 0
+    }))
+  }, [integrationAppsData])
+
+  // Transform workflows from backend
+  const apiWorkflows = useMemo(() => {
+    return (backendWorkflows || []).map((wf: any) => ({
+      id: wf.id,
+      name: wf.name || 'Workflow',
+      description: wf.description || '',
+      trigger: (wf.trigger || 'channel_message') as WorkflowTrigger,
+      triggerChannel: wf.trigger_channel || null,
+      steps: wf.steps_config || [],
+      isEnabled: wf.status === 'active',
+      createdBy: wf.created_by || '',
+      createdAt: wf.created_at || new Date().toISOString(),
+      runCount: wf.run_count || 0,
+      lastRun: wf.last_run || null,
+      errorCount: wf.error_count || 0
+    }))
+  }, [backendWorkflows])
+
+  // Transform reminders from notifications queue
+  const apiReminders = useMemo(() => {
+    const reminders = notificationQueueData || []
+    return reminders.filter((n: any) => n.type === 'reminder').map((r: any) => ({
+      id: r.id,
+      text: r.message || r.title || 'Reminder',
+      createdAt: r.created_at || new Date().toISOString(),
+      remindAt: r.scheduled_at || new Date().toISOString(),
+      status: (r.status === 'completed' ? 'completed' : r.status === 'snoozed' ? 'snoozed' : 'pending') as ReminderStatus,
+      channelId: r.channel_id || null,
+      messageId: r.message_id || null,
+      isRecurring: r.is_recurring || false,
+      recurringPattern: r.recurring_pattern || null
+    }))
+  }, [notificationQueueData])
 
   // Enhanced real stats from API
   const enhancedTeamStats = useMemo(() => ({
-    totalMembers: apiTeamStatsData?.data?.totalMembers || mockMembers.length,
-    activeMembers: apiTeamStatsData?.data?.activeMembers || mockMembers.filter(m => m.status === 'online').length,
+    totalMembers: apiTeamStatsData?.data?.totalMembers || apiTeamMembers.length || mockMembers.length,
+    activeMembers: apiTeamStatsData?.data?.activeMembers || apiTeamMembers.filter(m => m.status === 'online').length || mockMembers.filter(m => m.status === 'online').length,
     onlineNow: apiTeamMembers.filter(m => m.status === 'online').length || mockMembers.filter(m => m.status === 'online').length,
+    admins: apiTeamMembers.filter(m => m.role === 'admin' || m.role === 'owner').length || mockMembers.filter(m => m.role === 'admin' || m.role === 'owner').length,
     totalChannels: apiChannels.length || mockChannels.length,
     unreadMessages: messagingStatsData?.data?.unreadCount || 0,
     pendingInvitations: invitationsData?.data?.length || 0,
-    totalHuddles: eventsData?.data?.filter((e: any) => e.type === 'huddle').length || mockHuddles.length
-  }), [apiTeamStatsData, apiTeamMembers, apiChannels, messagingStatsData, invitationsData, eventsData])
+    totalHuddles: apiHuddles.length || mockHuddles.length
+  }), [apiTeamStatsData, apiTeamMembers, apiChannels, apiHuddles, messagingStatsData, invitationsData])
 
   // Use API data with fallback to mock data
   const effectiveMembers = apiTeamMembers.length > 0 ? apiTeamMembers : mockMembers
   const effectiveChannels = apiChannels.length > 0 ? apiChannels : mockChannels
+  const effectiveActivities = apiActivities.length > 0 ? apiActivities : mockActivities
+  const effectiveHuddles = apiHuddles.length > 0 ? apiHuddles : mockHuddles
+  const effectiveApps = apiApps.length > 0 ? apiApps : mockApps
+  const effectiveWorkflows = apiWorkflows.length > 0 ? apiWorkflows : mockWorkflows
+  const effectiveReminders = apiReminders.length > 0 ? apiReminders : mockReminders
 
-  // UI State
-  const [members] = useState<TeamMember[]>(mockMembers)
+  // UI State - synced from backend data via useEffect
+  const [members, setMembers] = useState<TeamMember[]>(mockMembers)
   const [channels, setChannels] = useState<Channel[]>(mockChannels)
   const [messages, setMessages] = useState<Message[]>(mockMessages)
-  const [activities] = useState<Activity[]>(mockActivities)
+  const [activities, setActivities] = useState<Activity[]>(mockActivities)
   const [huddles, setHuddles] = useState<Huddle[]>(mockHuddles)
   const [apps, setApps] = useState<SlackApp[]>(mockApps)
   const [workflows, setWorkflows] = useState<SlackWorkflow[]>(mockWorkflows)
-  const [reminders] = useState<Reminder[]>(mockReminders)
+  const [reminders, setReminders] = useState<Reminder[]>(mockReminders)
   const [savedItems, setSavedItems] = useState<SavedItem[]>(mockSavedItems)
-  const [userGroups] = useState<UserGroup[]>(mockUserGroups)
+  const [userGroups, setUserGroups] = useState<UserGroup[]>(mockUserGroups)
+
+  // Sync members from backend
+  useEffect(() => {
+    if (effectiveMembers.length > 0) {
+      setMembers(effectiveMembers as TeamMember[])
+    }
+  }, [effectiveMembers])
+
+  // Sync channels from backend
+  useEffect(() => {
+    if (effectiveChannels.length > 0) {
+      setChannels(effectiveChannels as Channel[])
+    }
+  }, [effectiveChannels])
+
+  // Sync activities from backend
+  useEffect(() => {
+    if (effectiveActivities.length > 0) {
+      setActivities(effectiveActivities as Activity[])
+    }
+  }, [effectiveActivities])
+
+  // Sync huddles from backend
+  useEffect(() => {
+    if (effectiveHuddles.length > 0) {
+      setHuddles(effectiveHuddles as Huddle[])
+    }
+  }, [effectiveHuddles])
+
+  // Sync apps from backend
+  useEffect(() => {
+    if (effectiveApps.length > 0) {
+      setApps(effectiveApps as SlackApp[])
+    }
+  }, [effectiveApps])
+
+  // Sync workflows from backend
+  useEffect(() => {
+    if (effectiveWorkflows.length > 0) {
+      setWorkflows(effectiveWorkflows as SlackWorkflow[])
+    }
+  }, [effectiveWorkflows])
+
+  // Sync reminders from backend
+  useEffect(() => {
+    if (effectiveReminders.length > 0) {
+      setReminders(effectiveReminders as Reminder[])
+    }
+  }, [effectiveReminders])
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null)
   const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null)
@@ -617,6 +809,22 @@ export default function TeamHubClient() {
 
   // API Token State
   const [apiToken, setApiToken] = useState('xoxb-****************************')
+
+  // Settings State
+  const [settingsState, setSettingsState] = useState({
+    workspaceName: 'FreeFlow Workspace',
+    defaultChannel: 'general',
+    messageRetention: 90,
+    allowGuestAccess: true,
+    requireTwoFactor: false,
+    allowFileUploads: true,
+    maxFileSize: 100,
+    notifications: {
+      desktop: true,
+      email: true,
+      mobile: true
+    }
+  })
 
   // Selected message for reactions
   const [selectedMessageForReaction, setSelectedMessageForReaction] = useState<Message | null>(null)
@@ -739,11 +947,13 @@ export default function TeamHubClient() {
     fetchMembers()
   }, [fetchMembers])
 
-  // Stats
+  // Stats - computed from current state (synced from backend)
   const stats = useMemo(() => {
     const totalMembers = members.length
     const onlineMembers = members.filter(m => m.status === 'online' || m.status === 'in-meeting').length
+    const onlineNow = onlineMembers // Alias for UI
     const inMeetingMembers = members.filter(m => m.status === 'in-meeting').length
+    const admins = members.filter(m => m.role === 'admin' || m.role === 'owner').length
     const totalChannels = channels.length
     const unreadMessages = channels.reduce((sum, c) => sum + c.unreadCount, 0)
     const totalMentions = channels.reduce((sum, c) => sum + c.mentionCount, 0)
@@ -751,7 +961,7 @@ export default function TeamHubClient() {
     const installedApps = apps.filter(a => a.isInstalled).length
     const activeWorkflows = workflows.filter(w => w.isEnabled).length
     const pendingReminders = reminders.filter(r => r.status === 'pending').length
-    return { totalMembers, onlineMembers, inMeetingMembers, totalChannels, unreadMessages, totalMentions, activeHuddles, installedApps, activeWorkflows, pendingReminders }
+    return { totalMembers, onlineMembers, onlineNow, inMeetingMembers, admins, totalChannels, unreadMessages, totalMentions, activeHuddles, installedApps, activeWorkflows, pendingReminders }
   }, [members, channels, huddles, apps, workflows, reminders])
 
   // Filtered members

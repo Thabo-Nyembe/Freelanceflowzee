@@ -248,142 +248,11 @@ interface Invoice {
   invoiceNumber: string
 }
 
-// Mock Data
-const mockPlans: PricingPlan[] = [
-  {
-    id: 'plan-1',
-    name: 'Free',
-    slug: 'free',
-    description: 'Perfect for getting started',
-    model: 'freemium',
-    status: 'active',
-    prices: { monthly: 0, annual: 0 },
-    currency: 'USD',
-    features: [
-      { id: 'f1', name: 'Up to 3 projects', included: true, limit: 3 },
-      { id: 'f2', name: '1 GB storage', included: true },
-      { id: 'f3', name: 'Basic support', included: true },
-      { id: 'f4', name: 'API access', included: false },
-      { id: 'f5', name: 'Custom domains', included: false }
-    ],
-    limits: { users: 1, storage: '1GB', apiCalls: 1000, projects: 3 },
-    isFeatured: false,
-    isPopular: false,
-    trialDays: 0,
-    subscriberCount: 15420,
-    revenue: 0,
-    churnRate: 45.2,
-    createdAt: '2024-01-01T00:00:00Z',
-    updatedAt: '2025-01-15T00:00:00Z'
-  },
-  {
-    id: 'plan-2',
-    name: 'Starter',
-    slug: 'starter',
-    description: 'Great for small teams',
-    model: 'flat',
-    status: 'active',
-    prices: { monthly: 29, quarterly: 79, annual: 290, lifetime: 999 },
-    currency: 'USD',
-    features: [
-      { id: 'f1', name: 'Up to 10 projects', included: true, limit: 10 },
-      { id: 'f2', name: '10 GB storage', included: true },
-      { id: 'f3', name: 'Priority support', included: true },
-      { id: 'f4', name: 'API access', included: true, limit: 10000 },
-      { id: 'f5', name: 'Custom domains', included: true, limit: 1 }
-    ],
-    limits: { users: 5, storage: '10GB', apiCalls: 10000, projects: 10 },
-    isFeatured: false,
-    isPopular: true,
-    trialDays: 14,
-    subscriberCount: 4520,
-    revenue: 131080,
-    churnRate: 8.5,
-    createdAt: '2024-01-01T00:00:00Z',
-    updatedAt: '2025-01-15T00:00:00Z'
-  },
-  {
-    id: 'plan-3',
-    name: 'Professional',
-    slug: 'professional',
-    description: 'For growing businesses',
-    model: 'tiered',
-    status: 'active',
-    prices: { monthly: 79, quarterly: 219, annual: 790 },
-    currency: 'USD',
-    features: [
-      { id: 'f1', name: 'Unlimited projects', included: true, limit: 'unlimited' },
-      { id: 'f2', name: '100 GB storage', included: true },
-      { id: 'f3', name: '24/7 support', included: true },
-      { id: 'f4', name: 'API access', included: true, limit: 'unlimited' },
-      { id: 'f5', name: 'Custom domains', included: true, limit: 5 },
-      { id: 'f6', name: 'Advanced analytics', included: true },
-      { id: 'f7', name: 'Team collaboration', included: true }
-    ],
-    limits: { users: 25, storage: '100GB', apiCalls: 100000, projects: -1 },
-    isFeatured: true,
-    isPopular: false,
-    trialDays: 14,
-    subscriberCount: 2340,
-    revenue: 184860,
-    churnRate: 4.2,
-    createdAt: '2024-01-01T00:00:00Z',
-    updatedAt: '2025-01-15T00:00:00Z'
-  },
-  {
-    id: 'plan-4',
-    name: 'Enterprise',
-    slug: 'enterprise',
-    description: 'For large organizations',
-    model: 'per_seat',
-    status: 'active',
-    prices: { monthly: 199, annual: 1990 },
-    currency: 'USD',
-    features: [
-      { id: 'f1', name: 'Everything in Pro', included: true },
-      { id: 'f2', name: 'Unlimited storage', included: true },
-      { id: 'f3', name: 'Dedicated support', included: true },
-      { id: 'f4', name: 'Custom integrations', included: true },
-      { id: 'f5', name: 'SLA guarantee', included: true },
-      { id: 'f6', name: 'SSO/SAML', included: true },
-      { id: 'f7', name: 'Audit logs', included: true },
-      { id: 'f8', name: 'Custom contracts', included: true }
-    ],
-    limits: { users: -1, storage: 'Unlimited', projects: -1 },
-    isFeatured: false,
-    isPopular: false,
-    trialDays: 30,
-    setupFee: 500,
-    subscriberCount: 156,
-    revenue: 310440,
-    churnRate: 2.1,
-    createdAt: '2024-01-01T00:00:00Z',
-    updatedAt: '2025-01-15T00:00:00Z'
-  }
-]
-
-const mockSubscriptions: Subscription[] = [
-  { id: 'sub-1', customerId: 'cust-1', customerName: 'Acme Corp', customerEmail: 'billing@acme.com', planId: 'plan-4', planName: 'Enterprise', status: 'active', billingPeriod: 'annual', currentPeriodStart: '2025-01-01T00:00:00Z', currentPeriodEnd: '2026-01-01T00:00:00Z', amount: 1990, currency: 'USD', createdAt: '2024-03-15T00:00:00Z' },
-  { id: 'sub-2', customerId: 'cust-2', customerName: 'TechStart Inc', customerEmail: 'finance@techstart.io', planId: 'plan-3', planName: 'Professional', status: 'active', billingPeriod: 'monthly', currentPeriodStart: '2025-01-15T00:00:00Z', currentPeriodEnd: '2025-02-15T00:00:00Z', amount: 79, currency: 'USD', createdAt: '2024-06-20T00:00:00Z' },
-  { id: 'sub-3', customerId: 'cust-3', customerName: 'Design Studio', customerEmail: 'accounts@designstudio.co', planId: 'plan-2', planName: 'Starter', status: 'trialing', billingPeriod: 'monthly', currentPeriodStart: '2025-01-10T00:00:00Z', currentPeriodEnd: '2025-01-24T00:00:00Z', amount: 29, currency: 'USD', trialEnd: '2025-01-24T00:00:00Z', createdAt: '2025-01-10T00:00:00Z' },
-  { id: 'sub-4', customerId: 'cust-4', customerName: 'Freelancer Pro', customerEmail: 'john@freelancer.com', planId: 'plan-2', planName: 'Starter', status: 'past_due', billingPeriod: 'monthly', currentPeriodStart: '2024-12-15T00:00:00Z', currentPeriodEnd: '2025-01-15T00:00:00Z', amount: 29, currency: 'USD', createdAt: '2024-08-01T00:00:00Z' },
-  { id: 'sub-5', customerId: 'cust-5', customerName: 'Growth Labs', customerEmail: 'billing@growthlabs.io', planId: 'plan-3', planName: 'Professional', status: 'canceled', billingPeriod: 'annual', currentPeriodStart: '2024-06-01T00:00:00Z', currentPeriodEnd: '2025-06-01T00:00:00Z', amount: 790, currency: 'USD', cancelAt: '2025-06-01T00:00:00Z', cancelReason: 'Switching to competitor', createdAt: '2024-06-01T00:00:00Z' }
-]
-
-const mockCoupons: Coupon[] = [
-  { id: 'coup-1', code: 'WELCOME50', name: '50% Off First Month', type: 'percentage', value: 50, duration: 'once', maxRedemptions: 1000, redemptionsCount: 456, isActive: true, createdAt: '2024-06-01T00:00:00Z' },
-  { id: 'coup-2', code: 'ANNUAL20', name: '20% Off Annual Plans', type: 'percentage', value: 20, duration: 'forever', redemptionsCount: 234, isActive: true, createdAt: '2024-08-15T00:00:00Z' },
-  { id: 'coup-3', code: 'TRIAL30', name: '30-Day Free Trial', type: 'free_trial', value: 30, duration: 'once', redemptionsCount: 890, isActive: true, createdAt: '2024-09-01T00:00:00Z' },
-  { id: 'coup-4', code: 'PARTNER15', name: 'Partner Discount', type: 'percentage', value: 15, duration: 'repeating', durationInMonths: 12, redemptionsCount: 123, isActive: true, createdAt: '2024-10-01T00:00:00Z' },
-  { id: 'coup-5', code: 'HOLIDAY2024', name: 'Holiday Sale', type: 'fixed', value: 50, duration: 'once', maxRedemptions: 500, redemptionsCount: 500, isActive: false, expiresAt: '2024-12-31T00:00:00Z', createdAt: '2024-12-01T00:00:00Z' }
-]
-
-const mockInvoices: Invoice[] = [
-  { id: 'inv-1', customerId: 'cust-1', customerName: 'Acme Corp', subscriptionId: 'sub-1', status: 'paid', amount: 1990, currency: 'USD', periodStart: '2025-01-01T00:00:00Z', periodEnd: '2026-01-01T00:00:00Z', paidAt: '2025-01-01T00:00:00Z', dueDate: '2025-01-15T00:00:00Z', invoiceNumber: 'INV-2025-0001' },
-  { id: 'inv-2', customerId: 'cust-2', customerName: 'TechStart Inc', subscriptionId: 'sub-2', status: 'paid', amount: 79, currency: 'USD', periodStart: '2025-01-15T00:00:00Z', periodEnd: '2025-02-15T00:00:00Z', paidAt: '2025-01-15T00:00:00Z', dueDate: '2025-01-22T00:00:00Z', invoiceNumber: 'INV-2025-0002' },
-  { id: 'inv-3', customerId: 'cust-4', customerName: 'Freelancer Pro', subscriptionId: 'sub-4', status: 'overdue', amount: 29, currency: 'USD', periodStart: '2024-12-15T00:00:00Z', periodEnd: '2025-01-15T00:00:00Z', dueDate: '2024-12-22T00:00:00Z', invoiceNumber: 'INV-2024-0456' },
-  { id: 'inv-4', customerId: 'cust-5', customerName: 'Growth Labs', subscriptionId: 'sub-5', status: 'paid', amount: 790, currency: 'USD', periodStart: '2024-06-01T00:00:00Z', periodEnd: '2025-06-01T00:00:00Z', paidAt: '2024-06-01T00:00:00Z', dueDate: '2024-06-15T00:00:00Z', invoiceNumber: 'INV-2024-0234' }
-]
+// Empty data arrays (real data comes from Supabase)
+const emptyPlans: PricingPlan[] = []
+const emptySubscriptions: Subscription[] = []
+const emptyCoupons: Coupon[] = []
+const emptyInvoices: Invoice[] = []
 
 // Helper Functions
 const getPlanStatusColor = (status: PlanStatus): string => {
@@ -441,34 +310,16 @@ interface PricingClientProps {
   initialPlans?: PricingPlan[]
 }
 
-// Enhanced Competitive Upgrade Mock Data
-const mockPricingAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Revenue Growth', description: 'Pro plan conversions up 28% after pricing optimization.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Revenue' },
-  { id: '2', type: 'info' as const, title: 'Pricing Insight', description: 'Annual billing adoption at 67%. Consider incentive increase.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Strategy' },
-  { id: '3', type: 'warning' as const, title: 'Competitor Alert', description: 'Main competitor reduced prices by 15%. Monitor impact.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Competition' },
-]
-
-const mockPricingCollaborators = [
-  { id: '1', name: 'Revenue Ops', avatar: '/avatars/revops.jpg', status: 'online' as const, role: 'Ops' },
-  { id: '2', name: 'Product Lead', avatar: '/avatars/product.jpg', status: 'online' as const, role: 'Product' },
-  { id: '3', name: 'Finance', avatar: '/avatars/finance.jpg', status: 'busy' as const, role: 'Finance' },
-]
-
-const mockPricingPredictions = [
-  { id: '1', title: 'MRR Forecast', prediction: '$125K MRR by end of quarter', confidence: 84, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Upgrade Rate', prediction: '12% free-to-paid conversion', confidence: 76, trend: 'up' as const, impact: 'medium' as const },
-]
-
-const mockPricingActivities = [
-  { id: '1', user: 'Billing System', action: 'Processed upgrade to', target: 'Enterprise Plan', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Coupon Engine', action: 'Applied discount for', target: '15 annual signups', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'System', action: 'Updated pricing for', target: 'EU region', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
-]
+// Empty Competitive Upgrade Data arrays (real data comes from backend)
+const emptyPricingAIInsights: { id: string; type: 'success' | 'info' | 'warning' | 'error'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
+const emptyPricingCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'offline' | 'busy'; role: string }[] = []
+const emptyPricingPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: 'low' | 'medium' | 'high' }[] = []
+const emptyPricingActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'update' | 'warning' | 'error' }[] = []
 
 // Note: Quick actions are defined inside the component to access state setters
 
 export default function PricingClient({
-  initialPlans = mockPlans
+  initialPlans = emptyPlans
 }: PricingClientProps) {
 
 
@@ -529,7 +380,7 @@ export default function PricingClient({
         .order('created_at', { ascending: false })
 
       if (error) {
-        // Table may not exist, use mock data
+        // Table may not exist - coupons will remain empty
       } else {
         setDbCoupons(data || [])
       }
@@ -568,7 +419,7 @@ export default function PricingClient({
   }, [initialPlans])
 
   const filteredSubscriptions = useMemo(() => {
-    return mockSubscriptions.filter(sub =>
+    return emptySubscriptions.filter(sub =>
       sub.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       sub.planName.toLowerCase().includes(searchQuery.toLowerCase())
     )
@@ -582,7 +433,7 @@ export default function PricingClient({
     { label: 'Paid Users', value: stats.paidSubscribers.toLocaleString(), change: 12.1, icon: CreditCard, color: 'from-indigo-500 to-violet-600' },
     { label: 'Active Plans', value: stats.activePlans.toString(), change: 0, icon: Package, color: 'from-teal-500 to-cyan-600' },
     { label: 'Avg Churn', value: `${stats.avgChurn.toFixed(1)}%`, change: -5.2, icon: ArrowDownRight, color: 'from-red-500 to-rose-600' },
-    { label: 'Coupons Active', value: mockCoupons.filter(c => c.isActive).length.toString(), change: 25, icon: Tag, color: 'from-pink-500 to-rose-600' }
+    { label: 'Coupons Active', value: emptyCoupons.filter(c => c.isActive).length.toString(), change: 25, icon: Tag, color: 'from-pink-500 to-rose-600' }
   ]
 
   // CRUD: Create Plan
@@ -822,7 +673,7 @@ ${invoice.paidAt ? `Paid on: ${new Date(invoice.paidAt).toLocaleDateString()}` :
     try {
       const csvContent = [
         ['Invoice Number', 'Customer', 'Amount', 'Status', 'Due Date', 'Paid Date'].join(','),
-        ...mockInvoices.map(inv => [
+        ...emptyInvoices.map(inv => [
           inv.invoiceNumber,
           inv.customerName,
           inv.amount,
@@ -851,7 +702,7 @@ ${invoice.paidAt ? `Paid on: ${new Date(invoice.paidAt).toLocaleDateString()}` :
     try {
       const csvContent = [
         ['Customer', 'Email', 'Plan', 'Status', 'Amount', 'Billing Period', 'Created'].join(','),
-        ...mockSubscriptions.map(sub => [
+        ...emptySubscriptions.map(sub => [
           sub.customerName,
           sub.customerEmail,
           sub.planName,
@@ -1325,85 +1176,15 @@ ${invoice.paidAt ? `Paid on: ${new Date(invoice.paidAt).toLocaleDateString()}` :
                   </CardContent>
                 </Card>
               ))}
-              {/* Mock coupons fallback */}
-              {dbCoupons.length === 0 && mockCoupons.map((coupon) => (
-                <Card key={coupon.id} className={`border-0 shadow-sm ${!coupon.isActive ? 'opacity-60' : ''}`}>
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex items-center gap-2">
-                        <div className="p-2 rounded-lg bg-gradient-to-br from-pink-500 to-rose-600">
-                          <Tag className="w-4 h-4 text-white" />
-                        </div>
-                        <div>
-                          <code className="font-mono font-bold text-lg">{coupon.code}</code>
-                          <p className="text-sm text-gray-500">{coupon.name}</p>
-                        </div>
-                      </div>
-                      <Badge className={coupon.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>
-                        {coupon.isActive ? 'Active' : 'Inactive'}
-                      </Badge>
-                    </div>
-
-                    <div className="space-y-2 text-sm">
-                      <div className="flex items-center justify-between">
-                        <span className="text-gray-500">Discount</span>
-                        <span className="font-semibold">
-                          {coupon.type === 'percentage' ? `${coupon.value}%` :
-                           coupon.type === 'fixed' ? formatCurrency(coupon.value) :
-                           `${coupon.value} days free`}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-gray-500">Duration</span>
-                        <span className="capitalize">{coupon.duration}</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-gray-500">Redemptions</span>
-                        <span>
-                          {coupon.redemptionsCount}
-                          {coupon.maxRedemptions && ` / ${coupon.maxRedemptions}`}
-                        </span>
-                      </div>
-                    </div>
-
-                    {coupon.maxRedemptions && (
-                      <Progress
-                        value={(coupon.redemptionsCount / coupon.maxRedemptions) * 100}
-                        className="mt-3 h-1"
-                      />
-                    )}
-
-                    <div className="flex gap-2 mt-4">
-                      <Button variant="outline" size="sm" className="flex-1" onClick={() => handleCopyCoupon(coupon.code)}>
-                        <Copy className="w-3 h-3 mr-1" />
-                        Copy
-                      </Button>
-                      <Button variant="outline" size="sm" onClick={() => {
-                          setCouponForm({
-                            code: coupon.code,
-                            name: coupon.name,
-                            discount_type: coupon.type,
-                            discount_value: coupon.value,
-                            duration: coupon.duration,
-                            duration_months: coupon.durationInMonths || 1,
-                            max_redemptions: coupon.maxRedemptions || null
-                          })
-                          setEditingCouponId(coupon.id)
-                          setShowCreateCouponDialog(true)
-                        }}>
-                        <Edit className="w-3 h-3" />
-                      </Button>
-                      <Button variant="outline" size="sm" onClick={() => {
-                          if (confirm(`Are you sure you want to delete coupon "${coupon.code}"?`)) {
-                            toast.success(`Coupon "${coupon.code}" deleted`)
-                          }
-                        }}>
-                        <Trash2 className="w-3 h-3" />
-                      </Button>
-                    </div>
+              {/* Empty state when no coupons */}
+              {dbCoupons.length === 0 && (
+                <Card className="col-span-full border-0 shadow-sm">
+                  <CardContent className="p-8 text-center">
+                    <Tag className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                    <p className="text-gray-500">No coupons found. Create a coupon to get started.</p>
                   </CardContent>
                 </Card>
-              ))}
+              )}
             </div>
           </TabsContent>
 
@@ -1420,38 +1201,45 @@ ${invoice.paidAt ? `Paid on: ${new Date(invoice.paidAt).toLocaleDateString()}` :
             <Card className="border-0 shadow-sm">
               <CardContent className="p-0">
                 <div className="divide-y">
-                  {mockInvoices.map((invoice) => (
-                    <div key={invoice.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors flex items-center gap-4">
-                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                        invoice.status === 'paid' ? 'bg-green-100 text-green-600' :
-                        invoice.status === 'overdue' ? 'bg-red-100 text-red-600' :
-                        'bg-yellow-100 text-yellow-600'
-                      }`}>
-                        <Receipt className="w-5 h-5" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <p className="font-semibold">{invoice.invoiceNumber}</p>
-                          <Badge className={getInvoiceStatusColor(invoice.status)}>{invoice.status}</Badge>
-                        </div>
-                        <p className="text-sm text-gray-500">{invoice.customerName}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-semibold">{formatCurrency(invoice.amount)}</p>
-                        <p className="text-sm text-gray-500">
-                          Due {new Date(invoice.dueDate).toLocaleDateString()}
-                        </p>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm" onClick={() => setShowInvoicePreview(invoice)}>
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                        <Button variant="outline" size="sm" onClick={() => handleDownloadInvoice(invoice)}>
-                          <Download className="w-4 h-4" />
-                        </Button>
-                      </div>
+                  {emptyInvoices.length === 0 ? (
+                    <div className="p-8 text-center">
+                      <Receipt className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                      <p className="text-gray-500">No invoices found.</p>
                     </div>
-                  ))}
+                  ) : (
+                    emptyInvoices.map((invoice) => (
+                      <div key={invoice.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors flex items-center gap-4">
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                          invoice.status === 'paid' ? 'bg-green-100 text-green-600' :
+                          invoice.status === 'overdue' ? 'bg-red-100 text-red-600' :
+                          'bg-yellow-100 text-yellow-600'
+                        }`}>
+                          <Receipt className="w-5 h-5" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <p className="font-semibold">{invoice.invoiceNumber}</p>
+                            <Badge className={getInvoiceStatusColor(invoice.status)}>{invoice.status}</Badge>
+                          </div>
+                          <p className="text-sm text-gray-500">{invoice.customerName}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-semibold">{formatCurrency(invoice.amount)}</p>
+                          <p className="text-sm text-gray-500">
+                            Due {new Date(invoice.dueDate).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button variant="outline" size="sm" onClick={() => setShowInvoicePreview(invoice)}>
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                          <Button variant="outline" size="sm" onClick={() => handleDownloadInvoice(invoice)}>
+                            <Download className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -2349,18 +2137,18 @@ ${invoice.paidAt ? `Paid on: ${new Date(invoice.paidAt).toLocaleDateString()}` :
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockPricingAIInsights}
+              insights={emptyPricingAIInsights}
               title="Pricing Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockPricingCollaborators}
+              collaborators={emptyPricingCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockPricingPredictions}
+              predictions={emptyPricingPredictions}
               title="Revenue Forecasts"
             />
           </div>
@@ -2368,7 +2156,7 @@ ${invoice.paidAt ? `Paid on: ${new Date(invoice.paidAt).toLocaleDateString()}` :
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockPricingActivities}
+            activities={emptyPricingActivities}
             title="Pricing Activity"
             maxItems={5}
           />

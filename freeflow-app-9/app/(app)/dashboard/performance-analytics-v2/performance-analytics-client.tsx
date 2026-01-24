@@ -156,69 +156,20 @@ interface SLO {
   errorBudget: { remaining: number; consumed: number }
 }
 
-// Mock Data
-const mockServices: ServiceHealth[] = [
-  { name: 'API Gateway', status: 'healthy', latency: 45, errorRate: 0.02, throughput: 12500, uptime: 99.99, lastChecked: '2024-12-23T10:30:00Z' },
-  { name: 'Auth Service', status: 'healthy', latency: 28, errorRate: 0.01, throughput: 8400, uptime: 99.98, lastChecked: '2024-12-23T10:30:00Z' },
-  { name: 'User Service', status: 'degraded', latency: 156, errorRate: 1.2, throughput: 5200, uptime: 99.85, lastChecked: '2024-12-23T10:28:00Z' },
-  { name: 'Payment Service', status: 'healthy', latency: 89, errorRate: 0.05, throughput: 3200, uptime: 99.95, lastChecked: '2024-12-23T10:30:00Z' },
-  { name: 'Notification Service', status: 'healthy', latency: 35, errorRate: 0.08, throughput: 15600, uptime: 99.92, lastChecked: '2024-12-23T10:30:00Z' },
-  { name: 'Analytics Service', status: 'critical', latency: 520, errorRate: 5.5, throughput: 1800, uptime: 98.50, lastChecked: '2024-12-23T10:25:00Z' },
-]
+// Data arrays - populated from API/Supabase
+const mockServices: ServiceHealth[] = []
 
-const mockMetrics: MetricData[] = [
-  { id: '1', name: 'Request Latency P99', category: 'application', value: 245, unit: 'ms', trend: 'up', change: 12, threshold: { warning: 200, critical: 500 }, status: 'warning' },
-  { id: '2', name: 'Error Rate', category: 'application', value: 0.85, unit: '%', trend: 'down', change: -0.3, threshold: { warning: 1, critical: 5 }, status: 'normal' },
-  { id: '3', name: 'CPU Utilization', category: 'infrastructure', value: 68, unit: '%', trend: 'up', change: 8, threshold: { warning: 70, critical: 90 }, status: 'normal' },
-  { id: '4', name: 'Memory Usage', category: 'infrastructure', value: 72, unit: '%', trend: 'up', change: 5, threshold: { warning: 80, critical: 95 }, status: 'normal' },
-  { id: '5', name: 'Disk I/O', category: 'infrastructure', value: 45, unit: 'MB/s', trend: 'stable', change: 0, threshold: { warning: 80, critical: 100 }, status: 'normal' },
-  { id: '6', name: 'Network Throughput', category: 'infrastructure', value: 125, unit: 'Mbps', trend: 'up', change: 15, threshold: { warning: 200, critical: 300 }, status: 'normal' },
-  { id: '7', name: 'Database Connections', category: 'application', value: 156, unit: '', trend: 'up', change: 24, threshold: { warning: 180, critical: 200 }, status: 'normal' },
-  { id: '8', name: 'Cache Hit Rate', category: 'application', value: 94.5, unit: '%', trend: 'stable', change: 0.2, threshold: { warning: 90, critical: 80 }, status: 'normal' },
-  { id: '9', name: 'Queue Depth', category: 'application', value: 45, unit: 'messages', trend: 'down', change: -12, threshold: { warning: 100, critical: 500 }, status: 'normal' },
-  { id: '10', name: 'Active Users', category: 'business', value: 2847, unit: '', trend: 'up', change: 156, threshold: { warning: 0, critical: 0 }, status: 'normal' },
-]
+const mockMetrics: MetricData[] = []
 
-const mockTraces: Trace[] = [
-  { id: '1', traceId: 'trace-abc123xyz', service: 'API Gateway', operation: 'POST /api/v2/users', duration: 245, status: 'success', timestamp: '2024-12-23T10:29:55Z', spans: 8 },
-  { id: '2', traceId: 'trace-def456uvw', service: 'Auth Service', operation: 'POST /auth/login', duration: 128, status: 'success', timestamp: '2024-12-23T10:29:50Z', spans: 5 },
-  { id: '3', traceId: 'trace-ghi789rst', service: 'Payment Service', operation: 'POST /payments/charge', duration: 892, status: 'error', timestamp: '2024-12-23T10:29:45Z', spans: 12, errorMessage: 'Payment gateway timeout' },
-  { id: '4', traceId: 'trace-jkl012opq', service: 'User Service', operation: 'GET /api/v2/users/:id', duration: 156, status: 'success', timestamp: '2024-12-23T10:29:40Z', spans: 6 },
-  { id: '5', traceId: 'trace-mno345lmn', service: 'Analytics Service', operation: 'POST /events/track', duration: 520, status: 'timeout', timestamp: '2024-12-23T10:29:35Z', spans: 3, errorMessage: 'Request timeout after 500ms' },
-  { id: '6', traceId: 'trace-pqr678ijk', service: 'Notification Service', operation: 'POST /notifications/send', duration: 85, status: 'success', timestamp: '2024-12-23T10:29:30Z', spans: 4 },
-]
+const mockTraces: Trace[] = []
 
-const mockAlerts: Alert[] = [
-  { id: '1', name: 'High Latency - Analytics Service', severity: 'critical', status: 'firing', metric: 'latency_p99', condition: '> 500ms', value: 520, threshold: 500, triggeredAt: '2024-12-23T10:25:00Z' },
-  { id: '2', name: 'Error Rate Spike - User Service', severity: 'high', status: 'acknowledged', metric: 'error_rate', condition: '> 1%', value: 1.2, threshold: 1, triggeredAt: '2024-12-23T10:20:00Z' },
-  { id: '3', name: 'Memory Usage Warning', severity: 'medium', status: 'resolved', metric: 'memory_usage', condition: '> 80%', value: 72, threshold: 80, triggeredAt: '2024-12-23T09:45:00Z', resolvedAt: '2024-12-23T10:00:00Z' },
-  { id: '4', name: 'Database Connection Pool', severity: 'low', status: 'resolved', metric: 'db_connections', condition: '> 150', value: 156, threshold: 150, triggeredAt: '2024-12-23T08:30:00Z', resolvedAt: '2024-12-23T09:00:00Z' },
-]
+const mockAlerts: Alert[] = []
 
-const mockHosts: Host[] = [
-  { id: 'h1', name: 'prod-api-1', ip: '10.0.1.10', status: 'running', cpu: 45, memory: 68, disk: 42, network: { in: 125, out: 89 }, containers: 8, os: 'Ubuntu 22.04', uptime: '45d 12h' },
-  { id: 'h2', name: 'prod-api-2', ip: '10.0.1.11', status: 'running', cpu: 52, memory: 72, disk: 38, network: { in: 118, out: 95 }, containers: 8, os: 'Ubuntu 22.04', uptime: '45d 12h' },
-  { id: 'h3', name: 'prod-db-1', ip: '10.0.2.10', status: 'warning', cpu: 78, memory: 85, disk: 72, network: { in: 256, out: 312 }, containers: 2, os: 'Ubuntu 22.04', uptime: '120d 5h' },
-  { id: 'h4', name: 'prod-cache-1', ip: '10.0.3.10', status: 'running', cpu: 32, memory: 45, disk: 28, network: { in: 450, out: 420 }, containers: 3, os: 'Ubuntu 22.04', uptime: '30d 8h' },
-  { id: 'h5', name: 'prod-worker-1', ip: '10.0.4.10', status: 'running', cpu: 65, memory: 58, disk: 35, network: { in: 45, out: 38 }, containers: 12, os: 'Ubuntu 22.04', uptime: '15d 3h' },
-]
+const mockHosts: Host[] = []
 
-const mockLogs: LogEntry[] = [
-  { id: 'l1', timestamp: '2024-12-23T10:30:15Z', level: 'error', service: 'Analytics Service', message: 'Connection timeout to downstream service after 500ms', host: 'prod-api-1', traceId: 'trace-mno345lmn' },
-  { id: 'l2', timestamp: '2024-12-23T10:30:12Z', level: 'warn', service: 'User Service', message: 'High latency detected: p99=156ms, threshold=100ms', host: 'prod-api-2' },
-  { id: 'l3', timestamp: '2024-12-23T10:30:10Z', level: 'info', service: 'API Gateway', message: 'Successfully processed 1000 requests in the last minute', host: 'prod-api-1' },
-  { id: 'l4', timestamp: '2024-12-23T10:30:08Z', level: 'error', service: 'Payment Service', message: 'Payment gateway returned 503: Service Unavailable', host: 'prod-api-1', traceId: 'trace-ghi789rst' },
-  { id: 'l5', timestamp: '2024-12-23T10:30:05Z', level: 'debug', service: 'Auth Service', message: 'JWT token validated successfully for user_id=12345', host: 'prod-api-2' },
-  { id: 'l6', timestamp: '2024-12-23T10:30:02Z', level: 'info', service: 'Notification Service', message: 'Sent 250 push notifications in batch', host: 'prod-worker-1' },
-  { id: 'l7', timestamp: '2024-12-23T10:30:00Z', level: 'fatal', service: 'Analytics Service', message: 'Out of memory error: heap size exceeded', host: 'prod-api-1' },
-]
+const mockLogs: LogEntry[] = []
 
-const mockSLOs: SLO[] = [
-  { id: 'slo1', name: 'API Availability', target: 99.9, current: 99.85, timeWindow: '30d', status: 'at_risk', errorBudget: { remaining: 15, consumed: 85 } },
-  { id: 'slo2', name: 'API Latency P99 < 200ms', target: 99.5, current: 99.72, timeWindow: '30d', status: 'met', errorBudget: { remaining: 56, consumed: 44 } },
-  { id: 'slo3', name: 'Payment Success Rate', target: 99.9, current: 99.95, timeWindow: '7d', status: 'met', errorBudget: { remaining: 78, consumed: 22 } },
-  { id: 'slo4', name: 'Authentication Uptime', target: 99.99, current: 99.98, timeWindow: '90d', status: 'met', errorBudget: { remaining: 42, consumed: 58 } },
-]
+const mockSLOs: SLO[] = []
 
 const logLevelColors: Record<string, string> = {
   debug: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
@@ -259,26 +210,11 @@ interface Integration {
   icon: string
 }
 
-// Mock Dashboards
-const mockDashboards: Dashboard[] = [
-  { id: 'd1', name: 'Production Overview', description: 'Real-time production metrics and health', widgets: 12, owner: 'Platform Team', shared: true, createdAt: '2024-01-15T00:00:00Z', updatedAt: '2024-12-23T10:00:00Z', views: 1250, isFavorite: true },
-  { id: 'd2', name: 'API Performance', description: 'API latency, throughput, and error rates', widgets: 8, owner: 'API Team', shared: true, createdAt: '2024-02-20T00:00:00Z', updatedAt: '2024-12-22T15:30:00Z', views: 890, isFavorite: true },
-  { id: 'd3', name: 'Database Metrics', description: 'PostgreSQL and Redis performance', widgets: 10, owner: 'Data Team', shared: true, createdAt: '2024-03-10T00:00:00Z', updatedAt: '2024-12-21T09:15:00Z', views: 654, isFavorite: false },
-  { id: 'd4', name: 'Error Analysis', description: 'Error tracking and exception monitoring', widgets: 6, owner: 'Engineering', shared: false, createdAt: '2024-04-05T00:00:00Z', updatedAt: '2024-12-20T14:45:00Z', views: 432, isFavorite: false },
-  { id: 'd5', name: 'Infrastructure Cost', description: 'Cloud resource utilization and costs', widgets: 9, owner: 'FinOps', shared: true, createdAt: '2024-05-12T00:00:00Z', updatedAt: '2024-12-19T11:20:00Z', views: 321, isFavorite: false },
-]
+// Dashboards - populated from API/Supabase
+const mockDashboards: Dashboard[] = []
 
-// Mock Integrations
-const mockIntegrations: Integration[] = [
-  { id: 'i1', name: 'AWS CloudWatch', type: 'cloud', status: 'connected', lastSync: '2024-12-23T10:30:00Z', dataPoints: 125000, icon: '☁️' },
-  { id: 'i2', name: 'PostgreSQL', type: 'database', status: 'connected', lastSync: '2024-12-23T10:29:00Z', dataPoints: 85000, icon: '🐘' },
-  { id: 'i3', name: 'Redis', type: 'database', status: 'connected', lastSync: '2024-12-23T10:30:00Z', dataPoints: 42000, icon: '⚡' },
-  { id: 'i4', name: 'Kafka', type: 'messaging', status: 'connected', lastSync: '2024-12-23T10:28:00Z', dataPoints: 256000, icon: '📨' },
-  { id: 'i5', name: 'Prometheus', type: 'monitoring', status: 'connected', lastSync: '2024-12-23T10:30:00Z', dataPoints: 890000, icon: '📊' },
-  { id: 'i6', name: 'Elasticsearch', type: 'logging', status: 'error', lastSync: '2024-12-23T09:45:00Z', dataPoints: 1250000, icon: '🔍' },
-  { id: 'i7', name: 'Kubernetes', type: 'cloud', status: 'connected', lastSync: '2024-12-23T10:30:00Z', dataPoints: 156000, icon: '☸️' },
-  { id: 'i8', name: 'MongoDB', type: 'database', status: 'disconnected', lastSync: '2024-12-22T18:00:00Z', dataPoints: 0, icon: '🍃' },
-]
+// Integrations - populated from API/Supabase
+const mockIntegrations: Integration[] = []
 
 const statusColors: Record<string, string> = {
   healthy: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
@@ -302,29 +238,14 @@ const severityColors: Record<string, string> = {
   critical: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',
 }
 
-// Mock data for AI-powered competitive upgrade components
-const mockPerfAnalyticsAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Performance Improved', description: 'P95 latency reduced 40% after database optimization.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Latency' },
-  { id: '2', type: 'warning' as const, title: 'Memory Pressure', description: 'API server memory usage at 85%. Consider scaling.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Resources' },
-  { id: '3', type: 'info' as const, title: 'Traffic Pattern', description: 'Peak traffic shifted to 2pm-4pm. Adjust autoscaling.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Traffic' },
-]
+// AI insights - populated from API/Supabase
+const mockPerfAnalyticsAIInsights: Array<{ id: string; type: 'success' | 'warning' | 'info'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }> = []
 
-const mockPerfAnalyticsCollaborators = [
-  { id: '1', name: 'SRE Lead', avatar: '/avatars/sre.jpg', status: 'online' as const, role: 'SRE' },
-  { id: '2', name: 'Performance Engineer', avatar: '/avatars/perf.jpg', status: 'online' as const, role: 'Engineering' },
-  { id: '3', name: 'Platform Lead', avatar: '/avatars/platform.jpg', status: 'away' as const, role: 'Platform' },
-]
+const mockPerfAnalyticsCollaborators: Array<{ id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }> = []
 
-const mockPerfAnalyticsPredictions = [
-  { id: '1', title: 'Capacity Forecast', prediction: 'Current growth rate requires 50% more capacity by Q2', confidence: 89, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Anomaly Detection', prediction: 'Error rate spike likely during next deployment window', confidence: 74, trend: 'up' as const, impact: 'medium' as const },
-]
+const mockPerfAnalyticsPredictions: Array<{ id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: 'low' | 'medium' | 'high' }> = []
 
-const mockPerfAnalyticsActivities = [
-  { id: '1', user: 'SRE Lead', action: 'Resolved', target: 'latency alert for /api/users', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Performance Engineer', action: 'Created', target: 'new dashboard for API metrics', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'Platform Lead', action: 'Scaled', target: 'web tier to 12 instances', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
-]
+const mockPerfAnalyticsActivities: Array<{ id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' | 'error' }> = []
 
 // Quick actions will be defined inside the component to access state setters
 

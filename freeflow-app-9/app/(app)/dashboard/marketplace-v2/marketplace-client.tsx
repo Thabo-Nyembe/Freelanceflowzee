@@ -215,7 +215,20 @@ interface Webhook {
   createdAt: string
 }
 
-// Mock Data - REMOVED (Batch #7 Migration)
+// Empty typed arrays (mock data removed)
+const mockProducts: Product[] = []
+const mockVendors: Vendor[] = []
+const mockReviews: Review[] = []
+const mockOrders: Order[] = []
+const mockCollections: Collection[] = []
+const mockCoupons: Coupon[] = []
+const mockBundles: Bundle[] = []
+const mockPaymentProviders: PaymentProvider[] = []
+const mockWebhooks: Webhook[] = []
+const mockMarketplaceAIInsights: { id: string; type: string; title: string; description: string; impact: string; confidence: number }[] = []
+const mockMarketplaceCollaborators: { id: string; name: string; avatar?: string; status: string; role: string }[] = []
+const mockMarketplacePredictions: { id: string; metric: string; current: number; predicted: number; trend: string; confidence: number }[] = []
+const mockMarketplaceActivities: { id: string; type: string; title: string; description: string; timestamp: string; user?: { name: string; avatar?: string } }[] = []
 
 // Helper functions for real marketplace actions
 const installApp = async (appId: string, appName: string) => {

@@ -141,76 +141,18 @@ interface FormAnalytics {
 }
 
 // ============================================================================
-// MOCK DATA
+// DATA ARRAYS (Empty - Real data comes from Supabase)
 // ============================================================================
 
-const questionTypes: QuestionType[] = [
-  // Text
-  { id: 'short_text', name: 'Short Text', icon: <Type className="w-5 h-5" />, description: 'Single line answer', category: 'text', isPremium: false },
-  { id: 'long_text', name: 'Long Text', icon: <AlignLeft className="w-5 h-5" />, description: 'Multi-line answer', category: 'text', isPremium: false },
-  { id: 'email', name: 'Email', icon: <Mail className="w-5 h-5" />, description: 'Email address', category: 'contact', isPremium: false },
-  { id: 'phone', name: 'Phone', icon: <Phone className="w-5 h-5" />, description: 'Phone number', category: 'contact', isPremium: false },
-  { id: 'website', name: 'Website', icon: <Globe className="w-5 h-5" />, description: 'URL input', category: 'contact', isPremium: false },
-  // Choice
-  { id: 'multiple_choice', name: 'Multiple Choice', icon: <CircleDot className="w-5 h-5" />, description: 'Select one option', category: 'choice', isPremium: false },
-  { id: 'checkboxes', name: 'Checkboxes', icon: <ListChecks className="w-5 h-5" />, description: 'Select multiple', category: 'choice', isPremium: false },
-  { id: 'dropdown', name: 'Dropdown', icon: <ChevronDown className="w-5 h-5" />, description: 'Select from list', category: 'choice', isPremium: false },
-  { id: 'picture_choice', name: 'Picture Choice', icon: <ImageIcon className="w-5 h-5" />, description: 'Visual options', category: 'choice', isPremium: true },
-  { id: 'yes_no', name: 'Yes/No', icon: <ToggleLeft className="w-5 h-5" />, description: 'Binary choice', category: 'choice', isPremium: false },
-  // Rating
-  { id: 'opinion_scale', name: 'Opinion Scale', icon: <Sliders className="w-5 h-5" />, description: '0-10 scale', category: 'rating', isPremium: false },
-  { id: 'star_rating', name: 'Star Rating', icon: <Star className="w-5 h-5" />, description: '1-5 stars', category: 'rating', isPremium: false },
-  { id: 'nps', name: 'NPS', icon: <TrendingUp className="w-5 h-5" />, description: 'Net Promoter Score', category: 'rating', isPremium: false },
-  { id: 'ranking', name: 'Ranking', icon: <ListChecks className="w-5 h-5" />, description: 'Order items', category: 'rating', isPremium: true },
-  // Date & File
-  { id: 'date', name: 'Date', icon: <Calendar className="w-5 h-5" />, description: 'Date picker', category: 'date', isPremium: false },
-  { id: 'file_upload', name: 'File Upload', icon: <FileUp className="w-5 h-5" />, description: 'Upload files', category: 'file', isPremium: false },
-  // Payment & Layout
-  { id: 'payment', name: 'Payment', icon: <CreditCard className="w-5 h-5" />, description: 'Collect payments', category: 'payment', isPremium: true },
-  { id: 'statement', name: 'Statement', icon: <MessageSquare className="w-5 h-5" />, description: 'Info block', category: 'layout', isPremium: false },
-  { id: 'welcome_screen', name: 'Welcome Screen', icon: <Sparkles className="w-5 h-5" />, description: 'Form intro', category: 'layout', isPremium: false },
-  { id: 'ending_screen', name: 'Ending Screen', icon: <CheckCircle className="w-5 h-5" />, description: 'Thank you', category: 'layout', isPremium: false },
-]
+const questionTypes: QuestionType[] = []
 
-const formTemplates: FormTemplate[] = [
-  { id: '1', name: 'Contact Form', description: 'Simple contact form with name, email, and message', icon: '📬', category: 'Basic', questions: 5, color: 'from-blue-500 to-cyan-500', uses: 12400, isPremium: false },
-  { id: '2', name: 'Customer Feedback', description: 'Collect product and service feedback', icon: '💬', category: 'Feedback', questions: 8, color: 'from-purple-500 to-pink-500', uses: 8900, isPremium: false },
-  { id: '3', name: 'Event Registration', description: 'Register attendees for events', icon: '🎫', category: 'Events', questions: 12, color: 'from-green-500 to-emerald-500', uses: 6500, isPremium: false },
-  { id: '4', name: 'Job Application', description: 'Streamline your hiring process', icon: '💼', category: 'HR', questions: 15, color: 'from-orange-500 to-red-500', uses: 5200, isPremium: false },
-  { id: '5', name: 'Product Survey', description: 'Gather product insights and preferences', icon: '📊', category: 'Survey', questions: 10, color: 'from-indigo-500 to-purple-500', uses: 7800, isPremium: false },
-  { id: '6', name: 'NPS Survey', description: 'Measure Net Promoter Score', icon: '⭐', category: 'Survey', questions: 3, color: 'from-yellow-500 to-orange-500', uses: 15600, isPremium: false },
-  { id: '7', name: 'Lead Generation', description: 'Capture and qualify leads', icon: '🎯', category: 'Marketing', questions: 7, color: 'from-rose-500 to-pink-500', uses: 9200, isPremium: true },
-  { id: '8', name: 'Quiz', description: 'Create interactive quizzes', icon: '🧠', category: 'Quiz', questions: 10, color: 'from-teal-500 to-cyan-500', uses: 4300, isPremium: true },
-]
+const formTemplates: FormTemplate[] = []
 
-const mockResponses: FormResponse[] = [
-  { id: '1', formId: '1', formTitle: 'Customer Feedback', respondentEmail: 'john@example.com', submittedAt: new Date(Date.now() - 1000 * 60 * 30), completionTime: 245, answers: {}, metadata: { device: 'desktop', browser: 'Chrome' } },
-  { id: '2', formId: '1', formTitle: 'Customer Feedback', respondentEmail: 'sarah@example.com', submittedAt: new Date(Date.now() - 1000 * 60 * 60 * 2), completionTime: 180, answers: {}, metadata: { device: 'mobile', browser: 'Safari' } },
-  { id: '3', formId: '2', formTitle: 'Event Registration', respondentEmail: 'mike@example.com', submittedAt: new Date(Date.now() - 1000 * 60 * 60 * 5), completionTime: 320, answers: {}, metadata: { device: 'desktop', browser: 'Firefox' } },
-  { id: '4', formId: '1', formTitle: 'Customer Feedback', submittedAt: new Date(Date.now() - 1000 * 60 * 60 * 8), completionTime: 156, answers: {}, metadata: { device: 'tablet', browser: 'Safari' } },
-  { id: '5', formId: '3', formTitle: 'NPS Survey', respondentEmail: 'emily@example.com', submittedAt: new Date(Date.now() - 1000 * 60 * 60 * 24), completionTime: 45, answers: {}, metadata: { device: 'mobile', browser: 'Chrome' } },
-]
+const formResponses: FormResponse[] = []
 
-const integrations: Integration[] = [
-  { id: '1', name: 'Slack', icon: '💬', description: 'Get notified on submissions', connected: true, category: 'notification', responsesSynced: 1250 },
-  { id: '2', name: 'Google Sheets', icon: '📊', description: 'Sync responses to sheets', connected: true, category: 'storage', responsesSynced: 4500 },
-  { id: '3', name: 'Mailchimp', icon: '✉️', description: 'Add to email lists', connected: false, category: 'crm' },
-  { id: '4', name: 'Zapier', icon: '⚡', description: 'Connect 5000+ apps', connected: true, category: 'automation', responsesSynced: 890 },
-  { id: '5', name: 'Stripe', icon: '💳', description: 'Accept payments', connected: false, category: 'payment' },
-  { id: '6', name: 'HubSpot', icon: '🧡', description: 'CRM integration', connected: false, category: 'crm' },
-  { id: '7', name: 'Webhooks', icon: '🔗', description: 'Custom integrations', connected: true, category: 'automation' },
-  { id: '8', name: 'Notion', icon: '📝', description: 'Sync to databases', connected: false, category: 'storage' },
-  { id: '9', name: 'Airtable', icon: '📋', description: 'Powerful spreadsheets', connected: true, category: 'storage', responsesSynced: 2100 },
-  { id: '10', name: 'Salesforce', icon: '☁️', description: 'Enterprise CRM', connected: false, category: 'crm' },
-]
+const integrations: Integration[] = []
 
-const formThemes: FormTheme[] = [
-  { id: '1', name: 'Default', primaryColor: '#6366f1', backgroundColor: '#ffffff', fontFamily: 'Inter', isCustom: false },
-  { id: '2', name: 'Dark Mode', primaryColor: '#8b5cf6', backgroundColor: '#1f2937', fontFamily: 'Inter', isCustom: false },
-  { id: '3', name: 'Ocean', primaryColor: '#0ea5e9', backgroundColor: '#f0f9ff', fontFamily: 'Poppins', isCustom: false },
-  { id: '4', name: 'Forest', primaryColor: '#10b981', backgroundColor: '#f0fdf4', fontFamily: 'Nunito', isCustom: false },
-  { id: '5', name: 'Sunset', primaryColor: '#f97316', backgroundColor: '#fff7ed', fontFamily: 'Roboto', isCustom: false },
-]
+const formThemes: FormTheme[] = []
 
 // ============================================================================
 // HELPER FUNCTIONS
@@ -245,36 +187,16 @@ const formatDuration = (seconds: number): string => {
   return `${mins}m ${secs}s`
 }
 
-// Enhanced Competitive Upgrade Mock Data
-const mockFormsAIInsights = [
-  { id: '1', type: 'success' as const, title: 'High Completion Rate', description: 'Contact form achieving 87% completion rate. Above benchmark.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Performance' },
-  { id: '2', type: 'warning' as const, title: 'Drop-off Detected', description: 'Survey form losing 40% of respondents at question 5.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Optimization' },
-  { id: '3', type: 'info' as const, title: 'New Template Available', description: 'AI-powered lead capture template ready for use.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Templates' },
-]
+// Empty arrays for competitive upgrade components (real data comes from Supabase)
+const formsAIInsights: { id: string; type: 'success' | 'warning' | 'info'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
 
-const mockFormsCollaborators = [
-  { id: '1', name: 'Forms Admin', avatar: '/avatars/forms.jpg', status: 'online' as const, role: 'Admin' },
-  { id: '2', name: 'Content Designer', avatar: '/avatars/design.jpg', status: 'online' as const, role: 'Designer' },
-  { id: '3', name: 'Marketing Lead', avatar: '/avatars/marketing.jpg', status: 'away' as const, role: 'Marketing' },
-]
+const formsCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }[] = []
 
-const mockFormsPredictions = [
-  { id: '1', title: 'Response Forecast', prediction: 'Expecting 500+ responses from product survey this week', confidence: 85, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Completion Trend', prediction: 'Overall completion rate trending toward 82%', confidence: 78, trend: 'up' as const, impact: 'medium' as const },
-]
+const formsPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: 'low' | 'medium' | 'high' }[] = []
 
-const mockFormsActivities = [
-  { id: '1', user: 'Admin', action: 'Published', target: 'Customer Feedback Survey', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Designer', action: 'Updated', target: 'Contact Form styling', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'System', action: 'Received', target: '45 new responses', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
-]
+const formsActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' | 'error' }[] = []
 
-const mockFormsQuickActions = [
-  { id: '1', label: 'New Form', icon: 'Plus', action: () => {}, shortcut: 'N' },
-  { id: '2', label: 'Templates', icon: 'FileText', action: () => {}, shortcut: 'T' },
-  { id: '3', label: 'Analytics', icon: 'BarChart3', action: () => {}, shortcut: 'A' },
-  { id: '4', label: 'Settings', icon: 'Settings', action: () => {}, shortcut: 'S' },
-]
+const formsQuickActions: { id: string; label: string; icon: string; action: () => void; shortcut: string }[] = []
 
 // ============================================================================
 // MAIN COMPONENT
@@ -752,7 +674,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                   }}>View All</Button>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {mockResponses.slice(0, 5).map(response => (
+                  {formResponses.slice(0, 5).map(response => (
                     <div key={response.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
                       <Avatar className="h-8 w-8">
                         <AvatarImage src={`https://avatar.vercel.sh/${response.respondentEmail || response.id}`} />
@@ -1011,7 +933,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {mockResponses.map(response => (
+                  {formResponses.map(response => (
                     <div key={response.id} className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all cursor-pointer">
                       <Avatar>
                         <AvatarImage src={`https://avatar.vercel.sh/${response.respondentEmail || response.id}`} />
@@ -2061,18 +1983,18 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockFormsAIInsights}
+              insights={formsAIInsights}
               title="Forms Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockFormsCollaborators}
+              collaborators={formsCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockFormsPredictions}
+              predictions={formsPredictions}
               title="Forms Forecasts"
             />
           </div>
@@ -2080,12 +2002,12 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockFormsActivities}
+            activities={formsActivities}
             title="Forms Activity"
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockFormsQuickActions}
+            actions={formsQuickActions}
             variant="grid"
           />
         </div>

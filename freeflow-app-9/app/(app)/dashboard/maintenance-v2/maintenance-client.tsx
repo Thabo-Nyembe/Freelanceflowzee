@@ -198,223 +198,14 @@ interface Incident {
   workOrderId?: string
 }
 
-// Mock Data
-const mockWorkOrders: WorkOrder[] = [
-  {
-    id: '1',
-    orderNumber: 'WO-2024-001',
-    title: 'HVAC System Annual Inspection',
-    description: 'Annual preventive maintenance for building HVAC system including filter replacement and coil cleaning.',
-    type: 'preventive',
-    status: 'in_progress',
-    priority: 'high',
-    asset: 'Main HVAC Unit - Building A',
-    assetId: 'AST-001',
-    location: 'Building A - Mechanical Room',
-    assignedTo: [
-      { id: '1', name: 'John Smith', email: 'john@company.com', role: 'Maintenance Tech' },
-      { id: '2', name: 'Sarah Johnson', email: 'sarah@company.com', role: 'HVAC Specialist' }
-    ],
-    requestedBy: 'Facilities Manager',
-    scheduledStart: '2024-12-25T08:00:00Z',
-    scheduledEnd: '2024-12-25T16:00:00Z',
-    actualStart: '2024-12-25T08:15:00Z',
-    estimatedHours: 8,
-    actualHours: 4,
-    progress: 65,
-    downtime: false,
-    downtimeMinutes: 0,
-    parts: [
-      { id: '1', name: 'Air Filter 24x24', partNumber: 'AF-2424-M', quantity: 4, cost: 25.00, available: true },
-      { id: '2', name: 'Refrigerant R-410A', partNumber: 'REF-410A-25', quantity: 2, cost: 150.00, available: true }
-    ],
-    checklists: [
-      {
-        id: '1',
-        title: 'Pre-Maintenance Checks',
-        items: [
-          { id: '1', task: 'Turn off power supply', completed: true },
-          { id: '2', task: 'Check refrigerant levels', completed: true },
-          { id: '3', task: 'Inspect electrical connections', completed: true }
-        ]
-      }
-    ],
-    notes: 'Filters were heavily soiled. Recommend quarterly replacement.',
-    createdAt: '2024-12-20T10:00:00Z',
-    updatedAt: '2024-12-25T12:30:00Z',
-    sla: { target: 24, remaining: 8, breached: false }
-  },
-  {
-    id: '2',
-    orderNumber: 'WO-2024-002',
-    title: 'Emergency Generator Repair',
-    description: 'Emergency repair for backup generator that failed during testing. Fuel pump suspected.',
-    type: 'emergency',
-    status: 'completed',
-    priority: 'critical',
-    asset: 'Backup Generator - Unit 1',
-    assetId: 'AST-002',
-    location: 'Building B - Generator Room',
-    assignedTo: [
-      { id: '3', name: 'Mike Wilson', email: 'mike@company.com', role: 'Electrical Tech' }
-    ],
-    requestedBy: 'Operations Manager',
-    scheduledStart: '2024-12-24T14:00:00Z',
-    scheduledEnd: '2024-12-24T18:00:00Z',
-    actualStart: '2024-12-24T14:10:00Z',
-    actualEnd: '2024-12-24T17:45:00Z',
-    estimatedHours: 4,
-    actualHours: 3.5,
-    progress: 100,
-    downtime: true,
-    downtimeMinutes: 225,
-    parts: [
-      { id: '3', name: 'Fuel Pump Assembly', partNumber: 'FP-GEN-100', quantity: 1, cost: 450.00, available: true }
-    ],
-    checklists: [],
-    notes: 'Fuel pump replaced. Generator tested successfully under load.',
-    createdAt: '2024-12-24T13:00:00Z',
-    updatedAt: '2024-12-24T17:45:00Z',
-    sla: { target: 4, remaining: 0, breached: false }
-  },
-  {
-    id: '3',
-    orderNumber: 'WO-2024-003',
-    title: 'Server Room UPS Battery Replacement',
-    description: 'Scheduled replacement of UPS batteries in server room. System is 3 years old.',
-    type: 'preventive',
-    status: 'scheduled',
-    priority: 'high',
-    asset: 'UPS System - Server Room',
-    assetId: 'AST-003',
-    location: 'Data Center - Server Room A',
-    assignedTo: [
-      { id: '4', name: 'Emily Brown', email: 'emily@company.com', role: 'IT Tech' }
-    ],
-    requestedBy: 'IT Manager',
-    scheduledStart: '2024-12-26T22:00:00Z',
-    scheduledEnd: '2024-12-27T02:00:00Z',
-    estimatedHours: 4,
-    actualHours: 0,
-    progress: 0,
-    downtime: true,
-    downtimeMinutes: 30,
-    parts: [
-      { id: '4', name: 'UPS Battery Pack', partNumber: 'BAT-UPS-3000', quantity: 8, cost: 200.00, available: true }
-    ],
-    checklists: [],
-    notes: 'Scheduled during off-peak hours. IT team on standby.',
-    createdAt: '2024-12-15T09:00:00Z',
-    updatedAt: '2024-12-15T09:00:00Z',
-    sla: { target: 72, remaining: 48, breached: false }
-  },
-  {
-    id: '4',
-    orderNumber: 'WO-2024-004',
-    title: 'Elevator Monthly Inspection',
-    description: 'Monthly safety inspection and lubrication for passenger elevator.',
-    type: 'inspection',
-    status: 'scheduled',
-    priority: 'medium',
-    asset: 'Passenger Elevator - Building A',
-    assetId: 'AST-004',
-    location: 'Building A - Elevator Shaft',
-    assignedTo: [],
-    requestedBy: 'Safety Officer',
-    scheduledStart: '2024-12-27T06:00:00Z',
-    scheduledEnd: '2024-12-27T09:00:00Z',
-    estimatedHours: 3,
-    actualHours: 0,
-    progress: 0,
-    downtime: true,
-    downtimeMinutes: 180,
-    parts: [],
-    checklists: [],
-    notes: '',
-    createdAt: '2024-12-01T08:00:00Z',
-    updatedAt: '2024-12-01T08:00:00Z',
-    sla: { target: 168, remaining: 96, breached: false }
-  },
-  {
-    id: '5',
-    orderNumber: 'WO-2024-005',
-    title: 'Production Line Conveyor Belt Replacement',
-    description: 'Replace worn conveyor belt on production line 3. Belt showing signs of cracking.',
-    type: 'corrective',
-    status: 'on_hold',
-    priority: 'high',
-    asset: 'Conveyor System - Line 3',
-    assetId: 'AST-005',
-    location: 'Manufacturing - Line 3',
-    assignedTo: [
-      { id: '5', name: 'David Lee', email: 'david@company.com', role: 'Mechanical Tech' }
-    ],
-    requestedBy: 'Production Manager',
-    scheduledStart: '2024-12-28T06:00:00Z',
-    scheduledEnd: '2024-12-28T14:00:00Z',
-    estimatedHours: 8,
-    actualHours: 0,
-    progress: 0,
-    downtime: true,
-    downtimeMinutes: 480,
-    parts: [
-      { id: '5', name: 'Conveyor Belt 100m', partNumber: 'CB-100M-HD', quantity: 1, cost: 2500.00, available: false }
-    ],
-    checklists: [],
-    notes: 'Waiting for replacement belt delivery. ETA Dec 27.',
-    createdAt: '2024-12-22T11:00:00Z',
-    updatedAt: '2024-12-24T10:00:00Z',
-    sla: { target: 48, remaining: 24, breached: false }
-  }
-]
-
-const mockAssets: Asset[] = [
-  { id: 'AST-001', assetTag: 'HVAC-001', name: 'Main HVAC Unit', type: 'HVAC', manufacturer: 'Carrier', model: 'WeatherMaker 9200', serialNumber: 'WM9200-12345', location: 'Building A', status: 'maintenance', criticality: 'high', lastMaintenance: '2024-12-25T08:00:00Z', nextMaintenance: '2025-03-25T08:00:00Z', maintenanceCount: 24, uptime: 99.2, mtbf: 4320, mttr: 2.5, purchaseDate: '2020-01-15', warrantyExpiry: '2025-01-15', owner: 'Facilities' },
-  { id: 'AST-002', assetTag: 'GEN-001', name: 'Backup Generator', type: 'Generator', manufacturer: 'Caterpillar', model: 'C15', serialNumber: 'CAT-C15-67890', location: 'Building B', status: 'operational', criticality: 'critical', lastMaintenance: '2024-12-24T14:00:00Z', nextMaintenance: '2025-01-24T14:00:00Z', maintenanceCount: 36, uptime: 99.8, mtbf: 8760, mttr: 3.0, purchaseDate: '2018-06-01', warrantyExpiry: '2023-06-01', owner: 'Operations' },
-  { id: 'AST-003', assetTag: 'UPS-001', name: 'Server Room UPS', type: 'UPS', manufacturer: 'APC', model: 'Smart-UPS 3000', serialNumber: 'APC-3000-11111', location: 'Data Center', status: 'operational', criticality: 'critical', lastMaintenance: '2024-09-15T22:00:00Z', nextMaintenance: '2024-12-26T22:00:00Z', maintenanceCount: 12, uptime: 100.0, mtbf: 52560, mttr: 0.5, purchaseDate: '2021-09-01', warrantyExpiry: '2026-09-01', owner: 'IT' },
-  { id: 'AST-004', assetTag: 'ELV-001', name: 'Passenger Elevator', type: 'Elevator', manufacturer: 'Otis', model: 'Gen2', serialNumber: 'OTIS-GEN2-22222', location: 'Building A', status: 'operational', criticality: 'high', lastMaintenance: '2024-11-27T06:00:00Z', nextMaintenance: '2024-12-27T06:00:00Z', maintenanceCount: 60, uptime: 99.5, mtbf: 2160, mttr: 1.0, purchaseDate: '2015-03-20', warrantyExpiry: '2020-03-20', owner: 'Facilities' },
-  { id: 'AST-005', assetTag: 'CONV-003', name: 'Production Line 3 Conveyor', type: 'Conveyor', manufacturer: 'Dorner', model: '3200 Series', serialNumber: 'DOR-3200-33333', location: 'Manufacturing', status: 'degraded', criticality: 'high', lastMaintenance: '2024-10-15T06:00:00Z', nextMaintenance: '2024-12-28T06:00:00Z', maintenanceCount: 48, uptime: 97.8, mtbf: 1440, mttr: 4.0, purchaseDate: '2019-08-10', warrantyExpiry: '2024-08-10', owner: 'Production' }
-]
-
-const mockSchedules: MaintenanceSchedule[] = [
-  { id: '1', name: 'HVAC Quarterly Inspection', description: 'Quarterly preventive maintenance for all HVAC units', type: 'preventive', frequency: 'quarterly', assets: ['AST-001'], lastRun: '2024-09-25', nextRun: '2024-12-25', duration: 480, active: true, assignedTeam: 'HVAC Team', checklist: ['Check filters', 'Inspect coils', 'Test thermostat', 'Check refrigerant'] },
-  { id: '2', name: 'Generator Monthly Test', description: 'Monthly load test for backup generators', type: 'inspection', frequency: 'monthly', assets: ['AST-002'], lastRun: '2024-11-24', nextRun: '2024-12-24', duration: 120, active: true, assignedTeam: 'Electrical Team', checklist: ['Start generator', 'Run under load', 'Check fuel levels', 'Log readings'] },
-  { id: '3', name: 'UPS Battery Check', description: 'Quarterly battery health check and capacity test', type: 'preventive', frequency: 'quarterly', assets: ['AST-003'], lastRun: '2024-09-15', nextRun: '2024-12-15', duration: 60, active: true, assignedTeam: 'IT Team', checklist: ['Check battery voltage', 'Test runtime', 'Inspect connections'] },
-  { id: '4', name: 'Elevator Safety Inspection', description: 'Monthly safety inspection as per regulations', type: 'inspection', frequency: 'monthly', assets: ['AST-004'], lastRun: '2024-11-27', nextRun: '2024-12-27', duration: 180, active: true, assignedTeam: 'Elevator Contractor', checklist: ['Safety brake test', 'Door sensor test', 'Emergency phone test', 'Lubrication'] }
-]
-
-const mockTechnicians: Technician[] = [
-  { id: '1', name: 'John Smith', email: 'john@company.com', phone: '555-0101', role: 'Maintenance Tech', department: 'Facilities', skills: ['HVAC', 'Electrical', 'Plumbing'], certifications: ['EPA 608', 'OSHA 10'], status: 'busy', currentWorkOrder: 'WO-2024-001', completedOrders: 156, avgRating: 4.8 },
-  { id: '2', name: 'Sarah Johnson', email: 'sarah@company.com', phone: '555-0102', role: 'HVAC Specialist', department: 'Facilities', skills: ['HVAC', 'Refrigeration', 'Controls'], certifications: ['EPA 608', 'NATE'], status: 'busy', currentWorkOrder: 'WO-2024-001', completedOrders: 203, avgRating: 4.9 },
-  { id: '3', name: 'Mike Wilson', email: 'mike@company.com', phone: '555-0103', role: 'Electrical Tech', department: 'Electrical', skills: ['Electrical', 'PLC', 'Motors'], certifications: ['Journeyman Electrician', 'OSHA 30'], status: 'available', completedOrders: 189, avgRating: 4.7 },
-  { id: '4', name: 'Emily Brown', email: 'emily@company.com', phone: '555-0104', role: 'IT Tech', department: 'IT', skills: ['Servers', 'Networking', 'UPS'], certifications: ['CompTIA A+', 'Network+'], status: 'available', completedOrders: 98, avgRating: 4.6 },
-  { id: '5', name: 'David Lee', email: 'david@company.com', phone: '555-0105', role: 'Mechanical Tech', department: 'Manufacturing', skills: ['Mechanical', 'Hydraulics', 'Conveyors'], certifications: ['CMRT', 'CRL'], status: 'on_leave', completedOrders: 234, avgRating: 4.8 },
-  { id: '6', name: 'Lisa Garcia', email: 'lisa@company.com', phone: '555-0106', role: 'Supervisor', department: 'Facilities', skills: ['Management', 'HVAC', 'Electrical'], certifications: ['CMRP', 'PMP'], status: 'available', completedOrders: 312, avgRating: 4.9 }
-]
-
-const mockInventory: SparePartInventory[] = [
-  { id: '1', partNumber: 'AF-2424-M', name: 'Air Filter 24x24', category: 'HVAC Filters', manufacturer: '3M', quantity: 48, minQuantity: 20, maxQuantity: 100, unitCost: 25.00, location: 'Warehouse A-1', lastRestocked: '2024-12-15', status: 'in_stock', leadTime: 3, supplier: 'HVAC Supply Co' },
-  { id: '2', partNumber: 'REF-410A-25', name: 'Refrigerant R-410A 25lb', category: 'Refrigerants', manufacturer: 'Honeywell', quantity: 8, minQuantity: 10, maxQuantity: 30, unitCost: 150.00, location: 'Warehouse A-2', lastRestocked: '2024-12-10', status: 'low_stock', leadTime: 5, supplier: 'Refrigerant Depot' },
-  { id: '3', partNumber: 'FP-GEN-100', name: 'Fuel Pump Assembly', category: 'Generator Parts', manufacturer: 'Caterpillar', quantity: 2, minQuantity: 1, maxQuantity: 5, unitCost: 450.00, location: 'Warehouse B-1', lastRestocked: '2024-11-20', status: 'in_stock', leadTime: 14, supplier: 'CAT Parts Direct' },
-  { id: '4', partNumber: 'BAT-UPS-3000', name: 'UPS Battery Pack', category: 'UPS Parts', manufacturer: 'APC', quantity: 12, minQuantity: 8, maxQuantity: 24, unitCost: 200.00, location: 'Warehouse C-1', lastRestocked: '2024-12-01', status: 'in_stock', leadTime: 7, supplier: 'APC Direct' },
-  { id: '5', partNumber: 'CB-100M-HD', name: 'Conveyor Belt 100m HD', category: 'Conveyor Parts', manufacturer: 'Dorner', quantity: 0, minQuantity: 1, maxQuantity: 3, unitCost: 2500.00, location: 'Warehouse D-1', lastRestocked: '2024-10-15', status: 'on_order', leadTime: 21, supplier: 'Industrial Belts Inc' },
-  { id: '6', partNumber: 'BRG-6205-2RS', name: 'Ball Bearing 6205-2RS', category: 'Bearings', manufacturer: 'SKF', quantity: 24, minQuantity: 20, maxQuantity: 50, unitCost: 15.00, location: 'Warehouse A-3', lastRestocked: '2024-12-18', status: 'in_stock', leadTime: 2, supplier: 'Bearing World' },
-  { id: '7', partNumber: 'OIL-10W30-5G', name: 'Motor Oil 10W-30 5gal', category: 'Lubricants', manufacturer: 'Mobil', quantity: 6, minQuantity: 8, maxQuantity: 20, unitCost: 85.00, location: 'Warehouse A-4', lastRestocked: '2024-12-05', status: 'low_stock', leadTime: 3, supplier: 'Lubricant Supply' },
-  { id: '8', partNumber: 'VBT-50MM', name: 'V-Belt 50mm', category: 'Belts', manufacturer: 'Gates', quantity: 15, minQuantity: 10, maxQuantity: 30, unitCost: 35.00, location: 'Warehouse A-5', lastRestocked: '2024-12-12', status: 'in_stock', leadTime: 4, supplier: 'Belt Masters' }
-]
-
-const mockVendors: Vendor[] = [
-  { id: '1', name: 'HVAC Supply Co', contactPerson: 'Robert Taylor', email: 'robert@hvacsupply.com', phone: '555-1001', address: '123 Industrial Blvd', category: 'HVAC Equipment', rating: 4.8, contractStart: '2024-01-01', contractEnd: '2025-12-31', status: 'active', totalOrders: 89, lastOrderDate: '2024-12-20' },
-  { id: '2', name: 'CAT Parts Direct', contactPerson: 'Amanda White', email: 'amanda@catparts.com', phone: '555-1002', address: '456 Equipment Way', category: 'Generator Parts', rating: 4.9, contractStart: '2023-06-01', contractEnd: '2025-05-31', status: 'active', totalOrders: 34, lastOrderDate: '2024-11-20' },
-  { id: '3', name: 'Industrial Belts Inc', contactPerson: 'James Brown', email: 'james@indbelts.com', phone: '555-1003', address: '789 Manufacturing St', category: 'Conveyor Parts', rating: 4.5, contractStart: '2024-03-01', contractEnd: '2025-02-28', status: 'active', totalOrders: 23, lastOrderDate: '2024-12-18' },
-  { id: '4', name: 'Elevator Services Ltd', contactPerson: 'Michelle Chen', email: 'michelle@elevatorsvcs.com', phone: '555-1004', address: '321 Tower Dr', category: 'Elevator Maintenance', rating: 4.7, contractStart: '2024-01-01', contractEnd: '2025-12-31', status: 'active', totalOrders: 12, lastOrderDate: '2024-11-27' }
-]
-
-const mockIncidents: Incident[] = [
-  { id: '1', incidentNumber: 'INC-2024-001', title: 'Generator Failed During Test', description: 'Backup generator failed to start during monthly load test', priority: 'critical', status: 'resolved', affectedAssets: ['AST-002'], reportedBy: 'Operations Manager', reportedAt: '2024-12-24T13:00:00Z', resolvedAt: '2024-12-24T17:45:00Z', rootCause: 'Fuel pump failure', resolution: 'Replaced fuel pump assembly', workOrderId: 'WO-2024-002' },
-  { id: '2', incidentNumber: 'INC-2024-002', title: 'Conveyor Belt Degradation', description: 'Visible cracks on production line 3 conveyor belt', priority: 'high', status: 'investigating', affectedAssets: ['AST-005'], reportedBy: 'Production Manager', reportedAt: '2024-12-22T11:00:00Z', workOrderId: 'WO-2024-005' },
-  { id: '3', incidentNumber: 'INC-2024-003', title: 'HVAC Temperature Fluctuation', description: 'Building A experiencing temperature inconsistencies', priority: 'medium', status: 'new', affectedAssets: ['AST-001'], reportedBy: 'Facilities Manager', reportedAt: '2024-12-25T08:00:00Z' }
-]
+// Data - empty until wired to real APIs
+const mockWorkOrders: WorkOrder[] = []
+const mockAssets: Asset[] = []
+const mockSchedules: MaintenanceSchedule[] = []
+const mockTechnicians: Technician[] = []
+const mockInventory: SparePartInventory[] = []
+const mockVendors: Vendor[] = []
+const mockIncidents: Incident[] = []
 
 const getInventoryStatusColor = (status: SparePartInventory['status']): string => {
   const colors = {
@@ -507,29 +298,11 @@ const formatDateTime = (date: string) => {
   return new Date(date).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
 }
 
-// Mock data for AI-powered competitive upgrade components
-const mockMaintenanceAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Preventive Maintenance', description: 'Scheduled maintenance reduced unplanned downtime by 60%.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Prevention' },
-  { id: '2', type: 'warning' as const, title: 'Overdue Work Order', description: 'HVAC inspection WO-1234 is 3 days overdue.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Scheduling' },
-  { id: '3', type: 'info' as const, title: 'Asset Health', description: 'Overall equipment effectiveness improved to 87%.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Analytics' },
-]
-
-const mockMaintenanceCollaborators = [
-  { id: '1', name: 'Facilities Manager', avatar: '/avatars/facilities.jpg', status: 'online' as const, role: 'Management' },
-  { id: '2', name: 'Lead Technician', avatar: '/avatars/tech.jpg', status: 'online' as const, role: 'Technician' },
-  { id: '3', name: 'Safety Officer', avatar: '/avatars/safety.jpg', status: 'away' as const, role: 'Safety' },
-]
-
-const mockMaintenancePredictions = [
-  { id: '1', title: 'Equipment Failure', prediction: 'Compressor C-204 likely needs service within 2 weeks', confidence: 78, trend: 'down' as const, impact: 'high' as const },
-  { id: '2', title: 'Resource Need', prediction: 'Additional technician needed for Q2 scheduled work', confidence: 85, trend: 'up' as const, impact: 'medium' as const },
-]
-
-const mockMaintenanceActivities = [
-  { id: '1', user: 'Lead Technician', action: 'Completed', target: 'generator monthly service', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Facilities Manager', action: 'Approved', target: 'emergency repair request', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'Safety Officer', action: 'Inspected', target: 'fire suppression system', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
-]
+// Competitive upgrade data - empty until wired to real APIs
+const mockMaintenanceAIInsights: { id: string; type: 'success' | 'warning' | 'info'; title: string; description: string; priority: 'low' | 'high' | 'medium'; timestamp: string; category: string }[] = []
+const mockMaintenanceCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }[] = []
+const mockMaintenancePredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down'; impact: 'high' | 'medium' | 'low' }[] = []
+const mockMaintenanceActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' }[] = []
 
 // Quick actions will be defined inside the component to access state setters
 

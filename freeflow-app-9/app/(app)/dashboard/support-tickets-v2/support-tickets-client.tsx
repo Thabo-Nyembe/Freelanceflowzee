@@ -115,95 +115,36 @@ const defaultStats: SupportStats = {
   satisfactionRate: 0,
 }
 
-// Mock data
-const mockMessages: TicketMessage[] = [
-  {
-    id: '1',
-    ticketId: '1',
-    type: 'public',
-    sender: 'John Customer',
-    senderType: 'customer',
-    content: 'I\'m having trouble logging into my account. It keeps saying invalid password even though I\'m sure it\'s correct.',
-    createdAt: '2024-03-15T10:00:00Z'
-  },
-  {
-    id: '2',
-    ticketId: '1',
-    type: 'public',
-    sender: 'Sarah Agent',
-    senderType: 'agent',
-    content: 'Hi John, I apologize for the inconvenience. Let me help you with that. Can you please try clearing your browser cache and cookies, then attempt to log in again?',
-    createdAt: '2024-03-15T10:15:00Z'
-  },
-  {
-    id: '3',
-    ticketId: '1',
-    type: 'internal',
-    sender: 'Sarah Agent',
-    senderType: 'agent',
-    content: 'Checked the logs - looks like there might be a rate limiting issue. Escalating to engineering.',
-    createdAt: '2024-03-15T10:20:00Z'
-  },
-]
+// Empty arrays - data fetched from Supabase
+const mockMessages: TicketMessage[] = []
 
-const mockMacros: Macro[] = [
-  { id: '1', name: 'Password Reset', description: 'Standard password reset instructions', content: 'To reset your password, please visit https://app.freeflow.io/reset-password and follow the instructions. If you continue to experience issues, please let us know.', category: 'Account', usageCount: 245 },
-  { id: '2', name: 'Billing Question', description: 'Redirect to billing team', content: 'Thank you for reaching out about billing. I\'ve forwarded your question to our billing team. They will respond within 1 business day.', category: 'Billing', usageCount: 189 },
-  { id: '3', name: 'Feature Request Logged', description: 'Acknowledge feature request', content: 'Thank you for your feature suggestion! We\'ve logged this in our product backlog. While we can\'t guarantee implementation, we value your feedback.', category: 'Product', usageCount: 156 },
-  { id: '4', name: 'Bug Acknowledged', description: 'Bug report acknowledgment', content: 'Thank you for reporting this bug. Our engineering team is investigating. We\'ll update you once we have more information.', category: 'Technical', usageCount: 134 },
-  { id: '5', name: 'Satisfaction Follow-up', description: 'Request satisfaction rating', content: 'We hope we\'ve resolved your issue. Could you take a moment to rate your experience? Your feedback helps us improve.', category: 'General', usageCount: 98 },
-]
+const mockMacros: Macro[] = []
 
-const mockSLAs: SLA[] = [
-  { id: '1', name: 'Urgent', firstResponseTime: 15, resolutionTime: 4, priority: 'urgent' },
-  { id: '2', name: 'High', firstResponseTime: 60, resolutionTime: 8, priority: 'high' },
-  { id: '3', name: 'Medium', firstResponseTime: 240, resolutionTime: 24, priority: 'medium' },
-  { id: '4', name: 'Low', firstResponseTime: 480, resolutionTime: 72, priority: 'low' },
-]
+const mockSLAs: SLA[] = []
 
-const mockAgents: AgentMetrics[] = [
-  { id: '1', name: 'Sarah Johnson', avatar: 'sarah', ticketsResolved: 156, avgResponseTime: 12, satisfactionScore: 98, currentLoad: 8 },
-  { id: '2', name: 'Mike Chen', avatar: 'mike', ticketsResolved: 142, avgResponseTime: 15, satisfactionScore: 96, currentLoad: 12 },
-  { id: '3', name: 'Emily Davis', avatar: 'emily', ticketsResolved: 128, avgResponseTime: 18, satisfactionScore: 94, currentLoad: 6 },
-  { id: '4', name: 'Alex Wilson', avatar: 'alex', ticketsResolved: 98, avgResponseTime: 22, satisfactionScore: 92, currentLoad: 10 },
-]
+const mockAgents: AgentMetrics[] = []
 
 const mockCustomer: CustomerProfile = {
-  id: '1',
-  name: 'John Customer',
-  email: 'john@example.com',
-  phone: '+1 (555) 123-4567',
-  company: 'Acme Corp',
-  totalTickets: 12,
-  openTickets: 2,
-  avgSatisfaction: 4.5,
-  lifetimeValue: 12500,
-  tags: ['VIP', 'Enterprise', 'Beta Tester']
+  id: '',
+  name: '',
+  email: '',
+  phone: '',
+  company: '',
+  totalTickets: 0,
+  openTickets: 0,
+  avgSatisfaction: 0,
+  lifetimeValue: 0,
+  tags: []
 }
 
-// Mock data for AI-powered competitive upgrade components
-const mockSupportTicketsAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Fast Resolution', description: 'Average first response time down to 12 minutes!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Performance' },
-  { id: '2', type: 'warning' as const, title: 'SLA At Risk', description: '3 urgent tickets approaching SLA breach in 2 hours.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'SLA' },
-  { id: '3', type: 'info' as const, title: 'CSAT Trending Up', description: 'Customer satisfaction score improved to 4.7/5.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Satisfaction' },
-]
+// Empty arrays for AI-powered competitive upgrade components
+const mockSupportTicketsAIInsights: { id: string; type: 'success' | 'warning' | 'info'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
 
-const mockSupportTicketsCollaborators = [
-  { id: '1', name: 'Support Lead', avatar: '/avatars/support-lead.jpg', status: 'online' as const, role: 'Lead' },
-  { id: '2', name: 'Agent Sarah', avatar: '/avatars/sarah.jpg', status: 'online' as const, role: 'Agent' },
-  { id: '3', name: 'Agent Mike', avatar: '/avatars/mike.jpg', status: 'away' as const, role: 'Agent' },
-]
+const mockSupportTicketsCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }[] = []
 
-const mockSupportTicketsPredictions = [
-  { id: '1', title: 'Volume Forecast', prediction: 'Expect 40% more tickets tomorrow (product launch)', confidence: 89, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Escalation Risk', prediction: '2 tickets likely to escalate based on sentiment analysis', confidence: 76, trend: 'up' as const, impact: 'medium' as const },
-]
+const mockSupportTicketsPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: 'low' | 'medium' | 'high' }[] = []
 
-const mockSupportTicketsActivities = [
-  { id: '1', user: 'Agent Sarah', action: 'Resolved', target: 'billing inquiry #4521', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Support Lead', action: 'Escalated', target: 'critical bug report to engineering', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'warning' as const },
-  { id: '3', user: 'Agent Mike', action: 'Updated', target: 'knowledge base article', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'info' as const },
-]
+const mockSupportTicketsActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'warning' | 'info' }[] = []
 
 // Quick actions will be defined inside the component to access state setters
 
@@ -390,14 +331,8 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
   const [showMyQueueDialog, setShowMyQueueDialog] = useState(false)
   const [showMacrosQuickDialog, setShowMacrosQuickDialog] = useState(false)
 
-  // My Queue data
-  const [myQueueTickets] = useState([
-    { id: '1', subject: 'Login issues', priority: 'high' as TicketPriority, status: 'open', customer: 'John Doe', createdAt: '2024-03-15T10:00:00Z', overdue: false },
-    { id: '2', subject: 'Billing inquiry', priority: 'medium' as TicketPriority, status: 'in-progress', customer: 'Jane Smith', createdAt: '2024-03-14T09:00:00Z', overdue: true },
-    { id: '3', subject: 'Feature request: Dark mode', priority: 'low' as TicketPriority, status: 'open', customer: 'Mike Chen', createdAt: '2024-03-13T14:00:00Z', overdue: false },
-    { id: '4', subject: 'API integration help', priority: 'high' as TicketPriority, status: 'pending', customer: 'Sarah Wilson', createdAt: '2024-03-12T11:00:00Z', overdue: true },
-    { id: '5', subject: 'Performance issue', priority: 'urgent' as TicketPriority, status: 'open', customer: 'Tom Brown', createdAt: '2024-03-15T08:00:00Z', overdue: false },
-  ])
+  // My Queue data - empty array, data fetched from Supabase
+  const [myQueueTickets] = useState<{ id: string; subject: string; priority: TicketPriority; status: string; customer: string; createdAt: string; overdue: boolean }[]>([])
 
   // Quick actions with dialog-based workflows
   const supportTicketsQuickActions = [
