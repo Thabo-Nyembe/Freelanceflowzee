@@ -3,6 +3,17 @@ import { createClient } from '@/lib/supabase/server'
 import { createStorageConnection } from '@/lib/storage/storage-queries'
 import { StorageProvider } from '@/lib/storage/providers'
 
+// Validate returnTo path to prevent open redirect attacks
+function isValidReturnPath(path: string): boolean {
+  // Must start with / and not have protocol or //
+  if (!path.startsWith('/') || path.startsWith('//')) {
+    return false
+  }
+  // Must be a valid relative path under allowed routes
+  const allowedPaths = ['/dashboard', '/settings', '/storage', '/files']
+  return allowedPaths.some(allowed => path.startsWith(allowed))
+}
+
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
@@ -23,7 +34,9 @@ export async function GET(request: Request) {
     // Decode state parameter
     const stateData = JSON.parse(atob(state))
     const provider: StorageProvider = stateData.provider
-    const returnTo = stateData.returnTo || '/dashboard/storage'
+    // Validate returnTo path to prevent open redirect
+    const rawReturnTo = stateData.returnTo || '/dashboard/storage'
+    const returnTo = isValidReturnPath(rawReturnTo) ? rawReturnTo : '/dashboard/storage'
 
     // Get current user
     const supabase = await createClient()

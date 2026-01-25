@@ -3,9 +3,15 @@ import { createFeatureLogger } from '@/lib/logger'
 
 const logger = createFeatureLogger('Stripe')
 
+// Validate Stripe key is configured
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY
+if (!stripeSecretKey) {
+  logger.warn('STRIPE_SECRET_KEY not configured - payment features will be disabled')
+}
+
 // Initialize Stripe with enhanced configuration
-export const stripe = new Stripe(
-  process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder',
+export const stripe = stripeSecretKey ? new Stripe(
+  stripeSecretKey,
   {
     apiVersion: '2024-06-20',
     appInfo: {
@@ -17,7 +23,7 @@ export const stripe = new Stripe(
     maxNetworkRetries: 3,
     timeout: 10000, // 10 seconds
   }
-)
+) : null
 
 // Enhanced payment intent creation with advanced features
 export async function createAdvancedPaymentIntent(params: {

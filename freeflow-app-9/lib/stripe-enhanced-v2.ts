@@ -1,19 +1,32 @@
 import Stripe from 'stripe'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('StripeEnhanced')
 
 // Enhanced Stripe service with Apple Pay, Google Pay, and advanced features
 class StripeEnhancedService {
-  private stripe: Stripe
+  private stripe: Stripe | null = null
   private publishableKey: string
+  private initialized: boolean = false
 
   constructor() {
-    this.stripe = new Stripe(
-      process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder',
-      {
-        apiVersion: '2025-05-28.basil',
+    const secretKey = process.env.STRIPE_SECRET_KEY
+    const pubKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+
+    if (!secretKey || !pubKey) {
+      logger.warn('Stripe keys not configured - payment features will be disabled')
+    } else {
+      this.stripe = new Stripe(secretKey, {
+        apiVersion: '2024-06-20',
         typescript: true,
-      }
-    )
-    this.publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || 'pk_test_placeholder'
+      })
+      this.initialized = true
+    }
+    this.publishableKey = pubKey || ''
+  }
+
+  isInitialized(): boolean {
+    return this.initialized
   }
 
   // Enhanced Payment Intent with Apple Pay/Google Pay support
