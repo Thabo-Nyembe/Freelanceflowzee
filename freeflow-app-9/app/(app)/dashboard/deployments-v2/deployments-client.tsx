@@ -2426,16 +2426,28 @@ export default function DeploymentsClient() {
                   const input = document.getElementById('domain-input') as HTMLInputElement
                   const domain = input?.value?.trim()
                   if (!domain) {
-                    toast.error('Validation Error')
+                    toast.error('Please enter a domain name')
                     return
                   }
                   try {
                     const { data: userData } = await supabase.auth.getUser()
                     if (!userData.user) throw new Error('Not authenticated')
-                    toast.success(`Domain Added: "${input.value}" has been added`)
+
+                    const { error } = await supabase.from('domains').insert({
+                      user_id: userData.user.id,
+                      domain: domain,
+                      status: 'pending',
+                      created_at: new Date().toISOString()
+                    })
+
+                    if (error) throw error
+
+                    toast.success(`Domain "${domain}" has been added`)
                     input.value = ''
+                    fetchDeployments()
                   } catch (error: any) {
-                    toast.error('Failed to add domain')
+                    console.error('Failed to add domain:', error)
+                    toast.error(error.message || 'Failed to add domain')
                   }
                 }}>Add Domain</Button>
               </div>
@@ -2488,19 +2500,47 @@ export default function DeploymentsClient() {
             <DialogFooter><Button variant="outline" onClick={() => setShowWebhookDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-purple-600 to-indigo-600" onClick={async () => {
               const nameInput = document.getElementById('webhook-name-input') as HTMLInputElement
               const urlInput = document.getElementById('webhook-url-input') as HTMLInputElement
+              const secretInput = document.getElementById('webhook-secret-input') as HTMLInputElement
               const name = nameInput?.value?.trim()
               const url = urlInput?.value?.trim()
+              const secret = secretInput?.value?.trim()
               if (!name || !url) {
-                toast.error('Validation Error')
+                toast.error('Name and URL are required')
+                return
+              }
+              // Validate URL format
+              try {
+                new URL(url)
+              } catch {
+                toast.error('Please enter a valid URL')
                 return
               }
               try {
                 const { data: userData } = await supabase.auth.getUser()
                 if (!userData.user) throw new Error('Not authenticated')
-                toast.success(`Webhook Created has been added`)
+
+                // Get selected events
+                const events = ['deployment.created', 'deployment.succeeded', 'deployment.failed', 'deployment.promoted', 'deployment.rolled_back', 'domain.added']
+                  .filter(event => (document.getElementById(`webhook-event-${event}`) as HTMLInputElement)?.checked)
+
+                const { error } = await supabase.from('webhooks').insert({
+                  user_id: userData.user.id,
+                  name,
+                  url,
+                  secret: secret || null,
+                  events: events.length > 0 ? events : ['deployment.created'],
+                  status: 'active',
+                  created_at: new Date().toISOString()
+                })
+
+                if (error) throw error
+
+                toast.success(`Webhook "${name}" has been created`)
                 setShowWebhookDialog(false)
+                fetchDeployments()
               } catch (error: any) {
-                toast.error('Failed to create webhook')
+                console.error('Failed to create webhook:', error)
+                toast.error(error.message || 'Failed to create webhook')
               }
             }}>Add Webhook</Button></DialogFooter>
           </DialogContent>
