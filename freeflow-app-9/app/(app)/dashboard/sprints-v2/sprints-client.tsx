@@ -153,158 +153,14 @@ interface Sprint {
 }
 
 // ============================================================================
-// MOCK DATA - Jira Sprints Level Comprehensive
+// EMPTY DATA ARRAYS - Production ready (no mock data)
 // ============================================================================
 
-const mockTeamMembers: TeamMember[] = [
-  { id: '1', name: 'Sarah Chen', avatar: '/avatars/sarah.jpg', role: 'Senior Developer', capacity_hours: 32, allocated_hours: 28 },
-  { id: '2', name: 'Michael Rodriguez', avatar: '/avatars/michael.jpg', role: 'Tech Lead', capacity_hours: 24, allocated_hours: 20 },
-  { id: '3', name: 'Emily Watson', avatar: '/avatars/emily.jpg', role: 'Designer', capacity_hours: 32, allocated_hours: 30 },
-  { id: '4', name: 'David Kim', avatar: '/avatars/david.jpg', role: 'QA Engineer', capacity_hours: 40, allocated_hours: 35 },
-  { id: '5', name: 'Jessica Brown', avatar: '/avatars/jessica.jpg', role: 'Developer', capacity_hours: 40, allocated_hours: 38 },
-]
-
-const mockTasks: SprintTask[] = [
-  {
-    id: 't1', key: 'PROJ-101', title: 'Implement user authentication flow', description: 'Set up OAuth and JWT authentication', type: 'story', status: 'done', priority: 'high',
-    assignee: mockTeamMembers[0], reporter: mockTeamMembers[1], story_points: 8, estimate_hours: 16, logged_hours: 14, remaining_hours: 0,
-    created_at: '2024-02-01', updated_at: '2024-02-15', labels: ['auth', 'security'], comments: [], subtasks: [],
-  },
-  {
-    id: 't2', key: 'PROJ-102', title: 'Fix login form validation bug', description: 'Email validation not working properly', type: 'bug', status: 'done', priority: 'critical',
-    assignee: mockTeamMembers[4], reporter: mockTeamMembers[3], story_points: 3, estimate_hours: 4, logged_hours: 3, remaining_hours: 0,
-    created_at: '2024-02-05', updated_at: '2024-02-10', labels: ['bug', 'login'], comments: [], subtasks: [],
-  },
-  {
-    id: 't3', key: 'PROJ-103', title: 'Design dashboard components', description: 'Create reusable dashboard UI components', type: 'story', status: 'in_progress', priority: 'high',
-    assignee: mockTeamMembers[2], reporter: mockTeamMembers[1], story_points: 13, estimate_hours: 24, logged_hours: 16, remaining_hours: 8,
-    created_at: '2024-02-08', updated_at: '2024-02-18', labels: ['ui', 'design'], comments: [], subtasks: [], due_date: '2024-02-22',
-  },
-  {
-    id: 't4', key: 'PROJ-104', title: 'Integrate payment gateway', description: 'Stripe payment integration', type: 'story', status: 'blocked', priority: 'critical',
-    assignee: mockTeamMembers[0], reporter: mockTeamMembers[1], story_points: 13, estimate_hours: 32, logged_hours: 8, remaining_hours: 24,
-    created_at: '2024-02-10', updated_at: '2024-02-19', labels: ['payments', 'integration'], comments: [], subtasks: [],
-    blocked_by: 'PROJ-108', blocker_reason: 'Waiting for API credentials from Stripe',
-  },
-  {
-    id: 't5', key: 'PROJ-105', title: 'API rate limiting implementation', description: 'Add rate limiting to all public endpoints', type: 'task', status: 'review', priority: 'medium',
-    assignee: mockTeamMembers[4], reporter: mockTeamMembers[1], story_points: 5, estimate_hours: 8, logged_hours: 7, remaining_hours: 1,
-    created_at: '2024-02-12', updated_at: '2024-02-18', labels: ['api', 'security'], comments: [], subtasks: [],
-  },
-  {
-    id: 't6', key: 'PROJ-106', title: 'Write API documentation', description: 'OpenAPI spec for all endpoints', type: 'task', status: 'in_progress', priority: 'medium',
-    assignee: mockTeamMembers[0], reporter: mockTeamMembers[1], story_points: 5, estimate_hours: 12, logged_hours: 6, remaining_hours: 6,
-    created_at: '2024-02-14', updated_at: '2024-02-19', labels: ['docs', 'api'], comments: [], subtasks: [],
-  },
-  {
-    id: 't7', key: 'PROJ-107', title: 'Performance optimization spike', description: 'Investigate slow dashboard load times', type: 'spike', status: 'todo', priority: 'high',
-    assignee: mockTeamMembers[1], reporter: mockTeamMembers[1], story_points: 3, estimate_hours: 8, logged_hours: 0, remaining_hours: 8,
-    created_at: '2024-02-16', updated_at: '2024-02-16', labels: ['performance', 'investigation'], comments: [], subtasks: [],
-  },
-  {
-    id: 't8', key: 'PROJ-108', title: 'Set up Stripe account', description: 'Admin task to get API keys', type: 'task', status: 'todo', priority: 'high',
-    reporter: mockTeamMembers[1], story_points: 1, estimate_hours: 2, logged_hours: 0, remaining_hours: 2,
-    created_at: '2024-02-18', updated_at: '2024-02-18', labels: ['admin', 'payments'], comments: [], subtasks: [],
-  },
-]
-
-const mockBurndown: BurndownPoint[] = [
-  { day: 1, date: '2024-02-05', ideal: 51, actual: 51, completed_points: 0 },
-  { day: 2, date: '2024-02-06', ideal: 47.7, actual: 48, completed_points: 3 },
-  { day: 3, date: '2024-02-07', ideal: 44.4, actual: 45, completed_points: 6 },
-  { day: 4, date: '2024-02-08', ideal: 41.1, actual: 45, completed_points: 6 },
-  { day: 5, date: '2024-02-09', ideal: 37.8, actual: 37, completed_points: 14 },
-  { day: 6, date: '2024-02-10', ideal: 34.5, actual: 34, completed_points: 17 },
-  { day: 7, date: '2024-02-11', ideal: 31.2, actual: 34, completed_points: 17 },
-  { day: 8, date: '2024-02-12', ideal: 27.9, actual: 29, completed_points: 22 },
-  { day: 9, date: '2024-02-13', ideal: 24.6, actual: 26, completed_points: 25 },
-  { day: 10, date: '2024-02-14', ideal: 21.3, actual: 21, completed_points: 30 },
-  { day: 11, date: '2024-02-15', ideal: 18, actual: 21, completed_points: 30 },
-  { day: 12, date: '2024-02-16', ideal: 14.7, actual: 18, completed_points: 33 },
-  { day: 13, date: '2024-02-17', ideal: 11.4, actual: 18, completed_points: 33 },
-  { day: 14, date: '2024-02-18', ideal: 8.1, actual: 15, completed_points: 36 },
-]
-
-const mockVelocity: VelocityData[] = [
-  { sprint_name: 'Sprint 20', committed: 45, completed: 42, completion_rate: 93 },
-  { sprint_name: 'Sprint 21', committed: 48, completed: 44, completion_rate: 92 },
-  { sprint_name: 'Sprint 22', committed: 50, completed: 38, completion_rate: 76 },
-  { sprint_name: 'Sprint 23', committed: 42, completed: 40, completion_rate: 95 },
-  { sprint_name: 'Sprint 24', committed: 51, completed: 36, completion_rate: 71 },
-]
-
-const mockSprints: Sprint[] = [
-  {
-    id: '1', key: 'SPR-24', name: 'Sprint 24 - Q1 Features', goal: 'Complete core platform features for Q1 release',
-    status: 'active', start_date: '2024-02-05', end_date: '2024-02-18', duration_days: 14, days_remaining: 3,
-    team_id: 't1', team_name: 'Platform Team',
-    scrum_master: mockTeamMembers[1], product_owner: mockTeamMembers[1],
-    team_members: mockTeamMembers,
-    tasks: mockTasks,
-    total_story_points: 51, completed_story_points: 36,
-    total_tasks: 8, completed_tasks: 2, in_progress_tasks: 3, blocked_tasks: 1,
-    velocity: 36, planned_velocity: 45,
-    capacity_hours: 168, committed_hours: 106, burned_hours: 54,
-    burndown: mockBurndown,
-    created_at: '2024-02-01',
-  },
-  {
-    id: '2', key: 'SPR-25', name: 'Sprint 25 - Mobile Focus', goal: 'Mobile app beta features',
-    status: 'planning', start_date: '2024-02-19', end_date: '2024-03-03', duration_days: 14, days_remaining: 14,
-    team_id: 't2', team_name: 'Mobile Team',
-    scrum_master: mockTeamMembers[0], product_owner: mockTeamMembers[1],
-    team_members: [mockTeamMembers[0], mockTeamMembers[4]],
-    tasks: [],
-    total_story_points: 42, completed_story_points: 0,
-    total_tasks: 12, completed_tasks: 0, in_progress_tasks: 0, blocked_tasks: 0,
-    velocity: 0, planned_velocity: 40,
-    capacity_hours: 144, committed_hours: 96, burned_hours: 0,
-    burndown: [],
-    created_at: '2024-02-15',
-  },
-  {
-    id: '3', key: 'SPR-23', name: 'Sprint 23 - Bug Fixes', goal: 'Address critical bugs from Q4',
-    status: 'completed', start_date: '2024-01-22', end_date: '2024-02-04', duration_days: 14, days_remaining: 0,
-    team_id: 't1', team_name: 'Platform Team',
-    scrum_master: mockTeamMembers[1], product_owner: mockTeamMembers[1],
-    team_members: mockTeamMembers,
-    tasks: [],
-    total_story_points: 42, completed_story_points: 40,
-    total_tasks: 15, completed_tasks: 14, in_progress_tasks: 0, blocked_tasks: 0,
-    velocity: 40, planned_velocity: 42,
-    capacity_hours: 168, committed_hours: 120, burned_hours: 115,
-    burndown: [],
-    retrospective: {
-      what_went_well: ['Team collaboration was excellent', 'Good estimation accuracy', 'Clear sprint goal'],
-      what_could_improve: ['More testing time needed', 'Better documentation of decisions'],
-      action_items: ['Schedule design review earlier', 'Add testing buffer to estimates'],
-    },
-    created_at: '2024-01-18',
-  },
-]
-
-const backlogTasks: SprintTask[] = [
-  {
-    id: 'b1', key: 'PROJ-110', title: 'User profile settings page', description: 'Allow users to update their profile', type: 'story', status: 'backlog', priority: 'medium',
-    reporter: mockTeamMembers[1], story_points: 8, estimate_hours: 16, logged_hours: 0, remaining_hours: 16,
-    created_at: '2024-02-01', updated_at: '2024-02-01', labels: ['user', 'settings'], comments: [], subtasks: [],
-  },
-  {
-    id: 'b2', key: 'PROJ-111', title: 'Email notification system', description: 'Transactional email templates', type: 'story', status: 'backlog', priority: 'high',
-    reporter: mockTeamMembers[1], story_points: 13, estimate_hours: 24, logged_hours: 0, remaining_hours: 24,
-    created_at: '2024-02-05', updated_at: '2024-02-05', labels: ['email', 'notifications'], comments: [], subtasks: [],
-  },
-  {
-    id: 'b3', key: 'PROJ-112', title: 'Analytics dashboard', description: 'Usage analytics for admin', type: 'epic', status: 'backlog', priority: 'medium',
-    reporter: mockTeamMembers[1], story_points: 21, estimate_hours: 48, logged_hours: 0, remaining_hours: 48,
-    created_at: '2024-02-08', updated_at: '2024-02-08', labels: ['analytics', 'admin'], comments: [], subtasks: [],
-  },
-  {
-    id: 'b4', key: 'PROJ-113', title: 'Dark mode support', description: 'Theme toggle functionality', type: 'story', status: 'backlog', priority: 'low',
-    reporter: mockTeamMembers[2], story_points: 5, estimate_hours: 8, logged_hours: 0, remaining_hours: 8,
-    created_at: '2024-02-10', updated_at: '2024-02-10', labels: ['ui', 'theme'], comments: [], subtasks: [],
-  },
-]
+// Empty typed arrays for production - data comes from Supabase hooks
+const emptyTeamMembers: TeamMember[] = []
+const emptyBurndown: BurndownPoint[] = []
+const emptyVelocity: VelocityData[] = []
+const emptyBacklogTasks: SprintTask[] = []
 
 // ============================================================================
 // HELPER FUNCTIONS
@@ -484,9 +340,9 @@ export default function SprintsClient() {
         days_remaining: sprint.days_remaining,
         team_id: 't1',
         team_name: sprint.team_name || 'Team',
-        scrum_master: sprint.scrum_master ? { id: '1', name: sprint.scrum_master, avatar: '', role: 'Scrum Master', capacity_hours: 40, allocated_hours: 0 } : mockTeamMembers[1],
-        product_owner: mockTeamMembers[1],
-        team_members: mockTeamMembers,
+        scrum_master: sprint.scrum_master ? { id: '1', name: sprint.scrum_master, avatar: '', role: 'Scrum Master', capacity_hours: 40, allocated_hours: 0 } : { id: '0', name: 'Unassigned', avatar: '', role: 'Scrum Master', capacity_hours: 40, allocated_hours: 0 },
+        product_owner: { id: '0', name: 'Unassigned', avatar: '', role: 'Product Owner', capacity_hours: 40, allocated_hours: 0 },
+        team_members: emptyTeamMembers,
         tasks: dbTasks.filter(t => t.sprint_id === sprint.id).map(task => ({
           id: task.id,
           key: task.task_code,
@@ -496,7 +352,7 @@ export default function SprintsClient() {
           status: (task.status === 'in-progress' ? 'in_progress' : task.status) as TaskStatus,
           priority: task.priority as TaskPriority,
           assignee: task.assignee_name ? { id: '1', name: task.assignee_name, avatar: '', role: 'Developer', capacity_hours: 40, allocated_hours: 0 } : undefined,
-          reporter: mockTeamMembers[1],
+          reporter: { id: '0', name: 'System', avatar: '', role: 'Reporter', capacity_hours: 0, allocated_hours: 0 },
           story_points: task.story_points,
           estimate_hours: task.estimated_hours,
           logged_hours: task.actual_hours,
@@ -519,7 +375,7 @@ export default function SprintsClient() {
         capacity_hours: sprint.capacity,
         committed_hours: sprint.committed,
         burned_hours: sprint.burned,
-        burndown: mockBurndown,
+        burndown: emptyBurndown,
         retrospective: sprint.retrospective ? {
           what_went_well: [sprint.retrospective],
           what_could_improve: [],
@@ -528,7 +384,7 @@ export default function SprintsClient() {
         created_at: sprint.created_at,
       })) as Sprint[]
     }
-    return mockSprints
+    return [] as Sprint[]
   }, [dbSprints, dbTasks])
 
   // Filter sprints
@@ -562,17 +418,17 @@ export default function SprintsClient() {
         totalTasks: dbStats.totalTasks,
         completedTasks: dbStats.completedTasks,
         blockedTasks: sprintsData.reduce((sum, s) => sum + s.blocked_tasks, 0),
-        backlogItems: backlogTasks.length,
+        backlogItems: emptyBacklogTasks.length,
       }
     }
 
-    // Fallback to mock data when no DB data
+    // Fallback when no DB data - return zeros
     const total = sprintsData.length
     const active = sprintsData.filter(s => s.status === 'active').length
     const planning = sprintsData.filter(s => s.status === 'planning').length
     const completed = sprintsData.filter(s => s.status === 'completed').length
-    const avgVelocity = mockVelocity.reduce((sum, v) => sum + v.completed, 0) / mockVelocity.length
-    const completionRate = mockVelocity.reduce((sum, v) => sum + v.completion_rate, 0) / mockVelocity.length
+    const avgVelocity = 0
+    const completionRate = 0
     const totalStoryPoints = sprintsData.reduce((sum, s) => sum + s.total_story_points, 0)
     const completedPoints = sprintsData.reduce((sum, s) => sum + s.completed_story_points, 0)
     const totalTasks = sprintsData.reduce((sum, s) => sum + s.total_tasks, 0)
@@ -582,7 +438,7 @@ export default function SprintsClient() {
     return {
       total, active, planning, completed, avgVelocity, completionRate,
       totalStoryPoints, completedPoints, totalTasks, completedTasks, blockedTasks,
-      backlogItems: backlogTasks.length,
+      backlogItems: emptyBacklogTasks.length,
     }
   }, [dbSprints, dbStats, sprintsData])
 
@@ -814,7 +670,7 @@ export default function SprintsClient() {
   }
 
   // Add backlog task to sprint - real Supabase operation
-  const handleAddToSprint = async (taskData: typeof backlogTasks[0], sprintId: string) => {
+  const handleAddToSprint = async (taskData: SprintTask, sprintId: string) => {
     try {
       await createTask({
         sprint_id: sprintId,
@@ -1564,12 +1420,12 @@ export default function SprintsClient() {
                     <Layers className="w-5 h-5 text-teal-500" />
                     Product Backlog
                   </span>
-                  <Badge variant="outline">{backlogTasks.length} items</Badge>
+                  <Badge variant="outline">{emptyBacklogTasks.length} items</Badge>
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {backlogTasks.map((task, idx) => {
+                  {emptyBacklogTasks.map((task, idx) => {
                     const TypeIcon = getTypeIcon(task.type)
                     return (
                       <div
@@ -1660,14 +1516,16 @@ export default function SprintsClient() {
                         strokeDasharray="2,2"
                       />
                       {/* Actual Line */}
-                      <polyline
-                        fill="none"
-                        stroke="#14b8a6"
-                        strokeWidth="1"
-                        points={mockBurndown.map((point, idx) =>
-                          `${(idx / (mockBurndown.length - 1)) * 100},${(point.actual / activeSprint.total_story_points) * 100}`
-                        ).join(' ')}
-                      />
+                      {activeSprint.burndown.length > 0 && (
+                        <polyline
+                          fill="none"
+                          stroke="#14b8a6"
+                          strokeWidth="1"
+                          points={activeSprint.burndown.map((point, idx) =>
+                            `${(idx / Math.max(1, activeSprint.burndown.length - 1)) * 100},${(point.actual / Math.max(1, activeSprint.total_story_points)) * 100}`
+                          ).join(' ')}
+                        />
+                      )}
                     </svg>
 
                     {/* Legend */}
@@ -1702,7 +1560,12 @@ export default function SprintsClient() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-6">
-                  {mockVelocity.map((velocity, idx) => (
+                  {emptyVelocity.length === 0 ? (
+                    <div className="text-center py-8 text-slate-500">
+                      <p>No velocity data available yet.</p>
+                      <p className="text-sm mt-2">Complete sprints to see velocity history.</p>
+                    </div>
+                  ) : emptyVelocity.map((velocity, idx) => (
                     <div key={idx} className="space-y-2">
                       <div className="flex items-center justify-between">
                         <span className="font-medium text-slate-900 dark:text-white">{velocity.sprint_name}</span>
@@ -2408,7 +2271,7 @@ export default function SprintsClient() {
                             <p className="text-xs text-gray-500">Tasks</p>
                           </div>
                           <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
-                            <p className="text-2xl font-bold text-purple-600">{mockTeamMembers.length}</p>
+                            <p className="text-2xl font-bold text-purple-600">{emptyTeamMembers.length}</p>
                             <p className="text-xs text-gray-500">Team Members</p>
                           </div>
                         </div>

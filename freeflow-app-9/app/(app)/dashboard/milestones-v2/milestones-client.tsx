@@ -176,326 +176,10 @@ interface MilestoneReport {
 }
 
 // ============================================================================
-// MOCK DATA - Monday.com Level Comprehensive
+// EMPTY DATA ARRAYS - Production Ready (Mock data removed)
 // ============================================================================
 
-const mockTeamMembers: TeamMember[] = [
-  { id: '1', name: 'Sarah Chen', avatar: '/avatars/sarah.jpg', role: 'Project Manager', email: 'sarah@company.com', workload: 85, tasks_assigned: 12, tasks_completed: 8 },
-  { id: '2', name: 'Michael Rodriguez', avatar: '/avatars/michael.jpg', role: 'Lead Developer', email: 'michael@company.com', workload: 92, tasks_assigned: 15, tasks_completed: 11 },
-  { id: '3', name: 'Emily Watson', avatar: '/avatars/emily.jpg', role: 'Designer', email: 'emily@company.com', workload: 78, tasks_assigned: 8, tasks_completed: 6 },
-  { id: '4', name: 'David Kim', avatar: '/avatars/david.jpg', role: 'QA Engineer', email: 'david@company.com', workload: 65, tasks_assigned: 10, tasks_completed: 9 },
-  { id: '5', name: 'Jessica Brown', avatar: '/avatars/jessica.jpg', role: 'DevOps', email: 'jessica@company.com', workload: 70, tasks_assigned: 7, tasks_completed: 5 },
-]
-
-const mockMilestones: Milestone[] = [
-  {
-    id: '1',
-    name: 'Platform V2.0 Launch',
-    description: 'Complete redesign and launch of the platform with new features',
-    status: 'in_progress',
-    type: 'launch',
-    priority: 'critical',
-    health: 'at_risk',
-    project_id: 'p1',
-    project_name: 'Platform Modernization',
-    owner: mockTeamMembers[0],
-    team: mockTeamMembers.slice(0, 4),
-    start_date: '2024-01-15',
-    due_date: '2024-03-31',
-    progress: 72,
-    deliverables: [
-      { id: 'd1', name: 'UI Components Library', description: 'Complete component system', status: 'approved', assignee: mockTeamMembers[2], due_date: '2024-02-15', completed_date: '2024-02-12', attachments: 8, comments: 24, priority: 'high' },
-      { id: 'd2', name: 'API Integration', description: 'Backend API connections', status: 'in_progress', assignee: mockTeamMembers[1], due_date: '2024-03-01', attachments: 5, comments: 18, priority: 'critical' },
-      { id: 'd3', name: 'User Authentication', description: 'OAuth and SSO implementation', status: 'review', assignee: mockTeamMembers[1], due_date: '2024-02-28', attachments: 3, comments: 12, priority: 'high' },
-      { id: 'd4', name: 'Performance Optimization', description: 'Load time improvements', status: 'pending', assignee: mockTeamMembers[3], due_date: '2024-03-15', attachments: 2, comments: 6, priority: 'medium' },
-    ],
-    dependencies_in: [
-      { id: 'dep1', source_milestone_id: '3', source_milestone_name: 'Infrastructure Upgrade', target_milestone_id: '1', target_milestone_name: 'Platform V2.0 Launch', type: 'finish_to_start', lag_days: 5, is_blocking: true, status: 'satisfied' }
-    ],
-    dependencies_out: [
-      { id: 'dep2', source_milestone_id: '1', source_milestone_name: 'Platform V2.0 Launch', target_milestone_id: '5', target_milestone_name: 'Marketing Campaign', type: 'finish_to_start', lag_days: 0, is_blocking: true, status: 'pending' }
-    ],
-    status_updates: [
-      { id: 'su1', author: mockTeamMembers[0], content: 'API integration running 2 days behind schedule due to third-party delays. Implementing workaround.', created_at: '2024-02-20T14:30:00Z', health_change: { from: 'on_track', to: 'at_risk' }, progress_change: { from: 68, to: 72 }, attachments: [], reactions: [{ emoji: '👍', count: 5 }, { emoji: '🔥', count: 2 }] },
-      { id: 'su2', author: mockTeamMembers[1], content: 'UI Components library completed ahead of schedule! Great work team.', created_at: '2024-02-12T10:00:00Z', progress_change: { from: 45, to: 55 }, attachments: ['design-review.pdf'], reactions: [{ emoji: '🎉', count: 8 }, { emoji: '⭐', count: 4 }] },
-    ],
-    risks: [
-      { id: 'r1', title: 'Third-party API Delays', description: 'External vendor API integration taking longer than expected', probability: 'high', impact: 'medium', mitigation: 'Developing fallback solution with mock data', status: 'mitigating', owner: mockTeamMembers[1] },
-      { id: 'r2', title: 'Resource Constraints', description: 'Team at capacity with current workload', probability: 'medium', impact: 'high', mitigation: 'Considering contractor support for non-critical tasks', status: 'identified', owner: mockTeamMembers[0] },
-    ],
-    budget: {
-      total: 150000,
-      spent: 98500,
-      forecast: 145000,
-      currency: 'USD',
-      items: [
-        { category: 'Development', planned: 80000, actual: 52000, forecast: 78000, variance: 2000 },
-        { category: 'Design', planned: 30000, actual: 28500, forecast: 30000, variance: 0 },
-        { category: 'Infrastructure', planned: 25000, actual: 12000, forecast: 24000, variance: 1000 },
-        { category: 'Testing', planned: 15000, actual: 6000, forecast: 13000, variance: 2000 },
-      ]
-    },
-    tags: ['critical', 'q1-2024', 'platform', 'launch'],
-    watchers: 24,
-    comments: 156,
-    is_critical_path: true,
-    created_at: '2024-01-10T09:00:00Z',
-    updated_at: '2024-02-20T14:30:00Z',
-  },
-  {
-    id: '2',
-    name: 'Mobile App Beta Release',
-    description: 'Beta release of mobile application for iOS and Android',
-    status: 'in_progress',
-    type: 'release',
-    priority: 'high',
-    health: 'on_track',
-    project_id: 'p2',
-    project_name: 'Mobile Experience',
-    owner: mockTeamMembers[1],
-    team: mockTeamMembers.slice(1, 4),
-    start_date: '2024-02-01',
-    due_date: '2024-04-15',
-    progress: 58,
-    deliverables: [
-      { id: 'd5', name: 'iOS Native App', description: 'SwiftUI implementation', status: 'in_progress', assignee: mockTeamMembers[1], due_date: '2024-03-20', attachments: 12, comments: 32, priority: 'high' },
-      { id: 'd6', name: 'Android Native App', description: 'Kotlin implementation', status: 'in_progress', assignee: mockTeamMembers[4], due_date: '2024-03-25', attachments: 10, comments: 28, priority: 'high' },
-      { id: 'd7', name: 'Push Notifications', description: 'FCM/APNS integration', status: 'pending', assignee: mockTeamMembers[4], due_date: '2024-04-01', attachments: 2, comments: 8, priority: 'medium' },
-    ],
-    dependencies_in: [],
-    dependencies_out: [],
-    status_updates: [
-      { id: 'su3', author: mockTeamMembers[1], content: 'Both iOS and Android apps passing initial QA tests. On track for beta.', created_at: '2024-02-18T11:00:00Z', progress_change: { from: 50, to: 58 }, attachments: [], reactions: [{ emoji: '👍', count: 6 }] },
-    ],
-    risks: [
-      { id: 'r3', title: 'App Store Approval Delays', description: 'Potential delays in App Store review process', probability: 'medium', impact: 'medium', mitigation: 'Early submission with buffer time', status: 'identified', owner: mockTeamMembers[1] },
-    ],
-    budget: {
-      total: 85000,
-      spent: 42000,
-      forecast: 82000,
-      currency: 'USD',
-      items: [
-        { category: 'Development', planned: 60000, actual: 32000, forecast: 58000, variance: 2000 },
-        { category: 'Testing', planned: 15000, actual: 6000, forecast: 14000, variance: 1000 },
-        { category: 'Design', planned: 10000, actual: 4000, forecast: 10000, variance: 0 },
-      ]
-    },
-    tags: ['mobile', 'beta', 'q2-2024'],
-    watchers: 18,
-    comments: 89,
-    is_critical_path: false,
-    created_at: '2024-01-20T09:00:00Z',
-    updated_at: '2024-02-18T11:00:00Z',
-  },
-  {
-    id: '3',
-    name: 'Infrastructure Upgrade',
-    description: 'Cloud infrastructure modernization and scaling improvements',
-    status: 'completed',
-    type: 'project',
-    priority: 'high',
-    health: 'on_track',
-    project_id: 'p3',
-    project_name: 'DevOps Excellence',
-    owner: mockTeamMembers[4],
-    team: [mockTeamMembers[4], mockTeamMembers[1]],
-    start_date: '2024-01-01',
-    due_date: '2024-02-15',
-    completed_date: '2024-02-12',
-    progress: 100,
-    deliverables: [
-      { id: 'd8', name: 'Kubernetes Migration', description: 'Move to K8s cluster', status: 'approved', assignee: mockTeamMembers[4], due_date: '2024-01-30', completed_date: '2024-01-28', attachments: 15, comments: 42, priority: 'critical' },
-      { id: 'd9', name: 'CI/CD Pipeline', description: 'GitHub Actions setup', status: 'approved', assignee: mockTeamMembers[4], due_date: '2024-02-10', completed_date: '2024-02-08', attachments: 8, comments: 21, priority: 'high' },
-      { id: 'd10', name: 'Monitoring Setup', description: 'Prometheus & Grafana', status: 'approved', assignee: mockTeamMembers[1], due_date: '2024-02-15', completed_date: '2024-02-12', attachments: 6, comments: 15, priority: 'medium' },
-    ],
-    dependencies_in: [],
-    dependencies_out: [
-      { id: 'dep1', source_milestone_id: '3', source_milestone_name: 'Infrastructure Upgrade', target_milestone_id: '1', target_milestone_name: 'Platform V2.0 Launch', type: 'finish_to_start', lag_days: 5, is_blocking: true, status: 'satisfied' }
-    ],
-    status_updates: [
-      { id: 'su4', author: mockTeamMembers[4], content: 'All infrastructure components deployed and verified. Milestone complete!', created_at: '2024-02-12T16:00:00Z', progress_change: { from: 95, to: 100 }, attachments: ['final-report.pdf'], reactions: [{ emoji: '🎉', count: 12 }, { emoji: '🚀', count: 8 }] },
-    ],
-    risks: [],
-    budget: {
-      total: 45000,
-      spent: 42500,
-      forecast: 42500,
-      currency: 'USD',
-      items: [
-        { category: 'Cloud Services', planned: 25000, actual: 24000, forecast: 24000, variance: 1000 },
-        { category: 'Tools & Licenses', planned: 10000, actual: 9500, forecast: 9500, variance: 500 },
-        { category: 'Consulting', planned: 10000, actual: 9000, forecast: 9000, variance: 1000 },
-      ]
-    },
-    tags: ['infrastructure', 'devops', 'completed'],
-    watchers: 15,
-    comments: 78,
-    is_critical_path: true,
-    created_at: '2023-12-15T09:00:00Z',
-    updated_at: '2024-02-12T16:00:00Z',
-  },
-  {
-    id: '4',
-    name: 'Security Compliance Audit',
-    description: 'SOC 2 Type II certification preparation and audit',
-    status: 'at_risk',
-    type: 'gate',
-    priority: 'critical',
-    health: 'at_risk',
-    project_id: 'p4',
-    project_name: 'Compliance',
-    owner: mockTeamMembers[3],
-    team: [mockTeamMembers[3], mockTeamMembers[4]],
-    start_date: '2024-02-01',
-    due_date: '2024-04-30',
-    progress: 35,
-    deliverables: [
-      { id: 'd11', name: 'Policy Documentation', description: 'Security policies update', status: 'in_progress', assignee: mockTeamMembers[3], due_date: '2024-03-01', attachments: 20, comments: 35, priority: 'critical' },
-      { id: 'd12', name: 'Vulnerability Assessment', description: 'Penetration testing', status: 'pending', assignee: mockTeamMembers[4], due_date: '2024-03-15', attachments: 3, comments: 8, priority: 'high' },
-      { id: 'd13', name: 'Access Control Review', description: 'RBAC implementation', status: 'pending', assignee: mockTeamMembers[3], due_date: '2024-04-01', attachments: 5, comments: 12, priority: 'high' },
-    ],
-    dependencies_in: [],
-    dependencies_out: [],
-    status_updates: [
-      { id: 'su5', author: mockTeamMembers[3], content: 'Policy documentation taking longer due to new regulatory requirements. May need additional resources.', created_at: '2024-02-19T09:00:00Z', health_change: { from: 'on_track', to: 'at_risk' }, attachments: [], reactions: [{ emoji: '⚠️', count: 3 }] },
-    ],
-    risks: [
-      { id: 'r4', title: 'Regulatory Changes', description: 'New compliance requirements added mid-project', probability: 'high', impact: 'high', mitigation: 'Working with legal team to understand full scope', status: 'mitigating', owner: mockTeamMembers[3] },
-    ],
-    budget: {
-      total: 75000,
-      spent: 28000,
-      forecast: 85000,
-      currency: 'USD',
-      items: [
-        { category: 'Consulting', planned: 40000, actual: 18000, forecast: 50000, variance: -10000 },
-        { category: 'Tools', planned: 20000, actual: 8000, forecast: 20000, variance: 0 },
-        { category: 'Training', planned: 15000, actual: 2000, forecast: 15000, variance: 0 },
-      ]
-    },
-    tags: ['compliance', 'soc2', 'security', 'critical'],
-    watchers: 20,
-    comments: 45,
-    is_critical_path: false,
-    created_at: '2024-01-25T09:00:00Z',
-    updated_at: '2024-02-19T09:00:00Z',
-  },
-  {
-    id: '5',
-    name: 'Marketing Campaign Launch',
-    description: 'Product launch marketing campaign and GTM strategy',
-    status: 'not_started',
-    type: 'launch',
-    priority: 'high',
-    health: 'on_track',
-    project_id: 'p5',
-    project_name: 'Go-To-Market',
-    owner: mockTeamMembers[2],
-    team: [mockTeamMembers[2]],
-    start_date: '2024-04-01',
-    due_date: '2024-05-15',
-    progress: 0,
-    deliverables: [
-      { id: 'd14', name: 'Campaign Assets', description: 'Marketing materials', status: 'pending', assignee: mockTeamMembers[2], due_date: '2024-04-15', attachments: 0, comments: 5, priority: 'high' },
-      { id: 'd15', name: 'Landing Pages', description: 'Campaign landing pages', status: 'pending', assignee: mockTeamMembers[2], due_date: '2024-04-20', attachments: 0, comments: 3, priority: 'high' },
-    ],
-    dependencies_in: [
-      { id: 'dep2', source_milestone_id: '1', source_milestone_name: 'Platform V2.0 Launch', target_milestone_id: '5', target_milestone_name: 'Marketing Campaign', type: 'finish_to_start', lag_days: 0, is_blocking: true, status: 'pending' }
-    ],
-    dependencies_out: [],
-    status_updates: [],
-    risks: [],
-    budget: {
-      total: 50000,
-      spent: 0,
-      forecast: 50000,
-      currency: 'USD',
-      items: [
-        { category: 'Advertising', planned: 30000, actual: 0, forecast: 30000, variance: 0 },
-        { category: 'Content', planned: 15000, actual: 0, forecast: 15000, variance: 0 },
-        { category: 'Events', planned: 5000, actual: 0, forecast: 5000, variance: 0 },
-      ]
-    },
-    tags: ['marketing', 'gtm', 'q2-2024'],
-    watchers: 12,
-    comments: 8,
-    is_critical_path: false,
-    created_at: '2024-02-01T09:00:00Z',
-    updated_at: '2024-02-01T09:00:00Z',
-  },
-  {
-    id: '6',
-    name: 'Data Analytics Platform',
-    description: 'Build comprehensive analytics and reporting system',
-    status: 'in_progress',
-    type: 'project',
-    priority: 'medium',
-    health: 'on_track',
-    project_id: 'p6',
-    project_name: 'Data Intelligence',
-    owner: mockTeamMembers[1],
-    team: [mockTeamMembers[1], mockTeamMembers[3]],
-    start_date: '2024-02-15',
-    due_date: '2024-05-31',
-    progress: 25,
-    deliverables: [
-      { id: 'd16', name: 'Data Pipeline', description: 'ETL infrastructure', status: 'in_progress', assignee: mockTeamMembers[1], due_date: '2024-03-31', attachments: 8, comments: 22, priority: 'high' },
-      { id: 'd17', name: 'Dashboard Builder', description: 'Custom dashboard creation', status: 'pending', assignee: mockTeamMembers[3], due_date: '2024-04-30', attachments: 3, comments: 10, priority: 'medium' },
-      { id: 'd18', name: 'Report Generator', description: 'Automated reporting', status: 'pending', assignee: mockTeamMembers[1], due_date: '2024-05-15', attachments: 2, comments: 6, priority: 'medium' },
-    ],
-    dependencies_in: [],
-    dependencies_out: [],
-    status_updates: [
-      { id: 'su6', author: mockTeamMembers[1], content: 'Data pipeline architecture finalized. Starting implementation phase.', created_at: '2024-02-17T14:00:00Z', progress_change: { from: 15, to: 25 }, attachments: ['architecture.pdf'], reactions: [{ emoji: '👍', count: 4 }] },
-    ],
-    risks: [],
-    budget: {
-      total: 95000,
-      spent: 18000,
-      forecast: 90000,
-      currency: 'USD',
-      items: [
-        { category: 'Development', planned: 55000, actual: 12000, forecast: 52000, variance: 3000 },
-        { category: 'Infrastructure', planned: 25000, actual: 4000, forecast: 24000, variance: 1000 },
-        { category: 'Tools', planned: 15000, actual: 2000, forecast: 14000, variance: 1000 },
-      ]
-    },
-    tags: ['analytics', 'data', 'q2-2024'],
-    watchers: 16,
-    comments: 38,
-    is_critical_path: false,
-    created_at: '2024-02-10T09:00:00Z',
-    updated_at: '2024-02-17T14:00:00Z',
-  },
-]
-
-const mockReports: MilestoneReport[] = [
-  {
-    id: 'rep1',
-    name: 'Weekly Status Report',
-    type: 'status',
-    generated_at: '2024-02-19T08:00:00Z',
-    period: 'Week of Feb 12-18',
-    metrics: [
-      { label: 'On Track', value: '4', change: 0, trend: 'stable' },
-      { label: 'At Risk', value: '2', change: 1, trend: 'up' },
-      { label: 'Completed', value: '1', change: 1, trend: 'up' },
-    ]
-  },
-  {
-    id: 'rep2',
-    name: 'Budget Analysis',
-    type: 'budget',
-    generated_at: '2024-02-18T10:00:00Z',
-    period: 'Q1 2024',
-    metrics: [
-      { label: 'Total Budget', value: '$500K', change: 0, trend: 'stable' },
-      { label: 'Spent', value: '$229K', change: 15, trend: 'up' },
-      { label: 'Forecast', value: '$494K', change: -2, trend: 'down' },
-    ]
-  },
-]
+// Empty typed arrays for production (data comes from Supabase hooks)
 
 // ============================================================================
 // HELPER FUNCTIONS
@@ -589,29 +273,11 @@ const getDaysRemaining = (dueDate: string) => {
 // COMPONENT
 // ============================================================================
 
-// Mock data for AI-powered competitive upgrade components
-const mockMilestonesAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Ahead of Schedule', description: 'Product Launch milestone is 5 days ahead. Team velocity increased!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Progress' },
-  { id: '2', type: 'warning' as const, title: 'At Risk', description: 'Q4 Release has 3 blocked dependencies. Immediate action needed.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Blockers' },
-  { id: '3', type: 'info' as const, title: 'Milestone Pattern', description: 'Sprint milestones average 2 days early completion. Great trend!', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Analytics' },
-]
-
-const mockMilestonesCollaborators = [
-  { id: '1', name: 'Project Manager', avatar: '/avatars/pm.jpg', status: 'online' as const, role: 'PM' },
-  { id: '2', name: 'Tech Lead', avatar: '/avatars/tech.jpg', status: 'online' as const, role: 'Engineering' },
-  { id: '3', name: 'Product Owner', avatar: '/avatars/po.jpg', status: 'away' as const, role: 'Product' },
-]
-
-const mockMilestonesPredictions = [
-  { id: '1', title: 'Delivery Forecast', prediction: 'Current velocity suggests Q1 goals will be met 1 week early', confidence: 87, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Resource Need', prediction: 'Backend milestone may need additional developer by Feb', confidence: 72, trend: 'up' as const, impact: 'medium' as const },
-]
-
-const mockMilestonesActivities = [
-  { id: '1', user: 'Project Manager', action: 'Completed', target: 'Sprint 23 milestone', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Tech Lead', action: 'Updated', target: 'API v2 milestone scope', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'Product Owner', action: 'Created', target: 'Q2 roadmap milestones', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
-]
+// Empty arrays for AI-powered competitive upgrade components (production ready)
+type AIInsight = { id: string; type: 'success' | 'warning' | 'info'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }
+type Collaborator = { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }
+type Prediction = { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: 'low' | 'medium' | 'high' }
+type Activity = { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' | 'error' }
 
 // Quick actions are defined inside the component to access state setters
 
@@ -1261,8 +927,8 @@ export default function MilestonesClient() {
     toast.success('Exporting timeline', { description: 'Timeline chart will be downloaded' })
   }
 
-  // Quick actions for the toolbar
-  const mockMilestonesQuickActions = [
+  // Quick actions for the toolbar (functional, not mock data)
+  const milestonesQuickActions = [
     { id: '1', label: 'New Milestone', icon: Plus, action: () => setShowCreateDialog(true), variant: 'primary' as const },
     { id: '2', label: 'Add Deliverable', icon: Package, action: () => setShowDeliverableDialog(true), variant: 'secondary' as const },
     { id: '3', label: 'Add Dependency', icon: Link2, action: () => setShowDependencyDialog(true), variant: 'secondary' as const },
@@ -1928,7 +1594,7 @@ export default function MilestonesClient() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Report Cards */}
               <div className="lg:col-span-2 space-y-6">
-                {mockReports.map((report) => (
+                {([] as MilestoneReport[]).map((report) => (
                   <Card key={report.id} className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
                     <CardHeader>
                       <CardTitle className="flex items-center justify-between">
@@ -2385,18 +2051,18 @@ export default function MilestonesClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockMilestonesAIInsights}
+              insights={[] as AIInsight[]}
               title="Milestone Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockMilestonesCollaborators}
+              collaborators={[] as Collaborator[]}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockMilestonesPredictions}
+              predictions={[] as Prediction[]}
               title="Delivery Forecasts"
             />
           </div>
@@ -2404,12 +2070,12 @@ export default function MilestonesClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockMilestonesActivities}
+            activities={[] as Activity[]}
             title="Milestone Activity"
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockMilestonesQuickActions}
+            actions={milestonesQuickActions}
             variant="grid"
           />
         </div>

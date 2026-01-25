@@ -361,81 +361,6 @@ interface SearchResult {
   highlights: string[]
 }
 
-// Mock Data
-const mockMembers: TeamMember[] = [
-  { id: '1', name: 'Sarah Johnson', displayName: 'sarah', email: 'sarah@example.com', avatar: '/avatars/sarah.jpg', role: 'owner', jobTitle: 'CEO', department: 'Executive', status: 'online', statusMessage: 'Working on Q1 strategy', statusEmoji: '📊', statusExpiry: null, timezone: 'America/New_York', localTime: '12:30 PM', joinedAt: '2022-01-15', lastActive: '2024-01-15T12:30:00Z', tasksCompleted: 156, projectsCount: 12, performanceScore: 98, isLead: true, phone: '+1 555-0101', slackConnect: true, customFields: [{ label: 'Pronouns', value: 'she/her' }] },
-  { id: '2', name: 'Mike Chen', displayName: 'mike.chen', email: 'mike@example.com', avatar: '/avatars/mike.jpg', role: 'admin', jobTitle: 'CTO', department: 'Engineering', status: 'in-meeting', statusMessage: 'In standup', statusEmoji: '🎯', statusExpiry: '2024-01-15T13:00:00Z', timezone: 'America/Los_Angeles', localTime: '9:30 AM', joinedAt: '2022-02-20', lastActive: '2024-01-15T12:25:00Z', tasksCompleted: 234, projectsCount: 8, performanceScore: 95, isLead: true, phone: '+1 555-0102', slackConnect: true, customFields: [] },
-  { id: '3', name: 'Emily Davis', displayName: 'emily', email: 'emily@example.com', avatar: '/avatars/emily.jpg', role: 'admin', jobTitle: 'Design Lead', department: 'Design', status: 'away', statusMessage: 'Coffee break', statusEmoji: '☕', statusExpiry: '2024-01-15T12:45:00Z', timezone: 'Europe/London', localTime: '5:30 PM', joinedAt: '2022-03-10', lastActive: '2024-01-15T12:00:00Z', tasksCompleted: 189, projectsCount: 15, performanceScore: 92, isLead: true, phone: '+44 20 7946 0958', slackConnect: false, customFields: [{ label: 'Pronouns', value: 'she/her' }] },
-  { id: '4', name: 'Alex Rivera', displayName: 'alex.r', email: 'alex@example.com', avatar: '/avatars/alex.jpg', role: 'member', jobTitle: 'Senior Developer', department: 'Engineering', status: 'dnd', statusMessage: 'Deep work until 3pm', statusEmoji: '🔕', statusExpiry: '2024-01-15T15:00:00Z', timezone: 'America/Chicago', localTime: '11:30 AM', joinedAt: '2022-05-15', lastActive: '2024-01-15T11:45:00Z', tasksCompleted: 312, projectsCount: 6, performanceScore: 94, isLead: false, phone: '+1 555-0104', slackConnect: false, customFields: [] },
-  { id: '5', name: 'Jordan Lee', displayName: 'jordan', email: 'jordan@example.com', avatar: '/avatars/jordan.jpg', role: 'member', jobTitle: 'Product Manager', department: 'Product', status: 'online', statusMessage: '', statusEmoji: '', statusExpiry: null, timezone: 'America/New_York', localTime: '12:30 PM', joinedAt: '2022-06-20', lastActive: '2024-01-15T12:28:00Z', tasksCompleted: 145, projectsCount: 4, performanceScore: 88, isLead: false, phone: '+1 555-0105', slackConnect: true, customFields: [] },
-  { id: '6', name: 'Chris Taylor', displayName: 'chris.t', email: 'chris@example.com', avatar: '/avatars/chris.jpg', role: 'member', jobTitle: 'Marketing Manager', department: 'Marketing', status: 'offline', statusMessage: '', statusEmoji: '', statusExpiry: null, timezone: 'Europe/Paris', localTime: '6:30 PM', joinedAt: '2022-08-01', lastActive: '2024-01-14T18:00:00Z', tasksCompleted: 98, projectsCount: 3, performanceScore: 85, isLead: false, phone: '+33 1 42 68 53 00', slackConnect: false, customFields: [] },
-  { id: '7', name: 'Sam Wilson', displayName: 'sam.w', email: 'sam@partner.com', avatar: '/avatars/sam.jpg', role: 'guest', jobTitle: 'Contractor', department: 'Engineering', status: 'online', statusMessage: 'Available for questions', statusEmoji: '💬', statusExpiry: null, timezone: 'Asia/Tokyo', localTime: '2:30 AM', joinedAt: '2024-01-01', lastActive: '2024-01-15T12:20:00Z', tasksCompleted: 23, projectsCount: 1, performanceScore: 90, isLead: false, phone: '+81 3-1234-5678', slackConnect: true, customFields: [{ label: 'Company', value: 'TechPartners Inc' }] }
-]
-
-const mockChannels: Channel[] = [
-  { id: '1', name: 'general', type: 'public', description: 'Company-wide announcements and work-based matters', topic: 'Welcome to FreeFlow! 🎉', memberCount: 45, unreadCount: 3, mentionCount: 1, isPinned: true, isMuted: false, isArchived: false, isStarred: true, lastMessage: 'Welcome to the new quarter!', lastMessageAt: '2024-01-15T12:00:00Z', createdBy: 'Sarah Johnson', createdAt: '2022-01-15', retentionDays: null, canvasCount: 2, bookmarkCount: 5, notificationLevel: 'all', externalConnections: [] },
-  { id: '2', name: 'engineering', type: 'public', description: 'Engineering team discussions and technical updates', topic: 'Code reviews needed for Q1 sprint', memberCount: 18, unreadCount: 12, mentionCount: 3, isPinned: true, isMuted: false, isArchived: false, isStarred: false, lastMessage: 'PR review needed for feature branch', lastMessageAt: '2024-01-15T12:25:00Z', createdBy: 'Mike Chen', createdAt: '2022-01-20', retentionDays: 365, canvasCount: 8, bookmarkCount: 12, notificationLevel: 'mentions', externalConnections: [] },
-  { id: '3', name: 'design', type: 'public', description: 'Design team collaboration and creative discussions', topic: 'New brand guidelines live! 🎨', memberCount: 8, unreadCount: 5, mentionCount: 0, isPinned: false, isMuted: false, isArchived: false, isStarred: true, lastMessage: 'New mockups ready for review', lastMessageAt: '2024-01-15T11:30:00Z', createdBy: 'Emily Davis', createdAt: '2022-02-01', retentionDays: null, canvasCount: 15, bookmarkCount: 8, notificationLevel: 'all', externalConnections: [] },
-  { id: '4', name: 'product', type: 'public', description: 'Product discussions and roadmap planning', topic: 'Q2 planning in progress', memberCount: 12, unreadCount: 0, mentionCount: 0, isPinned: false, isMuted: false, isArchived: false, isStarred: false, lastMessage: 'Q2 roadmap draft shared', lastMessageAt: '2024-01-15T10:00:00Z', createdBy: 'Jordan Lee', createdAt: '2022-03-01', retentionDays: null, canvasCount: 4, bookmarkCount: 3, notificationLevel: 'all', externalConnections: [] },
-  { id: '5', name: 'leadership', type: 'private', description: 'Leadership team only - confidential discussions', topic: 'Weekly sync Tuesdays 10am', memberCount: 5, unreadCount: 2, mentionCount: 2, isPinned: true, isMuted: false, isArchived: false, isStarred: false, lastMessage: 'Budget review meeting tomorrow', lastMessageAt: '2024-01-15T09:00:00Z', createdBy: 'Sarah Johnson', createdAt: '2022-01-15', retentionDays: 90, canvasCount: 3, bookmarkCount: 6, notificationLevel: 'all', externalConnections: [] },
-  { id: '6', name: 'random', type: 'public', description: 'Non-work banter and water cooler chat', topic: 'Keep it fun! 🎮', memberCount: 42, unreadCount: 8, mentionCount: 0, isPinned: false, isMuted: true, isArchived: false, isStarred: false, lastMessage: 'Anyone tried the new coffee machine?', lastMessageAt: '2024-01-15T12:15:00Z', createdBy: 'Chris Taylor', createdAt: '2022-01-16', retentionDays: 30, canvasCount: 0, bookmarkCount: 2, notificationLevel: 'nothing', externalConnections: [] },
-  { id: '7', name: 'ext-techpartners', type: 'shared', description: 'Slack Connect with TechPartners Inc', topic: 'Q1 collaboration project', memberCount: 8, unreadCount: 1, mentionCount: 0, isPinned: false, isMuted: false, isArchived: false, isStarred: false, lastMessage: 'API docs updated', lastMessageAt: '2024-01-15T11:00:00Z', createdBy: 'Mike Chen', createdAt: '2024-01-01', retentionDays: null, canvasCount: 1, bookmarkCount: 4, notificationLevel: 'all', externalConnections: ['TechPartners Inc'] }
-]
-
-const mockMessages: Message[] = [
-  { id: '1', content: 'Hey team! Just pushed the new feature to staging. Can someone review? :eyes:', type: 'text', senderId: '4', senderName: 'Alex Rivera', senderAvatar: '/avatars/alex.jpg', channelId: '2', timestamp: '2024-01-15T12:25:00Z', editedAt: null, reactions: [{ emoji: '👍', count: 3, users: ['1', '2', '5'], isCustom: false }, { emoji: '🎉', count: 2, users: ['3', '6'], isCustom: false }], replies: [{ id: 'r1', content: 'On it!', senderId: '2', senderName: 'Mike Chen', senderAvatar: '/avatars/mike.jpg', timestamp: '2024-01-15T12:26:00Z', reactions: [] }], replyCount: 4, isPinned: false, isBookmarked: false, isScheduled: false, scheduledFor: null, attachments: [], mentions: [], links: [], codeSnippet: null, poll: null },
-  { id: '2', content: 'Will check in 10 minutes. Just finishing up my current task.', type: 'text', senderId: '2', senderName: 'Mike Chen', senderAvatar: '/avatars/mike.jpg', channelId: '2', timestamp: '2024-01-15T12:26:00Z', editedAt: null, reactions: [], replies: [], replyCount: 0, isPinned: false, isBookmarked: false, isScheduled: false, scheduledFor: null, attachments: [], mentions: [], links: [], codeSnippet: null, poll: null },
-  { id: '3', content: 'New design mockups for the dashboard refresh', type: 'file', senderId: '3', senderName: 'Emily Davis', senderAvatar: '/avatars/emily.jpg', channelId: '3', timestamp: '2024-01-15T11:30:00Z', editedAt: null, reactions: [{ emoji: '❤️', count: 5, users: ['1', '2', '4', '5', '6'], isCustom: false }, { emoji: '🔥', count: 3, users: ['1', '2', '7'], isCustom: false }], replies: [], replyCount: 8, isPinned: true, isBookmarked: true, isScheduled: false, scheduledFor: null, attachments: [{ id: '1', name: 'dashboard-v2.fig', type: 'figma', size: 2500000, url: '/files/dashboard.fig', thumbnailUrl: '/thumbs/dashboard.png', downloadCount: 12 }], mentions: ['@design-team'], links: [], codeSnippet: null, poll: null },
-  { id: '4', content: ':mega: Reminder: All-hands meeting at 3pm EST today!', type: 'system', senderId: '1', senderName: 'Sarah Johnson', senderAvatar: '/avatars/sarah.jpg', channelId: '1', timestamp: '2024-01-15T12:00:00Z', editedAt: null, reactions: [{ emoji: '✅', count: 12, users: [], isCustom: false }], replies: [], replyCount: 2, isPinned: true, isBookmarked: false, isScheduled: false, scheduledFor: null, attachments: [], mentions: ['@channel'], links: [], codeSnippet: null, poll: null },
-  { id: '5', content: 'Here\'s the updated API endpoint', type: 'code', senderId: '4', senderName: 'Alex Rivera', senderAvatar: '/avatars/alex.jpg', channelId: '2', timestamp: '2024-01-15T11:00:00Z', editedAt: '2024-01-15T11:05:00Z', reactions: [{ emoji: '👀', count: 2, users: ['2', '7'], isCustom: false }], replies: [], replyCount: 3, isPinned: false, isBookmarked: true, isScheduled: false, scheduledFor: null, attachments: [], mentions: [], links: [], codeSnippet: { language: 'typescript', code: 'export async function getUser(id: string) {\n  return await db.users.findUnique({ where: { id } })\n}', filename: 'user-api.ts' }, poll: null },
-  { id: '6', content: 'Quick poll: When should we schedule the team lunch?', type: 'poll', senderId: '5', senderName: 'Jordan Lee', senderAvatar: '/avatars/jordan.jpg', channelId: '1', timestamp: '2024-01-15T10:00:00Z', editedAt: null, reactions: [], replies: [], replyCount: 5, isPinned: false, isBookmarked: false, isScheduled: false, scheduledFor: null, attachments: [], mentions: [], links: [], codeSnippet: null, poll: { question: 'When should we schedule the team lunch?', options: [{ text: 'Friday 12pm', votes: 8, voters: ['1', '2', '3', '4', '5', '6', '7', '1'] }, { text: 'Friday 1pm', votes: 4, voters: ['2', '3', '5', '6'] }, { text: 'Next Monday 12pm', votes: 2, voters: ['4', '7'] }], isAnonymous: false, expiresAt: '2024-01-16T12:00:00Z', allowMultiple: false } }
-]
-
-const mockActivities: Activity[] = [
-  { id: '1', type: 'message', userId: '4', userName: 'Alex Rivera', userAvatar: '/avatars/alex.jpg', content: 'Posted in #engineering', timestamp: '2024-01-15T12:25:00Z', channelName: 'engineering', channelId: '2', metadata: {} },
-  { id: '2', type: 'mention', userId: '2', userName: 'Mike Chen', userAvatar: '/avatars/mike.jpg', content: 'Mentioned you in a thread', timestamp: '2024-01-15T12:20:00Z', channelName: 'engineering', channelId: '2', metadata: { messageId: '1' } },
-  { id: '3', type: 'huddle', userId: '3', userName: 'Emily Davis', userAvatar: '/avatars/emily.jpg', content: 'Started a huddle', timestamp: '2024-01-15T12:15:00Z', channelName: 'design', channelId: '3', metadata: { huddleId: 'h1' } },
-  { id: '4', type: 'workflow', userId: '1', userName: 'Sarah Johnson', userAvatar: '/avatars/sarah.jpg', content: 'New hire onboarding triggered', timestamp: '2024-01-15T11:00:00Z', channelName: 'general', channelId: '1', metadata: { workflowId: 'w1' } },
-  { id: '5', type: 'file', userId: '3', userName: 'Emily Davis', userAvatar: '/avatars/emily.jpg', content: 'Shared dashboard-v2.fig', timestamp: '2024-01-15T11:30:00Z', channelName: 'design', channelId: '3', metadata: { fileId: 'f1' } }
-]
-
-const mockHuddles: Huddle[] = [
-  { id: 'h1', channelId: '3', channelName: 'design', status: 'active', startedAt: '2024-01-15T12:15:00Z', duration: 15, participants: [{ userId: '3', name: 'Emily Davis', avatar: '/avatars/emily.jpg', isSpeaking: true, isMuted: false, hasVideo: false }, { userId: '5', name: 'Jordan Lee', avatar: '/avatars/jordan.jpg', isSpeaking: false, isMuted: true, hasVideo: false }], isRecording: false, hasScreenShare: true },
-  { id: 'h2', channelId: '2', channelName: 'engineering', status: 'scheduled', startedAt: '2024-01-15T14:00:00Z', duration: 0, participants: [], isRecording: false, hasScreenShare: false }
-]
-
-const mockApps: SlackApp[] = [
-  { id: 'a1', name: 'GitHub', icon: '🐙', category: 'developer', description: 'Get updates from GitHub repos directly in Slack', developer: 'GitHub, Inc.', isInstalled: true, isEnabled: true, permissions: ['read_channels', 'write_messages'], webhookCount: 5, lastActivity: '2024-01-15T12:00:00Z', rating: 4.8, installCount: 150000 },
-  { id: 'a2', name: 'Google Calendar', icon: '📅', category: 'productivity', description: 'Sync your calendar and get meeting reminders', developer: 'Google LLC', isInstalled: true, isEnabled: true, permissions: ['read_channels', 'read_users'], webhookCount: 2, lastActivity: '2024-01-15T11:00:00Z', rating: 4.6, installCount: 200000 },
-  { id: 'a3', name: 'Jira Cloud', icon: '📋', category: 'productivity', description: 'Create and manage Jira issues from Slack', developer: 'Atlassian', isInstalled: true, isEnabled: true, permissions: ['read_channels', 'write_messages', 'read_users'], webhookCount: 8, lastActivity: '2024-01-15T12:20:00Z', rating: 4.5, installCount: 180000 },
-  { id: 'a4', name: 'Figma', icon: '🎨', category: 'productivity', description: 'Share and preview Figma designs in channels', developer: 'Figma, Inc.', isInstalled: true, isEnabled: true, permissions: ['read_channels', 'write_messages'], webhookCount: 3, lastActivity: '2024-01-15T11:30:00Z', rating: 4.7, installCount: 120000 },
-  { id: 'a5', name: 'Salesforce', icon: '☁️', category: 'sales', description: 'Connect Salesforce to collaborate on deals', developer: 'Salesforce', isInstalled: false, isEnabled: false, permissions: [], webhookCount: 0, lastActivity: '', rating: 4.4, installCount: 95000 },
-  { id: 'a6', name: 'Zendesk', icon: '🎫', category: 'support', description: 'Manage support tickets from Slack', developer: 'Zendesk', isInstalled: true, isEnabled: false, permissions: ['read_channels'], webhookCount: 1, lastActivity: '2024-01-10T09:00:00Z', rating: 4.3, installCount: 85000 }
-]
-
-const mockWorkflows: SlackWorkflow[] = [
-  { id: 'w1', name: 'New Hire Onboarding', description: 'Welcome new team members and share resources', trigger: 'new_member', triggerChannel: '1', steps: [{ id: 's1', type: 'send_message', config: { message: 'Welcome to the team!' }, order: 1 }, { id: 's2', type: 'add_reaction', config: { emoji: '👋' }, order: 2 }], isEnabled: true, createdBy: 'Sarah Johnson', createdAt: '2023-06-01', runCount: 45, lastRun: '2024-01-10', errorCount: 0 },
-  { id: 'w2', name: 'PR Review Reminder', description: 'Remind about pending PR reviews daily', trigger: 'scheduled', triggerChannel: '2', steps: [{ id: 's1', type: 'webhook', config: { url: '/api/github/pending-prs' }, order: 1 }, { id: 's2', type: 'send_message', config: { template: 'pr_reminder' }, order: 2 }], isEnabled: true, createdBy: 'Mike Chen', createdAt: '2023-08-15', runCount: 120, lastRun: '2024-01-15', errorCount: 2 },
-  { id: 'w3', name: 'Bug Report Triage', description: 'Auto-categorize and assign bug reports', trigger: 'emoji_reaction', triggerChannel: null, steps: [{ id: 's1', type: 'collect_info', config: { fields: ['severity', 'component'] }, order: 1 }, { id: 's2', type: 'create_channel', config: { prefix: 'bug-' }, order: 2 }], isEnabled: false, createdBy: 'Alex Rivera', createdAt: '2023-11-20', runCount: 23, lastRun: '2024-01-05', errorCount: 5 }
-]
-
-const mockReminders: Reminder[] = [
-  { id: 'r1', text: 'Review Q1 budget proposal', createdAt: '2024-01-14T10:00:00Z', remindAt: '2024-01-15T14:00:00Z', status: 'pending', channelId: '5', messageId: null, isRecurring: false, recurringPattern: null },
-  { id: 'r2', text: 'Submit weekly report', createdAt: '2024-01-08T09:00:00Z', remindAt: '2024-01-15T17:00:00Z', status: 'pending', channelId: null, messageId: null, isRecurring: true, recurringPattern: 'Every Friday at 5pm' },
-  { id: 'r3', text: 'Follow up on API documentation', createdAt: '2024-01-12T11:00:00Z', remindAt: '2024-01-15T10:00:00Z', status: 'completed', channelId: '2', messageId: 'm5', isRecurring: false, recurringPattern: null }
-]
-
-const mockSavedItems: SavedItem[] = [
-  { id: 's1', type: 'message', title: 'API endpoint update', preview: 'Here\'s the updated API endpoint...', savedAt: '2024-01-15T11:05:00Z', channelName: 'engineering', sourceUrl: '/channels/2/messages/5' },
-  { id: 's2', type: 'file', title: 'dashboard-v2.fig', preview: 'Design mockups for dashboard refresh', savedAt: '2024-01-15T11:35:00Z', channelName: 'design', sourceUrl: '/files/f1' },
-  { id: 's3', type: 'canvas', title: 'Q1 OKRs', preview: 'Company objectives and key results...', savedAt: '2024-01-10T09:00:00Z', channelName: 'leadership', sourceUrl: '/canvas/c1' }
-]
-
-const mockUserGroups: UserGroup[] = [
-  { id: 'ug1', handle: 'design-team', name: 'Design Team', description: 'All design team members', memberCount: 8, members: ['3'], createdBy: 'Emily Davis', isDefault: false },
-  { id: 'ug2', handle: 'engineering', name: 'Engineering', description: 'Engineering department', memberCount: 18, members: ['2', '4', '7'], createdBy: 'Mike Chen', isDefault: false },
-  { id: 'ug3', handle: 'leadership', name: 'Leadership', description: 'Company leadership', memberCount: 5, members: ['1', '2', '3'], createdBy: 'Sarah Johnson', isDefault: true }
-]
 
 // Database Types
 interface DbTeamMember {
@@ -663,36 +588,36 @@ export default function TeamHubClient() {
 
   // Enhanced real stats from API
   const enhancedTeamStats = useMemo(() => ({
-    totalMembers: apiTeamStatsData?.data?.totalMembers || apiTeamMembers.length || mockMembers.length,
-    activeMembers: apiTeamStatsData?.data?.activeMembers || apiTeamMembers.filter(m => m.status === 'online').length || mockMembers.filter(m => m.status === 'online').length,
-    onlineNow: apiTeamMembers.filter(m => m.status === 'online').length || mockMembers.filter(m => m.status === 'online').length,
-    admins: apiTeamMembers.filter(m => m.role === 'admin' || m.role === 'owner').length || mockMembers.filter(m => m.role === 'admin' || m.role === 'owner').length,
-    totalChannels: apiChannels.length || mockChannels.length,
+    totalMembers: apiTeamStatsData?.data?.totalMembers || apiTeamMembers.length,
+    activeMembers: apiTeamStatsData?.data?.activeMembers || apiTeamMembers.filter(m => m.status === 'online').length,
+    onlineNow: apiTeamMembers.filter(m => m.status === 'online').length,
+    admins: apiTeamMembers.filter(m => m.role === 'admin' || m.role === 'owner').length,
+    totalChannels: apiChannels.length,
     unreadMessages: messagingStatsData?.data?.unreadCount || 0,
     pendingInvitations: invitationsData?.data?.length || 0,
-    totalHuddles: apiHuddles.length || mockHuddles.length
+    totalHuddles: apiHuddles.length
   }), [apiTeamStatsData, apiTeamMembers, apiChannels, apiHuddles, messagingStatsData, invitationsData])
 
-  // Use API data with fallback to mock data
-  const effectiveMembers = apiTeamMembers.length > 0 ? apiTeamMembers : mockMembers
-  const effectiveChannels = apiChannels.length > 0 ? apiChannels : mockChannels
-  const effectiveActivities = apiActivities.length > 0 ? apiActivities : mockActivities
-  const effectiveHuddles = apiHuddles.length > 0 ? apiHuddles : mockHuddles
-  const effectiveApps = apiApps.length > 0 ? apiApps : mockApps
-  const effectiveWorkflows = apiWorkflows.length > 0 ? apiWorkflows : mockWorkflows
-  const effectiveReminders = apiReminders.length > 0 ? apiReminders : mockReminders
+  // Use API data directly (production ready - no mock data)
+  const effectiveMembers = apiTeamMembers
+  const effectiveChannels = apiChannels
+  const effectiveActivities = apiActivities
+  const effectiveHuddles = apiHuddles
+  const effectiveApps = apiApps
+  const effectiveWorkflows = apiWorkflows
+  const effectiveReminders = apiReminders
 
   // UI State - synced from backend data via useEffect
-  const [members, setMembers] = useState<TeamMember[]>(mockMembers)
-  const [channels, setChannels] = useState<Channel[]>(mockChannels)
-  const [messages, setMessages] = useState<Message[]>(mockMessages)
-  const [activities, setActivities] = useState<Activity[]>(mockActivities)
-  const [huddles, setHuddles] = useState<Huddle[]>(mockHuddles)
-  const [apps, setApps] = useState<SlackApp[]>(mockApps)
-  const [workflows, setWorkflows] = useState<SlackWorkflow[]>(mockWorkflows)
-  const [reminders, setReminders] = useState<Reminder[]>(mockReminders)
-  const [savedItems, setSavedItems] = useState<SavedItem[]>(mockSavedItems)
-  const [userGroups, setUserGroups] = useState<UserGroup[]>(mockUserGroups)
+  const [members, setMembers] = useState<TeamMember[]>([] as TeamMember[])
+  const [channels, setChannels] = useState<Channel[]>([] as Channel[])
+  const [messages, setMessages] = useState<Message[]>([] as Message[])
+  const [activities, setActivities] = useState<Activity[]>([] as Activity[])
+  const [huddles, setHuddles] = useState<Huddle[]>([] as Huddle[])
+  const [apps, setApps] = useState<SlackApp[]>([] as SlackApp[])
+  const [workflows, setWorkflows] = useState<SlackWorkflow[]>([] as SlackWorkflow[])
+  const [reminders, setReminders] = useState<Reminder[]>([] as Reminder[])
+  const [savedItems, setSavedItems] = useState<SavedItem[]>([] as SavedItem[])
+  const [userGroups, setUserGroups] = useState<UserGroup[]>([] as UserGroup[])
 
   // Sync members from backend
   useEffect(() => {
@@ -1164,7 +1089,7 @@ export default function TeamHubClient() {
     }
   }
 
-  // Combined stats from mock + db
+  // Combined stats from API + db
   const combinedMemberCount = members.length + dbMembers.length
   const dbOnlineCount = dbMembers.filter(m => m.status === 'online').length
 

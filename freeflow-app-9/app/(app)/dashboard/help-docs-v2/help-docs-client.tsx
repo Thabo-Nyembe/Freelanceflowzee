@@ -224,141 +224,17 @@ interface ChatbotSession {
   wasHelpful?: boolean
 }
 
-// Mock data
-const mockCategories: Category[] = [
-  {
-    id: 'cat1', name: 'Getting Started', description: 'Learn the basics and set up your account', icon: '🚀', color: 'blue',
-    articleCount: 24, sections: [
-      { id: 's1', categoryId: 'cat1', name: 'Quick Start Guide', description: 'Get up and running in minutes', articleCount: 8, order: 1, isVisible: true },
-      { id: 's2', categoryId: 'cat1', name: 'Account Setup', description: 'Configure your account settings', articleCount: 6, order: 2, isVisible: true },
-      { id: 's3', categoryId: 'cat1', name: 'First Steps', description: 'Your first actions in the platform', articleCount: 10, order: 3, isVisible: true }
-    ], order: 1, isVisible: true
-  },
-  {
-    id: 'cat2', name: 'Billing & Payments', description: 'Manage subscriptions, invoices, and payments', icon: '💳', color: 'green',
-    articleCount: 18, sections: [
-      { id: 's4', categoryId: 'cat2', name: 'Subscription Plans', description: 'Compare and choose plans', articleCount: 5, order: 1, isVisible: true },
-      { id: 's5', categoryId: 'cat2', name: 'Payment Methods', description: 'Add and manage payment methods', articleCount: 7, order: 2, isVisible: true },
-      { id: 's6', categoryId: 'cat2', name: 'Invoices', description: 'View and download invoices', articleCount: 6, order: 3, isVisible: true }
-    ], order: 2, isVisible: true
-  },
-  {
-    id: 'cat3', name: 'Troubleshooting', description: 'Solve common problems and errors', icon: '🔧', color: 'orange',
-    articleCount: 32, sections: [
-      { id: 's7', categoryId: 'cat3', name: 'Common Issues', description: 'Solutions to frequent problems', articleCount: 15, order: 1, isVisible: true },
-      { id: 's8', categoryId: 'cat3', name: 'Error Messages', description: 'Understanding error codes', articleCount: 12, order: 2, isVisible: true },
-      { id: 's9', categoryId: 'cat3', name: 'Performance', description: 'Speed and optimization tips', articleCount: 5, order: 3, isVisible: true }
-    ], order: 3, isVisible: true
-  },
-  {
-    id: 'cat4', name: 'API & Developers', description: 'Technical documentation and API reference', icon: '👨‍💻', color: 'purple',
-    articleCount: 45, sections: [
-      { id: 's10', categoryId: 'cat4', name: 'API Reference', description: 'Complete API documentation', articleCount: 20, order: 1, isVisible: true },
-      { id: 's11', categoryId: 'cat4', name: 'SDKs & Libraries', description: 'Official client libraries', articleCount: 15, order: 2, isVisible: true },
-      { id: 's12', categoryId: 'cat4', name: 'Webhooks', description: 'Event notifications setup', articleCount: 10, order: 3, isVisible: true }
-    ], order: 4, isVisible: true
-  },
-  {
-    id: 'cat5', name: 'Best Practices', description: 'Tips and recommendations for success', icon: '⭐', color: 'amber',
-    articleCount: 22, sections: [
-      { id: 's13', categoryId: 'cat5', name: 'Security', description: 'Keep your account secure', articleCount: 8, order: 1, isVisible: true },
-      { id: 's14', categoryId: 'cat5', name: 'Workflows', description: 'Optimize your processes', articleCount: 14, order: 2, isVisible: true }
-    ], order: 5, isVisible: true
-  },
-  {
-    id: 'cat6', name: 'Video Tutorials', description: 'Learn visually with step-by-step videos', icon: '🎬', color: 'red',
-    articleCount: 35, sections: [
-      { id: 's15', categoryId: 'cat6', name: 'Beginner Series', description: 'Start from scratch', articleCount: 15, order: 1, isVisible: true },
-      { id: 's16', categoryId: 'cat6', name: 'Advanced Topics', description: 'Deep dive tutorials', articleCount: 20, order: 2, isVisible: true }
-    ], order: 6, isVisible: true
-  }
-]
+// Empty typed arrays for production - data comes from Supabase
+const categories = [] as Category[]
+const articles = [] as Article[]
+const tickets = [] as SupportTicket[]
+const communityPosts = [] as CommunityPost[]
 
-const mockArticles: Article[] = [
-  {
-    id: 'art1', title: 'How to create your first project', excerpt: 'Learn how to set up and configure your first project in just a few simple steps.',
-    content: 'Full article content here...', category: 'Getting Started', section: 'Quick Start Guide', status: 'published', contentType: 'guide',
-    author: { id: 'u1', name: 'Sarah Chen', avatar: '', role: 'Content Lead' }, createdAt: '2024-01-10T10:00:00Z', updatedAt: '2024-01-15T14:30:00Z', publishedAt: '2024-01-10T10:00:00Z',
-    views: 12500, helpfulVotes: 450, notHelpfulVotes: 12, comments: 28, tags: ['getting-started', 'projects', 'setup'],
-    isFeatured: true, isPromoted: true, isPinned: false, relatedArticles: ['art2', 'art3'], language: 'en', translations: ['es', 'fr', 'de'], readTime: 5, version: 3,
-    seoTitle: 'Create Your First Project - Complete Guide', seoDescription: 'Step-by-step guide to creating your first project'
-  },
-  {
-    id: 'art2', title: 'Understanding your billing dashboard', excerpt: 'A comprehensive guide to managing your subscription, viewing invoices, and updating payment methods.',
-    content: 'Full article content here...', category: 'Billing & Payments', section: 'Subscription Plans', status: 'published', contentType: 'article',
-    author: { id: 'u2', name: 'Mike Johnson', avatar: '', role: 'Support Lead' }, createdAt: '2024-01-08T09:00:00Z', updatedAt: '2024-01-14T11:00:00Z', publishedAt: '2024-01-08T09:00:00Z',
-    views: 8900, helpfulVotes: 320, notHelpfulVotes: 8, comments: 15, tags: ['billing', 'payments', 'subscription'],
-    isFeatured: false, isPromoted: false, isPinned: false, relatedArticles: ['art1'], language: 'en', translations: ['es'], readTime: 8, version: 2
-  },
-  {
-    id: 'art3', title: 'Fixing "Connection Timeout" errors', excerpt: 'Step-by-step guide to diagnose and resolve connection timeout issues.',
-    content: 'Full article content here...', category: 'Troubleshooting', section: 'Error Messages', status: 'published', contentType: 'article',
-    author: { id: 'u3', name: 'Emma Davis', avatar: '', role: 'Technical Writer' }, createdAt: '2024-01-12T15:00:00Z', updatedAt: '2024-01-15T09:00:00Z', publishedAt: '2024-01-12T15:00:00Z',
-    views: 15600, helpfulVotes: 580, notHelpfulVotes: 25, comments: 42, tags: ['errors', 'connection', 'troubleshooting'],
-    isFeatured: true, isPromoted: false, isPinned: true, relatedArticles: ['art4'], language: 'en', translations: ['es', 'fr'], readTime: 6, version: 4
-  },
-  {
-    id: 'art4', title: 'REST API Authentication Guide', excerpt: 'Learn how to authenticate your API requests using OAuth 2.0 and API keys.',
-    content: 'Full article content here...', category: 'API & Developers', section: 'API Reference', status: 'published', contentType: 'tutorial',
-    author: { id: 'u4', name: 'Alex Kim', avatar: '', role: 'Developer Advocate' }, createdAt: '2024-01-05T10:00:00Z', updatedAt: '2024-01-13T16:00:00Z', publishedAt: '2024-01-05T10:00:00Z',
-    views: 22000, helpfulVotes: 890, notHelpfulVotes: 15, comments: 65, tags: ['api', 'authentication', 'oauth', 'security'],
-    isFeatured: true, isPromoted: true, isPinned: false, relatedArticles: ['art5'], language: 'en', translations: ['es', 'fr', 'de', 'ja'], readTime: 12, version: 5
-  },
-  {
-    id: 'art5', title: 'Security best practices for your account', excerpt: 'Essential security measures to protect your account and data.',
-    content: 'Full article content here...', category: 'Best Practices', section: 'Security', status: 'published', contentType: 'guide',
-    author: { id: 'u1', name: 'Sarah Chen', avatar: '', role: 'Content Lead' }, createdAt: '2024-01-01T08:00:00Z', updatedAt: '2024-01-10T12:00:00Z', publishedAt: '2024-01-01T08:00:00Z',
-    views: 9800, helpfulVotes: 410, notHelpfulVotes: 5, comments: 18, tags: ['security', 'best-practices', '2fa', 'passwords'],
-    isFeatured: false, isPromoted: false, isPinned: false, relatedArticles: ['art4'], language: 'en', translations: ['es'], readTime: 7, version: 2
-  },
-  {
-    id: 'art6', title: 'Getting Started with Webhooks', excerpt: 'Complete guide to setting up and managing webhooks for real-time notifications.',
-    content: 'Full article content here...', category: 'API & Developers', section: 'Webhooks', status: 'draft', contentType: 'tutorial',
-    author: { id: 'u4', name: 'Alex Kim', avatar: '', role: 'Developer Advocate' }, createdAt: '2024-01-16T10:00:00Z', updatedAt: '2024-01-16T14:00:00Z',
-    views: 0, helpfulVotes: 0, notHelpfulVotes: 0, comments: 0, tags: ['webhooks', 'api', 'events'],
-    isFeatured: false, isPromoted: false, isPinned: false, relatedArticles: ['art4'], language: 'en', translations: [], readTime: 10, version: 1
-  }
-]
-
-const mockTickets: SupportTicket[] = [
-  {
-    id: 'TKT-1001', subject: 'Unable to access billing dashboard', description: 'I cannot access my billing information',
-    status: 'open', priority: 'high', category: 'Billing', requester: { name: 'John Smith', email: 'john@example.com', avatar: '' },
-    assignee: { name: 'Mike Johnson', avatar: '' }, createdAt: '2024-01-15T10:00:00Z', updatedAt: '2024-01-15T14:00:00Z',
-    firstResponseAt: '2024-01-15T10:30:00Z', tags: ['billing', 'access'], messages: [
-      { id: 'm1', content: 'I cannot access my billing dashboard. It shows a 403 error.', author: { name: 'John Smith', avatar: '', isAgent: false }, createdAt: '2024-01-15T10:00:00Z', isInternal: false, attachments: [] },
-      { id: 'm2', content: 'Thanks for reaching out. Let me check your account permissions.', author: { name: 'Mike Johnson', avatar: '', isAgent: true }, createdAt: '2024-01-15T10:30:00Z', isInternal: false, attachments: [] }
-    ]
-  },
-  {
-    id: 'TKT-1002', subject: 'API rate limit exceeded', description: 'Getting rate limit errors on production',
-    status: 'pending', priority: 'urgent', category: 'API', requester: { name: 'Jane Doe', email: 'jane@example.com', avatar: '' },
-    assignee: { name: 'Alex Kim', avatar: '' }, createdAt: '2024-01-14T15:00:00Z', updatedAt: '2024-01-15T09:00:00Z',
-    firstResponseAt: '2024-01-14T15:15:00Z', tags: ['api', 'rate-limit'], messages: []
-  },
-  {
-    id: 'TKT-1003', subject: 'Feature request: Dark mode', description: 'Would love dark mode support',
-    status: 'solved', priority: 'low', category: 'Feature Request', requester: { name: 'Bob Wilson', email: 'bob@example.com', avatar: '' },
-    createdAt: '2024-01-10T08:00:00Z', updatedAt: '2024-01-12T16:00:00Z', solvedAt: '2024-01-12T16:00:00Z',
-    satisfaction: 'good', tags: ['feature-request', 'ui'], messages: []
-  }
-]
-
-const mockCommunityPosts: CommunityPost[] = [
-  { id: 'cp1', title: 'How do I integrate with Slack?', content: 'Looking for guidance on Slack integration...', author: { name: 'John Doe', avatar: '', badge: 'Power User' }, createdAt: '2024-01-15T10:00:00Z', replies: 5, votes: 12, views: 245, isAnswered: true, isSolved: true, isPinned: false, category: 'Integrations', tags: ['slack', 'integration'] },
-  { id: 'cp2', title: 'Best practices for team collaboration', content: 'What are your recommendations for team workflows?', author: { name: 'Jane Smith', avatar: '', badge: 'Contributor' }, createdAt: '2024-01-14T15:00:00Z', replies: 8, votes: 24, views: 412, isAnswered: true, isSolved: false, isPinned: true, category: 'Best Practices', tags: ['team', 'collaboration'] },
-  { id: 'cp3', title: 'Feature request: Dark mode', content: 'Would love to see dark mode support...', author: { name: 'Bob Wilson', avatar: '' }, createdAt: '2024-01-13T09:00:00Z', replies: 15, votes: 89, views: 890, isAnswered: false, isSolved: false, isPinned: false, category: 'Feature Requests', tags: ['dark-mode', 'ui'] },
-  { id: 'cp4', title: 'Tips for optimizing API performance', content: 'Sharing my experience with API optimization...', author: { name: 'Alex Kim', avatar: '', badge: 'Expert' }, createdAt: '2024-01-12T11:00:00Z', replies: 12, votes: 45, views: 678, isAnswered: false, isSolved: false, isPinned: true, category: 'Tips & Tricks', tags: ['api', 'performance'] }
-]
-
-const mockStats: HelpCenterStats = {
-  totalArticles: 176, publishedArticles: 165, draftArticles: 11, totalViews: 245000, avgSatisfaction: 94.5,
-  searchQueries: 12500, ticketsDeflected: 8900, viewsTrend: 12.5, satisfactionTrend: 2.3,
-  topSearches: [
-    { query: 'api authentication', count: 450 }, { query: 'billing', count: 380 },
-    { query: 'connection timeout', count: 320 }, { query: 'webhook setup', count: 290 },
-    { query: 'password reset', count: 245 }
-  ]
+// Stats computed from real data
+const emptyStats: HelpCenterStats = {
+  totalArticles: 0, publishedArticles: 0, draftArticles: 0, totalViews: 0, avgSatisfaction: 0,
+  searchQueries: 0, ticketsDeflected: 0, viewsTrend: 0, satisfactionTrend: 0,
+  topSearches: []
 }
 
 const getStatusColor = (status: ArticleStatus): string => {
@@ -492,20 +368,25 @@ export default function HelpDocsClient() {
     )
   }
 
-  const stats = useMemo(() => ({
-    totalArticles: mockArticles.length,
-    totalCategories: mockCategories.length,
-    totalViews: mockArticles.reduce((sum, a) => sum + a.views, 0),
-    avgHelpfulness: mockArticles.filter(a => a.status === 'published').reduce((sum, a) => sum + calculateHelpfulness(a.helpfulVotes, a.notHelpfulVotes), 0) / mockArticles.filter(a => a.status === 'published').length,
-    openTickets: mockTickets.filter(t => t.status === 'open' || t.status === 'new').length,
-    pendingTickets: mockTickets.filter(t => t.status === 'pending').length
-  }), [])
+  const stats = useMemo(() => {
+    const publishedArticles = articles.filter(a => a.status === 'published')
+    return {
+      totalArticles: articles.length,
+      totalCategories: categories.length,
+      totalViews: articles.reduce((sum, a) => sum + a.views, 0),
+      avgHelpfulness: publishedArticles.length > 0
+        ? publishedArticles.reduce((sum, a) => sum + calculateHelpfulness(a.helpfulVotes, a.notHelpfulVotes), 0) / publishedArticles.length
+        : 0,
+      openTickets: tickets.filter(t => t.status === 'open' || t.status === 'new').length,
+      pendingTickets: tickets.filter(t => t.status === 'pending').length
+    }
+  }, [])
 
-  const featuredArticles = mockArticles.filter(a => a.isFeatured && a.status === 'published')
-  const popularArticles = [...mockArticles].filter(a => a.status === 'published').sort((a, b) => b.views - a.views).slice(0, 5)
+  const featuredArticles = articles.filter(a => a.isFeatured && a.status === 'published')
+  const popularArticles = [...articles].filter(a => a.status === 'published').sort((a, b) => b.views - a.views).slice(0, 5)
 
   const filteredArticles = useMemo(() => {
-    return mockArticles.filter(article => {
+    return articles.filter(article => {
       if (articleFilter !== 'all' && article.status !== articleFilter) return false
       if (searchQuery) {
         const query = searchQuery.toLowerCase()
@@ -518,7 +399,7 @@ export default function HelpDocsClient() {
   }, [articleFilter, searchQuery])
 
   const filteredTickets = useMemo(() => {
-    return mockTickets.filter(ticket => {
+    return tickets.filter(ticket => {
       if (ticketFilter !== 'all' && ticket.status !== ticketFilter) return false
       return true
     })
@@ -861,10 +742,10 @@ export default function HelpDocsClient() {
                 </Button>
               )}
             </div>
-            {mockStats.topSearches.length > 0 && (
+            {emptyStats.topSearches.length > 0 && (
               <div className="flex items-center gap-2 mt-3 text-sm text-sky-100">
                 <span>Popular:</span>
-                {mockStats.topSearches.slice(0, 4).map(s => (
+                {emptyStats.topSearches.slice(0, 4).map(s => (
                   <button key={s.query} className="hover:text-white underline" onClick={() => setSearchQuery(s.query)}>
                     {s.query}
                   </button>
@@ -881,7 +762,7 @@ export default function HelpDocsClient() {
                   <FileText className="h-4 w-4 text-white" />
                 </div>
               </div>
-              <div className="text-2xl font-bold">{mockStats.totalArticles}</div>
+              <div className="text-2xl font-bold">{emptyStats.totalArticles}</div>
               <div className="text-xs text-sky-200">Articles</div>
             </div>
             <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
@@ -890,7 +771,7 @@ export default function HelpDocsClient() {
                   <CheckCircle className="h-4 w-4 text-white" />
                 </div>
               </div>
-              <div className="text-2xl font-bold">{mockStats.publishedArticles}</div>
+              <div className="text-2xl font-bold">{emptyStats.publishedArticles}</div>
               <div className="text-xs text-sky-200">Published</div>
             </div>
             <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
@@ -899,7 +780,7 @@ export default function HelpDocsClient() {
                   <Eye className="h-4 w-4 text-white" />
                 </div>
               </div>
-              <div className="text-2xl font-bold">{formatNumber(mockStats.totalViews)}</div>
+              <div className="text-2xl font-bold">{formatNumber(emptyStats.totalViews)}</div>
               <div className="text-xs text-sky-200">Total Views</div>
             </div>
             <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
@@ -908,7 +789,7 @@ export default function HelpDocsClient() {
                   <ThumbsUp className="h-4 w-4 text-white" />
                 </div>
               </div>
-              <div className="text-2xl font-bold">{mockStats.avgSatisfaction}%</div>
+              <div className="text-2xl font-bold">{emptyStats.avgSatisfaction}%</div>
               <div className="text-xs text-sky-200">Satisfaction</div>
             </div>
             <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
@@ -917,7 +798,7 @@ export default function HelpDocsClient() {
                   <Search className="h-4 w-4 text-white" />
                 </div>
               </div>
-              <div className="text-2xl font-bold">{formatNumber(mockStats.searchQueries)}</div>
+              <div className="text-2xl font-bold">{formatNumber(emptyStats.searchQueries)}</div>
               <div className="text-xs text-sky-200">Searches</div>
             </div>
             <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
@@ -926,7 +807,7 @@ export default function HelpDocsClient() {
                   <Zap className="h-4 w-4 text-white" />
                 </div>
               </div>
-              <div className="text-2xl font-bold">{formatNumber(mockStats.ticketsDeflected)}</div>
+              <div className="text-2xl font-bold">{formatNumber(emptyStats.ticketsDeflected)}</div>
               <div className="text-xs text-sky-200">Deflected</div>
             </div>
             <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
@@ -944,7 +825,7 @@ export default function HelpDocsClient() {
                   <TrendingUp className="h-4 w-4 text-white" />
                 </div>
               </div>
-              <div className="text-2xl font-bold">+{mockStats.viewsTrend}%</div>
+              <div className="text-2xl font-bold">+{emptyStats.viewsTrend}%</div>
               <div className="text-xs text-sky-200">Growth</div>
             </div>
           </div>
@@ -989,7 +870,7 @@ export default function HelpDocsClient() {
             <div>
               <h2 className="text-xl font-semibold mb-4">Browse by Category</h2>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                {mockCategories.map(category => (
+                {categories.map(category => (
                   <Card
                     key={category.id}
                     className="p-6 text-center hover:shadow-lg transition-shadow cursor-pointer border-t-4"
@@ -1139,15 +1020,15 @@ export default function HelpDocsClient() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mt-6">
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{mockCategories.length}</div>
+                  <div className="text-2xl font-bold">{categories.length}</div>
                   <div className="text-sm text-blue-100">Categories</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{mockCategories.reduce((acc, c) => acc + c.sections.length, 0)}</div>
+                  <div className="text-2xl font-bold">{categories.reduce((acc, c) => acc + c.sections.length, 0)}</div>
                   <div className="text-sm text-blue-100">Sections</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{mockCategories.reduce((acc, c) => acc + c.articleCount, 0)}</div>
+                  <div className="text-2xl font-bold">{categories.reduce((acc, c) => acc + c.articleCount, 0)}</div>
                   <div className="text-sm text-blue-100">Total Articles</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
@@ -1185,7 +1066,7 @@ export default function HelpDocsClient() {
                   <h3 className="font-semibold mb-4">Categories</h3>
                   <ScrollArea className="h-[600px]">
                     <div className="space-y-1">
-                      {mockCategories.map(category => (
+                      {categories.map(category => (
                         <div key={category.id}>
                           <div
                             className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors ${
@@ -1229,7 +1110,7 @@ export default function HelpDocsClient() {
                       <div key={section.id} className="mb-6">
                         <h3 className="font-semibold mb-3 text-gray-900 dark:text-white">{section.name}</h3>
                         <div className="space-y-2">
-                          {mockArticles.filter(a => a.section === section.name && a.status === 'published').map(article => (
+                          {articles.filter(a => a.section === section.name && a.status === 'published').map(article => (
                             <div
                               key={article.id}
                               className="p-4 border dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer"
@@ -1308,23 +1189,23 @@ export default function HelpDocsClient() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6 mt-6">
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{dbArticles.length || mockArticles.length}</div>
+                  <div className="text-2xl font-bold">{dbArticles.length || articles.length}</div>
                   <div className="text-sm text-emerald-100">Total</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{mockArticles.filter(a => a.status === 'published').length}</div>
+                  <div className="text-2xl font-bold">{articles.filter(a => a.status === 'published').length}</div>
                   <div className="text-sm text-emerald-100">Published</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{mockArticles.filter(a => a.status === 'draft').length}</div>
+                  <div className="text-2xl font-bold">{articles.filter(a => a.status === 'draft').length}</div>
                   <div className="text-sm text-emerald-100">Drafts</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{mockArticles.filter(a => a.status === 'review').length}</div>
+                  <div className="text-2xl font-bold">{articles.filter(a => a.status === 'review').length}</div>
                   <div className="text-sm text-emerald-100">In Review</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{formatNumber(mockArticles.reduce((sum, a) => sum + a.views, 0))}</div>
+                  <div className="text-2xl font-bold">{formatNumber(articles.reduce((sum, a) => sum + a.views, 0))}</div>
                   <div className="text-sm text-emerald-100">Total Views</div>
                 </div>
               </div>
@@ -1456,23 +1337,23 @@ export default function HelpDocsClient() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6 mt-6">
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{mockTickets.length}</div>
+                  <div className="text-2xl font-bold">{tickets.length}</div>
                   <div className="text-sm text-orange-100">Total</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{mockTickets.filter(t => t.status === 'new').length}</div>
+                  <div className="text-2xl font-bold">{tickets.filter(t => t.status === 'new').length}</div>
                   <div className="text-sm text-orange-100">New</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{mockTickets.filter(t => t.status === 'open').length}</div>
+                  <div className="text-2xl font-bold">{tickets.filter(t => t.status === 'open').length}</div>
                   <div className="text-sm text-orange-100">Open</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{mockTickets.filter(t => t.status === 'pending').length}</div>
+                  <div className="text-2xl font-bold">{tickets.filter(t => t.status === 'pending').length}</div>
                   <div className="text-sm text-orange-100">Pending</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{mockTickets.filter(t => t.status === 'solved').length}</div>
+                  <div className="text-2xl font-bold">{tickets.filter(t => t.status === 'solved').length}</div>
                   <div className="text-sm text-orange-100">Solved</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
@@ -1534,19 +1415,19 @@ export default function HelpDocsClient() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mb-4">
               <Card className="p-4">
-                <div className="text-2xl font-bold text-blue-600">{mockTickets.filter(t => t.status === 'new').length}</div>
+                <div className="text-2xl font-bold text-blue-600">{tickets.filter(t => t.status === 'new').length}</div>
                 <div className="text-sm text-gray-500">New</div>
               </Card>
               <Card className="p-4">
-                <div className="text-2xl font-bold text-yellow-600">{mockTickets.filter(t => t.status === 'open').length}</div>
+                <div className="text-2xl font-bold text-yellow-600">{tickets.filter(t => t.status === 'open').length}</div>
                 <div className="text-sm text-gray-500">Open</div>
               </Card>
               <Card className="p-4">
-                <div className="text-2xl font-bold text-orange-600">{mockTickets.filter(t => t.status === 'pending').length}</div>
+                <div className="text-2xl font-bold text-orange-600">{tickets.filter(t => t.status === 'pending').length}</div>
                 <div className="text-sm text-gray-500">Pending</div>
               </Card>
               <Card className="p-4">
-                <div className="text-2xl font-bold text-green-600">{mockTickets.filter(t => t.status === 'solved').length}</div>
+                <div className="text-2xl font-bold text-green-600">{tickets.filter(t => t.status === 'solved').length}</div>
                 <div className="text-sm text-gray-500">Solved</div>
               </Card>
             </div>
@@ -1616,15 +1497,15 @@ export default function HelpDocsClient() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6 mt-6">
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{mockCommunityPosts.length}</div>
+                  <div className="text-2xl font-bold">{communityPosts.length}</div>
                   <div className="text-sm text-purple-100">Posts</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{mockCommunityPosts.filter(p => p.isSolved).length}</div>
+                  <div className="text-2xl font-bold">{communityPosts.filter(p => p.isSolved).length}</div>
                   <div className="text-sm text-purple-100">Solved</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{mockCommunityPosts.reduce((sum, p) => sum + p.replies, 0)}</div>
+                  <div className="text-2xl font-bold">{communityPosts.reduce((sum, p) => sum + p.replies, 0)}</div>
                   <div className="text-sm text-purple-100">Replies</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
@@ -1674,7 +1555,7 @@ export default function HelpDocsClient() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6">
               <div className="col-span-2 space-y-4">
-                {mockCommunityPosts.map(post => (
+                {communityPosts.map(post => (
                   <Card key={post.id} className={`p-4 ${post.isPinned ? 'border-amber-300 dark:border-amber-700' : ''}`}>
                     <div className="flex items-start gap-4">
                       <Avatar><AvatarFallback>{post.author.name.split(' ').map(n => n[0]).join('')}</AvatarFallback></Avatar>
@@ -1739,7 +1620,7 @@ export default function HelpDocsClient() {
                 </div>
                 <div className="flex gap-3">
                   <Button variant="outline" className="border-white/30 text-white hover:bg-white/20" onClick={() => {
-                    downloadAsJson(mockStats, 'help-center-analytics.json')
+                    downloadAsJson(emptyStats, 'help-center-analytics.json')
                   }}>
                     <Download className="w-4 h-4 mr-2" />Export
                   </Button>
@@ -1756,21 +1637,21 @@ export default function HelpDocsClient() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6 mt-6">
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{formatNumber(mockStats.totalViews)}</div>
+                  <div className="text-2xl font-bold">{formatNumber(emptyStats.totalViews)}</div>
                   <div className="text-sm text-cyan-100">Total Views</div>
-                  <div className="text-xs text-green-300 mt-1">↑ {mockStats.viewsTrend}%</div>
+                  <div className="text-xs text-green-300 mt-1">↑ {emptyStats.viewsTrend}%</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{mockStats.avgSatisfaction}%</div>
+                  <div className="text-2xl font-bold">{emptyStats.avgSatisfaction}%</div>
                   <div className="text-sm text-cyan-100">Satisfaction</div>
-                  <div className="text-xs text-green-300 mt-1">↑ {mockStats.satisfactionTrend}%</div>
+                  <div className="text-xs text-green-300 mt-1">↑ {emptyStats.satisfactionTrend}%</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{formatNumber(mockStats.searchQueries)}</div>
+                  <div className="text-2xl font-bold">{formatNumber(emptyStats.searchQueries)}</div>
                   <div className="text-sm text-cyan-100">Searches</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{formatNumber(mockStats.ticketsDeflected)}</div>
+                  <div className="text-2xl font-bold">{formatNumber(emptyStats.ticketsDeflected)}</div>
                   <div className="text-sm text-cyan-100">Deflected</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
@@ -1809,21 +1690,21 @@ export default function HelpDocsClient() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               <Card className="p-6">
-                <div className="text-3xl font-bold text-blue-600">{formatNumber(mockStats.totalViews)}</div>
+                <div className="text-3xl font-bold text-blue-600">{formatNumber(emptyStats.totalViews)}</div>
                 <div className="text-sm text-gray-500">Total Views</div>
-                <div className="text-xs text-green-600 mt-1">↑ {mockStats.viewsTrend}% vs last month</div>
+                <div className="text-xs text-green-600 mt-1">↑ {emptyStats.viewsTrend}% vs last month</div>
               </Card>
               <Card className="p-6">
-                <div className="text-3xl font-bold text-green-600">{mockStats.avgSatisfaction}%</div>
+                <div className="text-3xl font-bold text-green-600">{emptyStats.avgSatisfaction}%</div>
                 <div className="text-sm text-gray-500">Satisfaction</div>
-                <div className="text-xs text-green-600 mt-1">↑ {mockStats.satisfactionTrend}% vs last month</div>
+                <div className="text-xs text-green-600 mt-1">↑ {emptyStats.satisfactionTrend}% vs last month</div>
               </Card>
               <Card className="p-6">
-                <div className="text-3xl font-bold text-purple-600">{formatNumber(mockStats.searchQueries)}</div>
+                <div className="text-3xl font-bold text-purple-600">{formatNumber(emptyStats.searchQueries)}</div>
                 <div className="text-sm text-gray-500">Search Queries</div>
               </Card>
               <Card className="p-6">
-                <div className="text-3xl font-bold text-amber-600">{formatNumber(mockStats.ticketsDeflected)}</div>
+                <div className="text-3xl font-bold text-amber-600">{formatNumber(emptyStats.ticketsDeflected)}</div>
                 <div className="text-sm text-gray-500">Tickets Deflected</div>
               </Card>
             </div>
@@ -1832,7 +1713,7 @@ export default function HelpDocsClient() {
               <Card className="p-6">
                 <h3 className="font-semibold mb-4">Top Searches</h3>
                 <div className="space-y-3">
-                  {mockStats.topSearches.map((search, idx) => (
+                  {emptyStats.topSearches.map((search, idx) => (
                     <div key={search.query} className="flex items-center gap-3">
                       <span className="text-lg font-bold text-gray-300 w-6">{idx + 1}</span>
                       <div className="flex-1">
@@ -1840,7 +1721,7 @@ export default function HelpDocsClient() {
                           <span className="font-medium">{search.query}</span>
                           <span className="text-sm text-gray-500">{search.count}</span>
                         </div>
-                        <Progress value={(search.count / mockStats.topSearches[0].count) * 100} className="h-2" />
+                        <Progress value={(search.count / emptyStats.topSearches[0].count) * 100} className="h-2" />
                       </div>
                     </div>
                   ))}
