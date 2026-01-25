@@ -1,4 +1,7 @@
 import Stripe from 'stripe'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('StripeService')
 
 interface PaymentIntentData {
   amount: number
@@ -25,9 +28,9 @@ export class StripeService {
     }
     
     if (this.isTestMode) {
-      console.log('StripeService is in test mode. No real payments will be processed.')
+      logger.info('StripeService is in test mode. No real payments will be processed.')
     } else {
-      console.log('StripeService is in production mode.')
+      logger.info('StripeService is in production mode.')
     }
   }
 
@@ -46,7 +49,7 @@ export class StripeService {
       const mockPaymentIntentId = `pi_3QdGhJ2eZvKYlo2C${Date.now()}`;
       const mockClientSecret = `${mockPaymentIntentId}_secret_${Math.random().toString(36).substring(2, 15)}`;
       
-      console.log('✅ Mock payment intent created: ', mockPaymentIntentId);
+      logger.debug('Mock payment intent created', { paymentIntentId: mockPaymentIntentId });
       return {
         clientSecret: mockClientSecret,
         paymentIntentId: mockPaymentIntentId,
@@ -95,7 +98,7 @@ export class StripeService {
     if (this.isTestMode) {
       const mockCustomerId = `cus_${Math.random().toString(36).substring(2, 15)}`;
       
-      console.log('✅ Mock customer created: ', mockCustomerId);
+      logger.debug('Mock customer created', { customerId: mockCustomerId });
       return {
         id: mockCustomerId,
         name,
@@ -159,7 +162,7 @@ export class StripeService {
       const mockLinkId = `plink_${Math.random().toString(36).substring(2, 15)}`;
       const mockUrl = `https://checkout.stripe.com/c/pay/${mockLinkId}#fidkdWxOYHwnPyd1blpxYHZxWjA0`;
       
-      console.log('✅ Mock payment link created: ', mockLinkId);
+      logger.debug('Mock payment link created', { linkId: mockLinkId });
       return {
         url: mockUrl,
         id: mockLinkId,
@@ -197,7 +200,7 @@ export class StripeService {
     currency: string
   }> {
     if (this.isTestMode || paymentIntentId.includes('mock')) {
-      console.log('✅ Mock payment verification - always successful')
+      logger.debug('Mock payment verification - always successful')
       return {
         status: 'succeeded',
         paid: true,
@@ -229,7 +232,7 @@ export class StripeService {
     message: string
   }> {
     // This is always test mode for alternative access
-    console.log('🔐 Validating alternative access: ', { method, projectId });
+    logger.debug('Validating alternative access', { method, projectId });
     if (method === 'password' && value === 'freeflow') {
       return {
         valid: true,

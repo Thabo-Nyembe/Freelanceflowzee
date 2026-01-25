@@ -80,6 +80,10 @@ export class AwarenessManager {
   private idleTimeout: NodeJS.Timeout | null = null
   private idleThreshold = 60000 // 1 minute
   private listeners: Map<string, Set<Function>> = new Map()
+  // Store references to event handlers for proper cleanup
+  private activityHandler: (() => void) | null = null
+  private visibilityHandler: (() => void) | null = null
+  private boundEvents: string[] = []
 
   constructor(awareness: Awareness) {
     this.awareness = awareness
@@ -277,6 +281,22 @@ export class AwarenessManager {
     if (this.idleTimeout) {
       clearTimeout(this.idleTimeout)
     }
+
+    // Remove activity event listeners to prevent memory leaks
+    if (typeof window !== 'undefined' && this.activityHandler) {
+      this.boundEvents.forEach(event => {
+        window.removeEventListener(event, this.activityHandler!)
+      })
+    }
+
+    // Remove visibility change listener
+    if (typeof document !== 'undefined' && this.visibilityHandler) {
+      document.removeEventListener('visibilitychange', this.visibilityHandler)
+    }
+
+    this.activityHandler = null
+    this.visibilityHandler = null
+    this.boundEvents = []
     this.listeners.clear()
   }
 
@@ -296,8 +316,10 @@ export class AwarenessManager {
     if (typeof window === 'undefined') return
 
     const events = ['mousemove', 'keypress', 'click', 'scroll', 'touchstart']
+    this.boundEvents = events
 
-    const handleActivity = () => {
+    // Store reference for cleanup
+    this.activityHandler = () => {
       this.resetIdleTimer()
       if (this.awareness.getLocalState()?.activity?.status === 'idle') {
         this.setActivity('active')
@@ -305,17 +327,18 @@ export class AwarenessManager {
     }
 
     events.forEach(event => {
-      window.addEventListener(event, handleActivity, { passive: true })
+      window.addEventListener(event, this.activityHandler!, { passive: true })
     })
 
-    // Handle visibility change
-    document.addEventListener('visibilitychange', () => {
+    // Store reference for cleanup
+    this.visibilityHandler = () => {
       if (document.hidden) {
         this.setActivity('away')
       } else {
         this.setActivity('active')
       }
-    })
+    }
+    document.addEventListener('visibilitychange', this.visibilityHandler)
 
     this.resetIdleTimer()
   }

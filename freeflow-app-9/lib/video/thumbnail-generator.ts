@@ -4,6 +4,9 @@
  */
 
 import { createClient } from '@/lib/supabase/client';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('ThumbnailGenerator');
 
 export interface ThumbnailOptions {
   width?: number;
@@ -189,7 +192,7 @@ export class VideoThumbnailGenerator {
 
       return thumbnailData;
     } catch (error) {
-      console.error('Failed to save thumbnail metadata:', error);
+      logger.error('Failed to save thumbnail metadata', { error });
       throw error;
     }
   }
@@ -209,7 +212,7 @@ export class VideoThumbnailGenerator {
 
       return data;
     } catch (error) {
-      console.error('Failed to get cached thumbnails:', error);
+      logger.error('Failed to get cached thumbnails', { error });
       return null;
     }
   }
@@ -264,7 +267,7 @@ export class VideoThumbnailGenerator {
 
       return thumbnailData;
     } catch (error) {
-      console.error('Failed to generate and cache thumbnails:', error);
+      logger.error('Failed to generate and cache thumbnails', { error });
       throw error;
     }
   }
@@ -337,9 +340,9 @@ export class VideoThumbnailGenerator {
 
       if (error) throw error;
 
-      console.log(`Cleaned up thumbnails older than ${daysOld} days`);
+      logger.info('Cleaned up thumbnails', { daysOld });
     } catch (error) {
-      console.error('Failed to cleanup old thumbnails:', error);
+      logger.error('Failed to cleanup old thumbnails', { error });
       throw error;
     }
   }
@@ -352,7 +355,7 @@ export class VideoThumbnailGenerator {
       const response = await fetch(url, { method: 'HEAD' });
       return response.ok;
     } catch (error) {
-      console.error('Failed to validate thumbnail URL:', error);
+      logger.error('Failed to validate thumbnail URL', { error });
       return false;
     }
   }
@@ -396,7 +399,7 @@ export class VideoThumbnailGenerator {
         source: 'gradient'
       };
     } catch (error) {
-      console.error('Failed to get thumbnail with fallback:', error);
+      logger.error('Failed to get thumbnail with fallback', { error });
       return {
         url: '',
         source: 'gradient'
