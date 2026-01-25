@@ -274,7 +274,9 @@ export function useDeployments(options: UseDeploymentsOptions = {}) {
   }, [updateDeployment])
 
   return {
+    data,
     deployments: data,
+    isLoading: loading,
     loading,
     error,
     refetch,
@@ -288,4 +290,36 @@ export function useDeployments(options: UseDeploymentsOptions = {}) {
     rollbackDeployment,
     cancelDeployment
   }
+}
+
+// Standalone mutation hooks for compatibility
+export function useCreateDeployment() {
+  const { create } = useSupabaseMutation<Deployment>({ table: 'deployments' })
+
+  const mutateAsync = async (data: Partial<Deployment>) => {
+    return create(data)
+  }
+
+  return { mutateAsync, mutate: mutateAsync }
+}
+
+export function useUpdateDeployment() {
+  const { update } = useSupabaseMutation<Deployment>({ table: 'deployments' })
+
+  const mutateAsync = async (data: { id: string } & Partial<Deployment>) => {
+    const { id, ...updateData } = data
+    return update(id, updateData)
+  }
+
+  return { mutateAsync, mutate: mutateAsync }
+}
+
+export function useDeleteDeployment() {
+  const { remove } = useSupabaseMutation<Deployment>({ table: 'deployments' })
+
+  const mutateAsync = async (id: string) => {
+    return remove(id)
+  }
+
+  return { mutateAsync, mutate: mutateAsync }
 }
