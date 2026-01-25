@@ -1343,46 +1343,11 @@ export default function GrowthHubClient() {
               </Button>
             </div>
 
-            {mockUserPaths.map((path) => (
-              <Card key={path.id}>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle className="flex items-center gap-2">
-                        <Route className="w-5 h-5 text-indigo-500" />
-                        {path.name}
-                      </CardTitle>
-                      <CardDescription>
-                        {path.startEvent} → {path.endEvent || 'Any'} | Avg path length: {path.avgPathLength.toFixed(1)} steps
-                      </CardDescription>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-2xl font-bold">{path.totalUsers.toLocaleString()}</p>
-                      <p className="text-sm text-muted-foreground">Total Users</p>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-start gap-4 overflow-x-auto pb-4">
-                    {path.nodes.map((nodeGroup, stepIdx) => (
-                      <div key={stepIdx} className="flex flex-col gap-2 min-w-[160px]">
-                        <div className="text-xs font-medium text-muted-foreground text-center">Step {stepIdx + 1}</div>
-                        {nodeGroup.map((node, nodeIdx) => (
-                          <div key={nodeIdx} className={`p-3 rounded-lg border ${node.event === 'exit' ? 'bg-red-50 dark:bg-red-950 border-red-200' : 'bg-muted/50'}`}>
-                            <div className="flex items-center justify-between mb-1">
-                              <span className="text-sm font-medium">{node.event}</span>
-                              {node.event === 'exit' && <XCircle className="w-3 h-3 text-red-500" />}
-                            </div>
-                            <p className="text-lg font-bold">{node.users.toLocaleString()}</p>
-                            <p className="text-xs text-muted-foreground">{node.percentage}%</p>
-                          </div>
-                        ))}
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+            <Card className="p-8 text-center">
+              <Route className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+              <p className="text-muted-foreground mb-4">User path analysis helps visualize how users navigate through your product.</p>
+              <p className="text-sm text-muted-foreground">Click "Create Path Analysis" to define start and end events for journey tracking.</p>
+            </Card>
           </TabsContent>
 
           {/* Settings Tab */}
@@ -1714,13 +1679,11 @@ export default function GrowthHubClient() {
                                 supabase.from('cohorts').select('*')
                               ])
                               const exportData = {
-                                experiments: experimentsRes.data || mockExperiments,
+                                experiments: experimentsRes.data || [],
                                 metrics: metricsRes.data || [],
-                                funnels: funnelsRes.data || mockFunnels,
-                                cohorts: cohortsRes.data || mockCohorts,
-                                retention: mockRetentionAnalyses,
-                                paths: mockUserPaths,
-                                dashboards: mockDashboards,
+                                funnels: funnelsRes.data || [],
+                                cohorts: cohortsRes.data || [],
+                                playbooks: dbPlaybooks || [],
                                 exportedAt: new Date().toISOString()
                               }
                               const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })

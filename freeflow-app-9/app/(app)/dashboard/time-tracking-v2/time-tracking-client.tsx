@@ -191,25 +191,19 @@ interface Workspace {
   createdAt: string
 }
 
-// Data - empty until wired to real APIs
-const projects: Project[] = []
-const entries: TimeEntry[] = []
-const team: TeamMember[] = []
-const invoices: Invoice[] = []
-const goals: Goal[] = []
-const clients: Client[] = []
-const tags: Tag[] = []
-const mockTimeOff: TimeOffRequest[] = []
-const mockSavedReports: SavedReport[] = []
-const mockAutomations: Automation[] = []
-const mockIntegrations: Integration[] = []
-const mockWorkspaces: Workspace[] = []
+// Data - wired to Supabase hooks (see component body)
+// Placeholder arrays for features not yet wired
+const timeOffData: TimeOffRequest[] = []
+const savedReportsData: SavedReport[] = []
+const automationsData: Automation[] = []
+const integrationsData: Integration[] = []
+const workspacesData: Workspace[] = []
 
 // Competitive upgrade data - empty until wired to real APIs
-const mockTimeTrackingAIInsights: { id: string; type: 'success' | 'warning' | 'info'; title: string; description: string; priority: 'low' | 'high' | 'medium'; timestamp: string; category: string }[] = []
-const mockTimeTrackingCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }[] = []
-const mockTimeTrackingPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down'; impact: 'high' | 'medium' | 'low' }[] = []
-const mockTimeTrackingActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' }[] = []
+const timeTrackingAIInsights: { id: string; type: 'success' | 'warning' | 'info'; title: string; description: string; priority: 'low' | 'high' | 'medium'; timestamp: string; category: string }[] = []
+const timeTrackingCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }[] = []
+const timeTrackingPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down'; impact: 'high' | 'medium' | 'low' }[] = []
+const timeTrackingActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' }[] = []
 
 // Quick actions will be defined inside the component to access state
 
@@ -450,6 +444,27 @@ export default function TimeTrackingClient() {
     current: g.current_value || 0,
     unit: g.unit || '%'
   }))
+
+  // Map time entries to component format
+  const entries = (dbTimeEntries || []).map(e => ({
+    id: e.id,
+    title: e.title,
+    description: e.description,
+    projectId: e.project_id || '',
+    projectName: projects.find(p => p.id === e.project_id)?.name || 'No Project',
+    startTime: e.start_time,
+    endTime: e.end_time,
+    durationSeconds: e.duration_seconds || 0,
+    durationHours: e.duration_hours || 0,
+    status: e.status as any,
+    isBillable: e.is_billable,
+    billableAmount: e.billable_amount || 0,
+    hourlyRate: e.hourly_rate || 0,
+    tags: e.tags || []
+  }))
+
+  // Tags - placeholder until tags hook is available
+  const tags: Tag[] = []
 
   // Track database connection status for UI feedback
   const [isDbConnected, setIsDbConnected] = useState<boolean | null>(null)

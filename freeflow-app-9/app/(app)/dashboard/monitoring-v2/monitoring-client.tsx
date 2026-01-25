@@ -4,12 +4,21 @@ import { createClient } from '@/lib/supabase/client'
 
 const supabase = createClient()
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import { useServers, useSystemAlerts, useServerMutations, useAlertMutations } from '@/lib/hooks/use-monitoring'
 import type { Server as DbServer, SystemAlert as DbAlert } from '@/lib/hooks/use-monitoring'
-import { useSystemLogs } from '@/lib/hooks/use-system-logs'
-import type { SystemLog } from '@/lib/hooks/use-system-logs'
+
+// System Log type for local use
+interface SystemLog {
+  id: string
+  log_level: string
+  log_source: string
+  message: string
+  server_hostname: string | null
+  request_id: string | null
+  logged_at: string
+}
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -347,9 +356,38 @@ export default function MonitoringClient() {
     status: statusFilter !== 'all' ? statusFilter : undefined
   })
   const { alerts: dbAlerts, isLoading: alertsLoading, error: alertsError, refetch: refetchAlerts } = useSystemAlerts()
-  const { data: systemLogs, isLoading: logsLoading, error: logsError, refetch: refetchLogs } = useSystemLogs()
   const { createServer, deleteServer, isCreating, isDeleting } = useServerMutations()
   const { acknowledgeAlert, resolveAlert, isAcknowledging, isResolving } = useAlertMutations()
+
+  // Local state for system logs
+  const [systemLogs, setSystemLogs] = useState<SystemLog[]>([])
+  const [logsLoading, setLogsLoading] = useState(true)
+  const [logsError, setLogsError] = useState<Error | null>(null)
+
+  const refetchLogs = useCallback(async () => {
+    setLogsLoading(true)
+    setLogsError(null)
+    try {
+      const { data, error } = await supabase
+        .from('system_logs')
+        .select('id, log_level, log_source, message, server_hostname, request_id, logged_at')
+        .is('deleted_at', null)
+        .order('logged_at', { ascending: false })
+        .limit(100)
+
+      if (error) throw new Error(error.message)
+      setSystemLogs(data || [])
+    } catch (err) {
+      setLogsError(err instanceof Error ? err : new Error('Failed to fetch logs'))
+    } finally {
+      setLogsLoading(false)
+    }
+  }, [])
+
+  // Initial fetch for logs
+  useEffect(() => {
+    refetchLogs()
+  }, [refetchLogs])
 
   const isLoading = serversLoading || alertsLoading || logsLoading
 

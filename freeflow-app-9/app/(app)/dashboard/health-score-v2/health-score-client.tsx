@@ -170,33 +170,7 @@ interface SLO {
   history: { date: string; value: number }[]
 }
 
-// Database types
-interface DbHealthScore {
-  id: string
-  user_id: string
-  health_code: string
-  customer_name: string
-  customer_id: string | null
-  account_type: string
-  overall_score: number
-  category: string
-  trend: string
-  previous_score: number
-  score_change: number
-  product_usage: number
-  engagement: number
-  support_health: number
-  financial: number
-  sentiment: number
-  risk_factors: number
-  opportunities: number
-  notes: string | null
-  tags: string[]
-  created_at: string
-  updated_at: string
-  deleted_at: string | null
-}
-
+// Form state type for create/edit dialog
 interface HealthScoreFormState {
   customer_name: string
   account_type: string
@@ -251,7 +225,7 @@ export default function HealthScoreClient() {
   // Supabase hooks for real health score data
   const { healthScores: dbHealthScores, stats: healthStats, isLoading: isLoadingHealthScores, error: healthScoresError, refetch: fetchHealthScores } = useHealthScores()
   const { health: systemHealth, isLoading: isLoadingSystemHealth, refresh: refreshSystemHealth } = useSystemHealth()
-  const { createHealthScore: createHealthScoreMutation, updateHealthScore: updateHealthScoreMutation, deleteHealthScore: deleteHealthScoreMutation, isCreating, isUpdating, isDeleting } = useHealthScoreMutations()
+  const { createHealthScore: createHealthScoreMutation, updateHealthScore: updateHealthScoreMutation, deleteHealthScore: deleteHealthScoreMutation, isCreating, isUpdating, isDeleting: _isDeleting } = useHealthScoreMutations()
 
   // UI State
   const [activeTab, setActiveTab] = useState('overview')
@@ -298,9 +272,6 @@ export default function HealthScoreClient() {
   }, [dbHealthScores, healthStats])
 
   const openIncidents = mockIncidents.filter(i => i.status !== 'resolved').length
-
-  // Generate health code
-  const generateHealthCode = () => `HS-${Date.now().toString(36).toUpperCase()}`
 
   // Create health score using mutation hook
   const handleCreateHealthScore = async () => {
