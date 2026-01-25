@@ -1297,11 +1297,11 @@ export default function TutorialsClient() {
               <Card><CardContent className="p-4"><div className="flex items-center gap-3"><div className="p-2 bg-blue-100 rounded-lg"><Clock className="w-5 h-5 text-blue-600" /></div><div><div className="text-2xl font-bold">156h</div><div className="text-sm text-gray-500">Total Watch Time</div></div></div></CardContent></Card>
             </div>
 
-            {mockProgress.length === 0 ? (
+            {([] as UserProgress[]).length === 0 ? (
               <Card><CardContent className="p-12 text-center"><Play className="w-12 h-12 text-gray-300 mx-auto mb-4" /><h3 className="text-lg font-semibold text-gray-900 mb-2">No courses in progress</h3><p className="text-gray-500 mb-4">Start learning by enrolling in a course</p><Button className="bg-rose-600" onClick={() => setActiveTab('browse')}>Browse Courses</Button></CardContent></Card>
             ) : (
               <div className="space-y-4">
-                {mockProgress.map(p => {
+                {([] as UserProgress[]).map(p => {
                   const course = courses.find(c => c.id === p.courseId)
                   if (!course) return null
                   return (
@@ -1340,11 +1340,11 @@ export default function TutorialsClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockLearningPaths.length}</p>
+                    <p className="text-3xl font-bold">{0}</p>
                     <p className="text-emerald-200 text-sm">Paths</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockLearningPaths.reduce((s, p) => s + p.courses.length, 0)}</p>
+                    <p className="text-3xl font-bold">{([] as LearningPath[]).reduce((s, p) => s + p.courses.length, 0)}</p>
                     <p className="text-emerald-200 text-sm">Total Courses</p>
                   </div>
                 </div>
@@ -1352,7 +1352,7 @@ export default function TutorialsClient() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {mockLearningPaths.map(path => (
+              {([] as LearningPath[]).map(path => (
                 <Card key={path.id} className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
                   <div className="h-24 bg-gradient-to-r from-rose-600 to-purple-600 p-4 flex items-end">
                     <div><h3 className="text-xl font-bold text-white">{path.title}</h3><p className="text-white/80 text-sm">{path.description}</p></div>
@@ -1422,13 +1422,13 @@ export default function TutorialsClient() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mb-6">
-              <Card><CardContent className="p-4 text-center"><div className="text-3xl font-bold text-rose-600">{mockAchievements.filter(a => a.unlockedAt).length}</div><div className="text-sm text-gray-500">Unlocked</div></CardContent></Card>
-              <Card><CardContent className="p-4 text-center"><div className="text-3xl font-bold text-amber-600">{mockAchievements.reduce((acc, a) => acc + (a.unlockedAt ? a.points : 0), 0)}</div><div className="text-sm text-gray-500">Total Points</div></CardContent></Card>
-              <Card><CardContent className="p-4 text-center"><div className="text-3xl font-bold text-blue-600">{mockAchievements.filter(a => !a.unlockedAt).length}</div><div className="text-sm text-gray-500">In Progress</div></CardContent></Card>
+              <Card><CardContent className="p-4 text-center"><div className="text-3xl font-bold text-rose-600">{([] as Achievement[]).filter(a => a.unlockedAt).length}</div><div className="text-sm text-gray-500">Unlocked</div></CardContent></Card>
+              <Card><CardContent className="p-4 text-center"><div className="text-3xl font-bold text-amber-600">{([] as Achievement[]).reduce((acc, a) => acc + (a.unlockedAt ? a.points : 0), 0)}</div><div className="text-sm text-gray-500">Total Points</div></CardContent></Card>
+              <Card><CardContent className="p-4 text-center"><div className="text-3xl font-bold text-blue-600">{([] as Achievement[]).filter(a => !a.unlockedAt).length}</div><div className="text-sm text-gray-500">In Progress</div></CardContent></Card>
               <Card><CardContent className="p-4 text-center"><div className="text-3xl font-bold text-green-600">5</div><div className="text-sm text-gray-500">Day Streak</div></CardContent></Card>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {mockAchievements.map(achievement => (
+              {([] as Achievement[]).map(achievement => (
                 <Card key={achievement.id} className={`${achievement.unlockedAt ? 'border-amber-300 bg-amber-50' : 'opacity-75'}`}>
                   <CardContent className="p-4">
                     <div className="flex items-center gap-3 mb-3">
@@ -1475,11 +1475,11 @@ export default function TutorialsClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockGoals.length}</p>
+                    <p className="text-3xl font-bold">{0}</p>
                     <p className="text-cyan-200 text-sm">Active Goals</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockGoals.filter(g => g.completed).length}</p>
+                    <p className="text-3xl font-bold">{([] as LearningGoal[]).filter(g => g.completed).length}</p>
                     <p className="text-cyan-200 text-sm">Completed</p>
                   </div>
                 </div>
@@ -1490,7 +1490,7 @@ export default function TutorialsClient() {
               <Button className="bg-rose-600" onClick={() => setShowGoalDialog(true)}><Plus className="w-4 h-4 mr-2" />Set New Goal</Button>
             </div>
             <div className="space-y-4">
-              {mockGoals.map(goal => (
+              {([] as LearningGoal[]).map(goal => (
                 <Card key={goal.id}>
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-2">

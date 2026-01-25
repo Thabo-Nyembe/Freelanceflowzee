@@ -3165,7 +3165,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                     <span className="font-medium">Open Defects</span>
                   </div>
                   <p className="text-2xl font-bold text-red-600">{openDefects}</p>
-                  <p className="text-xs text-muted-foreground">{mockDefects.filter(d => d.severity === 'critical').length} critical issues</p>
+                  <p className="text-xs text-muted-foreground">{([] as Defect[]).filter(d => d.severity === 'critical').length} critical issues</p>
                 </Card>
                 <Card className="p-4">
                   <div className="flex items-center gap-2 mb-2">

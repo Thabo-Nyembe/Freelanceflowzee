@@ -1311,7 +1311,7 @@ export default function SurveysClient() {
               <CardContent className="p-0">
                 <ScrollArea className="h-[600px]">
                   <div className="divide-y dark:divide-gray-700">
-                    {mockResponses.map(response => (
+                    {([] as Response[]).map(response => (
                       <div
                         key={response.id}
                         className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-colors"
@@ -1396,7 +1396,7 @@ export default function SurveysClient() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {mockTemplates.map(template => (
+              {([] as Template[]).map(template => (
                 <Card key={template.id} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur hover:shadow-lg transition-all cursor-pointer group">
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between mb-3">
@@ -1540,7 +1540,7 @@ export default function SurveysClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {mockSurveys.slice(0, 5).map(survey => (
+                    {([] as Survey[]).slice(0, 5).map(survey => (
                       <div key={survey.id} className="flex items-center gap-3">
                         <div className="flex-1">
                           <div className="flex items-center justify-between mb-1">
@@ -2229,18 +2229,18 @@ export default function SurveysClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockSurveysAIInsights}
+              insights={[]}
               title="Survey Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockSurveysCollaborators}
+              collaborators={[]}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockSurveysPredictions}
+              predictions={[]}
               title="Response Forecasts"
             />
           </div>
@@ -2248,7 +2248,7 @@ export default function SurveysClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockSurveysActivities}
+            activities={[]}
             title="Survey Activity"
             maxItems={5}
           />

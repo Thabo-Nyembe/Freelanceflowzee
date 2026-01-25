@@ -1857,11 +1857,11 @@ export default function WorkflowBuilderClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockTemplates.length}</p>
+                    <p className="text-3xl font-bold">{([] as WorkflowTemplate[]).length}</p>
                     <p className="text-amber-200 text-sm">Templates</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockTemplates.filter(t => t.featured).length}</p>
+                    <p className="text-3xl font-bold">{([] as WorkflowTemplate[]).filter(t => t.featured).length}</p>
                     <p className="text-amber-200 text-sm">Featured</p>
                   </div>
                 </div>
@@ -1893,7 +1893,7 @@ export default function WorkflowBuilderClient() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6">
-              {mockTemplates.map(template => (
+              {([] as WorkflowTemplate[]).map(template => (
                 <Card key={template.id} className="hover:shadow-lg transition-shadow cursor-pointer">
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-4">
@@ -1935,11 +1935,11 @@ export default function WorkflowBuilderClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockCredentials.length}</p>
+                    <p className="text-3xl font-bold">{([] as WorkflowCredential[]).length}</p>
                     <p className="text-slate-200 text-sm">Credentials</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockCredentials.filter(c => c.isShared).length}</p>
+                    <p className="text-3xl font-bold">{([] as WorkflowCredential[]).filter(c => c.isShared).length}</p>
                     <p className="text-slate-200 text-sm">Shared</p>
                   </div>
                 </div>
@@ -1980,7 +1980,7 @@ export default function WorkflowBuilderClient() {
               </div>
 
               <div className="grid gap-4">
-                {mockCredentials.map(cred => (
+                {([] as WorkflowCredential[]).map(cred => (
                   <Card key={cred.id}>
                     <CardContent className="p-4 flex items-center justify-between">
                       <div className="flex items-center gap-4">
@@ -2018,11 +2018,11 @@ export default function WorkflowBuilderClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockVariables.length}</p>
+                    <p className="text-3xl font-bold">{([] as WorkflowVariable[]).length}</p>
                     <p className="text-teal-200 text-sm">Variables</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockVariables.filter(v => v.isSecret).length}</p>
+                    <p className="text-3xl font-bold">{([] as WorkflowVariable[]).filter(v => v.isSecret).length}</p>
                     <p className="text-teal-200 text-sm">Secrets</p>
                   </div>
                 </div>
@@ -2065,7 +2065,7 @@ export default function WorkflowBuilderClient() {
               <Card>
                 <CardContent className="p-0">
                   <div className="divide-y">
-                    {mockVariables.map(variable => (
+                    {([] as WorkflowVariable[]).map(variable => (
                       <div key={variable.id} className="p-4 flex items-center justify-between">
                         <div className="flex items-center gap-4">
                           {variable.isSecret ? (
@@ -2966,7 +2966,7 @@ export default function WorkflowBuilderClient() {
           </DialogHeader>
           <ScrollArea className="h-[50vh]">
             <div className="space-y-3 pr-4">
-              {mockExecutions
+              {([] as WorkflowExecution[])
                 .filter(e => e.workflowId === executionHistoryWorkflow?.id || executionHistoryWorkflow?.name === e.workflowName)
                 .map(execution => (
                   <div key={execution.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
@@ -2985,7 +2985,7 @@ export default function WorkflowBuilderClient() {
                     </div>
                   </div>
                 ))}
-              {mockExecutions.filter(e => e.workflowId === executionHistoryWorkflow?.id || executionHistoryWorkflow?.name === e.workflowName).length === 0 && (
+              {([] as WorkflowExecution[]).filter(e => e.workflowId === executionHistoryWorkflow?.id || executionHistoryWorkflow?.name === e.workflowName).length === 0 && (
                 <div className="text-center py-8 text-gray-500">
                   <History className="w-12 h-12 mx-auto mb-4 opacity-50" />
                   <p>No execution history found for this workflow</p>

@@ -1612,7 +1612,7 @@ export default function HealthScoreClient() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {mockSLOs.map(slo => (
+              {([] as SLO[]).map(slo => (
                 <div key={slo.id} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
                   <div className="flex items-start justify-between mb-4">
                     <div>
@@ -1687,18 +1687,18 @@ export default function HealthScoreClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockHealthScoreAIInsights}
+              insights={[] as { id: string; type: 'success' | 'info' | 'warning'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[]}
               title="Health Score Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockHealthScoreCollaborators}
+              collaborators={[] as { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string; lastActive: string }[]}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockHealthScorePredictions}
+              predictions={[] as { id: string; label: string; current: number; target: number; predicted: number; confidence: number; trend: 'up' | 'down' | 'stable' }[]}
               title="System Forecasts"
             />
           </div>
@@ -1706,7 +1706,7 @@ export default function HealthScoreClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockHealthScoreActivities}
+            activities={[] as { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' }[]}
             title="Health Activity"
             maxItems={5}
           />
@@ -2205,7 +2205,7 @@ export default function HealthScoreClient() {
             </DialogHeader>
             <div className="space-y-4">
               <div className="space-y-3">
-                {mockAlerts.slice(0, 3).map(alert => (
+                {([] as AlertRule[]).slice(0, 3).map(alert => (
                   <div key={alert.id} className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg flex items-center justify-between">
                     <div>
                       <p className="font-medium text-sm">{alert.name}</p>

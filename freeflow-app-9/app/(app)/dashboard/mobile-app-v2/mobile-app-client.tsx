@@ -2069,11 +2069,11 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockMobileAppCollaborators}
+              collaborators={[]}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockMobileAppPredictions}
+              predictions={[]}
               title="App Store Forecasts"
             />
           </div>
@@ -2081,7 +2081,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockMobileAppActivities}
+            activities={[]}
             title="Mobile App Activity"
             maxItems={5}
           />

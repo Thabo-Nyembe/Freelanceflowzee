@@ -1213,11 +1213,11 @@ export default function InvestorMetricsClient() {
                   </div>
                   <div className="flex items-center gap-6">
                     <div className="text-center">
-                      <p className="text-3xl font-bold">{mockInvestors.length}</p>
+                      <p className="text-3xl font-bold">{([] as Investor[]).length}</p>
                       <p className="text-purple-200 text-sm">Investors</p>
                     </div>
                     <div className="text-center">
-                      <p className="text-3xl font-bold">{mockInvestors.filter(i => i.type === 'lead').length}</p>
+                      <p className="text-3xl font-bold">{([] as Investor[]).filter(i => i.type === 'lead').length}</p>
                       <p className="text-purple-200 text-sm">Lead</p>
                     </div>
                   </div>
@@ -1225,7 +1225,7 @@ export default function InvestorMetricsClient() {
               </div>
 
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {mockInvestors.map(investor => (
+                {([] as Investor[]).map(investor => (
                   <Card key={investor.id} className="bg-white dark:bg-gray-800 hover:shadow-md transition-shadow cursor-pointer" onClick={() => setSelectedInvestor(investor)}>
                     <CardContent className="p-6">
                       <div className="flex items-start gap-4 mb-4">
@@ -1294,11 +1294,11 @@ export default function InvestorMetricsClient() {
                   </div>
                   <div className="flex items-center gap-6">
                     <div className="text-center">
-                      <p className="text-3xl font-bold">{mockKPIs.length}</p>
+                      <p className="text-3xl font-bold">{([] as KPIMetric[]).length}</p>
                       <p className="text-rose-200 text-sm">Metrics</p>
                     </div>
                     <div className="text-center">
-                      <p className="text-3xl font-bold">{mockKPIs.filter(k => k.trend === 'up').length}</p>
+                      <p className="text-3xl font-bold">{([] as KPIMetric[]).filter(k => k.trend === 'up').length}</p>
                       <p className="text-rose-200 text-sm">Improving</p>
                     </div>
                   </div>
@@ -1342,7 +1342,7 @@ export default function InvestorMetricsClient() {
                   </CardHeader>
                   <CardContent>
                     <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-                      {mockKPIs.filter(k => k.category === category).map(kpi => {
+                      {([] as KPIMetric[]).filter(k => k.category === category).map(kpi => {
                         const change = calculateChange(kpi.currentValue, kpi.previousValue)
                         const isInverse = kpi.name.includes('Churn') || kpi.name.includes('CAC') || kpi.name.includes('Burn')
                         return (
@@ -2111,18 +2111,18 @@ export default function InvestorMetricsClient() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
             <div className="lg:col-span-2">
               <AIInsightsPanel
-                insights={mockInvestorMetricsAIInsights}
+                insights={[] as AIInsight[]}
                 title="Investor Intelligence"
                 onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
               />
             </div>
             <div className="space-y-6">
               <CollaborationIndicator
-                collaborators={mockInvestorMetricsCollaborators}
+                collaborators={[] as Collaborator[]}
                 maxVisible={4}
               />
               <PredictiveAnalytics
-                predictions={mockInvestorMetricsPredictions}
+                predictions={[] as Prediction[]}
                 title="Financial Forecasts"
               />
             </div>
@@ -2130,7 +2130,7 @@ export default function InvestorMetricsClient() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
             <ActivityFeed
-              activities={mockInvestorMetricsActivities}
+              activities={[] as ActivityItem[]}
               title="Investor Activity"
               maxItems={5}
             />

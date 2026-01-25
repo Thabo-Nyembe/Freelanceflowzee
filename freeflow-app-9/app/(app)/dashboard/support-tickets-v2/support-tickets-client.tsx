@@ -2288,22 +2288,22 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                 Quick Macros
               </DialogTitle>
               <DialogDescription>
-                {mockMacros.length} macros available - Select one to copy or apply
+                {0} macros available - Select one to copy or apply
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               {/* Macro Stats */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                 <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg text-center">
-                  <p className="text-2xl font-bold text-purple-600">{mockMacros.length}</p>
+                  <p className="text-2xl font-bold text-purple-600">{0}</p>
                   <p className="text-xs text-muted-foreground">Total Macros</p>
                 </div>
                 <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center">
-                  <p className="text-2xl font-bold text-blue-600">{mockMacros.reduce((acc, m) => acc + m.usageCount, 0)}</p>
+                  <p className="text-2xl font-bold text-blue-600">{0}</p>
                   <p className="text-xs text-muted-foreground">Total Uses</p>
                 </div>
                 <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
-                  <p className="text-2xl font-bold text-green-600">{new Set(mockMacros.map(m => m.category)).size}</p>
+                  <p className="text-2xl font-bold text-green-600">{0}</p>
                   <p className="text-xs text-muted-foreground">Categories</p>
                 </div>
               </div>
@@ -2311,7 +2311,7 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
               {/* Macro List */}
               <ScrollArea className="h-[350px]">
                 <div className="space-y-2">
-                  {mockMacros.map(macro => (
+                  {([] as Macro[]).map(macro => (
                     <div
                       key={macro.id}
                       className="p-4 border rounded-lg hover:border-yellow-500 hover:bg-yellow-50/50 dark:hover:bg-yellow-900/20 transition-all"

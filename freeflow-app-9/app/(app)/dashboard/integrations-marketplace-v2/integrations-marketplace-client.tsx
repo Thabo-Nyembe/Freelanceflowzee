@@ -906,7 +906,7 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
           {/* Collections Tab */}
           <TabsContent value="collections" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {mockCollections.map(collection => (
+              {([] as Collection[]).map(collection => (
                 <Card key={collection.id} className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
                   <div className={`h-24 bg-gradient-to-r ${collection.color} p-4 flex items-end`}>
                     <div>
@@ -1860,18 +1860,18 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockIntegrationsAIInsights}
+              insights={[]}
               title="Integration Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockIntegrationsCollaborators}
+              collaborators={[]}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockIntegrationsPredictions}
+              predictions={[]}
               title="Integration Forecasts"
             />
           </div>
@@ -1879,7 +1879,7 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockIntegrationsActivities}
+            activities={[]}
             title="Integration Activity"
             maxItems={5}
           />
@@ -2061,7 +2061,7 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
                       </div>
                     </div>
 
-                    {mockReviews.filter(r => r.appId === selectedApp.id).map(review => (
+                    {([] as Review[]).filter(r => r.appId === selectedApp.id).map(review => (
                       <Card key={review.id}>
                         <CardContent className="p-4">
                           <div className="flex items-start gap-3">

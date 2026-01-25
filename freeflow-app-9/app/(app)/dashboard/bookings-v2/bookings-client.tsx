@@ -27,15 +27,11 @@ import {
   AIInsightsPanel,
   CollaborationIndicator,
   PredictiveAnalytics,
-  type AIInsight,
-  type Collaborator,
-  type Prediction,
 } from '@/components/ui/competitive-upgrades'
 
 import {
   ActivityFeed,
   QuickActionsToolbar,
-  type ActivityItem,
 } from '@/components/ui/competitive-upgrades-extended'
 
 
@@ -2333,7 +2329,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockBookingsPredictions}
+              predictions={[]}
               title="Booking Forecasts"
             />
           </div>
@@ -2341,7 +2337,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockBookingsActivities}
+            activities={[]}
             title="Booking Activity"
             maxItems={5}
           />

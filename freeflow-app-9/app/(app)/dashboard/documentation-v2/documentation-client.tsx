@@ -1765,7 +1765,7 @@ export default function DocumentationClient() {
                     <FileCheck className="h-5 w-5 text-purple-600" />
                     <span className="text-sm text-gray-500">Pages Translated</span>
                   </div>
-                  <div className="text-3xl font-bold">{mockLocales.reduce((sum, l) => sum + l.pages_translated, 0)}</div>
+                  <div className="text-3xl font-bold">{([] as DocLocale[]).reduce((sum, l) => sum + l.pages_translated, 0)}</div>
                 </CardContent>
               </Card>
               <Card>
@@ -1774,13 +1774,13 @@ export default function DocumentationClient() {
                     <Users className="h-5 w-5 text-purple-600" />
                     <span className="text-sm text-gray-500">Translators</span>
                   </div>
-                  <div className="text-3xl font-bold">{mockLocales.reduce((sum, l) => sum + l.contributors.length, 0)}</div>
+                  <div className="text-3xl font-bold">{([] as DocLocale[]).reduce((sum, l) => sum + l.contributors.length, 0)}</div>
                 </CardContent>
               </Card>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {mockLocales.map(locale => (
+              {([] as DocLocale[]).map(locale => (
                 <Card key={locale.id} className={locale.is_default ? 'border-purple-300' : ''}>
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between mb-4">
@@ -1886,7 +1886,7 @@ export default function DocumentationClient() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {mockPages.slice(0, 5).map((page, i) => (
+                  {([] as DocPage[]).slice(0, 5).map((page, i) => (
                     <div key={page.id} className="flex items-center gap-4">
                       <span className="w-6 h-6 flex items-center justify-center bg-purple-100 dark:bg-purple-900/30 rounded-full text-xs font-medium text-purple-600">
                         {i + 1}
@@ -1988,7 +1988,7 @@ export default function DocumentationClient() {
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
-                                {mockSpaces.map(space => (
+                                {([] as DocSpace[]).map(space => (
                                   <SelectItem key={space.id} value={space.id}>{space.name}</SelectItem>
                                 ))}
                               </SelectContent>
