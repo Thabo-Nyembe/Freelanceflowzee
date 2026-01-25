@@ -122,13 +122,7 @@ interface IntegrationsMarketplaceClientProps {
   initialStats: MarketplaceStats
 }
 
-// Empty data arrays - will be populated from real API
-const mockDevelopers: Developer[] = []
-
-const mockApps: AppListing[] = []
-
-const mockReviews: Review[] = []
-
+// Static data arrays - collections are defined statically
 const mockCollections: Collection[] = []
 
 const categories: { id: AppCategory; name: string; icon: React.ReactNode; count: number }[] = [

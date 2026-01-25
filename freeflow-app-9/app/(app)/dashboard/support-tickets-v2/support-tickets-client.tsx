@@ -24,7 +24,8 @@ import {
   Timer, Zap, FileText, Link2, Merge, Flag, Trash2, Smile, TrendingUp, Lock, RefreshCw, Download, Settings,
   Inbox, UserCheck, Hourglass, CheckCheck, AlertCircle,
   Bot, Copy, MessageCircle,
-  Bell, Key, Webhook, Shield, Cpu, AlertOctagon, Palette, Globe, Headphones, Sliders
+  Bell, Key, Webhook, Shield, Cpu, AlertOctagon, Palette, Globe, Headphones, Sliders,
+  Loader2
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -620,7 +621,7 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
         <div className="max-w-[1800px] mx-auto">
           <div className="flex items-center justify-center h-[60vh]">
             <div className="text-center">
-              <RefreshCw className="w-12 h-12 animate-spin text-teal-600 mx-auto mb-4" />
+              <Loader2 className="w-12 h-12 animate-spin text-teal-600 mx-auto mb-4" />
               <p className="text-lg text-muted-foreground">Loading support tickets...</p>
             </div>
           </div>

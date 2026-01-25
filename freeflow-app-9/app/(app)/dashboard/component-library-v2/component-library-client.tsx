@@ -23,7 +23,7 @@ import {
   Github, Plus, CheckCircle, AlertTriangle, Paintbrush,
   Type, LayoutGrid, History, RefreshCw, Package, Sparkles, FileText,
   Key, Webhook, Database, Trash2, Lock, Bell, Link2,
-  Upload, AlertOctagon
+  Upload, AlertOctagon, Loader2
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -175,8 +175,8 @@ export default function ComponentLibraryClient() {
   const [showDocsDialog, setShowDocsDialog] = useState(false)
 
   // MIGRATED: Database hooks for component data - no fallback
-  const { components: dbComponents = [], stats: componentStats } = useUIComponents([])
-  const { data: showcaseComponents = [] } = useComponentShowcases()
+  const { components: dbComponents = [], stats: componentStats, loading: componentsLoading } = useUIComponents([])
+  const { data: showcaseComponents = [], isLoading: showcasesLoading, refresh: refetchShowcases } = useComponentShowcases()
 
   // MIGRATED: Removed mock data, using empty array
   const quickActions: { id: string; label: string; icon: string; shortcut: string; action: () => void }[] = []
@@ -208,6 +208,12 @@ export default function ComponentLibraryClient() {
       i.tags.some(t => t.includes(iconSearch.toLowerCase()))
     )
   }, [iconSearch])
+
+  // Combined loading state for all hooks
+  const isLoading = componentsLoading || showcasesLoading
+
+  // Loading state - early return (must be after all hooks)
+  if (isLoading) return <div className="flex items-center justify-center h-full"><Loader2 className="h-8 w-8 animate-spin" /></div>
 
   const getStatusColor = (status: ComponentStatus) => {
     const colors: Record<ComponentStatus, string> = {

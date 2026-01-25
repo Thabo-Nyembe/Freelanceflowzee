@@ -17,7 +17,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Textarea } from '@/components/ui/textarea'
 import { useReleaseNotes, ReleaseNote, ReleaseNotesStats } from '@/lib/hooks/use-release-notes'
 import { createReleaseNote, deleteReleaseNote, publishReleaseNote, archiveReleaseNote, likeReleaseNote, updateReleaseNote, ReleaseNoteInput } from '@/app/actions/release-notes'
-import { Rocket, Calendar, Flag, GitBranch, Download, Eye, Heart, MessageSquare, Bell, BellOff, Share2, Code, Smartphone, Monitor, Globe, CheckCircle, AlertCircle, Zap, TrendingUp, Settings, Search, Plus, Sparkles, Star, FileText, History, Target, Layers, Key, Webhook, Database, Trash2, Lock, Mail, Link2, RefreshCw, Palette, Copy, AlertOctagon, Edit2, EyeOff } from 'lucide-react'
+import { Rocket, Calendar, Flag, GitBranch, Download, Eye, Heart, MessageSquare, Bell, BellOff, Share2, Code, Smartphone, Monitor, Globe, CheckCircle, AlertCircle, Zap, TrendingUp, Settings, Search, Plus, Sparkles, Star, FileText, History, Target, Layers, Key, Webhook, Database, Trash2, Lock, Mail, Link2, RefreshCw, Palette, Copy, AlertOctagon, Edit2, EyeOff, Loader2 } from 'lucide-react'
 import { copyToClipboard, downloadAsJson } from '@/lib/button-handlers'
 
 // Enhanced & Competitive Upgrade Components
@@ -127,8 +127,8 @@ interface _Subscription {
 }
 
 interface ReleaseNotesClientProps {
-  initialReleases: ReleaseNote[]
-  initialStats: ReleaseNotesStats
+  initialReleases?: ReleaseNote[]
+  initialStats?: ReleaseNotesStats
 }
 
 // Empty arrays - real data comes from props/hooks
@@ -176,7 +176,7 @@ const defaultFormState: ReleaseNoteInput = {
 }
 
 export default function ReleaseNotesClient({ initialReleases, initialStats }: ReleaseNotesClientProps) {
-  const { releases, stats: _stats } = useReleaseNotes(initialReleases, initialStats)
+  const { releases, stats, loading, error, refetch } = useReleaseNotes(initialReleases, initialStats)
   const [activeTab, setActiveTab] = useState('releases')
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
@@ -200,16 +200,17 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
   const [featuresInput, setFeaturesInput] = useState('')
   const [tagsInput, setTagsInput] = useState('')
 
+  // Filter database releases based on search and filters
   const filteredReleases = useMemo(() => {
-    let filtered = [...mockReleases]
+    let filtered = [...releases]
 
     if (searchQuery) {
       const query = searchQuery.toLowerCase()
       filtered = filtered.filter(r =>
         r.title.toLowerCase().includes(query) ||
         r.version.toLowerCase().includes(query) ||
-        r.description.toLowerCase().includes(query) ||
-        r.tags.some(t => t.toLowerCase().includes(query))
+        (r.description || '').toLowerCase().includes(query) ||
+        (r.tags || []).some(t => t.toLowerCase().includes(query))
       )
     }
 
@@ -218,15 +219,15 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
     }
 
     if (typeFilter !== 'all') {
-      filtered = filtered.filter(r => r.releaseType === typeFilter)
+      filtered = filtered.filter(r => r.release_type === typeFilter)
     }
 
     if (platformFilter !== 'all') {
-      filtered = filtered.filter(r => r.platforms.some(p => p.icon === platformFilter))
+      filtered = filtered.filter(r => r.platform === platformFilter || r.platform === 'all')
     }
 
     return filtered
-  }, [searchQuery, statusFilter, typeFilter, platformFilter])
+  }, [releases, searchQuery, statusFilter, typeFilter, platformFilter])
 
   const getStatusColor = (status: string) => {
     const colors: Record<string, string> = {
@@ -613,20 +614,20 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
           {/* Quick Stats */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-6 mt-8">
             <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
-              <div className="text-3xl font-bold">{mockReleases.length}</div>
+              <div className="text-3xl font-bold">{stats.total}</div>
               <div className="text-orange-100 text-sm">Total Releases</div>
             </div>
             <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
-              <div className="text-3xl font-bold">{mockReleases.filter(r => r.status === 'published').length}</div>
+              <div className="text-3xl font-bold">{stats.published}</div>
               <div className="text-orange-100 text-sm">Published</div>
             </div>
             <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
-              <div className="text-3xl font-bold">{formatNumber(mockReleases.reduce((sum, r) => sum + r.metrics.downloads, 0))}</div>
+              <div className="text-3xl font-bold">{formatNumber(stats.totalDownloads)}</div>
               <div className="text-orange-100 text-sm">Total Downloads</div>
             </div>
             <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
-              <div className="text-3xl font-bold">4.5</div>
-              <div className="text-orange-100 text-sm">Avg Feedback</div>
+              <div className="text-3xl font-bold">{stats.avgLikes.toFixed(1)}</div>
+              <div className="text-orange-100 text-sm">Avg Likes</div>
             </div>
           </div>
         </div>
@@ -695,15 +696,44 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
             </div>
           </div>
 
+          {/* Loading State */}
+          {loading && (
+            <div className="flex items-center justify-center gap-3 py-4 px-6 bg-orange-50 dark:bg-orange-900/20 rounded-xl border border-orange-200 dark:border-orange-800 mb-6">
+              <Loader2 className="h-5 w-5 animate-spin text-orange-600" />
+              <span className="text-orange-700 dark:text-orange-400 font-medium">Loading release notes...</span>
+            </div>
+          )}
+
+          {/* Error State */}
+          {error && (
+            <div className="flex items-center justify-between gap-3 py-4 px-6 bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-800 mb-6">
+              <div className="flex items-center gap-3">
+                <AlertCircle className="h-5 w-5 text-red-600" />
+                <span className="text-red-700 dark:text-red-400 font-medium">
+                  {error.message || 'Failed to load release notes'}
+                </span>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => refetch()}
+                className="border-red-300 text-red-600 hover:bg-red-100"
+              >
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Retry
+              </Button>
+            </div>
+          )}
+
           {/* Releases Tab */}
           <TabsContent value="releases" className="space-y-6">
             {/* Real Releases from Database */}
-            {releases.length > 0 && (
+            {filteredReleases.length > 0 && (
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <h3 className="font-semibold text-lg text-gray-900 dark:text-white flex items-center gap-2">
                     <Database className="w-5 h-5 text-orange-600" />
-                    Your Release Notes ({releases.length})
+                    Your Release Notes ({filteredReleases.length}{filteredReleases.length !== releases.length ? ` of ${releases.length}` : ''})
                   </h3>
                   <Button variant="outline" size="sm" onClick={handleExportNotes}>
                     <Download className="w-4 h-4 mr-1" />
@@ -711,7 +741,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                   </Button>
                 </div>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  {releases.map((release) => (
+                  {filteredReleases.map((release) => (
                     <Card key={release.id} className="hover:shadow-lg transition-all border-gray-200 hover:border-orange-300">
                       <CardContent className="p-5">
                         <div className="flex items-start justify-between mb-3">
@@ -791,28 +821,27 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
               </div>
             )}
 
-            {/* Mock/Example Releases */}
-            {filteredReleases.length === 0 && releases.length === 0 ? (
+            {/* Empty State */}
+            {!loading && filteredReleases.length === 0 && (
               <Card>
                 <CardContent className="p-12 text-center">
                   <Rocket className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No releases found</h3>
-                  <p className="text-gray-500 mb-4">Try adjusting your filters or create a new release</p>
-                  <Button className="bg-orange-600" onClick={handleOpenCreateModal}>Create Release</Button>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                    {releases.length === 0 ? 'No release notes yet' : 'No releases match your filters'}
+                  </h3>
+                  <p className="text-gray-500 dark:text-gray-400 mb-4">
+                    {releases.length === 0
+                      ? 'Create your first release note to get started'
+                      : 'Try adjusting your search or filters'}
+                  </p>
+                  {releases.length === 0 && (
+                    <Button className="bg-orange-600 hover:bg-orange-700" onClick={handleOpenCreateModal}>
+                      <Plus className="w-4 h-4 mr-2" />
+                      Create Release Note
+                    </Button>
+                  )}
                 </CardContent>
               </Card>
-            ) : filteredReleases.length > 0 && (
-              <div className="space-y-4">
-                <h3 className="font-semibold text-lg text-gray-900 dark:text-white flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-amber-600" />
-                  Example Releases
-                </h3>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {filteredReleases.map(release => (
-                    <ReleaseCard key={release.id} release={release} />
-                  ))}
-                </div>
-              </div>
             )}
           </TabsContent>
 
@@ -826,80 +855,89 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="relative">
-                  <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200" />
-                  <div className="space-y-8">
-                    {mockReleases.sort((a, b) => new Date(b.releaseDate || b.scheduledDate || '').getTime() - new Date(a.releaseDate || a.scheduledDate || '').getTime()).map((release) => (
-                      <div key={release.id} className="relative pl-10">
-                        <div className={`absolute left-2 w-5 h-5 rounded-full border-4 border-white ${
-                          release.status === 'published' ? 'bg-green-500' :
-                          release.status === 'rolling-out' ? 'bg-amber-500' :
-                          release.status === 'draft' ? 'bg-gray-400' :
-                          'bg-blue-500'
-                        }`} />
-                        <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow cursor-pointer" onClick={() => setSelectedRelease(release)}>
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center gap-2">
-                              <span className="font-bold">{release.version}</span>
-                              <Badge className={getTypeColor(release.releaseType)}>{release.releaseType}</Badge>
+                {releases.length === 0 ? (
+                  <div className="text-center py-8">
+                    <History className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                    <p className="text-gray-500 dark:text-gray-400">No release history yet</p>
+                  </div>
+                ) : (
+                  <div className="relative">
+                    <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200 dark:bg-gray-700" />
+                    <div className="space-y-8">
+                      {[...releases].sort((a, b) => new Date(b.published_at || b.created_at).getTime() - new Date(a.published_at || a.created_at).getTime()).map((release) => (
+                        <div key={release.id} className="relative pl-10">
+                          <div className={`absolute left-2 w-5 h-5 rounded-full border-4 border-white dark:border-gray-900 ${
+                            release.status === 'published' ? 'bg-green-500' :
+                            release.status === 'archived' ? 'bg-slate-500' :
+                            release.status === 'draft' ? 'bg-gray-400' :
+                            'bg-blue-500'
+                          }`} />
+                          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center gap-2">
+                                <span className="font-bold">{release.version}</span>
+                                <Badge className={getTypeColor(release.release_type)}>{release.release_type}</Badge>
+                              </div>
+                              <span className="text-sm text-gray-500">
+                                {release.published_at
+                                  ? new Date(release.published_at).toLocaleDateString()
+                                  : new Date(release.created_at).toLocaleDateString()}
+                              </span>
                             </div>
-                            <span className="text-sm text-gray-500">{release.releaseDate || release.scheduledDate}</span>
-                          </div>
-                          <h4 className="font-semibold text-gray-900 dark:text-white">{release.title}</h4>
-                          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{release.description}</p>
-                          <div className="flex items-center gap-4 mt-3 text-xs text-gray-500">
-                            <span className="flex items-center gap-1"><Download className="w-3 h-3" />{formatNumber(release.metrics.downloads)}</span>
-                            <span className="flex items-center gap-1"><Eye className="w-3 h-3" />{formatNumber(release.metrics.views)}</span>
-                            <span className="flex items-center gap-1"><Heart className="w-3 h-3" />{release.metrics.likes}</span>
+                            <h4 className="font-semibold text-gray-900 dark:text-white">{release.title}</h4>
+                            {release.description && (
+                              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{release.description}</p>
+                            )}
+                            <div className="flex items-center gap-4 mt-3 text-xs text-gray-500">
+                              <span className="flex items-center gap-1"><Download className="w-3 h-3" />{formatNumber(release.downloads_count || 0)}</span>
+                              <span className="flex items-center gap-1"><Eye className="w-3 h-3" />{formatNumber(release.views_count || 0)}</span>
+                              <span className="flex items-center gap-1"><Heart className="w-3 h-3" />{release.likes_count || 0}</span>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
 
           {/* Roadmap Tab */}
           <TabsContent value="roadmap" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {['Q1 2024', 'Q2 2024'].map(quarter => (
-                <Card key={quarter}>
-                  <CardHeader>
-                    <CardTitle>{quarter}</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {mockRoadmap.filter(r => r.quarter === quarter).map(item => (
-                      <div key={item.id} className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <div className={`w-2 h-2 rounded-full mt-2 ${getRoadmapStatusColor(item.status)}`} />
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between">
-                            <h4 className="font-semibold text-gray-900 dark:text-white">{item.title}</h4>
-                            <Badge variant="outline" className="text-xs">{item.category}</Badge>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Target className="w-5 h-5" />
+                  Product Roadmap
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8">
+                  <Target className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Roadmap Coming Soon</h3>
+                  <p className="text-gray-500 dark:text-gray-400">
+                    Your scheduled and upcoming release notes will appear here.
+                  </p>
+                  {releases.filter(r => r.status === 'scheduled').length > 0 && (
+                    <div className="mt-6 space-y-3">
+                      <h4 className="font-medium text-gray-700 dark:text-gray-300">Scheduled Releases</h4>
+                      {releases.filter(r => r.status === 'scheduled').map(release => (
+                        <div key={release.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <Badge className="bg-blue-100 text-blue-700">{release.version}</Badge>
+                            <span className="font-medium">{release.title}</span>
                           </div>
-                          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{item.description}</p>
-                          <div className="flex items-center gap-2 mt-2">
-                            <Badge className={
-                              item.status === 'completed' ? 'bg-green-100 text-green-700' :
-                              item.status === 'in-progress' ? 'bg-blue-100 text-blue-700' :
-                              item.status === 'delayed' ? 'bg-red-100 text-red-700' :
-                              'bg-gray-100 text-gray-700'
-                            }>
-                              {item.status}
-                            </Badge>
-                            <span className="text-xs text-gray-500 flex items-center gap-1">
-                              <TrendingUp className="w-3 h-3" />
-                              {item.votes} votes
-                            </span>
-                          </div>
+                          <span className="text-sm text-gray-500">
+                            {release.scheduled_at ? new Date(release.scheduled_at).toLocaleDateString() : 'TBD'}
+                          </span>
                         </div>
-                      </div>
-                    ))}
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Feature Flags Tab */}

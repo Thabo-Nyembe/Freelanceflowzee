@@ -57,7 +57,8 @@ import {
   Webhook,
   Mail,
   Copy,
-  Archive
+  Archive,
+  Loader2
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -201,11 +202,11 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
   const [showCreateSearch, setShowCreateSearch] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')
 
-  const { auditEvents, loading } = useAuditEvents({ action: selectedAction })
-  const { complianceChecks } = useComplianceChecks()
+  const { data: auditEvents = [], isLoading: eventsLoading, error: eventsError } = useAuditEvents({ action: selectedAction })
+  const { data: complianceChecks = [], isLoading: checksLoading, error: checksError } = useComplianceChecks()
 
   const displayEvents = useMemo(() => {
-    const events = (auditEvents?.length || 0) > 0 ? auditEvents : (initialEvents || [])
+    const events = auditEvents.length > 0 ? auditEvents : (initialEvents || [])
     return events.map((e) => ({
       ...e,
       source: 'unknown',
@@ -217,7 +218,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
     })) as LogEvent[]
   }, [auditEvents, initialEvents])
 
-  const displayChecks = (complianceChecks || []).length > 0 ? complianceChecks : (initialComplianceChecks || [])
+  const displayChecks = complianceChecks.length > 0 ? complianceChecks : (initialComplianceChecks || [])
 
   // Stats calculations
   const totalEvents = displayEvents.length
@@ -246,6 +247,31 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
       return true
     })
   }, [displayEvents, searchQuery])
+
+  // Loading state
+  if (eventsLoading || checksLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-green-500" />
+          <p className="text-slate-400">Loading audit data...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Error state
+  if (eventsError || checksError) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4 text-center">
+          <AlertCircle className="h-8 w-8 text-red-500" />
+          <p className="text-red-400">Failed to load audit data</p>
+          <p className="text-slate-500 text-sm">{eventsError?.message || checksError?.message}</p>
+        </div>
+      </div>
+    )
+  }
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {

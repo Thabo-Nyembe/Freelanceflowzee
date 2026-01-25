@@ -21,8 +21,11 @@ import {
   Settings, Code, Paintbrush, Type, Layers, ChevronRight,
   Bell, Key, Globe, RefreshCw, Upload, Link2, AlertTriangle,
   CreditCard, FileText, Database, Server,
-  Copy, Trash2, Share2, Grid3x3, Gift, Save, Archive
+  Copy, Trash2, Share2, Grid3x3, Gift, Save, Archive, Loader2
 } from 'lucide-react'
+
+// Supabase hooks for real data
+import { useThemes as useThemesData } from '@/lib/hooks/use-themes-extended'
 
 // Enhanced & Competitive Upgrade Components
 import {
@@ -175,7 +178,68 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
   const [customColors, setCustomColors] = useState<Partial<ColorPalette>>({})
   const [settingsTab, setSettingsTab] = useState('general')
 
-  const themes = mockThemes
+  // Supabase real-time data
+  const { themes: themesData, isLoading } = useThemesData()
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    )
+  }
+
+  // Transform Supabase data to match extended theme format or use empty array
+  const themes: ThemeExtended[] = (themesData || []).map((t: any) => ({
+    id: t.id,
+    name: t.name || '',
+    slug: t.slug || t.name?.toLowerCase().replace(/\s+/g, '-') || '',
+    description: t.description || '',
+    longDescription: t.long_description || t.description || '',
+    thumbnail: t.thumbnail || t.preview_image || '/placeholder-theme.png',
+    screenshots: t.screenshots || [],
+    demoUrl: t.demo_url || t.preview_url || '',
+    status: t.status || 'available',
+    category: t.category || 'modern',
+    pricing: t.is_free ? 'free' : (t.pricing || 'premium'),
+    price: parseFloat(t.price) || 0,
+    discountPrice: t.discount_price ? parseFloat(t.discount_price) : undefined,
+    designer: {
+      id: t.author_id || '',
+      name: t.author_name || t.designer || 'Unknown',
+      avatar: t.author_avatar || '/placeholder-avatar.png',
+      verified: t.author_verified || false,
+      themesCount: t.author_themes_count || 0,
+      totalDownloads: t.author_downloads || 0,
+      rating: t.author_rating || 0,
+      bio: t.author_bio || '',
+      social: {}
+    },
+    framework: t.framework || 'universal',
+    version: t.version || '1.0.0',
+    versionHistory: t.version_history || [],
+    rating: t.rating || 0,
+    reviewsCount: t.reviews_count || 0,
+    reviews: t.reviews || [],
+    downloads: t.install_count || t.downloads_count || 0,
+    favorites: t.favorites_count || 0,
+    features: t.features || [],
+    colors: t.colors || { primary: '#000', secondary: '#fff', accent: '#0066ff', background: '#fff', foreground: '#000', muted: '#666' },
+    typography: t.typography || { headingFont: 'Inter', bodyFont: 'Inter', codeFont: 'Fira Code' },
+    responsive: t.responsive !== false,
+    darkMode: t.dark_mode !== false,
+    rtlSupport: t.rtl_support || false,
+    wcagCompliant: t.wcag_compliant || false,
+    components: t.components_count || 0,
+    layouts: t.layouts_count || 0,
+    pages: t.pages_count || 0,
+    fileSize: t.file_size || '0 MB',
+    lastUpdated: t.updated_at || t.created_at || new Date().toISOString(),
+    compatibility: t.compatibility || [],
+    tags: t.tags || [],
+    license: t.license || 'standard'
+  }))
   const collections = mockCollections
 
   const filteredThemes = useMemo(() => {

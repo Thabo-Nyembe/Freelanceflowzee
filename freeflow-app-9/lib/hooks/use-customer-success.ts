@@ -1,4 +1,7 @@
-import { useSupabaseQuery, useSupabaseMutation } from './base-hooks'
+'use client'
+
+import { useSupabaseQuery, useSupabaseMutation } from './use-supabase-query'
+import { useMemo } from 'react'
 
 export type HealthStatus = 'healthy' | 'at_risk' | 'critical' | 'churned' | 'onboarding' | 'inactive'
 export type HealthTrend = 'improving' | 'stable' | 'declining' | 'unknown'
@@ -146,36 +149,109 @@ export interface CustomerSuccess {
   custom_fields?: any
 }
 
-export function useCustomerSuccess(filters?: {
+export interface CustomerSuccessFilters {
   healthStatus?: HealthStatus | 'all'
   accountTier?: AccountTier | 'all'
   accountStatus?: AccountStatus | 'all'
-}) {
-  let query = useSupabaseQuery<CustomerSuccess>('customer_success')
+}
+
+export function useCustomerSuccess(filters?: CustomerSuccessFilters) {
+  const queryFilters: Record<string, any> = {}
 
   if (filters?.healthStatus && filters.healthStatus !== 'all') {
-    query = query.eq('health_status', filters.healthStatus)
+    queryFilters.health_status = filters.healthStatus
   }
 
   if (filters?.accountTier && filters.accountTier !== 'all') {
-    query = query.eq('account_tier', filters.accountTier)
+    queryFilters.account_tier = filters.accountTier
   }
 
   if (filters?.accountStatus && filters.accountStatus !== 'all') {
-    query = query.eq('account_status', filters.accountStatus)
+    queryFilters.account_status = filters.accountStatus
   }
 
-  return query.order('health_score', { ascending: false })
+  const query = useSupabaseQuery<CustomerSuccess>({
+    table: 'customer_success',
+    select: '*',
+    filters: queryFilters,
+    orderBy: { column: 'health_score', ascending: false }
+  })
+
+  // Calculate stats from data
+  const stats = useMemo(() => {
+    if (!query.data || query.data.length === 0) {
+      return {
+        total: 0,
+        healthy: 0,
+        atRisk: 0,
+        critical: 0,
+        churned: 0,
+        totalARR: 0,
+        totalMRR: 0,
+        avgHealthScore: 0,
+        avgNPS: 0
+      }
+    }
+
+    const healthy = query.data.filter(c => c.health_status === 'healthy').length
+    const atRisk = query.data.filter(c => c.health_status === 'at_risk').length
+    const critical = query.data.filter(c => c.health_status === 'critical').length
+    const churned = query.data.filter(c => c.health_status === 'churned').length
+    const totalARR = query.data.reduce((sum, c) => sum + (c.arr || 0), 0)
+    const totalMRR = query.data.reduce((sum, c) => sum + (c.mrr || 0), 0)
+    const avgHealthScore = query.data.reduce((sum, c) => sum + (c.health_score || 0), 0) / query.data.length
+    const npsScores = query.data.filter(c => c.nps_score !== null && c.nps_score !== undefined)
+    const avgNPS = npsScores.length > 0
+      ? npsScores.reduce((sum, c) => sum + (c.nps_score || 0), 0) / npsScores.length
+      : 0
+
+    return {
+      total: query.data.length,
+      healthy,
+      atRisk,
+      critical,
+      churned,
+      totalARR,
+      totalMRR,
+      avgHealthScore,
+      avgNPS
+    }
+  }, [query.data])
+
+  return {
+    ...query,
+    customerSuccess: query.data,
+    stats,
+    isLoading: query.loading
+  }
 }
 
+export function useCustomerSuccessMutations() {
+  const mutation = useSupabaseMutation<CustomerSuccess>({
+    table: 'customer_success'
+  })
+
+  return {
+    createCustomerSuccess: (data: Partial<CustomerSuccess>) => mutation.mutate(data),
+    updateCustomerSuccess: (data: Partial<CustomerSuccess> & { id: string }) => mutation.mutate(data, data.id),
+    deleteCustomerSuccess: (id: string) => mutation.remove(id),
+    loading: mutation.loading,
+    error: mutation.error
+  }
+}
+
+// Backwards compatibility exports
 export function useCreateCustomerSuccess() {
-  return useSupabaseMutation<CustomerSuccess>('customer_success', 'insert')
+  const { createCustomerSuccess, loading, error } = useCustomerSuccessMutations()
+  return { mutate: createCustomerSuccess, loading, error }
 }
 
 export function useUpdateCustomerSuccess() {
-  return useSupabaseMutation<CustomerSuccess>('customer_success', 'update')
+  const { updateCustomerSuccess, loading, error } = useCustomerSuccessMutations()
+  return { mutate: updateCustomerSuccess, loading, error }
 }
 
 export function useDeleteCustomerSuccess() {
-  return useSupabaseMutation<CustomerSuccess>('customer_success', 'delete')
+  const { deleteCustomerSuccess, loading, error } = useCustomerSuccessMutations()
+  return { mutate: deleteCustomerSuccess, loading, error }
 }

@@ -131,17 +131,18 @@ interface Policy {
   totalEmployees: number
 }
 
-// Mock Data - REMOVED (Batch #7 Migration)
-// Data now comes from Supabase via useCompliance hook
-const mockComplianceQuickActionsBase = [
+// MIGRATED: Batch #7 - Main compliance data now comes from Supabase via useCompliance hook
+// Quick actions config for toolbar
+const complianceQuickActionsBase = [
   { icon: Plus, label: 'New Control', color: 'bg-emerald-100 text-emerald-600' },
   { icon: ClipboardCheck, label: 'Assess', color: 'bg-blue-100 text-blue-600' },
   { icon: FileText, label: 'Report', color: 'bg-purple-100 text-purple-600' },
 ]
-const mockComplianceAIInsights: any[] = []
-const mockComplianceCollaborators: any[] = []
-const mockCompliancePredictions: any[] = []
-const mockComplianceActivities: any[] = []
+// Placeholder arrays for competitive upgrade components (empty until AI/collaboration features are implemented)
+const complianceAIInsights: any[] = []
+const complianceCollaborators: any[] = []
+const compliancePredictions: any[] = []
+const complianceActivities: any[] = []
 
 // Helper function to generate compliance report (accepts data from hook)
 const generateComplianceReport = (data: any[]) => ({
@@ -521,7 +522,7 @@ export default function ComplianceClient() {
   }
 
   // Quick actions with real handlers for the QuickActionsToolbar
-  const complianceQuickActions = mockComplianceQuickActionsBase.map(action => ({
+  const complianceQuickActions = complianceQuickActionsBase.map(action => ({
     ...action,
     action: action.label === 'New Control'
       ? () => {
@@ -2196,18 +2197,18 @@ export default function ComplianceClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockComplianceAIInsights}
+              insights={complianceAIInsights}
               title="Compliance Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockComplianceCollaborators}
+              collaborators={complianceCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockCompliancePredictions}
+              predictions={compliancePredictions}
               title="Compliance Forecasts"
             />
           </div>
@@ -2215,7 +2216,7 @@ export default function ComplianceClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockComplianceActivities}
+            activities={complianceActivities}
             title="Compliance Activity"
             maxItems={5}
           />
@@ -2602,7 +2603,7 @@ export default function ComplianceClient() {
                   <SelectValue placeholder="Select team member" />
                 </SelectTrigger>
                 <SelectContent>
-                  {mockComplianceCollaborators.map(member => (
+                  {complianceCollaborators.map(member => (
                     <SelectItem key={member.id} value={member.id}>
                       <div className="flex items-center gap-2">
                         <Avatar className="h-6 w-6">

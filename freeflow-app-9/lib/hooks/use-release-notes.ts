@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
 export interface ReleaseNote {
@@ -38,11 +38,47 @@ export interface ReleaseNotesStats {
   avgLikes: number
 }
 
-export function useReleaseNotes(initialReleases: ReleaseNote[], initialStats: ReleaseNotesStats) {
-  const [releases, setReleases] = useState<ReleaseNote[]>(initialReleases)
-  const [stats, setStats] = useState<ReleaseNotesStats>(initialStats)
+export function useReleaseNotes(initialReleases?: ReleaseNote[], initialStats?: ReleaseNotesStats) {
+  const [releases, setReleases] = useState<ReleaseNote[]>(initialReleases || [])
+  const [stats, setStats] = useState<ReleaseNotesStats>(initialStats || {
+    total: 0,
+    published: 0,
+    draft: 0,
+    scheduled: 0,
+    totalDownloads: 0,
+    avgLikes: 0
+  })
+  const [loading, setLoading] = useState(!initialReleases || initialReleases.length === 0)
+  const [error, setError] = useState<Error | null>(null)
   const supabase = createClient()
 
+  // Fetch release notes from Supabase
+  const fetchReleaseNotes = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const { data, error: fetchError } = await supabase
+        .from('release_notes')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (fetchError) throw fetchError
+      setReleases(data || [])
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Failed to fetch release notes'))
+    } finally {
+      setLoading(false)
+    }
+  }, [supabase])
+
+  // Initial fetch if no initial data provided
+  useEffect(() => {
+    if (!initialReleases || initialReleases.length === 0) {
+      fetchReleaseNotes()
+    }
+  }, [initialReleases, fetchReleaseNotes])
+
+  // Real-time subscription
   useEffect(() => {
     const channel = supabase
       .channel('release_notes_changes')
@@ -60,6 +96,7 @@ export function useReleaseNotes(initialReleases: ReleaseNote[], initialStats: Re
     return () => { supabase.removeChannel(channel) }
   }, [supabase])
 
+  // Update stats when releases change
   useEffect(() => {
     const published = releases.filter(r => r.status === 'published').length
     const draft = releases.filter(r => r.status === 'draft').length
@@ -79,5 +116,5 @@ export function useReleaseNotes(initialReleases: ReleaseNote[], initialStats: Re
     })
   }, [releases])
 
-  return { releases, stats }
+  return { releases, stats, loading, error, refetch: fetchReleaseNotes }
 }

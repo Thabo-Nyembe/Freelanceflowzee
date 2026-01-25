@@ -247,7 +247,7 @@ function generateHealthReport(customers: Customer[]) {
 
 export default function CustomerSuccessClient() {
   // Use the customer success hook for data fetching
-  const { data: dbCustomerSuccess, isLoading: loading, error, refetch } = useCustomerSuccess()
+  const { customerSuccess: dbCustomerSuccess, isLoading: loading, error, refetch } = useCustomerSuccess()
 
   // Map DB data to UI types using useMemo
   const customers = useMemo(() => {
