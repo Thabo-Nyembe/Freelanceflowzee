@@ -5,6 +5,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('recordings');
 
 export interface RecordingPayload {
   title: string;
@@ -84,7 +87,7 @@ export async function GET(request: NextRequest) {
     const { data: recordings, error, count } = await query;
 
     if (error) {
-      console.error('Error fetching recordings:', error);
+      logger.error('Error fetching recordings', { error });
       return NextResponse.json(
         { error: 'Failed to fetch recordings' },
         { status: 500 }
@@ -133,7 +136,7 @@ export async function GET(request: NextRequest) {
       offset,
     });
   } catch (error) {
-    console.error('Error in GET /api/recordings:', error);
+    logger.error('Error in GET /api/recordings', { error });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -194,7 +197,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (insertError) {
-      console.error('Error creating recording:', insertError);
+      logger.error('Error creating recording', { error: insertError });
       return NextResponse.json(
         { error: 'Failed to create recording' },
         { status: 500 }
@@ -226,7 +229,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(transformedRecording, { status: 201 });
   } catch (error) {
-    console.error('Error in POST /api/recordings:', error);
+    logger.error('Error in POST /api/recordings', { error });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -299,7 +302,7 @@ export async function PATCH(request: NextRequest) {
       .single();
 
     if (updateError) {
-      console.error('Error updating recording:', updateError);
+      logger.error('Error updating recording', { error: updateError });
       return NextResponse.json(
         { error: 'Failed to update recording' },
         { status: 500 }
@@ -331,7 +334,7 @@ export async function PATCH(request: NextRequest) {
 
     return NextResponse.json(transformedRecording);
   } catch (error) {
-    console.error('Error in PATCH /api/recordings:', error);
+    logger.error('Error in PATCH /api/recordings', { error });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -390,7 +393,7 @@ export async function DELETE(request: NextRequest) {
       .eq('id', id);
 
     if (deleteError) {
-      console.error('Error deleting recording:', deleteError);
+      logger.error('Error deleting recording', { error: deleteError });
       return NextResponse.json(
         { error: 'Failed to delete recording' },
         { status: 500 }
@@ -399,7 +402,7 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error in DELETE /api/recordings:', error);
+    logger.error('Error in DELETE /api/recordings', { error });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

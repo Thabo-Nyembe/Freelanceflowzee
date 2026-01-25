@@ -6,6 +6,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { z } from 'zod';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('goals-check-in');
 
 const checkInSchema = z.object({
   status: z.enum(['active', 'on_track', 'at_risk', 'behind', 'completed']).optional(),
@@ -68,7 +71,7 @@ export async function POST(
       .single();
 
     if (checkInError) {
-      console.error('Failed to create check-in:', checkInError);
+      logger.error('Failed to create check-in', { error: checkInError });
       return NextResponse.json(
         { error: 'Failed to create check-in' },
         { status: 500 }
@@ -107,7 +110,7 @@ export async function POST(
         { status: 400 }
       );
     }
-    console.error('Failed to create check-in:', error);
+    logger.error('Failed to create check-in', { error });
     return NextResponse.json(
       { error: 'Failed to create check-in' },
       { status: 500 }
@@ -156,7 +159,7 @@ export async function GET(
       data: checkIns || [],
     });
   } catch (error) {
-    console.error('Failed to fetch check-ins:', error);
+    logger.error('Failed to fetch check-ins', { error });
     return NextResponse.json(
       { error: 'Failed to fetch check-ins' },
       { status: 500 }

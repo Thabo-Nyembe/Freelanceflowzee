@@ -8,6 +8,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { ssoService } from '@/lib/auth/sso-service'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('auth-api')
 
 /**
  * Get SAML SP Metadata
@@ -48,7 +51,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       ...result
     })
   } catch (error: unknown) {
-    console.error('SAML login initiation error:', error)
+    logger.error('SAML login initiation error', { error })
     const message = error instanceof Error ? error.message : 'Failed to initiate SAML login'
     return NextResponse.json(
       { success: false, error: message },
@@ -112,7 +115,7 @@ export async function PUT(request: NextRequest): Promise<NextResponse> {
 
     return response
   } catch (error: unknown) {
-    console.error('SAML response processing error:', error)
+    logger.error('SAML response processing error', { error })
     const message = error instanceof Error ? error.message : 'Failed to process SAML response'
     return NextResponse.json(
       { success: false, error: message },

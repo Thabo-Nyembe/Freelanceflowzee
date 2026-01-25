@@ -5,6 +5,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('suggestions');
 
 export interface SuggestionPayload {
   documentId: string;
@@ -77,7 +80,7 @@ export async function GET(request: NextRequest) {
     const { data: suggestions, error } = await query;
 
     if (error) {
-      console.error('Error fetching suggestions:', error);
+      logger.error('Error fetching suggestions', { error });
       return NextResponse.json(
         { error: 'Failed to fetch suggestions' },
         { status: 500 }
@@ -115,7 +118,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(transformedSuggestions);
   } catch (error) {
-    console.error('Error in GET /api/suggestions:', error);
+    logger.error('Error in GET /api/suggestions', { error });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -184,7 +187,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (insertError) {
-      console.error('Error creating suggestion:', insertError);
+      logger.error('Error creating suggestion', { error: insertError });
       return NextResponse.json(
         { error: 'Failed to create suggestion' },
         { status: 500 }
@@ -212,7 +215,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(transformedSuggestion, { status: 201 });
   } catch (error) {
-    console.error('Error in POST /api/suggestions:', error);
+    logger.error('Error in POST /api/suggestions', { error });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -257,7 +260,7 @@ export async function PATCH(request: NextRequest) {
         .single();
 
       if (updateError) {
-        console.error('Error updating suggestion:', updateError);
+        logger.error('Error updating suggestion', { error: updateError });
         return NextResponse.json(
           { error: 'Failed to update suggestion' },
           { status: 500 }
@@ -277,7 +280,7 @@ export async function PATCH(request: NextRequest) {
       { status: 400 }
     );
   } catch (error) {
-    console.error('Error in PATCH /api/suggestions:', error);
+    logger.error('Error in PATCH /api/suggestions', { error });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -336,7 +339,7 @@ export async function DELETE(request: NextRequest) {
       .eq('id', id);
 
     if (deleteError) {
-      console.error('Error deleting suggestion:', deleteError);
+      logger.error('Error deleting suggestion', { error: deleteError });
       return NextResponse.json(
         { error: 'Failed to delete suggestion' },
         { status: 500 }
@@ -345,7 +348,7 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error in DELETE /api/suggestions:', error);
+    logger.error('Error in DELETE /api/suggestions', { error });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

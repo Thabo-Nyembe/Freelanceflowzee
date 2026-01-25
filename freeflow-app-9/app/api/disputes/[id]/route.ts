@@ -6,6 +6,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { z } from 'zod';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('disputes-detail');
 
 const updateDisputeSchema = z.object({
   action: z.enum([
@@ -123,7 +126,7 @@ export async function GET(
       can_resolve: isMediator || dispute.mediator_id === user.id,
     });
   } catch (error) {
-    console.error('Dispute GET error:', error);
+    logger.error('Dispute GET error', { error });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -358,7 +361,7 @@ export async function PATCH(
         { status: 400 }
       );
     }
-    console.error('Dispute PATCH error:', error);
+    logger.error('Dispute PATCH error', { error });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

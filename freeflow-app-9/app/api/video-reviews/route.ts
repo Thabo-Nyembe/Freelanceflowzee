@@ -5,6 +5,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('video-reviews');
 
 // GET - Get review sessions
 export async function GET(request: NextRequest) {
@@ -114,7 +117,7 @@ export async function GET(request: NextRequest) {
       limit,
     });
   } catch (error) {
-    console.error('Video review sessions GET error:', error);
+    logger.error('Video review sessions GET error', { error });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -247,7 +250,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(completeSession, { status: 201 });
   } catch (error) {
-    console.error('Video review session POST error:', error);
+    logger.error('Video review session POST error', { error });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -312,7 +315,7 @@ export async function PATCH(request: NextRequest) {
 
     return NextResponse.json(session);
   } catch (error) {
-    console.error('Video review session PATCH error:', error);
+    logger.error('Video review session PATCH error', { error });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -357,7 +360,7 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Video review session DELETE error:', error);
+    logger.error('Video review session DELETE error', { error });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

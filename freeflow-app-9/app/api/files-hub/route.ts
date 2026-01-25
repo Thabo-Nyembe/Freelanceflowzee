@@ -17,6 +17,9 @@ import {
   getRecentFiles,
   searchFiles
 } from '@/lib/files-hub-queries'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('files-hub')
 
 export async function GET(request: NextRequest) {
   try {
@@ -89,7 +92,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid type parameter' }, { status: 400 })
     }
   } catch (error) {
-    console.error('Files Hub API error:', error)
+    logger.error('Files Hub API error', { error })
     return NextResponse.json(
       { error: 'Failed to fetch files data' },
       { status: 500 }
@@ -193,7 +196,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
   } catch (error) {
-    console.error('Files Hub API error:', error)
+    logger.error('Files Hub API error', { error })
     return NextResponse.json(
       { error: 'Failed to process files request' },
       { status: 500 }

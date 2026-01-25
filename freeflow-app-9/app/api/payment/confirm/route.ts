@@ -6,6 +6,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import Stripe from 'stripe';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('payment-confirm');
 
 // Initialize Stripe if API key is available
 const stripe = process.env.STRIPE_SECRET_KEY
@@ -48,7 +51,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.error('Payment confirm error:', errorMessage);
+    logger.error('Payment confirm error', { error: errorMessage });
     return NextResponse.json(
       { success: false, error: errorMessage },
       { status: 500 }
@@ -86,7 +89,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     });
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.error('Payment confirm GET error:', errorMessage);
+    logger.error('Payment confirm GET error', { error: errorMessage });
     return NextResponse.json(
       { success: false, error: errorMessage },
       { status: 500 }
@@ -167,7 +170,7 @@ async function confirmPaymentIntent(data: any) {
       }
     });
   } catch (stripeError: any) {
-    console.error('Stripe confirmation error:', stripeError);
+    logger.error('Stripe confirmation error', { error: stripeError });
     return NextResponse.json(
       {
         success: false,
@@ -329,7 +332,7 @@ async function processWebhook(request: NextRequest) {
 
     return NextResponse.json({ received: true });
   } catch (err: any) {
-    console.error('Webhook error:', err.message);
+    logger.error('Webhook error', { error: err.message });
     return NextResponse.json(
       { success: false, error: `Webhook error: ${err.message}` },
       { status: 400 }
@@ -635,7 +638,7 @@ async function processRefund(data: any) {
       }
     });
   } catch (stripeError: any) {
-    console.error('Stripe refund error:', stripeError);
+    logger.error('Stripe refund error', { error: stripeError });
     return NextResponse.json(
       {
         success: false,

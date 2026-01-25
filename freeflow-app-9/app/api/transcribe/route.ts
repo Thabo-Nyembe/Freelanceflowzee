@@ -12,6 +12,9 @@ import {
   whisperService,
   TranscriptionOptions,
 } from '@/lib/whisper/whisper-service'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('transcription-api')
 
 /**
  * Start a new transcription job
@@ -162,7 +165,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       result,
     })
   } catch (error) {
-    console.error('Transcription error:', error)
+    logger.error('Transcription error', { error })
     return NextResponse.json(
       {
         error: error instanceof Error ? error.message : 'Failed to transcribe audio',
@@ -266,7 +269,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       })),
     })
   } catch (error) {
-    console.error('Get transcription job error:', error)
+    logger.error('Get transcription job error', { error })
     return NextResponse.json(
       { error: 'Failed to get transcription job' },
       { status: 500 }
@@ -320,7 +323,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
       message: 'Transcription job deleted',
     })
   } catch (error) {
-    console.error('Delete transcription job error:', error)
+    logger.error('Delete transcription job error', { error })
     return NextResponse.json(
       { error: 'Failed to delete transcription job' },
       { status: 500 }

@@ -8,6 +8,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { webAuthnService } from '@/lib/auth/webauthn-service'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('auth-api')
 
 /**
  * Start passkey authentication - generates WebAuthn options
@@ -42,7 +45,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       challengeId
     })
   } catch (error: unknown) {
-    console.error('Passkey authentication start error:', error)
+    logger.error('Passkey authentication start error', { error })
     const message = error instanceof Error ? error.message : 'Failed to start authentication'
     return NextResponse.json(
       { success: false, error: message },
@@ -135,7 +138,7 @@ export async function PUT(request: NextRequest): Promise<NextResponse> {
       { headers: responseHeaders }
     )
   } catch (error: unknown) {
-    console.error('Passkey authentication complete error:', error)
+    logger.error('Passkey authentication complete error', { error })
     const message = error instanceof Error ? error.message : 'Failed to complete authentication'
     return NextResponse.json(
       { success: false, error: message },

@@ -9,6 +9,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { z } from 'zod';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('jobs');
 
 const createJobSchema = z.object({
   title: z.string().min(10).max(200),
@@ -204,7 +207,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Jobs GET error:', error);
+    logger.error('Jobs GET error', { error });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -279,7 +282,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (jobError) {
-      console.error('Job creation error:', jobError);
+      logger.error('Job creation error', { error: jobError });
       return NextResponse.json({ error: jobError.message }, { status: 500 });
     }
 
@@ -321,7 +324,7 @@ export async function POST(request: NextRequest) {
               .eq('id', job.id)
               .then(() => {});
           }
-        }).catch(console.error);
+        }).catch((err) => logger.error('Embedding creation error', { error: err }));
       } catch {
         // Embedding creation is optional
       }
@@ -335,7 +338,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    console.error('Jobs POST error:', error);
+    logger.error('Jobs POST error', { error });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

@@ -6,6 +6,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { eventTrackingService } from '@/lib/email/event-tracking-service'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('email-tracking')
 
 // Allowed domains for redirect URLs (prevent open redirect vulnerability)
 const ALLOWED_REDIRECT_DOMAINS = [
@@ -116,7 +119,7 @@ export async function GET(request: NextRequest) {
       // Redirect to original URL with validation
       const decodedUrl = decodeURIComponent(url)
       if (!isValidRedirectUrl(decodedUrl)) {
-        console.warn('Blocked redirect to untrusted URL:', decodedUrl)
+        logger.warn('Blocked redirect to untrusted URL', { url: decodedUrl })
         return new NextResponse(TRACKING_PIXEL, {
           headers: { 'Content-Type': 'image/gif' }
         })
@@ -131,7 +134,7 @@ export async function GET(request: NextRequest) {
       }
     })
   } catch (error) {
-    console.error('Tracking error:', error)
+    logger.error('Tracking error', { error })
 
     // Always return pixel/redirect to not break user experience
     const url = new URL(request.url).searchParams.get('u')

@@ -6,6 +6,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { z } from 'zod';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('job-proposals');
 
 const createProposalSchema = z.object({
   job_id: z.string().uuid(),
@@ -65,7 +68,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ proposals: proposals || [] });
   } catch (error) {
-    console.error('Proposals GET error:', error);
+    logger.error('Proposals GET error', { error });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -185,7 +188,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    console.error('Proposals POST error:', error);
+    logger.error('Proposals POST error', { error });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

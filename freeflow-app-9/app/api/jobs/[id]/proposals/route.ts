@@ -5,6 +5,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('job-proposals');
 
 // GET - Get proposals for a job (client only)
 export async function GET(
@@ -55,7 +58,7 @@ export async function GET(
 
     return NextResponse.json({ proposals: proposals || [] });
   } catch (error) {
-    console.error('Job proposals GET error:', error);
+    logger.error('Job proposals GET error', { error });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

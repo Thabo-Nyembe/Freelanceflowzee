@@ -17,6 +17,9 @@ import {
   CreateCallOptions,
   JoinCallOptions,
 } from '@/lib/livekit/voice-video-service';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('calls-api');
 
 // ============================================================================
 // POST - Call Actions
@@ -219,7 +222,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
     }
   } catch (error) {
-    console.error('[Calls API] Error:', error);
+    logger.error('Failed to process call request', { error });
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to process call request' },
       { status: 500 }
@@ -305,7 +308,7 @@ export async function GET(request: NextRequest) {
       calls,
     });
   } catch (error) {
-    console.error('[Calls API] Error:', error);
+    logger.error('Failed to fetch calls', { error });
     return NextResponse.json(
       { error: 'Failed to fetch calls' },
       { status: 500 }

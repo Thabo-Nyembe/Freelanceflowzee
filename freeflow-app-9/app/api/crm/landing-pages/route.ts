@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('landing-pages');
 
 // Phase 7 Gap #3: Landing Page Builder
 // Priority: MEDIUM | Competitor: HubSpot
@@ -661,7 +664,7 @@ export async function POST(request: NextRequest) {
         );
     }
   } catch (error) {
-    console.error('Landing Pages API error:', error);
+    logger.error('Landing Pages API error', { error });
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }
@@ -706,7 +709,7 @@ export async function GET(request: NextRequest) {
       }
     });
   } catch (error) {
-    console.error('Landing Pages GET error:', error);
+    logger.error('Landing Pages GET error', { error });
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

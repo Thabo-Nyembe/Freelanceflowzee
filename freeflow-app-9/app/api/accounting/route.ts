@@ -13,6 +13,9 @@ import {
   JournalLine,
 } from '@/lib/accounting/double-entry';
 import { z } from 'zod';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('accounting-api');
 
 // ============================================================================
 // SCHEMAS
@@ -563,7 +566,7 @@ export async function POST(request: NextRequest) {
         );
     }
   } catch (error) {
-    console.error('Accounting API error:', error);
+    logger.error('Accounting API error', { error });
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Validation error', details: error.errors },
@@ -792,7 +795,7 @@ export async function GET(request: NextRequest) {
         );
     }
   } catch (error) {
-    console.error('Accounting API GET error:', error);
+    logger.error('Accounting API GET error', { error });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -885,7 +888,7 @@ export async function PUT(request: NextRequest) {
         );
     }
   } catch (error) {
-    console.error('Accounting API PUT error:', error);
+    logger.error('Accounting API PUT error', { error });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -969,7 +972,7 @@ export async function DELETE(request: NextRequest) {
         );
     }
   } catch (error) {
-    console.error('Accounting API DELETE error:', error);
+    logger.error('Accounting API DELETE error', { error });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

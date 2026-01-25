@@ -7,6 +7,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { ssoService } from '@/lib/auth/sso-service'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('sso-callback')
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 
@@ -132,7 +135,7 @@ export async function GET(
       `${APP_URL}/auth/error?error=${encodeURIComponent('Unknown provider')}`
     )
   } catch (error) {
-    console.error('SSO callback error:', error)
+    logger.error('SSO callback error', { error })
     const message = error instanceof Error ? error.message : 'Authentication failed'
     return NextResponse.redirect(
       `${APP_URL}/auth/error?error=${encodeURIComponent(message)}`
@@ -197,7 +200,7 @@ export async function POST(
 
     return response
   } catch (error) {
-    console.error('SAML POST callback error:', error)
+    logger.error('SAML POST callback error', { error })
     const message = error instanceof Error ? error.message : 'SAML authentication failed'
     return NextResponse.redirect(
       `${APP_URL}/auth/error?error=${encodeURIComponent(message)}`

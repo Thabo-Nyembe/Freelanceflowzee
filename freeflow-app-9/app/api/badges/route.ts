@@ -11,6 +11,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getServerSession } from '@/lib/auth'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('badges')
 
 // ============================================================================
 // TYPES
@@ -133,7 +136,7 @@ export async function GET(request: NextRequest) {
     const { data: badges, error, count } = await query
 
     if (error) {
-      console.error('Badges query error:', error)
+      logger.error('Badges query error', { error })
       return NextResponse.json(
         { error: 'Failed to fetch badges' },
         { status: 500 }
@@ -167,7 +170,7 @@ export async function GET(request: NextRequest) {
       }
     })
   } catch (error) {
-    console.error('Badges GET error:', error)
+    logger.error('Badges GET error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -213,7 +216,7 @@ export async function POST(request: NextRequest) {
         return handleCreateBadge(supabase, userId, body)
     }
   } catch (error) {
-    console.error('Badges POST error:', error)
+    logger.error('Badges POST error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -286,7 +289,7 @@ export async function PUT(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('Badge update error:', error)
+      logger.error('Badge update error', { error })
       return NextResponse.json(
         { error: 'Failed to update badge' },
         { status: 500 }
@@ -299,7 +302,7 @@ export async function PUT(request: NextRequest) {
       message: 'Badge updated successfully'
     })
   } catch (error) {
-    console.error('Badges PUT error:', error)
+    logger.error('Badges PUT error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -362,7 +365,7 @@ export async function DELETE(request: NextRequest) {
       .eq('id', badgeId)
 
     if (error) {
-      console.error('Badge deletion error:', error)
+      logger.error('Badge deletion error', { error })
       return NextResponse.json(
         { error: 'Failed to delete badge' },
         { status: 500 }
@@ -374,7 +377,7 @@ export async function DELETE(request: NextRequest) {
       message: `Badge "${badge.name}" deleted successfully`
     })
   } catch (error) {
-    console.error('Badges DELETE error:', error)
+    logger.error('Badges DELETE error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -434,7 +437,7 @@ async function handleCreateBadge(
     .single()
 
   if (error) {
-    console.error('Badge creation error:', error)
+    logger.error('Badge creation error', { error })
     return NextResponse.json(
       { error: 'Failed to create badge' },
       { status: 500 }
@@ -507,7 +510,7 @@ async function handleAwardBadge(
     .single()
 
   if (error) {
-    console.error('Badge award error:', error)
+    logger.error('Badge award error', { error })
     return NextResponse.json(
       { error: 'Failed to award badge' },
       { status: 500 }
@@ -658,7 +661,7 @@ async function getBadgeStats(
       completion_rate: totalBadges ? Math.round(((earnedBadges || 0) / totalBadges) * 100) : 0
     }
   } catch (error) {
-    console.error('Error getting badge stats:', error)
+    logger.error('Error getting badge stats', { error })
     return {
       total_badges: 0,
       earned_badges: 0,

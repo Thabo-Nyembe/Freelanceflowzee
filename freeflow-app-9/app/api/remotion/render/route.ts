@@ -13,6 +13,9 @@ import {
   RenderJobConfig,
   RenderProgress,
 } from '@/lib/remotion/remotion-service'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('remotion-render-api')
 
 // Store SSE connections for progress updates
 const progressConnections = new Map<string, ReadableStreamDefaultController>()
@@ -190,7 +193,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       },
     })
   } catch (error) {
-    console.error('Render error:', error)
+    logger.error('Render error', { error })
     return NextResponse.json(
       {
         error: error instanceof Error ? error.message : 'Failed to render video',
@@ -341,7 +344,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       })),
     })
   } catch (error) {
-    console.error('Get render job error:', error)
+    logger.error('Get render job error', { error })
     return NextResponse.json(
       { error: 'Failed to get render job' },
       { status: 500 }
@@ -420,7 +423,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
       message: 'Job deleted',
     })
   } catch (error) {
-    console.error('Delete render job error:', error)
+    logger.error('Delete render job error', { error })
     return NextResponse.json(
       { error: 'Failed to delete render job' },
       { status: 500 }

@@ -7,6 +7,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('ai-agents')
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
@@ -40,7 +43,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const { data: agents, error } = await query
 
     if (error) {
-      console.error('Error fetching agents:', error)
+      logger.error('Error fetching agents', { error })
       return NextResponse.json(
         { error: 'Failed to fetch agents' },
         { status: 500 }
@@ -49,7 +52,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     return NextResponse.json({ agents })
   } catch (error) {
-    console.error('Get agents error:', error)
+    logger.error('Get agents error', { error })
     return NextResponse.json(
       { error: 'Failed to fetch agents' },
       { status: 500 }
@@ -157,7 +160,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       .single()
 
     if (error) {
-      console.error('Error creating agent:', error)
+      logger.error('Error creating agent', { error })
       return NextResponse.json(
         { error: 'Failed to create agent' },
         { status: 500 }
@@ -166,7 +169,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     return NextResponse.json({ agent }, { status: 201 })
   } catch (error) {
-    console.error('Create agent error:', error)
+    logger.error('Create agent error', { error })
     return NextResponse.json(
       { error: 'Failed to create agent' },
       { status: 500 }

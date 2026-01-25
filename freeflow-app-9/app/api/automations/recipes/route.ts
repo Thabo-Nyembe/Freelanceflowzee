@@ -6,6 +6,9 @@ import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { recipeBuilderService } from '@/lib/automations/recipe-builder';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('automations-recipes');
 
 // Demo user for unauthenticated access
 const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001';
@@ -144,7 +147,7 @@ export async function GET(request: NextRequest) {
         const { data, error } = await query;
 
         if (error) {
-          console.error('Error fetching recipes:', error);
+          logger.error('Error fetching recipes', { error });
           return NextResponse.json({ error: error.message }, { status: 500 });
         }
 
@@ -162,7 +165,7 @@ export async function GET(request: NextRequest) {
           .rpc('get_recipe_full', { p_recipe_id: recipeId });
 
         if (error) {
-          console.error('Error fetching recipe:', error);
+          logger.error('Error fetching recipe', { error });
           return NextResponse.json({ error: error.message }, { status: 500 });
         }
 
@@ -192,7 +195,7 @@ export async function GET(request: NextRequest) {
         const { data, error } = await query;
 
         if (error) {
-          console.error('Error fetching templates:', error);
+          logger.error('Error fetching templates', { error });
           return NextResponse.json({ error: error.message }, { status: 500 });
         }
 
@@ -221,7 +224,7 @@ export async function GET(request: NextRequest) {
         const { data, error } = await query;
 
         if (error) {
-          console.error('Error fetching executions:', error);
+          logger.error('Error fetching executions', { error });
           return NextResponse.json({ error: error.message }, { status: 500 });
         }
 
@@ -241,7 +244,7 @@ export async function GET(request: NextRequest) {
           .order('created_at', { ascending: true });
 
         if (error) {
-          console.error('Error fetching execution logs:', error);
+          logger.error('Error fetching execution logs', { error });
           return NextResponse.json({ error: error.message }, { status: 500 });
         }
 
@@ -258,7 +261,7 @@ export async function GET(request: NextRequest) {
           .eq('user_id', userId);
 
         if (error) {
-          console.error('Error fetching integrations:', error);
+          logger.error('Error fetching integrations', { error });
           return NextResponse.json({ error: error.message }, { status: 500 });
         }
 
@@ -319,7 +322,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Unknown resource' }, { status: 400 });
     }
   } catch (error) {
-    console.error('Error in GET /api/automations/recipes:', error);
+    logger.error('Error in GET /api/automations/recipes', { error });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -361,7 +364,7 @@ export async function POST(request: NextRequest) {
           .single();
 
         if (recipeError) {
-          console.error('Error creating recipe:', recipeError);
+          logger.error('Error creating recipe', { error: recipeError });
           return NextResponse.json({ error: recipeError.message }, { status: 500 });
         }
 
@@ -386,7 +389,7 @@ export async function POST(request: NextRequest) {
             .insert(nodesData);
 
           if (nodesError) {
-            console.error('Error creating nodes:', nodesError);
+            logger.error('Error creating nodes', { error: nodesError });
           }
         }
 
@@ -416,7 +419,7 @@ export async function POST(request: NextRequest) {
             .insert(edgesData);
 
           if (edgesError) {
-            console.error('Error creating edges:', edgesError);
+            logger.error('Error creating edges', { error: edgesError });
           }
         }
 
@@ -436,7 +439,7 @@ export async function POST(request: NextRequest) {
             .insert(variablesData);
 
           if (variablesError) {
-            console.error('Error creating variables:', variablesError);
+            logger.error('Error creating variables', { error: variablesError });
           }
         }
 
@@ -483,7 +486,7 @@ export async function POST(request: NextRequest) {
           .single();
 
         if (execError) {
-          console.error('Error creating execution:', execError);
+          logger.error('Error creating execution', { error: execError });
           return NextResponse.json({ error: execError.message }, { status: 500 });
         }
 
@@ -561,7 +564,7 @@ export async function POST(request: NextRequest) {
           .eq('id', execution.id);
 
         if (updateError) {
-          console.error('Error updating execution:', updateError);
+          logger.error('Error updating execution', { error: updateError });
         }
 
         // Save execution logs
@@ -580,7 +583,7 @@ export async function POST(request: NextRequest) {
             .insert(logsData);
 
           if (logsError) {
-            console.error('Error saving logs:', logsError);
+            logger.error('Error saving logs', { error: logsError });
           }
         }
 
@@ -612,7 +615,7 @@ export async function POST(request: NextRequest) {
           });
 
         if (error) {
-          console.error('Error cloning recipe:', error);
+          logger.error('Error cloning recipe', { error });
           return NextResponse.json({ error: error.message }, { status: 500 });
         }
 
@@ -644,7 +647,7 @@ export async function POST(request: NextRequest) {
           });
 
         if (error) {
-          console.error('Error creating from template:', error);
+          logger.error('Error creating from template', { error });
           return NextResponse.json({ error: error.message }, { status: 500 });
         }
 
@@ -784,7 +787,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Unknown action' }, { status: 400 });
     }
   } catch (error) {
-    console.error('Error in POST /api/automations/recipes:', error);
+    logger.error('Error in POST /api/automations/recipes', { error });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -845,7 +848,7 @@ export async function PUT(request: NextRequest) {
         .eq('id', recipeId);
 
       if (recipeError) {
-        console.error('Error updating recipe:', recipeError);
+        logger.error('Error updating recipe', { error: recipeError });
         return NextResponse.json({ error: recipeError.message }, { status: 500 });
       }
     }
@@ -941,7 +944,7 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({ data: recipe });
   } catch (error) {
-    console.error('Error in PUT /api/automations/recipes:', error);
+    logger.error('Error in PUT /api/automations/recipes', { error });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -983,7 +986,7 @@ export async function DELETE(request: NextRequest) {
         .eq('id', recipeId);
 
       if (error) {
-        console.error('Error deleting recipe:', error);
+        logger.error('Error deleting recipe', { error });
         return NextResponse.json({ error: error.message }, { status: 500 });
       }
     } else {
@@ -994,14 +997,14 @@ export async function DELETE(request: NextRequest) {
         .eq('id', recipeId);
 
       if (error) {
-        console.error('Error archiving recipe:', error);
+        logger.error('Error archiving recipe', { error });
         return NextResponse.json({ error: error.message }, { status: 500 });
       }
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error in DELETE /api/automations/recipes:', error);
+    logger.error('Error in DELETE /api/automations/recipes', { error });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

@@ -2,6 +2,9 @@ import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth.config'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('activity')
 
 export async function GET(request: Request) {
   try {
@@ -30,7 +33,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ activities: data })
   } catch (error) {
-    console.error('Activity API error:', error)
+    logger.error('Activity API error', { error })
     return NextResponse.json(
       { error: 'Failed to fetch activity' },
       { status: 500 }
@@ -72,7 +75,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ activity: data })
   } catch (error) {
-    console.error('Activity POST error:', error)
+    logger.error('Activity POST error', { error })
     return NextResponse.json(
       { error: 'Failed to create activity' },
       { status: 500 }

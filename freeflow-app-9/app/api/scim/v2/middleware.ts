@@ -6,6 +6,9 @@
 
 import { NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('scim-api')
 
 export interface SCIMAuthResult {
   success: boolean
@@ -75,7 +78,7 @@ export async function validateSCIMAuth(request: NextRequest): Promise<SCIMAuthRe
       organizationId: scimToken.organization_id
     }
   } catch (err) {
-    console.error('SCIM auth error:', err)
+    logger.error('SCIM auth error', { error: err })
     return {
       success: false,
       error: 'Authentication failed'

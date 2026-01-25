@@ -8,6 +8,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { webAuthnService } from '@/lib/auth/webauthn-service'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('auth-api')
 
 /**
  * List user's passkeys
@@ -45,7 +48,7 @@ export async function GET(): Promise<NextResponse> {
       count: safePasskeys.length
     })
   } catch (error: unknown) {
-    console.error('List passkeys error:', error)
+    logger.error('List passkeys error', { error })
     const message = error instanceof Error ? error.message : 'Failed to list passkeys'
     return NextResponse.json(
       { success: false, error: message },
@@ -90,7 +93,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       message: 'Save these codes securely. They will only be shown once.'
     })
   } catch (error: unknown) {
-    console.error('Generate backup codes error:', error)
+    logger.error('Generate backup codes error', { error })
     const message = error instanceof Error ? error.message : 'Failed to generate backup codes'
     return NextResponse.json(
       { success: false, error: message },

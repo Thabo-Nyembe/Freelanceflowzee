@@ -11,6 +11,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('video-editor-projects-api')
 
 /**
  * Create new video editor project
@@ -75,7 +78,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       .single()
 
     if (createError) {
-      console.error('Create project error:', createError)
+      logger.error('Create project error', { error: createError })
       return NextResponse.json(
         { error: 'Failed to create project' },
         { status: 500 }
@@ -99,7 +102,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       }
     }, { status: 201 })
   } catch (error) {
-    console.error('Create project error:', error)
+    logger.error('Create project error', { error })
     return NextResponse.json(
       { error: 'Failed to create project' },
       { status: 500 }
@@ -178,7 +181,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       .range(offset, offset + limit - 1)
 
     if (listError) {
-      console.error('List projects error:', listError)
+      logger.error('List projects error', { error: listError })
       return NextResponse.json(
         { error: 'Failed to list projects' },
         { status: 500 }
@@ -206,7 +209,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       }
     })
   } catch (error) {
-    console.error('List projects error:', error)
+    logger.error('List projects error', { error })
     return NextResponse.json(
       { error: 'Failed to list projects' },
       { status: 500 }
@@ -276,7 +279,7 @@ export async function PUT(request: NextRequest): Promise<NextResponse> {
       .single()
 
     if (updateError) {
-      console.error('Update project error:', updateError)
+      logger.error('Update project error', { error: updateError })
       return NextResponse.json(
         { error: 'Failed to update project' },
         { status: 500 }
@@ -307,7 +310,7 @@ export async function PUT(request: NextRequest): Promise<NextResponse> {
       }
     })
   } catch (error) {
-    console.error('Update project error:', error)
+    logger.error('Update project error', { error })
     return NextResponse.json(
       { error: 'Failed to update project' },
       { status: 500 }
@@ -349,7 +352,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
       .eq('user_id', user.id)
 
     if (deleteError) {
-      console.error('Delete project error:', deleteError)
+      logger.error('Delete project error', { error: deleteError })
       return NextResponse.json(
         { error: 'Failed to delete project' },
         { status: 500 }
@@ -361,7 +364,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
       message: 'Project deleted'
     })
   } catch (error) {
-    console.error('Delete project error:', error)
+    logger.error('Delete project error', { error })
     return NextResponse.json(
       { error: 'Failed to delete project' },
       { status: 500 }

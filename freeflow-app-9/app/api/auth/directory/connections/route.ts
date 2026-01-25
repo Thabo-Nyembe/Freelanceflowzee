@@ -12,6 +12,9 @@ import {
   listDirectoryConnections,
   type DirectoryProvider
 } from '@/lib/auth/directory-sync'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('directory-connections')
 
 /**
  * List directory connections for organization
@@ -70,7 +73,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       connections
     })
   } catch (error) {
-    console.error('List directory connections error:', error)
+    logger.error('List directory connections error', { error })
     return NextResponse.json(
       { error: 'Failed to list directory connections' },
       { status: 500 }
@@ -184,7 +187,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       message: 'Directory connection created successfully'
     }, { status: 201 })
   } catch (error) {
-    console.error('Create directory connection error:', error)
+    logger.error('Create directory connection error', { error })
     return NextResponse.json(
       { error: 'Failed to create directory connection' },
       { status: 500 }

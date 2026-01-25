@@ -5,6 +5,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('ai-captions');
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -45,7 +48,7 @@ export async function POST(req: NextRequest) {
         );
     }
   } catch (error) {
-    console.error('Caption AI error:', error);
+    logger.error('Caption AI error', { error });
     return NextResponse.json(
       { error: 'Failed to process captions' },
       { status: 500 }
@@ -213,7 +216,7 @@ async function retranscribe(
       language: transcription.language,
     });
   } catch (error) {
-    console.error('Re-transcription error:', error);
+    logger.error('Re-transcription error', { error });
     return NextResponse.json(
       { error: 'Failed to re-transcribe audio' },
       { status: 500 }

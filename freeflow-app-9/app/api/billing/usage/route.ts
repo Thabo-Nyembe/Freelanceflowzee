@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import Stripe from 'stripe';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('invoices-api');
 
 // ============================================================================
 // USAGE TRACKING API
@@ -202,7 +205,7 @@ export async function POST(request: NextRequest) {
 
         if (dbError) {
           // Table might not exist - create it
-          console.error('Usage record error (table may not exist):', dbError);
+          logger.error('Usage record error (table may not exist)', { error: dbError });
         }
 
         // Report to Stripe for metered billing (if configured)
@@ -231,7 +234,7 @@ export async function POST(request: NextRequest) {
               }
             }
           } catch (stripeError) {
-            console.error('Stripe usage record error:', stripeError);
+            logger.error('Stripe usage record error', { error: stripeError });
           }
         }
 
@@ -351,7 +354,7 @@ export async function POST(request: NextRequest) {
         const { data: records, error } = await query;
 
         if (error) {
-          console.error('Usage history error:', error);
+          logger.error('Usage history error', { error });
           return NextResponse.json({
             success: true,
             data: { records: [] },
@@ -423,7 +426,7 @@ export async function POST(request: NextRequest) {
         }, { status: 400 });
     }
   } catch (error) {
-    console.error('Usage API Error:', error);
+    logger.error('Usage API Error', { error });
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'An error occurred',
@@ -473,7 +476,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Usage GET Error:', error);
+    logger.error('Usage GET Error', { error });
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'An error occurred',

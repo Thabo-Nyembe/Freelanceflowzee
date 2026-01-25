@@ -12,6 +12,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getServerSession } from '@/lib/auth'
 import { checkPermission } from '@/lib/rbac/rbac-service'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('clients-api')
 
 // ============================================================================
 // TYPES
@@ -250,7 +253,7 @@ export async function GET(request: NextRequest) {
     const { data: clients, error, count } = await query
 
     if (error) {
-      console.error('Clients query error:', error)
+      logger.error('Clients query error', { error })
       return NextResponse.json(
         { error: 'Failed to fetch clients' },
         { status: 500 }
@@ -283,7 +286,7 @@ export async function GET(request: NextRequest) {
       }
     })
   } catch (error) {
-    console.error('Clients GET error:', error)
+    logger.error('Clients GET error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -338,7 +341,7 @@ export async function POST(request: NextRequest) {
         return handleCreateClient(supabase, userId, body)
     }
   } catch (error) {
-    console.error('Clients POST error:', error)
+    logger.error('Clients POST error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -416,7 +419,7 @@ export async function PUT(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('Client update error:', error)
+      logger.error('Client update error', { error })
       return NextResponse.json(
         { error: 'Failed to update client' },
         { status: 500 }
@@ -434,7 +437,7 @@ export async function PUT(request: NextRequest) {
       message: 'Client updated successfully'
     })
   } catch (error) {
-    console.error('Clients PUT error:', error)
+    logger.error('Clients PUT error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -494,7 +497,7 @@ export async function DELETE(request: NextRequest) {
         .eq('id', clientId)
 
       if (error) {
-        console.error('Client deletion error:', error)
+        logger.error('Client deletion error', { error })
         return NextResponse.json(
           { error: 'Failed to delete client' },
           { status: 500 }
@@ -511,7 +514,7 @@ export async function DELETE(request: NextRequest) {
         .eq('id', clientId)
 
       if (error) {
-        console.error('Client archive error:', error)
+        logger.error('Client archive error', { error })
         return NextResponse.json(
           { error: 'Failed to archive client' },
           { status: 500 }
@@ -530,7 +533,7 @@ export async function DELETE(request: NextRequest) {
       message: permanent ? 'Client deleted permanently' : 'Client archived successfully'
     })
   } catch (error) {
-    console.error('Clients DELETE error:', error)
+    logger.error('Clients DELETE error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -656,7 +659,7 @@ async function handleCreateClient(
     .single()
 
   if (error) {
-    console.error('Client creation error:', error)
+    logger.error('Client creation error', { error })
     return NextResponse.json(
       { error: 'Failed to create client' },
       { status: 500 }
@@ -739,7 +742,7 @@ async function handleAddContact(
     .single()
 
   if (error) {
-    console.error('Contact creation error:', error)
+    logger.error('Contact creation error', { error })
     return NextResponse.json(
       { error: 'Failed to add contact' },
       { status: 500 }
@@ -792,7 +795,7 @@ async function handleLogInteraction(
     .single()
 
   if (error) {
-    console.error('Interaction logging error:', error)
+    logger.error('Interaction logging error', { error })
     return NextResponse.json(
       { error: 'Failed to log interaction' },
       { status: 500 }
@@ -847,7 +850,7 @@ async function handleBulkUpdate(
     .eq('user_id', userId)
 
   if (error) {
-    console.error('Bulk update error:', error)
+    logger.error('Bulk update error', { error })
     return NextResponse.json(
       { error: 'Failed to update clients' },
       { status: 500 }
@@ -883,7 +886,7 @@ async function handleBulkDelete(
       .eq('user_id', userId)
 
     if (error) {
-      console.error('Bulk delete error:', error)
+      logger.error('Bulk delete error', { error })
       return NextResponse.json(
         { error: 'Failed to delete clients' },
         { status: 500 }
@@ -900,7 +903,7 @@ async function handleBulkDelete(
       .eq('user_id', userId)
 
     if (error) {
-      console.error('Bulk archive error:', error)
+      logger.error('Bulk archive error', { error })
       return NextResponse.json(
         { error: 'Failed to archive clients' },
         { status: 500 }
@@ -994,7 +997,7 @@ async function handleExportClients(
   const { data: clients, error } = await query
 
   if (error) {
-    console.error('Export error:', error)
+    logger.error('Export error', { error })
     return NextResponse.json(
       { error: 'Failed to export clients' },
       { status: 500 }
@@ -1084,7 +1087,7 @@ async function getClientStats(
       last_activity: lastActivity?.created_at || ''
     }
   } catch (error) {
-    console.error('Error getting client stats:', error)
+    logger.error('Error getting client stats', { error })
     return {
       total_projects: 0,
       active_projects: 0,
@@ -1153,7 +1156,7 @@ async function getAggregateClientStats(
       }
     }
   } catch (error) {
-    console.error('Error getting aggregate stats:', error)
+    logger.error('Error getting aggregate stats', { error })
     return {
       total: 0,
       by_status: { vip: 0, active: 0, lead: 0, prospect: 0, inactive: 0 }
@@ -1178,7 +1181,7 @@ async function logClientActivity(
       created_at: new Date().toISOString()
     })
   } catch (error) {
-    console.error('Error logging client activity:', error)
+    logger.error('Error logging client activity', { error })
   }
 }
 

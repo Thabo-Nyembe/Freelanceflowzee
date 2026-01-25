@@ -5,6 +5,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('seller-profile');
 
 // GET - Get seller's public profile
 export async function GET(
@@ -82,7 +85,7 @@ export async function GET(
       recentPromotions: levelHistory || [],
     });
   } catch (error) {
-    console.error('Seller profile GET error:', error);
+    logger.error('Seller profile GET error', { error });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

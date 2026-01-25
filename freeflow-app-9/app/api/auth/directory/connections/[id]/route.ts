@@ -8,6 +8,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('directory-connection')
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -99,7 +102,7 @@ export async function GET(
       connection: safeConnection
     })
   } catch (error) {
-    console.error('Get directory connection error:', error)
+    logger.error('Get directory connection error', { error })
     return NextResponse.json(
       { error: 'Failed to get directory connection' },
       { status: 500 }
@@ -208,7 +211,7 @@ export async function PUT(
       }
     })
   } catch (error) {
-    console.error('Update directory connection error:', error)
+    logger.error('Update directory connection error', { error })
     return NextResponse.json(
       { error: 'Failed to update directory connection' },
       { status: 500 }
@@ -293,7 +296,7 @@ export async function DELETE(
       message: 'Directory connection deleted'
     })
   } catch (error) {
-    console.error('Delete directory connection error:', error)
+    logger.error('Delete directory connection error', { error })
     return NextResponse.json(
       { error: 'Failed to delete directory connection' },
       { status: 500 }

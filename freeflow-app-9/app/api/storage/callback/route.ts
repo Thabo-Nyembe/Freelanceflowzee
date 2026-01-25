@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createStorageConnection } from '@/lib/storage/storage-queries'
 import { StorageProvider } from '@/lib/storage/providers'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('storage-callback')
 
 // Validate returnTo path to prevent open redirect attacks
 function isValidReturnPath(path: string): boolean {
@@ -22,7 +25,7 @@ export async function GET(request: Request) {
 
   // Handle OAuth errors
   if (error) {
-    console.error('OAuth error:', error)
+    logger.error('OAuth error', { error })
     return NextResponse.redirect(`${requestUrl.origin}/dashboard/storage?error=oauth_denied`)
   }
 
@@ -180,7 +183,7 @@ export async function GET(request: Request) {
     // Redirect back to storage page with success
     return NextResponse.redirect(`${requestUrl.origin}${returnTo}?connected=${provider}`)
   } catch (error) {
-    console.error('Storage OAuth callback error:', error)
+    logger.error('Storage OAuth callback error', { error })
     return NextResponse.redirect(`${requestUrl.origin}/dashboard/storage?error=connection_failed`)
   }
 }

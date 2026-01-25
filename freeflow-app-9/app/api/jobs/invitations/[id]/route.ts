@@ -6,6 +6,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { z } from 'zod';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('job-invitations-detail');
 
 const respondSchema = z.object({
   accept: z.boolean(),
@@ -82,7 +85,7 @@ export async function PATCH(
         { status: 400 }
       );
     }
-    console.error('Invitation PATCH error:', error);
+    logger.error('Invitation PATCH error', { error });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

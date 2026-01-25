@@ -9,6 +9,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { taxService } from '@/lib/tax/tax-service'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('tax-api')
 
 /**
  * Validate address for tax purposes
@@ -70,7 +73,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       }
     })
   } catch (error) {
-    console.error('Address validation error:', error)
+    logger.error('Address validation error', { error })
     return NextResponse.json(
       { error: 'Failed to validate address' },
       { status: 500 }

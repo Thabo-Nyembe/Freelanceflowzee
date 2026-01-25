@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('invoices-api')
 
 // ============================================================================
 // INVOICE DOWNLOAD API - Dynamic Route
@@ -135,7 +138,7 @@ ${invoice.terms_and_conditions || 'Payment is due within 30 days of invoice date
       },
     })
   } catch (error) {
-    console.error('Invoice Download Error:', error)
+    logger.error('Invoice Download Error', { error })
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to download invoice',

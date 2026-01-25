@@ -8,6 +8,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { webAuthnService } from '@/lib/auth/webauthn-service'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('auth-api')
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -58,7 +61,7 @@ export async function PATCH(
       message: 'Passkey renamed successfully'
     })
   } catch (error: unknown) {
-    console.error('Rename passkey error:', error)
+    logger.error('Rename passkey error', { error })
     const message = error instanceof Error ? error.message : 'Failed to rename passkey'
     return NextResponse.json(
       { success: false, error: message },
@@ -102,7 +105,7 @@ export async function DELETE(
       message: 'Passkey deleted successfully'
     })
   } catch (error: unknown) {
-    console.error('Delete passkey error:', error)
+    logger.error('Delete passkey error', { error })
     const message = error instanceof Error ? error.message : 'Failed to delete passkey'
     return NextResponse.json(
       { success: false, error: message },

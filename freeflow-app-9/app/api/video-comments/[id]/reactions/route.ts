@@ -5,6 +5,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('video-comment-reactions');
 
 // GET - Get reactions for a comment
 export async function GET(
@@ -52,7 +55,7 @@ export async function GET(
       usersByEmoji,
     });
   } catch (error) {
-    console.error('Video comment reactions GET error:', error);
+    logger.error('Video comment reactions GET error', { error });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -120,7 +123,7 @@ export async function POST(
 
     return NextResponse.json({ added: true, reaction }, { status: 201 });
   } catch (error) {
-    console.error('Video comment reaction POST error:', error);
+    logger.error('Video comment reaction POST error', { error });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -160,7 +163,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Video comment reaction DELETE error:', error);
+    logger.error('Video comment reaction DELETE error', { error });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

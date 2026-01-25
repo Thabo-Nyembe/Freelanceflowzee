@@ -17,6 +17,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getServerSession } from '@/lib/auth'
 import { checkPermission } from '@/lib/rbac/rbac-service'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('projects-timeline')
 
 // ============================================================================
 // TYPES
@@ -163,7 +166,7 @@ export async function GET(request: NextRequest) {
     const { data: tasks, error: tasksError } = await taskQuery
 
     if (tasksError) {
-      console.error('Tasks query error:', tasksError)
+      logger.error('Tasks query error', { error: tasksError })
       throw tasksError
     }
 
@@ -227,7 +230,7 @@ export async function GET(request: NextRequest) {
       view: viewType
     })
   } catch (error) {
-    console.error('Timeline GET error:', error)
+    logger.error('Timeline GET error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -304,7 +307,7 @@ export async function POST(request: NextRequest) {
         )
     }
   } catch (error) {
-    console.error('Timeline POST error:', error)
+    logger.error('Timeline POST error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -626,7 +629,7 @@ async function handleCreatePhase(
     .single()
 
   if (error) {
-    console.error('Phase creation error:', error)
+    logger.error('Phase creation error', { error })
     return NextResponse.json(
       { error: 'Failed to create phase' },
       { status: 500 }
@@ -745,7 +748,7 @@ async function handleCreateBaseline(
     .single()
 
   if (error) {
-    console.error('Baseline creation error:', error)
+    logger.error('Baseline creation error', { error })
     return NextResponse.json(
       { error: 'Failed to create baseline' },
       { status: 500 }

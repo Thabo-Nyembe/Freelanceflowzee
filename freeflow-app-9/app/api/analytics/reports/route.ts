@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import PDFDocument from 'pdfkit'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('analytics-reports')
 
 // Analytics reports and data export API
 // Supports: Dashboard data, Custom reports, AI insights, Predictive analytics
@@ -216,7 +219,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       generatedAt: new Date().toISOString()
     })
   } catch (error: any) {
-    console.error('Analytics API Error:', error)
+    logger.error('Analytics API Error', { error })
     return NextResponse.json({
       success: false,
       error: error.message || 'Failed to generate analytics report'
@@ -281,7 +284,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       generatedAt: new Date().toISOString()
     })
   } catch (error: any) {
-    console.error('Analytics API Error:', error)
+    logger.error('Analytics API Error', { error })
     return NextResponse.json({
       success: false,
       error: error.message || 'Failed to fetch analytics'

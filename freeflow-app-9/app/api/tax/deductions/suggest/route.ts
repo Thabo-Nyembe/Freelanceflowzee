@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { taxService } from '@/lib/tax/tax-service'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('tax-deductions')
 
 export async function POST(request: NextRequest) {
   try {
@@ -37,7 +40,7 @@ export async function POST(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Deduction suggestion error:', error)
+    logger.error('Deduction suggestion error', { error })
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to generate suggestion' },
       { status: 500 }

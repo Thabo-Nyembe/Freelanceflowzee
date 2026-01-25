@@ -12,6 +12,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getServerSession } from '@/lib/auth'
 import { checkPermission } from '@/lib/rbac/rbac-service'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('tasks-api')
 
 // ============================================================================
 // TYPES
@@ -277,7 +280,7 @@ export async function GET(request: NextRequest) {
     const { data: tasks, error, count } = await query
 
     if (error) {
-      console.error('Tasks query error:', error)
+      logger.error('Tasks query error', { error })
       return NextResponse.json(
         { error: 'Failed to fetch tasks' },
         { status: 500 }
@@ -299,7 +302,7 @@ export async function GET(request: NextRequest) {
       }
     })
   } catch (error) {
-    console.error('Tasks GET error:', error)
+    logger.error('Tasks GET error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -364,7 +367,7 @@ export async function POST(request: NextRequest) {
         return handleCreateTask(supabase, userId, body)
     }
   } catch (error) {
-    console.error('Tasks POST error:', error)
+    logger.error('Tasks POST error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -458,7 +461,7 @@ export async function PUT(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('Task update error:', error)
+      logger.error('Task update error', { error })
       return NextResponse.json(
         { error: 'Failed to update task' },
         { status: 500 }
@@ -483,7 +486,7 @@ export async function PUT(request: NextRequest) {
       message: 'Task updated successfully'
     })
   } catch (error) {
-    console.error('Tasks PUT error:', error)
+    logger.error('Tasks PUT error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -550,7 +553,7 @@ export async function DELETE(request: NextRequest) {
         .eq('id', taskId)
 
       if (error) {
-        console.error('Task deletion error:', error)
+        logger.error('Task deletion error', { error })
         return NextResponse.json(
           { error: 'Failed to delete task' },
           { status: 500 }
@@ -567,7 +570,7 @@ export async function DELETE(request: NextRequest) {
         .eq('id', taskId)
 
       if (error) {
-        console.error('Task archive error:', error)
+        logger.error('Task archive error', { error })
         return NextResponse.json(
           { error: 'Failed to archive task' },
           { status: 500 }
@@ -590,7 +593,7 @@ export async function DELETE(request: NextRequest) {
       message: permanent ? 'Task deleted permanently' : 'Task cancelled successfully'
     })
   } catch (error) {
-    console.error('Tasks DELETE error:', error)
+    logger.error('Tasks DELETE error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -698,7 +701,7 @@ async function handleCreateTask(
     .single()
 
   if (error) {
-    console.error('Task creation error:', error)
+    logger.error('Task creation error', { error })
     return NextResponse.json(
       { error: 'Failed to create task' },
       { status: 500 }
@@ -756,7 +759,7 @@ async function handleCompleteTask(
     .single()
 
   if (error) {
-    console.error('Task completion error:', error)
+    logger.error('Task completion error', { error })
     return NextResponse.json(
       { error: 'Failed to update task' },
       { status: 500 }
@@ -827,7 +830,7 @@ async function handleStartTimer(
     .single()
 
   if (error) {
-    console.error('Timer start error:', error)
+    logger.error('Timer start error', { error })
     return NextResponse.json(
       { error: 'Failed to start timer' },
       { status: 500 }
@@ -894,7 +897,7 @@ async function handleStopTimer(
     .single()
 
   if (error) {
-    console.error('Timer stop error:', error)
+    logger.error('Timer stop error', { error })
     return NextResponse.json(
       { error: 'Failed to stop timer' },
       { status: 500 }
@@ -956,7 +959,7 @@ async function handleLogTime(
     .single()
 
   if (error) {
-    console.error('Time log error:', error)
+    logger.error('Time log error', { error })
     return NextResponse.json(
       { error: 'Failed to log time' },
       { status: 500 }
@@ -1036,7 +1039,7 @@ async function handleBulkUpdate(
     .or(`user_id.eq.${userId},assignee_id.eq.${userId}`)
 
   if (error) {
-    console.error('Bulk update error:', error)
+    logger.error('Bulk update error', { error })
     return NextResponse.json(
       { error: 'Failed to update tasks' },
       { status: 500 }
@@ -1072,7 +1075,7 @@ async function handleBulkDelete(
       .or(`user_id.eq.${userId},assignee_id.eq.${userId}`)
 
     if (error) {
-      console.error('Bulk delete error:', error)
+      logger.error('Bulk delete error', { error })
       return NextResponse.json(
         { error: 'Failed to delete tasks' },
         { status: 500 }
@@ -1089,7 +1092,7 @@ async function handleBulkDelete(
       .or(`user_id.eq.${userId},assignee_id.eq.${userId}`)
 
     if (error) {
-      console.error('Bulk cancel error:', error)
+      logger.error('Bulk cancel error', { error })
       return NextResponse.json(
         { error: 'Failed to cancel tasks' },
         { status: 500 }
@@ -1247,7 +1250,7 @@ async function handleDuplicateTask(
     .single()
 
   if (createError) {
-    console.error('Task duplication error:', createError)
+    logger.error('Task duplication error', { error: createError })
     return NextResponse.json(
       { error: 'Failed to duplicate task' },
       { status: 500 }
@@ -1368,7 +1371,7 @@ async function getTaskStats(
       completion_rate: total ? Math.round(((completed || 0) / total) * 100) : 0
     }
   } catch (error) {
-    console.error('Error getting task stats:', error)
+    logger.error('Error getting task stats', { error })
     return {
       total: 0,
       completed: 0,
@@ -1410,7 +1413,7 @@ async function updateProjectProgress(
       })
       .eq('id', projectId)
   } catch (error) {
-    console.error('Error updating project progress:', error)
+    logger.error('Error updating project progress', { error })
   }
 }
 
@@ -1431,7 +1434,7 @@ async function logTaskActivity(
       created_at: new Date().toISOString()
     })
   } catch (error) {
-    console.error('Error logging task activity:', error)
+    logger.error('Error logging task activity', { error })
   }
 }
 

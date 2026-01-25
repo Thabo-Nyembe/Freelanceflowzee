@@ -12,6 +12,9 @@ import {
   TeamContext,
   AIConfiguration,
 } from '@/lib/ai/organization-context';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('ai-organization-context');
 
 // Initialize service
 const contextService = new OrganizationContextService();
@@ -368,7 +371,7 @@ export async function POST(request: NextRequest) {
         );
     }
   } catch (error) {
-    console.error('Error in POST /api/ai/organization-context:', error);
+    logger.error('Error in POST /api/ai/organization-context', { error });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -448,7 +451,7 @@ export async function GET(request: NextRequest) {
       isDefault: false,
     });
   } catch (error) {
-    console.error('Error in GET /api/ai/organization-context:', error);
+    logger.error('Error in GET /api/ai/organization-context', { error });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -560,7 +563,7 @@ export async function DELETE(request: NextRequest) {
       message: 'Organization context deleted',
     });
   } catch (error) {
-    console.error('Error in DELETE /api/ai/organization-context:', error);
+    logger.error('Error in DELETE /api/ai/organization-context', { error });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

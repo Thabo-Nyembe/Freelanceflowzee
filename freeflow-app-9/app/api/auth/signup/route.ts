@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { z } from 'zod'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('auth-signup')
 
 // Validation schema
 const signupSchema = z.object({
@@ -58,7 +61,7 @@ export async function POST(request: NextRequest) {
     })
 
     if (authError) {
-      console.error('Supabase Auth error:', authError)
+      logger.error('Supabase Auth error', { error: authError })
 
       // Handle specific errors
       if (authError.message.includes('already registered')) {
@@ -96,7 +99,7 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     )
   } catch (error) {
-    console.error('Signup error:', error)
+    logger.error('Signup error', { error })
     return NextResponse.json(
       { error: 'An unexpected error occurred during signup' },
       { status: 500 }

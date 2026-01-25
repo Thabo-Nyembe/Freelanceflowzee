@@ -12,6 +12,9 @@ import {
   predictProjectHealth,
   type Client
 } from '@/lib/analytics/predictive-engine';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('enhanced-analytics');
 
 // Demo user for unauthenticated access
 const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001';
@@ -114,7 +117,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     }
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.error('Enhanced Analytics GET error:', errorMessage);
+    logger.error('Enhanced Analytics GET error', { error: errorMessage });
     return NextResponse.json(
       { success: false, error: errorMessage },
       { status: 500 }
@@ -163,7 +166,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.error('Enhanced Analytics POST error:', errorMessage);
+    logger.error('Enhanced Analytics POST error', { error: errorMessage });
     return NextResponse.json(
       { success: false, error: errorMessage },
       { status: 500 }

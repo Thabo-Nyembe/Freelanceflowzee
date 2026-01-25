@@ -6,6 +6,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { integrationService } from '@/lib/integrations/integration-service';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('integrations-refresh');
 
 // POST - Refresh a specific integration's token
 export async function POST(request: NextRequest) {
@@ -69,7 +72,7 @@ export async function POST(request: NextRequest) {
       message: 'Token refreshed successfully',
     });
   } catch (error) {
-    console.error('Token refresh failed:', error);
+    logger.error('Token refresh failed', { error });
     return NextResponse.json(
       {
         error: 'Token refresh failed',
@@ -112,7 +115,7 @@ export async function GET(request: NextRequest) {
       count: needingRefresh.length,
     });
   } catch (error) {
-    console.error('Failed to get integrations needing refresh:', error);
+    logger.error('Failed to get integrations needing refresh', { error });
     return NextResponse.json(
       { error: 'Failed to fetch integrations' },
       { status: 500 }
@@ -147,7 +150,7 @@ export async function PATCH(request: NextRequest) {
       message: `Refreshed ${refreshed.length} tokens, ${failed.length} failed`,
     });
   } catch (error) {
-    console.error('Bulk token refresh failed:', error);
+    logger.error('Bulk token refresh failed', { error });
     return NextResponse.json(
       {
         error: 'Bulk token refresh failed',

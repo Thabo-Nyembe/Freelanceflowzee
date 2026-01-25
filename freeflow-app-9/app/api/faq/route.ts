@@ -123,7 +123,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid type' }, { status: 400 })
     }
   } catch (error) {
-    console.error('FAQ GET error:', error)
+    logger.error('FAQ GET error', { error })
     return NextResponse.json({ error: 'Failed to fetch FAQ data' }, { status: 500 })
   }
 }
@@ -305,7 +305,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
   } catch (error) {
-    console.error('FAQ POST error:', error)
+    logger.error('FAQ POST error', { error })
     return NextResponse.json({ error: 'Failed to process FAQ request' }, { status: 500 })
   }
 }

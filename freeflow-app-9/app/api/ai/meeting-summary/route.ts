@@ -11,6 +11,9 @@ import {
   SummarizerOptions,
   MeetingTranscript,
 } from '@/lib/ai/meeting-summarizer';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('ai-meeting-summary');
 
 // Initialize service
 const summarizer = new MeetingSummarizerService();
@@ -112,7 +115,7 @@ export async function POST(request: NextRequest) {
           .single();
 
         if (storeError) {
-          console.warn('Could not store summary:', storeError);
+          logger.warn('Could not store summary', { error: storeError });
           // Continue anyway - summary was generated
         }
 
@@ -166,7 +169,7 @@ export async function POST(request: NextRequest) {
         );
     }
   } catch (error) {
-    console.error('Error in POST /api/ai/meeting-summary:', error);
+    logger.error('Error in POST /api/ai/meeting-summary', { error });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -233,7 +236,7 @@ export async function GET(request: NextRequest) {
     const { data, error, count } = await query;
 
     if (error) {
-      console.error('Error fetching summaries:', error);
+      logger.error('Error fetching summaries', { error });
       return NextResponse.json(
         { error: 'Failed to fetch summaries' },
         { status: 500 }
@@ -247,7 +250,7 @@ export async function GET(request: NextRequest) {
       offset,
     });
   } catch (error) {
-    console.error('Error in GET /api/ai/meeting-summary:', error);
+    logger.error('Error in GET /api/ai/meeting-summary', { error });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -289,7 +292,7 @@ export async function DELETE(request: NextRequest) {
       .eq('user_id', user.id);
 
     if (error) {
-      console.error('Error deleting summary:', error);
+      logger.error('Error deleting summary', { error });
       return NextResponse.json(
         { error: 'Failed to delete summary' },
         { status: 500 }
@@ -301,7 +304,7 @@ export async function DELETE(request: NextRequest) {
       message: 'Summary deleted successfully',
     });
   } catch (error) {
-    console.error('Error in DELETE /api/ai/meeting-summary:', error);
+    logger.error('Error in DELETE /api/ai/meeting-summary', { error });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

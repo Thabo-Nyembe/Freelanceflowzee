@@ -7,6 +7,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { authorizationService } from '@/lib/auth/authorization-service'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('auth-api')
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
@@ -81,7 +84,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       message: 'Permission revoked successfully'
     })
   } catch (error: unknown) {
-    console.error('Permission revoke error:', error)
+    logger.error('Permission revoke error', { error })
     const message = error instanceof Error ? error.message : 'Failed to revoke permission'
     return NextResponse.json(
       { success: false, error: message },
@@ -198,7 +201,7 @@ export async function PUT(request: NextRequest): Promise<NextResponse> {
       }
     })
   } catch (error: unknown) {
-    console.error('Batch permission revoke error:', error)
+    logger.error('Batch permission revoke error', { error })
     const message = error instanceof Error ? error.message : 'Batch revoke failed'
     return NextResponse.json(
       { success: false, error: message },

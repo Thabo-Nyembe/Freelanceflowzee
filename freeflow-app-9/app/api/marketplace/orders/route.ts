@@ -8,6 +8,9 @@ import { createClient } from '@/lib/supabase/server';
 import { z } from 'zod';
 import { stripeConnectService } from '@/lib/stripe/stripe-connect-service';
 import { notificationService } from '@/lib/realtime/notification-service';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('marketplace-orders');
 
 const createOrderSchema = z.object({
   listing_id: z.string().uuid(),
@@ -124,7 +127,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Orders GET error:', error);
+    logger.error('Orders GET error', { error });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -241,7 +244,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (orderError) {
-      console.error('Create order error:', orderError);
+      logger.error('Create order error', { error: orderError });
       return NextResponse.json({ error: 'Failed to create order' }, { status: 500 });
     }
 
@@ -320,7 +323,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    console.error('Orders POST error:', error);
+    logger.error('Orders POST error', { error });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -482,7 +485,7 @@ export async function PATCH(request: NextRequest) {
         if (order.payment_intent_id) {
           const captureResult = await stripeConnectService.capturePayment(order.payment_intent_id);
           if (!captureResult.success) {
-            console.error('Failed to capture payment:', captureResult.error);
+            logger.error('Failed to capture payment', { error: captureResult.error });
           }
         }
 
@@ -523,7 +526,7 @@ export async function PATCH(request: NextRequest) {
               orderId: order.id
             });
             if (!refundResult.success) {
-              console.error('Failed to process refund:', refundResult.error);
+              logger.error('Failed to process refund', { error: refundResult.error });
             }
           }
 
@@ -559,7 +562,7 @@ export async function PATCH(request: NextRequest) {
             orderId: order.id
           });
           if (!refundResult.success) {
-            console.error('Failed to process refund:', refundResult.error);
+            logger.error('Failed to process refund', { error: refundResult.error });
           }
         }
 
@@ -606,7 +609,7 @@ export async function PATCH(request: NextRequest) {
         { status: 400 }
       );
     }
-    console.error('Orders PATCH error:', error);
+    logger.error('Orders PATCH error', { error });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

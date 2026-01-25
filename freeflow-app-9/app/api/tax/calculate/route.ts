@@ -10,6 +10,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { taxService, type TaxCalculationParams, type TaxLineItem } from '@/lib/tax/tax-service'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('tax-api')
 
 /**
  * Calculate tax for a transaction
@@ -114,7 +117,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       }
     })
   } catch (error) {
-    console.error('Tax calculation error:', error)
+    logger.error('Tax calculation error', { error })
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to calculate tax' },
       { status: 500 }
@@ -169,7 +172,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       }
     })
   } catch (error) {
-    console.error('Tax rate lookup error:', error)
+    logger.error('Tax rate lookup error', { error })
     return NextResponse.json(
       { error: 'Failed to get tax rate' },
       { status: 500 }

@@ -9,6 +9,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('directory-mappings')
 
 /**
  * List attribute mappings for a connection
@@ -91,7 +94,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       defaultMappings
     })
   } catch (error) {
-    console.error('Get attribute mappings error:', error)
+    logger.error('Get attribute mappings error', { error })
     return NextResponse.json(
       { error: 'Failed to get attribute mappings' },
       { status: 500 }
@@ -210,7 +213,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       mapping
     }, { status: 201 })
   } catch (error) {
-    console.error('Create attribute mapping error:', error)
+    logger.error('Create attribute mapping error', { error })
     return NextResponse.json(
       { error: 'Failed to create attribute mapping' },
       { status: 500 }
@@ -314,7 +317,7 @@ export async function PUT(request: NextRequest): Promise<NextResponse> {
       mappings: updatedMappings
     })
   } catch (error) {
-    console.error('Update attribute mappings error:', error)
+    logger.error('Update attribute mappings error', { error })
     return NextResponse.json(
       { error: 'Failed to update attribute mappings' },
       { status: 500 }
@@ -406,7 +409,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
       message: 'Mapping deleted'
     })
   } catch (error) {
-    console.error('Delete attribute mapping error:', error)
+    logger.error('Delete attribute mapping error', { error })
     return NextResponse.json(
       { error: 'Failed to delete attribute mapping' },
       { status: 500 }

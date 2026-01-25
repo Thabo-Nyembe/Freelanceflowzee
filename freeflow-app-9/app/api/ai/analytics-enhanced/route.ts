@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('ai-analytics');
 
 // ============================================================================
 // WORLD-CLASS AI ANALYTICS API
@@ -1723,7 +1726,7 @@ Respond in JSON format with clear, actionable insights.`
         }, { status: 400 });
     }
   } catch (error) {
-    console.error('AI Analytics API Error:', error);
+    logger.error('AI Analytics API Error', { error });
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'An error occurred',

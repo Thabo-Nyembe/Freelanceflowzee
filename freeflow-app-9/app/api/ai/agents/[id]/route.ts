@@ -8,6 +8,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('ai-agent')
 
 interface RouteContext {
   params: Promise<{ id: string }>
@@ -49,7 +52,7 @@ export async function GET(
 
     return NextResponse.json({ agent })
   } catch (error) {
-    console.error('Get agent error:', error)
+    logger.error('Get agent error', { error })
     return NextResponse.json(
       { error: 'Failed to fetch agent' },
       { status: 500 }
@@ -112,7 +115,7 @@ export async function PUT(
       .single()
 
     if (error) {
-      console.error('Error updating agent:', error)
+      logger.error('Error updating agent', { error })
       return NextResponse.json(
         { error: 'Failed to update agent' },
         { status: 500 }
@@ -128,7 +131,7 @@ export async function PUT(
 
     return NextResponse.json({ agent })
   } catch (error) {
-    console.error('Update agent error:', error)
+    logger.error('Update agent error', { error })
     return NextResponse.json(
       { error: 'Failed to update agent' },
       { status: 500 }
@@ -159,7 +162,7 @@ export async function DELETE(
       .eq('user_id', user.id)
 
     if (error) {
-      console.error('Error deleting agent:', error)
+      logger.error('Error deleting agent', { error })
       return NextResponse.json(
         { error: 'Failed to delete agent' },
         { status: 500 }
@@ -168,7 +171,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Delete agent error:', error)
+    logger.error('Delete agent error', { error })
     return NextResponse.json(
       { error: 'Failed to delete agent' },
       { status: 500 }

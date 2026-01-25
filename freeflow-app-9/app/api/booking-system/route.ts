@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('booking-system');
 
 // ============================================================================
 // WORLD-CLASS BOOKING SYSTEM API
@@ -1860,7 +1863,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ success: false, error: `Unknown action: ${action}` }, { status: 400 });
     }
   } catch (error) {
-    console.error('Booking System API error:', error);
+    logger.error('Booking System API error', { error });
     return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }
 }

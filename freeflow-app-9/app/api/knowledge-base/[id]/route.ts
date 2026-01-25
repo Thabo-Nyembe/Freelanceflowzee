@@ -76,7 +76,7 @@ export async function GET(
 
     return NextResponse.json({ data })
   } catch (error) {
-    console.error('Knowledge Base API error:', error)
+    logger.error('Knowledge Base API error', { error })
     return NextResponse.json(
       { error: 'Failed to fetch resource' },
       { status: 500 }
@@ -133,7 +133,7 @@ export async function PUT(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Knowledge Base API error:', error)
+    logger.error('Knowledge Base API error', { error })
     return NextResponse.json(
       { error: 'Failed to update resource' },
       { status: 500 }
@@ -180,7 +180,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Knowledge Base API error:', error)
+    logger.error('Knowledge Base API error', { error })
     return NextResponse.json(
       { error: 'Failed to delete resource' },
       { status: 500 }

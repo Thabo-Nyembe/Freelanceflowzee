@@ -18,6 +18,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getServerSession } from '@/lib/auth'
 import crypto from 'crypto'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('chunked-upload')
 
 // ============================================================================
 // TYPES
@@ -148,7 +151,7 @@ export async function GET(request: NextRequest) {
       }
     })
   } catch (error) {
-    console.error('Upload GET error:', error)
+    logger.error('Upload GET error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -204,7 +207,7 @@ export async function POST(request: NextRequest) {
         return handleInitSession(supabase, userId, body)
     }
   } catch (error) {
-    console.error('Upload POST error:', error)
+    logger.error('Upload POST error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -271,7 +274,7 @@ export async function DELETE(request: NextRequest) {
       message: 'Upload session deleted'
     })
   } catch (error) {
-    console.error('Upload DELETE error:', error)
+    logger.error('Upload DELETE error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -365,7 +368,7 @@ async function handleInitSession(
     .single()
 
   if (error) {
-    console.error('Session creation error:', error)
+    logger.error('Session creation error', { error })
     return NextResponse.json(
       { error: 'Failed to create upload session' },
       { status: 500 }
@@ -502,7 +505,7 @@ async function handleChunkUpload(request: NextRequest, userId: string) {
       })
 
     if (uploadError) {
-      console.error('Chunk upload error:', uploadError)
+      logger.error('Chunk upload error', { error: uploadError })
       return NextResponse.json(
         { error: 'Failed to upload chunk' },
         { status: 500 }
@@ -533,7 +536,7 @@ async function handleChunkUpload(request: NextRequest, userId: string) {
       chunk_size: chunkBuffer.length,
       checksum: chunkChecksum || null,
       uploaded_at: new Date().toISOString()
-    }).catch((e) => console.warn('Non-critical operation failed:', e)) // Non-critical
+    }).catch((e) => logger.warn('Non-critical operation failed', { error: e })) // Non-critical
 
     const progress = Math.round((chunksReceived / uploadSession.total_chunks) * 100)
 
@@ -550,7 +553,7 @@ async function handleChunkUpload(request: NextRequest, userId: string) {
         : `Chunk ${chunkIndex} uploaded successfully`
     })
   } catch (error) {
-    console.error('Chunk upload error:', error)
+    logger.error('Chunk upload error', { error })
     return NextResponse.json(
       { error: 'Failed to process chunk upload' },
       { status: 500 }
@@ -699,7 +702,7 @@ async function handleCompleteUpload(
       .single()
 
     if (fileError) {
-      console.error('File record creation error:', fileError)
+      logger.error('File record creation error', { error: fileError })
       // Don't fail the upload, file is saved
     }
 
@@ -708,14 +711,14 @@ async function handleCompleteUpload(
       await supabase.storage
         .from('uploads')
         .remove([`${uploadSession.storage_path}/${chunkFile.name}`])
-        .catch((e) => console.warn('Non-critical operation failed:', e))
+        .catch((e) => logger.warn('Non-critical operation failed', { error: e }))
     }
 
     // Remove upload directory
     await supabase.storage
       .from('uploads')
       .remove([uploadSession.storage_path])
-      .catch((e) => console.warn('Non-critical operation failed:', e))
+      .catch((e) => logger.warn('Non-critical operation failed', { error: e }))
 
     // Update session status
     await supabase
@@ -737,7 +740,7 @@ async function handleCompleteUpload(
       message: 'File uploaded successfully'
     })
   } catch (error) {
-    console.error('Complete upload error:', error)
+    logger.error('Complete upload error', { error })
 
     // Update session with error
     await supabase
@@ -781,7 +784,7 @@ async function handleCancelUpload(
     // Clean up chunks
     for (const chunkIndex of uploadSession.uploaded_chunks || []) {
       const chunkPath = `${uploadSession.storage_path}/chunk_${chunkIndex.toString().padStart(6, '0')}`
-      await supabase.storage.from('uploads').remove([chunkPath]).catch((e) => console.warn('Non-critical operation failed:', e))
+      await supabase.storage.from('uploads').remove([chunkPath]).catch((e) => logger.warn('Non-critical operation failed', { error: e }))
     }
   }
 

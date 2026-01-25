@@ -5,6 +5,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('video-markers');
 
 export interface VideoMarkerPayload {
   videoId: string;
@@ -63,7 +66,7 @@ export async function GET(request: NextRequest) {
     const { data: markers, error } = await query;
 
     if (error) {
-      console.error('Error fetching markers:', error);
+      logger.error('Error fetching markers', { error });
       return NextResponse.json(
         { error: 'Failed to fetch markers' },
         { status: 500 }
@@ -93,7 +96,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(transformedMarkers);
   } catch (error) {
-    console.error('Error in GET /api/video-markers:', error);
+    logger.error('Error in GET /api/video-markers', { error });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -171,7 +174,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (insertError) {
-      console.error('Error creating marker:', insertError);
+      logger.error('Error creating marker', { error: insertError });
       return NextResponse.json(
         { error: 'Failed to create marker' },
         { status: 500 }
@@ -201,7 +204,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(transformedMarker, { status: 201 });
   } catch (error) {
-    console.error('Error in POST /api/video-markers:', error);
+    logger.error('Error in POST /api/video-markers', { error });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -280,7 +283,7 @@ export async function PATCH(request: NextRequest) {
       .single();
 
     if (updateError) {
-      console.error('Error updating marker:', updateError);
+      logger.error('Error updating marker', { error: updateError });
       return NextResponse.json(
         { error: 'Failed to update marker' },
         { status: 500 }
@@ -310,7 +313,7 @@ export async function PATCH(request: NextRequest) {
 
     return NextResponse.json(transformedMarker);
   } catch (error) {
-    console.error('Error in PATCH /api/video-markers:', error);
+    logger.error('Error in PATCH /api/video-markers', { error });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -369,7 +372,7 @@ export async function DELETE(request: NextRequest) {
       .eq('id', id);
 
     if (deleteError) {
-      console.error('Error deleting marker:', deleteError);
+      logger.error('Error deleting marker', { error: deleteError });
       return NextResponse.json(
         { error: 'Failed to delete marker' },
         { status: 500 }
@@ -378,7 +381,7 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error in DELETE /api/video-markers:', error);
+    logger.error('Error in DELETE /api/video-markers', { error });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

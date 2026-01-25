@@ -12,6 +12,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { hyperswitchPayments } from '@/lib/payments/hyperswitch'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('hyperswitch-api')
 
 /**
  * Create a new customer
@@ -89,7 +92,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       },
     }, { status: 201 })
   } catch (error) {
-    console.error('Create customer error:', error)
+    logger.error('Create customer error', { error })
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to create customer' },
       { status: 500 }
@@ -160,7 +163,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       saved_methods: savedMethods,
     })
   } catch (error) {
-    console.error('Get customer error:', error)
+    logger.error('Get customer error', { error })
     return NextResponse.json(
       { error: 'Failed to get customer' },
       { status: 500 }
@@ -247,7 +250,7 @@ export async function PUT(request: NextRequest): Promise<NextResponse> {
       customer,
     })
   } catch (error) {
-    console.error('Update customer error:', error)
+    logger.error('Update customer error', { error })
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to update customer' },
       { status: 500 }
@@ -318,7 +321,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
       message: 'Customer deleted',
     })
   } catch (error) {
-    console.error('Delete customer error:', error)
+    logger.error('Delete customer error', { error })
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to delete customer' },
       { status: 500 }

@@ -18,6 +18,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getServerSession } from '@/lib/auth'
 import { checkPermission } from '@/lib/rbac/rbac-service'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('comments-api')
 
 // ============================================================================
 // TYPES
@@ -253,7 +256,7 @@ export async function GET(request: NextRequest) {
     const { data: comments, error, count } = await query
 
     if (error) {
-      console.error('Comments query error:', error)
+      logger.error('Comments query error', { error })
       return NextResponse.json(
         { error: 'Failed to fetch comments' },
         { status: 500 }
@@ -291,7 +294,7 @@ export async function GET(request: NextRequest) {
       }
     })
   } catch (error) {
-    console.error('Comments GET error:', error)
+    logger.error('Comments GET error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -355,7 +358,7 @@ export async function POST(request: NextRequest) {
         return handleCreateComment(supabase, userId, body)
     }
   } catch (error) {
-    console.error('Comments POST error:', error)
+    logger.error('Comments POST error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -445,7 +448,7 @@ export async function PUT(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('Comment update error:', error)
+      logger.error('Comment update error', { error })
       return NextResponse.json(
         { error: 'Failed to update comment' },
         { status: 500 }
@@ -464,7 +467,7 @@ export async function PUT(request: NextRequest) {
       message: 'Comment updated successfully'
     })
   } catch (error) {
-    console.error('Comments PUT error:', error)
+    logger.error('Comments PUT error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -573,7 +576,7 @@ export async function DELETE(request: NextRequest) {
       message: permanent ? 'Comment deleted permanently' : 'Comment deleted'
     })
   } catch (error) {
-    console.error('Comments DELETE error:', error)
+    logger.error('Comments DELETE error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -655,7 +658,7 @@ async function handleCreateComment(
     .single()
 
   if (error) {
-    console.error('Comment creation error:', error)
+    logger.error('Comment creation error', { error })
     return NextResponse.json(
       { error: 'Failed to create comment' },
       { status: 500 }
@@ -752,7 +755,7 @@ async function handleReplyToComment(
     .single()
 
   if (error) {
-    console.error('Reply creation error:', error)
+    logger.error('Reply creation error', { error })
     return NextResponse.json(
       { error: 'Failed to create reply' },
       { status: 500 }
@@ -861,7 +864,7 @@ async function handleReaction(
     .single()
 
   if (error) {
-    console.error('Reaction error:', error)
+    logger.error('Reaction error', { error })
     return NextResponse.json(
       { error: 'Failed to add reaction' },
       { status: 500 }
@@ -910,7 +913,7 @@ async function handleResolveComment(
     .single()
 
   if (error) {
-    console.error('Resolve error:', error)
+    logger.error('Resolve error', { error })
     return NextResponse.json(
       { error: 'Failed to resolve comment' },
       { status: 500 }
@@ -959,7 +962,7 @@ async function handleReopenComment(
     .single()
 
   if (error) {
-    console.error('Reopen error:', error)
+    logger.error('Reopen error', { error })
     return NextResponse.json(
       { error: 'Failed to reopen comment' },
       { status: 500 }
@@ -1000,7 +1003,7 @@ async function handlePinComment(
     .single()
 
   if (error) {
-    console.error('Pin error:', error)
+    logger.error('Pin error', { error })
     return NextResponse.json(
       { error: 'Failed to pin comment' },
       { status: 500 }
@@ -1107,7 +1110,7 @@ async function handleAnnotation(
     .single()
 
   if (error) {
-    console.error('Annotation error:', error)
+    logger.error('Annotation error', { error })
     return NextResponse.json(
       { error: 'Failed to create annotation' },
       { status: 500 }
@@ -1146,7 +1149,7 @@ async function handleBulkResolve(
     .in('id', comment_ids)
 
   if (error) {
-    console.error('Bulk resolve error:', error)
+    logger.error('Bulk resolve error', { error })
     return NextResponse.json(
       { error: 'Failed to resolve comments' },
       { status: 500 }
@@ -1279,7 +1282,7 @@ async function createNotification(
       created_at: new Date().toISOString()
     })
   } catch (error) {
-    console.error('Notification error:', error)
+    logger.error('Notification error', { error })
   }
 }
 
@@ -1365,7 +1368,7 @@ async function logCommentActivity(
       created_at: new Date().toISOString()
     })
   } catch (error) {
-    console.error('Activity log error:', error)
+    logger.error('Activity log error', { error })
   }
 }
 

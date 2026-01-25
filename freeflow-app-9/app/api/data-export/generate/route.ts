@@ -6,6 +6,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient, createAdminClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('data-export');
 
 // Demo user for unauthenticated access
 const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001';
@@ -139,7 +142,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.error('Data Export Generate error:', errorMessage);
+    logger.error('Data Export Generate error', { error: errorMessage });
     return NextResponse.json(
       { success: false, error: errorMessage },
       { status: 500 }
@@ -282,7 +285,7 @@ async function fetchDataForExport(
 
   if (error) {
     // If table doesn't exist, return sample data
-    console.warn(`Table ${tableName} query failed:`, error.message);
+    logger.warn('Table query failed', { tableName, error: error.message });
     return generateSampleData(dataSource, limit);
   }
 

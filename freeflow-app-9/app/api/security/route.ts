@@ -80,7 +80,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid type' }, { status: 400 })
     }
   } catch (error) {
-    console.error('Security GET error:', error)
+    logger.error('Security GET error', { error })
     return NextResponse.json({ error: 'Failed to fetch security data' }, { status: 500 })
   }
 }
@@ -216,7 +216,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
   } catch (error) {
-    console.error('Security POST error:', error)
+    logger.error('Security POST error', { error })
     return NextResponse.json({ error: 'Failed to process security request' }, { status: 500 })
   }
 }

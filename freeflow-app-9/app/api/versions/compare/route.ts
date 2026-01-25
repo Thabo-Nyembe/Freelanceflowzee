@@ -5,6 +5,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('versions-compare');
 
 interface DiffResult {
   type: 'unchanged' | 'added' | 'removed' | 'modified';
@@ -160,7 +163,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(result);
   } catch (error) {
-    console.error('Error in GET /api/versions/compare:', error);
+    logger.error('Error in GET /api/versions/compare', { error });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

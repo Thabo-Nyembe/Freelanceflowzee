@@ -10,6 +10,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { scimService } from '@/lib/auth/scim-service'
 import { validateSCIMAuth } from '../../middleware'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('scim-api')
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -48,7 +51,7 @@ export async function GET(
       headers: { 'Content-Type': 'application/scim+json' }
     })
   } catch (error) {
-    console.error('SCIM get group error:', error)
+    logger.error('SCIM get group error', { error })
 
     if ((error as { schemas?: string[] }).schemas) {
       const scimError = error as { status: string }
@@ -103,7 +106,7 @@ export async function PUT(
       headers: { 'Content-Type': 'application/scim+json' }
     })
   } catch (error) {
-    console.error('SCIM update group error:', error)
+    logger.error('SCIM update group error', { error })
 
     if ((error as { schemas?: string[] }).schemas) {
       const scimError = error as { status: string }
@@ -184,7 +187,7 @@ export async function PATCH(
       headers: { 'Content-Type': 'application/scim+json' }
     })
   } catch (error) {
-    console.error('SCIM patch group error:', error)
+    logger.error('SCIM patch group error', { error })
 
     if ((error as { schemas?: string[] }).schemas) {
       const scimError = error as { status: string }
@@ -236,7 +239,7 @@ export async function DELETE(
 
     return new NextResponse(null, { status: 204 })
   } catch (error) {
-    console.error('SCIM delete group error:', error)
+    logger.error('SCIM delete group error', { error })
 
     if ((error as { schemas?: string[] }).schemas) {
       const scimError = error as { status: string }

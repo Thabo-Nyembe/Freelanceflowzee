@@ -12,6 +12,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { hyperswitchPayments, type RoutingRule } from '@/lib/payments/hyperswitch'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('hyperswitch-api')
 
 // Check admin permission
 async function checkAdminPermission(supabase: Awaited<ReturnType<typeof createClient>>, userId: string): Promise<boolean> {
@@ -100,7 +103,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       rule,
     }, { status: 201 })
   } catch (error) {
-    console.error('Create routing rule error:', error)
+    logger.error('Create routing rule error', { error })
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to create routing rule' },
       { status: 500 }
@@ -186,7 +189,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       rules: rulesWithAnalytics,
     })
   } catch (error) {
-    console.error('Get routing rules error:', error)
+    logger.error('Get routing rules error', { error })
     return NextResponse.json(
       { error: 'Failed to get routing rules' },
       { status: 500 }
@@ -297,7 +300,7 @@ export async function PUT(request: NextRequest): Promise<NextResponse> {
       rule: updatedRule,
     })
   } catch (error) {
-    console.error('Update routing rule error:', error)
+    logger.error('Update routing rule error', { error })
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to update routing rule' },
       { status: 500 }
@@ -375,7 +378,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
       message: 'Routing rule deleted',
     })
   } catch (error) {
-    console.error('Delete routing rule error:', error)
+    logger.error('Delete routing rule error', { error })
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to delete routing rule' },
       { status: 500 }

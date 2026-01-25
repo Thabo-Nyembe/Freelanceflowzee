@@ -7,6 +7,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { ssoService } from '@/lib/auth/sso-service'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('auth-api')
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 
@@ -38,7 +41,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       ...result
     })
   } catch (error: unknown) {
-    console.error('OIDC authorization initiation error:', error)
+    logger.error('OIDC authorization initiation error', { error })
     const message = error instanceof Error ? error.message : 'Failed to initiate OIDC login'
     return NextResponse.json(
       { success: false, error: message },
@@ -89,7 +92,7 @@ export async function PUT(request: NextRequest): Promise<NextResponse> {
 
     return response
   } catch (error: unknown) {
-    console.error('OIDC code exchange error:', error)
+    logger.error('OIDC code exchange error', { error })
     const message = error instanceof Error ? error.message : 'Failed to exchange authorization code'
     return NextResponse.json(
       { success: false, error: message },

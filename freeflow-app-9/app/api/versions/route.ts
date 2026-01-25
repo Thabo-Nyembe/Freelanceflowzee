@@ -5,6 +5,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('versions');
 
 export interface VersionPayload {
   documentId: string;
@@ -74,7 +77,7 @@ export async function GET(request: NextRequest) {
     const { data: versions, error, count } = await query;
 
     if (error) {
-      console.error('Error fetching versions:', error);
+      logger.error('Error fetching versions', { error });
       return NextResponse.json(
         { error: 'Failed to fetch versions' },
         { status: 500 }
@@ -111,7 +114,7 @@ export async function GET(request: NextRequest) {
       offset,
     });
   } catch (error) {
-    console.error('Error in GET /api/versions:', error);
+    logger.error('Error in GET /api/versions', { error });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -186,7 +189,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (insertError) {
-      console.error('Error creating version:', insertError);
+      logger.error('Error creating version', { error: insertError });
       return NextResponse.json(
         { error: 'Failed to create version' },
         { status: 500 }
@@ -217,7 +220,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(transformedVersion, { status: 201 });
   } catch (error) {
-    console.error('Error in POST /api/versions:', error);
+    logger.error('Error in POST /api/versions', { error });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -270,7 +273,7 @@ export async function PATCH(request: NextRequest) {
       .single();
 
     if (updateError) {
-      console.error('Error updating version:', updateError);
+      logger.error('Error updating version', { error: updateError });
       return NextResponse.json(
         { error: 'Failed to update version' },
         { status: 500 }
@@ -301,7 +304,7 @@ export async function PATCH(request: NextRequest) {
 
     return NextResponse.json(transformedVersion);
   } catch (error) {
-    console.error('Error in PATCH /api/versions:', error);
+    logger.error('Error in PATCH /api/versions', { error });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -361,7 +364,7 @@ export async function DELETE(request: NextRequest) {
       .eq('id', id);
 
     if (deleteError) {
-      console.error('Error deleting version:', deleteError);
+      logger.error('Error deleting version', { error: deleteError });
       return NextResponse.json(
         { error: 'Failed to delete version' },
         { status: 500 }
@@ -370,7 +373,7 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error in DELETE /api/versions:', error);
+    logger.error('Error in DELETE /api/versions', { error });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

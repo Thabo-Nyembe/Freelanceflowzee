@@ -16,6 +16,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getServerSession } from '@/lib/auth'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('projects-templates')
 
 // ============================================================================
 // TYPES
@@ -241,7 +244,7 @@ export async function GET(request: NextRequest) {
     const { data: templates, error, count } = await query
 
     if (error) {
-      console.error('Templates query error:', error)
+      logger.error('Templates query error', { error })
       return NextResponse.json(
         { error: 'Failed to fetch templates' },
         { status: 500 }
@@ -265,7 +268,7 @@ export async function GET(request: NextRequest) {
       }
     })
   } catch (error) {
-    console.error('Templates GET error:', error)
+    logger.error('Templates GET error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -317,7 +320,7 @@ export async function POST(request: NextRequest) {
         return handleCreateTemplate(supabase, userId, body)
     }
   } catch (error) {
-    console.error('Templates POST error:', error)
+    logger.error('Templates POST error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -393,7 +396,7 @@ export async function PUT(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('Template update error:', error)
+      logger.error('Template update error', { error })
       return NextResponse.json(
         { error: 'Failed to update template' },
         { status: 500 }
@@ -406,7 +409,7 @@ export async function PUT(request: NextRequest) {
       message: 'Template updated successfully'
     })
   } catch (error) {
-    console.error('Templates PUT error:', error)
+    logger.error('Templates PUT error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -462,7 +465,7 @@ export async function DELETE(request: NextRequest) {
       .eq('id', templateId)
 
     if (error) {
-      console.error('Template deletion error:', error)
+      logger.error('Template deletion error', { error })
       return NextResponse.json(
         { error: 'Failed to delete template' },
         { status: 500 }
@@ -474,7 +477,7 @@ export async function DELETE(request: NextRequest) {
       message: 'Template deleted successfully'
     })
   } catch (error) {
-    console.error('Templates DELETE error:', error)
+    logger.error('Templates DELETE error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -556,7 +559,7 @@ async function handleCreateTemplate(
     .single()
 
   if (error) {
-    console.error('Template creation error:', error)
+    logger.error('Template creation error', { error })
     return NextResponse.json(
       { error: 'Failed to create template' },
       { status: 500 }
@@ -687,7 +690,7 @@ async function handleCreateFromProject(
     .single()
 
   if (error) {
-    console.error('Template from project error:', error)
+    logger.error('Template from project error', { error })
     return NextResponse.json(
       { error: 'Failed to create template' },
       { status: 500 }
@@ -753,7 +756,7 @@ async function handleDuplicateTemplate(
     .single()
 
   if (error) {
-    console.error('Template duplication error:', error)
+    logger.error('Template duplication error', { error })
     return NextResponse.json(
       { error: 'Failed to duplicate template' },
       { status: 500 }
@@ -839,7 +842,7 @@ async function handleUseTemplate(
     .single()
 
   if (projectError) {
-    console.error('Project creation error:', projectError)
+    logger.error('Project creation error', { error: projectError })
     return NextResponse.json(
       { error: 'Failed to create project' },
       { status: 500 }

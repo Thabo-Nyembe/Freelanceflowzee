@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import Stripe from 'stripe';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('stripe-api');
 
 // ============================================================================
 // PAYMENT METHODS API
@@ -273,7 +276,7 @@ export async function POST(request: NextRequest) {
         }, { status: 400 });
     }
   } catch (error) {
-    console.error('Payment Methods API Error:', error);
+    logger.error('Payment Methods API Error', { error });
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'An error occurred',
@@ -331,7 +334,7 @@ export async function DELETE(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Payment Methods DELETE Error:', error);
+    logger.error('Payment Methods DELETE Error', { error });
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to remove payment method',

@@ -49,7 +49,7 @@ export async function GET(
 
     return NextResponse.json({ error: 'Invalid type' }, { status: 400 })
   } catch (error) {
-    console.error('AI Create API error:', error)
+    logger.error('AI Create API error', { error })
     return NextResponse.json(
       { error: 'Failed to fetch resource' },
       { status: 500 }
@@ -104,7 +104,7 @@ export async function PUT(
         return NextResponse.json({ error: 'Invalid type' }, { status: 400 })
     }
   } catch (error) {
-    console.error('AI Create API error:', error)
+    logger.error('AI Create API error', { error })
     return NextResponse.json(
       { error: 'Failed to update resource' },
       { status: 500 }
@@ -159,7 +159,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('AI Create API error:', error)
+    logger.error('AI Create API error', { error })
     return NextResponse.json(
       { error: 'Failed to delete resource' },
       { status: 500 }

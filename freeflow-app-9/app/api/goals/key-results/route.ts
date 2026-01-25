@@ -6,6 +6,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { z } from 'zod';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('goals-key-results');
 
 const createKeyResultSchema = z.object({
   objective_id: z.string().uuid(),
@@ -87,7 +90,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Failed to create key result:', error);
+      logger.error('Failed to create key result', { error });
       return NextResponse.json(
         { error: 'Failed to create key result' },
         { status: 500 }
@@ -105,7 +108,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    console.error('Failed to create key result:', error);
+    logger.error('Failed to create key result', { error });
     return NextResponse.json(
       { error: 'Failed to create key result' },
       { status: 500 }
@@ -193,7 +196,7 @@ export async function PATCH(request: NextRequest) {
         { status: 400 }
       );
     }
-    console.error('Failed to update key result:', error);
+    logger.error('Failed to update key result', { error });
     return NextResponse.json(
       { error: 'Failed to update key result' },
       { status: 500 }
@@ -243,7 +246,7 @@ export async function DELETE(request: NextRequest) {
       message: 'Key result deleted',
     });
   } catch (error) {
-    console.error('Failed to delete key result:', error);
+    logger.error('Failed to delete key result', { error });
     return NextResponse.json(
       { error: 'Failed to delete key result' },
       { status: 500 }

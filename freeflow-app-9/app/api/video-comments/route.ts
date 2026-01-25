@@ -5,6 +5,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('video-comments');
 
 // GET - Get video comments with filters
 export async function GET(request: NextRequest) {
@@ -157,7 +160,7 @@ export async function GET(request: NextRequest) {
       limit,
     });
   } catch (error) {
-    console.error('Video comments GET error:', error);
+    logger.error('Video comments GET error', { error });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -283,7 +286,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(comment, { status: 201 });
   } catch (error) {
-    console.error('Video comment POST error:', error);
+    logger.error('Video comment POST error', { error });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -386,7 +389,7 @@ export async function PATCH(request: NextRequest) {
 
     return NextResponse.json(comment);
   } catch (error) {
-    console.error('Video comment PATCH error:', error);
+    logger.error('Video comment PATCH error', { error });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -437,7 +440,7 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Video comment DELETE error:', error);
+    logger.error('Video comment DELETE error', { error });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

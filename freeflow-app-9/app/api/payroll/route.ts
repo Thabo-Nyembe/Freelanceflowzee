@@ -10,6 +10,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getServerSession } from '@/lib/auth'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('payroll')
 
 // ============================================================================
 // TYPES
@@ -130,7 +133,7 @@ export async function GET(request: NextRequest) {
         })
     }
   } catch (error) {
-    console.error('Payroll GET error:', error)
+    logger.error('Payroll GET error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -186,7 +189,7 @@ export async function POST(request: NextRequest) {
         return handleCreatePayRun(supabase, userId, body)
     }
   } catch (error) {
-    console.error('Payroll POST error:', error)
+    logger.error('Payroll POST error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -270,7 +273,7 @@ export async function PUT(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('Pay run update error:', error)
+      logger.error('Pay run update error', { error })
       return NextResponse.json(
         { error: 'Failed to update pay run' },
         { status: 500 }
@@ -283,7 +286,7 @@ export async function PUT(request: NextRequest) {
       message: 'Pay run updated successfully'
     })
   } catch (error) {
-    console.error('Payroll PUT error:', error)
+    logger.error('Payroll PUT error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -350,7 +353,7 @@ export async function DELETE(request: NextRequest) {
         .eq('id', runId)
 
       if (error) {
-        console.error('Pay run deletion error:', error)
+        logger.error('Pay run deletion error', { error })
         return NextResponse.json(
           { error: 'Failed to delete pay run' },
           { status: 500 }
@@ -366,7 +369,7 @@ export async function DELETE(request: NextRequest) {
         .eq('id', runId)
 
       if (error) {
-        console.error('Pay run soft delete error:', error)
+        logger.error('Pay run soft delete error', { error })
         return NextResponse.json(
           { error: 'Failed to delete pay run' },
           { status: 500 }
@@ -379,7 +382,7 @@ export async function DELETE(request: NextRequest) {
       message: `Pay run "${existing.period}" deleted successfully`
     })
   } catch (error) {
-    console.error('Payroll DELETE error:', error)
+    logger.error('Payroll DELETE error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -405,7 +408,7 @@ async function handleGetApprovalQueue(
       .order('pay_date', { ascending: true })
 
     if (error) {
-      console.error('Approval queue error:', error)
+      logger.error('Approval queue error', { error })
       return NextResponse.json(
         { error: 'Failed to load approval queue' },
         { status: 500 }
@@ -427,7 +430,7 @@ async function handleGetApprovalQueue(
         : 'No pay runs pending approval'
     })
   } catch (error) {
-    console.error('Approval queue error:', error)
+    logger.error('Approval queue error', { error })
     return NextResponse.json(
       { error: 'Failed to load approval queue' },
       { status: 500 }
@@ -448,7 +451,7 @@ async function handleGetAnalytics(
       .is('deleted_at', null)
 
     if (error) {
-      console.error('Analytics error:', error)
+      logger.error('Analytics error', { error })
       return NextResponse.json(
         { error: 'Failed to load analytics' },
         { status: 500 }
@@ -514,7 +517,7 @@ async function handleGetAnalytics(
       message: 'Payroll analytics loaded successfully'
     })
   } catch (error) {
-    console.error('Analytics error:', error)
+    logger.error('Analytics error', { error })
     return NextResponse.json(
       { error: 'Failed to load analytics' },
       { status: 500 }
@@ -589,7 +592,7 @@ async function handleListPayRuns(
   const { data: payRuns, error, count } = await query
 
   if (error) {
-    console.error('Pay runs query error:', error)
+    logger.error('Pay runs query error', { error })
     return NextResponse.json(
       { error: 'Failed to fetch pay runs' },
       { status: 500 }
@@ -664,7 +667,7 @@ async function handleCreatePayRun(
     .single()
 
   if (error) {
-    console.error('Pay run creation error:', error)
+    logger.error('Pay run creation error', { error })
     return NextResponse.json(
       { error: 'Failed to create pay run' },
       { status: 500 }
@@ -730,7 +733,7 @@ async function handleApprovePayRun(
     .single()
 
   if (error) {
-    console.error('Pay run approval error:', error)
+    logger.error('Pay run approval error', { error })
     return NextResponse.json(
       { error: 'Failed to approve pay run' },
       { status: 500 }
@@ -789,7 +792,7 @@ async function handleRejectPayRun(
     .single()
 
   if (error) {
-    console.error('Pay run rejection error:', error)
+    logger.error('Pay run rejection error', { error })
     return NextResponse.json(
       { error: 'Failed to reject pay run' },
       { status: 500 }
@@ -853,7 +856,7 @@ async function handleProcessPayRun(
     .single()
 
   if (error) {
-    console.error('Pay run processing error:', error)
+    logger.error('Pay run processing error', { error })
     return NextResponse.json(
       { error: 'Failed to start processing' },
       { status: 500 }
@@ -920,7 +923,7 @@ async function handleCancelPayRun(
     .single()
 
   if (error) {
-    console.error('Pay run cancellation error:', error)
+    logger.error('Pay run cancellation error', { error })
     return NextResponse.json(
       { error: 'Failed to cancel pay run' },
       { status: 500 }
@@ -954,7 +957,7 @@ async function handleExportPayroll(
   const { data: payRuns, error } = await query
 
   if (error) {
-    console.error('Export error:', error)
+    logger.error('Export error', { error })
     return NextResponse.json(
       { error: 'Failed to export payroll data' },
       { status: 500 }

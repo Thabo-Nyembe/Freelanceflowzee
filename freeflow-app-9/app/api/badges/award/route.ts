@@ -9,6 +9,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getServerSession } from '@/lib/auth'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('badges-award')
 
 export async function POST(request: NextRequest) {
   try {
@@ -82,7 +85,7 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('Badge award error:', error)
+      logger.error('Badge award error', { error })
       return NextResponse.json(
         { error: 'Failed to award badge' },
         { status: 500 }
@@ -126,7 +129,7 @@ export async function POST(request: NextRequest) {
       message: `Badge "${badge.name}" awarded successfully!`
     })
   } catch (error) {
-    console.error('Award badge error:', error)
+    logger.error('Award badge error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

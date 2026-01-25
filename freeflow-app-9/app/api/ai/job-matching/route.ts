@@ -22,6 +22,9 @@ import {
   createProfileEmbedding,
 } from '@/lib/ai/job-matching';
 import { z } from 'zod';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('ai-job-matching');
 
 // ============================================================================
 // VALIDATION SCHEMAS
@@ -158,7 +161,7 @@ export async function GET(request: NextRequest) {
           },
         });
       } catch (error) {
-        console.error('Error calculating matches:', error);
+        logger.error('Error calculating matches', { error });
         // Return stored matches even if stale
         return NextResponse.json({
           success: true,
@@ -180,7 +183,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Job Matching GET error:', error);
+    logger.error('Job Matching GET error', { error });
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }
@@ -227,7 +230,7 @@ export async function POST(request: NextRequest) {
             },
           });
         } catch (error) {
-          console.error('Match calculation error:', error);
+          logger.error('Match calculation error', { error });
           return NextResponse.json({
             success: false,
             error: 'Failed to calculate matches',
@@ -358,7 +361,7 @@ export async function POST(request: NextRequest) {
             },
           });
         } catch (error) {
-          console.error('Freelancer matching error:', error);
+          logger.error('Freelancer matching error', { error });
           return NextResponse.json({
             success: false,
             error: 'Failed to find matching freelancers',
@@ -637,7 +640,7 @@ export async function POST(request: NextRequest) {
             },
           });
         } catch (error) {
-          console.error('Insights error:', error);
+          logger.error('Insights error', { error });
           return NextResponse.json({
             success: false,
             error: 'Failed to get insights',
@@ -657,7 +660,7 @@ export async function POST(request: NextRequest) {
             data: optimization,
           });
         } catch (error) {
-          console.error('Profile optimization error:', error);
+          logger.error('Profile optimization error', { error });
           return NextResponse.json({
             success: false,
             error: 'Failed to analyze profile',
@@ -718,7 +721,7 @@ export async function POST(request: NextRequest) {
             message: 'Profile embedding updated. New matches will be calculated.',
           });
         } catch (error) {
-          console.error('Embedding refresh error:', error);
+          logger.error('Embedding refresh error', { error });
           return NextResponse.json({
             success: false,
             error: 'Failed to refresh embedding',
@@ -739,7 +742,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    console.error('Job Matching POST error:', error);
+    logger.error('Job Matching POST error', { error });
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

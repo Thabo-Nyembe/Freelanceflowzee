@@ -7,6 +7,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { scimService } from '@/lib/auth/scim-service'
 import { validateSCIMAuth } from '../middleware'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('scim-api')
 
 /**
  * Execute bulk operations
@@ -78,7 +81,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       }
     })
   } catch (error) {
-    console.error('SCIM bulk error:', error)
+    logger.error('SCIM bulk error', { error })
 
     return NextResponse.json(
       {

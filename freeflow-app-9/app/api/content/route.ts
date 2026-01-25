@@ -1,5 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('content-api')
 
 export async function GET(request: Request) {
   try {
@@ -58,7 +61,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(response)
   } catch (error) {
-    console.error('Content API error:', error)
+    logger.error('Content API error', { error })
     return NextResponse.json(
       { error: 'Failed to fetch content' },
       { status: 500 }

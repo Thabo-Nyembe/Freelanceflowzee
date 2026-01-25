@@ -7,6 +7,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('captions-api')
 import {
   generateSRT,
   generateVTT,
@@ -149,7 +152,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       segmentCount: captionSegments.length,
     })
   } catch (error) {
-    console.error('Generate captions error:', error)
+    logger.error('Generate captions error', { error })
     return NextResponse.json(
       { error: 'Failed to generate captions' },
       { status: 500 }
@@ -285,7 +288,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     return new NextResponse(content, { headers })
   } catch (error) {
-    console.error('Export captions error:', error)
+    logger.error('Export captions error', { error })
     return NextResponse.json(
       { error: 'Failed to export captions' },
       { status: 500 }

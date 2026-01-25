@@ -7,6 +7,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import OpenAI from 'openai'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('ai-agent-chat')
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -95,7 +98,7 @@ export async function POST(
         .single()
 
       if (convError || !newConv) {
-        console.error('Error creating conversation:', convError)
+        logger.error('Error creating conversation', { error: convError })
         return NextResponse.json(
           { error: 'Failed to create conversation' },
           { status: 500 }
@@ -278,7 +281,7 @@ export async function POST(
       },
     })
   } catch (error) {
-    console.error('Agent chat error:', error)
+    logger.error('Agent chat error', { error })
     return NextResponse.json(
       { error: 'Failed to process message' },
       { status: 500 }

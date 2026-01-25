@@ -15,6 +15,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import OpenAI from 'openai'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('ai-project-status')
 
 // ============================================================================
 // TYPES
@@ -279,7 +282,7 @@ ${(project.milestones || []).filter(m => m.status === 'pending').map(m => `- ${m
       tokens: completion.usage?.total_tokens || 0
     }
   } catch (error) {
-    console.error('OpenAI API error:', error)
+    logger.error('OpenAI API error', { error })
     return generateDemoReport(project, metrics, reportType)
   }
 }
@@ -671,7 +674,7 @@ export async function POST(request: NextRequest) {
         }, { status: 400 })
     }
   } catch (error) {
-    console.error('AI Project Status API Error:', error)
+    logger.error('AI Project Status API Error', { error })
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'An error occurred'
@@ -722,7 +725,7 @@ export async function GET(request: NextRequest) {
       }
     })
   } catch (error) {
-    console.error('AI Project Status GET Error:', error)
+    logger.error('AI Project Status GET Error', { error })
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'An error occurred'

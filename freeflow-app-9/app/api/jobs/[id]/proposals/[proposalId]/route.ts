@@ -6,6 +6,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { z } from 'zod';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('job-proposals-detail');
 
 const updateProposalSchema = z.object({
   action: z.enum(['shortlist', 'reject', 'schedule_interview', 'send_offer']).optional(),
@@ -108,7 +111,7 @@ export async function PATCH(
         { status: 400 }
       );
     }
-    console.error('Proposal PATCH error:', error);
+    logger.error('Proposal PATCH error', { error });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

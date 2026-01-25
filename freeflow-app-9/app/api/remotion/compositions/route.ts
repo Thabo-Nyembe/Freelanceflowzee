@@ -8,6 +8,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { remotionService } from '@/lib/remotion/remotion-service'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('remotion-compositions-api')
 
 // Composition metadata
 const compositionMeta: Record<
@@ -490,7 +493,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       categories: ['basic', 'social', 'marketing', 'presentation', 'full'],
     })
   } catch (error) {
-    console.error('Get compositions error:', error)
+    logger.error('Get compositions error', { error })
     return NextResponse.json(
       { error: 'Failed to get compositions' },
       { status: 500 }

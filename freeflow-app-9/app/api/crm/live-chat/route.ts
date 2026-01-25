@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('live-chat');
 
 // Phase 7 Gap #9: Live Chat Widget
 // Priority: MEDIUM | Competitor: HubSpot
@@ -797,7 +800,7 @@ export async function POST(request: NextRequest) {
         );
     }
   } catch (error) {
-    console.error('Live Chat API error:', error);
+    logger.error('Live Chat API error', { error });
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }
@@ -842,7 +845,7 @@ export async function GET(request: NextRequest) {
       }
     });
   } catch (error) {
-    console.error('Live Chat GET error:', error);
+    logger.error('Live Chat GET error', { error });
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

@@ -8,6 +8,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { updateAlertStatus, type AlertStatus } from '@/lib/security/anomaly-detection'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('security-alerts')
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -98,7 +101,7 @@ export async function GET(
       }
     })
   } catch (error) {
-    console.error('Get security alert error:', error)
+    logger.error('Get security alert error', { error })
     return NextResponse.json(
       { error: 'Failed to get security alert' },
       { status: 500 }
@@ -211,7 +214,7 @@ export async function PATCH(
       alert: updatedAlert
     })
   } catch (error) {
-    console.error('Update security alert error:', error)
+    logger.error('Update security alert error', { error })
     return NextResponse.json(
       { error: 'Failed to update security alert' },
       { status: 500 }

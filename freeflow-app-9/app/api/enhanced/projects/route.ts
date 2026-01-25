@@ -6,6 +6,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient, createAdminClient } from '@/lib/supabase/server';
 import { predictProjectHealth } from '@/lib/analytics/predictive-engine';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('enhanced-projects');
 
 // Demo user for unauthenticated access
 const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001';
@@ -95,7 +98,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     }
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.error('Enhanced Projects GET error:', errorMessage);
+    logger.error('Enhanced Projects GET error', { error: errorMessage });
     return NextResponse.json(
       { success: false, error: errorMessage },
       { status: 500 }
@@ -164,7 +167,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    console.error('Enhanced Projects POST error:', errorMessage);
+    logger.error('Enhanced Projects POST error', { error: errorMessage });
     return NextResponse.json(
       { success: false, error: errorMessage },
       { status: 500 }

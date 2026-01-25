@@ -11,6 +11,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getServerSession } from '@/lib/auth'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('courses')
 
 // ============================================================================
 // TYPES
@@ -190,7 +193,7 @@ export async function GET(request: NextRequest) {
     const { data: courses, error, count } = await query
 
     if (error) {
-      console.error('Courses query error:', error)
+      logger.error('Courses query error', { error })
       return NextResponse.json(
         { error: 'Failed to fetch courses' },
         { status: 500 }
@@ -212,7 +215,7 @@ export async function GET(request: NextRequest) {
       }
     })
   } catch (error) {
-    console.error('Courses GET error:', error)
+    logger.error('Courses GET error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -359,7 +362,7 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('Course creation error:', error)
+      logger.error('Course creation error', { error })
       return NextResponse.json(
         { error: 'Failed to create course' },
         { status: 500 }
@@ -372,7 +375,7 @@ export async function POST(request: NextRequest) {
       message: 'Course created successfully'
     }, { status: 201 })
   } catch (error) {
-    console.error('Courses POST error:', error)
+    logger.error('Courses POST error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -455,7 +458,7 @@ export async function PUT(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('Course update error:', error)
+      logger.error('Course update error', { error })
       return NextResponse.json(
         { error: 'Failed to update course' },
         { status: 500 }
@@ -468,7 +471,7 @@ export async function PUT(request: NextRequest) {
       message: 'Course updated successfully'
     })
   } catch (error) {
-    console.error('Courses PUT error:', error)
+    logger.error('Courses PUT error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -527,7 +530,7 @@ export async function DELETE(request: NextRequest) {
         .eq('id', courseId)
 
       if (error) {
-        console.error('Course deletion error:', error)
+        logger.error('Course deletion error', { error })
         return NextResponse.json(
           { error: 'Failed to delete course' },
           { status: 500 }
@@ -545,7 +548,7 @@ export async function DELETE(request: NextRequest) {
         .eq('id', courseId)
 
       if (error) {
-        console.error('Course archive error:', error)
+        logger.error('Course archive error', { error })
         return NextResponse.json(
           { error: 'Failed to archive course' },
           { status: 500 }
@@ -558,7 +561,7 @@ export async function DELETE(request: NextRequest) {
       message: permanent ? 'Course deleted permanently' : 'Course archived successfully'
     })
   } catch (error) {
-    console.error('Courses DELETE error:', error)
+    logger.error('Courses DELETE error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -618,7 +621,7 @@ async function getAggregateCourseStats(
       total_students: totalStudents
     }
   } catch (error) {
-    console.error('Error getting aggregate stats:', error)
+    logger.error('Error getting aggregate stats', { error })
     return {
       total: 0,
       by_status: { published: 0, draft: 0, archived: 0 },

@@ -8,6 +8,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { runDirectorySync } from '@/lib/auth/directory-sync'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('directory-sync')
 
 /**
  * Get sync status and history
@@ -74,7 +77,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       runningSyncs: runningSyncs || []
     })
   } catch (error) {
-    console.error('Get sync status error:', error)
+    logger.error('Get sync status error', { error })
     return NextResponse.json(
       { error: 'Failed to get sync status' },
       { status: 500 }
@@ -184,7 +187,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       connectionId
     }, { status: 202 })
   } catch (error) {
-    console.error('Trigger sync error:', error)
+    logger.error('Trigger sync error', { error })
     return NextResponse.json(
       { error: 'Failed to trigger sync' },
       { status: 500 }

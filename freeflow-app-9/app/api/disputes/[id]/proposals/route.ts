@@ -6,6 +6,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { z } from 'zod';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('dispute-proposals');
 
 const createProposalSchema = z.object({
   resolution_type: z.enum([
@@ -91,7 +94,7 @@ export async function GET(
       active_proposal: activeProposal || null,
     });
   } catch (error) {
-    console.error('Proposals GET error:', error);
+    logger.error('Proposals GET error', { error });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -236,7 +239,7 @@ export async function POST(
         { status: 400 }
       );
     }
-    console.error('Proposals POST error:', error);
+    logger.error('Proposals POST error', { error });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -410,7 +413,7 @@ export async function PATCH(
         { status: 400 }
       );
     }
-    console.error('Proposals PATCH error:', error);
+    logger.error('Proposals PATCH error', { error });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

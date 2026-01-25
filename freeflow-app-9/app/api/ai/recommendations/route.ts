@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('ai-recommendations');
 
 // ============================================================================
 // WORLD-CLASS AI RECOMMENDATIONS API
@@ -1421,7 +1424,7 @@ Return as JSON array of recommendations.`
         }, { status: 400 });
     }
   } catch (error) {
-    console.error('AI Recommendations API Error:', error);
+    logger.error('AI Recommendations API Error', { error });
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'An error occurred',

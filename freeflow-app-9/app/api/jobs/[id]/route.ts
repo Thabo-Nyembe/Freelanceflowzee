@@ -6,6 +6,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { z } from 'zod';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('job-detail');
 
 const updateJobSchema = z.object({
   title: z.string().min(10).max(200).optional(),
@@ -73,7 +76,7 @@ export async function GET(
 
     return NextResponse.json({ job });
   } catch (error) {
-    console.error('Job GET error:', error);
+    logger.error('Job GET error', { error });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -152,7 +155,7 @@ export async function PATCH(
         { status: 400 }
       );
     }
-    console.error('Job PATCH error:', error);
+    logger.error('Job PATCH error', { error });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -203,7 +206,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true, message: 'Job deleted' });
   } catch (error) {
-    console.error('Job DELETE error:', error);
+    logger.error('Job DELETE error', { error });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

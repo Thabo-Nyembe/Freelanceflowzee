@@ -1,5 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('translation')
 
 export async function GET(request: NextRequest) {
   try {
@@ -97,7 +100,7 @@ export async function GET(request: NextRequest) {
       }
     }
   } catch (error: any) {
-    console.error('Translation API error:', error)
+    logger.error('Translation API error', { error })
     return NextResponse.json(
       { error: error.message || 'Failed to fetch translation data' },
       { status: 500 }
@@ -149,7 +152,7 @@ export async function POST(request: NextRequest) {
               translatedText = data.choices?.[0]?.message?.content || sourceText
             }
           } catch (error) {
-            console.error('OpenAI translation error:', error)
+            logger.error('OpenAI translation error', { error })
             translatedText = `[Translated] ${sourceText}`
           }
         } else {
@@ -295,7 +298,7 @@ export async function POST(request: NextRequest) {
               translatedText = data.choices?.[0]?.message?.content || text
             }
           } catch (error) {
-            console.error('OpenAI translation error:', error)
+            logger.error('OpenAI translation error', { error })
             // Fall back to placeholder
             translatedText = `[${targetLang}] ${text}`
           }
@@ -322,7 +325,7 @@ export async function POST(request: NextRequest) {
         )
     }
   } catch (error: any) {
-    console.error('Translation API error:', error)
+    logger.error('Translation API error', { error })
     return NextResponse.json(
       { error: error.message || 'Operation failed' },
       { status: 500 }

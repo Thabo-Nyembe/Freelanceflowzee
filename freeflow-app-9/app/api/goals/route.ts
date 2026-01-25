@@ -14,6 +14,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('goals')
 
 // ============================================================================
 // TYPES
@@ -267,7 +270,7 @@ export async function GET(request: NextRequest) {
     const { data: goals, error } = await query
 
     if (error) {
-      console.error('Error fetching goals:', error)
+      logger.error('Error fetching goals', { error })
       // Fall back to demo data
       return NextResponse.json({
         success: true,
@@ -301,7 +304,7 @@ export async function GET(request: NextRequest) {
       }
     })
   } catch (error) {
-    console.error('Goals API GET Error:', error)
+    logger.error('Goals API GET Error', { error })
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'An error occurred'
@@ -639,7 +642,7 @@ export async function POST(request: NextRequest) {
         }, { status: 400 })
     }
   } catch (error) {
-    console.error('Goals API POST Error:', error)
+    logger.error('Goals API POST Error', { error })
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'An error occurred'

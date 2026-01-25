@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('invoices-api')
 
 // ============================================================================
 // INVOICE API - Dynamic Route by ID
@@ -43,7 +46,7 @@ export async function GET(
       data: invoice,
     })
   } catch (error) {
-    console.error('Invoice GET Error:', error)
+    logger.error('Invoice GET Error', { error })
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to fetch invoice',
@@ -122,7 +125,7 @@ export async function PUT(
       .single()
 
     if (error) {
-      console.error('Invoice PUT Error:', error)
+      logger.error('Invoice PUT Error', { error })
       return NextResponse.json({
         success: false,
         error: 'Failed to update invoice',
@@ -135,7 +138,7 @@ export async function PUT(
       message: `Invoice ${updatedInvoice.invoice_number} updated successfully`,
     })
   } catch (error) {
-    console.error('Invoice PUT Error:', error)
+    logger.error('Invoice PUT Error', { error })
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to update invoice',
@@ -181,7 +184,7 @@ export async function DELETE(
       .eq('id', id)
 
     if (error) {
-      console.error('Invoice DELETE Error:', error)
+      logger.error('Invoice DELETE Error', { error })
       return NextResponse.json({
         success: false,
         error: 'Failed to delete invoice',
@@ -194,7 +197,7 @@ export async function DELETE(
       message: `Invoice ${invoice.invoice_number} deleted successfully`,
     })
   } catch (error) {
-    console.error('Invoice DELETE Error:', error)
+    logger.error('Invoice DELETE Error', { error })
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to delete invoice',

@@ -11,6 +11,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { taxService } from '@/lib/tax/tax-service'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('tax-api')
 
 /**
  * Get nexus states for user
@@ -49,7 +52,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       nexusStates
     })
   } catch (error) {
-    console.error('Get nexus error:', error)
+    logger.error('Get nexus error', { error })
     return NextResponse.json(
       { error: 'Failed to get nexus states' },
       { status: 500 }
@@ -118,7 +121,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       message: 'Nexus status updated'
     })
   } catch (error) {
-    console.error('Update nexus error:', error)
+    logger.error('Update nexus error', { error })
     return NextResponse.json(
       { error: 'Failed to update nexus status' },
       { status: 500 }
@@ -166,7 +169,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
       message: 'Nexus status removed'
     })
   } catch (error) {
-    console.error('Delete nexus error:', error)
+    logger.error('Delete nexus error', { error })
     return NextResponse.json(
       { error: 'Failed to delete nexus status' },
       { status: 500 }

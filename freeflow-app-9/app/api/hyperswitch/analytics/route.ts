@@ -11,6 +11,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { hyperswitchPayments } from '@/lib/payments/hyperswitch'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('hyperswitch-api')
 
 /**
  * Get payment analytics
@@ -70,7 +73,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         )
     }
   } catch (error) {
-    console.error('Get analytics error:', error)
+    logger.error('Get analytics error', { error })
     return NextResponse.json(
       { error: 'Failed to get analytics' },
       { status: 500 }

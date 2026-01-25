@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('stripe-api');
 
 // ============================================================================
 // SUBSCRIPTION SETTINGS API
@@ -94,7 +97,7 @@ export async function POST(request: NextRequest) {
 
         if (error) {
           // If table doesn't exist, just return success (demo mode)
-          console.warn('Settings table may not exist:', error.message);
+          logger.warn('Settings table may not exist', { error: error.message });
         }
 
         return NextResponse.json({
@@ -114,7 +117,7 @@ export async function POST(request: NextRequest) {
         }, { status: 400 });
     }
   } catch (error) {
-    console.error('Settings API Error:', error);
+    logger.error('Settings API Error', { error });
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'An error occurred',

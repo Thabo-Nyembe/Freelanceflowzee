@@ -6,6 +6,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { z } from 'zod';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('marketplace-listings');
 
 const packageSchema = z.object({
   name: z.string(),
@@ -149,7 +152,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
   } catch (error) {
-    console.error('Listings GET error:', error);
+    logger.error('Listings GET error', { error });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -211,7 +214,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Create listing error:', error);
+      logger.error('Create listing error', { error });
       return NextResponse.json({ error: 'Failed to create listing' }, { status: 500 });
     }
 
@@ -223,7 +226,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    console.error('Listings POST error:', error);
+    logger.error('Listings POST error', { error });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -280,7 +283,7 @@ export async function PUT(request: NextRequest) {
         { status: 400 }
       );
     }
-    console.error('Listings PUT error:', error);
+    logger.error('Listings PUT error', { error });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -341,7 +344,7 @@ export async function PATCH(request: NextRequest) {
 
     return NextResponse.json({ listing });
   } catch (error) {
-    console.error('Listings PATCH error:', error);
+    logger.error('Listings PATCH error', { error });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -400,7 +403,7 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Listings DELETE error:', error);
+    logger.error('Listings DELETE error', { error });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

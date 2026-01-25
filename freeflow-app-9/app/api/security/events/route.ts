@@ -9,6 +9,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { processSecurityEvent, type SecurityEvent } from '@/lib/security/anomaly-detection'
 import { headers } from 'next/headers'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('security-events')
 
 /**
  * List security events
@@ -102,7 +105,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       offset
     })
   } catch (error) {
-    console.error('List security events error:', error)
+    logger.error('List security events error', { error })
     return NextResponse.json(
       { error: 'Failed to list security events' },
       { status: 500 }
@@ -175,7 +178,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       alerts_created: result.alerts.length
     })
   } catch (error) {
-    console.error('Record security event error:', error)
+    logger.error('Record security event error', { error })
     return NextResponse.json(
       { error: 'Failed to record security event' },
       { status: 500 }

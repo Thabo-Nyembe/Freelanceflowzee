@@ -11,6 +11,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { hyperswitchPayments, processRefund, type Refund } from '@/lib/payments/hyperswitch'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('hyperswitch-api')
 
 /**
  * Create a new refund
@@ -149,7 +152,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       },
     }, { status: 201 })
   } catch (error) {
-    console.error('Create refund error:', error)
+    logger.error('Create refund error', { error })
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to create refund' },
       { status: 500 }
@@ -250,7 +253,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       },
     })
   } catch (error) {
-    console.error('Get refunds error:', error)
+    logger.error('Get refunds error', { error })
     return NextResponse.json(
       { error: 'Failed to get refunds' },
       { status: 500 }
@@ -324,7 +327,7 @@ export async function PUT(request: NextRequest): Promise<NextResponse> {
       refund,
     })
   } catch (error) {
-    console.error('Update refund error:', error)
+    logger.error('Update refund error', { error })
     return NextResponse.json(
       { error: 'Failed to update refund' },
       { status: 500 }

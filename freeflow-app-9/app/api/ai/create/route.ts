@@ -320,8 +320,8 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (dbError) {
-      console.error('Failed to save to DB', dbError)
-      // formatting fail safe 
+      logger.error('Failed to save to DB', { error: dbError })
+      // formatting fail safe
     }
 
     const response = {

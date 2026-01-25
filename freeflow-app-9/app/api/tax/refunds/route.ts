@@ -10,6 +10,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { taxService } from '@/lib/tax/tax-service'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('tax-api')
 
 /**
  * Create tax refund
@@ -97,7 +100,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       refund: result
     }, { status: 201 })
   } catch (error) {
-    console.error('Create refund error:', error)
+    logger.error('Create refund error', { error })
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to create refund' },
       { status: 500 }
@@ -160,7 +163,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       }
     })
   } catch (error) {
-    console.error('List refunds error:', error)
+    logger.error('List refunds error', { error })
     return NextResponse.json(
       { error: 'Failed to list refunds' },
       { status: 500 }

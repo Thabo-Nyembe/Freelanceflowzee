@@ -9,6 +9,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('security-rules')
 
 /**
  * List anomaly detection rules
@@ -74,7 +77,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       rules
     })
   } catch (error) {
-    console.error('List anomaly rules error:', error)
+    logger.error('List anomaly rules error', { error })
     return NextResponse.json(
       { error: 'Failed to list anomaly rules' },
       { status: 500 }
@@ -187,7 +190,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       rule
     }, { status: 201 })
   } catch (error) {
-    console.error('Create anomaly rule error:', error)
+    logger.error('Create anomaly rule error', { error })
     return NextResponse.json(
       { error: 'Failed to create anomaly rule' },
       { status: 500 }
@@ -291,7 +294,7 @@ export async function PUT(request: NextRequest): Promise<NextResponse> {
       rule
     })
   } catch (error) {
-    console.error('Update anomaly rule error:', error)
+    logger.error('Update anomaly rule error', { error })
     return NextResponse.json(
       { error: 'Failed to update anomaly rule' },
       { status: 500 }
@@ -377,7 +380,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
       message: 'Rule deleted'
     })
   } catch (error) {
-    console.error('Delete anomaly rule error:', error)
+    logger.error('Delete anomaly rule error', { error })
     return NextResponse.json(
       { error: 'Failed to delete anomaly rule' },
       { status: 500 }

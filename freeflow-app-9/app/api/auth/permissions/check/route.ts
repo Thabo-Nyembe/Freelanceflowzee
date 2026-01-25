@@ -7,6 +7,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { authorizationService } from '@/lib/auth/authorization-service'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('auth-api')
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
@@ -60,7 +63,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       debug: process.env.NODE_ENV === 'development' ? result.debug : undefined
     })
   } catch (error: unknown) {
-    console.error('Permission check error:', error)
+    logger.error('Permission check error', { error })
     const message = error instanceof Error ? error.message : 'Permission check failed'
     return NextResponse.json(
       { success: false, error: message },
@@ -134,7 +137,7 @@ export async function PUT(request: NextRequest): Promise<NextResponse> {
       results
     })
   } catch (error: unknown) {
-    console.error('Batch permission check error:', error)
+    logger.error('Batch permission check error', { error })
     const message = error instanceof Error ? error.message : 'Batch permission check failed'
     return NextResponse.json(
       { success: false, error: message },

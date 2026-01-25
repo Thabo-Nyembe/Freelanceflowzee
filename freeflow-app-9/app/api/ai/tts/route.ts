@@ -7,6 +7,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import OpenAI from 'openai'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('ai-tts')
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -93,7 +96,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       },
     })
   } catch (error) {
-    console.error('TTS error:', error)
+    logger.error('TTS error', { error })
     return NextResponse.json(
       { error: 'Text-to-speech failed' },
       { status: 500 }

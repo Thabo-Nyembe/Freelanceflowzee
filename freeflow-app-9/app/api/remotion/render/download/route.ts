@@ -9,6 +9,9 @@ import { createClient } from '@/lib/supabase/server'
 import { remotionService } from '@/lib/remotion/remotion-service'
 import fs from 'fs/promises'
 import path from 'path'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('remotion-download-api')
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
@@ -100,7 +103,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       { status: 404 }
     )
   } catch (error) {
-    console.error('Download error:', error)
+    logger.error('Download error', { error })
     return NextResponse.json(
       { error: 'Failed to download video' },
       { status: 500 }

@@ -11,6 +11,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { hyperswitchPayments, createFreeFlowPayment, type PaymentIntent } from '@/lib/payments/hyperswitch'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('hyperswitch-api')
 
 /**
  * Create a new payment intent
@@ -148,7 +151,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       },
     }, { status: 201 })
   } catch (error) {
-    console.error('Create payment intent error:', error)
+    logger.error('Create payment intent error', { error })
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to create payment' },
       { status: 500 }
@@ -239,7 +242,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       },
     })
   } catch (error) {
-    console.error('Get payments error:', error)
+    logger.error('Get payments error', { error })
     return NextResponse.json(
       { error: 'Failed to get payments' },
       { status: 500 }
@@ -327,7 +330,7 @@ export async function PUT(request: NextRequest): Promise<NextResponse> {
       payment: updatedPayment,
     })
   } catch (error) {
-    console.error('Update payment error:', error)
+    logger.error('Update payment error', { error })
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to update payment' },
       { status: 500 }

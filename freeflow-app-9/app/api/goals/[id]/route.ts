@@ -6,6 +6,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { z } from 'zod';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('goals-detail');
 
 const updateGoalSchema = z.object({
   title: z.string().min(1).optional(),
@@ -111,7 +114,7 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error('Failed to fetch goal:', error);
+    logger.error('Failed to fetch goal', { error });
     return NextResponse.json(
       { error: 'Failed to fetch goal' },
       { status: 500 }
@@ -175,7 +178,7 @@ export async function PUT(
       .single();
 
     if (error) {
-      console.error('Failed to update goal:', error);
+      logger.error('Failed to update goal', { error });
       return NextResponse.json(
         { error: 'Failed to update goal' },
         { status: 500 }
@@ -193,7 +196,7 @@ export async function PUT(
         { status: 400 }
       );
     }
-    console.error('Failed to update goal:', error);
+    logger.error('Failed to update goal', { error });
     return NextResponse.json(
       { error: 'Failed to update goal' },
       { status: 500 }
@@ -227,7 +230,7 @@ export async function DELETE(
       .eq('user_id', user.id);
 
     if (error) {
-      console.error('Failed to delete goal:', error);
+      logger.error('Failed to delete goal', { error });
       return NextResponse.json(
         { error: 'Failed to delete goal' },
         { status: 500 }
@@ -239,7 +242,7 @@ export async function DELETE(
       message: 'Goal deleted',
     });
   } catch (error) {
-    console.error('Failed to delete goal:', error);
+    logger.error('Failed to delete goal', { error });
     return NextResponse.json(
       { error: 'Failed to delete goal' },
       { status: 500 }

@@ -12,6 +12,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getServerSession } from '@/lib/auth'
 import { checkPermission } from '@/lib/rbac/rbac-service'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('projects-api')
 
 // ============================================================================
 // TYPES
@@ -209,7 +212,7 @@ export async function GET(request: NextRequest) {
     const { data: projects, error, count } = await query
 
     if (error) {
-      console.error('Projects query error:', error)
+      logger.error('Projects query error', { error })
       return NextResponse.json(
         { error: 'Failed to fetch projects' },
         { status: 500 }
@@ -238,7 +241,7 @@ export async function GET(request: NextRequest) {
       }
     })
   } catch (error) {
-    console.error('Projects GET error:', error)
+    logger.error('Projects GET error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -352,7 +355,7 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('Project creation error:', error)
+      logger.error('Project creation error', { error })
       return NextResponse.json(
         { error: 'Failed to create project' },
         { status: 500 }
@@ -420,7 +423,7 @@ export async function POST(request: NextRequest) {
       message: 'Project created successfully'
     }, { status: 201 })
   } catch (error) {
-    console.error('Projects POST error:', error)
+    logger.error('Projects POST error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -512,7 +515,7 @@ export async function PUT(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('Project update error:', error)
+      logger.error('Project update error', { error })
       return NextResponse.json(
         { error: 'Failed to update project' },
         { status: 500 }
@@ -544,7 +547,7 @@ export async function PUT(request: NextRequest) {
       message: 'Project updated successfully'
     })
   } catch (error) {
-    console.error('Projects PUT error:', error)
+    logger.error('Projects PUT error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -605,7 +608,7 @@ export async function DELETE(request: NextRequest) {
         .eq('id', projectId)
 
       if (error) {
-        console.error('Project deletion error:', error)
+        logger.error('Project deletion error', { error })
         return NextResponse.json(
           { error: 'Failed to delete project' },
           { status: 500 }
@@ -622,7 +625,7 @@ export async function DELETE(request: NextRequest) {
         .eq('id', projectId)
 
       if (error) {
-        console.error('Project archive error:', error)
+        logger.error('Project archive error', { error })
         return NextResponse.json(
           { error: 'Failed to archive project' },
           { status: 500 }
@@ -640,7 +643,7 @@ export async function DELETE(request: NextRequest) {
       message: permanent ? 'Project deleted permanently' : 'Project archived successfully'
     })
   } catch (error) {
-    console.error('Projects DELETE error:', error)
+    logger.error('Projects DELETE error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -701,7 +704,7 @@ async function getProjectStats(supabase: ReturnType<typeof createClient>, projec
       team_members: teamMembers || 0
     }
   } catch (error) {
-    console.error('Error getting project stats:', error)
+    logger.error('Error getting project stats', { error })
     return {
       total_tasks: 0,
       completed_tasks: 0,
@@ -730,7 +733,7 @@ async function logProjectActivity(
       created_at: new Date().toISOString()
     })
   } catch (error) {
-    console.error('Error logging project activity:', error)
+    logger.error('Error logging project activity', { error })
   }
 }
 

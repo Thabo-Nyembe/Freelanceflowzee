@@ -8,6 +8,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { lagoBilling, syncUserToLago, type LagoCustomer } from '@/lib/billing/lago'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('billing-customers')
 
 /**
  * Get customer billing information
@@ -104,7 +107,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       })
     }
   } catch (error) {
-    console.error('Get billing customer error:', error)
+    logger.error('Get billing customer error', { error })
     return NextResponse.json(
       { error: 'Failed to get billing customer' },
       { status: 500 }
@@ -231,7 +234,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       customer,
     }, { status: sync_only ? 200 : 201 })
   } catch (error) {
-    console.error('Create billing customer error:', error)
+    logger.error('Create billing customer error', { error })
     return NextResponse.json(
       { error: 'Failed to create billing customer' },
       { status: 500 }

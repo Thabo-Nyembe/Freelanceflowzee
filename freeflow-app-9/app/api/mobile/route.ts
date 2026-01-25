@@ -5,6 +5,9 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('mobile-api');
 
 // Demo user for unauthenticated access
 const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001';
@@ -452,7 +455,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Unknown resource' }, { status: 400 });
     }
   } catch (error) {
-    console.error('Error in GET /api/mobile:', error);
+    logger.error('Error in GET /api/mobile', { error });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -943,7 +946,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Unknown action' }, { status: 400 });
     }
   } catch (error) {
-    console.error('Error in POST /api/mobile:', error);
+    logger.error('Error in POST /api/mobile', { error });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -998,7 +1001,7 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({ data });
   } catch (error) {
-    console.error('Error in PUT /api/mobile:', error);
+    logger.error('Error in PUT /api/mobile', { error });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -1049,7 +1052,7 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error in DELETE /api/mobile:', error);
+    logger.error('Error in DELETE /api/mobile', { error });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

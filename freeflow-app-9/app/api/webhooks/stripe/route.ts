@@ -12,6 +12,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import Stripe from 'stripe';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('stripe-webhook');
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
   apiVersion: '2024-11-20.acacia',
@@ -40,7 +43,7 @@ export async function POST(request: NextRequest) {
     try {
       event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
     } catch (err) {
-      console.error('Webhook signature verification failed:', err);
+      logger.error('Webhook signature verification failed', { error: err });
       return NextResponse.json(
         { error: 'Invalid signature' },
         { status: 400 }
@@ -48,7 +51,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Log webhook event
-    console.log(`[Stripe Webhook] Received event: ${event.type}`);
+    logger.info('Received Stripe webhook event', { eventType: event.type });
 
     // Handle different event types
     switch (event.type) {
@@ -163,12 +166,12 @@ export async function POST(request: NextRequest) {
         break;
 
       default:
-        console.log(`[Stripe Webhook] Unhandled event type: ${event.type}`);
+        logger.info('Unhandled Stripe webhook event type', { eventType: event.type });
     }
 
     return NextResponse.json({ received: true });
   } catch (error) {
-    console.error('Webhook handler error:', error);
+    logger.error('Webhook handler error', { error });
     return NextResponse.json(
       { error: 'Webhook handler failed' },
       { status: 500 }
@@ -443,7 +446,7 @@ async function handleDisputeCreated(dispute: Stripe.Dispute) {
   });
 
   // Notify admin
-  console.log('[ALERT] New dispute created:', dispute.id);
+  logger.warn('New dispute created', { disputeId: dispute.id });
 }
 
 async function handleDisputeUpdated(dispute: Stripe.Dispute) {

@@ -16,6 +16,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getServerSession } from '@/lib/auth'
 import { checkPermission } from '@/lib/rbac/rbac-service'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('projects-milestones')
 
 // ============================================================================
 // TYPES
@@ -194,7 +197,7 @@ export async function GET(request: NextRequest) {
     const { data: milestones, error, count } = await query
 
     if (error) {
-      console.error('Milestones query error:', error)
+      logger.error('Milestones query error', { error })
       return NextResponse.json(
         { error: 'Failed to fetch milestones' },
         { status: 500 }
@@ -211,7 +214,7 @@ export async function GET(request: NextRequest) {
       total: count || 0
     })
   } catch (error) {
-    console.error('Milestones GET error:', error)
+    logger.error('Milestones GET error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -293,7 +296,7 @@ export async function POST(request: NextRequest) {
         return handleCreateMilestone(supabase, userId, body)
     }
   } catch (error) {
-    console.error('Milestones POST error:', error)
+    logger.error('Milestones POST error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -376,7 +379,7 @@ export async function PUT(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('Milestone update error:', error)
+      logger.error('Milestone update error', { error })
       return NextResponse.json(
         { error: 'Failed to update milestone' },
         { status: 500 }
@@ -394,7 +397,7 @@ export async function PUT(request: NextRequest) {
       message: 'Milestone updated successfully'
     })
   } catch (error) {
-    console.error('Milestones PUT error:', error)
+    logger.error('Milestones PUT error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -494,7 +497,7 @@ export async function DELETE(request: NextRequest) {
       message: permanent ? 'Milestone deleted permanently' : 'Milestone cancelled'
     })
   } catch (error) {
-    console.error('Milestones DELETE error:', error)
+    logger.error('Milestones DELETE error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -585,7 +588,7 @@ async function handleCreateMilestone(
     .single()
 
   if (error) {
-    console.error('Milestone creation error:', error)
+    logger.error('Milestone creation error', { error })
     return NextResponse.json(
       { error: 'Failed to create milestone' },
       { status: 500 }
@@ -1022,7 +1025,7 @@ async function handleGenerateInvoice(
     .single()
 
   if (error) {
-    console.error('Invoice creation error:', error)
+    logger.error('Invoice creation error', { error })
     return NextResponse.json(
       { error: 'Failed to create invoice' },
       { status: 500 }
@@ -1268,7 +1271,7 @@ async function logMilestoneActivity(
       created_at: new Date().toISOString()
     })
   } catch (error) {
-    console.error('Activity log error:', error)
+    logger.error('Activity log error', { error })
   }
 }
 

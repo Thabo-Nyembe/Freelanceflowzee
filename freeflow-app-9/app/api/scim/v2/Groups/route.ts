@@ -8,6 +8,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { scimService } from '@/lib/auth/scim-service'
 import { validateSCIMAuth } from '../middleware'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('scim-api')
 
 /**
  * List groups with filtering and pagination
@@ -48,7 +51,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       }
     })
   } catch (error) {
-    console.error('SCIM list groups error:', error)
+    logger.error('SCIM list groups error', { error })
 
     if ((error as { schemas?: string[] }).schemas) {
       const scimError = error as { status: string }
@@ -102,7 +105,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       }
     })
   } catch (error) {
-    console.error('SCIM create group error:', error)
+    logger.error('SCIM create group error', { error })
 
     if ((error as { schemas?: string[] }).schemas) {
       const scimError = error as { status: string }

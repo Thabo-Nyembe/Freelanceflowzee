@@ -11,6 +11,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { taxService } from '@/lib/tax/tax-service'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('tax-api')
 
 /**
  * Record transaction for tax filing
@@ -70,7 +73,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       transaction: result
     }, { status: 201 })
   } catch (error) {
-    console.error('Record transaction error:', error)
+    logger.error('Record transaction error', { error })
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to record transaction' },
       { status: 500 }
@@ -138,7 +141,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       }
     })
   } catch (error) {
-    console.error('List transactions error:', error)
+    logger.error('List transactions error', { error })
     return NextResponse.json(
       { error: 'Failed to list transactions' },
       { status: 500 }
@@ -180,7 +183,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
       message: 'Transaction deleted'
     })
   } catch (error) {
-    console.error('Delete transaction error:', error)
+    logger.error('Delete transaction error', { error })
     return NextResponse.json(
       { error: 'Failed to delete transaction' },
       { status: 500 }

@@ -9,6 +9,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import crypto from 'crypto'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('hyperswitch-webhooks')
 
 interface WebhookEvent {
   event_type: string
@@ -56,7 +59,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     if (webhookSecret && signature) {
       const isValid = verifySignature(payload, signature, webhookSecret)
       if (!isValid) {
-        console.error('Invalid webhook signature')
+        logger.error('Invalid webhook signature')
         return NextResponse.json(
           { error: 'Invalid signature' },
           { status: 401 }
@@ -123,7 +126,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         break
 
       default:
-        console.log(`Unhandled webhook event type: ${event.event_type}`)
+        logger.info('Unhandled webhook event type', { eventType: event.event_type })
     }
 
     // Mark as processed
@@ -136,7 +139,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     return NextResponse.json({ received: true })
   } catch (error) {
-    console.error('Webhook processing error:', error)
+    logger.error('Webhook processing error', { error })
     return NextResponse.json(
       { error: 'Webhook processing failed' },
       { status: 500 }

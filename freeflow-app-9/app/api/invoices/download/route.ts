@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import Stripe from 'stripe';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('invoices-api');
 
 // ============================================================================
 // INVOICE DOWNLOAD API
@@ -69,7 +72,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Invoice Download Error:', error);
+    logger.error('Invoice Download Error', { error });
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to get invoice PDF',

@@ -5,6 +5,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('versions-restore');
 
 interface RestorePayload {
   versionId: string;
@@ -97,7 +100,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (insertError) {
-      console.error('Error creating restored version:', insertError);
+      logger.error('Error creating restored version', { error: insertError });
       return NextResponse.json(
         { error: 'Failed to restore version' },
         { status: 500 }
@@ -116,7 +119,7 @@ export async function POST(request: NextRequest) {
 
     if (docUpdateError) {
       // Log but don't fail - the version was created successfully
-      console.warn('Could not update document content:', docUpdateError);
+      logger.warn('Could not update document content', { error: docUpdateError });
     }
 
     // Transform to camelCase
@@ -147,7 +150,7 @@ export async function POST(request: NextRequest) {
       newVersion: transformedVersion,
     });
   } catch (error) {
-    console.error('Error in POST /api/versions/restore:', error);
+    logger.error('Error in POST /api/versions/restore', { error });
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

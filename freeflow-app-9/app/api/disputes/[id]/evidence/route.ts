@@ -6,6 +6,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { z } from 'zod';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('dispute-evidence');
 
 const submitEvidenceSchema = z.object({
   title: z.string().min(3).max(200),
@@ -91,7 +94,7 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error('Evidence GET error:', error);
+    logger.error('Evidence GET error', { error });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -223,7 +226,7 @@ export async function POST(
         { status: 400 }
       );
     }
-    console.error('Evidence POST error:', error);
+    logger.error('Evidence POST error', { error });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

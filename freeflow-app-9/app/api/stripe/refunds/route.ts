@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import Stripe from 'stripe';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('stripe-api');
 
 // ============================================================================
 // REFUNDS API
@@ -142,7 +145,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Refunds API Error:', error);
+    logger.error('Refunds API Error', { error });
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to process refund request',
@@ -218,7 +221,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Refunds GET Error:', error);
+    logger.error('Refunds GET Error', { error });
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to get refund status',

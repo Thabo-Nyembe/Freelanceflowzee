@@ -8,6 +8,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createSecurityAlert, type SecurityAlert } from '@/lib/security/anomaly-detection'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('security-alerts')
 
 /**
  * List security alerts
@@ -115,7 +118,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       stats
     })
   } catch (error) {
-    console.error('List security alerts error:', error)
+    logger.error('List security alerts error', { error })
     return NextResponse.json(
       { error: 'Failed to list security alerts' },
       { status: 500 }
@@ -212,7 +215,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       alertId
     }, { status: 201 })
   } catch (error) {
-    console.error('Create security alert error:', error)
+    logger.error('Create security alert error', { error })
     return NextResponse.json(
       { error: 'Failed to create security alert' },
       { status: 500 }

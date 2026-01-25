@@ -10,6 +10,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { integrationService } from '@/lib/integrations/integration-service';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('cron-token-refresh');
 
 // Verify the request is from an authorized source
 const CRON_SECRET = process.env.CRON_SECRET;
@@ -36,7 +39,7 @@ export async function GET(request: NextRequest) {
       .not('token_expires_at', 'is', null);
 
     if (fetchError) {
-      console.error('Failed to fetch integrations:', fetchError);
+      logger.error('Failed to fetch integrations', { error: fetchError });
       return NextResponse.json(
         { error: 'Failed to fetch integrations' },
         { status: 500 }
@@ -72,14 +75,16 @@ export async function GET(request: NextRequest) {
           });
         }
       } catch (error) {
-        console.error(`Failed to refresh tokens for user ${userId}:`, error);
+        logger.error('Failed to refresh tokens for user', { userId, error });
       }
     }
 
     // Log summary
-    console.log(
-      `Token refresh cron completed: ${results.refreshed} refreshed, ${results.failed} failed, ${results.errors.length} errors`
-    );
+    logger.info('Token refresh cron completed', {
+      refreshed: results.refreshed,
+      failed: results.failed,
+      errors: results.errors.length
+    });
 
     return NextResponse.json({
       success: true,
@@ -93,7 +98,7 @@ export async function GET(request: NextRequest) {
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
-    console.error('Token refresh cron failed:', error);
+    logger.error('Token refresh cron failed', { error });
     return NextResponse.json(
       {
         error: 'Token refresh cron failed',

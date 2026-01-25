@@ -11,6 +11,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { taxService } from '@/lib/tax/tax-service'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('tax-api')
 
 /**
  * Create exemption certificate
@@ -62,7 +65,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       certificate
     }, { status: 201 })
   } catch (error) {
-    console.error('Create exemption error:', error)
+    logger.error('Create exemption error', { error })
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to create exemption certificate' },
       { status: 500 }
@@ -102,7 +105,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       certificates
     })
   } catch (error) {
-    console.error('List exemptions error:', error)
+    logger.error('List exemptions error', { error })
     return NextResponse.json(
       { error: 'Failed to list exemption certificates' },
       { status: 500 }
@@ -179,7 +182,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
       message: 'Exemption certificate deleted'
     })
   } catch (error) {
-    console.error('Delete exemption error:', error)
+    logger.error('Delete exemption error', { error })
     return NextResponse.json(
       { error: 'Failed to delete exemption certificate' },
       { status: 500 }
