@@ -736,20 +736,91 @@ export default function MilestonesClient() {
 
   // Generate report handlers
   const handleGenerateStatusReport = () => {
-    toast.success('Status report generated', { description: 'Check your downloads folder' })
-    handleExportReport()
+    const headers = ['Name', 'Status', 'Priority', 'Health', 'Progress', 'Due Date']
+    const rows = dbMilestones.map(m => [
+      m.name,
+      m.status,
+      m.priority,
+      m.health || 'N/A',
+      `${m.progress}%`,
+      m.due_date || 'N/A'
+    ])
+
+    const csv = [headers.join(','), ...rows.map(r => r.map(cell => `"${cell}"`).join(','))].join('\n')
+    downloadCsv(csv, 'milestone-status-report')
+    toast.success('Status report generated', { description: 'Report downloaded' })
   }
 
   const handleGenerateBudgetReport = () => {
+    const headers = ['Milestone', 'Status', 'Progress', 'Start Date', 'Due Date', 'Completed Date']
+    const rows = dbMilestones.map(m => [
+      m.name,
+      m.status,
+      `${m.progress}%`,
+      m.start_date || 'N/A',
+      m.due_date || 'N/A',
+      m.completed_date || 'N/A'
+    ])
+
+    const csv = [headers.join(','), ...rows.map(r => r.map(cell => `"${cell}"`).join(','))].join('\n')
+    downloadCsv(csv, 'milestone-budget-report')
     toast.success('Budget report generated', { description: 'Financial summary exported' })
   }
 
   const handleGenerateRiskReport = () => {
-    toast.success('Risk assessment exported', { description: 'Risk analysis report generated' })
+    // Focus on at-risk and blocked milestones
+    const atRiskMilestones = dbMilestones.filter(m => m.status === 'at_risk' || m.status === 'blocked' || m.health === 'at_risk' || m.health === 'off_track')
+    const headers = ['Milestone', 'Status', 'Health', 'Priority', 'Progress', 'Due Date', 'Days Overdue']
+    const rows = atRiskMilestones.map(m => {
+      const dueDate = m.due_date ? new Date(m.due_date) : null
+      const daysOverdue = dueDate && dueDate < new Date() ? Math.floor((Date.now() - dueDate.getTime()) / (1000 * 60 * 60 * 24)) : 0
+      return [
+        m.name,
+        m.status,
+        m.health || 'N/A',
+        m.priority,
+        `${m.progress}%`,
+        m.due_date || 'N/A',
+        daysOverdue.toString()
+      ]
+    })
+
+    const csv = [headers.join(','), ...rows.map(r => r.map(cell => `"${cell}"`).join(','))].join('\n')
+    downloadCsv(csv, 'milestone-risk-assessment')
+    toast.success('Risk assessment exported', { description: `${atRiskMilestones.length} at-risk milestones analyzed` })
   }
 
   const handleGenerateProgressReport = () => {
+    const headers = ['Milestone', 'Status', 'Progress', 'Start Date', 'Due Date', 'Days Remaining']
+    const rows = dbMilestones.map(m => {
+      const dueDate = m.due_date ? new Date(m.due_date) : null
+      const daysRemaining = dueDate ? Math.floor((dueDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : 'N/A'
+      return [
+        m.name,
+        m.status,
+        `${m.progress}%`,
+        m.start_date || 'N/A',
+        m.due_date || 'N/A',
+        daysRemaining.toString()
+      ]
+    })
+
+    const csv = [headers.join(','), ...rows.map(r => r.map(cell => `"${cell}"`).join(','))].join('\n')
+    downloadCsv(csv, 'milestone-progress-report')
     toast.success('Progress report generated', { description: 'Timeline and progress exported' })
+  }
+
+  // Helper for CSV downloads
+  const downloadCsv = (content: string, filename: string) => {
+    const blob = new Blob([content], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${filename}-${new Date().toISOString().split('T')[0]}.csv`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
   }
 
   // Export milestones report

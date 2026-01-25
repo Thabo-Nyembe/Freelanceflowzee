@@ -1,7 +1,9 @@
 "use client"
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { toast } from 'sonner'
+import { createClient } from '@/lib/supabase/client'
+import { useRenewals, useRenewalMutations, type Renewal as DbRenewal } from '@/lib/hooks/use-renewals'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -261,6 +263,12 @@ const renewalsActivities: { id: string; user: string; action: string; target: st
 // Quick actions are defined inside component to access state setters
 
 export default function RenewalsClient({ initialRenewals }: RenewalsClientProps) {
+  const supabase = createClient()
+
+  // Data hooks
+  const { renewals: dbRenewals, stats: renewalStats, isLoading, error, refetch } = useRenewals()
+  const { updateRenewal, deleteRenewal, isUpdating, isDeleting } = useRenewalMutations()
+
   const [activeTab, setActiveTab] = useState('overview')
   const [settingsTab, setSettingsTab] = useState('general')
   const [searchQuery, setSearchQuery] = useState('')
@@ -639,15 +647,43 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
     toast.info('Loading reports...')
   }
 
-  const handleGenerateReport = (reportType: string) => {
+  const handleGenerateReport = useCallback((reportType: string) => {
     toast.loading(`Generating ${reportType}...`, { id: 'report' })
-    setTimeout(() => {
+
+    try {
+      // Generate CSV report based on renewals data
+      const headers = ['Customer Name', 'Status', 'Priority', 'Current ARR', 'Proposed ARR', 'Renewal Date', 'Health Score', 'Probability']
+      const rows = dbRenewals.map(r => [
+        r.customer_name,
+        r.status,
+        r.priority,
+        r.current_arr.toString(),
+        r.proposed_arr.toString(),
+        r.renewal_date || 'N/A',
+        r.health_score.toString(),
+        `${r.probability}%`
+      ])
+
+      const csv = [headers.join(','), ...rows.map(r => r.map(cell => `"${cell}"`).join(','))].join('\n')
+      const blob = new Blob([csv], { type: 'text/csv' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `${reportType.toLowerCase().replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.csv`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+
       toast.success(`${reportType} generated`, {
         id: 'report',
-        description: 'Report is ready for download'
+        description: 'Report downloaded to your device'
       })
-    }, 1500)
-  }
+    } catch (error) {
+      console.error('Error generating report:', error)
+      toast.error(`Failed to generate ${reportType}`, { id: 'report' })
+    }
+  }, [dbRenewals])
 
   const handleOpenCustomers = () => {
     setIsCustomersDialogOpen(true)
@@ -707,12 +743,50 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
     }
   }
 
-  const handleArchiveOldRenewals = () => {
-    toast.warning('Archiving old renewals')
+  const handleArchiveOldRenewals = async () => {
+    try {
+      toast.loading('Archiving old renewals...', { id: 'archive-renewals' })
+
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to archive renewals', { id: 'archive-renewals' })
+        return
+      }
+
+      // Archive renewals older than 2 years (renewed or churned)
+      const twoYearsAgo = new Date()
+      twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 2)
+
+      const { error, count } = await supabase
+        .from('renewals')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('user_id', user.id)
+        .in('status', ['renewed', 'churned'])
+        .lt('renewal_date', twoYearsAgo.toISOString())
+
+      if (error) throw error
+
+      toast.success(`Archived ${count || 0} old renewals`, { id: 'archive-renewals' })
+      refetch()
+    } catch (error) {
+      console.error('Error archiving renewals:', error)
+      toast.error('Failed to archive old renewals', { id: 'archive-renewals' })
+    }
   }
 
   const handleResetSettings = () => {
-    toast.warning('Settings reset')
+    // Reset filter and form state to defaults
+    setFilterCriteria({
+      status: 'all',
+      priority: 'all',
+      healthScore: 'all',
+      csm: 'all',
+      dateRange: { start: '', end: '' }
+    })
+    setSelectedStatus('all')
+    setSearchQuery('')
+    setSettingsTab('general')
+    toast.success('Settings reset to defaults')
   }
 
   return (

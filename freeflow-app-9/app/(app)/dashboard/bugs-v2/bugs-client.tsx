@@ -563,10 +563,40 @@ export default function BugsClient() {
   }
 
   // Handler for archiving bugs
-  const handleArchiveBugs = () => {
-    const closedCount = allBugs.filter(b => b.status === 'closed').length
-    toast.success(`Bugs Archived: ${closedCount} closed bugs have been archived`)
-    setShowArchiveDialog(false)
+  const handleArchiveBugs = async () => {
+    const closedBugs = bugs.filter(b => b.status === 'closed')
+    if (closedBugs.length === 0) {
+      toast.info('No closed bugs to archive')
+      setShowArchiveDialog(false)
+      return
+    }
+
+    try {
+      setIsSaving(true)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to archive bugs')
+        return
+      }
+
+      // Archive all closed bugs (soft delete)
+      const { error } = await supabase
+        .from('bugs')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('user_id', user.id)
+        .eq('status', 'closed')
+
+      if (error) throw error
+
+      toast.success(`${closedBugs.length} bugs archived successfully`)
+      setShowArchiveDialog(false)
+      fetchBugs()
+    } catch (error) {
+      console.error('Error archiving bugs:', error)
+      toast.error('Failed to archive bugs')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   // Quick action handlers for list actions

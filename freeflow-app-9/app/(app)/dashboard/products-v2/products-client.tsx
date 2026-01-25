@@ -191,7 +191,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
   const [localCoupons, setLocalCoupons] = useState<Coupon[]>([])
   const [localTaxRates, setLocalTaxRates] = useState<TaxRate[]>([])
 
-  const { data: apiProducts } = useProducts({
+  const { data: apiProducts, refetch, loading: productsLoading } = useProducts({
     status: selectedCategory === 'all' ? undefined : selectedCategory,
     searchQuery: searchQuery || undefined
   })
@@ -386,10 +386,15 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
     toast.success('Catalog exported as JSON')
   }
 
-  const handleSyncAll = () => {
-    setLocalProducts(emptyProducts)
-    setLocalCoupons(emptyCoupons)
-    toast.success('All data synced successfully')
+  const handleSyncAll = async () => {
+    try {
+      toast.loading('Syncing products...', { id: 'sync-products' })
+      await refetch()
+      toast.success('Products synced successfully', { id: 'sync-products' })
+    } catch (error) {
+      console.error('Error syncing products:', error)
+      toast.error('Failed to sync products', { id: 'sync-products' })
+    }
   }
 
   const handleQuickAction = (actionLabel: string) => {
