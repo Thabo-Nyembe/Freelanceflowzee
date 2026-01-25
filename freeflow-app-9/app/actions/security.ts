@@ -8,6 +8,17 @@ import { hasPermission } from '@/lib/auth/permissions'
 
 const logger = createFeatureLogger('security-actions')
 
+// Safe JSON parse helper
+function safeJsonParse<T>(value: string | null, fallback: T): T {
+  if (!value) return fallback
+  try {
+    return JSON.parse(value) as T
+  } catch (e) {
+    logger.warn('Failed to parse JSON value', { value: value.substring(0, 100) })
+    return fallback
+  }
+}
+
 // =====================================================
 // SECURITY SETTINGS SERVER ACTIONS
 // =====================================================
@@ -61,10 +72,10 @@ export async function updateSecuritySettings(formData: FormData): Promise<Action
   if (ipWhitelistEnabled !== null) updates.ip_whitelist_enabled = ipWhitelistEnabled === 'true'
 
   const ipWhitelist = formData.get('ip_whitelist')
-  if (ipWhitelist) updates.ip_whitelist = JSON.parse(ipWhitelist as string)
+  if (ipWhitelist) updates.ip_whitelist = safeJsonParse<string[]>(ipWhitelist as string, [])
 
   const ipBlacklist = formData.get('ip_blacklist')
-  if (ipBlacklist) updates.ip_blacklist = JSON.parse(ipBlacklist as string)
+  if (ipBlacklist) updates.ip_blacklist = safeJsonParse<string[]>(ipBlacklist as string, [])
 
   // Password policy
   const passwordMinLength = formData.get('password_min_length')

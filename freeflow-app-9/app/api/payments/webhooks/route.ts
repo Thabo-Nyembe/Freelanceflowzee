@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('stripe-webhooks')
 
 /**
  * Production Stripe Webhook Handler
@@ -43,7 +46,7 @@ export async function POST(request: NextRequest) {
     const signature = request.headers.get('stripe-signature')
 
     if (!signature) {
-      console.error('❌ Webhook Error: No signature provided')
+      logger.error('Webhook Error: No signature provided')
       return NextResponse.json(
         { error: 'No signature provided' },
         { status: 400 }
@@ -54,11 +57,12 @@ export async function POST(request: NextRequest) {
     let event: Stripe.Event
     try {
       event = stripe.webhooks.constructEvent(body, signature, webhookSecret)
-      console.log('✅ Webhook signature verified:', event.type)
+      logger.info('Webhook signature verified', { eventType: event.type })
     } catch (err: unknown) {
-      console.error('❌ Webhook signature verification failed:', err.message)
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error'
+      logger.error('Webhook signature verification failed', { error: errorMessage })
       return NextResponse.json(
-        { error: `Webhook signature verification failed: ${err.message}` },
+        { error: `Webhook signature verification failed: ${errorMessage}` },
         { status: 400 }
       )
     }
@@ -66,7 +70,7 @@ export async function POST(request: NextRequest) {
     // Check for duplicate events (idempotency)
     const isDuplicate = await checkDuplicateEvent(event.id)
     if (isDuplicate) {
-      console.log(`⚠️  Duplicate event detected: ${event.id} - Skipping`)
+      logger.warn('Duplicate event detected - Skipping', { eventId: event.id })
       return NextResponse.json({ received: true, duplicate: true })
     }
 
@@ -108,14 +112,15 @@ export async function POST(request: NextRequest) {
         break
 
       default:
-        console.log(`ℹ️  Unhandled event type: ${event.type}`)
+        logger.info('Unhandled event type', { eventType: event.type })
     }
 
     // Return success response
     return NextResponse.json({ received: true, eventType: event.type })
 
-  } catch (error: any) {
-    console.error('❌ Webhook Error:', error)
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    logger.error('Webhook Error', { error: errorMessage })
     return NextResponse.json(
       { error: 'Webhook processing failed', details: error.message },
       { status: 500 }
@@ -136,12 +141,12 @@ async function checkDuplicateEvent(eventId: string): Promise<boolean> {
 
     if (error && error.code !== 'PGRST116') {
       // PGRST116 = no rows returned (not an error in this case)
-      console.error('Error checking duplicate event:', error)
+      logger.error('Error checking duplicate event', { error })
     }
 
     return !!data
   } catch (error) {
-    console.error('Error in checkDuplicateEvent:', error)
+    logger.error('Error in checkDuplicateEvent', { error })
     return false
   }
 }
@@ -162,10 +167,10 @@ async function logWebhookEvent(event: Stripe.Event): Promise<void> {
       })
 
     if (error) {
-      console.error('Error logging webhook event:', error)
+      logger.error('Error logging webhook event', { error })
     }
   } catch (error) {
-    console.error('Error in logWebhookEvent:', error)
+    logger.error('Error in logWebhookEvent', { error })
   }
 }
 
@@ -173,7 +178,7 @@ async function logWebhookEvent(event: Stripe.Event): Promise<void> {
  * Handle successful payment intent
  */
 async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent): Promise<void> {
-  console.log('💰 Payment succeeded:', paymentIntent.id)
+  logger.info('Payment succeeded', { paymentIntentId: paymentIntent.id })
 
   try {
     const { projectId, userId, type } = paymentIntent.metadata
@@ -191,7 +196,7 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
       .eq('stripe_payment_intent_id', paymentIntent.id)
 
     if (paymentError) {
-      console.error('Error updating payment:', paymentError)
+      logger.error('Error updating payment', { error: paymentError })
     }
 
     // Grant access to project if applicable
@@ -207,13 +212,13 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
 
       if (accessError && accessError.code !== '23505') {
         // 23505 = unique constraint violation (already has access)
-        console.error('Error granting project access:', accessError)
+        logger.error('Error granting project access', { error: accessError })
       }
     }
 
-    console.log('✅ Payment processed successfully')
+    logger.info('Payment processed successfully', { paymentIntentId: paymentIntent.id })
   } catch (error) {
-    console.error('Error in handlePaymentIntentSucceeded:', error)
+    logger.error('Error in handlePaymentIntentSucceeded', { error })
   }
 }
 
@@ -221,7 +226,7 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
  * Handle failed payment intent
  */
 async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent): Promise<void> {
-  console.log('❌ Payment failed:', paymentIntent.id)
+  logger.warn('Payment failed', { paymentIntentId: paymentIntent.id })
 
   try {
     const { error } = await supabase
@@ -233,10 +238,10 @@ async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent): P
       .eq('stripe_payment_intent_id', paymentIntent.id)
 
     if (error) {
-      console.error('Error updating failed payment:', error)
+      logger.error('Error updating failed payment', { error })
     }
   } catch (error) {
-    console.error('Error in handlePaymentIntentFailed:', error)
+    logger.error('Error in handlePaymentIntentFailed', { error })
   }
 }
 
@@ -244,7 +249,7 @@ async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent): P
  * Handle subscription creation
  */
 async function handleSubscriptionCreated(subscription: Stripe.Subscription): Promise<void> {
-  console.log('🎫 Subscription created:', subscription.id)
+  logger.info('Subscription created', { subscriptionId: subscription.id })
 
   try {
     const customerId = typeof subscription.customer === 'string'
@@ -259,7 +264,7 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription): Pro
       .single()
 
     if (!user) {
-      console.warn('User not found for customer:', customerId)
+      logger.warn('User not found for customer', { customerId })
       return
     }
 
@@ -277,10 +282,10 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription): Pro
       })
 
     if (error) {
-      console.error('Error creating subscription:', error)
+      logger.error('Error creating subscription', { error })
     }
   } catch (error) {
-    console.error('Error in handleSubscriptionCreated:', error)
+    logger.error('Error in handleSubscriptionCreated', { error })
   }
 }
 
@@ -288,7 +293,7 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription): Pro
  * Handle subscription update
  */
 async function handleSubscriptionUpdated(subscription: Stripe.Subscription): Promise<void> {
-  console.log('🔄 Subscription updated:', subscription.id)
+  logger.info('Subscription updated', { subscriptionId: subscription.id })
 
   try {
     const { error } = await supabase
@@ -302,10 +307,10 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription): Pro
       .eq('stripe_subscription_id', subscription.id)
 
     if (error) {
-      console.error('Error updating subscription:', error)
+      logger.error('Error updating subscription', { error })
     }
   } catch (error) {
-    console.error('Error in handleSubscriptionUpdated:', error)
+    logger.error('Error in handleSubscriptionUpdated', { error })
   }
 }
 
@@ -313,7 +318,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription): Pro
  * Handle subscription cancellation
  */
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription): Promise<void> {
-  console.log('🚫 Subscription deleted:', subscription.id)
+  logger.info('Subscription deleted', { subscriptionId: subscription.id })
 
   try {
     const { error } = await supabase
@@ -325,10 +330,10 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription): Pro
       .eq('stripe_subscription_id', subscription.id)
 
     if (error) {
-      console.error('Error updating canceled subscription:', error)
+      logger.error('Error updating canceled subscription', { error })
     }
   } catch (error) {
-    console.error('Error in handleSubscriptionDeleted:', error)
+    logger.error('Error in handleSubscriptionDeleted', { error })
   }
 }
 
@@ -336,7 +341,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription): Pro
  * Handle successful invoice payment
  */
 async function handleInvoicePaid(invoice: Stripe.Invoice): Promise<void> {
-  console.log('📄 Invoice paid:', invoice.id)
+  logger.info('Invoice paid', { invoiceId: invoice.id })
 
   try {
     // Log invoice payment
@@ -361,10 +366,10 @@ async function handleInvoicePaid(invoice: Stripe.Invoice): Promise<void> {
 
     if (error && error.code !== '23505') {
       // 23505 = unique constraint (invoice already logged)
-      console.error('Error logging invoice:', error)
+      logger.error('Error logging invoice', { error })
     }
   } catch (error) {
-    console.error('Error in handleInvoicePaid:', error)
+    logger.error('Error in handleInvoicePaid', { error })
   }
 }
 
@@ -372,7 +377,7 @@ async function handleInvoicePaid(invoice: Stripe.Invoice): Promise<void> {
  * Handle failed invoice payment
  */
 async function handleInvoicePaymentFailed(invoice: Stripe.Invoice): Promise<void> {
-  console.log('❌ Invoice payment failed:', invoice.id)
+  logger.warn('Invoice payment failed', { invoiceId: invoice.id })
 
   try {
     // Get invoice with user info for email
@@ -391,7 +396,7 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice): Promise<void
       .eq('stripe_invoice_id', invoice.id)
 
     if (error) {
-      console.error('Error updating failed invoice:', error)
+      logger.error('Error updating failed invoice', { error })
     }
 
     // Send email notification to user about failed payment
@@ -417,7 +422,7 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice): Promise<void
       }
     }
   } catch (error) {
-    console.error('Error in handleInvoicePaymentFailed:', error)
+    logger.error('Error in handleInvoicePaymentFailed', { error })
   }
 }
 
@@ -425,7 +430,7 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice): Promise<void
  * Handle completed checkout session
  */
 async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session): Promise<void> {
-  console.log('✅ Checkout session completed:', session.id)
+  logger.info('Checkout session completed', { sessionId: session.id })
 
   try {
     const { userId, projectId, type } = session.metadata || {}
@@ -446,7 +451,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session):
       })
 
     if (paymentError && paymentError.code !== '23505') {
-      console.error('Error creating payment record:', paymentError)
+      logger.error('Error creating payment record', { error: paymentError })
     }
 
     // Grant project access if applicable
@@ -461,11 +466,11 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session):
         })
 
       if (accessError && accessError.code !== '23505') {
-        console.error('Error granting project access:', accessError)
+        logger.error('Error granting project access', { error: accessError })
       }
     }
   } catch (error) {
-    console.error('Error in handleCheckoutSessionCompleted:', error)
+    logger.error('Error in handleCheckoutSessionCompleted', { error })
   }
 }
 

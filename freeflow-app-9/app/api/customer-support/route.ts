@@ -428,7 +428,7 @@ async function handleSendReply(
   // Store reply in metadata (or a separate replies table if available)
   const replies = (ticket.metadata?.replies as unknown[]) || []
   replies.push({
-    id: `reply-${Date.now()}`,
+    id: `reply-${crypto.randomUUID()}`,
     user_id: userId,
     message,
     is_internal,

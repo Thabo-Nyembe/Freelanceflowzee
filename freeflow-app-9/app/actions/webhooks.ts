@@ -83,6 +83,17 @@ type WebhookStatus = 'active' | 'paused' | 'disabled'
 
 const logger = createFeatureLogger('webhooks')
 
+// Safe JSON parse helper
+function safeJsonParse<T>(value: string | null, fallback: T): T {
+  if (!value) return fallback
+  try {
+    return JSON.parse(value) as T
+  } catch (e) {
+    logger.warn('Failed to parse JSON value', { value: value.substring(0, 100) })
+    return fallback
+  }
+}
+
 // ============================================
 // WEBHOOKS ACTIONS
 // ============================================
@@ -106,7 +117,7 @@ export async function createWebhook(
     const url = formData.get('url') as string
     const description = formData.get('description') as string | null
     const secret = formData.get('secret') as string | null
-    const events = JSON.parse(formData.get('events') as string || '[]')
+    const events = safeJsonParse<string[]>(formData.get('events') as string, [])
     const retryCount = parseInt(formData.get('retry_count') as string || '3')
     const timeoutMs = parseInt(formData.get('timeout_ms') as string || '30000')
     const verifySsl = formData.get('verify_ssl') !== 'false'
@@ -199,7 +210,7 @@ export async function updateWebhook(
     if (secret !== null) updates.secret = secret as string | null
 
     const events = formData.get('events')
-    if (events) updates.events = JSON.parse(events as string)
+    if (events) updates.events = safeJsonParse<string[]>(events as string, [])
 
     const status = formData.get('status')
     if (status) updates.status = status as string
@@ -214,7 +225,7 @@ export async function updateWebhook(
     if (verifySsl !== null) updates.verify_ssl = verifySsl !== 'false'
 
     const customHeaders = formData.get('custom_headers')
-    if (customHeaders) updates.custom_headers = JSON.parse(customHeaders as string)
+    if (customHeaders) updates.custom_headers = safeJsonParse<Record<string, string>>(customHeaders as string, {})
 
     const { data, error } = await supabase
       .from('webhooks')

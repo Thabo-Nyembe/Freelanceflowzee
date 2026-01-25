@@ -99,7 +99,7 @@ async function processStripePayment(
     })
 
     // Generate access token for download
-    const accessToken = `access_${Date.now()}_${Math.random().toString(36).substring(7)}`
+    const accessToken = `access_${crypto.randomUUID()}`
 
     // Map Stripe status to our status
     const statusMap: Record<string, PaymentResponse['status']> = {
