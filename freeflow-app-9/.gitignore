@@ -34,6 +34,9 @@ next-env.d.ts
 *.code-workspace
 .idea/
 
+# Cursor IDE (may contain sensitive keys)
+.cursor/rules/keys.mdc
+
 # OS
 .DS_Store
 .localized
