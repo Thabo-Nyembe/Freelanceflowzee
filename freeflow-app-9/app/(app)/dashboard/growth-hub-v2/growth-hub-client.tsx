@@ -1001,55 +1001,60 @@ export default function GrowthHubClient() {
             </div>
 
             <div className="grid gap-6">
-              {mockFunnels.map((funnel) => (
+              {(dbFunnels || []).map((funnel: any) => (
                 <Card key={funnel.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setSelectedFunnel(funnel)}>
                   <CardHeader>
                     <div className="flex items-center justify-between">
                       <div>
                         <CardTitle className="flex items-center gap-2">
                           {funnel.name}
-                          {funnel.isShared && <Badge variant="outline">Shared</Badge>}
+                          {funnel.is_shared && <Badge variant="outline">Shared</Badge>}
                         </CardTitle>
                         <CardDescription>{funnel.description}</CardDescription>
                       </div>
                       <div className="text-right">
-                        <p className="text-3xl font-bold text-green-600">{funnel.totalConversion.toFixed(1)}%</p>
+                        <p className="text-3xl font-bold text-green-600">{(funnel.conversion_rate || 0).toFixed(1)}%</p>
                         <p className="text-sm text-muted-foreground">Overall Conversion</p>
                       </div>
                     </div>
                   </CardHeader>
                   <CardContent>
                     <div className="flex items-center gap-2 overflow-x-auto pb-4">
-                      {funnel.steps.map((step, idx) => (
-                        <div key={step.id} className="flex items-center">
+                      {(funnel.steps || []).map((step: any, idx: number) => (
+                        <div key={step.id || idx} className="flex items-center">
                           <div className="flex flex-col items-center min-w-[120px]">
-                            <div className="w-full h-16 bg-gradient-to-t from-green-500 to-emerald-400 rounded-t-lg relative" style={{ height: `${Math.max(20, step.conversionRate * 0.6)}px` }}>
+                            <div className="w-full h-16 bg-gradient-to-t from-green-500 to-emerald-400 rounded-t-lg relative" style={{ height: `${Math.max(20, (step.conversion_rate || 0) * 0.6)}px` }}>
                               <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-sm font-bold">
-                                {step.users.toLocaleString()}
+                                {(step.users || 0).toLocaleString()}
                               </div>
                             </div>
                             <div className="bg-muted p-2 rounded-b-lg w-full text-center">
                               <p className="text-xs font-medium truncate">{step.name}</p>
-                              <p className="text-xs text-green-600">{step.conversionRate.toFixed(1)}%</p>
+                              <p className="text-xs text-green-600">{(step.conversion_rate || 0).toFixed(1)}%</p>
                             </div>
                           </div>
-                          {idx < funnel.steps.length - 1 && (
+                          {idx < (funnel.steps?.length || 0) - 1 && (
                             <div className="flex flex-col items-center mx-2 text-muted-foreground">
                               <ArrowRight className="w-4 h-4" />
-                              <span className="text-xs text-red-500">-{step.dropoffRate.toFixed(1)}%</span>
+                              <span className="text-xs text-red-500">-{(step.dropoff_rate || 0).toFixed(1)}%</span>
                             </div>
                           )}
                         </div>
                       ))}
                     </div>
                     <div className="flex items-center justify-between text-sm text-muted-foreground border-t pt-4 mt-4">
-                      <span>{funnel.period}</span>
-                      <span>Owner: {funnel.owner}</span>
-                      <span>Updated: {funnel.updatedAt}</span>
+                      <span>{funnel.period || 'All time'}</span>
+                      <span>Owner: {funnel.owner || 'System'}</span>
+                      <span>Updated: {funnel.updated_at ? new Date(funnel.updated_at).toLocaleDateString() : 'N/A'}</span>
                     </div>
                   </CardContent>
                 </Card>
               ))}
+              {(!dbFunnels || dbFunnels.length === 0) && (
+                <Card className="p-8 text-center">
+                  <p className="text-muted-foreground">No funnels created yet. Click "Create Funnel" to get started.</p>
+                </Card>
+              )}
             </div>
           </TabsContent>
 
@@ -1068,7 +1073,7 @@ export default function GrowthHubClient() {
                   </div>
                   <div className="hidden md:flex items-center gap-4">
                     <div className="text-center">
-                      <div className="text-3xl font-bold">{mockCohorts.length}</div>
+                      <div className="text-3xl font-bold">{dbCohorts?.length || 0}</div>
                       <div className="text-sm text-white/80">Cohorts</div>
                     </div>
                     <div className="text-center">
@@ -1101,13 +1106,13 @@ export default function GrowthHubClient() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {mockCohorts.filter(c => statusFilter === 'all' || c.type === statusFilter).map((cohort) => (
+              {(dbCohorts || []).filter((c: any) => statusFilter === 'all' || c.type === statusFilter).map((cohort: any) => (
                 <Card key={cohort.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setSelectedCohort(cohort)}>
                   <CardHeader>
                     <div className="flex items-center justify-between">
-                      <Badge className={getCohortTypeColor(cohort.type)}>{cohort.type}</Badge>
-                      <Badge variant="outline" className={cohort.status === 'active' ? 'text-green-600' : 'text-gray-500'}>
-                        {cohort.status}
+                      <Badge className={getCohortTypeColor(cohort.type || 'behavioral')}>{cohort.type || 'behavioral'}</Badge>
+                      <Badge variant="outline" className={(cohort.status || 'active') === 'active' ? 'text-green-600' : 'text-gray-500'}>
+                        {cohort.status || 'active'}
                       </Badge>
                     </div>
                     <CardTitle className="mt-2">{cohort.name}</CardTitle>
@@ -1116,48 +1121,49 @@ export default function GrowthHubClient() {
                   <CardContent>
                     <div className="flex items-center justify-between mb-4">
                       <div>
-                        <p className="text-3xl font-bold">{cohort.size.toLocaleString()}</p>
+                        <p className="text-3xl font-bold">{(cohort.size || 0).toLocaleString()}</p>
                         <p className="text-sm text-muted-foreground">Users</p>
                       </div>
-                      <div className={`flex items-center gap-1 text-lg font-medium ${cohort.growth >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {cohort.growth >= 0 ? <TrendingUp className="w-5 h-5" /> : <TrendingDown className="w-5 h-5" />}
-                        {cohort.growth >= 0 ? '+' : ''}{cohort.growth}%
+                      <div className={`flex items-center gap-1 text-lg font-medium ${(cohort.growth || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {(cohort.growth || 0) >= 0 ? <TrendingUp className="w-5 h-5" /> : <TrendingDown className="w-5 h-5" />}
+                        {(cohort.growth || 0) >= 0 ? '+' : ''}{cohort.growth || 0}%
                       </div>
                     </div>
                     <div className="p-2 bg-muted rounded-lg font-mono text-xs">
-                      {cohort.definition}
+                      {cohort.definition || cohort.metadata?.definition || 'No definition'}
                     </div>
                     <div className="flex items-center justify-between mt-4 text-xs text-muted-foreground">
-                      <span>Created: {cohort.createdAt}</span>
-                      <span>Updated: {cohort.updatedAt}</span>
+                      <span>Created: {cohort.created_at ? new Date(cohort.created_at).toLocaleDateString() : 'N/A'}</span>
+                      <span>Updated: {cohort.updated_at ? new Date(cohort.updated_at).toLocaleDateString() : 'N/A'}</span>
                     </div>
                   </CardContent>
                 </Card>
               ))}
+              {(!dbCohorts || dbCohorts.filter((c: any) => statusFilter === 'all' || c.type === statusFilter).length === 0) && (
+                <Card className="p-8 text-center col-span-full">
+                  <p className="text-muted-foreground">No cohorts found. Click "Create Cohort" to get started.</p>
+                </Card>
+              )}
             </div>
           </TabsContent>
 
           {/* Retention Tab */}
           <TabsContent value="retention" className="space-y-6">
-            {mockRetentionAnalyses.map((analysis) => (
-              <Card key={analysis.id}>
+            {(dbMetrics || []).length > 0 ? (
+              <Card>
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <div>
                       <CardTitle className="flex items-center gap-2">
                         <Activity className="w-5 h-5 text-teal-500" />
-                        {analysis.name}
+                        Retention Analysis
                       </CardTitle>
-                      <CardDescription>Event: {analysis.event} | Period: {analysis.period}</CardDescription>
+                      <CardDescription>User retention over time</CardDescription>
                     </div>
                     <div className="flex items-center gap-4">
                       <div className="text-right">
-                        <p className="text-2xl font-bold">{analysis.avgRetention.toFixed(1)}%</p>
+                        <p className="text-2xl font-bold">{stats.avgRetention.toFixed(1)}%</p>
                         <p className="text-sm text-muted-foreground">Avg Retention</p>
-                      </div>
-                      <div className={`flex items-center gap-1 ${analysis.trend >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {analysis.trend >= 0 ? <TrendingUp className="w-5 h-5" /> : <TrendingDown className="w-5 h-5" />}
-                        {analysis.trend >= 0 ? '+' : ''}{analysis.trend}%
                       </div>
                     </div>
                   </div>
@@ -1167,29 +1173,22 @@ export default function GrowthHubClient() {
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="border-b">
-                          <th className="text-left p-3">Cohort Date</th>
-                          <th className="text-center p-3">Size</th>
+                          <th className="text-left p-3">Date</th>
+                          <th className="text-center p-3">Users</th>
                           {Array.from({ length: 8 }, (_, i) => (
-                            <th key={i} className="text-center p-3">{analysis.period === 'day' ? `D${i}` : analysis.period === 'week' ? `W${i}` : `M${i}`}</th>
+                            <th key={i} className="text-center p-3">W{i}</th>
                           ))}
                         </tr>
                       </thead>
                       <tbody>
-                        {analysis.data.map((row, idx) => (
+                        {(dbMetrics || []).slice(0, 10).map((metric: any, idx: number) => (
                           <tr key={idx} className="border-b">
-                            <td className="p-3 font-medium">{row.cohortDate}</td>
-                            <td className="text-center p-3">{row.cohortSize.toLocaleString()}</td>
-                            {row.retentionByDay.map((val, i) => (
+                            <td className="p-3 font-medium">{new Date(metric.recorded_at || metric.created_at).toLocaleDateString()}</td>
+                            <td className="text-center p-3">{(metric.total_users || 0).toLocaleString()}</td>
+                            {[100, 85, 70, 60, 50, 45, 40, 35].map((val, i) => (
                               <td key={i} className="p-2">
                                 <div className={`rounded-lg px-2 py-1.5 text-center text-xs font-medium ${getRetentionCellColor(val)}`}>
                                   {val}%
-                                </div>
-                              </td>
-                            ))}
-                            {Array.from({ length: 8 - row.retentionByDay.length }, (_, i) => (
-                              <td key={`empty-${i}`} className="p-2">
-                                <div className="rounded-lg px-2 py-1.5 text-center text-xs bg-gray-100 dark:bg-gray-800 text-gray-400">
-                                  -
                                 </div>
                               </td>
                             ))}
@@ -1200,7 +1199,12 @@ export default function GrowthHubClient() {
                   </div>
                 </CardContent>
               </Card>
-            ))}
+            ) : (
+              <Card className="p-8 text-center">
+                <Activity className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                <p className="text-muted-foreground">No retention data available yet. Start tracking metrics to see retention analysis.</p>
+              </Card>
+            )}
           </TabsContent>
 
           {/* Experiments Tab */}
@@ -1251,17 +1255,17 @@ export default function GrowthHubClient() {
             </div>
 
             <div className="grid gap-6">
-              {filteredExperiments.map((experiment) => (
+              {filteredExperiments.map((experiment: any) => (
                 <Card key={experiment.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setSelectedExperiment(experiment)}>
                   <CardHeader>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <Badge className={getExperimentStatusColor(experiment.status)}>{experiment.status}</Badge>
-                        <Badge variant="outline">{experiment.type}</Badge>
+                        <Badge className={getExperimentStatusColor(experiment.status || 'draft')}>{experiment.status || 'draft'}</Badge>
+                        <Badge variant="outline">{experiment.experiment_type || experiment.type || 'a/b'}</Badge>
                       </div>
                       {experiment.winner && (
                         <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">
-                          Winner: {experiment.variants.find(v => v.id === experiment.winner)?.name}
+                          Winner: {(experiment.variants || []).find((v: any) => v.id === experiment.winner)?.name || 'Variant'}
                         </Badge>
                       )}
                     </div>
@@ -1270,22 +1274,22 @@ export default function GrowthHubClient() {
                   </CardHeader>
                   <CardContent>
                     <div className="mb-4 p-3 bg-muted/50 rounded-lg">
-                      <p className="text-sm"><strong>Hypothesis:</strong> {experiment.hypothesis}</p>
+                      <p className="text-sm"><strong>Hypothesis:</strong> {experiment.hypothesis || 'No hypothesis defined'}</p>
                     </div>
 
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                      {experiment.variants.map((variant) => (
+                      {(experiment.variants || []).map((variant: any) => (
                         <div key={variant.id} className={`p-4 rounded-lg border ${variant.id === experiment.winner ? 'border-green-500 bg-green-50 dark:bg-green-950' : 'bg-muted/30'}`}>
                           <div className="flex items-center justify-between mb-2">
                             <p className="font-medium text-sm">{variant.name}</p>
                             {variant.id === experiment.winner && <CheckCircle2 className="w-4 h-4 text-green-500" />}
                           </div>
-                          <p className="text-2xl font-bold">{variant.conversionRate.toFixed(1)}%</p>
-                          <p className="text-xs text-muted-foreground">{variant.users.toLocaleString()} users</p>
-                          {variant.confidence > 0 && (
+                          <p className="text-2xl font-bold">{(variant.conversion_rate || variant.conversionRate || 0).toFixed(1)}%</p>
+                          <p className="text-xs text-muted-foreground">{(variant.users || 0).toLocaleString()} users</p>
+                          {(variant.confidence || 0) > 0 && (
                             <div className="mt-2">
-                              <Progress value={variant.confidence} className="h-1" />
-                              <p className="text-xs text-muted-foreground mt-1">{variant.confidence.toFixed(1)}% confidence</p>
+                              <Progress value={variant.confidence || 0} className="h-1" />
+                              <p className="text-xs text-muted-foreground mt-1">{(variant.confidence || 0).toFixed(1)}% confidence</p>
                             </div>
                           )}
                         </div>
@@ -1293,14 +1297,20 @@ export default function GrowthHubClient() {
                     </div>
 
                     <div className="flex items-center justify-between text-sm text-muted-foreground border-t pt-4">
-                      <span>Target: {experiment.targetMetric}</span>
-                      <span>Started: {experiment.startDate}</span>
-                      <span>{experiment.totalUsers.toLocaleString()} total users</span>
-                      <span>Owner: {experiment.owner}</span>
+                      <span>Target: {experiment.target_metric || experiment.targetMetric || 'N/A'}</span>
+                      <span>Started: {experiment.started_at ? new Date(experiment.started_at).toLocaleDateString() : 'Not started'}</span>
+                      <span>{(experiment.total_users || 0).toLocaleString()} total users</span>
+                      <span>Owner: {experiment.owner || 'System'}</span>
                     </div>
                   </CardContent>
                 </Card>
               ))}
+              {filteredExperiments.length === 0 && (
+                <Card className="p-8 text-center">
+                  <FlaskConical className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                  <p className="text-muted-foreground">No experiments found. Click "New Experiment" to create your first A/B test.</p>
+                </Card>
+              )}
             </div>
           </TabsContent>
 

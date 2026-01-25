@@ -1,5 +1,6 @@
 'use client'
 
+import { createClient } from '@/lib/supabase/client'
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -192,6 +193,9 @@ const mockPermissionsPredictions: { id: string; title: string; prediction: strin
 const mockPermissionsActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' | 'error' }[] = []
 
 // Quick actions are defined inside the component to access state setters
+
+// Initialize Supabase client once at module level
+const supabase = createClient()
 
 export default function PermissionsClient({ initialRoles, initialPermissions }: PermissionsClientProps) {
 

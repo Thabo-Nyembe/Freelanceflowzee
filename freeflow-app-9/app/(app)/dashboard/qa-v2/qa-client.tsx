@@ -1100,6 +1100,39 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
     }
   }, [ executeTest, refetch])
 
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 via-teal-50/30 to-emerald-50/40 dark:bg-none dark:bg-gray-900 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-green-600" />
+          <p className="text-gray-600 dark:text-gray-400">Loading QA test cases...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 via-teal-50/30 to-emerald-50/40 dark:bg-none dark:bg-gray-900 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4 text-center">
+          <div className="p-3 bg-red-100 dark:bg-red-900/30 rounded-full">
+            <XCircle className="h-8 w-8 text-red-600 dark:text-red-400" />
+          </div>
+          <div>
+            <p className="text-lg font-medium text-gray-900 dark:text-white">Failed to load QA data</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{error.message || 'An unexpected error occurred'}</p>
+          </div>
+          <Button onClick={() => refetch()} variant="outline" className="gap-2">
+            <RefreshCw className="h-4 w-4" />
+            Try Again
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-teal-50/30 to-emerald-50/40 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">

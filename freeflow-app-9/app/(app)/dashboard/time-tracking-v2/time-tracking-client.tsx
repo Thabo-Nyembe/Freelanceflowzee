@@ -38,6 +38,11 @@ import {
 
 import { CardDescription } from '@/components/ui/card'
 import { useTimeTracking } from '@/lib/hooks/use-time-tracking'
+import { useProjects } from '@/lib/hooks/use-projects'
+import { useTeam } from '@/lib/hooks/use-team'
+import { useInvoices } from '@/lib/hooks/use-invoices'
+import { useClients } from '@/lib/hooks/use-clients'
+import { useGoals } from '@/lib/hooks/use-goals'
 import { toast } from 'sonner'
 
 // Types
@@ -187,13 +192,13 @@ interface Workspace {
 }
 
 // Data - empty until wired to real APIs
-const mockProjects: Project[] = []
-const mockEntries: TimeEntry[] = []
-const mockTeam: TeamMember[] = []
-const mockInvoices: Invoice[] = []
-const mockGoals: Goal[] = []
-const mockClients: Client[] = []
-const mockTags: Tag[] = []
+const projects: Project[] = []
+const entries: TimeEntry[] = []
+const team: TeamMember[] = []
+const invoices: Invoice[] = []
+const goals: Goal[] = []
+const clients: Client[] = []
+const tags: Tag[] = []
 const mockTimeOff: TimeOffRequest[] = []
 const mockSavedReports: SavedReport[] = []
 const mockAutomations: Automation[] = []
@@ -310,6 +315,142 @@ export default function TimeTrackingClient() {
     refetch
   } = useTimeTracking()
 
+  // Projects hook for real data
+  const {
+    projects: dbProjects,
+    isLoading: projectsLoading,
+    error: projectsError,
+    fetchProjects
+  } = useProjects()
+
+  // Team hook for real data
+  const {
+    members: dbTeamMembers,
+    loading: teamLoading,
+    fetchMembers: fetchTeam
+  } = useTeam()
+
+  // Invoices hook for real data
+  const {
+    invoices: dbInvoices,
+    loading: invoicesLoading,
+    error: invoicesError
+  } = useInvoices()
+
+  // Clients hook for real data
+  const {
+    clients: dbClients,
+    isLoading: clientsLoading,
+    error: clientsError,
+    fetchClients
+  } = useClients()
+
+  // Goals hook for real data
+  const {
+    goals: dbGoals,
+    isLoading: goalsLoading,
+    error: goalsError
+  } = useGoals()
+
+  // Fetch data on mount
+  useEffect(() => {
+    fetchProjects()
+    fetchTeam()
+    fetchClients()
+  }, [fetchProjects, fetchTeam, fetchClients])
+
+  // Combined loading state
+  const isLoading = entriesLoading || projectsLoading || teamLoading || invoicesLoading || clientsLoading || goalsLoading
+
+  // Loading state UI
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-muted-foreground">Loading time tracking data...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Error state UI
+  if (entriesError || projectsError || invoicesError || clientsError || goalsError) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="flex flex-col items-center gap-4">
+          <AlertCircle className="h-8 w-8 text-destructive" />
+          <p className="text-destructive">Failed to load data. Please try again.</p>
+          <Button onClick={() => { refetch(); fetchProjects(); fetchTeam(); fetchClients(); }}>
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Retry
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
+  // Map database data to component-expected formats
+  const projects = (dbProjects || []).map(p => ({
+    id: p.id,
+    name: p.name,
+    client: p.client_id || 'No Client',
+    color: p.color || '#3b82f6',
+    status: p.status as any,
+    billable: true,
+    hourlyRate: 150,
+    budget: p.budget || 0,
+    spent: p.spent || 0,
+    totalHours: 0
+  }))
+
+  const team = (dbTeamMembers || []).map(m => ({
+    id: m.id,
+    name: m.name,
+    email: m.email || '',
+    role: m.role || 'Member',
+    avatar: m.avatar_url,
+    todayHours: 0,
+    weekHours: m.performance_score || 0,
+    activeProject: undefined,
+    isOnline: m.status === 'active'
+  }))
+
+  const invoices = (dbInvoices || []).map(inv => ({
+    id: inv.id,
+    number: inv.invoice_number,
+    client: inv.client_name || 'Unknown',
+    project: inv.title || '',
+    amount: inv.total_amount || 0,
+    hours: 0,
+    status: inv.status as any,
+    dueDate: inv.due_date,
+    createdAt: inv.created_at
+  }))
+
+  const clients = (dbClients || []).map(c => ({
+    id: c.id,
+    name: c.name,
+    email: c.email,
+    phone: c.phone || '',
+    address: c.address || '',
+    currency: c.currency || 'USD',
+    projects: c.projects_count || 0,
+    totalBilled: c.total_revenue || 0,
+    outstandingBalance: 0,
+    status: c.status as any,
+    createdAt: c.created_at,
+    color: '#3b82f6'
+  }))
+
+  const goals = (dbGoals || []).map(g => ({
+    id: g.id,
+    label: g.title,
+    target: g.target_value || 100,
+    current: g.current_value || 0,
+    unit: g.unit || '%'
+  }))
+
   // Track database connection status for UI feedback
   const [isDbConnected, setIsDbConnected] = useState<boolean | null>(null)
 
@@ -382,7 +523,7 @@ export default function TimeTrackingClient() {
         durationSeconds = parseFloat(durationStr || '0') * 3600
       }
 
-      const project = mockProjects.find(p => p.id === newEntryForm.projectId)
+      const project = projects.find(p => p.id === newEntryForm.projectId)
 
       await createEntry({
         title: newEntryForm.description,
@@ -422,7 +563,7 @@ export default function TimeTrackingClient() {
       return
     }
     try {
-      const project = mockProjects.find(p => p.id === timerProject)
+      const project = projects.find(p => p.id === timerProject)
       const result = await dbStartTimer({
         title: timerDescription,
         description: timerDescription,
@@ -450,7 +591,7 @@ export default function TimeTrackingClient() {
       return
     }
     try {
-      const project = mockProjects.find(p => p.id === timerProject)
+      const project = projects.find(p => p.id === timerProject)
       const durationSeconds = timerSeconds
       const billableAmount = timerBillable ? (durationSeconds / 3600) * (project?.hourlyRate || 0) : 0
 
@@ -561,8 +702,8 @@ export default function TimeTrackingClient() {
       totalRevenue,
       entries: entries.length,
       running,
-      projects: mockProjects.filter(p => p.status === 'active').length,
-      teamOnline: mockTeam.filter(t => t.isOnline).length,
+      projects: projects.filter(p => p.status === 'active').length,
+      teamOnline: team.filter(t => t.isOnline).length,
       isUsingRealData: dbTimeEntries && dbTimeEntries.length > 0
     }
   }, [dbTimeEntries])
@@ -575,7 +716,7 @@ export default function TimeTrackingClient() {
     { label: 'Entries', value: stats.entries.toString(), icon: FileText, color: 'from-indigo-500 to-indigo-600', trend: '+3' },
     { label: 'Running', value: stats.running.toString(), icon: Play, color: 'from-green-500 to-green-600', trend: '' },
     { label: 'Projects', value: stats.projects.toString(), icon: Briefcase, color: 'from-pink-500 to-pink-600', trend: '' },
-    { label: 'Team Online', value: `${stats.teamOnline}/${mockTeam.length}`, icon: Users, color: 'from-cyan-500 to-cyan-600', trend: '' }
+    { label: 'Team Online', value: `${stats.teamOnline}/${team.length}`, icon: Users, color: 'from-cyan-500 to-cyan-600', trend: '' }
   ]
 
   const formatTimer = (seconds: number) => {
@@ -759,11 +900,11 @@ export default function TimeTrackingClient() {
       (async () => {
         const allData = {
           timeEntries: dbTimeEntries || [],
-          projects: mockProjects,
-          team: mockTeam,
-          invoices: mockInvoices,
-          clients: mockClients,
-          tags: mockTags,
+          projects: projects,
+          team: team,
+          invoices: invoices,
+          clients: clients,
+          tags: tags,
           settings: {
             workspace: 'Acme Inc Workspace',
             currency: 'USD',
@@ -796,7 +937,7 @@ export default function TimeTrackingClient() {
 
   // Real Archive Projects Handler - archives completed projects
   const handleArchiveProjects = async () => {
-    const completedProjects = mockProjects.filter(p => p.status === 'completed')
+    const completedProjects = projects.filter(p => p.status === 'completed')
 
     if (completedProjects.length === 0) {
       toast.info('No completed projects to archive')
@@ -819,7 +960,7 @@ export default function TimeTrackingClient() {
       return
     }
 
-    const count = dbTimeEntries?.length || mockEntries.length
+    const count = dbTimeEntries?.length || entries.length
     toast.promise(
       fetch('/api/time-tracking/entries/clear', { method: 'DELETE' }).then(res => { if (!res.ok) throw new Error('Failed'); return count; }),
       {
@@ -944,7 +1085,7 @@ export default function TimeTrackingClient() {
           <CardContent className="p-4">
             <div className="flex items-center gap-4">
               <Input value={timerDescription} onChange={(e) => setTimerDescription(e.target.value)} placeholder="What are you working on?" className="flex-1 text-lg" />
-              <Select value={timerProject} onValueChange={setTimerProject}><SelectTrigger className="w-48"><SelectValue placeholder="Project" /></SelectTrigger><SelectContent>{mockProjects.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}</SelectContent></Select>
+              <Select value={timerProject} onValueChange={setTimerProject}><SelectTrigger className="w-48"><SelectValue placeholder="Project" /></SelectTrigger><SelectContent>{projects.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}</SelectContent></Select>
               <Button variant={timerBillable ? 'default' : 'outline'} size="icon" onClick={() => setTimerBillable(!timerBillable)} className={timerBillable ? 'bg-emerald-500 hover:bg-emerald-600' : ''}><DollarSign className="h-5 w-5" /></Button>
               <div className="text-4xl font-mono font-bold min-w-[160px] text-center">{formatTimer(timerSeconds)}</div>
               {isTimerRunning ? (
@@ -997,11 +1138,11 @@ export default function TimeTrackingClient() {
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockEntries.filter(e => e.startTime.startsWith('2024-01-16')).reduce((sum, e) => sum + e.durationHours, 0).toFixed(1)}h</p>
+                    <p className="text-3xl font-bold">{entries.filter(e => e.startTime.startsWith('2024-01-16')).reduce((sum, e) => sum + e.durationHours, 0).toFixed(1)}h</p>
                     <p className="text-amber-200 text-sm">Today</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">${mockEntries.filter(e => e.isBillable).reduce((sum, e) => sum + e.billableAmount, 0).toFixed(0)}</p>
+                    <p className="text-3xl font-bold">${entries.filter(e => e.isBillable).reduce((sum, e) => sum + e.billableAmount, 0).toFixed(0)}</p>
                     <p className="text-amber-200 text-sm">Billable</p>
                   </div>
                 </div>
@@ -1043,7 +1184,7 @@ export default function TimeTrackingClient() {
                       <SelectTrigger className="w-40 h-8 text-xs"><SelectValue placeholder="All Projects" /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="">All Projects</SelectItem>
-                        {mockProjects.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                        {projects.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
                       </SelectContent>
                     </Select>
                     <Input type="date" className="w-36 h-8 text-xs" value={filters.dateFrom} onChange={(e) => setFilters(prev => ({ ...prev, dateFrom: e.target.value }))} placeholder="From" />
@@ -1071,7 +1212,7 @@ export default function TimeTrackingClient() {
                   const matchBillable = !filters.billableOnly || entry.is_billable
                   return (filters.dateFrom ? matchDate : isToday) && matchProject && matchBillable
                 }).map((entry: any) => {
-                  const project = mockProjects.find(p => p.id === entry.project_id)
+                  const project = projects.find(p => p.id === entry.project_id)
                   return (
                     <div key={entry.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all group">
                       <div className="flex items-center justify-between">
@@ -1162,7 +1303,7 @@ export default function TimeTrackingClient() {
                     <p className="text-blue-200 text-sm">This Week</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockProjects.filter(p => p.status === 'active').length}</p>
+                    <p className="text-3xl font-bold">{projects.filter(p => p.status === 'active').length}</p>
                     <p className="text-blue-200 text-sm">Projects</p>
                   </div>
                 </div>
@@ -1261,7 +1402,7 @@ export default function TimeTrackingClient() {
                 <table className="w-full min-w-[800px]">
                   <thead><tr className="bg-gray-50 dark:bg-gray-800"><th className="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase w-48">Project</th>{weekDays.map((day, idx) => <th key={idx} className={`py-3 px-4 text-center ${day.toDateString() === new Date().toDateString() ? 'bg-amber-50 dark:bg-amber-900/20' : ''}`}><div className="text-xs text-gray-500">{day.toLocaleDateString('en-US', { weekday: 'short' })}</div><div className={`text-lg font-bold ${day.toDateString() === new Date().toDateString() ? 'text-amber-600' : ''}`}>{day.getDate()}</div></th>)}<th className="py-3 px-4 text-center text-xs font-medium text-gray-500 uppercase">Total</th></tr></thead>
                   <tbody>
-                    {mockProjects.filter(p => p.status === 'active').slice(0, 4).map(project => (
+                    {projects.filter(p => p.status === 'active').slice(0, 4).map(project => (
                       <tr key={project.id} className="border-t dark:border-gray-700">
                         <td className="py-3 px-4"><div className="flex items-center gap-2"><div className={`w-2 h-2 rounded-full bg-${project.color}-500`}></div><span className="font-medium text-sm">{project.name}</span></div><p className="text-xs text-gray-500">{project.client}</p></td>
                         {weekDays.map((day, dayIdx) => <td key={dayIdx} className={`py-3 px-4 text-center ${day.toDateString() === new Date().toDateString() ? 'bg-amber-50 dark:bg-amber-900/20' : ''}`}><Input type="text" className="w-16 text-center" placeholder="-" defaultValue={Math.random() > 0.6 ? (Math.random() * 4 + 1).toFixed(1) : ''} /></td>)}
@@ -1335,7 +1476,7 @@ export default function TimeTrackingClient() {
                   toast.success('Summary report loaded')
                 }},
                 { icon: TrendingUp, label: 'Trends', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: () => {
-                  const entries = dbTimeEntries || mockEntries
+                  const entries = dbTimeEntries || entries
                   const thisWeekHours = entries.reduce((sum: number, e: any) => sum + (e.duration_hours || e.durationHours || 0), 0)
                   toast.success(`Trend: ${thisWeekHours.toFixed(1)}h logged this period`)
                 }},
@@ -1353,7 +1494,7 @@ export default function TimeTrackingClient() {
                   toast.success('Client breakdown loaded')
                 }},
                 { icon: DollarSign, label: 'Revenue', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => {
-                  const entries = dbTimeEntries || mockEntries
+                  const entries = dbTimeEntries || entries
                   const totalRevenue = entries.reduce((sum: number, e: any) => sum + (e.billable_amount || e.billableAmount || 0), 0)
                   toast.success(`Total Revenue: $${totalRevenue.toLocaleString()}`)
                 }},
@@ -1394,7 +1535,7 @@ export default function TimeTrackingClient() {
                 <Card className="border-gray-200 dark:border-gray-700">
                   <CardHeader><CardTitle>Hours by Project</CardTitle></CardHeader>
                   <CardContent className="space-y-4">
-                    {mockProjects.map(project => {
+                    {projects.map(project => {
                       const percentage = (project.totalHours / 160) * 100
                       return (
                         <div key={project.id}>
@@ -1408,7 +1549,7 @@ export default function TimeTrackingClient() {
                 <Card className="border-gray-200 dark:border-gray-700">
                   <CardHeader><CardTitle>Goals Progress</CardTitle></CardHeader>
                   <CardContent className="space-y-4">
-                    {mockGoals.map(goal => {
+                    {goals.map(goal => {
                       const percentage = (goal.current / goal.target) * 100
                       return (
                         <div key={goal.id}>
@@ -1479,7 +1620,7 @@ export default function TimeTrackingClient() {
                   <table className="w-full">
                     <thead className="bg-gray-50 dark:bg-gray-800"><tr><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Client</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Projects</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Billed</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Outstanding</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th><th className="px-4 py-3"></th></tr></thead>
                     <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                      {mockClients.map(client => (
+                      {clients.map(client => (
                         <tr key={client.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                           <td className="px-4 py-4"><div className="flex items-center gap-3"><div className={`w-10 h-10 rounded-lg bg-${client.color}-100 dark:bg-${client.color}-900/30 flex items-center justify-center`}><Building2 className={`h-5 w-5 text-${client.color}-600`} /></div><div><h4 className="font-medium">{client.name}</h4><p className="text-sm text-gray-500">{client.email}</p></div></div></td>
                           <td className="px-4 py-4 font-medium">{client.projects}</td>
@@ -1503,7 +1644,7 @@ export default function TimeTrackingClient() {
                 <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Tags Usage</CardTitle><Button onClick={() => setShowTagDialog(true)}><Plus className="h-4 w-4 mr-2" />Add Tag</Button></CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
-                    {mockTags.map(tag => (
+                    {tags.map(tag => (
                       <div key={tag.id} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-2"><div className={`w-3 h-3 rounded-full bg-${tag.color}-500`}></div><span className="font-medium">{tag.name}</span></div>
@@ -1533,11 +1674,11 @@ export default function TimeTrackingClient() {
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockProjects.length}</p>
+                    <p className="text-3xl font-bold">{projects.length}</p>
                     <p className="text-pink-200 text-sm">Projects</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockProjects.filter(p => p.status === 'active').length}</p>
+                    <p className="text-3xl font-bold">{projects.filter(p => p.status === 'active').length}</p>
                     <p className="text-pink-200 text-sm">Active</p>
                   </div>
                 </div>
@@ -1552,15 +1693,15 @@ export default function TimeTrackingClient() {
                 }},
                 { icon: Users, label: 'Team View', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', onClick: () => setActiveTab('team') },
                 { icon: DollarSign, label: 'Budgets', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', onClick: () => {
-                  const totalBudget = mockProjects.reduce((sum, p) => sum + (p.budget || 0), 0)
-                  const totalSpent = mockProjects.reduce((sum, p) => sum + p.spent, 0)
+                  const totalBudget = projects.reduce((sum, p) => sum + (p.budget || 0), 0)
+                  const totalSpent = projects.reduce((sum, p) => sum + p.spent, 0)
                   toast.success(`Budget: $${totalSpent.toLocaleString()} / $${totalBudget.toLocaleString()} (${((totalSpent/totalBudget)*100).toFixed(0)}%)`)
                 }},
                 { icon: Target, label: 'Milestones', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', onClick: () => {
-                  toast.info(`${mockProjects.filter(p => p.status === 'active').length} active projects with milestones`)
+                  toast.info(`${projects.filter(p => p.status === 'active').length} active projects with milestones`)
                 }},
                 { icon: Archive, label: 'Archive', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => {
-                  const archivedCount = mockProjects.filter(p => p.status === 'archived' || p.status === 'completed').length
+                  const archivedCount = projects.filter(p => p.status === 'archived' || p.status === 'completed').length
                   toast.success(`${archivedCount} archived/completed projects`)
                 }},
                 { icon: BarChart3, label: 'Analytics', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', onClick: () => {
@@ -1588,7 +1729,7 @@ export default function TimeTrackingClient() {
                 <table className="w-full">
                   <thead className="bg-gray-50 dark:bg-gray-800"><tr><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Project</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Client</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rate</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Hours</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Budget</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th><th className="px-4 py-3"></th></tr></thead>
                   <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                    {mockProjects.map(project => (
+                    {projects.map(project => (
                       <tr key={project.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                         <td className="px-4 py-4"><div className="flex items-center gap-2"><div className={`w-3 h-3 rounded-full bg-${project.color}-500`}></div><span className="font-medium">{project.name}</span></div></td>
                         <td className="px-4 py-4 text-gray-500">{project.client}</td>
@@ -1619,11 +1760,11 @@ export default function TimeTrackingClient() {
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockTeam.length}</p>
+                    <p className="text-3xl font-bold">{team.length}</p>
                     <p className="text-violet-200 text-sm">Members</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockTeam.filter(m => m.isOnline).length}</p>
+                    <p className="text-3xl font-bold">{team.filter(m => m.isOnline).length}</p>
                     <p className="text-violet-200 text-sm">Online</p>
                   </div>
                 </div>
@@ -1636,7 +1777,7 @@ export default function TimeTrackingClient() {
                 { icon: Users, label: 'All Members', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => setTeamTab('activity') },
                 { icon: Clock, label: 'Time Logs', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => {
                   setActiveTab('timer')
-                  toast.success(`Team logged ${mockTeam.reduce((sum, m) => sum + m.todayHours, 0).toFixed(1)}h today`)
+                  toast.success(`Team logged ${team.reduce((sum, m) => sum + m.todayHours, 0).toFixed(1)}h today`)
                 }},
                 { icon: Calendar, label: 'Schedule', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', onClick: () => setActiveTab('calendar') },
                 { icon: Coffee, label: 'Time Off', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => setTeamTab('timeoff') },
@@ -1681,7 +1822,7 @@ export default function TimeTrackingClient() {
               <Card className="border-gray-200 dark:border-gray-700">
                 <CardHeader><CardTitle>Team Activity</CardTitle></CardHeader>
                 <CardContent className="space-y-4">
-                  {mockTeam.map(member => (
+                  {team.map(member => (
                     <div key={member.id} className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <div className="relative">
                         <Avatar className="h-12 w-12"><AvatarFallback className="bg-amber-100 text-amber-700">{member.name.split(' ').map(n => n[0]).join('')}</AvatarFallback></Avatar>
@@ -1738,7 +1879,7 @@ export default function TimeTrackingClient() {
                 <Card className="border-gray-200 dark:border-gray-700">
                   <CardHeader><CardTitle>Team Utilization</CardTitle></CardHeader>
                   <CardContent className="space-y-4">
-                    {mockTeam.map(member => {
+                    {team.map(member => {
                       const utilization = (member.weekHours / 40) * 100
                       return (
                         <div key={member.id}>
@@ -1756,10 +1897,10 @@ export default function TimeTrackingClient() {
                   <CardHeader><CardTitle>Team Summary</CardTitle></CardHeader>
                   <CardContent className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                      <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg text-center"><p className="text-3xl font-bold text-amber-600">{mockTeam.length}</p><p className="text-sm text-gray-500">Team Members</p></div>
-                      <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center"><p className="text-3xl font-bold text-green-600">{mockTeam.filter(m => m.isOnline).length}</p><p className="text-sm text-gray-500">Currently Online</p></div>
-                      <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center"><p className="text-3xl font-bold text-blue-600">{mockTeam.reduce((sum, m) => sum + m.weekHours, 0)}h</p><p className="text-sm text-gray-500">Total Week Hours</p></div>
-                      <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg text-center"><p className="text-3xl font-bold text-purple-600">{((mockTeam.reduce((sum, m) => sum + m.weekHours, 0) / (mockTeam.length * 40)) * 100).toFixed(0)}%</p><p className="text-sm text-gray-500">Avg Utilization</p></div>
+                      <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg text-center"><p className="text-3xl font-bold text-amber-600">{team.length}</p><p className="text-sm text-gray-500">Team Members</p></div>
+                      <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg text-center"><p className="text-3xl font-bold text-green-600">{team.filter(m => m.isOnline).length}</p><p className="text-sm text-gray-500">Currently Online</p></div>
+                      <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center"><p className="text-3xl font-bold text-blue-600">{team.reduce((sum, m) => sum + m.weekHours, 0)}h</p><p className="text-sm text-gray-500">Total Week Hours</p></div>
+                      <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg text-center"><p className="text-3xl font-bold text-purple-600">{((team.reduce((sum, m) => sum + m.weekHours, 0) / (team.length * 40)) * 100).toFixed(0)}%</p><p className="text-sm text-gray-500">Avg Utilization</p></div>
                     </div>
                     <div><h4 className="font-medium mb-2">Time Off This Week</h4><div className="flex items-center gap-2">{(mockTimeOff.filter(t => t.status === 'approved') || []).map(t => <Badge key={t.id} variant="outline">{t.userName.split(' ')[0]}: {t.type}</Badge>)}{mockTimeOff.filter(t => t.status === 'approved').length === 0 && <span className="text-gray-500">No time off scheduled</span>}</div></div>
                   </CardContent>
@@ -1779,15 +1920,15 @@ export default function TimeTrackingClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockInvoices.length}</p>
+                    <p className="text-3xl font-bold">{invoices.length}</p>
                     <p className="text-emerald-200 text-sm">Total Invoices</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">${mockInvoices.reduce((sum, inv) => sum + inv.amount, 0).toLocaleString()}</p>
+                    <p className="text-3xl font-bold">${invoices.reduce((sum, inv) => sum + inv.amount, 0).toLocaleString()}</p>
                     <p className="text-emerald-200 text-sm">Total Billed</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockInvoices.filter(i => i.status === 'paid').length}</p>
+                    <p className="text-3xl font-bold">{invoices.filter(i => i.status === 'paid').length}</p>
                     <p className="text-emerald-200 text-sm">Paid</p>
                   </div>
                 </div>
@@ -1799,12 +1940,12 @@ export default function TimeTrackingClient() {
               {[
                 { icon: Plus, label: 'New Invoice', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: () => setShowInvoiceDialog(true) },
                 { icon: Clock, label: 'Auto-Bill', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => { setActiveTab('settings'); setSettingsTab('billing'); toast.success('Auto-billing settings: Configure billing automation'); } },
-                { icon: Send, label: 'Send All', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: async () => { const draftInvoices = mockInvoices.filter(i => i.status === 'draft'); if (draftInvoices.length === 0) { toast.info('No draft invoices to send'); return; } toast.success(`Sending ${draftInvoices.length} draft invoices...`); } },
-                { icon: DollarSign, label: 'Record Pay', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => { const sentInvoices = mockInvoices.filter(i => i.status === 'sent'); toast.success(`${sentInvoices.length} invoices awaiting payment - select one to record`); } },
+                { icon: Send, label: 'Send All', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: async () => { const draftInvoices = invoices.filter(i => i.status === 'draft'); if (draftInvoices.length === 0) { toast.info('No draft invoices to send'); return; } toast.success(`Sending ${draftInvoices.length} draft invoices...`); } },
+                { icon: DollarSign, label: 'Record Pay', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => { const sentInvoices = invoices.filter(i => i.status === 'sent'); toast.success(`${sentInvoices.length} invoices awaiting payment - select one to record`); } },
                 { icon: FileText, label: 'Templates', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => toast.success('Invoice templates: Default, Detailed, Simple available') },
                 { icon: Repeat, label: 'Recurring', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => toast.info('Recurring invoices: Set up in invoice creation dialog') },
-                { icon: Download, label: 'Export', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => { const invoiceData = mockInvoices.map(inv => ({ number: inv.number, client: inv.client, project: inv.project, amount: inv.amount, hours: inv.hours, status: inv.status, dueDate: inv.dueDate })); const csvContent = ['Invoice,Client,Project,Amount,Hours,Status,Due Date', ...invoiceData.map(i => `${i.number},${i.client},${i.project},$${i.amount},${i.hours}h,${i.status},${i.dueDate}`)].join('\n'); const blob = new Blob([csvContent], { type: 'text/csv' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `invoices_${new Date().toISOString().split('T')[0]}.csv`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); toast.success(`Exported ${invoiceData.length} invoices to CSV`); } },
-                { icon: BarChart3, label: 'Revenue', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => { const totalRevenue = mockInvoices.reduce((sum, inv) => sum + inv.amount, 0); const paidRevenue = mockInvoices.filter(i => i.status === 'paid').reduce((sum, inv) => sum + inv.amount, 0); toast.success(`Revenue: $${paidRevenue.toLocaleString()} paid / $${totalRevenue.toLocaleString()} total`); } },
+                { icon: Download, label: 'Export', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => { const invoiceData = invoices.map(inv => ({ number: inv.number, client: inv.client, project: inv.project, amount: inv.amount, hours: inv.hours, status: inv.status, dueDate: inv.dueDate })); const csvContent = ['Invoice,Client,Project,Amount,Hours,Status,Due Date', ...invoiceData.map(i => `${i.number},${i.client},${i.project},$${i.amount},${i.hours}h,${i.status},${i.dueDate}`)].join('\n'); const blob = new Blob([csvContent], { type: 'text/csv' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `invoices_${new Date().toISOString().split('T')[0]}.csv`; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url); toast.success(`Exported ${invoiceData.length} invoices to CSV`); } },
+                { icon: BarChart3, label: 'Revenue', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => { const totalRevenue = invoices.reduce((sum, inv) => sum + inv.amount, 0); const paidRevenue = invoices.filter(i => i.status === 'paid').reduce((sum, inv) => sum + inv.amount, 0); toast.success(`Revenue: $${paidRevenue.toLocaleString()} paid / $${totalRevenue.toLocaleString()} total`); } },
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -1828,7 +1969,7 @@ export default function TimeTrackingClient() {
                     </div>
                     <div>
                       <p className="text-sm text-gray-500 dark:text-gray-400">Draft</p>
-                      <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400">{mockInvoices.filter(i => i.status === 'draft').length}</p>
+                      <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400">{invoices.filter(i => i.status === 'draft').length}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -1841,7 +1982,7 @@ export default function TimeTrackingClient() {
                     </div>
                     <div>
                       <p className="text-sm text-gray-500 dark:text-gray-400">Sent</p>
-                      <p className="text-xl font-bold text-amber-600 dark:text-amber-400">{mockInvoices.filter(i => i.status === 'sent').length}</p>
+                      <p className="text-xl font-bold text-amber-600 dark:text-amber-400">{invoices.filter(i => i.status === 'sent').length}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -1854,7 +1995,7 @@ export default function TimeTrackingClient() {
                     </div>
                     <div>
                       <p className="text-sm text-gray-500 dark:text-gray-400">Pending</p>
-                      <p className="text-xl font-bold text-blue-600 dark:text-blue-400">{mockInvoices.filter(i => i.status === 'pending').length}</p>
+                      <p className="text-xl font-bold text-blue-600 dark:text-blue-400">{invoices.filter(i => i.status === 'pending').length}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -1867,7 +2008,7 @@ export default function TimeTrackingClient() {
                     </div>
                     <div>
                       <p className="text-sm text-gray-500 dark:text-gray-400">Paid</p>
-                      <p className="text-xl font-bold text-green-600 dark:text-green-400">{mockInvoices.filter(i => i.status === 'paid').length}</p>
+                      <p className="text-xl font-bold text-green-600 dark:text-green-400">{invoices.filter(i => i.status === 'paid').length}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -1880,7 +2021,7 @@ export default function TimeTrackingClient() {
                 <table className="w-full">
                   <thead className="bg-gray-50 dark:bg-gray-800"><tr><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Invoice</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Client</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Project</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Due Date</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th><th className="px-4 py-3"></th></tr></thead>
                   <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                    {mockInvoices.map(invoice => (
+                    {invoices.map(invoice => (
                       <tr key={invoice.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                         <td className="px-4 py-4 font-mono">{invoice.number}</td>
                         <td className="px-4 py-4">{invoice.client}</td>
@@ -2548,7 +2689,7 @@ export default function TimeTrackingClient() {
           <DialogContent><DialogHeader><DialogTitle>{editingEntryId ? 'Edit Time Entry' : 'Add Time Entry'}</DialogTitle><DialogDescription>{editingEntryId ? 'Update this time entry' : 'Manually log a time entry'}</DialogDescription></DialogHeader>
             <div className="space-y-4 py-4">
               <div><Label>Description</Label><Input placeholder="What did you work on?" className="mt-1" value={newEntryForm.description} onChange={(e) => setNewEntryForm(prev => ({ ...prev, description: e.target.value }))} /></div>
-              <div><Label>Project</Label><Select value={newEntryForm.projectId} onValueChange={(value) => setNewEntryForm(prev => ({ ...prev, projectId: value }))}><SelectTrigger className="mt-1"><SelectValue placeholder="Select project" /></SelectTrigger><SelectContent>{mockProjects.map(p => <SelectItem key={p.id} value={p.id}>{p.name} - {p.client}</SelectItem>)}</SelectContent></Select></div>
+              <div><Label>Project</Label><Select value={newEntryForm.projectId} onValueChange={(value) => setNewEntryForm(prev => ({ ...prev, projectId: value }))}><SelectTrigger className="mt-1"><SelectValue placeholder="Select project" /></SelectTrigger><SelectContent>{projects.map(p => <SelectItem key={p.id} value={p.id}>{p.name} - {p.client}</SelectItem>)}</SelectContent></Select></div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6"><div><Label>Date</Label><Input type="date" className="mt-1" value={newEntryForm.date} onChange={(e) => setNewEntryForm(prev => ({ ...prev, date: e.target.value }))} /></div><div><Label>Duration</Label><Input placeholder="1h 30m" className="mt-1" value={newEntryForm.duration} onChange={(e) => setNewEntryForm(prev => ({ ...prev, duration: e.target.value }))} /></div></div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6"><div><Label>Start Time</Label><Input type="time" className="mt-1" value={newEntryForm.startTime} onChange={(e) => setNewEntryForm(prev => ({ ...prev, startTime: e.target.value }))} /></div><div><Label>End Time</Label><Input type="time" className="mt-1" value={newEntryForm.endTime} onChange={(e) => setNewEntryForm(prev => ({ ...prev, endTime: e.target.value }))} /></div></div>
               <div className="flex items-center gap-2"><Switch id="billable" checked={newEntryForm.isBillable} onCheckedChange={(checked) => setNewEntryForm(prev => ({ ...prev, isBillable: checked }))} /><Label htmlFor="billable">Billable</Label></div>
@@ -2569,7 +2710,7 @@ export default function TimeTrackingClient() {
                     }
                   }
 
-                  const project = mockProjects.find(p => p.id === newEntryForm.projectId)
+                  const project = projects.find(p => p.id === newEntryForm.projectId)
                   const billableAmount = newEntryForm.isBillable ? (durationSeconds / 3600) * (project?.hourlyRate || 0) : 0
 
                   await updateEntry(editingEntryId, {
@@ -2606,8 +2747,8 @@ export default function TimeTrackingClient() {
         }}>
           <DialogContent><DialogHeader><DialogTitle>Create Invoice</DialogTitle><DialogDescription>Generate invoice from tracked time</DialogDescription></DialogHeader>
             <div className="space-y-4 py-4">
-              <div><Label>Client</Label><Select value={invoiceFormData.clientName} onValueChange={(value) => setInvoiceFormData(prev => ({ ...prev, clientName: value }))}><SelectTrigger className="mt-1"><SelectValue placeholder="Select client" /></SelectTrigger><SelectContent>{[...new Set(mockProjects.map(p => p.client))].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent></Select></div>
-              <div><Label>Project</Label><Select value={invoiceFormData.projectId} onValueChange={(value) => setInvoiceFormData(prev => ({ ...prev, projectId: value }))}><SelectTrigger className="mt-1"><SelectValue placeholder="Select project" /></SelectTrigger><SelectContent>{mockProjects.filter(p => !invoiceFormData.clientName || p.client === invoiceFormData.clientName).map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}</SelectContent></Select></div>
+              <div><Label>Client</Label><Select value={invoiceFormData.clientName} onValueChange={(value) => setInvoiceFormData(prev => ({ ...prev, clientName: value }))}><SelectTrigger className="mt-1"><SelectValue placeholder="Select client" /></SelectTrigger><SelectContent>{[...new Set(projects.map(p => p.client))].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent></Select></div>
+              <div><Label>Project</Label><Select value={invoiceFormData.projectId} onValueChange={(value) => setInvoiceFormData(prev => ({ ...prev, projectId: value }))}><SelectTrigger className="mt-1"><SelectValue placeholder="Select project" /></SelectTrigger><SelectContent>{projects.filter(p => !invoiceFormData.clientName || p.client === invoiceFormData.clientName).map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}</SelectContent></Select></div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6"><div><Label>From Date</Label><Input type="date" className="mt-1" value={invoiceFormData.fromDate} onChange={(e) => setInvoiceFormData(prev => ({ ...prev, fromDate: e.target.value }))} /></div><div><Label>To Date</Label><Input type="date" className="mt-1" value={invoiceFormData.toDate} onChange={(e) => setInvoiceFormData(prev => ({ ...prev, toDate: e.target.value }))} /></div></div>
               <div><Label>Due Date</Label><Input type="date" className="mt-1" value={invoiceFormData.dueDate} onChange={(e) => setInvoiceFormData(prev => ({ ...prev, dueDate: e.target.value }))} /></div>
             </div>
@@ -2725,7 +2866,7 @@ export default function TimeTrackingClient() {
               <div><Label>Group By</Label><Select value={reportFormData.groupBy} onValueChange={(value) => setReportFormData(prev => ({ ...prev, groupBy: value }))}><SelectTrigger className="mt-1"><SelectValue placeholder="Select grouping" /></SelectTrigger><SelectContent><SelectItem value="day">Day</SelectItem><SelectItem value="week">Week</SelectItem><SelectItem value="project">Project</SelectItem><SelectItem value="client">Client</SelectItem><SelectItem value="member">Team Member</SelectItem></SelectContent></Select></div>
             </div>
             <DialogFooter><Button variant="outline" onClick={() => setShowReportDialog(false)}>Cancel</Button><Button variant="outline" onClick={() => {
-              const entries = dbTimeEntries || mockEntries
+              const entries = dbTimeEntries || entries
               const filteredEntries = entries.filter((e: any) => !filters.billableOnly || (e.is_billable || e.isBillable))
               const totalHours = filteredEntries.reduce((sum: any, e: any) => sum + (e.duration_hours || e.durationHours || 0), 0)
               const totalRevenue = filteredEntries.reduce((sum: any, e: any) => sum + (e.billable_amount || e.billableAmount || 0), 0)
@@ -2765,7 +2906,7 @@ export default function TimeTrackingClient() {
                 <Select value={projectFormData.clientId} onValueChange={(value) => setProjectFormData(prev => ({ ...prev, clientId: value }))}>
                   <SelectTrigger className="mt-1"><SelectValue placeholder="Select client" /></SelectTrigger>
                   <SelectContent>
-                    {mockClients.map(client => <SelectItem key={client.id} value={client.id}>{client.name}</SelectItem>)}
+                    {clients.map(client => <SelectItem key={client.id} value={client.id}>{client.name}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>

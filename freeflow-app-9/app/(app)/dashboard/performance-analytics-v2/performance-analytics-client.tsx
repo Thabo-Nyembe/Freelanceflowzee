@@ -880,6 +880,28 @@ export default function PerformanceAnalyticsClient() {
     setShowSettingsDialog(true)
   }
 
+  // Combined loading state
+  const isLoading = apiPerformanceLoading || apiDashboardLoading || apiPredictiveLoading || analyticsLoading
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
+
+  // Error state
+  if (analyticsError) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full min-h-screen gap-4">
+        <p className="text-red-500">Error loading performance analytics data</p>
+        <Button onClick={() => refetchAllApiData()}>Retry</Button>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 p-8">
       <div className="max-w-7xl mx-auto space-y-8">

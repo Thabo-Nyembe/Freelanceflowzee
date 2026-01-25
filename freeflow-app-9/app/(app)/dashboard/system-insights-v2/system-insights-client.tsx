@@ -145,30 +145,7 @@ interface APMService {
   status: 'healthy' | 'degraded' | 'critical'
 }
 
-// Data arrays - populated from Supabase
-const metrics: Metric[] = []
-
-const alerts: Alert[] = []
-
-const mockLogs: LogEntry[] = []
-
-const services: ServiceHealth[] = []
-
-const mockTraces: Trace[] = []
-
-const mockHosts: Host[] = []
-
-const mockAPMServices: APMService[] = []
-
-// Enhanced System Insights Data - populated from Supabase
-const mockSystemInsightsAIInsights: { id: string; type: 'success' | 'info' | 'warning' | 'error'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
-
-const mockSystemInsightsCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string; lastActive: string }[] = []
-
-const mockSystemInsightsPredictions: { id: string; label: string; current: number; target: number; predicted: number; confidence: number; trend: 'up' | 'down' | 'stable' }[] = []
-
-const mockSystemInsightsActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' | 'error' }[] = []
-
+// Data arrays are now populated from Supabase hooks inside the component
 // Quick actions will be defined inside the component to use state setters
 
 // Database types
@@ -1208,7 +1185,7 @@ export default function SystemInsightsClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2 font-mono text-sm">
-                    {mockLogs.slice(0, 5).map(log => (
+                    {logs.slice(0, 5).map(log => (
                       <div key={log.id} className="flex items-start gap-2 p-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded">
                         <span className="text-gray-400 text-xs">{new Date(log.timestamp).toLocaleTimeString()}</span>
                         <Badge className={`${getLogLevelColor(log.level)} text-xs`}>{log.level}</Badge>
@@ -1468,7 +1445,7 @@ export default function SystemInsightsClient() {
               <CardContent className="p-0">
                 <ScrollArea className="h-[600px]">
                   <div className="p-4 font-mono text-sm space-y-1">
-                    {mockLogs.filter(log => logLevel === 'all' || log.level === logLevel).map(log => (
+                    {logs.filter(log => logLevel === 'all' || log.level === logLevel).map(log => (
                       <div key={log.id} className="flex items-start gap-3 hover:bg-gray-800 p-2 rounded">
                         <span className="text-gray-500 text-xs whitespace-nowrap">{new Date(log.timestamp).toLocaleString()}</span>
                         <Badge className={`${getLogLevelColor(log.level)} text-xs uppercase`}>{log.level}</Badge>
@@ -1517,7 +1494,7 @@ export default function SystemInsightsClient() {
             </div>
 
             <div className="space-y-4">
-              {mockTraces.map(trace => (
+              {traces.map(trace => (
                 <Card key={trace.id} className={trace.status === 'error' ? 'border-red-300 dark:border-red-700' : ''}>
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between mb-4">
@@ -1567,7 +1544,7 @@ export default function SystemInsightsClient() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {mockAPMServices.map(service => (
+              {apmServices.map(service => (
                 <Card key={service.id} className={service.status !== 'healthy' ? 'border-amber-300 dark:border-amber-700' : ''}>
                   <CardHeader>
                     <div className="flex items-center justify-between">
@@ -1622,7 +1599,7 @@ export default function SystemInsightsClient() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {mockHosts.map(host => (
+              {hosts.map(host => (
                 <Card key={host.id} className={
                   host.status === 'critical' || host.status === 'offline' ? 'border-red-300 dark:border-red-700' :
                   host.status === 'warning' ? 'border-amber-300 dark:border-amber-700' : ''
@@ -2828,18 +2805,18 @@ docker run -d --name kazi-agent \\
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockSystemInsightsAIInsights}
+              insights={aiInsights}
               title="System Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockSystemInsightsCollaborators}
+              collaborators={collaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockSystemInsightsPredictions}
+              predictions={predictions}
               title="System Forecasts"
             />
           </div>
@@ -2847,7 +2824,7 @@ docker run -d --name kazi-agent \\
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockSystemInsightsActivities}
+            activities={activities}
             title="System Activity"
             maxItems={5}
           />
@@ -3005,7 +2982,7 @@ docker run -d --name kazi-agent \\
               </Select>
             </div>
             <div className="bg-gray-900 rounded-lg p-4 h-80 overflow-y-auto font-mono text-sm">
-              {mockLogs.map(log => (
+              {logs.map(log => (
                 <div key={log.id} className="flex items-start gap-2 py-1 text-gray-300">
                   <span className="text-gray-500 text-xs">{new Date(log.timestamp).toLocaleTimeString()}</span>
                   <Badge className={`${getLogLevelColor(log.level)} text-xs`}>{log.level}</Badge>
@@ -3052,7 +3029,7 @@ docker run -d --name kazi-agent \\
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Hosts</SelectItem>
-                  {mockHosts.map(h => (
+                  {hosts.map(h => (
                     <SelectItem key={h.id} value={h.name}>{h.name}</SelectItem>
                   ))}
                 </SelectContent>
