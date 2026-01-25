@@ -209,13 +209,14 @@ interface StorageQuota {
 }
 
 // Empty data arrays - real data comes from Supabase via useCloudStorage hook
-const files: CloudFile[] = []
+// Prefixed with _ to indicate they are placeholders for future features
+const _files: CloudFile[] = []
 const folders: Folder[] = []
 const shareLinks: ShareLink[] = []
 const versions: FileVersion[] = []
 const comments: FileComment[] = []
 const transfers: TransferItem[] = []
-const quota: StorageQuota = {
+const _quota: StorageQuota = {
   used: 0,
   total: 100 * 1024 * 1024 * 1024,
   breakdown: []
@@ -251,7 +252,7 @@ export default function CloudStorageClient() {
   const [sortBy, setSortBy] = useState<string>('modified')
 
   // Dialog states
-  const [showUploadDialog, setShowUploadDialog] = useState(false)
+  const [_showUploadDialog, _setShowUploadDialog] = useState(false)
   const [showCreateFolderDialog, setShowCreateFolderDialog] = useState(false)
   const [showShareDialog, setShowShareDialog] = useState(false)
   const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] = useState(false)
@@ -269,6 +270,7 @@ export default function CloudStorageClient() {
   const [uploadProgress, setUploadProgress] = useState(0)
   const [isUploading, setIsUploading] = useState(false)
   const [commentText, setCommentText] = useState('')
+  const [syncPaused, setSyncPaused] = useState(false)
 
   // Show error toast if there's an error loading files
   useEffect(() => {
@@ -350,6 +352,27 @@ export default function CloudStorageClient() {
   [mappedFiles])
   const sharedFiles = useMemo(() => mappedFiles.filter(f => f.isShared), [mappedFiles])
 
+  // MIGRATED: Computed stats from real database data
+  const computedStats = useMemo(() => {
+    const allFiles = dbFiles || []
+    const totalFiles = allFiles.filter(f => f.file_type !== 'folder').length
+    const totalFolders = allFiles.filter(f => f.file_type === 'folder').length
+    const sharedCount = allFiles.filter(f => f.is_shared).length
+    const totalDownloads = allFiles.reduce((sum, f) => sum + (f.download_count || 0), 0)
+    const storageUsed = allFiles.reduce((sum, f) => sum + (f.file_size || 0), 0)
+    const syncedCount = allFiles.filter(f => f.processing_status === 'completed').length
+    const syncPercentage = allFiles.length > 0 ? Math.round((syncedCount / allFiles.length) * 100) : 100
+
+    return {
+      totalFiles,
+      totalFolders,
+      sharedFiles: sharedCount,
+      storageUsed: storageUsed / (1024 * 1024 * 1024), // Convert to GB
+      totalDownloads,
+      syncPercentage
+    }
+  }, [dbFiles])
+
   const formatSize = (bytes: number) => {
     if (bytes < 1024) return `${bytes} B`
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
@@ -368,6 +391,21 @@ export default function CloudStorageClient() {
     if (hours < 24) return `${hours}h ago`
     if (days < 7) return `${days}d ago`
     return date.toLocaleDateString()
+  }
+
+  // Stats object for the stats grid - now uses real data
+  const stats = {
+    ...computedStats,
+    gridStats: [
+      { label: 'Storage Used', value: formatSize(computedStats.storageUsed * 1024 * 1024 * 1024), icon: HardDrive, change: '+0 GB', color: 'text-blue-600' },
+      { label: 'Total Files', value: computedStats.totalFiles.toString(), icon: File, change: '+0', color: 'text-indigo-600' },
+      { label: 'Shared Files', value: computedStats.sharedFiles.toString(), icon: Share2, change: '+0', color: 'text-green-600' },
+      { label: 'Total Folders', value: computedStats.totalFolders.toString(), icon: Users, change: '+0', color: 'text-purple-600' },
+      { label: 'Active Shares', value: sharedFiles.length.toString(), icon: LinkIcon, change: '+0', color: 'text-cyan-600' },
+      { label: 'Downloads', value: computedStats.totalDownloads.toString(), icon: Download, change: '+0', color: 'text-pink-600' },
+      { label: 'Sync Status', value: `${computedStats.syncPercentage}%`, icon: RefreshCw, change: '+0%', color: 'text-orange-600' },
+      { label: 'Total Items', value: (dbFiles || []).length.toString(), icon: MessageSquare, change: '+0', color: 'text-teal-600' }
+    ]
   }
 
   const getFileIcon = (type: FileType) => {
@@ -472,7 +510,7 @@ export default function CloudStorageClient() {
         const filePath = `${user.id}/${fileName}`
 
         // Upload to Supabase Storage
-        const { data: uploadData, error: uploadError } = await supabase.storage
+        const { error: uploadError } = await supabase.storage
           .from('cloud-storage')
           .upload(filePath, file, {
             cacheControl: '3600',
@@ -1019,8 +1057,6 @@ export default function CloudStorageClient() {
     }
   }
 
-  const [syncPaused, setSyncPaused] = useState(false)
-
   const handlePauseSync = async () => {
     try {
       toast.loading(syncPaused ? 'Resuming sync...' : 'Pausing sync...')
@@ -1190,40 +1226,42 @@ export default function CloudStorageClient() {
     }
   }
 
-  // MIGRATED: Computed stats from real database data
-  const computedStats = useMemo(() => {
-    const allFiles = dbFiles || []
-    const totalFiles = allFiles.filter(f => f.file_type !== 'folder').length
-    const totalFolders = allFiles.filter(f => f.file_type === 'folder').length
-    const sharedCount = allFiles.filter(f => f.is_shared).length
-    const totalDownloads = allFiles.reduce((sum, f) => sum + (f.download_count || 0), 0)
-    const storageUsed = allFiles.reduce((sum, f) => sum + (f.file_size || 0), 0)
-    const syncedCount = allFiles.filter(f => f.processing_status === 'completed').length
-    const syncPercentage = allFiles.length > 0 ? Math.round((syncedCount / allFiles.length) * 100) : 100
+  // Loading state - show spinner overlay when loading
+  if (filesLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-sky-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 dark:bg-none dark:bg-gray-900 p-6 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 flex items-center justify-center animate-pulse">
+            <Cloud className="w-6 h-6 text-white" />
+          </div>
+          <div className="text-center">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Loading Cloud Storage</h2>
+            <p className="text-gray-500 dark:text-gray-400">Fetching your files...</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
-    return {
-      totalFiles,
-      totalFolders,
-      sharedFiles: sharedCount,
-      storageUsed: storageUsed / (1024 * 1024 * 1024), // Convert to GB
-      totalDownloads,
-      syncPercentage
-    }
-  }, [dbFiles])
-
-  // Stats array for the stats grid - now uses real data
-  const stats = {
-    ...computedStats,
-    gridStats: [
-      { label: 'Storage Used', value: formatSize(computedStats.storageUsed * 1024 * 1024 * 1024), icon: HardDrive, change: '+0 GB', color: 'text-blue-600' },
-      { label: 'Total Files', value: computedStats.totalFiles.toString(), icon: File, change: '+0', color: 'text-indigo-600' },
-      { label: 'Shared Files', value: computedStats.sharedFiles.toString(), icon: Share2, change: '+0', color: 'text-green-600' },
-      { label: 'Total Folders', value: computedStats.totalFolders.toString(), icon: Users, change: '+0', color: 'text-purple-600' },
-      { label: 'Active Shares', value: sharedFiles.length.toString(), icon: LinkIcon, change: '+0', color: 'text-cyan-600' },
-      { label: 'Downloads', value: computedStats.totalDownloads.toString(), icon: Download, change: '+0', color: 'text-pink-600' },
-      { label: 'Sync Status', value: `${computedStats.syncPercentage}%`, icon: RefreshCw, change: '+0%', color: 'text-orange-600' },
-      { label: 'Total Items', value: (dbFiles || []).length.toString(), icon: MessageSquare, change: '+0', color: 'text-teal-600' }
-    ]
+  // Error state - show error message
+  if (filesError) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-sky-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 dark:bg-none dark:bg-gray-900 p-6 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4 text-center">
+          <div className="w-12 h-12 rounded-xl bg-red-100 dark:bg-red-900/20 flex items-center justify-center">
+            <AlertCircle className="w-6 h-6 text-red-500" />
+          </div>
+          <div>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Failed to Load Files</h2>
+            <p className="text-gray-500 dark:text-gray-400 mb-4">There was an error loading your cloud storage.</p>
+            <Button onClick={() => refetch()} variant="outline">
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Try Again
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (

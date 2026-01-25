@@ -309,14 +309,26 @@ export default function ComplianceClient() {
     return 'text-green-600'
   }
 
-  const stats = useMemo(() => ({
-    overallCompliance: mockFrameworks.length > 0 ? mockFrameworks.reduce((sum, f) => sum + f.complianceScore, 0) / mockFrameworks.length : 0,
-    totalControls: mockFrameworks.reduce((sum, f) => sum + f.totalControls, 0),
-    passedControls: mockFrameworks.reduce((sum, f) => sum + f.passedControls, 0),
-    failedControls: mockFrameworks.reduce((sum, f) => sum + f.failedControls, 0),
-    openRisks: mockRisks.filter(r => r.status === 'open').length,
-    activeAudits: mockAudits.filter(a => a.status === 'in_progress').length
-  }), [])
+  const stats = useMemo(() => {
+    const compliance = complianceData || []
+    const avgScore = compliance.length > 0
+      ? compliance.reduce((sum, c) => sum + (c.complianceScore || 0), 0) / compliance.length
+      : 0
+    const totalControls = compliance.reduce((sum, c) => sum + (c.totalRequirements || 0), 0)
+    const passedControls = compliance.reduce((sum, c) => sum + (c.metRequirements || 0), 0)
+    const failedControls = compliance.reduce((sum, c) => sum + (c.failedRequirements || 0), 0)
+    const openRisks = compliance.filter(c => c.riskLevel === 'high' || c.riskLevel === 'critical').length
+    const activeAudits = compliance.filter(c => c.status === 'in_progress' || c.status === 'under_review').length
+
+    return {
+      overallCompliance: avgScore,
+      totalControls,
+      passedControls,
+      failedControls,
+      openRisks,
+      activeAudits
+    }
+  }, [complianceData])
 
   // Loading state - after all hooks
   if (isLoading) {
@@ -816,7 +828,7 @@ export default function ComplianceClient() {
                 <Globe className="w-5 h-5 text-green-200" />
                 <div>
                   <p className="text-sm text-green-200">Frameworks</p>
-                  <p className="text-2xl font-bold">{mockFrameworks.length}</p>
+                  <p className="text-2xl font-bold">{complianceData.length}</p>
                 </div>
               </div>
             </Card>
@@ -868,15 +880,15 @@ export default function ComplianceClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockFrameworks.length}</p>
+                    <p className="text-3xl font-bold">{complianceData.length}</p>
                     <p className="text-blue-200 text-sm">Frameworks</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockFrameworks.filter(f => f.status === 'compliant').length}</p>
+                    <p className="text-3xl font-bold">{complianceData.filter(c => c.status === 'compliant').length}</p>
                     <p className="text-blue-200 text-sm">Compliant</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{(mockFrameworks.reduce((sum, f) => sum + f.complianceScore, 0) / mockFrameworks.length).toFixed(0)}%</p>
+                    <p className="text-3xl font-bold">{complianceData.length > 0 ? (complianceData.reduce((sum, c) => sum + (c.complianceScore || 0), 0) / complianceData.length).toFixed(0) : 0}%</p>
                     <p className="text-blue-200 text-sm">Avg Score</p>
                   </div>
                 </div>
@@ -982,15 +994,15 @@ export default function ComplianceClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockControls.length}</p>
+                    <p className="text-3xl font-bold">{stats.totalControls}</p>
                     <p className="text-emerald-200 text-sm">Controls</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockControls.filter(c => c.status === 'passing').length}</p>
+                    <p className="text-3xl font-bold">{stats.passedControls}</p>
                     <p className="text-emerald-200 text-sm">Passing</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockControls.filter(c => c.status === 'failing').length}</p>
+                    <p className="text-3xl font-bold">{stats.failedControls}</p>
                     <p className="text-emerald-200 text-sm">Failing</p>
                   </div>
                 </div>
@@ -1110,15 +1122,15 @@ export default function ComplianceClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockRisks.length}</p>
+                    <p className="text-3xl font-bold">{stats.openRisks}</p>
                     <p className="text-rose-200 text-sm">Total Risks</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockRisks.filter(r => r.severity === 'critical').length}</p>
+                    <p className="text-3xl font-bold">{complianceData.filter(c => c.riskLevel === 'critical').length}</p>
                     <p className="text-rose-200 text-sm">Critical</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockRisks.filter(r => r.status === 'mitigated').length}</p>
+                    <p className="text-3xl font-bold">{complianceData.filter(c => c.status === 'compliant').length}</p>
                     <p className="text-rose-200 text-sm">Mitigated</p>
                   </div>
                 </div>
@@ -1253,15 +1265,15 @@ export default function ComplianceClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockAudits.length}</p>
+                    <p className="text-3xl font-bold">{stats.activeAudits}</p>
                     <p className="text-amber-200 text-sm">Audits</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockAudits.filter(a => a.status === 'in_progress').length}</p>
+                    <p className="text-3xl font-bold">{complianceData.filter(c => c.status === 'in_progress').length}</p>
                     <p className="text-amber-200 text-sm">In Progress</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockAudits.filter(a => a.status === 'completed').length}</p>
+                    <p className="text-3xl font-bold">{complianceData.filter(c => c.status === 'compliant').length}</p>
                     <p className="text-amber-200 text-sm">Completed</p>
                   </div>
                 </div>

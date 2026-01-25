@@ -1,9 +1,21 @@
 'use client'
 
+// MIGRATED: Wired to Supabase backend with marketplace hooks
+// Hooks used: useMarketplaceApps, useMarketplaceReviews, useFeaturedApps, useMarketplaceMutations
+
 import { createClient } from '@/lib/supabase/client'
+const supabase = createClient()
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { useCreateCoupon, useCoupons } from '@/lib/hooks/use-coupon-extended'
+import {
+  useMarketplaceApps,
+  useMarketplaceReviews,
+  useFeaturedApps,
+  useMarketplaceMutations,
+  type MarketplaceApp,
+  type MarketplaceReview,
+} from '@/lib/hooks/use-marketplace'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -21,7 +33,7 @@ import {
   Store, Package, Users, Star, Download, TrendingUp, Rocket, Trophy,
   DollarSign, Search, Filter, Grid, List, Heart, ExternalLink, MoreHorizontal,
   Plus, Settings, Eye, CreditCard, Award, Shield, Zap, Tag, Percent,
-  Clock, CheckCircle, XCircle,
+  Clock, CheckCircle, XCircle, Loader2,
   Layers, BarChart3, MessageSquare, Crown, Sparkles, ThumbsUp, RefreshCw, Mail, MapPin, FileText, Receipt, PieChart, Activity, Target, Megaphone, Wallet, Bell, ThumbsDown, Reply, Edit, Trash2, Copy, Code, Bitcoin, Send, AlertTriangle
 } from 'lucide-react'
 
@@ -320,16 +332,23 @@ export default function MarketplaceClient() {
   const [selectedCoupon, setSelectedCoupon] = useState<Coupon | null>(null)
   const [mockAPIKeysState, setMockAPIKeysState] = useState([])
 
-  // Database state
-  const [dbApps, setDbApps] = useState<any[]>([])
+  // Database state (local state for non-hook managed data)
   const [dbWebhooks, setDbWebhooks] = useState<any[]>([])
   const [dbApiKeys, setDbApiKeys] = useState<any[]>([])
-  const [loading, setLoading] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // Database integration
+  // Database integration - Marketplace hooks
+  const { apps: dbApps, loading: loadingApps, error: appsError, refetch: refetchApps } = useMarketplaceApps({ status: 'published' })
+  const { reviews: dbReviews, loading: loadingReviews, error: reviewsError, refetch: refetchReviews } = useMarketplaceReviews()
+  const { featuredApps: dbFeaturedApps, loading: loadingFeatured, refetch: refetchFeatured } = useFeaturedApps()
+  const { createApp, updateApp, deleteApp, createReview, updateReview, deleteReview } = useMarketplaceMutations()
+
+  // Coupon hooks
   const { create: createCouponMutation, isLoading: creatingCoupon } = useCreateCoupon()
   const { data: dbCoupons, refresh: refreshCoupons } = useCoupons()
+
+  // Combined loading state
+  const isLoading = loadingApps || loadingReviews || loadingFeatured
 
   // Form state for marketplace coupon
   const [marketplaceCouponForm, setMarketplaceCouponForm] = useState({
@@ -383,22 +402,12 @@ export default function MarketplaceClient() {
     }
   }, [])
 
-  // Fetch marketplace apps from Supabase
-  const fetchMarketplaceApps = useCallback(async () => {
-    try {
-      const { data, error } = await supabase.from('marketplace_apps').select('*').eq('status', 'published').order('total_downloads', { ascending: false })
-      if (error) throw error
-      setDbApps(data || [])
-    } catch (error) {
-      console.error('Error fetching marketplace apps:', error)
-    }
-  }, [])
+  // Marketplace apps now fetched via useMarketplaceApps hook
 
   useEffect(() => {
     fetchWebhooks()
     fetchApiKeys()
-    fetchMarketplaceApps()
-  }, [fetchWebhooks, fetchApiKeys, fetchMarketplaceApps])
+  }, [fetchWebhooks, fetchApiKeys])
 
   const handleCreateMarketplaceCoupon = async () => {
     if (!marketplaceCouponForm.code || !marketplaceCouponForm.value) {
@@ -533,8 +542,90 @@ export default function MarketplaceClient() {
     }))
   }
 
+  // Map database apps to UI Product format
+  const productsData: Product[] = useMemo(() => {
+    return (dbApps || []).map((app: MarketplaceApp) => ({
+      id: app.id,
+      name: app.app_name,
+      description: app.description || '',
+      shortDescription: app.short_description || '',
+      vendor: {
+        id: app.user_id,
+        name: app.developer_name || 'Unknown Developer',
+        logo: app.icon_url || undefined,
+        description: '',
+        website: app.developer_website || '',
+        email: app.developer_email || '',
+        status: app.developer_verified ? 'verified' as VendorStatus : 'active' as VendorStatus,
+        productCount: 1,
+        totalSales: app.total_downloads,
+        totalRevenue: app.total_downloads * app.price,
+        rating: app.average_rating,
+        reviewCount: app.total_reviews,
+        isVerified: app.developer_verified,
+        isFeatured: app.is_featured,
+        joinedAt: app.created_at,
+        location: '',
+        supportEmail: app.developer_email || '',
+        responseTime: '24h'
+      },
+      category: app.category as Category,
+      subcategory: app.subcategory || '',
+      price: app.price,
+      compareAtPrice: undefined,
+      pricingModel: (app.pricing_model === 'paid' ? 'one_time' : app.pricing_model) as PricingModel,
+      status: (app.status === 'published' ? 'active' : app.status) as ProductStatus,
+      images: app.screenshots || [],
+      rating: app.average_rating,
+      reviewCount: app.total_reviews,
+      downloads: app.total_downloads,
+      installs: app.total_installs,
+      activeInstalls: app.total_installs,
+      isFeatured: app.is_featured,
+      isVerified: app.is_verified,
+      isBestseller: app.total_downloads > 10000,
+      isNew: new Date(app.created_at) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
+      tags: app.tags || [],
+      createdAt: app.created_at,
+      updatedAt: app.updated_at,
+      version: app.version || '1.0.0',
+      compatibility: [],
+      features: [],
+      requirements: app.permissions || [],
+      changelog: []
+    }))
+  }, [dbApps])
+
+  // Map database reviews to UI Review format
+  const reviewsData: Review[] = useMemo(() => {
+    return (dbReviews || []).map((review: MarketplaceReview) => ({
+      id: review.id,
+      productId: review.app_id,
+      productName: '',
+      author: {
+        name: review.reviewer_name || 'Anonymous',
+        avatar: review.reviewer_avatar || undefined,
+        company: undefined
+      },
+      rating: review.rating,
+      title: review.title || '',
+      content: review.content || '',
+      pros: [],
+      cons: [],
+      helpful: review.helpful_count,
+      notHelpful: review.not_helpful_count,
+      createdAt: review.created_at,
+      verified: review.is_verified_purchase,
+      status: review.status as ReviewStatus,
+      response: review.developer_response ? {
+        content: review.developer_response,
+        date: review.developer_responded_at || review.updated_at
+      } : undefined
+    }))
+  }, [dbReviews])
+
   const filteredProducts = useMemo(() => {
-    return mockProducts.filter(product => {
+    return productsData.filter(product => {
       const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            product.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            product.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -542,18 +633,29 @@ export default function MarketplaceClient() {
       const matchesPricing = selectedPricing === 'all' || product.pricingModel === selectedPricing
       return matchesSearch && matchesCategory && matchesPricing && product.status === 'active'
     })
-  }, [searchQuery, selectedCategory, selectedPricing])
+  }, [searchQuery, selectedCategory, selectedPricing, productsData])
+
+  // Get unique vendors from products
+  const vendorsData = useMemo(() => {
+    const vendorMap = new Map<string, Vendor>()
+    productsData.forEach(p => {
+      if (!vendorMap.has(p.vendor.id)) {
+        vendorMap.set(p.vendor.id, p.vendor)
+      }
+    })
+    return Array.from(vendorMap.values())
+  }, [productsData])
 
   const stats = useMemo(() => ({
-    totalProducts: mockProducts.length,
-    totalVendors: mockVendors.length,
-    totalDownloads: mockProducts.reduce((sum, p) => sum + p.downloads, 0),
-    totalInstalls: mockProducts.reduce((sum, p) => sum + p.activeInstalls, 0),
-    avgRating: (mockProducts.reduce((sum, p) => sum + p.rating, 0) / mockProducts.length).toFixed(1),
-    totalRevenue: mockVendors.reduce((sum, v) => sum + v.totalRevenue, 0),
-    totalReviews: mockReviews.length,
-    pendingOrders: mockOrders.filter(o => o.status === 'pending' || o.status === 'processing').length
-  }), [])
+    totalProducts: productsData.length,
+    totalVendors: vendorsData.length,
+    totalDownloads: productsData.reduce((sum, p) => sum + p.downloads, 0),
+    totalInstalls: productsData.reduce((sum, p) => sum + p.activeInstalls, 0),
+    avgRating: productsData.length > 0 ? (productsData.reduce((sum, p) => sum + p.rating, 0) / productsData.length).toFixed(1) : '0.0',
+    totalRevenue: vendorsData.reduce((sum, v) => sum + v.totalRevenue, 0),
+    totalReviews: reviewsData.length,
+    pendingOrders: 0 // Orders are managed separately
+  }), [productsData, vendorsData, reviewsData])
 
   const statsCards = [
     { label: 'Total Apps', value: stats.totalProducts.toString(), icon: Package, color: 'from-violet-500 to-violet-600', trend: '+12%' },
@@ -621,6 +723,13 @@ export default function MarketplaceClient() {
   }
 
   // Handlers
+  const handleSync = async () => {
+    toast.promise(
+      Promise.all([refetchApps(), refetchReviews(), refetchFeatured()]),
+      { loading: 'Syncing marketplace data...', success: 'Marketplace data synced!', error: 'Failed to sync' }
+    )
+  }
+
   const handleAddToWishlist = (product: Product) => {
     toast.promise(Promise.resolve().then(() => setWishlist(prev => [...prev, product.id])), { loading: 'Adding to wishlist...', success: `"${product.name}" added to your wishlist`, error: 'Failed to add' })
   }
@@ -645,6 +754,31 @@ export default function MarketplaceClient() {
     const mailtoUrl = `mailto:${product.vendor.supportEmail || product.vendor.email}?subject=Inquiry about ${encodeURIComponent(product.name)}`
     window.location.href = mailtoUrl
     toast.success(`Opening email to ${product.vendor.name}`)
+  }
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:bg-none dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-violet-600 mx-auto mb-4" />
+          <p className="text-slate-600 dark:text-slate-400">Loading marketplace...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Error state
+  if (appsError) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:bg-none dark:bg-gray-900 flex flex-col items-center justify-center gap-4">
+        <p className="text-red-500">Error loading marketplace data</p>
+        <Button onClick={() => { refetchApps(); refetchReviews(); refetchFeatured(); }}>
+          <RefreshCw className="w-4 h-4 mr-2" />
+          Retry
+        </Button>
+      </div>
+    )
   }
 
   return (

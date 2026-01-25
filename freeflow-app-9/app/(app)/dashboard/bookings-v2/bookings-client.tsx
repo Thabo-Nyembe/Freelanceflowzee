@@ -19,7 +19,7 @@ import {
   Bell, Link2, Mail, Phone, Globe, Copy, ExternalLink, CreditCard,
   Repeat, UserCheck, CalendarClock, RefreshCw, Download, Shield,
   Key, Palette, AlertTriangle, MessageSquare, Webhook, Timer, Edit,
-  Trash2, BarChart3, FileText
+  Trash2, BarChart3, FileText, Loader2
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -529,7 +529,27 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
     setCurrentDate(newDate)
   }
 
-  // In demo mode, continue with empty bookings instead of showing error
+  // Loading state
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-full min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-sky-600" />
+      </div>
+    )
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full min-h-[400px] gap-4">
+        <p className="text-red-500">Error loading bookings: {error.message}</p>
+        <Button onClick={() => refetch()} variant="outline">
+          <RefreshCw className="h-4 w-4 mr-2" />
+          Retry
+        </Button>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-50 via-blue-50 to-indigo-50 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">

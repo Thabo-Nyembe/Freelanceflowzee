@@ -814,6 +814,30 @@ export default function SurveysClient() {
     { id: '3', label: 'Export Data', icon: 'download', action: () => setShowExportDialog(true), variant: 'outline' as const },
   ]
 
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
+      </div>
+    )
+  }
+
+  // Error state
+  if (dbError) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full min-h-[400px] gap-4">
+        <XCircle className="h-12 w-12 text-red-500" />
+        <p className="text-red-500 font-medium">Error loading surveys</p>
+        <p className="text-sm text-muted-foreground">{dbError.message}</p>
+        <Button onClick={() => refetch()} variant="outline">
+          <RefreshCw className="h-4 w-4 mr-2" />
+          Retry
+        </Button>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-green-50/30 to-teal-50/40 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">

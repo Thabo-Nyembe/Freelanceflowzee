@@ -217,8 +217,10 @@ export default function VideoStudioClient() {
 
   const { data: dbEffects, isLoading: isLoadingEffects, refresh: refetchEffects } = useVideoEffects()
   const { data: dbTemplates, isLoading: isLoadingTemplates, refresh: refetchTemplates } = useVideoTemplates()
-  const { data: dbRenderJobs, isLoading: isLoadingRenderJobs, refresh: refetchRenderJobs } = useVideoRenderJobs()
-  const { data: dbAssets, isLoading: isLoadingAssets, refresh: refetchAssets } = useVideoAssets()
+  // Note: useVideoRenderJobs and useVideoAssets require IDs - they'll return empty until a project is selected
+  // In production, you might want to create useAllVideoRenderJobs() or useAllVideoAssets() hooks
+  const { data: dbRenderJobs = [], isLoading: isLoadingRenderJobs, refresh: refetchRenderJobs } = useVideoRenderJobs()
+  const { data: dbAssets = [], isLoading: isLoadingAssets, refresh: refetchAssets } = useVideoAssets()
 
   // Fetch data on mount
   useEffect(() => {

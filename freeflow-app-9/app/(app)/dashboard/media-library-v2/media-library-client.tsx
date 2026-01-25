@@ -381,15 +381,18 @@ const defaultCollectionForm: CollectionFormData = {
 }
 
 export default function MediaLibraryClient({
-  initialAssets = emptyAssets,
-  initialFolders = emptyFolders
+  initialAssets: _initialAssets = emptyAssets,
+  initialFolders: _initialFolders = emptyFolders
 }: MediaLibraryClientProps) {
-
+  // Note: initialAssets and initialFolders are kept for backward compatibility
+  // but we now use Supabase hooks for real data
+  void _initialAssets
+  void _initialFolders
 
   // Supabase hooks for real data
   const { files: supabaseFiles, loading: filesLoading, error: filesError, refetch: refetchFiles } = useMediaFiles({ status: 'active' })
   const { folders: supabaseFolders, loading: foldersLoading, error: foldersError, refetch: refetchFolders } = useMediaFolders()
-  const mediaStats = useMediaStats()
+  const _mediaStats = useMediaStats() // Available for future use
 
   // Mutation hooks
   const fileMutation = useSupabaseMutation({
@@ -491,10 +494,6 @@ export default function MediaLibraryClient({
   const mappedFolders: MediaFolder[] = useMemo(() => {
     return (supabaseFolders || []).map(mapDbFolder)
   }, [supabaseFolders, mapDbFolder])
-
-  // Use mapped Supabase data (no fallback to mock data)
-  const displayFiles = supabaseFiles
-  const displayFolders = supabaseFolders
 
   const [activeTab, setActiveTab] = useState('assets')
   const [searchQuery, setSearchQuery] = useState('')
@@ -1223,7 +1222,7 @@ export default function MediaLibraryClient({
 
     try {
       // Find folders with no recent activity (older folders beyond index 2)
-      const foldersToArchive = initialFolders.filter((_, idx) => idx > 2)
+      const foldersToArchive = mappedFolders.filter((_, idx) => idx > 2)
 
       if (foldersToArchive.length === 0) {
         toast.dismiss()
@@ -1278,9 +1277,9 @@ export default function MediaLibraryClient({
     toast.loading('Cleaning up empty folders...')
 
     try {
-      const emptyFolders = initialFolders.filter(f => f.assetCount === 0)
+      const emptyFoldersToClean = mappedFolders.filter(f => f.assetCount === 0)
 
-      if (emptyFolders.length === 0) {
+      if (emptyFoldersToClean.length === 0) {
         toast.dismiss()
         toast.info('No empty folders found')
         return
@@ -1288,7 +1287,7 @@ export default function MediaLibraryClient({
 
       // Delete each empty folder via API
       let deletedCount = 0
-      for (const folder of emptyFolders) {
+      for (const folder of emptyFoldersToClean) {
         try {
           const response = await fetch('/api/files', {
             method: 'POST',
@@ -2302,12 +2301,12 @@ export default function MediaLibraryClient({
                   </div>
                   <div>
                     <h2 className="text-2xl font-bold">Folder Organization</h2>
-                    <p className="text-blue-100">{initialFolders.length} folders • {initialFolders.reduce((sum, f) => sum + f.assetCount, 0)} total assets</p>
+                    <p className="text-blue-100">{mappedFolders.length} folders • {mappedFolders.reduce((sum, f) => sum + f.assetCount, 0)} total assets</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="text-right">
-                    <p className="text-2xl font-bold">{formatSize(initialFolders.reduce((sum, f) => sum + f.totalSize, 0))}</p>
+                    <p className="text-2xl font-bold">{formatSize(mappedFolders.reduce((sum, f) => sum + f.totalSize, 0))}</p>
                     <p className="text-blue-100 text-sm">Total Size</p>
                   </div>
                   <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={handleOpenNewFolder}>
@@ -2353,7 +2352,7 @@ export default function MediaLibraryClient({
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-              {initialFolders.map((folder) => (
+              {mappedFolders.map((folder) => (
                 <Card key={folder.id} className="border-0 shadow-sm hover:shadow-md transition-all cursor-pointer">
                   <CardContent className="p-4">
                     <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${folder.color} flex items-center justify-center mb-3`}>
@@ -3778,9 +3777,9 @@ export default function MediaLibraryClient({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="root">Root (No folder)</SelectItem>
-                    {displayFolders.map((folder: any) => (
+                    {mappedFolders.map((folder) => (
                       <SelectItem key={folder.id} value={folder.id}>
-                        {folder.name || folder.folder_name}
+                        {folder.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -4344,7 +4343,7 @@ export default function MediaLibraryClient({
               </div>
               <div className="space-y-2">
                 <h4 className="font-medium">Most Downloaded Assets</h4>
-                {initialAssets
+                {mappedAssets
                   .sort((a, b) => b.downloadCount - a.downloadCount)
                   .slice(0, 3)
                   .map((asset, idx) => (
