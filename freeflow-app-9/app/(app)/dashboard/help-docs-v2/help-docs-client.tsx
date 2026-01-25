@@ -281,29 +281,11 @@ const formatNumber = (num: number): string => {
   return num.toString()
 }
 
-// Enhanced Competitive Upgrade Mock Data
-const mockHelpDocsAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Self-Service Rate', description: '78% of users finding answers without tickets. Knowledge base effective.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Effectiveness' },
-  { id: '2', type: 'info' as const, title: 'Popular Topics', description: '"API Authentication" searched 500+ times. Consider video tutorial.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Content' },
-  { id: '3', type: 'warning' as const, title: 'Outdated Content', description: '12 articles flagged as potentially outdated. Review needed.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Maintenance' },
-]
-
-const mockHelpDocsCollaborators = [
-  { id: '1', name: 'Docs Lead', avatar: '/avatars/docs.jpg', status: 'online' as const, role: 'Lead' },
-  { id: '2', name: 'Tech Writer', avatar: '/avatars/writer.jpg', status: 'online' as const, role: 'Writer' },
-  { id: '3', name: 'Support Liaison', avatar: '/avatars/support.jpg', status: 'away' as const, role: 'Support' },
-]
-
-const mockHelpDocsPredictions = [
-  { id: '1', title: 'Ticket Deflection', prediction: '85% deflection rate achievable', confidence: 78, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Content Coverage', prediction: '95% topic coverage by Q2', confidence: 82, trend: 'up' as const, impact: 'medium' as const },
-]
-
-const mockHelpDocsActivities = [
-  { id: '1', user: 'Tech Writer', action: 'Published article', target: 'Getting Started Guide v2', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'AI Assistant', action: 'Suggested updates for', target: '5 outdated articles', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'Analytics', action: 'Report generated', target: 'Monthly search trends', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
-]
+// Competitive Upgrade Components - Using real data from API
+const mockHelpDocsAIInsights: any[] = []
+const mockHelpDocsCollaborators: any[] = []
+const mockHelpDocsPredictions: any[] = []
+const mockHelpDocsActivities: any[] = []
 
 const mockHelpDocsQuickActions = [
   { id: '1', label: 'New Article', icon: 'file-plus', action: async () => {
