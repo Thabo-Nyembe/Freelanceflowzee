@@ -1062,7 +1062,7 @@ export default function MilestonesClient() {
     // Filter hook data by search only (status/priority already filtered by hook)
     return hookMilestones.filter(milestone => {
       const matchesSearch = searchQuery === '' ||
-        milestone.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (milestone.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
         (milestone.team_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
         (milestone.description || '').toLowerCase().includes(searchQuery.toLowerCase())
       return matchesSearch

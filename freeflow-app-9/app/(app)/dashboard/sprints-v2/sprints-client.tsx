@@ -370,8 +370,8 @@ export default function SprintsClient() {
   const filteredSprints = useMemo(() => {
     return sprintsData.filter(sprint => {
       const matchesSearch = searchQuery === '' ||
-        sprint.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        sprint.key.toLowerCase().includes(searchQuery.toLowerCase())
+        (sprint.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (sprint.key || '').toLowerCase().includes(searchQuery.toLowerCase())
       const matchesStatus = statusFilter === 'all' || sprint.status === statusFilter
       return matchesSearch && matchesStatus
     })
@@ -1073,7 +1073,7 @@ export default function SprintsClient() {
                           <Avatar key={idx} className="w-8 h-8 border-2 border-white dark:border-slate-900">
                             <AvatarImage src={member.avatar} alt="User avatar" />
                             <AvatarFallback className="bg-gradient-to-br from-teal-500 to-cyan-500 text-white text-xs">
-                              {member.name.split(' ').map(n => n[0]).join('')}
+                              {(member.name || 'U').split(' ').map(n => n[0]).join('')}
                             </AvatarFallback>
                           </Avatar>
                         ))}
@@ -1363,7 +1363,7 @@ export default function SprintsClient() {
                                     <Avatar className="w-5 h-5">
                                       <AvatarImage src={task.assignee.avatar} alt="User avatar" />
                                       <AvatarFallback className="bg-teal-500 text-white text-[8px]">
-                                        {task.assignee.name.split(' ').map(n => n[0]).join('')}
+                                        {(task.assignee.name || 'U').split(' ').map(n => n[0]).join('')}
                                       </AvatarFallback>
                                     </Avatar>
                                   )}
@@ -2393,7 +2393,7 @@ export default function SprintsClient() {
                             <Avatar className="w-6 h-6">
                               <AvatarImage src={member.avatar} alt="User avatar" />
                               <AvatarFallback className="bg-gradient-to-br from-teal-500 to-cyan-500 text-white text-xs">
-                                {member.name.split(' ').map(n => n[0]).join('')}
+                                {(member.name || 'U').split(' ').map(n => n[0]).join('')}
                               </AvatarFallback>
                             </Avatar>
                             <div>
@@ -2480,7 +2480,7 @@ export default function SprintsClient() {
                       <Avatar className="w-8 h-8">
                         <AvatarImage src={selectedTask.assignee.avatar} alt="User avatar" />
                         <AvatarFallback className="bg-teal-500 text-white text-xs">
-                          {selectedTask.assignee.name.split(' ').map(n => n[0]).join('')}
+                          {(selectedTask.assignee.name || 'U').split(' ').map(n => n[0]).join('')}
                         </AvatarFallback>
                       </Avatar>
                       <div>

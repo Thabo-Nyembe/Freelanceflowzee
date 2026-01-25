@@ -1308,9 +1308,9 @@ export default function WarehouseClient() {
   // Filter functions - use real inventory when available
   const filteredInventory = useMemo(() => {
     return activeInventory.filter(item => {
-      const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.sku.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.bin_location.toLowerCase().includes(searchQuery.toLowerCase())
+      const matchesSearch = (item.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (item.sku || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (item.bin_location || '').toLowerCase().includes(searchQuery.toLowerCase())
       const matchesStatus = inventoryFilter === 'all' || item.status === inventoryFilter
       const matchesZone = zoneFilter === 'all' || item.zone === zoneFilter
       return matchesSearch && matchesStatus && matchesZone
@@ -1319,8 +1319,8 @@ export default function WarehouseClient() {
 
   const filteredTasks = useMemo(() => {
     return activeWarehouseTasks.filter(task => {
-      const matchesSearch = task.item_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        task.task_number.toLowerCase().includes(searchQuery.toLowerCase())
+      const matchesSearch = (task.item_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (task.task_number || '').toLowerCase().includes(searchQuery.toLowerCase())
       const matchesPriority = priorityFilter === 'all' || task.priority === priorityFilter
       return matchesSearch && matchesPriority
     })
@@ -2117,7 +2117,7 @@ export default function WarehouseClient() {
                           {task.assigned_to ? (
                             <div className="flex items-center gap-2">
                               <Avatar className="w-8 h-8">
-                                <AvatarFallback>{task.assigned_to.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                                <AvatarFallback>{(task.assigned_to || 'U').split(' ').map(n => n[0]).join('')}</AvatarFallback>
                               </Avatar>
                               <span className="text-sm text-gray-600 dark:text-gray-400">{task.assigned_to}</span>
                             </div>

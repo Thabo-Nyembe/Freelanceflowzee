@@ -651,9 +651,9 @@ export default function ShippingClient() {
   // Filtered data from real Supabase data
   const filteredShipments = useMemo(() => {
     return mappedShipments.filter(shipment => {
-      const matchesSearch = shipment.orderNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      const matchesSearch = (shipment.orderNumber || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
         shipment.trackingNumber?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        shipment.destination.name.toLowerCase().includes(searchQuery.toLowerCase())
+        (shipment.destination?.name || '').toLowerCase().includes(searchQuery.toLowerCase())
       const matchesStatus = statusFilter === 'all' || shipment.status === statusFilter
       return matchesSearch && matchesStatus
     })
@@ -3076,7 +3076,7 @@ export default function ShippingClient() {
               <Button variant="outline" onClick={() => setShowFindOrderDialog(false)}>Cancel</Button>
               <Button onClick={() => {
                 const searchResults = pendingOrders.filter(o =>
-                  o.customer.toLowerCase().includes('search') || o.id.toLowerCase().includes('search')
+                  (o.customer || '').toLowerCase().includes('search') || (o.id || '').toLowerCase().includes('search')
                 )
                 if (searchResults.length > 0) {
                   toast.success('Orders found: matching orders')

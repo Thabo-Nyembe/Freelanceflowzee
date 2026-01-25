@@ -320,8 +320,8 @@ export default function GoalsPage() {
       weeklyGoals,
       exportedAt: new Date().toISOString(),
       analytics: {
-        dailyCompletionRate: Math.round((dailyGoals.filter(g => g.status === 'completed').length / dailyGoals.length) * 100),
-        weeklyCompletionRate: Math.round((weeklyGoals.filter(g => g.status === 'completed').length / weeklyGoals.length) * 100)
+        dailyCompletionRate: Math.round((dailyGoals.filter(g => g.status === 'completed').length / (dailyGoals.length || 1)) * 100),
+        weeklyCompletionRate: Math.round((weeklyGoals.filter(g => g.status === 'completed').length / (weeklyGoals.length || 1)) * 100)
       }
     }
     const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })

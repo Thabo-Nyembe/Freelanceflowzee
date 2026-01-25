@@ -240,7 +240,7 @@ const mapPipelineToWorkflow = (pipeline: CiCd): Workflow => {
   return {
     id: pipeline.id,
     name: pipeline.pipeline_name,
-    path: pipeline.repository_url || `.pipelines/${pipeline.pipeline_name.toLowerCase().replace(/\s+/g, '-')}.yml`,
+    path: pipeline.repository_url || `.pipelines/${(pipeline.pipeline_name || 'unnamed').toLowerCase().replace(/\s+/g, '-')}.yml`,
     status: pipeline.is_running ? 'running' :
             pipeline.last_status === 'success' ? 'success' :
             pipeline.last_status === 'failure' ? 'failure' : 'success',
@@ -639,8 +639,8 @@ export default function CiCdClient() {
   // Filter workflows
   const filteredWorkflows = useMemo(() => {
     return workflows.filter(workflow => {
-      const matchesSearch = workflow.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        workflow.path.toLowerCase().includes(searchQuery.toLowerCase())
+      const matchesSearch = (workflow.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (workflow.path || '').toLowerCase().includes(searchQuery.toLowerCase())
       const matchesStatus = statusFilter === 'all' || workflow.status === statusFilter
       return matchesSearch && matchesStatus
     })
@@ -1068,7 +1068,7 @@ export default function CiCdClient() {
                   </div>
                   {pipelines
                     .filter(pipeline => {
-                      const matchesSearch = pipeline.pipeline_name.toLowerCase().includes(searchQuery.toLowerCase())
+                      const matchesSearch = (pipeline.pipeline_name || '').toLowerCase().includes(searchQuery.toLowerCase())
                       const matchesStatus = statusFilter === 'all' || pipeline.status === statusFilter
                       return matchesSearch && matchesStatus
                     })

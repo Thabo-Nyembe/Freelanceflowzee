@@ -1076,9 +1076,9 @@ export default function LogisticsClient() {
   const filteredShipments = useMemo(() => {
     return shipments.filter(shipment => {
       const matchesSearch = searchQuery === '' ||
-        shipment.trackingNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        shipment.destination.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        shipment.orderId.toLowerCase().includes(searchQuery.toLowerCase())
+        (shipment.trackingNumber || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (shipment.destination?.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (shipment.orderId || '').toLowerCase().includes(searchQuery.toLowerCase())
       const matchesStatus = statusFilter === 'all' || shipment.status === statusFilter
       return matchesSearch && matchesStatus
     })

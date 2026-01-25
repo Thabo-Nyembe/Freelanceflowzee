@@ -3244,7 +3244,7 @@ export default function DeploymentsClient() {
                 const filteredLogs = realTimeLogs.filter(log =>
                   levels.includes(log.level) &&
                   (!functionInput?.value || log.step.includes(functionInput.value)) &&
-                  (!messageInput?.value || log.message.toLowerCase().includes(messageInput.value.toLowerCase()))
+                  (!messageInput?.value || (log.message || '').toLowerCase().includes(messageInput.value.toLowerCase()))
                 );
                 setRealTimeLogs(filteredLogs);
                 setShowLogFiltersDialog(false);
