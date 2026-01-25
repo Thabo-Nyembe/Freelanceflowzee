@@ -1526,7 +1526,7 @@ export default function TutorialsClient() {
               </CardHeader>
               <CardContent className="p-0">
                 <div className="divide-y">
-                  {mockNotifications.map(notification => (
+                  {([] as LearningNotification[]).map(notification => (
                     <div key={notification.id} className={`flex items-start gap-4 p-4 ${!notification.isRead ? 'bg-blue-50' : ''}`}>
                       <div className={`w-10 h-10 rounded-full flex items-center justify-center ${notification.type === 'achievement' ? 'bg-amber-100' : notification.type === 'promotion' ? 'bg-green-100' : 'bg-blue-100'}`}>
                         {notification.type === 'course_update' && <RefreshCw className="w-5 h-5 text-blue-600" />}
@@ -1833,7 +1833,7 @@ export default function TutorialsClient() {
                       </CardHeader>
                       <CardContent>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                          {mockSubscriptions.map(sub => (
+                          {([] as Subscription[]).map(sub => (
                             <div key={sub.id} className={`p-4 border rounded-lg ${sub.isCurrent ? 'border-rose-500 bg-rose-50 dark:bg-rose-900/20' : 'dark:border-gray-700'}`}>
                               <div className="flex items-center justify-between mb-2">
                                 <h4 className="font-semibold text-lg">{sub.name}</h4>
@@ -2384,7 +2384,7 @@ export default function TutorialsClient() {
                       <div className="text-center"><div className="text-4xl font-bold">{selectedCourse.metrics.rating}</div><div className="flex justify-center mt-1">{renderStars(selectedCourse.metrics.rating)}</div><div className="text-sm text-gray-500 mt-1">{selectedCourse.metrics.reviewsCount.toLocaleString()} reviews</div></div>
                       <div className="flex-1 space-y-1">{[5,4,3,2,1].map(star => (<div key={star} className="flex items-center gap-2"><span className="text-sm w-3">{star}</span><Star className="w-3 h-3 fill-yellow-400 text-yellow-400" /><Progress value={star === 5 ? 72 : star === 4 ? 20 : 8/star} className="h-2 flex-1" /></div>))}</div>
                     </div>
-                    {mockReviews.filter(r => r.courseId === selectedCourse.id).map(review => (
+                    {([] as Review[]).filter(r => r.courseId === selectedCourse.id).map(review => (
                       <Card key={review.id}><CardContent className="p-4">
                         <div className="flex items-start gap-3">
                           <Avatar><AvatarFallback>{review.user.avatar}</AvatarFallback></Avatar>
@@ -2493,11 +2493,11 @@ export default function TutorialsClient() {
                 {/* Course Progress */}
                 <div className="flex items-center gap-4 mb-4">
                   <Progress
-                    value={mockProgress.find(p => p.courseId === activeTutorial.id)?.progress || 0}
+                    value={([] as UserProgress[]).find(p => p.courseId === activeTutorial.id)?.progress || 0}
                     className="flex-1 h-2"
                   />
                   <span className="text-sm font-medium">
-                    {mockProgress.find(p => p.courseId === activeTutorial.id)?.progress || 0}% complete
+                    {([] as UserProgress[]).find(p => p.courseId === activeTutorial.id)?.progress || 0}% complete
                   </span>
                 </div>
 

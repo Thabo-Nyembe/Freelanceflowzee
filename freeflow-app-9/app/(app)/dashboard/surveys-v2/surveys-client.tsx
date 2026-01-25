@@ -200,16 +200,6 @@ interface SurveyStats {
 
 // Real data comes from Supabase hooks - no mock data needed
 
-const mockStats: SurveyStats = {
-  totalSurveys: 0,
-  activeSurveys: 0,
-  totalResponses: 0,
-  avgCompletionRate: 0,
-  avgNPS: 0,
-  responsesThisWeek: 0,
-  responsesLastWeek: 0
-}
-
 // Helper functions
 const getStatusColor = (status: SurveyStatus) => {
   switch (status) {
@@ -510,8 +500,8 @@ export default function SurveysClient() {
       totalResponses: dbStats?.totalResponses || 0,
       avgCompletionRate: dbStats?.avgCompletionRate ? Math.round(dbStats.avgCompletionRate * 10) / 10 : 0,
       avgNPS: dbStats?.avgNPS ? Math.round(dbStats.avgNPS * 10) / 10 : 0,
-      responsesThisWeek: mockStats.responsesThisWeek, // Would need additional query for real data
-      responsesLastWeek: mockStats.responsesLastWeek
+      responsesThisWeek: 0, // Would need additional query for real data
+      responsesLastWeek: 0
     }
   }, [dbStats])
 

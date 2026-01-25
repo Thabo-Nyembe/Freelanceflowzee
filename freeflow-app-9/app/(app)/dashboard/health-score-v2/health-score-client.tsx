@@ -2253,7 +2253,7 @@ export default function HealthScoreClient() {
               <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
                 <h4 className="font-medium mb-3">Service Performance</h4>
                 <div className="space-y-2">
-                  {mockServices.slice(0, 4).map(service => (
+                  {([] as ServiceHealth[]).slice(0, 4).map(service => (
                     <div key={service.id} className="flex items-center justify-between text-sm">
                       <span>{service.name}</span>
                       <div className="flex items-center gap-2">

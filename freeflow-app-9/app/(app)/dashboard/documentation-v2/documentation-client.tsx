@@ -2227,7 +2227,7 @@ export default function DocumentationClient() {
                       </CardHeader>
                       <CardContent>
                         <div className="space-y-3">
-                          {mockIntegrations.map(int => (
+                          {([] as DocIntegration[]).map(int => (
                             <div key={int.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                               <div className="flex items-center gap-3">
                                 <div className="p-2 bg-white dark:bg-gray-700 rounded-lg">
@@ -2459,18 +2459,18 @@ export default function DocumentationClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockDocsAIInsights}
+              insights={[] as AIInsight[]}
               title="Documentation Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockDocsCollaborators}
+              collaborators={[] as Collaborator[]}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockDocsPredictions}
+              predictions={[] as Prediction[]}
               title="Documentation Forecasts"
             />
           </div>
@@ -2478,12 +2478,12 @@ export default function DocumentationClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockDocsActivities}
+            activities={[] as ActivityItem[]}
             title="Documentation Activity"
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockDocsQuickActions}
+            actions={[] as QuickAction[]}
             variant="grid"
           />
         </div>
@@ -2499,7 +2499,7 @@ export default function DocumentationClient() {
             </DialogHeader>
             <ScrollArea className="h-[400px]">
               <div className="space-y-3 py-4">
-                {mockVersions.map((version) => (
+                {([] as DocVersion[]).map((version) => (
                   <div key={version.id} className={`p-4 rounded-lg border ${version.is_current ? 'bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-700' : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700'}`}>
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-3">
