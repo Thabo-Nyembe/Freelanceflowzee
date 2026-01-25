@@ -1443,7 +1443,7 @@ export default function MilestonesClient() {
                             <Avatar key={idx} className="w-8 h-8 border-2 border-white dark:border-slate-900">
                               <AvatarImage src={member.avatar} alt="User avatar" />
                               <AvatarFallback className="bg-gradient-to-br from-rose-500 to-pink-500 text-white text-xs">
-                                {member.name.split(' ').map(n => n[0]).join('')}
+                                {(member.name || 'U').split(' ').map(n => n[0]).join('')}
                               </AvatarFallback>
                             </Avatar>
                           ))}
@@ -1456,7 +1456,7 @@ export default function MilestonesClient() {
                         <div className="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400">
                           <span className="flex items-center gap-1">
                             <Package className="w-4 h-4" />
-                            {milestone.deliverables.filter(d => d.status === 'approved').length}/{milestone.deliverables.length}
+                            {(milestone.deliverables || []).filter(d => d.status === 'approved').length}/{(milestone.deliverables || []).length}
                           </span>
                           <span className="flex items-center gap-1">
                             <MessageSquare className="w-4 h-4" />
@@ -2289,7 +2289,7 @@ export default function MilestonesClient() {
                             <Avatar className="w-6 h-6">
                               <AvatarImage src={member.avatar} alt="User avatar" />
                               <AvatarFallback className="bg-gradient-to-br from-rose-500 to-pink-500 text-white text-xs">
-                                {member.name.split(' ').map(n => n[0]).join('')}
+                                {(member.name || 'U').split(' ').map(n => n[0]).join('')}
                               </AvatarFallback>
                             </Avatar>
                             <div>
@@ -2351,9 +2351,9 @@ export default function MilestonesClient() {
                             <div key={update.id} className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50">
                               <div className="flex items-center gap-2 mb-2">
                                 <Avatar className="w-6 h-6">
-                                  <AvatarImage src={update.author.avatar} alt="User avatar" />
+                                  <AvatarImage src={update.author?.avatar} alt="User avatar" />
                                   <AvatarFallback className="bg-gradient-to-br from-rose-500 to-pink-500 text-white text-xs">
-                                    {update.author.name.split(' ').map(n => n[0]).join('')}
+                                    {(update.author?.name || 'U').split(' ').map(n => n[0]).join('')}
                                   </AvatarFallback>
                                 </Avatar>
                                 <span className="text-sm font-medium">{update.author.name}</span>

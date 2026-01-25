@@ -790,7 +790,7 @@ export default function LogisticsClient() {
       toast.error('Tracking number required')
       return
     }
-    const found = shipments.find(s => s.trackingNumber.toLowerCase().includes(trackingNumber.toLowerCase()))
+    const found = shipments.find(s => s.trackingNumber?.toLowerCase().includes(trackingNumber.toLowerCase()))
     if (found) {
       setSelectedShipment(found)
       toast.success(`Shipment found`)
