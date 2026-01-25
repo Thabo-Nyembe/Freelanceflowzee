@@ -1840,35 +1840,87 @@ export default function SecurityAuditClient() {
             <div className="space-y-4">
               <p className="text-sm text-gray-500">Select the format and content for your export</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                <div className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => {
-                  setShowExportDialog(false)
-                  toast.success('Exporting PDF report...')
-                }}>
-                  <FileText className="h-8 w-8 text-red-600 mb-2" />
+                <div
+                  role="button"
+                  tabIndex={0}
+                  className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onClick={() => {
+                    setShowExportDialog(false)
+                    toast.success('Exporting PDF report...')
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      setShowExportDialog(false)
+                      toast.success('Exporting PDF report...')
+                    }
+                  }}
+                  aria-label="Export as PDF Report"
+                >
+                  <FileText className="h-8 w-8 text-red-600 mb-2" aria-hidden="true" />
                   <h4 className="font-medium">PDF Report</h4>
                   <p className="text-sm text-gray-500">Comprehensive audit report</p>
                 </div>
-                <div className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => {
-                  setShowExportDialog(false)
-                  toast.success('Exporting CSV data...')
-                }}>
-                  <FileText className="h-8 w-8 text-green-600 mb-2" />
+                <div
+                  role="button"
+                  tabIndex={0}
+                  className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onClick={() => {
+                    setShowExportDialog(false)
+                    toast.success('Exporting CSV data...')
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      setShowExportDialog(false)
+                      toast.success('Exporting CSV data...')
+                    }
+                  }}
+                  aria-label="Export as CSV"
+                >
+                  <FileText className="h-8 w-8 text-green-600 mb-2" aria-hidden="true" />
                   <h4 className="font-medium">CSV Export</h4>
                   <p className="text-sm text-gray-500">Raw vulnerability data</p>
                 </div>
-                <div className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => {
-                  setShowExportDialog(false)
-                  toast.success('Exporting JSON data...')
-                }}>
-                  <FileText className="h-8 w-8 text-blue-600 mb-2" />
+                <div
+                  role="button"
+                  tabIndex={0}
+                  className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onClick={() => {
+                    setShowExportDialog(false)
+                    toast.success('Exporting JSON data...')
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      setShowExportDialog(false)
+                      toast.success('Exporting JSON data...')
+                    }
+                  }}
+                  aria-label="Export as JSON"
+                >
+                  <FileText className="h-8 w-8 text-blue-600 mb-2" aria-hidden="true" />
                   <h4 className="font-medium">JSON Export</h4>
                   <p className="text-sm text-gray-500">Machine-readable format</p>
                 </div>
-                <div className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onClick={() => {
-                  setShowExportDialog(false)
-                  toast.success('Generating executive summary...')
-                }}>
-                  <BarChart3 className="h-8 w-8 text-purple-600 mb-2" />
+                <div
+                  role="button"
+                  tabIndex={0}
+                  className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onClick={() => {
+                    setShowExportDialog(false)
+                    toast.success('Generating executive summary...')
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      setShowExportDialog(false)
+                      toast.success('Generating executive summary...')
+                    }
+                  }}
+                  aria-label="Generate Executive Summary"
+                >
+                  <BarChart3 className="h-8 w-8 text-purple-600 mb-2" aria-hidden="true" />
                   <h4 className="font-medium">Executive Summary</h4>
                   <p className="text-sm text-gray-500">High-level overview</p>
                 </div>

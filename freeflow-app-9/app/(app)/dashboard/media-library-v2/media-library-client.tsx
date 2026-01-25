@@ -2512,14 +2512,26 @@ export default function MediaLibraryClient({
 
             <Card className="border-0 shadow-sm">
               <CardContent className="p-8">
-                <div className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl p-12 text-center hover:border-indigo-500 transition-colors cursor-pointer" onClick={handleUploadMedia}>
-                  <CloudUpload className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                <div
+                  role="button"
+                  tabIndex={0}
+                  className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl p-12 text-center hover:border-indigo-500 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  onClick={handleUploadMedia}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      handleUploadMedia()
+                    }
+                  }}
+                  aria-label="Upload media files - click or press Enter to browse"
+                >
+                  <CloudUpload className="w-16 h-16 text-gray-400 mx-auto mb-4" aria-hidden="true" />
                   <h3 className="text-xl font-semibold mb-2">Upload Assets</h3>
                   <p className="text-gray-500 mb-4">Drag and drop files here, or click to browse</p>
                   <p className="text-sm text-gray-400">Supports: Images, Videos, Audio, Documents, Archives</p>
                   <p className="text-sm text-gray-400">Max file size: 5GB</p>
                   <Button className="mt-6 bg-gradient-to-r from-indigo-500 to-purple-600 text-white" onClick={handleUploadMedia}>
-                    <Upload className="w-4 h-4 mr-2" />
+                    <Upload className="w-4 h-4 mr-2" aria-hidden="true" />
                     Select Files
                   </Button>
                 </div>

@@ -24,7 +24,7 @@ import {
   GitCommit, FileCode, Zap, Shield, RefreshCw, AlertTriangle, Check, X,
   Box, Layers, Database, Lock, Plus, ChevronRight, ChevronDown,
   Search, Filter, MoreHorizontal, Download, Upload, ArrowUpRight, Timer, Network, User, MessageSquare, FileText, BarChart3, AlertCircle, Webhook,
-  Folder, File, Package, Gauge, MonitorPlay, GitPullRequest, Bell, AlertOctagon, Globe2
+  Folder, File, Package, Gauge, MonitorPlay, GitPullRequest, Bell, AlertOctagon, Globe2, Loader2
 } from 'lucide-react'
 
 // Lazy-loaded Enhanced & Competitive Upgrade Components for code splitting
@@ -71,7 +71,6 @@ const QuickActionsToolbar = dynamic(
 )
 
 import { Textarea } from '@/components/ui/textarea'
-import { Loader2 } from 'lucide-react'
 
 // Initialize Supabase client once at module level
 const supabase = createClient()
