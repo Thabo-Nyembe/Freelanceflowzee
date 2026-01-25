@@ -1710,7 +1710,7 @@ export default function LogisticsClient() {
                       <div className="text-sm text-emerald-100">Active</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold">{(carriers.reduce((s, c) => s + c.onTimeRate, 0) / carriers.length).toFixed(1)}%</div>
+                      <div className="text-2xl font-bold">{carriers.length > 0 ? (carriers.reduce((s, c) => s + c.onTimeRate, 0) / carriers.length).toFixed(1) : '0.0'}%</div>
                       <div className="text-sm text-emerald-100">Avg On-Time</div>
                     </div>
                     <div className="text-center">

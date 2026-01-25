@@ -82,6 +82,8 @@ interface AIInsightsPanelProps {
 export function AIInsightsPanel({
   insights = [],
   onQuery,
+  onInsightAction,
+  title = 'AI Insights',
   className
 }: AIInsightsPanelProps) {
   const [query, setQuery] = React.useState('')
@@ -182,7 +184,7 @@ export function AIInsightsPanel({
             >
               <Brain className="h-5 w-5 text-violet-600" />
             </motion.div>
-            <CardTitle className="text-lg">AI Insights</CardTitle>
+            <CardTitle className="text-lg">{title}</CardTitle>
             <Badge variant="secondary" className="text-xs">
               <Sparkles className="h-3 w-3 mr-1" />
               Powered by AI
@@ -1186,6 +1188,7 @@ interface PredictiveAnalyticsProps {
 export function PredictiveAnalytics({
   predictions = [],
   onRefresh,
+  title = 'Predictions',
   className
 }: PredictiveAnalyticsProps) {
   const [selectedPrediction, setSelectedPrediction] = React.useState<Prediction | null>(null)
@@ -1214,7 +1217,7 @@ export function PredictiveAnalytics({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Brain className="h-5 w-5 text-purple-600" />
-            <CardTitle className="text-lg">Predictive Insights</CardTitle>
+            <CardTitle className="text-lg">{title}</CardTitle>
             <Badge variant="outline" className="text-xs">
               <Sparkles className="h-3 w-3 mr-1" />
               AI Powered

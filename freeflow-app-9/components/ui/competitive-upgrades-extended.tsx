@@ -97,6 +97,8 @@ export function ActivityFeed({
   onPin,
   onArchive,
   filters = ['all', 'mentions', 'updates', 'comments'],
+  title = 'Activity Feed',
+  maxItems,
   className
 }: ActivityFeedProps) {
   const [activeFilter, setActiveFilter] = React.useState('all')
@@ -107,7 +109,7 @@ export function ActivityFeed({
 
   const filteredActivities = React.useMemo(() => {
     if (!activities || activities.length === 0) return []
-    return activities.filter(activity => {
+    const filtered = activities.filter(activity => {
       // Filter by type
       if (activeFilter !== 'all') {
         if (activeFilter === 'mentions' && activity.type !== 'mention') return false
@@ -130,7 +132,9 @@ export function ActivityFeed({
 
       return true
     })
-  }, [activities, activeFilter, showUnreadOnly, searchQuery])
+    // Apply maxItems limit if specified
+    return maxItems ? filtered.slice(0, maxItems) : filtered
+  }, [activities, activeFilter, showUnreadOnly, searchQuery, maxItems])
 
   // Early return after hooks
   if (!activities || activities.length === 0) return null
@@ -193,7 +197,7 @@ export function ActivityFeed({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Bell className="h-5 w-5" />
-            <CardTitle className="text-lg">Activity Feed</CardTitle>
+            <CardTitle className="text-lg">{title}</CardTitle>
             {unreadCount > 0 && (
               <Badge variant="secondary" className="rounded-full">
                 {unreadCount}
