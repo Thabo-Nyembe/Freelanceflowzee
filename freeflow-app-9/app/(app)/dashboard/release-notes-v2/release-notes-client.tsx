@@ -949,46 +949,23 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                     <Flag className="w-5 h-5" />
                     Feature Flags
                   </CardTitle>
-                  <Button size="sm" className="bg-orange-600" onClick={() => setShowFlagDialog(true)}>
+                  <Button size="sm" className="bg-orange-600 hover:bg-orange-700" onClick={() => setShowFlagDialog(true)}>
                     <Plus className="w-4 h-4 mr-1" />
                     New Flag
                   </Button>
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {mockReleases.flatMap(r => r.featureFlags).map(flag => (
-                    <div key={flag.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
-                      <div className="flex items-center gap-4">
-                        <div className={`w-3 h-3 rounded-full ${flag.enabled ? 'bg-green-500' : 'bg-gray-300'}`} />
-                        <div>
-                          <h4 className="font-semibold text-gray-900 dark:text-white">{flag.name}</h4>
-                          <code className="text-xs text-gray-500 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded">{flag.key}</code>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <div className="flex -space-x-1">
-                          {flag.platforms.map(p => (
-                            <div key={p} className="w-6 h-6 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center border-2 border-white">
-                              {platformIcons[p]}
-                            </div>
-                          ))}
-                        </div>
-                        <div className="text-sm">
-                          <div className="text-gray-900 dark:text-white font-semibold">{flag.rolloutPercentage}%</div>
-                          <div className="text-xs text-gray-500">rollout</div>
-                        </div>
-                        <Progress value={flag.rolloutPercentage} className="w-24 h-2" />
-                        <Button variant="outline" size="sm" onClick={() => {
-                          toast.info(`Opening ${flag.name} settings...`)
-                          // In a real app, this would navigate to the flag settings page or open a dialog
-                          window.open(`/dashboard/feature-flags/${flag.key}`, '_blank')
-                        }}>
-                          <Settings className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
+                <div className="text-center py-8">
+                  <Flag className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No Feature Flags</h3>
+                  <p className="text-gray-500 dark:text-gray-400 mb-4">
+                    Create feature flags to control feature rollouts across your releases.
+                  </p>
+                  <Button className="bg-orange-600 hover:bg-orange-700" onClick={() => setShowFlagDialog(true)}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create Feature Flag
+                  </Button>
                 </div>
               </CardContent>
             </Card>

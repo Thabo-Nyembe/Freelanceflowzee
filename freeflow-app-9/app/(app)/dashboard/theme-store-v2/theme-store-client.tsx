@@ -181,17 +181,8 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
   // Supabase real-time data
   const { themes: themesData, isLoading } = useThemesData()
 
-  // Loading state
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-96">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
-    )
-  }
-
   // Transform Supabase data to match extended theme format or use empty array
-  const themes: ThemeExtended[] = (themesData || []).map((t: any) => ({
+  const themes: ThemeExtended[] = useMemo(() => (themesData || []).map((t: any) => ({
     id: t.id,
     name: t.name || '',
     slug: t.slug || t.name?.toLowerCase().replace(/\s+/g, '-') || '',
@@ -239,7 +230,7 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
     compatibility: t.compatibility || [],
     tags: t.tags || [],
     license: t.license || 'standard'
-  }))
+  })), [themesData])
   const collections = mockCollections
 
   const filteredThemes = useMemo(() => {
@@ -268,7 +259,16 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
     totalThemes: themes.length,
     installed: installedThemes.length,
     totalDownloads: themes.reduce((sum, t) => sum + t.downloads, 0),
-    avgRating: themes.reduce((sum, t) => sum + t.rating, 0) / themes.length
+    avgRating: themes.length > 0 ? themes.reduce((sum, t) => sum + t.rating, 0) / themes.length : 0
+  }
+
+  // Loading state - placed after all hooks
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    )
   }
 
   const openThemeDetails = (theme: ThemeExtended) => {

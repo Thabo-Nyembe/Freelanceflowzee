@@ -59,7 +59,8 @@ import {
   Info,
   FileCheck,
   UserCog,
-  BookOpen
+  BookOpen,
+  Loader2
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -246,6 +247,30 @@ export default function InvestorMetricsClient() {
     description: '',
     period: 'quarterly'
   })
+
+  // Initialize default stats for the hook
+  const defaultStats: InvestorStats = {
+    total: 0,
+    revenue: 0,
+    growth: 0,
+    efficiency: 0,
+    engagement: 0,
+    avgChangePercent: 0,
+    totalCurrentValue: 0
+  }
+
+  // Use the investor metrics hook for real-time Supabase data
+  const {
+    metrics: hookMetrics,
+    stats: hookStats,
+    loading: hookLoading,
+    error: hookError,
+    createMetric: hookCreateMetric,
+    updateMetric: hookUpdateMetric,
+    deleteMetric: hookDeleteMetric,
+    getMetricsByCategory,
+    getMetricsByPeriod
+  } = useInvestorMetrics([], defaultStats)
 
   // Fetch metrics from Supabase
   useEffect(() => {

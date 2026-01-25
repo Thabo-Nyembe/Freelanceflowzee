@@ -44,7 +44,8 @@ import {
   Users,
   Network,
   Gauge,
-  Trash2
+  Trash2,
+  Loader2
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -69,6 +70,8 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { useHealthScores, useHealthScoreMutations, type HealthScore } from '@/lib/hooks/use-health-scores'
+import { useSystemHealth } from '@/lib/hooks/use-health-extended'
 
 // Initialize Supabase client once at module level
 const supabase = createClient()
