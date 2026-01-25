@@ -12,6 +12,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getServerSession } from '@/lib/auth'
 import crypto from 'crypto'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('customer-support-api')
 
 // ============================================================================
 // GET - List Tickets / Get Single Ticket
@@ -92,7 +95,7 @@ export async function GET(request: NextRequest) {
     const { data: tickets, error, count } = await query
 
     if (error) {
-      console.error('Tickets query error:', error)
+      logger.error('Tickets query error', { error })
       return NextResponse.json(
         { error: 'Failed to fetch tickets' },
         { status: 500 }
@@ -110,7 +113,7 @@ export async function GET(request: NextRequest) {
       }
     })
   } catch (error) {
-    console.error('Customer Support GET error:', error)
+    logger.error('Customer Support GET error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -174,7 +177,7 @@ export async function POST(request: NextRequest) {
         return handleCreateTicket(supabase, userId, body)
     }
   } catch (error) {
-    console.error('Customer Support POST error:', error)
+    logger.error('Customer Support POST error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -238,7 +241,7 @@ export async function PUT(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('Ticket update error:', error)
+      logger.error('Ticket update error', { error })
       return NextResponse.json(
         { error: 'Failed to update ticket' },
         { status: 500 }
@@ -251,7 +254,7 @@ export async function PUT(request: NextRequest) {
       message: 'Ticket updated successfully'
     })
   } catch (error) {
-    console.error('Customer Support PUT error:', error)
+    logger.error('Customer Support PUT error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -294,7 +297,7 @@ export async function DELETE(request: NextRequest) {
         .eq('id', ticketId)
 
       if (error) {
-        console.error('Ticket deletion error:', error)
+        logger.error('Ticket deletion error', { error })
         return NextResponse.json(
           { error: 'Failed to delete ticket' },
           { status: 500 }
@@ -308,7 +311,7 @@ export async function DELETE(request: NextRequest) {
         .eq('id', ticketId)
 
       if (error) {
-        console.error('Ticket archive error:', error)
+        logger.error('Ticket archive error', { error })
         return NextResponse.json(
           { error: 'Failed to archive ticket' },
           { status: 500 }
@@ -321,7 +324,7 @@ export async function DELETE(request: NextRequest) {
       message: permanent ? 'Ticket deleted permanently' : 'Ticket archived successfully'
     })
   } catch (error) {
-    console.error('Customer Support DELETE error:', error)
+    logger.error('Customer Support DELETE error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -383,7 +386,7 @@ async function handleCreateTicket(
     .single()
 
   if (error) {
-    console.error('Ticket creation error:', error)
+    logger.error('Ticket creation error', { error })
     return NextResponse.json(
       { error: 'Failed to create ticket' },
       { status: 500 }
@@ -445,7 +448,7 @@ async function handleSendReply(
     .eq('id', ticket_id)
 
   if (error) {
-    console.error('Reply error:', error)
+    logger.error('Reply error', { error })
     return NextResponse.json(
       { error: 'Failed to send reply' },
       { status: 500 }
@@ -504,7 +507,7 @@ async function handleEscalateTicket(
     .eq('id', ticket_id)
 
   if (error) {
-    console.error('Escalation error:', error)
+    logger.error('Escalation error', { error })
     return NextResponse.json(
       { error: 'Failed to escalate ticket' },
       { status: 500 }
@@ -541,7 +544,7 @@ async function handleAssignTicket(
     .eq('id', ticket_id)
 
   if (error) {
-    console.error('Assignment error:', error)
+    logger.error('Assignment error', { error })
     return NextResponse.json(
       { error: 'Failed to assign ticket' },
       { status: 500 }
@@ -595,7 +598,7 @@ async function handleAddTag(
     .eq('id', ticket_id)
 
   if (error) {
-    console.error('Add tag error:', error)
+    logger.error('Add tag error', { error })
     return NextResponse.json(
       { error: 'Failed to add tag' },
       { status: 500 }
@@ -631,7 +634,7 @@ async function handleArchiveTickets(
     .in('id', ticket_ids)
 
   if (error) {
-    console.error('Archive error:', error)
+    logger.error('Archive error', { error })
     return NextResponse.json(
       { error: 'Failed to archive tickets' },
       { status: 500 }
