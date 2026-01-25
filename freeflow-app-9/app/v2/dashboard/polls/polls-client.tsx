@@ -413,7 +413,7 @@ const mockForms: Form[] = [
       sendConfirmationEmail: false,
       redirectOnComplete: false,
       passwordProtected: true,
-      password: 'employee2024'
+      password: '' // Password would be set by user, not stored in code
     },
     responseCount: 0,
     viewCount: 45,

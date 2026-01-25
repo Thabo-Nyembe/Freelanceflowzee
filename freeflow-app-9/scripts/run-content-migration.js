@@ -10,14 +10,25 @@ const fs = require('fs');
 const path = require('path');
 
 async function runMigration() {
+  // SECURITY: Credentials must be provided via environment variables
+  const dbHost = process.env.SUPABASE_DB_HOST;
+  const dbUser = process.env.SUPABASE_DB_USER;
+  const dbPassword = process.env.SUPABASE_DB_PASSWORD;
+
+  if (!dbHost || !dbUser || !dbPassword) {
+    console.error('ERROR: Database credentials not configured.');
+    console.error('Required environment variables: SUPABASE_DB_HOST, SUPABASE_DB_USER, SUPABASE_DB_PASSWORD');
+    process.exit(1);
+  }
+
   console.log('Connecting to Supabase PostgreSQL...');
 
   const client = new Client({
-    host: 'aws-1-eu-north-1.pooler.supabase.com',
+    host: dbHost,
     port: 5432,
     database: 'postgres',
-    user: 'postgres.gcinvwprtlnwuwuvmrux',
-    password: 'qUCPaWXy1jpgakyE',
+    user: dbUser,
+    password: dbPassword,
     ssl: { rejectUnauthorized: false }
   });
 
