@@ -1819,18 +1819,14 @@ export class RecipeBuilderService {
     config: Record<string, unknown>,
     inputs: Record<string, unknown>
   ): { result: unknown } {
-    const code = config.code as string;
-
-    // Create a sandboxed function
-    // In production, use a proper sandbox like vm2 or isolated-vm
-    try {
-      const fn = new Function('inputs', code);
-      const result = fn(inputs);
-      return { result };
-    } catch (error) {
-      console.error('Code execution failed:', error);
-      return { result: null };
-    }
+    // SECURITY: Code execution is disabled for security reasons
+    // Custom code execution requires a proper sandbox (vm2, isolated-vm, or Deno)
+    // to prevent arbitrary code execution vulnerabilities (RCE)
+    console.warn('Code execution action is disabled for security. Implement a proper sandbox before enabling.')
+    return {
+      result: null,
+      error: 'Code execution is disabled. Contact administrator to enable sandboxed execution.'
+    };
   }
 
   // --------------------------------------------------------------------------

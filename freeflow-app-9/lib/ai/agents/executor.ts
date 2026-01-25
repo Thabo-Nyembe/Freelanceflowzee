@@ -105,16 +105,14 @@ const DEFAULT_TOOLS: AgentTool[] = [
       timeout: { type: 'number', default: 30000 }
     },
     execute: async (params) => {
-      // Would integrate with code execution sandbox
-      try {
-        if (params.language === 'javascript') {
-          // Safe evaluation for simple expressions
-          const result = new Function(`return (${params.code})`)()
-          return { output: result, success: true }
-        }
-        return { output: 'Code execution simulated', success: true }
-      } catch (error) {
-        return { error: error instanceof Error ? error.message : 'Execution failed', success: false }
+      // SECURITY: Code execution is disabled for security reasons
+      // Arbitrary code execution via new Function() is a critical RCE vulnerability
+      // Implement a proper sandbox (vm2, isolated-vm, or Deno) before enabling
+      console.warn('Code execution tool is disabled for security reasons')
+      return {
+        output: null,
+        success: false,
+        error: 'Code execution is disabled. A sandboxed environment is required.'
       }
     }
   },
