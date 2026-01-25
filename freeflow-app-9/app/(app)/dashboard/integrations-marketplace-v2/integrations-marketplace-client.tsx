@@ -16,7 +16,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { useMarketplaceIntegrations, MarketplaceIntegration, MarketplaceStats } from '@/lib/hooks/use-marketplace-integrations'
-import { Search, Star, Download, ExternalLink, Shield, Zap, Users, TrendingUp, CheckCircle, Settings, Code, CreditCard, Package, Grid3X3, List, ChevronRight, Heart, Flag, MessageSquare, Plus, Sparkles, Verified, Lock, RefreshCw, Bell, Webhook, Key, AlertOctagon, Sliders, Mail, Copy } from 'lucide-react'
+import { Search, Star, Download, ExternalLink, Shield, Zap, Users, TrendingUp, CheckCircle, Settings, Code, CreditCard, Package, Grid3X3, List, ChevronRight, Heart, Flag, MessageSquare, Plus, Sparkles, Verified, Lock, RefreshCw, Bell, Webhook, Key, AlertOctagon, Sliders, Mail, Copy, Loader2 } from 'lucide-react'
 import { apiPost, apiDelete, copyToClipboard, downloadAsJson } from '@/lib/button-handlers'
 
 // Enhanced & Competitive Upgrade Components
@@ -155,7 +155,7 @@ const mockIntegrationsActivities: { id: string; user: string; action: string; ta
 
 export default function IntegrationsMarketplaceClient({ initialIntegrations, initialStats }: IntegrationsMarketplaceClientProps) {
   const router = useRouter()
-  const { integrations, stats } = useMarketplaceIntegrations(initialIntegrations, initialStats)
+  const { integrations, stats, loading, error } = useMarketplaceIntegrations(initialIntegrations, initialStats)
   const [activeTab, setActiveTab] = useState('discover')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<AppCategory | 'all'>('all')
@@ -168,6 +168,98 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
   const [showConfigureDialog, setShowConfigureDialog] = useState(false)
   const [configureApp, setConfigureApp] = useState<AppListing | null>(null)
   const [installedAppsList, setInstalledAppsList] = useState<AppListing[]>([])
+
+  // Map MarketplaceIntegration (snake_case) to AppListing (camelCase) for UI
+  const apps = useMemo<AppListing[]>(() => {
+    return integrations.map((integration): AppListing => {
+      // Map category from DB to AppCategory type
+      const categoryMap: Record<string, AppCategory> = {
+        'crm': 'crm',
+        'marketing': 'marketing',
+        'productivity': 'productivity',
+        'communication': 'communication',
+        'analytics': 'analytics',
+        'payment': 'payments',
+        'storage': 'productivity',
+        'social': 'marketing'
+      }
+
+      // Map status from DB to UI status
+      const statusMap: Record<string, 'available' | 'installed' | 'pending' | 'error'> = {
+        'connected': 'installed',
+        'available': 'available',
+        'disconnected': 'available',
+        'configuring': 'pending',
+        'error': 'error'
+      }
+
+      return {
+        id: integration.id,
+        name: integration.name,
+        slug: integration.name.toLowerCase().replace(/\s+/g, '-'),
+        icon: integration.logo || integration.name.charAt(0).toUpperCase(),
+        shortDescription: integration.description || 'No description available',
+        fullDescription: integration.description || 'No description available',
+        developer: {
+          id: integration.provider || 'unknown',
+          name: integration.provider || 'Unknown Developer',
+          logo: '',
+          verified: true,
+          website: '',
+          supportEmail: '',
+          appsCount: 1
+        },
+        category: categoryMap[integration.category] || 'productivity',
+        subcategory: '',
+        pricing: integration.pricing === 'free' ? [
+          { id: 'free', name: 'Free', price: 0, interval: 'month' as const, features: integration.features || [] }
+        ] : [
+          { id: 'basic', name: 'Basic', price: 0, interval: 'month' as const, features: [] },
+          { id: 'pro', name: 'Pro', price: 29, interval: 'month' as const, features: integration.features || [], popular: true }
+        ],
+        currentPlan: integration.status === 'connected' ? 'pro' : undefined,
+        rating: integration.rating || 4.5,
+        reviewCount: integration.reviews_count || 0,
+        installCount: integration.installs_count || 0,
+        featured: (integration.rating || 0) >= 4.5,
+        verified: true,
+        isNew: new Date(integration.created_at).getTime() > Date.now() - 30 * 24 * 60 * 60 * 1000, // New if created in last 30 days
+        status: statusMap[integration.status] || 'available',
+        version: integration.version || '1.0.0',
+        lastUpdated: integration.updated_at,
+        screenshots: [],
+        permissions: [],
+        tags: integration.tags || [],
+        supportUrl: '',
+        docsUrl: '',
+        privacyUrl: '',
+        changelog: []
+      }
+    })
+  }, [integrations])
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-full min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
+      </div>
+    )
+  }
+
+  // Error state with retry
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full min-h-[400px] gap-4">
+        <div className="text-red-500 text-lg font-medium">Failed to load integrations</div>
+        <p className="text-gray-500 text-sm">{error}</p>
+        <Button onClick={() => window.location.reload()} variant="outline">
+          <RefreshCw className="w-4 h-4 mr-2" />
+          Retry
+        </Button>
+      </div>
+    )
+  }
 
   // Quick actions with real functionality
   const mockIntegrationsQuickActions = [
@@ -204,11 +296,11 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
   ]
 
   const filteredApps = useMemo(() => {
-    let apps = [...mockApps]
+    let filtered = [...apps]
 
     if (searchQuery) {
       const query = searchQuery.toLowerCase()
-      apps = apps.filter(app =>
+      filtered = filtered.filter(app =>
         app.name.toLowerCase().includes(query) ||
         app.shortDescription.toLowerCase().includes(query) ||
         app.tags.some(tag => tag.toLowerCase().includes(query))
@@ -216,26 +308,28 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
     }
 
     if (selectedCategory !== 'all') {
-      apps = apps.filter(app => app.category === selectedCategory)
+      filtered = filtered.filter(app => app.category === selectedCategory)
     }
 
     switch (sortBy) {
       case 'popular':
-        apps.sort((a, b) => b.installCount - a.installCount)
+        filtered.sort((a, b) => b.installCount - a.installCount)
         break
       case 'rating':
-        apps.sort((a, b) => b.rating - a.rating)
+        filtered.sort((a, b) => b.rating - a.rating)
         break
       case 'newest':
-        apps.sort((a, b) => new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime())
+        filtered.sort((a, b) => new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime())
         break
     }
 
-    return apps
-  }, [searchQuery, selectedCategory, sortBy])
+    return filtered
+  }, [apps, searchQuery, selectedCategory, sortBy])
 
-  const installedApps = installedAppsList
-  const featuredApps = mockApps.filter(app => app.featured)
+  const installedApps = installedAppsList.length > 0
+    ? installedAppsList
+    : apps.filter(app => app.status === 'installed')
+  const featuredApps = apps.filter(app => app.featured)
 
   const formatInstalls = (count: number) => {
     if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M`
@@ -595,11 +689,11 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
           {/* Quick Stats */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-6 mt-8">
             <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
-              <div className="text-3xl font-bold">{mockApps.length * 62}</div>
+              <div className="text-3xl font-bold">{stats.total || apps.length}</div>
               <div className="text-teal-100 text-sm">Total Apps</div>
             </div>
             <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
-              <div className="text-3xl font-bold">{installedApps.length}</div>
+              <div className="text-3xl font-bold">{stats.connected || installedApps.length}</div>
               <div className="text-teal-100 text-sm">Installed</div>
             </div>
             <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
@@ -607,7 +701,7 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
               <div className="text-teal-100 text-sm">Categories</div>
             </div>
             <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
-              <div className="text-3xl font-bold">4.6</div>
+              <div className="text-3xl font-bold">{stats.avgRating?.toFixed(1) || '4.6'}</div>
               <div className="text-teal-100 text-sm">Avg Rating</div>
             </div>
           </div>
@@ -844,7 +938,7 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
                     </div>
                     <div className="flex -space-x-2">
                       {collection.apps.slice(0, 4).map((appId, idx) => {
-                        const app = mockApps.find(a => a.id === appId)
+                        const app = apps.find(a => a.id === appId)
                         return app ? (
                           <div key={appId} className="w-10 h-10 rounded-lg bg-gradient-to-br from-teal-500 to-blue-600 flex items-center justify-center text-white font-bold text-sm border-2 border-white">
                             {app.icon}

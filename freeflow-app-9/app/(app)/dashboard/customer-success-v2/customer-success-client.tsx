@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useMemo } from 'react'
+import { useCustomerSuccess, type CustomerSuccess } from '@/lib/hooks/use-customer-success'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -52,6 +53,8 @@ import {
   Handshake,
   GraduationCap,
   BookOpen,
+  Loader2,
+  AlertCircle,
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -243,8 +246,145 @@ function generateHealthReport(customers: Customer[]) {
 }
 
 export default function CustomerSuccessClient() {
-  const [customers] = useState<Customer[]>(mockCustomers)
-  const [csms] = useState<CSM[]>(mockCSMs)
+  // Use the customer success hook for data fetching
+  const { data: dbCustomerSuccess, isLoading: loading, error, refetch } = useCustomerSuccess()
+
+  // Map DB data to UI types using useMemo
+  const customers = useMemo(() => {
+    if (!dbCustomerSuccess || dbCustomerSuccess.length === 0) return []
+
+    return dbCustomerSuccess.map((cs: CustomerSuccess): Customer => {
+      // Map health status - the DB may have different status values
+      const healthStatusMap: Record<string, HealthStatus> = {
+        'healthy': 'healthy',
+        'at_risk': 'at_risk',
+        'critical': 'critical',
+        'churned': 'churned',
+        'onboarding': 'good',
+        'inactive': 'concerning'
+      }
+      const healthStatus = healthStatusMap[cs.health_status] || 'good'
+
+      // Map engagement level
+      const engagementMap: Record<string, EngagementLevel> = {
+        'high': 'champion',
+        'medium': 'active',
+        'low': 'passive',
+        'inactive': 'disengaged',
+        'dormant': 'churning'
+      }
+      const engagementLevel = engagementMap[cs.engagement_level] || 'active'
+
+      // Map account tier
+      const tierMap: Record<string, AccountTier> = {
+        'enterprise': 'enterprise',
+        'business': 'business',
+        'professional': 'professional',
+        'starter': 'starter',
+        'trial': 'trial',
+        'freemium': 'trial'
+      }
+      const tier = tierMap[cs.account_tier] || 'starter'
+
+      // Calculate renewal risk from churn risk
+      let renewalRisk: RenewalRisk = 'low'
+      if (cs.churn_risk_score >= 80) renewalRisk = 'critical'
+      else if (cs.churn_risk_score >= 60) renewalRisk = 'high'
+      else if (cs.churn_risk_score >= 40) renewalRisk = 'medium'
+
+      return {
+        id: cs.id,
+        name: cs.customer_name,
+        logo: cs.customer_name.substring(0, 2).toUpperCase(),
+        industry: cs.tags?.[0] || 'Technology',
+        size: cs.account_tier === 'enterprise' ? 'Enterprise' : cs.account_tier === 'business' ? 'Mid-Market' : 'SMB',
+        tier,
+        healthScore: cs.health_score,
+        healthStatus,
+        healthTrend: generateHealthTrend(cs.health_score, cs.previous_health_score),
+        engagementLevel,
+        csm: {
+          id: cs.csm_id || 'default',
+          name: cs.csm_name || 'Unassigned',
+          avatar: (cs.csm_name || 'U').substring(0, 2).toUpperCase(),
+          email: cs.csm_email || '',
+          accounts: 0,
+          arr: 0
+        },
+        mrr: cs.mrr,
+        arr: cs.arr,
+        nps: cs.nps_score || 0,
+        csat: cs.csat_score || 0,
+        renewalDate: cs.renewal_date || '',
+        daysToRenewal: cs.days_to_renewal || 0,
+        renewalRisk,
+        lifetimeValue: cs.lifetime_value,
+        contractStart: cs.contract_start_date || cs.created_at,
+        touchpoints: [],
+        usageMetrics: [
+          { feature: 'Product Usage', adoption: cs.product_usage_percentage, trend: 0, benchmark: 70 },
+          { feature: 'Feature Adoption', adoption: cs.feature_adoption_rate, trend: 0, benchmark: 60 }
+        ],
+        risks: cs.churn_reasons?.map((reason, i) => ({
+          id: `risk-${i}`,
+          type: 'churn',
+          severity: renewalRisk === 'critical' ? 'critical' : renewalRisk === 'high' ? 'high' : 'medium',
+          description: reason,
+          mitigation: cs.retention_actions?.[i] || 'Review and address',
+          status: 'open' as const
+        })) || [],
+        opportunities: cs.cross_sell_opportunities?.map((opp, i) => ({
+          id: `opp-${i}`,
+          type: 'cross-sell' as const,
+          product: opp,
+          value: cs.upsell_potential * 1000,
+          probability: 50,
+          stage: 'Identified'
+        })) || [],
+        keyContacts: [],
+        milestones: cs.success_milestones ? Object.entries(cs.success_milestones).map(([name, completed]) => ({
+          name,
+          date: '',
+          completed: Boolean(completed)
+        })) : [],
+        tags: cs.tags || []
+      }
+    })
+  }, [dbCustomerSuccess])
+
+  // Helper function to generate health trend data
+  function generateHealthTrend(currentScore: number, previousScore?: number): HealthTrend[] {
+    const trend: HealthTrend[] = []
+    const baseScore = previousScore || currentScore
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date()
+      date.setMonth(date.getMonth() - i)
+      const variance = Math.random() * 10 - 5
+      const score = i === 0 ? currentScore : Math.min(100, Math.max(0, baseScore + variance))
+      trend.push({
+        date: date.toISOString().split('T')[0],
+        score: Math.round(score)
+      })
+    }
+    return trend
+  }
+
+  // CSMs are derived from customers
+  const csms = useMemo(() => {
+    const csmMap = new Map<string, CSM>()
+    customers.forEach(c => {
+      if (c.csm.id !== 'default' && !csmMap.has(c.csm.id)) {
+        csmMap.set(c.csm.id, {
+          ...c.csm,
+          accounts: customers.filter(cust => cust.csm.id === c.csm.id).length,
+          arr: customers.filter(cust => cust.csm.id === c.csm.id).reduce((sum, cust) => sum + cust.arr, 0)
+        })
+      }
+    })
+    return Array.from(csmMap.values())
+  }, [customers])
+
+  // Playbooks remain empty until a playbooks table is created
   const [playbooks] = useState<Playbook[]>(mockPlaybooks)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedTier, setSelectedTier] = useState<AccountTier | 'all'>('all')
@@ -524,6 +664,35 @@ export default function CustomerSuccessClient() {
             </div>
           </div>
         </div>
+
+        {/* Loading State */}
+        {loading && (
+          <div className="flex items-center justify-center gap-3 py-4 px-6 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl border border-emerald-200 dark:border-emerald-800">
+            <Loader2 className="h-5 w-5 animate-spin text-emerald-600" />
+            <span className="text-emerald-700 dark:text-emerald-400 font-medium">Loading customer success data...</span>
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && (
+          <div className="flex items-center justify-between gap-3 py-4 px-6 bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-800">
+            <div className="flex items-center gap-3">
+              <AlertCircle className="h-5 w-5 text-red-600" />
+              <span className="text-red-700 dark:text-red-400 font-medium">
+                {error.message || 'Failed to load customer success data'}
+              </span>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => refetch()}
+              className="border-red-300 text-red-600 hover:bg-red-100"
+            >
+              <RefreshCcw className="h-4 w-4 mr-2" />
+              Retry
+            </Button>
+          </div>
+        )}
 
         {/* Main Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">

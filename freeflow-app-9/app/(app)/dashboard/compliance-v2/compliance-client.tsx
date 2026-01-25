@@ -132,13 +132,7 @@ interface Policy {
 }
 
 // Mock Data - REMOVED (Batch #7 Migration)
-// Empty arrays to prevent undefined errors until full migration
-const mockFrameworks: ComplianceFramework[] = []
-const mockControls: Control[] = []
-const mockRisks: Risk[] = []
-const mockAudits: Audit[] = []
-const mockPolicies: Policy[] = []
-const mockEvidence: Evidence[] = []
+// Data now comes from Supabase via useCompliance hook
 const mockComplianceQuickActionsBase = [
   { icon: Plus, label: 'New Control', color: 'bg-emerald-100 text-emerald-600' },
   { icon: ClipboardCheck, label: 'Assess', color: 'bg-blue-100 text-blue-600' },
@@ -149,19 +143,18 @@ const mockComplianceCollaborators: any[] = []
 const mockCompliancePredictions: any[] = []
 const mockComplianceActivities: any[] = []
 
-// Helper function to generate compliance report
-const generateComplianceReport = () => ({
+// Helper function to generate compliance report (accepts data from hook)
+const generateComplianceReport = (data: any[]) => ({
   generatedAt: new Date().toISOString(),
-  frameworks: mockFrameworks,
-  controls: mockControls,
-  risks: mockRisks,
-  audits: mockAudits,
+  compliance: data,
   summary: {
-    totalFrameworks: mockFrameworks.length,
-    compliantFrameworks: mockFrameworks.filter(f => f.status === 'compliant').length,
-    totalControls: mockControls.length,
-    passedControls: mockControls.filter(c => c.status === 'passed').length,
-    openRisks: mockRisks.filter(r => r.status === 'open').length,
+    totalItems: data.length,
+    compliant: data.filter(c => c.status === 'compliant').length,
+    nonCompliant: data.filter(c => c.status === 'non_compliant').length,
+    pending: data.filter(c => c.status === 'pending').length,
+    totalRequirements: data.reduce((sum, c) => sum + (c.totalRequirements || 0), 0),
+    metRequirements: data.reduce((sum, c) => sum + (c.metRequirements || 0), 0),
+    avgScore: data.length > 0 ? data.reduce((sum, c) => sum + (c.complianceScore || 0), 0) / data.length : 0,
   }
 })
 
@@ -379,7 +372,7 @@ export default function ComplianceClient() {
         return res.json()
       })
       .then(() => {
-        const report = generateComplianceReport()
+        const report = generateComplianceReport(complianceData)
         downloadAsJson(report, `compliance-report-${new Date().toISOString().split('T')[0]}.json`)
         toast.success('Report generated and downloaded!')
       })
@@ -484,7 +477,8 @@ export default function ComplianceClient() {
         return res.json()
       })
       .then(() => {
-        setControls(mockControls.map(c => ({ ...c, status: 'pending' as const })))
+        // Refetch compliance data to reflect the reset
+        refetch()
         toast.success('Controls reset successfully')
       })
       .catch(err => toast.error(err.message || 'Reset failed'))
@@ -601,17 +595,11 @@ export default function ComplianceClient() {
       case 'Sync':
       case 'Refresh':
         toast.success('Syncing data...')
-        fetch('/api/compliance')
-          .then(res => {
-            if (!res.ok) throw new Error('Sync failed')
-            return res.json()
-          })
+        refetch()
           .then(() => {
-            setControls([...mockControls])
-            setRisks([...mockRisks])
             toast.success('Data synced successfully')
           })
-          .catch(err => toast.error(err.message || 'Sync failed'))
+          .catch((err: Error) => toast.error(err.message || 'Sync failed'))
         break
       case 'Settings':
         setActiveTab('settings')
@@ -1450,15 +1438,15 @@ export default function ComplianceClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockPolicies.length}</p>
+                    <p className="text-3xl font-bold">{complianceData.length}</p>
                     <p className="text-violet-200 text-sm">Policies</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockPolicies.filter(p => p.status === 'active').length}</p>
+                    <p className="text-3xl font-bold">{complianceData.filter(c => c.status === 'compliant').length}</p>
                     <p className="text-violet-200 text-sm">Active</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockPolicies.filter(p => p.status === 'pending_review').length}</p>
+                    <p className="text-3xl font-bold">{complianceData.filter(c => c.status === 'under_review' || c.status === 'pending').length}</p>
                     <p className="text-violet-200 text-sm">Review</p>
                   </div>
                 </div>
@@ -1589,11 +1577,11 @@ export default function ComplianceClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockEvidence.length}</p>
+                    <p className="text-3xl font-bold">{complianceData.filter(c => c.metRequirements > 0).length}</p>
                     <p className="text-cyan-200 text-sm">Evidence</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockEvidence.filter(e => e.status === 'approved').length}</p>
+                    <p className="text-3xl font-bold">{complianceData.filter(c => c.status === 'compliant').length}</p>
                     <p className="text-cyan-200 text-sm">Approved</p>
                   </div>
                 </div>
@@ -1653,27 +1641,35 @@ export default function ComplianceClient() {
             </Card>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mt-6">
-              {mockControls.flatMap(c => c.evidence).slice(0, 4).map(evidence => (
-                <Card key={evidence.id} className="p-4">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg">
-                      <FileText className="w-5 h-5 text-gray-600" />
+              {complianceData.length === 0 ? (
+                <div className="col-span-full text-center py-8 text-gray-500">
+                  <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p>No evidence uploaded yet</p>
+                  <p className="text-sm">Upload evidence to track compliance</p>
+                </div>
+              ) : (
+                complianceData.slice(0, 8).map(item => (
+                  <Card key={item.id} className="p-4">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="p-2 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                        <FileText className="w-5 h-5 text-gray-600" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium truncate">{item.name}</p>
+                        <p className="text-xs text-gray-500">{item.framework || item.type}</p>
+                      </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">{evidence.name}</p>
-                      <p className="text-xs text-gray-500">{evidence.fileSize}</p>
+                    <div className="flex items-center justify-between">
+                      <Badge className={item.status === 'compliant' ? 'bg-green-100 text-green-700' : item.status === 'pending' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'}>
+                        {item.status}
+                      </Badge>
+                      <Button variant="ghost" size="icon" onClick={handleExport} aria-label="Export data">
+                        <Download className="w-4 h-4" />
+                      </Button>
                     </div>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <Badge className={evidence.status === 'approved' ? 'bg-green-100 text-green-700' : evidence.status === 'pending' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'}>
-                      {evidence.status}
-                    </Badge>
-                    <Button variant="ghost" size="icon" onClick={handleExport} aria-label="Export data">
-                  <Download className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </Card>
-              ))}
+                  </Card>
+                ))
+              )}
             </div>
           </TabsContent>
 
