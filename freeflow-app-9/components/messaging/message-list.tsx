@@ -15,6 +15,7 @@
 
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { cn } from '@/lib/utils'
+import { sanitizeHtml } from '@/lib/sanitize'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -565,7 +566,7 @@ export default function MessageList({
           ) : message.htmlContent ? (
             <div
               className="prose prose-sm dark:prose-invert max-w-none break-words"
-              dangerouslySetInnerHTML={{ __html: message.htmlContent }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(message.htmlContent) }}
             />
           ) : (
             <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>

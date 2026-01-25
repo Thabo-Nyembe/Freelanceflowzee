@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState, useEffect } from 'react'
+import { sanitizeCode } from '@/lib/sanitize'
 import {
   MessageSquare,
   Edit,
@@ -343,7 +344,7 @@ export function CodeViewer({
                   <div className="flex-1 px-4 py-1">
                     <code
                       className="text-gray-300"
-                      dangerouslySetInnerHTML={{ __html: highlightedLines[index] || line }}
+                      dangerouslySetInnerHTML={{ __html: sanitizeCode(highlightedLines[index] || line) }}
                     />
                   </div>
 

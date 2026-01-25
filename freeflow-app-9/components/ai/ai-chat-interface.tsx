@@ -15,6 +15,7 @@
  */
 
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react'
+import { sanitizeHtmlStrict } from '@/lib/sanitize'
 import {
   Send,
   Paperclip,
@@ -483,10 +484,10 @@ export function AIChatInterface({
 
         // List items
         if (line.match(/^\d+\.\s/)) {
-          return <li key={i} className="ml-4" dangerouslySetInnerHTML={{ __html: processedLine.replace(/^\d+\.\s/, '') }} />
+          return <li key={i} className="ml-4" dangerouslySetInnerHTML={{ __html: sanitizeHtmlStrict(processedLine.replace(/^\d+\.\s/, '')) }} />
         }
         if (line.startsWith('- ') || line.startsWith('* ')) {
-          return <li key={i} className="ml-4 list-disc" dangerouslySetInnerHTML={{ __html: processedLine.slice(2) }} />
+          return <li key={i} className="ml-4 list-disc" dangerouslySetInnerHTML={{ __html: sanitizeHtmlStrict(processedLine.slice(2)) }} />
         }
 
         // Empty lines
@@ -495,7 +496,7 @@ export function AIChatInterface({
         }
 
         // Regular paragraph
-        return <p key={i} className="mb-2" dangerouslySetInnerHTML={{ __html: processedLine }} />
+        return <p key={i} className="mb-2" dangerouslySetInnerHTML={{ __html: sanitizeHtmlStrict(processedLine) }} />
       })
   }, [])
 
