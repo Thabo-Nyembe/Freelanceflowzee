@@ -641,8 +641,17 @@ function generateSQL(data: any[], dataSource: string): { content: string; conten
     return { content: '-- No data to export', contentType: 'application/sql', extension: 'sql' };
   }
 
-  const tableName = dataSource;
+  // Escape SQL identifiers (table/column names) to prevent SQL injection
+  const escapeIdentifier = (name: string): string => {
+    // Only allow alphanumeric and underscores in identifiers
+    const sanitized = name.replace(/[^a-zA-Z0-9_]/g, '')
+    // Double quote the identifier for safety
+    return `"${sanitized}"`
+  }
+
+  const tableName = escapeIdentifier(dataSource);
   const columns = Object.keys(data[0]);
+  const escapedColumns = columns.map(escapeIdentifier);
 
   const escapeSQL = (val: any): string => {
     if (val === null || val === undefined) return 'NULL';
@@ -652,7 +661,7 @@ function generateSQL(data: any[], dataSource: string): { content: string; conten
     return `'${String(val).replace(/'/g, "''")}'`;
   };
 
-  let sql = `-- ${tableName} Export\n`;
+  let sql = `-- ${dataSource} Export\n`;
   sql += `-- Generated: ${new Date().toISOString()}\n`;
   sql += `-- Records: ${data.length}\n\n`;
 
@@ -665,12 +674,12 @@ function generateSQL(data: any[], dataSource: string): { content: string; conten
     if (typeof sampleVal === 'boolean') type = 'BOOLEAN';
     if (col === 'id') type = 'UUID PRIMARY KEY';
     if (col.includes('_at') || col.includes('date')) type = 'TIMESTAMP';
-    sql += `--   ${col} ${type}${i < columns.length - 1 ? ',' : ''}\n`;
+    sql += `--   ${escapeIdentifier(col)} ${type}${i < columns.length - 1 ? ',' : ''}\n`;
   });
   sql += `-- );\n\n`;
 
-  // Insert statements
-  sql += `INSERT INTO ${tableName} (${columns.join(', ')}) VALUES\n`;
+  // Insert statements with escaped identifiers
+  sql += `INSERT INTO ${tableName} (${escapedColumns.join(', ')}) VALUES\n`;
   data.forEach((row, i) => {
     const values = columns.map(col => escapeSQL(row[col])).join(', ');
     sql += `  (${values})${i < data.length - 1 ? ',' : ';'}\n`;

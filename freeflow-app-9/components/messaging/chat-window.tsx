@@ -17,6 +17,7 @@
 
 import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { cn } from '@/lib/utils'
+import { sanitizeHtml } from '@/lib/sanitize'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -378,7 +379,7 @@ export default function ChatWindow({
       return (
         <div
           className="prose prose-sm dark:prose-invert max-w-none"
-          dangerouslySetInnerHTML={{ __html: message.htmlContent }}
+          dangerouslySetInnerHTML={{ __html: sanitizeHtml(message.htmlContent) }}
         />
       )
     }

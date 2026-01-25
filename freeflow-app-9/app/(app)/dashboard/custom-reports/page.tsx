@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
  * Complete implementation of report building functionality
  */
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import {
   FileText, BarChart3, PieChart, TrendingUp, Users, Clock,
@@ -67,6 +67,16 @@ export default function CustomReportBuilderPage() {
   const [exportFormat, setExportFormat] = useState<ExportFormat>('pdf')
   const [isGenerating, setIsGenerating] = useState(false)
   const [progress, setProgress] = useState(0)
+  const progressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  // Cleanup interval on unmount
+  useEffect(() => {
+    return () => {
+      if (progressIntervalRef.current) {
+        clearInterval(progressIntervalRef.current)
+      }
+    }
+  }, [])
 
   // A+++ LOAD REPORT BUILDER DATA
   useEffect(() => {
@@ -123,14 +133,22 @@ export default function CustomReportBuilderPage() {
   }
 
   const handleGenerateReport = () => {
+    // Clear any existing interval
+    if (progressIntervalRef.current) {
+      clearInterval(progressIntervalRef.current)
+    }
+
     setIsGenerating(true)
     setProgress(0)
 
     // Simulate report generation
-    const interval = setInterval(() => {
+    progressIntervalRef.current = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
-          clearInterval(interval)
+          if (progressIntervalRef.current) {
+            clearInterval(progressIntervalRef.current)
+            progressIntervalRef.current = null
+          }
           setIsGenerating(false)
           setStep('export')
           return 100

@@ -10,6 +10,17 @@ import { ssoService } from '@/lib/auth/sso-service'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 
+// Validate redirect path to prevent open redirect attacks
+function isValidRedirectPath(path: string): boolean {
+  // Must start with / and not have protocol or //
+  if (!path || !path.startsWith('/') || path.startsWith('//')) {
+    return false
+  }
+  // Only allow dashboard and related paths
+  const allowedPaths = ['/dashboard', '/settings', '/projects', '/profile', '/files', '/messages']
+  return allowedPaths.some(allowed => path.startsWith(allowed))
+}
+
 interface RouteParams {
   params: Promise<{ provider: string }>
 }
@@ -94,7 +105,9 @@ export async function GET(
         )
       }
 
-      const redirectUrl = result.redirectUrl || '/dashboard'
+      // Validate redirect URL to prevent open redirect
+      const rawRedirectUrl = result.redirectUrl || '/dashboard'
+      const redirectUrl = isValidRedirectPath(rawRedirectUrl) ? rawRedirectUrl : '/dashboard'
       const response = NextResponse.redirect(`${APP_URL}${redirectUrl}`)
 
       const sessionId = crypto.randomUUID()
@@ -162,7 +175,9 @@ export async function POST(
       )
     }
 
-    const redirectUrl = result.redirectUrl || '/dashboard'
+    // Validate redirect URL to prevent open redirect
+    const rawRedirectUrl = result.redirectUrl || '/dashboard'
+    const redirectUrl = isValidRedirectPath(rawRedirectUrl) ? rawRedirectUrl : '/dashboard'
     const response = NextResponse.redirect(`${APP_URL}${redirectUrl}`)
 
     const sessionId = crypto.randomUUID()

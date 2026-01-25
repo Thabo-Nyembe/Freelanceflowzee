@@ -183,6 +183,10 @@ export function ScreenRecordingClient() {
   const previewVideoRef = useRef<HTMLVideoElement>(null);
   const webcamStreamRef = useRef<MediaStream | null>(null);
 
+  // Interval refs for cleanup
+  const countdownIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const uploadProgressIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
   // Screen recorder hook
   const {
     recordingState,
@@ -214,15 +218,35 @@ export function ScreenRecordingClient() {
     }
   }, [capabilities]);
 
+  // Cleanup intervals on unmount
+  useEffect(() => {
+    return () => {
+      if (countdownIntervalRef.current) {
+        clearInterval(countdownIntervalRef.current);
+      }
+      if (uploadProgressIntervalRef.current) {
+        clearInterval(uploadProgressIntervalRef.current);
+      }
+    };
+  }, []);
+
   // Handle countdown and start
   const handleStartRecording = useCallback(() => {
+    // Clear any existing countdown interval
+    if (countdownIntervalRef.current) {
+      clearInterval(countdownIntervalRef.current);
+    }
+
     // Start 3-second countdown
     setCountdown(3);
 
-    const countdownInterval = setInterval(() => {
+    countdownIntervalRef.current = setInterval(() => {
       setCountdown(prev => {
         if (prev === null || prev <= 1) {
-          clearInterval(countdownInterval);
+          if (countdownIntervalRef.current) {
+            clearInterval(countdownIntervalRef.current);
+            countdownIntervalRef.current = null;
+          }
           // Actually start recording
           const options: RecordingOptions = {
             video: {
@@ -259,12 +283,17 @@ export function ScreenRecordingClient() {
   const handleUpload = useCallback(async () => {
     if (!recordingBlob) return;
 
+    // Clear any existing progress interval
+    if (uploadProgressIntervalRef.current) {
+      clearInterval(uploadProgressIntervalRef.current);
+    }
+
     try {
       setIsUploading(true);
       setUploadProgress(0);
 
       // Simulate progress
-      const progressInterval = setInterval(() => {
+      uploadProgressIntervalRef.current = setInterval(() => {
         setUploadProgress(prev => Math.min(prev + 10, 90));
       }, 200);
 
@@ -282,7 +311,10 @@ export function ScreenRecordingClient() {
 
       await uploadRecording(options);
 
-      clearInterval(progressInterval);
+      if (uploadProgressIntervalRef.current) {
+        clearInterval(uploadProgressIntervalRef.current);
+        uploadProgressIntervalRef.current = null;
+      }
       setUploadProgress(100);
 
       // Add to recordings list
@@ -307,6 +339,10 @@ export function ScreenRecordingClient() {
       }, 1000);
 
     } catch (error) {
+      if (uploadProgressIntervalRef.current) {
+        clearInterval(uploadProgressIntervalRef.current);
+        uploadProgressIntervalRef.current = null;
+      }
       setIsUploading(false);
       setUploadProgress(0);
       toast.error('Failed to upload recording');

@@ -2,7 +2,7 @@
 
 import { useMaintenance, type MaintenanceWindow } from '@/lib/hooks/use-maintenance'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef, useEffect } from 'react'
 import { toast } from 'sonner'
 import {
   Wrench, CheckCircle, AlertCircle, Server,
@@ -376,6 +376,16 @@ export default function MaintenanceClient() {
   const [selectedPartForReorder, setSelectedPartForReorder] = useState<SparePartInventory | null>(null)
   const [diagnosticsRunning, setDiagnosticsRunning] = useState(false)
   const [diagnosticsProgress, setDiagnosticsProgress] = useState(0)
+  const diagnosticsIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  // Cleanup interval on unmount
+  useEffect(() => {
+    return () => {
+      if (diagnosticsIntervalRef.current) {
+        clearInterval(diagnosticsIntervalRef.current)
+      }
+    }
+  }, [])
 
   // Schedule PM Form State
   const [pmFormState, setPMFormState] = useState({
@@ -639,14 +649,22 @@ export default function MaintenanceClient() {
 
   // Run system diagnostics
   const handleRunDiagnostics = async () => {
+    // Clear any existing interval
+    if (diagnosticsIntervalRef.current) {
+      clearInterval(diagnosticsIntervalRef.current)
+    }
+
     setDiagnosticsRunning(true)
     setDiagnosticsProgress(0)
 
     // Simulate diagnostics progress
-    const interval = setInterval(() => {
+    diagnosticsIntervalRef.current = setInterval(() => {
       setDiagnosticsProgress(prev => {
         if (prev >= 100) {
-          clearInterval(interval)
+          if (diagnosticsIntervalRef.current) {
+            clearInterval(diagnosticsIntervalRef.current)
+            diagnosticsIntervalRef.current = null
+          }
           setDiagnosticsRunning(false)
           toast.success('System diagnostics completed successfully')
           return 100
