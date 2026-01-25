@@ -36,7 +36,6 @@ import {
   Route,
   LayoutDashboard,
   CheckCircle2,
-  XCircle,
   ArrowRight,
   Percent,
   Search,
@@ -206,22 +205,6 @@ interface Dashboard {
 }
 
 // ============================================================================
-// DATA ARRAYS (Empty - populated from Supabase)
-// ============================================================================
-
-const mockFunnels: Funnel[] = []
-
-const mockCohorts: Cohort[] = []
-
-const mockRetentionAnalyses: RetentionAnalysis[] = []
-
-const mockExperiments: Experiment[] = []
-
-const mockUserPaths: UserPath[] = []
-
-const mockDashboards: Dashboard[] = []
-
-// ============================================================================
 // HELPER FUNCTIONS
 // ============================================================================
 
@@ -309,18 +292,6 @@ export default function GrowthHubClient() {
 
   // Combined loading state
   const isDataLoading = expLoading || metricsLoading || cohortsLoading || funnelsLoading
-
-  // Loading state - show after all hooks are called
-  if (isDataLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-emerald-50/30 to-teal-50/40 dark:bg-none dark:bg-gray-900">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="w-8 h-8 animate-spin text-green-600" />
-          <p className="text-muted-foreground">Loading growth analytics...</p>
-        </div>
-      </div>
-    )
-  }
 
   // Fetch user ID on mount
   useEffect(() => {
@@ -601,6 +572,18 @@ export default function GrowthHubClient() {
       toast.error('Failed to refresh data')
     }
   }, [refreshExperiments, refreshMetrics, refreshCohorts, refreshFunnels, refreshGoals])
+
+  // Loading state - placed after all hooks
+  if (isDataLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-emerald-50/30 to-teal-50/40 dark:bg-none dark:bg-gray-900">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-8 h-8 animate-spin text-green-600" />
+          <p className="text-muted-foreground">Loading growth analytics...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50/30 to-teal-50/40 dark:bg-none dark:bg-gray-900">

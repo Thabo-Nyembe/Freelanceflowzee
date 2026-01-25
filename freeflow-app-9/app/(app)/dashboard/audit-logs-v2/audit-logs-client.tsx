@@ -880,6 +880,20 @@ export default function AuditLogsClient() {
     )
   }
 
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50/30 to-violet-50/40 dark:bg-none dark:bg-gray-900 p-6">
+        <div className="max-w-[1800px] mx-auto flex items-center justify-center h-[calc(100vh-6rem)]">
+          <div className="text-center">
+            <Loader2 className="w-12 h-12 text-indigo-500 animate-spin mx-auto mb-4" />
+            <p className="text-gray-500 dark:text-gray-400">Loading audit logs...</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50/30 to-violet-50/40 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">
