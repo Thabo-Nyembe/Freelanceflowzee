@@ -228,14 +228,6 @@ interface Webhook {
   createdAt: string
 }
 
-// Empty typed arrays for static data (data now comes from hooks)
-const mockCollections: Collection[] = []
-const mockBundles: Bundle[] = []
-const mockPaymentProviders: PaymentProvider[] = []
-const mockMarketplaceAIInsights: { id: string; type: string; title: string; description: string; impact: string; confidence: number }[] = []
-const mockMarketplaceCollaborators: { id: string; name: string; avatar?: string; status: string; role: string }[] = []
-const mockMarketplacePredictions: { id: string; metric: string; current: number; predicted: number; trend: string; confidence: number }[] = []
-const mockMarketplaceActivities: { id: string; type: string; title: string; description: string; timestamp: string; user?: { name: string; avatar?: string } }[] = []
 
 // Helper functions for real marketplace actions
 const installApp = async (appId: string, appName: string) => {
@@ -1189,7 +1181,7 @@ export default function MarketplaceClient() {
           {/* Collections Tab */}
           <TabsContent value="collections" className="mt-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {mockCollections.map((collection, i) => (
+              {([] as Collection[]).map((collection, i) => (
                 <Card key={collection.id} className="border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow cursor-pointer group">
                   <CardContent className="p-0">
                     <div className={`h-36 bg-gradient-to-br ${['from-violet-500 to-purple-500', 'from-blue-500 to-cyan-500', 'from-green-500 to-emerald-500', 'from-orange-500 to-red-500', 'from-pink-500 to-rose-500', 'from-indigo-500 to-violet-500'][i % 6]} flex items-center justify-center`}>
@@ -1947,7 +1939,7 @@ export default function MarketplaceClient() {
                   <Card className="border-gray-200 dark:border-gray-700">
                     <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Payment Providers</CardTitle><Button onClick={() => window.open('/dashboard/settings/payments/add-provider', '_blank')}><Plus className="h-4 w-4 mr-2" />Add Provider</Button></CardHeader>
                     <CardContent className="space-y-4">
-                      {mockPaymentProviders.map(provider => (
+                      {([] as PaymentProvider[]).map(provider => (
                         <div key={provider.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div className="flex items-center gap-4">
                             <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${provider.status === 'active' ? 'bg-green-100 dark:bg-green-900/30' : 'bg-gray-100 dark:bg-gray-700'}`}>
@@ -2010,7 +2002,7 @@ export default function MarketplaceClient() {
                     <Card className="border-gray-200 dark:border-gray-700">
                       <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Product Bundles</CardTitle><Button onClick={() => setShowBundleDialog(true)}><Plus className="h-4 w-4 mr-2" />Create Bundle</Button></CardHeader>
                       <CardContent className="space-y-4">
-                        {mockBundles.map(bundle => (
+                        {([] as Bundle[]).map(bundle => (
                           <div key={bundle.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                             <div><h4 className="font-medium">{bundle.name}</h4><p className="text-sm text-gray-500">{bundle.products.length} apps • {bundle.discount}% discount</p></div>
                             <div className="flex items-center gap-4">
@@ -2113,18 +2105,18 @@ export default function MarketplaceClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockMarketplaceAIInsights}
+              insights={[]}
               title="Marketplace Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockMarketplaceCollaborators}
+              collaborators={[]}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockMarketplacePredictions}
+              predictions={[]}
               title="Marketplace Forecasts"
             />
           </div>
@@ -2132,7 +2124,7 @@ export default function MarketplaceClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockMarketplaceActivities}
+            activities={[]}
             title="Marketplace Activity"
             maxItems={5}
           />

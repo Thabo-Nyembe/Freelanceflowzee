@@ -198,15 +198,6 @@ interface Incident {
   workOrderId?: string
 }
 
-// Data - empty until wired to real APIs
-const mockWorkOrders: WorkOrder[] = []
-const mockAssets: Asset[] = []
-const mockSchedules: MaintenanceSchedule[] = []
-const mockTechnicians: Technician[] = []
-const mockInventory: SparePartInventory[] = []
-const mockVendors: Vendor[] = []
-const mockIncidents: Incident[] = []
-
 const getInventoryStatusColor = (status: SparePartInventory['status']): string => {
   const colors = {
     in_stock: 'bg-green-100 text-green-700',
@@ -459,9 +450,9 @@ export default function MaintenanceClient() {
     })
   }, [dbMaintenanceWindows, searchQuery, statusFilter])
 
-  // Filtered assets for the Asset List Dialog (using mockAssets as assets are not in hook)
+  // Filtered assets for the Asset List Dialog (using ([] as Asset[]) as assets are not in hook)
   const filteredAssets = useMemo(() => {
-    return mockAssets.filter(asset => {
+    return ([] as Asset[]).filter(asset => {
       const matchesSearch = assetFilter.search === '' ||
         asset.name.toLowerCase().includes(assetFilter.search.toLowerCase()) ||
         asset.assetTag.toLowerCase().includes(assetFilter.search.toLowerCase()) ||
@@ -921,7 +912,7 @@ export default function MaintenanceClient() {
                   <CardContent>
                     <ScrollArea className="h-[400px]">
                       <div className="space-y-4">
-                        {mockWorkOrders.filter(w => ['in_progress', 'scheduled'].includes(w.status)).map((order) => (
+                        {([] as WorkOrder[]).filter(w => ['in_progress', 'scheduled'].includes(w.status)).map((order) => (
                           <div key={order.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
                             <div className="flex items-center gap-4">
                               <div className="p-2 bg-gradient-to-br from-orange-500 to-amber-600 rounded-lg">
@@ -961,7 +952,7 @@ export default function MaintenanceClient() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {mockAssets.slice(0, 4).map((asset) => (
+                      {([] as Asset[]).slice(0, 4).map((asset) => (
                         <div key={asset.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div>
                             <p className="font-medium text-gray-900 dark:text-white">{asset.name}</p>
@@ -988,7 +979,7 @@ export default function MaintenanceClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {mockSchedules.map((schedule) => (
+                    {([] as MaintenanceSchedule[]).map((schedule) => (
                       <div key={schedule.id} className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
                         <div className="flex items-center justify-between mb-2">
                           <Badge className={getTypeColor(schedule.type)}>{schedule.type}</Badge>
@@ -1202,7 +1193,7 @@ export default function MaintenanceClient() {
                 <CardContent>
                   <ScrollArea className="h-[500px]">
                     <div className="space-y-4">
-                      {mockAssets.map((asset) => (
+                      {([] as Asset[]).map((asset) => (
                         <div key={asset.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
                           <div className="flex items-center gap-4">
                             <div className="p-2 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-lg">
@@ -1242,7 +1233,7 @@ export default function MaintenanceClient() {
             {/* Schedules Tab */}
             <TabsContent value="schedules" className="space-y-6">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {mockSchedules.map((schedule) => (
+                {([] as MaintenanceSchedule[]).map((schedule) => (
                   <Card key={schedule.id} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
                     <CardHeader>
                       <div className="flex items-start justify-between">
@@ -1342,7 +1333,7 @@ export default function MaintenanceClient() {
                 </div>
                 <div className="flex gap-3">
                   <Button variant="outline" className="flex items-center gap-2" onClick={() => {
-                    const csv = mockInventory.map(p =>
+                    const csv = ([] as SparePartInventory[]).map(p =>
                       `${p.partNumber},${p.name},${p.category},${p.quantity},${p.unitCost},${p.status}`
                     ).join('\n')
                     const blob = new Blob([`Part Number,Name,Category,Quantity,Unit Cost,Status\n${csv}`], { type: 'text/csv' })
@@ -1373,7 +1364,7 @@ export default function MaintenanceClient() {
                         <CheckCircle className="w-5 h-5 text-white" />
                       </div>
                       <div>
-                        <p className="text-2xl font-bold text-gray-900 dark:text-white">{mockInventory.filter(i => i.status === 'in_stock').length}</p>
+                        <p className="text-2xl font-bold text-gray-900 dark:text-white">{([] as SparePartInventory[]).filter(i => i.status === 'in_stock').length}</p>
                         <p className="text-xs text-gray-500">In Stock</p>
                       </div>
                     </div>
@@ -1386,7 +1377,7 @@ export default function MaintenanceClient() {
                         <AlertTriangle className="w-5 h-5 text-white" />
                       </div>
                       <div>
-                        <p className="text-2xl font-bold text-gray-900 dark:text-white">{mockInventory.filter(i => i.status === 'low_stock').length}</p>
+                        <p className="text-2xl font-bold text-gray-900 dark:text-white">{([] as SparePartInventory[]).filter(i => i.status === 'low_stock').length}</p>
                         <p className="text-xs text-gray-500">Low Stock</p>
                       </div>
                     </div>
@@ -1399,7 +1390,7 @@ export default function MaintenanceClient() {
                         <RotateCw className="w-5 h-5 text-white" />
                       </div>
                       <div>
-                        <p className="text-2xl font-bold text-gray-900 dark:text-white">{mockInventory.filter(i => i.status === 'on_order').length}</p>
+                        <p className="text-2xl font-bold text-gray-900 dark:text-white">{([] as SparePartInventory[]).filter(i => i.status === 'on_order').length}</p>
                         <p className="text-xs text-gray-500">On Order</p>
                       </div>
                     </div>
@@ -1412,7 +1403,7 @@ export default function MaintenanceClient() {
                         <Database className="w-5 h-5 text-white" />
                       </div>
                       <div>
-                        <p className="text-2xl font-bold text-gray-900 dark:text-white">${mockInventory.reduce((sum, i) => sum + (i.quantity * i.unitCost), 0).toLocaleString()}</p>
+                        <p className="text-2xl font-bold text-gray-900 dark:text-white">${([] as SparePartInventory[]).reduce((sum, i) => sum + (i.quantity * i.unitCost), 0).toLocaleString()}</p>
                         <p className="text-xs text-gray-500">Total Value</p>
                       </div>
                     </div>
@@ -1425,7 +1416,7 @@ export default function MaintenanceClient() {
                 <CardContent className="p-0">
                   <ScrollArea className="h-[500px]">
                     <div className="divide-y divide-gray-100 dark:divide-gray-700">
-                      {mockInventory.map((part) => (
+                      {([] as SparePartInventory[]).map((part) => (
                         <div key={part.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-4">
@@ -1481,7 +1472,7 @@ export default function MaintenanceClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {mockVendors.map((vendor) => (
+                    {([] as Vendor[]).map((vendor) => (
                       <div key={vendor.id} className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
                         <div className="flex items-start justify-between mb-3">
                           <div>
@@ -1527,7 +1518,7 @@ export default function MaintenanceClient() {
                         <CheckCircle className="w-5 h-5 text-white" />
                       </div>
                       <div>
-                        <p className="text-2xl font-bold text-gray-900 dark:text-white">{mockTechnicians.filter(t => t.status === 'available').length}</p>
+                        <p className="text-2xl font-bold text-gray-900 dark:text-white">{([] as Technician[]).filter(t => t.status === 'available').length}</p>
                         <p className="text-xs text-gray-500">Available</p>
                       </div>
                     </div>
@@ -1540,7 +1531,7 @@ export default function MaintenanceClient() {
                         <Activity className="w-5 h-5 text-white" />
                       </div>
                       <div>
-                        <p className="text-2xl font-bold text-gray-900 dark:text-white">{mockTechnicians.filter(t => t.status === 'busy').length}</p>
+                        <p className="text-2xl font-bold text-gray-900 dark:text-white">{([] as Technician[]).filter(t => t.status === 'busy').length}</p>
                         <p className="text-xs text-gray-500">Busy</p>
                       </div>
                     </div>
@@ -1553,7 +1544,7 @@ export default function MaintenanceClient() {
                         <Users className="w-5 h-5 text-white" />
                       </div>
                       <div>
-                        <p className="text-2xl font-bold text-gray-900 dark:text-white">{mockTechnicians.length}</p>
+                        <p className="text-2xl font-bold text-gray-900 dark:text-white">{([] as Technician[]).length}</p>
                         <p className="text-xs text-gray-500">Total Team</p>
                       </div>
                     </div>
@@ -1566,7 +1557,7 @@ export default function MaintenanceClient() {
                         <Target className="w-5 h-5 text-white" />
                       </div>
                       <div>
-                        <p className="text-2xl font-bold text-gray-900 dark:text-white">{(mockTechnicians.reduce((sum, t) => sum + t.avgRating, 0) / mockTechnicians.length).toFixed(1)}</p>
+                        <p className="text-2xl font-bold text-gray-900 dark:text-white">{(([] as Technician[]).reduce((sum, t) => sum + t.avgRating, 0) / ([] as Technician[]).length).toFixed(1)}</p>
                         <p className="text-xs text-gray-500">Avg Rating</p>
                       </div>
                     </div>
@@ -1579,7 +1570,7 @@ export default function MaintenanceClient() {
                 <CardContent className="p-0">
                   <ScrollArea className="h-[500px]">
                     <div className="divide-y divide-gray-100 dark:divide-gray-700">
-                      {mockTechnicians.map((tech) => (
+                      {([] as Technician[]).map((tech) => (
                         <div key={tech.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-4">
@@ -1639,7 +1630,7 @@ export default function MaintenanceClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {mockIncidents.map((incident) => (
+                    {([] as Incident[]).map((incident) => (
                       <div key={incident.id} className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
                         <div className="flex items-start justify-between mb-2">
                           <div className="flex items-center gap-2">
@@ -2271,7 +2262,7 @@ export default function MaintenanceClient() {
                   className="w-full mt-1.5 px-3 py-2 border rounded-lg dark:bg-gray-900 dark:border-gray-700"
                 >
                   <option value="">Choose an asset...</option>
-                  {mockAssets.map(asset => (
+                  {([] as Asset[]).map(asset => (
                     <option key={asset.id} value={asset.name}>
                       {asset.name} ({asset.assetTag}) - {asset.location}
                     </option>
@@ -2421,19 +2412,19 @@ export default function MaintenanceClient() {
             {/* Asset Stats */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
               <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg text-center">
-                <p className="text-lg font-bold text-green-700">{mockAssets.filter(a => a.status === 'operational').length}</p>
+                <p className="text-lg font-bold text-green-700">{([] as Asset[]).filter(a => a.status === 'operational').length}</p>
                 <p className="text-xs text-green-600">Operational</p>
               </div>
               <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg text-center">
-                <p className="text-lg font-bold text-yellow-700">{mockAssets.filter(a => a.status === 'degraded').length}</p>
+                <p className="text-lg font-bold text-yellow-700">{([] as Asset[]).filter(a => a.status === 'degraded').length}</p>
                 <p className="text-xs text-yellow-600">Degraded</p>
               </div>
               <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-center">
-                <p className="text-lg font-bold text-blue-700">{mockAssets.filter(a => a.status === 'maintenance').length}</p>
+                <p className="text-lg font-bold text-blue-700">{([] as Asset[]).filter(a => a.status === 'maintenance').length}</p>
                 <p className="text-xs text-blue-600">In Maintenance</p>
               </div>
               <div className="p-3 bg-red-50 dark:bg-red-900/20 rounded-lg text-center">
-                <p className="text-lg font-bold text-red-700">{mockAssets.filter(a => a.criticality === 'critical').length}</p>
+                <p className="text-lg font-bold text-red-700">{([] as Asset[]).filter(a => a.criticality === 'critical').length}</p>
                 <p className="text-xs text-red-600">Critical Assets</p>
               </div>
             </div>
@@ -2508,12 +2499,12 @@ export default function MaintenanceClient() {
             </ScrollArea>
           </div>
           <div className="flex justify-between items-center">
-            <p className="text-sm text-gray-500">{filteredAssets.length} of {mockAssets.length} assets</p>
+            <p className="text-sm text-gray-500">{filteredAssets.length} of {([] as Asset[]).length} assets</p>
             <div className="flex gap-3">
               <Button
                 variant="outline"
                 onClick={() => {
-                  const csv = mockAssets.map(a =>
+                  const csv = ([] as Asset[]).map(a =>
                     `${a.assetTag},${a.name},${a.type},${a.status},${a.criticality},${a.location},${a.uptime}%`
                   ).join('\n')
                   const blob = new Blob([`Tag,Name,Type,Status,Criticality,Location,Uptime\n${csv}`], { type: 'text/csv' })
@@ -2595,7 +2586,7 @@ export default function MaintenanceClient() {
             {[
               { name: 'Work Orders', desc: 'Export all work orders as CSV', action: handleExportReport },
               { name: 'Asset Inventory', desc: 'Export asset list with health data', action: () => {
-                const csv = mockAssets.map(a => `${a.assetTag},${a.name},${a.status},${a.uptime}%`).join('\n')
+                const csv = ([] as Asset[]).map(a => `${a.assetTag},${a.name},${a.status},${a.uptime}%`).join('\n')
                 const blob = new Blob([`Tag,Name,Status,Uptime\n${csv}`], { type: 'text/csv' })
                 const url = URL.createObjectURL(blob)
                 const link = document.createElement('a')
@@ -2606,7 +2597,7 @@ export default function MaintenanceClient() {
                 toast.success('Assets exported')
               }},
               { name: 'Maintenance Schedules', desc: 'Export PM schedules', action: () => {
-                const csv = mockSchedules.map(s => `${s.name},${s.type},${s.frequency},${s.nextRun}`).join('\n')
+                const csv = ([] as MaintenanceSchedule[]).map(s => `${s.name},${s.type},${s.frequency},${s.nextRun}`).join('\n')
                 const blob = new Blob([`Name,Type,Frequency,Next Run\n${csv}`], { type: 'text/csv' })
                 const url = URL.createObjectURL(blob)
                 const link = document.createElement('a')
@@ -2617,7 +2608,7 @@ export default function MaintenanceClient() {
                 toast.success('Schedules exported')
               }},
               { name: 'Team Performance', desc: 'Export technician metrics', action: () => {
-                const csv = mockTechnicians.map(t => `${t.name},${t.role},${t.completedOrders},${t.avgRating}`).join('\n')
+                const csv = ([] as Technician[]).map(t => `${t.name},${t.role},${t.completedOrders},${t.avgRating}`).join('\n')
                 const blob = new Blob([`Name,Role,Completed,Rating\n${csv}`], { type: 'text/csv' })
                 const url = URL.createObjectURL(blob)
                 const link = document.createElement('a')
@@ -2894,7 +2885,7 @@ export default function MaintenanceClient() {
           </DialogHeader>
           <ScrollArea className="h-[400px] pr-4">
             <div className="space-y-4">
-              {mockWorkOrders.filter(w => w.priority === 'critical' || w.sla.breached).map((order) => (
+              {([] as WorkOrder[]).filter(w => w.priority === 'critical' || w.sla.breached).map((order) => (
                 <div key={order.id} className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
                   <div className="flex items-start justify-between">
                     <div>
@@ -2916,7 +2907,7 @@ export default function MaintenanceClient() {
                   </div>
                 </div>
               ))}
-              {mockAssets.filter(a => a.status === 'degraded' || a.status === 'offline').map((asset) => (
+              {([] as Asset[]).filter(a => a.status === 'degraded' || a.status === 'offline').map((asset) => (
                 <div key={asset.id} className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
                   <div className="flex items-start justify-between">
                     <div>
@@ -2936,7 +2927,7 @@ export default function MaintenanceClient() {
                   </div>
                 </div>
               ))}
-              {mockInventory.filter(p => p.status === 'low_stock' || p.status === 'out_of_stock').map((part) => (
+              {([] as SparePartInventory[]).filter(p => p.status === 'low_stock' || p.status === 'out_of_stock').map((part) => (
                 <div key={part.id} className="p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
                   <div className="flex items-start justify-between">
                     <div>
@@ -3024,7 +3015,7 @@ export default function MaintenanceClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {mockAssets.map((asset) => (
+                    {([] as Asset[]).map((asset) => (
                       <div key={asset.id} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
                         <div>
                           <p className="font-medium text-sm">{asset.name}</p>
@@ -3050,7 +3041,7 @@ export default function MaintenanceClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {mockTechnicians.slice(0, 5).map((tech) => (
+                    {([] as Technician[]).slice(0, 5).map((tech) => (
                       <div key={tech.id} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
                         <div className="flex items-center gap-3">
                           <Avatar className="w-8 h-8">

@@ -200,16 +200,6 @@ interface OrderTimeline {
 }
 
 // ============================================================================
-// DATA ARRAYS - Empty arrays for real data integration
-// ============================================================================
-
-const mockOrders: Order[] = []
-
-const mockReturns: Return[] = []
-
-const mockCustomers: Customer[] = []
-
-// ============================================================================
 // HELPER FUNCTIONS
 // ============================================================================
 
@@ -286,15 +276,6 @@ const formatCurrency = (amount: number, currency = 'USD'): string => {
 // ============================================================================
 // MAIN COMPONENT
 // ============================================================================
-
-// Empty arrays for AI-powered competitive upgrade components
-const mockOrdersAIInsights: { id: string; type: 'success' | 'warning' | 'info'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
-
-const mockOrdersCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }[] = []
-
-const mockOrdersPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down'; impact: 'low' | 'medium' | 'high' }[] = []
-
-const mockOrdersActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' }[] = []
 
 // Helper function to generate CSV from orders
 const generateOrdersCSV = (orders: Order[]): string => {
@@ -420,9 +401,6 @@ const sendOrderUpdateAPI = async (orderId: string): Promise<void> => {
   })
   if (!response.ok) throw new Error('Failed to send update')
 }
-
-// Empty array for quick actions
-const mockOrdersQuickActions: { id: string; label: string; icon: string; action: () => void | Promise<void>; variant: 'default' | 'outline' }[] = []
 
 export default function OrdersClient() {
   // Supabase hook for orders data

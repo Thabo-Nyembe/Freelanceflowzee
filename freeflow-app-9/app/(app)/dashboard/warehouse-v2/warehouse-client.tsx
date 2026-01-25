@@ -249,18 +249,7 @@ interface CycleCount {
   accuracy_percent: number
 }
 
-// Fallback empty data arrays - used when no real data is available
-const mockInventory: InventoryItem[] = []
-
-const mockZones: Zone[] = []
-
-const mockInboundShipments: InboundShipment[] = []
-
-const mockOutboundOrders: OutboundOrder[] = []
-
-const mockTasks: WarehouseTask[] = []
-
-const mockCycleCounts: CycleCount[] = []
+// Empty arrays used as fallback when no real data is available
 
 // Empty competitive upgrade data arrays - connect to real data source
 const mockWarehouseAIInsights: Array<{ id: string; type: 'success' | 'warning' | 'info' | 'error' | 'recommendation' | 'alert' | 'opportunity' | 'prediction'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }> = []
@@ -1096,7 +1085,7 @@ export default function WarehouseClient() {
         } as InventoryItem
       })
     }
-    return mockInventory
+    return []
   }, [dbStockLevels])
 
   // Map warehouses to zones format
@@ -1116,7 +1105,7 @@ export default function WarehouseClient() {
         last_activity: w.updated_at
       })) as Zone[]
     }
-    return mockZones
+    return []
   }, [dbWarehouses])
 
   // Map orders to OutboundOrder format
@@ -1154,7 +1143,7 @@ export default function WarehouseClient() {
         } as OutboundOrder
       })
     }
-    return mockOutboundOrders
+    return []
   }, [dbOrders])
 
   // Map shipments to InboundShipment format
@@ -1192,7 +1181,7 @@ export default function WarehouseClient() {
           } as InboundShipment
         })
     }
-    return mockInboundShipments
+    return []
   }, [dbShipments])
 
   // Map tasks to WarehouseTask format
@@ -1240,7 +1229,7 @@ export default function WarehouseClient() {
         } as WarehouseTask
       })
     }
-    return mockTasks
+    return []
   }, [dbTasks])
 
   // Map activity logs to competitive upgrade activity format
@@ -1280,8 +1269,7 @@ export default function WarehouseClient() {
 
   // Stats calculations - use real data when available
   const stats = useMemo(() => {
-    const useRealInventory = dbStockLevels && dbStockLevels.length > 0
-    const inventoryData = useRealInventory ? activeInventory : mockInventory
+    const inventoryData = activeInventory
 
     const totalItems = inventoryData.length
     const lowStockItems = inventoryData.filter(i => i.status === 'low_stock').length
@@ -1289,9 +1277,9 @@ export default function WarehouseClient() {
     const totalValue = inventoryData.reduce((sum, i) => sum + (i.quantity_on_hand * i.unit_cost), 0)
 
     // Use real shipments and orders data when available
-    const shipmentsData = dbShipments && dbShipments.length > 0 ? activeInboundShipments : mockInboundShipments
-    const ordersData = dbOrders && dbOrders.length > 0 ? activeOutboundOrders : mockOutboundOrders
-    const tasksData = dbTasks && dbTasks.length > 0 ? activeWarehouseTasks : mockTasks
+    const shipmentsData = activeInboundShipments
+    const ordersData = activeOutboundOrders
+    const tasksData = activeWarehouseTasks
 
     const pendingInbound = shipmentsData.filter(s => s.status !== 'completed').length
     const pendingOutbound = ordersData.filter(o => o.status !== 'shipped').length
@@ -1299,7 +1287,7 @@ export default function WarehouseClient() {
     const pendingTasks = tasksData.filter(t => t.status === 'pending').length
 
     // Use real zone data when available
-    const zonesData = dbWarehouses && dbWarehouses.length > 0 ? activeZones : mockZones
+    const zonesData = activeZones
     const avgZoneUtilization = zonesData.length > 0
       ? zonesData.reduce((sum, z) => sum + (z.capacity_units > 0 ? (z.used_units / z.capacity_units * 100) : 0), 0) / zonesData.length
       : 0
@@ -1330,14 +1318,13 @@ export default function WarehouseClient() {
   }, [activeInventory, searchQuery, inventoryFilter, zoneFilter])
 
   const filteredTasks = useMemo(() => {
-    const tasksData = dbTasks && dbTasks.length > 0 ? activeWarehouseTasks : mockTasks
-    return tasksData.filter(task => {
+    return activeWarehouseTasks.filter(task => {
       const matchesSearch = task.item_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         task.task_number.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesPriority = priorityFilter === 'all' || task.priority === priorityFilter
       return matchesSearch && matchesPriority
     })
-  }, [searchQuery, priorityFilter, dbTasks, activeWarehouseTasks])
+  }, [searchQuery, priorityFilter, activeWarehouseTasks])
 
   // Loading state - includes all data sources
   const isLoading = isLoadingWarehouses || isLoadingStock || isLoadingOrders || isLoadingShipments || isLoadingTasks || isLoadingActivities

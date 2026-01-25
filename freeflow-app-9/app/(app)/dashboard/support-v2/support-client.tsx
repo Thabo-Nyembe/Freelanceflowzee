@@ -174,16 +174,6 @@ interface AutomationRule {
   executionCount: number
 }
 
-// Empty data arrays - to be populated from API/database
-const mockCustomers: Customer[] = []
-
-const mockAgents: Agent[] = []
-
-const mockTickets: Ticket[] = []
-
-const mockCannedResponses: CannedResponse[] = []
-
-const mockSLAPolicies: SLAPolicy[] = []
 
 // Helper functions
 const getStatusColor = (status: TicketStatus): string => {
@@ -260,16 +250,6 @@ interface SupportClientProps {
   initialStats?: any
 }
 
-// Empty arrays for competitive upgrade components - to be populated from API/database
-const mockSupportAIInsights: { id: string; type: 'success' | 'warning' | 'info'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
-
-const mockSupportCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }[] = []
-
-const mockSupportPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: 'low' | 'medium' | 'high' }[] = []
-
-const mockSupportActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' | 'error' }[] = []
-
-const mockSupportQuickActionsConfig: { id: string; label: string; icon: string; actionType: string; variant: 'default' | 'outline' }[] = []
 
 export default function SupportClient({ initialTickets, initialStats }: SupportClientProps) {
   // Use the support tickets hook for data fetching and mutations
@@ -462,7 +442,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
     toast.success('Tickets exported successfully')
   }
 
-  // QuickAction handlers for mockSupportQuickActionsConfig
+  // QuickAction handlers
   const handleQuickAction = (actionType: string) => {
     switch (actionType) {
       case 'createTicket': setShowCreateDialog(true); break
@@ -470,10 +450,6 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
       case 'knowledgeBase': setShowKnowledgeBase(true); break
     }
   }
-  const mockSupportQuickActions = mockSupportQuickActionsConfig.map(item => ({
-    ...item,
-    action: () => handleQuickAction(item.actionType)
-  }))
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-cyan-50/30 to-blue-50/40 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 dark:bg-none dark:bg-gray-900">
@@ -776,14 +752,14 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockAgents.length}</p>
+                    <p className="text-3xl font-bold">{0}</p>
                     <p className="text-purple-200 text-sm">Agents</p>
                   </div>
                 </div>
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {mockAgents.map(agent => (
+              {([] as Agent[]).map(agent => (
                 <Card key={agent.id} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm">
                   <CardContent className="p-4">
                     <div className="flex items-center gap-4 mb-4">
@@ -844,7 +820,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
               </Button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {mockCannedResponses.map(response => (
+              {([] as CannedResponse[]).map(response => (
                 <Card key={response.id} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm">
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between mb-2">
@@ -884,7 +860,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                     </tr>
                   </thead>
                   <tbody>
-                    {mockSLAPolicies.map(policy => (
+                    {([] as SLAPolicy[]).map(policy => (
                       <tr key={policy.id} className="border-b last:border-0 hover:bg-gray-50 dark:hover:bg-gray-700/50">
                         <td className="p-4 font-medium">{policy.name}</td>
                         <td className="p-4">
@@ -917,14 +893,14 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                 <CardContent>
                   <div className="space-y-3">
                     {(['open', 'in_progress', 'waiting_on_customer', 'resolved', 'closed'] as const).map(status => {
-                      const count = mockTickets.filter(t => t.status === status).length
+                      const count = ([] as Ticket[]).filter(t => t.status === status).length
                       return (
                         <div key={status} className="space-y-1">
                           <div className="flex justify-between text-sm">
                             <span className="capitalize">{status.replace(/_/g, ' ')}</span>
                             <span className="font-medium">{count}</span>
                           </div>
-                          <Progress value={(count / mockTickets.length) * 100} className="h-2" />
+                          <Progress value={0} className="h-2" />
                         </div>
                       )
                     })}
@@ -939,7 +915,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                 <CardContent>
                   <div className="space-y-3">
                     {(['email', 'chat', 'phone', 'portal'] as const).map(channel => {
-                      const count = mockTickets.filter(t => t.channel === channel).length
+                      const count = ([] as Ticket[]).filter(t => t.channel === channel).length
                       const ChannelIcon = getChannelIcon(channel)
                       return (
                         <div key={channel} className="flex items-center justify-between p-2 rounded-lg bg-gray-50 dark:bg-gray-700/50">
@@ -961,7 +937,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {mockAgents.map(agent => (
+                    {([] as Agent[]).map(agent => (
                       <div key={agent.id} className="flex items-center justify-between p-2 rounded-lg bg-gray-50 dark:bg-gray-700/50">
                         <div className="flex items-center gap-2">
                           <Avatar className="w-6 h-6">
@@ -1678,18 +1654,18 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockSupportAIInsights}
+              insights={[]}
               title="Support Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockSupportCollaborators}
+              collaborators={[]}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockSupportPredictions}
+              predictions={[]}
               title="Support Forecasts"
             />
           </div>
@@ -1697,12 +1673,12 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockSupportActivities}
+            activities={[]}
             title="Support Activity"
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockSupportQuickActions}
+            actions={[]}
             variant="grid"
           />
         </div>

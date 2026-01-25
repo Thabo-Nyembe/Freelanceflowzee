@@ -2258,21 +2258,7 @@ export default function DeploymentsClient() {
                   <Card className="border-gray-200 dark:border-gray-700">
                     <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Connected Integrations</CardTitle><Button onClick={() => setShowIntegrationDialog(true)}><Plus className="h-4 w-4 mr-2" />Add Integration</Button></CardHeader>
                     <CardContent className="space-y-4">
-                      {mockIntegrations.map(integration => (
-                        <div key={integration.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div className="flex items-center gap-4">
-                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${integration.status === 'connected' ? 'bg-green-100' : 'bg-gray-100'}`}>
-                              {integration.type === 'ci_cd' && <GitBranch className="h-5 w-5 text-purple-600" />}
-                              {integration.type === 'monitoring' && <Activity className="h-5 w-5 text-blue-600" />}
-                              {integration.type === 'notification' && <MessageSquare className="h-5 w-5 text-pink-600" />}
-                              {integration.type === 'logging' && <Terminal className="h-5 w-5 text-green-600" />}
-                              {integration.type === 'analytics' && <BarChart3 className="h-5 w-5 text-amber-600" />}
-                            </div>
-                            <div><h4 className="font-medium">{integration.name}</h4><p className="text-sm text-gray-500">Last sync: {integration.lastSync}</p></div>
-                          </div>
-                          <div className="flex items-center gap-3"><Badge className={integration.status === 'connected' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>{integration.status}</Badge><Button variant="ghost" size="sm" onClick={() => { setSelectedIntegration(integration); setShowIntegrationDialog(true); }}><Settings className="h-4 w-4" /></Button></div>
-                        </div>
-                      ))}
+                      {/* Integrations list - connect to real data source */}
                     </CardContent>
                   </Card>
                 )}
@@ -2280,39 +2266,7 @@ export default function DeploymentsClient() {
                   <Card className="border-gray-200 dark:border-gray-700">
                     <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Webhooks</CardTitle><Button onClick={() => setShowWebhookDialog(true)}><Plus className="h-4 w-4 mr-2" />Add Webhook</Button></CardHeader>
                     <CardContent className="space-y-4">
-                      {mockWebhooks.map(webhook => (
-                        <div key={webhook.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2"><h4 className="font-medium">{webhook.name}</h4><Badge className={webhook.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}>{webhook.status}</Badge></div>
-                            <p className="font-mono text-sm text-gray-500 mt-1">{webhook.url}</p>
-                            <div className="flex items-center gap-2 mt-2">{webhook.events.map(e => <Badge key={e} variant="outline" className="text-xs">{e}</Badge>)}</div>
-                          </div>
-                          <div className="flex items-center gap-4">
-                            <div className="text-right"><p className="text-sm"><span className={webhook.successRate >= 95 ? 'text-green-600' : 'text-amber-600'}>{webhook.successRate}%</span></p><p className="text-xs text-gray-500">success rate</p></div>
-                            <Button variant="ghost" size="icon" onClick={async () => {
-                              try {
-                                const response = await fetch(`/api/webhooks/${webhook.id}/test`, { method: 'POST' })
-                                if (!response.ok) throw new Error('Test failed')
-                                toast.success(`Webhook Tested: test successful`)
-                              } catch {
-                                toast.info(`Test Webhook: ${webhook.name} - ${webhook.successRate}% success rate`)
-                              }
-                            }}><RefreshCw className="h-4 w-4" /></Button>
-                            <Button variant="ghost" size="icon" className="text-red-500" onClick={async () => {
-                              setIsProcessing(true)
-                              try {
-                                const { error } = await supabase.from('webhooks').delete().eq('id', webhook.id)
-                                if (error) throw error
-                                toast.success(`Webhook Deleted: "${webhook.url}" has been removed`)
-                              } catch (error: any) {
-                                toast.error('Delete Failed')
-                              } finally {
-                                setIsProcessing(false)
-                              }
-                            }} disabled={isProcessing}><Trash2 className="h-4 w-4" /></Button>
-                          </div>
-                        </div>
-                      ))}
+                      {/* Webhooks list - connect to real data source */}
                     </CardContent>
                   </Card>
                 )}
@@ -2320,19 +2274,7 @@ export default function DeploymentsClient() {
                   <Card className="border-gray-200 dark:border-gray-700">
                     <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Team Members</CardTitle><Button onClick={() => setShowTeamDialog(true)}><Plus className="h-4 w-4 mr-2" />Invite Member</Button></CardHeader>
                     <CardContent className="space-y-4">
-                      {mockTeamMembers.map(member => (
-                        <div key={member.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div className="flex items-center gap-4">
-                            <Avatar className="h-10 w-10"><AvatarFallback className="bg-purple-100 text-purple-700">{member.avatar}</AvatarFallback></Avatar>
-                            <div><h4 className="font-medium">{member.name}</h4><p className="text-sm text-gray-500">{member.email}</p></div>
-                          </div>
-                          <div className="flex items-center gap-4">
-                            <div className="text-right"><p className="text-sm font-medium">{member.deploymentsThisMonth} deploys</p><p className="text-xs text-gray-500">this month</p></div>
-                            <Badge variant="outline" className={member.role === 'owner' ? 'bg-purple-100 text-purple-700' : member.role === 'admin' ? 'bg-blue-100 text-blue-700' : ''}>{member.role}</Badge>
-                            <Button variant="ghost" size="icon" onClick={() => { setSelectedTeamMember(member); setShowTeamMemberMenu(true); }}><MoreHorizontal className="h-4 w-4" /></Button>
-                          </div>
-                        </div>
-                      ))}
+                      {/* Team members list - connect to real data source */}
                     </CardContent>
                   </Card>
                 )}
@@ -2340,15 +2282,7 @@ export default function DeploymentsClient() {
                   <Card className="border-gray-200 dark:border-gray-700">
                     <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Build Plugins</CardTitle><Button variant="outline" onClick={() => setShowMarketplaceDialog(true)}><Search className="h-4 w-4 mr-2" />Browse Marketplace</Button></CardHeader>
                     <CardContent className="space-y-4">
-                      {mockBuildPlugins.map(plugin => (
-                        <div key={plugin.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                          <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 rounded-lg bg-indigo-100 flex items-center justify-center"><Package className="h-5 w-5 text-indigo-600" /></div>
-                            <div><div className="flex items-center gap-2"><h4 className="font-medium">{plugin.name}</h4><Badge variant="outline" className="text-xs">v{plugin.version}</Badge></div><p className="text-sm text-gray-500">{plugin.description}</p><p className="text-xs text-gray-400 mt-1">by {plugin.author} • {(plugin.installCount / 1000).toFixed(0)}k installs</p></div>
-                          </div>
-                          <Switch checked={plugin.enabled} />
-                        </div>
-                      ))}
+                      {/* Build plugins list - connect to real data source */}
                     </CardContent>
                   </Card>
                 )}
@@ -2361,18 +2295,18 @@ export default function DeploymentsClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockDeploymentsAIInsights}
+              insights={[]}
               title="Deployment Intelligence"
               onInsightAction={handleInsightAction}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockDeploymentsCollaborators}
+              collaborators={[]}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockDeploymentsPredictions}
+              predictions={[]}
               title="Deploy Forecasts"
             />
           </div>
@@ -2380,7 +2314,7 @@ export default function DeploymentsClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockDeploymentsActivities}
+            activities={[]}
             title="Deploy Activity"
             maxItems={5}
           />
@@ -2466,19 +2400,7 @@ export default function DeploymentsClient() {
               </div>
               <ScrollArea className="h-[300px]">
                 <div className="space-y-2">
-                  {mockEnvVars.map(env => (
-                    <div key={env.id} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="font-mono font-medium">{env.key}</span>
-                          {env.encrypted && <Lock className="h-3 w-3 text-gray-400" />}
-                        </div>
-                        <span className="text-sm text-gray-500">{env.value}</span>
-                      </div>
-                      <Badge variant="outline">{env.environment}</Badge>
-                      <Button variant="ghost" size="icon" onClick={() => { setSelectedEnvVar(env); setShowDeleteEnvVarDialog(true); }}><Trash2 className="h-4 w-4 text-red-500" /></Button>
-                    </div>
-                  ))}
+                  {/* Environment variables list - connect to real data source */}
                 </div>
               </ScrollArea>
             </div>
@@ -2520,21 +2442,7 @@ export default function DeploymentsClient() {
               </div>
               <ScrollArea className="h-[300px]">
                 <div className="space-y-2">
-                  {mockDomains.map(domain => (
-                    <div key={domain.id} className="flex items-center gap-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                      <Globe className="h-4 w-4 text-gray-400" />
-                      <div className="flex-1">
-                        <span className="font-medium">{domain.domain}</span>
-                        {domain.ssl && <Badge className="ml-2 bg-green-100 text-green-700"><Lock className="h-3 w-3 mr-1" />SSL</Badge>}
-                        {domain.redirectTo && <span className="ml-2 text-sm text-gray-500">→ {domain.redirectTo}</span>}
-                      </div>
-                      <Badge variant={domain.type === 'production' ? 'default' : 'outline'}>{domain.type}</Badge>
-                      <Button variant="ghost" size="icon" onClick={() => {
-                        window.open(`https://${domain.domain}`, '_blank', 'noopener,noreferrer')
-                        toast.success(`Opened: ${domain.domain} opened in new tab`)
-                      }}><ExternalLink className="h-4 w-4" /></Button>
-                    </div>
-                  ))}
+                  {/* Domains list - connect to real data source */}
                 </div>
               </ScrollArea>
             </div>
@@ -3294,7 +3202,7 @@ export default function DeploymentsClient() {
                   functionFilter: functionInput?.value || '',
                   messageFilter: messageInput?.value || ''
                 });
-                const filteredLogs = mockBuildLogs.filter(log =>
+                const filteredLogs = realTimeLogs.filter(log =>
                   levels.includes(log.level) &&
                   (!functionInput?.value || log.step.includes(functionInput.value)) &&
                   (!messageInput?.value || log.message.toLowerCase().includes(messageInput.value.toLowerCase()))

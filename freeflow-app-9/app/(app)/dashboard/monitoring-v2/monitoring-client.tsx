@@ -205,18 +205,6 @@ interface SLO {
 }
 
 // ============================================================================
-// EMPTY DATA ARRAYS (No mock data - use real database data)
-// ============================================================================
-
-const mockServices: Service[] = []
-
-// mockLogs removed - using real Supabase data via systemLogs state
-
-const mockSLOs: SLO[] = []
-
-const mockDashboards: Dashboard[] = []
-
-// ============================================================================
 // HELPER FUNCTIONS
 // ============================================================================
 
@@ -293,15 +281,6 @@ const getMetricColor = (value: number, threshold: number): string => {
   if (value >= threshold * 0.8) return 'text-yellow-600'
   return 'text-green-600'
 }
-
-// Empty arrays for competitive upgrade components (no mock data)
-const mockMonitoringAIInsights: { id: string; type: 'success' | 'info' | 'warning' | 'error'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
-
-const mockMonitoringCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string; lastActive: string }[] = []
-
-const mockMonitoringPredictions: { id: string; label: string; current: number; target: number; predicted: number; confidence: number; trend: 'up' | 'down' | 'stable' }[] = []
-
-const mockMonitoringActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' | 'error' }[] = []
 
 // Quick actions are defined inside the component to access state setters
 
@@ -793,7 +772,7 @@ export default function MonitoringClient() {
           {/* APM Tab */}
           <TabsContent value="apm" className="mt-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-              {mockServices.map(service => (
+              {([] as Service[]).map(service => (
                 <Card key={service.id}>
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
@@ -845,7 +824,7 @@ export default function MonitoringClient() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {mockSLOs.map(slo => (
+                  {([] as SLO[]).map(slo => (
                     <div key={slo.id} className="flex items-center gap-4 p-3 border rounded-lg">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
@@ -1012,7 +991,7 @@ export default function MonitoringClient() {
           {/* Dashboards Tab */}
           <TabsContent value="dashboards" className="mt-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {mockDashboards.map(dashboard => (
+              {([] as Dashboard[]).map(dashboard => (
                 <Card key={dashboard.id} className="hover:shadow-md transition-shadow cursor-pointer">
                   <CardHeader>
                     <div className="flex items-center justify-between">
@@ -1937,18 +1916,18 @@ export default function MonitoringClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockMonitoringAIInsights}
+              insights={[]}
               title="Monitoring Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockMonitoringCollaborators}
+              collaborators={[]}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockMonitoringPredictions}
+              predictions={[]}
               title="Infrastructure Forecasts"
             />
           </div>
@@ -1956,7 +1935,7 @@ export default function MonitoringClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockMonitoringActivities}
+            activities={[]}
             title="Monitoring Activity"
             maxItems={5}
           />
@@ -2248,7 +2227,7 @@ export default function MonitoringClient() {
               <DialogDescription>View and manage your monitoring dashboards</DialogDescription>
             </DialogHeader>
             <div className="py-4 space-y-4">
-              {mockDashboards.map(dashboard => (
+              {([] as Dashboard[]).map(dashboard => (
                 <div key={dashboard.id} className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
                   <div className="flex items-center justify-between">
                     <div>
