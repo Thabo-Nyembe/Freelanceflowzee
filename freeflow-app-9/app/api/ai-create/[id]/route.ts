@@ -8,6 +8,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
 import {
   getAsset,
   updateAsset,
@@ -20,6 +21,8 @@ import {
   deleteGeneration,
   deleteModelComparison
 } from '@/lib/ai-create-queries'
+
+const logger = createFeatureLogger('AICreateAPI')
 
 export async function GET(
   request: NextRequest,
@@ -39,7 +42,7 @@ export async function GET(
       }
 
       // Log view
-      await incrementViewCount(id).catch(() => {})
+      await incrementViewCount(id).catch((err) => logger.warn('Failed to increment view count', { assetId: id, error: err }))
 
       return NextResponse.json({ data })
     }

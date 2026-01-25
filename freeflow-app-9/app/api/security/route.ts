@@ -8,6 +8,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('SecurityAPI')
 
 export async function GET(request: NextRequest) {
   try {
@@ -125,7 +128,7 @@ export async function POST(request: NextRequest) {
             event_description: `Added password for ${website || name}`,
             created_at: new Date().toISOString()
           })
-          .catch(() => {})
+          .catch((err) => logger.warn('Failed to log password_added audit event', { error: err }))
 
         return NextResponse.json({
           success: true,
@@ -162,7 +165,7 @@ export async function POST(request: NextRequest) {
             metadata: auditResults,
             created_at: new Date().toISOString()
           })
-          .catch(() => {})
+          .catch((err) => logger.warn('Failed to log security_audit event', { error: err }))
 
         return NextResponse.json({
           success: true,
@@ -182,7 +185,7 @@ export async function POST(request: NextRequest) {
             event_description: 'User requested vault deletion',
             created_at: new Date().toISOString()
           })
-          .catch(() => {})
+          .catch((err) => logger.warn('Failed to log vault_deletion_requested event', { error: err }))
 
         return NextResponse.json({
           success: true,

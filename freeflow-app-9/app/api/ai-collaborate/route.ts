@@ -8,6 +8,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('AICollaborateAPI')
 
 export async function GET(request: NextRequest) {
   try {
@@ -152,7 +155,7 @@ export async function POST(request: NextRequest) {
             user_id: user.id,
             ...design
           })
-          .catch(() => {}) // Ignore if table doesn't exist
+          .catch((err) => logger.warn('Failed to save AI design to database', { error: err }))
 
         return NextResponse.json({
           success: true,

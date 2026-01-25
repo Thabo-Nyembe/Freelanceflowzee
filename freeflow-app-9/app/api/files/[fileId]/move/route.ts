@@ -63,9 +63,11 @@ export async function PUT(
 
     // Update folder file counts (decrement old, increment new)
     if (previousFolderId && previousFolderId !== folderId) {
-      await supabase.rpc('decrement_folder_count', { folder_id: previousFolderId }).catch(() => {})
+      await supabase.rpc('decrement_folder_count', { folder_id: previousFolderId })
+        .catch((err) => logger.warn('Failed to decrement folder count', { folder_id: previousFolderId, error: err }))
     }
-    await supabase.rpc('increment_folder_count', { folder_id: folderId }).catch(() => {})
+    await supabase.rpc('increment_folder_count', { folder_id: folderId })
+      .catch((err) => logger.warn('Failed to increment folder count', { folder_id: folderId, error: err }))
 
     return NextResponse.json({
       success: true,

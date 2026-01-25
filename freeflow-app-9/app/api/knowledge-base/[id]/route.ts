@@ -8,6 +8,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
 import {
   getCategory,
   updateCategory,
@@ -26,6 +27,8 @@ import {
   logVideoView,
   getRelatedArticles
 } from '@/lib/knowledge-base-queries'
+
+const logger = createFeatureLogger('KnowledgeBaseAPI')
 
 export async function GET(
   request: NextRequest,
@@ -47,14 +50,14 @@ export async function GET(
         data = await getArticle(id)
         // Log view if article found
         if (data) {
-          await logArticleView(id).catch(() => {})
+          await logArticleView(id).catch((err) => logger.warn('Failed to log article view', { articleId: id, error: err }))
         }
         break
 
       case 'video':
         data = await getVideoTutorial(id)
         if (data) {
-          await logVideoView(id).catch(() => {})
+          await logVideoView(id).catch((err) => logger.warn('Failed to log video view', { videoId: id, error: err }))
         }
         break
 

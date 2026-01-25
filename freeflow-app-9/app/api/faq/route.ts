@@ -8,6 +8,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('FaqAPI')
 
 export async function GET(request: NextRequest) {
   try {
@@ -197,7 +200,7 @@ export async function POST(request: NextRequest) {
             results_count: results?.length || 0,
             created_at: new Date().toISOString()
           })
-          .catch(() => {}) // Ignore if table doesn't exist
+          .catch((err) => logger.warn('Failed to log FAQ search query', { error: err }))
 
         return NextResponse.json({
           success: true,
@@ -247,11 +250,12 @@ export async function POST(request: NextRequest) {
             helpful,
             created_at: new Date().toISOString()
           })
-          .catch(() => {})
+          .catch((err) => logger.warn('Failed to record FAQ vote', { articleId, error: err }))
 
         // Update article helpful count
         if (helpful) {
-          await supabase.rpc('increment_faq_helpful', { article_id: articleId }).catch(() => {})
+          await supabase.rpc('increment_faq_helpful', { article_id: articleId })
+            .catch((err) => logger.warn('Failed to increment FAQ helpful count', { articleId, error: err }))
         }
 
         return NextResponse.json({
