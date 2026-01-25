@@ -228,6 +228,7 @@ export default function DeploymentsClient() {
 
   // Integrate useDeployments hook with filter support
   const { data: dbDeploymentsData, isLoading, error: deploymentsError, refetch: fetchDeployments } = useDeployments()
+  const dbDeployments = dbDeploymentsData || []
   const createDeploymentMutation = useCreateDeployment()
   const updateDeploymentMutation = useUpdateDeployment()
   const deleteDeploymentMutation = useDeleteDeployment()
