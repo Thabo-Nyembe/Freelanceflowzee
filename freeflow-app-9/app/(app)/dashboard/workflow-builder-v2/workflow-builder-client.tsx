@@ -1,8 +1,11 @@
 'use client'
 
+// MIGRATED: Batch #18 - Verified database hook integration
+// Hooks used: useWorkflows
+
 import { createClient } from '@/lib/supabase/client'
 
-import React, { useState, useMemo, useCallback } from 'react'
+import React, { useState, useMemo, useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -51,6 +54,12 @@ import {
 } from '@/components/ui/competitive-upgrades-extended'
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+
+// Import Supabase hooks for real data operations
+import {
+  useWorkflows,
+  type Workflow as DBWorkflow
+} from '@/lib/hooks/use-workflows'
 
 // Initialize Supabase client once at module level
 const supabase = createClient()
@@ -401,17 +410,74 @@ export default function WorkflowBuilderClient() {
   const [showCredentialsDialog, setShowCredentialsDialog] = useState(false)
   const [showVariablesDialog, setShowVariablesDialog] = useState(false)
 
+  // Supabase hooks for real data operations
+  const {
+    workflows: dbWorkflows,
+    loading: isLoading,
+    error,
+    stats: dbStats,
+    fetchWorkflows: refetch,
+    createWorkflow: createWorkflowMutation,
+    updateWorkflow: updateWorkflowMutation,
+    deleteWorkflow: deleteWorkflowMutation,
+    startWorkflow: startWorkflowMutation,
+    pauseWorkflow: pauseWorkflowMutation,
+    resumeWorkflow: resumeWorkflowMutation,
+    archiveWorkflow: archiveWorkflowMutation
+  } = useWorkflows()
+
+  // Fetch workflows on mount
+  useEffect(() => {
+    refetch()
+  }, [refetch])
+
+  // Map DB workflows to UI workflows with useMemo
+  const workflowsData: Workflow[] = useMemo(() => {
+    return dbWorkflows.map((dbWf: DBWorkflow) => ({
+      id: dbWf.id,
+      name: dbWf.name,
+      description: dbWf.description || undefined,
+      status: dbWf.status === 'archived' ? 'archived' :
+              dbWf.status === 'paused' ? 'paused' :
+              dbWf.status === 'active' ? 'active' :
+              dbWf.status === 'failed' ? 'error' : 'draft',
+      nodes: [],
+      connections: [],
+      settings: {
+        executionOrder: 'v1' as const,
+        saveExecutionProgress: true,
+        saveManualExecutions: true,
+        callerPolicy: 'any' as const,
+        timezone: 'UTC',
+        executionTimeout: 3600,
+        maxConcurrency: 10
+      },
+      tags: dbWf.tags || [],
+      createdAt: new Date(dbWf.created_at),
+      updatedAt: new Date(dbWf.updated_at),
+      createdBy: dbWf.user_id,
+      executionCount: dbWf.total_steps || 0,
+      successCount: dbWf.current_step || 0,
+      errorCount: 0,
+      avgExecutionTime: 0,
+      isShared: false,
+      sharedWith: dbWf.assigned_to || [],
+      version: 1,
+      versionHistory: []
+    }))
+  }, [dbWorkflows])
+
   const stats: WorkflowStats = useMemo(() => ({
-    totalWorkflows: mockWorkflows.length,
-    activeWorkflows: mockWorkflows.filter(w => w.status === 'active').length,
-    draftWorkflows: mockWorkflows.filter(w => w.status === 'draft').length,
-    totalExecutions: mockWorkflows.reduce((sum, w) => sum + w.executionCount, 0),
-    successfulExecutions: mockWorkflows.reduce((sum, w) => sum + w.successCount, 0),
-    failedExecutions: mockWorkflows.reduce((sum, w) => sum + w.errorCount, 0),
-    avgExecutionTime: mockWorkflows.filter(w => w.avgExecutionTime > 0).reduce((sum, w) => sum + w.avgExecutionTime, 0) / mockWorkflows.filter(w => w.avgExecutionTime > 0).length || 0,
-    executionsToday: 156,
-    successRateToday: 98.7
-  }), [])
+    totalWorkflows: dbStats.total,
+    activeWorkflows: dbStats.active,
+    draftWorkflows: dbStats.draft,
+    totalExecutions: dbStats.totalSteps,
+    successfulExecutions: dbStats.completedSteps,
+    failedExecutions: dbStats.failed,
+    avgExecutionTime: dbStats.avgCompletionRate * 1000, // Convert to ms
+    executionsToday: dbStats.active,
+    successRateToday: dbStats.total > 0 ? (dbStats.completed / dbStats.total * 100) : 0
+  }), [dbStats])
 
   const filteredNodes = useMemo(() => {
     return selectedCategory === 'all'
@@ -420,11 +486,11 @@ export default function WorkflowBuilderClient() {
   }, [selectedCategory])
 
   const filteredWorkflows = useMemo(() => {
-    return mockWorkflows.filter(w =>
+    return workflowsData.filter(w =>
       w.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       w.description?.toLowerCase().includes(searchQuery.toLowerCase())
     )
-  }, [searchQuery])
+  }, [searchQuery, workflowsData])
 
   // Dialog states
   const [showCreateDialog, setShowCreateDialog] = useState(false)
@@ -479,16 +545,13 @@ export default function WorkflowBuilderClient() {
     window.location.href = `/dashboard/workflow-builder-v2/editor?workflow=${encodeURIComponent(workflowName)}`
   }
 
-  const handleActivateWorkflow = async (workflowName: string) => {
+  const handleActivateWorkflow = async (workflowId: string, workflowName: string) => {
     try {
-      const response = await fetch('/api/workflows/activate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: workflowName, status: 'active' })
-      })
-      if (!response.ok) throw new Error('Failed to activate')
+      const result = await startWorkflowMutation(workflowId)
+      if (!result.success) throw new Error(result.error || 'Failed to activate')
       toast.success(`"${workflowName}" is now active`)
-    } catch (error) {
+      refetch()
+    } catch (err) {
       toast.error('Failed to activate workflow')
     }
   }
@@ -508,19 +571,16 @@ export default function WorkflowBuilderClient() {
     }
   }
 
-  const handleDeleteWorkflow = async (workflowName: string) => {
+  const handleDeleteWorkflow = async (workflowId: string, workflowName: string) => {
     if (!confirm(`Are you sure you want to delete "${workflowName}"? This action cannot be undone.`)) {
       return
     }
     try {
-      const response = await fetch('/api/workflows', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: workflowName })
-      })
-      if (!response.ok) throw new Error('Failed to delete')
+      const result = await deleteWorkflowMutation(workflowId)
+      if (!result.success) throw new Error(result.error || 'Failed to delete')
       toast.success(`"${workflowName}" has been removed`)
-    } catch (error) {
+      refetch()
+    } catch (err) {
       toast.error('Failed to delete workflow')
     }
   }
@@ -585,30 +645,24 @@ export default function WorkflowBuilderClient() {
     setActiveTab('settings')
   }
 
-  const handlePauseWorkflow = async (workflowName: string) => {
+  const handlePauseWorkflow = async (workflowId: string, workflowName: string) => {
     try {
-      const response = await fetch('/api/workflows/pause', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: workflowName })
-      })
-      if (!response.ok) throw new Error('Failed to pause')
+      const result = await pauseWorkflowMutation(workflowId)
+      if (!result.success) throw new Error(result.error || 'Failed to pause')
       toast.success(`"${workflowName}" paused`)
-    } catch (error) {
+      refetch()
+    } catch (err) {
       toast.error('Failed to pause workflow')
     }
   }
 
-  const handlePlayWorkflow = async (workflowName: string) => {
+  const handlePlayWorkflow = async (workflowId: string, workflowName: string) => {
     try {
-      const response = await fetch('/api/workflows/run', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: workflowName })
-      })
-      if (!response.ok) throw new Error('Failed to start')
+      const result = await resumeWorkflowMutation(workflowId)
+      if (!result.success) throw new Error(result.error || 'Failed to start')
       toast.success(`"${workflowName}" is now running`)
-    } catch (error) {
+      refetch()
+    } catch (err) {
       toast.error('Failed to start workflow')
     }
   }
@@ -1037,29 +1091,36 @@ export default function WorkflowBuilderClient() {
       return
     }
     setIsSaving(true)
-    const createPromise = fetch('/api/workflows', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+    try {
+      const result = await createWorkflowMutation({
         name: newWorkflowName,
         description: newWorkflowDescription,
-        tags: newWorkflowTags.split(',').map(t => t.trim()).filter(Boolean)
+        tags: newWorkflowTags.split(',').map(t => t.trim()).filter(Boolean),
+        status: 'draft',
+        type: 'processing',
+        priority: 'medium',
+        total_steps: 0,
+        current_step: 0,
+        steps_config: [],
+        approvals_required: 0,
+        approvals_received: 0,
+        completion_rate: 0,
+        assigned_to: [],
+        dependencies: [],
+        metadata: {}
       })
-    }).then(async (response) => {
-      if (!response.ok) throw new Error('Failed to create')
-      const data = await response.json()
+      if (!result.success) throw new Error(result.error || 'Failed to create')
       setShowNewWorkflowDialog(false)
       setNewWorkflowName('')
       setNewWorkflowDescription('')
       setNewWorkflowTags('')
-      return data
-    }).finally(() => setIsSaving(false))
-
-    toast.promise(createPromise, {
-      loading: 'Creating workflow...',
-      success: (data) => `Workflow "${data?.name || newWorkflowName}" created successfully!`,
-      error: 'Failed to create workflow'
-    })
+      toast.success(`Workflow "${newWorkflowName}" created successfully!`)
+      refetch()
+    } catch (err) {
+      toast.error('Failed to create workflow')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   // Add workflow step handler
@@ -1292,6 +1353,25 @@ export default function WorkflowBuilderClient() {
     // Here you would implement actual insight action logic
   }, [])
 
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-violet-600" />
+      </div>
+    )
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full min-h-screen gap-4">
+        <p className="text-red-500">Error loading workflows: {error}</p>
+        <Button onClick={() => refetch()}>Retry</Button>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:bg-none dark:bg-gray-900">
       {/* Header */}
@@ -1461,11 +1541,11 @@ export default function WorkflowBuilderClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockWorkflows.length}</p>
+                    <p className="text-3xl font-bold">{workflowsData.length}</p>
                     <p className="text-violet-200 text-sm">Workflows</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockWorkflows.filter(w => w.status === 'active').length}</p>
+                    <p className="text-3xl font-bold">{workflowsData.filter(w => w.status === 'active').length}</p>
                     <p className="text-violet-200 text-sm">Active</p>
                   </div>
                   <div className="text-center">

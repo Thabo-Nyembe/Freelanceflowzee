@@ -35,7 +35,8 @@ import {
   Copy,
   RefreshCw,
   Plus,
-  Download
+  Download,
+  Loader2
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -288,6 +289,9 @@ function convertDbEventToUiEvent(dbEvent: DbEvent): EventTracking {
 }
 
 export default function BroadcastsClient({ initialBroadcasts }: { initialBroadcasts: Broadcast[] }) {
+  // Initialize Supabase client
+  const supabase = createClient()
+
   // Define adapter variables locally (removed mock data imports)
   const broadcastsAIInsights: any[] = []
   const broadcastsCollaborators: any[] = []
@@ -950,8 +954,24 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
     }
   }
 
+  // Loading state - check all hooks
+  if (loading || campaignsLoading || templatesLoading || automationsLoading || eventsLoading || isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
 
-  if (error) return <div className="p-8"><div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded dark:bg-red-900/20 dark:border-red-800 dark:text-red-400">Error: {error.message}</div></div>
+  // Error state with retry
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-4">
+        <p className="text-red-500">Error loading data</p>
+        <Button onClick={() => refetch()}>Retry</Button>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">

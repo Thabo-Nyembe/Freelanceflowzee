@@ -17,7 +17,7 @@ import {
   Lock, Unlock, UserPlus, Edit, Trash2, Download, Upload, RefreshCw, Smartphone, Globe, Monitor, Activity,
   ShieldCheck, ShieldAlert, UserCheck, UserX, Fingerprint, LogOut,
   AlertCircle, CheckCircle, Copy, Bell, Palette,
-  Database, Server, Zap, Webhook
+  Database, Server, Zap, Webhook, Loader2
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -370,7 +370,11 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
     }
   }
 
-  if (error) return <div className="p-8"><div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded">Error: {error.message}</div></div>
+  // Loading state
+  if (loading) return <div className="flex items-center justify-center h-full"><Loader2 className="h-8 w-8 animate-spin" /></div>
+
+  // Error state
+  if (error) return <div className="flex flex-col items-center justify-center h-full gap-4"><p className="text-red-500">Error loading data</p><Button onClick={() => refetch()}>Retry</Button></div>
 
   // Real Supabase Handlers
   const handleInviteUser = async () => {

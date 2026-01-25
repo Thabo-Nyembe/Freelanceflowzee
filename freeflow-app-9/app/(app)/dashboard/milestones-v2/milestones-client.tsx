@@ -1,6 +1,9 @@
 'use client'
 
 import { createClient } from '@/lib/supabase/client'
+import { useMilestones, useMilestoneMutations, type Milestone as HookMilestone, type MilestoneFilters } from '@/lib/hooks/use-milestones'
+
+const supabase = createClient()
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
@@ -678,9 +681,19 @@ export default function MilestonesClient() {
   const [priorityFilter, setPriorityFilter] = useState<Priority | 'all'>('all')
   const [settingsTab, setSettingsTab] = useState('general')
 
-  // Supabase data state
+  // Build filters for the hook
+  const hookFilters: MilestoneFilters = useMemo(() => ({
+    status: statusFilter !== 'all' ? statusFilter : undefined,
+    priority: priorityFilter !== 'all' ? priorityFilter : undefined,
+  }), [statusFilter, priorityFilter])
+
+  // Use Supabase hook for milestones data
+  const { milestones: hookMilestones, stats: hookStats, isLoading, error: hookError, refetch } = useMilestones([], hookFilters)
+  const { createMilestone, updateMilestone, deleteMilestone, isCreating, isUpdating, isDeleting } = useMilestoneMutations()
+
+  // Supabase data state (kept for backward compatibility)
   const [dbMilestones, setDbMilestones] = useState<DbMilestone[]>([])
-  const [loading, setLoading] = useState(true)
+  const loading = isLoading
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [showRiskAnalysisDialog, setShowRiskAnalysisDialog] = useState(false)
@@ -755,54 +768,30 @@ export default function MilestonesClient() {
     owner: ''
   })
 
-  // Fetch milestones from Supabase
-  const fetchMilestones = useCallback(async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-
-      const { data, error } = await supabase
-        .from('milestones')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-
-      if (error) throw error
-      setDbMilestones(data || [])
-    } catch (error) {
-      console.error('Error fetching milestones:', error)
-      toast.error('Failed to load milestones')
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
+  // Sync dbMilestones with hook data for backward compatibility
   useEffect(() => {
-    fetchMilestones()
-  }, [fetchMilestones])
+    if (hookMilestones) {
+      setDbMilestones(hookMilestones as unknown as DbMilestone[])
+    }
+  }, [hookMilestones])
 
-  // Create milestone
+  // Fetch milestones using hook refetch
+  const fetchMilestones = useCallback(async () => {
+    await refetch()
+  }, [refetch])
+
+  // Create milestone using hook mutation
   const handleCreateMilestone = async () => {
     if (!formState.name.trim()) {
       toast.error('Milestone name is required')
       return
     }
 
-    setIsSubmitting(true)
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        toast.error('Please sign in to create milestones')
-        return
-      }
-
-      const milestoneCode = `MS-${Date.now().toString(36).toUpperCase()}`
       const dueDate = formState.due_date ? new Date(formState.due_date) : null
       const daysRemaining = dueDate ? Math.ceil((dueDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : 0
 
-      const { error } = await supabase.from('milestones').insert({
-        user_id: user.id,
-        milestone_code: milestoneCode,
+      await createMilestone({
         name: formState.name,
         description: formState.description || null,
         type: formState.type,
@@ -822,94 +811,69 @@ export default function MilestonesClient() {
         dependencies: 0,
       })
 
-      if (error) throw error
-
       toast.success('Milestone created successfully')
       setShowCreateDialog(false)
       setFormState(initialFormState)
-      fetchMilestones()
     } catch (error) {
       console.error('Error creating milestone:', error)
       toast.error('Failed to create milestone')
-    } finally {
-      setIsSubmitting(false)
     }
   }
 
-  // Update milestone status
+  // Update milestone status using hook mutation
   const handleUpdateStatus = async (milestoneId: string, newStatus: MilestoneStatus) => {
     try {
       const progress = newStatus === 'completed' ? 100 : newStatus === 'not_started' ? 0 : undefined
 
-      const updateData: Record<string, unknown> = { status: newStatus, updated_at: new Date().toISOString() }
+      const updateData: Partial<HookMilestone> = { status: newStatus }
       if (progress !== undefined) updateData.progress = progress
 
-      const { error } = await supabase
-        .from('milestones')
-        .update(updateData)
-        .eq('id', milestoneId)
-
-      if (error) throw error
-
+      await updateMilestone({ id: milestoneId, updates: updateData })
       toast.success(`Milestone marked as ${newStatus.replace('_', ' ')}`)
-      fetchMilestones()
     } catch (error) {
       console.error('Error updating status:', error)
       toast.error('Failed to update milestone status')
     }
   }
 
-  // Update milestone progress
+  // Update milestone progress using hook mutation
   const handleUpdateProgress = async (milestoneId: string, progress: number) => {
     try {
-      const { error } = await supabase
-        .from('milestones')
-        .update({
+      await updateMilestone({
+        id: milestoneId,
+        updates: {
           progress,
-          status: progress === 100 ? 'completed' : progress > 0 ? 'in_progress' : 'not_started',
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', milestoneId)
-
-      if (error) throw error
+          status: progress === 100 ? 'completed' : progress > 0 ? 'in-progress' : 'upcoming',
+        }
+      })
       toast.success('Progress updated')
-      fetchMilestones()
     } catch (error) {
       console.error('Error updating progress:', error)
       toast.error('Failed to update progress')
     }
   }
 
-  // Delete/Archive milestone
+  // Delete/Archive milestone using hook mutation
   const handleArchiveMilestone = async (milestoneId: string) => {
     try {
-      const { error } = await supabase
-        .from('milestones')
-        .update({ status: 'cancelled', updated_at: new Date().toISOString() })
-        .eq('id', milestoneId)
-
-      if (error) throw error
+      await updateMilestone({
+        id: milestoneId,
+        updates: { status: 'missed' }
+      })
       toast.success('Milestone archived')
-      fetchMilestones()
     } catch (error) {
       console.error('Error archiving milestone:', error)
       toast.error('Failed to archive milestone')
     }
   }
 
-  // Delete milestone permanently
+  // Delete milestone permanently using hook mutation
   const handleDeleteMilestone = async (milestoneId: string) => {
     try {
-      const { error } = await supabase
-        .from('milestones')
-        .delete()
-        .eq('id', milestoneId)
-
-      if (error) throw error
+      await deleteMilestone(milestoneId)
       toast.success('Milestone deleted')
       setShowDeleteDialog(false)
       setMilestoneToDelete(null)
-      fetchMilestones()
     } catch (error) {
       console.error('Error deleting milestone:', error)
       toast.error('Failed to delete milestone')
@@ -942,21 +906,20 @@ export default function MilestonesClient() {
     setShowEditDialog(true)
   }
 
-  // Update existing milestone
+  // Update existing milestone using hook mutation
   const handleUpdateMilestone = async () => {
     if (!editingMilestone || !formState.name.trim()) {
       toast.error('Milestone name is required')
       return
     }
 
-    setIsSubmitting(true)
     try {
       const dueDate = formState.due_date ? new Date(formState.due_date) : null
       const daysRemaining = dueDate ? Math.ceil((dueDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : 0
 
-      const { error } = await supabase
-        .from('milestones')
-        .update({
+      await updateMilestone({
+        id: editingMilestone.id,
+        updates: {
           name: formState.name,
           description: formState.description || null,
           type: formState.type,
@@ -968,22 +931,16 @@ export default function MilestonesClient() {
           owner_email: formState.owner_email || null,
           team_name: formState.team_name || null,
           budget: parseFloat(formState.budget) || 0,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', editingMilestone.id)
-
-      if (error) throw error
+        }
+      })
 
       toast.success('Milestone updated successfully')
       setShowEditDialog(false)
       setEditingMilestone(null)
       setFormState(initialFormState)
-      fetchMilestones()
     } catch (error) {
       console.error('Error updating milestone:', error)
       toast.error('Failed to update milestone')
-    } finally {
-      setIsSubmitting(false)
     }
   }
 
@@ -1147,7 +1104,6 @@ export default function MilestonesClient() {
 
   // Sync/Refresh data
   const handleSync = async () => {
-    setLoading(true)
     await fetchMilestones()
     toast.success('Data synced')
   }
@@ -1248,22 +1204,25 @@ export default function MilestonesClient() {
     return notifications.filter(n => !n.read).length
   }, [notifications])
 
-  // Calculate stats
+  // Calculate stats from hook data
   const stats = useMemo(() => {
-    const total = mockMilestones.length
-    const completed = mockMilestones.filter(m => m.status === 'completed').length
-    const inProgress = mockMilestones.filter(m => m.status === 'in_progress').length
-    const atRisk = mockMilestones.filter(m => m.health === 'at_risk' || m.health === 'off_track').length
-    const onTrack = mockMilestones.filter(m => m.health === 'on_track').length
-    const criticalPath = mockMilestones.filter(m => m.is_critical_path).length
-    const totalBudget = mockMilestones.reduce((sum, m) => sum + m.budget.total, 0)
-    const spentBudget = mockMilestones.reduce((sum, m) => sum + m.budget.spent, 0)
-    const avgProgress = mockMilestones.reduce((sum, m) => sum + m.progress, 0) / total
-    const totalDeliverables = mockMilestones.reduce((sum, m) => sum + m.deliverables.length, 0)
-    const completedDeliverables = mockMilestones.reduce((sum, m) =>
-      sum + m.deliverables.filter(d => d.status === 'approved').length, 0)
-    const totalRisks = mockMilestones.reduce((sum, m) => sum + m.risks.length, 0)
-    const upcomingDeadlines = mockMilestones.filter(m => {
+    // Use hook stats as primary source
+    const total = hookStats?.total || hookMilestones.length
+    const completed = hookStats?.completed || hookMilestones.filter(m => m.status === 'completed').length
+    const inProgress = hookStats?.inProgress || hookMilestones.filter(m => m.status === 'in-progress').length
+    const atRisk = hookStats?.atRisk || hookMilestones.filter(m => m.status === 'at-risk').length
+
+    // Extended stats calculated from real data
+    const onTrack = hookMilestones.filter(m => m.status === 'in-progress' && m.days_remaining > 7).length
+    const criticalPath = hookMilestones.filter(m => m.priority === 'critical').length
+    const totalBudget = hookMilestones.reduce((sum, m) => sum + (m.budget || 0), 0)
+    const spentBudget = hookMilestones.reduce((sum, m) => sum + (m.spent || 0), 0)
+    const avgProgress = hookStats?.avgProgress || (total > 0 ? hookMilestones.reduce((sum, m) => sum + m.progress, 0) / total : 0)
+    const totalDeliverables = hookMilestones.reduce((sum, m) => sum + (m.deliverables || 0), 0)
+    const completedDeliverables = hookMilestones.reduce((sum, m) => sum + (m.completed_deliverables || 0), 0)
+    const totalRisks = hookMilestones.filter(m => m.status === 'at-risk').length
+    const upcomingDeadlines = hookMilestones.filter(m => {
+      if (!m.due_date) return false
       const days = getDaysRemaining(m.due_date)
       return days > 0 && days <= 14
     }).length
@@ -1272,31 +1231,29 @@ export default function MilestonesClient() {
       total, completed, inProgress, atRisk, onTrack, criticalPath,
       totalBudget, spentBudget, avgProgress, totalDeliverables,
       completedDeliverables, totalRisks, upcomingDeadlines,
-      completionRate: Math.round((completed / total) * 100),
-      budgetUtilization: Math.round((spentBudget / totalBudget) * 100),
-      deliverableRate: Math.round((completedDeliverables / totalDeliverables) * 100),
+      completionRate: total > 0 ? Math.round((completed / total) * 100) : 0,
+      budgetUtilization: totalBudget > 0 ? Math.round((spentBudget / totalBudget) * 100) : 0,
+      deliverableRate: totalDeliverables > 0 ? Math.round((completedDeliverables / totalDeliverables) * 100) : 0,
     }
-  }, [])
+  }, [hookStats, hookMilestones])
 
-  // Filter milestones
+  // Filter milestones - use hook data with search filter (status/priority already applied via hook)
   const filteredMilestones = useMemo(() => {
-    return mockMilestones.filter(milestone => {
+    // Filter hook data by search only (status/priority already filtered by hook)
+    return hookMilestones.filter(milestone => {
       const matchesSearch = searchQuery === '' ||
         milestone.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        milestone.project_name.toLowerCase().includes(searchQuery.toLowerCase())
-      const matchesStatus = statusFilter === 'all' || milestone.status === statusFilter
-      const matchesPriority = priorityFilter === 'all' || milestone.priority === priorityFilter
-      return matchesSearch && matchesStatus && matchesPriority
+        (milestone.team_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (milestone.description || '').toLowerCase().includes(searchQuery.toLowerCase())
+      return matchesSearch
     })
-  }, [searchQuery, statusFilter, priorityFilter])
+  }, [searchQuery, hookMilestones])
 
-  // Get all dependencies for visualization
+  // Get all dependencies for visualization (empty array until DB supports dependencies)
   const allDependencies = useMemo(() => {
     const deps: Dependency[] = []
-    mockMilestones.forEach(m => {
-      deps.push(...m.dependencies_in, ...m.dependencies_out)
-    })
-    return [...new Map(deps.map(d => [d.id, d])).values()]
+    // Dependencies will be populated when the feature is added to the database
+    return deps
   }, [])
 
   // Export timeline handler
@@ -1315,6 +1272,25 @@ export default function MilestonesClient() {
     { id: '7', label: 'Settings', icon: Settings, action: () => setShowSettingsDialog(true), variant: 'secondary' as const },
     { id: '8', label: 'Refresh', icon: RefreshCw, action: handleSync, variant: 'secondary' as const },
   ]
+
+  // Show error state
+  if (hookError) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-pink-50 dark:bg-none dark:bg-gray-900 flex items-center justify-center">
+        <Card className="max-w-md mx-auto">
+          <CardContent className="p-6 text-center">
+            <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">Error Loading Milestones</h2>
+            <p className="text-slate-600 dark:text-slate-400 mb-4">{hookError.message || 'Failed to load milestones data'}</p>
+            <Button onClick={() => refetch()} className="bg-gradient-to-r from-rose-600 to-pink-600 text-white">
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Try Again
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-pink-50 dark:bg-none dark:bg-gray-900">
@@ -1336,16 +1312,23 @@ export default function MilestonesClient() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm" onClick={handleSync} disabled={loading}>
-              <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            {isLoading && (
+              <Badge variant="outline" className="text-rose-600 border-rose-200">
+                <RefreshCw className="w-3 h-3 mr-1 animate-spin" />
+                Loading...
+              </Badge>
+            )}
+            <Button variant="outline" size="sm" onClick={handleSync} disabled={isLoading}>
+              <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
               Sync
             </Button>
             <Button
               className="bg-gradient-to-r from-rose-600 to-pink-600 text-white"
               onClick={() => setShowCreateDialog(true)}
+              disabled={isCreating}
             >
               <Plus className="w-4 h-4 mr-2" />
-              New Milestone
+              {isCreating ? 'Creating...' : 'New Milestone'}
             </Button>
           </div>
         </div>
@@ -1707,7 +1690,7 @@ export default function MilestonesClient() {
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockMilestones.length}</p>
+                    <p className="text-3xl font-bold">{hookMilestones.length}</p>
                     <p className="text-rose-200 text-sm">Milestones</p>
                   </div>
                   <div className="text-center">
@@ -1739,11 +1722,13 @@ export default function MilestonesClient() {
 
                   {/* Timeline rows */}
                   <div className="space-y-4">
-                    {mockMilestones.map((milestone) => {
-                      const TypeIcon = getTypeIcon(milestone.type)
-                      const startPercent = Math.max(0, Math.min(100, ((new Date(milestone.start_date).getMonth()) / 6) * 100))
-                      const endPercent = Math.max(0, Math.min(100, ((new Date(milestone.due_date).getMonth() + 1) / 6) * 100))
-                      const width = endPercent - startPercent
+                    {hookMilestones.map((milestone) => {
+                      const TypeIcon = getTypeIcon(milestone.type as MilestoneType) || Milestone
+                      const startDate = milestone.due_date ? new Date(milestone.due_date) : new Date()
+                      startDate.setMonth(startDate.getMonth() - 1) // Approximate start as 1 month before due
+                      const startPercent = Math.max(0, Math.min(100, ((startDate.getMonth()) / 6) * 100))
+                      const endPercent = Math.max(0, Math.min(100, ((new Date(milestone.due_date || new Date()).getMonth() + 1) / 6) * 100))
+                      const width = Math.max(5, endPercent - startPercent)
 
                       return (
                         <div key={milestone.id} className="flex items-center gap-4">
@@ -1763,7 +1748,7 @@ export default function MilestonesClient() {
                               className={`absolute top-1 bottom-1 rounded-md ${
                                 milestone.status === 'completed'
                                   ? 'bg-gradient-to-r from-green-500 to-emerald-500'
-                                  : milestone.health === 'at_risk'
+                                  : milestone.status === 'at-risk'
                                   ? 'bg-gradient-to-r from-amber-500 to-orange-500'
                                   : 'bg-gradient-to-r from-rose-500 to-pink-500'
                               }`}
@@ -1774,7 +1759,7 @@ export default function MilestonesClient() {
                                 style={{ width: `${milestone.progress}%` }}
                               />
                             </div>
-                            {milestone.is_critical_path && (
+                            {milestone.priority === 'critical' && (
                               <Zap className="absolute -top-2 -right-2 w-4 h-4 text-red-500" />
                             )}
                           </div>
@@ -1810,73 +1795,55 @@ export default function MilestonesClient() {
           {/* Deliverables Tab */}
           <TabsContent value="deliverables" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {mockMilestones.filter(m => m.deliverables.length > 0).map((milestone) => (
+              {hookMilestones.filter(m => (m.deliverables || 0) > 0).map((milestone) => (
                 <Card key={milestone.id} className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
                   <CardHeader className="pb-3">
                     <CardTitle className="flex items-center justify-between">
                       <span className="text-lg">{milestone.name}</span>
                       <Badge variant="outline">
-                        {milestone.deliverables.filter(d => d.status === 'approved').length}/{milestone.deliverables.length} Complete
+                        {milestone.completed_deliverables || 0}/{milestone.deliverables || 0} Complete
                       </Badge>
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      {milestone.deliverables.map((deliverable) => (
-                        <div
-                          key={deliverable.id}
-                          className="flex items-center justify-between p-3 rounded-lg border border-slate-200 dark:border-slate-700 hover:border-rose-500/50 transition-colors"
-                        >
-                          <div className="flex items-center gap-3">
-                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                              deliverable.status === 'approved'
-                                ? 'bg-green-100 dark:bg-green-900/30'
-                                : deliverable.status === 'in_progress'
-                                ? 'bg-blue-100 dark:bg-blue-900/30'
-                                : deliverable.status === 'review'
-                                ? 'bg-amber-100 dark:bg-amber-900/30'
-                                : 'bg-slate-100 dark:bg-slate-800'
-                            }`}>
-                              {deliverable.status === 'approved' ? (
-                                <CheckCircle2 className="w-4 h-4 text-green-600" />
-                              ) : deliverable.status === 'in_progress' ? (
-                                <PlayCircle className="w-4 h-4 text-blue-600" />
-                              ) : deliverable.status === 'review' ? (
-                                <Eye className="w-4 h-4 text-amber-600" />
-                              ) : (
-                                <Clock className="w-4 h-4 text-slate-600" />
-                              )}
-                            </div>
-                            <div>
-                              <p className="text-sm font-medium text-slate-900 dark:text-white">
-                                {deliverable.name}
-                              </p>
-                              <p className="text-xs text-slate-500">
-                                Due: {formatDate(deliverable.due_date)} • {deliverable.assignee.name}
-                              </p>
-                            </div>
+                      <div className="flex items-center justify-between p-3 rounded-lg border border-slate-200 dark:border-slate-700">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-rose-100 dark:bg-rose-900/30">
+                            <Package className="w-4 h-4 text-rose-600" />
                           </div>
-                          <div className="flex items-center gap-3">
-                            <Badge variant="outline" className={getPriorityColor(deliverable.priority)}>
-                              {deliverable.priority}
-                            </Badge>
-                            <div className="flex items-center gap-2 text-sm text-slate-500">
-                              <span className="flex items-center gap-1">
-                                <FileText className="w-3 h-3" />
-                                {deliverable.attachments}
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <MessageSquare className="w-3 h-3" />
-                                {deliverable.comments}
-                              </span>
-                            </div>
+                          <div>
+                            <p className="text-sm font-medium text-slate-900 dark:text-white">
+                              {milestone.deliverables || 0} Deliverable{(milestone.deliverables || 0) !== 1 ? 's' : ''}
+                            </p>
+                            <p className="text-xs text-slate-500">
+                              {milestone.completed_deliverables || 0} completed • {(milestone.deliverables || 0) - (milestone.completed_deliverables || 0)} remaining
+                            </p>
                           </div>
                         </div>
-                      ))}
+                        <div className="flex items-center gap-3">
+                          <Progress
+                            value={milestone.deliverables ? ((milestone.completed_deliverables || 0) / milestone.deliverables) * 100 : 0}
+                            className="w-24 h-2"
+                          />
+                          <Badge variant="outline" className={getPriorityColor(milestone.priority)}>
+                            {milestone.priority}
+                          </Badge>
+                        </div>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
               ))}
+              {hookMilestones.filter(m => (m.deliverables || 0) > 0).length === 0 && (
+                <Card className="col-span-full border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+                  <CardContent className="py-12 text-center">
+                    <Package className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+                    <p className="text-slate-500">No milestones with deliverables yet</p>
+                    <p className="text-sm text-slate-400 mt-1">Create milestones and add deliverables to track progress</p>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           </TabsContent>
 
@@ -2734,25 +2701,25 @@ export default function MilestonesClient() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
                 <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
                   <div className="text-2xl font-bold text-red-600">
-                    {mockMilestones.reduce((acc, m) => acc + m.risks.filter(r => r.impact === 'critical').length, 0)}
+                    {hookMilestones.filter(m => m.priority === 'critical' && m.status === 'at-risk').length}
                   </div>
                   <div className="text-xs text-red-600">Critical Risks</div>
                 </div>
                 <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
                   <div className="text-2xl font-bold text-amber-600">
-                    {mockMilestones.reduce((acc, m) => acc + m.risks.filter(r => r.impact === 'high').length, 0)}
+                    {hookMilestones.filter(m => m.priority === 'high' && m.status === 'at-risk').length}
                   </div>
                   <div className="text-xs text-amber-600">High Impact</div>
                 </div>
                 <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
                   <div className="text-2xl font-bold text-blue-600">
-                    {mockMilestones.reduce((acc, m) => acc + m.risks.filter(r => r.status === 'mitigating').length, 0)}
+                    {hookMilestones.filter(m => m.status === 'in-progress').length}
                   </div>
                   <div className="text-xs text-blue-600">Being Mitigated</div>
                 </div>
                 <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
                   <div className="text-2xl font-bold text-green-600">
-                    {mockMilestones.reduce((acc, m) => acc + m.risks.filter(r => r.status === 'mitigated').length, 0)}
+                    {hookMilestones.filter(m => m.status === 'completed').length}
                   </div>
                   <div className="text-xs text-green-600">Mitigated</div>
                 </div>
@@ -3410,7 +3377,7 @@ export default function MilestonesClient() {
                 <Label>Source Milestone</Label>
                 <select className="w-full h-10 px-3 rounded-md border border-input bg-background">
                   <option value="">Select source milestone...</option>
-                  {mockMilestones.map(m => (
+                  {hookMilestones.map(m => (
                     <option key={m.id} value={m.id}>{m.name}</option>
                   ))}
                 </select>
@@ -3428,7 +3395,7 @@ export default function MilestonesClient() {
                 <Label>Target Milestone</Label>
                 <select className="w-full h-10 px-3 rounded-md border border-input bg-background">
                   <option value="">Select target milestone...</option>
-                  {mockMilestones.map(m => (
+                  {hookMilestones.map(m => (
                     <option key={m.id} value={m.id}>{m.name}</option>
                   ))}
                 </select>

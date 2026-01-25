@@ -2,10 +2,11 @@
 
 import { createClient } from '@/lib/supabase/client'
 
-import { useState, useMemo, useEffect, useCallback } from 'react'
+import { useState, useMemo } from 'react'
 import dynamic from 'next/dynamic'
 import { toast } from 'sonner'
 import { useCustomerSupport } from '@/lib/hooks/use-customer-support'
+import { useSupportTickets, type SupportTicket } from '@/lib/hooks/use-support-tickets'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -24,7 +25,7 @@ import {
   BarChart3, Target, Zap, Shield, Globe, Tag, Inbox,
   Archive, RefreshCw, FileText, Bot,
   Settings, Bell, Key, Link2, Database, Headphones,
-  Languages, Calendar, Timer
+  Languages, Calendar, Timer, Loader2
 } from 'lucide-react'
 
 // Lazy-loaded Competitive Upgrade Components for code splitting
@@ -220,6 +221,22 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
     initialStats || { totalAgents: 0, onlineAgents: 0, busyAgents: 0, totalActiveConversations: 0, avgSatisfaction: 0, resolvedToday: 0 }
   )
 
+  // MIGRATED: Support tickets from Supabase hook
+  const {
+    tickets: supportTickets,
+    loading: ticketsLoading,
+    error: ticketsError,
+    fetchTickets,
+    createTicket,
+    updateTicket,
+    deleteTicket: hookDeleteTicket,
+    assignTicket,
+    resolveTicket,
+    closeTicket,
+    reopenTicket,
+    getStats: getTicketStats
+  } = useSupportTickets()
+
   const [activeTab, setActiveTab] = useState('tickets')
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null)
   const [showTicketDialog, setShowTicketDialog] = useState(false)
@@ -298,9 +315,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
   const [ptoRequestForm, setPtoRequestForm] = useState({ startDate: '', endDate: '', reason: '' })
   const [shiftSwapForm, setShiftSwapForm] = useState({ date: '', swapWith: '' })
 
-  // Supabase state
-  const [dbTickets, setDbTickets] = useState<DbTicket[]>([])
-  const [isLoading, setIsLoading] = useState(false)
+  // UI state
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [showCreateTeamDialog, setShowCreateTeamDialog] = useState(false)
@@ -309,36 +324,45 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
   const [newSegmentName, setNewSegmentName] = useState('')
   const [ticketForm, setTicketForm] = useState<TicketFormState>(initialTicketForm)
 
-  // Fetch tickets from Supabase
-  const fetchTickets = useCallback(async () => {
-    setIsLoading(true)
-    try {
-      const { data, error } = await supabase
-        .from('support_tickets')
-        .select('*')
-        .is('deleted_at', null)
-        .order('created_at', { ascending: false })
-
-      if (error) throw error
-      setDbTickets(data || [])
-    } catch (error) {
-      console.error('Error fetching tickets:', error)
-      toast.error('Failed to load tickets')
-    } finally {
-      setIsLoading(false)
-    }
-  }, [])
-
-  useEffect(() => {
-    fetchTickets()
-  }, [fetchTickets])
-
   // MIGRATED: Batch #13 - Removed mock data, using database hooks
-  const tickets: Ticket[] = []
   const agents: Agent[] = dbAgents || []
   const slas: SLA[] = []
   const cannedResponses: CannedResponse[] = []
   const customers: Customer[] = []
+
+  // Map support tickets from hook to UI Ticket type
+  const tickets: Ticket[] = useMemo(() => {
+    return (supportTickets || []).map((t: SupportTicket): Ticket => ({
+      id: t.id,
+      subject: t.subject,
+      description: t.description || '',
+      status: t.status === 'in_progress' ? 'open' : t.status === 'resolved' ? 'solved' : t.status as TicketStatus,
+      priority: t.priority as TicketPriority,
+      channel: t.channel === 'self_service' ? 'web' : t.channel as TicketChannel,
+      customer: {
+        id: t.user_id,
+        name: t.customer_name || 'Unknown Customer',
+        email: t.customer_email || '',
+        avatar: '',
+        tier: 'basic',
+        totalTickets: 1,
+        satisfactionScore: t.satisfaction_rating || 0,
+        lastContact: t.updated_at,
+        tags: [],
+        notes: ''
+      },
+      assignee: undefined,
+      tags: t.tags || [],
+      messages: [],
+      createdAt: t.created_at,
+      updatedAt: t.updated_at,
+      firstResponseAt: t.first_response_at || undefined,
+      resolvedAt: t.resolved_at || undefined,
+      slaBreached: t.sla_breached,
+      satisfactionRating: t.satisfaction_rating || undefined,
+      category: t.category
+    }))
+  }, [supportTickets])
 
   const filteredTickets = useMemo(() => {
     return tickets.filter(ticket => {
@@ -351,13 +375,34 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
     })
   }, [tickets, statusFilter, priorityFilter, channelFilter, searchQuery])
 
-  const stats = {
-    totalTickets: tickets.length,
-    openTickets: tickets.filter(t => ['new', 'open', 'pending'].includes(t.status)).length,
-    avgResponseTime: Math.round(agents.reduce((sum, a) => sum + a.avgResponseTime, 0) / agents.length),
-    satisfactionScore: (agents.reduce((sum, a) => sum + a.satisfactionScore, 0) / agents.length).toFixed(1),
-    slaCompliance: Math.round(slas.reduce((sum, s) => sum + s.complianceRate, 0) / slas.length),
-    resolvedToday: agents.reduce((sum, a) => sum + a.resolvedToday, 0)
+  // Get stats from the hook
+  const ticketStatsData = useMemo(() => getTicketStats(), [getTicketStats])
+
+  const stats = useMemo(() => ({
+    totalTickets: ticketStatsData.total,
+    openTickets: ticketStatsData.open + ticketStatsData.inProgress + ticketStatsData.pending,
+    avgResponseTime: ticketStatsData.avgResponseTime || 0,
+    satisfactionScore: ticketStatsData.satisfactionRate.toFixed(1),
+    slaCompliance: Math.round(slas.reduce((sum, s) => sum + s.complianceRate, 0) / (slas.length || 1)),
+    resolvedToday: agents.reduce((sum, a) => sum + (a.resolvedToday || 0), 0)
+  }), [ticketStatsData, slas, agents])
+
+  // Loading and error states from hook (placed after all hooks)
+  if (ticketsLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
+
+  if (ticketsError) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-4">
+        <p className="text-red-500">Error loading data</p>
+        <Button onClick={() => fetchTickets()}>Retry</Button>
+      </div>
+    )
   }
 
   const openTicketDetails = (ticket: Ticket) => {

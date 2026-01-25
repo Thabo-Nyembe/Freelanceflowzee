@@ -1,11 +1,10 @@
 "use client"
 
-import React, { useState, useMemo, useEffect } from 'react'
+import React, { useState, useMemo } from 'react'
 import dynamic from 'next/dynamic'
 import { toast } from 'sonner'
 // Real database hooks for marketing data
-import { useMarketingCampaigns, MarketingCampaign } from '@/lib/hooks/use-marketing'
-import { useCampaigns, Campaign as DBCampaign } from '@/lib/hooks/use-campaigns'
+import { useMarketingCampaigns } from '@/lib/hooks/use-marketing'
 import { useLeads as useLeadsExtended } from '@/lib/hooks/use-leads-extended'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -59,6 +58,8 @@ import {
   Heart,
   Bookmark,
   Brain,
+  Loader2,
+  AlertCircle,
 } from 'lucide-react'
 
 // Lazy-loaded Competitive Upgrades - Beats HubSpot, Salesforce, Monday.com - Code splitting for performance
@@ -458,8 +459,8 @@ const getScoreColor = (score: number) => {
 
 export default function MarketingClient() {
   // MIGRATED: Real database hooks
-  const { campaigns: dbCampaigns, loading: campaignsLoading, fetchCampaigns } = useMarketingCampaigns()
-  const { leads: dbLeads, isLoading: leadsLoading } = useLeadsExtended({ limit: 100 })
+  const { campaigns: dbCampaigns, loading: campaignsLoading, error: campaignsError, fetchCampaigns } = useMarketingCampaigns()
+  const { leads: dbLeads, isLoading: leadsLoading, refresh: refetchLeads } = useLeadsExtended({ limit: 100 })
 
   // Transform database data to local types (use empty array when no data)
   const campaigns: Campaign[] = useMemo(() => {
@@ -642,6 +643,30 @@ export default function MarketingClient() {
       return matchesSearch && matchesFilter
     })
   }, [leads, searchQuery, leadFilter])
+
+  // Combined loading state
+  const isLoading = campaignsLoading || leadsLoading
+  const error = campaignsError
+
+  // Loading state early return (after all hooks)
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
+
+  // Error state early return (after all hooks)
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-4">
+        <AlertCircle className="h-12 w-12 text-red-500" />
+        <p className="text-red-500">Error loading data</p>
+        <Button onClick={() => { fetchCampaigns(); refetchLeads(); }}>Retry</Button>
+      </div>
+    )
+  }
 
   // Handlers - Real functionality
   const handleCreateCampaign = () => {

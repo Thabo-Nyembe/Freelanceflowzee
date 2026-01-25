@@ -40,9 +40,11 @@ export function useActivityLogs(initialLogs: ActivityLog[] = [], filters: Activi
   const supabase = createClient()
   const [logs, setLogs] = useState<ActivityLog[]>(initialLogs)
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<Error | null>(null)
 
   const fetchLogs = useCallback(async () => {
     setIsLoading(true)
+    setError(null)
     let query = supabase
       .from('activity_logs')
       .select('*')
@@ -58,8 +60,10 @@ export function useActivityLogs(initialLogs: ActivityLog[] = [], filters: Activi
       query = query.eq('category', filters.category)
     }
 
-    const { data, error } = await query.limit(200)
-    if (!error && data) {
+    const { data, error: fetchError } = await query.limit(200)
+    if (fetchError) {
+      setError(new Error(fetchError.message))
+    } else if (data) {
       setLogs(data)
     }
     setIsLoading(false)
@@ -98,7 +102,7 @@ export function useActivityLogs(initialLogs: ActivityLog[] = [], filters: Activi
     successRate: logs.length > 0 ? (logs.filter(l => l.status === 'success').length / logs.length) * 100 : 0
   }
 
-  return { logs, stats, isLoading, refetch: fetchLogs }
+  return { logs, stats, isLoading, error, refetch: fetchLogs }
 }
 
 export function getActivityStatusColor(status: string): string {

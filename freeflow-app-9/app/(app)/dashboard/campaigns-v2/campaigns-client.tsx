@@ -33,7 +33,7 @@ import {
   RefreshCw, Download, Share2, PieChart,
   Palette, Image, Type, Wand2, Shield, Smartphone, ArrowUp, ArrowDown, AlertTriangle, CheckCircle, Timer, MailOpen, MousePointerClick, UserMinus, AreaChart,
   Sliders, Webhook, Database, Terminal, Archive,
-  Trash2 as TrashIcon, Bell, Code
+  Trash2 as TrashIcon, Bell, Code, Loader2
 } from 'lucide-react'
 
 // Competitive Upgrade Components
@@ -304,7 +304,7 @@ export default function CampaignsClient() {
   ]
 
   // Database integration
-  const { campaigns: dbCampaigns, createCampaign, updateCampaign, deleteCampaign, loading: campaignsLoading, refetch } = useCampaigns({})
+  const { campaigns: dbCampaigns, createCampaign, updateCampaign, deleteCampaign, loading: isLoading, error, refetch } = useCampaigns({})
 
   // Form state for new campaign
   const [newCampaignForm, setNewCampaignForm] = useState({
@@ -397,6 +397,12 @@ export default function CampaignsClient() {
 
   // Handlers - Real Supabase Operations
   const [operationLoading, setOperationLoading] = useState<string | null>(null)
+
+  // Loading state
+  if (isLoading) return <div className="flex items-center justify-center h-full"><Loader2 className="h-8 w-8 animate-spin" /></div>
+
+  // Error state
+  if (error) return <div className="flex flex-col items-center justify-center h-full gap-4"><p className="text-red-500">Error loading data</p><Button onClick={() => refetch()}>Retry</Button></div>
 
   const handleLaunchCampaign = async (campaignId: string, campaignName: string) => {
     setOperationLoading(campaignId)

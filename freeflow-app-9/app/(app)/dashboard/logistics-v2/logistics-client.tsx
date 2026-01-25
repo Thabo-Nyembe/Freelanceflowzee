@@ -2,7 +2,7 @@
 
 import { createClient } from '@/lib/supabase/client'
 
-import { useState, useMemo, useEffect, useCallback } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
 import {
   Truck, Package, MapPin, Route, Clock, CheckCircle, XCircle,
@@ -15,6 +15,11 @@ import {
 
 // Auth hook
 import { useAuthUserId } from '@/lib/hooks/use-auth-user-id'
+
+// Logistics hooks from Supabase
+import { useLogisticsRoutes, useFleetVehicles } from '@/lib/hooks/use-logistics'
+import { useShipments, useCarriers, useWarehouses } from '@/lib/hooks/use-logistics-extended'
+import { useOrders as useOrdersHook } from '@/lib/hooks/use-orders'
 
 // Enhanced & Competitive Upgrade Components
 import {
@@ -372,11 +377,263 @@ export default function LogisticsClient() {
     getUserId().then(setUserId)
   }, [getUserId])
 
-  // Empty arrays - no mock data, ready for real backend integration
-  const shipments: Shipment[] = []
-  const carriers: Carrier[] = []
-  const warehouses: WarehouseLocation[] = []
-  const orders: Order[] = []
+  // =====================================================
+  // SUPABASE HOOKS - Real data integration
+  // =====================================================
+
+  // Shipments from use-logistics-extended
+  const {
+    shipments: hookShipments,
+    isLoading: shipmentsLoading,
+    refresh: refreshShipments
+  } = useShipments()
+
+  // Carriers from use-logistics-extended
+  const {
+    carriers: hookCarriers,
+    isLoading: carriersLoading,
+    refresh: refreshCarriers
+  } = useCarriers({ is_active: true })
+
+  // Warehouses from use-logistics-extended
+  const {
+    warehouses: hookWarehouses,
+    isLoading: warehousesLoading,
+    refresh: refreshWarehouses
+  } = useWarehouses()
+
+  // Routes from use-logistics
+  const {
+    routes: hookRoutes,
+    loading: routesLoading,
+    fetchRoutes,
+    createRoute,
+    updateRoute,
+    deleteRoute,
+    startRoute,
+    completeRoute,
+    getStats: getRouteStats
+  } = useLogisticsRoutes()
+
+  // Fleet vehicles from use-logistics
+  const {
+    vehicles: hookVehicles,
+    loading: vehiclesLoading,
+    createVehicle,
+    updateVehicle,
+    deleteVehicle
+  } = useFleetVehicles()
+
+  // Orders from use-orders
+  const {
+    data: hookOrders,
+    isLoading: ordersLoading,
+    refetch: refreshOrders
+  } = useOrdersHook()
+
+  // Map hook data to component types
+  const dbShipments: DbShipment[] = useMemo(() => {
+    return (hookShipments || []).map((s: any) => ({
+      id: s.id,
+      user_id: s.user_id || '',
+      shipment_code: s.shipment_code || s.tracking_number || '',
+      tracking_number: s.tracking_number,
+      order_id: s.order_id,
+      status: s.status || 'pending',
+      method: s.method || s.shipping_method || 'standard',
+      carrier: s.carrier || s.logistics_carriers?.name || '',
+      origin_address: s.origin_address,
+      origin_city: s.origin_city,
+      origin_state: s.origin_state,
+      origin_country: s.origin_country || 'US',
+      origin_postal: s.origin_postal,
+      recipient_name: s.recipient_name,
+      recipient_email: s.recipient_email,
+      recipient_phone: s.recipient_phone,
+      destination_address: s.destination_address,
+      destination_city: s.destination_city,
+      destination_state: s.destination_state,
+      destination_country: s.destination_country || 'US',
+      destination_postal: s.destination_postal,
+      item_count: s.item_count || 1,
+      weight_lbs: s.weight_lbs || s.weight || 1,
+      dimensions_length: s.dimensions_length,
+      dimensions_width: s.dimensions_width,
+      dimensions_height: s.dimensions_height,
+      shipping_cost: s.shipping_cost || 0,
+      insurance_value: s.insurance_value || 0,
+      declared_value: s.declared_value || 0,
+      estimated_delivery: s.estimated_delivery,
+      actual_delivery: s.actual_delivery,
+      shipped_at: s.shipped_at,
+      priority: s.priority || false,
+      signature_required: s.signature_required || false,
+      insurance_enabled: s.insurance_enabled || false,
+      notes: s.notes,
+      created_at: s.created_at,
+      updated_at: s.updated_at
+    }))
+  }, [hookShipments])
+
+  const dbCarriers: DbCarrier[] = useMemo(() => {
+    return (hookCarriers || []).map((c: any) => ({
+      id: c.id,
+      user_id: c.user_id || '',
+      name: c.name || '',
+      code: c.code || '',
+      logo_url: c.logo_url,
+      status: c.is_active ? 'active' : 'inactive',
+      total_shipments: c.total_shipments || 0,
+      on_time_rate: c.on_time_rate || 0,
+      avg_delivery_days: c.avg_delivery_days || 0,
+      api_key_encrypted: c.api_key_encrypted,
+      api_config: c.api_config || {},
+      supports_tracking: c.supports_tracking || false,
+      supports_labels: c.supports_labels || false,
+      supports_rates: c.supports_rates || false,
+      created_at: c.created_at,
+      updated_at: c.updated_at
+    }))
+  }, [hookCarriers])
+
+  const dbRoutes: DbRoute[] = useMemo(() => {
+    return (hookRoutes || []).map((r: any) => ({
+      id: r.id,
+      user_id: r.user_id || '',
+      route_code: r.route_code || '',
+      route_name: r.route_name || '',
+      description: r.description,
+      route_type: r.route_type || 'local',
+      status: r.status || 'planned',
+      driver_name: r.driver_name,
+      driver_phone: r.driver_phone,
+      vehicle_type: r.vehicle_type,
+      origin_city: r.origin_city,
+      destination_city: r.destination_city,
+      total_stops: r.total_stops || 0,
+      completed_stops: r.completed_stops || 0,
+      total_distance_miles: r.total_distance_miles || 0,
+      total_packages: r.total_packages || 0,
+      delivered_packages: r.delivered_packages || 0,
+      estimated_duration_minutes: r.estimated_duration_minutes || 0,
+      departure_time: r.departure_time,
+      estimated_arrival: r.estimated_arrival,
+      created_at: r.created_at,
+      updated_at: r.updated_at
+    }))
+  }, [hookRoutes])
+
+  // Combined loading state
+  const isLoading = shipmentsLoading || carriersLoading || warehousesLoading || routesLoading || ordersLoading
+
+  // Map hook data to legacy UI types
+  const shipments: Shipment[] = useMemo(() => {
+    return (hookShipments || []).map((s: any) => ({
+      id: s.id,
+      trackingNumber: s.tracking_number || s.shipment_code || `TRK-${s.id?.substring(0, 8)}`,
+      orderId: s.order_id || '',
+      status: (s.status || 'pending') as ShipmentStatus,
+      type: (s.method || 'standard') as ShipmentType,
+      carrier: s.carrier || s.logistics_carriers?.name || 'Unknown',
+      carrierService: s.service_type || 'Standard',
+      origin: {
+        name: 'Warehouse',
+        address: s.origin_address || '',
+        city: s.origin_city || '',
+        state: s.origin_state || '',
+        zip: s.origin_postal || '',
+        country: s.origin_country || 'US'
+      },
+      destination: {
+        name: s.recipient_name || 'Customer',
+        address: s.destination_address || '',
+        city: s.destination_city || '',
+        state: s.destination_state || '',
+        zip: s.destination_postal || '',
+        country: s.destination_country || 'US'
+      },
+      weight: s.weight_lbs || s.weight || 1,
+      dimensions: {
+        length: s.dimensions_length || 10,
+        width: s.dimensions_width || 10,
+        height: s.dimensions_height || 10
+      },
+      value: s.declared_value || 0,
+      shippingCost: s.shipping_cost || 0,
+      insurance: s.insurance_value || 0,
+      estimatedDelivery: s.estimated_delivery || new Date().toISOString(),
+      actualDelivery: s.actual_delivery,
+      createdAt: s.created_at,
+      lastUpdate: s.updated_at || s.created_at,
+      events: [],
+      notes: s.notes || '',
+      priority: s.priority ? 'high' : 'normal',
+      requiresSignature: s.signature_required || false,
+      fragile: false
+    }))
+  }, [hookShipments])
+
+  const carriers: Carrier[] = useMemo(() => {
+    return (hookCarriers || []).map((c: any) => ({
+      id: c.id,
+      name: c.name || 'Unknown Carrier',
+      code: c.code || '',
+      type: 'ground' as CarrierType,
+      logo: c.logo_url || '',
+      active: c.is_active !== false,
+      accountNumber: c.account_number || '',
+      services: [],
+      rating: c.rating || 4.5,
+      onTimeRate: c.on_time_rate || 95,
+      avgTransitDays: c.avg_delivery_days || 3,
+      shipmentsThisMonth: c.shipments_this_month || 0,
+      totalShipments: c.total_shipments || 0,
+      avgCost: c.avg_cost || 15,
+      regions: c.regions || ['Domestic'],
+      features: c.features || []
+    }))
+  }, [hookCarriers])
+  const warehouses: WarehouseLocation[] = useMemo(() => {
+    return (hookWarehouses || []).map((w: any) => ({
+      id: w.id,
+      name: w.name || '',
+      code: w.code || '',
+      type: w.type || 'fulfillment',
+      address: w.address || '',
+      city: w.city || '',
+      state: w.state || '',
+      country: w.country || 'US',
+      capacity: w.capacity || 0,
+      usedCapacity: w.used_capacity || 0,
+      manager: w.manager || '',
+      phone: w.phone || '',
+      email: w.email || '',
+      operatingHours: w.operating_hours || '9AM-5PM',
+      zones: w.zones || 1,
+      staff: w.staff || 0,
+      ordersProcessed: w.orders_processed || 0,
+      pickAccuracy: w.pick_accuracy || 0,
+      avgFulfillmentTime: w.avg_fulfillment_time || 0,
+      active: w.is_active !== false
+    }))
+  }, [hookWarehouses])
+
+  const orders: Order[] = useMemo(() => {
+    return (hookOrders || []).map((o: any) => ({
+      id: o.id,
+      orderNumber: o.order_number || `ORD-${o.id?.substring(0, 8)}`,
+      customer: o.customer_name || 'Unknown Customer',
+      email: o.customer_email || '',
+      status: (o.status === 'confirmed' || o.status === 'on_hold' ? 'pending' : o.status) as 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled',
+      items: o.item_count || 1,
+      total: o.total_amount || 0,
+      warehouse: o.warehouse || 'Main Warehouse',
+      createdAt: o.created_at,
+      shipBy: o.estimated_delivery || new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
+      priority: o.priority === 'urgent' ? 'urgent' : o.priority === 'high' ? 'high' : 'normal',
+      shipment: o.tracking_number
+    }))
+  }, [hookOrders])
 
   // Define adapter variables locally (removed mock data imports)
   const logisticsAIInsights: any[] = []
@@ -391,11 +648,7 @@ export default function LogisticsClient() {
   const [statusFilter, setStatusFilter] = useState<ShipmentStatus | 'all'>('all')
   const [settingsTab, setSettingsTab] = useState('general')
 
-  // Database state
-  const [dbShipments, setDbShipments] = useState<DbShipment[]>([])
-  const [dbCarriers, setDbCarriers] = useState<DbCarrier[]>([])
-  const [dbRoutes, setDbRoutes] = useState<DbRoute[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  // Form saving state
   const [isSaving, setIsSaving] = useState(false)
 
   // Form state
@@ -434,57 +687,6 @@ export default function LogisticsClient() {
     dateRange: 'all'
   })
 
-  // Fetch data from Supabase
-  const fetchShipments = useCallback(async () => {
-    const { data, error } = await supabase
-      .from('shipments')
-      .select('*')
-      .is('deleted_at', null)
-      .order('created_at', { ascending: false })
-
-    if (error) {
-      console.error('Error fetching shipments:', error)
-      return
-    }
-    setDbShipments(data || [])
-  }, [])
-
-  const fetchCarriers = useCallback(async () => {
-    const { data, error } = await supabase
-      .from('shipping_carriers')
-      .select('*')
-      .order('name')
-
-    if (error) {
-      console.error('Error fetching carriers:', error)
-      return
-    }
-    setDbCarriers(data || [])
-  }, [])
-
-  const fetchRoutes = useCallback(async () => {
-    const { data, error } = await supabase
-      .from('logistics_routes')
-      .select('*')
-      .is('deleted_at', null)
-      .order('created_at', { ascending: false })
-
-    if (error) {
-      console.error('Error fetching routes:', error)
-      return
-    }
-    setDbRoutes(data || [])
-  }, [])
-
-  useEffect(() => {
-    const loadData = async () => {
-      setIsLoading(true)
-      await Promise.all([fetchShipments(), fetchCarriers(), fetchRoutes()])
-      setIsLoading(false)
-    }
-    loadData()
-  }, [fetchShipments, fetchCarriers, fetchRoutes])
-
   // CRUD Operations
   const handleCreateShipment = async () => {
     setIsSaving(true)
@@ -517,7 +719,7 @@ export default function LogisticsClient() {
       toast.success('Shipment created')
       setShipmentForm(initialShipmentForm)
       setShowNewShipmentDialog(false)
-      await fetchShipments()
+      await refreshShipments()
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Failed to create shipment'
       toast.error('Error')
@@ -536,7 +738,7 @@ export default function LogisticsClient() {
       if (error) throw error
 
       toast.success(`Status updated`)
-      await fetchShipments()
+      await refreshShipments()
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Failed to update status'
       toast.error('Error')
@@ -553,7 +755,7 @@ export default function LogisticsClient() {
       if (error) throw error
 
       toast.success('Shipment deleted')
-      await fetchShipments()
+      await refreshShipments()
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Failed to delete shipment'
       toast.error('Error')
@@ -570,7 +772,7 @@ export default function LogisticsClient() {
       if (error) throw error
 
       toast.success('Carrier updated successfully')
-      await fetchCarriers()
+      await refreshCarriers()
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Failed to update carrier'
       toast.error('Error')
@@ -578,9 +780,7 @@ export default function LogisticsClient() {
   }
 
   const handleRefreshData = async () => {
-    setIsLoading(true)
-    await Promise.all([fetchShipments(), fetchCarriers(), fetchRoutes()])
-    setIsLoading(false)
+    await Promise.all([refreshShipments(), refreshCarriers(), refreshWarehouses(), fetchRoutes(), refreshOrders()])
     toast.success('Data refreshed')
   }
 
@@ -817,9 +1017,7 @@ export default function LogisticsClient() {
 
   // Sync carriers handler
   const handleSyncCarriers = async () => {
-    setIsLoading(true)
-    await fetchCarriers()
-    setIsLoading(false)
+    await refreshCarriers()
     toast.success('Carriers synced')
   }
 

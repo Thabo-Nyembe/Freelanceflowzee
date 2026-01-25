@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
+import { useCompliance, type Compliance as HookCompliance } from '@/lib/hooks/use-compliance'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -28,7 +29,7 @@ import {
   ClipboardCheck, ClipboardList, Scale, Building, Globe,
   Shield, Zap, RefreshCw,
   Key, Webhook, Mail, Database, AlertOctagon, Trash2, Copy, Bell,
-  GitBranch, FileCode, Cpu, CheckCircle, Send
+  GitBranch, FileCode, Cpu, CheckCircle, Send, Loader2
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -131,6 +132,38 @@ interface Policy {
 }
 
 // Mock Data - REMOVED (Batch #7 Migration)
+// Empty arrays to prevent undefined errors until full migration
+const mockFrameworks: ComplianceFramework[] = []
+const mockControls: Control[] = []
+const mockRisks: Risk[] = []
+const mockAudits: Audit[] = []
+const mockPolicies: Policy[] = []
+const mockEvidence: Evidence[] = []
+const mockComplianceQuickActionsBase = [
+  { icon: Plus, label: 'New Control', color: 'bg-emerald-100 text-emerald-600' },
+  { icon: ClipboardCheck, label: 'Assess', color: 'bg-blue-100 text-blue-600' },
+  { icon: FileText, label: 'Report', color: 'bg-purple-100 text-purple-600' },
+]
+const mockComplianceAIInsights: any[] = []
+const mockComplianceCollaborators: any[] = []
+const mockCompliancePredictions: any[] = []
+const mockComplianceActivities: any[] = []
+
+// Helper function to generate compliance report
+const generateComplianceReport = () => ({
+  generatedAt: new Date().toISOString(),
+  frameworks: mockFrameworks,
+  controls: mockControls,
+  risks: mockRisks,
+  audits: mockAudits,
+  summary: {
+    totalFrameworks: mockFrameworks.length,
+    compliantFrameworks: mockFrameworks.filter(f => f.status === 'compliant').length,
+    totalControls: mockControls.length,
+    passedControls: mockControls.filter(c => c.status === 'passed').length,
+    openRisks: mockRisks.filter(r => r.status === 'open').length,
+  }
+})
 
 // Helper function to download data as JSON
 const downloadAsJson = (data: unknown, filename: string) => {
@@ -171,6 +204,17 @@ const copyToClipboard = async (text: string) => {
 }
 
 export default function ComplianceClient() {
+  // Use the compliance hook for Supabase data
+  const {
+    compliance: dbCompliance,
+    loading: isLoading,
+    error,
+    createCompliance,
+    updateCompliance,
+    deleteCompliance,
+    refetch
+  } = useCompliance()
+
   const [activeTab, setActiveTab] = useState('frameworks')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedFramework, setSelectedFramework] = useState<ComplianceFramework | null>(null)
@@ -208,6 +252,30 @@ export default function ComplianceClient() {
   const [policies, setPolicies] = useState([])
   const [frameworks, setFrameworks] = useState([])
 
+  // Map DB compliance data to UI format using useMemo
+  const complianceData = useMemo(() => {
+    if (!dbCompliance) return []
+    return dbCompliance.map((item: HookCompliance) => ({
+      id: item.id,
+      name: item.compliance_name,
+      description: item.description || '',
+      type: item.compliance_type,
+      framework: item.framework || '',
+      status: item.status,
+      isCompliant: item.is_compliant,
+      complianceScore: item.compliance_score || 0,
+      totalRequirements: item.total_requirements,
+      metRequirements: item.met_requirements,
+      pendingRequirements: item.pending_requirements,
+      failedRequirements: item.failed_requirements,
+      riskLevel: item.risk_level,
+      lastAuditDate: item.last_audit_date,
+      nextAuditDate: item.next_audit_date,
+      createdAt: item.created_at,
+      updatedAt: item.updated_at,
+    }))
+  }, [dbCompliance])
+
   const getFrameworkStatusColor = (status: ComplianceFramework['status']) => {
     switch (status) {
       case 'compliant': return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
@@ -242,13 +310,32 @@ export default function ComplianceClient() {
   }
 
   const stats = useMemo(() => ({
-    overallCompliance: mockFrameworks.reduce((sum, f) => sum + f.complianceScore, 0) / mockFrameworks.length,
+    overallCompliance: mockFrameworks.length > 0 ? mockFrameworks.reduce((sum, f) => sum + f.complianceScore, 0) / mockFrameworks.length : 0,
     totalControls: mockFrameworks.reduce((sum, f) => sum + f.totalControls, 0),
     passedControls: mockFrameworks.reduce((sum, f) => sum + f.passedControls, 0),
     failedControls: mockFrameworks.reduce((sum, f) => sum + f.failedControls, 0),
     openRisks: mockRisks.filter(r => r.status === 'open').length,
     activeAudits: mockAudits.filter(a => a.status === 'in_progress').length
   }), [])
+
+  // Loading state - after all hooks
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
+
+  // Error state - after all hooks
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-4">
+        <p className="text-red-500">Error loading compliance data</p>
+        <Button onClick={() => refetch()}>Retry</Button>
+      </div>
+    )
+  }
 
   // Handlers with real functionality
   const handleRunAudit = () => {

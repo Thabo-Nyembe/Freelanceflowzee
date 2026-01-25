@@ -344,6 +344,9 @@ const defaultEnrollmentForm: EnrollmentFormData = {
 }
 
 export default function TrainingClient({ initialPrograms }: TrainingClientProps) {
+  // Create Supabase client for direct queries
+  const supabase = createClient()
+
   // Define adapter variables locally (removed mock data imports)
   const trainingAIInsights: any[] = []
   const trainingCollaborators: any[] = []
@@ -356,7 +359,7 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
   const userId = user?.id
 
   // Hooks for real data
-  const { programs: dbPrograms, stats: dbStats, isLoading, refetch } = useTrainingPrograms(initialPrograms || [])
+  const { programs: dbPrograms, stats: dbStats, isLoading, error, refetch } = useTrainingPrograms(initialPrograms || [])
   const {
     createProgram, isCreating,
     updateProgram, isUpdating,
@@ -1124,6 +1127,25 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
       setSelectedEnrollment(null)
     }
   }, [selectedEnrollment])
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-4">
+        <p className="text-red-500">Error loading data</p>
+        <Button onClick={() => refetch()}>Retry</Button>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-green-50/30 to-teal-50/40 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 dark:bg-none dark:bg-gray-900">

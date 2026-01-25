@@ -161,13 +161,13 @@ export function useBuilds(initialData?: Build[], filters?: BuildFilters) {
   }
 }
 
-export function useBuildArtifacts(buildId?: string) {
+export function useBuildArtifacts(buildId?: string, fetchAll?: boolean) {
   return useSupabaseQuery<BuildArtifact>({
     table: 'build_artifacts',
     select: '*',
     filters: buildId ? [{ column: 'build_id', operator: 'eq', value: buildId }] : [],
     orderBy: { column: 'created_at', ascending: false },
-    enabled: !!buildId
+    enabled: fetchAll || !!buildId
   })
 }
 

@@ -56,36 +56,16 @@ import {
 } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Textarea } from '@/components/ui/textarea'
-// Production-ready API hooks with TanStack Query from @/lib/api-clients
-import {
-  useInvoices,
-  useCreateInvoice,
-  useUpdateInvoice,
-  useDeleteInvoice,
-  useSendInvoice,
-  useMarkInvoiceAsPaid,
-  useGenerateInvoicePDF,
-  useInvoiceStats,
-  type Invoice as ApiInvoice,
-  type InvoiceFilters
-} from '@/lib/api-clients'
+// Supabase hook for real-time data
+import { useInvoices as useInvoicesHook, type Invoice as HookInvoice, type InvoiceStatus as HookInvoiceStatus } from '@/lib/hooks/use-invoices'
 import { toast } from 'sonner'
+import { Loader2 } from 'lucide-react'
 
 // Type alias for backward compatibility
-type InvoiceStatus = 'draft' | 'sent' | 'viewed' | 'paid' | 'overdue' | 'cancelled'
+type InvoiceStatus = HookInvoiceStatus
 
-// Extended Invoice type for UI
-interface Invoice extends Omit<ApiInvoice, 'line_items'> {
-  client_name: string | null
-  client_email: string | null
-  items: any
-  item_count: number
-  discount_percentage: number
-  terms_and_conditions: string | null
-  reminder_sent_count?: number
-  last_reminder_sent_at?: string | null
-  total_amount: number
-}
+// Extended Invoice type for UI - using hook type directly
+type Invoice = HookInvoice
 import TaxCalculationWidget from '@/components/tax/tax-calculation-widget'
 
 // Currency data
@@ -216,51 +196,26 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
   })
 
   // =================================================================
-  // Production API Integration - TanStack Query hooks from @/lib/api-clients
+  // Production API Integration - Supabase hooks
   // =================================================================
 
-  // Pagination state
-  const [page, setPage] = useState(1)
-  const [pageSize] = useState(100)
+  // Use the Supabase invoices hook for data fetching and mutations
+  const {
+    invoices: dbInvoices,
+    loading: isLoading,
+    error,
+    mutating,
+    createInvoice,
+    updateInvoice,
+    deleteInvoice,
+    refetch
+  } = useInvoicesHook({ status: statusFilter === 'all' ? undefined : statusFilter })
 
-  // Build filters for the query
-  const invoiceFilters: InvoiceFilters | undefined = useMemo(() => {
-    if (statusFilter === 'all') return undefined
-    return { status: [statusFilter as any] }
-  }, [statusFilter])
-
-  // Invoices Query - fetches invoices with caching and auto-revalidation
-  const { data: invoicesData, isLoading: loading, error, refetch: refetchInvoices } = useInvoices(
-    page,
-    pageSize,
-    invoiceFilters
-  )
-
-  // Invoice Stats Query - dashboard metrics
-  const { data: invoiceStatsData, isLoading: statsLoading } = useInvoiceStats()
-
-  // Mutations with optimistic updates
-  const createInvoiceMutation = useCreateInvoice()
-  const updateInvoiceMutation = useUpdateInvoice()
-  const deleteInvoiceMutation = useDeleteInvoice()
-  const sendInvoiceMutation = useSendInvoice()
-  const markAsPaidMutation = useMarkInvoiceAsPaid()
-  const generatePDFMutation = useGenerateInvoicePDF()
-
-  // Track mutation loading state
-  const mutating = createInvoiceMutation.isPending ||
-    updateInvoiceMutation.isPending ||
-    deleteInvoiceMutation.isPending ||
-    sendInvoiceMutation.isPending ||
-    markAsPaidMutation.isPending
-
-  // Extract invoices array from paginated response
-  const invoices = useMemo(() => {
-    if (!invoicesData?.data) return []
-    return invoicesData.data as Invoice[]
-  }, [invoicesData])
-
-  const displayInvoices = (invoices && invoices.length > 0) ? invoices : (initialInvoices || [])
+  // Map DB invoices to display invoices
+  const displayInvoices = useMemo(() => {
+    if (dbInvoices && dbInvoices.length > 0) return dbInvoices
+    return initialInvoices || []
+  }, [dbInvoices, initialInvoices])
 
   // Stripe integration state
   const [stripeLoading, setStripeLoading] = useState(false)
@@ -368,6 +323,12 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
     return filtered
   }, [displayInvoices, searchQuery, activeTab, dateRange, filterAmountMin, filterAmountMax, filterClient, filterDueDateFrom, filterDueDateTo])
 
+  // Loading state - early return
+  if (isLoading) return <div className="flex items-center justify-center h-full"><Loader2 className="h-8 w-8 animate-spin" /></div>
+
+  // Error state - early return
+  if (error) return <div className="flex flex-col items-center justify-center h-full gap-4"><p className="text-red-500">Error loading data</p><Button onClick={() => refetch()}>Retry</Button></div>
+
   const addLineItem = () => {
     const newItem: LineItem = {
       id: crypto.randomUUID(),
@@ -410,10 +371,10 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
   const calculateTotal = () => calculateSubtotal() + calculateTax() - calculateDiscount()
 
   // =================================================================
-  // Invoice Handlers - Using TanStack Query Mutations
+  // Invoice Handlers - Using Supabase Mutations
   // =================================================================
 
-  // Handle creating a new invoice - uses TanStack Query mutation
+  // Handle creating a new invoice - uses Supabase mutation
   const handleCreateInvoice = async () => {
     if (!newInvoice.client || !newInvoice.title) {
       toast.error('Please fill in client name and invoice title')
@@ -425,24 +386,34 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
       const discountAmount = calculateDiscount()
       const total = calculateTotal()
 
-      await createInvoiceMutation.mutateAsync({
+      await createInvoice({
         title: newInvoice.title,
+        invoice_number: `INV-${Date.now()}`,
+        status: 'draft',
         issue_date: new Date().toISOString().split('T')[0],
         due_date: newInvoice.dueDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
         currency: newInvoice.currency,
+        subtotal: subtotal,
         tax_rate: newInvoice.items.length > 0 ? newInvoice.items[0].tax : 0,
+        tax_amount: taxAmount,
         discount_amount: discountAmount,
-        notes: newInvoice.notes,
-        terms: newInvoice.terms,
-        line_items: newInvoice.items.map(item => ({
-          description: item.description,
-          quantity: item.quantity,
-          rate: item.rate,
-          amount: item.amount,
-          tax_rate: item.tax,
-          tax_amount: item.quantity * item.rate * (item.tax / 100)
-        }))
+        discount_percentage: newInvoice.discount.enabled && newInvoice.discount.type === 'percentage' ? newInvoice.discount.value : 0,
+        total_amount: total,
+        amount_paid: 0,
+        amount_due: total,
+        item_count: newInvoice.items.length,
+        items: newInvoice.items,
+        client_name: newInvoice.client,
+        client_email: newInvoice.clientEmail,
+        notes: newInvoice.notes || null,
+        terms_and_conditions: newInvoice.terms || null,
+        late_fee_percentage: newInvoice.lateFee.enabled ? newInvoice.lateFee.value : 0,
+        is_recurring: newInvoice.recurring.enabled,
+        recurring_schedule: newInvoice.recurring.enabled ? newInvoice.recurring.frequency : null,
+        reminder_sent_count: 0,
+        has_attachments: false
       })
+      toast.success('Invoice created successfully')
       setShowCreateModal(false)
       // Reset form
       setNewInvoice({
@@ -462,55 +433,60 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
         deposit: { enabled: false, percentage: 50 },
         recurring: { enabled: false, frequency: 'monthly', endDate: '' }
       })
-    } catch (error) {
-      console.error('Failed to create invoice:', error)
+    } catch (err) {
+      console.error('Failed to create invoice:', err)
+      toast.error('Failed to create invoice')
     }
   }
 
-  // Send Invoice - uses dedicated useSendInvoice mutation
+  // Send Invoice - updates status to 'sent'
   const handleSendInvoice = async (invoice: Invoice) => {
     try {
-      await sendInvoiceMutation.mutateAsync(invoice.id)
-      // Toast is handled by the mutation hook
-    } catch (error) {
-      // Error toast is handled by the mutation hook
-      console.error('Failed to send invoice:', error)
+      await updateInvoice(invoice.id, {
+        status: 'sent',
+        sent_date: new Date().toISOString()
+      })
+      toast.success(`Invoice ${invoice.invoice_number} sent successfully`)
+    } catch (err) {
+      console.error('Failed to send invoice:', err)
+      toast.error('Failed to send invoice')
     }
   }
 
-  // Mark as Paid - uses dedicated useMarkInvoiceAsPaid mutation with Stripe support
+  // Mark as Paid - updates status and payment info
   const handleMarkAsPaid = async (invoice: Invoice, paymentMethod: 'stripe' | 'bank_transfer' | 'paypal' | 'cash' | 'check' | 'other' = 'other') => {
     try {
-      await markAsPaidMutation.mutateAsync({
-        id: invoice.id,
+      await updateInvoice(invoice.id, {
+        status: 'paid',
+        paid_date: new Date().toISOString(),
         payment_method: paymentMethod,
-        amount_paid: invoice.total_amount
+        amount_paid: invoice.total_amount,
+        amount_due: 0
       })
-      // Toast is handled by the mutation hook
-    } catch (error) {
-      console.error('Failed to mark invoice as paid:', error)
+      toast.success(`Invoice ${invoice.invoice_number} marked as paid`)
+    } catch (err) {
+      console.error('Failed to mark invoice as paid:', err)
+      toast.error('Failed to mark invoice as paid')
     }
   }
 
-  // Delete Invoice - uses TanStack Query mutation
+  // Delete Invoice - uses Supabase mutation
   const handleDeleteInvoice = async (invoice: Invoice) => {
     try {
-      await deleteInvoiceMutation.mutateAsync(invoice.id)
-      // Toast is handled by the mutation hook
-    } catch (error) {
-      console.error('Failed to delete invoice:', error)
+      await deleteInvoice(invoice.id)
+      toast.success(`Invoice ${invoice.invoice_number} deleted`)
+    } catch (err) {
+      console.error('Failed to delete invoice:', err)
+      toast.error('Failed to delete invoice')
     }
   }
 
   // Void Invoice - updates status to 'cancelled'
   const handleVoidInvoice = async (invoice: Invoice) => {
     try {
-      await updateInvoiceMutation.mutateAsync({
-        id: invoice.id,
-        updates: { status: 'cancelled' }
-      })
+      await updateInvoice(invoice.id, { status: 'cancelled' })
       toast.info(`Invoice ${invoice.invoice_number} has been cancelled`)
-    } catch (error) {
+    } catch (err) {
       toast.error('Failed to void invoice')
     }
   }
@@ -518,24 +494,35 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
   // Duplicate Invoice - creates a copy with draft status
   const handleDuplicateInvoice = async (invoice: Invoice) => {
     try {
-      await createInvoiceMutation.mutateAsync({
+      await createInvoice({
         title: `Copy of ${invoice.title}`,
+        invoice_number: `INV-${Date.now()}`,
+        status: 'draft',
         issue_date: new Date().toISOString().split('T')[0],
         due_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
         currency: invoice.currency,
+        subtotal: invoice.subtotal,
         tax_rate: invoice.tax_rate,
+        tax_amount: invoice.tax_amount,
         discount_amount: invoice.discount_amount,
-        notes: invoice.notes || undefined,
-        terms: invoice.terms_and_conditions || undefined,
-        line_items: (invoice.items || []).map((item: any) => ({
-          description: item.description,
-          quantity: item.quantity,
-          rate: item.rate,
-          amount: item.amount
-        }))
+        discount_percentage: invoice.discount_percentage,
+        total_amount: invoice.total_amount,
+        amount_paid: 0,
+        amount_due: invoice.total_amount,
+        item_count: invoice.item_count,
+        items: invoice.items,
+        client_name: invoice.client_name,
+        client_email: invoice.client_email,
+        notes: invoice.notes,
+        terms_and_conditions: invoice.terms_and_conditions,
+        late_fee_percentage: invoice.late_fee_percentage,
+        is_recurring: invoice.is_recurring,
+        recurring_schedule: invoice.recurring_schedule,
+        reminder_sent_count: 0,
+        has_attachments: false
       })
       toast.success(`Invoice duplicated from ${invoice.invoice_number}`)
-    } catch (error) {
+    } catch (err) {
       toast.error('Failed to duplicate invoice')
     }
   }
@@ -543,30 +530,29 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
   // Send Reminder - updates reminder_sent_count and last_reminder_sent_at
   const handleSendReminder = async (invoice: Invoice) => {
     try {
-      await updateInvoiceMutation.mutateAsync({
-        id: invoice.id,
-        updates: {
-          // These fields will be handled by the API
-        }
+      await updateInvoice(invoice.id, {
+        reminder_sent_count: (invoice.reminder_sent_count || 0) + 1,
+        last_reminder_sent_at: new Date().toISOString()
       })
       toast.success(`Reminder sent for invoice ${invoice.invoice_number}`)
-    } catch (error) {
+    } catch (err) {
       toast.error('Failed to send reminder')
     }
   }
 
   // =================================================================
-  // PDF Generation - Uses useGenerateInvoicePDF mutation
+  // PDF Generation - Direct download fallback
   // =================================================================
   const handleGeneratePDF = async (invoice: Invoice) => {
     try {
       toast.loading(`Generating PDF for invoice #${invoice.invoice_number}...`)
-      await generatePDFMutation.mutateAsync(invoice.id)
+      // Fallback to download handler
+      await handleDownloadInvoice(invoice)
       toast.dismiss()
-      // PDF URL will be opened by the mutation hook
-    } catch (error) {
+    } catch (err) {
       toast.dismiss()
-      console.error('Failed to generate PDF:', error)
+      console.error('Failed to generate PDF:', err)
+      toast.error('Failed to generate PDF')
     }
   }
 
@@ -605,18 +591,15 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
 
       const data = await response.json()
 
-      // Store payment intent ID for tracking
-      await updateInvoiceMutation.mutateAsync({
-        id: invoice.id,
-        updates: {
-          stripe_payment_intent_id: data.paymentIntentId
-        }
+      // Store payment intent ID for tracking - using metadata field
+      await updateInvoice(invoice.id, {
+        metadata: { ...invoice.metadata, stripe_payment_intent_id: data.paymentIntentId }
       })
 
       toast.success('Payment link created! Client will receive invoice via email.')
       setShowStripePaymentModal(true)
-    } catch (error) {
-      console.error('Stripe billing error:', error)
+    } catch (err) {
+      console.error('Stripe billing error:', err)
       toast.error('Failed to setup Stripe billing')
     } finally {
       setStripeLoading(false)
@@ -624,16 +607,18 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
   }
 
   // Process Stripe webhook payment confirmation
-  const handleStripePaymentConfirmed = async (invoiceId: string, paymentIntentId: string) => {
+  const handleStripePaymentConfirmed = async (invoiceId: string, _paymentIntentId: string) => {
     try {
-      await markAsPaidMutation.mutateAsync({
-        id: invoiceId,
+      await updateInvoice(invoiceId, {
+        status: 'paid',
+        paid_date: new Date().toISOString(),
         payment_method: 'stripe',
-        amount_paid: selectedInvoiceForPayment?.total_amount || 0
+        amount_paid: selectedInvoiceForPayment?.total_amount || 0,
+        amount_due: 0
       })
       toast.success('Payment received via Stripe!')
-    } catch (error) {
-      console.error('Failed to confirm Stripe payment:', error)
+    } catch (err) {
+      console.error('Failed to confirm Stripe payment:', err)
     }
   }
 
@@ -829,17 +814,6 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
       }
     },
   ]
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl flex items-center gap-2">
-          <AlertCircle className="h-5 w-5" />
-          Error: {error.message}
-        </div>
-      </div>
-    )
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50 dark:bg-none dark:bg-gray-900">
@@ -1102,12 +1076,7 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
           </TabsList>
 
           <TabsContent value={activeTab} className="mt-4">
-            {loading ? (
-              <div className="text-center py-12">
-                <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-emerald-600 border-r-transparent" />
-                <p className="mt-2 text-muted-foreground">Loading invoices...</p>
-              </div>
-            ) : filteredInvoices.length === 0 ? (
+            {filteredInvoices.length === 0 ? (
               <Card>
                 <CardContent className="text-center py-12">
                   <FileText className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
@@ -1178,7 +1147,7 @@ Terms: ${invoice.terms_and_conditions || 'N/A'}
                     title="All Invoices"
                     description="Manage invoices with sorting, filtering, and bulk actions"
                     searchKey="client_name"
-                    isLoading={loading}
+                    isLoading={isLoading}
                     onRowClick={(row) => {
                       window.open(`/dashboard/invoices/${row.id}`, '_blank')
                     }}

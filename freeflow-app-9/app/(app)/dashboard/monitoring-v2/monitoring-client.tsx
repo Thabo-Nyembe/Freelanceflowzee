@@ -4,8 +4,10 @@ import { createClient } from '@/lib/supabase/client'
 
 const supabase = createClient()
 
-import { useState, useMemo, useEffect, useCallback } from 'react'
+import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
+import { useServers, useSystemAlerts, useServerMutations, useAlertMutations } from '@/lib/hooks/use-monitoring'
+import type { Server as DbServer, SystemAlert as DbAlert } from '@/lib/hooks/use-monitoring'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -194,11 +196,7 @@ interface SLO {
 // EMPTY DATA ARRAYS (No mock data - use real database data)
 // ============================================================================
 
-const mockHosts: Host[] = []
-
 const mockServices: Service[] = []
-
-const mockAlerts: Alert[] = []
 
 const mockLogs: LogEntry[] = []
 
@@ -299,45 +297,6 @@ const mockMonitoringActivities: { id: string; user: string; action: string; targ
 // MAIN COMPONENT
 // ============================================================================
 
-// Database types
-interface DbServer {
-  id: string
-  user_id: string
-  server_name: string
-  server_type: string
-  status: string
-  location: string | null
-  ip_address: string | null
-  cpu_usage: number
-  memory_usage: number
-  disk_usage: number
-  network_throughput: number
-  uptime_percentage: number
-  requests_per_hour: number
-  last_health_check: string
-  configuration: Record<string, unknown>
-  tags: string[]
-  created_at: string
-  updated_at: string
-}
-
-interface DbAlert {
-  id: string
-  user_id: string
-  server_id: string | null
-  alert_type: string
-  severity: string
-  title: string
-  description: string | null
-  status: string
-  acknowledged_at: string | null
-  acknowledged_by: string | null
-  resolved_at: string | null
-  resolved_by: string | null
-  created_at: string
-  updated_at: string
-}
-
 // Form state types
 interface ServerFormData {
   server_name: string
@@ -375,15 +334,20 @@ export default function MonitoringClient() {
 
   const [activeTab, setActiveTab] = useState('infrastructure')
   const [searchQuery, setSearchQuery] = useState('')
-  const [statusFilter, setStatusFilter] = useState<HostStatus | 'all'>('all')
+  const [statusFilter, setStatusFilter] = useState<string>('all')
   const [selectedHost, setSelectedHost] = useState<Host | null>(null)
   const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null)
   const [settingsTab, setSettingsTab] = useState('general')
 
-  // Database state
-  const [dbServers, setDbServers] = useState<DbServer[]>([])
-  const [dbAlerts, setDbAlerts] = useState<DbAlert[]>([])
-  const [isLoading, setIsLoading] = useState(false)
+  // Supabase hooks for servers and alerts
+  const { servers: dbServers, stats: serverStats, data: allServers, isLoading: serversLoading, error: serversError, refetch: refetchServers } = useServers(undefined, {
+    status: statusFilter !== 'all' ? statusFilter : undefined
+  })
+  const { alerts: dbAlerts, isLoading: alertsLoading, error: alertsError, refetch: refetchAlerts } = useSystemAlerts()
+  const { createServer, deleteServer, isCreating, isDeleting } = useServerMutations()
+  const { acknowledgeAlert, resolveAlert, isAcknowledging, isResolving } = useAlertMutations()
+
+  const isLoading = serversLoading || alertsLoading
 
   // Dialog state
   const [showAddServerDialog, setShowAddServerDialog] = useState(false)
@@ -394,51 +358,13 @@ export default function MonitoringClient() {
   const [serverForm, setServerForm] = useState<ServerFormData>(initialServerForm)
   const [alertForm, setAlertForm] = useState<AlertFormData>(initialAlertForm)
 
-  // Fetch servers from Supabase
-  const fetchServers = useCallback(async () => {
-    try {
-      const { data, error } = await supabase
-        .from('servers')
-        .select('*')
-        .is('deleted_at', null)
-        .order('created_at', { ascending: false })
-
-      if (error) throw error
-      setDbServers(data || [])
-    } catch (error) {
-      console.error('Error fetching servers:', error)
-    }
-  }, [])
-
-  // Fetch alerts from Supabase
-  const fetchAlerts = useCallback(async () => {
-    try {
-      const { data, error } = await supabase
-        .from('system_alerts')
-        .select('*')
-        .order('created_at', { ascending: false })
-
-      if (error) throw error
-      setDbAlerts(data || [])
-    } catch (error) {
-      console.error('Error fetching alerts:', error)
-    }
-  }, [])
-
-  // Load data on mount
-  useEffect(() => {
-    fetchServers()
-    fetchAlerts()
-  }, [fetchServers, fetchAlerts])
-
-  // Create server
+  // Create server via hook
   const handleCreateServer = async () => {
-    setIsLoading(true)
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
-      const { error } = await supabase.from('servers').insert({
+      createServer({
         user_id: user.id,
         server_name: serverForm.server_name,
         server_type: serverForm.server_type,
@@ -449,33 +375,21 @@ export default function MonitoringClient() {
         cpu_usage: 0,
         memory_usage: 0,
         disk_usage: 0
-      })
-
-      if (error) throw error
+      } as Partial<DbServer>)
 
       toast.success('Server added', { description: `${serverForm.server_name} has been registered` })
       setShowAddServerDialog(false)
       setServerForm(initialServerForm)
-      fetchServers()
     } catch (error) {
       toast.error('Failed to add server', { description: error instanceof Error ? error.message : 'Unknown error' })
-    } finally {
-      setIsLoading(false)
     }
   }
 
-  // Delete server
+  // Delete server via hook
   const handleDeleteServer = async (serverId: string) => {
     try {
-      const { error } = await supabase
-        .from('servers')
-        .update({ deleted_at: new Date().toISOString() })
-        .eq('id', serverId)
-
-      if (error) throw error
-
+      deleteServer(serverId)
       toast.success('Server removed', { description: 'Server has been unregistered' })
-      fetchServers()
     } catch (error) {
       toast.error('Failed to remove server', { description: error instanceof Error ? error.message : 'Unknown error' })
     }
@@ -483,7 +397,6 @@ export default function MonitoringClient() {
 
   // Create alert
   const handleCreateAlert = async () => {
-    setIsLoading(true)
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
@@ -503,98 +416,69 @@ export default function MonitoringClient() {
       toast.success('Alert created', { description: alertForm.title })
       setShowAddAlertDialog(false)
       setAlertForm(initialAlertForm)
-      fetchAlerts()
+      refetchAlerts()
     } catch (error) {
       toast.error('Failed to create alert', { description: error instanceof Error ? error.message : 'Unknown error' })
-    } finally {
-      setIsLoading(false)
     }
   }
 
-  // Acknowledge alert
+  // Acknowledge alert via hook
   const handleAcknowledgeAlert = async (alertId: string) => {
     try {
       const { data: { user } } = await supabase.auth.getUser()
-
-      const { error } = await supabase
-        .from('system_alerts')
-        .update({
-          status: 'acknowledged',
-          acknowledged_at: new Date().toISOString(),
-          acknowledged_by: user?.id
-        })
-        .eq('id', alertId)
-
-      if (error) throw error
-
+      acknowledgeAlert(alertId, user?.id || '')
       toast.success('Alert acknowledged')
-      fetchAlerts()
     } catch (error) {
       toast.error('Failed to acknowledge alert', { description: error instanceof Error ? error.message : 'Unknown error' })
     }
   }
 
-  // Resolve alert
+  // Resolve alert via hook
   const handleResolveAlert = async (alertId: string) => {
     try {
       const { data: { user } } = await supabase.auth.getUser()
-
-      const { error } = await supabase
-        .from('system_alerts')
-        .update({
-          status: 'resolved',
-          resolved_at: new Date().toISOString(),
-          resolved_by: user?.id
-        })
-        .eq('id', alertId)
-
-      if (error) throw error
-
+      resolveAlert(alertId, user?.id || '')
       toast.success('Alert resolved')
-      fetchAlerts()
     } catch (error) {
       toast.error('Failed to resolve alert', { description: error instanceof Error ? error.message : 'Unknown error' })
     }
   }
 
-  // Refresh metrics
+  // Refresh metrics via hooks
   const handleRefreshMetrics = async () => {
-    setIsLoading(true)
     try {
-      await Promise.all([fetchServers(), fetchAlerts()])
+      await Promise.all([refetchServers(), refetchAlerts()])
       toast.success('Metrics refreshed', { description: 'Infrastructure data updated' })
     } catch (error) {
       toast.error('Failed to refresh', { description: error instanceof Error ? error.message : 'Unknown error' })
-    } finally {
-      setIsLoading(false)
     }
   }
 
-  // Filtered hosts
-  const filteredHosts = useMemo(() => {
-    return mockHosts.filter(host => {
+  // Filtered servers for infrastructure tab (search filtering on top of hook's status filter)
+  const filteredServers = useMemo(() => {
+    if (!dbServers) return []
+    return dbServers.filter(server => {
       const matchesSearch =
-        host.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        host.hostname.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        host.ip_address.includes(searchQuery)
-      const matchesStatus = statusFilter === 'all' || host.status === statusFilter
-      return matchesSearch && matchesStatus
+        server.server_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (server.ip_address || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (server.location || '').toLowerCase().includes(searchQuery.toLowerCase())
+      return matchesSearch
     })
-  }, [searchQuery, statusFilter])
+  }, [dbServers, searchQuery])
 
-  // Stats calculations
+  // Stats calculations from hook data
   const stats = useMemo(() => {
-    const total = mockHosts.length
-    const healthy = mockHosts.filter(h => h.status === 'healthy').length
-    const warning = mockHosts.filter(h => h.status === 'warning').length
-    const critical = mockHosts.filter(h => h.status === 'critical').length
-    const avgCpu = total > 0 ? Math.round(mockHosts.reduce((acc, h) => acc + h.cpu_usage, 0) / total) : 0
-    const avgMemory = total > 0 ? Math.round(mockHosts.reduce((acc, h) => acc + h.memory_usage, 0) / total) : 0
-    const totalContainers = mockHosts.reduce((acc, h) => acc + h.containers, 0)
-    const activeAlerts = mockAlerts.filter(a => a.status === 'triggered').length
+    const total = serverStats?.total || 0
+    const healthy = serverStats?.healthy || 0
+    const warning = serverStats?.warning || 0
+    const critical = serverStats?.critical || 0
+    const avgCpu = serverStats?.avgCpu || 0
+    const avgMemory = serverStats?.avgMemory || 0
+    const totalContainers = 0
+    const activeAlerts = dbAlerts ? dbAlerts.filter((a: DbAlert) => a.status === 'active' || a.status === 'triggered').length : 0
 
     return { total, healthy, warning, critical, avgCpu, avgMemory, totalContainers, activeAlerts }
-  }, [])
+  }, [serverStats, dbAlerts])
 
   // Quick actions with proper dialog openers
   const monitoringQuickActions = [
@@ -632,6 +516,40 @@ export default function MonitoringClient() {
             </Button>
           </div>
         </div>
+
+        {/* Loading State */}
+        {isLoading && (
+          <Card className="border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/20">
+            <CardContent className="p-4 flex items-center gap-3">
+              <RefreshCw className="w-5 h-5 text-blue-600 animate-spin" />
+              <div>
+                <p className="font-medium text-blue-900 dark:text-blue-200">Loading monitoring data...</p>
+                <p className="text-sm text-blue-700 dark:text-blue-400">Fetching servers and alerts from database</p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Error State */}
+        {(serversError || alertsError) && (
+          <Card className="border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/20">
+            <CardContent className="p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <AlertTriangle className="w-5 h-5 text-red-600" />
+                <div>
+                  <p className="font-medium text-red-900 dark:text-red-200">Error loading data</p>
+                  <p className="text-sm text-red-700 dark:text-red-400">
+                    {serversError?.message || alertsError?.message || 'Failed to load monitoring data'}
+                  </p>
+                </div>
+              </div>
+              <Button variant="outline" size="sm" onClick={handleRefreshMetrics}>
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Retry
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
@@ -702,7 +620,7 @@ export default function MonitoringClient() {
             <Card>
               <CardHeader className="border-b">
                 <div className="flex items-center justify-between">
-                  <CardTitle>Host List</CardTitle>
+                  <CardTitle>Host List ({filteredServers.length} servers)</CardTitle>
                   <div className="flex items-center gap-3">
                     <div className="relative">
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -731,17 +649,16 @@ export default function MonitoringClient() {
               </CardHeader>
               <CardContent className="p-0">
                 <div className="divide-y">
-                  {filteredHosts.map(host => (
+                  {filteredServers.map(server => (
                     <div
-                      key={host.id}
+                      key={server.id}
                       className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer transition-colors"
-                      onClick={() => setSelectedHost(host)}
                     >
                       <div className="flex items-start gap-4">
                         <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                          host.status === 'healthy' ? 'bg-green-100 text-green-600' :
-                          host.status === 'warning' ? 'bg-yellow-100 text-yellow-600' :
-                          host.status === 'critical' ? 'bg-red-100 text-red-600' :
+                          server.status === 'healthy' ? 'bg-green-100 text-green-600' :
+                          server.status === 'warning' ? 'bg-yellow-100 text-yellow-600' :
+                          server.status === 'critical' ? 'bg-red-100 text-red-600' :
                           'bg-gray-100 text-gray-600'
                         }`}>
                           <Server className="w-5 h-5" />
@@ -749,65 +666,83 @@ export default function MonitoringClient() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
                             <span className="font-semibold text-gray-900 dark:text-white">
-                              {host.name}
+                              {server.server_name}
                             </span>
-                            <Badge className={getHostStatusColor(host.status)}>
-                              {host.status}
+                            <Badge className={getHostStatusColor(server.status as HostStatus)}>
+                              {server.status}
                             </Badge>
-                            {host.containers > 0 && (
-                              <Badge variant="outline" className="text-xs">
-                                <Container className="w-3 h-3 mr-1" />
-                                {host.containers}
-                              </Badge>
-                            )}
+                            <Badge variant="outline" className="text-xs">
+                              {server.server_type}
+                            </Badge>
                           </div>
                           <p className="text-sm text-gray-600 dark:text-gray-300">
-                            {host.ip_address} • {host.instance_type} • {host.os}
+                            {server.ip_address || 'No IP'} {server.location ? `• ${server.location}` : ''}
                           </p>
                           <div className="flex items-center gap-4 text-xs text-gray-500 mt-1">
-                            <span className="flex items-center gap-1">
-                              <MapPin className="w-3 h-3" />
-                              {host.region}
-                            </span>
+                            {server.location && (
+                              <span className="flex items-center gap-1">
+                                <MapPin className="w-3 h-3" />
+                                {server.location}
+                              </span>
+                            )}
                             <span className="flex items-center gap-1">
                               <Clock className="w-3 h-3" />
-                              Uptime: {formatUptime(host.uptime_seconds)}
+                              Uptime: {server.uptime_percentage}%
                             </span>
                             <span className="flex items-center gap-1">
                               <Activity className="w-3 h-3" />
-                              Agent v{host.agent_version}
+                              {server.requests_per_hour} req/h
                             </span>
                           </div>
+                          {server.tags && server.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {server.tags.map((tag: string) => (
+                                <Badge key={tag} variant="outline" className="text-xs">{tag}</Badge>
+                              ))}
+                            </div>
+                          )}
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 text-center">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 text-center">
                           <div>
-                            <p className={`text-lg font-bold ${getMetricColor(host.cpu_usage, 80)}`}>
-                              {host.cpu_usage}%
+                            <p className={`text-lg font-bold ${getMetricColor(Number(server.cpu_usage), 80)}`}>
+                              {Number(server.cpu_usage).toFixed(1)}%
                             </p>
                             <p className="text-xs text-gray-500">CPU</p>
                           </div>
                           <div>
-                            <p className={`text-lg font-bold ${getMetricColor(host.memory_usage, 80)}`}>
-                              {host.memory_usage}%
+                            <p className={`text-lg font-bold ${getMetricColor(Number(server.memory_usage), 80)}`}>
+                              {Number(server.memory_usage).toFixed(1)}%
                             </p>
                             <p className="text-xs text-gray-500">Memory</p>
                           </div>
                           <div>
-                            <p className={`text-lg font-bold ${getMetricColor(host.disk_usage, 80)}`}>
-                              {host.disk_usage}%
+                            <p className={`text-lg font-bold ${getMetricColor(Number(server.disk_usage), 80)}`}>
+                              {Number(server.disk_usage).toFixed(1)}%
                             </p>
                             <p className="text-xs text-gray-500">Disk</p>
                           </div>
-                          <div>
-                            <p className="text-lg font-bold text-blue-600">
-                              {host.load_avg.toFixed(2)}
-                            </p>
-                            <p className="text-xs text-gray-500">Load</p>
-                          </div>
                         </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-red-600"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleDeleteServer(server.id)
+                          }}
+                          disabled={isDeleting}
+                        >
+                          <XCircle className="w-4 h-4" />
+                        </Button>
                       </div>
                     </div>
                   ))}
+                  {filteredServers.length === 0 && !isLoading && (
+                    <div className="p-8 text-center text-gray-500">
+                      <Server className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                      <p>No servers found. Click &quot;Add Host&quot; to register your first server.</p>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -1016,45 +951,10 @@ export default function MonitoringClient() {
                       </div>
                     </div>
                   ))}
-                  {/* Mock Alerts for demo */}
-                  {mockAlerts.map(alert => (
-                    <div
-                      key={alert.id}
-                      className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer"
-                      onClick={() => setSelectedAlert(alert)}
-                    >
-                      <div className="flex items-start gap-4">
-                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                          alert.severity === 'critical' ? 'bg-red-100 text-red-600' :
-                          alert.severity === 'high' ? 'bg-orange-100 text-orange-600' :
-                          alert.severity === 'medium' ? 'bg-yellow-100 text-yellow-600' :
-                          'bg-blue-100 text-blue-600'
-                        }`}>
-                          <AlertTriangle className="w-5 h-5" />
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-semibold">{alert.title}</span>
-                            <Badge className={getAlertSeverityColor(alert.severity)}>{alert.severity}</Badge>
-                            <Badge className={getAlertStatusColor(alert.status)}>{alert.status}</Badge>
-                          </div>
-                          <p className="text-sm text-gray-600 dark:text-gray-300">{alert.message}</p>
-                          <div className="flex items-center gap-4 text-xs text-gray-500 mt-1">
-                            <span>Triggered: {new Date(alert.triggered_at).toLocaleString()}</span>
-                            {alert.host_name && <span>Host: {alert.host_name}</span>}
-                            {alert.service_name && <span>Service: {alert.service_name}</span>}
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-lg font-bold text-red-600">{alert.current_value}</p>
-                          <p className="text-xs text-gray-500">Threshold: {alert.threshold}</p>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                  {dbAlerts.length === 0 && mockAlerts.length === 0 && (
+                  {dbAlerts.length === 0 && !alertsLoading && (
                     <div className="p-8 text-center text-gray-500">
-                      No alerts. Click "Create Alert" to add one.
+                      <Bell className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                      <p>No alerts. Click &quot;Create Alert&quot; to add one.</p>
                     </div>
                   )}
                 </div>
@@ -2194,8 +2094,8 @@ export default function MonitoringClient() {
             </div>
             <div className="flex justify-end gap-3">
               <Button variant="outline" onClick={() => setShowAddServerDialog(false)}>Cancel</Button>
-              <Button onClick={handleCreateServer} disabled={isLoading || !serverForm.server_name}>
-                {isLoading ? 'Adding...' : 'Add Server'}
+              <Button onClick={handleCreateServer} disabled={isCreating || !serverForm.server_name}>
+                {isCreating ? 'Adding...' : 'Add Server'}
               </Button>
             </div>
           </DialogContent>
@@ -2440,8 +2340,8 @@ export default function MonitoringClient() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Hosts</SelectItem>
-                      {mockHosts.map(host => (
-                        <SelectItem key={host.id} value={host.id}>{host.name}</SelectItem>
+                      {(allServers || []).map((server: DbServer) => (
+                        <SelectItem key={server.id} value={server.id}>{server.server_name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>

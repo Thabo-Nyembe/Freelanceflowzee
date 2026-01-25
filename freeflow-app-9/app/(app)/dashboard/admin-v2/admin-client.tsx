@@ -47,8 +47,18 @@ import {
   Webhook,
   PlayCircle,
   StopCircle,
-  History
+  History,
+  Loader2
 } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+
+// Import Supabase hooks for real data
+import { useAuditLogs } from '@/lib/hooks/use-audit-logs'
+import { useUserManagement } from '@/lib/hooks/use-user-management'
+import { useServers } from '@/lib/hooks/use-monitoring'
+import { useFeatures } from '@/lib/hooks/use-features'
+import { useDeployments } from '@/lib/hooks/use-deployments'
+import { useAdminActivityLog, useAdminWorkflows } from '@/lib/hooks/use-admin-extended'
 
 // Enhanced & Competitive Upgrade Components
 import {
@@ -168,22 +178,7 @@ interface SystemMetric {
   status: 'good' | 'warning' | 'critical'
 }
 
-// Empty data arrays - real data should be fetched from Supabase
-const mockResources: SystemResource[] = []
-
-const mockAdminUsers: AdminUser[] = []
-
-const mockAuditLogs: AuditLog[] = []
-
-const mockMetrics: SystemMetric[] = []
-
-const mockJobs: ScheduledJob[] = []
-
-const mockFeatureFlags: FeatureFlag[] = []
-
-const mockDeployments: Deployment[] = []
-
-const mockDatabaseTables: DatabaseTable[] = []
+// Data is now fetched from Supabase hooks
 
 const jobStatusColors: Record<JobStatus, string> = {
   running: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
@@ -246,6 +241,31 @@ const getAdminQuickActions = (handlers: {
 
 export default function AdminClient({ initialSettings }: { initialSettings: AdminSetting[] }) {
 
+  // Supabase hooks for real data
+  const { logs: auditLogsData, loading: auditLogsLoading, error: auditLogsError, refetch: refetchAuditLogs, stats: auditStats } = useAuditLogs()
+  const { users: managedUsersData, loading: usersLoading, error: usersError, refetch: refetchUsers } = useUserManagement()
+  const { servers: serversData, loading: serversLoading, error: serversError, stats: serverStats, refetch: refetchServers } = useServers()
+  const { data: featuresData, loading: featuresLoading, error: featuresError, refetch: refetchFeatures } = useFeatures()
+  const { deployments: deploymentsData, loading: deploymentsLoading, error: deploymentsError, refetch: refetchDeployments } = useDeployments()
+  const { data: activityLogData, isLoading: activityLoading, refresh: refreshActivityLog } = useAdminActivityLog()
+  const { data: workflowsData, isLoading: workflowsLoading, refresh: refreshWorkflows } = useAdminWorkflows()
+
+  // Combined loading state
+  const isDataLoading = auditLogsLoading || usersLoading || serversLoading || featuresLoading || deploymentsLoading
+
+  // Combined error state
+  const dataError = auditLogsError || usersError || serversError || featuresError || deploymentsError
+
+  // Refetch all data
+  const refetchAllData = useCallback(() => {
+    refetchAuditLogs()
+    refetchUsers()
+    refetchServers()
+    refetchFeatures()
+    refetchDeployments()
+    refreshActivityLog()
+    refreshWorkflows()
+  }, [refetchAuditLogs, refetchUsers, refetchServers, refetchFeatures, refetchDeployments, refreshActivityLog, refreshWorkflows])
 
   const [activeTab, setActiveTab] = useState('overview')
   const [searchQuery, setSearchQuery] = useState('')
@@ -263,7 +283,6 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
   const [envFilter, setEnvFilter] = useState<'all' | 'production' | 'staging' | 'development'>('all')
   const [sqlQuery, setSqlQuery] = useState('SELECT * FROM users LIMIT 10;')
   const [sqlResults, setSqlResults] = useState<QueryResult | null>(null)
-  const [featureFlags, setFeatureFlags] = useState(mockFeatureFlags)
   const [selectedTable, setSelectedTable] = useState<DatabaseTable | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
@@ -308,13 +327,87 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
   const { settings, createSetting, updateSetting, deleteSetting, refetch } = useAdminSettings({})
   const displaySettings = settings || []
 
-  // Calculate stats
-  const overallHealth = mockResources.filter(r => r.status === 'healthy').length / mockResources.length * 100
-  const activeUsers = mockAdminUsers.filter(u => u.status === 'active').length
-  const criticalLogs = mockAuditLogs.filter(l => l.severity === 'critical').length
-  const runningJobs = mockJobs.filter(j => j.status === 'running').length
+  // Map database data to UI types
+  const adminUsers: AdminUser[] = useMemo(() => {
+    if (!managedUsersData) return []
+    return managedUsersData.map(u => ({
+      id: u.id,
+      name: u.full_name || u.display_name || u.email,
+      email: u.email,
+      role: (u.role === 'superadmin' ? 'super_admin' : u.role === 'admin' ? 'admin' : u.role === 'manager' ? 'moderator' : 'viewer') as 'super_admin' | 'admin' | 'moderator' | 'viewer',
+      status: (u.status === 'active' ? 'active' : u.status === 'suspended' ? 'suspended' : 'pending') as 'active' | 'suspended' | 'pending',
+      lastLogin: u.last_login_at || '',
+      mfaEnabled: u.two_factor_enabled,
+      permissions: u.permissions || []
+    }))
+  }, [managedUsersData])
+
+  const auditLogs: AuditLog[] = useMemo(() => {
+    if (!auditLogsData) return []
+    return auditLogsData.map(l => ({
+      id: l.id,
+      action: l.action,
+      actor: l.user_email || 'Unknown',
+      resource: l.resource || '',
+      details: l.description || '',
+      ipAddress: l.ip_address || '',
+      timestamp: l.created_at,
+      severity: (l.severity === 'critical' ? 'critical' : l.severity === 'warning' ? 'warning' : 'info') as 'info' | 'warning' | 'critical'
+    }))
+  }, [auditLogsData])
+
+  const systemResources: SystemResource[] = useMemo(() => {
+    if (!serversData) return []
+    return serversData.map(s => ({
+      id: s.id,
+      name: s.server_name,
+      type: (s.server_type === 'database' ? 'database' : s.server_type === 'api' ? 'api' : s.server_type === 'cache' ? 'cache' : s.server_type === 'storage' ? 'storage' : 'queue') as SystemResource['type'],
+      status: (s.status === 'healthy' ? 'healthy' : s.status === 'warning' ? 'warning' : s.status === 'critical' ? 'critical' : 'offline') as SystemResource['status'],
+      endpoint: s.ip_address || '',
+      latency: Math.round(s.network_throughput || 0),
+      uptime: s.uptime_percentage,
+      lastChecked: s.last_health_check
+    }))
+  }, [serversData])
+
+  const featureFlags: FeatureFlag[] = useMemo(() => {
+    if (!featuresData) return []
+    return featuresData.map(f => ({
+      id: f.id,
+      key: f.feature_key,
+      name: f.feature_name,
+      description: f.description || '',
+      enabled: f.is_enabled,
+      environment: (f.production_enabled ? 'production' : f.staging_enabled ? 'staging' : 'development') as 'production' | 'staging' | 'development',
+      rolloutPercentage: f.rollout_percentage,
+      createdAt: f.created_at,
+      updatedAt: f.updated_at
+    }))
+  }, [featuresData])
+
+  const deployments: Deployment[] = useMemo(() => {
+    if (!deploymentsData) return []
+    return deploymentsData.map(d => ({
+      id: d.id,
+      version: d.version,
+      environment: (d.environment === 'production' ? 'production' : d.environment === 'staging' ? 'staging' : 'development') as 'production' | 'staging' | 'development',
+      status: (d.status === 'success' ? 'success' : d.status === 'failed' ? 'failed' : d.status === 'pending' ? 'pending' : d.status === 'rolled_back' ? 'rolling_back' : 'in_progress') as DeploymentStatus,
+      commit: d.commit_hash || '',
+      branch: d.branch || '',
+      deployedBy: d.deployed_by_name || '',
+      deployedAt: d.started_at || d.created_at,
+      duration: d.duration_seconds,
+      changes: 0
+    }))
+  }, [deploymentsData])
+
+  // Calculate stats from real data
+  const overallHealth = systemResources.length > 0 ? (systemResources.filter(r => r.status === 'healthy').length / systemResources.length * 100) : 0
+  const activeUsers = adminUsers.filter(u => u.status === 'active').length
+  const criticalLogs = auditLogs.filter(l => l.severity === 'critical').length
+  const runningJobs = workflowsData?.filter((w: any) => w.status === 'running').length || 0
   const enabledFlags = featureFlags.filter(f => f.enabled).length
-  const successfulDeploys = mockDeployments.filter(d => d.status === 'success').length
+  const successfulDeploys = deployments.filter(d => d.status === 'success').length
 
   // Toggle feature flag (calls DB handler)
   const toggleFlag = useCallback(async (flagId: string) => {
@@ -322,18 +415,16 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
     if (!flag) return
     try {
       const { error } = await supabase
-        .from('feature_flags')
-        .update({ enabled: !flag.enabled, updated_at: new Date().toISOString() })
+        .from('features')
+        .update({ is_enabled: !flag.enabled, updated_at: new Date().toISOString() })
         .eq('id', flagId)
       if (error) throw error
-      setFeatureFlags(prev => prev.map(f =>
-        f.id === flagId ? { ...f, enabled: !f.enabled, updatedAt: new Date().toISOString() } : f
-      ))
+      refetchFeatures()
       toast.success(`Flag ${!flag.enabled ? 'enabled' : 'disabled'}`)
     } catch (err) {
       toast.error('Failed to toggle flag')
     }
-  }, [ featureFlags])
+  }, [featureFlags, refetchFeatures])
 
   // Run SQL query (mock)
   const runQuery = () => {
@@ -362,14 +453,14 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
 
   // Filtered deployments
   const filteredDeployments = useMemo(() => {
-    return mockDeployments.filter(d => {
+    return deployments.filter(d => {
       const matchesSearch = searchQuery === '' ||
         d.version.toLowerCase().includes(searchQuery.toLowerCase()) ||
         d.branch.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesEnv = envFilter === 'all' || d.environment === envFilter
       return matchesSearch && matchesEnv
     })
-  }, [searchQuery, envFilter])
+  }, [deployments, searchQuery, envFilter])
 
   const filteredSettings = useMemo(() => {
     return displaySettings.filter(s => {
@@ -382,24 +473,24 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
   }, [displaySettings, searchQuery, settingCategoryFilter])
 
   const filteredUsers = useMemo(() => {
-    return mockAdminUsers.filter(u => {
+    return adminUsers.filter(u => {
       const matchesSearch = searchQuery === '' ||
         u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         u.email.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesRole = userRoleFilter === 'all' || u.role === userRoleFilter
       return matchesSearch && matchesRole
     })
-  }, [searchQuery, userRoleFilter])
+  }, [adminUsers, searchQuery, userRoleFilter])
 
   const filteredLogs = useMemo(() => {
-    return mockAuditLogs.filter(l => {
+    return auditLogs.filter(l => {
       const matchesSearch = searchQuery === '' ||
         l.action.toLowerCase().includes(searchQuery.toLowerCase()) ||
         l.actor.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesSeverity = logSeverityFilter === 'all' || l.severity === logSeverityFilter
       return matchesSearch && matchesSeverity
     })
-  }, [searchQuery, logSeverityFilter])
+  }, [auditLogs, searchQuery, logSeverityFilter])
 
   const formatDate = (dateString: string) => {
     if (!dateString) return 'Never'
@@ -646,6 +737,25 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
     )
   }, [])
 
+  // Loading state
+  if (isDataLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
+
+  // Error state
+  if (dataError) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-4">
+        <p className="text-red-500">Error loading data</p>
+        <Button onClick={() => refetchAllData()}>Retry</Button>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 p-8">
       <div className="max-w-7xl mx-auto space-y-8">
@@ -749,7 +859,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
               </div>
               <div>
                 <p className="text-xs text-gray-500">Tables</p>
-                <p className="text-xl font-bold text-indigo-600">{mockDatabaseTables.length}</p>
+                <p className="text-xl font-bold text-indigo-600">0</p>
               </div>
             </div>
           </div>
@@ -836,7 +946,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
                     <p className="text-slate-200 text-sm">Health</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockResources.length}</p>
+                    <p className="text-3xl font-bold">{systemResources.length}</p>
                     <p className="text-slate-200 text-sm">Resources</p>
                   </div>
                 </div>
@@ -845,7 +955,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
 
             {/* System Metrics */}
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-              {mockMetrics.map((metric) => (
+              {([] as SystemMetric[]).map((metric) => (
                 <div key={metric.name} className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
                   <p className="text-xs text-gray-500 mb-1">{metric.name}</p>
                   <div className="flex items-end gap-1">
@@ -875,7 +985,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
                 </div>
                 <ScrollArea className="h-[300px]">
                   <div className="divide-y divide-gray-100 dark:divide-gray-700">
-                    {mockAuditLogs.slice(0, 5).map((log) => (
+                    {auditLogs.slice(0, 5).map((log) => (
                       <div key={log.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                         <div className="flex items-start gap-3">
                           <div className={`p-2 rounded-lg ${
@@ -911,7 +1021,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
                 </div>
                 <ScrollArea className="h-[300px]">
                   <div className="divide-y divide-gray-100 dark:divide-gray-700">
-                    {mockResources.map((resource) => (
+                    {systemResources.map((resource) => (
                       <div key={resource.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
@@ -958,7 +1068,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
                     <p className="text-purple-200 text-sm">Active</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockAdminUsers.filter(u => u.mfaEnabled).length}</p>
+                    <p className="text-3xl font-bold">{adminUsers.filter(u => u.mfaEnabled).length}</p>
                     <p className="text-purple-200 text-sm">MFA On</p>
                   </div>
                 </div>
@@ -1079,7 +1189,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
           {/* Resources Tab */}
           <TabsContent value="resources" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {mockResources.map((resource) => (
+              {systemResources.map((resource) => (
                 <div key={resource.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
                   <div className="flex items-center justify-between mb-4">
                     <div className={`p-3 rounded-xl ${
@@ -1309,11 +1419,11 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockDatabaseTables.length}</p>
+                    <p className="text-3xl font-bold">0</p>
                     <p className="text-emerald-200 text-sm">Tables</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{(mockDatabaseTables.reduce((sum, t) => sum + t.rows, 0) / 1000000).toFixed(1)}M</p>
+                    <p className="text-3xl font-bold">0.0M</p>
                     <p className="text-emerald-200 text-sm">Rows</p>
                   </div>
                 </div>
@@ -1337,7 +1447,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
                 </div>
                 <ScrollArea className="h-[400px]">
                   <div className="divide-y divide-gray-100 dark:divide-gray-700">
-                    {mockDatabaseTables.map((table) => (
+                    {([] as DatabaseTable[]).map((table) => (
                       <button
                         key={table.name}
                         onClick={() => setSelectedTable(table)}
@@ -1426,7 +1536,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockJobs.length}</p>
+                    <p className="text-3xl font-bold">{workflowsData?.length || 0}</p>
                     <p className="text-amber-200 text-sm">Total Jobs</p>
                   </div>
                   <div className="text-center">
@@ -1453,7 +1563,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
                 </div>
               </div>
               <div className="divide-y divide-gray-100 dark:divide-gray-700">
-                {mockJobs.map((job) => (
+                {([] as ScheduledJob[]).map((job) => (
                   <div key={job.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
@@ -1626,7 +1736,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockDeployments.length}</p>
+                    <p className="text-3xl font-bold">{deployments.length}</p>
                     <p className="text-cyan-200 text-sm">Deployments</p>
                   </div>
                   <div className="text-center">

@@ -67,7 +67,8 @@ import {
   Sliders,
   Cpu,
   Archive,
-  Download
+  Download,
+  Loader2
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -341,6 +342,25 @@ export default function WorkflowsClient() {
     })
   }, [searchQuery, statusFilter, folderFilter, dbWorkflows])
 
+  // Loading state
+  if (dbLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
+
+  // Error state
+  if (dbError) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-4">
+        <p className="text-red-500">Error loading data</p>
+        <Button onClick={() => fetchWorkflows()}>Retry</Button>
+      </div>
+    )
+  }
+
   // Quick actions with real dialog openers (replaces mock toast-only actions)
   const workflowsQuickActions = [
     { id: '1', label: 'Create Workflow', icon: 'plus', action: () => setShowCreateDialog(true), variant: 'default' as const },
@@ -517,7 +537,7 @@ export default function WorkflowsClient() {
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
 
-      toast.success(`Export Complete: ${exportWorkflows.length} workflows exported successfully`)
+      toast.success(`Export Complete: ${filteredWorkflows.length} workflows exported successfully`)
       setShowExportDialog(false)
     } catch (error) {
       toast.error('Export Failed')
@@ -685,11 +705,11 @@ export default function WorkflowsClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockWorkflows.length}</p>
+                    <p className="text-3xl font-bold">{stats.totalWorkflows}</p>
                     <p className="text-violet-200 text-sm">Workflows</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockWorkflows.filter(w => w.isActive).length}</p>
+                    <p className="text-3xl font-bold">{stats.activeWorkflows}</p>
                     <p className="text-violet-200 text-sm">Active</p>
                   </div>
                 </div>
@@ -2189,41 +2209,11 @@ export default function WorkflowsClient() {
           </DialogHeader>
           <ScrollArea className="h-[400px] pr-4">
             <div className="space-y-3">
-              {mockRuns.map((run) => (
-                <div
-                  key={run.id}
-                  className="p-4 rounded-lg border hover:bg-muted/30 cursor-pointer"
-                  onClick={() => {
-                    setSelectedRun(run)
-                    setShowViewLogsDialog(false)
-                  }}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <div className={`w-2 h-2 rounded-full ${
-                        run.status === 'success' ? 'bg-green-500' :
-                        run.status === 'error' ? 'bg-red-500' :
-                        run.status === 'running' ? 'bg-blue-500 animate-pulse' :
-                        'bg-yellow-500'
-                      }`} />
-                      <span className="font-medium text-sm">{run.workflowName}</span>
-                    </div>
-                    <Badge variant="outline" className="text-xs">
-                      {run.status}
-                    </Badge>
-                  </div>
-                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                    <span>{formatTimeAgo(run.startedAt)}</span>
-                    <span>Duration: {run.duration}</span>
-                    <span>{run.stepsCompleted}/{run.totalSteps} steps</span>
-                  </div>
-                  {run.error && (
-                    <div className="mt-2 p-2 bg-red-50 dark:bg-red-900/20 rounded text-xs text-red-600 dark:text-red-400">
-                      {run.error}
-                    </div>
-                  )}
-                </div>
-              ))}
+              <div className="flex flex-col items-center justify-center h-[300px] text-muted-foreground">
+                <History className="w-12 h-12 mb-4 opacity-50" />
+                <p className="text-sm">No workflow runs yet</p>
+                <p className="text-xs mt-1">Run a workflow to see execution logs here</p>
+              </div>
             </div>
           </ScrollArea>
           <div className="flex justify-end gap-2 pt-4 border-t">

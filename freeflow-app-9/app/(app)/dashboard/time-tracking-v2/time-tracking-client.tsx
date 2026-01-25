@@ -21,7 +21,7 @@ import {
   Trash2, FileText, Check, X, RefreshCw, Coffee, AlertCircle, Receipt, Send,
   CheckCircle, Eye, MoreHorizontal, Building2, Mail, Bell, Shield, Lock,
   Key, AlertOctagon, Sliders, Network, HardDrive, CreditCard, Archive, Trash2 as TrashIcon,
-  Printer, Copy, Repeat, RefreshCcw
+  Printer, Copy, Repeat, RefreshCcw, Loader2
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -859,6 +859,25 @@ export default function TimeTrackingClient() {
     { id: '2', label: 'Manual Entry', icon: 'plus', action: () => setShowEntryDialog(true), variant: 'default' as const },
     { id: '3', label: 'Reports', icon: 'barChart', action: () => setActiveTab('reports'), variant: 'outline' as const },
   ]
+
+  // Loading state early return
+  if (entriesLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
+
+  // Error state early return
+  if (entriesError) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-4">
+        <p className="text-red-500">Error loading data</p>
+        <Button onClick={() => refetch()}>Retry</Button>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 dark:bg-none dark:bg-gray-900 p-6">

@@ -41,7 +41,8 @@ export function useFAQs(initialFAQs: FAQ[] = [], initialStats: FAQStats = {
 }) {
   const [faqs, setFAQs] = useState<FAQ[]>(initialFAQs)
   const [stats, setStats] = useState<FAQStats>(initialStats)
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const supabase = createClient()
 
   const calculateStats = useCallback((faqList: FAQ[]) => {
@@ -60,6 +61,34 @@ export function useFAQs(initialFAQs: FAQ[] = [], initialStats: FAQStats = {
     }
   }, [])
 
+  // Fetch initial data
+  const fetchFAQs = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const { data, error: fetchError } = await supabase
+        .from('faqs')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (fetchError) throw fetchError
+
+      const faqList = (data || []) as FAQ[]
+      setFAQs(faqList)
+      setStats(calculateStats(faqList))
+    } catch (err: any) {
+      setError(err.message || 'Failed to fetch FAQs')
+    } finally {
+      setLoading(false)
+    }
+  }, [supabase, calculateStats])
+
+  // Initial fetch
+  useEffect(() => {
+    fetchFAQs()
+  }, [fetchFAQs])
+
+  // Real-time subscription
   useEffect(() => {
     const channel = supabase
       .channel('faqs-changes')
@@ -156,6 +185,8 @@ export function useFAQs(initialFAQs: FAQ[] = [], initialStats: FAQStats = {
     faqs,
     stats,
     loading,
+    error,
+    refetch: fetchFAQs,
     createFAQ,
     updateFAQ,
     deleteFAQ,

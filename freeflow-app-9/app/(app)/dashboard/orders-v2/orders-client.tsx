@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
 import { useOrders } from '@/lib/hooks/use-orders'
+import { Loader2 } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -424,6 +425,23 @@ const sendOrderUpdateAPI = async (orderId: string): Promise<void> => {
 const mockOrdersQuickActions: { id: string; label: string; icon: string; action: () => void | Promise<void>; variant: 'default' | 'outline' }[] = []
 
 export default function OrdersClient() {
+  // Supabase hook for orders data
+  const {
+    orders: dbOrders,
+    loading: isLoading,
+    error,
+    refetch,
+    stats: orderStats,
+    mutationLoading,
+    createOrder,
+    updateOrder,
+    updateOrderStatus,
+    updatePaymentStatus,
+    cancelOrder,
+    fulfillOrder: fulfillOrderMutation,
+    deleteOrder
+  } = useOrders()
+
   const [activeTab, setActiveTab] = useState('orders')
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<OrderStatus | 'all'>('all')
@@ -432,65 +450,152 @@ export default function OrdersClient() {
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
   const [settingsTab, setSettingsTab] = useState('general')
 
-  // Filtered orders
-  const filteredOrders = useMemo(() => {
-    return mockOrders.filter(order => {
-      const matchesSearch =
-        order.order_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        order.customer_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        order.customer_email.toLowerCase().includes(searchQuery.toLowerCase())
-      const matchesStatus = statusFilter === 'all' || order.status === statusFilter
-      return matchesSearch && matchesStatus
-    })
-  }, [searchQuery, statusFilter])
-
-  // Stats calculations
-  const stats = useMemo(() => {
-    const totalOrders = mockOrders.length
-    const totalRevenue = mockOrders.filter(o => o.payment_status === 'paid').reduce((acc, o) => acc + o.total, 0)
-    const pendingOrders = mockOrders.filter(o => o.status === 'pending').length
-    const processingOrders = mockOrders.filter(o => o.status === 'processing').length
-    const shippedOrders = mockOrders.filter(o => o.status === 'shipped').length
-    const deliveredOrders = mockOrders.filter(o => o.status === 'delivered').length
-    const avgOrderValue = totalRevenue / mockOrders.filter(o => o.payment_status === 'paid').length
-    const pendingReturns = mockReturns.filter(r => r.status === 'requested').length
-
-    return {
-      totalOrders,
-      totalRevenue,
-      pendingOrders,
-      processingOrders,
-      shippedOrders,
-      deliveredOrders,
-      avgOrderValue,
-      pendingReturns
+  // Show error toast if there's an error loading orders
+  useEffect(() => {
+    if (error) {
+      toast.error('Failed to load orders')
     }
-  }, [])
+  }, [error])
 
-  // Handlers
-  const handleCreateOrder = () => {
-    toast.info('Create Order', {
-      description: 'Order creation wizard would open here. Fill in customer, products, and shipping details.',
-      action: {
-        label: 'Quick Create',
-        onClick: () => {
-          toast.success('Order Created', {
-            description: `Order #ORD-${Date.now().toString().slice(-6)} created successfully`
-          })
-        }
-      }
-    })
+  // Map DB orders to UI Order type
+  const orders: Order[] = useMemo(() => {
+    if (!dbOrders) return []
+    return dbOrders.map((dbOrder): Order => ({
+      id: dbOrder.id,
+      order_number: dbOrder.order_number,
+      status: dbOrder.status as OrderStatus,
+      payment_status: dbOrder.payment_status as PaymentStatus,
+      fulfillment_status: dbOrder.status === 'shipped' || dbOrder.status === 'delivered' ? 'fulfilled' : 'unfulfilled',
+      customer_id: dbOrder.user_id,
+      customer_name: dbOrder.customer_name || 'Unknown Customer',
+      customer_email: dbOrder.customer_email || '',
+      customer_phone: dbOrder.customer_phone || '',
+      customer_avatar: '',
+      customer_orders_count: 1,
+      customer_total_spent: dbOrder.total_amount,
+      shipping_address: dbOrder.shipping_address as ShippingAddress || {
+        first_name: '',
+        last_name: '',
+        company: null,
+        address1: '',
+        address2: null,
+        city: '',
+        state: '',
+        postal_code: '',
+        country: '',
+        phone: ''
+      },
+      billing_address: dbOrder.billing_address as ShippingAddress || {
+        first_name: '',
+        last_name: '',
+        company: null,
+        address1: '',
+        address2: null,
+        city: '',
+        state: '',
+        postal_code: '',
+        country: '',
+        phone: ''
+      },
+      items: [],
+      subtotal: dbOrder.subtotal,
+      shipping_cost: dbOrder.shipping_cost,
+      tax: dbOrder.tax_amount,
+      discount_total: dbOrder.discount_amount,
+      total: dbOrder.total_amount,
+      currency: dbOrder.currency,
+      payment_method: (dbOrder.payment_method as PaymentMethod) || 'credit_card',
+      shipping_method: 'standard',
+      tracking_number: dbOrder.tracking_number,
+      carrier: dbOrder.carrier,
+      estimated_delivery: dbOrder.estimated_delivery,
+      notes: dbOrder.notes,
+      tags: [],
+      source: 'web',
+      ip_address: '',
+      created_at: dbOrder.created_at,
+      updated_at: dbOrder.updated_at,
+      shipped_at: dbOrder.status === 'shipped' ? dbOrder.updated_at : null,
+      delivered_at: dbOrder.actual_delivery
+    }))
+  }, [dbOrders])
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
   }
 
-  const handleRefreshOrders = () => {
+  // Error state
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-4">
+        <p className="text-red-500">Error loading data</p>
+        <Button onClick={() => refetch()}>Retry</Button>
+      </div>
+    )
+  }
+
+  // Filtered orders
+  const filteredOrders = orders.filter(order => {
+    const matchesSearch =
+      order.order_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      order.customer_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      order.customer_email.toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesStatus = statusFilter === 'all' || order.status === statusFilter
+    return matchesSearch && matchesStatus
+  })
+
+  // Stats calculations using hook stats
+  const stats = {
+    totalOrders: orderStats.totalOrders,
+    totalRevenue: orderStats.totalRevenue,
+    pendingOrders: orderStats.pendingOrders,
+    processingOrders: orderStats.processingOrders,
+    shippedOrders: orderStats.shippedOrders,
+    deliveredOrders: orderStats.deliveredOrders,
+    avgOrderValue: orderStats.averageOrderValue,
+    pendingReturns: mockReturns.filter(r => r.status === 'requested').length
+  }
+
+  // Handlers
+  const handleCreateOrder = async () => {
+    try {
+      const result = await createOrder({
+        customer_name: 'New Customer',
+        customer_email: 'customer@example.com',
+        total_amount: 0
+      })
+      if (result) {
+        toast.success('Order Created', {
+          description: `Order ${result.order_number} created successfully`
+        })
+      }
+    } catch {
+      toast.error('Failed to create order')
+    }
+  }
+
+  const handleRefreshOrders = async () => {
+    await refetch()
     toast.success('Refreshed', { description: 'Orders list updated' })
   }
 
-  const handleFulfillOrder = (order: Order) => {
-    toast.success('Order Fulfilled', { description: `Order ${order.order_number} marked as fulfilled` })
+  const handleFulfillOrder = async (order: Order) => {
+    try {
+      await fulfillOrderMutation(order.id)
+      toast.success('Order Fulfilled', { description: `Order ${order.order_number} marked as fulfilled` })
+    } catch {
+      toast.error('Failed to fulfill order')
+    }
   }
 
   const handleExportOrders = () => {
+    const csv = generateOrdersCSV(orders)
+    downloadFile(csv, `orders-${new Date().toISOString().split('T')[0]}.csv`, 'text/csv')
     toast.success('Export Complete', { description: 'Orders exported to CSV' })
   }
 
@@ -614,11 +719,11 @@ export default function OrdersClient() {
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockOrders.length}</p>
+                    <p className="text-3xl font-bold">{orders.length}</p>
                     <p className="text-blue-200 text-sm">Total Orders</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockOrders.filter(o => o.status === 'pending').length}</p>
+                    <p className="text-3xl font-bold">{orders.filter(o => o.status === 'pending').length}</p>
                     <p className="text-blue-200 text-sm">Pending</p>
                   </div>
                 </div>
@@ -636,7 +741,7 @@ export default function OrdersClient() {
                   })
                 }},
                 { icon: Package, label: 'Fulfill', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: async () => {
-                  const unfulfilledIds = mockOrders.filter(o => o.fulfillment_status === 'unfulfilled').map(o => o.id)
+                  const unfulfilledIds = orders.filter(o => o.fulfillment_status === 'unfulfilled').map(o => o.id)
                   if (unfulfilledIds.length === 0) {
                     toast.info('No orders to fulfill')
                     return
@@ -648,7 +753,7 @@ export default function OrdersClient() {
                   })
                 }},
                 { icon: Truck, label: 'Ship', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: async () => {
-                  const processingIds = mockOrders.filter(o => o.status === 'processing').map(o => o.id)
+                  const processingIds = orders.filter(o => o.status === 'processing').map(o => o.id)
                   if (processingIds.length === 0) {
                     toast.info('No orders ready for shipping')
                     return
@@ -665,14 +770,14 @@ export default function OrdersClient() {
                 }},
                 { icon: Receipt, label: 'Invoice', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => {
                   // Generate invoice PDF content
-                  const invoiceContent = mockOrders.map(o =>
+                  const invoiceContent = orders.map(o =>
                     `Invoice: ${o.order_number}\nCustomer: ${o.customer_name}\nTotal: $${o.total.toFixed(2)}\n---`
                   ).join('\n')
                   downloadFile(invoiceContent, `invoices-${new Date().toISOString().split('T')[0]}.txt`, 'text/plain')
                   toast.success('Invoices generated')
                 }},
                 { icon: Download, label: 'Export', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => {
-                  const csv = generateOrdersCSV(mockOrders)
+                  const csv = generateOrdersCSV(orders)
                   downloadFile(csv, `orders-${new Date().toISOString().split('T')[0]}.csv`, 'text/csv')
                   toast.success('Orders exported to CSV')
                 }},
@@ -896,11 +1001,11 @@ export default function OrdersClient() {
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockOrders.filter(o => o.fulfillment_status === 'unfulfilled').length}</p>
+                    <p className="text-3xl font-bold">{orders.filter(o => o.fulfillment_status === 'unfulfilled').length}</p>
                     <p className="text-green-200 text-sm">Unfulfilled</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockOrders.filter(o => o.status === 'shipped').length}</p>
+                    <p className="text-3xl font-bold">{orders.filter(o => o.status === 'shipped').length}</p>
                     <p className="text-green-200 text-sm">Shipped</p>
                   </div>
                 </div>
@@ -911,7 +1016,7 @@ export default function OrdersClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
                 { icon: PackageCheck, label: 'Fulfill All', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: async () => {
-                  const unfulfilledIds = mockOrders.filter(o => o.fulfillment_status === 'unfulfilled').map(o => o.id)
+                  const unfulfilledIds = orders.filter(o => o.fulfillment_status === 'unfulfilled').map(o => o.id)
                   if (unfulfilledIds.length === 0) {
                     toast.info('No orders to fulfill')
                     return
@@ -923,14 +1028,14 @@ export default function OrdersClient() {
                   })
                 }},
                 { icon: Printer, label: 'Print Slips', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => {
-                  const slipsContent = mockOrders.filter(o => o.fulfillment_status === 'unfulfilled').map(o =>
+                  const slipsContent = orders.filter(o => o.fulfillment_status === 'unfulfilled').map(o =>
                     `PACKING SLIP\n${o.order_number}\nCustomer: ${o.customer_name}\nItems: ${o.items.map(i => `${i.product_name} x${i.quantity}`).join(', ')}\n---`
                   ).join('\n\n')
                   downloadFile(slipsContent, `packing-slips-${new Date().toISOString().split('T')[0]}.txt`, 'text/plain')
                   toast.success('Packing slips generated')
                 }},
                 { icon: Truck, label: 'Schedule', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: async () => {
-                  const processingIds = mockOrders.filter(o => o.status === 'processing').map(o => o.id)
+                  const processingIds = orders.filter(o => o.status === 'processing').map(o => o.id)
                   if (processingIds.length === 0) {
                     toast.info('No orders ready for shipping')
                     return
@@ -945,14 +1050,14 @@ export default function OrdersClient() {
                   toast.info('Scanner mode: Ready to scan items')
                 }},
                 { icon: Tag, label: 'Labels', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => {
-                  const labelsContent = mockOrders.filter(o => o.fulfillment_status === 'unfulfilled').map(o =>
+                  const labelsContent = orders.filter(o => o.fulfillment_status === 'unfulfilled').map(o =>
                     `SHIPPING LABEL\nTo: ${o.customer_name}\n${o.shipping_address.address1}\n${o.shipping_address.city}, ${o.shipping_address.state} ${o.shipping_address.postal_code}\n---`
                   ).join('\n\n')
                   downloadFile(labelsContent, `shipping-labels-${new Date().toISOString().split('T')[0]}.txt`, 'text/plain')
                   toast.success('Shipping labels generated')
                 }},
                 { icon: MapPin, label: 'Track', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => {
-                  const shippedOrders = mockOrders.filter(o => o.tracking_number)
+                  const shippedOrdersWithTracking = orders.filter(o => o.tracking_number)
                   if (shippedOrders.length === 0) {
                     toast.info('No orders with tracking numbers')
                     return
@@ -960,7 +1065,7 @@ export default function OrdersClient() {
                   toast.success(`${shippedOrders.length} orders have tracking`)
                 }},
                 { icon: AlertCircle, label: 'Issues', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => {
-                  const onHold = mockOrders.filter(o => o.status === 'on_hold')
+                  const onHold = orders.filter(o => o.status === 'on_hold')
                   if (onHold.length === 0) {
                     toast.success('No fulfillment issues')
                   } else {
@@ -968,7 +1073,7 @@ export default function OrdersClient() {
                   }
                 }},
                 { icon: History, label: 'History', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => {
-                  const historyContent = mockOrders.map(o =>
+                  const historyContent = orders.map(o =>
                     `${o.order_number}: ${o.status} - ${new Date(o.updated_at).toLocaleString()}`
                   ).join('\n')
                   downloadFile(historyContent, `fulfillment-history-${new Date().toISOString().split('T')[0]}.txt`, 'text/plain')
@@ -996,7 +1101,7 @@ export default function OrdersClient() {
                   </CardHeader>
                   <CardContent className="p-0">
                     <div className="divide-y">
-                      {mockOrders.filter(o => o.fulfillment_status === 'unfulfilled').map(order => (
+                      {orders.filter(o => o.fulfillment_status === 'unfulfilled').map(order => (
                         <div key={order.id} className="p-4">
                           <div className="flex items-center justify-between mb-3">
                             <div className="flex items-center gap-3">
@@ -1060,19 +1165,19 @@ export default function OrdersClient() {
                       <div className="flex items-center justify-between">
                         <span className="text-gray-500">Unfulfilled</span>
                         <span className="font-bold text-yellow-600">
-                          {mockOrders.filter(o => o.fulfillment_status === 'unfulfilled').length}
+                          {orders.filter(o => o.fulfillment_status === 'unfulfilled').length}
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-gray-500">Partially Fulfilled</span>
                         <span className="font-bold text-blue-600">
-                          {mockOrders.filter(o => o.fulfillment_status === 'partially_fulfilled').length}
+                          {orders.filter(o => o.fulfillment_status === 'partially_fulfilled').length}
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-gray-500">Fulfilled Today</span>
                         <span className="font-bold text-green-600">
-                          {mockOrders.filter(o => o.fulfillment_status === 'fulfilled').length}
+                          {orders.filter(o => o.fulfillment_status === 'fulfilled').length}
                         </span>
                       </div>
                     </div>
@@ -1397,8 +1502,8 @@ export default function OrdersClient() {
                   <div className="space-y-4">
                     {[
                       { status: 'Paid', amount: stats.totalRevenue, color: 'bg-green-500' },
-                      { status: 'Pending', amount: mockOrders.filter(o => o.payment_status === 'pending').reduce((acc, o) => acc + o.total, 0), color: 'bg-yellow-500' },
-                      { status: 'Refunded', amount: mockOrders.filter(o => o.payment_status === 'refunded').reduce((acc, o) => acc + o.total, 0), color: 'bg-red-500' }
+                      { status: 'Pending', amount: orders.filter(o => o.payment_status === 'pending').reduce((acc, o) => acc + o.total, 0), color: 'bg-yellow-500' },
+                      { status: 'Refunded', amount: orders.filter(o => o.payment_status === 'refunded').reduce((acc, o) => acc + o.total, 0), color: 'bg-red-500' }
                     ].map(item => (
                       <div key={item.status} className="flex items-center gap-3">
                         <div className={`w-3 h-3 rounded-full ${item.color}`} />
@@ -1417,10 +1522,10 @@ export default function OrdersClient() {
                 <CardContent>
                   <div className="space-y-4">
                     {[
-                      { source: 'Web', count: mockOrders.filter(o => o.source === 'web').length, pct: 60 },
-                      { source: 'Mobile', count: mockOrders.filter(o => o.source === 'mobile').length, pct: 30 },
-                      { source: 'POS', count: mockOrders.filter(o => o.source === 'pos').length, pct: 8 },
-                      { source: 'API', count: mockOrders.filter(o => o.source === 'api').length, pct: 2 }
+                      { source: 'Web', count: orders.filter(o => o.source === 'web').length, pct: 60 },
+                      { source: 'Mobile', count: orders.filter(o => o.source === 'mobile').length, pct: 30 },
+                      { source: 'POS', count: orders.filter(o => o.source === 'pos').length, pct: 8 },
+                      { source: 'API', count: orders.filter(o => o.source === 'api').length, pct: 2 }
                     ].map(item => (
                       <div key={item.source} className="space-y-1">
                         <div className="flex items-center justify-between text-sm">

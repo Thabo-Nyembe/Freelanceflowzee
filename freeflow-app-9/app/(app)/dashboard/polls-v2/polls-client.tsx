@@ -2,7 +2,8 @@
 
 import { createClient } from '@/lib/supabase/client'
 
-import { useState, useMemo, useCallback, useEffect } from 'react'
+import { useState, useMemo, useCallback } from 'react'
+import { usePolls as usePollsHook, type Poll, type PollStatus as HookPollStatus } from '@/lib/hooks/use-polls'
 import { toast } from 'sonner'
 import {
   ClipboardList,
@@ -75,7 +76,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 
-// Initialize Supabase client once at module level
+// Initialize Supabase client for operations not covered by hooks
 const supabase = createClient()
 
 // ============================================================================
@@ -259,29 +260,14 @@ const questionTypes = [
 // Quick actions defined inline within component for proper state access
 
 // ============================================================================
-// SUPABASE POLL TYPE
+// SUPABASE POLL TYPE (from hook)
 // ============================================================================
 
 type PollType = 'single-choice' | 'multiple-choice' | 'rating' | 'ranking' | 'open-ended'
 type PollStatus = 'draft' | 'active' | 'paused' | 'closed' | 'archived'
 
-interface DbPoll {
-  id: string
-  user_id: string
-  question: string
-  description: string | null
-  poll_type: PollType
-  status: PollStatus
-  options: { id: string; text: string }[]
-  total_votes: number
-  total_voters: number
-  views_count: number
-  starts_at: string | null
-  ends_at: string | null
-  is_public: boolean
-  created_at: string
-  updated_at: string
-}
+// DbPoll is now the Poll type from the hook
+type DbPoll = Poll
 
 // ============================================================================
 // COMPONENT
@@ -301,10 +287,8 @@ export default function PollsClient() {
   const [selectedQuestionType, setSelectedQuestionType] = useState<string | null>(null)
   const [settingsTab, setSettingsTab] = useState('general')
 
-  // Database state
-  const [dbPolls, setDbPolls] = useState<DbPoll[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [isSaving, setIsSaving] = useState(false)
+  // Database state from Supabase hook
+  const { polls: dbPolls, loading: isLoading, error: pollsError, mutating: isSaving, createPoll, updatePoll, deletePoll, refetch: fetchPolls } = usePollsHook()
 
   // Form state for create/edit
   const [formData, setFormData] = useState({
@@ -322,7 +306,7 @@ export default function PollsClient() {
   const [selectedFormForView, setSelectedFormForView] = useState<Form | null>(null)
 
   // Selected theme
-  const [selectedTheme, setSelectedTheme] = useState<string>([][0].id)
+  const [selectedTheme, setSelectedTheme] = useState<string>('default')
 
   // Dialog states for functionality
   const [showWebhookDialog, setShowWebhookDialog] = useState(false)
@@ -398,45 +382,16 @@ export default function PollsClient() {
     setSelectedQuestionType(null)
   }
 
-  // Fetch polls from Supabase
-  const fetchPolls = useCallback(async () => {
-    try {
-      setIsLoading(true)
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
+  // fetchPolls is now provided by the usePollsHook above
 
-      const { data, error } = await supabase
-        .from('polls')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-
-      if (error) throw error
-      setDbPolls(data || [])
-    } catch (error) {
-      console.error('Error fetching polls:', error)
-      toast.error('Failed to load polls')
-    } finally {
-      setIsLoading(false)
-    }
-  }, [])
-
-  // Create poll
+  // Create poll using hook mutation
   const handleCreatePoll = async () => {
     if (!formData.question.trim()) {
       toast.error('Please enter a question')
       return
     }
     try {
-      setIsSaving(true)
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        toast.error('Please sign in to create polls')
-        return
-      }
-
-      const { error } = await supabase.from('polls').insert({
-        user_id: user.id,
+      await createPoll({
         question: formData.question,
         description: formData.description || null,
         poll_type: formData.poll_type,
@@ -447,50 +402,30 @@ export default function PollsClient() {
         ends_at: formData.ends_at || null
       })
 
-      if (error) throw error
-
       toast.success('Poll created successfully')
       setShowCreateDialog(false)
       resetForm()
-      fetchPolls()
     } catch (error) {
       console.error('Error creating poll:', error)
       toast.error('Failed to create poll')
-    } finally {
-      setIsSaving(false)
     }
   }
 
-  // Update poll status
+  // Update poll status using hook mutation
   const handleUpdatePollStatus = async (pollId: string, newStatus: PollStatus) => {
     try {
-      const { error } = await supabase
-        .from('polls')
-        .update({ status: newStatus, updated_at: new Date().toISOString() })
-        .eq('id', pollId)
-
-      if (error) throw error
-
+      await updatePoll(pollId, { status: newStatus as HookPollStatus })
       toast.success(`Poll ${newStatus === 'active' ? 'activated' : newStatus}`)
-      fetchPolls()
     } catch (error) {
       console.error('Error updating poll:', error)
       toast.error('Failed to update poll')
     }
   }
 
-  // Delete poll
+  // Delete poll using hook mutation
   const handleDeletePoll = async (pollId: string) => {
     toast.promise(
-      (async () => {
-        const { error } = await supabase
-          .from('polls')
-          .delete()
-          .eq('id', pollId)
-
-        if (error) throw error
-        fetchPolls()
-      })(),
+      deletePoll(pollId),
       {
         loading: 'Deleting poll...',
         success: 'Poll deleted successfully',
@@ -499,27 +434,17 @@ export default function PollsClient() {
     )
   }
 
-  // Duplicate poll
+  // Duplicate poll using hook mutation
   const handleDuplicatePollDb = async (poll: DbPoll) => {
-    setIsSaving(true)
     toast.promise(
-      (async () => {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) throw new Error('Please sign in to duplicate polls')
-
-        const { error } = await supabase.from('polls').insert({
-          user_id: user.id,
-          question: `${poll.question} (Copy)`,
-          description: poll.description,
-          poll_type: poll.poll_type,
-          status: 'draft',
-          options: poll.options,
-          is_public: poll.is_public
-        })
-
-        if (error) throw error
-        fetchPolls()
-      })().finally(() => setIsSaving(false)),
+      createPoll({
+        question: `${poll.question} (Copy)`,
+        description: poll.description,
+        poll_type: poll.poll_type,
+        status: 'draft' as HookPollStatus,
+        options: poll.options,
+        is_public: poll.is_public
+      }),
       {
         loading: 'Duplicating poll...',
         success: 'Poll duplicated successfully',
@@ -556,10 +481,7 @@ export default function PollsClient() {
     }))
   }
 
-  // Load polls on mount
-  useEffect(() => {
-    fetchPolls()
-  }, [fetchPolls])
+  // Polls are automatically loaded by the usePollsHook
 
   const filteredForms = useMemo(() => {
     return forms.filter(form => {
@@ -571,16 +493,16 @@ export default function PollsClient() {
   }, [forms, searchQuery, statusFilter])
 
   const stats = useMemo(() => ({
-    totalForms: forms.length,
-    totalResponses: forms.reduce((sum, f) => sum + f.responseCount, 0),
-    totalViews: forms.reduce((sum, f) => sum + f.viewCount, 0),
+    totalForms: forms.length + (dbPolls?.length || 0),
+    totalResponses: forms.reduce((sum, f) => sum + f.responseCount, 0) + (dbPolls?.reduce((sum, p) => sum + (p.total_votes || 0), 0) || 0),
+    totalViews: forms.reduce((sum, f) => sum + f.viewCount, 0) + (dbPolls?.reduce((sum, p) => sum + (p.views_count || 0), 0) || 0),
     avgCompletionRate: forms.filter(f => f.responseCount > 0).length > 0
       ? forms.filter(f => f.responseCount > 0).reduce((sum, f) => sum + f.completionRate, 0) /
         forms.filter(f => f.responseCount > 0).length
       : 0,
-    activeForms: forms.filter(f => f.status === 'active').length,
-    draftForms: forms.filter(f => f.status === 'draft').length
-  }), [forms])
+    activeForms: forms.filter(f => f.status === 'active').length + (dbPolls?.filter(p => p.status === 'active').length || 0),
+    draftForms: forms.filter(f => f.status === 'draft').length + (dbPolls?.filter(p => p.status === 'draft').length || 0)
+  }), [forms, dbPolls])
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -609,7 +531,8 @@ export default function PollsClient() {
 
   const handleExportResponses = async () => {
     try {
-      const csvContent = dbPolls.map(p =>
+      const polls = dbPolls || []
+      const csvContent = polls.map(p =>
         `"${p.question}","${p.poll_type}","${p.status}","${p.total_votes}","${p.created_at}"`
       ).join('\n')
       const blob = new Blob([`Question,Type,Status,Votes,Created\n${csvContent}`], { type: 'text/csv' })
@@ -847,10 +770,18 @@ export default function PollsClient() {
   }
 
   // Handle reset workspace
-  const handleResetWorkspace = () => {
+  const handleResetWorkspace = async () => {
     if (confirm('Are you sure you want to reset your workspace? This will delete all forms and data. This action cannot be undone.')) {
       setForms([])
-      setDbPolls([])
+      // Delete all polls from database
+      const polls = dbPolls || []
+      for (const poll of polls) {
+        try {
+          await deletePoll(poll.id)
+        } catch {
+          // continue deleting remaining polls
+        }
+      }
       toast.success('Workspace reset complete')
     }
   }

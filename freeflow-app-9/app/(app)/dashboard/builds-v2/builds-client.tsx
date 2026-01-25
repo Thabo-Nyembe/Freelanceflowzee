@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { useBuilds, useBuildPipelines, useBuildArtifacts } from '@/lib/hooks/use-builds'
+import { useBuilds, useBuildPipelines, useBuildArtifacts, useBuildMutations } from '@/lib/hooks/use-builds'
 import { apiPost, apiDelete, downloadFile } from '@/lib/button-handlers'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -215,23 +215,8 @@ interface Runner {
 // interface CacheEntry { id: string, key: string, ref: string, ... }
 
 // ============================================================================
-// EMPTY DATA ARRAYS - Using database hooks for real data
+// DATA - All driven by Supabase hooks (useBuilds, useBuildPipelines, useBuildArtifacts)
 // ============================================================================
-
-// Database-driven: Using useBuilds hook
-const builds: Build[] = []
-
-// Database-driven: Using useBuildPipelines hook
-const workflows: Workflow[] = []
-
-// Database-driven: Environment data from database hooks
-const environments: Environment[] = []
-
-// Database-driven: Artifact data from useBuildArtifacts hook
-const artifacts: Artifact[] = []
-
-// Database-driven: Runner data from database hooks
-const runners: Runner[] = []
 
 // ============================================================================
 // HELPER FUNCTIONS
@@ -341,10 +326,21 @@ const buildsActivities: { id: string; action: string; timestamp: string }[] = []
 
 export default function BuildsClient() {
   const router = useRouter()
-  // MIGRATED: Batch #12 - Database hooks for builds data
-  const { builds: databaseBuilds = [], isLoading: buildsLoading } = useBuilds()
-  const { pipelines: databasePipelines = [], activePipelines = [] } = useBuildPipelines()
-  const { data: databaseArtifacts = [] } = useBuildArtifacts()
+  // MIGRATED: Database hooks for builds data (Supabase)
+  const { builds: databaseBuilds = [], isLoading: buildsLoading, error: buildsError, refetch: refetchBuilds } = useBuilds()
+  const { pipelines: databasePipelines = [], activePipelines = [], isLoading: pipelinesLoading, error: pipelinesError } = useBuildPipelines()
+  const { data: databaseArtifacts = [], isLoading: artifactsLoading, error: artifactsError } = useBuildArtifacts(undefined, true)
+  const {
+    triggerBuild: mutateTriggerBuild,
+    cancelBuild: mutateCancelBuild,
+    retryBuild: mutateRetryBuild,
+    isTriggering,
+    isCancelling,
+    isRetrying,
+  } = useBuildMutations()
+
+  const isLoading = buildsLoading || pipelinesLoading || artifactsLoading
+  const error = buildsError || pipelinesError || artifactsError
 
   const [activeTab, setActiveTab] = useState('builds')
   const [searchQuery, setSearchQuery] = useState('')
@@ -356,6 +352,10 @@ export default function BuildsClient() {
   const [maxConcurrentJobs, setMaxConcurrentJobs] = useState(5)
   const [queuePendingJobs, setQueuePendingJobs] = useState(true)
   const [cancelOnNewPush, setCancelOnNewPush] = useState(false)
+
+  // Placeholder arrays for data not yet backed by Supabase hooks
+  const environments: Environment[] = []
+  const runners: Runner[] = []
 
   // Filtered data - using database builds only
   const filteredBuilds = useMemo(() => {
@@ -408,21 +408,37 @@ export default function BuildsClient() {
   }
 
   const handleCancelBuild = async (build: Build) => {
-    await apiPost(`/api/builds/${build.id}/cancel`, {}, {
-      loading: `Cancelling build #${build.build_number}...`,
-      success: `Build #${build.build_number} has been cancelled`,
-      error: `Failed to cancel build #${build.build_number}`
-    })
+    try {
+      toast.loading(`Cancelling build #${build.build_number}...`)
+      mutateCancelBuild(build.id)
+      toast.dismiss()
+      toast.success(`Build #${build.build_number} has been cancelled`)
+      refetchBuilds()
+    } catch {
+      toast.dismiss()
+      toast.error(`Failed to cancel build #${build.build_number}`)
+    }
   }
 
   const handleRetryBuild = async (build: Build) => {
-    await apiPost(`/api/builds/${build.id}/retry`, {
-      run_attempt: build.run_attempt + 1
-    }, {
-      loading: `Restarting build #${build.build_number}...`,
-      success: `Build #${build.build_number} restarted successfully`,
-      error: `Failed to restart build #${build.build_number}`
-    })
+    try {
+      toast.loading(`Restarting build #${build.build_number}...`)
+      mutateRetryBuild({
+        pipeline_id: (build as any).pipeline_id,
+        build_number: build.build_number + 1,
+        branch: build.branch,
+        commit_hash: build.commit_hash,
+        commit_message: build.commit_message,
+        author_name: build.author_name,
+        author_email: build.author_email,
+      })
+      toast.dismiss()
+      toast.success(`Build #${build.build_number} restarted successfully`)
+      refetchBuilds()
+    } catch {
+      toast.dismiss()
+      toast.error(`Failed to restart build #${build.build_number}`)
+    }
   }
 
   const handleDownloadArtifact = async (artifact: Artifact) => {
@@ -579,6 +595,37 @@ export default function BuildsClient() {
     },
   ]
 
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-teal-50 via-cyan-50/30 to-blue-50/40 dark:bg-none dark:bg-gray-900 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
+          <p className="text-gray-500 dark:text-gray-400">Loading builds...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-teal-50 via-cyan-50/30 to-blue-50/40 dark:bg-none dark:bg-gray-900 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4 text-center">
+          <AlertCircle className="h-8 w-8 text-red-500" />
+          <div>
+            <p className="text-lg font-semibold text-gray-900 dark:text-white">Failed to load builds</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{error?.message || 'An unexpected error occurred'}</p>
+          </div>
+          <Button variant="outline" onClick={() => refetchBuilds()}>
+            <RefreshCw className="w-4 h-4 mr-2" />
+            Retry
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-cyan-50/30 to-blue-50/40 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">
@@ -594,7 +641,7 @@ export default function BuildsClient() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
+            <Button variant="outline" size="sm" onClick={() => refetchBuilds()}>
               <RefreshCw className="w-4 h-4 mr-2" />
               Refresh
             </Button>

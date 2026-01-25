@@ -15,8 +15,8 @@ import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Progress } from '@/components/ui/progress'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { useTutorials, Tutorial, TutorialStats } from '@/lib/hooks/use-tutorials'
-import { Search, Play, BookOpen, Clock, Users, Star, Award, CheckCircle, Lock, FileText, Video, Code, Bookmark, ChevronRight, Trophy, Target, TrendingUp, BarChart3, GraduationCap, Zap, Filter, Grid3X3, List, Heart, Download, Plus, Circle, Check, Settings, Bell, CreditCard, Shield, Palette, Globe, Flame, Medal, Sparkles, Mail, Smartphone, MoreHorizontal, Trash2, RefreshCw, Share2 } from 'lucide-react'
+import { useTutorials } from '@/lib/hooks/use-tutorials'
+import { Search, Play, BookOpen, Clock, Users, Star, Award, CheckCircle, Lock, FileText, Video, Code, Bookmark, ChevronRight, Trophy, Target, TrendingUp, BarChart3, GraduationCap, Zap, Filter, Grid3X3, List, Heart, Download, Plus, Circle, Check, Settings, Bell, CreditCard, Shield, Palette, Globe, Flame, Medal, Sparkles, Mail, Smartphone, MoreHorizontal, Trash2, RefreshCw, Share2, Loader2 } from 'lucide-react'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -201,15 +201,12 @@ interface LearningNotification {
 type CourseLevel = 'beginner' | 'intermediate' | 'advanced' | 'all-levels'
 type CourseCategory = 'development' | 'design' | 'business' | 'marketing' | 'data-science' | 'productivity' | 'it-security'
 
-interface TutorialsClientProps {
-  initialTutorials: Tutorial[]
-  initialStats: TutorialStats
-}
+// Props no longer needed - data is fetched by the hook
 
 // Empty arrays - data will come from database hooks
-const mockInstructors: Instructor[] = []
+const _mockInstructors: Instructor[] = []
 
-const mockCourses: Course[] = []
+const _mockCourses: Course[] = []
 
 const mockLearningPaths: LearningPath[] = []
 
@@ -313,9 +310,77 @@ const getQuickActions = (router: ReturnType<typeof useRouter>) => [
   },
 ]
 
-export default function TutorialsClient({ initialTutorials, initialStats }: TutorialsClientProps) {
+export default function TutorialsClient() {
   const router = useRouter()
-  const { tutorials: _tutorials, stats: _stats } = useTutorials(initialTutorials, initialStats)
+
+  // Fetch tutorials from Supabase with real-time updates
+  const {
+    tutorials: dbTutorials,
+    stats,
+    loading: isLoading,
+    error,
+    refetch,
+    createTutorial: _createTutorial,
+    updateTutorial: _updateTutorial,
+    deleteTutorial: _deleteTutorial,
+    publishTutorial: _publishTutorial
+  } = useTutorials()
+
+  // Convert DB tutorials (snake_case) to UI Course format (camelCase)
+  const courses = useMemo((): Course[] => {
+    if (!dbTutorials) return []
+    return dbTutorials.map((tutorial): Course => ({
+      id: tutorial.id,
+      title: tutorial.title,
+      slug: tutorial.title.toLowerCase().replace(/\s+/g, '-'),
+      description: tutorial.description || '',
+      longDescription: tutorial.content || tutorial.description || '',
+      thumbnail: tutorial.thumbnail_url || '/placeholder-course.jpg',
+      instructor: {
+        id: tutorial.user_id,
+        name: tutorial.author || 'Unknown Instructor',
+        avatar: '/placeholder-avatar.jpg',
+        title: 'Course Instructor',
+        bio: '',
+        rating: 4.5,
+        studentsCount: tutorial.enrollments_count || 0,
+        coursesCount: 1,
+        verified: true
+      },
+      level: (tutorial.level === 'expert' ? 'advanced' : tutorial.level) as CourseLevel,
+      category: 'development' as CourseCategory,
+      subcategory: '',
+      language: 'English',
+      status: tutorial.status === 'published' ? 'published' : tutorial.status === 'scheduled' ? 'coming-soon' : 'draft',
+      price: 0,
+      duration: {
+        hours: Math.floor((tutorial.duration_minutes || 0) / 60),
+        minutes: (tutorial.duration_minutes || 0) % 60,
+        totalMinutes: tutorial.duration_minutes || 0
+      },
+      chapters: [],
+      skills: tutorial.tags || [],
+      prerequisites: tutorial.prerequisites || [],
+      whatYouLearn: [],
+      requirements: [],
+      targetAudience: [],
+      certificate: true,
+      metrics: {
+        enrollments: tutorial.enrollments_count || 0,
+        completions: tutorial.completions_count || 0,
+        rating: tutorial.rating || 0,
+        reviewsCount: tutorial.reviews_count || 0,
+        watchTime: (tutorial.duration_minutes || 0) * 60,
+        completionRate: tutorial.enrollments_count && tutorial.enrollments_count > 0
+          ? ((tutorial.completions_count || 0) / tutorial.enrollments_count) * 100
+          : 0
+      },
+      tags: tutorial.tags || [],
+      lastUpdated: tutorial.updated_at,
+      createdAt: tutorial.created_at
+    }))
+  }, [dbTutorials])
+
   const [activeTab, setActiveTab] = useState('browse')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<CourseCategory | 'all'>('all')
@@ -345,7 +410,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
   const [completedCourses, setCompletedCourses] = useState<string[]>([])
 
   const filteredCourses = useMemo(() => {
-    let filtered = [...mockCourses]
+    let filtered = [...courses]
 
     // Search filter
     if (searchQuery) {
@@ -410,7 +475,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
     }
 
     return filtered
-  }, [searchQuery, selectedCategory, levelFilter, sortBy, showOnlySaved, showOnlyCertified, bookmarkedCourses])
+  }, [courses, searchQuery, selectedCategory, levelFilter, sortBy, showOnlySaved, showOnlyCertified, bookmarkedCourses])
 
   const getLevelColor = (level: CourseLevel) => {
     const colors: Record<CourseLevel, string> = {
@@ -512,7 +577,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
 
   const handleMyList = useCallback(() => {
     // Filter to show only bookmarked courses
-    const bookmarked = mockCourses.filter(c => bookmarkedCourses.includes(c.id))
+    const bookmarked = courses.filter(c => bookmarkedCourses.includes(c.id))
     if (bookmarked.length === 0) {
       toast.info('No saved courses yet. Bookmark courses to add them to your list.')
     } else {
@@ -520,7 +585,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
       setSelectedCategory('all')
       setActiveTab('browse')
     }
-  }, [bookmarkedCourses])
+  }, [courses, bookmarkedCourses])
 
   const handleQuickAction = useCallback((actionLabel: string) => {
     switch (actionLabel) {
@@ -876,6 +941,25 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
     )
   }, [])
 
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-4">
+        <p className="text-red-500">Error loading data</p>
+        <Button onClick={() => refetch()}>Retry</Button>
+      </div>
+    )
+  }
+
   const CourseCard = ({ course }: { course: Course }) => {
     const progress = mockProgress.find(p => p.courseId === course.id)
     const isBookmarked = bookmarkedCourses.includes(course.id)
@@ -1013,20 +1097,20 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
           {/* Quick Stats */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-6 mt-8">
             <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
-              <div className="text-3xl font-bold">{mockCourses.length * 45}</div>
+              <div className="text-3xl font-bold">{stats.total}</div>
               <div className="text-rose-100 text-sm">Total Courses</div>
             </div>
             <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
-              <div className="text-3xl font-bold">{mockProgress.length}</div>
+              <div className="text-3xl font-bold">{stats.draft}</div>
               <div className="text-rose-100 text-sm">In Progress</div>
             </div>
             <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
-              <div className="text-3xl font-bold">12</div>
+              <div className="text-3xl font-bold">{stats.published}</div>
               <div className="text-rose-100 text-sm">Completed</div>
             </div>
             <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
-              <div className="text-3xl font-bold">5</div>
-              <div className="text-rose-100 text-sm">Certificates</div>
+              <div className="text-3xl font-bold">{stats.totalEnrollments}</div>
+              <div className="text-rose-100 text-sm">Enrollments</div>
             </div>
           </div>
         </div>
@@ -1072,7 +1156,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockCourses.length}</p>
+                    <p className="text-3xl font-bold">{courses.length}</p>
                     <p className="text-rose-200 text-sm">Courses</p>
                   </div>
                   <div className="text-center">
@@ -1080,7 +1164,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
                     <p className="text-rose-200 text-sm">Categories</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockCourses.reduce((s, c) => s + c.lessons, 0)}</p>
+                    <p className="text-3xl font-bold">{courses.reduce((s, c) => s + (c.chapters?.length || 0), 0)}</p>
                     <p className="text-rose-200 text-sm">Lessons</p>
                   </div>
                 </div>
@@ -1232,7 +1316,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
             ) : (
               <div className="space-y-4">
                 {mockProgress.map(p => {
-                  const course = mockCourses.find(c => c.id === p.courseId)
+                  const course = courses.find(c => c.id === p.courseId)
                   if (!course) return null
                   return (
                     <Card key={p.courseId} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => setSelectedCourse(course)}>
@@ -2348,7 +2432,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
             <div><Label>Deadline</Label><Input type="date" className="mt-1" /></div>
             <div><Label>Related Course</Label>
               <Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select a course" /></SelectTrigger><SelectContent>
-                {mockCourses.map(c => (<SelectItem key={c.id} value={c.id}>{c.title}</SelectItem>))}
+                {courses.map(c => (<SelectItem key={c.id} value={c.id}>{c.title}</SelectItem>))}
               </SelectContent></Select>
             </div>
             <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">

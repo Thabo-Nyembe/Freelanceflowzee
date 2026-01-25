@@ -764,6 +764,37 @@ export default function AnnouncementsClient() {
     setShowShareAnnouncementDialog(false)
   }
 
+  // Loading state
+  if (dbLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50/30 to-fuchsia-50/40 dark:bg-none dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <RefreshCw className="w-12 h-12 text-violet-600 animate-spin mx-auto mb-4" />
+          <p className="text-slate-600 dark:text-slate-400">Loading announcements...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Error state
+  if (dbError) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50/30 to-fuchsia-50/40 dark:bg-none dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+          <p className="text-red-600 dark:text-red-400 font-medium mb-2">Failed to load announcements</p>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mb-4">
+            {dbError instanceof Error ? dbError.message : 'An unexpected error occurred'}
+          </p>
+          <Button onClick={() => refetch()} variant="outline" className="gap-2">
+            <RefreshCw className="h-4 w-4" />
+            Retry
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50/30 to-fuchsia-50/40 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">

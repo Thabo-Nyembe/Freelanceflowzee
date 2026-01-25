@@ -46,7 +46,7 @@ import {
   Filter, Archive, Inbox, Download, Upload, Headphones, MessageCircle, ThumbsUp, UserPlus, LogOut, Zap, Bot, Workflow, Code, Calendar, ArrowUpRight, ArrowDownRight,
   FolderOpen, Files, Sparkles, Moon, Sun, Palette, Shield, Key,
   RefreshCw, PhoneOff, ScreenShare, PlayCircle, Radio, BookOpen, HelpCircle,
-  Webhook, HardDrive, AlertOctagon, Sliders
+  Webhook, HardDrive, AlertOctagon, Sliders, Loader2
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -1272,6 +1272,18 @@ export default function MessagesClient() {
       toast.error('Failed to send reply')
     }
   }
+
+  // Combined loading state for all hooks
+  const isLoading = authLoading || teamLoading || threadsLoading || filesLoading || mentionsLoading || callsLoading || messagesLoading || chatsLoading
+
+  // Combined error state for all hooks
+  const hasError = messagesError || chatsError || chatMessagesError
+
+  // Loading state
+  if (isLoading) return <div className="flex items-center justify-center h-full"><Loader2 className="h-8 w-8 animate-spin" /></div>
+
+  // Error state
+  if (hasError) return <div className="flex flex-col items-center justify-center h-full gap-4"><p className="text-red-500">Error loading data</p><Button onClick={() => { refetchMessages(); fetchChats(); }}>Retry</Button></div>
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 dark:bg-none dark:bg-gray-900 p-6">

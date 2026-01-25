@@ -55,18 +55,16 @@ import {
   useAnalyticsConversionFunnels,
 } from '@/lib/hooks/use-analytics-extended'
 
+// Import useAnalytics hook for core analytics CRUD operations
+import { useAnalytics, type AnalyticsRecord } from '@/lib/hooks/use-analytics'
+
 // Production-ready API hooks for analytics
 import {
   useDashboardMetrics,
   useRevenueAnalytics,
   useEngagementMetrics,
   usePerformanceMetrics,
-  usePredictiveInsights,
-  type DashboardMetrics,
-  type RevenueMetrics,
-  type EngagementMetrics as ApiEngagementMetrics,
-  type PerformanceMetrics as ApiPerformanceMetrics,
-  type PredictiveInsights
+  usePredictiveInsights
 } from '@/lib/api-clients'
 import {
   DropdownMenu,
@@ -92,7 +90,8 @@ import {
   ArrowUpRight, ArrowDownRight, Download, RefreshCw, Settings, Plus,
   Calendar, Filter, Layers, Zap, Bell, ChevronRight, MoreVertical,
   AreaChart, Gauge, Globe, Smartphone, Monitor, Search, Play, Pause,
-  FileText, Layout, Share2, Trash2, Copy, Edit3, Database, GitBranch, Workflow, Mail
+  FileText, Layout, Share2, Trash2, Copy, Edit3, Database, GitBranch, Workflow, Mail,
+  Loader2
 } from 'lucide-react'
 
 // Lazy-loaded Competitive Upgrade Components for code splitting
@@ -305,6 +304,17 @@ export default function AnalyticsClient() {
   const { data: revenueData, isLoading: revenueLoading, refresh: refreshRevenue } = useAnalyticsRevenue(userId || undefined)
   const { data: conversionFunnelsDb, isLoading: funnelsLoading, refresh: refreshFunnels } = useAnalyticsConversionFunnels(userId || undefined)
 
+  // Use core analytics hook for CRUD operations on analytics table
+  const {
+    analytics: analyticsRecords,
+    loading: analyticsLoading,
+    error: analyticsHookError,
+    createAnalytic,
+    updateAnalytic,
+    deleteAnalytic,
+    refetch: refetchAnalytics
+  } = useAnalytics({ limit: 100 })
+
   // ==================== PRODUCTION-READY API HOOKS ====================
   // Calculate date range based on timeRange state
   const dateRangeParams = useMemo(() => {
@@ -380,10 +390,11 @@ export default function AnalyticsClient() {
       refetchApiRevenueAnalytics(),
       refetchApiEngagementMetrics(),
       refetchApiPerformanceMetrics(),
-      refetchApiPredictiveInsights()
+      refetchApiPredictiveInsights(),
+      refetchAnalytics()
     ])
     toast.success('Analytics data refreshed')
-  }, [refetchApiDashboardMetrics, refetchApiRevenueAnalytics, refetchApiEngagementMetrics, refetchApiPerformanceMetrics, refetchApiPredictiveInsights])
+  }, [refetchApiDashboardMetrics, refetchApiRevenueAnalytics, refetchApiEngagementMetrics, refetchApiPerformanceMetrics, refetchApiPredictiveInsights, refetchAnalytics])
 
   // Form state for creating funnel
   const [funnelForm, setFunnelForm] = useState({
@@ -639,6 +650,34 @@ export default function AnalyticsClient() {
     }
   }, [timeRange, customDateRange.start, customDateRange.end])
 
+  // Map analytics records from snake_case (DB) to camelCase (UI)
+  const mappedAnalyticsRecords = useMemo((): AnalyticsMetric[] => {
+    if (!analyticsRecords || analyticsRecords.length === 0) return []
+
+    return analyticsRecords.map((record: AnalyticsRecord) => ({
+      id: record.id,
+      name: record.metric_name,
+      value: record.value,
+      previousValue: record.previous_value || 0,
+      changePercent: record.change_percent || 0,
+      category: record.category,
+      type: record.metric_type === 'sum' || record.metric_type === 'ratio'
+        ? 'currency'
+        : record.metric_type === 'percentage'
+          ? 'percentage'
+          : record.metric_type === 'duration'
+            ? 'duration'
+            : 'count',
+      status: (record.change_percent || 0) > 0
+        ? 'up'
+        : (record.change_percent || 0) < 0
+          ? 'down'
+          : 'stable',
+      alertThreshold: record.alert_threshold_max || record.alert_threshold_min,
+      isAlertTriggered: record.is_alert_triggered
+    }))
+  }, [analyticsRecords])
+
   // Compute real metrics from API hooks and Supabase data
   const computedMetrics = useMemo((): AnalyticsMetric[] => {
     const realMetrics: AnalyticsMetric[] = []
@@ -806,8 +845,17 @@ export default function AnalyticsClient() {
       })
     }
 
+    // Priority 5: Add mapped analytics records from useAnalytics hook
+    if (mappedAnalyticsRecords.length > 0) {
+      mappedAnalyticsRecords.forEach((metric) => {
+        if (!realMetrics.find(m => m.id === metric.id)) {
+          realMetrics.push(metric)
+        }
+      })
+    }
+
     return realMetrics
-  }, [apiDashboardMetrics, apiEngagementMetrics, dashboardMetricsData, userAnalyticsData, platformMetricsDb, revenueData])
+  }, [apiDashboardMetrics, apiEngagementMetrics, dashboardMetricsData, userAnalyticsData, platformMetricsDb, revenueData, mappedAnalyticsRecords])
 
   // Filter metrics based on search
   const filteredMetrics = useMemo(() => {
@@ -1773,6 +1821,25 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
     }
     return actions
   }, [filteredMetrics, activeFunnels, dbReports])
+
+  // Loading state early return
+  if (analyticsLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
+
+  // Error state early return
+  if (analyticsHookError) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-4">
+        <p className="text-red-500">Error loading data</p>
+        <Button onClick={() => refetchAnalytics()}>Retry</Button>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">

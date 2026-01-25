@@ -69,6 +69,7 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Button } from '@/components/ui/button'
 
 // ============================================================================
 // TYPE DEFINITIONS - Intercom/Zendesk Level
@@ -263,7 +264,7 @@ export default function FAQClient() {
   })
 
   // Supabase hook for FAQs
-  const { faqs: dbFaqs, stats: dbStats, loading: isLoading, createFAQ, updateFAQ, deleteFAQ, markHelpful } = useFAQs()
+  const { faqs: dbFaqs, stats: dbStats, loading: isLoading, error, refetch, createFAQ, updateFAQ, deleteFAQ, markHelpful } = useFAQs()
 
   // Convert DB FAQs to Article format for display
   const articles = useMemo(() => {
@@ -691,6 +692,25 @@ export default function FAQClient() {
       }
     },
   ], [])
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-4">
+        <p className="text-red-500">Error loading data</p>
+        <Button onClick={() => refetch()}>Retry</Button>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50/30 to-purple-50/40 dark:bg-none dark:bg-gray-900">

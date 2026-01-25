@@ -42,7 +42,7 @@ import {
   AlertTriangle, Ban, BarChart3, UserX,
   VolumeX, Gavel, FileText, ExternalLink, Rocket, Gem, ShieldCheck, ShieldAlert, Mail, Bot,
   Webhook, Download, Key, HardDrive,
-  CreditCard, Sliders
+  CreditCard, Sliders, Loader2
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -408,6 +408,9 @@ const getModActionColor = (type: ModActionType): string => {
 // ============== MAIN COMPONENT ==============
 
 export default function CommunityClient() {
+  // Create Supabase client for direct operations
+  const supabase = createClient()
+
   // Define adapter variables locally (removed mock data imports)
   const communityAIInsights: any[] = []
   const communityCollaborators: any[] = []
@@ -475,7 +478,7 @@ export default function CommunityClient() {
   // ============== REAL DATA HOOKS ==============
 
   // Community hooks
-  const { communities, loading: communitiesLoading, createCommunity, updateCommunity, deleteCommunity, refetch: refetchCommunities } = useCommunity()
+  const { communities, loading: communitiesLoading, error: communitiesError, createCommunity, updateCommunity, deleteCommunity, refetch: refetchCommunities } = useCommunity()
   const { data: communityEventsData, isLoading: eventsLoading, refresh: refreshEvents } = useCommunityEvents()
   const { data: communityMembersData, isLoading: membersLoading, refresh: refreshMembers } = useCommunityMembers(communities?.[0]?.id)
   const { data: communityPostsData, isLoading: postsLoading, refresh: refreshPosts } = useCommunityPosts()
@@ -727,6 +730,28 @@ export default function CommunityClient() {
     if (!messageInput.trim()) return
     handleSendMessageSubmit()
   }, [messageInput])
+
+  // Combined loading state
+  const isLoading = communitiesLoading || eventsLoading || membersLoading || postsLoading || rolesLoading || messagesLoading || modLogsLoading || botsLoading || channelsLoading
+
+  // Loading state early return
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
+
+  // Error state early return
+  if (communitiesError) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-4">
+        <p className="text-red-500">Error loading data</p>
+        <Button onClick={() => refetchCommunities()}>Retry</Button>
+      </div>
+    )
+  }
 
   const handleViewMember = (member: Member) => {
     setSelectedMember(member)

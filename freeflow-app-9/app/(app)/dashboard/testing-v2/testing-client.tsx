@@ -1,9 +1,11 @@
 'use client'
 
 import { createClient } from '@/lib/supabase/client'
+import { useTestRuns, useTestingMutations, type TestRun as DbTestRun } from '@/lib/hooks/use-testing'
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
+import { Loader2 } from 'lucide-react'
 import {
   Play,
   Square,
@@ -45,7 +47,8 @@ import {
   Chrome,
   CircleSlash
 } from 'lucide-react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Switch } from '@/components/ui/switch'
@@ -67,7 +70,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-
+// Initialize Supabase client once at module level
+const supabase = createClient()
 
 // Database Types
 interface DbTestCase {
@@ -241,7 +245,23 @@ const getBrowserIcon = (browser: BrowserType): React.ReactNode => {
 
 
 export default function TestingClient() {
+  // Database hooks - wire to Supabase
+  const {
+    runs: dbTestRuns,
+    stats: dbStats,
+    isLoading,
+    error,
+    refetch
+  } = useTestRuns()
 
+  const {
+    createRun,
+    isCreating,
+    updateRun,
+    isUpdating,
+    cancelRun,
+    isCancelling
+  } = useTestingMutations()
 
   // Core state
   const [activeTab, setActiveTab] = useState('runs')
@@ -280,6 +300,30 @@ export default function TestingClient() {
   const [tests, setTests] = useState<DbTestCase[]>([])
   const [formState, setFormState] = useState<TestFormState>(initialFormState)
 
+  // Map database test runs to UI TestRun type
+  const mappedTestRuns = useMemo((): TestRun[] => {
+    return dbTestRuns.map((run: DbTestRun) => ({
+      id: run.id,
+      name: run.run_name,
+      branch: run.branch_name || 'main',
+      commit: run.commit_hash || '',
+      status: (run.status === 'completed' ? 'passed' : run.status) as RunStatus,
+      startTime: new Date(run.start_time),
+      endTime: run.end_time ? new Date(run.end_time) : undefined,
+      duration: run.duration_seconds * 1000, // Convert to ms for UI
+      totalTests: run.total_count,
+      passed: run.passed_count,
+      failed: run.failed_count,
+      skipped: run.skipped_count,
+      flaky: 0,
+      coverage: Number(run.coverage_percent) || 0,
+      browsers: ['chromium'] as BrowserType[],
+      parallel: 4,
+      triggeredBy: run.triggered_by || 'manual',
+      specs: []
+    }))
+  }, [dbTestRuns])
+
   // Filter specs
   const filteredSpecs = useMemo(() => {
     if (!selectedRun) return []
@@ -292,21 +336,33 @@ export default function TestingClient() {
     })
   }, [selectedRun, searchQuery, statusFilter])
 
-  // Calculate stats
+  // Calculate stats - use hook stats from database
   const overallStats = useMemo(() => {
-    if (testRuns.length === 0) {
+    // Use database stats from hook if available
+    if (dbStats.total > 0) {
+      return {
+        total: dbStats.totalPassed + dbStats.totalFailed + dbStats.totalSkipped,
+        passed: dbStats.totalPassed,
+        failed: dbStats.totalFailed,
+        avgDuration: dbStats.avgDuration * 1000, // Convert to ms for UI
+        avgCoverage: dbStats.avgCoverage,
+        passRate: dbStats.successRate
+      }
+    }
+    // Fallback to computing from mapped test runs
+    if (mappedTestRuns.length === 0) {
       return { total: 0, passed: 0, failed: 0, avgDuration: 0, avgCoverage: 0, passRate: 0 }
     }
-    const total = testRuns.reduce((sum, r) => sum + r.totalTests, 0)
-    const passed = testRuns.reduce((sum, r) => sum + r.passed, 0)
-    const failed = testRuns.reduce((sum, r) => sum + r.failed, 0)
-    const avgDuration = testRuns.reduce((sum, r) => sum + r.duration, 0) / testRuns.length
-    const runsWithCoverage = testRuns.filter(r => r.coverage > 0)
+    const total = mappedTestRuns.reduce((sum, r) => sum + r.totalTests, 0)
+    const passed = mappedTestRuns.reduce((sum, r) => sum + r.passed, 0)
+    const failed = mappedTestRuns.reduce((sum, r) => sum + r.failed, 0)
+    const avgDuration = mappedTestRuns.reduce((sum, r) => sum + r.duration, 0) / mappedTestRuns.length
+    const runsWithCoverage = mappedTestRuns.filter(r => r.coverage > 0)
     const avgCoverage = runsWithCoverage.length > 0
       ? runsWithCoverage.reduce((sum, r) => sum + r.coverage, 0) / runsWithCoverage.length
       : 0
     return { total, passed, failed, avgDuration, avgCoverage, passRate: total > 0 ? (passed / total) * 100 : 0 }
-  }, [testRuns])
+  }, [dbStats, mappedTestRuns])
 
   // Toggle suite expansion
   const toggleSuite = (suiteId: string) => {
@@ -578,6 +634,25 @@ export default function TestingClient() {
     }
   }
 
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-4">
+        <p className="text-red-500">Error loading data</p>
+        <Button onClick={() => refetch()}>Retry</Button>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:bg-none dark:bg-gray-900">
       {/* Premium Header */}
@@ -731,7 +806,7 @@ export default function TestingClient() {
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="text-right">
-                    <p className="text-3xl font-bold">{testRuns.length}</p>
+                    <p className="text-3xl font-bold">{mappedTestRuns.length}</p>
                     <p className="text-indigo-200 text-sm">Recent Runs</p>
                   </div>
                 </div>
@@ -772,7 +847,7 @@ export default function TestingClient() {
               {/* Runs List */}
               <div className="lg:col-span-1 space-y-3">
                 <h3 className="font-semibold text-gray-900 dark:text-white">Recent Runs</h3>
-                {testRuns.map(run => (
+                {mappedTestRuns.map(run => (
                   <div
                     key={run.id}
                     onClick={() => setSelectedRun(run)}

@@ -2,6 +2,17 @@
 
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
+import { Loader2 } from 'lucide-react'
+import {
+  useEmailCampaigns,
+  useEmailSubscribers,
+  useEmailLists,
+  useEmailTemplates,
+  type EmailCampaign as DbEmailCampaign,
+  type EmailSubscriber as DbEmailSubscriber,
+  type EmailList as DbEmailList,
+  type EmailTemplate as DbEmailTemplate
+} from '@/lib/hooks/use-email-marketing'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -280,11 +291,8 @@ const getTemplateCategoryColor = (category: TemplateCategory): string => {
   return colors[category]
 }
 
-interface EmailMarketingClientProps {
-  initialCampaigns?: Campaign[]
-  initialSubscribers?: Subscriber[]
-  initialTemplates?: EmailTemplate[]
-}
+// MIGRATED: Using Supabase hooks for real data
+// Props removed - all data now comes from hooks
 
 
 // Helper function to download data as CSV
@@ -387,11 +395,46 @@ const apiHelpers = {
 
 // Quick actions will be defined inside the component to access state setters
 
-export default function EmailMarketingClient({
-  initialCampaigns = mockCampaigns,
-  initialSubscribers = mockSubscribers,
-  initialTemplates = mockTemplates
-}: EmailMarketingClientProps) {
+// Empty arrays for mock data placeholders (to be populated from DB or left empty)
+const mockSegments: Segment[] = []
+const mockAutomations: Automation[] = []
+const mockEmailAIInsights: { id: string; type: string; title: string; description: string; impact?: string; priority?: string }[] = []
+const mockEmailCollaborators: { id: string; name: string; avatar?: string; status: 'online' | 'away' | 'offline' }[] = []
+const mockEmailPredictions: { id: string; label: string; current: number; predicted: number; confidence: number; trend: 'up' | 'down' | 'stable' }[] = []
+const mockEmailActivities: { id: string; type: string; title: string; user: string; timestamp: Date }[] = []
+
+export default function EmailMarketingClient() {
+  // Use Supabase hooks for real data
+  const {
+    campaigns: dbCampaigns,
+    loading: campaignsLoading,
+    error: campaignsError,
+    fetchCampaigns: refetchCampaigns,
+    sendCampaign: hookSendCampaign,
+    scheduleCampaign: hookScheduleCampaign,
+    deleteCampaign: hookDeleteCampaign
+  } = useEmailCampaigns()
+
+  const {
+    subscribers: dbSubscribers,
+    loading: subscribersLoading
+  } = useEmailSubscribers()
+
+  const {
+    lists: dbLists,
+    loading: listsLoading,
+    createList: hookCreateList
+  } = useEmailLists()
+
+  const {
+    templates: dbTemplates,
+    loading: templatesLoading
+  } = useEmailTemplates()
+
+  // Combined loading and error states
+  const isLoading = campaignsLoading || subscribersLoading || listsLoading || templatesLoading
+  const error = campaignsError
+
   const [activeTab, setActiveTab] = useState('campaigns')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null)
@@ -412,6 +455,149 @@ export default function EmailMarketingClient({
   const [showAutomationEditorDialog, setShowAutomationEditorDialog] = useState(false)
   const [showAnalyticsDialog, setShowAnalyticsDialog] = useState(false)
   const [showReportDialog, setShowReportDialog] = useState(false)
+
+  // Map DB campaigns to UI Campaign type (must be before early returns due to React hooks rules)
+  const campaigns: Campaign[] = useMemo(() => dbCampaigns.map((c: DbEmailCampaign) => ({
+    id: c.id,
+    name: c.title,
+    subject: c.subject,
+    previewText: c.preview_text || '',
+    type: (c.campaign_type || 'newsletter') as CampaignType,
+    status: c.status as CampaignStatus,
+    listId: c.list_ids?.[0] || '',
+    segmentId: c.segment_ids?.[0],
+    templateId: c.template_id || '',
+    createdAt: c.created_at,
+    scheduledAt: c.scheduled_at || undefined,
+    sentAt: c.sent_at || undefined,
+    stats: {
+      sent: c.sent_count || 0,
+      delivered: c.delivered_count || 0,
+      opens: c.opened_count || 0,
+      uniqueOpens: c.opened_count || 0,
+      clicks: c.clicked_count || 0,
+      uniqueClicks: c.clicked_count || 0,
+      bounces: c.bounced_count || 0,
+      unsubscribes: c.unsubscribed_count || 0,
+      complaints: c.complained_count || 0,
+      forwards: 0
+    },
+    abTest: c.ab_test_enabled ? {
+      enabled: true,
+      winnerCriteria: 'open_rate' as const,
+      variants: []
+    } : undefined,
+    sendTime: c.scheduled_at || c.sent_at || '',
+    fromName: c.sender_name || 'FreeFlow Team',
+    fromEmail: c.sender_email || 'hello@freeflow.com',
+    replyTo: c.reply_to || 'support@freeflow.com'
+  })), [dbCampaigns])
+
+  // Map DB subscribers to UI Subscriber type
+  const subscribers: Subscriber[] = useMemo(() => dbSubscribers.map((s: DbEmailSubscriber) => ({
+    id: s.id,
+    email: s.email,
+    firstName: s.first_name || '',
+    lastName: s.last_name || '',
+    status: s.status as SubscriberStatus,
+    engagementLevel: 'engaged' as EngagementLevel,
+    tags: s.tags || [],
+    listId: s.list_ids?.[0] || '',
+    openRate: s.total_opens > 0 ? Math.min(100, s.total_opens * 10) : 0,
+    clickRate: s.total_clicks > 0 ? Math.min(100, s.total_clicks * 5) : 0,
+    lastOpened: s.last_open_at || s.subscribed_at,
+    lastClicked: s.last_click_at || s.subscribed_at,
+    signupDate: s.subscribed_at,
+    location: { city: 'Unknown', country: 'Unknown' },
+    source: s.source || 'Direct',
+    totalOpens: s.total_opens,
+    totalClicks: s.total_clicks,
+    purchaseValue: 0
+  })), [dbSubscribers])
+
+  // Map DB lists to UI EmailList type
+  const lists: EmailList[] = useMemo(() => dbLists.map((l: DbEmailList) => ({
+    id: l.id,
+    name: l.name,
+    description: l.description || '',
+    subscriberCount: l.subscriber_count,
+    openRate: 0,
+    clickRate: 0,
+    createdAt: l.created_at,
+    tags: l.tags || []
+  })), [dbLists])
+
+  // Map DB templates to UI EmailTemplate type
+  const templates: EmailTemplate[] = useMemo(() => dbTemplates.map((t: DbEmailTemplate) => ({
+    id: t.id,
+    name: t.name,
+    category: (t.category || 'newsletter') as TemplateCategory,
+    thumbnail: t.thumbnail_url || '',
+    isCustom: !t.is_default,
+    createdAt: t.created_at,
+    lastUsed: undefined,
+    useCount: 0
+  })), [dbTemplates])
+
+  // Calculate stats
+  const stats = useMemo(() => {
+    const sentCampaigns = campaigns.filter(c => c.status === 'sent')
+    const totalSent = sentCampaigns.reduce((sum, c) => sum + c.stats.sent, 0)
+    const totalDelivered = sentCampaigns.reduce((sum, c) => sum + c.stats.delivered, 0)
+    const totalOpens = sentCampaigns.reduce((sum, c) => sum + c.stats.uniqueOpens, 0)
+    const totalClicks = sentCampaigns.reduce((sum, c) => sum + c.stats.uniqueClicks, 0)
+    const totalBounces = sentCampaigns.reduce((sum, c) => sum + c.stats.bounces, 0)
+    const totalUnsubscribes = sentCampaigns.reduce((sum, c) => sum + c.stats.unsubscribes, 0)
+
+    const openRate = totalDelivered > 0 ? (totalOpens / totalDelivered) * 100 : 0
+    const clickRate = totalDelivered > 0 ? (totalClicks / totalDelivered) * 100 : 0
+    const bounceRate = totalSent > 0 ? (totalBounces / totalSent) * 100 : 0
+
+    const activeSubscribers = subscribers.filter(s => s.status === 'subscribed').length
+    const totalLists = lists.reduce((sum, l) => sum + l.subscriberCount, 0)
+
+    return {
+      totalSent,
+      totalDelivered,
+      totalOpens,
+      totalClicks,
+      openRate,
+      clickRate,
+      bounceRate,
+      totalUnsubscribes,
+      activeSubscribers,
+      totalLists,
+      engagedRate: subscribers.length > 0 ? (subscribers.filter(s => s.engagementLevel === 'highly_engaged' || s.engagementLevel === 'engaged').length / subscribers.length) * 100 : 0
+    }
+  }, [campaigns, subscribers, lists])
+
+  const filteredCampaigns = useMemo(() => {
+    return campaigns.filter(campaign => {
+      const matchesSearch = campaign.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        campaign.subject.toLowerCase().includes(searchQuery.toLowerCase())
+      const matchesFilter = campaignFilter === 'all' || campaign.status === campaignFilter
+      return matchesSearch && matchesFilter
+    })
+  }, [campaigns, searchQuery, campaignFilter])
+
+  // Loading state early return
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
+
+  // Error state early return
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-4">
+        <p className="text-red-500">Error loading data</p>
+        <Button onClick={() => refetchCampaigns()}>Retry</Button>
+      </div>
+    )
+  }
 
   // Quick actions defined inside component to access state
   const emailQuickActions = [
@@ -443,45 +629,6 @@ export default function EmailMarketingClient({
       variant: 'outline' as const
     },
   ]
-
-  // Calculate stats
-  const stats = useMemo(() => {
-    const sentCampaigns = initialCampaigns.filter(c => c.status === 'sent')
-    const totalSent = sentCampaigns.reduce((sum, c) => sum + c.stats.sent, 0)
-    const totalDelivered = sentCampaigns.reduce((sum, c) => sum + c.stats.delivered, 0)
-    const totalOpens = sentCampaigns.reduce((sum, c) => sum + c.stats.uniqueOpens, 0)
-    const totalClicks = sentCampaigns.reduce((sum, c) => sum + c.stats.uniqueClicks, 0)
-    const totalBounces = sentCampaigns.reduce((sum, c) => sum + c.stats.bounces, 0)
-    const totalUnsubscribes = sentCampaigns.reduce((sum, c) => sum + c.stats.unsubscribes, 0)
-
-    const openRate = totalDelivered > 0 ? (totalOpens / totalDelivered) * 100 : 0
-    const clickRate = totalDelivered > 0 ? (totalClicks / totalDelivered) * 100 : 0
-    const bounceRate = totalSent > 0 ? (totalBounces / totalSent) * 100 : 0
-
-    const activeSubscribers = initialSubscribers.filter(s => s.status === 'subscribed').length
-    const totalLists = mockLists.reduce((sum, l) => sum + l.subscriberCount, 0)
-
-    return {
-      totalSent,
-      totalDelivered,
-      openRate,
-      clickRate,
-      bounceRate,
-      totalUnsubscribes,
-      activeSubscribers,
-      totalLists,
-      engagedRate: (initialSubscribers.filter(s => s.engagementLevel === 'highly_engaged' || s.engagementLevel === 'engaged').length / initialSubscribers.length) * 100
-    }
-  }, [initialCampaigns, initialSubscribers])
-
-  const filteredCampaigns = useMemo(() => {
-    return initialCampaigns.filter(campaign => {
-      const matchesSearch = campaign.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        campaign.subject.toLowerCase().includes(searchQuery.toLowerCase())
-      const matchesFilter = campaignFilter === 'all' || campaign.status === campaignFilter
-      return matchesSearch && matchesFilter
-    })
-  }, [initialCampaigns, searchQuery, campaignFilter])
 
   const statCards = [
     { label: 'Emails Sent', value: stats.totalSent.toLocaleString(), change: 18.5, icon: Send, color: 'from-rose-500 to-pink-600' },
@@ -607,7 +754,7 @@ export default function EmailMarketingClient({
                     <p className="text-purple-200 text-sm">Campaigns</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockCampaigns.filter(c => c.status === 'sent').length}</p>
+                    <p className="text-3xl font-bold">{campaigns.filter(c => c.status === 'sent').length}</p>
                     <p className="text-purple-200 text-sm">Sent</p>
                   </div>
                 </div>
@@ -729,11 +876,11 @@ export default function EmailMarketingClient({
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockSubscribers.length}</p>
+                    <p className="text-3xl font-bold">{subscribers.length}</p>
                     <p className="text-blue-200 text-sm">Total</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockSubscribers.filter(s => s.status === 'active').length}</p>
+                    <p className="text-3xl font-bold">{subscribers.filter(s => s.status === 'subscribed').length}</p>
                     <p className="text-blue-200 text-sm">Active</p>
                   </div>
                 </div>
@@ -754,7 +901,7 @@ export default function EmailMarketingClient({
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {mockLists.map((list) => (
+                      {lists.map((list) => (
                         <div key={list.id} className="p-4 rounded-xl border hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                           <div className="flex items-start justify-between">
                             <div>
@@ -793,13 +940,13 @@ export default function EmailMarketingClient({
                       <CardTitle>Recent Subscribers</CardTitle>
                       <Button variant="outline" size="sm" onClick={() => {
                         setShowAllSubscribersDialog(true)
-                        toast.success(`All subscribers loaded: ${initialSubscribers.length} subscribers across all lists`)
+                        toast.success(`All subscribers loaded: ${subscribers.length} subscribers across all lists`)
                       }}>View All</Button>
                     </div>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      {initialSubscribers.map((subscriber) => (
+                      {subscribers.map((subscriber) => (
                         <div
                           key={subscriber.id}
                           className="p-3 rounded-xl border hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer"
@@ -1004,7 +1151,7 @@ export default function EmailMarketingClient({
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {initialTemplates.map((template) => (
+              {templates.map((template) => (
                 <Card key={template.id} className="border-0 shadow-sm hover:shadow-md transition-all cursor-pointer group">
                   <CardContent className="p-0">
                     <div className={`h-40 bg-gradient-to-br ${getTemplateCategoryColor(template.category)} rounded-t-lg flex items-center justify-center`}>
@@ -1101,7 +1248,7 @@ export default function EmailMarketingClient({
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {initialCampaigns
+                    {campaigns
                       .filter(c => c.status === 'sent')
                       .sort((a, b) => (b.stats.uniqueClicks / b.stats.delivered) - (a.stats.uniqueClicks / a.stats.delivered))
                       .slice(0, 5)

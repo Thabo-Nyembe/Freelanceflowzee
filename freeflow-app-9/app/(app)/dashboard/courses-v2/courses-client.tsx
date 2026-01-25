@@ -2,7 +2,7 @@
 
 import { createClient } from '@/lib/supabase/client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -20,8 +20,7 @@ import {
   Upload, Download, Trash2, Copy, AlertOctagon, RefreshCw, Zap, Link2,
   MessageSquare, CheckCircle, Eye, Edit, Plus, Loader2
 } from 'lucide-react'
-import { useCourses as useCoursesExtended } from '@/lib/hooks/use-courses-extended'
-import { useCreateCourse, useUpdateCourse, useDeleteCourse, type CourseStatus as DBCourseStatus, type CourseLevel as DBCourseLevel, type CourseCategory as DBCourseCategory } from '@/lib/hooks/use-courses'
+import { useCourses, useCreateCourse, useUpdateCourse, useDeleteCourse, type CourseStatus as DBCourseStatus, type CourseLevel as DBCourseLevel, type CourseCategory as DBCourseCategory } from '@/lib/hooks/use-courses'
 
 // Enhanced & Competitive Upgrade Components
 import {
@@ -263,13 +262,19 @@ export default function CoursesClient() {
   const [courseToDelete, setCourseToDelete] = useState<Course | null>(null)
 
   // Supabase hooks
-  const { courses: dbCourses, isLoading: coursesLoading, refresh: refreshCourses } = useCoursesExtended({
-    category: categoryFilter !== 'all' ? categoryFilter : undefined,
-    search: searchQuery || undefined
+  const { courses: dbCourses, isLoading: coursesLoading, error: coursesError, refetch: refreshCourses } = useCourses({
+    category: (categoryFilter !== 'all' ? categoryFilter : undefined) as DBCourseCategory | undefined,
   })
   const createCourseMutation = useCreateCourse()
   const updateCourseMutation = useUpdateCourse()
   const deleteCourseMutation = useDeleteCourse()
+
+  // Show error toast if there's an error loading courses
+  useEffect(() => {
+    if (coursesError) {
+      toast.error('Failed to load courses')
+    }
+  }, [coursesError])
 
   // Use database courses (with fallback to empty array)
   const courses = (dbCourses || []) as Course[]
@@ -370,13 +375,17 @@ export default function CoursesClient() {
     return { totalCourses, publishedCourses, totalStudents, totalRevenue, avgRating, totalCompletions, totalHours, totalReviews }
   }, [courses])
 
-  // Filtered courses (category and search filtering is already done by the hook)
+  // Filtered courses (category filtering is done by the hook, status and search are client-side)
   const filteredCourses = useMemo(() => {
-    return courses.filter(c => {
+    return courses.filter((c: any) => {
       const matchesStatus = statusFilter === 'all' || c.status === statusFilter
-      return matchesStatus
+      const matchesSearch = !searchQuery ||
+        (c.course_name || c.title || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (c.description || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (c.instructor_name || '').toLowerCase().includes(searchQuery.toLowerCase())
+      return matchesStatus && matchesSearch
     })
-  }, [courses, statusFilter])
+  }, [courses, statusFilter, searchQuery])
 
   // Helpers
   const getStatusColor = (status: string) => {
@@ -962,7 +971,39 @@ export default function CoursesClient() {
             </div>
 
             <div className="grid gap-4">
-              {filteredCourses.length === 0 ? (
+              {coursesLoading ? (
+                <div className="space-y-4">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border dark:border-gray-700 animate-pulse">
+                      <div className="flex items-start gap-4">
+                        <div className="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-lg" />
+                        <div className="flex-1 space-y-3">
+                          <div className="flex items-center gap-2">
+                            <div className="h-5 w-20 bg-gray-200 dark:bg-gray-700 rounded" />
+                            <div className="h-5 w-16 bg-gray-200 dark:bg-gray-700 rounded" />
+                          </div>
+                          <div className="h-5 w-3/4 bg-gray-200 dark:bg-gray-700 rounded" />
+                          <div className="h-4 w-1/2 bg-gray-200 dark:bg-gray-700 rounded" />
+                        </div>
+                        <div className="h-6 w-16 bg-gray-200 dark:bg-gray-700 rounded" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : coursesError ? (
+                <div className="bg-white dark:bg-gray-800 rounded-xl p-12 shadow-sm border dark:border-gray-700 text-center">
+                  <AlertOctagon className="w-16 h-16 mx-auto mb-4 text-red-400" />
+                  <h3 className="text-lg font-semibold dark:text-white mb-2">Failed to load courses</h3>
+                  <p className="text-gray-500 dark:text-gray-400 mb-4">There was an error loading your courses. Please try again.</p>
+                  <Button
+                    onClick={() => refreshCourses()}
+                    className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white"
+                  >
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    Retry
+                  </Button>
+                </div>
+              ) : filteredCourses.length === 0 ? (
                 <div className="bg-white dark:bg-gray-800 rounded-xl p-12 shadow-sm border dark:border-gray-700 text-center">
                   <BookOpen className="w-16 h-16 mx-auto mb-4 text-gray-300 dark:text-gray-600" />
                   <h3 className="text-lg font-semibold dark:text-white mb-2">No courses yet</h3>

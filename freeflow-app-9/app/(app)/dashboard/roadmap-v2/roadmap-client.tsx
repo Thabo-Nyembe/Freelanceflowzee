@@ -1,7 +1,19 @@
 "use client"
 
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useCallback } from 'react'
 import { toast } from 'sonner'
+import {
+  useSupabaseQuery,
+  useSupabaseMutation,
+} from '@/lib/hooks/use-supabase-helpers'
+import type {
+  RoadmapInitiative,
+  RoadmapMilestone,
+  InitiativeStatus as DBInitiativeStatus,
+  InitiativePriority as DBPriority,
+  InitiativeImpact as DBImpact,
+  InitiativeEffort as DBEffort,
+} from '@/lib/hooks/use-roadmap'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
@@ -153,16 +165,63 @@ interface Objective {
   features: string[]
 }
 
-// Empty data arrays (replace with real data from API)
-const mockFeatures: Feature[] = []
+// Helper: map DB impact to UI impact level
+const mapImpact = (impact: string | null): ImpactLevel => {
+  const map: Record<string, ImpactLevel> = {
+    critical: 'transformational',
+    very_high: 'transformational',
+    high: 'significant',
+    medium: 'moderate',
+    low: 'minor',
+  }
+  return map[impact || 'medium'] || 'moderate'
+}
 
-const mockReleases: Release[] = []
+// Helper: map DB effort to UI effort level
+const mapEffort = (effort: string | null): EffortLevel => {
+  const map: Record<string, EffortLevel> = {
+    extra_large: 'xl',
+    large: 'large',
+    medium: 'medium',
+    small: 'small',
+  }
+  return map[effort || 'medium'] || 'medium'
+}
 
-const mockInsights: CustomerInsight[] = []
+// Helper: numeric score for impact
+const impactScore = (impact: string | null): number => {
+  const map: Record<string, number> = { critical: 10, very_high: 8, high: 6, medium: 4, low: 2 }
+  return map[impact || 'medium'] || 4
+}
 
-const mockIdeas: Idea[] = []
+// Helper: numeric score for effort
+const effortScore = (effort: string | null): number => {
+  const map: Record<string, number> = { extra_large: 10, large: 8, medium: 5, small: 3 }
+  return map[effort || 'medium'] || 5
+}
 
-const mockObjectives: Objective[] = []
+// Map DB initiative status to UI initiative status
+const mapStatus = (status: string): InitiativeStatus => {
+  const map: Record<string, InitiativeStatus> = {
+    planned: 'planned',
+    in_progress: 'in_progress',
+    completed: 'released',
+    on_hold: 'archived',
+    cancelled: 'archived',
+  }
+  return map[status] || 'backlog'
+}
+
+// Map DB priority to UI priority
+const mapPriority = (priority: string): Priority => {
+  const map: Record<string, Priority> = {
+    critical: 'critical',
+    high: 'high',
+    medium: 'medium',
+    low: 'low',
+  }
+  return map[priority] || 'medium'
+}
 
 // Helper Functions
 const getStatusColor = (status: InitiativeStatus): string => {
@@ -233,16 +292,122 @@ interface RoadmapClientProps {
   initialMilestones?: any[]
 }
 
-// Empty competitive upgrade data arrays (replace with real data from API)
-const mockRoadmapAIInsights: { id: string; type: 'success' | 'warning' | 'info' | 'error'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
+// Competitive upgrade placeholder arrays (populated when AI analytics integration is available)
+const roadmapAIInsights: { id: string; type: 'success' | 'warning' | 'info' | 'error'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
 
-const mockRoadmapCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }[] = []
+const roadmapCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }[] = []
 
-const mockRoadmapPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: 'high' | 'medium' | 'low' }[] = []
+const roadmapPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: 'high' | 'medium' | 'low' }[] = []
 
-const mockRoadmapActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' | 'error' }[] = []
+const roadmapActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' | 'error' }[] = []
 
 export default function RoadmapClient({ initialInitiatives, initialMilestones }: RoadmapClientProps) {
+  // ── Real Supabase Data ──────────────────────────────────────────────
+  const {
+    data: rawInitiatives,
+    isLoading: initiativesLoading,
+    error: initiativesError,
+    refetch: refetchInitiatives,
+  } = useSupabaseQuery<RoadmapInitiative>({
+    table: 'roadmap_initiatives',
+    orderBy: { column: 'created_at', ascending: false },
+  })
+
+  const {
+    data: rawMilestones,
+    isLoading: milestonesLoading,
+    error: milestonesError,
+    refetch: refetchMilestones,
+  } = useSupabaseQuery<RoadmapMilestone>({
+    table: 'roadmap_milestones',
+    orderBy: { column: 'target_date', ascending: true },
+  })
+
+  const {
+    mutate: mutateInitiative,
+    remove: removeInitiative,
+    isLoading: isMutating,
+  } = useSupabaseMutation<RoadmapInitiative>({
+    table: 'roadmap_initiatives',
+    onSuccess: () => { refetchInitiatives() },
+  })
+
+  const {
+    mutate: mutateMilestone,
+    remove: removeMilestone,
+  } = useSupabaseMutation<RoadmapMilestone>({
+    table: 'roadmap_milestones',
+    onSuccess: () => { refetchMilestones() },
+  })
+
+  const isLoading = initiativesLoading || milestonesLoading
+  const dataError = initiativesError || milestonesError
+
+  // Map DB records to UI Feature type
+  const features: Feature[] = useMemo(() => {
+    return (rawInitiatives || []).map((init) => {
+      const iScore = impactScore(init.impact)
+      const eScore = effortScore(init.effort)
+      const rice = iScore > 0 && eScore > 0 ? Math.round((iScore * (init.progress_percentage || 1)) / eScore) : 0
+      return {
+        id: init.id,
+        title: init.title,
+        description: init.description || '',
+        status: mapStatus(init.status),
+        priority: mapPriority(init.priority),
+        impact: mapImpact(init.impact),
+        effort: mapEffort(init.effort),
+        impactScore: iScore,
+        effortScore: eScore,
+        riceScore: rice,
+        progress: init.progress_percentage || 0,
+        quarter: (init.quarter as Quarter) || 'Q1',
+        year: init.year || new Date().getFullYear(),
+        theme: init.theme || 'General',
+        team: init.team || 'Unassigned',
+        owner: {
+          id: init.owner_id || init.user_id,
+          name: init.owner_id ? 'Team Member' : 'You',
+          avatar: '',
+        },
+        votes: 0,
+        comments: 0,
+        dependencies: init.dependencies || [],
+        tags: init.tags || [],
+        customerRequests: 0,
+        createdAt: new Date(init.created_at),
+        updatedAt: new Date(init.updated_at),
+        targetDate: init.target_date ? new Date(init.target_date) : undefined,
+      } satisfies Feature
+    })
+  }, [rawInitiatives])
+
+  // Map DB milestones to Release type for the Releases tab
+  const releases: Release[] = useMemo(() => {
+    return (rawMilestones || []).map((ms) => {
+      const releaseStatus: ReleaseStatus =
+        ms.status === 'completed' ? 'released'
+        : ms.status === 'on_track' ? 'development'
+        : ms.status === 'at_risk' ? 'testing'
+        : ms.status === 'delayed' ? 'testing'
+        : 'planning'
+      return {
+        id: ms.id,
+        name: ms.milestone_name,
+        version: '1.0',
+        status: releaseStatus,
+        targetDate: new Date(ms.target_date),
+        features: [],
+        progress: ms.completion_percentage || 0,
+        description: ms.description || '',
+      } satisfies Release
+    })
+  }, [rawMilestones])
+
+  // Empty placeholder arrays for features not yet backed by DB tables
+  const insights: CustomerInsight[] = []
+  const ideas: Idea[] = []
+  const objectives: Objective[] = []
   const [activeTab, setActiveTab] = useState('roadmap')
   const [viewMode, setViewMode] = useState<ViewMode>('timeline')
   const [searchQuery, setSearchQuery] = useState('')
@@ -282,12 +447,6 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
     { id: '2', label: 'Timeline', icon: 'calendar', action: () => setShowTimelineDialog(true), variant: 'default' as const },
     { id: '3', label: 'Share', icon: 'share', action: () => { navigator.clipboard.writeText('https://kazi.app/roadmap/2024'); toast.success('Link Copied', { description: 'Roadmap link copied to clipboard' }); }, variant: 'outline' as const },
   ]
-
-  const features = mockFeatures
-  const releases = mockReleases
-  const insights = mockInsights
-  const ideas = mockIdeas
-  const objectives = mockObjectives
 
   // Computed Statistics
   const stats = useMemo(() => {
@@ -449,40 +608,49 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
     toast.error('Delete Roadmap', { description: 'This action cannot be undone' })
   }
 
-  // Handler for creating new initiative
-  const handleCreateInitiative = () => {
+  // Handler for creating new initiative via Supabase mutation
+  const handleCreateInitiative = useCallback(async () => {
     if (!newInitiative.title.trim()) {
       toast.error('Validation Error', { description: 'Initiative title is required' })
       return
     }
     toast.promise(
-      fetch('/api/roadmap/initiatives', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newInitiative)
-      }).then(res => {
-        if (!res.ok) throw new Error('Failed to create initiative')
-        return res.json()
+      mutateInitiative({
+        title: newInitiative.title,
+        description: newInitiative.description || null,
+        quarter: newInitiative.quarter,
+        year: new Date().getFullYear(),
+        priority: newInitiative.priority as any,
+        theme: newInitiative.theme || null,
+        status: 'planned' as any,
+        progress_percentage: 0,
+        impact: 'medium' as any,
+        effort: 'medium' as any,
+        stakeholders: [],
+        tags: [],
+        dependencies: [],
+        metadata: newInitiative.objective ? { objective: newInitiative.objective, keyResults: newInitiative.keyResults } : {},
+      } as any).then(result => {
+        if (!result) throw new Error('Failed to create initiative')
+        setShowNewInitiativeDialog(false)
+        setNewInitiative({
+          title: '',
+          description: '',
+          objective: '',
+          quarter: 'Q1',
+          priority: 'medium',
+          theme: '',
+          keyResults: ''
+        })
+        return result
       }),
       {
         loading: 'Creating initiative...',
-        success: () => {
-          setShowNewInitiativeDialog(false)
-          setNewInitiative({
-            title: '',
-            description: '',
-            objective: '',
-            quarter: 'Q1',
-            priority: 'medium',
-            theme: '',
-            keyResults: ''
-          })
-          return `Initiative "${newInitiative.title}" created successfully`
-        },
+        success: `Initiative "${newInitiative.title}" created successfully`,
         error: 'Failed to create initiative'
       }
     )
-  }
+  }, [newInitiative, mutateInitiative])
 
   // Handler for applying timeline settings
   const handleApplyTimelineSettings = () => {
@@ -506,6 +674,35 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
     })
     return grouped
   }, [filteredFeatures])
+
+  // ── Loading State ────────────────────────────────────────────────────
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-500" />
+          <p className="text-sm text-muted-foreground">Loading roadmap data...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // ── Error State ─────────────────────────────────────────────────────
+  if (dataError) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 gap-4">
+        <div className="w-14 h-14 rounded-2xl bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+          <Map className="w-7 h-7 text-red-500" />
+        </div>
+        <p className="text-destructive font-medium">Failed to load roadmap data</p>
+        <p className="text-sm text-muted-foreground max-w-md text-center">{dataError.message}</p>
+        <Button variant="outline" size="sm" onClick={() => { refetchInitiatives(); refetchMilestones() }}>
+          <RefreshCw className="w-4 h-4 mr-2" />
+          Retry
+        </Button>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-cyan-50/30 to-blue-50/40 dark:bg-none dark:bg-gray-900 p-6">
@@ -1589,18 +1786,18 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockRoadmapAIInsights}
+              insights={roadmapAIInsights}
               title="Roadmap Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockRoadmapCollaborators}
+              collaborators={roadmapCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockRoadmapPredictions}
+              predictions={roadmapPredictions}
               title="Delivery Forecasts"
             />
           </div>
@@ -1608,7 +1805,7 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockRoadmapActivities}
+            activities={roadmapActivities}
             title="Roadmap Activity"
             maxItems={5}
           />

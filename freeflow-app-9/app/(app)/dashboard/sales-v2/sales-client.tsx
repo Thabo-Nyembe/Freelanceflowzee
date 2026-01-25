@@ -322,6 +322,7 @@ export default function SalesClient() {
   const {
     deals,
     loading: dealsLoading,
+    error,
     createDeal,
     updateDeal,
     deleteDeal,
@@ -443,6 +444,12 @@ export default function SalesClient() {
       return matchesSearch && matchesStage
     })
   }, [searchQuery, stageFilter])
+
+  // Loading state early return
+  if (dealsLoading) return <div className="flex items-center justify-center h-full"><Loader2 className="h-8 w-8 animate-spin" /></div>
+
+  // Error state early return
+  if (error) return <div className="flex flex-col items-center justify-center h-full gap-4"><p className="text-red-500">Error loading data</p><Button onClick={() => fetchDeals()}>Retry</Button></div>
 
   // Real Supabase Handlers
   const handleCreateDeal = async () => {

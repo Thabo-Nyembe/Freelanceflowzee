@@ -3,6 +3,8 @@
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import dynamic from 'next/dynamic'
 import { toast } from 'sonner'
+import { useInvoices, type Invoice as DbInvoice } from '@/lib/hooks/use-invoices'
+import { Loader2 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -327,9 +329,22 @@ const getDaysOverdue = (dueDate: string) => {
 // ============================================================================
 
 export default function InvoicingClient() {
+  // ============================================================================
+  // SUPABASE DATA HOOK
+  // ============================================================================
+  const {
+    invoices: dbInvoices,
+    loading: isLoading,
+    error: invoicesError,
+    mutating: isMutating,
+    createInvoice: createDbInvoice,
+    updateInvoice: updateDbInvoice,
+    deleteInvoice: deleteDbInvoice,
+    refetch: refetchInvoices
+  } = useInvoices()
+
   const [activeTab, setActiveTab] = useState('invoices')
   const [settingsTab, setSettingsTab] = useState('general')
-  const [invoices, setInvoices] = useState<Invoice[]>([])
   const [clients, setClients] = useState<Client[]>([])
   const [expenses, setExpenses] = useState<Expense[]>([])
   const [report, setReport] = useState<Report>({
@@ -345,7 +360,6 @@ export default function InvoicingClient() {
     revenueByMonth: [],
     paymentsByMethod: []
   })
-  const [isLoading, setIsLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<InvoiceStatus | 'all'>('all')
   const [typeFilter, setTypeFilter] = useState<InvoiceType | 'all'>('all')
@@ -429,127 +443,81 @@ export default function InvoicingClient() {
   const [showGuestPaymentModal, setShowGuestPaymentModal] = useState(false)
   const [selectedInvoiceForGuestPayment, setSelectedInvoiceForGuestPayment] = useState<Invoice | null>(null)
 
-  // Supabase client
-
-
-  // Transform database invoice to frontend Invoice type
-  const transformInvoice = useCallback((dbInvoice: Record<string, unknown>): Invoice => {
-    return {
-      id: dbInvoice.id as string,
-      invoiceNumber: dbInvoice.invoice_number as string,
-      type: (dbInvoice.project_id ? 'standard' : 'standard') as InvoiceType,
+  // ============================================================================
+  // TRANSFORM DB DATA TO UI FORMAT
+  // ============================================================================
+  const invoices = useMemo(() => {
+    if (!dbInvoices || dbInvoices.length === 0) return []
+    return dbInvoices.map((dbInvoice: DbInvoice): Invoice => ({
+      id: dbInvoice.id,
+      invoiceNumber: dbInvoice.invoice_number,
+      type: dbInvoice.is_recurring ? 'recurring' : 'standard' as InvoiceType,
       status: dbInvoice.status as InvoiceStatus,
       client: {
-        id: (dbInvoice.client_id as string) || '',
-        name: dbInvoice.client_name as string,
-        email: dbInvoice.client_email as string,
-        company: dbInvoice.client_name as string,
-        address: (dbInvoice.client_address as { address?: string })?.address,
+        id: dbInvoice.client_id || '',
+        name: dbInvoice.client_name || '',
+        email: dbInvoice.client_email || '',
+        company: dbInvoice.client_name || '',
+        address: dbInvoice.client_address || '',
       },
-      lineItems: [],
+      lineItems: dbInvoice.items || [],
       subtotal: Number(dbInvoice.subtotal) || 0,
       taxAmount: Number(dbInvoice.tax_amount) || 0,
       discountAmount: Number(dbInvoice.discount_amount) || 0,
-      total: Number(dbInvoice.total) || 0,
-      amountPaid: dbInvoice.paid_date ? Number(dbInvoice.total) : 0,
-      amountDue: dbInvoice.paid_date ? 0 : Number(dbInvoice.total),
+      total: Number(dbInvoice.total_amount) || 0,
+      amountPaid: Number(dbInvoice.amount_paid) || 0,
+      amountDue: Number(dbInvoice.amount_due) || 0,
       currency: (dbInvoice.currency as Currency) || 'USD',
-      issueDate: new Date(dbInvoice.issue_date as string).toISOString().split('T')[0],
-      dueDate: new Date(dbInvoice.due_date as string).toISOString().split('T')[0],
-      paidDate: dbInvoice.paid_date ? new Date(dbInvoice.paid_date as string).toISOString().split('T')[0] : undefined,
-      terms: dbInvoice.terms as string,
-      notes: dbInvoice.notes as string,
+      issueDate: dbInvoice.issue_date ? new Date(dbInvoice.issue_date).toISOString().split('T')[0] : '',
+      dueDate: dbInvoice.due_date ? new Date(dbInvoice.due_date).toISOString().split('T')[0] : '',
+      paidDate: dbInvoice.paid_date ? new Date(dbInvoice.paid_date).toISOString().split('T')[0] : undefined,
+      viewedDate: dbInvoice.viewed_date ? new Date(dbInvoice.viewed_date).toISOString().split('T')[0] : undefined,
+      sentDate: dbInvoice.sent_date ? new Date(dbInvoice.sent_date).toISOString().split('T')[0] : undefined,
+      terms: dbInvoice.terms_and_conditions || '',
+      notes: dbInvoice.notes || '',
       payments: [],
       lateFeeApplied: false,
       template: 'professional',
-      tags: [],
-      createdAt: dbInvoice.created_at as string,
-      updatedAt: dbInvoice.updated_at as string,
-    }
-  }, [])
+      tags: dbInvoice.tags || [],
+      createdAt: dbInvoice.created_at,
+      updatedAt: dbInvoice.updated_at,
+    }))
+  }, [dbInvoices])
 
-  // Fetch invoices from Supabase
-  const fetchInvoices = useCallback(async () => {
-    try {
-      const { data, error } = await supabase
-        .from('invoices')
-        .select('*')
-        .order('created_at', { ascending: false })
-
-      if (error) {
-        console.error('Error fetching invoices:', error)
-        toast.error('Failed to load invoices')
-        return
-      }
-
-      if (data && data.length > 0) {
-        const transformedInvoices = data.map(transformInvoice)
-        setInvoices(transformedInvoices)
-      }
-    } catch (err) {
-      console.error('Error fetching invoices:', err)
-      toast.error('Failed to load invoices')
-    } finally {
-      setIsLoading(false)
-    }
-  }, [ transformInvoice])
-
-  // Fetch clients (simplified - using empty array for now as clients table may differ)
-  const fetchClients = useCallback(async () => {
-    // For now, use empty clients - can be extended to fetch from a clients table
-    setClients([])
-  }, [])
-
-  // Create new invoice in Supabase
+  // ============================================================================
+  // MUTATION WRAPPER FUNCTIONS (convert UI types to DB types)
+  // ============================================================================
   const createInvoice = useCallback(async (invoiceData: Partial<Invoice>) => {
     try {
-      const { data: userData } = await supabase.auth.getUser()
-      if (!userData.user) {
-        toast.error('You must be logged in to create invoices')
-        return null
+      const dbData = {
+        invoice_number: invoiceData.invoiceNumber || `INV-${Date.now()}`,
+        client_name: invoiceData.client?.name || 'Unknown Client',
+        client_email: invoiceData.client?.email || '',
+        client_address: invoiceData.client?.address || null,
+        subtotal: invoiceData.subtotal || 0,
+        tax_rate: 0,
+        tax_amount: invoiceData.taxAmount || 0,
+        discount_amount: invoiceData.discountAmount || 0,
+        total_amount: invoiceData.total || 0,
+        amount_due: invoiceData.total || 0,
+        amount_paid: 0,
+        currency: invoiceData.currency || 'USD',
+        issue_date: invoiceData.issueDate || new Date().toISOString(),
+        due_date: invoiceData.dueDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        status: invoiceData.status || 'draft',
+        terms_and_conditions: invoiceData.terms,
+        notes: invoiceData.notes,
       }
-
-      const { data, error } = await supabase
-        .from('invoices')
-        .insert({
-          user_id: userData.user.id,
-          invoice_number: invoiceData.invoiceNumber || `INV-${Date.now()}`,
-          client_name: invoiceData.client?.name || 'Unknown Client',
-          client_email: invoiceData.client?.email || '',
-          client_address: invoiceData.client?.address ? { address: invoiceData.client.address } : null,
-          subtotal: invoiceData.subtotal || 0,
-          tax_rate: 0,
-          tax_amount: invoiceData.taxAmount || 0,
-          discount_amount: invoiceData.discountAmount || 0,
-          total_amount: invoiceData.total || 0,
-          amount_due: invoiceData.total || 0,
-          amount_paid: 0,
-          currency: invoiceData.currency || 'USD',
-          issue_date: invoiceData.issueDate || new Date().toISOString(),
-          due_date: invoiceData.dueDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-          status: invoiceData.status || 'draft',
-          terms_and_conditions: invoiceData.terms,
-          notes: invoiceData.notes,
-        })
-        .select()
-        .single()
-
-      if (error) {
-        console.error('Error creating invoice:', error)
-        toast.error('Failed to create invoice')
-        return null
-      }
-
+      await createDbInvoice(dbData)
       toast.success('Invoice created successfully!')
-      return data
+      return true
     } catch (err) {
       console.error('Error creating invoice:', err)
       toast.error('Failed to create invoice')
       return null
     }
-  }, [])
+  }, [createDbInvoice])
 
-  // Update invoice in Supabase
   const updateInvoice = useCallback(async (invoiceId: string, updates: Partial<Invoice>) => {
     try {
       const dbUpdates: Record<string, unknown> = {}
@@ -565,78 +533,32 @@ export default function InvoicingClient() {
       if (updates.terms) dbUpdates.terms_and_conditions = updates.terms
       if (updates.paidDate) dbUpdates.paid_date = updates.paidDate
 
-      const { error } = await supabase
-        .from('invoices')
-        .update(dbUpdates)
-        .eq('id', invoiceId)
-
-      if (error) {
-        console.error('Error updating invoice:', error)
-        toast.error('Failed to update invoice')
-        return false
-      }
-
-      // Refetch to update local state
-      fetchInvoices()
+      await updateDbInvoice(invoiceId, dbUpdates)
       return true
     } catch (err) {
       console.error('Error updating invoice:', err)
       toast.error('Failed to update invoice')
       return false
     }
-  }, [fetchInvoices])
+  }, [updateDbInvoice])
 
-  // Delete invoice from Supabase
   const deleteInvoice = useCallback(async (invoiceId: string) => {
     try {
-      const { error } = await supabase
-        .from('invoices')
-        .delete()
-        .eq('id', invoiceId)
-
-      if (error) {
-        console.error('Error deleting invoice:', error)
-        toast.error('Failed to delete invoice')
-        return false
-      }
-
-      // Refetch to update local state
-      fetchInvoices()
+      await deleteDbInvoice(invoiceId)
       return true
     } catch (err) {
       console.error('Error deleting invoice:', err)
       toast.error('Failed to delete invoice')
       return false
     }
-  }, [fetchInvoices])
+  }, [deleteDbInvoice])
 
-  // Initial data fetch and real-time subscription
+  // Show error toast if data loading fails
   useEffect(() => {
-    fetchInvoices()
-    fetchClients()
-
-    // Set up real-time subscription for invoice changes
-    const channel = supabase
-      .channel('invoices-channel')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'invoices' }, (payload) => {
-        if (payload.eventType === 'INSERT') {
-          const newInvoice = transformInvoice(payload.new as Record<string, unknown>)
-          setInvoices(prev => [newInvoice, ...prev])
-        } else if (payload.eventType === 'UPDATE') {
-          const updatedInvoice = transformInvoice(payload.new as Record<string, unknown>)
-          setInvoices(prev => prev.map(inv => inv.id === updatedInvoice.id ? updatedInvoice : inv))
-        } else if (payload.eventType === 'DELETE') {
-          const deletedId = (payload.old as { id: string }).id
-          setInvoices(prev => prev.filter(inv => inv.id !== deletedId))
-        }
-      })
-      .subscribe()
-
-    // Cleanup subscription on unmount
-    return () => {
-      supabase.removeChannel(channel)
+    if (invoicesError) {
+      toast.error('Failed to load invoices')
     }
-  }, [ fetchInvoices, fetchClients, transformInvoice])
+  }, [invoicesError])
 
   // Quick Actions with proper dialog handlers
   const invoicingQuickActions = [
@@ -803,11 +725,31 @@ export default function InvoicingClient() {
       toast.success(`Payment of ${formatCurrency(paymentResult.amount)} received for invoice ${selectedInvoiceForGuestPayment?.invoiceNumber}!`)
       setShowGuestPaymentModal(false)
       setSelectedInvoiceForGuestPayment(null)
-      fetchInvoices()
+      refetchInvoices()
     } catch (error) {
       console.error('Failed to record payment:', error)
       toast.error('Payment succeeded but failed to record. Please contact support.')
     }
+  }
+
+  // ============================================================================
+  // LOADING AND ERROR STATES
+  // ============================================================================
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
+
+  if (invoicesError) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-4">
+        <p className="text-red-500">Error loading data</p>
+        <Button onClick={() => refetchInvoices()}>Retry</Button>
+      </div>
+    )
   }
 
   return (

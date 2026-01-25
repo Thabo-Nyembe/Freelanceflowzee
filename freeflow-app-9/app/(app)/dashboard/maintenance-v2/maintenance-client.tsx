@@ -1,8 +1,8 @@
 'use client'
 
-import { createClient } from '@/lib/supabase/client'
+import { useMaintenance, type MaintenanceWindow } from '@/lib/hooks/use-maintenance'
 
-import { useState, useMemo, useEffect, useCallback } from 'react'
+import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import {
   Wrench, CheckCircle, AlertCircle, Server,
@@ -10,7 +10,7 @@ import {
   BarChart3, Bell, Pause, Users, Plus, Search,
   Download, RefreshCw, FileText, Shield, Database,
   HardDrive, RotateCw, Target,
-  ClipboardList
+  ClipboardList, Loader2
 } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -405,77 +405,93 @@ export default function MaintenanceClient() {
     criticality: 'all' as Priority | 'all'
   })
 
-  // Supabase data state
-  const [dbMaintenanceWindows, setDbMaintenanceWindows] = useState<DbMaintenanceWindow[]>([])
-  const [loading, setLoading] = useState(true)
+  // Use the maintenance hook for data fetching and mutations
+  const {
+    windows: dbMaintenanceWindows,
+    loading,
+    error,
+    fetchWindows,
+    createWindow,
+    updateWindow,
+    deleteWindow,
+    startMaintenance,
+    completeMaintenance,
+    cancelMaintenance,
+    getStats
+  } = useMaintenance()
+
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [formState, setFormState] = useState<MaintenanceFormState>(initialFormState)
 
-  // Fetch maintenance windows from Supabase
-  const fetchMaintenanceWindows = useCallback(async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-
-      const { data, error } = await supabase
-        .from('maintenance_windows')
-        .select('*')
-        .eq('user_id', user.id)
-        .is('deleted_at', null)
-        .order('created_at', { ascending: false })
-
-      if (error) throw error
-      setDbMaintenanceWindows(data || [])
-    } catch (error) {
-      console.error('Error fetching maintenance windows:', error)
-      toast.error('Failed to load maintenance data')
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
-  useEffect(() => {
-    fetchMaintenanceWindows()
-  }, [fetchMaintenanceWindows])
-
-  // Computed stats
+  // Computed stats from hook data
   const stats = useMemo(() => {
-    const total = mockWorkOrders.length
-    const scheduled = mockWorkOrders.filter(w => w.status === 'scheduled').length
-    const inProgress = mockWorkOrders.filter(w => w.status === 'in_progress').length
-    const completed = mockWorkOrders.filter(w => w.status === 'completed').length
-    const overdue = mockWorkOrders.filter(w => w.sla.breached).length
-    const avgCompletion = mockWorkOrders.filter(w => w.status === 'completed').reduce((sum, w) => sum + (w.actualHours / w.estimatedHours) * 100, 0) / (completed || 1)
-    const totalDowntime = mockWorkOrders.reduce((sum, w) => sum + w.downtimeMinutes, 0)
-    const criticalAssets = mockAssets.filter(a => a.criticality === 'critical').length
+    const hookStats = getStats()
+    const totalDowntime = dbMaintenanceWindows
+      .filter(w => w.downtime_expected)
+      .reduce((sum, w) => sum + (w.duration_minutes || 0), 0)
+    const criticalCount = dbMaintenanceWindows.filter(w => w.impact === 'critical').length
 
     return {
-      total,
-      scheduled,
-      inProgress,
-      completed,
-      overdue,
-      avgCompletion: Math.round(avgCompletion),
+      total: hookStats.total,
+      scheduled: hookStats.scheduled,
+      inProgress: hookStats.inProgress,
+      completed: hookStats.completed,
+      overdue: hookStats.delayed,
+      avgCompletion: Math.round(hookStats.avgCompletionRate),
       totalDowntime,
-      criticalAssets,
-      uptime: 99.5
+      criticalAssets: criticalCount,
+      uptime: hookStats.total > 0 ? Math.round((hookStats.completed / hookStats.total) * 100) : 99.5
     }
-  }, [])
+  }, [dbMaintenanceWindows, getStats])
 
-  // Filtered work orders
+  // Filtered maintenance windows from DB
   const filteredOrders = useMemo(() => {
-    return mockWorkOrders.filter(order => {
+    return dbMaintenanceWindows.filter(window => {
       const matchesSearch = searchQuery === '' ||
-        order.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        order.orderNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        order.asset.toLowerCase().includes(searchQuery.toLowerCase())
-      const matchesStatus = statusFilter === 'all' || order.status === statusFilter
+        window.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        window.window_code?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (window.affected_systems || []).some(s => s.toLowerCase().includes(searchQuery.toLowerCase()))
+      // Map DB status (e.g., 'in-progress') to UI status (e.g., 'in_progress')
+      const dbStatus = window.status?.replace('-', '_') as MaintenanceStatus
+      const matchesStatus = statusFilter === 'all' || dbStatus === statusFilter
       return matchesSearch && matchesStatus
     })
-  }, [searchQuery, statusFilter])
+  }, [dbMaintenanceWindows, searchQuery, statusFilter])
 
-  // Create maintenance window
+  // Filtered assets for the Asset List Dialog (using mockAssets as assets are not in hook)
+  const filteredAssets = useMemo(() => {
+    return mockAssets.filter(asset => {
+      const matchesSearch = assetFilter.search === '' ||
+        asset.name.toLowerCase().includes(assetFilter.search.toLowerCase()) ||
+        asset.assetTag.toLowerCase().includes(assetFilter.search.toLowerCase()) ||
+        asset.location.toLowerCase().includes(assetFilter.search.toLowerCase())
+      const matchesStatus = assetFilter.status === 'all' || asset.status === assetFilter.status
+      const matchesCriticality = assetFilter.criticality === 'all' || asset.criticality === assetFilter.criticality
+      return matchesSearch && matchesStatus && matchesCriticality
+    })
+  }, [assetFilter])
+
+  // Loading state - after all hooks
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
+
+  // Error state - after all hooks
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-4">
+        <p className="text-red-500">Error loading data</p>
+        <Button onClick={() => fetchWindows()}>Retry</Button>
+      </div>
+    )
+  }
+
+  // Create maintenance window using hook mutation
   const handleCreateWorkOrder = async () => {
     if (!formState.title.trim()) {
       toast.error('Title is required')
@@ -488,20 +504,13 @@ export default function MaintenanceClient() {
 
     setIsSubmitting(true)
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        toast.error('Please sign in to create maintenance windows')
-        return
-      }
-
-      const { error } = await supabase.from('maintenance_windows').insert({
-        user_id: user.id,
+      await createWindow({
         title: formState.title,
         description: formState.description || null,
-        type: formState.type,
+        type: formState.type as MaintenanceWindow['type'],
         status: 'scheduled',
-        priority: formState.priority,
-        impact: formState.impact,
+        priority: formState.priority as MaintenanceWindow['priority'],
+        impact: formState.impact as MaintenanceWindow['impact'],
         start_time: formState.start_time,
         end_time: formState.end_time,
         duration_minutes: parseInt(formState.duration_minutes) || 60,
@@ -512,81 +521,51 @@ export default function MaintenanceClient() {
         completion_rate: 0,
       })
 
-      if (error) throw error
-
-      toast.success('Maintenance window created successfully')
       setShowCreateDialog(false)
       setFormState(initialFormState)
-      fetchMaintenanceWindows()
-    } catch (error) {
-      console.error('Error creating maintenance window:', error)
-      toast.error('Failed to create maintenance window')
+    } catch (err) {
+      console.error('Error creating maintenance window:', err)
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  // Update maintenance status
+  // Update maintenance status using hook mutation
   const handleUpdateStatus = async (windowId: string, newStatus: string) => {
     try {
-      const completionRate = newStatus === 'completed' ? 100 : newStatus === 'scheduled' ? 0 : undefined
-      const updateData: Record<string, unknown> = { status: newStatus, updated_at: new Date().toISOString() }
-      if (completionRate !== undefined) updateData.completion_rate = completionRate
-      if (newStatus === 'in-progress') updateData.actual_start = new Date().toISOString()
-      if (newStatus === 'completed') updateData.actual_end = new Date().toISOString()
-
-      const { error } = await supabase
-        .from('maintenance_windows')
-        .update(updateData)
-        .eq('id', windowId)
-
-      if (error) throw error
-
-      toast.success(`Status updated to ${newStatus.replace('-', ' ')}`)
-      fetchMaintenanceWindows()
-    } catch (error) {
-      console.error('Error updating status:', error)
-      toast.error('Failed to update status')
+      if (newStatus === 'in-progress') {
+        await startMaintenance(windowId)
+      } else if (newStatus === 'completed') {
+        await completeMaintenance(windowId)
+      } else if (newStatus === 'cancelled') {
+        await cancelMaintenance(windowId)
+      } else {
+        await updateWindow(windowId, { status: newStatus as MaintenanceWindow['status'] })
+      }
+    } catch (err) {
+      console.error('Error updating status:', err)
     }
   }
 
-  // Delete maintenance window
-  const handleDeleteWindow = async (windowId: string) => {
+  // Delete maintenance window using hook mutation
+  const handleDeleteWindowAction = async (windowId: string) => {
     try {
-      const { error } = await supabase
-        .from('maintenance_windows')
-        .update({ deleted_at: new Date().toISOString() })
-        .eq('id', windowId)
-
-      if (error) throw error
-
-      toast.success('Maintenance window deleted')
-      fetchMaintenanceWindows()
-    } catch (error) {
-      console.error('Error deleting window:', error)
-      toast.error('Failed to delete maintenance window')
+      await deleteWindow(windowId)
+    } catch (err) {
+      console.error('Error deleting window:', err)
     }
   }
 
-  // Assign technician (update assigned_to)
+  // Assign technician using hook mutation
   const handleAssignTechnician = async (windowId: string, techName?: string) => {
     try {
       const window = dbMaintenanceWindows.find(w => w.id === windowId)
       const currentAssigned = window?.assigned_to || []
       const newAssigned = techName ? [...currentAssigned, techName] : currentAssigned
 
-      const { error } = await supabase
-        .from('maintenance_windows')
-        .update({ assigned_to: newAssigned, updated_at: new Date().toISOString() })
-        .eq('id', windowId)
-
-      if (error) throw error
-
-      toast.success('Technician assigned successfully')
-      fetchMaintenanceWindows()
-    } catch (error) {
-      console.error('Error assigning technician:', error)
-      toast.error('Failed to assign technician')
+      await updateWindow(windowId, { assigned_to: newAssigned })
+    } catch (err) {
+      console.error('Error assigning technician:', err)
     }
   }
 
@@ -616,7 +595,7 @@ export default function MaintenanceClient() {
     toast.success('Report exported successfully')
   }
 
-  // Schedule PM Handler
+  // Schedule PM Handler using hook mutation
   const handleSchedulePM = async () => {
     if (!pmFormState.asset) {
       toast.error('Please select an asset')
@@ -629,20 +608,13 @@ export default function MaintenanceClient() {
 
     setIsSubmitting(true)
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        toast.error('Please sign in to schedule maintenance')
-        return
-      }
-
       const startDate = new Date(pmFormState.startDate)
       const endDate = new Date(startDate.getTime() + parseInt(pmFormState.duration) * 60000)
 
-      const { error } = await supabase.from('maintenance_windows').insert({
-        user_id: user.id,
+      await createWindow({
         title: `Preventive Maintenance - ${pmFormState.asset}`,
         description: `Scheduled ${pmFormState.frequency} ${pmFormState.maintenanceType} maintenance`,
-        type: pmFormState.maintenanceType,
+        type: pmFormState.maintenanceType as MaintenanceWindow['type'],
         status: 'scheduled',
         priority: 'medium',
         impact: 'low',
@@ -656,9 +628,6 @@ export default function MaintenanceClient() {
         completion_rate: 0,
       })
 
-      if (error) throw error
-
-      toast.success('Preventive maintenance scheduled successfully')
       setShowSchedulePMDialog(false)
       setPMFormState({
         asset: '',
@@ -670,10 +639,8 @@ export default function MaintenanceClient() {
         checklist: '',
         notes: ''
       })
-      fetchMaintenanceWindows()
-    } catch (error) {
-      console.error('Error scheduling PM:', error)
-      toast.error('Failed to schedule preventive maintenance')
+    } catch (err) {
+      console.error('Error scheduling PM:', err)
     } finally {
       setIsSubmitting(false)
     }
@@ -731,28 +698,18 @@ export default function MaintenanceClient() {
     setShowResetSettingsDialog(false)
   }
 
-  // Delete all data
+  // Delete all data using hook mutations
   const handleDeleteAllData = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        toast.error('Please sign in to perform this action')
-        return
+      // Delete all maintenance windows one by one using the hook
+      for (const window of dbMaintenanceWindows) {
+        await deleteWindow(window.id)
       }
-
-      // Soft delete all maintenance windows
-      const { error } = await supabase
-        .from('maintenance_windows')
-        .update({ deleted_at: new Date().toISOString() })
-        .eq('user_id', user.id)
-
-      if (error) throw error
 
       toast.success('All maintenance data has been deleted')
       setShowDeleteDataDialog(false)
-      fetchMaintenanceWindows()
-    } catch (error) {
-      console.error('Error deleting data:', error)
+    } catch (err) {
+      console.error('Error deleting data:', err)
       toast.error('Failed to delete data')
     }
   }
@@ -764,10 +721,9 @@ export default function MaintenanceClient() {
     toast.info(`Showing ${status === 'all' ? 'all' : status.replace('_', ' ')} work orders`)
   }
 
-  // Refresh data
+  // Refresh data using hook
   const handleRefreshData = () => {
-    setLoading(true)
-    fetchMaintenanceWindows()
+    fetchWindows()
     toast.success('Data refreshed')
   }
 
@@ -793,24 +749,11 @@ export default function MaintenanceClient() {
     toast.info('Viewing asset inventory')
   }
 
-  // Archive completed orders
+  // Archive completed orders using DB data
   const handleArchiveOrders = () => {
-    const completedCount = mockWorkOrders.filter(w => w.status === 'completed').length
+    const completedCount = dbMaintenanceWindows.filter(w => w.status === 'completed').length
     toast.success(`${completedCount} completed work orders archived`)
   }
-
-  // Filtered assets for the Asset List Dialog
-  const filteredAssets = useMemo(() => {
-    return mockAssets.filter(asset => {
-      const matchesSearch = assetFilter.search === '' ||
-        asset.name.toLowerCase().includes(assetFilter.search.toLowerCase()) ||
-        asset.assetTag.toLowerCase().includes(assetFilter.search.toLowerCase()) ||
-        asset.location.toLowerCase().includes(assetFilter.search.toLowerCase())
-      const matchesStatus = assetFilter.status === 'all' || asset.status === assetFilter.status
-      const matchesCriticality = assetFilter.criticality === 'all' || asset.criticality === assetFilter.criticality
-      return matchesSearch && matchesStatus && matchesCriticality
-    })
-  }, [assetFilter])
 
   // Quick Actions with real dialog functionality
   const maintenanceQuickActions = [

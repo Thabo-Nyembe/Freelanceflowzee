@@ -39,7 +39,6 @@ import {
   MoreHorizontal,
   Tag,
   UserPlus,
-  AlertCircle,
   Inbox,
   Mail,
   Phone,
@@ -47,11 +46,11 @@ import {
   Bell,
   Settings,
   Zap,
-  RefreshCw,
   ChevronRight,
   Bookmark,
   Trash2,
-  Edit
+  Edit,
+  Loader2
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -212,7 +211,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
   const messageInputRef = useRef<HTMLTextAreaElement>(null)
 
   // Hook for chat data with mutations
-  const { chatMessages, loading, error, sendMessage, updateMessage, deleteMessage, mutating } = useChat({
+  const { chatMessages, loading, error, sendMessage, updateMessage, deleteMessage, mutating, refetch } = useChat({
     roomType: roomTypeFilter,
     limit: 50
   })
@@ -475,20 +474,21 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
     return `${days}d ago`
   }
 
+  // Loading state early return (after all hooks)
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
+
+  // Error state early return
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-blue-50 to-indigo-50 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">
-        <Card className="max-w-md mx-auto">
-          <CardContent className="p-6 text-center">
-            <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Error Loading Chat</h3>
-            <p className="text-gray-600 dark:text-gray-400">{error.message}</p>
-            <Button className="mt-4" onClick={() => window.location.reload()}>
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Retry
-            </Button>
-          </CardContent>
-        </Card>
+      <div className="flex flex-col items-center justify-center h-full gap-4">
+        <p className="text-red-500">Error loading data</p>
+        <Button onClick={() => refetch()}>Retry</Button>
       </div>
     )
   }

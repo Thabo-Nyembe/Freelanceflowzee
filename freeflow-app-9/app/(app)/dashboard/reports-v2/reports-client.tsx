@@ -87,7 +87,7 @@ import { Textarea } from '@/components/ui/textarea'
 type ReportStatus = 'published' | 'draft' | 'scheduled' | 'generating' | 'error' | 'archived'
 type ReportType = 'dashboard' | 'table' | 'chart' | 'story' | 'embedded'
 type ChartType = 'bar' | 'line' | 'pie' | 'area' | 'scatter' | 'heatmap' | 'map' | 'funnel' | 'gauge'
-type DataSourceType = 'database' | 'file' | 'api' | 'cloud' | 'spreadsheet'
+type _DataSourceType = 'database' | 'file' | 'api' | 'cloud' | 'spreadsheet'
 
 interface Report {
   id: string
@@ -476,10 +476,10 @@ export default function ReportsClient() {
     loading: dashboardsLoading,
     error: dashboardsError,
     createDashboard,
-    updateDashboard,
+    updateDashboard: _updateDashboard,
     deleteDashboard,
     toggleFavorite,
-    publishDashboard,
+    publishDashboard: _publishDashboard,
     refetch: refetchDashboards
   } = useDashboards()
 
@@ -498,7 +498,7 @@ export default function ReportsClient() {
     loading: scheduledLoading,
     error: scheduledError,
     createScheduledReport,
-    updateScheduledReport,
+    updateScheduledReport: _updateScheduledReport,
     deleteScheduledReport,
     toggleScheduledReport,
     runReportNow,
@@ -507,9 +507,9 @@ export default function ReportsClient() {
 
   // Financial reports hook for revenue/expense tracking
   const {
-    reports: financialReports,
+    reports: _financialReports,
     stats: financialStats,
-    loading: financialLoading,
+    loading: _financialLoading,
     fetchReports: fetchFinancialReports,
     fetchRevenueEntries
   } = useFinancialReports()
@@ -922,6 +922,35 @@ export default function ReportsClient() {
       )}
     </div>
   )
+
+  // Check for combined loading state
+  const isLoading = dashboardsLoading && dataSourcesLoading && scheduledLoading
+
+  // Check for critical error
+  const combinedError = dashboardsError || dataSourcesError || scheduledError
+
+  // Loading state early return
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
+
+  // Error state early return
+  if (combinedError) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-4">
+        <p className="text-red-500">Error loading data</p>
+        <Button onClick={() => {
+          refetchDashboards()
+          refetchDataSources()
+          refetchScheduled()
+        }}>Retry</Button>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50/30 to-indigo-50/20 dark:bg-none dark:bg-gray-900 p-6">

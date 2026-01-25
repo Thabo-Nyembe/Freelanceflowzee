@@ -227,6 +227,7 @@ export default function RolesClient() {
   const {
     roles: dbRoles,
     loading: rolesLoading,
+    error,
     createRole,
     updateRole,
     deleteRole,
@@ -618,6 +619,25 @@ export default function RolesClient() {
     { id: '2', label: 'Audit Permissions', icon: 'shield', action: handleAuditPermissions, variant: 'default' as const },
     { id: '3', label: 'Export Report', icon: 'download', action: handleExportRoles, variant: 'outline' as const },
   ]
+
+  // Loading state
+  if (rolesLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-4">
+        <p className="text-red-500">Error loading data</p>
+        <Button onClick={() => fetchRoles()}>Retry</Button>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 dark:bg-none dark:bg-gray-900">

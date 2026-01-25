@@ -2,7 +2,7 @@
 
 import { createClient } from '@/lib/supabase/client'
 
-import { useState, useCallback, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -18,7 +18,7 @@ import {
   Download, CheckCircle2, XCircle, Clock, Database, HardDrive,
   FileCode, Shield, Archive, Play, Pause, RefreshCw, Settings, Zap, GitBranch, ArrowRight, Filter, Layers, AlertTriangle,
   BarChart3, History, Plus, Search, MoreHorizontal, Eye, Trash2, Copy,
-  Server, Cloud, Table, Key, Globe, Activity
+  Server, Cloud, Table, Key, Globe, Activity, Loader2
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -365,6 +365,25 @@ export default function DataExportClient() {
     } catch (error: any) {
       toast.error('Failed to cancel export')
     }
+  }
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
+
+  // Error state
+  if (exportsError) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-4">
+        <p className="text-red-500">Error loading data</p>
+        <Button onClick={() => fetchDataExports()}>Retry</Button>
+      </div>
+    )
   }
 
   return (

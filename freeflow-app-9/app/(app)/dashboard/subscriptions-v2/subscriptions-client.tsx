@@ -1,10 +1,13 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import {
   CreditCard, Receipt, DollarSign, Users, Plus, BarChart3, Settings, RefreshCw, Download, AlertCircle, AlertTriangle, Clock, Edit, Eye,
-  Zap, Package, ExternalLink, Crown, Star, Check, X, ArrowRight, Shield, Rocket, Sparkles, ChevronRight, Filter
+  Zap, Package, ExternalLink, Crown, Star, Check, X, ArrowRight, Shield, Rocket, Sparkles, ChevronRight, Filter, Loader2
 } from 'lucide-react'
+import { useUserSubscription, useSubscriptionUsageSummary, useSubscriptionStats, useCreateSubscription } from '@/lib/hooks/use-subscriptions-extended'
+import { useSubscriptionPlans } from '@/lib/hooks/use-subscription-extended'
+import { useAuthUserId } from '@/lib/hooks/use-auth-user-id'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -97,13 +100,107 @@ async function fetchWithAuth(url: string, options: RequestInit = {}) {
 // ============================================================================
 
 export default function SubscriptionsClient() {
-  // State
-  const [subscription, setSubscription] = useState<Subscription | null>(null)
+  // Auth hook for user ID
+  const { getUserId } = useAuthUserId()
+  const [userId, setUserId] = useState<string | null>(null)
+
+  // Fetch user ID on mount
+  useEffect(() => {
+    getUserId().then(id => setUserId(id))
+  }, [getUserId])
+
+  // Supabase hooks for data
+  const { subscription: dbSubscription, isLoading: subscriptionLoading, refresh: refetchSubscription } = useUserSubscription(userId || undefined)
+  const { data: dbPlans, isLoading: plansLoading, refresh: refetchPlans } = useSubscriptionPlans(true)
+  const { summary: usageSummary, isLoading: usageLoading, refresh: refetchUsage } = useSubscriptionUsageSummary(dbSubscription?.id)
+  const { stats: _subscriptionStats, isLoading: _statsLoading } = useSubscriptionStats()
+  const { create: _createSubscription, isLoading: _createLoading } = useCreateSubscription()
+
+  // Combined loading state
+  const isLoading = subscriptionLoading || plansLoading || usageLoading
+  const error = null // Hooks don't expose error, but we can add error handling
+
+  // Refetch all data
+  const refetch = useCallback(() => {
+    refetchSubscription()
+    refetchPlans()
+    refetchUsage()
+  }, [refetchSubscription, refetchPlans, refetchUsage])
+
+  // Map DB subscription to UI type
+  const subscription = useMemo<Subscription | null>(() => {
+    if (!dbSubscription) return null
+    return {
+      id: dbSubscription.id,
+      status: dbSubscription.status || 'active',
+      planId: dbSubscription.plan_id || '',
+      planName: dbSubscription.plan_name || dbSubscription.plan_id || 'Unknown Plan',
+      price: dbSubscription.price || 0,
+      interval: dbSubscription.billing_cycle === 'yearly' ? 'year' : 'month',
+      currentPeriodStart: dbSubscription.current_period_start || new Date().toISOString(),
+      currentPeriodEnd: dbSubscription.current_period_end || new Date().toISOString(),
+      cancelAtPeriodEnd: dbSubscription.cancel_at_period_end || false,
+      trialEnd: dbSubscription.trial_end || null,
+    }
+  }, [dbSubscription])
+
+  // Map DB plans to UI type
+  const plans = useMemo<Plan[]>(() => {
+    if (!dbPlans || dbPlans.length === 0) return []
+    return dbPlans.map((plan: any) => ({
+      id: plan.id,
+      name: plan.name || plan.id,
+      price: plan.price || 0,
+      interval: plan.billing_cycle === 'yearly' ? 'year' : 'month',
+      features: plan.features || [],
+      limits: {
+        projects: plan.limits?.projects || 10,
+        storage: plan.limits?.storage || 5 * 1024 * 1024 * 1024,
+        aiCredits: plan.limits?.ai_credits || 100,
+        teamMembers: plan.limits?.team_members || 5,
+      },
+      popular: plan.is_popular || false,
+    }))
+  }, [dbPlans])
+
+  // Map usage summary to UI type
+  const usage = useMemo<Usage | null>(() => {
+    const currentPlan = plans.find(p => p.id === subscription?.planId)
+    const limits = currentPlan?.limits || { projects: 10, storage: 5 * 1024 * 1024 * 1024, aiCredits: 100, teamMembers: 5 }
+
+    const projectsUsed = usageSummary?.projects || 0
+    const storageUsed = usageSummary?.storage || 0
+    const aiCreditsUsed = usageSummary?.ai_credits || 0
+    const teamMembersUsed = usageSummary?.team_members || 1
+
+    return {
+      projects: {
+        used: projectsUsed,
+        limit: limits.projects,
+        percentage: limits.projects > 0 ? Math.min((projectsUsed / limits.projects) * 100, 100) : 0,
+      },
+      storage: {
+        used: storageUsed,
+        limit: limits.storage,
+        percentage: limits.storage > 0 ? Math.min((storageUsed / limits.storage) * 100, 100) : 0,
+      },
+      aiCredits: {
+        used: aiCreditsUsed,
+        limit: limits.aiCredits,
+        percentage: limits.aiCredits > 0 ? Math.min((aiCreditsUsed / limits.aiCredits) * 100, 100) : 0,
+      },
+      teamMembers: {
+        used: teamMembersUsed,
+        limit: limits.teamMembers,
+        percentage: limits.teamMembers > 0 ? Math.min((teamMembersUsed / limits.teamMembers) * 100, 100) : 0,
+      },
+    }
+  }, [usageSummary, plans, subscription])
+
+  // State for data not yet in Supabase (invoices, payment methods - still from Stripe)
   const [invoices, setInvoices] = useState<Invoice[]>([])
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([])
-  const [usage, setUsage] = useState<Usage | null>(null)
-  const [plans, setPlans] = useState<Plan[]>([])
-  const [loading, setLoading] = useState(true)
+  const [_stripeLoading, setStripeLoading] = useState(false)
   const [billingInterval, setBillingInterval] = useState<'month' | 'year'>('month')
 
   // Dialogs
@@ -140,28 +237,16 @@ export default function SubscriptionsClient() {
   const [emailNotificationsEnabled, setEmailNotificationsEnabled] = useState(true)
 
   // ============================================================================
-  // Data Fetching
+  // Data Fetching (Stripe-specific data - invoices and payment methods)
   // ============================================================================
 
-  const loadSubscriptionData = useCallback(async () => {
-    setLoading(true)
+  const loadStripeData = useCallback(async () => {
+    setStripeLoading(true)
     try {
-      const [subResult, invoicesResult, usageResult, plansResult, paymentMethodsResult] = await Promise.all([
-        fetchWithAuth('/api/stripe/subscriptions', {
-          method: 'POST',
-          body: JSON.stringify({ action: 'get-subscription' }),
-        }),
+      const [invoicesResult, paymentMethodsResult] = await Promise.all([
         fetchWithAuth('/api/stripe/subscriptions', {
           method: 'POST',
           body: JSON.stringify({ action: 'get-invoices' }),
-        }),
-        fetchWithAuth('/api/stripe/subscriptions', {
-          method: 'POST',
-          body: JSON.stringify({ action: 'get-usage' }),
-        }),
-        fetchWithAuth('/api/stripe/checkout-session', {
-          method: 'POST',
-          body: JSON.stringify({ action: 'get-plans', billingInterval }),
         }),
         fetchWithAuth('/api/stripe/payment-methods', {
           method: 'POST',
@@ -169,32 +254,48 @@ export default function SubscriptionsClient() {
         }),
       ])
 
-      if (subResult.success && subResult.data?.subscription) {
-        setSubscription(subResult.data.subscription)
-      }
       if (invoicesResult.success && invoicesResult.data?.invoices) {
         setInvoices(invoicesResult.data.invoices)
-      }
-      if (usageResult.success && usageResult.data?.usage) {
-        setUsage(usageResult.data.usage)
-      }
-      if (plansResult.success && plansResult.data?.plans) {
-        setPlans(plansResult.data.plans)
       }
       if (paymentMethodsResult.success && paymentMethodsResult.data?.paymentMethods) {
         setPaymentMethods(paymentMethodsResult.data.paymentMethods)
       }
     } catch (error) {
-      console.error('Failed to load subscription data:', error)
-      toast.error('Failed to load subscription data')
+      console.error('Failed to load Stripe data:', error)
+      // Don't show toast for Stripe data failures - graceful degradation
     } finally {
-      setLoading(false)
+      setStripeLoading(false)
     }
-  }, [billingInterval])
+  }, [])
 
+  // Load Stripe data on mount
   useEffect(() => {
-    loadSubscriptionData()
-  }, [loadSubscriptionData])
+    loadStripeData()
+  }, [loadStripeData])
+
+  // Combined refetch function for all data
+  const loadSubscriptionData = useCallback(() => {
+    refetch()
+    loadStripeData()
+  }, [refetch, loadStripeData])
+
+  // Loading and error states
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-4">
+        <p className="text-red-500">Error loading data</p>
+        <Button onClick={() => refetch()}>Retry</Button>
+      </div>
+    )
+  }
 
   // ============================================================================
   // Real Handler Functions
@@ -819,17 +920,6 @@ export default function SubscriptionsClient() {
   // ============================================================================
   // Render
   // ============================================================================
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="flex flex-col items-center gap-4">
-          <RefreshCw className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-muted-foreground">Loading subscription data...</p>
-        </div>
-      </div>
-    )
-  }
 
   return (
     <div className="container mx-auto py-6 space-y-8">

@@ -57,7 +57,8 @@ import {
   Sliders,
   Archive,
   History,
-  Gauge
+  Gauge,
+  Loader2
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -86,6 +87,7 @@ import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Button } from '@/components/ui/button'
 
 // Type definitions for Datadog-level logging
 type LogLevel = 'debug' | 'info' | 'warn' | 'error' | 'critical'
@@ -219,7 +221,7 @@ const emptyActivities: Array<{
 
 export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientProps) {
   // Use the activity logs hook for real data
-  const { logs: activityLogs, isLoading, refetch } = useActivityLogs(initialLogs)
+  const { logs: activityLogs, isLoading, error, refetch } = useActivityLogs(initialLogs)
 
   // Convert ActivityLog[] to LogEntry[] for display
   const logsAsLogEntries: LogEntry[] = useMemo(() => {
@@ -375,6 +377,25 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
       return true
     })
   }, [logsAsLogEntries, searchQuery, levelFilter, sourceFilter])
+
+  // Loading state - placed after all hooks
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
+
+  // Error state - placed after all hooks
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-4">
+        <p className="text-red-500">Error loading data</p>
+        <Button onClick={() => refetch()}>Retry</Button>
+      </div>
+    )
+  }
 
   const getLevelColor = (level: LogLevel) => {
     switch (level) {

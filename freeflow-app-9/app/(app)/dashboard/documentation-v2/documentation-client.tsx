@@ -29,7 +29,8 @@ import {
   BookOpen, FolderOpen, ChevronRight, ChevronDown, MessageSquare, History,
   Share2, Settings, Globe, Tag, ThumbsUp, ThumbsDown, Calendar, CheckCircle2, Code, GitBranch,
   Zap, TrendingUp, BarChart3, Download, Upload, Sparkles, Layout,
-  RefreshCw, Bell, Shield, Database, Webhook, Languages, FileCheck, Rocket, Target, PenTool, Megaphone
+  RefreshCw, Bell, Database, Languages, FileCheck, Rocket, Target, PenTool, Megaphone,
+  Loader2
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -245,6 +246,7 @@ export default function DocumentationClient() {
     stats: supabaseStats,
     loading: docsLoading,
     mutating,
+    error: docsError,
     createDoc,
     updateDoc,
     deleteDoc,
@@ -1112,6 +1114,12 @@ export default function DocumentationClient() {
     }
     return colors[docType]
   }
+
+  // Loading state
+  if (docsLoading) return <div className="flex items-center justify-center h-full"><Loader2 className="h-8 w-8 animate-spin" /></div>
+
+  // Error state
+  if (docsError) return <div className="flex flex-col items-center justify-center h-full gap-4"><p className="text-red-500">Error loading data</p><Button onClick={() => refetchDocs()}>Retry</Button></div>
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">

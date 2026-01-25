@@ -1,8 +1,7 @@
 'use client'
 
-import { createClient } from '@/lib/supabase/client'
-
-import { useState, useMemo, useEffect, useCallback } from 'react'
+import { useState, useMemo } from 'react'
+import { useCiCd, type CiCd, type PipelineType, type PipelineStatus } from '@/lib/hooks/use-ci-cd'
 import { toast } from 'sonner'
 import { downloadAsJson, copyToClipboard } from '@/lib/button-handlers'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -75,7 +74,9 @@ import {
   Archive,
   FileCode,
   History,
-  GitMerge
+  GitMerge,
+  Loader2,
+  AlertCircle
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -199,31 +200,6 @@ interface UsageStats {
   maxConcurrentJobs: number
 }
 
-// Database types for Supabase
-interface DbPipeline {
-  id: string
-  user_id: string
-  pipeline_name: string
-  description: string | null
-  pipeline_type: string
-  config: Record<string, unknown>
-  trigger_type: string
-  trigger_branch: string | null
-  status: string
-  last_status: string | null
-  is_running: boolean
-  run_count: number
-  success_count: number
-  failure_count: number
-  avg_duration_seconds: number | null
-  last_run_at: string | null
-  deployment_environment: string | null
-  repository_url: string | null
-  tags: string[] | null
-  created_at: string
-  updated_at: string
-}
-
 interface PipelineFormState {
   pipeline_name: string
   description: string
@@ -255,254 +231,161 @@ interface CiCdStats {
   runningNow: number
 }
 
-// Mock Data
-const mockWorkflows: Workflow[] = [
-  {
-    id: 'w1',
-    name: 'CI Pipeline',
-    path: '.github/workflows/ci.yml',
-    status: 'success',
-    runs: 234,
-    successRate: 94.2,
-    avgDuration: 185,
-    createdAt: '2024-01-01',
-    updatedAt: '2024-03-12',
-    lastRun: {
-      id: 'r1',
-      workflowId: 'w1',
-      runNumber: 234,
-      status: 'completed',
-      conclusion: 'success',
-      triggeredBy: 'Sarah Chen',
-      triggerType: 'push',
-      branch: 'main',
-      commit: 'abc123f',
-      commitMessage: 'fix: resolve authentication issue',
-      jobs: [
-        {
-          id: 'j1',
-          name: 'build',
-          status: 'completed',
-          runner: 'ubuntu-latest',
-          duration: 45,
-          startedAt: '2024-03-12T10:00:00Z',
-          steps: [
-            { id: 's1', name: 'Checkout', status: 'completed', duration: 2 },
-            { id: 's2', name: 'Setup Node.js', status: 'completed', duration: 5 },
-            { id: 's3', name: 'Install dependencies', status: 'completed', duration: 25 },
-            { id: 's4', name: 'Build', status: 'completed', duration: 13 }
-          ]
-        },
-        {
-          id: 'j2',
-          name: 'test',
-          status: 'completed',
-          runner: 'ubuntu-latest',
-          duration: 120,
-          startedAt: '2024-03-12T10:01:00Z',
-          steps: [
-            { id: 's1', name: 'Checkout', status: 'completed', duration: 2 },
-            { id: 's2', name: 'Setup Node.js', status: 'completed', duration: 5 },
-            { id: 's3', name: 'Install dependencies', status: 'completed', duration: 25 },
-            { id: 's4', name: 'Run tests', status: 'completed', duration: 88 }
-          ]
-        },
-        {
-          id: 'j3',
-          name: 'lint',
-          status: 'completed',
-          runner: 'ubuntu-latest',
-          duration: 20,
-          startedAt: '2024-03-12T10:01:00Z',
-          steps: [
-            { id: 's1', name: 'Checkout', status: 'completed', duration: 2 },
-            { id: 's2', name: 'Setup Node.js', status: 'completed', duration: 5 },
-            { id: 's3', name: 'Run linter', status: 'completed', duration: 13 }
-          ]
-        }
-      ],
-      duration: 185,
-      startedAt: '2024-03-12T10:00:00Z',
-      completedAt: '2024-03-12T10:03:05Z'
+// Helper to map DB pipeline to Workflow UI type
+const mapPipelineToWorkflow = (pipeline: CiCd): Workflow => {
+  const successRate = pipeline.run_count > 0
+    ? ((pipeline.success_count / pipeline.run_count) * 100)
+    : 0
+
+  return {
+    id: pipeline.id,
+    name: pipeline.pipeline_name,
+    path: pipeline.repository_url || `.pipelines/${pipeline.pipeline_name.toLowerCase().replace(/\s+/g, '-')}.yml`,
+    status: pipeline.is_running ? 'running' :
+            pipeline.last_status === 'success' ? 'success' :
+            pipeline.last_status === 'failure' ? 'failure' : 'success',
+    runs: pipeline.run_count || 0,
+    successRate: Math.round(successRate * 10) / 10,
+    avgDuration: pipeline.avg_duration_seconds || 0,
+    createdAt: pipeline.created_at?.split('T')[0] || new Date().toISOString().split('T')[0],
+    updatedAt: pipeline.updated_at?.split('T')[0] || new Date().toISOString().split('T')[0],
+    lastRun: pipeline.last_run_at ? {
+      id: `run-${pipeline.id}`,
+      workflowId: pipeline.id,
+      runNumber: pipeline.last_build_number || pipeline.run_count || 1,
+      status: pipeline.is_running ? 'in_progress' : 'completed',
+      conclusion: pipeline.last_status === 'success' ? 'success' : pipeline.last_status === 'failure' ? 'failure' : 'success',
+      triggeredBy: 'System',
+      triggerType: (pipeline.trigger_type as TriggerType) || 'push',
+      branch: pipeline.last_build_branch || pipeline.trigger_branch || 'main',
+      commit: pipeline.last_build_commit || 'latest',
+      commitMessage: `${pipeline.pipeline_type} pipeline run`,
+      jobs: [],
+      duration: pipeline.avg_duration_seconds || 0,
+      startedAt: pipeline.last_run_at,
+      completedAt: pipeline.is_running ? undefined : pipeline.last_run_at
+    } : undefined
+  }
+}
+
+// Helper to generate runs from pipeline data
+const generateRunsFromPipelines = (pipelines: CiCd[]): WorkflowRun[] => {
+  return pipelines
+    .filter(p => p.run_count > 0)
+    .map(pipeline => ({
+      id: `run-${pipeline.id}`,
+      workflowId: pipeline.id,
+      runNumber: pipeline.last_build_number || pipeline.run_count || 1,
+      status: pipeline.is_running ? 'in_progress' as RunStatus : 'completed' as RunStatus,
+      conclusion: pipeline.last_status === 'success' ? 'success' as WorkflowStatus :
+                  pipeline.last_status === 'failure' ? 'failure' as WorkflowStatus :
+                  'success' as WorkflowStatus,
+      triggeredBy: 'System',
+      triggerType: (pipeline.trigger_type as TriggerType) || 'push',
+      branch: pipeline.last_build_branch || pipeline.trigger_branch || 'main',
+      commit: pipeline.last_build_commit || 'latest',
+      commitMessage: `${pipeline.pipeline_type} pipeline: ${pipeline.pipeline_name}`,
+      jobs: [],
+      duration: pipeline.avg_duration_seconds || 0,
+      startedAt: pipeline.last_run_at || pipeline.updated_at,
+      completedAt: pipeline.is_running ? undefined : pipeline.last_run_at || pipeline.updated_at
+    }))
+}
+
+// Helper to derive artifacts from pipeline data
+const deriveArtifacts = (pipelines: CiCd[]): Artifact[] => {
+  return pipelines
+    .filter(p => p.artifacts && Array.isArray(p.artifacts) && p.artifacts.length > 0)
+    .flatMap(pipeline =>
+      (pipeline.artifacts || []).map((artifact: any, index: number) => ({
+        id: `${pipeline.id}-artifact-${index}`,
+        name: artifact.name || `artifact-${index}`,
+        workflowId: pipeline.id,
+        runNumber: pipeline.last_build_number || pipeline.run_count || 1,
+        size: artifact.size || 0,
+        expiresAt: new Date(Date.now() + (pipeline.artifact_retention_days || 7) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        createdAt: pipeline.updated_at?.split('T')[0] || new Date().toISOString().split('T')[0]
+      }))
+    )
+}
+
+// Helper to derive environments from pipeline data
+const deriveEnvironments = (pipelines: CiCd[]): EnvironmentConfig[] => {
+  const envMap = new Map<string, EnvironmentConfig>()
+
+  pipelines.forEach(pipeline => {
+    if (pipeline.deployment_environment) {
+      const envName = pipeline.deployment_environment as Environment
+      if (!envMap.has(envName)) {
+        envMap.set(envName, {
+          id: `env-${envName}`,
+          name: envName,
+          url: envName === 'production' ? 'https://app.example.com' :
+               envName === 'staging' ? 'https://staging.example.com' :
+               envName === 'development' ? 'https://dev.example.com' : undefined,
+          protection: envName === 'production' || envName === 'staging',
+          reviewers: envName === 'production' ? ['Admin'] : [],
+          secrets: Object.keys(pipeline.secrets || {}).length,
+          variables: Object.keys(pipeline.environment_variables || {}).length,
+          lastDeployment: pipeline.last_run_at?.split('T')[0],
+          status: 'active'
+        })
+      }
     }
-  },
-  {
-    id: 'w2',
-    name: 'Deploy to Production',
-    path: '.github/workflows/deploy-prod.yml',
-    status: 'success',
-    runs: 89,
-    successRate: 97.8,
-    avgDuration: 312,
-    createdAt: '2024-01-15',
-    updatedAt: '2024-03-11'
-  },
-  {
-    id: 'w3',
-    name: 'Deploy to Staging',
-    path: '.github/workflows/deploy-staging.yml',
-    status: 'running',
-    runs: 156,
-    successRate: 91.2,
-    avgDuration: 245,
-    createdAt: '2024-01-15',
-    updatedAt: '2024-03-12'
-  },
-  {
-    id: 'w4',
-    name: 'Nightly Tests',
-    path: '.github/workflows/nightly.yml',
-    status: 'failure',
-    runs: 45,
-    successRate: 82.2,
-    avgDuration: 1800,
-    createdAt: '2024-02-01',
-    updatedAt: '2024-03-12'
-  },
-  {
-    id: 'w5',
-    name: 'Release Workflow',
-    path: '.github/workflows/release.yml',
-    status: 'success',
-    runs: 23,
-    successRate: 100,
-    avgDuration: 420,
-    createdAt: '2024-02-15',
-    updatedAt: '2024-03-10'
-  },
-  {
-    id: 'w6',
-    name: 'Security Scan',
-    path: '.github/workflows/security.yml',
-    status: 'success',
-    runs: 234,
-    successRate: 98.7,
-    avgDuration: 156,
-    createdAt: '2024-01-01',
-    updatedAt: '2024-03-12'
+  })
+
+  // Add default environments if none exist
+  if (envMap.size === 0) {
+    return [
+      { id: 'e1', name: 'production', protection: true, reviewers: [], secrets: 0, variables: 0, status: 'active' },
+      { id: 'e2', name: 'staging', protection: true, reviewers: [], secrets: 0, variables: 0, status: 'active' },
+      { id: 'e3', name: 'development', protection: false, reviewers: [], secrets: 0, variables: 0, status: 'active' },
+    ]
   }
-]
 
-const mockRuns: WorkflowRun[] = [
-  {
-    id: 'r1',
-    workflowId: 'w1',
-    runNumber: 234,
-    status: 'completed',
-    conclusion: 'success',
-    triggeredBy: 'Sarah Chen',
-    triggerType: 'push',
-    branch: 'main',
-    commit: 'abc123f',
-    commitMessage: 'fix: resolve authentication issue',
-    jobs: [],
-    duration: 185,
-    startedAt: '2024-03-12T10:00:00Z',
-    completedAt: '2024-03-12T10:03:05Z'
-  },
-  {
-    id: 'r2',
-    workflowId: 'w3',
-    runNumber: 156,
-    status: 'in_progress',
-    triggeredBy: 'Mike Johnson',
-    triggerType: 'push',
-    branch: 'feature/new-dashboard',
-    commit: 'def456a',
-    commitMessage: 'feat: add new dashboard components',
-    jobs: [],
-    duration: 120,
-    startedAt: '2024-03-12T11:30:00Z'
-  },
-  {
-    id: 'r3',
-    workflowId: 'w4',
-    runNumber: 45,
-    status: 'failed',
-    conclusion: 'failure',
-    triggeredBy: 'Scheduled',
-    triggerType: 'schedule',
-    branch: 'main',
-    commit: 'ghi789b',
-    commitMessage: 'chore: nightly test run',
-    jobs: [],
-    duration: 1456,
-    startedAt: '2024-03-12T02:00:00Z',
-    completedAt: '2024-03-12T02:24:16Z'
-  },
-  {
-    id: 'r4',
-    workflowId: 'w1',
-    runNumber: 233,
-    status: 'completed',
-    conclusion: 'success',
-    triggeredBy: 'Alex Rivera',
-    triggerType: 'pull_request',
-    branch: 'fix/button-styles',
-    commit: 'jkl012c',
-    commitMessage: 'fix: button hover states',
-    jobs: [],
-    duration: 178,
-    startedAt: '2024-03-12T09:00:00Z',
-    completedAt: '2024-03-12T09:02:58Z'
-  },
-  {
-    id: 'r5',
-    workflowId: 'w2',
-    runNumber: 89,
-    status: 'completed',
-    conclusion: 'success',
-    triggeredBy: 'Sarah Chen',
-    triggerType: 'workflow_dispatch',
-    branch: 'main',
-    commit: 'mno345d',
-    commitMessage: 'release: v2.3.0',
-    jobs: [],
-    duration: 298,
-    startedAt: '2024-03-11T15:00:00Z',
-    completedAt: '2024-03-11T15:04:58Z'
-  }
-]
+  return Array.from(envMap.values())
+}
 
-const mockArtifacts: Artifact[] = [
-  { id: 'a1', name: 'build-artifacts', workflowId: 'w1', runNumber: 234, size: 45600000, expiresAt: '2024-03-19', createdAt: '2024-03-12' },
-  { id: 'a2', name: 'test-reports', workflowId: 'w1', runNumber: 234, size: 2340000, expiresAt: '2024-03-19', createdAt: '2024-03-12' },
-  { id: 'a3', name: 'coverage-report', workflowId: 'w1', runNumber: 234, size: 1890000, expiresAt: '2024-03-19', createdAt: '2024-03-12' },
-  { id: 'a4', name: 'docker-image', workflowId: 'w2', runNumber: 89, size: 156000000, expiresAt: '2024-03-18', createdAt: '2024-03-11' },
-  { id: 'a5', name: 'release-notes', workflowId: 'w5', runNumber: 23, size: 45000, expiresAt: '2024-03-17', createdAt: '2024-03-10' }
-]
+// Helper to derive secrets from pipeline data
+const deriveSecrets = (pipelines: CiCd[]): Secret[] => {
+  const secretSet = new Set<string>()
+  const secrets: Secret[] = []
 
-const mockEnvironments: EnvironmentConfig[] = [
-  { id: 'e1', name: 'production', url: 'https://app.example.com', protection: true, reviewers: ['Sarah Chen', 'Mike Johnson'], secrets: 12, variables: 8, lastDeployment: '2024-03-11', status: 'active' },
-  { id: 'e2', name: 'staging', url: 'https://staging.example.com', protection: true, reviewers: ['Alex Rivera'], secrets: 10, variables: 8, lastDeployment: '2024-03-12', status: 'active' },
-  { id: 'e3', name: 'development', url: 'https://dev.example.com', protection: false, reviewers: [], secrets: 8, variables: 6, lastDeployment: '2024-03-12', status: 'active' },
-  { id: 'e4', name: 'testing', protection: false, reviewers: [], secrets: 5, variables: 4, status: 'inactive' }
-]
+  pipelines.forEach(pipeline => {
+    if (pipeline.secrets && typeof pipeline.secrets === 'object') {
+      Object.keys(pipeline.secrets).forEach(key => {
+        if (!secretSet.has(key)) {
+          secretSet.add(key)
+          secrets.push({
+            name: key,
+            createdAt: pipeline.created_at?.split('T')[0] || new Date().toISOString().split('T')[0],
+            updatedAt: pipeline.updated_at?.split('T')[0] || new Date().toISOString().split('T')[0],
+            scope: pipeline.deployment_environment ? 'environment' : 'repository',
+            environment: pipeline.deployment_environment
+          })
+        }
+      })
+    }
+  })
 
-const mockSecrets: Secret[] = [
-  { name: 'AWS_ACCESS_KEY_ID', createdAt: '2024-01-01', updatedAt: '2024-03-01', scope: 'repository' },
-  { name: 'AWS_SECRET_ACCESS_KEY', createdAt: '2024-01-01', updatedAt: '2024-03-01', scope: 'repository' },
-  { name: 'DATABASE_URL', createdAt: '2024-01-15', updatedAt: '2024-02-28', scope: 'environment', environment: 'production' },
-  { name: 'STRIPE_SECRET_KEY', createdAt: '2024-02-01', updatedAt: '2024-02-01', scope: 'environment', environment: 'production' },
-  { name: 'NPM_TOKEN', createdAt: '2024-01-01', updatedAt: '2024-01-01', scope: 'organization' },
-  { name: 'DOCKER_PASSWORD', createdAt: '2024-01-01', updatedAt: '2024-03-05', scope: 'repository' }
-]
+  return secrets
+}
 
-const mockRunners: Runner[] = [
-  { id: 'run1', name: 'ubuntu-runner-1', os: 'linux', status: 'online', labels: ['ubuntu-latest', 'self-hosted'], version: '2.311.0' },
-  { id: 'run2', name: 'ubuntu-runner-2', os: 'linux', status: 'busy', labels: ['ubuntu-latest', 'self-hosted'], lastJob: 'Deploy to Staging #156', version: '2.311.0' },
-  { id: 'run3', name: 'macos-runner-1', os: 'macos', status: 'online', labels: ['macos-latest', 'self-hosted'], version: '2.311.0' },
-  { id: 'run4', name: 'windows-runner-1', os: 'windows', status: 'offline', labels: ['windows-latest', 'self-hosted'], version: '2.309.0' }
-]
-
-const mockUsage: UsageStats = {
+// Default usage stats (can be enhanced with real metrics later)
+const defaultUsage: UsageStats = {
   totalMinutes: 3000,
-  usedMinutes: 2145,
-  storageUsed: 4.2,
+  usedMinutes: 0,
+  storageUsed: 0,
   storageLimit: 10,
-  concurrentJobs: 2,
+  concurrentJobs: 0,
   maxConcurrentJobs: 20
 }
+
+// Default runners (can be enhanced with real runner data later)
+const defaultRunners: Runner[] = [
+  { id: 'run1', name: 'ubuntu-runner-1', os: 'linux', status: 'online', labels: ['ubuntu-latest', 'self-hosted'], version: '2.311.0' },
+  { id: 'run2', name: 'macos-runner-1', os: 'macos', status: 'online', labels: ['macos-latest', 'self-hosted'], version: '2.311.0' },
+]
 
 // Helper Functions
 const getStatusColor = (status: RunStatus | WorkflowStatus) => {
@@ -611,8 +494,6 @@ const mockCiCdActivities = [
 // Note: mockCiCdQuickActions is defined inside CiCdClient to access component state and handlers
 
 export default function CiCdClient() {
-
-
   // Core state
   const [activeTab, setActiveTab] = useState('workflows')
   const [searchQuery, setSearchQuery] = useState('')
@@ -620,42 +501,14 @@ export default function CiCdClient() {
   const [selectedWorkflow, setSelectedWorkflow] = useState<Workflow | null>(null)
   const [selectedRun, setSelectedRun] = useState<WorkflowRun | null>(null)
   const [settingsTab, setSettingsTab] = useState('general')
-
-  // Supabase data state
-  const [dbPipelines, setDbPipelines] = useState<DbPipeline[]>([])
-  const [loading, setLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [formState, setFormState] = useState<PipelineFormState>(initialFormState)
 
-  // Fetch pipelines from Supabase
-  const fetchPipelines = useCallback(async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
+  // Use the CI/CD hook for data fetching and mutations
+  const { pipelines: dbPipelines, loading, error, createPipeline, updatePipeline, deletePipeline, refetch } = useCiCd()
 
-      const { data, error } = await supabase
-        .from('ci_cd')
-        .select('*')
-        .eq('user_id', user.id)
-        .is('deleted_at', null)
-        .order('created_at', { ascending: false })
-
-      if (error) throw error
-      setDbPipelines(data || [])
-    } catch (error) {
-      console.error('Error fetching pipelines:', error)
-      toast.error('Failed to load pipelines')
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
-  useEffect(() => {
-    fetchPipelines()
-  }, [fetchPipelines])
-
-  // Create pipeline
+  // Create pipeline handler
   const handleCreatePipeline = async () => {
     if (!formState.pipeline_name.trim()) {
       toast.error('Pipeline name is required')
@@ -664,36 +517,26 @@ export default function CiCdClient() {
 
     setIsSubmitting(true)
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        toast.error('Please sign in to create pipelines')
-        return
-      }
-
-      const { error } = await supabase.from('ci_cd').insert({
-        user_id: user.id,
+      await createPipeline({
         pipeline_name: formState.pipeline_name,
         description: formState.description || null,
-        pipeline_type: formState.pipeline_type,
+        pipeline_type: formState.pipeline_type as PipelineType,
         trigger_type: formState.trigger_type,
         trigger_branch: formState.trigger_branch || 'main',
         deployment_environment: formState.deployment_environment || null,
         repository_url: formState.repository_url || null,
-        status: 'active',
+        status: 'active' as PipelineStatus,
         config: {},
         run_count: 0,
         success_count: 0,
         failure_count: 0,
       })
 
-      if (error) throw error
-
       toast.success('Pipeline created successfully')
       setShowCreateDialog(false)
       setFormState(initialFormState)
-      fetchPipelines()
-    } catch (error) {
-      console.error('Error creating pipeline:', error)
+    } catch (err) {
+      console.error('Error creating pipeline:', err)
       toast.error('Failed to create pipeline')
     } finally {
       setIsSubmitting(false)
@@ -703,24 +546,19 @@ export default function CiCdClient() {
   // Trigger/Run pipeline
   const handleTriggerPipeline = async (pipelineId: string, pipelineName: string) => {
     try {
-      const { error } = await supabase
-        .from('ci_cd')
-        .update({
-          is_running: true,
-          last_run_at: new Date().toISOString(),
-          run_count: dbPipelines.find(p => p.id === pipelineId)?.run_count ?? 0 + 1,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', pipelineId)
-
-      if (error) throw error
+      const pipeline = pipelines.find(p => p.id === pipelineId)
+      await updatePipeline({
+        id: pipelineId,
+        is_running: true,
+        last_run_at: new Date().toISOString(),
+        run_count: (pipeline?.run_count ?? 0) + 1,
+      })
 
       toast.success(`Pipeline "${pipelineName}" triggered`, {
         description: 'Build started...'
       })
-      fetchPipelines()
-    } catch (error) {
-      console.error('Error triggering pipeline:', error)
+    } catch (err) {
+      console.error('Error triggering pipeline:', err)
       toast.error('Failed to trigger pipeline')
     }
   }
@@ -728,72 +566,108 @@ export default function CiCdClient() {
   // Update pipeline status
   const handleUpdateStatus = async (pipelineId: string, newStatus: string) => {
     try {
-      const { error } = await supabase
-        .from('ci_cd')
-        .update({
-          status: newStatus,
-          is_running: newStatus === 'running',
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', pipelineId)
-
-      if (error) throw error
+      await updatePipeline({
+        id: pipelineId,
+        status: newStatus as PipelineStatus,
+        is_running: newStatus === 'running',
+      })
 
       toast.success(`Pipeline status updated to ${newStatus}`)
-      fetchPipelines()
-    } catch (error) {
-      console.error('Error updating pipeline:', error)
+    } catch (err) {
+      console.error('Error updating pipeline:', err)
       toast.error('Failed to update pipeline status')
     }
   }
 
-  // Delete pipeline
+  // Delete pipeline (soft delete)
   const handleDeletePipeline = async (pipelineId: string) => {
     try {
-      const { error } = await supabase
-        .from('ci_cd')
-        .update({ deleted_at: new Date().toISOString() })
-        .eq('id', pipelineId)
-
-      if (error) throw error
-
+      await deletePipeline({ id: pipelineId })
       toast.success('Pipeline deleted')
-      fetchPipelines()
-    } catch (error) {
-      console.error('Error deleting pipeline:', error)
+    } catch (err) {
+      console.error('Error deleting pipeline:', err)
       toast.error('Failed to delete pipeline')
     }
   }
 
-  // Calculate stats from DB data + mock data for display
-  const stats: CiCdStats = useMemo(() => {
-    const dbCount = dbPipelines.length
-    const dbRunning = dbPipelines.filter(p => p.is_running).length
-    const dbSuccess = dbPipelines.reduce((sum, p) => sum + (p.success_count || 0), 0)
-    const dbFailed = dbPipelines.reduce((sum, p) => sum + (p.failure_count || 0), 0)
-    const dbTotalRuns = dbPipelines.reduce((sum, p) => sum + (p.run_count || 0), 0)
+  // Derive data from DB pipelines - memoize to prevent unnecessary re-renders
+  const pipelines = useMemo(() => dbPipelines || [], [dbPipelines])
+
+  // Map pipelines to workflows for UI display
+  const workflows = useMemo(() => {
+    return pipelines.map(mapPipelineToWorkflow)
+  }, [pipelines])
+
+  // Generate runs from pipelines
+  const runs = useMemo(() => {
+    return generateRunsFromPipelines(pipelines)
+  }, [pipelines])
+
+  // Derive artifacts from pipelines
+  const artifacts = useMemo(() => {
+    return deriveArtifacts(pipelines)
+  }, [pipelines])
+
+  // Derive environments from pipelines
+  const environments = useMemo(() => {
+    return deriveEnvironments(pipelines)
+  }, [pipelines])
+
+  // Derive secrets from pipelines
+  const secrets = useMemo(() => {
+    return deriveSecrets(pipelines)
+  }, [pipelines])
+
+  // Use default runners (can be enhanced later with real runner data)
+  const runners = defaultRunners
+
+  // Calculate usage stats from pipelines
+  const usage = useMemo((): UsageStats => {
+    const totalMinutes = pipelines.reduce((sum, p) => sum + (p.total_duration_seconds || 0) / 60, 0)
+    const runningCount = pipelines.filter(p => p.is_running).length
 
     return {
-      totalWorkflows: mockWorkflows.length + dbCount,
-      activeWorkflows: mockWorkflows.filter(w => w.status === 'running').length + dbRunning,
-      totalRuns: mockRuns.length + dbTotalRuns,
-      successfulRuns: mockRuns.filter(r => r.conclusion === 'success').length + dbSuccess,
-      failedRuns: mockRuns.filter(r => r.conclusion === 'failure').length + dbFailed,
-      avgDuration: mockWorkflows.reduce((sum, w) => sum + w.avgDuration, 0) / mockWorkflows.length,
-      successRate: mockWorkflows.reduce((sum, w) => sum + w.successRate, 0) / mockWorkflows.length,
-      runningNow: mockRuns.filter(r => r.status === 'in_progress').length + dbRunning
+      ...defaultUsage,
+      usedMinutes: Math.round(totalMinutes),
+      concurrentJobs: runningCount,
+      storageUsed: artifacts.reduce((sum, a) => sum + a.size, 0) / (1024 * 1024 * 1024) // Convert bytes to GB
     }
-  }, [dbPipelines])
+  }, [pipelines, artifacts])
+
+  // Calculate stats from real DB data
+  const stats: CiCdStats = useMemo(() => {
+    const totalRuns = pipelines.reduce((sum, p) => sum + (p.run_count || 0), 0)
+    const successfulRuns = pipelines.reduce((sum, p) => sum + (p.success_count || 0), 0)
+    const failedRuns = pipelines.reduce((sum, p) => sum + (p.failure_count || 0), 0)
+    const runningNow = pipelines.filter(p => p.is_running).length
+    const avgDuration = pipelines.length > 0
+      ? pipelines.reduce((sum, p) => sum + (p.avg_duration_seconds || 0), 0) / pipelines.length
+      : 0
+    const successRate = totalRuns > 0
+      ? (successfulRuns / totalRuns) * 100
+      : 0
+
+    return {
+      totalWorkflows: pipelines.length,
+      activeWorkflows: pipelines.filter(p => p.status === 'active').length,
+      totalRuns,
+      successfulRuns,
+      failedRuns,
+      avgDuration,
+      successRate,
+      runningNow
+    }
+  }, [pipelines])
 
   // Filter workflows
   const filteredWorkflows = useMemo(() => {
-    return mockWorkflows.filter(workflow => {
+    return workflows.filter(workflow => {
       const matchesSearch = workflow.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         workflow.path.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesStatus = statusFilter === 'all' || workflow.status === statusFilter
       return matchesSearch && matchesStatus
     })
-  }, [searchQuery, statusFilter])
+  }, [workflows, searchQuery, statusFilter])
 
   // Mock workflow handlers (for demo workflows)
   const handleTriggerWorkflow = (workflow: Workflow) => {
@@ -815,21 +689,21 @@ export default function CiCdClient() {
   }
 
   // Quick actions for the QuickActionsToolbar component
-  const mockCiCdQuickActions = [
+  const quickActions = [
     { id: '1', label: 'Run Pipeline', icon: Play, onClick: () => setShowCreateDialog(true), variant: 'default' as const },
     { id: '2', label: 'View Runs', icon: Activity, onClick: () => setActiveTab('runs'), variant: 'outline' as const },
     { id: '3', label: 'Environments', icon: Globe, onClick: () => setActiveTab('environments'), variant: 'outline' as const },
     { id: '4', label: 'Settings', icon: Settings, onClick: () => setActiveTab('settings'), variant: 'outline' as const },
     { id: '5', label: 'Export Logs', icon: Download, onClick: () => {
-      const logsData = mockRuns.map(run => ({
+      const logsData = runs.map(run => ({
         runNumber: run.runNumber,
-        workflow: mockWorkflows.find(w => w.id === run.workflowId)?.name || 'Unknown',
+        workflow: workflows.find(w => w.id === run.workflowId)?.name || 'Unknown',
         status: run.conclusion || run.status,
         startedAt: run.startedAt
       }))
       downloadAsJson(logsData, `ci-cd-logs-${new Date().toISOString().split('T')[0]}.json`)
     }, variant: 'outline' as const },
-    { id: '6', label: 'Refresh', icon: RefreshCw, onClick: () => { fetchPipelines(); toast.success('Data refreshed') }, variant: 'outline' as const },
+    { id: '6', label: 'Refresh', icon: RefreshCw, onClick: () => { refetch(); toast.success('Data refreshed') }, variant: 'outline' as const },
   ]
 
   return (
@@ -852,9 +726,9 @@ export default function CiCdClient() {
           </div>
           <div className="flex items-center gap-3">
             <Button variant="outline" className="gap-2" onClick={() => {
-              const logsData = mockRuns.map(run => ({
+              const logsData = runs.map(run => ({
                 runNumber: run.runNumber,
-                workflow: mockWorkflows.find(w => w.id === run.workflowId)?.name || 'Unknown',
+                workflow: workflows.find(w => w.id === run.workflowId)?.name || 'Unknown',
                 status: run.conclusion || run.status,
                 branch: run.branch,
                 commit: run.commit,
@@ -926,7 +800,7 @@ export default function CiCdClient() {
                 <Play className="w-4 h-4 text-orange-600" />
                 <span className="text-xs text-gray-500">Total Runs</span>
               </div>
-              <p className="text-2xl font-bold">{mockWorkflows.reduce((sum, w) => sum + w.runs, 0)}</p>
+              <p className="text-2xl font-bold">{stats.totalRuns}</p>
               <p className="text-xs text-orange-600">This month</p>
             </CardContent>
           </Card>
@@ -946,7 +820,7 @@ export default function CiCdClient() {
                 <Server className="w-4 h-4 text-cyan-600" />
                 <span className="text-xs text-gray-500">Runners</span>
               </div>
-              <p className="text-2xl font-bold">{mockRunners.filter(r => r.status !== 'offline').length}/{mockRunners.length}</p>
+              <p className="text-2xl font-bold">{runners.filter(r => r.status !== 'offline').length}/{runners.length}</p>
               <p className="text-xs text-cyan-600">Online</p>
             </CardContent>
           </Card>
@@ -956,11 +830,40 @@ export default function CiCdClient() {
                 <Clock className="w-4 h-4 text-pink-600" />
                 <span className="text-xs text-gray-500">Minutes Used</span>
               </div>
-              <p className="text-2xl font-bold">{mockUsage.usedMinutes}</p>
-              <p className="text-xs text-pink-600">of {mockUsage.totalMinutes}</p>
+              <p className="text-2xl font-bold">{usage.usedMinutes}</p>
+              <p className="text-xs text-pink-600">of {usage.totalMinutes}</p>
             </CardContent>
           </Card>
         </div>
+
+        {/* Loading State */}
+        {loading && (
+          <div className="flex items-center justify-center gap-3 py-4 px-6 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
+            <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
+            <span className="text-blue-700 dark:text-blue-400 font-medium">Loading pipelines...</span>
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && (
+          <div className="flex items-center justify-between gap-3 py-4 px-6 bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-800">
+            <div className="flex items-center gap-3">
+              <AlertCircle className="h-5 w-5 text-red-600" />
+              <span className="text-red-700 dark:text-red-400 font-medium">
+                {error.message || 'Failed to load pipelines'}
+              </span>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => refetch()}
+              className="border-red-300 text-red-600 hover:bg-red-100"
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Retry
+            </Button>
+          </div>
+        )}
 
         {/* Main Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -1025,12 +928,12 @@ export default function CiCdClient() {
               {[
                 { icon: Plus, label: 'New Pipeline', color: 'text-blue-500', onClick: () => setShowCreateDialog(true) },
                 { icon: Play, label: 'Run All', color: 'text-green-500', onClick: async () => {
-                  if (dbPipelines.length === 0) {
+                  if (pipelines.length === 0) {
                     toast.info('No pipelines to run')
                     return
                   }
                   toast.loading('Starting all pipelines...')
-                  for (const pipeline of dbPipelines.filter(p => !p.is_running)) {
+                  for (const pipeline of pipelines.filter(p => !p.is_running)) {
                     await handleTriggerPipeline(pipeline.id, pipeline.pipeline_name)
                   }
                   toast.dismiss()
@@ -1068,14 +971,14 @@ export default function CiCdClient() {
                 } },
                 { icon: History, label: 'Run History', color: 'text-indigo-500', onClick: () => setActiveTab('runs') },
                 { icon: Download, label: 'Export', color: 'text-cyan-500', onClick: () => {
-                  const pipelinesData = [...mockWorkflows.map(w => ({
+                  const pipelinesData = [...workflows.map(w => ({
                     name: w.name,
                     path: w.path,
                     status: w.status,
                     runs: w.runs,
                     successRate: w.successRate,
                     avgDuration: formatDuration(w.avgDuration)
-                  })), ...dbPipelines.map(p => ({
+                  })), ...pipelines.map(p => ({
                     name: p.pipeline_name,
                     path: p.repository_url || 'N/A',
                     status: p.status,
@@ -1086,7 +989,7 @@ export default function CiCdClient() {
                   downloadAsJson(pipelinesData, `pipelines-export-${new Date().toISOString().split('T')[0]}.json`)
                 } },
                 { icon: RefreshCw, label: 'Refresh', color: 'text-rose-500', onClick: () => {
-                  fetchPipelines()
+                  refetch()
                   toast.success('Pipelines refreshed')
                 } },
               ].map((action, i) => (
@@ -1179,14 +1082,14 @@ export default function CiCdClient() {
               ))}
 
               {/* Database Pipelines */}
-              {dbPipelines.length > 0 && (
+              {pipelines.length > 0 && (
                 <>
                   <div className="flex items-center gap-2 mt-6 mb-2">
                     <Database className="w-4 h-4 text-blue-600" />
                     <h4 className="text-sm font-semibold text-gray-600">Your Pipelines</h4>
-                    <Badge variant="outline">{dbPipelines.length}</Badge>
+                    <Badge variant="outline">{pipelines.length}</Badge>
                   </div>
-                  {dbPipelines
+                  {pipelines
                     .filter(pipeline => {
                       const matchesSearch = pipeline.pipeline_name.toLowerCase().includes(searchQuery.toLowerCase())
                       const matchesStatus = statusFilter === 'all' || pipeline.status === statusFilter
@@ -1274,7 +1177,7 @@ export default function CiCdClient() {
               )}
 
               {/* Empty state */}
-              {filteredWorkflows.length === 0 && dbPipelines.length === 0 && !loading && (
+              {filteredWorkflows.length === 0 && pipelines.length === 0 && !loading && (
                 <Card className="border-dashed">
                   <CardContent className="p-12 text-center">
                     <Workflow className="w-12 h-12 text-gray-400 mx-auto mb-4" />
@@ -1307,7 +1210,7 @@ export default function CiCdClient() {
                   <div className="flex items-center gap-4">
                     <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
                       <p className="text-sm text-green-100">Total Runs</p>
-                      <p className="text-xl font-bold">{mockWorkflows.reduce((sum, w) => sum + w.runs, 0)}</p>
+                      <p className="text-xl font-bold">{workflows.reduce((sum, w) => sum + w.runs, 0)}</p>
                     </div>
                     <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
                       <p className="text-sm text-green-100">Successful</p>
@@ -1355,7 +1258,7 @@ export default function CiCdClient() {
               </div>
               <select className="px-3 py-2 border rounded-lg text-sm bg-white dark:bg-gray-800">
                 <option value="all">All Workflows</option>
-                {mockWorkflows.map(w => (
+                {workflows.map(w => (
                   <option key={w.id} value={w.id}>{w.name}</option>
                 ))}
               </select>
@@ -1368,8 +1271,8 @@ export default function CiCdClient() {
             </div>
 
             <div className="space-y-3">
-              {mockRuns.map((run) => {
-                const workflow = mockWorkflows.find(w => w.id === run.workflowId)
+              {runs.map((run) => {
+                const workflow = workflows.find(w => w.id === run.workflowId)
                 return (
                   <Card key={run.id} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => setSelectedRun(run)}>
                     <CardContent className="p-4">
@@ -1427,15 +1330,15 @@ export default function CiCdClient() {
                   <div className="flex items-center gap-4">
                     <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
                       <p className="text-sm text-amber-100">Total Artifacts</p>
-                      <p className="text-xl font-bold">{mockArtifacts.length}</p>
+                      <p className="text-xl font-bold">{artifacts.length}</p>
                     </div>
                     <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
                       <p className="text-sm text-amber-100">Storage Used</p>
-                      <p className="text-xl font-bold">{mockUsage.storageUsed}GB</p>
+                      <p className="text-xl font-bold">{usage.storageUsed}GB</p>
                     </div>
                     <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
                       <p className="text-sm text-amber-100">Storage Limit</p>
-                      <p className="text-xl font-bold">{mockUsage.storageLimit}GB</p>
+                      <p className="text-xl font-bold">{usage.storageLimit}GB</p>
                     </div>
                   </div>
                 </div>
@@ -1475,7 +1378,7 @@ export default function CiCdClient() {
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-500">
                 <HardDrive className="w-4 h-4" />
-                <span>Storage: {mockUsage.storageUsed}GB / {mockUsage.storageLimit}GB</span>
+                <span>Storage: {usage.storageUsed}GB / {usage.storageLimit}GB</span>
               </div>
             </div>
 
@@ -1494,8 +1397,8 @@ export default function CiCdClient() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                      {mockArtifacts.map((artifact) => {
-                        const workflow = mockWorkflows.find(w => w.id === artifact.workflowId)
+                      {artifacts.map((artifact) => {
+                        const workflow = workflows.find(w => w.id === artifact.workflowId)
                         return (
                           <tr key={artifact.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                             <td className="px-6 py-4">
@@ -1539,15 +1442,15 @@ export default function CiCdClient() {
                   <div className="flex items-center gap-4">
                     <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
                       <p className="text-sm text-cyan-100">Total Environments</p>
-                      <p className="text-xl font-bold">{mockEnvironments.length}</p>
+                      <p className="text-xl font-bold">{environments.length}</p>
                     </div>
                     <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
                       <p className="text-sm text-cyan-100">Active</p>
-                      <p className="text-xl font-bold">{mockEnvironments.filter(e => e.status === 'active').length}</p>
+                      <p className="text-xl font-bold">{environments.filter(e => e.status === 'active').length}</p>
                     </div>
                     <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
                       <p className="text-sm text-cyan-100">Secrets</p>
-                      <p className="text-xl font-bold">{mockSecrets.length}</p>
+                      <p className="text-xl font-bold">{secrets.length}</p>
                     </div>
                   </div>
                 </div>
@@ -1589,7 +1492,7 @@ export default function CiCdClient() {
             </div>
 
             <div className="grid gap-4">
-              {mockEnvironments.map((env) => (
+              {environments.map((env) => (
                 <Card key={env.id}>
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between">
@@ -1674,7 +1577,7 @@ export default function CiCdClient() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                        {mockSecrets.map((secret) => (
+                        {secrets.map((secret) => (
                           <tr key={secret.name} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                             <td className="px-6 py-4">
                               <div className="flex items-center gap-2">
@@ -1720,15 +1623,15 @@ export default function CiCdClient() {
                   <div className="flex items-center gap-4">
                     <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
                       <p className="text-sm text-purple-100">Total Runners</p>
-                      <p className="text-xl font-bold">{mockRunners.length}</p>
+                      <p className="text-xl font-bold">{runners.length}</p>
                     </div>
                     <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
                       <p className="text-sm text-purple-100">Online</p>
-                      <p className="text-xl font-bold">{mockRunners.filter(r => r.status !== 'offline').length}</p>
+                      <p className="text-xl font-bold">{runners.filter(r => r.status !== 'offline').length}</p>
                     </div>
                     <div className="bg-white/20 backdrop-blur rounded-lg px-4 py-2">
                       <p className="text-sm text-purple-100">Busy</p>
-                      <p className="text-xl font-bold">{mockRunners.filter(r => r.status === 'busy').length}</p>
+                      <p className="text-xl font-bold">{runners.filter(r => r.status === 'busy').length}</p>
                     </div>
                   </div>
                 </div>
@@ -1770,7 +1673,7 @@ export default function CiCdClient() {
             </div>
 
             <div className="grid gap-4">
-              {mockRunners.map((runner) => (
+              {runners.map((runner) => (
                 <Card key={runner.id}>
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
@@ -1823,26 +1726,26 @@ export default function CiCdClient() {
                   <div>
                     <p className="text-sm text-gray-500 mb-2">Minutes Used</p>
                     <div className="flex items-end gap-2">
-                      <span className="text-3xl font-bold">{mockUsage.usedMinutes}</span>
-                      <span className="text-gray-500 mb-1">/ {mockUsage.totalMinutes}</span>
+                      <span className="text-3xl font-bold">{usage.usedMinutes}</span>
+                      <span className="text-gray-500 mb-1">/ {usage.totalMinutes}</span>
                     </div>
-                    <Progress value={(mockUsage.usedMinutes / mockUsage.totalMinutes) * 100} className="mt-2" />
+                    <Progress value={(usage.usedMinutes / usage.totalMinutes) * 100} className="mt-2" />
                   </div>
                   <div>
                     <p className="text-sm text-gray-500 mb-2">Storage Used</p>
                     <div className="flex items-end gap-2">
-                      <span className="text-3xl font-bold">{mockUsage.storageUsed}GB</span>
-                      <span className="text-gray-500 mb-1">/ {mockUsage.storageLimit}GB</span>
+                      <span className="text-3xl font-bold">{usage.storageUsed}GB</span>
+                      <span className="text-gray-500 mb-1">/ {usage.storageLimit}GB</span>
                     </div>
-                    <Progress value={(mockUsage.storageUsed / mockUsage.storageLimit) * 100} className="mt-2" />
+                    <Progress value={(usage.storageUsed / usage.storageLimit) * 100} className="mt-2" />
                   </div>
                   <div>
                     <p className="text-sm text-gray-500 mb-2">Concurrent Jobs</p>
                     <div className="flex items-end gap-2">
-                      <span className="text-3xl font-bold">{mockUsage.concurrentJobs}</span>
-                      <span className="text-gray-500 mb-1">/ {mockUsage.maxConcurrentJobs} max</span>
+                      <span className="text-3xl font-bold">{usage.concurrentJobs}</span>
+                      <span className="text-gray-500 mb-1">/ {usage.maxConcurrentJobs} max</span>
                     </div>
-                    <Progress value={(mockUsage.concurrentJobs / mockUsage.maxConcurrentJobs) * 100} className="mt-2" />
+                    <Progress value={(usage.concurrentJobs / usage.maxConcurrentJobs) * 100} className="mt-2" />
                   </div>
                 </div>
               </CardContent>
@@ -2314,7 +2217,7 @@ export default function CiCdClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockCiCdQuickActions}
+            actions={quickActions}
             variant="grid"
           />
         </div>

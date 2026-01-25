@@ -15,9 +15,9 @@ import {
   Wallet, PiggyBank, TrendingUp, DollarSign, CreditCard, Target,
   ArrowUpRight, ArrowDownRight, Plus, ChevronLeft, ChevronRight, Calendar,
   BarChart3, PieChart, Download, Settings, RefreshCw,
-  CheckCircle, AlertCircle, AlertTriangle,
-  Sparkles, Receipt, ShoppingCart, Home, Car, Utensils, Plane,
-  Heart, Zap, GraduationCap, Briefcase, Gift, Music, Film,
+  CheckCircle, AlertTriangle,
+  Sparkles, Receipt,
+  Zap,
   Building2, Landmark, Coins,
   Clock, Bell, Repeat, ArrowLeftRight, Search,
   FileText, Trash2, Edit3, Copy,
@@ -62,24 +62,6 @@ interface BudgetCategory {
   carryover: boolean
 }
 
-// Local transaction interface for UI display
-interface LocalTransaction {
-  id: string
-  date: Date
-  payee: string
-  category: string
-  categoryId: string
-  amount: number
-  type: 'inflow' | 'outflow'
-  cleared: boolean
-  approved: boolean
-  memo?: string
-  accountId: string
-  accountName: string
-  recurring?: boolean
-  transferId?: string
-}
-
 interface Account {
   id: string
   name: string
@@ -106,17 +88,6 @@ interface Goal {
   priority: 'high' | 'medium' | 'low'
 }
 
-interface RecurringTransaction {
-  id: string
-  payee: string
-  category: string
-  amount: number
-  frequency: 'weekly' | 'biweekly' | 'monthly' | 'yearly'
-  nextDate: Date
-  accountId: string
-  active: boolean
-}
-
 interface MonthData {
   income: number
   budgeted: number
@@ -126,18 +97,16 @@ interface MonthData {
 }
 
 // ============================================================================
-// EMPTY DATA ARRAYS (No mock data - use real Supabase data)
+// EMPTY STATIC DATA (Categories, accounts, goals are managed via Supabase)
+// These remain as typed placeholders for UI sections that aren't yet
+// backed by dedicated tables. The budget & transaction data comes from hooks.
 // ============================================================================
 
 const categories: BudgetCategory[] = []
 
-const localTransactions: LocalTransaction[] = []
-
 const accounts: Account[] = []
 
 const goals: Goal[] = []
-
-const recurringTransactions: RecurringTransaction[] = []
 
 // ============================================================================
 // HELPER FUNCTIONS
@@ -264,7 +233,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
   const [allocationAmount, setAllocationAmount] = useState(0)
   const [expandedGroups, setExpandedGroups] = useState<string[]>(['needs', 'wants', 'savings', 'debt'])
   const [searchQuery, setSearchQuery] = useState('')
-  const [selectedTransaction, setSelectedTransaction] = useState<LocalTransaction | null>(null)
+  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null)
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null)
   const [selectedBudget, setSelectedBudget] = useState<Budget | null>(null)
 
@@ -281,7 +250,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
     budgetType: typeFilter,
     status: statusFilter
   })
-  const { transactions: dbTransactions, createTransaction, stats: txStats, loading: txLoading } = useTransactions({ limit: 50 })
+  const { transactions: dbTransactions, createTransaction, deleteTransaction: deleteTransactionFn, stats: txStats, loading: txLoading } = useTransactions({ limit: 50 })
 
   const displayBudgets = budgets.length > 0 ? budgets : initialBudgets
 
@@ -678,6 +647,15 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
     )
   }
 
+  if (loading && !displayBudgets.length) return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-cyan-50 to-teal-50 dark:bg-none dark:bg-gray-900">
+      <div className="flex flex-col items-center gap-4">
+        <Loader2 className="h-10 w-10 animate-spin text-blue-600" />
+        <p className="text-gray-500 font-medium">Loading budget data...</p>
+      </div>
+    </div>
+  )
+
   if (error) return (
     <div className="p-8">
       <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg">
@@ -982,25 +960,36 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                   <Button variant="ghost" size="sm" onClick={() => setActiveTab('transactions')}>View All</Button>
                 </CardHeader>
                 <CardContent className="space-y-2">
-                  {localTransactions.slice(0, 5).map(tx => (
-                    <div key={tx.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all cursor-pointer" onClick={() => setSelectedTransaction(tx)}>
-                      <div className="flex items-center gap-3">
-                        <div className={`p-2 rounded-lg ${tx.type === 'inflow' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600 dark:bg-gray-700'}`}>
-                          {tx.type === 'inflow' ? <ArrowDownRight className="h-4 w-4" /> : <ArrowUpRight className="h-4 w-4" />}
-                        </div>
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">{tx.payee}</p>
-                          <p className="text-xs text-gray-500">{tx.category} • {tx.date.toLocaleDateString()}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {tx.cleared && <CheckCircle className="h-4 w-4 text-green-500" />}
-                        <span className={`font-semibold ${tx.type === 'inflow' ? 'text-green-600' : 'text-gray-900 dark:text-white'}`}>
-                          {tx.type === 'inflow' ? '+' : '-'}{formatCurrency(tx.amount)}
-                        </span>
-                      </div>
+                  {txLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="h-6 w-6 animate-spin text-purple-600" />
+                      <span className="ml-2 text-gray-500">Loading transactions...</span>
                     </div>
-                  ))}
+                  ) : (dbTransactions && dbTransactions.length > 0) ? (
+                    dbTransactions.slice(0, 5).map(tx => (
+                      <div key={tx.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all cursor-pointer">
+                        <div className="flex items-center gap-3">
+                          <div className={`p-2 rounded-lg ${tx.type === 'income' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600 dark:bg-gray-700'}`}>
+                            {tx.type === 'income' ? <ArrowDownRight className="h-4 w-4" /> : <ArrowUpRight className="h-4 w-4" />}
+                          </div>
+                          <div>
+                            <p className="font-medium text-gray-900 dark:text-white">{tx.description}</p>
+                            <p className="text-xs text-gray-500">{tx.category} • {new Date(tx.transaction_date).toLocaleDateString()}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className={`font-semibold ${tx.type === 'income' ? 'text-green-600' : 'text-gray-900 dark:text-white'}`}>
+                            {tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}
+                          </span>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      <Receipt className="h-8 w-8 mx-auto mb-2 text-gray-300" />
+                      <p className="text-sm">No recent transactions</p>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
 
@@ -1475,12 +1464,6 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>All Transactions</CardTitle>
                 <div className="flex items-center gap-3">
-                  <select className="px-4 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
-                    <option value="all">All Accounts</option>
-                    {accounts.map(account => (
-                      <option key={account.id} value={account.id}>{account.name}</option>
-                    ))}
-                  </select>
                   <Button onClick={() => setShowNewTransactionModal(true)}>
                     <Plus className="h-4 w-4 mr-2" />
                     Add
@@ -1488,39 +1471,54 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="space-y-2">
-                  {localTransactions.map(tx => (
-                    <div key={tx.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all cursor-pointer" onClick={() => setSelectedTransaction(tx)}>
-                      <div className="flex items-center gap-4">
-                        <div className={`p-2 rounded-lg ${tx.type === 'inflow' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600 dark:bg-gray-700'}`}>
-                          {tx.type === 'inflow' ? <ArrowDownRight className="h-5 w-5" /> : <ArrowUpRight className="h-5 w-5" />}
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <p className="font-medium text-gray-900 dark:text-white">{tx.payee}</p>
-                            {tx.recurring && <Repeat className="h-3 w-3 text-blue-500" />}
+                {txLoading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
+                    <span className="ml-3 text-gray-500">Loading transactions...</span>
+                  </div>
+                ) : (dbTransactions && dbTransactions.length > 0) ? (
+                  <div className="space-y-2">
+                    {dbTransactions.map(tx => (
+                      <div key={tx.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all cursor-pointer">
+                        <div className="flex items-center gap-4">
+                          <div className={`p-2 rounded-lg ${tx.type === 'income' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600 dark:bg-gray-700'}`}>
+                            {tx.type === 'income' ? <ArrowDownRight className="h-5 w-5" /> : <ArrowUpRight className="h-5 w-5" />}
                           </div>
-                          <p className="text-sm text-gray-500">
-                            {tx.date.toLocaleDateString()} • {tx.accountName}
-                          </p>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <p className="font-medium text-gray-900 dark:text-white">{tx.description}</p>
+                              {tx.is_recurring && <Repeat className="h-3 w-3 text-blue-500" />}
+                            </div>
+                            <p className="text-sm text-gray-500">
+                              {new Date(tx.transaction_date).toLocaleDateString()}
+                              {tx.vendor_name ? ` • ${tx.vendor_name}` : ''}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <Badge variant="outline">{tx.category}</Badge>
-                        <div className="flex items-center gap-2">
-                          {tx.cleared ? (
-                            <CheckCircle className="h-4 w-4 text-green-500" />
-                          ) : (
-                            <Clock className="h-4 w-4 text-gray-400" />
-                          )}
-                          <span className={`font-semibold ${tx.type === 'inflow' ? 'text-green-600' : 'text-gray-900 dark:text-white'}`}>
-                            {tx.type === 'inflow' ? '+' : '-'}{formatCurrency(tx.amount)}
+                        <div className="flex items-center gap-4">
+                          <Badge variant="outline">{tx.category}</Badge>
+                          <span className={`font-semibold ${tx.type === 'income' ? 'text-green-600' : 'text-gray-900 dark:text-white'}`}>
+                            {tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}
                           </span>
                         </div>
                       </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <div className="mx-auto w-16 h-16 bg-purple-50 dark:bg-purple-900/20 rounded-full flex items-center justify-center mb-4">
+                      <Receipt className="h-8 w-8 text-purple-600" />
                     </div>
-                  ))}
-                </div>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No transactions yet</h3>
+                    <p className="text-gray-500 mb-4 max-w-sm mx-auto">
+                      Record your first transaction to start tracking your income and expenses.
+                    </p>
+                    <Button onClick={() => setShowNewTransactionModal(true)} className="bg-purple-600 hover:bg-purple-700">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Your First Transaction
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -2354,50 +2352,42 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
               </DialogHeader>
               <div className="space-y-4 py-4">
                 <div className="flex items-center gap-4">
-                  <div className={'p-3 rounded-lg ' + (selectedTransaction.type === 'inflow' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600')}>
-                    {selectedTransaction.type === 'inflow' ? <ArrowDownRight className="h-6 w-6" /> : <ArrowUpRight className="h-6 w-6" />}
+                  <div className={'p-3 rounded-lg ' + (selectedTransaction.type === 'income' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600')}>
+                    {selectedTransaction.type === 'income' ? <ArrowDownRight className="h-6 w-6" /> : <ArrowUpRight className="h-6 w-6" />}
                   </div>
                   <div>
-                    <h3 className="font-semibold text-lg">{selectedTransaction.payee}</h3>
-                    <p className="text-gray-500">{selectedTransaction.date.toLocaleDateString()}</p>
+                    <h3 className="font-semibold text-lg">{selectedTransaction.description}</h3>
+                    <p className="text-gray-500">{new Date(selectedTransaction.transaction_date).toLocaleDateString()}</p>
                   </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                     <p className="text-sm text-gray-500">Amount</p>
-                    <p className={'font-semibold ' + (selectedTransaction.type === 'inflow' ? 'text-green-600' : '')}>
-                      {selectedTransaction.type === 'inflow' ? '+' : '-'}{formatCurrency(selectedTransaction.amount)}
+                    <p className={'font-semibold ' + (selectedTransaction.type === 'income' ? 'text-green-600' : '')}>
+                      {selectedTransaction.type === 'income' ? '+' : '-'}{formatCurrency(selectedTransaction.amount)}
                     </p>
                   </div>
                   <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                     <p className="text-sm text-gray-500">Category</p>
                     <p className="font-semibold">{selectedTransaction.category}</p>
                   </div>
-                  <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                    <p className="text-sm text-gray-500">Account</p>
-                    <p className="font-semibold">{selectedTransaction.accountName}</p>
-                  </div>
-                  <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                    <p className="text-sm text-gray-500">Status</p>
-                    <div className="flex items-center gap-2">
-                      {selectedTransaction.cleared ? (
-                        <>
-                          <CheckCircle className="h-4 w-4 text-green-500" />
-                          <span className="font-semibold text-green-600">Cleared</span>
-                        </>
-                      ) : (
-                        <>
-                          <Clock className="h-4 w-4 text-gray-400" />
-                          <span className="font-semibold text-gray-500">Pending</span>
-                        </>
-                      )}
+                  {selectedTransaction.vendor_name && (
+                    <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <p className="text-sm text-gray-500">Vendor</p>
+                      <p className="font-semibold">{selectedTransaction.vendor_name}</p>
                     </div>
-                  </div>
+                  )}
+                  {selectedTransaction.client_name && (
+                    <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <p className="text-sm text-gray-500">Client</p>
+                      <p className="font-semibold">{selectedTransaction.client_name}</p>
+                    </div>
+                  )}
                 </div>
-                {selectedTransaction.memo && (
+                {selectedTransaction.notes && (
                   <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                    <p className="text-sm text-gray-500">Memo</p>
-                    <p>{selectedTransaction.memo}</p>
+                    <p className="text-sm text-gray-500">Notes</p>
+                    <p>{selectedTransaction.notes}</p>
                   </div>
                 )}
               </div>
@@ -2408,19 +2398,14 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                   <Edit3 className="h-4 w-4 mr-2" />
                   Edit
                 </Button>
-                <Button variant="outline" className="text-red-600" onClick={() => {
+                <Button variant="outline" className="text-red-600" onClick={async () => {
                   if (confirm('Are you sure you want to delete this transaction?')) {
-                    toast.promise(
-                      fetch('/api/budgets/transactions/' + selectedTransaction?.id, { method: 'DELETE' }).then(res => {
-                        if (!res.ok) throw new Error('Delete failed')
-                        return res.json()
-                      }),
-                      {
-                        loading: 'Deleting transaction...',
-                        success: 'Transaction deleted successfully',
-                        error: 'Failed to delete transaction'
-                      }
-                    )
+                    try {
+                      await deleteTransactionFn(selectedTransaction.id)
+                      toast.success('Transaction deleted successfully')
+                    } catch {
+                      toast.error('Failed to delete transaction')
+                    }
                     setSelectedTransaction(null)
                   }
                 }}>
@@ -3135,23 +3120,25 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
             </DialogHeader>
             <div className="py-4">
               <div className="space-y-3">
-                {localTransactions.filter(t => t.recurring).length > 0 ? (
-                  localTransactions.filter(t => t.recurring).map(tx => (
+                {dbTransactions && dbTransactions.filter(t => t.is_recurring).length > 0 ? (
+                  dbTransactions.filter(t => t.is_recurring).map(tx => (
                     <div key={tx.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <div className="flex items-center gap-3">
-                        <div className={'p-2 rounded-lg ' + (tx.type === 'inflow' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600')}>
+                        <div className={'p-2 rounded-lg ' + (tx.type === 'income' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-600')}>
                           <Repeat className="h-4 w-4" />
                         </div>
                         <div>
-                          <p className="font-medium">{tx.payee}</p>
-                          <p className="text-sm text-gray-500">{tx.category} • Monthly</p>
+                          <p className="font-medium">{tx.description}</p>
+                          <p className="text-sm text-gray-500">{tx.category} • {tx.recurring_frequency || 'Monthly'}</p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className={'font-semibold ' + (tx.type === 'inflow' ? 'text-green-600' : '')}>
-                          {tx.type === 'inflow' ? '+' : '-'}{formatCurrency(tx.amount)}
+                        <p className={'font-semibold ' + (tx.type === 'income' ? 'text-green-600' : '')}>
+                          {tx.type === 'income' ? '+' : '-'}{formatCurrency(tx.amount)}
                         </p>
-                        <p className="text-xs text-gray-500">Next: {tx.date.toLocaleDateString()}</p>
+                        {tx.next_due_date && (
+                          <p className="text-xs text-gray-500">Next: {new Date(tx.next_due_date).toLocaleDateString()}</p>
+                        )}
                       </div>
                     </div>
                   ))

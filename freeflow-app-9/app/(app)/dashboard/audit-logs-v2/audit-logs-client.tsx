@@ -1,8 +1,9 @@
 'use client'
 
 import { createClient } from '@/lib/supabase/client'
+import { useAuditLogs, useAuditAlertRules, useAuditLogMutations, useAuditAlertRuleMutations, type AuditLog as HookAuditLog, type AuditAlertRule } from '@/lib/hooks/use-audit-logs'
 
-import { useState, useMemo, useEffect, useCallback } from 'react'
+import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
@@ -87,9 +88,8 @@ import {
   type QuickAction,
 } from '@/components/ui/competitive-upgrades-extended'
 
-// Import mock data from centralized adapters
-
-
+// Initialize Supabase client once at module level (for operations not covered by hooks)
+const supabase = createClient()
 
 // ============================================================================
 // TYPE DEFINITIONS - Datadog/Splunk Level Audit Logging
@@ -124,22 +124,6 @@ interface DbAuditLog {
   duration_ms: number
   metadata: Record<string, unknown>
   created_at: string
-}
-
-interface DbAlertRule {
-  id: string
-  user_id: string
-  rule_name: string
-  description: string | null
-  log_type: string | null
-  severity: string | null
-  action_pattern: string | null
-  conditions: Record<string, unknown>
-  notification_channels: string[]
-  is_active: boolean
-  created_at: string
-  updated_at: string
-  deleted_at: string | null
 }
 
 interface AuditLog {
@@ -242,12 +226,8 @@ interface GeoDistribution {
 }
 
 // ============================================================================
-// EMPTY DATA ARRAYS (Real data comes from Supabase)
+// EMPTY DATA ARRAYS (For types not yet backed by Supabase)
 // ============================================================================
-
-const mockLogs: AuditLog[] = []
-
-const mockAlertRules: AlertRule[] = []
 
 const mockAlerts: Alert[] = []
 
@@ -338,27 +318,33 @@ const mockAuditQuickActions: QuickAction[] = []
 
 export default function AuditLogsClient() {
 
+  // ---- Supabase Hooks ----
+  const [severityFilter, setSeverityFilter] = useState<LogSeverity | 'all'>('all')
+  const [typeFilter, setTypeFilter] = useState<LogType | 'all'>('all')
+
+  // Build filters object for the hook
+  const hookFilters = useMemo(() => ({
+    severity: severityFilter === 'all' ? undefined : severityFilter,
+    logType: typeFilter === 'all' ? undefined : typeFilter
+  }), [severityFilter, typeFilter])
+
+  const { logs: hookLogs, data: rawLogs, isLoading, error: logsError, refetch: refetchLogs, stats: hookStats } = useAuditLogs(undefined, hookFilters)
+  const { rules: hookAlertRules, error: rulesError, refetch: refetchRules } = useAuditAlertRules()
+  const { createLog } = useAuditLogMutations()
+  const { createRule, updateRule, deleteRule, toggleRule, isCreating: isCreatingRule, isUpdating: isUpdatingRule, isDeleting: isDeletingRule } = useAuditAlertRuleMutations()
 
   // UI State
   const [activeTab, setActiveTab] = useState('events')
   const [searchQuery, setSearchQuery] = useState('')
-  const [severityFilter, setSeverityFilter] = useState<LogSeverity | 'all'>('all')
-  const [typeFilter, setTypeFilter] = useState<LogType | 'all'>('all')
   const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null)
   const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null)
   const [isLiveMode, setIsLiveMode] = useState(true)
   const [settingsTab, setSettingsTab] = useState('general')
 
-  // Data State
-  const [dbLogs, setDbLogs] = useState<DbAuditLog[]>([])
-  const [dbAlertRules, setDbAlertRules] = useState<DbAlertRule[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [isSaving, setIsSaving] = useState(false)
-
   // Dialog State
   const [showCreateRuleDialog, setShowCreateRuleDialog] = useState(false)
   const [showEditRuleDialog, setShowEditRuleDialog] = useState(false)
-  const [editingRule, setEditingRule] = useState<DbAlertRule | null>(null)
+  const [editingRule, setEditingRule] = useState<AuditAlertRule | null>(null)
 
   // Form State for Alert Rules
   const [ruleFormData, setRuleFormData] = useState({
@@ -371,97 +357,35 @@ export default function AuditLogsClient() {
     is_active: true
   })
 
-  // Fetch audit logs from database
-  const fetchAuditLogs = useCallback(async () => {
-    try {
-      setIsLoading(true)
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
+  // Derive isSaving from mutation states
+  const isSaving = isCreatingRule || isUpdatingRule || isDeletingRule
 
-      const { data, error } = await supabase
-        .from('audit_logs')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(100)
-
-      if (error) throw error
-      setDbLogs(data || [])
-    } catch (error) {
-      console.error('Error fetching audit logs:', error)
-      toast.error('Failed to load audit logs')
-    } finally {
-      setIsLoading(false)
-    }
-  }, [])
-
-  // Fetch alert rules from database
-  const fetchAlertRules = useCallback(async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-
-      const { data, error } = await supabase
-        .from('audit_alert_rules')
-        .select('*')
-        .eq('user_id', user.id)
-        .is('deleted_at', null)
-        .order('created_at', { ascending: false })
-
-      if (error) throw error
-      setDbAlertRules(data || [])
-    } catch (error) {
-      console.error('Error fetching alert rules:', error)
-      toast.error('Failed to load alert rules')
-    }
-  }, [])
-
-  // Create audit log entry
+  // Create audit log entry via hook
   const createAuditLog = async (logData: Partial<DbAuditLog>) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        toast.error('Please sign in')
-        return
-      }
-
-      const { error } = await supabase.from('audit_logs').insert({
-        user_id: user.id,
+      createLog({
         log_type: logData.log_type || 'system',
         severity: logData.severity || 'info',
         action: logData.action || 'manual_entry',
         description: logData.description || null,
         resource: logData.resource || null,
-        user_email: user.email,
         ip_address: logData.ip_address || null,
         location: logData.location || null,
         device: logData.device || null,
         status: logData.status || 'success',
         duration_ms: logData.duration_ms || 0,
         metadata: logData.metadata || {}
-      })
-
-      if (error) throw error
-      toast.success('Audit log created')
-      fetchAuditLogs()
+      } as Partial<HookAuditLog>)
     } catch (error) {
       console.error('Error creating audit log:', error)
       toast.error('Failed to create audit log')
     }
   }
 
-  // Create alert rule
+  // Create alert rule via hook
   const handleCreateAlertRule = async () => {
     try {
-      setIsSaving(true)
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        toast.error('Please sign in to create alert rules')
-        return
-      }
-
-      const { error } = await supabase.from('audit_alert_rules').insert({
-        user_id: user.id,
+      createRule({
         rule_name: ruleFormData.rule_name,
         description: ruleFormData.description || null,
         log_type: ruleFormData.log_type || null,
@@ -470,86 +394,57 @@ export default function AuditLogsClient() {
         notification_channels: ruleFormData.notification_channels,
         is_active: ruleFormData.is_active,
         conditions: {}
-      })
-
-      if (error) throw error
-
+      } as Partial<AuditAlertRule>)
       toast.success('Alert rule created successfully')
       setShowCreateRuleDialog(false)
       resetRuleForm()
-      fetchAlertRules()
     } catch (error) {
       console.error('Error creating alert rule:', error)
       toast.error('Failed to create alert rule')
-    } finally {
-      setIsSaving(false)
     }
   }
 
-  // Update alert rule
+  // Update alert rule via hook
   const handleUpdateAlertRule = async () => {
     if (!editingRule) return
     try {
-      setIsSaving(true)
-      const { error } = await supabase
-        .from('audit_alert_rules')
-        .update({
-          rule_name: ruleFormData.rule_name,
-          description: ruleFormData.description || null,
-          log_type: ruleFormData.log_type || null,
-          severity: ruleFormData.severity || null,
-          action_pattern: ruleFormData.action_pattern || null,
-          notification_channels: ruleFormData.notification_channels,
-          is_active: ruleFormData.is_active,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', editingRule.id)
-
-      if (error) throw error
-
+      updateRule({
+        id: editingRule.id,
+        rule_name: ruleFormData.rule_name,
+        description: ruleFormData.description || null,
+        log_type: ruleFormData.log_type || null,
+        severity: ruleFormData.severity || null,
+        action_pattern: ruleFormData.action_pattern || null,
+        notification_channels: ruleFormData.notification_channels,
+        is_active: ruleFormData.is_active,
+        updated_at: new Date().toISOString()
+      } as Partial<AuditAlertRule>)
       toast.success('Alert rule updated successfully')
       setShowEditRuleDialog(false)
       setEditingRule(null)
       resetRuleForm()
-      fetchAlertRules()
     } catch (error) {
       console.error('Error updating alert rule:', error)
       toast.error('Failed to update alert rule')
-    } finally {
-      setIsSaving(false)
     }
   }
 
-  // Delete alert rule
+  // Delete alert rule via hook
   const handleDeleteAlertRule = async (ruleId: string) => {
     try {
-      const { error } = await supabase
-        .from('audit_alert_rules')
-        .update({ deleted_at: new Date().toISOString() })
-        .eq('id', ruleId)
-
-      if (error) throw error
-
+      deleteRule(ruleId)
       toast.success('Alert rule deleted')
-      fetchAlertRules()
     } catch (error) {
       console.error('Error deleting alert rule:', error)
       toast.error('Failed to delete alert rule')
     }
   }
 
-  // Toggle alert rule status
+  // Toggle alert rule status via hook
   const handleToggleRuleStatus = async (ruleId: string, isActive: boolean) => {
     try {
-      const { error } = await supabase
-        .from('audit_alert_rules')
-        .update({ is_active: isActive, updated_at: new Date().toISOString() })
-        .eq('id', ruleId)
-
-      if (error) throw error
-
+      toggleRule(ruleId, isActive)
       toast.success(`Alert rule ${isActive ? 'activated' : 'deactivated'}`)
-      fetchAlertRules()
     } catch (error) {
       console.error('Error toggling rule status:', error)
       toast.error('Failed to update rule status')
@@ -570,7 +465,7 @@ export default function AuditLogsClient() {
   }
 
   // Open edit dialog
-  const openEditRuleDialog = (rule: DbAlertRule) => {
+  const openEditRuleDialog = (rule: AuditAlertRule) => {
     setEditingRule(rule)
     setRuleFormData({
       rule_name: rule.rule_name,
@@ -584,25 +479,16 @@ export default function AuditLogsClient() {
     setShowEditRuleDialog(true)
   }
 
-  // Export audit logs
+  // Export audit logs using hook data
   const handleExportAuditLogs = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-
-      const { data, error } = await supabase
-        .from('audit_logs')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-
-      if (error) throw error
+      const exportData = rawLogs || []
 
       // Create CSV
       const headers = ['ID', 'Type', 'Severity', 'Action', 'Description', 'Status', 'IP Address', 'Created At']
       const csvContent = [
         headers.join(','),
-        ...(data || []).map(log => [
+        ...exportData.map(log => [
           log.id,
           log.log_type,
           log.severity,
@@ -637,15 +523,10 @@ export default function AuditLogsClient() {
     }
   }
 
-  // Initial fetch
-  useEffect(() => {
-    fetchAuditLogs()
-    fetchAlertRules()
-  }, [fetchAuditLogs, fetchAlertRules])
-
-  // Convert DB logs to display format
-  const convertedDbLogs: AuditLog[] = useMemo(() => {
-    return dbLogs.map(log => ({
+  // Convert hook logs (HookAuditLog from Supabase) to display format
+  const allLogs: AuditLog[] = useMemo(() => {
+    if (!hookLogs || hookLogs.length === 0) return []
+    return hookLogs.map(log => ({
       id: log.id,
       timestamp: log.created_at,
       log_type: (log.log_type || 'system') as LogType,
@@ -674,30 +555,25 @@ export default function AuditLogsClient() {
       is_anomaly: log.severity === 'critical' || log.severity === 'error',
       risk_score: log.severity === 'critical' ? 90 : log.severity === 'error' ? 60 : log.severity === 'warning' ? 40 : 10
     }))
-  }, [dbLogs])
+  }, [hookLogs])
 
-  // Combine DB logs with mock logs for display
-  const allLogs = useMemo(() => {
-    return [...convertedDbLogs, ...mockLogs]
-  }, [convertedDbLogs])
-
-  // Filtered logs
+  // Filtered logs (search only; severity/type already handled by hook filters)
   const filteredLogs = useMemo(() => {
+    if (!searchQuery) return allLogs
     return allLogs.filter(log => {
       const matchesSearch =
         log.action.toLowerCase().includes(searchQuery.toLowerCase()) ||
         log.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (log.user_email?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false) ||
         log.ip_address.includes(searchQuery)
-      const matchesSeverity = severityFilter === 'all' || log.severity === severityFilter
-      const matchesType = typeFilter === 'all' || log.log_type === typeFilter
-      return matchesSearch && matchesSeverity && matchesType
+      return matchesSearch
     })
-  }, [allLogs, searchQuery, severityFilter, typeFilter])
+  }, [allLogs, searchQuery])
 
-  // Convert DB alert rules to display format
+  // Convert hook alert rules to display format
   const allAlertRules = useMemo(() => {
-    const dbRulesFormatted: AlertRule[] = dbAlertRules.map(rule => ({
+    if (!hookAlertRules || hookAlertRules.length === 0) return []
+    return hookAlertRules.map((rule: AuditAlertRule) => ({
       id: rule.id,
       name: rule.rule_name,
       description: rule.description || '',
@@ -711,23 +587,22 @@ export default function AuditLogsClient() {
       trigger_count_24h: 0,
       created_at: rule.created_at,
       updated_at: rule.updated_at
-    }))
-    return [...dbRulesFormatted, ...mockAlertRules]
-  }, [dbAlertRules])
+    })) as AlertRule[]
+  }, [hookAlertRules])
 
-  // Stats calculations
+  // Stats calculations from hook
   const stats = useMemo(() => {
-    const total = allLogs.length
-    const critical = allLogs.filter(l => l.severity === 'critical').length
-    const warnings = allLogs.filter(l => l.severity === 'warning').length
-    const errors = allLogs.filter(l => l.severity === 'error').length
+    const total = hookStats?.total ?? allLogs.length
+    const critical = hookStats?.critical ?? allLogs.filter(l => l.severity === 'critical').length
+    const warnings = hookStats?.warning ?? allLogs.filter(l => l.severity === 'warning').length
+    const errors = hookStats?.error ?? allLogs.filter(l => l.severity === 'error').length
     const anomalies = allLogs.filter(l => l.is_anomaly).length
-    const blocked = allLogs.filter(l => l.status === 'blocked').length
+    const blocked = hookStats?.blocked ?? allLogs.filter(l => l.status === 'blocked').length
     const activeAlerts = mockAlerts.filter(a => a.status === 'active').length
-    const avgRisk = allLogs.length > 0 ? allLogs.reduce((acc, l) => acc + l.risk_score, 0) / total : 0
+    const avgRisk = allLogs.length > 0 ? allLogs.reduce((acc, l) => acc + l.risk_score, 0) / allLogs.length : 0
 
     return { total, critical, warnings, errors, anomalies, blocked, activeAlerts, avgRisk }
-  }, [allLogs])
+  }, [hookStats, allLogs])
 
   // Handlers
   const handleCreateAlert = () => {
@@ -785,7 +660,7 @@ export default function AuditLogsClient() {
   const handleRefresh = () => {
     toast.promise(
       (async () => {
-        await Promise.all([fetchAuditLogs(), fetchAlertRules()])
+        await Promise.all([refetchLogs(), refetchRules()])
       })(),
       {
         loading: 'Refreshing data...',
@@ -979,6 +854,29 @@ export default function AuditLogsClient() {
         success: 'Related events loaded',
         error: 'Failed to load related events'
       }
+    )
+  }
+
+  // Show error state
+  if (logsError || rulesError) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50/30 to-violet-50/40 dark:bg-none dark:bg-gray-900 p-6">
+        <div className="max-w-[1800px] mx-auto">
+          <Card className="border-red-200 dark:border-red-900/50">
+            <CardContent className="p-8 text-center">
+              <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Failed to load audit logs</h2>
+              <p className="text-gray-500 dark:text-gray-400 mb-4">
+                {(logsError as Error)?.message || (rulesError as Error)?.message || 'An unexpected error occurred'}
+              </p>
+              <Button onClick={() => { refetchLogs(); refetchRules() }} className="bg-indigo-600">
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Retry
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     )
   }
 
@@ -1335,7 +1233,7 @@ export default function AuditLogsClient() {
                   </div>
                   <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
                     <p className="text-white/70 text-sm">Rules</p>
-                    <p className="text-2xl font-bold">{mockAlertRules.length}</p>
+                    <p className="text-2xl font-bold">{allAlertRules.length}</p>
                   </div>
                 </div>
               </div>
@@ -1409,19 +1307,17 @@ export default function AuditLogsClient() {
                               <span className="text-sm text-gray-500">
                                 {rule.trigger_count_24h} triggers/24h
                               </span>
-                              {!mockAlertRules.find(m => m.id === rule.id) && (
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={(e) => {
-                                    e.stopPropagation()
-                                    const dbRule = dbAlertRules.find(r => r.id === rule.id)
-                                    if (dbRule) openEditRuleDialog(dbRule)
-                                  }}
-                                >
-                                  <Edit className="w-3 h-3" />
-                                </Button>
-                              )}
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  const hookRule = hookAlertRules.find(r => r.id === rule.id)
+                                  if (hookRule) openEditRuleDialog(hookRule)
+                                }}
+                              >
+                                <Edit className="w-3 h-3" />
+                              </Button>
                             </div>
                           </div>
                           <p className="text-sm text-gray-600 dark:text-gray-300">{rule.description}</p>

@@ -2,7 +2,10 @@
 
 import { createClient } from '@/lib/supabase/client'
 
-import React, { useState, useMemo, useEffect, useCallback } from 'react'
+import React, { useState, useMemo } from 'react'
+
+// Import shipping hooks for real Supabase data
+import { useShipments, useShippingCarriers } from '@/lib/hooks/use-shipments'
 import dynamic from 'next/dynamic'
 import { toast } from 'sonner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -339,33 +342,15 @@ interface ShippingAnalytics {
 }
 
 // ============================================================================
-// DATA - Empty until wired to real APIs
+// COMPETITIVE UPGRADE PLACEHOLDER DATA
+// These empty arrays are passed to upgrade components until real data APIs are available
+// Main shipment/carrier/label data is now sourced from Supabase hooks inside the component
 // ============================================================================
-
-const mockShipments: Shipment[] = []
-const mockOrders: Order[] = []
-const mockCarriers: Carrier[] = []
-const mockLabels: Label[] = []
-
-const mockAnalytics: ShippingAnalytics = {
-  totalShipments: 0,
-  shippedToday: 0,
-  inTransit: 0,
-  delivered: 0,
-  onTimeRate: 0,
-  avgShippingCost: 0,
-  totalCost: 0,
-  avgDeliveryDays: 0,
-  topCarrier: '',
-  topDestination: ''
-}
-
-// Competitive upgrade data - empty until wired to real APIs
-const mockShippingAIInsights: { id: string; type: 'success' | 'warning' | 'info'; title: string; description: string; priority: 'low' | 'high' | 'medium'; timestamp: string; category: string }[] = []
-const mockShippingCollaborators: { id: string; name: string; avatar: string; role: string; status: 'online' | 'away' | 'offline' }[] = []
-const mockShippingPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down'; timeframe: string }[] = []
-const mockShippingActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' }[] = []
-const mockShippingQuickActions: { id: string; label: string; icon: string; action: () => void; shortcut: string }[] = []
+const shippingAIInsights: { id: string; type: 'success' | 'warning' | 'info'; title: string; description: string; priority: 'low' | 'high' | 'medium'; timestamp: string; category: string }[] = []
+const shippingCollaborators: { id: string; name: string; avatar: string; role: string; status: 'online' | 'away' | 'offline' }[] = []
+const shippingPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down'; timeframe: string }[] = []
+const shippingActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' }[] = []
+const shippingQuickActions: { id: string; label: string; icon: string; action: () => void; shortcut: string }[] = []
 
 // ============================================================================
 // HELPER FUNCTIONS
@@ -452,6 +437,142 @@ const formatTime = (dateString: string) => {
 
 export default function ShippingClient() {
 
+  // ============================================================================
+  // SUPABASE HOOKS - Real data integration
+  // ============================================================================
+  const {
+    shipments: hookShipments,
+    loading: shipmentsLoading,
+    error: shipmentsError,
+    fetchShipments: refetchShipments,
+    createShipment,
+    updateShipment,
+    deleteShipment,
+    markAsShipped,
+    markAsDelivered,
+    cancelShipment: cancelShipmentMutation,
+    getStats
+  } = useShipments()
+
+  const {
+    carriers: hookCarriers,
+    loading: carriersLoading
+  } = useShippingCarriers()
+
+  // Compute analytics from real shipment data
+  const computedAnalytics = useMemo(() => {
+    const stats = getStats()
+    return {
+      totalShipments: stats.total,
+      shippedToday: hookShipments.filter(s => {
+        const today = new Date().toDateString()
+        return s.shipped_at && new Date(s.shipped_at).toDateString() === today
+      }).length,
+      inTransit: stats.inTransit,
+      delivered: stats.delivered,
+      onTimeRate: stats.onTimeRate,
+      avgShippingCost: stats.total > 0 ? stats.totalCost / stats.total : 0,
+      totalCost: stats.totalCost,
+      avgDeliveryDays: stats.avgDeliveryDays,
+      topCarrier: hookShipments.length > 0
+        ? (hookShipments.reduce((acc, s) => {
+            const carrier = s.carrier_name || 'Unknown'
+            acc[carrier] = (acc[carrier] || 0) + 1
+            return acc
+          }, {} as Record<string, number>))
+        : '',
+      topDestination: hookShipments.length > 0
+        ? hookShipments[0]?.destination_address?.country || 'US'
+        : 'US'
+    }
+  }, [hookShipments, getStats])
+
+  // Map hook carriers to UI Carrier type
+  const mappedCarriers: Carrier[] = useMemo(() => {
+    return hookCarriers.map((c: any) => ({
+      id: c.id,
+      name: c.name || 'Unknown Carrier',
+      code: c.code || c.name?.toLowerCase().replace(/\s+/g, '-') || 'unknown',
+      logo: c.logo_url,
+      type: 'national' as CarrierType,
+      services: [],
+      isActive: c.is_active ?? true,
+      accountNumber: c.account_number,
+    }))
+  }, [hookCarriers])
+
+  // Map hook shipments to UI Shipment type for display
+  const mappedShipments: Shipment[] = useMemo(() => {
+    return hookShipments.map((s: any) => ({
+      id: s.id,
+      orderId: s.order_id || '',
+      orderNumber: s.shipment_code || `SHP-${s.id.slice(0, 8)}`,
+      status: (s.status || 'pending') as ShipmentStatus,
+      carrier: s.carrier_name || 'Unknown',
+      service: s.service_type || s.shipping_method || 'Standard',
+      method: (s.shipping_method || 'ground') as ShippingMethod,
+      trackingNumber: s.tracking_number,
+      origin: s.origin_address || {
+        name: '',
+        street1: '',
+        city: '',
+        state: '',
+        postalCode: '',
+        country: 'US',
+      },
+      destination: s.destination_address || {
+        name: '',
+        street1: '',
+        city: '',
+        state: '',
+        postalCode: '',
+        country: 'US',
+      },
+      package: {
+        weight: s.weight || 1,
+        weightUnit: (s.weight_unit || 'lb') as 'lb',
+        length: s.dimensions?.length || 0,
+        width: s.dimensions?.width || 0,
+        height: s.dimensions?.height || 0,
+        dimensionUnit: 'in' as const,
+        packageType: (s.package_details?.type || 'box') as 'box',
+      },
+      shippingCost: s.shipping_cost || 0,
+      insuranceCost: s.insurance_cost || 0,
+      totalCost: s.total_cost || 0,
+      estimatedDelivery: s.estimated_delivery,
+      actualDelivery: s.actual_delivery,
+      shippedAt: s.shipped_at,
+      createdAt: s.created_at,
+      items: s.package_details?.items_count || 1,
+      signatureRequired: s.signature_required || false,
+      saturdayDelivery: false,
+      priority: s.metadata?.is_priority || false,
+      events: [],
+    }))
+  }, [hookShipments])
+
+  // Labels derived from shipments that have tracking numbers
+  const mappedLabels: Label[] = useMemo(() => {
+    return hookShipments
+      .filter((s: any) => s.tracking_number && s.status !== 'pending')
+      .map((s: any) => ({
+        id: `label-${s.id}`,
+        shipmentId: s.id,
+        trackingNumber: s.tracking_number || '',
+        carrier: s.carrier_name || 'Unknown',
+        service: s.service_type || 'Standard',
+        status: (s.status === 'shipped' || s.status === 'delivered' ? 'printed' : 'created') as LabelStatus,
+        createdAt: s.created_at,
+        cost: s.shipping_cost || 0,
+        labelUrl: s.labels?.[0] || '',
+        format: 'PDF' as const,
+      }))
+  }, [hookShipments])
+
+  // Orders - empty for now (would come from orders table)
+  const mappedOrders: Order[] = []
+
   const [activeTab, setActiveTab] = useState('shipments')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedShipment, setSelectedShipment] = useState<Shipment | null>(null)
@@ -459,9 +580,9 @@ export default function ShippingClient() {
   const [selectedOrders, setSelectedOrders] = useState<string[]>([])
   const [settingsTab, setSettingsTab] = useState('general')
 
-  // Database state
-  const [dbShipments, setDbShipments] = useState<DbShipment[]>([])
-  const [loading, setLoading] = useState(true)
+  // Database state - now synced with hooks
+  const dbShipments = hookShipments
+  const loading = shipmentsLoading
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [formState, setFormState] = useState<ShipmentFormState>(initialFormState)
@@ -524,45 +645,23 @@ export default function ShippingClient() {
   const [selectedCarrier, setSelectedCarrier] = useState<Carrier | null>(null)
   const [trackingInput, setTrackingInput] = useState('')
 
-  // Fetch shipments from Supabase
-  const fetchShipments = useCallback(async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
+  // fetchShipments is now provided by the useShipments hook as refetchShipments
+  const fetchShipments = refetchShipments
 
-      const { data, error } = await supabase
-        .from('shipments')
-        .select('*')
-        .order('created_at', { ascending: false })
-
-      if (error) throw error
-      setDbShipments(data || [])
-    } catch (error) {
-      console.error('Error fetching shipments:', error)
-      toast.error('Failed to load shipments')
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
-  useEffect(() => {
-    fetchShipments()
-  }, [fetchShipments])
-
-  // Filtered data (combines mock + db)
+  // Filtered data from real Supabase data
   const filteredShipments = useMemo(() => {
-    return mockShipments.filter(shipment => {
+    return mappedShipments.filter(shipment => {
       const matchesSearch = shipment.orderNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
         shipment.trackingNumber?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         shipment.destination.name.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesStatus = statusFilter === 'all' || shipment.status === statusFilter
       return matchesSearch && matchesStatus
     })
-  }, [searchQuery, statusFilter])
+  }, [mappedShipments, searchQuery, statusFilter])
 
-  const pendingOrders = mockOrders.filter(o => o.status === 'awaiting_shipment')
+  const pendingOrders = mappedOrders.filter(o => o.status === 'awaiting_shipment')
 
-  // Create shipment in Supabase
+  // Create shipment using hook mutation
   const handleCreateShipment = async () => {
     if (!formState.recipient_name.trim()) {
       toast.error('Recipient name is required')
@@ -570,93 +669,80 @@ export default function ShippingClient() {
     }
     setIsSubmitting(true)
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        toast.error('Please sign in to create shipments')
-        return
-      }
-
-      const { error } = await supabase.from('shipments').insert({
-        user_id: user.id,
-        recipient_name: formState.recipient_name,
-        recipient_email: formState.recipient_email,
-        destination_address: formState.destination_address,
-        destination_city: formState.destination_city,
-        destination_state: formState.destination_state,
-        destination_postal: formState.destination_postal,
-        destination_country: formState.destination_country,
-        carrier: formState.carrier,
-        method: formState.method,
-        weight_lbs: formState.weight_lbs,
-        item_count: formState.item_count,
-        signature_required: formState.signature_required,
-        is_priority: formState.is_priority,
-        status: 'pending',
+      await createShipment({
+        shipment_code: `SHP-${Date.now()}`,
         tracking_number: `TRK${Date.now()}`,
-      })
+        status: 'pending',
+        shipping_method: formState.method,
+        carrier_name: formState.carrier,
+        destination_address: {
+          name: formState.recipient_name,
+          street1: formState.destination_address,
+          city: formState.destination_city,
+          state: formState.destination_state,
+          postal_code: formState.destination_postal,
+          country: formState.destination_country,
+        },
+        origin_address: {
+          name: 'FreeFlow Inc',
+          street1: '123 Shipping Lane',
+          city: 'Los Angeles',
+          state: 'CA',
+          postal_code: '90001',
+          country: 'US',
+        },
+        package_details: {
+          type: 'box',
+          items_count: formState.item_count,
+        },
+        weight: formState.weight_lbs,
+        weight_unit: 'lb',
+        signature_required: formState.signature_required,
+        shipping_cost: 0,
+        insurance_cost: 0,
+        total_cost: 0,
+        currency: 'USD',
+        labels: [],
+        metadata: {
+          is_priority: formState.is_priority,
+        },
+      } as any)
 
-      if (error) throw error
-
-      toast.success('Shipment created successfully')
       setShowCreateDialog(false)
       setFormState(initialFormState)
-      fetchShipments()
     } catch (error) {
       console.error('Error creating shipment:', error)
-      toast.error('Failed to create shipment')
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  // Update shipment status
+  // Update shipment status using hook mutation
   const handleUpdateStatus = async (shipmentId: string, newStatus: string) => {
     try {
-      const { error } = await supabase
-        .from('shipments')
-        .update({ status: newStatus, updated_at: new Date().toISOString() })
-        .eq('id', shipmentId)
-
-      if (error) throw error
-
-      toast.success(`Status updated to ${newStatus}`)
-      fetchShipments()
+      await updateShipment(shipmentId, { status: newStatus as any })
     } catch (error) {
       console.error('Error updating status:', error)
-      toast.error('Failed to update status')
     }
   }
 
-  // Delete shipment
+  // Delete shipment using hook mutation
   const handleDeleteShipment = async (shipmentId: string) => {
     try {
-      const { error } = await supabase
-        .from('shipments')
-        .delete()
-        .eq('id', shipmentId)
-
-      if (error) throw error
-
-      toast.success('Shipment deleted')
-      fetchShipments()
+      await deleteShipment(shipmentId)
     } catch (error) {
       console.error('Error deleting shipment:', error)
-      toast.error('Failed to delete shipment')
     }
   }
 
-  // Print label handler
+  // Print label handler - uses hook mutation
   const handlePrintLabel = async (shipment: Shipment) => {
     try {
       // Update status to label_created if pending
       if (shipment.status === 'pending') {
-        await supabase
-          .from('shipments')
-          .update({ status: 'label_created', updated_at: new Date().toISOString() })
-          .eq('tracking_number', shipment.trackingNumber)
+        await updateShipment(shipment.id, { status: 'processing' } as any)
       }
       toast.success(`Label ready: "${shipment.trackingNumber}" is ready to print`)
-      fetchShipments()
     } catch (error) {
       console.error('Error:', error)
       toast.error('Failed to generate label')
@@ -666,12 +752,12 @@ export default function ShippingClient() {
   // Track shipment handler
   const handleTrackShipment = async (shipment: Shipment) => {
     try {
-      // Add tracking event
+      // Add tracking event using supabase directly (tracking is separate table)
       await supabase.from('shipment_tracking').insert({
         shipment_id: shipment.id,
         status: 'Tracking viewed',
         description: 'Customer viewed tracking information',
-        location: shipment.destination.city || 'Unknown',
+        location: shipment.destination?.city || 'Unknown',
       })
       toast.info(`Tracking: viewing shipment ${shipment.id}`)
     } catch (error) {
@@ -679,67 +765,74 @@ export default function ShippingClient() {
     }
   }
 
-  // Batch ship handler
+  // Batch ship handler - uses hook mutation
   const handleBatchShip = async () => {
     if (selectedOrders.length === 0) {
       toast.error('No orders selected')
       return
     }
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
+      // Create shipments for selected orders using hook
+      for (const orderId of selectedOrders) {
+        await createShipment({
+          shipment_code: `BATCH-${Date.now()}-${orderId}`,
+          order_id: orderId,
+          status: 'processing',
+          shipping_method: 'standard',
+          carrier_name: 'FedEx',
+          tracking_number: `BATCH${Date.now()}${orderId}`,
+          origin_address: {
+            name: 'FreeFlow Inc',
+            street1: '123 Shipping Lane',
+            city: 'Los Angeles',
+            state: 'CA',
+            postal_code: '90001',
+            country: 'US',
+          },
+          destination_address: {
+            name: 'Customer',
+            street1: '',
+            city: '',
+            state: '',
+            postal_code: '',
+            country: 'US',
+          },
+          package_details: { type: 'box', items_count: 1 },
+          weight: 1,
+          weight_unit: 'lb',
+          shipping_cost: 0,
+          insurance_cost: 0,
+          total_cost: 0,
+          currency: 'USD',
+          signature_required: false,
+          labels: [],
+          metadata: {},
+        } as any)
+      }
 
-      // Create shipments for selected orders
-      const shipmentsToCreate = selectedOrders.map(orderId => ({
-        user_id: user.id,
-        order_id: orderId,
-        status: 'processing',
-        method: 'standard',
-        carrier: 'FedEx',
-        tracking_number: `BATCH${Date.now()}${orderId}`,
-      }))
-
-      const { error } = await supabase.from('shipments').insert(shipmentsToCreate)
-      if (error) throw error
-
-      toast.success(`Batch shipment created orders queued for shipment`)
+      toast.success(`Batch shipment created: ${selectedOrders.length} orders queued for shipment`)
       setSelectedOrders([])
-      fetchShipments()
     } catch (error) {
       console.error('Error:', error)
       toast.error('Failed to create batch shipment')
     }
   }
 
-  // Cancel shipment
-  const handleCancelShipment = async (trackingNumber: string) => {
+  // Cancel shipment - uses hook mutation
+  const handleCancelShipment = async (shipmentId: string) => {
     try {
-      const { error } = await supabase
-        .from('shipments')
-        .update({ status: 'cancelled', updated_at: new Date().toISOString() })
-        .eq('tracking_number', trackingNumber)
-
-      if (error) throw error
-
-      toast.info(`Shipment cancelled: "${trackingNumber}" has been cancelled`)
-      fetchShipments()
+      await cancelShipmentMutation(shipmentId)
+      toast.info('Shipment cancelled')
     } catch (error) {
       console.error('Error:', error)
       toast.error('Failed to cancel shipment')
     }
   }
 
-  // Export shipments
+  // Export shipments - uses hook data
   const handleExportShipments = async () => {
     try {
-      const { data, error } = await supabase
-        .from('shipments')
-        .select('*')
-        .order('created_at', { ascending: false })
-
-      if (error) throw error
-
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+      const blob = new Blob([JSON.stringify(hookShipments, null, 2)], { type: 'application/json' })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
@@ -791,14 +884,14 @@ export default function ShippingClient() {
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
           {[
-            { label: 'Total Shipments', value: mockAnalytics.totalShipments.toLocaleString(), change: 15.3, icon: Package, color: 'from-blue-500 to-cyan-500' },
-            { label: 'Shipped Today', value: mockAnalytics.shippedToday.toString(), change: 8.7, icon: Send, color: 'from-green-500 to-emerald-500' },
-            { label: 'In Transit', value: mockAnalytics.inTransit.toString(), change: 12.4, icon: Truck, color: 'from-yellow-500 to-orange-500' },
-            { label: 'Delivered', value: mockAnalytics.delivered.toLocaleString(), change: 18.9, icon: CheckCircle, color: 'from-emerald-500 to-teal-500' },
-            { label: 'On-Time Rate', value: `${mockAnalytics.onTimeRate}%`, change: 2.1, icon: Timer, color: 'from-purple-500 to-violet-500' },
-            { label: 'Avg Cost', value: formatCurrency(mockAnalytics.avgShippingCost), change: -5.2, icon: DollarSign, color: 'from-pink-500 to-rose-500' },
-            { label: 'Total Cost', value: formatCurrency(mockAnalytics.totalCost), change: 22.4, icon: TrendingUp, color: 'from-indigo-500 to-blue-500' },
-            { label: 'Avg Delivery', value: `${mockAnalytics.avgDeliveryDays}d`, change: -8.3, icon: Calendar, color: 'from-teal-500 to-cyan-500' }
+            { label: 'Total Shipments', value: computedAnalytics.totalShipments.toLocaleString(), change: 15.3, icon: Package, color: 'from-blue-500 to-cyan-500' },
+            { label: 'Shipped Today', value: computedAnalytics.shippedToday.toString(), change: 8.7, icon: Send, color: 'from-green-500 to-emerald-500' },
+            { label: 'In Transit', value: computedAnalytics.inTransit.toString(), change: 12.4, icon: Truck, color: 'from-yellow-500 to-orange-500' },
+            { label: 'Delivered', value: computedAnalytics.delivered.toLocaleString(), change: 18.9, icon: CheckCircle, color: 'from-emerald-500 to-teal-500' },
+            { label: 'On-Time Rate', value: `${computedAnalytics.onTimeRate}%`, change: 2.1, icon: Timer, color: 'from-purple-500 to-violet-500' },
+            { label: 'Avg Cost', value: formatCurrency(computedAnalytics.avgShippingCost), change: -5.2, icon: DollarSign, color: 'from-pink-500 to-rose-500' },
+            { label: 'Total Cost', value: formatCurrency(computedAnalytics.totalCost), change: 22.4, icon: TrendingUp, color: 'from-indigo-500 to-blue-500' },
+            { label: 'Avg Delivery', value: `${computedAnalytics.avgDeliveryDays}d`, change: -8.3, icon: Calendar, color: 'from-teal-500 to-cyan-500' }
           ].map((stat, idx) => (
             <Card key={idx} className="relative overflow-hidden border-0 shadow-sm hover:shadow-md transition-shadow">
               <CardContent className="p-4">
@@ -870,15 +963,15 @@ export default function ShippingClient() {
                   </div>
                   <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6 text-center">
                     <div>
-                      <p className="text-2xl font-bold">{mockAnalytics.totalShipments.toLocaleString()}</p>
+                      <p className="text-2xl font-bold">{computedAnalytics.totalShipments.toLocaleString()}</p>
                       <p className="text-sm text-white/80">Total Shipments</p>
                     </div>
                     <div>
-                      <p className="text-2xl font-bold">{mockAnalytics.inTransit}</p>
+                      <p className="text-2xl font-bold">{computedAnalytics.inTransit}</p>
                       <p className="text-sm text-white/80">In Transit</p>
                     </div>
                     <div>
-                      <p className="text-2xl font-bold">{mockAnalytics.onTimeRate}%</p>
+                      <p className="text-2xl font-bold">{computedAnalytics.onTimeRate}%</p>
                       <p className="text-sm text-white/80">On-Time Rate</p>
                     </div>
                   </div>
@@ -1083,7 +1176,7 @@ export default function ShippingClient() {
                       <p className="text-sm text-white/80">Pending</p>
                     </div>
                     <div>
-                      <p className="text-2xl font-bold">{mockOrders.length}</p>
+                      <p className="text-2xl font-bold">{mappedOrders.length}</p>
                       <p className="text-sm text-white/80">Total Orders</p>
                     </div>
                     <div>
@@ -1136,7 +1229,7 @@ export default function ShippingClient() {
             </div>
 
             <div className="space-y-4">
-              {mockOrders.map(order => (
+              {mappedOrders.map(order => (
                 <Card key={order.id} className="hover:shadow-md transition-shadow">
                   <CardContent className="p-4">
                     <div className="flex items-start gap-4">
@@ -1219,15 +1312,15 @@ export default function ShippingClient() {
                   </div>
                   <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6 text-center">
                     <div>
-                      <p className="text-2xl font-bold">{mockShipments.filter(s => s.status === 'in_transit').length}</p>
+                      <p className="text-2xl font-bold">{mappedShipments.filter(s => s.status === 'in_transit').length}</p>
                       <p className="text-sm text-white/80">In Transit</p>
                     </div>
                     <div>
-                      <p className="text-2xl font-bold">{mockShipments.filter(s => s.status === 'out_for_delivery').length}</p>
+                      <p className="text-2xl font-bold">{mappedShipments.filter(s => s.status === 'out_for_delivery').length}</p>
                       <p className="text-sm text-white/80">Out for Delivery</p>
                     </div>
                     <div>
-                      <p className="text-2xl font-bold">{mockShipments.filter(s => s.events.length > 0).length}</p>
+                      <p className="text-2xl font-bold">{mappedShipments.filter(s => s.events.length > 0).length}</p>
                       <p className="text-sm text-white/80">With Updates</p>
                     </div>
                   </div>
@@ -1286,7 +1379,7 @@ export default function ShippingClient() {
             </Card>
 
             <div className="grid gap-4">
-              {mockShipments.filter(s => s.events.length > 0).map(shipment => (
+              {mappedShipments.filter(s => s.events.length > 0).map(shipment => (
                 <Card key={shipment.id}>
                   <CardHeader>
                     <div className="flex items-center justify-between">
@@ -1340,15 +1433,15 @@ export default function ShippingClient() {
                   </div>
                   <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6 text-center">
                     <div>
-                      <p className="text-2xl font-bold">{mockLabels.length}</p>
+                      <p className="text-2xl font-bold">{mappedLabels.length}</p>
                       <p className="text-sm text-white/80">Total Labels</p>
                     </div>
                     <div>
-                      <p className="text-2xl font-bold">{mockLabels.filter(l => l.status === 'printed').length}</p>
+                      <p className="text-2xl font-bold">{mappedLabels.filter(l => l.status === 'printed').length}</p>
                       <p className="text-sm text-white/80">Printed</p>
                     </div>
                     <div>
-                      <p className="text-2xl font-bold">${mockLabels.reduce((sum, l) => sum + l.cost, 0).toFixed(2)}</p>
+                      <p className="text-2xl font-bold">${mappedLabels.reduce((sum, l) => sum + l.cost, 0).toFixed(2)}</p>
                       <p className="text-sm text-white/80">Total Cost</p>
                     </div>
                   </div>
@@ -1391,7 +1484,7 @@ export default function ShippingClient() {
             </div>
 
             <div className="grid gap-4">
-              {mockLabels.map(label => (
+              {mappedLabels.map(label => (
                 <Card key={label.id} className="hover:shadow-md transition-shadow">
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
@@ -1452,15 +1545,15 @@ export default function ShippingClient() {
                   </div>
                   <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6 text-center">
                     <div>
-                      <p className="text-2xl font-bold">{mockCarriers.length}</p>
+                      <p className="text-2xl font-bold">{mappedCarriers.length}</p>
                       <p className="text-sm text-white/80">Carriers</p>
                     </div>
                     <div>
-                      <p className="text-2xl font-bold">{mockCarriers.filter(c => c.isActive).length}</p>
+                      <p className="text-2xl font-bold">{mappedCarriers.filter(c => c.isActive).length}</p>
                       <p className="text-sm text-white/80">Active</p>
                     </div>
                     <div>
-                      <p className="text-2xl font-bold">{mockCarriers.reduce((sum, c) => sum + c.services.length, 0)}</p>
+                      <p className="text-2xl font-bold">{mappedCarriers.reduce((sum, c) => sum + c.services.length, 0)}</p>
                       <p className="text-sm text-white/80">Services</p>
                     </div>
                   </div>
@@ -1503,7 +1596,7 @@ export default function ShippingClient() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {mockCarriers.map(carrier => (
+              {mappedCarriers.map(carrier => (
                 <Card key={carrier.id} className={carrier.isActive ? 'ring-1 ring-green-500' : ''}>
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-4">
@@ -1563,15 +1656,15 @@ export default function ShippingClient() {
                   </div>
                   <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6 text-center">
                     <div>
-                      <p className="text-2xl font-bold">{mockAnalytics.onTimeRate}%</p>
+                      <p className="text-2xl font-bold">{computedAnalytics.onTimeRate}%</p>
                       <p className="text-sm text-white/80">On-Time Rate</p>
                     </div>
                     <div>
-                      <p className="text-2xl font-bold">{formatCurrency(mockAnalytics.avgShippingCost)}</p>
+                      <p className="text-2xl font-bold">{formatCurrency(computedAnalytics.avgShippingCost)}</p>
                       <p className="text-sm text-white/80">Avg Cost</p>
                     </div>
                     <div>
-                      <p className="text-2xl font-bold">{mockAnalytics.avgDeliveryDays}d</p>
+                      <p className="text-2xl font-bold">{computedAnalytics.avgDeliveryDays}d</p>
                       <p className="text-sm text-white/80">Avg Delivery</p>
                     </div>
                   </div>
@@ -1618,22 +1711,22 @@ export default function ShippingClient() {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-6">
                     <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <p className="text-sm text-gray-500">Total Volume</p>
-                      <p className="text-2xl font-bold text-gray-900 dark:text-white">{mockAnalytics.totalShipments.toLocaleString()}</p>
+                      <p className="text-2xl font-bold text-gray-900 dark:text-white">{computedAnalytics.totalShipments.toLocaleString()}</p>
                       <p className="text-xs text-green-600">+15.3% this month</p>
                     </div>
                     <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <p className="text-sm text-gray-500">On-Time Rate</p>
-                      <p className="text-2xl font-bold text-green-600">{mockAnalytics.onTimeRate}%</p>
+                      <p className="text-2xl font-bold text-green-600">{computedAnalytics.onTimeRate}%</p>
                       <p className="text-xs text-green-600">Above target</p>
                     </div>
                     <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <p className="text-sm text-gray-500">Total Spend</p>
-                      <p className="text-2xl font-bold text-gray-900 dark:text-white">{formatCurrency(mockAnalytics.totalCost)}</p>
+                      <p className="text-2xl font-bold text-gray-900 dark:text-white">{formatCurrency(computedAnalytics.totalCost)}</p>
                       <p className="text-xs text-red-600">+22.4% vs last month</p>
                     </div>
                     <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <p className="text-sm text-gray-500">Avg Delivery</p>
-                      <p className="text-2xl font-bold text-gray-900 dark:text-white">{mockAnalytics.avgDeliveryDays} days</p>
+                      <p className="text-2xl font-bold text-gray-900 dark:text-white">{computedAnalytics.avgDeliveryDays} days</p>
                       <p className="text-xs text-green-600">-8.3% faster</p>
                     </div>
                   </div>
@@ -1922,7 +2015,7 @@ export default function ShippingClient() {
                         <CardDescription>Manage your carrier integrations and API keys</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        {mockCarriers.map((carrier) => (
+                        {mappedCarriers.map((carrier) => (
                           <div key={carrier.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                             <div className="flex items-center gap-4">
                               <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 flex items-center justify-center text-white font-bold">
@@ -2300,18 +2393,18 @@ export default function ShippingClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockShippingAIInsights}
+              insights={shippingAIInsights}
               title="Shipping Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockShippingCollaborators}
+              collaborators={shippingCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockShippingPredictions}
+              predictions={shippingPredictions}
               title="Shipping Forecasts"
             />
           </div>
@@ -2319,12 +2412,12 @@ export default function ShippingClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockShippingActivities}
+            activities={shippingActivities}
             title="Shipping Activity"
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockShippingQuickActions}
+            actions={shippingQuickActions}
             variant="grid"
           />
         </div>
@@ -2685,7 +2778,7 @@ export default function ShippingClient() {
                 <span>Printer</span>
                 <Input defaultValue="Default" className="w-32" />
               </div>
-              <p className="text-sm text-gray-500">{mockShipments.filter(s => s.status === 'pending').length} labels ready to print</p>
+              <p className="text-sm text-gray-500">{mappedShipments.filter(s => s.status === 'pending').length} labels ready to print</p>
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowPrintLabelsDialog(false)}>Cancel</Button>
@@ -2713,7 +2806,7 @@ export default function ShippingClient() {
               <DialogDescription>View tracking status for all active shipments</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4 max-h-[400px] overflow-y-auto">
-              {mockShipments.map(shipment => (
+              {mappedShipments.map(shipment => (
                 <div key={shipment.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                   <div>
                     <p className="font-medium">{shipment.trackingNumber || 'No tracking'}</p>
@@ -2729,7 +2822,7 @@ export default function ShippingClient() {
                 toast.loading('Refreshing all tracking...', { id: 'refresh-all' })
                 try {
                   await fetchShipments()
-                  toast.success('All tracking refreshed', { id: 'refresh-all', description: `${mockShipments.length} shipments updated` })
+                  toast.success('All tracking refreshed', { id: 'refresh-all', description: `${mappedShipments.length} shipments updated` })
                 } catch {
                   toast.error('Failed to refresh tracking', { id: 'refresh-all' })
                 }
@@ -2759,12 +2852,12 @@ export default function ShippingClient() {
                 <Label>Apply To</Label>
                 <Input defaultValue="All pending shipments" className="mt-1" />
               </div>
-              <p className="text-sm text-gray-500">This will update {mockShipments.filter(s => s.status === 'pending').length} shipments</p>
+              <p className="text-sm text-gray-500">This will update {mappedShipments.filter(s => s.status === 'pending').length} shipments</p>
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowBatchUpdateDialog(false)}>Cancel</Button>
               <Button className="bg-gradient-to-r from-pink-500 to-rose-500 text-white" onClick={() => {
-                const pendingCount = mockShipments.filter(s => s.status === 'pending').length
+                const pendingCount = mappedShipments.filter(s => s.status === 'pending').length
                 toast.promise(
                   fetch('/api/shipping/batch-update', { method: 'POST' }).then(async res => { if (!res.ok) throw new Error('Failed'); await fetchShipments(); setShowBatchUpdateDialog(false); }),
                   { loading: 'Applying batch update...', success: `${pendingCount} shipments updated`, error: 'Batch update failed' }
@@ -2787,7 +2880,7 @@ export default function ShippingClient() {
               <DialogDescription>Sync tracking status from all carriers</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              {mockCarriers.map(carrier => (
+              {mappedCarriers.map(carrier => (
                 <div key={carrier.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                   <span className="font-medium">{carrier.name}</span>
                   <Badge className="bg-green-100 text-green-700">Synced</Badge>
@@ -3068,10 +3161,10 @@ export default function ShippingClient() {
                         location: shipment.destination_city || 'Unknown',
                       })
                     } else {
-                      // Check mock data
-                      const mockShipment = mockShipments.find(s => s.trackingNumber === trackingInput.trim())
-                      if (mockShipment) {
-                        toast.success('Shipment found - ' + mockShipment.destination.name)
+                      // Check shipments from database
+                      const foundShipment = mappedShipments.find(s => s.trackingNumber === trackingInput.trim())
+                      if (foundShipment) {
+                        toast.success('Shipment found - ' + foundShipment.destination.name)
                       } else {
                         toast.info('No shipment found')
                       }
@@ -3099,7 +3192,7 @@ export default function ShippingClient() {
               <div className="text-center">
                 <Globe className="w-16 h-16 mx-auto text-gray-400 mb-4" />
                 <p className="text-gray-500">Map visualization would appear here</p>
-                <p className="text-sm text-gray-400">{mockShipments.length} active shipments</p>
+                <p className="text-sm text-gray-400">{mappedShipments.length} active shipments</p>
               </div>
             </div>
             <div className="flex justify-end">
@@ -3160,7 +3253,7 @@ export default function ShippingClient() {
               <DialogDescription>View chronological shipment events</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4 max-h-[400px] overflow-y-auto">
-              {mockShipments[0]?.events.map((event, idx) => (
+              {mappedShipments[0]?.events.map((event, idx) => (
                 <div key={idx} className="flex items-start gap-3">
                   <div className={`w-2 h-2 rounded-full mt-2 ${idx === 0 ? 'bg-green-500' : 'bg-gray-300'}`} />
                   <div>
@@ -3214,7 +3307,7 @@ export default function ShippingClient() {
               <DialogDescription>Update tracking for all shipments</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <p className="text-sm">This will refresh tracking status for {mockShipments.length} shipments</p>
+              <p className="text-sm">This will refresh tracking status for {mappedShipments.length} shipments</p>
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowRefreshAllDialog(false)}>Cancel</Button>
@@ -3303,7 +3396,7 @@ export default function ShippingClient() {
               <DialogDescription>Print multiple labels at once</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <p className="text-sm">{mockLabels.length} labels ready to print</p>
+              <p className="text-sm">{mappedLabels.length} labels ready to print</p>
               <div>
                 <Label>Printer</Label>
                 <Input defaultValue="Default Printer" className="mt-1" />
@@ -3328,7 +3421,7 @@ export default function ShippingClient() {
               <DialogDescription>Download all labels as a ZIP file</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <p className="text-sm">{mockLabels.length} labels will be downloaded</p>
+              <p className="text-sm">{mappedLabels.length} labels will be downloaded</p>
               <div>
                 <Label>Format</Label>
                 <Input defaultValue="PDF" className="mt-1" />
@@ -3337,7 +3430,7 @@ export default function ShippingClient() {
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowDownloadAllLabelsDialog(false)}>Cancel</Button>
               <Button onClick={() => {
-                const labelsData = JSON.stringify(mockLabels, null, 2)
+                const labelsData = JSON.stringify(mappedLabels, null, 2)
                 const blob = new Blob([labelsData], { type: 'application/json' })
                 const url = URL.createObjectURL(blob)
                 const a = document.createElement('a')
@@ -3419,7 +3512,7 @@ export default function ShippingClient() {
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowFindLabelDialog(false)}>Cancel</Button>
               <Button onClick={() => {
-                const foundLabel = mockLabels.find(l => l.trackingNumber.includes('TRK'))
+                const foundLabel = mappedLabels.find(l => l.trackingNumber.includes('TRK'))
                 if (foundLabel) {
                   toast.success('Label found - ' + foundLabel.trackingNumber)
                 } else {
@@ -3439,7 +3532,7 @@ export default function ShippingClient() {
               <DialogDescription>View label creation history</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4 max-h-[400px] overflow-y-auto">
-              {mockLabels.map(label => (
+              {mappedLabels.map(label => (
                 <div key={label.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                   <div>
                     <p className="font-medium">{label.trackingNumber}</p>
@@ -3639,7 +3732,7 @@ export default function ShippingClient() {
               <DialogDescription>Update rates from all carriers</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              {mockCarriers.map(carrier => (
+              {mappedCarriers.map(carrier => (
                 <div key={carrier.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                   <span>{carrier.name}</span>
                   <Badge className="bg-green-100 text-green-700">Ready</Badge>
@@ -3651,7 +3744,7 @@ export default function ShippingClient() {
               <Button onClick={() => {
                 toast.promise(
                   fetch('/api/shipping/carriers/sync', { method: 'POST' }).then(res => { if (!res.ok) throw new Error('Failed'); setShowSyncRatesDialog(false); }),
-                  { loading: 'Syncing rates from carriers...', success: `Rates synced - ${mockCarriers.length} carriers updated`, error: 'Failed to sync rates' }
+                  { loading: 'Syncing rates from carriers...', success: `Rates synced - ${mappedCarriers.length} carriers updated`, error: 'Failed to sync rates' }
                 )
               }}>Sync All</Button>
             </div>
@@ -3691,8 +3784,8 @@ export default function ShippingClient() {
               <Button variant="outline" onClick={() => setShowCompareRatesDialog(false)}>Cancel</Button>
               <Button
                 onClick={() => {
-                  // Generate mock rate comparison
-                  const rates = mockCarriers.flatMap(carrier =>
+                  // Generate rate comparison from carrier data
+                  const rates = mappedCarriers.flatMap(carrier =>
                     carrier.services.map(service => ({
                       carrier: carrier.name,
                       service: service.name,
@@ -3760,7 +3853,7 @@ export default function ShippingClient() {
               <DialogDescription>Manage carrier API keys</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              {mockCarriers.map(carrier => (
+              {mappedCarriers.map(carrier => (
                 <div key={carrier.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                   <span>{carrier.name}</span>
                   <Button
@@ -3891,7 +3984,7 @@ export default function ShippingClient() {
               <DialogDescription>Performance metrics by carrier</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              {mockCarriers.map(carrier => (
+              {mappedCarriers.map(carrier => (
                 <div key={carrier.id} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                   <div className="flex items-center justify-between mb-2">
                     <span className="font-medium">{carrier.name}</span>
@@ -3943,8 +4036,8 @@ export default function ShippingClient() {
                 const reportData = {
                   type: 'Summary Report',
                   dateRange: 'Last 30 days',
-                  totalShipments: mockShipments.length,
-                  totalCost: mockAnalytics.totalCost,
+                  totalShipments: mappedShipments.length,
+                  totalCost: computedAnalytics.totalCost,
                   generatedAt: new Date().toISOString()
                 }
                 const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' })
@@ -3991,11 +4084,11 @@ export default function ShippingClient() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                   <p className="text-sm text-gray-500">Total Spend</p>
-                  <p className="text-2xl font-bold">{formatCurrency(mockAnalytics.totalCost)}</p>
+                  <p className="text-2xl font-bold">{formatCurrency(computedAnalytics.totalCost)}</p>
                 </div>
                 <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
                   <p className="text-sm text-gray-500">Avg Per Shipment</p>
-                  <p className="text-2xl font-bold">{formatCurrency(mockAnalytics.avgShippingCost)}</p>
+                  <p className="text-2xl font-bold">{formatCurrency(computedAnalytics.avgShippingCost)}</p>
                 </div>
               </div>
             </div>
@@ -4013,7 +4106,7 @@ export default function ShippingClient() {
               <DialogDescription>View carrier performance stats</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              {mockCarriers.map(carrier => (
+              {mappedCarriers.map(carrier => (
                 <div key={carrier.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                   <span>{carrier.name}</span>
                   <span className="text-sm text-gray-500">{carrier.services.length} services</span>
@@ -4055,7 +4148,7 @@ export default function ShippingClient() {
               <DialogDescription>Average delivery times by carrier</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              {mockCarriers.map(carrier => (
+              {mappedCarriers.map(carrier => (
                 <div key={carrier.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                   <span>{carrier.name}</span>
                   <span className="font-medium">{(3 + Math.random() * 2).toFixed(1)} days avg</span>

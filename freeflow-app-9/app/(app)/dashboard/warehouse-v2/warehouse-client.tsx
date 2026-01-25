@@ -1,6 +1,12 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { useWarehouses, useWarehouseMutations, type Warehouse as DBWarehouse } from '@/lib/hooks/use-warehouse'
+import { useStockLevels, type StockLevel } from '@/lib/hooks/use-stock'
+import { useOrders, type Order as DBOrder } from '@/lib/hooks/use-orders'
+import { useShipments, type Shipment as DBShipment } from '@/lib/hooks/use-shipments'
+import { useTasks, type Task as DBTask, type TaskPriority as DBTaskPriority } from '@/lib/hooks/use-tasks'
+import { useActivityLogs, type ActivityLog } from '@/lib/hooks/use-activity-logs'
 import dynamic from 'next/dynamic'
 import { toast } from 'sonner'
 import {
@@ -242,7 +248,7 @@ interface CycleCount {
   accuracy_percent: number
 }
 
-// Empty data arrays - connect to real data source
+// Fallback empty data arrays - used when no real data is available
 const mockInventory: InventoryItem[] = []
 
 const mockZones: Zone[] = []
@@ -267,6 +273,17 @@ const mockWarehouseActivities: Array<{ id: string; user: { id: string; name: str
 // Quick actions are now defined inside the component to use dialog state
 
 export default function WarehouseClient() {
+  // Supabase hooks for real warehouse data
+  const { warehouses: dbWarehouses, stats: warehouseStats, isLoading: isLoadingWarehouses, refetch: refetchWarehouses } = useWarehouses()
+  const { stockLevels: dbStockLevels, stats: stockStats, isLoading: isLoadingStock, refetch: refetchStock } = useStockLevels()
+  const { createWarehouse, updateWarehouse, deleteWarehouse, isCreating, isUpdating, isDeleting } = useWarehouseMutations()
+
+  // Additional Supabase hooks for orders, shipments, tasks, and activities
+  const { data: dbOrders, isLoading: isLoadingOrders, refetch: refetchOrders } = useOrders()
+  const { shipments: dbShipments, loading: isLoadingShipments, fetchShipments: refetchShipments } = useShipments()
+  const { tasks: dbTasks, isLoading: isLoadingTasks, refresh: refetchTasks, stats: taskStats } = useTasks()
+  const { logs: dbActivityLogs, isLoading: isLoadingActivities, refetch: refetchActivities } = useActivityLogs()
+
   const [activeTab, setActiveTab] = useState('inventory')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null)
@@ -1045,18 +1062,245 @@ export default function WarehouseClient() {
     }
   }
 
-  // Stats calculations
+  // Map stock levels to InventoryItem format for display
+  const activeInventory: InventoryItem[] = useMemo(() => {
+    if (dbStockLevels && dbStockLevels.length > 0) {
+      return dbStockLevels.map((sl: StockLevel) => {
+        const status: InventoryStatus = sl.quantity_available <= 0 ? 'out_of_stock'
+          : sl.quantity_available <= sl.reorder_point ? 'low_stock' : 'in_stock'
+        return {
+          id: sl.id,
+          sku: sl.sku || `SKU-${sl.id.substring(0, 8)}`,
+          name: sl.product_name,
+          description: `Stock level for ${sl.product_name}`,
+          category: 'General',
+          quantity_on_hand: sl.quantity_on_hand || 0,
+          quantity_available: sl.quantity_available || 0,
+          quantity_reserved: sl.quantity_reserved || 0,
+          quantity_incoming: 0,
+          reorder_point: sl.reorder_point || 0,
+          reorder_quantity: sl.reorder_quantity || 0,
+          unit_cost: sl.unit_cost || 0,
+          bin_location: sl.location_code || 'Unassigned',
+          zone: sl.warehouse_id ? `Zone ${sl.warehouse_id.substring(0, 4)}` : 'Default Zone',
+          lot_number: sl.batch_number || '',
+          expiry_date: sl.expiry_date || null,
+          last_counted: sl.last_count_date || sl.updated_at,
+          status,
+          weight_kg: 0,
+          dimensions: { l: 0, w: 0, h: 0 },
+          is_serialized: false,
+          requires_cold_storage: false,
+          is_hazmat: false
+        } as InventoryItem
+      })
+    }
+    return mockInventory
+  }, [dbStockLevels])
+
+  // Map warehouses to zones format
+  const activeZones: Zone[] = useMemo(() => {
+    if (dbWarehouses && dbWarehouses.length > 0) {
+      return dbWarehouses.map((w: DBWarehouse) => ({
+        id: w.id,
+        name: w.warehouse_name,
+        code: w.warehouse_code,
+        type: (w.warehouse_type || 'storage') as ZoneType,
+        capacity_units: w.capacity_sqm || 0,
+        used_units: Math.round((w.capacity_sqm || 0) * (w.utilization_percent / 100)),
+        bin_count: w.zone_count || 0,
+        temperature_min: null,
+        temperature_max: null,
+        is_active: w.status === 'active',
+        last_activity: w.updated_at
+      })) as Zone[]
+    }
+    return mockZones
+  }, [dbWarehouses])
+
+  // Map orders to OutboundOrder format
+  const activeOutboundOrders: OutboundOrder[] = useMemo(() => {
+    if (dbOrders && dbOrders.length > 0) {
+      return dbOrders.map((o: DBOrder) => {
+        const statusMap: Record<string, OrderStatus> = {
+          pending: 'pending',
+          confirmed: 'allocated',
+          processing: 'picking',
+          shipped: 'shipped',
+          delivered: 'shipped',
+          cancelled: 'cancelled',
+          refunded: 'cancelled',
+          on_hold: 'pending'
+        }
+        const isShipped = o.status === 'shipped' || o.status === 'delivered'
+        return {
+          id: o.id,
+          order_number: o.order_number,
+          customer: o.customer_name || 'Unknown Customer',
+          priority: 'normal' as TaskPriority,
+          status: statusMap[o.status] || 'pending',
+          order_date: o.created_at,
+          ship_by_date: o.estimated_delivery || o.created_at,
+          shipped_date: isShipped ? o.actual_delivery || o.updated_at : null,
+          total_lines: 1,
+          picked_lines: isShipped ? 1 : 0,
+          total_units: 1,
+          picked_units: isShipped ? 1 : 0,
+          carrier: o.carrier || 'Standard',
+          tracking_number: o.tracking_number || null,
+          assigned_to: null,
+          wave_id: null
+        } as OutboundOrder
+      })
+    }
+    return mockOutboundOrders
+  }, [dbOrders])
+
+  // Map shipments to InboundShipment format
+  const activeInboundShipments: InboundShipment[] = useMemo(() => {
+    if (dbShipments && dbShipments.length > 0) {
+      return dbShipments
+        .filter((s: DBShipment) => s.status === 'pending' || s.status === 'processing' || s.status === 'in_transit')
+        .map((s: DBShipment) => {
+          const statusMap: Record<string, ShipmentStatus> = {
+            pending: 'pending',
+            processing: 'receiving',
+            shipped: 'in_transit',
+            in_transit: 'in_transit',
+            out_for_delivery: 'in_transit',
+            delivered: 'completed',
+            returned: 'cancelled',
+            cancelled: 'cancelled'
+          }
+          return {
+            id: s.id,
+            shipment_number: s.shipment_code,
+            po_number: s.order_number || `PO-${s.id.substring(0, 8)}`,
+            supplier: s.origin_address?.company || s.origin_address?.name || 'Unknown Supplier',
+            carrier: s.carrier_name || 'Standard Carrier',
+            tracking_number: s.tracking_number || '',
+            expected_date: s.estimated_delivery || s.created_at,
+            received_date: s.delivered_at || null,
+            status: statusMap[s.status] || 'pending',
+            total_items: s.package_details?.items_count || 1,
+            received_items: s.status === 'delivered' ? (s.package_details?.items_count || 1) : 0,
+            total_units: s.package_details?.items_count || 1,
+            received_units: s.status === 'delivered' ? (s.package_details?.items_count || 1) : 0,
+            dock_door: null,
+            assigned_to: null
+          } as InboundShipment
+        })
+    }
+    return mockInboundShipments
+  }, [dbShipments])
+
+  // Map tasks to WarehouseTask format
+  const activeWarehouseTasks: WarehouseTask[] = useMemo(() => {
+    if (dbTasks && dbTasks.length > 0) {
+      return dbTasks.map((t: DBTask) => {
+        const typeMap: Record<string, TaskType> = {
+          task: 'pick',
+          milestone: 'pack',
+          bug: 'count',
+          feature: 'putaway',
+          improvement: 'replenish'
+        }
+        const priorityMap: Record<DBTaskPriority, TaskPriority> = {
+          low: 'low',
+          medium: 'normal',
+          high: 'high',
+          urgent: 'urgent'
+        }
+        const statusMap: Record<string, 'pending' | 'in_progress' | 'completed' | 'cancelled'> = {
+          todo: 'pending',
+          in_progress: 'in_progress',
+          review: 'in_progress',
+          completed: 'completed',
+          cancelled: 'cancelled',
+          blocked: 'pending'
+        }
+        return {
+          id: t.id,
+          task_number: `TSK-${t.id.substring(0, 8)}`,
+          type: typeMap[t.type] || 'pick',
+          priority: priorityMap[t.priority] || 'normal',
+          status: statusMap[t.status] || 'pending',
+          from_location: '',
+          to_location: '',
+          item_sku: '',
+          item_name: t.title,
+          quantity: 1,
+          assigned_to: t.assignee?.name || null,
+          assigned_to_avatar: t.assignee?.avatar_url || null,
+          created_at: t.created_at,
+          started_at: t.status === 'in_progress' ? t.updated_at : null,
+          completed_at: t.completed_at || null,
+          estimated_minutes: t.estimated_minutes || 30
+        } as WarehouseTask
+      })
+    }
+    return mockTasks
+  }, [dbTasks])
+
+  // Map activity logs to competitive upgrade activity format
+  const activeActivities = useMemo(() => {
+    if (dbActivityLogs && dbActivityLogs.length > 0) {
+      return dbActivityLogs.slice(0, 20).map((log: ActivityLog) => {
+        const typeMap: Record<string, 'comment' | 'update' | 'create' | 'delete' | 'mention' | 'assignment' | 'status_change' | 'milestone' | 'integration'> = {
+          create: 'create',
+          update: 'update',
+          delete: 'delete',
+          view: 'comment',
+          login: 'status_change',
+          logout: 'status_change',
+          export: 'integration',
+          import: 'integration'
+        }
+        return {
+          id: log.id,
+          user: {
+            id: log.user_id || 'unknown',
+            name: log.user_name || 'System',
+            avatar: undefined
+          },
+          action: log.action,
+          target: log.resource_name ? {
+            type: log.resource_type || 'item',
+            name: log.resource_name,
+            url: undefined
+          } : undefined,
+          timestamp: log.created_at,
+          type: typeMap[log.activity_type] || 'update'
+        }
+      })
+    }
+    return mockWarehouseActivities
+  }, [dbActivityLogs])
+
+  // Stats calculations - use real data when available
   const stats = useMemo(() => {
-    const totalItems = mockInventory.length
-    const lowStockItems = mockInventory.filter(i => i.status === 'low_stock').length
-    const outOfStockItems = mockInventory.filter(i => i.status === 'out_of_stock').length
-    const totalValue = mockInventory.reduce((sum, i) => sum + (i.quantity_on_hand * i.unit_cost), 0)
-    const pendingInbound = mockInboundShipments.filter(s => s.status !== 'completed').length
-    const pendingOutbound = mockOutboundOrders.filter(o => o.status !== 'shipped').length
-    const activeTasks = mockTasks.filter(t => t.status === 'in_progress').length
-    const pendingTasks = mockTasks.filter(t => t.status === 'pending').length
-    const avgZoneUtilization = mockZones.length > 0
-      ? mockZones.reduce((sum, z) => sum + (z.used_units / z.capacity_units * 100), 0) / mockZones.length
+    const useRealInventory = dbStockLevels && dbStockLevels.length > 0
+    const inventoryData = useRealInventory ? activeInventory : mockInventory
+
+    const totalItems = inventoryData.length
+    const lowStockItems = inventoryData.filter(i => i.status === 'low_stock').length
+    const outOfStockItems = inventoryData.filter(i => i.status === 'out_of_stock').length
+    const totalValue = inventoryData.reduce((sum, i) => sum + (i.quantity_on_hand * i.unit_cost), 0)
+
+    // Use real shipments and orders data when available
+    const shipmentsData = dbShipments && dbShipments.length > 0 ? activeInboundShipments : mockInboundShipments
+    const ordersData = dbOrders && dbOrders.length > 0 ? activeOutboundOrders : mockOutboundOrders
+    const tasksData = dbTasks && dbTasks.length > 0 ? activeWarehouseTasks : mockTasks
+
+    const pendingInbound = shipmentsData.filter(s => s.status !== 'completed').length
+    const pendingOutbound = ordersData.filter(o => o.status !== 'shipped').length
+    const activeTasks = tasksData.filter(t => t.status === 'in_progress').length
+    const pendingTasks = tasksData.filter(t => t.status === 'pending').length
+
+    // Use real zone data when available
+    const zonesData = dbWarehouses && dbWarehouses.length > 0 ? activeZones : mockZones
+    const avgZoneUtilization = zonesData.length > 0
+      ? zonesData.reduce((sum, z) => sum + (z.capacity_units > 0 ? (z.used_units / z.capacity_units * 100) : 0), 0) / zonesData.length
       : 0
 
     return {
@@ -1070,11 +1314,11 @@ export default function WarehouseClient() {
       pendingTasks,
       avgZoneUtilization: avgZoneUtilization.toFixed(1)
     }
-  }, [])
+  }, [dbStockLevels, activeInventory, dbWarehouses, activeZones, dbShipments, activeInboundShipments, dbOrders, activeOutboundOrders, dbTasks, activeWarehouseTasks])
 
-  // Filter functions
+  // Filter functions - use real inventory when available
   const filteredInventory = useMemo(() => {
-    return mockInventory.filter(item => {
+    return activeInventory.filter(item => {
       const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         item.sku.toLowerCase().includes(searchQuery.toLowerCase()) ||
         item.bin_location.toLowerCase().includes(searchQuery.toLowerCase())
@@ -1082,16 +1326,30 @@ export default function WarehouseClient() {
       const matchesZone = zoneFilter === 'all' || item.zone === zoneFilter
       return matchesSearch && matchesStatus && matchesZone
     })
-  }, [searchQuery, inventoryFilter, zoneFilter])
+  }, [activeInventory, searchQuery, inventoryFilter, zoneFilter])
 
   const filteredTasks = useMemo(() => {
-    return mockTasks.filter(task => {
+    const tasksData = dbTasks && dbTasks.length > 0 ? activeWarehouseTasks : mockTasks
+    return tasksData.filter(task => {
       const matchesSearch = task.item_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         task.task_number.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesPriority = priorityFilter === 'all' || task.priority === priorityFilter
       return matchesSearch && matchesPriority
     })
-  }, [searchQuery, priorityFilter])
+  }, [searchQuery, priorityFilter, dbTasks, activeWarehouseTasks])
+
+  // Loading state - includes all data sources
+  const isLoading = isLoadingWarehouses || isLoadingStock || isLoadingOrders || isLoadingShipments || isLoadingTasks || isLoadingActivities
+
+  // Refresh all data
+  const handleRefresh = () => {
+    refetchWarehouses()
+    refetchStock()
+    refetchOrders()
+    refetchShipments()
+    refetchTasks()
+    refetchActivities()
+  }
 
   // Helper functions
   const getInventoryStatusBadge = (status: InventoryStatus) => {
@@ -1201,6 +1459,15 @@ export default function WarehouseClient() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            {isLoading && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <RefreshCw className="w-4 h-4 animate-spin" />
+                Loading...
+              </div>
+            )}
+            <Button variant="outline" size="icon" onClick={handleRefresh} disabled={isLoading}>
+              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+            </Button>
             <Button variant="outline" className="gap-2" onClick={() => setShowScanModeDialog(true)}>
               <Scan className="w-4 h-4" />
               Scan Mode
@@ -1433,7 +1700,7 @@ export default function WarehouseClient() {
                       className="px-3 py-2 border rounded-lg bg-white dark:bg-gray-800 text-sm"
                     >
                       <option value="all">All Zones</option>
-                      {mockZones.map(zone => (
+                      {activeZones.map(zone => (
                         <option key={zone.id} value={zone.name}>{zone.name}</option>
                       ))}
                     </select>
@@ -1549,7 +1816,7 @@ export default function WarehouseClient() {
                       <div className="text-sm text-white/80">Pending</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-3xl font-bold">{mockInboundShipments.filter(s => s.status === 'receiving').length}</div>
+                      <div className="text-3xl font-bold">{activeInboundShipments.filter(s => s.status === 'receiving').length}</div>
                       <div className="text-sm text-white/80">Receiving</div>
                     </div>
                   </div>
@@ -1558,7 +1825,7 @@ export default function WarehouseClient() {
             </div>
 
             <div className="grid gap-4">
-              {mockInboundShipments.map((shipment) => {
+              {activeInboundShipments.map((shipment) => {
                 const statusBadge = getShipmentStatusBadge(shipment.status)
                 const progress = (shipment.received_units / shipment.total_units) * 100
                 return (
@@ -1660,7 +1927,7 @@ export default function WarehouseClient() {
                       <div className="text-sm text-white/80">Pending</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-3xl font-bold">{mockOutboundOrders.filter(o => o.priority === 'urgent').length}</div>
+                      <div className="text-3xl font-bold">{activeOutboundOrders.filter(o => o.priority === 'urgent').length}</div>
                       <div className="text-sm text-white/80">Urgent</div>
                     </div>
                   </div>
@@ -1669,7 +1936,7 @@ export default function WarehouseClient() {
             </div>
 
             <div className="grid gap-4">
-              {mockOutboundOrders.map((order) => {
+              {activeOutboundOrders.map((order) => {
                 const statusBadge = getOrderStatusBadge(order.status)
                 const priorityBadge = getPriorityBadge(order.priority)
                 const progress = (order.picked_units / order.total_units) * 100
@@ -1901,7 +2168,7 @@ export default function WarehouseClient() {
                   </div>
                   <div className="hidden md:flex items-center gap-4">
                     <div className="text-center">
-                      <div className="text-3xl font-bold">{mockZones.length}</div>
+                      <div className="text-3xl font-bold">{activeZones.length}</div>
                       <div className="text-sm text-white/80">Zones</div>
                     </div>
                     <div className="text-center">
@@ -1914,7 +2181,7 @@ export default function WarehouseClient() {
             </div>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {mockZones.map((zone) => {
+              {activeZones.map((zone) => {
                 const ZoneIcon = getZoneTypeIcon(zone.type)
                 const utilization = (zone.used_units / zone.capacity_units) * 100
                 return (
@@ -2553,7 +2820,7 @@ export default function WarehouseClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockWarehouseActivities}
+            activities={activeActivities}
             title="Warehouse Activity"
             maxItems={5}
           />
@@ -2740,7 +3007,7 @@ export default function WarehouseClient() {
                     <SelectValue placeholder="Select zone" />
                   </SelectTrigger>
                   <SelectContent>
-                    {mockZones.map((zone) => (
+                    {activeZones.map((zone) => (
                       <SelectItem key={zone.id} value={zone.code}>
                         {zone.name} ({zone.code})
                       </SelectItem>
@@ -2816,7 +3083,7 @@ export default function WarehouseClient() {
                   <SelectValue placeholder="Select zone" />
                 </SelectTrigger>
                 <SelectContent>
-                  {mockZones.map((zone) => (
+                  {activeZones.map((zone) => (
                     <SelectItem key={zone.id} value={zone.name}>
                       {zone.name} - {zone.bin_count} bins
                     </SelectItem>
@@ -2874,7 +3141,7 @@ export default function WarehouseClient() {
             <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
               <p className="text-sm text-blue-700 dark:text-blue-300">
                 {cycleCount.zone ? (
-                  <>Estimated locations to count: {mockZones.find(z => z.name === cycleCount.zone)?.bin_count || 0} bins</>
+                  <>Estimated locations to count: {activeZones.find(z => z.name === cycleCount.zone)?.bin_count || 0} bins</>
                 ) : (
                   <>Select a zone to see estimated locations</>
                 )}
@@ -3340,7 +3607,7 @@ export default function WarehouseClient() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {mockZones.map((zone) => (
+                      {activeZones.map((zone) => (
                         <SelectItem key={zone.id} value={zone.name}>{zone.name}</SelectItem>
                       ))}
                     </SelectContent>

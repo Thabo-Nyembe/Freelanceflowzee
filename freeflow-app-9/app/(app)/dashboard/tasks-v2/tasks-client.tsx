@@ -207,6 +207,7 @@ interface TaskCardProps {
   isSelected?: boolean
   onSelectToggle?: (taskId: string) => void
   selectionMode?: boolean
+  teamMembers: TeamMember[]
 }
 
 function TaskCard({
@@ -226,7 +227,8 @@ function TaskCard({
   isUpdating,
   isSelected,
   onSelectToggle,
-  selectionMode
+  selectionMode,
+  teamMembers
 }: TaskCardProps) {
   const [dueDateOpen, setDueDateOpen] = useState(false)
   const isCompleted = task.status === 'completed'
@@ -1656,6 +1658,7 @@ export function TasksClient() {
                         isSelected={selectedTasks.has(task.id)}
                         onSelectToggle={handleToggleSelection}
                         selectionMode={selectionMode}
+                        teamMembers={teamMembers}
                       />
                     ))}
                   </div>
@@ -1696,6 +1699,7 @@ export function TasksClient() {
                         isSelected={selectedTasks.has(task.id)}
                         onSelectToggle={handleToggleSelection}
                         selectionMode={selectionMode}
+                        teamMembers={teamMembers}
                       />
                     ))}
                   </div>
@@ -1736,6 +1740,7 @@ export function TasksClient() {
                         isSelected={selectedTasks.has(task.id)}
                         onSelectToggle={handleToggleSelection}
                         selectionMode={selectionMode}
+                        teamMembers={teamMembers}
                       />
                     ))}
                   </div>
@@ -1776,6 +1781,7 @@ export function TasksClient() {
                         isSelected={selectedTasks.has(task.id)}
                         onSelectToggle={handleToggleSelection}
                         selectionMode={selectionMode}
+                        teamMembers={teamMembers}
                       />
                     ))}
                   </div>

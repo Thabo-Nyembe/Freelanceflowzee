@@ -27,6 +27,9 @@ import {
   useUpdateEvent,
   useBookings
 } from '@/lib/api-clients'
+
+// Supabase collaboration hook
+import { useCollaboration, CollaborationSession } from '@/lib/hooks/use-collaboration'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -89,7 +92,8 @@ import {
   Archive,
   Copy,
   Eye,
-  Flag
+  Flag,
+  Loader2
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -494,6 +498,17 @@ export default function CollaborationClient() {
   // Notifications for real-time updates
   const { data: notificationsData } = useNotifications()
 
+  // Collaboration sessions from Supabase
+  const {
+    sessions: collaborationSessions,
+    loading: isLoadingCollaboration,
+    error: collaborationError,
+    createSession,
+    updateSession,
+    deleteSession,
+    refetch: refetchCollaboration
+  } = useCollaboration()
+
   // Map API data to component format with fallbacks
   const apiTeamMembers = teamMembersData?.data || []
   const apiConversations = conversationsData?.data || []
@@ -558,8 +573,80 @@ export default function CollaborationClient() {
     return []
   }, [apiEvents, mockMembers])
 
-  // Boards - empty until wired to collaboration board API
-  const mockBoards: Board[] = useMemo(() => [], [mockMembers])
+  // Transform collaboration sessions to boards format
+  const mockBoards: Board[] = useMemo(() => {
+    if (collaborationSessions && collaborationSessions.length > 0) {
+      return collaborationSessions.map((session: CollaborationSession) => {
+        // Map session_type to BoardType
+        const boardTypeMap: Record<string, BoardType> = {
+          'document': 'whiteboard',
+          'whiteboard': 'whiteboard',
+          'code': 'flowchart',
+          'design': 'wireframe',
+          'video': 'brainstorm',
+          'audio': 'brainstorm',
+          'screen_share': 'kanban',
+          'meeting': 'retrospective'
+        }
+        const boardType = boardTypeMap[session.session_type] || 'whiteboard'
+
+        // Map status
+        const statusMap: Record<string, BoardStatus> = {
+          'active': 'active',
+          'scheduled': 'active',
+          'in_progress': 'active',
+          'paused': 'active',
+          'ended': 'archived',
+          'archived': 'archived'
+        }
+        const boardStatus = statusMap[session.status] || 'active'
+
+        // Create a default member for createdBy
+        const defaultMember: TeamMember = mockMembers[0] || {
+          id: session.host_id || session.user_id,
+          name: 'Session Host',
+          email: '',
+          role: 'owner',
+          presence: 'online' as PresenceStatus,
+          cursorColor: '#3b82f6',
+          lastActive: session.updated_at || session.created_at
+        }
+
+        return {
+          id: session.id,
+          name: session.session_name,
+          description: session.description,
+          type: boardType,
+          status: boardStatus,
+          createdAt: session.created_at,
+          updatedAt: session.updated_at,
+          createdBy: defaultMember,
+          members: session.participants?.map((p: any) => ({
+            id: p.id || p.user_id,
+            name: p.name || 'Participant',
+            email: p.email || '',
+            role: p.role || 'member',
+            presence: 'online' as PresenceStatus,
+            cursorColor: `#${Math.floor(Math.random()*16777215).toString(16)}`,
+            lastActive: session.last_activity_at || session.updated_at
+          })) || [defaultMember],
+          isStarred: false,
+          isLocked: !session.can_edit,
+          isPublic: session.access_type === 'public',
+          viewCount: session.total_edits || 0,
+          commentCount: session.comment_count || 0,
+          elementCount: session.change_count || 0,
+          version: session.version || 1,
+          tags: session.tags || [],
+          teamId: undefined,
+          teamName: undefined,
+          channelId: undefined
+        }
+      })
+    }
+    // No fallback - use real data only
+    return []
+  }, [collaborationSessions, mockMembers])
 
   // Files - empty until wired to files API
   const mockFiles: SharedFile[] = useMemo(() => [], [mockMembers])
@@ -799,6 +886,26 @@ export default function CollaborationClient() {
   }
 
   // Note: handleSendCurrentMessage is already defined above with proper API integration
+
+  // Loading state - show spinner while loading
+  const isLoading = isLoadingTeam || isLoadingConversations || isLoadingEvents || isLoadingCollaboration
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
+
+  // Error state - show error message with retry
+  if (collaborationError) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-4">
+        <p className="text-red-500">Error loading collaboration data</p>
+        <Button onClick={() => refetchCollaboration()}>Retry</Button>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:bg-none dark:bg-gray-900 p-6">

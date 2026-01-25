@@ -1,4 +1,5 @@
-import { useSupabaseQuery, useSupabaseMutation } from './base-hooks'
+import { useSupabaseQuery } from './use-supabase-query'
+import { useSupabaseMutation } from './use-supabase-helpers'
 
 export type CourseCategory = 'development' | 'business' | 'design' | 'marketing' | 'data-science' | 'finance' | 'healthcare' | 'education' | 'technology' | 'other'
 export type CourseStatus = 'draft' | 'published' | 'archived' | 'under_review' | 'suspended' | 'deleted'
@@ -144,32 +145,57 @@ export function useCourses(filters?: {
   category?: CourseCategory | 'all'
   status?: CourseStatus | 'all'
   level?: CourseLevel | 'all'
+  search?: string
 }) {
-  let query = useSupabaseQuery<Course>('courses')
+  const queryFilters: Record<string, any> = {}
 
   if (filters?.category && filters.category !== 'all') {
-    query = query.eq('course_category', filters.category)
+    queryFilters.course_category = filters.category
   }
 
   if (filters?.status && filters.status !== 'all') {
-    query = query.eq('status', filters.status)
+    queryFilters.status = filters.status
   }
 
   if (filters?.level && filters.level !== 'all') {
-    query = query.eq('level', filters.level)
+    queryFilters.level = filters.level
   }
 
-  return query.order('created_at', { ascending: false })
+  const { data, loading, error, refetch } = useSupabaseQuery<Course>({
+    table: 'courses',
+    filters: queryFilters,
+    orderBy: { column: 'created_at', ascending: false },
+  })
+
+  return { courses: data, isLoading: loading, error, refetch }
 }
 
 export function useCreateCourse() {
-  return useSupabaseMutation<Course>('courses', 'insert')
+  const { mutate, isLoading, error } = useSupabaseMutation<Course>({ table: 'courses' })
+  return {
+    mutateAsync: (data: Partial<Course>) => mutate(data),
+    isLoading,
+    error
+  }
 }
 
 export function useUpdateCourse() {
-  return useSupabaseMutation<Course>('courses', 'update')
+  const { mutate, isLoading, error } = useSupabaseMutation<Course>({ table: 'courses' })
+  return {
+    mutateAsync: (data: Partial<Course> & { id: string }) => {
+      const { id, ...rest } = data
+      return mutate(rest, id)
+    },
+    isLoading,
+    error
+  }
 }
 
 export function useDeleteCourse() {
-  return useSupabaseMutation<Course>('courses', 'delete')
+  const { remove, isLoading, error } = useSupabaseMutation<Course>({ table: 'courses' })
+  return {
+    mutateAsync: (data: { id: string }) => remove(data.id),
+    isLoading,
+    error
+  }
 }

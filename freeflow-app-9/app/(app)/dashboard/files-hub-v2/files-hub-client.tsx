@@ -72,7 +72,6 @@ import { AdvancedFileUpload, type UploadedFile } from '@/components/world-class/
 // Production-ready API hooks for file management
 import {
   useFiles,
-  useFile,
   useUploadFile,
   useUploadFiles,
   useUpdateFile,
@@ -85,8 +84,7 @@ import {
   useDownloadFile,
   useMoveFile,
   type FileItem as ApiFileItem,
-  type Folder as ApiFolder,
-  type StorageStats as ApiStorageStats
+  type Folder as ApiFolder
 } from '@/lib/api-clients'
 
 
@@ -304,6 +302,9 @@ interface FilesHubClientProps {
 }
 
 export default function FilesHubClient({ initialFiles = [] }: FilesHubClientProps) {
+  // Supabase client for direct queries (shared links, activities)
+  const supabase = createClient()
+
   // UI State
   const [activeTab, setActiveTab] = useState('files')
   const [searchQuery, setSearchQuery] = useState('')

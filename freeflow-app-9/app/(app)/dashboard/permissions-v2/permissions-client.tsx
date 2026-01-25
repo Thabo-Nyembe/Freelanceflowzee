@@ -1,7 +1,5 @@
 'use client'
 
-import { createClient } from '@/lib/supabase/client'
-
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -16,7 +14,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { DialogFooter } from '@/components/ui/dialog'
 import { Textarea } from '@/components/ui/textarea'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { useRoles, usePermissions, useRoleAssignments, useCreateRole, useUpdateRole, useDeleteRole, useCreatePermission, useCreateRoleAssignment, type Role, type Permission, type RoleLevel } from '@/lib/hooks/use-permissions'
+import { useRoles, usePermissions, useRoleAssignments, useRoleMutations, usePermissionMutations, useRoleAssignmentMutations, type Role, type Permission, type RoleLevel } from '@/lib/hooks/use-permissions'
+import { Loader2 } from 'lucide-react'
 import {
   Lock,
   Shield,
@@ -289,22 +288,19 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
     type: 'custom' as GroupType
   })
 
-  const { data: hookRoles, refetch: refetchRoles } = useRoles()
-  const { data: hookPermissions, refetch: refetchPermissions } = usePermissions()
-  const { data: roleAssignments, refetch: refetchAssignments } = useRoleAssignments()
-  const createRole = useCreateRole()
-  const updateRole = useUpdateRole()
-  const deleteRole = useDeleteRole()
-  const createPermission = useCreatePermission()
-  const createRoleAssignment = useCreateRoleAssignment()
+  // Fetch roles, permissions, and assignments from Supabase
+  const { data: hookRoles, isLoading: rolesLoading, error: rolesError, refetch: refetchRoles } = useRoles()
+  const { data: hookPermissions, isLoading: permissionsLoading, error: permissionsError, refetch: refetchPermissions } = usePermissions()
+  const { data: roleAssignments, isLoading: assignmentsLoading, error: assignmentsError, refetch: refetchAssignments } = useRoleAssignments()
 
-  // Stats
-  const totalUsers = mockUsers.length
-  const activeUsers = mockUsers.filter(u => u.status === 'active').length
-  const mfaEnabledUsers = mockUsers.filter(u => u.mfaEnabled).length
-  const totalGroups = mockGroups.length
-  const totalApps = mockApplications.length
-  const pendingUsers = mockUsers.filter(u => u.status === 'pending').length
+  // Mutation hooks for CRUD operations
+  const { create: createRoleDb, update: updateRoleDb, remove: deleteRoleDb, loading: roleMutationLoading } = useRoleMutations(() => refetchRoles())
+  const { create: createPermissionDb, update: updatePermissionDb, loading: permissionMutationLoading } = usePermissionMutations(() => refetchPermissions())
+  const { create: createAssignmentDb, update: updateAssignmentDb, loading: assignmentMutationLoading } = useRoleAssignmentMutations(() => refetchAssignments())
+
+  // Combined loading and error states
+  const dataLoading = rolesLoading || permissionsLoading || assignmentsLoading
+  const dataError = rolesError || permissionsError || assignmentsError
 
   // State for applied advanced filters (separate from the form state)
   const [appliedAdvancedFilters, setAppliedAdvancedFilters] = useState({
@@ -341,6 +337,33 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
       return matchesStatus && matchesSearch && matchesDepartment && matchesMfa && matchesCreatedAfter && matchesCreatedBefore && matchesRole
     })
   }, [userStatusFilter, searchQuery, appliedAdvancedFilters])
+
+  // Stats
+  const totalUsers = mockUsers.length
+  const activeUsers = mockUsers.filter(u => u.status === 'active').length
+  const mfaEnabledUsers = mockUsers.filter(u => u.mfaEnabled).length
+  const totalGroups = mockGroups.length
+  const totalApps = mockApplications.length
+  const pendingUsers = mockUsers.filter(u => u.status === 'pending').length
+
+  // Early return for loading state (after all hooks)
+  if (dataLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
+
+  // Early return for error state
+  if (dataError) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-4">
+        <p className="text-red-500">Error loading data</p>
+        <Button onClick={() => { refetchRoles(); refetchPermissions(); refetchAssignments(); }}>Retry</Button>
+      </div>
+    )
+  }
 
   const getUserStatusColor = (status: UserStatus) => {
     switch (status) {

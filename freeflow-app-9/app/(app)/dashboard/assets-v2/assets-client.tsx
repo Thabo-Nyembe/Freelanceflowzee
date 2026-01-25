@@ -55,7 +55,8 @@ import {
   Award,
   Layers,
   File,
-  Sparkles
+  Sparkles,
+  Loader2
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -73,8 +74,7 @@ import {
 
 
 
-import { useAssets, useAssetCollections, useAssetStats } from '@/lib/hooks/use-assets'
-import { useSupabaseMutation } from '@/lib/hooks/use-supabase-mutation'
+import { useAssets, useAssetCollections, useAssetStats, type DigitalAsset as DbDigitalAsset, type AssetCollection as DbAssetCollection } from '@/lib/hooks/use-assets'
 
 // Types
 type AssetType = 'image' | 'video' | 'audio' | 'document' | 'font' | 'icon' | 'template' | 'brand_asset' | '3d_model' | 'raw_file'
@@ -707,22 +707,36 @@ const defaultCollectionForm: CollectionFormData = {
   is_public: false,
 }
 
-export default function AssetsClient({ initialAssets, initialCollections }: AssetsClientProps) {
+export default function AssetsClient({ initialAssets: _initialAssets, initialCollections: _initialCollections }: AssetsClientProps) {
 
   // Supabase hooks
-  const { data: dbAssets, loading: assetsLoading, refetch: refetchAssets } = useAssets()
-  const { data: dbCollections, loading: collectionsLoading, refetch: refetchCollections } = useAssetCollections()
-  const { stats: dbStats } = useAssetStats()
+  const {
+    assets: dbAssets,
+    loading: assetsLoading,
+    error: assetsError,
+    refetch: refetchAssets,
+    mutationLoading: _assetMutationLoading,
+    createAsset,
+    updateAsset,
+    deleteAsset
+  } = useAssets()
 
-  // Mutation hooks
-  const assetMutation = useSupabaseMutation({
-    table: 'digital_assets',
-    onSuccess: () => refetchAssets(),
-  })
-  const collectionMutation = useSupabaseMutation({
-    table: 'asset_collections',
-    onSuccess: () => refetchCollections(),
-  })
+  const {
+    collections: dbCollections,
+    loading: collectionsLoading,
+    error: collectionsError,
+    refetch: refetchCollections,
+    mutationLoading: _collectionMutationLoading,
+    createCollection,
+    updateCollection: _updateCollection,
+    deleteCollection
+  } = useAssetCollections()
+
+  const { stats: _dbStats, loading: _statsLoading, error: _statsError } = useAssetStats()
+
+  // Combined loading and error states
+  const isLoading = assetsLoading || collectionsLoading
+  const error = assetsError || collectionsError
 
   const [activeTab, setActiveTab] = useState('assets')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
@@ -745,9 +759,64 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
   const [itemToEdit, setItemToEdit] = useState<DigitalAsset | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // Use Supabase data directly
-  const assets = dbAssets || []
-  const collections = dbCollections || []
+  // Map DB data (snake_case) to UI types (camelCase) using useMemo
+  const assets: DigitalAsset[] = useMemo(() => {
+    return (dbAssets || []).map((dbAsset: DbDigitalAsset) => ({
+      id: dbAsset.id,
+      name: dbAsset.asset_name,
+      description: dbAsset.metadata?.description || '',
+      type: dbAsset.asset_type as AssetType,
+      status: (dbAsset.status === 'active' ? 'published' : dbAsset.status) as AssetStatus,
+      license: (dbAsset.license_type || 'internal_only') as LicenseType,
+      accessLevel: (dbAsset.is_public ? 'public' : 'internal') as AccessLevel,
+      thumbnail: dbAsset.thumbnail_url || '/assets/default-thumbnail.png',
+      fileSize: dbAsset.file_size,
+      format: dbAsset.file_format,
+      dimensions: dbAsset.metadata?.dimensions || undefined,
+      duration: dbAsset.metadata?.duration || undefined,
+      downloads: dbAsset.download_count,
+      views: dbAsset.metadata?.views || 0,
+      favorites: dbAsset.metadata?.favorites || 0,
+      tags: dbAsset.tags || [],
+      keywords: dbAsset.metadata?.keywords || [],
+      createdAt: new Date(dbAsset.created_at),
+      updatedAt: new Date(dbAsset.updated_at),
+      expiresAt: dbAsset.expiry_date ? new Date(dbAsset.expiry_date) : undefined,
+      createdBy: {
+        id: dbAsset.user_id,
+        name: dbAsset.metadata?.created_by_name || 'Unknown',
+        avatar: dbAsset.metadata?.created_by_avatar || ''
+      },
+      variants: dbAsset.metadata?.variants || [],
+      versions: dbAsset.metadata?.versions || [],
+      usage: dbAsset.metadata?.usage || [],
+      metadata: dbAsset.metadata || {},
+      brandId: dbAsset.metadata?.brand_id || undefined,
+      collectionIds: dbAsset.collection_id ? [dbAsset.collection_id] : [],
+      isFavorite: dbAsset.metadata?.is_favorite || false,
+      isStarred: dbAsset.metadata?.is_starred || false
+    }))
+  }, [dbAssets])
+
+  const collections: AssetCollection[] = useMemo(() => {
+    return (dbCollections || []).map((dbCollection: DbAssetCollection) => ({
+      id: dbCollection.id,
+      name: dbCollection.collection_name,
+      description: dbCollection.description || '',
+      thumbnail: dbCollection.cover_image_url || '/collections/default.png',
+      assetCount: dbCollection.asset_count,
+      totalSize: dbCollection.total_size,
+      accessLevel: (dbCollection.is_public ? 'public' : 'internal') as AccessLevel,
+      createdAt: new Date(dbCollection.created_at),
+      updatedAt: new Date(dbCollection.updated_at),
+      createdBy: {
+        id: dbCollection.user_id,
+        name: 'Unknown',
+        avatar: ''
+      }
+    }))
+  }, [dbCollections])
+
   const brandPortal = mockBrandPortal
 
   // Computed Statistics
@@ -786,6 +855,25 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
     })
   }, [assets, searchQuery, selectedType, selectedStatus])
 
+  // Loading state early return
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
+
+  // Error state early return
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-4">
+        <p className="text-red-500">Error loading data</p>
+        <Button onClick={() => { refetchAssets(); refetchCollections(); }}>Retry</Button>
+      </div>
+    )
+  }
+
   const openAssetDetail = (asset: DigitalAsset) => {
     setSelectedAsset(asset)
     setIsAssetDialogOpen(true)
@@ -812,9 +900,9 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
     setIsSubmitting(true)
     try {
       const tagsArray = assetForm.tags.split(',').map(t => t.trim()).filter(Boolean)
-      await assetMutation.create({
+      await createAsset({
         asset_name: assetForm.asset_name,
-        asset_type: assetForm.asset_type,
+        asset_type: assetForm.asset_type as any,
         file_format: assetForm.file_format,
         file_url: '',
         file_size: 0,
@@ -822,12 +910,12 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
         tags: tagsArray.length > 0 ? tagsArray : [],
         metadata: { description: assetForm.description },
         version: 1,
-        status: assetForm.status,
+        status: assetForm.status as any,
         is_public: assetForm.is_public,
         download_count: 0,
         license_type: assetForm.license_type,
       })
-      toast.success(`${assetForm.name} has been added`)
+      toast.success(`${assetForm.asset_name} has been added`)
       setShowCreateAssetDialog(false)
       setAssetForm(defaultAssetForm)
     } catch (error) {
@@ -844,7 +932,7 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
     }
     setIsSubmitting(true)
     try {
-      await collectionMutation.create({
+      await createCollection({
         collection_name: collectionForm.collection_name,
         description: collectionForm.description || null,
         is_public: collectionForm.is_public,
@@ -852,7 +940,7 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
         total_size: 0,
         sort_order: 0,
       })
-      toast.success(`Collection created: "${collectionForm.name}" has been created`)
+      toast.success(`Collection created: "${collectionForm.collection_name}" has been created`)
       setShowCreateCollectionDialog(false)
       setCollectionForm(defaultCollectionForm)
     } catch (error) {
@@ -872,10 +960,10 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
     setIsSubmitting(true)
     try {
       if (itemToDelete.type === 'asset') {
-        await assetMutation.remove(itemToDelete.id)
+        await deleteAsset(itemToDelete.id)
         toast.success('Asset deleted')
       } else {
-        await collectionMutation.remove(itemToDelete.id)
+        await deleteCollection(itemToDelete.id)
         toast.success('Collection deleted')
       }
       setShowDeleteDialog(false)
@@ -907,13 +995,13 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
     setIsSubmitting(true)
     try {
       const tagsArray = assetForm.tags.split(',').map(t => t.trim()).filter(Boolean)
-      await assetMutation.update(itemToEdit.id, {
+      await updateAsset(itemToEdit.id, {
         asset_name: assetForm.asset_name,
-        asset_type: assetForm.asset_type,
+        asset_type: assetForm.asset_type as any,
         file_format: assetForm.file_format,
         tags: tagsArray,
         metadata: { description: assetForm.description },
-        status: assetForm.status,
+        status: assetForm.status as any,
         is_public: assetForm.is_public,
         license_type: assetForm.license_type,
       })
@@ -941,7 +1029,7 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
   const handleFavoriteAsset = async () => {
     if (!selectedAsset) return
     try {
-      await assetMutation.update(selectedAsset.id, { is_starred: !selectedAsset.isFavorite })
+      await updateAsset(selectedAsset.id, { metadata: { is_starred: !selectedAsset.isFavorite } })
       toast.success(selectedAsset.isFavorite ? 'Removed from favorites' : 'Added to favorites')
     } catch {
       toast.error('Failed to update favorite status')
@@ -972,7 +1060,7 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
         window.URL.revokeObjectURL(url)
 
         // Update download count
-        await assetMutation.update(selectedAsset.id, { download_count: selectedAsset.downloads + 1 })
+        await updateAsset(selectedAsset.id, { download_count: selectedAsset.downloads + 1 })
         return selectedAsset.name
       })(),
       {

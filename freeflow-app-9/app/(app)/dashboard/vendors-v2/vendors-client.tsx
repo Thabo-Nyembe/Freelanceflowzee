@@ -3,7 +3,7 @@
 // MIGRATED: Batch #18 - Verified database hook integration
 // Hooks used: useVendors
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { toast } from 'sonner'
 import {
   Building2,
@@ -26,6 +26,7 @@ import {
   Globe,
   Copy,
   Send,
+  Loader2,
 } from 'lucide-react'
 import { useVendors } from '@/lib/hooks/use-vendors-extended'
 import { Button } from '@/components/ui/button'
@@ -119,9 +120,9 @@ const initialFormData: VendorFormData = {
 }
 
 export default function VendorsClient() {
-  const { vendors: hookVendors, isLoading: hookLoading, refresh } = useVendors()
+  const { vendors: hookVendors, isLoading, refresh } = useVendors()
   const [vendors, setVendors] = useState<Vendor[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<Error | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [typeFilter, setTypeFilter] = useState<string>('all')
@@ -132,30 +133,13 @@ export default function VendorsClient() {
   const [formData, setFormData] = useState<VendorFormData>(initialFormData)
   const [isSaving, setIsSaving] = useState(false)
 
-  // Fetch vendors from API
-  const fetchVendors = useCallback(async () => {
-    setIsLoading(true)
-    try {
-      const response = await fetch('/api/vendors')
-      if (!response.ok) {
-        throw new Error('Failed to fetch vendors')
-      }
-      const data = await response.json()
-      setVendors(data.vendors || [])
-    } catch (error) {
-      console.error('Error fetching vendors:', error)
-      // Fallback to hook data if available
-      if (hookVendors && hookVendors.length > 0) {
-        setVendors(hookVendors)
-      }
-    } finally {
-      setIsLoading(false)
+  // Sync hook data to local state
+  useEffect(() => {
+    if (hookVendors) {
+      setVendors(hookVendors as Vendor[])
+      setError(null)
     }
   }, [hookVendors])
-
-  useEffect(() => {
-    fetchVendors()
-  }, [fetchVendors])
 
   // Filter vendors based on search and filters
   const filteredVendors = useMemo(() => {
@@ -185,6 +169,25 @@ export default function VendorsClient() {
     return { activeVendors, totalSpent, avgRating, pendingVendors }
   }, [vendors])
 
+  // Early return for loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
+
+  // Early return for error state
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-4">
+        <p className="text-red-500">Error loading data</p>
+        <Button onClick={() => refresh()}>Retry</Button>
+      </div>
+    )
+  }
+
   // Add vendor handler - REAL API call
   const handleAddVendor = async () => {
     if (!formData.name || !formData.email) {
@@ -205,8 +208,8 @@ export default function VendorsClient() {
         throw new Error(errorData.error || 'Failed to create vendor')
       }
 
-      const data = await response.json()
-      setVendors((prev) => [...prev, data.vendor])
+      await response.json()
+      await refresh() // Refresh from Supabase
       setIsAddDialogOpen(false)
       setFormData(initialFormData)
       toast.success(`Vendor "${formData.name}" created successfully`)
@@ -238,10 +241,8 @@ export default function VendorsClient() {
         throw new Error(errorData.error || 'Failed to update vendor')
       }
 
-      const data = await response.json()
-      setVendors((prev) =>
-        prev.map((v) => (v.id === selectedVendor.id ? data.vendor : v))
-      )
+      await response.json()
+      await refresh() // Refresh from Supabase
       setIsEditDialogOpen(false)
       setSelectedVendor(null)
       setFormData(initialFormData)
@@ -272,7 +273,7 @@ export default function VendorsClient() {
         throw new Error(errorData.error || 'Failed to delete vendor')
       }
 
-      setVendors((prev) => prev.filter((v) => v.id !== vendor.id))
+      await refresh() // Refresh from Supabase
       toast.success(`Vendor "${vendor.name}" deleted successfully`)
     } catch (error) {
       console.error('Error deleting vendor:', error)
@@ -419,7 +420,7 @@ export default function VendorsClient() {
 
   // Refresh vendors
   const handleRefresh = async () => {
-    await fetchVendors()
+    await refresh()
     toast.success('Vendors refreshed')
   }
 

@@ -465,9 +465,88 @@ export default function SprintsClient() {
     isCompletingTask,
   } = useSprintMutations()
 
-  // Calculate stats - combine mock data with real DB data
+  // Calculate stats - combine DB data with mock fallback (stats depends on sprintsData, defined below)
+
+  // Convert DB sprints to UI format, with mock fallback
+  const sprintsData = useMemo(() => {
+    if (dbSprints.length > 0) {
+      return dbSprints.map(sprint => ({
+        id: sprint.id,
+        key: sprint.sprint_code,
+        name: sprint.name,
+        goal: sprint.goal || '',
+        status: sprint.status as SprintStatus,
+        start_date: sprint.start_date || '',
+        end_date: sprint.end_date || '',
+        duration_days: sprint.start_date && sprint.end_date
+          ? Math.ceil((new Date(sprint.end_date).getTime() - new Date(sprint.start_date).getTime()) / (1000 * 60 * 60 * 24))
+          : 14,
+        days_remaining: sprint.days_remaining,
+        team_id: 't1',
+        team_name: sprint.team_name || 'Team',
+        scrum_master: sprint.scrum_master ? { id: '1', name: sprint.scrum_master, avatar: '', role: 'Scrum Master', capacity_hours: 40, allocated_hours: 0 } : mockTeamMembers[1],
+        product_owner: mockTeamMembers[1],
+        team_members: mockTeamMembers,
+        tasks: dbTasks.filter(t => t.sprint_id === sprint.id).map(task => ({
+          id: task.id,
+          key: task.task_code,
+          title: task.title,
+          description: task.description || '',
+          type: 'task' as TaskType,
+          status: (task.status === 'in-progress' ? 'in_progress' : task.status) as TaskStatus,
+          priority: task.priority as TaskPriority,
+          assignee: task.assignee_name ? { id: '1', name: task.assignee_name, avatar: '', role: 'Developer', capacity_hours: 40, allocated_hours: 0 } : undefined,
+          reporter: mockTeamMembers[1],
+          story_points: task.story_points,
+          estimate_hours: task.estimated_hours,
+          logged_hours: task.actual_hours,
+          remaining_hours: Math.max(0, task.estimated_hours - task.actual_hours),
+          created_at: task.created_at,
+          updated_at: task.updated_at,
+          due_date: task.due_date || undefined,
+          labels: task.labels || [],
+          comments: [],
+          subtasks: [],
+        })),
+        total_story_points: sprint.total_tasks * 5, // Estimate
+        completed_story_points: sprint.completed_tasks * 5,
+        total_tasks: sprint.total_tasks,
+        completed_tasks: sprint.completed_tasks,
+        in_progress_tasks: sprint.in_progress_tasks,
+        blocked_tasks: sprint.blocked_tasks,
+        velocity: sprint.velocity,
+        planned_velocity: sprint.committed,
+        capacity_hours: sprint.capacity,
+        committed_hours: sprint.committed,
+        burned_hours: sprint.burned,
+        burndown: mockBurndown,
+        retrospective: sprint.retrospective ? {
+          what_went_well: [sprint.retrospective],
+          what_could_improve: [],
+          action_items: [],
+        } : undefined,
+        created_at: sprint.created_at,
+      })) as Sprint[]
+    }
+    return mockSprints
+  }, [dbSprints, dbTasks])
+
+  // Filter sprints
+  const filteredSprints = useMemo(() => {
+    return sprintsData.filter(sprint => {
+      const matchesSearch = searchQuery === '' ||
+        sprint.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        sprint.key.toLowerCase().includes(searchQuery.toLowerCase())
+      const matchesStatus = statusFilter === 'all' || sprint.status === statusFilter
+      return matchesSearch && matchesStatus
+    })
+  }, [sprintsData, searchQuery, statusFilter])
+
+  // Get active sprint
+  const activeSprint = sprintsData.find(s => s.status === 'active')
+
+  // Calculate stats from sprintsData
   const stats = useMemo(() => {
-    // Use real DB stats if available, otherwise fall back to mock
     const useDbData = dbSprints.length > 0
 
     if (useDbData) {
@@ -478,48 +557,34 @@ export default function SprintsClient() {
         completed: dbStats.completed,
         avgVelocity: Math.round(dbStats.avgVelocity),
         completionRate: Math.round(dbStats.completionRate),
-        totalStoryPoints: mockSprints.reduce((sum, s) => sum + s.total_story_points, 0),
-        completedPoints: mockSprints.reduce((sum, s) => sum + s.completed_story_points, 0),
+        totalStoryPoints: sprintsData.reduce((sum, s) => sum + s.total_story_points, 0),
+        completedPoints: sprintsData.reduce((sum, s) => sum + s.completed_story_points, 0),
         totalTasks: dbStats.totalTasks,
         completedTasks: dbStats.completedTasks,
-        blockedTasks: mockSprints.reduce((sum, s) => sum + s.blocked_tasks, 0),
+        blockedTasks: sprintsData.reduce((sum, s) => sum + s.blocked_tasks, 0),
         backlogItems: backlogTasks.length,
       }
     }
 
-    // Fallback to mock data
-    const total = mockSprints.length
-    const active = mockSprints.filter(s => s.status === 'active').length
-    const planning = mockSprints.filter(s => s.status === 'planning').length
-    const completed = mockSprints.filter(s => s.status === 'completed').length
+    // Fallback to mock data when no DB data
+    const total = sprintsData.length
+    const active = sprintsData.filter(s => s.status === 'active').length
+    const planning = sprintsData.filter(s => s.status === 'planning').length
+    const completed = sprintsData.filter(s => s.status === 'completed').length
     const avgVelocity = mockVelocity.reduce((sum, v) => sum + v.completed, 0) / mockVelocity.length
     const completionRate = mockVelocity.reduce((sum, v) => sum + v.completion_rate, 0) / mockVelocity.length
-    const totalStoryPoints = mockSprints.reduce((sum, s) => sum + s.total_story_points, 0)
-    const completedPoints = mockSprints.reduce((sum, s) => sum + s.completed_story_points, 0)
-    const totalTasks = mockSprints.reduce((sum, s) => sum + s.total_tasks, 0)
-    const completedTasks = mockSprints.reduce((sum, s) => sum + s.completed_tasks, 0)
-    const blockedTasks = mockSprints.reduce((sum, s) => sum + s.blocked_tasks, 0)
+    const totalStoryPoints = sprintsData.reduce((sum, s) => sum + s.total_story_points, 0)
+    const completedPoints = sprintsData.reduce((sum, s) => sum + s.completed_story_points, 0)
+    const totalTasks = sprintsData.reduce((sum, s) => sum + s.total_tasks, 0)
+    const completedTasks = sprintsData.reduce((sum, s) => sum + s.completed_tasks, 0)
+    const blockedTasks = sprintsData.reduce((sum, s) => sum + s.blocked_tasks, 0)
 
     return {
       total, active, planning, completed, avgVelocity, completionRate,
       totalStoryPoints, completedPoints, totalTasks, completedTasks, blockedTasks,
       backlogItems: backlogTasks.length,
     }
-  }, [dbSprints, dbStats])
-
-  // Filter sprints
-  const filteredSprints = useMemo(() => {
-    return mockSprints.filter(sprint => {
-      const matchesSearch = searchQuery === '' ||
-        sprint.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        sprint.key.toLowerCase().includes(searchQuery.toLowerCase())
-      const matchesStatus = statusFilter === 'all' || sprint.status === statusFilter
-      return matchesSearch && matchesStatus
-    })
-  }, [searchQuery, statusFilter])
-
-  // Get active sprint
-  const activeSprint = mockSprints.find(s => s.status === 'active')
+  }, [dbSprints, dbStats, sprintsData])
 
   // Group tasks by status for board view
   const tasksByStatus = useMemo(() => {
@@ -920,9 +985,7 @@ export default function SprintsClient() {
       label: 'Start Sprint',
       icon: 'play',
       action: async () => {
-        const planningSprintFromDb = dbSprints.find(s => s.status === 'planning')
-        const planningSprintFromMock = mockSprints.find(s => s.status === 'planning')
-        const planningSprint = planningSprintFromDb || planningSprintFromMock
+        const planningSprint = sprintsData.find(s => s.status === 'planning')
         if (planningSprint) {
           await handleStartSprint(planningSprint.id, planningSprint.name)
         } else {
@@ -940,7 +1003,19 @@ export default function SprintsClient() {
       action: () => setActiveTab('backlog'),
       variant: 'outline' as const
     }
-  ], [activeSprint, dbSprints])
+  ], [activeSprint, sprintsData])
+
+  // Loading state
+  if (isLoadingSprints) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-cyan-50 dark:bg-none dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <RefreshCw className="w-12 h-12 text-teal-600 animate-spin mx-auto mb-4" />
+          <p className="text-slate-600 dark:text-slate-400">Loading sprints...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-cyan-50 dark:bg-none dark:bg-gray-900">
@@ -958,17 +1033,20 @@ export default function SprintsClient() {
               </h1>
               <p className="text-slate-600 dark:text-slate-400 mt-1">
                 Jira level agile sprint planning and tracking
+                {dbSprints.length > 0 && (
+                  <span className="ml-2 text-xs text-teal-600">(Live data)</span>
+                )}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button onClick={handleSync} variant="outline" size="sm">
-              <RefreshCw className="w-4 h-4 mr-2" />
+            <Button onClick={handleSync} variant="outline" size="sm" disabled={isLoadingSprints || isLoadingTasks}>
+              <RefreshCw className={`w-4 h-4 mr-2 ${isLoadingSprints || isLoadingTasks ? 'animate-spin' : ''}`} />
               Sync
             </Button>
-            <Button onClick={handleCreateSprint} className="bg-gradient-to-r from-teal-600 to-cyan-600 text-white">
+            <Button onClick={handleCreateSprint} className="bg-gradient-to-r from-teal-600 to-cyan-600 text-white" disabled={isCreatingSprint}>
               <Plus className="w-4 h-4 mr-2" />
-              Create Sprint
+              {isCreatingSprint ? 'Creating...' : 'Create Sprint'}
             </Button>
           </div>
         </div>
@@ -1534,12 +1612,7 @@ export default function SprintsClient() {
                             <SelectValue placeholder="Add to Sprint" />
                           </SelectTrigger>
                           <SelectContent>
-                            {dbSprints.filter(s => s.status !== 'completed').map((sprint) => (
-                              <SelectItem key={sprint.id} value={sprint.id}>
-                                {sprint.name}
-                              </SelectItem>
-                            ))}
-                            {mockSprints.filter(s => s.status !== 'completed').map((sprint) => (
+                            {sprintsData.filter(s => s.status !== 'completed').map((sprint) => (
                               <SelectItem key={sprint.id} value={sprint.id}>
                                 {sprint.name}
                               </SelectItem>
@@ -2724,12 +2797,7 @@ export default function SprintsClient() {
                     <SelectValue placeholder="Select a sprint" />
                   </SelectTrigger>
                   <SelectContent>
-                    {dbSprints.filter(s => s.status !== 'completed').map((sprint) => (
-                      <SelectItem key={sprint.id} value={sprint.id}>
-                        {sprint.name}
-                      </SelectItem>
-                    ))}
-                    {mockSprints.filter(s => s.status !== 'completed').map((sprint) => (
+                    {sprintsData.filter(s => s.status !== 'completed').map((sprint) => (
                       <SelectItem key={sprint.id} value={sprint.id}>
                         {sprint.name}
                       </SelectItem>

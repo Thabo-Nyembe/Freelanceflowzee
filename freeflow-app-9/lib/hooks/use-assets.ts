@@ -1,6 +1,8 @@
 'use client'
 
-import { useSupabaseQuery, useSupabaseMutation } from './use-supabase-query'
+import { useSupabaseQuery } from './use-supabase-query'
+import { useSupabaseMutation } from './use-supabase-mutation'
+import { useCallback, useState } from 'react'
 
 // Types
 export type AssetType = 'image' | 'video' | 'audio' | 'document' | 'font' | 'icon' | 'template' | 'brand_asset' | 'other'
@@ -45,111 +47,241 @@ export interface AssetCollection {
 }
 
 // Hook Options
-interface UseAssetsOptions {
-  type?: AssetType
-  status?: AssetStatus
+export interface UseAssetsOptions {
+  type?: AssetType | 'all'
+  status?: AssetStatus | 'all'
   collectionId?: string
   isPublic?: boolean
-  searchQuery?: string
+  limit?: number
 }
 
-interface UseAssetCollectionsOptions {
+export interface UseAssetCollectionsOptions {
   isPublic?: boolean
-  searchQuery?: string
+  limit?: number
 }
 
 // Assets Hook
 export function useAssets(options: UseAssetsOptions = {}) {
-  const { type, status, collectionId, isPublic, searchQuery } = options
+  const { type, status, collectionId, isPublic, limit } = options
+  const [mutationLoading, setMutationLoading] = useState(false)
+  const [mutationError, setMutationError] = useState<Error | null>(null)
 
-  const buildQuery = (supabase: any) => {
-    let query = supabase
-      .from('digital_assets')
-      .select('*')
-      .is('deleted_at', null)
-      .order('created_at', { ascending: false })
+  const filters: Record<string, any> = {}
+  if (type && type !== 'all') filters.asset_type = type
+  if (status && status !== 'all') filters.status = status
+  if (collectionId) filters.collection_id = collectionId
+  if (isPublic !== undefined) filters.is_public = isPublic
 
-    if (type) {
-      query = query.eq('asset_type', type)
-    }
-
-    if (status) {
-      query = query.eq('status', status)
-    }
-
-    if (collectionId) {
-      query = query.eq('collection_id', collectionId)
-    }
-
-    if (isPublic !== undefined) {
-      query = query.eq('is_public', isPublic)
-    }
-
-    if (searchQuery) {
-      query = query.ilike('asset_name', `%${searchQuery}%`)
-    }
-
-    return query
+  const queryOptions: any = {
+    table: 'digital_assets',
+    filters,
+    orderBy: { column: 'created_at', ascending: false },
+    limit: limit || 100,
+    realtime: true,
+    softDelete: true
   }
 
-  return useSupabaseQuery<DigitalAsset>('digital_assets', buildQuery, [type, status, collectionId, isPublic, searchQuery])
+  const { data, loading, error, refetch } = useSupabaseQuery<DigitalAsset>(queryOptions)
+
+  const { create, update, remove } = useSupabaseMutation({
+    table: 'digital_assets',
+    onSuccess: () => {
+      refetch()
+    },
+    onError: (err) => {
+      setMutationError(err)
+    }
+  })
+
+  // Create a new asset
+  const createAsset = useCallback(async (input: Partial<DigitalAsset>) => {
+    setMutationLoading(true)
+    setMutationError(null)
+    try {
+      const assetData = {
+        asset_name: input.asset_name || 'Untitled Asset',
+        asset_type: input.asset_type || 'other',
+        file_url: input.file_url || '',
+        file_size: input.file_size || 0,
+        file_format: input.file_format || '',
+        thumbnail_url: input.thumbnail_url || null,
+        collection_id: input.collection_id || null,
+        tags: input.tags || [],
+        metadata: input.metadata || {},
+        version: input.version || 1,
+        status: input.status || 'draft',
+        is_public: input.is_public || false,
+        download_count: input.download_count || 0,
+        license_type: input.license_type || null,
+        expiry_date: input.expiry_date || null
+      }
+      const result = await create(assetData)
+      return result
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Failed to create asset')
+      setMutationError(error)
+      throw error
+    } finally {
+      setMutationLoading(false)
+    }
+  }, [create])
+
+  // Update an existing asset
+  const updateAsset = useCallback(async (id: string, input: Partial<DigitalAsset>) => {
+    setMutationLoading(true)
+    setMutationError(null)
+    try {
+      const result = await update(id, input)
+      return result
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Failed to update asset')
+      setMutationError(error)
+      throw error
+    } finally {
+      setMutationLoading(false)
+    }
+  }, [update])
+
+  // Delete an asset
+  const deleteAsset = useCallback(async (id: string) => {
+    setMutationLoading(true)
+    setMutationError(null)
+    try {
+      await remove(id)
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Failed to delete asset')
+      setMutationError(error)
+      throw error
+    } finally {
+      setMutationLoading(false)
+    }
+  }, [remove])
+
+  return {
+    assets: data,
+    loading,
+    error,
+    refetch,
+    mutationLoading,
+    mutationError,
+    createAsset,
+    updateAsset,
+    deleteAsset
+  }
 }
 
 // Asset Collections Hook
 export function useAssetCollections(options: UseAssetCollectionsOptions = {}) {
-  const { isPublic, searchQuery } = options
+  const { isPublic, limit } = options
+  const [mutationLoading, setMutationLoading] = useState(false)
+  const [mutationError, setMutationError] = useState<Error | null>(null)
 
-  const buildQuery = (supabase: any) => {
-    let query = supabase
-      .from('asset_collections')
-      .select('*')
-      .is('deleted_at', null)
-      .order('sort_order', { ascending: true })
+  const filters: Record<string, any> = {}
+  if (isPublic !== undefined) filters.is_public = isPublic
 
-    if (isPublic !== undefined) {
-      query = query.eq('is_public', isPublic)
-    }
-
-    if (searchQuery) {
-      query = query.ilike('collection_name', `%${searchQuery}%`)
-    }
-
-    return query
+  const queryOptions: any = {
+    table: 'asset_collections',
+    filters,
+    orderBy: { column: 'sort_order', ascending: true },
+    limit: limit || 50,
+    realtime: true,
+    softDelete: true
   }
 
-  return useSupabaseQuery<AssetCollection>('asset_collections', buildQuery, [isPublic, searchQuery])
-}
+  const { data, loading, error, refetch } = useSupabaseQuery<AssetCollection>(queryOptions)
 
-// Single Asset Hook
-export function useAsset(assetId: string | null) {
-  const buildQuery = (supabase: any) => {
-    return supabase
-      .from('digital_assets')
-      .select('*')
-      .eq('id', assetId)
-      .single()
+  const { create, update, remove } = useSupabaseMutation({
+    table: 'asset_collections',
+    onSuccess: () => {
+      refetch()
+    },
+    onError: (err) => {
+      setMutationError(err)
+    }
+  })
+
+  // Create a new collection
+  const createCollection = useCallback(async (input: Partial<AssetCollection>) => {
+    setMutationLoading(true)
+    setMutationError(null)
+    try {
+      const collectionData = {
+        collection_name: input.collection_name || 'Untitled Collection',
+        description: input.description || null,
+        cover_image_url: input.cover_image_url || null,
+        asset_count: input.asset_count || 0,
+        total_size: input.total_size || 0,
+        is_public: input.is_public || false,
+        sort_order: input.sort_order || 0
+      }
+      const result = await create(collectionData)
+      return result
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Failed to create collection')
+      setMutationError(error)
+      throw error
+    } finally {
+      setMutationLoading(false)
+    }
+  }, [create])
+
+  // Update a collection
+  const updateCollection = useCallback(async (id: string, input: Partial<AssetCollection>) => {
+    setMutationLoading(true)
+    setMutationError(null)
+    try {
+      const result = await update(id, input)
+      return result
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Failed to update collection')
+      setMutationError(error)
+      throw error
+    } finally {
+      setMutationLoading(false)
+    }
+  }, [update])
+
+  // Delete a collection
+  const deleteCollection = useCallback(async (id: string) => {
+    setMutationLoading(true)
+    setMutationError(null)
+    try {
+      await remove(id)
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Failed to delete collection')
+      setMutationError(error)
+      throw error
+    } finally {
+      setMutationLoading(false)
+    }
+  }, [remove])
+
+  return {
+    collections: data,
+    loading,
+    error,
+    refetch,
+    mutationLoading,
+    mutationError,
+    createCollection,
+    updateCollection,
+    deleteCollection
   }
-
-  return useSupabaseQuery<DigitalAsset>(
-    'digital_assets',
-    buildQuery,
-    [assetId],
-    { enabled: !!assetId }
-  )
 }
 
 // Asset Statistics Hook
 export function useAssetStats() {
-  const buildQuery = (supabase: any) => {
-    return supabase
-      .from('digital_assets')
-      .select('asset_type, file_size, status, download_count')
-      .is('deleted_at', null)
+  const queryOptions: any = {
+    table: 'digital_assets',
+    select: 'asset_type, file_size, status, download_count',
+    orderBy: { column: 'created_at', ascending: false },
+    realtime: false,
+    softDelete: true
   }
 
-  const { data, ...rest } = useSupabaseQuery<any>('digital_assets', buildQuery, [])
+  const { data, loading, error, refetch } = useSupabaseQuery<any>(queryOptions)
 
-  const stats = data ? {
+  const stats = data && data.length > 0 ? {
     totalAssets: data.length,
     totalSize: data.reduce((sum: number, a: any) => sum + (a.file_size || 0), 0),
     totalDownloads: data.reduce((sum: number, a: any) => sum + (a.download_count || 0), 0),
@@ -159,12 +291,14 @@ export function useAssetStats() {
     }, {}),
     activeAssets: data.filter((a: any) => a.status === 'active').length,
     draftAssets: data.filter((a: any) => a.status === 'draft').length
-  } : null
+  } : {
+    totalAssets: 0,
+    totalSize: 0,
+    totalDownloads: 0,
+    byType: {},
+    activeAssets: 0,
+    draftAssets: 0
+  }
 
-  return { stats, ...rest }
-}
-
-// Mutations
-export function useAssetMutations() {
-  return useSupabaseMutation()
+  return { stats, loading, error, refetch }
 }

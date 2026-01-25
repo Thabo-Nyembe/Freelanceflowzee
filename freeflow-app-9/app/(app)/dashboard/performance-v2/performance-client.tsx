@@ -31,8 +31,6 @@ import {
   Target,
   Layers,
   Server,
-  ArrowUp,
-  ArrowDown,
   Loader2,
   Copy,
   Check,
@@ -253,9 +251,16 @@ export default function PerformanceClient() {
   const [userId, setUserId] = useState<string | null>(null)
 
   // Use hooks for data fetching
-  const { data: performanceMetrics, isLoading: metricsLoading } = usePerformanceMetrics()
-  const { data: performanceBenchmarks, isLoading: benchmarksLoading } = usePerformanceBenchmarks()
-  const { data: performanceAlerts, isLoading: alertsLoading } = usePerformanceAlerts(userId || undefined)
+  const { data: performanceMetrics, isLoading: metricsLoading, refresh: refreshMetrics } = usePerformanceMetrics()
+  const { data: performanceBenchmarks, isLoading: benchmarksLoading, refresh: refreshBenchmarks } = usePerformanceBenchmarks()
+  const { data: performanceAlerts, isLoading: alertsLoading, refresh: refreshAlerts } = usePerformanceAlerts(userId || undefined)
+
+  // Refetch all data
+  const refetchAll = useCallback(() => {
+    refreshMetrics()
+    refreshBenchmarks()
+    refreshAlerts()
+  }, [refreshMetrics, refreshBenchmarks, refreshAlerts])
 
   const isLoading = metricsLoading || benchmarksLoading || alertsLoading
 
@@ -314,6 +319,46 @@ export default function PerformanceClient() {
     }
   }, [performanceMetrics])
 
+  // Build current test from database metrics or use defaults
+  const currentTest = useMemo(() => {
+    const latestMetric = performanceMetrics?.[0]
+    const defaultScores: PerformanceScore = {
+      performance: latestMetric?.efficiency_score || 0,
+      accessibility: 0,
+      bestPractices: 0,
+      seo: 0,
+      pwa: 0
+    }
+    const defaultVitals: CoreWebVital[] = [
+      { name: 'LCP', value: 0, unit: 's', rating: 'good', target: { good: 2.5, needsImprovement: 4 } },
+      { name: 'FID', value: 0, unit: 'ms', rating: 'good', target: { good: 100, needsImprovement: 300 } },
+      { name: 'CLS', value: 0, unit: '', rating: 'good', target: { good: 0.1, needsImprovement: 0.25 } },
+      { name: 'TTFB', value: 0, unit: 'ms', rating: 'good', target: { good: 800, needsImprovement: 1800 } },
+      { name: 'INP', value: 0, unit: 'ms', rating: 'good', target: { good: 200, needsImprovement: 500 } }
+    ]
+
+    if (selectedTest) return selectedTest
+
+    return {
+      id: 'default',
+      url: testUrl,
+      device: selectedDevice,
+      scores: defaultScores,
+      vitals: defaultVitals,
+      audits: [] as Audit[],
+      timestamp: new Date(),
+      duration: 0
+    } as PageTest
+  }, [selectedTest, performanceMetrics, testUrl, selectedDevice])
+
+  // Loading state - after all hooks
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
 
   // Run performance audit - stores result in Supabase
   const handleRunTest = async () => {
@@ -377,8 +422,6 @@ export default function PerformanceClient() {
       toast.error('Failed to copy URL')
     }
   }
-
-  const currentTest = selectedTest
 
   // Export performance report
   const handleExportReport = async () => {

@@ -1,6 +1,7 @@
 'use client'
 
 import { createClient } from '@/lib/supabase/client'
+import { useReleases, type ReleaseType as HookReleaseType, type Environment as HookEnvironment } from '@/lib/hooks/use-releases'
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
@@ -249,7 +250,7 @@ interface RollbackEvent {
   completedAt: string | null
 }
 
-interface ReleaseStats {
+interface _ReleaseStats {
   totalReleases: number
   deployedReleases: number
   scheduledReleases: number
@@ -264,9 +265,9 @@ interface ReleaseStats {
 }
 
 // Empty typed arrays (no mock data - uses real Supabase data)
-const emptyReleases: Release[] = []
+const _emptyReleases: Release[] = []
 const emptyCommits: Commit[] = []
-const emptyRollbackEvents: RollbackEvent[] = []
+const _emptyRollbackEvents: RollbackEvent[] = []
 
 // Empty typed arrays for competitive upgrade components
 const emptyAIInsights: { id: string; type: 'success' | 'info' | 'warning' | 'error'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
@@ -293,6 +294,20 @@ const initialFormData: ReleaseFormData = {
 export default function ReleasesClient() {
   const supabase = createClient()
 
+  // Use the releases hook for data fetching and mutations
+  const {
+    releases: dbReleases,
+    loading: isLoading,
+    error: releasesError,
+    refetch: fetchReleases,
+    mutationLoading: isSaving,
+    createRelease,
+    updateRelease,
+    deleteRelease: removeRelease,
+    deployRelease,
+    rollbackRelease: rollbackReleaseStatus
+  } = useReleases()
+
   // UI State
   const [activeTab, setActiveTab] = useState('releases')
   const [searchQuery, setSearchQuery] = useState('')
@@ -314,14 +329,11 @@ export default function ReleasesClient() {
   const [rollbackReason, setRollbackReason] = useState('')
   const [targetVersion, setTargetVersion] = useState('')
 
-  // Loading States
-  const [isLoading, setIsLoading] = useState(true)
-  const [isSaving, setIsSaving] = useState(false)
+  // Additional Loading States
   const [isDeploying, setIsDeploying] = useState(false)
   const [isRollingBack, setIsRollingBack] = useState(false)
 
-  // Data State
-  const [releases, setReleases] = useState<DbRelease[]>([])
+  // Data State for deployments and rollbacks (still using direct Supabase for these)
   const [deployments, setDeployments] = useState<DbDeployment[]>([])
   const [rollbacks, setRollbacks] = useState<DbRollback[]>([])
   const [releaseToEdit, setReleaseToEdit] = useState<DbRelease | null>(null)
@@ -329,29 +341,17 @@ export default function ReleasesClient() {
   const [releaseToDeploy, setReleaseToDeploy] = useState<DbRelease | null>(null)
   const [releaseToRollback, setReleaseToRollback] = useState<DbRelease | null>(null)
 
-  // Fetch releases from Supabase
-  const fetchReleases = useCallback(async () => {
-    try {
-      setIsLoading(true)
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-
-      const { data, error } = await supabase
-        .from('releases')
-        .select('*')
-        .eq('user_id', user.id)
-        .is('deleted_at', null)
-        .order('created_at', { ascending: false })
-
-      if (error) throw error
-      setReleases(data || [])
-    } catch (error) {
-      console.error('Error fetching releases:', error)
+  // Show error toast if there's an error loading releases
+  useEffect(() => {
+    if (releasesError) {
       toast.error('Failed to load releases')
-    } finally {
-      setIsLoading(false)
     }
-  }, [])
+  }, [releasesError])
+
+  // Map hook releases to component's DbRelease type
+  const releases = useMemo(() => {
+    return (dbReleases || []) as DbRelease[]
+  }, [dbReleases])
 
   // Fetch deployments
   const fetchDeployments = useCallback(async () => {
@@ -370,7 +370,7 @@ export default function ReleasesClient() {
     } catch (error) {
       console.error('Error fetching deployments:', error)
     }
-  }, [])
+  }, [supabase])
 
   // Fetch rollbacks
   const fetchRollbacks = useCallback(async () => {
@@ -389,28 +389,19 @@ export default function ReleasesClient() {
     } catch (error) {
       console.error('Error fetching rollbacks:', error)
     }
-  }, [])
+  }, [supabase])
 
-  // Initial data fetch
+  // Initial data fetch for deployments and rollbacks
   useEffect(() => {
-    fetchReleases()
     fetchDeployments()
     fetchRollbacks()
-  }, [fetchReleases, fetchDeployments, fetchRollbacks])
+  }, [fetchDeployments, fetchRollbacks])
 
-  // Real-time subscription
+  // Real-time subscription for deployments and rollbacks only
+  // (releases are handled by the useReleases hook)
   useEffect(() => {
     const channel = supabase
-      .channel('releases_changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'releases' }, (payload) => {
-        if (payload.eventType === 'INSERT') {
-          setReleases(prev => [payload.new as DbRelease, ...prev])
-        } else if (payload.eventType === 'UPDATE') {
-          setReleases(prev => prev.map(r => r.id === payload.new.id ? payload.new as DbRelease : r))
-        } else if (payload.eventType === 'DELETE') {
-          setReleases(prev => prev.filter(r => r.id !== payload.old.id))
-        }
-      })
+      .channel('releases_related_changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'deployments' }, () => {
         fetchDeployments()
       })
@@ -422,145 +413,86 @@ export default function ReleasesClient() {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [ fetchDeployments, fetchRollbacks])
+  }, [supabase, fetchDeployments, fetchRollbacks])
 
-  // Create release
+  // Create release using hook
   const handleCreateRelease = async () => {
-    try {
-      setIsSaving(true)
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        toast.error('You must be logged in to create a release')
-        return
-      }
+    if (!formData.version || !formData.release_name) {
+      toast.error('Version and name are required')
+      return
+    }
 
-      const releaseData = {
-        user_id: user.id,
+    try {
+      await createRelease({
         version: formData.version,
         release_name: formData.release_name,
-        description: formData.description || null,
-        status: formData.scheduled_for ? 'scheduled' : (formData.is_draft ? 'draft' : 'deployed'),
-        release_type: formData.release_type,
-        environment: formData.environment,
-        changelog: formData.changelog || null,
-        git_branch: formData.git_branch || null,
+        description: formData.description || undefined,
+        release_type: formData.release_type as HookReleaseType,
+        environment: formData.environment as HookEnvironment,
+        changelog: formData.changelog || undefined,
+        git_branch: formData.git_branch || undefined,
         git_tag: formData.git_tag || formData.version,
         is_prerelease: formData.is_prerelease,
         is_draft: formData.is_draft,
-        is_latest: false,
-        scheduled_for: formData.scheduled_for || null,
-        commits_count: 0,
-        contributors_count: 1,
-        coverage_percentage: 0,
-        rollback_rate: 0,
-        breaking_changes: [],
-        downloads_count: 0,
-        views_count: 0,
-        additions_count: 0,
-        deletions_count: 0,
-        files_changed: 0,
-        metadata: {}
-      }
-
-      const { data, error } = await supabase
-        .from('releases')
-        .insert(releaseData)
-        .select()
-        .single()
-
-      if (error) throw error
+        scheduled_for: formData.scheduled_for || undefined
+      })
 
       toast.success(`Release created successfully: (${formData.version}) has been created`)
       setShowCreateDialog(false)
       setFormData(initialFormData)
-      fetchReleases()
     } catch (error: any) {
       console.error('Error creating release:', error)
       toast.error('Failed to create release')
-    } finally {
-      setIsSaving(false)
     }
   }
 
-  // Update release
+  // Update release using hook
   const handleUpdateRelease = async () => {
     if (!releaseToEdit) return
 
     try {
-      setIsSaving(true)
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        toast.error('You must be logged in to update a release')
-        return
-      }
+      await updateRelease({
+        id: releaseToEdit.id,
+        version: formData.version,
+        release_name: formData.release_name,
+        description: formData.description || undefined,
+        release_type: formData.release_type as HookReleaseType,
+        environment: formData.environment as HookEnvironment,
+        changelog: formData.changelog || undefined,
+        git_branch: formData.git_branch || undefined,
+        git_tag: formData.git_tag || formData.version,
+        is_prerelease: formData.is_prerelease,
+        is_draft: formData.is_draft,
+        scheduled_for: formData.scheduled_for || undefined
+      })
 
-      const { error } = await supabase
-        .from('releases')
-        .update({
-          version: formData.version,
-          release_name: formData.release_name,
-          description: formData.description || null,
-          release_type: formData.release_type,
-          environment: formData.environment,
-          changelog: formData.changelog || null,
-          git_branch: formData.git_branch || null,
-          git_tag: formData.git_tag || formData.version,
-          is_prerelease: formData.is_prerelease,
-          is_draft: formData.is_draft,
-          scheduled_for: formData.scheduled_for || null,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', releaseToEdit.id)
-        .eq('user_id', user.id)
-
-      if (error) throw error
-
-      toast.success(`Release updated successfully has been updated`)
+      toast.success(`Release updated successfully`)
       setShowEditDialog(false)
       setReleaseToEdit(null)
       setFormData(initialFormData)
-      fetchReleases()
     } catch (error: any) {
       console.error('Error updating release:', error)
       toast.error('Failed to update release')
-    } finally {
-      setIsSaving(false)
     }
   }
 
-  // Delete release (soft delete)
+  // Delete release using hook (soft delete)
   const handleDeleteRelease = async () => {
     if (!releaseToDelete) return
 
     try {
-      setIsSaving(true)
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        toast.error('You must be logged in to delete a release')
-        return
-      }
+      await removeRelease(releaseToDelete.id)
 
-      const { error } = await supabase
-        .from('releases')
-        .update({ deleted_at: new Date().toISOString() })
-        .eq('id', releaseToDelete.id)
-        .eq('user_id', user.id)
-
-      if (error) throw error
-
-      toast.success(`Release deleted successfully has been deleted`)
+      toast.success(`Release deleted successfully`)
       setShowDeleteDialog(false)
       setReleaseToDelete(null)
-      fetchReleases()
     } catch (error: any) {
       console.error('Error deleting release:', error)
       toast.error('Failed to delete release')
-    } finally {
-      setIsSaving(false)
     }
   }
 
-  // Deploy release
+  // Deploy release using hook + create deployment record
   const handleDeployRelease = async () => {
     if (!releaseToDeploy) return
 
@@ -590,22 +522,12 @@ export default function ReleasesClient() {
 
       if (deployError) throw deployError
 
-      // Update release status
-      const { error: releaseError } = await supabase
-        .from('releases')
-        .update({
-          status: 'rolling',
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', releaseToDeploy.id)
-        .eq('user_id', user.id)
-
-      if (releaseError) throw releaseError
+      // Update release status using hook
+      await deployRelease(releaseToDeploy.id)
 
       toast.success('Deployment started: deployment is in progress')
       setShowDeployDialog(false)
       setReleaseToDeploy(null)
-      fetchReleases()
       fetchDeployments()
     } catch (error: any) {
       console.error('Error deploying release:', error)
@@ -615,7 +537,7 @@ export default function ReleasesClient() {
     }
   }
 
-  // Rollback release
+  // Rollback release using hook
   const handleRollbackRelease = async () => {
     if (!releaseToRollback || !rollbackReason || !targetVersion) return
 
@@ -645,24 +567,14 @@ export default function ReleasesClient() {
 
       if (rollbackError) throw rollbackError
 
-      // Update release status
-      const { error: releaseError } = await supabase
-        .from('releases')
-        .update({
-          status: 'rolled_back',
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', releaseToRollback.id)
-        .eq('user_id', user.id)
-
-      if (releaseError) throw releaseError
+      // Update release status using hook
+      await rollbackReleaseStatus(releaseToRollback.id)
 
       toast.success(`Rollback initiated to ${targetVersion}`)
       setShowRollbackDialog(false)
       setReleaseToRollback(null)
       setRollbackReason('')
       setTargetVersion('')
-      fetchReleases()
       fetchRollbacks()
     } catch (error: any) {
       console.error('Error rolling back release:', error)
@@ -704,7 +616,7 @@ export default function ReleasesClient() {
   }
 
   // Open delete dialog
-  const openDeleteDialog = (release: DbRelease) => {
+  const _openDeleteDialog = (release: DbRelease) => {
     setReleaseToDelete(release)
     setShowDeleteDialog(true)
   }
@@ -803,6 +715,25 @@ export default function ReleasesClient() {
       return matchesSearch && matchesStatus && matchesType
     })
   }, [releases, searchQuery, selectedStatus, selectedType])
+
+  // Loading state - early return (after all hooks are defined)
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
+
+  // Error state - early return (after all hooks are defined)
+  if (releasesError) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-4">
+        <p className="text-red-500">Error loading data</p>
+        <Button onClick={() => fetchReleases()}>Retry</Button>
+      </div>
+    )
+  }
 
   const getStatusColor = (status: ReleaseStatus) => {
     switch (status) {

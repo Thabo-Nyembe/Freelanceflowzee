@@ -47,7 +47,8 @@ import {
   Bell,
   HardDrive,
   AlertOctagon,
-  Sliders
+  Sliders,
+  Loader2
 } from 'lucide-react'
 
 
@@ -203,11 +204,13 @@ export default function WebhooksClient({
   const {
     webhooks,
     loading: webhooksLoading,
+    error,
     createWebhook,
     updateWebhook,
     deleteWebhook,
     toggleStatus,
     testWebhook,
+    fetchWebhooks,
     stats
   } = useWebhooks(initialWebhooks, initialStats)
 
@@ -980,6 +983,25 @@ export default function WebhooksClient({
       action: handleRetryFailedDeliveries
     },
   ], [webhooks, openCreateDialog, setActiveTab])
+
+  // Loading state
+  if (webhooksLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-4">
+        <p className="text-red-500">Error loading data</p>
+        <Button onClick={() => fetchWebhooks()}>Retry</Button>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50/30 to-cyan-50/40 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 dark:bg-none dark:bg-gray-900">

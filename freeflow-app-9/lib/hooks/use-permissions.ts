@@ -1,6 +1,7 @@
 'use client'
 
-import { useSupabaseQuery, useSupabaseMutation } from './use-supabase-helpers'
+import { useSupabaseQuery } from './use-supabase-query'
+import { useSupabaseMutation } from './use-supabase-mutation'
 
 export type RoleLevel = 'system' | 'admin' | 'manager' | 'standard' | 'basic' | 'guest'
 export type RoleType = 'system' | 'built-in' | 'custom'
@@ -144,91 +145,101 @@ export interface UseRolesOptions {
 export function useRoles(options: UseRolesOptions = {}) {
   const { level, type, active } = options
 
-  const buildQuery = (supabase: any) => {
-    let query = supabase
-      .from('roles')
-      .select('*')
-      .is('deleted_at', null)
-      .order('priority', { ascending: false })
+  const filters: Record<string, any> = {}
+  if (level && level !== 'all') filters.role_level = level
+  if (type && type !== 'all') filters.role_type = type
+  if (active !== undefined) filters.is_active = active
 
-    if (level && level !== 'all') {
-      query = query.eq('role_level', level)
-    }
+  const { data, loading, error, refetch } = useSupabaseQuery<Role>({
+    table: 'roles',
+    filters,
+    orderBy: { column: 'priority', ascending: false },
+    realtime: true,
+    softDelete: true
+  })
 
-    if (type && type !== 'all') {
-      query = query.eq('role_type', type)
-    }
-
-    if (active !== undefined) {
-      query = query.eq('is_active', active)
-    }
-
-    return query
-  }
-
-  return useSupabaseQuery<Role>('roles', buildQuery, [level, type, active])
+  return { data, isLoading: loading, error, refetch }
 }
 
 export function usePermissions(resource?: string) {
-  const buildQuery = (supabase: any) => {
-    let query = supabase
-      .from('permissions')
-      .select('*')
-      .is('deleted_at', null)
-      .order('priority', { ascending: false })
+  const filters: Record<string, any> = {}
+  if (resource && resource !== 'all') filters.resource = resource
 
-    if (resource && resource !== 'all') {
-      query = query.eq('resource', resource)
-    }
+  const { data, loading, error, refetch } = useSupabaseQuery<Permission>({
+    table: 'permissions',
+    filters,
+    orderBy: { column: 'priority', ascending: false },
+    realtime: true,
+    softDelete: true
+  })
 
-    return query
-  }
-
-  return useSupabaseQuery<Permission>('permissions', buildQuery, [resource])
+  return { data, isLoading: loading, error, refetch }
 }
 
 export function useRoleAssignments(status?: AssignmentStatus) {
-  const buildQuery = (supabase: any) => {
-    let query = supabase
-      .from('role_assignments')
-      .select('*')
-      .is('deleted_at', null)
-      .order('created_at', { ascending: false })
+  const filters: Record<string, any> = {}
+  if (status && status !== 'all') filters.status = status
 
-    if (status && status !== 'all') {
-      query = query.eq('status', status)
-    }
+  const { data, loading, error, refetch } = useSupabaseQuery<RoleAssignment>({
+    table: 'role_assignments',
+    filters,
+    orderBy: { column: 'created_at', ascending: false },
+    realtime: true,
+    softDelete: true
+  })
 
-    return query
-  }
-
-  return useSupabaseQuery<RoleAssignment>('role_assignments', buildQuery, [status])
+  return { data, isLoading: loading, error, refetch }
 }
 
+export function useRoleMutations(onSuccess?: () => void) {
+  return useSupabaseMutation({
+    table: 'roles',
+    onSuccess,
+    enableRealtime: true
+  })
+}
+
+export function usePermissionMutations(onSuccess?: () => void) {
+  return useSupabaseMutation({
+    table: 'permissions',
+    onSuccess,
+    enableRealtime: true
+  })
+}
+
+export function useRoleAssignmentMutations(onSuccess?: () => void) {
+  return useSupabaseMutation({
+    table: 'role_assignments',
+    onSuccess,
+    enableRealtime: true
+  })
+}
+
+// Legacy exports for backward compatibility
 export function useCreateRole() {
-  return useSupabaseMutation<Role>('roles', 'insert')
+  return useSupabaseMutation({ table: 'roles' })
 }
 
 export function useUpdateRole() {
-  return useSupabaseMutation<Role>('roles', 'update')
+  return useSupabaseMutation({ table: 'roles' })
 }
 
 export function useDeleteRole() {
-  return useSupabaseMutation<Role>('roles', 'delete')
+  return useSupabaseMutation({ table: 'roles' })
 }
 
 export function useCreatePermission() {
-  return useSupabaseMutation<Permission>('permissions', 'insert')
+  return useSupabaseMutation({ table: 'permissions' })
 }
 
 export function useUpdatePermission() {
-  return useSupabaseMutation<Permission>('permissions', 'update')
+  return useSupabaseMutation({ table: 'permissions' })
 }
 
 export function useCreateRoleAssignment() {
-  return useSupabaseMutation<RoleAssignment>('role_assignments', 'insert')
+  return useSupabaseMutation({ table: 'role_assignments' })
 }
 
 export function useUpdateRoleAssignment() {
-  return useSupabaseMutation<RoleAssignment>('role_assignments', 'update')
+  return useSupabaseMutation({ table: 'role_assignments' })
 }

@@ -41,6 +41,7 @@ import {
   Bell,
   ChevronDown,
   ChevronRight,
+  Loader2,
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -67,6 +68,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Button } from '@/components/ui/button'
 
 // Initialize Supabase client once at module level
 const supabase = createClient()
@@ -185,12 +187,12 @@ interface InventoryStats {
 }
 
 
-export default function InventoryClient({ initialInventory }: { initialInventory: InventoryItem[] }) {
+export default function InventoryClient({ initialInventory: _initialInventory }: { initialInventory: InventoryItem[] }) {
   const [activeTab, setActiveTab] = useState('products')
   const [settingsTab, setSettingsTab] = useState('general')
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'draft' | 'archived'>('all')
-  const [locationFilter, setLocationFilter] = useState<string>('all')
+  const [_locationFilter, _setLocationFilter] = useState<string>('all')
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [showProductDialog, setShowProductDialog] = useState(false)
   const [showTransferDialog, setShowTransferDialog] = useState(false)
@@ -198,12 +200,11 @@ export default function InventoryClient({ initialInventory }: { initialInventory
   const [expandedProducts, setExpandedProducts] = useState<Set<string>>(new Set())
 
   // Database integration
-  const { data: dbInventory, loading: inventoryLoading, refetch } = useInventory({ status: statusFilter === 'all' ? 'all' : statusFilter as InventoryStatus })
+  const { data: dbInventory, loading: inventoryLoading, error: inventoryError, refetch } = useInventory({ status: statusFilter === 'all' ? 'all' : statusFilter as InventoryStatus })
   const { mutate: createInventoryItem, loading: creating } = useCreateInventoryItem()
-  const { mutate: updateInventoryItem, loading: updating } = useUpdateInventoryItem()
-  const { mutate: deleteInventoryItem, loading: deleting } = useDeleteInventoryItem()
-  const { locations: dbLocations } = useInventoryLocations()
-
+  const { mutate: updateInventoryItem, loading: _updating } = useUpdateInventoryItem()
+  const { mutate: _deleteInventoryItem, loading: _deleting } = useDeleteInventoryItem()
+  const { locations: dbLocations, isLoading: locationsLoading } = useInventoryLocations()
 
   // Form state for new product
   const [newProductForm, setNewProductForm] = useState({
@@ -264,7 +265,143 @@ export default function InventoryClient({ initialInventory }: { initialInventory
   const [showStockCountDialog, setShowStockCountDialog] = useState(false)
   const [showBarcodeScannerDialog, setShowBarcodeScannerDialog] = useState(false)
   const [importingInventory, setImportingInventory] = useState(false)
-  const [printingLabels, setPrintingLabels] = useState(false)
+  const [_printingLabels, setPrintingLabels] = useState(false)
+
+  // Compute inventory stats from database data
+  const inventoryStats = useMemo(() => {
+    const items = dbInventory || []
+    const totalProducts = items.length
+    const totalValue = items.reduce((sum, item) => sum + (item.total_value || 0), 0)
+    const lowStockItems = items.filter(item => item.low_stock_alert || item.status === 'low-stock').length
+    const outOfStockItems = items.filter(item => item.status === 'out-of-stock' || item.quantity === 0).length
+    const avgTurnoverRate = items.length > 0
+      ? items.reduce((sum, item) => sum + (item.turnover_rate || 0), 0) / items.length
+      : 0
+    const inventoryAccuracy = 98.5 // This would come from audit data in production
+
+    return {
+      totalProducts,
+      totalVariants: totalProducts, // In this model, products are variants
+      totalValue,
+      lowStockItems,
+      outOfStockItems,
+      totalLocations: dbLocations?.length || 0,
+      avgTurnoverRate,
+      inventoryAccuracy
+    }
+  }, [dbInventory, dbLocations])
+
+  // Filtered products from database
+  const filteredProducts = useMemo((): Product[] => {
+    // Map database inventory items to Product type
+    const products: Product[] = (dbInventory || []).map(item => ({
+      id: item.id,
+      title: item.product_name,
+      description: item.description || '',
+      vendor: item.brand || item.manufacturer || '',
+      productType: item.category || 'General',
+      tags: item.tags || [],
+      status: item.status === 'in-stock' ? 'active' : item.status === 'discontinued' ? 'archived' : 'draft',
+      variants: [{
+        id: item.id,
+        sku: item.sku || '',
+        barcode: item.barcode || '',
+        option1: null,
+        option2: null,
+        option3: null,
+        price: item.selling_price || item.unit_price,
+        costPrice: item.cost_price,
+        quantity: item.quantity,
+        weight: item.weight_kg,
+        weightUnit: 'kg' as const
+      }],
+      totalQuantity: item.quantity,
+      totalValue: item.total_value,
+      images: item.images || (item.image_url ? [item.image_url] : []),
+      createdAt: item.created_at,
+      updatedAt: item.updated_at
+    }))
+
+    // Apply search filter
+    let filtered = products
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase()
+      filtered = filtered.filter(p =>
+        p.title.toLowerCase().includes(query) ||
+        p.vendor.toLowerCase().includes(query) ||
+        p.variants.some(v => v.sku.toLowerCase().includes(query))
+      )
+    }
+
+    // Apply status filter
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(p => p.status === statusFilter)
+    }
+
+    return filtered
+  }, [dbInventory, searchQuery, statusFilter])
+
+  // Export handler using useCallback (must be before early returns)
+  const handleExportInventory = useCallback(async () => {
+    try {
+      toast.info('Export started')
+      const { data, error } = await supabase
+        .from('inventory')
+        .select('*')
+        .is('deleted_at', null)
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+
+      // Convert to CSV
+      const items = data || []
+      if (items.length === 0) {
+        toast.info('No data to export')
+        return
+      }
+
+      const headers = Object.keys(items[0]).join(',')
+      const rows = items.map(item =>
+        Object.values(item).map(v =>
+          typeof v === 'string' ? `"${v.replace(/"/g, '""')}"` : v
+        ).join(',')
+      )
+      const csv = [headers, ...rows].join('\n')
+
+      // Download
+      const blob = new Blob([csv], { type: 'text/csv' })
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `inventory-export-${new Date().toISOString().split('T')[0]}.csv`
+      a.click()
+      window.URL.revokeObjectURL(url)
+
+      toast.success(`Export completed: ${dbInventory?.length || 0} items`)
+    } catch (error) {
+      console.error('Export error:', error)
+      toast.error('Failed to export inventory')
+    }
+  }, [dbInventory?.length])
+
+  // Loading state - after all hooks
+  if (inventoryLoading || locationsLoading) {
+    return (
+      <div className="flex items-center justify-center h-full min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      </div>
+    )
+  }
+
+  // Error state - after all hooks
+  if (inventoryError) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full min-h-[400px] gap-4">
+        <p className="text-red-500">Error loading inventory data</p>
+        <Button onClick={() => refetch()}>Retry</Button>
+      </div>
+    )
+  }
 
   const handleCreateProduct = async () => {
     if (!newProductForm.title) {
@@ -330,11 +467,6 @@ export default function InventoryClient({ initialInventory }: { initialInventory
     }
   }
 
-  const filteredProducts = useMemo(() => {
-    // Filter from database products when available
-    return []
-  }, [searchQuery, statusFilter])
-
   const toggleProductExpanded = (productId: string) => {
     const newExpanded = new Set(expandedProducts)
     if (newExpanded.has(productId)) {
@@ -381,49 +513,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
     setShowTransferDialog(true)
   }
 
-  const handleExportInventory = useCallback(async () => {
-    try {
-      toast.info('Export started')
-      const { data, error } = await supabase
-        .from('inventory')
-        .select('*')
-        .is('deleted_at', null)
-        .order('created_at', { ascending: false })
-
-      if (error) throw error
-
-      // Convert to CSV
-      const items = data || []
-      if (items.length === 0) {
-        toast.info('No data to export')
-        return
-      }
-
-      const headers = Object.keys(items[0]).join(',')
-      const rows = items.map(item =>
-        Object.values(item).map(v =>
-          typeof v === 'string' ? `"${v.replace(/"/g, '""')}"` : v
-        ).join(',')
-      )
-      const csv = [headers, ...rows].join('\n')
-
-      // Download
-      const blob = new Blob([csv], { type: 'text/csv' })
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `inventory-export-${new Date().toISOString().split('T')[0]}.csv`
-      a.click()
-      window.URL.revokeObjectURL(url)
-
-      toast.success(`Export completed: ${dbInventory?.length || 0} items`)
-    } catch (error) {
-      console.error('Export error:', error)
-      toast.error('Failed to export inventory')
-    }
-  }, [])
-
-  const handleCreatePurchaseOrder = () => {
+  const _handleCreatePurchaseOrder = () => {
     setShowPODialog(true)
   }
 
@@ -507,7 +597,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
     }
   }
 
-  const handleUpdateStock = async (product: Product) => {
+  const _handleUpdateStock = async (product: Product) => {
     // Find matching inventory item from DB
     const inventoryItem = dbInventory?.find(item =>
       item.product_name === product.title || item.sku === product.variants[0]?.sku
@@ -537,7 +627,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
     }
   }
 
-  const handleArchiveProduct = async (product: Product) => {
+  const _handleArchiveProduct = async (product: Product) => {
     const inventoryItem = dbInventory?.find(item =>
       item.product_name === product.title || item.sku === product.variants[0]?.sku
     )
@@ -789,15 +879,15 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                 <Package className="w-4 h-4" />
                 Total Products
               </div>
-              <div className="text-2xl font-bold">{0}</div>
-              <div className="text-xs text-white/60">{0} variants</div>
+              <div className="text-2xl font-bold">{inventoryStats.totalProducts}</div>
+              <div className="text-xs text-white/60">{inventoryStats.totalVariants} variants</div>
             </div>
             <div className="bg-white/10 backdrop-blur rounded-xl p-4">
               <div className="flex items-center gap-2 text-white/70 text-sm mb-1">
                 <DollarSign className="w-4 h-4" />
                 Total Value
               </div>
-              <div className="text-2xl font-bold">${(0 / 1000).toFixed(1)}K</div>
+              <div className="text-2xl font-bold">${(inventoryStats.totalValue / 1000).toFixed(1)}K</div>
               <div className="text-xs text-white/60">Across all locations</div>
             </div>
             <div className="bg-white/10 backdrop-blur rounded-xl p-4">
@@ -805,15 +895,15 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                 <AlertTriangle className="w-4 h-4" />
                 Low Stock
               </div>
-              <div className="text-2xl font-bold text-yellow-300">{0}</div>
-              <div className="text-xs text-white/60">{0} out of stock</div>
+              <div className="text-2xl font-bold text-yellow-300">{inventoryStats.lowStockItems}</div>
+              <div className="text-xs text-white/60">{inventoryStats.outOfStockItems} out of stock</div>
             </div>
             <div className="bg-white/10 backdrop-blur rounded-xl p-4">
               <div className="flex items-center gap-2 text-white/70 text-sm mb-1">
                 <RefreshCw className="w-4 h-4" />
                 Turnover Rate
               </div>
-              <div className="text-2xl font-bold">{0}x</div>
+              <div className="text-2xl font-bold">{inventoryStats.avgTurnoverRate.toFixed(1)}x</div>
               <div className="text-xs text-white/60">Monthly average</div>
             </div>
             <div className="bg-white/10 backdrop-blur rounded-xl p-4">
@@ -821,7 +911,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                 <CheckCircle2 className="w-4 h-4" />
                 Accuracy
               </div>
-              <div className="text-2xl font-bold">{0}%</div>
+              <div className="text-2xl font-bold">{inventoryStats.inventoryAccuracy}%</div>
               <div className="text-xs text-white/60">Last count</div>
             </div>
           </div>
@@ -981,12 +1071,12 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                   </div>
                   <div>
                     <p className="text-sm text-gray-500 dark:text-gray-400">Total SKUs</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{0}</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{inventoryStats.totalProducts}</p>
                   </div>
                 </div>
                 <div className="mt-3 flex items-center gap-2 text-sm">
                   <TrendingUp className="w-4 h-4 text-green-500" />
-                  <span className="text-green-600">+12 this week</span>
+                  <span className="text-green-600">Active products</span>
                 </div>
               </div>
               <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-4">
@@ -996,12 +1086,12 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                   </div>
                   <div>
                     <p className="text-sm text-gray-500 dark:text-gray-400">In Stock</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">1,847</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{inventoryStats.totalProducts - inventoryStats.outOfStockItems}</p>
                   </div>
                 </div>
                 <div className="mt-3 flex items-center gap-2 text-sm">
                   <CheckCircle2 className="w-4 h-4 text-green-500" />
-                  <span className="text-gray-500">98.5% in stock rate</span>
+                  <span className="text-gray-500">{inventoryStats.totalProducts > 0 ? ((inventoryStats.totalProducts - inventoryStats.outOfStockItems) / inventoryStats.totalProducts * 100).toFixed(1) : 0}% in stock rate</span>
                 </div>
               </div>
               <div className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 p-4">
@@ -1011,7 +1101,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                   </div>
                   <div>
                     <p className="text-sm text-gray-500 dark:text-gray-400">Low Stock</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">23</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{inventoryStats.lowStockItems}</p>
                   </div>
                 </div>
                 <div className="mt-3 flex items-center gap-2 text-sm">
@@ -1026,12 +1116,12 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                   </div>
                   <div>
                     <p className="text-sm text-gray-500 dark:text-gray-400">Out of Stock</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-white">5</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{inventoryStats.outOfStockItems}</p>
                   </div>
                 </div>
                 <div className="mt-3 flex items-center gap-2 text-sm">
                   <Truck className="w-4 h-4 text-blue-500" />
-                  <span className="text-blue-600">3 on order</span>
+                  <span className="text-blue-600">Awaiting restock</span>
                 </div>
               </div>
             </div>

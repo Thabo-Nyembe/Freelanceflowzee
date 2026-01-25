@@ -340,6 +340,7 @@ export default function IntegrationsClient() {
     workflows,
     stats: workflowStats,
     loading: workflowsLoading,
+    error: workflowsError,
     fetchWorkflows,
     createWorkflow,
     updateWorkflow,
@@ -353,6 +354,7 @@ export default function IntegrationsClient() {
     webhooks,
     stats: webhookStats,
     loading: webhooksLoading,
+    error: webhooksError,
     fetchWebhooks,
     createWebhook,
     updateWebhook,
@@ -652,6 +654,38 @@ export default function IntegrationsClient() {
   }> = []
 
   const isLoading = integrationsLoading || workflowsLoading || webhooksLoading
+  const error = workflowsError || webhooksError
+
+  // Refetch function for retry button
+  const refetch = () => {
+    fetchIntegrations()
+    fetchWorkflows()
+    fetchWebhooks()
+  }
+
+  // Loading state early return
+  if (isLoading && integrations.length === 0 && workflows.length === 0 && webhooks.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-full min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
+      </div>
+    )
+  }
+
+  // Error state early return
+  if (error && integrations.length === 0 && workflows.length === 0 && webhooks.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full min-h-[400px] gap-4">
+        <AlertCircle className="h-12 w-12 text-red-500" />
+        <p className="text-red-500 font-medium">Error loading data</p>
+        <p className="text-muted-foreground text-sm">{error}</p>
+        <Button onClick={refetch} variant="outline">
+          <RefreshCw className="h-4 w-4 mr-2" />
+          Retry
+        </Button>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-blue-50/30 to-indigo-50/40 dark:bg-none dark:bg-gray-900 p-6">

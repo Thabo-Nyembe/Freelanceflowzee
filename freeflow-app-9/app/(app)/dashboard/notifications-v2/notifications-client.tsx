@@ -1,7 +1,5 @@
 'use client'
 
-import { createClient } from '@/lib/supabase/client'
-
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
@@ -356,23 +354,24 @@ export default function NotificationsClient() {
 
   // Calculate stats - using real notification data
   const stats = useMemo(() => {
-    const totalSent = mockCampaigns.reduce((sum, c) => sum + c.stats.sent, 0)
-    const totalDelivered = mockCampaigns.reduce((sum, c) => sum + c.stats.delivered, 0)
-    const totalOpened = mockCampaigns.reduce((sum, c) => sum + c.stats.opened, 0)
-    const totalClicked = mockCampaigns.reduce((sum, c) => sum + c.stats.clicked, 0)
+    // Campaign stats from local state (campaigns are managed locally until a campaigns hook is added)
+    const totalSent = (campaigns as Campaign[]).reduce((sum, c) => sum + (c.stats?.sent || 0), 0)
+    const totalDelivered = (campaigns as Campaign[]).reduce((sum, c) => sum + (c.stats?.delivered || 0), 0)
+    const totalOpened = (campaigns as Campaign[]).reduce((sum, c) => sum + (c.stats?.opened || 0), 0)
+    const totalClicked = (campaigns as Campaign[]).reduce((sum, c) => sum + (c.stats?.clicked || 0), 0)
     return {
       // Use real notification stats from Supabase
       totalNotifications: notificationStats.total,
       unread: notificationStats.unread,
       starred: notificationStats.starred,
-      // Campaign stats (still using mock data for campaigns)
+      // Campaign stats from local state
       totalSent,
       deliveryRate: totalSent > 0 ? ((totalDelivered / totalSent) * 100).toFixed(1) : '0',
       openRate: totalDelivered > 0 ? ((totalOpened / totalDelivered) * 100).toFixed(1) : '0',
       clickRate: totalOpened > 0 ? ((totalClicked / totalOpened) * 100).toFixed(1) : '0',
-      activeAutomations: mockAutomations.filter(a => a.status === 'active').length
+      activeAutomations: (automations as Automation[]).filter(a => a.status === 'active').length
     }
-  }, [notificationStats])
+  }, [notificationStats, campaigns, automations])
 
   const statsCards = [
     { label: 'Total', value: stats.totalNotifications.toString(), icon: Bell, color: 'from-violet-500 to-purple-600' },
@@ -549,7 +548,7 @@ export default function NotificationsClient() {
     setShowCreateAutomation(true)
   }
 
-  const handleToggleAutomation = async (automation: (typeof mockAutomations)[0]) => {
+  const handleToggleAutomation = async (automation: Automation) => {
     const newStatus = automation.status === 'active' ? 'paused' : 'active'
     const action = newStatus === 'active' ? 'Activating' : 'Pausing'
 
@@ -769,7 +768,7 @@ export default function NotificationsClient() {
             <Card className="border-gray-200 dark:border-gray-700">
               <CardContent className="p-0">
                 <div className="divide-y divide-gray-100 dark:divide-gray-800">
-                  {mockCampaigns.map(campaign => {
+                  {(campaigns as Campaign[]).map(campaign => {
                     const ChannelIcon = getChannelIcon(campaign.channel)
                     return (
                       <div key={campaign.id} className="p-6 hover:bg-gray-50 dark:hover:bg-gray-800">

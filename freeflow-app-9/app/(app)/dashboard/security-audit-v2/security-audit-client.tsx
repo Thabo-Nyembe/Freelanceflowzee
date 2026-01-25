@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { useSecurityAudits, type SecurityAudit as DBSecurityAudit } from '@/lib/hooks/use-security-audits'
+import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -165,9 +167,63 @@ export default function SecurityAuditClient() {
   const [showScanDialog, setShowScanDialog] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')
 
-  // Data state
+  // Use security audits hook for real Supabase data
+  const {
+    audits: dbAudits,
+    loading,
+    error,
+    fetchAudits: refetch,
+    createAudit,
+    updateAudit,
+    deleteAudit,
+    startAudit,
+    completeAudit,
+    cancelAudit,
+    getStats
+  } = useSecurityAudits()
+
+  // Map DB audits (snake_case) to UI audits (camelCase)
+  const audits: SecurityAudit[] = useMemo(() => {
+    return (dbAudits || []).map((dbAudit: DBSecurityAudit): SecurityAudit => ({
+      id: dbAudit.id,
+      name: dbAudit.name,
+      auditCode: dbAudit.audit_code,
+      description: dbAudit.description || '',
+      type: dbAudit.audit_type === 'access-control' ? 'compliance' :
+            dbAudit.audit_type === 'data-encryption' ? 'vulnerability-scan' :
+            dbAudit.audit_type === 'compliance' ? 'compliance' :
+            dbAudit.audit_type === 'penetration-test' ? 'penetration-test' :
+            dbAudit.audit_type === 'code-review' ? 'web-app-scan' :
+            dbAudit.audit_type === 'infrastructure' ? 'cloud-security' : 'vulnerability-scan',
+      status: dbAudit.status as AuditStatus,
+      severity: dbAudit.severity as Severity,
+      scheduledAt: dbAudit.next_scheduled_at || dbAudit.created_at,
+      startedAt: dbAudit.started_at || undefined,
+      completedAt: dbAudit.completed_at || undefined,
+      duration: dbAudit.duration_seconds,
+      scope: dbAudit.tags || [],
+      findings: {
+        critical: dbAudit.findings_critical,
+        high: dbAudit.findings_high,
+        medium: dbAudit.findings_medium,
+        low: dbAudit.findings_low,
+        info: 0
+      },
+      compliance: (dbAudit.compliance_standards || []) as ComplianceFramework[],
+      securityScore: dbAudit.security_score || 0,
+      passRate: dbAudit.total_recommendations > 0
+        ? Math.round((dbAudit.remediated_count / dbAudit.total_recommendations) * 100)
+        : 0,
+      auditor: dbAudit.audited_by || dbAudit.auditor_email || 'System',
+      assets: 0, // Asset count not tracked in DB schema
+      progress: dbAudit.status === 'completed' || dbAudit.status === 'passed' || dbAudit.status === 'failed' ? 100 :
+               dbAudit.status === 'in-progress' ? 50 :
+               dbAudit.status === 'scheduled' ? 0 : 0
+    }))
+  }, [dbAudits])
+
+  // Data state for other entities (vulnerabilities, assets, controls remain local for now)
   const [vulnerabilities, setVulnerabilities] = useState<Vulnerability[]>([])
-  const [audits, setAudits] = useState<SecurityAudit[]>([])
   const [assets, setAssets] = useState<Asset[]>([])
   const [controls, setControls] = useState<ComplianceControl[]>([])
 
@@ -185,28 +241,48 @@ export default function SecurityAuditClient() {
   const [showAssetMenuDialog, setShowAssetMenuDialog] = useState(false)
   const [selectedAssetForMenu, setSelectedAssetForMenu] = useState<Asset | null>(null)
 
-  // Compute stats from real data
+  // Get computed stats from the hook
+  const auditStats = getStats()
+
+  // Compute vulnerability stats from audit findings data
   const vulnerabilityStats = useMemo(() => {
-    // Return zero stats when no data available
-    return { total: 0, critical: 0, high: 0, medium: 0, low: 0, open: 0, resolved: 0 }
-  }, [])
+    const totalCritical = audits.reduce((sum, a) => sum + a.findings.critical, 0)
+    const totalHigh = audits.reduce((sum, a) => sum + a.findings.high, 0)
+    const totalMedium = audits.reduce((sum, a) => sum + a.findings.medium, 0)
+    const totalLow = audits.reduce((sum, a) => sum + a.findings.low, 0)
+    const total = totalCritical + totalHigh + totalMedium + totalLow
+    return {
+      total,
+      critical: totalCritical,
+      high: totalHigh,
+      medium: totalMedium,
+      low: totalLow,
+      open: auditStats.totalFindings,
+      resolved: audits.reduce((sum, a) => sum + (a.passRate > 0 ? Math.round((a.passRate / 100) * (a.findings.critical + a.findings.high + a.findings.medium + a.findings.low)) : 0), 0)
+    }
+  }, [audits, auditStats])
 
   // Filter vulnerabilities from real data
   const filteredVulnerabilities = useMemo(() => {
-    // Return empty array when no data available
-    return []
-  }, [searchQuery, selectedSeverity])
+    // Vulnerabilities are local state for now - return empty array when no data
+    return vulnerabilities.filter(v => {
+      const matchesSearch = v.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           v.cveId.toLowerCase().includes(searchQuery.toLowerCase())
+      const matchesSeverity = selectedSeverity === 'all' || v.severity === selectedSeverity
+      return matchesSearch && matchesSeverity
+    })
+  }, [vulnerabilities, searchQuery, selectedSeverity])
 
-  // Stats cards
+  // Stats cards - derived from real audit data
   const stats = [
-    { label: 'Security Score', value: '82%', change: '+5%', icon: Shield, color: 'from-blue-500 to-blue-600' },
+    { label: 'Security Score', value: `${Math.round(auditStats.avgScore)}%`, change: '+5%', icon: Shield, color: 'from-blue-500 to-blue-600' },
     { label: 'Open Vulnerabilities', value: vulnerabilityStats.open.toString(), change: '-12', icon: Bug, color: 'from-red-500 to-red-600' },
     { label: 'Critical/High', value: (vulnerabilityStats.critical + vulnerabilityStats.high).toString(), change: '-3', icon: AlertTriangle, color: 'from-amber-500 to-amber-600' },
-    { label: 'Assets Scanned', value: '156', change: '+23', icon: Server, color: 'from-green-500 to-green-600' },
-    { label: 'Compliance Rate', value: '89%', change: '+2%', icon: FileCheck, color: 'from-purple-500 to-purple-600' },
-    { label: 'MTTR', value: '4.2d', change: '-0.8d', icon: Clock, color: 'from-cyan-500 to-cyan-600' },
-    { label: 'Active Scans', value: '3', change: '', icon: Radar, color: 'from-indigo-500 to-indigo-600' },
-    { label: 'Resolved (30d)', value: '47', change: '+15', icon: CheckCircle2, color: 'from-emerald-500 to-emerald-600' }
+    { label: 'Total Audits', value: auditStats.total.toString(), change: '+' + auditStats.scheduled, icon: Server, color: 'from-green-500 to-green-600' },
+    { label: 'Remediation Rate', value: `${Math.round(auditStats.remediationRate)}%`, change: '+2%', icon: FileCheck, color: 'from-purple-500 to-purple-600' },
+    { label: 'Passed Audits', value: auditStats.passed.toString(), change: '', icon: Clock, color: 'from-cyan-500 to-cyan-600' },
+    { label: 'In Progress', value: auditStats.inProgress.toString(), change: '', icon: Radar, color: 'from-indigo-500 to-indigo-600' },
+    { label: 'Resolved', value: vulnerabilityStats.resolved.toString(), change: '+15', icon: CheckCircle2, color: 'from-emerald-500 to-emerald-600' }
   ]
 
   const getSeverityColor = (severity: Severity): string => {
@@ -272,6 +348,21 @@ export default function SecurityAuditClient() {
   const handleCreateTicket = (vuln: Vulnerability) => {
     toast.success(`Ticket created for "${vuln.title}"`)
   }
+
+  // Loading state
+  if (loading) return (
+    <div className="flex items-center justify-center h-full">
+      <Loader2 className="h-8 w-8 animate-spin" />
+    </div>
+  )
+
+  // Error state
+  if (error) return (
+    <div className="flex flex-col items-center justify-center h-full gap-4">
+      <p className="text-red-500">Error loading data</p>
+      <Button onClick={() => refetch()}>Retry</Button>
+    </div>
+  )
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/20 dark:bg-none dark:bg-gray-900 p-6">

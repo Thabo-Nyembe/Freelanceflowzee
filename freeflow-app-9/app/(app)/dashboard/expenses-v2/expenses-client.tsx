@@ -2,7 +2,7 @@
 
 import { createClient } from '@/lib/supabase/client'
 
-import React, { useState, useMemo, useEffect } from 'react'
+import React, { useState, useMemo } from 'react'
 import { useExpenses, useCreateExpense, useUpdateExpense, useDeleteExpense } from '@/lib/hooks/use-expenses'
 import { toast } from 'sonner'
 import DeductionSuggestionWidget from '@/components/tax/deduction-suggestion-widget'
@@ -28,17 +28,17 @@ import {
   Wallet, Building2, UserCog
 } from 'lucide-react'
 
-// Enhanced & Competitive Upgrade Components
-import {
-  AIInsightsPanel,
-  CollaborationIndicator,
-  PredictiveAnalytics,
-} from '@/components/ui/competitive-upgrades'
-
-import {
-  ActivityFeed,
-  QuickActionsToolbar,
-} from '@/components/ui/competitive-upgrades-extended'
+// Enhanced & Competitive Upgrade Components - temporarily disabled due to Radix UI infinite loop
+// import {
+//   AIInsightsPanel,
+//   CollaborationIndicator,
+//   PredictiveAnalytics,
+// } from '@/components/ui/competitive-upgrades'
+//
+// import {
+//   ActivityFeed,
+//   QuickActionsToolbar,
+// } from '@/components/ui/competitive-upgrades-extended'
 
 
 
@@ -215,17 +215,7 @@ interface QuickActionItem {
   description?: string
 }
 
-// Empty arrays - no mock data, using database hooks
-const mockEmployees: Employee[] = []
-const mockReports: ExpenseReport[] = []
-const mockPolicies: Policy[] = []
-const mockMileage: MileageEntry[] = []
-const mockPerDiems: PerDiem[] = []
-const mockExpensesAIInsights: AIInsight[] = []
-const mockExpensesCollaborators: Collaborator[] = []
-const mockExpensesPredictions: Prediction[] = []
-const mockExpensesActivities: ActivityItem[] = []
-const mockExpensesQuickActions: QuickActionItem[] = []
+// All data now fetched from Supabase via useExpenses hook
 
 // Quick actions will be defined inside the component to access state setters
 const getExpensesQuickActions = (
@@ -259,6 +249,7 @@ const getExpensesQuickActions = (
 ]
 
 export default function ExpensesClient({ initialExpenses }: ExpensesClientProps) {
+  const supabase = createClient()
   const [activeTab, setActiveTab] = useState('reports')
   const [statusFilter, setStatusFilter] = useState<ExpenseStatus | 'all'>('all')
   const [categoryFilter, setCategoryFilter] = useState<ExpenseCategory | 'all'>('all')
@@ -299,10 +290,10 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
   const [webhookUrl, setWebhookUrl] = useState('')
 
   // Database integration - use real expenses hooks
-  const { data: dbExpenses, loading: expensesLoading, refetch } = useExpenses({ status: statusFilter as any })
-  const { mutate: createExpense, loading: creating } = useCreateExpense()
-  const { mutate: updateExpense, loading: updating } = useUpdateExpense()
-  const { mutate: deleteExpense, loading: deleting } = useDeleteExpense()
+  const { data: dbExpenses, isLoading: expensesLoading, error: expensesError, refetch } = useExpenses({ status: statusFilter as any })
+  const { mutate: createExpense, isLoading: creating } = useCreateExpense()
+  const { mutate: updateExpense, isLoading: updating } = useUpdateExpense()
+  const { mutate: deleteExpense, isLoading: deleting } = useDeleteExpense()
 
   // Form state for new expense
   const [newExpenseForm, setNewExpenseForm] = useState({
@@ -313,11 +304,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
     category: 'travel' as const
   })
 
-  // Fetch expenses on mount - only run once to avoid infinite loop
-  useEffect(() => {
-    refetch()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  // Hook auto-fetches on mount and when filter deps change
 
   // Handle creating a new expense
   const handleCreateExpense = async () => {
@@ -346,28 +333,35 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
     }
   }
 
-  const reports = mockReports
-  const policies = mockPolicies
-  const mileage = mockMileage
-  const perDiems = mockPerDiems
+  // Use Supabase data as the source of truth
+  const expenses = dbExpenses || []
+  // Mileage, per diem, and policies are managed via direct Supabase calls in their handlers
+  const policies: Policy[] = []
+  const mileage: MileageEntry[] = []
+  const perDiems: PerDiem[] = []
 
-  const filteredReports = useMemo(() => {
-    return reports.filter(report => {
-      if (statusFilter !== 'all' && report.status !== statusFilter) return false
-      if (searchQuery && !report.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
-          !report.submittedBy.name.toLowerCase().includes(searchQuery.toLowerCase())) return false
+  const filteredExpenses = useMemo(() => {
+    return expenses.filter((expense: any) => {
+      if (statusFilter !== 'all' && expense.status !== statusFilter) return false
+      if (searchQuery) {
+        const title = (expense.expense_title || '').toLowerCase()
+        const merchant = (expense.merchant_name || '').toLowerCase()
+        const description = (expense.description || '').toLowerCase()
+        const query = searchQuery.toLowerCase()
+        if (!title.includes(query) && !merchant.includes(query) && !description.includes(query)) return false
+      }
       return true
     })
-  }, [reports, statusFilter, searchQuery])
+  }, [expenses, statusFilter, searchQuery])
 
-  const stats = {
-    totalExpenses: reports.reduce((sum, r) => sum + r.totalAmount, 0),
-    pendingApproval: reports.filter(r => r.status === 'pending').reduce((sum, r) => sum + r.totalAmount, 0),
-    approved: reports.filter(r => r.status === 'approved').reduce((sum, r) => sum + r.totalAmount, 0),
-    reimbursed: reports.filter(r => r.status === 'reimbursed').reduce((sum, r) => sum + r.totalAmount, 0),
-    pendingCount: reports.filter(r => r.status === 'pending').length,
+  const stats = useMemo(() => ({
+    totalExpenses: expenses.reduce((sum: number, r: any) => sum + (r.total_amount || r.amount || 0), 0),
+    pendingApproval: expenses.filter((r: any) => r.status === 'pending').reduce((sum: number, r: any) => sum + (r.total_amount || r.amount || 0), 0),
+    approved: expenses.filter((r: any) => r.status === 'approved').reduce((sum: number, r: any) => sum + (r.total_amount || r.amount || 0), 0),
+    reimbursed: expenses.filter((r: any) => r.status === 'reimbursed').reduce((sum: number, r: any) => sum + (r.total_amount || r.amount || 0), 0),
+    pendingCount: expenses.filter((r: any) => r.status === 'pending').length,
     avgProcessingTime: 2.3
-  }
+  }), [expenses])
 
   const getStatusColor = (status: ExpenseStatus) => {
     const colors: Record<ExpenseStatus, string> = {
@@ -410,13 +404,12 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
 
   const categoryBreakdown = useMemo(() => {
     const breakdown: Record<string, number> = {}
-    reports.forEach(report => {
-      report.lineItems.forEach(item => {
-        breakdown[item.category] = (breakdown[item.category] || 0) + item.amount
-      })
+    expenses.forEach((expense: any) => {
+      const cat = expense.expense_category || 'other'
+      breakdown[cat] = (breakdown[cat] || 0) + (expense.total_amount || expense.amount || 0)
     })
     return Object.entries(breakdown).sort((a, b) => b[1] - a[1])
-  }, [reports])
+  }, [expenses])
 
   // Handlers - Real Supabase operations
   const handleApproveExpense = async (expenseId: string, title: string) => {
@@ -490,19 +483,19 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
   const handleExportExpenses = async () => {
     const exportExpenseData = async () => {
       // Collect all expense data for export
-      const allExpenses = dbExpenses?.length ? dbExpenses : reports
+      const allExpenses = expenses
       const exportData = {
         exportDate: new Date().toISOString(),
         totalExpenses: allExpenses.length,
-        totalAmount: allExpenses.reduce((sum: number, r: any) => sum + (r.total_amount || r.totalAmount || 0), 0),
+        totalAmount: allExpenses.reduce((sum: number, r: any) => sum + (r.total_amount || r.amount || 0), 0),
         expenses: allExpenses.map((expense: any) => ({
           id: expense.id,
-          title: expense.expense_title || expense.title,
-          amount: expense.total_amount || expense.totalAmount,
+          title: expense.expense_title || '',
+          amount: expense.total_amount || expense.amount || 0,
           status: expense.status,
-          category: expense.expense_category || expense.lineItems?.[0]?.category,
-          date: expense.expense_date || expense.createdAt,
-          submittedBy: expense.submittedBy?.name || 'Current User'
+          category: expense.expense_category || 'other',
+          date: expense.expense_date || expense.created_at,
+          submittedBy: expense.submitted_by || 'Current User'
         }))
       }
 
@@ -618,8 +611,8 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
   // Handler for generating expense report
   const handleGenerateReport = async () => {
     const generateReport = async () => {
-      const allExpenses = dbExpenses?.length ? dbExpenses : reports
-      const totalAmount = allExpenses.reduce((sum: number, r: any) => sum + (r.total_amount || r.totalAmount || 0), 0)
+      const allExpenses = expenses
+      const totalAmount = allExpenses.reduce((sum: number, r: any) => sum + (r.total_amount || r.amount || 0), 0)
       const expenseCount = allExpenses.length
 
       // Generate a simple report summary
@@ -849,7 +842,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
   }
 
   const handleDeleteAllDrafts = () => {
-    const draftCount = reports.filter(r => r.status === 'draft').length
+    const draftCount = expenses.filter((r: any) => r.status === 'draft').length
     if (!confirm(`Are you sure you want to delete ${draftCount} draft reports?`)) return
     toast.promise(
       (async () => {
@@ -875,10 +868,10 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
         const { data: perDiemRequests } = await supabase.from('per_diem_requests').select('*')
         const exportData = {
           exportDate: new Date().toISOString(),
-          expenses: expenseReports || reports,
-          policies: expensePolicies || policies,
-          mileage: mileageTrips || mileage,
-          perDiems: perDiemRequests || perDiems,
+          expenses: expenseReports || expenses,
+          policies: expensePolicies || [],
+          mileage: mileageTrips || [],
+          perDiems: perDiemRequests || [],
           settings: {
             currency: 'USD',
             fiscalYearStart: 'January',
@@ -1008,11 +1001,11 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{dbExpenses?.length || reports.length}</p>
+                    <p className="text-3xl font-bold">{expenses.length}</p>
                     <p className="text-emerald-200 text-sm">Reports</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">${(dbExpenses?.reduce((sum, r) => sum + (r.total_amount || 0), 0) || stats.totalExpenses).toLocaleString()}</p>
+                    <p className="text-3xl font-bold">${stats.totalExpenses.toLocaleString()}</p>
                     <p className="text-emerald-200 text-sm">Total</p>
                   </div>
                 </div>
@@ -1069,70 +1062,145 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
                   ))}
                 </div>
 
-                {/* Report Cards */}
+                {/* Loading State */}
+                {expensesLoading && (
+                  <div className="flex items-center justify-center py-12">
+                    <RefreshCw className="h-6 w-6 animate-spin text-purple-600 mr-2" />
+                    <span className="text-gray-500">Loading expenses...</span>
+                  </div>
+                )}
+
+                {/* Error State */}
+                {expensesError && !expensesLoading && (
+                  <div className="p-6 bg-red-50 border border-red-200 rounded-lg text-center">
+                    <AlertTriangle className="h-8 w-8 text-red-500 mx-auto mb-2" />
+                    <p className="text-red-700 font-medium">Failed to load expenses</p>
+                    <p className="text-sm text-red-500 mt-1">{expensesError.message || 'An error occurred'}</p>
+                    <Button variant="outline" className="mt-3" onClick={() => refetch()}>
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                      Retry
+                    </Button>
+                  </div>
+                )}
+
+                {/* Empty State */}
+                {!expensesLoading && !expensesError && filteredExpenses.length === 0 && (
+                  <div className="p-12 text-center">
+                    <Receipt className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+                    <p className="text-gray-500 font-medium">No expenses found</p>
+                    <p className="text-sm text-gray-400 mt-1">
+                      {searchQuery || statusFilter !== 'all'
+                        ? 'Try adjusting your filters'
+                        : 'Create your first expense report to get started'}
+                    </p>
+                    {!searchQuery && statusFilter === 'all' && (
+                      <Button className="mt-4 bg-purple-600 hover:bg-purple-700" onClick={() => setShowNewExpenseDialog(true)}>
+                        <Plus className="h-4 w-4 mr-2" />
+                        New Expense
+                      </Button>
+                    )}
+                  </div>
+                )}
+
+                {/* Expense Cards */}
                 <div className="space-y-4">
-                  {filteredReports.map(report => (
-                    <Card key={report.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => openReportDetails(report)}>
-                      <CardContent className="p-4">
-                        <div className="flex items-start gap-4">
-                          <div className="p-3 bg-purple-100 rounded-lg">
-                            <Receipt className="h-6 w-6 text-purple-600" />
-                          </div>
-
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <h3 className="font-semibold">{report.title}</h3>
-                              <Badge className={getStatusColor(report.status)}>{report.status}</Badge>
-                              {report.policyViolations.length > 0 && (
-                                <Badge variant="destructive" className="text-xs">
-                                  <AlertTriangle className="h-3 w-3 mr-1" />
-                                  {report.policyViolations.length} violation{report.policyViolations.length > 1 ? 's' : ''}
-                                </Badge>
-                              )}
+                  {!expensesLoading && filteredExpenses.map((expense: any) => {
+                    const CategoryIcon = getCategoryIcon(expense.expense_category as ExpenseCategory)
+                    const policyViolations = expense.policy_violations || []
+                    return (
+                      <Card key={expense.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => {
+                        setSelectedReport({
+                          id: expense.id,
+                          title: expense.expense_title || 'Untitled Expense',
+                          status: expense.status as ExpenseStatus,
+                          submittedBy: { id: expense.submitted_by_id || '', name: expense.submitted_by || 'Current User', email: '', avatar: '', department: expense.department || '' },
+                          approver: expense.approved_by ? { id: expense.approved_by_id || '', name: expense.approved_by, email: '', avatar: '' } : undefined,
+                          lineItems: [{
+                            id: expense.id,
+                            description: expense.description || expense.expense_title || '',
+                            amount: expense.amount || 0,
+                            category: (expense.expense_category || 'other') as ExpenseCategory,
+                            date: expense.expense_date || expense.created_at,
+                            merchant: expense.merchant_name || '',
+                            taxAmount: expense.tax_amount || 0,
+                            isBillable: expense.is_billable || false,
+                            projectCode: expense.project_name || undefined
+                          }],
+                          totalAmount: expense.total_amount || expense.amount || 0,
+                          currency: (expense.currency || 'USD') as Currency,
+                          paymentMethod: (expense.payment_method || 'corporate_card') as PaymentMethod,
+                          createdAt: expense.created_at,
+                          submittedAt: expense.submitted_at || undefined,
+                          approvedAt: expense.approved_at || undefined,
+                          reimbursedAt: expense.reimbursed_at || undefined,
+                          notes: expense.description || undefined,
+                          policyViolations: Array.isArray(policyViolations) ? policyViolations.map((v: string) => ({ rule: v, severity: 'warning' as const })) : [],
+                          attachments: expense.attachment_count || 0,
+                          tripId: expense.trip_id || undefined
+                        })
+                        setShowReportDialog(true)
+                      }}>
+                        <CardContent className="p-4">
+                          <div className="flex items-start gap-4">
+                            <div className="p-3 bg-purple-100 rounded-lg">
+                              <CategoryIcon className="h-6 w-6 text-purple-600" />
                             </div>
 
-                            <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
-                              <span className="flex items-center gap-1">
-                                <Avatar className="h-4 w-4">
-                                  <AvatarImage src={report.submittedBy.avatar} alt="User avatar" />
-                                  <AvatarFallback>{report.submittedBy.name[0]}</AvatarFallback>
-                                </Avatar>
-                                {report.submittedBy.name}
-                              </span>
-                              <span>{report.submittedBy.department}</span>
-                              <span>{report.lineItems.length} items</span>
-                              <span>{report.attachments} receipts</span>
-                            </div>
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <h3 className="font-semibold">{expense.expense_title || 'Untitled Expense'}</h3>
+                                <Badge className={getStatusColor(expense.status as ExpenseStatus)}>{expense.status}</Badge>
+                                {policyViolations.length > 0 && (
+                                  <Badge variant="destructive" className="text-xs">
+                                    <AlertTriangle className="h-3 w-3 mr-1" />
+                                    {policyViolations.length} violation{policyViolations.length > 1 ? 's' : ''}
+                                  </Badge>
+                                )}
+                              </div>
 
-                            <div className="flex flex-wrap gap-2">
-                              {report.lineItems.slice(0, 3).map((item, i) => {
-                                const Icon = getCategoryIcon(item.category)
-                                return (
-                                  <div key={i} className="flex items-center gap-1 text-xs bg-gray-100 px-2 py-1 rounded">
-                                    <Icon className="h-3 w-3" />
-                                    {item.description.slice(0, 20)}...
+                              <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
+                                <span className="flex items-center gap-1">
+                                  <Avatar className="h-4 w-4">
+                                    <AvatarFallback>{(expense.submitted_by || 'U')[0]}</AvatarFallback>
+                                  </Avatar>
+                                  {expense.submitted_by || 'Current User'}
+                                </span>
+                                {expense.department && <span>{expense.department}</span>}
+                                {expense.expense_category && (
+                                  <span className="capitalize">{expense.expense_category}</span>
+                                )}
+                                {expense.attachment_count > 0 && <span>{expense.attachment_count} receipts</span>}
+                              </div>
+
+                              {expense.description && (
+                                <div className="flex flex-wrap gap-2">
+                                  <div className="flex items-center gap-1 text-xs bg-gray-100 px-2 py-1 rounded">
+                                    <CategoryIcon className="h-3 w-3" />
+                                    {expense.description.slice(0, 40)}{expense.description.length > 40 ? '...' : ''}
                                   </div>
-                                )
-                              })}
-                              {report.lineItems.length > 3 && (
-                                <span className="text-xs text-gray-500">+{report.lineItems.length - 3} more</span>
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="text-right">
+                              <p className="text-2xl font-bold text-purple-600">${(expense.total_amount || expense.amount || 0).toLocaleString()}</p>
+                              <p className="text-sm text-gray-500">{expense.currency || 'USD'}</p>
+                              {expense.submitted_at && (
+                                <p className="text-xs text-gray-400 mt-1">
+                                  Submitted {new Date(expense.submitted_at).toLocaleDateString()}
+                                </p>
+                              )}
+                              {!expense.submitted_at && expense.expense_date && (
+                                <p className="text-xs text-gray-400 mt-1">
+                                  {new Date(expense.expense_date).toLocaleDateString()}
+                                </p>
                               )}
                             </div>
                           </div>
-
-                          <div className="text-right">
-                            <p className="text-2xl font-bold text-purple-600">${report.totalAmount.toLocaleString()}</p>
-                            <p className="text-sm text-gray-500">{report.currency}</p>
-                            {report.submittedAt && (
-                              <p className="text-xs text-gray-400 mt-1">
-                                Submitted {new Date(report.submittedAt).toLocaleDateString()}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                        </CardContent>
+                      </Card>
+                    )
+                  })}
                 </div>
               </div>
 
@@ -1197,19 +1265,38 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {reports.filter(r => r.status === 'pending').slice(0, 3).map(report => (
-                      <div key={report.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 cursor-pointer" onClick={() => openReportDetails(report)}>
-                        <Avatar className="h-8 w-8">
-                          <AvatarImage src={report.submittedBy.avatar} alt="User avatar" />
-                          <AvatarFallback>{report.submittedBy.name[0]}</AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1">
-                          <p className="text-sm font-medium">{report.submittedBy.name}</p>
-                          <p className="text-xs text-gray-500">${report.totalAmount}</p>
+                    {expenses.filter((r: any) => r.status === 'pending').length === 0 ? (
+                      <p className="text-sm text-gray-400 text-center py-4">No pending approvals</p>
+                    ) : (
+                      expenses.filter((r: any) => r.status === 'pending').slice(0, 3).map((expense: any) => (
+                        <div key={expense.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 cursor-pointer" onClick={() => {
+                          setSelectedReport({
+                            id: expense.id,
+                            title: expense.expense_title || 'Untitled',
+                            status: expense.status as ExpenseStatus,
+                            submittedBy: { id: expense.submitted_by_id || '', name: expense.submitted_by || 'Current User', email: '', avatar: '', department: expense.department || '' },
+                            lineItems: [],
+                            totalAmount: expense.total_amount || expense.amount || 0,
+                            currency: (expense.currency || 'USD') as Currency,
+                            paymentMethod: (expense.payment_method || 'corporate_card') as PaymentMethod,
+                            createdAt: expense.created_at,
+                            submittedAt: expense.submitted_at || undefined,
+                            policyViolations: [],
+                            attachments: expense.attachment_count || 0
+                          })
+                          setShowReportDialog(true)
+                        }}>
+                          <Avatar className="h-8 w-8">
+                            <AvatarFallback>{(expense.submitted_by || 'U')[0]}</AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1">
+                            <p className="text-sm font-medium">{expense.submitted_by || expense.expense_title || 'Expense'}</p>
+                            <p className="text-xs text-gray-500">${(expense.total_amount || expense.amount || 0).toLocaleString()}</p>
+                          </div>
+                          <ChevronRight className="h-4 w-4 text-gray-400" />
                         </div>
-                        <ChevronRight className="h-4 w-4 text-gray-400" />
-                      </div>
-                    ))}
+                      ))
+                    )}
                   </CardContent>
                 </Card>
               </div>
@@ -1443,23 +1530,34 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {mockEmployees.map((emp, i) => {
-                      const empTotal = reports.filter(r => r.submittedBy.id === emp.id).reduce((sum, r) => sum + r.totalAmount, 0)
-                      return (
-                        <div key={emp.id} className="flex items-center gap-3">
+                    {(() => {
+                      // Aggregate expenses by submitter from Supabase data
+                      const spenderMap: Record<string, { name: string; department: string; total: number }> = {}
+                      expenses.forEach((exp: any) => {
+                        const key = exp.submitted_by_id || exp.submitted_by || 'unknown'
+                        if (!spenderMap[key]) {
+                          spenderMap[key] = { name: exp.submitted_by || 'Current User', department: exp.department || '', total: 0 }
+                        }
+                        spenderMap[key].total += (exp.total_amount || exp.amount || 0)
+                      })
+                      const topSpenders = Object.entries(spenderMap).sort((a, b) => b[1].total - a[1].total).slice(0, 5)
+                      if (topSpenders.length === 0) {
+                        return <p className="text-sm text-gray-400 text-center py-4">No expense data yet</p>
+                      }
+                      return topSpenders.map(([key, spender], i) => (
+                        <div key={key} className="flex items-center gap-3">
                           <span className="text-lg font-bold text-gray-400 w-6">{i + 1}</span>
                           <Avatar>
-                            <AvatarImage src={emp.avatar} alt="User avatar" />
-                            <AvatarFallback>{emp.name[0]}</AvatarFallback>
+                            <AvatarFallback>{spender.name[0]}</AvatarFallback>
                           </Avatar>
                           <div className="flex-1">
-                            <p className="font-medium">{emp.name}</p>
-                            <p className="text-sm text-gray-500">{emp.department}</p>
+                            <p className="font-medium">{spender.name}</p>
+                            <p className="text-sm text-gray-500">{spender.department}</p>
                           </div>
-                          <span className="font-semibold">${empTotal.toLocaleString()}</span>
+                          <span className="font-semibold">${spender.total.toLocaleString()}</span>
                         </div>
-                      )
-                    })}
+                      ))
+                    })()}
                   </div>
                 </CardContent>
               </Card>
@@ -2950,7 +3048,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
             </div>
             <div className="p-4 bg-gray-50 rounded-lg">
               <p className="text-sm text-gray-700">
-                <strong>{reports.filter(r => r.status === 'draft').length}</strong> draft reports will be deleted.
+                <strong>{expenses.filter((r: any) => r.status === 'draft').length}</strong> draft reports will be deleted.
               </p>
             </div>
             <div className="flex gap-3">

@@ -4,9 +4,11 @@
 
 import { createClient } from '@/lib/supabase/client'
 
-import { useState, useMemo, useEffect, useCallback } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { toast } from 'sonner'
 import { useAuth } from '@/lib/hooks/use-auth'
+import { useFeedback as useFeedbackMutations } from '@/lib/hooks/use-feedback'
+import { useFeedbacks, useFeedbackStats } from '@/lib/hooks/use-feedback-extended'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -171,26 +173,10 @@ interface FeedbackAnalytics {
   categoryBreakdown: Record<IdeaCategory, number>
 }
 
-// Empty data arrays (previously mock data - now using real data from Supabase)
-const mockUsers: FeedbackUser[] = []
-
-const mockIdeas: Idea[] = []
-
+// Static empty arrays for features not yet backed by Supabase tables
 const mockNPSResponses: NPSResponse[] = []
-
 const mockSegments: Segment[] = []
-
 const mockRoadmap: RoadmapItem[] = []
-
-const mockAnalytics: FeedbackAnalytics = {
-  totalIdeas: 0,
-  totalVotes: 0,
-  avgResponseTime: '0 hours',
-  implementationRate: 0,
-  topTrends: [],
-  sentimentBreakdown: { positive: 0, neutral: 0, negative: 0, mixed: 0 },
-  categoryBreakdown: { feature: 0, improvement: 0, bug: 0, integration: 0, ux: 0, performance: 0, other: 0 }
-}
 
 // Helper functions
 const getStatusColor = (status: IdeaStatus): string => {
@@ -297,6 +283,18 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
 
   const { user } = useAuth()
 
+  // --- Real Supabase data via hooks ---
+  const { feedbacks: feedbackItems, isLoading: feedbackLoading, refresh: refreshFeedback } = useFeedbacks()
+  const { feedback: _mutationData, loading: hookMutating, createFeedback, updateFeedback, deleteFeedback, refetch: refetchMutations } = useFeedbackMutations()
+  const { stats: feedbackStats, isLoading: statsLoading, refresh: refreshStats } = useFeedbackStats()
+
+  const loading = feedbackLoading || statsLoading
+  const fetchFeedback = useCallback(() => {
+    refreshFeedback()
+    refreshStats()
+    refetchMutations()
+  }, [refreshFeedback, refreshStats, refetchMutations])
+
   // UI State
   const [activeTab, setActiveTab] = useState('ideas')
   const [searchQuery, setSearchQuery] = useState('')
@@ -311,8 +309,6 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
   const [settingsTab, setSettingsTab] = useState('general')
 
   // Data State
-  const [feedbackItems, setFeedbackItems] = useState<DBFeedback[]>([])
-  const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
 
   // Form State
@@ -339,33 +335,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
     mergeReason: ''
   })
 
-  // Fetch feedback data
-  const fetchFeedback = useCallback(async () => {
-    if (!user?.id) return
-
-    setLoading(true)
-    try {
-      const { data, error } = await supabase
-        .from('feedback')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-
-      if (error) throw error
-      setFeedbackItems(data || [])
-    } catch (error) {
-      console.error('Error fetching feedback:', error)
-      toast.error('Failed to load feedback')
-    } finally {
-      setLoading(false)
-    }
-  }, [user?.id, ])
-
-  useEffect(() => {
-    fetchFeedback()
-  }, [fetchFeedback])
-
-  // Create feedback
+  // Create feedback via hook mutation
   const handleCreateFeedback = async () => {
     if (!user?.id) {
       toast.error('Please sign in to submit feedback')
@@ -379,7 +349,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
 
     setSaving(true)
     try {
-      const { error } = await supabase.from('feedback').insert({
+      await createFeedback({
         user_id: user.id,
         title: formData.title,
         description: formData.description,
@@ -390,8 +360,6 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
         tags: formData.tags.split(',').map(t => t.trim()).filter(Boolean),
         is_public: true
       })
-
-      if (error) throw error
 
       toast.success('Idea submitted', { description: 'Your feedback has been submitted successfully' })
       setFormData({ title: '', description: '', category: 'feature', product: 'core', tags: '' })
@@ -405,7 +373,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
     }
   }
 
-  // Vote on feedback
+  // Vote on feedback via hook mutation
   const handleVoteFeedback = async (feedbackId: string, currentVotes: number) => {
     if (!user?.id) {
       toast.error('Please sign in to vote')
@@ -413,13 +381,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
     }
 
     try {
-      const { error } = await supabase
-        .from('feedback')
-        .update({ upvotes_count: currentVotes + 1, updated_at: new Date().toISOString() })
-        .eq('id', feedbackId)
-
-      if (error) throw error
-
+      await updateFeedback(feedbackId, { upvotes_count: currentVotes + 1, updated_at: new Date().toISOString() })
       toast.success('Vote recorded')
       fetchFeedback()
     } catch (error) {
@@ -428,12 +390,10 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
     }
   }
 
-  // Delete feedback
+  // Delete feedback via hook mutation
   const handleDeleteFeedback = async (feedbackId: string) => {
     try {
-      const { error } = await supabase.from('feedback').delete().eq('id', feedbackId)
-      if (error) throw error
-
+      await deleteFeedback(feedbackId)
       toast.success('Feedback deleted')
       fetchFeedback()
     } catch (error) {
@@ -442,7 +402,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
     }
   }
 
-  // Respond to feedback
+  // Respond to feedback via hook mutation
   const handleRespondToFeedback = async () => {
     if (!respondFormData.selectedFeedbackId) {
       toast.error('Please select a feedback item to respond to')
@@ -465,14 +425,10 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
         updateData.status = respondFormData.updateStatus
       }
 
-      const { error } = await supabase
-        .from('feedback')
-        .update(updateData)
-        .eq('id', respondFormData.selectedFeedbackId)
-
-      if (error) throw error
+      await updateFeedback(respondFormData.selectedFeedbackId, updateData)
 
       // Also create a comment/response record if comments table exists
+      const supabase = createClient()
       try {
         await supabase.from('feedback_comments').insert({
           feedback_id: respondFormData.selectedFeedbackId,
@@ -497,7 +453,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
     }
   }
 
-  // Merge feedback items
+  // Merge feedback items (complex multi-step operation)
   const handleMergeFeedback = async () => {
     if (!mergeFormData.primaryFeedbackId) {
       toast.error('Please select a primary feedback item')
@@ -510,6 +466,8 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
 
     setSaving(true)
     try {
+      const supabase = createClient()
+
       // Get primary feedback to aggregate votes
       const { data: primaryFeedback, error: fetchError } = await supabase
         .from('feedback')
@@ -530,20 +488,11 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
       const totalVotes = (primaryFeedback?.upvotes_count || 0) +
         (secondaryFeedbacks?.reduce((sum, f) => sum + (f.upvotes_count || 0), 0) || 0)
 
-      // Update primary feedback with merged votes and note
-      const mergeNote = mergeFormData.mergeReason
-        ? ` [Merged: ${mergeFormData.mergeReason}]`
-        : ' [Merged from duplicate items]'
-
-      const { error: updateError } = await supabase
-        .from('feedback')
-        .update({
-          upvotes_count: totalVotes,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', mergeFormData.primaryFeedbackId)
-
-      if (updateError) throw updateError
+      // Update primary feedback with merged votes via hook mutation
+      await updateFeedback(mergeFormData.primaryFeedbackId, {
+        upvotes_count: totalVotes,
+        updated_at: new Date().toISOString()
+      })
 
       // Mark secondary feedback items as duplicates/merged
       const { error: mergeError } = await supabase
@@ -580,16 +529,10 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
     }))
   }
 
-  // Update feedback status
+  // Update feedback status via hook mutation
   const handleUpdateStatus = async (feedbackId: string, newStatus: string) => {
     try {
-      const { error } = await supabase
-        .from('feedback')
-        .update({ status: newStatus, updated_at: new Date().toISOString() })
-        .eq('id', feedbackId)
-
-      if (error) throw error
-
+      await updateFeedback(feedbackId, { status: newStatus, updated_at: new Date().toISOString() })
       toast.success('Status updated')
       fetchFeedback()
     } catch (error) {
@@ -598,17 +541,10 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
     }
   }
 
-  // Export feedback
+  // Export feedback (uses feedbackItems from hook)
   const handleExportFeedback = async () => {
     try {
-      const { data, error } = await supabase
-        .from('feedback')
-        .select('*')
-        .eq('user_id', user?.id)
-
-      if (error) throw error
-
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+      const blob = new Blob([JSON.stringify(feedbackItems, null, 2)], { type: 'application/json' })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url

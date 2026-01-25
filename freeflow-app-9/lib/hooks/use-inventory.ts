@@ -1,6 +1,7 @@
 'use client'
 
-import { useSupabaseQuery, useSupabaseMutation } from './use-supabase-helpers'
+import { useState, useEffect, useCallback } from 'react'
+import { createClient } from '@/lib/supabase/client'
 
 export type InventoryStatus = 'in-stock' | 'low-stock' | 'out-of-stock' | 'discontinued' | 'on-order' | 'backorder'
 
@@ -111,48 +112,159 @@ export interface UseInventoryOptions {
 
 export function useInventory(options: UseInventoryOptions = {}) {
   const { status, category, warehouse, lowStock, expiring } = options
+  const [data, setData] = useState<InventoryItem[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<Error | null>(null)
 
-  const buildQuery = (supabase: any) => {
-    let query = supabase
-      .from('inventory')
-      .select('*')
-      .is('deleted_at', null)
-      .order('created_at', { ascending: false })
+  const fetchData = useCallback(async () => {
+    const supabase = createClient()
+    setLoading(true)
+    setError(null)
 
-    if (status && status !== 'all') {
-      query = query.eq('status', status)
+    try {
+      let query = supabase
+        .from('inventory')
+        .select('*')
+        .is('deleted_at', null)
+        .order('created_at', { ascending: false })
+
+      if (status && status !== 'all') {
+        query = query.eq('status', status)
+      }
+
+      if (category && category !== 'all') {
+        query = query.eq('category', category)
+      }
+
+      if (warehouse && warehouse !== 'all') {
+        query = query.eq('warehouse', warehouse)
+      }
+
+      if (lowStock) {
+        query = query.eq('low_stock_alert', true)
+      }
+
+      if (expiring) {
+        query = query.eq('expiry_alert', true)
+      }
+
+      const { data: result, error: queryError } = await query
+
+      if (queryError) throw queryError
+      setData((result as InventoryItem[]) || [])
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Unknown error'))
+    } finally {
+      setLoading(false)
     }
+  }, [status, category, warehouse, lowStock, expiring])
 
-    if (category && category !== 'all') {
-      query = query.eq('category', category)
-    }
+  useEffect(() => {
+    fetchData()
+  }, [fetchData])
 
-    if (warehouse && warehouse !== 'all') {
-      query = query.eq('warehouse', warehouse)
-    }
-
-    if (lowStock) {
-      query = query.eq('low_stock_alert', true)
-    }
-
-    if (expiring) {
-      query = query.eq('expiry_alert', true)
-    }
-
-    return query
-  }
-
-  return useSupabaseQuery<InventoryItem>('inventory', buildQuery, [status, category, warehouse, lowStock, expiring])
+  return { data, loading, error, refetch: fetchData }
 }
 
 export function useCreateInventoryItem() {
-  return useSupabaseMutation<InventoryItem>('inventory', 'insert')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<Error | null>(null)
+
+  const mutate = useCallback(async (itemData: Partial<InventoryItem>): Promise<InventoryItem | null> => {
+    const supabase = createClient()
+    setLoading(true)
+    setError(null)
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const { data: result, error: insertError } = await supabase
+        .from('inventory')
+        .insert({ ...itemData, user_id: user.id })
+        .select()
+        .single()
+
+      if (insertError) throw insertError
+      return result as InventoryItem
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Unknown error')
+      setError(error)
+      return null
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  return { mutate, loading, error }
 }
 
 export function useUpdateInventoryItem() {
-  return useSupabaseMutation<InventoryItem>('inventory', 'update')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<Error | null>(null)
+
+  const mutate = useCallback(async (itemData: Partial<InventoryItem> & { id: string }): Promise<InventoryItem | null> => {
+    const supabase = createClient()
+    setLoading(true)
+    setError(null)
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const { id, ...updateData } = itemData
+      const { data: result, error: updateError } = await supabase
+        .from('inventory')
+        .update({ ...updateData, updated_at: new Date().toISOString() })
+        .eq('id', id)
+        .eq('user_id', user.id)
+        .select()
+        .single()
+
+      if (updateError) throw updateError
+      return result as InventoryItem
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Unknown error')
+      setError(error)
+      return null
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  return { mutate, loading, error }
 }
 
 export function useDeleteInventoryItem() {
-  return useSupabaseMutation<InventoryItem>('inventory', 'delete')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<Error | null>(null)
+
+  const mutate = useCallback(async (id: string): Promise<boolean> => {
+    const supabase = createClient()
+    setLoading(true)
+    setError(null)
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      // Soft delete
+      const { error: deleteError } = await supabase
+        .from('inventory')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('id', id)
+        .eq('user_id', user.id)
+
+      if (deleteError) throw deleteError
+      return true
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Unknown error')
+      setError(error)
+      return false
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  return { mutate, loading, error }
 }

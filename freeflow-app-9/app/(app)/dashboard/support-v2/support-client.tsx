@@ -3,6 +3,8 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { useSupportTickets, type SupportTicket as DbSupportTicket } from '@/lib/hooks/use-support-tickets'
+import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -270,6 +272,22 @@ const mockSupportActivities: { id: string; user: string; action: string; target:
 const mockSupportQuickActionsConfig: { id: string; label: string; icon: string; actionType: string; variant: 'default' | 'outline' }[] = []
 
 export default function SupportClient({ initialTickets, initialStats }: SupportClientProps) {
+  // Use the support tickets hook for data fetching and mutations
+  const {
+    tickets: dbTickets,
+    loading: isLoading,
+    error,
+    fetchTickets: refetch,
+    createTicket,
+    updateTicket,
+    deleteTicket,
+    assignTicket,
+    resolveTicket: resolveTicketMutation,
+    closeTicket,
+    reopenTicket,
+    getStats
+  } = useSupportTickets()
+
   const [activeTab, setActiveTab] = useState('tickets')
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<TicketStatus | 'all'>('all')
@@ -291,16 +309,74 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [showResetConfirm, setShowResetConfirm] = useState(false)
 
-  // Ticket state management
-  const [tickets, setTickets] = useState<Ticket[]>([])
-  const [isLoading, setIsLoading] = useState(false)
-
   // Integration connection states
   const [facebookConnected, setFacebookConnected] = useState(false)
   const [teamsConnected, setTeamsConnected] = useState(false)
 
   // API key state
   const [apiKey, setApiKey] = useState('sk_live_' + Math.random().toString(36).substring(2, 15))
+
+  // Handler dialog states (must be before early returns due to hooks rules)
+  const [showCreateDialog, setShowCreateDialog] = useState(false)
+  const [showAssignDialog, setShowAssignDialog] = useState(false)
+  const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null)
+
+  // Map DB tickets (snake_case) to UI Ticket type (camelCase)
+  const tickets: Ticket[] = useMemo(() => {
+    if (!dbTickets) return []
+    return dbTickets.map((dbTicket: DbSupportTicket) => ({
+      id: dbTicket.id,
+      code: dbTicket.ticket_code,
+      subject: dbTicket.subject,
+      description: dbTicket.description || '',
+      status: dbTicket.status === 'in_progress' ? 'in_progress' :
+              dbTicket.status === 'pending' ? 'pending' :
+              dbTicket.status === 'resolved' ? 'resolved' :
+              dbTicket.status === 'closed' ? 'closed' :
+              'open' as TicketStatus,
+      priority: dbTicket.priority === 'urgent' ? 'urgent' :
+                dbTicket.priority === 'high' ? 'high' :
+                dbTicket.priority === 'low' ? 'low' :
+                'medium' as TicketPriority,
+      type: 'question' as TicketType,
+      channel: dbTicket.channel === 'email' ? 'email' :
+               dbTicket.channel === 'chat' ? 'chat' :
+               dbTicket.channel === 'phone' ? 'phone' :
+               'portal' as TicketChannel,
+      customer: {
+        id: dbTicket.user_id,
+        name: dbTicket.customer_name || 'Unknown Customer',
+        email: dbTicket.customer_email || '',
+        phone: dbTicket.customer_phone || undefined,
+        tier: 'basic' as const,
+        totalTickets: 1,
+        createdAt: dbTicket.created_at
+      },
+      assignee: dbTicket.assigned_to ? {
+        id: dbTicket.assigned_to,
+        name: 'Assigned Agent',
+        email: '',
+        role: 'agent' as const,
+        status: 'online' as const,
+        openTickets: 0,
+        resolvedToday: 0,
+        avgResponseTime: 0,
+        satisfaction: 0,
+        skills: []
+      } : undefined,
+      tags: dbTicket.tags || [],
+      createdAt: dbTicket.created_at,
+      updatedAt: dbTicket.updated_at,
+      firstResponseAt: dbTicket.first_response_at || undefined,
+      resolvedAt: dbTicket.resolved_at || undefined,
+      dueDate: dbTicket.sla_due_at || new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+      slaBreached: dbTicket.sla_breached,
+      replies: [],
+      linkedTickets: [],
+      watchers: [],
+      customFields: dbTicket.metadata || {}
+    }))
+  }, [dbTickets])
 
   // Filter tickets
   const filteredTickets = useMemo(() => {
@@ -331,7 +407,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
       const priorityOrder = { urgent: 0, high: 1, medium: 2, low: 3 }
       return priorityOrder[a.priority] - priorityOrder[b.priority]
     })
-  }, [searchQuery, statusFilter, priorityFilter])
+  }, [tickets, searchQuery, statusFilter, priorityFilter])
 
   // Calculate stats
   const stats = useMemo(() => ({
@@ -346,17 +422,31 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
     unassigned: tickets.filter(t => !t.assignee).length
   }), [tickets])
 
+  // Loading state - show spinner
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
+
+  // Error state - show error message with retry
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-4">
+        <p className="text-red-500">Error loading data</p>
+        <Button onClick={() => refetch()}>Retry</Button>
+      </div>
+    )
+  }
+
   // Handlers
-  const [showCreateDialog, setShowCreateDialog] = useState(false)
-  const [showAssignDialog, setShowAssignDialog] = useState(false)
-  const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null)
   const handleCreateTicket = () => setShowCreateDialog(true)
   const handleAssignTicket = (id: string) => { setSelectedTicketId(id); setShowAssignDialog(true) }
   const handleResolveTicket = async (id: string) => {
     try {
-      const res = await fetch(`/api/support/tickets/${id}/resolve`, { method: 'POST' })
-      if (!res.ok) throw new Error('Failed')
-      setTickets(prev => prev.map(t => t.id === id ? { ...t, status: 'resolved' as TicketStatus } : t))
+      await resolveTicketMutation(id, 'Resolved via dashboard')
       toast.success(`Ticket #${id} resolved successfully`)
     } catch { toast.error('Failed to resolve ticket') }
   }

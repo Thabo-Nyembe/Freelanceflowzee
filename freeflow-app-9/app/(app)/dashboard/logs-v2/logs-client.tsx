@@ -4,7 +4,10 @@ import { createClient } from '@/lib/supabase/client'
 
 import React, { useState, useCallback, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
+import { Loader2 } from 'lucide-react'
 import { useAuthUserId } from '@/lib/hooks/use-auth-user-id'
+import { useAccessLogs } from '@/lib/hooks/use-access-logs'
+import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -20,12 +23,12 @@ import {
   DialogFooter
 } from '@/components/ui/dialog'
 import {
-  FileText, AlertCircle, Info, AlertTriangle, XCircle, Search,
+  FileText, AlertCircle, XCircle, Search,
   Download, Filter, Clock, Server, Code, Database, Play, Pause, RefreshCw,
   ChevronRight, ChevronDown, Settings, BarChart3, Activity, Layers,
   Terminal, Tag, Bookmark, Share2, Copy, ExternalLink,
   HardDrive, TrendingUp, TrendingDown, MoreHorizontal,
-  Plus, Trash2, LineChart, Archive, Shield, Lock, Key, Workflow, Bell, BellRing, Send,
+  Plus, Trash2, LineChart, Archive, Shield, Lock, Key, Workflow, Bell, Send,
   CloudUpload, CloudDownload, Sparkles, Wand2, Bug, Microscope,
   Sliders, Webhook
 } from 'lucide-react'
@@ -41,6 +44,9 @@ import {
   ActivityFeed,
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
+
+// Initialize Supabase client at module level
+const supabase = createClient()
 
 // ============== COMPREHENSIVE DATADOG-LEVEL INTERFACES ==============
 
@@ -241,10 +247,79 @@ export default function LogsClient() {
   const [settingsTab, setSettingsTab] = useState('general')
   const [isLoading, setIsLoading] = useState(false)
 
-  // Database state
+  // ============================================================================
+  // SUPABASE DATA HOOKS
+  // ============================================================================
+
+  // System logs - manual state (hook has signature issues)
   const [dbSystemLogs, setDbSystemLogs] = useState<any[]>([])
-  const [dbAccessLogs, setDbAccessLogs] = useState<any[]>([])
-  const [dbActivityLogs, setDbActivityLogs] = useState<any[]>([])
+  const [isLoadingSystemLogs, setIsLoadingSystemLogs] = useState(true)
+  const [systemLogsError, setSystemLogsError] = useState<Error | null>(null)
+
+  const refetchSystemLogs = useCallback(async () => {
+    if (!userId) {
+      setIsLoadingSystemLogs(false)
+      return
+    }
+    setIsLoadingSystemLogs(true)
+    try {
+      const { data, error } = await supabase
+        .from('system_logs')
+        .select('*')
+        .eq('user_id', userId)
+        .is('deleted_at', null)
+        .order('logged_at', { ascending: false })
+        .limit(100)
+      if (error) throw error
+      setDbSystemLogs(data || [])
+      setSystemLogsError(null)
+    } catch (err) {
+      console.error('Error fetching system logs:', err)
+      setSystemLogsError(err instanceof Error ? err : new Error('Unknown error'))
+    } finally {
+      setIsLoadingSystemLogs(false)
+    }
+  }, [userId])
+
+  // Fetch system logs when userId changes
+  useEffect(() => {
+    refetchSystemLogs()
+  }, [refetchSystemLogs])
+
+  // Real-time subscription for system logs
+  useEffect(() => {
+    if (!userId) return
+    const channel = supabase
+      .channel('system_logs_changes')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'system_logs' }, (payload) => {
+        setDbSystemLogs(prev => [payload.new as any, ...prev].slice(0, 100))
+      })
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [userId])
+
+  // Access logs hook
+  const {
+    logs: dbAccessLogs,
+    stats: accessLogsStats,
+    isLoading: isLoadingAccessLogs,
+    refetch: refetchAccessLogs
+  } = useAccessLogs()
+
+  // Activity logs hook
+  const {
+    logs: dbActivityLogs,
+    stats: activityLogsStats,
+    isLoading: isLoadingActivityLogs,
+    refetch: refetchActivityLogs
+  } = useActivityLogs()
+
+  // Combined loading state
+  const isLoadingData = isLoadingSystemLogs || isLoadingAccessLogs || isLoadingActivityLogs
+  const hasError = systemLogsError
 
   // Form state for pipeline
   const [pipelineForm, setPipelineForm] = useState({
@@ -309,77 +384,12 @@ export default function LogsClient() {
     fetchUserId()
   }, [getUserId])
 
-  // Fetch system logs
-  const fetchSystemLogs = useCallback(async () => {
-    if (!userId) return
-    try {
-      const { data, error } = await supabase
-        .from('system_logs')
-        .select('*')
-        .eq('user_id', userId)
-        .is('deleted_at', null)
-        .order('logged_at', { ascending: false })
-        .limit(100)
-      if (error) throw error
-      setDbSystemLogs(data || [])
-    } catch (err) {
-      console.error('Error fetching system logs:', err)
-    }
-  }, [userId, ])
-
-  // Fetch access logs
-  const fetchAccessLogs = useCallback(async () => {
-    try {
-      const { data, error } = await supabase
-        .from('access_logs')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(100)
-      if (error) throw error
-      setDbAccessLogs(data || [])
-    } catch (err) {
-      console.error('Error fetching access logs:', err)
-    }
-  }, [])
-
-  // Fetch activity logs
-  const fetchActivityLogs = useCallback(async () => {
-    try {
-      const { data, error } = await supabase
-        .from('activity_logs')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(100)
-      if (error) throw error
-      setDbActivityLogs(data || [])
-    } catch (err) {
-      console.error('Error fetching activity logs:', err)
-    }
-  }, [])
-
-  // Fetch data on user change
+  // Show error toast if there's an error loading logs
   useEffect(() => {
-    if (userId) {
-      fetchSystemLogs()
-      fetchAccessLogs()
-      fetchActivityLogs()
+    if (systemLogsError) {
+      toast.error('Failed to load system logs')
     }
-  }, [userId, fetchSystemLogs, fetchAccessLogs, fetchActivityLogs])
-
-  // Real-time subscription for system logs
-  useEffect(() => {
-    if (!userId) return
-    const channel = supabase
-      .channel('system_logs_changes')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'system_logs' }, (payload) => {
-        setDbSystemLogs(prev => [payload.new as any, ...prev].slice(0, 100))
-      })
-      .subscribe()
-
-    return () => {
-      supabase.removeChannel(channel)
-    }
-  }, [ userId])
+  }, [systemLogsError])
 
   const toggleLogExpand = (logId: string) => {
     setExpandedLogs(prev =>
@@ -388,34 +398,63 @@ export default function LogsClient() {
   }
 
   const stats = useMemo(() => ({
-    totalLogs: dbSystemLogs.length + dbAccessLogs.length + dbActivityLogs.length,
-    errorRate: 0,
-    avgLatency: 0,
+    totalLogs: (dbSystemLogs?.length || 0) + (dbAccessLogs?.length || 0) + (dbActivityLogs?.length || 0),
+    errorRate: accessLogsStats?.successRate ? 100 - accessLogsStats.successRate : 0,
+    avgLatency: accessLogsStats?.avgDuration || 0,
     activeServices: 0,
     logsPerSecond: 1245,
     bytesIngested: 15400000000,
     alertsActive: 0,
     pipelinesActive: 0
-  }), [])
+  }), [dbSystemLogs, dbAccessLogs, dbActivityLogs, accessLogsStats])
 
-  const logsByLevel = useMemo(() => ({
-    critical: 0,
-    error: 0,
-    warn: 0,
-    info: 0,
-    debug: 0
-  }), [])
+  const logsByLevel = useMemo(() => {
+    const systemLogs = dbSystemLogs || []
+    return {
+      critical: systemLogs.filter((l: any) => l.severity === 'critical').length,
+      error: systemLogs.filter((l: any) => l.log_level === 'error').length,
+      warn: systemLogs.filter((l: any) => l.log_level === 'warn').length,
+      info: systemLogs.filter((l: any) => l.log_level === 'info').length,
+      debug: systemLogs.filter((l: any) => l.log_level === 'debug').length
+    }
+  }, [dbSystemLogs])
 
-  const filteredLogs = selectedLevel
-    ? dbSystemLogs.filter(l => l.level === selectedLevel)
-    : dbSystemLogs
+  const filteredLogs = useMemo(() => {
+    const logs = dbSystemLogs || []
+    return selectedLevel
+      ? logs.filter((l: any) => l.log_level === selectedLevel)
+      : logs
+  }, [dbSystemLogs, selectedLevel])
+
+  // Loading state early return (after all hooks)
+  if (isLoadingData) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
+
+  // Error state early return (after all hooks)
+  if (hasError) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-4">
+        <p className="text-red-500">Error loading data</p>
+        <Button onClick={() => {
+          refetchSystemLogs()
+          refetchAccessLogs()
+          refetchActivityLogs()
+        }}>Retry</Button>
+      </div>
+    )
+  }
 
   // CRUD Handlers
 
   // Create a new system log (for testing/demo purposes)
   const handleCreateLog = async (level: string, message: string) => {
     if (!userId) {
-      toast.error('Error')
+      toast.error('User not authenticated')
       return
     }
     setIsLoading(true)
@@ -433,7 +472,7 @@ export default function LogsClient() {
         })
       if (error) throw error
       toast.success('Log created')
-      fetchSystemLogs()
+      refetchSystemLogs()
     } catch (err: unknown) {
       toast.error('Error creating log')
     } finally {
@@ -453,7 +492,7 @@ export default function LogsClient() {
         .eq('user_id', userId)
       if (error) throw error
       toast.success(`${logIds.length} logs have been archived`)
-      fetchSystemLogs()
+      refetchSystemLogs()
     } catch (err: unknown) {
       toast.error('Error archiving logs')
     } finally {
@@ -495,7 +534,7 @@ export default function LogsClient() {
         .is('deleted_at', null)
       if (error) throw error
       toast.success('Logs cleared')
-      fetchSystemLogs()
+      refetchSystemLogs()
     } catch (err: unknown) {
       toast.error('Error clearing logs')
     } finally {

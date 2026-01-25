@@ -415,15 +415,21 @@ export default function EmployeesClient() {
     setShowDeleteDialog(true)
   }
 
+  // Map DB employees to UI employees format for filtering and display
   const filteredEmployees = useMemo(() => {
-    return [].filter(emp => {
-      const matchesSearch = emp.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           emp.position.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           emp.email.toLowerCase().includes(searchQuery.toLowerCase())
-      const matchesDept = departmentFilter === 'all' || emp.department.toLowerCase() === departmentFilter.toLowerCase()
+    if (!dbEmployees) return []
+    return dbEmployees.filter(emp => {
+      const name = emp.employee_name || ''
+      const position = emp.position || emp.job_title || ''
+      const email = emp.email || ''
+      const department = emp.department || ''
+      const matchesSearch = name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           position.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           email.toLowerCase().includes(searchQuery.toLowerCase())
+      const matchesDept = departmentFilter === 'all' || department.toLowerCase() === departmentFilter.toLowerCase()
       return matchesSearch && matchesDept
     })
-  }, [searchQuery, departmentFilter])
+  }, [dbEmployees, searchQuery, departmentFilter])
 
   // Combine database stats with mock stats - prioritize real data when available
   const stats = useMemo(() => {
@@ -497,23 +503,23 @@ export default function EmployeesClient() {
 
   // Handlers
   const handleExportEmployees = () => {
-    const exportData = [].map(emp => ({
-      Name: emp.name,
-      Email: emp.email,
+    const exportData = (dbEmployees || []).map(emp => ({
+      Name: emp.employee_name || '',
+      Email: emp.email || '',
       Phone: emp.phone || '',
-      Position: emp.position,
-      Department: emp.department,
-      Level: emp.level,
-      Manager: emp.manager || '',
-      Status: emp.status,
-      HireDate: emp.hireDate,
-      Location: emp.location,
-      Salary: emp.salary,
-      Equity: emp.equity || 0,
-      PerformanceScore: emp.performanceScore,
-      ProjectsCount: emp.projectsCount,
-      DirectReports: emp.directReports,
-      Skills: emp.skills.join('; ')
+      Position: emp.position || emp.job_title || '',
+      Department: emp.department || '',
+      Level: emp.level || '',
+      Manager: emp.manager_name || '',
+      Status: emp.status || '',
+      HireDate: emp.hire_date || '',
+      Location: emp.office_location || emp.work_location || '',
+      Salary: emp.salary || 0,
+      Equity: emp.stock_options || 0,
+      PerformanceScore: emp.performance_score || 0,
+      ProjectsCount: emp.projects_count || 0,
+      DirectReports: emp.direct_reports || 0,
+      Skills: (emp.skills || []).join('; ')
     }))
     downloadAsCsv(exportData, `employees-export-${new Date().toISOString().split('T')[0]}.csv`)
   }
@@ -639,7 +645,7 @@ export default function EmployeesClient() {
                     <p className="text-blue-200 text-sm">Employees</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{[].filter(e => e.status === 'active').length}</p>
+                    <p className="text-3xl font-bold">{filteredEmployees.filter(e => e.status === 'active').length}</p>
                     <p className="text-blue-200 text-sm">Active</p>
                   </div>
                 </div>

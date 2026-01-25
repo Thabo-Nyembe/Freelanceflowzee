@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useCallback, useEffect } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
 import { useApiKeys, ApiKey as DBApiKey } from '@/lib/hooks/use-api-keys'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -23,7 +23,7 @@ import {
   Search, Filter, MoreHorizontal, Webhook, Zap, Activity,
   BarChart3, ExternalLink, Download,
   AlertTriangle, Fingerprint, ShieldCheck,
-  RotateCcw, History, FileText, Layers, Play, LayoutGrid, List
+  RotateCcw, History, FileText, Layers, Play, LayoutGrid, List, Loader2
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -598,6 +598,12 @@ export default function ApiKeysClient() {
       variant: 'outline' as const
     },
   ], [])
+
+  // Loading state
+  if (isLoading) return <div className="flex items-center justify-center h-full"><Loader2 className="h-8 w-8 animate-spin" /></div>
+
+  // Error state
+  if (error) return <div className="flex flex-col items-center justify-center h-full gap-4"><p className="text-red-500">Error loading data</p><Button onClick={() => fetchKeys()}>Retry</Button></div>
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-zinc-50 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">

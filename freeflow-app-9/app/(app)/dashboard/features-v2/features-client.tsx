@@ -3,6 +3,7 @@
 import React, { useState, useMemo, useCallback } from 'react'
 import { toast } from 'sonner'
 import { downloadAsCsv, apiPost, deleteWithConfirmation } from '@/lib/button-handlers'
+import { useFeatures, useCreateFeature, useUpdateFeature, useDeleteFeature, type Feature as DbFeature } from '@/lib/hooks/use-features'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -58,6 +59,7 @@ import {
   LayoutGrid,
   List,
   Kanban,
+  Loader2,
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -171,11 +173,50 @@ interface Segment {
   userCount: number
 }
 
-// Empty data arrays (connect to real data sources)
-const features: Feature[] = []
-const segments: Segment[] = []
-
 const categories = ['All', 'AI & ML', 'Collaboration', 'Analytics', 'Mobile', 'Security', 'Integrations']
+
+// Helper function to map DB status to UI status
+function mapDbStatusToUIStatus(dbStatus: string): FeatureStatus {
+  const statusMap: Record<string, FeatureStatus> = {
+    'enabled': 'released',
+    'disabled': 'planned',
+    'rollout': 'in_progress',
+    'testing': 'testing',
+    'archived': 'archived'
+  }
+  return statusMap[dbStatus] || 'idea'
+}
+
+// Helper function to map UI status to DB status
+function mapUIStatusToDbStatus(uiStatus: FeatureStatus): string {
+  const statusMap: Record<FeatureStatus, string> = {
+    'released': 'enabled',
+    'planned': 'disabled',
+    'in_progress': 'rollout',
+    'testing': 'testing',
+    'archived': 'archived',
+    'idea': 'disabled'
+  }
+  return statusMap[uiStatus]
+}
+
+// Helper function to determine rollout stage from percentage
+function mapRolloutStage(percentage: number): RolloutStage {
+  if (percentage <= 5) return 'canary'
+  if (percentage <= 25) return 'beta'
+  if (percentage <= 75) return 'ga'
+  return 'full'
+}
+
+// Helper function to calculate RICE score from DB feature
+function calculateRICEScore(dbFeature: DbFeature): number {
+  const reach = dbFeature.target_users || 0
+  const impact = Math.round((dbFeature.success_rate || 0) / 10)
+  const confidence = Math.round(dbFeature.rollout_percentage || 50)
+  const effort = 5 // Default effort
+  if (effort === 0) return 0
+  return (reach * impact * (confidence / 100)) / effort
+}
 
 // Empty data arrays for competitive upgrade components (connect to real data sources)
 const featuresAIInsights: { id: string; type: 'success' | 'info' | 'warning' | 'error'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
@@ -189,8 +230,73 @@ const featuresActivities: { id: string; user: string; action: string; target: st
 // Quick actions will be defined inside the component to access state
 
 export default function FeaturesClient() {
-  const [featuresState] = useState<Feature[]>(features)
-  const [segmentsState] = useState<Segment[]>(segments)
+  // Supabase hooks for data fetching and mutations
+  const { data: dbFeatures, isLoading, error, refetch } = useFeatures()
+  const { mutate: createFeature, isPending: isCreating } = useCreateFeature()
+  const { mutate: updateFeature, isPending: isUpdating } = useUpdateFeature()
+  const { mutate: deleteFeatureMutation, isPending: isDeleting } = useDeleteFeature()
+
+  // Map DB features (snake_case) to UI features (camelCase)
+  const featuresState = useMemo<Feature[]>(() => {
+    if (!dbFeatures) return []
+    return dbFeatures.map((dbFeature: DbFeature) => ({
+      id: dbFeature.id,
+      key: dbFeature.feature_key,
+      name: dbFeature.feature_name,
+      description: dbFeature.description || '',
+      status: mapDbStatusToUIStatus(dbFeature.status),
+      priority: 'medium' as Priority, // Default, can be enhanced with DB field
+      category: dbFeature.category || 'Integrations',
+      tags: dbFeature.tags || [],
+      owner: {
+        id: dbFeature.user_id,
+        name: dbFeature.created_by || 'Unknown',
+        avatar: '',
+        role: 'Developer'
+      },
+      team: 'Engineering',
+      createdAt: dbFeature.created_at,
+      updatedAt: dbFeature.updated_at,
+      targetRelease: undefined,
+      votes: [],
+      comments: [],
+      rice: {
+        reach: dbFeature.target_users || 0,
+        impact: Math.round((dbFeature.success_rate || 0) / 10),
+        confidence: Math.round(dbFeature.rollout_percentage || 50),
+        effort: 5,
+        score: calculateRICEScore(dbFeature)
+      },
+      metrics: dbFeature.status === 'enabled' ? {
+        adoption: dbFeature.rollout_percentage || 0,
+        usage: Math.min(100, Math.round((dbFeature.total_requests || 0) / 100)),
+        satisfaction: dbFeature.success_rate || 0,
+        errorRate: 100 - (dbFeature.success_rate || 100),
+        latency: dbFeature.avg_response_time_ms || 0
+      } : undefined,
+      rollout: dbFeature.rollout_percentage > 0 ? {
+        stage: mapRolloutStage(dbFeature.rollout_percentage),
+        percentage: dbFeature.rollout_percentage,
+        targetSegments: dbFeature.target_segments || [],
+        environments: dbFeature.environments || ['staging'],
+        startDate: dbFeature.enabled_at || dbFeature.created_at
+      } : undefined,
+      abTest: dbFeature.is_ab_test && dbFeature.ab_test_variants ? {
+        id: `${dbFeature.id}-test`,
+        name: `${dbFeature.feature_name} Test`,
+        variants: Array.isArray(dbFeature.ab_test_variants) ? dbFeature.ab_test_variants : [],
+        status: 'running' as const,
+        winner: dbFeature.ab_test_winner || undefined,
+        metrics: Array.isArray(dbFeature.ab_test_conversion) ? dbFeature.ab_test_conversion : []
+      } : undefined,
+      dependencies: [],
+      linkedIssues: [],
+      platforms: ['web'] as ('web' | 'ios' | 'android' | 'api')[]
+    }))
+  }, [dbFeatures])
+
+  // Segments state (empty for now, can be enhanced with separate hook)
+  const [segmentsState] = useState<Segment[]>([])
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('All')
   const [selectedStatus, setSelectedStatus] = useState<FeatureStatus | 'all'>('all')
@@ -510,6 +616,25 @@ export default function FeaturesClient() {
     toast.success('Exporting roadmap', {
       description: 'Roadmap will be downloaded'
     })
+  }
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-4">
+        <p className="text-red-500">Error loading features</p>
+        <Button onClick={() => refetch()}>Retry</Button>
+      </div>
+    )
   }
 
   return (

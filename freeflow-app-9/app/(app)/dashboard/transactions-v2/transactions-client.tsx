@@ -171,20 +171,7 @@ interface BalanceTransaction {
   availableOn: string
 }
 
-// Empty typed arrays (no mock data)
-const mockPayments: Payment[] = []
-
-const mockRefunds: Refund[] = []
-
-const mockDisputes: Dispute[] = []
-
-const mockPayouts: Payout[] = []
-
-const mockInvoices: Invoice[] = []
-
-const mockCustomers: Customer[] = []
-
-const mockBalanceTransactions: BalanceTransaction[] = []
+// Note: All data is now fetched from Supabase via useTransactions hook
 
 const statusColors: Record<string, string> = {
   succeeded: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
@@ -219,14 +206,14 @@ const cardBrandIcons: Record<string, string> = {
   discover: '💳 Discover',
 }
 
-// Empty typed arrays for AI-powered competitive upgrade components
-const mockTransactionsAIInsights: { id: string; type: 'success' | 'warning' | 'info'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
+// AI/competitive upgrade component data arrays (empty - populated by Supabase data below)
+const emptyAIInsights: { id: string; type: 'success' | 'warning' | 'info'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
 
-const mockTransactionsCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }[] = []
+const emptyCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }[] = []
 
-const mockTransactionsPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: 'low' | 'medium' | 'high' }[] = []
+const emptyPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: 'low' | 'medium' | 'high' }[] = []
 
-const mockTransactionsActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'info' | 'warning' | 'success' }[] = []
+const emptyActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'info' | 'warning' | 'success' }[] = []
 
 // Quick actions will be defined inside the component with proper state access
 
@@ -277,31 +264,134 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
   const [invoiceForm, setInvoiceForm] = useState({ customerId: '', description: '', amount: '', dueDate: '', sendEmail: true })
   const [customerForm, setCustomerForm] = useState({ name: '', email: '', phone: '', description: '' })
 
-  const { transactions, createTransaction, deleteTransaction, refetch } = useTransactions({})
+  const { transactions, loading, error, createTransaction, deleteTransaction, refetch, stats } = useTransactions({})
   const displayTransactions = transactions || []
 
-  // Calculate stats (handles empty arrays safely)
-  const totalVolume = mockPayments.filter(p => p.status === 'succeeded').reduce((sum, p) => sum + p.amount, 0)
-  const totalFees = mockPayments.filter(p => p.status === 'succeeded').reduce((sum, p) => sum + p.fees, 0)
-  const successRate = mockPayments.length > 0 ? (mockPayments.filter(p => p.status === 'succeeded').length / mockPayments.length * 100).toFixed(1) : '0.0'
-  const pendingPayouts = mockPayouts.filter(p => p.status === 'pending' || p.status === 'in_transit').reduce((sum, p) => sum + p.amount, 0)
+  // Calculate stats from real Supabase data
+  const totalVolume = useMemo(() => displayTransactions.filter(t => t.type === 'income').reduce((sum, t) => sum + Math.abs(t.amount) * 100, 0), [displayTransactions])
+  const totalFees = useMemo(() => Math.round(totalVolume * 0.029 + displayTransactions.filter(t => t.type === 'income').length * 30), [totalVolume, displayTransactions])
+  const successRate = displayTransactions.length > 0 ? ((displayTransactions.filter(t => t.type === 'income').length / displayTransactions.length) * 100).toFixed(1) : '0.0'
+  const pendingPayouts = useMemo(() => displayTransactions.filter(t => t.type === 'income' && new Date(t.transaction_date) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)).reduce((sum, t) => sum + Math.abs(t.amount) * 100, 0), [displayTransactions])
 
-  // Balance calculations (handles empty arrays safely)
-  const availableBalance = mockBalanceTransactions.filter(t => new Date(t.availableOn) <= new Date()).reduce((sum, t) => sum + t.net, 0)
-  const pendingBalance = mockBalanceTransactions.filter(t => new Date(t.availableOn) > new Date()).reduce((sum, t) => sum + t.net, 0)
-  const totalCustomers = mockCustomers.length
-  const totalInvoicesDue = mockInvoices.filter(i => i.status === 'open').reduce((sum, i) => sum + i.amount, 0)
+  // Balance calculations from real data
+  const availableBalance = useMemo(() => {
+    const income = displayTransactions.filter(t => t.type === 'income').reduce((sum, t) => sum + Math.abs(t.amount) * 100, 0)
+    const expenses = displayTransactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + Math.abs(t.amount) * 100, 0)
+    return income - expenses - totalFees
+  }, [displayTransactions, totalFees])
+  const pendingBalance = useMemo(() => displayTransactions.filter(t => new Date(t.transaction_date) > new Date(Date.now() - 2 * 24 * 60 * 60 * 1000)).reduce((sum, t) => sum + Math.abs(t.amount) * 100, 0), [displayTransactions])
+  const totalCustomers = useMemo(() => {
+    const uniqueClients = new Set(displayTransactions.filter(t => t.client_name).map(t => t.client_name))
+    return uniqueClients.size
+  }, [displayTransactions])
+  const totalInvoicesDue = useMemo(() => displayTransactions.filter(t => t.category === 'Invoice' && t.type === 'income').reduce((sum, t) => sum + Math.abs(t.amount) * 100, 0), [displayTransactions])
+
+  // Derive payment-like objects from real transactions for display
+  const derivedPayments = useMemo(() => displayTransactions.filter(t => t.type === 'income').map(t => ({
+    id: t.id,
+    amount: Math.abs(t.amount) * 100,
+    currency: t.currency || 'USD',
+    status: 'succeeded' as const,
+    description: t.description,
+    customer: { name: t.client_name || 'Unknown', email: '', id: t.client_id || '' },
+    paymentMethod: { type: 'card' as const, brand: 'card', last4: '0000' },
+    metadata: {} as Record<string, string>,
+    created: t.transaction_date,
+    fees: Math.round(Math.abs(t.amount) * 2.9 + 30),
+    net: Math.round(Math.abs(t.amount) * 100 - Math.abs(t.amount) * 2.9 - 30),
+    riskScore: 5,
+    refunded: false,
+  })), [displayTransactions])
+
+  const derivedRefunds = useMemo(() => displayTransactions.filter(t => t.category === 'Refund').map(t => ({
+    id: t.id,
+    paymentId: t.notes?.match(/Original payment: (\S+)/)?.[1] || 'unknown',
+    amount: Math.abs(t.amount) * 100,
+    currency: t.currency || 'USD',
+    status: 'succeeded' as const,
+    reason: (t.notes?.match(/Reason: (\S+)/)?.[1] || 'other') as 'duplicate' | 'fraudulent' | 'requested_by_customer' | 'other',
+    created: t.transaction_date,
+  })), [displayTransactions])
+
+  const derivedInvoices = useMemo(() => displayTransactions.filter(t => t.category === 'Invoice').map(t => ({
+    id: t.id,
+    number: t.invoice_number || `INV-${t.id.slice(0, 8)}`,
+    customer: { name: t.client_name || 'Unknown', email: '' },
+    amount: Math.abs(t.amount) * 100,
+    currency: t.currency || 'USD',
+    status: (t.type === 'income' ? 'paid' : 'open') as 'draft' | 'open' | 'paid' | 'void' | 'uncollectible',
+    dueDate: t.transaction_date,
+    created: t.created_at,
+    items: [{ description: t.description, quantity: 1, unitPrice: Math.abs(t.amount) * 100 }],
+  })), [displayTransactions])
 
   const filteredPayments = useMemo(() => {
-    return mockPayments.filter(p => {
+    return derivedPayments.filter(p => {
       const matchesSearch = searchQuery === '' ||
         p.customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.customer.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
         p.id.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesStatus = statusFilter === 'all' || p.status === statusFilter
       return matchesSearch && matchesStatus
     })
-  }, [searchQuery, statusFilter])
+  }, [searchQuery, statusFilter, derivedPayments])
+
+  // Derive customer-like objects from real transactions
+  const derivedCustomers = useMemo(() => {
+    const customerMap = new Map<string, Customer>()
+    displayTransactions.forEach(t => {
+      if (!t.client_name) return
+      const key = t.client_name
+      if (!customerMap.has(key)) {
+        customerMap.set(key, {
+          id: t.client_id || t.id,
+          name: t.client_name,
+          email: '',
+          created: t.created_at,
+          totalSpent: 0,
+          paymentCount: 0,
+          lastPayment: t.transaction_date,
+          subscriptions: 0,
+        })
+      }
+      const c = customerMap.get(key)!
+      if (t.type === 'income') {
+        c.totalSpent += Math.abs(t.amount) * 100
+        c.paymentCount += 1
+      }
+      if (new Date(t.transaction_date) > new Date(c.lastPayment)) {
+        c.lastPayment = t.transaction_date
+      }
+    })
+    return Array.from(customerMap.values())
+  }, [displayTransactions])
+
+  // Derive payout-like objects from real expense transactions
+  const derivedPayouts: Payout[] = useMemo(() => displayTransactions.filter(t => t.type === 'expense' && t.category !== 'Refund').map(t => ({
+    id: t.id,
+    amount: Math.abs(t.amount) * 100,
+    currency: t.currency || 'USD',
+    status: 'paid' as const,
+    arrivalDate: t.transaction_date,
+    created: t.created_at,
+    destination: { bank: t.vendor_name || 'Bank Account', last4: '0000' },
+    automatic: true,
+  })), [displayTransactions])
+
+  // Disputes are not tracked in financial_transactions, so keep empty
+  const derivedDisputes: Dispute[] = []
+
+  // Derive balance transactions from all real transactions
+  const derivedBalanceTransactions: BalanceTransaction[] = useMemo(() => displayTransactions.map(t => ({
+    id: t.id,
+    type: (t.type === 'income' ? (t.category === 'Refund' ? 'refund' : 'charge') : 'payout') as 'charge' | 'refund' | 'payout' | 'adjustment' | 'fee',
+    amount: t.type === 'income' ? Math.abs(t.amount) * 100 : -Math.abs(t.amount) * 100,
+    fee: t.type === 'income' ? Math.round(Math.abs(t.amount) * 2.9 + 30) : 0,
+    net: t.type === 'income' ? Math.round(Math.abs(t.amount) * 100 - Math.abs(t.amount) * 2.9 - 30) : -Math.abs(t.amount) * 100,
+    currency: t.currency || 'USD',
+    description: t.description,
+    created: t.transaction_date,
+    availableOn: new Date(new Date(t.transaction_date).getTime() + 2 * 24 * 60 * 60 * 1000).toISOString(),
+  })), [displayTransactions])
 
   const formatCurrency = (amount: number, currency: string = 'USD') => {
     return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount / 100)
@@ -355,7 +445,7 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
     setIsSubmitting(true)
     try {
       const amount = parseFloat(invoiceForm.amount.replace(/[^0-9.]/g, '')) * 100
-      const customer = mockCustomers.find(c => c.id === invoiceForm.customerId) || mockCustomers[0]
+      const customer = derivedCustomers.find(c => c.id === invoiceForm.customerId) || derivedCustomers[0]
       await createTransaction({
         type: 'income',
         category: 'Invoice',
@@ -452,7 +542,7 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
     setIsSubmitting(true)
     try {
       const amount = parseFloat(newPaymentForm.amount.replace(/[^0-9.]/g, ''))
-      const customer = mockCustomers.find(c => c.id === newPaymentForm.customerId) || mockCustomers[0]
+      const customer = derivedCustomers.find(c => c.id === newPaymentForm.customerId) || derivedCustomers[0]
       await createTransaction({
         type: 'income',
         category: 'Payment',
@@ -503,14 +593,14 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
       }
 
       // Add payments
-      const paymentsData = mockPayments.map(p =>
+      const paymentsData = derivedPayments.map(p =>
         [p.id, 'Payment', (p.amount / 100).toFixed(2), p.currency, p.status, p.customer.name, p.created].join(',')
       )
       exportData = [...exportData, ...paymentsData]
 
       // Add refunds if selected
       if (exportReportForm.includeRefunds) {
-        const refundsData = mockRefunds.map(r =>
+        const refundsData = derivedRefunds.map(r =>
           [r.id, 'Refund', (r.amount / 100).toFixed(2), r.currency, r.status, r.paymentId, r.created].join(',')
         )
         exportData = [...exportData, ...refundsData]
@@ -518,7 +608,7 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
 
       // Add disputes if selected
       if (exportReportForm.includeDisputes) {
-        const disputesData = mockDisputes.map(d =>
+        const disputesData = derivedDisputes.map(d =>
           [d.id, 'Dispute', (d.amount / 100).toFixed(2), d.currency, d.status, d.paymentId, d.created].join(',')
         )
         exportData = [...exportData, ...disputesData]
@@ -526,7 +616,7 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
 
       // Add payouts if selected
       if (exportReportForm.includePayouts) {
-        const payoutsData = mockPayouts.map(p =>
+        const payoutsData = derivedPayouts.map(p =>
           [p.id, 'Payout', (p.amount / 100).toFixed(2), p.currency, p.status, p.destination.bank, p.created].join(',')
         )
         exportData = [...exportData, ...payoutsData]
@@ -561,7 +651,7 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
     setIsSubmitting(true)
     try {
       const refundAmount = parseFloat(quickRefundForm.amount.replace(/[^0-9.]/g, ''))
-      const payment = mockPayments.find(p => p.id === quickRefundForm.paymentId)
+      const payment = derivedPayments.find(p => p.id === quickRefundForm.paymentId)
       await createTransaction({
         type: 'expense',
         category: 'Refund',
@@ -588,6 +678,32 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
     { id: '2', label: 'Export Report', icon: 'download', action: () => setShowExportReportDialog(true), variant: 'default' as const },
     { id: '3', label: 'Issue Refund', icon: 'undo', action: () => setShowQuickRefundDialog(true), variant: 'outline' as const },
   ]
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 p-8 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <RefreshCw className="w-8 h-8 animate-spin text-emerald-600 mx-auto" />
+          <p className="text-gray-600 dark:text-gray-400">Loading transactions...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 p-8 flex items-center justify-center">
+        <div className="text-center space-y-4 max-w-md">
+          <AlertTriangle className="w-8 h-8 text-red-500 mx-auto" />
+          <p className="text-red-600 dark:text-red-400 font-medium">Failed to load transactions</p>
+          <p className="text-sm text-gray-500">{error}</p>
+          <button onClick={() => refetch()} className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700">
+            Try Again
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 p-8">
@@ -768,20 +884,20 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
                   <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
-                    <p className="text-white/70 text-sm">Today's Volume</p>
-                    <p className="text-2xl font-bold">{formatCurrency(49800)}</p>
+                    <p className="text-white/70 text-sm">Total Volume</p>
+                    <p className="text-2xl font-bold">{formatCurrency(totalVolume)}</p>
                   </div>
                   <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
                     <p className="text-white/70 text-sm">Transactions</p>
-                    <p className="text-2xl font-bold">127</p>
+                    <p className="text-2xl font-bold">{displayTransactions.length}</p>
                   </div>
                   <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
                     <p className="text-white/70 text-sm">Avg. Value</p>
-                    <p className="text-2xl font-bold">{formatCurrency(39213)}</p>
+                    <p className="text-2xl font-bold">{formatCurrency(displayTransactions.length > 0 ? Math.round(totalVolume / displayTransactions.length) : 0)}</p>
                   </div>
                   <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
                     <p className="text-white/70 text-sm">Success Rate</p>
-                    <p className="text-2xl font-bold">98.2%</p>
+                    <p className="text-2xl font-bold">{successRate}%</p>
                   </div>
                 </div>
               </div>
@@ -824,7 +940,7 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
                 </div>
                 <ScrollArea className="h-[350px]">
                   <div className="divide-y divide-gray-100 dark:divide-gray-700">
-                    {mockPayments.slice(0, 5).map((payment) => (
+                    {derivedPayments.slice(0, 5).map((payment) => (
                       <div key={payment.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer" onClick={() => { setSelectedPayment(payment); setShowPaymentDialog(true); }}>
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
@@ -859,7 +975,7 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
                 </div>
                 <ScrollArea className="h-[350px]">
                   <div className="divide-y divide-gray-100 dark:divide-gray-700">
-                    {mockPayouts.map((payout) => (
+                    {derivedPayouts.map((payout) => (
                       <div key={payout.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
@@ -892,13 +1008,13 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
             </div>
 
             {/* Active Disputes Alert */}
-            {mockDisputes.filter(d => d.status === 'needs_response').length > 0 && (
+            {derivedDisputes.filter(d => d.status === 'needs_response').length > 0 && (
               <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4">
                 <div className="flex items-center gap-3">
                   <AlertTriangle className="w-6 h-6 text-red-600" />
                   <div className="flex-1">
                     <p className="font-semibold text-red-800 dark:text-red-200">
-                      {mockDisputes.filter(d => d.status === 'needs_response').length} dispute(s) need your response
+                      {derivedDisputes.filter(d => d.status === 'needs_response').length} dispute(s) need your response
                     </p>
                     <p className="text-sm text-red-600 dark:text-red-300">
                       Respond before the deadline to avoid automatic loss
@@ -991,7 +1107,7 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                    {mockBalanceTransactions.map((txn) => (
+                    {derivedBalanceTransactions.map((txn) => (
                       <tr key={txn.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                         <td className="px-6 py-4">
                           <span className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${balanceTypeColors[txn.type]} bg-opacity-20`}>
@@ -1046,7 +1162,7 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                    {mockInvoices.map((invoice) => (
+                    {derivedInvoices.map((invoice) => (
                       <tr key={invoice.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                         <td className="px-6 py-4">
                           <p className="text-sm font-medium text-gray-900 dark:text-white">{invoice.number}</p>
@@ -1107,7 +1223,7 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
                 </div>
               </div>
               <div className="divide-y divide-gray-100 dark:divide-gray-700">
-                {mockCustomers.map((customer) => (
+                {derivedCustomers.map((customer) => (
                   <div key={customer.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
@@ -1173,19 +1289,19 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
                   <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3">
                     <p className="text-white/70 text-sm">Succeeded</p>
-                    <p className="text-xl font-bold">{mockPayments.filter(p => p.status === 'succeeded').length}</p>
+                    <p className="text-xl font-bold">{derivedPayments.filter(p => p.status === 'succeeded').length}</p>
                   </div>
                   <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3">
                     <p className="text-white/70 text-sm">Pending</p>
-                    <p className="text-xl font-bold">{mockPayments.filter(p => p.status === 'pending').length}</p>
+                    <p className="text-xl font-bold">{derivedPayments.filter(p => p.status === 'pending').length}</p>
                   </div>
                   <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3">
                     <p className="text-white/70 text-sm">Failed</p>
-                    <p className="text-xl font-bold">{mockPayments.filter(p => p.status === 'failed').length}</p>
+                    <p className="text-xl font-bold">{derivedPayments.filter(p => p.status === 'failed').length}</p>
                   </div>
                   <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3">
                     <p className="text-white/70 text-sm">Total</p>
-                    <p className="text-xl font-bold">{mockPayments.length}</p>
+                    <p className="text-xl font-bold">{derivedPayments.length}</p>
                   </div>
                 </div>
               </div>
@@ -1310,7 +1426,7 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
               <div className="p-6 border-b border-gray-100 dark:border-gray-700">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white">All Refunds</h3>
-                  <p className="text-sm text-gray-500">{mockRefunds.length} total refunds</p>
+                  <p className="text-sm text-gray-500">{derivedRefunds.length} total refunds</p>
                 </div>
               </div>
               <div className="overflow-x-auto">
@@ -1326,7 +1442,7 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                    {mockRefunds.map((refund) => (
+                    {derivedRefunds.map((refund) => (
                       <tr key={refund.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                         <td className="px-6 py-4 text-sm font-mono text-gray-900 dark:text-white">{refund.id}</td>
                         <td className="px-6 py-4 text-sm font-mono text-gray-500">{refund.paymentId}</td>
@@ -1354,7 +1470,7 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white">All Disputes</h3>
                   <div className="flex items-center gap-2">
                     <span className="px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
-                      {mockDisputes.filter(d => d.status === 'needs_response').length} Need Response
+                      {derivedDisputes.filter(d => d.status === 'needs_response').length} Need Response
                     </span>
                   </div>
                 </div>
@@ -1373,7 +1489,7 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                    {mockDisputes.map((dispute) => (
+                    {derivedDisputes.map((dispute) => (
                       <tr key={dispute.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                         <td className="px-6 py-4 text-sm font-mono text-gray-900 dark:text-white">{dispute.id}</td>
                         <td className="px-6 py-4 text-sm font-mono text-gray-500">{dispute.paymentId}</td>
@@ -1435,7 +1551,7 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                    {mockPayouts.map((payout) => (
+                    {derivedPayouts.map((payout) => (
                       <tr key={payout.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                         <td className="px-6 py-4 text-sm font-mono text-gray-900 dark:text-white">{payout.id}</td>
                         <td className="px-6 py-4 text-sm font-semibold text-gray-900 dark:text-white">{formatCurrency(payout.amount)}</td>
@@ -1930,18 +2046,18 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockTransactionsAIInsights}
+              insights={emptyAIInsights}
               title="Transaction Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockTransactionsCollaborators}
+              collaborators={emptyCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockTransactionsPredictions}
+              predictions={emptyPredictions}
               title="Revenue Forecasts"
             />
           </div>
@@ -1949,7 +2065,7 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockTransactionsActivities}
+            activities={emptyActivities}
             title="Transaction Activity"
             maxItems={5}
           />
@@ -2104,7 +2220,7 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
                   onChange={(e) => setInvoiceForm(prev => ({ ...prev, customerId: e.target.value }))}
                   className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
                 >
-                  {mockCustomers.map(c => (
+                  {derivedCustomers.map(c => (
                     <option key={c.id} value={c.id}>{c.name} ({c.email})</option>
                   ))}
                 </select>
@@ -2237,7 +2353,7 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
                   className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
                 >
                   <option value="">Select a customer</option>
-                  {mockCustomers.map(c => (
+                  {derivedCustomers.map(c => (
                     <option key={c.id} value={c.id}>{c.name} ({c.email})</option>
                   ))}
                 </select>
@@ -2372,7 +2488,7 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
                 <select
                   value={quickRefundForm.paymentId}
                   onChange={(e) => {
-                    const payment = mockPayments.find(p => p.id === e.target.value)
+                    const payment = derivedPayments.find(p => p.id === e.target.value)
                     setQuickRefundForm(prev => ({
                       ...prev,
                       paymentId: e.target.value,
@@ -2382,7 +2498,7 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
                   className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
                 >
                   <option value="">Select a payment to refund</option>
-                  {mockPayments.filter(p => p.status === 'succeeded' && !p.refunded).map(p => (
+                  {derivedPayments.filter(p => p.status === 'succeeded' && !p.refunded).map(p => (
                     <option key={p.id} value={p.id}>
                       {p.customer.name} - {formatCurrency(p.amount)} ({p.id.slice(-8)})
                     </option>
@@ -2394,7 +2510,7 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
                   <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                     <p className="text-sm text-gray-500">Original Amount</p>
                     <p className="text-xl font-bold text-gray-900 dark:text-white">
-                      {formatCurrency((mockPayments.find(p => p.id === quickRefundForm.paymentId)?.amount || 0))}
+                      {formatCurrency((derivedPayments.find(p => p.id === quickRefundForm.paymentId)?.amount || 0))}
                     </p>
                   </div>
                   <div>

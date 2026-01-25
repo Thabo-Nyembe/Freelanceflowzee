@@ -1,6 +1,7 @@
 'use client'
 
 import { createClient } from '@/lib/supabase/client'
+import { useHelpDocs } from '@/lib/hooks/use-help-extended'
 
 import { useState, useCallback, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
@@ -44,6 +45,9 @@ import {
   ActivityFeed,
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
+
+// Initialize Supabase client
+const supabase = createClient()
 
 // Database Types
 interface DbHelpArticle {
@@ -457,11 +461,13 @@ export default function HelpDocsClient() {
   const [ticketFilter, setTicketFilter] = useState<string>('all')
   const [settingsTab, setSettingsTab] = useState('general')
 
-  // Data State
+  // Data State - Use Supabase hook for real data
+  const { data: helpDocsData, isLoading: isLoadingHelpDocs, refresh: refetchHelpDocs } = useHelpDocs()
   const [dbArticles, setDbArticles] = useState<DbHelpArticle[]>([])
   const [dbCategories, setDbCategories] = useState<DbHelpCategory[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
+  const [error, setError] = useState<Error | null>(null)
 
   // Dialog State
   const [showCreateDialog, setShowCreateDialog] = useState(false)
@@ -521,29 +527,33 @@ export default function HelpDocsClient() {
   // Generate article code
   const generateArticleCode = () => `ART-${Date.now().toString(36).toUpperCase()}`
 
-  // Fetch articles
+  // Fetch articles - also refresh hook data
   const fetchArticles = useCallback(async () => {
     try {
       setIsLoading(true)
+      setError(null)
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      const { data, error } = await supabase
+      const { data, error: fetchError } = await supabase
         .from('help_articles')
         .select('*')
         .eq('user_id', user.id)
         .is('deleted_at', null)
         .order('created_at', { ascending: false })
 
-      if (error) throw error
+      if (fetchError) throw fetchError
       setDbArticles(data || [])
-    } catch (error) {
-      console.error('Error fetching articles:', error)
+      // Also refresh hook data
+      refetchHelpDocs()
+    } catch (err) {
+      console.error('Error fetching articles:', err)
+      setError(err instanceof Error ? err : new Error('Failed to load articles'))
       toast.error('Failed to load articles')
     } finally {
       setIsLoading(false)
     }
-  }, [])
+  }, [refetchHelpDocs])
 
   // Create article
   const handleCreateArticle = async () => {
@@ -738,6 +748,63 @@ export default function HelpDocsClient() {
   useEffect(() => {
     fetchArticles()
   }, [fetchArticles])
+
+  // Sync hook data to local state for backward compatibility
+  useEffect(() => {
+    if (helpDocsData && helpDocsData.length > 0) {
+      // Map help_docs data to DbHelpArticle format for compatibility
+      const mappedArticles: DbHelpArticle[] = helpDocsData.map((doc: any) => ({
+        id: doc.id,
+        user_id: doc.user_id || '',
+        article_code: doc.article_code || `DOC-${doc.id?.slice(0, 8)}`,
+        title: doc.title || '',
+        slug: doc.slug || null,
+        content: doc.content || doc.answer || null,
+        excerpt: doc.excerpt || doc.question || null,
+        category: doc.category || 'guide',
+        status: doc.status || 'draft',
+        published_at: doc.published_at || null,
+        views: doc.views_count || doc.views || 0,
+        helpful_count: doc.helpful_count || 0,
+        not_helpful_count: doc.not_helpful_count || 0,
+        read_time_minutes: doc.read_time_minutes || 5,
+        meta_title: doc.meta_title || null,
+        meta_description: doc.meta_description || null,
+        keywords: doc.keywords || [],
+        featured_image: doc.featured_image || null,
+        attachments: doc.attachments || [],
+        author_id: doc.author_id || doc.user_id || null,
+        author_name: doc.author_name || doc.author || null,
+        sort_order: doc.sort_order || 0,
+        parent_id: doc.parent_id || null,
+        tags: doc.tags || [],
+        metadata: doc.metadata || {},
+        created_at: doc.created_at || new Date().toISOString(),
+        updated_at: doc.updated_at || new Date().toISOString(),
+        deleted_at: doc.deleted_at || null
+      }))
+      setDbArticles(prev => prev.length === 0 ? mappedArticles : prev)
+    }
+  }, [helpDocsData])
+
+  // Loading state early return
+  if (isLoadingHelpDocs && dbArticles.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-full min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    )
+  }
+
+  // Error state early return
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full min-h-screen gap-4">
+        <p className="text-red-500">Error loading data</p>
+        <Button onClick={() => { setError(null); refetchHelpDocs(); fetchArticles(); }}>Retry</Button>
+      </div>
+    )
+  }
 
   // Legacy handlers for UI compatibility
   const handleContactSupport = () => {

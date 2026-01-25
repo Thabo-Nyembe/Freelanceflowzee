@@ -15,6 +15,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Loader2 } from 'lucide-react'
 import { useCertifications, type Certification, type CertificationType, type CertificationStatus } from '@/lib/hooks/use-certifications'
+import { useCertificationCourses, useCertificationBadges } from '@/lib/hooks/use-certifications-extended'
 
 // Enhanced & Competitive Upgrade Components
 import {
@@ -148,25 +149,14 @@ interface VerificationRecord {
   deviceType: string
 }
 
-// Empty arrays for credentials (to be populated from database)
-const mockCredentials: Credential[] = []
+// Competitive upgrade component empty arrays (populated from database when available)
+const certsAIInsights: { id: string; type: 'success' | 'info' | 'warning' | 'error'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
 
-const mockBadges: Badge[] = []
+const certsCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'offline' | 'away'; role: string }[] = []
 
-const mockSkills: Skill[] = []
+const certsPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: 'low' | 'medium' | 'high' }[] = []
 
-const mockPathways: LearningPathway[] = []
-
-const mockVerifications: VerificationRecord[] = []
-
-// Empty arrays for competitive upgrade components (to be populated from database)
-const mockCertsAIInsights: { id: string; type: 'success' | 'info' | 'warning' | 'error'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
-
-const mockCertsCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'offline' | 'away'; role: string }[] = []
-
-const mockCertsPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: 'low' | 'medium' | 'high' }[] = []
-
-const mockCertsActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'update' | 'error' }[] = []
+const certsActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'update' | 'error' }[] = []
 
 // Quick actions are defined inside the component to access state setters
 
@@ -189,11 +179,11 @@ export default function CertificationsClient() {
   const [certToDelete, setCertToDelete] = useState<Certification | null>(null)
   const [certToEdit, setCertToEdit] = useState<Certification | null>(null)
 
-  // Supabase client and hooks
-
+  // Supabase hooks for real data
   const {
     certifications: dbCertifications,
     loading: certificationsLoading,
+    error: certificationsError,
     createCertification,
     updateCertification,
     deleteCertification,
@@ -202,6 +192,9 @@ export default function CertificationsClient() {
     certificationType: typeFilter !== 'all' ? typeFilter as CertificationType : undefined,
     status: statusFilter !== 'all' ? statusFilter as CertificationStatus : undefined
   })
+
+  const { courses: dbCourses, isLoading: coursesLoading } = useCertificationCourses()
+  const { badges: dbBadges, isLoading: badgesLoading } = useCertificationBadges()
 
   // Form state
   const [certForm, setCertForm] = useState({
@@ -262,23 +255,33 @@ export default function CertificationsClient() {
     })
   }
 
-  // Calculate stats
+  // Calculate stats from real database data
+  const certifications = dbCertifications || []
+  const badges = dbBadges || []
+  const courses = dbCourses || []
+
   const stats = useMemo(() => {
-    const totalCredentials = mockCredentials.length
-    const activeCredentials = mockCredentials.filter(c => c.status === 'active').length
-    const totalBadges = mockBadges.length
-    const totalSkills = mockSkills.length
-    const totalXP = mockBadges.reduce((sum, b) => sum + b.xpValue, 0)
-    const totalEndorsements = mockSkills.reduce((sum, s) => sum + s.endorsements.count, 0)
-    const pathwaysCompleted = mockPathways.filter(p => p.progress === 100).length
-    const pathwaysInProgress = mockPathways.filter(p => p.progress > 0 && p.progress < 100).length
-    const verificationCount = mockVerifications.length
-    const blockchainVerified = mockCredentials.filter(c => c.blockchainTxId).length
+    const totalCredentials = certifications.length
+    const activeCredentials = certifications.filter((c: any) => c.status === 'active').length
+    const expiredCredentials = certifications.filter((c: any) => c.status === 'expired').length
+    const pendingCredentials = certifications.filter((c: any) => c.status === 'pending').length
+    const totalBadges = badges.length
+    const totalCourses = courses.length
+    const totalSkills = 0
+    const totalXP = 0
+    const totalEndorsements = 0
+    const pathwaysCompleted = 0
+    const pathwaysInProgress = 0
+    const verificationCount = 0
+    const blockchainVerified = 0
 
     return {
       totalCredentials,
       activeCredentials,
+      expiredCredentials,
+      pendingCredentials,
       totalBadges,
+      totalCourses,
       totalSkills,
       totalXP,
       totalEndorsements,
@@ -287,28 +290,19 @@ export default function CertificationsClient() {
       verificationCount,
       blockchainVerified
     }
-  }, [])
+  }, [certifications, badges, courses])
 
-  // Filtered credentials
-  const filteredCredentials = useMemo(() => {
-    return mockCredentials.filter(c => {
-      const matchesType = typeFilter === 'all' || c.type === typeFilter
+  // Filtered certifications from real Supabase data
+  const filteredCertifications = useMemo(() => {
+    return certifications.filter((c: any) => {
+      const matchesType = typeFilter === 'all' || c.certification_type === typeFilter
       const matchesStatus = statusFilter === 'all' || c.status === statusFilter
       const matchesSearch = !searchQuery ||
-        c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        c.issuer.name.toLowerCase().includes(searchQuery.toLowerCase())
+        (c.certification_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (c.issuing_organization || '').toLowerCase().includes(searchQuery.toLowerCase())
       return matchesType && matchesStatus && matchesSearch
     })
-  }, [typeFilter, statusFilter, searchQuery])
-
-  // Filtered skills
-  const filteredSkills = useMemo(() => {
-    return mockSkills.filter(s => {
-      const matchesCategory = skillCategory === 'all' || s.category === skillCategory
-      const matchesSearch = !searchQuery || s.name.toLowerCase().includes(searchQuery.toLowerCase())
-      return matchesCategory && matchesSearch
-    })
-  }, [skillCategory, searchQuery])
+  }, [certifications, typeFilter, statusFilter, searchQuery])
 
   // Helper functions
   const getLevelColor = (level: string) => {
@@ -380,7 +374,7 @@ export default function CertificationsClient() {
         certificate_number: certForm.certificate_number || undefined,
         notes: certForm.notes || undefined
       })
-      toast.success(`${certForm.name} has been added`)
+      toast.success(`"${certForm.certification_name}" has been added`)
       setShowCreateDialog(false)
       resetForm()
     } catch (error: any) {
@@ -415,7 +409,7 @@ export default function CertificationsClient() {
         certificate_number: certForm.certificate_number || undefined,
         notes: certForm.notes || undefined
       })
-      toast.success(`Certification updated: "${certForm.name}" has been updated`)
+      toast.success(`Certification updated: "${certForm.certification_name}" has been updated`)
       setShowEditDialog(false)
       setCertToEdit(null)
       resetForm()
@@ -431,7 +425,7 @@ export default function CertificationsClient() {
     setIsSubmitting(true)
     try {
       await deleteCertification(certToDelete.id)
-      toast.success(`Certification deleted: "${certToDelete.title}" has been removed`)
+      toast.success(`Certification deleted: "${certToDelete.certification_name}" has been removed`)
       setShowDeleteDialog(false)
       setCertToDelete(null)
     } catch (error: any) {
@@ -600,21 +594,43 @@ export default function CertificationsClient() {
       label: 'Export Report',
       icon: 'download',
       action: () => {
-        const exportData = mockCredentials.map(c => ({
-          name: c.name,
-          type: c.type,
-          issuer: c.issuer.name,
+        const exportData = certifications.map((c: any) => ({
+          name: c.certification_name,
+          type: c.certification_type,
+          issuer: c.issuing_organization || 'N/A',
           status: c.status,
-          issueDate: c.issueDate,
-          expiryDate: c.expiryDate || 'N/A',
-          level: c.level,
-          credentialId: c.credentialId
+          issueDate: c.issue_date || 'N/A',
+          expiryDate: c.expiry_date || 'N/A',
+          level: c.level || 'N/A',
+          certificateNumber: c.certificate_number || 'N/A'
         }))
         downloadAsJson(exportData, 'certifications-report.json')
       },
       variant: 'outline' as const
     },
   ], [resetForm])
+
+  // Loading state
+  if (certificationsLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+          <p className="text-sm text-gray-500 dark:text-gray-400">Loading certifications...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Error state
+  if (certificationsError) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 gap-4">
+        <p className="text-destructive">Failed to load certifications data</p>
+        <button onClick={() => refetch()} className="text-sm underline hover:text-blue-600">Retry</button>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">
@@ -761,121 +777,64 @@ export default function CertificationsClient() {
             </div>
 
             <div className="grid gap-4">
-              {filteredCredentials.map(credential => (
-                <Dialog key={credential.id}>
-                  <DialogTrigger asChild>
-                    <div
-                      className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border dark:border-gray-700 hover:shadow-md transition-all cursor-pointer"
-                      onClick={() => setSelectedCredential(credential)}
-                    >
-                      <div className="flex items-start gap-4">
-                        <div className="text-4xl">{credential.badgeImage}</div>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className={`px-2 py-1 rounded text-xs ${getStatusColor(credential.status)}`}>
-                              {credential.status}
+              {filteredCertifications.length === 0 ? (
+                <div className="bg-white dark:bg-gray-800 rounded-xl p-12 shadow-sm border dark:border-gray-700 text-center">
+                  <p className="text-gray-500 dark:text-gray-400 mb-4">No certifications found. Add your first credential to get started.</p>
+                  <Button onClick={() => { resetForm(); setShowCreateDialog(true) }} className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+                    + Add Credential
+                  </Button>
+                </div>
+              ) : (
+                filteredCertifications.map((cert: any) => (
+                  <div key={cert.id} className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border dark:border-gray-700 hover:shadow-md transition-all">
+                    <div className="flex items-start gap-4">
+                      <div className="text-4xl">🏆</div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className={`px-2 py-1 rounded text-xs ${getStatusColor(cert.status)}`}>
+                            {cert.status}
+                          </span>
+                          <span className="px-2 py-1 rounded text-xs bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+                            {cert.certification_type}
+                          </span>
+                          {cert.level && (
+                            <span className={`px-2 py-1 rounded text-xs ${getLevelColor(cert.level)}`}>
+                              {cert.level}
                             </span>
-                            <span className={`px-2 py-1 rounded text-xs ${getLevelColor(credential.level)}`}>
-                              {credential.level}
-                            </span>
-                            <span className="px-2 py-1 rounded text-xs bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300">
-                              {credential.type}
-                            </span>
-                            {credential.blockchainTxId && (
-                              <span className="px-2 py-1 rounded text-xs bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300">
-                                ⛓️ On-chain
-                              </span>
-                            )}
-                          </div>
-                          <h3 className="text-lg font-semibold dark:text-white">{credential.name}</h3>
-                          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{credential.description}</p>
-                          <div className="flex items-center gap-4 mt-3 text-sm text-gray-500 dark:text-gray-400">
-                            <span>{credential.issuer.logo} {credential.issuer.name}</span>
-                            <span>📅 {credential.issueDate}</span>
-                            {credential.expiryDate && <span>⏰ Expires {credential.expiryDate}</span>}
-                          </div>
+                          )}
+                        </div>
+                        <h3 className="text-lg font-semibold dark:text-white">{cert.certification_name}</h3>
+                        {cert.scope && (
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{cert.scope}</p>
+                        )}
+                        <div className="flex items-center gap-4 mt-3 text-sm text-gray-500 dark:text-gray-400">
+                          {cert.issuing_organization && <span>🏢 {cert.issuing_organization}</span>}
+                          {cert.issue_date && <span>📅 {new Date(cert.issue_date).toLocaleDateString()}</span>}
+                          {cert.expiry_date && <span>⏰ Expires {new Date(cert.expiry_date).toLocaleDateString()}</span>}
+                        </div>
+                        {cert.associated_skills && cert.associated_skills.length > 0 && (
                           <div className="flex flex-wrap gap-2 mt-3">
-                            {credential.skills.slice(0, 4).map(skill => (
+                            {cert.associated_skills.slice(0, 4).map((skill: string) => (
                               <span key={skill} className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs dark:text-gray-300">
                                 {skill}
                               </span>
                             ))}
-                            {credential.skills.length > 4 && (
+                            {cert.associated_skills.length > 4 && (
                               <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-xs dark:text-gray-300">
-                                +{credential.skills.length - 4}
+                                +{cert.associated_skills.length - 4}
                               </span>
                             )}
                           </div>
-                        </div>
-                        <div className="text-right">
-                          <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
-                            <span>👁️ {formatNumber(credential.viewCount)}</span>
-                            <span>🔗 {credential.shareCount}</span>
-                            <span>👍 {credential.endorsements}</span>
-                          </div>
-                        </div>
+                        )}
+                      </div>
+                      <div className="flex gap-2">
+                        <Button variant="outline" size="sm" onClick={() => openEditDialog(cert)}>Edit</Button>
+                        <Button variant="destructive" size="sm" onClick={() => openDeleteDialog(cert)}>Delete</Button>
                       </div>
                     </div>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-2xl">
-                    <DialogHeader>
-                      <DialogTitle className="flex items-center gap-3">
-                        <span className="text-3xl">{credential.badgeImage}</span>
-                        {credential.name}
-                      </DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                      <p className="text-gray-600 dark:text-gray-400">{credential.description}</p>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                        <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-                          <div className="text-sm text-gray-500 dark:text-gray-400">Credential ID</div>
-                          <div className="font-mono text-sm dark:text-white">{credential.credentialId}</div>
-                        </div>
-                        <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-                          <div className="text-sm text-gray-500 dark:text-gray-400">Issuer</div>
-                          <div className="dark:text-white">{credential.issuer.name}</div>
-                        </div>
-                      </div>
-                      {credential.blockchainTxId && (
-                        <div className="bg-cyan-50 dark:bg-cyan-900/20 p-4 rounded-lg border border-cyan-200 dark:border-cyan-800">
-                          <div className="text-sm font-medium text-cyan-700 dark:text-cyan-300 mb-2">⛓️ Blockchain Verification</div>
-                          <div className="font-mono text-xs text-cyan-600 dark:text-cyan-400 break-all">{credential.verificationHash}</div>
-                        </div>
-                      )}
-                      <div>
-                        <div className="text-sm font-medium mb-2 dark:text-white">Earning Criteria</div>
-                        <ul className="space-y-1">
-                          {credential.earningCriteria.map((criteria, i) => (
-                            <li key={i} className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-                              <span className="text-green-500">✓</span> {criteria}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                      <div className="flex gap-3">
-                        <button
-                          className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                          onClick={() => handleShareCertification(credential)}
-                        >
-                          Share Credential
-                        </button>
-                        <button
-                          className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-white"
-                          onClick={() => handleDownloadCertificate(credential)}
-                        >
-                          Download PDF
-                        </button>
-                        <button
-                          className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-white"
-                          onClick={() => handleVerifyCredential(credential)}
-                        >
-                          Verify
-                        </button>
-                      </div>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              ))}
+                  </div>
+                ))
+              )}
             </div>
           </TabsContent>
 
@@ -902,11 +861,11 @@ export default function CertificationsClient() {
                     <div className="text-xs text-white/70">Total XP</div>
                   </div>
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
-                    <div className="text-2xl font-bold">{mockBadges.filter(b => b.rarity === 'legendary' || b.rarity === 'epic').length}</div>
+                    <div className="text-2xl font-bold">0</div>
                     <div className="text-xs text-white/70">Rare Badges</div>
                   </div>
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
-                    <div className="text-2xl font-bold">{mockBadges.filter(b => b.isPinned).length}</div>
+                    <div className="text-2xl font-bold">0</div>
                     <div className="text-xs text-white/70">Pinned</div>
                   </div>
                 </div>
@@ -914,103 +873,31 @@ export default function CertificationsClient() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {mockBadges.map(badge => (
-                <Dialog key={badge.id}>
-                  <DialogTrigger asChild>
-                    <div
-                      className={`rounded-xl p-6 shadow-sm border-2 hover:shadow-md transition-all cursor-pointer ${getRarityColor(badge.rarity)}`}
-                      onClick={() => setSelectedBadge(badge)}
-                    >
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="text-5xl">{badge.image}</div>
-                        <div className="text-right">
-                          {badge.isPinned && <span className="text-yellow-500">📌</span>}
-                          <div className="text-xs text-gray-500 dark:text-gray-400 capitalize mt-1">{badge.rarity}</div>
-                        </div>
-                      </div>
-                      <h3 className="font-semibold text-lg mb-1 dark:text-white">{badge.name}</h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">{badge.description}</p>
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-purple-600 font-medium">+{badge.xpValue} XP</span>
-                        <span className="text-gray-500 dark:text-gray-400">Level {badge.level}</span>
-                      </div>
-                      <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mt-2">
-                        <span>{badge.issuer.name}</span>
-                        <span>{formatNumber(badge.holders)} holders</span>
+              {badgesLoading ? (
+                <div className="col-span-full flex items-center justify-center py-8">
+                  <Loader2 className="w-6 h-6 animate-spin text-purple-600" />
+                </div>
+              ) : badges.length === 0 ? (
+                <div className="col-span-full bg-white dark:bg-gray-800 rounded-xl p-12 shadow-sm border dark:border-gray-700 text-center">
+                  <p className="text-gray-500 dark:text-gray-400">No badges earned yet. Complete learning pathways to earn badges.</p>
+                </div>
+              ) : (
+                badges.map((badge: any) => (
+                  <div key={badge.id} className="rounded-xl p-6 shadow-sm border-2 hover:shadow-md transition-all cursor-pointer border-gray-300 bg-gray-50 dark:border-gray-600 dark:bg-gray-800">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="text-5xl">🎖️</div>
+                      <div className="text-right">
+                        <div className="text-xs text-gray-500 dark:text-gray-400 capitalize mt-1">{badge.badge_type || 'badge'}</div>
                       </div>
                     </div>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle className="flex items-center gap-3">
-                        <span className="text-4xl">{badge.image}</span>
-                        {badge.name}
-                      </DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                      <p className="text-gray-600 dark:text-gray-400">{badge.description}</p>
-                      <div className="flex items-center gap-4">
-                        <span className={`px-3 py-1 rounded-full text-sm capitalize ${getRarityColor(badge.rarity)}`}>
-                          {badge.rarity}
-                        </span>
-                        <span className="text-purple-600 font-medium">+{badge.xpValue} XP</span>
-                        <span className="text-gray-500 dark:text-gray-400">Level {badge.level}</span>
-                      </div>
-                      <div>
-                        <div className="text-sm font-medium mb-2 dark:text-white">Requirements</div>
-                        <ul className="space-y-2">
-                          {badge.requirements.map((req, i) => (
-                            <li key={i} className="flex items-center gap-2 text-sm">
-                              <span className={req.completed ? 'text-green-500' : 'text-gray-300'}>
-                                {req.completed ? '✓' : '○'}
-                              </span>
-                              <span className={req.completed ? 'text-gray-600 dark:text-gray-400' : 'text-gray-400 dark:text-gray-500'}>
-                                {req.description}
-                              </span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                      {badge.skills.length > 0 && (
-                        <div>
-                          <div className="text-sm font-medium mb-2 dark:text-white">Related Skills</div>
-                          <div className="flex flex-wrap gap-2">
-                            {badge.skills.map(skill => (
-                              <span key={skill} className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-sm dark:text-gray-300">
-                                {skill}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                      <div className="flex gap-3">
-                        <button
-                          className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
-                          onClick={() => shareContent({
-                            title: badge.name,
-                            text: `I earned the ${badge.name} badge! ${badge.description}`,
-                            url: `${window.location.origin}/badges/${badge.id}`
-                          })}
-                        >
-                          Share Badge
-                        </button>
-                        <button
-                          className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-white"
-                          onClick={async () => {
-                            const result = await apiPost(`/api/badges/${badge.id}/pin`, { pinned: !badge.isPinned }, {
-                              loading: badge.isPinned ? 'Unpinning badge...' : 'Pinning badge...',
-                              success: badge.isPinned ? 'Badge unpinned!' : 'Badge pinned to profile!',
-                              error: 'Failed to update pin status'
-                            })
-                          }}
-                        >
-                          {badge.isPinned ? 'Unpin' : 'Pin to Profile'}
-                        </button>
-                      </div>
+                    <h3 className="font-semibold text-lg mb-1 dark:text-white">{badge.name || badge.badge_name}</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">{badge.description || ''}</p>
+                    <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mt-2">
+                      <span>{badge.awarded_at ? new Date(badge.awarded_at).toLocaleDateString() : ''}</span>
                     </div>
-                  </DialogContent>
-                </Dialog>
-              ))}
+                  </div>
+                ))
+              )}
             </div>
           </TabsContent>
 

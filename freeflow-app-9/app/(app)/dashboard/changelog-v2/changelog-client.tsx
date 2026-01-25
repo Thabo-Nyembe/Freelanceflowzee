@@ -32,10 +32,6 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-// Data arrays are initialized as empty - real data should be fetched from API
-
-
-
 // GitHub Releases level interfaces
 type ReleaseType = 'stable' | 'prerelease' | 'draft' | 'rc' | 'beta' | 'alpha'
 type AssetType = 'binary' | 'source' | 'checksum' | 'signature' | 'documentation' | 'other'
@@ -148,22 +144,7 @@ interface ReleaseStats {
   downloadsTrend: number
 }
 
-// Empty typed arrays (no mock data)
-const releases: Release[] = []
-const contributors: Contributor[] = []
-const assets: ReleaseAsset[] = []
-const discussions: Discussion[] = []
-const webhooks: WebhookConfig[] = []
-const releaseStats: ReleaseStats = {
-  totalReleases: 0,
-  stableReleases: 0,
-  prereleases: 0,
-  totalDownloads: 0,
-  avgDownloadsPerRelease: 0,
-  totalContributors: 0,
-  releasesThisMonth: 0,
-  downloadsTrend: 0
-}
+// Data arrays are derived from real Supabase data inside the component via useMemo
 
 const formatBytes = (bytes: number): string => {
   if (bytes === 0) return '0 B'
@@ -217,17 +198,7 @@ const getReleaseTypeColor = (type: ReleaseType): string => {
   return colors[type]
 }
 
-// Empty typed arrays for enhanced components
-const changelogAIInsights: { id: string; type: 'success' | 'info' | 'warning' | 'error'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
-
-const changelogCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string; lastActive: string }[] = []
-
-const changelogPredictions: { id: string; label: string; current: number; target: number; predicted: number; confidence: number; trend: 'up' | 'down' | 'stable' }[] = []
-
-const changelogActivities: { id: string; user: { id: string; name: string; avatar?: string }; type: 'comment' | 'update' | 'create' | 'delete' | 'mention' | 'assignment' | 'status_change' | 'milestone' | 'integration'; title: string; description?: string; timestamp: string | Date }[] = []
-
-// Quick actions are defined inside the component to access state setters
-// See getChangelogQuickActions() function inside ChangelogClient component
+// Enhanced component data arrays are derived from real data inside the component
 
 // Default form state for new changelog entry
 const defaultChangelogForm: Partial<Changelog> = {
@@ -248,7 +219,7 @@ const defaultChangelogForm: Partial<Changelog> = {
   rollout_percentage: 100,
 }
 
-export default function ChangelogClient({ initialChangelog }: { initialChangelog: Changelog[] }) {
+export default function ChangelogClient() {
   const [activeTab, setActiveTab] = useState('releases')
   const [settingsTab, setSettingsTab] = useState('general')
   const [searchQuery, setSearchQuery] = useState('')
@@ -285,7 +256,172 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
   const [isCIConfigDialogOpen, setIsCIConfigDialogOpen] = useState(false)
   const [selectedCITool, setSelectedCITool] = useState<string | null>(null)
 
+  // Missing state declarations for compare/release-notes dialogs
+  const [isCompareDialogOpen, setIsCompareDialogOpen] = useState(false)
+  const [isReleaseNotesDialogOpen, setIsReleaseNotesDialogOpen] = useState(false)
+  const [selectedVersion, setSelectedVersion] = useState<string | null>(null)
+
+  // Real Supabase data via hook
   const { changelog, loading, error, createChange, updateChange, deleteChange, refetch } = useChangelog()
+
+  // Map Changelog[] from Supabase to Release[] for the UI
+  const releases: Release[] = useMemo(() => {
+    if (!changelog || changelog.length === 0) return []
+    return changelog.map((entry) => {
+      const releaseType: ReleaseType =
+        entry.release_status === 'draft' ? 'draft' :
+        entry.version_tag === 'beta' ? 'beta' :
+        entry.version_tag === 'alpha' ? 'alpha' :
+        entry.version_tag === 'rc' ? 'rc' :
+        entry.release_status === 'released' ? 'stable' : 'prerelease'
+
+      return {
+        id: entry.id,
+        tagName: entry.version || 'v0.0.0',
+        name: entry.title || 'Untitled Release',
+        body: entry.description || entry.summary || '',
+        isDraft: entry.release_status === 'draft',
+        isPrerelease: releaseType !== 'stable' && releaseType !== 'draft',
+        releaseType,
+        createdAt: entry.created_at,
+        publishedAt: entry.published_at || undefined,
+        author: {
+          name: entry.author_name || 'Unknown',
+          avatar: (entry.author_name || 'U').charAt(0).toUpperCase(),
+          username: entry.author_name?.toLowerCase().replace(/\s+/g, '') || 'unknown',
+        },
+        assets: [],
+        targetCommitish: entry.branch_name || 'main',
+        compareUrl: entry.pr_url || '',
+        contributors: (entry.contributors || []).map((name, idx) => ({
+          id: `contrib-${idx}`,
+          username: name.toLowerCase().replace(/\s+/g, ''),
+          avatarUrl: '',
+          name,
+          contributions: 1,
+          commits: 1,
+          additions: 0,
+          deletions: 0,
+          role: 'contributor' as const,
+          profileUrl: '',
+        })),
+        commits: entry.commit_hash ? [{
+          sha: entry.commit_hash,
+          message: entry.title,
+          author: { name: entry.author_name || 'Unknown', avatar: (entry.author_name || 'U').charAt(0).toUpperCase(), date: entry.created_at },
+          additions: 0,
+          deletions: 0,
+          files: 0,
+        }] : [],
+        totalDownloads: entry.view_count || 0,
+        reactions: [],
+        isLatest: false,
+        isVerified: false,
+      } satisfies Release
+    })
+  }, [changelog])
+
+  // Derive contributors from all releases
+  const contributors: Contributor[] = useMemo(() => {
+    const map = new Map<string, Contributor>()
+    releases.forEach(r => {
+      r.contributors.forEach(c => {
+        if (!map.has(c.name)) map.set(c.name, c)
+      })
+    })
+    return Array.from(map.values())
+  }, [releases])
+
+  // Derive assets from all releases
+  const assets: ReleaseAsset[] = useMemo(() => {
+    return releases.flatMap(r => r.assets)
+  }, [releases])
+
+  // Empty arrays for features not yet backed by Supabase tables
+  const discussions: Discussion[] = useMemo(() => [], [])
+  const webhooks: WebhookConfig[] = useMemo(() => [], [])
+
+  // Compute release stats from real data
+  const releaseStats: ReleaseStats = useMemo(() => {
+    const stableReleases = releases.filter(r => r.releaseType === 'stable' && !r.isDraft)
+    const prereleases = releases.filter(r => r.isPrerelease)
+    const totalDownloads = releases.reduce((sum, r) => sum + r.totalDownloads, 0)
+    const now = new Date()
+    const thisMonth = releases.filter(r => {
+      const d = new Date(r.createdAt)
+      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
+    })
+    return {
+      totalReleases: releases.length,
+      stableReleases: stableReleases.length,
+      prereleases: prereleases.length,
+      totalDownloads,
+      avgDownloadsPerRelease: releases.length > 0 ? Math.round(totalDownloads / releases.length) : 0,
+      totalContributors: contributors.length,
+      releasesThisMonth: thisMonth.length,
+      downloadsTrend: 0,
+    }
+  }, [releases, contributors])
+
+  // Enhanced component data derived from real changelog data
+  const changelogAIInsights = useMemo(() => {
+    if (!changelog || changelog.length === 0) return []
+    const insights: { id: string; type: 'success' | 'info' | 'warning' | 'error'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
+    const breakingChanges = changelog.filter(e => e.breaking_change)
+    if (breakingChanges.length > 0) {
+      insights.push({ id: 'ai-breaking', type: 'warning', title: 'Breaking Changes Detected', description: `${breakingChanges.length} release(s) contain breaking changes. Ensure migration guides are provided.`, priority: 'high', timestamp: new Date().toISOString(), category: 'quality' })
+    }
+    const drafts = changelog.filter(e => e.release_status === 'draft')
+    if (drafts.length > 0) {
+      insights.push({ id: 'ai-drafts', type: 'info', title: 'Pending Drafts', description: `${drafts.length} draft release(s) are awaiting publication.`, priority: 'medium', timestamp: new Date().toISOString(), category: 'workflow' })
+    }
+    if (changelog.length > 0) {
+      insights.push({ id: 'ai-total', type: 'success', title: 'Release Cadence', description: `${changelog.length} total releases tracked. Keep up the momentum!`, priority: 'low', timestamp: new Date().toISOString(), category: 'metrics' })
+    }
+    return insights
+  }, [changelog])
+
+  const changelogCollaborators = useMemo(() => {
+    return contributors.slice(0, 6).map(c => ({
+      id: c.id,
+      name: c.name,
+      avatar: c.avatarUrl || '',
+      status: 'online' as const,
+      role: c.role === 'maintainer' ? 'Maintainer' : 'Contributor',
+      lastActive: new Date().toISOString(),
+    }))
+  }, [contributors])
+
+  const changelogPredictions = useMemo(() => {
+    return [
+      { id: 'pred-releases', label: 'Releases This Quarter', current: releaseStats.releasesThisMonth, target: Math.max(releaseStats.releasesThisMonth * 3, 10), predicted: releaseStats.releasesThisMonth * 3, confidence: 0.7, trend: 'up' as const },
+      { id: 'pred-downloads', label: 'Monthly Downloads', current: releaseStats.totalDownloads, target: releaseStats.totalDownloads * 2, predicted: Math.round(releaseStats.totalDownloads * 1.5), confidence: 0.6, trend: 'up' as const },
+    ]
+  }, [releaseStats])
+
+  const changelogActivities = useMemo(() => {
+    if (!changelog || changelog.length === 0) return []
+    return changelog.slice(0, 10).map(entry => ({
+      id: entry.id,
+      user: { id: entry.author_id || entry.user_id, name: entry.author_name || 'Unknown' },
+      type: (entry.release_status === 'released' ? 'create' : 'update') as 'create' | 'update',
+      title: `${entry.release_status === 'released' ? 'Published' : entry.release_status === 'draft' ? 'Drafted' : 'Updated'} ${entry.version || 'release'}`,
+      description: entry.title,
+      timestamp: entry.updated_at || entry.created_at,
+    }))
+  }, [changelog])
+
+  // Loading state - show spinner while data is being fetched
+  if (loading && (!changelog || changelog.length === 0)) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-zinc-50 dark:bg-none dark:bg-gray-900 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <p className="text-sm text-muted-foreground">Loading changelog data...</p>
+        </div>
+      </div>
+    )
+  }
 
   // Filter releases
   const filteredReleases = useMemo(() => {
@@ -300,24 +436,25 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
       }
       return true
     })
-  }, [releaseTypeFilter, searchQuery, showDrafts])
+  }, [releases, releaseTypeFilter, searchQuery, showDrafts])
 
-  // Calculate stats
+  // Calculate stats from real data
   const stats = useMemo(() => {
     const stable = releases.filter(r => r.releaseType === 'stable' && !r.isDraft)
     const prerelease = releases.filter(r => r.isPrerelease)
     const totalDownloads = releases.reduce((sum, r) => sum + r.totalDownloads, 0)
+    const latestRelease = releases.length > 0 ? releases[0] : null
     return {
       total: releases.length,
       stable: stable.length,
       prerelease: prerelease.length,
       downloads: totalDownloads,
       contributors: contributors.length,
-      latestVersion: releases.find(r => r.isLatest)?.tagName || 'v0.0.0',
+      latestVersion: latestRelease?.tagName || 'v0.0.0',
       verified: releases.filter(r => r.isVerified).length,
       avgDownloads: releases.length > 0 ? Math.round(totalDownloads / releases.length) : 0
     }
-  }, [])
+  }, [releases, contributors])
 
   // CRUD Handlers for Changelog/Release entries
   const handleCreateRelease = useCallback(async () => {
@@ -679,9 +816,16 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-zinc-50 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg dark:bg-red-900/20 dark:border-red-800 dark:text-red-400">
-          Error loading changelog: {error.message}
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-zinc-50 dark:bg-none dark:bg-gray-900 flex items-center justify-center p-4 md:p-6 lg:p-8">
+        <div className="flex flex-col items-center justify-center gap-4">
+          <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-4 rounded-lg dark:bg-red-900/20 dark:border-red-800 dark:text-red-400 text-center">
+            <p className="font-medium text-destructive mb-1">Failed to load changelog data</p>
+            <p className="text-sm">{error.message}</p>
+          </div>
+          <Button variant="outline" onClick={() => refetch()} className="text-sm">
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Retry
+          </Button>
         </div>
       </div>
     )

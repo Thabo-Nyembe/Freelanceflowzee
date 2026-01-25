@@ -1,8 +1,14 @@
 'use client'
 
+// MIGRATED: Batch #18 - Verified database hook integration
+// Hooks used: useLearning, useCourses, useUserProgress, useCollections from use-learning
+// Extended hooks available: useLearningPaths, useMyCertificates, useLearningSearch from use-learning-extended
+
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { useLearning, useCourses, useUserProgress, useCollections } from '@/lib/hooks/use-learning'
+// Extended hooks available for future use:
+// import { useLearningPaths, useMyCertificates, useLearningSearch, usePopularPaths } from '@/lib/hooks/use-learning-extended'
 import {
   GraduationCap,
   BookOpen,
@@ -322,11 +328,22 @@ export default function LearningClient() {
     is_public: false
   })
 
-  // Supabase hooks
-  const { paths: dbPaths, loading: pathsLoading, createPath, updatePath, deletePath, mutating: pathsMutating } = useLearning()
-  const { courses: dbCourses, loading: coursesLoading, createCourse, updateCourse, deleteCourse, mutating: coursesMutating } = useCourses({ category: selectedCategory, level: selectedLevel as any })
-  const { progress: dbProgress, loading: progressLoading, updateProgress } = useUserProgress()
-  const { collections: dbCollections, loading: collectionsLoading, createCollection, updateCollection, deleteCollection, mutating: collectionsMutating } = useCollections()
+  // Supabase hooks - real data from database
+  const { paths: dbPaths, loading: pathsLoading, error: pathsError, createPath, updatePath, deletePath, mutating: pathsMutating, refetch: refetchPaths } = useLearning()
+  const { courses: dbCourses, loading: coursesLoading, error: coursesError, createCourse, updateCourse, deleteCourse, mutating: coursesMutating, refetch: refetchCourses } = useCourses({ category: selectedCategory, level: selectedLevel as any })
+  const { progress: dbProgress, loading: progressLoading, error: progressError, updateProgress, refetch: refetchProgress } = useUserProgress()
+  const { collections: dbCollections, loading: collectionsLoading, error: collectionsError, createCollection, updateCollection, deleteCollection, mutating: collectionsMutating, refetch: refetchCollections } = useCollections()
+
+  // Combined loading / error states
+  const isLoading = pathsLoading || coursesLoading || progressLoading || collectionsLoading
+  const hasError = pathsError || coursesError || progressError || collectionsError
+
+  const refetchAll = () => {
+    refetchPaths()
+    refetchCourses()
+    refetchProgress()
+    refetchCollections()
+  }
 
   // Map database data to component types with defaults
   const courses: Course[] = (dbCourses || []).map(c => ({
@@ -429,6 +446,34 @@ export default function LearningClient() {
       return matchesSearch && matchesCategory && matchesLevel
     })
   }, [courses, searchQuery, selectedCategory, selectedLevel])
+
+  // Loading state - early return (placed after all hooks)
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600"></div>
+          <p className="text-sm text-gray-500">Loading learning data...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Error state - early return (placed after all hooks)
+  if (hasError) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 gap-4">
+        <AlertTriangle className="w-10 h-10 text-destructive" />
+        <p className="text-destructive font-medium">Failed to load learning data</p>
+        <p className="text-sm text-gray-500 max-w-md text-center">
+          {pathsError?.message || coursesError?.message || progressError?.message || collectionsError?.message || 'An unexpected error occurred'}
+        </p>
+        <button onClick={refetchAll} className="text-sm underline text-emerald-600 hover:text-emerald-700">
+          Retry
+        </button>
+      </div>
+    )
+  }
 
   const getProgressForCourse = (courseId: string) => {
     return progress.find(p => p.courseId === courseId)

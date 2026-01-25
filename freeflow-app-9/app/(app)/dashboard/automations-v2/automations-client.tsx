@@ -2,6 +2,9 @@
 
 import { createClient } from '@/lib/supabase/client'
 import React, { useState, useMemo, useEffect, useCallback } from 'react'
+
+// Initialize Supabase client once at module level
+const supabase = createClient()
 import { toast } from 'sonner'
 import { useAutomations, type AutomationWorkflow, type WorkflowType, type WorkflowStatus } from '@/lib/hooks/use-automations'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -22,7 +25,7 @@ import {
   RotateCcw, Copy, Trash2, MoreVertical, Eye, Edit2, History, Layers,
   Filter, TrendingUp, AlertTriangle, RefreshCw, Share2, Star, BarChart3, Cpu, Gauge, Network,
   Bell, MessageSquare, ExternalLink, PlayCircle, PauseCircle,
-  StopCircle, CheckCircle, Package, Shield, Rocket
+  StopCircle, CheckCircle, Package, Shield, Rocket, Loader2
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -783,9 +786,18 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
     },
   ], [displayWorkflows, ])
 
+  // Loading state
+  if (loading) return (
+    <div className="flex items-center justify-center h-full">
+      <Loader2 className="h-8 w-8 animate-spin" />
+    </div>
+  )
+
+  // Error state
   if (error) return (
-    <div className="p-8">
-      <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">Error: {error.message}</div>
+    <div className="flex flex-col items-center justify-center h-full gap-4">
+      <p className="text-red-500">Error loading data</p>
+      <Button onClick={() => refetch()}>Retry</Button>
     </div>
   )
 

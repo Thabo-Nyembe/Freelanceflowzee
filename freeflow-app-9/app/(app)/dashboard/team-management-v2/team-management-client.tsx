@@ -12,7 +12,7 @@ import {
   MoreHorizontal, Download, Settings, RefreshCw, Clock,
   CheckCircle, AlertCircle, GitBranch, Send, Eye,
   Bell, Globe, Link2, Database, Shield, Mail,
-  Smartphone, Slack, Video, UserCog, DollarSign
+  Smartphone, Slack, Video, UserCog, DollarSign, Loader2
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -37,6 +37,9 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useTeamManagement, type Team, type TeamType, type TeamStatus } from '@/lib/hooks/use-team-management'
 import { toast } from 'sonner'
+
+// Initialize Supabase client once at module level
+const supabase = createClient()
 
 interface TeamMember {
   id: string
@@ -639,7 +642,8 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
     }
   }
 
-  if (error) return <div className="p-8"><div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded">Error: {error.message}</div></div>
+  if (loading) return <div className="flex items-center justify-center h-full"><Loader2 className="h-8 w-8 animate-spin" /></div>
+  if (error) return <div className="flex flex-col items-center justify-center h-full gap-4"><p className="text-red-500">Error loading data</p><Button onClick={() => refetch()}>Retry</Button></div>
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-rose-50 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">
