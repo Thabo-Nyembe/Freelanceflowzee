@@ -167,16 +167,7 @@ interface AuditClientProps {
   initialComplianceChecks: ComplianceCheck[]
 }
 
-// Empty typed arrays - no mock data
-const mockLogEvents: LogEvent[] = []
-
-const mockAlerts: Alert[] = []
-
-const mockSavedSearches: SavedSearch[] = []
-
-const mockReports: Report[] = []
-
-const mockFieldStats: FieldStats[] = []
+// Types are defined above - using inline empty arrays where needed
 
 // Typed empty arrays for competitive upgrade components
 const mockAuditAIInsights: Array<{ id: string; type: 'success' | 'warning' | 'info' | 'error'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }> = []
@@ -231,7 +222,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
     ? displayChecks.reduce((sum, c) => sum + c.score, 0) / displayChecks.length
     : 0
 
-  const activeAlerts = mockAlerts.filter(a => a.status === 'active').length
+  const activeAlerts = ([] as Alert[]).filter(a => a.status === 'active').length
 
   const filteredEvents = useMemo(() => {
     return displayEvents.filter(event => {
@@ -453,7 +444,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
     const fullExport = {
       events: auditEvents,
       complianceChecks,
-      alerts: mockAlerts,
+      alerts: [] as Alert[],
       exportedAt: new Date().toISOString()
     }
     const data = JSON.stringify(fullExport, null, 2)
@@ -857,7 +848,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {mockFieldStats.map((field) => (
+                      {([] as FieldStats[]).map((field) => (
                         <div key={field.field}>
                           <div className="flex items-center justify-between mb-2">
                             <span className="text-sm font-medium text-white">{field.field}</span>
@@ -927,15 +918,15 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
                   </div>
                   <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6 text-center">
                     <div>
-                      <p className="text-2xl font-bold">{mockAlerts.filter(a => a.status === 'active').length}</p>
+                      <p className="text-2xl font-bold">{([] as Alert[]).filter(a => a.status === 'active').length}</p>
                       <p className="text-sm text-white/80">Active</p>
                     </div>
                     <div>
-                      <p className="text-2xl font-bold">{mockAlerts.filter(a => a.priority === 'critical' || a.priority === 'high').length}</p>
+                      <p className="text-2xl font-bold">{([] as Alert[]).filter(a => a.priority === 'critical' || a.priority === 'high').length}</p>
                       <p className="text-sm text-white/80">Critical/High</p>
                     </div>
                     <div>
-                      <p className="text-2xl font-bold">{mockAlerts.length}</p>
+                      <p className="text-2xl font-bold">{([] as Alert[]).length}</p>
                       <p className="text-sm text-white/80">Total Rules</p>
                     </div>
                   </div>

@@ -144,22 +144,6 @@ interface ThemeStoreClientProps {
   initialStats: any
 }
 
-// Empty arrays - data will come from real API/database
-const mockDesigners: Designer[] = []
-
-const mockThemes: ThemeExtended[] = []
-
-const mockCollections: Collection[] = []
-
-// Empty arrays for competitive upgrade components
-const mockThemeStoreAIInsights: { id: string; type: 'success' | 'warning' | 'info'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
-
-const mockThemeStoreCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }[] = []
-
-const mockThemeStorePredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: 'low' | 'medium' | 'high' }[] = []
-
-const mockThemeStoreActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' | 'error' }[] = []
-
 // Quick actions will be defined inside the component to use real handlers
 
 export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeStoreClientProps) {
@@ -231,7 +215,7 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
     tags: t.tags || [],
     license: t.license || 'standard'
   })), [themesData])
-  const collections = mockCollections
+  const collections: Collection[] = []
 
   const filteredThemes = useMemo(() => {
     return themes.filter(theme => {
@@ -915,15 +899,15 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockThemes.length}</p>
+                    <p className="text-3xl font-bold">{themes.length}</p>
                     <p className="text-violet-200 text-sm">Themes</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockThemes.filter(t => t.pricing === 'free').length}</p>
+                    <p className="text-3xl font-bold">{themes.filter(t => t.pricing === 'free').length}</p>
                     <p className="text-violet-200 text-sm">Free</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockDesigners.length}</p>
+                    <p className="text-3xl font-bold">0</p>
                     <p className="text-violet-200 text-sm">Designers</p>
                   </div>
                 </div>

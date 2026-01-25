@@ -630,7 +630,7 @@ export default function DocumentationClient() {
 
   // REAL: Share page - Copies share link to clipboard
   const handleSharePage = async () => {
-    const currentPage = selectedPage || mockPages[0]
+    const currentPage = selectedPage || ([] as DocPage[])[0]
     const shareUrl = `${window.location.origin}/docs/${currentPage?.slug || 'getting-started'}`
 
     try {
@@ -698,7 +698,7 @@ export default function DocumentationClient() {
 
   // REAL: Edit changelog - Opens changelog for editing
   const handleEditChangelog = (changelogTitle: string) => {
-    const changelog = mockChangelogs.find(c => c.title === changelogTitle)
+    const changelog = ([] as DocChangelog[]).find(c => c.title === changelogTitle)
     if (changelog) {
       setSelectedChangelog(changelog)
       setActiveTab('changelogs')
@@ -738,7 +738,7 @@ export default function DocumentationClient() {
 
   // REAL: Manage locale - Opens locale settings
   const handleManageLocale = (localeName: string) => {
-    const locale = mockLocales.find(l => l.name === localeName)
+    const locale = ([] as DocLocale[]).find(l => l.name === localeName)
     if (locale) {
       setSelectedLocale(locale)
       toast.success(`Managing locale: ${localeName}`)
@@ -759,7 +759,7 @@ export default function DocumentationClient() {
           total_spaces: stats.totalSpaces,
           satisfaction_rate: stats.satisfaction,
           languages: stats.languages,
-          pages: mockPages.map(p => ({
+          pages: ([] as DocPage[]).map(p => ({
             title: p.title,
             views: p.views,
             likes: p.likes,
@@ -796,19 +796,19 @@ export default function DocumentationClient() {
         // Generate config data
         const configData = {
           exported_at: new Date().toISOString(),
-          spaces: mockSpaces.map(s => ({
+          spaces: ([] as DocSpace[]).map(s => ({
             key: s.key,
             name: s.name,
             visibility: s.visibility,
             git_sync: s.git_sync,
             custom_domain: s.custom_domain
           })),
-          integrations: mockIntegrations.map(i => ({
+          integrations: ([] as DocIntegration[]).map(i => ({
             name: i.name,
             type: i.type,
             status: i.status
           })),
-          locales: mockLocales.map(l => ({
+          locales: ([] as DocLocale[]).map(l => ({
             code: l.code,
             name: l.name,
             is_default: l.is_default
@@ -838,7 +838,7 @@ export default function DocumentationClient() {
 
   // REAL: Configure integration - Opens integration settings
   const handleConfigureIntegration = async (integrationName: string) => {
-    const integration = mockIntegrations.find(i => i.name === integrationName)
+    const integration = ([] as DocIntegration[]).find(i => i.name === integrationName)
     if (!integration) {
       toast.error(`Integration "${integrationName}" not found`)
       return
@@ -925,12 +925,12 @@ export default function DocumentationClient() {
         const fullBackup = {
           exported_at: new Date().toISOString(),
           version: '1.0',
-          spaces: mockSpaces,
-          pages: mockPages,
-          templates: mockTemplates,
-          changelogs: mockChangelogs,
-          locales: mockLocales,
-          integrations: mockIntegrations.map(i => ({
+          spaces: [] as DocSpace[],
+          pages: [] as DocPage[],
+          templates: [] as DocTemplate[],
+          changelogs: [] as DocChangelog[],
+          locales: [] as DocLocale[],
+          integrations: ([] as DocIntegration[]).map(i => ({
             name: i.name,
             type: i.type,
             status: i.status
@@ -998,7 +998,7 @@ export default function DocumentationClient() {
 
   // REAL: View version - Loads specific version
   const handleViewVersion = async (versionNumber: number) => {
-    const version = mockVersions.find(v => v.version === versionNumber)
+    const version = ([] as DocVersion[]).find(v => v.version === versionNumber)
     if (version) {
       toast.success(`Viewing version ${versionNumber} from ${new Date(version.created_at).toLocaleDateString()}`)
       // In a real implementation, this would load the version's content
@@ -1253,7 +1253,7 @@ export default function DocumentationClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {mockPages.slice(0, 5).map(page => (
+                    {([] as DocPage[]).slice(0, 5).map(page => (
                       <div key={page.id} onClick={() => setSelectedPage(page)}
                         className="flex items-center gap-4 p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg cursor-pointer">
                         <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">

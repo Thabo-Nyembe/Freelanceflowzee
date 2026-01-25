@@ -638,7 +638,7 @@ export default function HealthScoreClient() {
           <h2>Services</h2>
           <table>
             <tr><th>Service</th><th>Status</th><th>Apdex</th><th>Error Rate</th><th>Uptime</th></tr>
-            ${mockServices.map(s => `
+            ${([] as ServiceHealth[]).map(s => `
               <tr>
                 <td>${s.name}</td>
                 <td class="status-${s.status}">${s.status}</td>
@@ -652,7 +652,7 @@ export default function HealthScoreClient() {
           <h2>Hosts</h2>
           <table>
             <tr><th>Hostname</th><th>Status</th><th>CPU</th><th>Memory</th><th>Disk</th></tr>
-            ${mockHosts.map(h => `
+            ${([] as HostMetrics[]).map(h => `
               <tr>
                 <td>${h.hostname}</td>
                 <td class="status-${h.status}">${h.status}</td>
@@ -675,7 +675,7 @@ export default function HealthScoreClient() {
   const handleShareReport = async () => {
     await shareContent({
       title: 'System Health Report',
-      text: `Overall Health: ${overallHealth}% | Services: ${mockServices.length} | Open Incidents: ${openIncidents}`,
+      text: `Overall Health: ${overallHealth}% | Services: ${([] as ServiceHealth[]).length} | Open Incidents: ${openIncidents}`,
       url: window.location.href
     })
   }
@@ -773,9 +773,9 @@ export default function HealthScoreClient() {
               </div>
               <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
                 <div className="text-emerald-200 text-sm mb-1">Services</div>
-                <div className="text-3xl font-bold text-white">{mockServices.length}</div>
+                <div className="text-3xl font-bold text-white">{([] as ServiceHealth[]).length}</div>
                 <div className="text-emerald-200 text-xs mt-1">
-                  {mockServices.filter(s => s.status === 'healthy').length} healthy
+                  {([] as ServiceHealth[]).filter(s => s.status === 'healthy').length} healthy
                 </div>
               </div>
               <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
@@ -814,7 +814,7 @@ export default function HealthScoreClient() {
                     <p className="text-emerald-200 text-sm">Health Score</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockServices.filter(s => s.status === 'healthy').length}</p>
+                    <p className="text-3xl font-bold">{([] as ServiceHealth[]).filter(s => s.status === 'healthy').length}</p>
                     <p className="text-emerald-200 text-sm">Healthy</p>
                   </div>
                   <div className="text-center">
@@ -898,7 +898,7 @@ export default function HealthScoreClient() {
               <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Service Status</h2>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {mockServices.map(service => {
+                  {([] as ServiceHealth[]).map(service => {
                     const Icon = getServiceIcon(service.type)
                     return (
                       <button
@@ -930,7 +930,7 @@ export default function HealthScoreClient() {
                 </div>
                 <ScrollArea className="h-[280px]">
                   <div className="space-y-3">
-                    {mockIncidents.filter(i => i.status !== 'resolved').map(incident => (
+                    {([] as Incident[]).filter(i => i.status !== 'resolved').map(incident => (
                       <button
                         key={incident.id}
                         onClick={() => setSelectedIncident(incident)}
@@ -1032,7 +1032,7 @@ export default function HealthScoreClient() {
                 <button className="text-sm text-emerald-600 dark:text-emerald-400 hover:underline">View All</button>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                {mockSLOs.map(slo => (
+                {([] as SLO[]).map(slo => (
                   <div key={slo.id} className="p-4 rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm font-medium text-gray-900 dark:text-white">{slo.name}</span>
@@ -1072,15 +1072,15 @@ export default function HealthScoreClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockServices.length}</p>
+                    <p className="text-3xl font-bold">{([] as ServiceHealth[]).length}</p>
                     <p className="text-blue-200 text-sm">Services</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockServices.filter(s => s.status === 'healthy').length}</p>
+                    <p className="text-3xl font-bold">{([] as ServiceHealth[]).filter(s => s.status === 'healthy').length}</p>
                     <p className="text-blue-200 text-sm">Healthy</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockServices.filter(s => s.status === 'degraded' || s.status === 'critical').length}</p>
+                    <p className="text-3xl font-bold">{([] as ServiceHealth[]).filter(s => s.status === 'degraded' || s.status === 'critical').length}</p>
                     <p className="text-blue-200 text-sm">Issues</p>
                   </div>
                 </div>
@@ -1141,7 +1141,7 @@ export default function HealthScoreClient() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                  {mockServices.filter(s =>
+                  {([] as ServiceHealth[]).filter(s =>
                     s.name.toLowerCase().includes(searchQuery.toLowerCase())
                   ).map(service => {
                     const Icon = getServiceIcon(service.type)

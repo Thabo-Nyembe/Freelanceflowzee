@@ -131,13 +131,6 @@ interface ReleaseNotesClientProps {
   initialStats?: ReleaseNotesStats
 }
 
-// Empty arrays - real data comes from props/hooks
-const mockAuthors: Author[] = []
-
-const mockReleases: Release[] = []
-
-const mockRoadmap: RoadmapItem[] = []
-
 const platformIcons: Record<string, React.ReactNode> = {
   ios: <Smartphone className="w-4 h-4" />,
   android: <Smartphone className="w-4 h-4" />,
@@ -145,15 +138,6 @@ const platformIcons: Record<string, React.ReactNode> = {
   desktop: <Monitor className="w-4 h-4" />,
   api: <Code className="w-4 h-4" />,
 }
-
-// Empty arrays - real data comes from props/hooks
-const mockReleaseNotesAIInsights: { id: string; type: 'success' | 'warning' | 'info' | 'error'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
-
-const mockReleaseNotesCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string; lastActive: string }[] = []
-
-const mockReleaseNotesPredictions: { id: string; label: string; current: number; target: number; predicted: number; confidence: number; trend: 'up' | 'down' | 'stable' }[] = []
-
-const mockReleaseNotesActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'warning' | 'info' | 'error' }[] = []
 
 // Quick actions will be populated dynamically in the component
 
@@ -2056,7 +2040,7 @@ ${r.features?.length ? '### Features\n' + r.features.map(f => `- ${f}`).join('\n
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockReleaseNotesAIInsights}
+              insights={[]}
               title="Release Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />

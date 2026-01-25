@@ -242,7 +242,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
   const [selectedScheduledReport, setSelectedScheduledReport] = useState<{ name: string; frequency: string; recipients: string; status: string } | null>(null)
   const [reportToGenerate, setReportToGenerate] = useState('')
   const [showTestCaseOptionsDialog, setShowTestCaseOptionsDialog] = useState(false)
-  const [selectedTestCaseForOptions, setSelectedTestCaseForOptions] = useState<typeof mockTestCases[0] | null>(null)
+  const [selectedTestCaseForOptions, setSelectedTestCaseForOptions] = useState<QATestCase | null>(null)
   const [templateFile, setTemplateFile] = useState<File | null>(null)
 
   // Form states for create test suite
@@ -339,8 +339,8 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
   const failedTests = stats.failed
   const automatedTests = stats.automated
   const overallPassRate = stats.total > 0 ? (stats.passed / stats.total) * 100 : 0
-  const activeRuns = mockRuns.filter(r => r.status === 'active').length
-  const openDefects = mockDefects.filter(d => d.status === 'open' || d.status === 'in_progress').length
+  const activeRuns = ([] as TestRun[]).filter(r => r.status === 'active').length
+  const openDefects = ([] as Defect[]).filter(d => d.status === 'open' || d.status === 'in_progress').length
 
   // Map hookTestCases to UI TestCase type for display
   const mappedTestCases: TestCase[] = useMemo(() => hookTestCases.map(tc => ({
@@ -1211,7 +1211,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
               <p className="text-xs text-green-100">Open Defects</p>
             </div>
             <div className="bg-white/20 rounded-lg p-3 text-center">
-              <p className="text-2xl font-bold">{mockMilestones.length}</p>
+              <p className="text-2xl font-bold">{([] as Milestone[]).length}</p>
               <p className="text-xs text-green-100">Milestones</p>
             </div>
           </div>
@@ -1389,8 +1389,8 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                 <Milestone className="w-4 h-4 text-teal-500" />
                 <span className="text-xs text-gray-500">Milestones</span>
               </div>
-              <p className="text-2xl font-bold">{mockMilestones.length}</p>
-              <p className="text-xs text-gray-500">{mockMilestones.filter(m => m.status === 'started').length} active</p>
+              <p className="text-2xl font-bold">{([] as Milestone[]).length}</p>
+              <p className="text-xs text-gray-500">{([] as Milestone[]).filter(m => m.status === 'started').length} active</p>
             </CardContent>
           </Card>
         </div>
@@ -1445,7 +1445,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                   </CardHeader>
                   <CardContent className="p-0">
                     <div className="divide-y">
-                      {mockSuites.map((suite) => (
+                      {([] as TestSuite[]).map((suite) => (
                         <div
                           key={suite.id}
                           className={`p-3 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer ${selectedSuite?.id === suite.id ? 'bg-green-50 dark:bg-green-900/20' : ''}`}
@@ -1594,9 +1594,9 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                 </Button>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
-                <div className="bg-white/20 rounded-lg p-3 text-center"><p className="text-2xl font-bold">{mockRuns.length}</p><p className="text-xs text-blue-100">Total Runs</p></div>
-                <div className="bg-white/20 rounded-lg p-3 text-center"><p className="text-2xl font-bold">{mockRuns.filter(r => r.status === 'active').length}</p><p className="text-xs text-blue-100">Active</p></div>
-                <div className="bg-white/20 rounded-lg p-3 text-center"><p className="text-2xl font-bold">{mockRuns.filter(r => r.status === 'completed').length}</p><p className="text-xs text-blue-100">Completed</p></div>
+                <div className="bg-white/20 rounded-lg p-3 text-center"><p className="text-2xl font-bold">{([] as TestRun[]).length}</p><p className="text-xs text-blue-100">Total Runs</p></div>
+                <div className="bg-white/20 rounded-lg p-3 text-center"><p className="text-2xl font-bold">{([] as TestRun[]).filter(r => r.status === 'active').length}</p><p className="text-xs text-blue-100">Active</p></div>
+                <div className="bg-white/20 rounded-lg p-3 text-center"><p className="text-2xl font-bold">{([] as TestRun[]).filter(r => r.status === 'completed').length}</p><p className="text-xs text-blue-100">Completed</p></div>
                 <div className="bg-white/20 rounded-lg p-3 text-center"><p className="text-2xl font-bold">87%</p><p className="text-xs text-blue-100">Avg Pass Rate</p></div>
                 <div className="bg-white/20 rounded-lg p-3 text-center"><p className="text-2xl font-bold">2.3h</p><p className="text-xs text-blue-100">Avg Duration</p></div>
               </div>
@@ -1605,8 +1605,8 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
             {/* Run Status Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {[
-                { status: 'Active', count: mockRuns.filter(r => r.status === 'active').length, icon: PlayCircle, color: 'blue', desc: 'Currently running' },
-                { status: 'Completed', count: mockRuns.filter(r => r.status === 'completed').length, icon: CheckCircle2, color: 'green', desc: 'Successfully finished' },
+                { status: 'Active', count: ([] as TestRun[]).filter(r => r.status === 'active').length, icon: PlayCircle, color: 'blue', desc: 'Currently running' },
+                { status: 'Completed', count: ([] as TestRun[]).filter(r => r.status === 'completed').length, icon: CheckCircle2, color: 'green', desc: 'Successfully finished' },
                 { status: 'Scheduled', count: 2, icon: Calendar, color: 'purple', desc: 'Upcoming runs' },
                 { status: 'Failed', count: 1, icon: XCircle, color: 'red', desc: 'Needs attention' },
               ].map((stat, i) => (
@@ -1629,7 +1629,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
             <div className="space-y-4">
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {mockRuns.map((run) => {
+                {([] as TestRun[]).map((run) => {
                   const progress = ((run.passedCount + run.failedCount + run.blockedCount) / run.totalCount) * 100
                   const passRate = run.totalCount > 0 ? (run.passedCount / (run.passedCount + run.failedCount)) * 100 : 0
 

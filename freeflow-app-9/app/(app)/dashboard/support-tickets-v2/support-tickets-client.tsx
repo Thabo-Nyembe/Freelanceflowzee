@@ -116,14 +116,7 @@ const defaultStats: SupportStats = {
   satisfactionRate: 0,
 }
 
-// Empty arrays - data fetched from Supabase
-const mockMessages: TicketMessage[] = []
-
-const mockMacros: Macro[] = []
-
-const mockSLAs: SLA[] = []
-
-const mockAgents: AgentMetrics[] = []
+// Data fetched from Supabase - using empty arrays as placeholders
 
 const mockCustomer: CustomerProfile = {
   id: '',
@@ -138,14 +131,6 @@ const mockCustomer: CustomerProfile = {
   tags: []
 }
 
-// Empty arrays for AI-powered competitive upgrade components
-const mockSupportTicketsAIInsights: { id: string; type: 'success' | 'warning' | 'info'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
-
-const mockSupportTicketsCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }[] = []
-
-const mockSupportTicketsPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: 'low' | 'medium' | 'high' }[] = []
-
-const mockSupportTicketsActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'warning' | 'info' }[] = []
 
 // Quick actions will be defined inside the component to access state setters
 

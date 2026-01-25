@@ -2412,18 +2412,18 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockPermissionsAIInsights}
+              insights={[]}
               title="Security Intelligence"
               onInsightAction={handleAIInsightAction}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockPermissionsCollaborators}
+              collaborators={[]}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockPermissionsPredictions}
+              predictions={[]}
               title="Access Forecasts"
             />
           </div>
@@ -2431,7 +2431,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockPermissionsActivities}
+            activities={[]}
             title="Security Activity"
             maxItems={5}
           />
@@ -3312,7 +3312,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
             <div className="space-y-4">
               <Input placeholder="Search users..." />
               <div className="max-h-[300px] overflow-y-auto space-y-2">
-                {mockUsers.filter(u => !selectedGroup?.applications.includes(u.id)).map(user => (
+                {([] as User[]).filter(u => !selectedGroup?.applications.includes(u.id)).map(user => (
                   <div key={user.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
                     <div className="flex items-center gap-3">
                       <Avatar className="w-8 h-8">
@@ -3402,7 +3402,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
             <div className="space-y-4">
               <Input placeholder="Search users..." />
               <div className="max-h-[300px] overflow-y-auto space-y-2">
-                {mockUsers.map(user => (
+                {([] as User[]).map(user => (
                   <div key={user.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
                     <div className="flex items-center gap-3">
                       <Avatar className="w-8 h-8">

@@ -1112,7 +1112,7 @@ export default function PerformanceAnalyticsClient() {
                 </div>
                 <ScrollArea className="h-[300px]">
                   <div className="divide-y divide-gray-100 dark:divide-gray-700">
-                    {mockTraces.slice(0, 5).map((trace) => (
+                    {([] as Trace[]).slice(0, 5).map((trace) => (
                       <div
                         key={trace.id}
                         className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer"
@@ -1146,7 +1146,7 @@ export default function PerformanceAnalyticsClient() {
                       {firingAlerts} active alert{firingAlerts > 1 ? 's' : ''} require attention
                     </p>
                     <p className="text-sm text-red-600 dark:text-red-300">
-                      {mockAlerts.filter(a => a.status === 'firing').map(a => a.name).join(', ')}
+                      {([] as Alert[]).filter(a => a.status === 'firing').map(a => a.name).join(', ')}
                     </p>
                   </div>
                   <button onClick={handleViewAlerts} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium">
@@ -1213,7 +1213,7 @@ export default function PerformanceAnalyticsClient() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                    {mockHosts.map((host) => (
+                    {([] as Host[]).map((host) => (
                       <tr key={host.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                         <td className="px-6 py-4">
                           <p className="font-medium text-gray-900 dark:text-white">{host.name}</p>
@@ -1316,7 +1316,7 @@ export default function PerformanceAnalyticsClient() {
               </div>
               <ScrollArea className="h-[500px]">
                 <div className="font-mono text-sm">
-                  {mockLogs.map((log) => (
+                  {([] as LogEntry[]).map((log) => (
                     <div key={log.id} className="px-6 py-3 border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">
                       <div className="flex items-start gap-4">
                         <span className="text-xs text-gray-400 whitespace-nowrap">{formatDate(log.timestamp)}</span>
@@ -1371,7 +1371,7 @@ export default function PerformanceAnalyticsClient() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {mockSLOs.map((slo) => (
+              {([] as SLO[]).map((slo) => (
                 <div key={slo.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="font-semibold text-gray-900 dark:text-white">{slo.name}</h3>
@@ -1456,7 +1456,7 @@ export default function PerformanceAnalyticsClient() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                    {mockServices.map((service) => (
+                    {([] as ServiceHealth[]).map((service) => (
                       <tr key={service.name} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
@@ -1623,7 +1623,7 @@ export default function PerformanceAnalyticsClient() {
               <div className="p-6 border-b border-gray-100 dark:border-gray-700">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Distributed Traces</h3>
-                  <p className="text-sm text-gray-500">{mockTraces.length} traces in the last hour</p>
+                  <p className="text-sm text-gray-500">{0} traces in the last hour</p>
                 </div>
               </div>
               <div className="overflow-x-auto">
@@ -1640,7 +1640,7 @@ export default function PerformanceAnalyticsClient() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                    {mockTraces.map((trace) => (
+                    {([] as Trace[]).map((trace) => (
                       <tr
                         key={trace.id}
                         className="hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer"
@@ -1733,7 +1733,7 @@ export default function PerformanceAnalyticsClient() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                    {mockAlerts.map((alert) => (
+                    {([] as Alert[]).map((alert) => (
                       <tr key={alert.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                         <td className="px-6 py-4">
                           <p className="font-medium text-gray-900 dark:text-white">{alert.name}</p>

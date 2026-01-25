@@ -171,21 +171,6 @@ interface Playbook {
   activeAccounts: number
 }
 
-// Data arrays - empty, to be populated from API/database
-const mockCSMs: CSM[] = []
-
-const mockCustomers: Customer[] = []
-
-const mockPlaybooks: Playbook[] = []
-
-// Enhanced Competitive Upgrade Data - empty arrays
-const mockCSAIInsights: { id: string; type: 'success' | 'warning' | 'info'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
-
-const mockCSCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }[] = []
-
-const mockCSPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: 'low' | 'medium' | 'high' }[] = []
-
-const mockCSActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'update' | 'warning' }[] = []
 
 // Helper function for exporting customer success data
 function exportCustomerSuccessData(customers: Customer[]) {

@@ -172,20 +172,6 @@ interface KPIMetric {
   description?: string
 }
 
-// Empty data arrays (database-driven)
-const mockFundingRounds: FundingRound[] = []
-
-const mockInvestors: Investor[] = []
-
-const mockCapTable: CapTableEntry[] = []
-
-const mockKPIs: KPIMetric[] = []
-
-// Empty arrays for AI-powered competitive upgrade components (database-driven)
-const mockInvestorMetricsAIInsights: AIInsight[] = []
-const mockInvestorMetricsCollaborators: Collaborator[] = []
-const mockInvestorMetricsPredictions: Prediction[] = []
-const mockInvestorMetricsActivities: ActivityItem[] = []
 
 // QuickActions are defined inside the component to access state setters
 
@@ -422,15 +408,15 @@ export default function InvestorMetricsClient() {
 
   // Stats calculations
   const stats = useMemo(() => {
-    const totalRaised = mockFundingRounds.reduce((sum, r) => sum + r.raisedAmount, 0)
-    const currentValuation = mockFundingRounds.find(r => r.status === 'open')?.postMoneyValuation ||
-      mockFundingRounds.filter(r => r.status === 'closed').sort((a, b) => new Date(b.closeDate).getTime() - new Date(a.closeDate).getTime())[0]?.postMoneyValuation || 0
-    const totalInvestors = mockInvestors.length
-    const totalShares = mockCapTable.reduce((sum, e) => sum + e.shares, 0)
-    const arr = mockKPIs.find(k => k.name === 'Annual Recurring Revenue')?.currentValue || 0
-    const mrr = mockKPIs.find(k => k.name === 'Monthly Recurring Revenue')?.currentValue || 0
-    const runway = mockKPIs.find(k => k.name === 'Runway (months)')?.currentValue || 0
-    const burnRate = mockKPIs.find(k => k.name === 'Burn Rate')?.currentValue || 0
+    const totalRaised = ([] as FundingRound[]).reduce((sum, r) => sum + r.raisedAmount, 0)
+    const currentValuation = ([] as FundingRound[]).find(r => r.status === 'open')?.postMoneyValuation ||
+      ([] as FundingRound[]).filter(r => r.status === 'closed').sort((a, b) => new Date(b.closeDate).getTime() - new Date(a.closeDate).getTime())[0]?.postMoneyValuation || 0
+    const totalInvestors = ([] as Investor[]).length
+    const totalShares = ([] as CapTableEntry[]).reduce((sum, e) => sum + e.shares, 0)
+    const arr = ([] as KPIMetric[]).find(k => k.name === 'Annual Recurring Revenue')?.currentValue || 0
+    const mrr = ([] as KPIMetric[]).find(k => k.name === 'Monthly Recurring Revenue')?.currentValue || 0
+    const runway = ([] as KPIMetric[]).find(k => k.name === 'Runway (months)')?.currentValue || 0
+    const burnRate = ([] as KPIMetric[]).find(k => k.name === 'Burn Rate')?.currentValue || 0
 
     return {
       totalRaised,
@@ -506,9 +492,9 @@ export default function InvestorMetricsClient() {
     try {
       const exportData = {
         metrics: dbMetrics,
-        kpis: mockKPIs,
-        capTable: mockCapTable,
-        fundingRounds: mockFundingRounds,
+        kpis: [] as KPIMetric[],
+        capTable: [] as CapTableEntry[],
+        fundingRounds: [] as FundingRound[],
         exportedAt: new Date().toISOString()
       }
       const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
@@ -544,9 +530,9 @@ export default function InvestorMetricsClient() {
         type: reportConfig.reportType,
         generatedAt: new Date().toISOString(),
         company: 'Kazi Technologies Inc.',
-        ...(reportConfig.includeFinancials && { financials: mockKPIs.filter(k => k.category === 'revenue') }),
-        ...(reportConfig.includeCapTable && { capTable: mockCapTable }),
-        ...(reportConfig.includeKPIs && { kpis: mockKPIs })
+        ...(reportConfig.includeFinancials && { financials: ([] as KPIMetric[]).filter(k => k.category === 'revenue') }),
+        ...(reportConfig.includeCapTable && { capTable: [] as CapTableEntry[] }),
+        ...(reportConfig.includeKPIs && { kpis: [] as KPIMetric[] })
       }
 
       // Create and download report
@@ -623,16 +609,16 @@ export default function InvestorMetricsClient() {
 
       if (exportConfig.includeMetrics) {
         exportData.metrics = dbMetrics
-        exportData.kpis = mockKPIs
+        exportData.kpis = [] as KPIMetric[]
       }
       if (exportConfig.includeCapTable) {
-        exportData.capTable = mockCapTable
+        exportData.capTable = [] as CapTableEntry[]
       }
       if (exportConfig.includeFundingRounds) {
-        exportData.fundingRounds = mockFundingRounds
+        exportData.fundingRounds = [] as FundingRound[]
       }
       if (exportConfig.includeInvestors) {
-        exportData.investors = mockInvestors
+        exportData.investors = [] as Investor[]
       }
 
       let blob: Blob
