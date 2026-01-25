@@ -239,43 +239,7 @@ interface BuildPlugin {
   installCount: number
 }
 
-// MIGRATED: Batch #13 - Removed mock data, using database hooks
-const mockDeployments: Deployment[] = []
-
-// MIGRATED: Batch #13 - Removed mock data, using database hooks
-const mockBuildLogs: BuildLog[] = []
-
-// MIGRATED: Batch #13 - Removed mock data, using database hooks
-const mockDomains: DeploymentDomain[] = []
-
-// MIGRATED: Batch #13 - Removed mock data, using database hooks
-const mockEnvVars: EnvironmentVariable[] = []
-
-// MIGRATED: Batch #13 - Removed mock data, using database hooks
-const mockFunctions: ServerlessFunction[] = []
-
-// MIGRATED: Batch #13 - Removed mock data, using database hooks
-const mockEdgeConfigs: EdgeConfig[] = []
-
-// MIGRATED: Batch #13 - Removed mock data, using database hooks
-const mockBlobs: StorageBlob[] = []
-
-// MIGRATED: Removed mock data, using database hooks
-const mockProtections: DeploymentProtection[] = []
-
-// MIGRATED: Removed mock data, using database hooks
-const mockWebhooks: DeploymentWebhook[] = []
-
-// MIGRATED: Batch #13 - Removed mock data, using database hooks
-const mockIntegrations: Integration[] = []
-
-// MIGRATED: Batch #13 - Removed mock data, using database hooks
-const mockTeamMembers: TeamMember[] = []
-
-// MIGRATED: Batch #13 - Removed mock data, using database hooks
-const mockBuildPlugins: BuildPlugin[] = []
-
-// MIGRATED: Removed mock data - using empty arrays
+// Types for AI features (data comes from database when implemented)
 // Type definitions for AI Insights
 interface AIInsight {
   id: string
@@ -337,14 +301,6 @@ interface ActivityItem {
   isPinned?: boolean
   actions?: Array<{ label: string; action: () => void; variant?: 'default' | 'destructive' }>
 }
-
-const mockDeploymentsAIInsights: AIInsight[] = []
-
-const mockDeploymentsCollaborators: Collaborator[] = []
-
-const mockDeploymentsPredictions: Prediction[] = []
-
-const mockDeploymentsActivities: ActivityItem[] = []
 
 // Quick actions are defined inside the component to access state setters and handlers
 
@@ -1416,7 +1372,7 @@ export default function DeploymentsClient() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
                 <div className="bg-white/20 rounded-lg p-3 text-center">
-                  <p className="text-2xl font-bold">{mockFunctions.length}</p>
+                  <p className="text-2xl font-bold">0</p>
                   <p className="text-sm text-yellow-100">Functions</p>
                 </div>
                 <div className="bg-white/20 rounded-lg p-3 text-center">
@@ -1537,30 +1493,7 @@ export default function DeploymentsClient() {
               </CardHeader>
               <CardContent className="p-0">
                 <div className="divide-y divide-gray-100 dark:divide-gray-800">
-                  {mockFunctions.map(fn => (
-                    <div key={fn.id} className="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-800">
-                      <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-purple-900 flex items-center justify-center">
-                        <Zap className="h-5 w-5 text-purple-600" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <p className="font-medium font-mono text-sm">{fn.name}</p>
-                          <Badge variant="outline" className="text-xs">{fn.runtime}</Badge>
-                        </div>
-                        <p className="text-xs text-gray-500">{fn.region} • {fn.memory}MB</p>
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-6 text-center">
-                        <div><p className="font-medium">{fn.invocations.toLocaleString()}</p><p className="text-xs text-gray-500">invocations</p></div>
-                        <div><p className="font-medium">{fn.avgDuration}ms</p><p className="text-xs text-gray-500">avg duration</p></div>
-                        <div><p className={`font-medium ${fn.errors > 20 ? 'text-red-600' : 'text-green-600'}`}>{fn.errors}</p><p className="text-xs text-gray-500">errors</p></div>
-                      </div>
-                      <div className="flex gap-1">
-                        <Button variant="ghost" size="sm" onClick={() => { setSelectedFunction(fn); setActiveTab('logs'); setLogFilters(prev => ({ ...prev, functionFilter: fn.name })); toast.success(`Terminal Opened`); }}><Terminal className="h-4 w-4" /></Button>
-                        <Button variant="ghost" size="sm" onClick={() => { setSelectedFunction(fn); setActiveTab('analytics'); toast.success(`Metrics Loaded: ${fn.invocations} invocations, ${fn.avgDuration}ms avg`); }}><BarChart3 className="h-4 w-4" /></Button>
-                        <Button variant="ghost" size="sm" onClick={() => { setSelectedFunction(fn); setActiveTab('settings'); setSettingsTab('general'); toast.success(`Settings Opened: ${fn.name} function`); }}><Settings className="h-4 w-4" /></Button>
-                      </div>
-                    </div>
-                  ))}
+                  {/* Functions list - connect to real data source */}
                 </div>
               </CardContent>
             </Card>
@@ -1582,7 +1515,7 @@ export default function DeploymentsClient() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
                 <div className="bg-white/20 rounded-lg p-3 text-center">
-                  <p className="text-2xl font-bold">{mockEdgeConfigs.length}</p>
+                  <p className="text-2xl font-bold">0</p>
                   <p className="text-sm text-cyan-100">Configs</p>
                 </div>
                 <div className="bg-white/20 rounded-lg p-3 text-center">
@@ -1619,30 +1552,7 @@ export default function DeploymentsClient() {
 
             {/* Edge Configs Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6">
-              {mockEdgeConfigs.map(config => (
-                <Card key={config.id} className="border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow cursor-pointer">
-                  <CardContent className="p-6">
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="w-10 h-10 rounded-lg bg-cyan-100 dark:bg-cyan-900 flex items-center justify-center">
-                        <Network className="h-5 w-5 text-cyan-600" />
-                      </div>
-                      <div>
-                        <h4 className="font-semibold">{config.name}</h4>
-                        <p className="text-xs text-gray-500">{config.itemCount} items</p>
-                      </div>
-                      <Badge className="ml-auto bg-green-100 text-green-700">Active</Badge>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 text-sm">
-                      <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><p className="text-lg font-bold">{(config.reads / 1000).toFixed(0)}k</p><p className="text-xs text-gray-500">Reads</p></div>
-                      <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><p className="text-lg font-bold">{config.writes}</p><p className="text-xs text-gray-500">Writes</p></div>
-                    </div>
-                    <div className="flex gap-2 mt-4">
-                      <Button variant="outline" size="sm" className="flex-1" onClick={() => { setSelectedEdgeConfig(config); setShowEdgeConfigViewDialog(true); }}><Eye className="h-3 w-3 mr-1" />View</Button>
-                      <Button variant="outline" size="sm" className="flex-1" onClick={() => { setSelectedEdgeConfig(config); setShowEdgeConfigEditDialog(true); }}><Settings className="h-3 w-3 mr-1" />Edit</Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+              {/* Edge configs list - connect to real data source */}
             </div>
           </TabsContent>
 
@@ -1662,7 +1572,7 @@ export default function DeploymentsClient() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
                 <div className="bg-white/20 rounded-lg p-3 text-center">
-                  <p className="text-2xl font-bold">{mockBlobs.length}</p>
+                  <p className="text-2xl font-bold">0</p>
                   <p className="text-sm text-indigo-100">Files</p>
                 </div>
                 <div className="bg-white/20 rounded-lg p-3 text-center">
@@ -1785,19 +1695,19 @@ export default function DeploymentsClient() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
                 <div className="bg-white/10 rounded-lg p-3 text-center">
-                  <p className="text-2xl font-bold">{mockBuildLogs.length}</p>
+                  <p className="text-2xl font-bold">0</p>
                   <p className="text-sm text-gray-400">Total Logs</p>
                 </div>
                 <div className="bg-white/10 rounded-lg p-3 text-center">
-                  <p className="text-2xl font-bold text-red-400">{mockBuildLogs.filter(l => l.level === 'error').length}</p>
+                  <p className="text-2xl font-bold text-red-400">0</p>
                   <p className="text-sm text-gray-400">Errors</p>
                 </div>
                 <div className="bg-white/10 rounded-lg p-3 text-center">
-                  <p className="text-2xl font-bold text-amber-400">{mockBuildLogs.filter(l => l.level === 'warn').length}</p>
+                  <p className="text-2xl font-bold text-amber-400">0</p>
                   <p className="text-sm text-gray-400">Warnings</p>
                 </div>
                 <div className="bg-white/10 rounded-lg p-3 text-center">
-                  <p className="text-2xl font-bold text-green-400">{mockBuildLogs.filter(l => l.level === 'success').length}</p>
+                  <p className="text-2xl font-bold text-green-400">0</p>
                   <p className="text-sm text-gray-400">Success</p>
                 </div>
                 <div className="bg-white/10 rounded-lg p-3 text-center">
@@ -2139,7 +2049,7 @@ export default function DeploymentsClient() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
                 <div className="bg-white/20 rounded-lg p-3 text-center">
-                  <p className="text-2xl font-bold">{mockProtections.filter(p => p.enabled).length}</p>
+                  <p className="text-2xl font-bold">0</p>
                   <p className="text-sm text-red-100">Active Rules</p>
                 </div>
                 <div className="bg-white/20 rounded-lg p-3 text-center">

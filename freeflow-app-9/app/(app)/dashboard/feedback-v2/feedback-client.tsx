@@ -1282,11 +1282,6 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
             </Card>
 
             {/* Ideas List */}
-            {loading && (
-              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm p-8 text-center">
-                <div className="animate-pulse text-gray-500">Loading feedback...</div>
-              </Card>
-            )}
             <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 gap-4' : 'space-y-3'}>
               {filteredIdeas.map((idea) => {
                 const CategoryIcon = getCategoryIcon(idea.category)
