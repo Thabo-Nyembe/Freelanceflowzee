@@ -722,7 +722,8 @@ export default function LogisticsClient() {
       await refreshShipments()
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Failed to create shipment'
-      toast.error('Error')
+      console.error('Create shipment error:', error)
+      toast.error(message)
     } finally {
       setIsSaving(false)
     }
@@ -741,7 +742,8 @@ export default function LogisticsClient() {
       await refreshShipments()
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Failed to update status'
-      toast.error('Error')
+      console.error('Update status error:', error)
+      toast.error(message)
     }
   }
 
@@ -758,7 +760,8 @@ export default function LogisticsClient() {
       await refreshShipments()
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Failed to delete shipment'
-      toast.error('Error')
+      console.error('Delete shipment error:', error)
+      toast.error(message)
     }
   }
 
@@ -814,8 +817,9 @@ export default function LogisticsClient() {
       toast.success(`Order processed: "${selectedOrder.id}" has been processed and is ready for shipment`)
       setShowProcessOrderDialog(false)
       setSelectedOrder(null)
-    } catch {
-      toast.error('Error')
+    } catch (error) {
+      console.error('Process order error:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to process order')
     } finally {
       setIsSaving(false)
     }
@@ -865,8 +869,9 @@ export default function LogisticsClient() {
       a.click()
       URL.revokeObjectURL(url)
       toast.success(`Export complete: data downloaded`)
-    } catch {
-      toast.error('Export failed')
+    } catch (error) {
+      console.error('Export error:', error)
+      toast.error(error instanceof Error ? error.message : 'Export failed')
     }
     setShowExportDialog(false)
   }
@@ -990,9 +995,12 @@ export default function LogisticsClient() {
   const handleConfirmResetHistory = async () => {
     setIsSaving(true)
     try {
+      // TODO: Wire to actual database operation to reset shipment history
+      console.warn('handleConfirmResetHistory: Not yet wired to database')
       toast.success('History reset')
-    } catch {
-      toast.error('Error')
+    } catch (error) {
+      console.error('Reset history error:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to reset history')
     } finally {
       setIsSaving(false)
       setShowResetHistoryDialog(false)
@@ -1006,9 +1014,12 @@ export default function LogisticsClient() {
   const handleConfirmDisconnectCarriers = async () => {
     setIsSaving(true)
     try {
+      // TODO: Wire to actual database operation to disconnect carriers
+      console.warn('handleConfirmDisconnectCarriers: Not yet wired to database')
       toast.success('Carriers disconnected')
-    } catch {
-      toast.error('Error')
+    } catch (error) {
+      console.error('Disconnect carriers error:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to disconnect carriers')
     } finally {
       setIsSaving(false)
       setShowDisconnectCarriersDialog(false)

@@ -2823,8 +2823,9 @@ export default function ShippingClient() {
                 try {
                   await fetchShipments()
                   toast.success('All tracking refreshed', { id: 'refresh-all', description: `${mappedShipments.length} shipments updated` })
-                } catch {
-                  toast.error('Failed to refresh tracking', { id: 'refresh-all' })
+                } catch (error) {
+                  console.error('Refresh tracking error:', error)
+                  toast.error(error instanceof Error ? error.message : 'Failed to refresh tracking', { id: 'refresh-all' })
                 }
               }}>Refresh All</Button>
             </div>
@@ -2894,7 +2895,10 @@ export default function ShippingClient() {
                 try {
                   await fetchShipments()
                   toast.success('Carrier sync complete', { id: 'carrier-sync' })
-                } catch { toast.error('Sync failed', { id: 'carrier-sync' }) }
+                } catch (error) {
+                  console.error('Carrier sync error:', error)
+                  toast.error(error instanceof Error ? error.message : 'Sync failed', { id: 'carrier-sync' })
+                }
               }}>Sync Now</Button>
             </div>
           </DialogContent>
