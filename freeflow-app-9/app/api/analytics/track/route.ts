@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createFeatureLogger } from '@/lib/logger'
+import crypto from 'crypto'
 
 const logger = createFeatureLogger('Analytics:Track')
 
@@ -74,10 +75,10 @@ export async function POST(request: NextRequest) {
 }
 
 /**
- * Generate a unique session ID
+ * Generate a unique session ID using cryptographically secure randomness
  */
 function generateSessionId(): string {
-  return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+  return `session_${crypto.randomUUID()}`
 }
 
 /**

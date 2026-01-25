@@ -11,6 +11,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getServerSession } from '@/lib/auth'
+import crypto from 'crypto'
 
 // ============================================================================
 // GET - List Tickets / Get Single Ticket
@@ -355,8 +356,8 @@ async function handleCreateTicket(
     )
   }
 
-  // Generate ticket code
-  const ticketCode = `TKT-${Date.now().toString(36).toUpperCase()}`
+  // Generate ticket code using cryptographically secure randomness
+  const ticketCode = `TKT-${crypto.randomUUID().split('-')[0].toUpperCase()}`
 
   const ticketData = {
     user_id: userId,

@@ -46,22 +46,18 @@ export const browserSupport = {
   supportsFlexbox: CSS.supports('display', 'flex')
 };
 
-// Safe feature usage
-export function safeOptionalChaining(obj, path, fallback = undefined) {
-  if (browserSupport.supportsOptionalChaining) {
-    try {
-      return eval(`obj${path}`);
-    } catch {
-      return fallback;
-    }
+// Safe feature usage - always use safe path traversal (never eval)
+export function safeOptionalChaining(obj: unknown, path: string, fallback: unknown = undefined): unknown {
+  if (!obj || typeof obj !== 'object') {
+    return fallback;
   }
-  
-  // Fallback for older browsers
-  const keys = path.replace(/[?.]/, '').split('.');
-  let result = obj;
+
+  // Safe path traversal without eval
+  const keys = path.replace(/^\??\.?/, '').split(/[?.]+/).filter(Boolean);
+  let result: unknown = obj;
   for (const key of keys) {
-    if (result && typeof result === 'object' && key in result) {
-      result = result[key];
+    if (result && typeof result === 'object' && key in (result as Record<string, unknown>)) {
+      result = (result as Record<string, unknown>)[key];
     } else {
       return fallback;
     }

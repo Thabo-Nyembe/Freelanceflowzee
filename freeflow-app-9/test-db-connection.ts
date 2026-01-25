@@ -5,13 +5,22 @@
 
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://gcinvwprtlnwuwuvmrux.supabase.co'
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdjaW52d3BydGxud3V3dXZtcnV4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQwNTg1OTIsImV4cCI6MjA3OTYzNDU5Mn0.DAS5YdlYIybCPxQrnzcr6UTtku2xf6JsGnXusM15quQ'
+// SECURITY: Credentials must be provided via environment variables
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
 async function testConnection() {
+  if (!supabaseUrl || !supabaseKey) {
+    console.error('❌ Missing required environment variables:')
+    console.error('   - NEXT_PUBLIC_SUPABASE_URL')
+    console.error('   - NEXT_PUBLIC_SUPABASE_ANON_KEY')
+    console.error('\nSet these in your .env.local file before running this test.')
+    process.exit(1)
+  }
+
   console.log('🔌 Testing Supabase connection...\n')
   console.log(`URL: ${supabaseUrl}`)
-  console.log(`Key: ${supabaseKey.substring(0, 20)}...\n`)
+  console.log(`Key: ✅ Configured (hidden for security)\n`)
 
   const supabase = createClient(supabaseUrl, supabaseKey)
 

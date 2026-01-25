@@ -164,7 +164,11 @@ export async function getVideoMetadata(inputPath: string): Promise<VideoMetadata
         duration: metadata.format.duration || 0,
         width: videoStream.width || 0,
         height: videoStream.height || 0,
-        fps: eval(videoStream.r_frame_rate || '30/1'),
+        fps: (() => {
+          const rate = videoStream.r_frame_rate || '30/1';
+          const [num, den] = rate.split('/').map(Number);
+          return den ? num / den : num || 30;
+        })(),
         bitrate: Math.round((metadata.format.bit_rate || 0) / 1000),
         codec: videoStream.codec_name || 'unknown',
         audioCodec: audioStream?.codec_name || null,
