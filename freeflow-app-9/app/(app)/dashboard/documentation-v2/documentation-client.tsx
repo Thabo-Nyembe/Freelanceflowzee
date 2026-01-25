@@ -1318,7 +1318,7 @@ export default function DocumentationClient() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {mockChangelogs.slice(0, 3).map(changelog => (
+                  {([] as DocChangelog[]).slice(0, 3).map(changelog => (
                     <div key={changelog.id} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <div className="flex items-center gap-2 mb-2">
                         <Badge className={getVersionTypeColor(changelog.type)}>{changelog.version}</Badge>
@@ -1357,7 +1357,7 @@ export default function DocumentationClient() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {mockSpaces.map(space => (
+              {([] as DocSpace[]).map(space => (
                 <Card key={space.id} className="hover:shadow-lg transition-all cursor-pointer group" onClick={() => setSelectedSpace(space)}>
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-4">
@@ -1432,7 +1432,7 @@ export default function DocumentationClient() {
                 </CardHeader>
                 <CardContent className="p-2">
                   <ScrollArea className="h-[500px]">
-                    {mockPages.filter(p => !p.parent_id).map(page => (
+                    {([] as DocPage[]).filter(p => !p.parent_id).map(page => (
                       <div key={page.id}>
                         <div
                           className={`flex items-center gap-2 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg cursor-pointer ${selectedPage?.id === page.id ? 'bg-purple-100 dark:bg-purple-900/30' : ''}`}
@@ -1446,7 +1446,7 @@ export default function DocumentationClient() {
                           {page.children.length === 0 && <FileText className="h-4 w-4 text-gray-400" />}
                           <span className="flex-1 text-sm truncate">{page.title}</span>
                         </div>
-                        {expandedPages.includes(page.id) && mockPages.filter(p => p.parent_id === page.id).map(child => (
+                        {expandedPages.includes(page.id) && ([] as DocPage[]).filter(p => p.parent_id === page.id).map(child => (
                           <div key={child.id}
                             className={`flex items-center gap-2 px-3 py-2 pl-8 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg cursor-pointer ${selectedPage?.id === child.id ? 'bg-purple-100 dark:bg-purple-900/30' : ''}`}
                             onClick={() => setSelectedPage(child)}>
@@ -1549,7 +1549,7 @@ export default function DocumentationClient() {
                   </div>
                   <div>
                     <h2 className="text-2xl font-bold">Documentation Templates</h2>
-                    <p className="text-amber-100">{mockTemplates.length} templates available</p>
+                    <p className="text-amber-100">{([] as DocTemplate[]).length} templates available</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
@@ -1562,7 +1562,7 @@ export default function DocumentationClient() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {mockTemplates.map(template => (
+              {([] as DocTemplate[]).map(template => (
                 <Card key={template.id} className="hover:shadow-lg transition-all cursor-pointer group">
                   <CardContent className="p-6">
                     <div className="flex items-center gap-3 mb-4">
@@ -1600,7 +1600,7 @@ export default function DocumentationClient() {
             </div>
 
             <div className="space-y-4">
-              {mockChangelogs.map(changelog => (
+              {([] as DocChangelog[]).map(changelog => (
                 <Card key={changelog.id} className={changelog.status === 'scheduled' ? 'border-dashed border-purple-300' : ''}>
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-4">
@@ -1747,7 +1747,7 @@ export default function DocumentationClient() {
                     <Globe className="h-5 w-5 text-purple-600" />
                     <span className="text-sm text-gray-500">Languages</span>
                   </div>
-                  <div className="text-3xl font-bold">{mockLocales.length}</div>
+                  <div className="text-3xl font-bold">{([] as DocLocale[]).length}</div>
                 </CardContent>
               </Card>
               <Card>

@@ -1824,7 +1824,7 @@ export default function PerformanceAnalyticsClient() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {mockDashboards.map((dashboard) => (
+              {([] as Dashboard[]).map((dashboard) => (
                 <Card key={dashboard.id} className="bg-white dark:bg-gray-800 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => handleDashboardClick(dashboard.name)}>
                   <CardHeader className="pb-2">
                     <div className="flex items-center justify-between">
@@ -1993,7 +1993,7 @@ export default function PerformanceAnalyticsClient() {
                         </Button>
                       </div>
                       <div className="space-y-3">
-                        {mockIntegrations.map((integration) => (
+                        {([] as Integration[]).map((integration) => (
                           <div key={integration.id} className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
                             <div className="flex items-center gap-4">
                               <span className="text-2xl">{integration.icon}</span>
@@ -3421,7 +3421,7 @@ export default function PerformanceAnalyticsClient() {
             </DialogHeader>
             <ScrollArea className="max-h-[400px]">
               <div className="space-y-3 py-4">
-                {mockAlerts.filter(a => a.status === 'firing' || a.status === 'acknowledged').map((alert) => (
+                {([] as Alert[]).filter(a => a.status === 'firing' || a.status === 'acknowledged').map((alert) => (
                   <div key={alert.id} className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">

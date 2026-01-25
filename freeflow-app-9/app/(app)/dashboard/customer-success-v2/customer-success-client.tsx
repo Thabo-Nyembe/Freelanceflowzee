@@ -370,7 +370,7 @@ export default function CustomerSuccessClient() {
   }, [customers])
 
   // Playbooks remain empty until a playbooks table is created
-  const [playbooks] = useState<Playbook[]>(mockPlaybooks)
+  const [playbooks] = useState<Playbook[]>([])
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedTier, setSelectedTier] = useState<AccountTier | 'all'>('all')
   const [selectedHealth, setSelectedHealth] = useState<HealthStatus | 'all'>('all')
@@ -1684,18 +1684,18 @@ export default function CustomerSuccessClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockCSAIInsights}
+              insights={[]}
               title="Customer Success Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockCSCollaborators}
+              collaborators={[]}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockCSPredictions}
+              predictions={[]}
               title="Success Forecasts"
             />
           </div>
@@ -1703,7 +1703,7 @@ export default function CustomerSuccessClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockCSActivities}
+            activities={[]}
             title="Customer Activity"
             maxItems={5}
           />

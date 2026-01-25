@@ -140,23 +140,6 @@ interface MobileAppClientProps {
   initialStats: any
 }
 
-// Data arrays - empty by default, populated from Supabase
-const mockBuilds: Build[] = []
-
-const mockReviews: AppReview[] = []
-
-const mockCampaigns: PushCampaign[] = []
-
-const mockIAPs: InAppPurchase[] = []
-
-// Enhanced Competitive Upgrade data - empty arrays
-const mockMobileAppAIInsights: { id: string; type: 'success' | 'warning' | 'info' | 'error'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
-
-const mockMobileAppCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }[] = []
-
-const mockMobileAppPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: 'low' | 'medium' | 'high' }[] = []
-
-const mockMobileAppActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' | 'error' }[] = []
 
 // Quick actions will be defined inside the component to access state setters
 
@@ -283,8 +266,8 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
   }, [versions])
 
   // Empty arrays for campaigns and iaps - can be wired to separate tables if needed
-  const campaigns = mockCampaigns
-  const iaps = mockIAPs
+  const campaigns: PushCampaign[] = []
+  const iaps: InAppPurchase[] = []
 
   const filteredBuilds = useMemo(() => {
     return builds.filter(b => selectedPlatform === 'all' || b.platform === selectedPlatform)
@@ -2079,7 +2062,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockMobileAppAIInsights}
+              insights={[]}
               title="Mobile App Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />

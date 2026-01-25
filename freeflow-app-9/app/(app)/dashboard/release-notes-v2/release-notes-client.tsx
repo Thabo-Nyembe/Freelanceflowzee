@@ -2047,11 +2047,11 @@ ${r.features?.length ? '### Features\n' + r.features.map(f => `- ${f}`).join('\n
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockReleaseNotesCollaborators}
+              collaborators={[]}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockReleaseNotesPredictions}
+              predictions={[]}
               title="Release Forecasts"
             />
           </div>
@@ -2059,7 +2059,7 @@ ${r.features?.length ? '### Features\n' + r.features.map(f => `- ${f}`).join('\n
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockReleaseNotesActivities}
+            activities={[]}
             title="Release Activity"
             maxItems={5}
           />

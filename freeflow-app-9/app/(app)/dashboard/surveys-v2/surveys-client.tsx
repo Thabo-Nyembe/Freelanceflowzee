@@ -198,12 +198,7 @@ interface SurveyStats {
   responsesLastWeek: number
 }
 
-// Empty arrays - real data comes from Supabase hooks
-const mockSurveys: Survey[] = []
-
-const mockResponses: Response[] = []
-
-const mockTemplates: Template[] = []
+// Real data comes from Supabase hooks - no mock data needed
 
 const mockStats: SurveyStats = {
   totalSurveys: 0,
@@ -271,14 +266,7 @@ const getNPSCategory = (score: number) => {
   return { label: 'Detractor', color: 'text-red-600' }
 }
 
-// Empty arrays for AI-powered competitive upgrade components - real data comes from Supabase
-const mockSurveysAIInsights: { id: string; type: 'success' | 'warning' | 'info'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
-
-const mockSurveysCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }[] = []
-
-const mockSurveysPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: 'low' | 'medium' | 'high' }[] = []
-
-const mockSurveysActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' }[] = []
+// AI-powered competitive upgrade components use empty arrays - real data comes from Supabase
 
 // Quick actions will be defined inside the component with proper handlers
 
@@ -511,7 +499,7 @@ export default function SurveysClient() {
 
   const surveyResponses = useMemo(() => {
     if (!selectedSurvey) return []
-    return mockResponses.filter(r => r.surveyId === selectedSurvey.id)
+    return ([] as Response[]).filter(r => r.surveyId === selectedSurvey.id)
   }, [selectedSurvey])
 
   // Computed stats from database
@@ -528,9 +516,10 @@ export default function SurveysClient() {
   }, [dbStats])
 
   const npsDistribution = useMemo(() => {
-    const promoters = mockResponses.filter(r => r.npsScore && r.npsScore >= 9).length
-    const passives = mockResponses.filter(r => r.npsScore && r.npsScore >= 7 && r.npsScore < 9).length
-    const detractors = mockResponses.filter(r => r.npsScore && r.npsScore < 7).length
+    const responses: Response[] = []
+    const promoters = responses.filter(r => r.npsScore && r.npsScore >= 9).length
+    const passives = responses.filter(r => r.npsScore && r.npsScore >= 7 && r.npsScore < 9).length
+    const detractors = responses.filter(r => r.npsScore && r.npsScore < 7).length
     const total = promoters + passives + detractors
     return {
       promoters: total > 0 ? (promoters / total) * 100 : 0,

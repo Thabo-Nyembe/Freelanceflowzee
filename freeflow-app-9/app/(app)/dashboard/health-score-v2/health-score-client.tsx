@@ -1227,15 +1227,15 @@ export default function HealthScoreClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockHosts.length}</p>
+                    <p className="text-3xl font-bold">{([] as HostMetrics[]).length}</p>
                     <p className="text-amber-200 text-sm">Resources</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockHosts.filter(i => i.status === 'healthy').length}</p>
+                    <p className="text-3xl font-bold">{([] as HostMetrics[]).filter(i => i.status === 'healthy').length}</p>
                     <p className="text-amber-200 text-sm">Healthy</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{(mockHosts.reduce((sum, i) => sum + i.cpu, 0) / mockHosts.length).toFixed(0)}%</p>
+                    <p className="text-3xl font-bold">{(([] as HostMetrics[]).reduce((sum, i) => sum + i.cpu, 0) / (([] as HostMetrics[]).length || 1)).toFixed(0)}%</p>
                     <p className="text-amber-200 text-sm">Avg CPU</p>
                   </div>
                 </div>
@@ -1272,10 +1272,10 @@ export default function HealthScoreClient() {
                   <span className="font-medium text-gray-900 dark:text-white">Servers</span>
                 </div>
                 <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {mockHosts.filter(h => h.type === 'server').length}
+                  {([] as HostMetrics[]).filter(h => h.type === 'server').length}
                 </div>
                 <div className="text-xs text-gray-500 dark:text-gray-400">
-                  {mockHosts.filter(h => h.type === 'server' && h.status === 'healthy').length} healthy
+                  {([] as HostMetrics[]).filter(h => h.type === 'server' && h.status === 'healthy').length} healthy
                 </div>
               </div>
               <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
@@ -1284,10 +1284,10 @@ export default function HealthScoreClient() {
                   <span className="font-medium text-gray-900 dark:text-white">Kubernetes Nodes</span>
                 </div>
                 <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {mockHosts.filter(h => h.type === 'kubernetes').length}
+                  {([] as HostMetrics[]).filter(h => h.type === 'kubernetes').length}
                 </div>
                 <div className="text-xs text-gray-500 dark:text-gray-400">
-                  {mockHosts.filter(h => h.type === 'kubernetes' && h.status === 'healthy').length} healthy
+                  {([] as HostMetrics[]).filter(h => h.type === 'kubernetes' && h.status === 'healthy').length} healthy
                 </div>
               </div>
               <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
@@ -1315,7 +1315,7 @@ export default function HealthScoreClient() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                  {mockHosts.map(host => {
+                  {([] as HostMetrics[]).map(host => {
                     const Icon = getHostIcon(host.type)
                     return (
                       <tr key={host.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
@@ -1410,11 +1410,11 @@ export default function HealthScoreClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockAlerts.length}</p>
+                    <p className="text-3xl font-bold">{([] as AlertRule[]).length}</p>
                     <p className="text-rose-200 text-sm">Rules</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockAlerts.filter(a => a.enabled).length}</p>
+                    <p className="text-3xl font-bold">{([] as AlertRule[]).filter(a => a.enabled).length}</p>
                     <p className="text-rose-200 text-sm">Active</p>
                   </div>
                   <div className="text-center">
@@ -1459,7 +1459,7 @@ export default function HealthScoreClient() {
                 </div>
                 <ScrollArea className="h-[400px]">
                   <div className="space-y-3">
-                    {mockAlerts.map(alert => (
+                    {([] as AlertRule[]).map(alert => (
                       <div key={alert.id} className="p-4 rounded-lg border border-gray-200 dark:border-gray-700">
                         <div className="flex items-start justify-between mb-2">
                           <div className="flex items-center gap-2">
@@ -1499,16 +1499,16 @@ export default function HealthScoreClient() {
                   <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Incidents</h2>
                   <div className="flex items-center gap-2">
                     <span className="px-2 py-1 bg-red-500/10 text-red-500 rounded text-xs">
-                      {mockIncidents.filter(i => i.status === 'open').length} Open
+                      {([] as Incident[]).filter(i => i.status === 'open').length} Open
                     </span>
                     <span className="px-2 py-1 bg-yellow-500/10 text-yellow-500 rounded text-xs">
-                      {mockIncidents.filter(i => i.status === 'acknowledged').length} Acknowledged
+                      {([] as Incident[]).filter(i => i.status === 'acknowledged').length} Acknowledged
                     </span>
                   </div>
                 </div>
                 <ScrollArea className="h-[400px]">
                   <div className="space-y-3">
-                    {mockIncidents.map(incident => (
+                    {([] as Incident[]).map(incident => (
                       <button
                         key={incident.id}
                         onClick={() => setSelectedIncident(incident)}
@@ -1566,15 +1566,15 @@ export default function HealthScoreClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockSLOs.length}</p>
+                    <p className="text-3xl font-bold">{([] as SLO[]).length}</p>
                     <p className="text-purple-200 text-sm">SLOs</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockSLOs.filter(s => s.current >= s.target).length}</p>
+                    <p className="text-3xl font-bold">{([] as SLO[]).filter(s => s.current >= s.target).length}</p>
                     <p className="text-purple-200 text-sm">On Track</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockSLOs.filter(s => s.current < s.target).length}</p>
+                    <p className="text-3xl font-bold">{([] as SLO[]).filter(s => s.current < s.target).length}</p>
                     <p className="text-purple-200 text-sm">At Risk</p>
                   </div>
                 </div>

@@ -322,18 +322,6 @@ const NODE_DEFINITIONS: NodeDefinition[] = [
   { type: 'control_wait', name: 'Wait', displayName: 'Wait', description: 'Wait for webhook', category: 'control', icon: <Timer className="h-4 w-4" />, iconColor: 'text-gray-600', color: 'bg-gray-500', inputs: [{ name: 'main', type: 'main' }], outputs: [{ name: 'main', type: 'main' }], properties: [{ name: 'resume', displayName: 'Resume', type: 'options', options: [{ name: 'After Time Interval', value: 'timeInterval' }, { name: 'On Webhook Call', value: 'webhook' }] }], version: 1 },
 ]
 
-// ============== DATA ARRAYS (Empty - to be populated from Supabase) ==============
-
-const mockWorkflows: Workflow[] = []
-
-const mockExecutions: WorkflowExecution[] = []
-
-const mockTemplates: WorkflowTemplate[] = []
-
-const mockCredentials: WorkflowCredential[] = []
-
-const mockVariables: WorkflowVariable[] = []
-
 // ============== HELPER FUNCTIONS ==============
 
 const getStatusColor = (status: WorkflowStatus): string => {
@@ -1681,15 +1669,15 @@ export default function WorkflowBuilderClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockExecutions.filter(e => e.status === 'success').length}</p>
+                    <p className="text-3xl font-bold">{([] as WorkflowExecution[]).filter(e => e.status === 'success').length}</p>
                     <p className="text-emerald-200 text-sm">Successful</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockExecutions.filter(e => e.status === 'running').length}</p>
+                    <p className="text-3xl font-bold">{([] as WorkflowExecution[]).filter(e => e.status === 'running').length}</p>
                     <p className="text-emerald-200 text-sm">Running</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockExecutions.filter(e => e.status === 'error').length}</p>
+                    <p className="text-3xl font-bold">{([] as WorkflowExecution[]).filter(e => e.status === 'error').length}</p>
                     <p className="text-emerald-200 text-sm">Failed</p>
                   </div>
                 </div>
@@ -1727,7 +1715,7 @@ export default function WorkflowBuilderClient() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {mockExecutions.map(execution => (
+                  {([] as WorkflowExecution[]).map(execution => (
                     <div key={execution.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <div className="flex items-center gap-4">
                         {execution.status === 'success' && <CheckCircle className="w-5 h-5 text-green-600" />}

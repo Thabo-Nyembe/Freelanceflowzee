@@ -381,7 +381,7 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
   }
 
   const getSLAStatus = (ticket: SupportTicket) => {
-    const sla = mockSLAs.find(s => s.priority === (ticket.priority === 'normal' ? 'medium' : ticket.priority))
+    const sla = ([] as SLA[]).find(s => s.priority === (ticket.priority === 'normal' ? 'medium' : ticket.priority))
     if (!sla) return null
     const createdAt = new Date(ticket.created_at)
     const now = new Date()
@@ -1025,7 +1025,7 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <div className="space-y-3">
-                        {mockAgents.slice(0, 3).map(agent => (
+                        {([] as AgentMetrics[]).slice(0, 3).map(agent => (
                           <div key={agent.id} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
                             <Avatar>
                               <AvatarImage src={`https://avatar.vercel.sh/${agent.avatar}`} />
@@ -1049,7 +1049,7 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
           {/* Agents Tab */}
           <TabsContent value="agents" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {mockAgents.map(agent => (
+              {([] as AgentMetrics[]).map(agent => (
                 <Card key={agent.id}>
                   <CardContent className="pt-6">
                     <div className="text-center mb-4">
@@ -1097,7 +1097,7 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
               </button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {mockMacros.map(macro => (
+              {([] as Macro[]).map(macro => (
                 <Card key={macro.id}>
                   <CardContent className="pt-4">
                     <div className="flex items-start justify-between mb-3">
@@ -1165,7 +1165,7 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {mockSLAs.map(sla => (
+                  {([] as SLA[]).map(sla => (
                     <div key={sla.id} className="flex items-center gap-4">
                       <Badge className={getPriorityColor(sla.priority)}>{sla.priority}</Badge>
                       <div className="flex-1">
@@ -1983,18 +1983,18 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockSupportTicketsAIInsights}
+              insights={[]}
               title="Support Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockSupportTicketsCollaborators}
+              collaborators={[]}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockSupportTicketsPredictions}
+              predictions={[]}
               title="Ticket Forecasts"
             />
           </div>
@@ -2002,7 +2002,7 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockSupportTicketsActivities}
+            activities={[]}
             title="Support Activity"
             maxItems={5}
           />
@@ -2112,7 +2112,7 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
             </DialogHeader>
             <ScrollArea className="h-[400px]">
               <div className="space-y-2">
-                {mockMacros.map(macro => (
+                {([] as Macro[]).map(macro => (
                   <div
                     key={macro.id}
                     onClick={() => handleUseMacro(macro)}

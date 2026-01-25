@@ -73,11 +73,6 @@ interface TeamMember {
   bookingsToday: number
 }
 
-// Properly typed empty arrays for AI-powered competitive upgrade components
-const mockBookingsAIInsights: AIInsight[] = []
-const mockBookingsCollaborators: Collaborator[] = []
-const mockBookingsPredictions: Prediction[] = []
-const mockBookingsActivities: ActivityItem[] = []
 
 // Quick actions are defined inside the component to access state setters
 
@@ -2327,14 +2322,14 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockBookingsAIInsights}
+              insights={[]}
               title="Booking Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockBookingsCollaborators}
+              collaborators={[]}
               maxVisible={4}
             />
             <PredictiveAnalytics

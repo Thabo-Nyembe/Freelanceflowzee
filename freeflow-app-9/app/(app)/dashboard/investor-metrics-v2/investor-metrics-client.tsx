@@ -880,15 +880,15 @@ export default function InvestorMetricsClient() {
                   </div>
                   <div className="flex items-center gap-6">
                     <div className="text-center">
-                      <p className="text-3xl font-bold">${Math.round(mockCapTable.reduce((s, c) => s + (c.shares * c.sharePrice), 0) / 1000000)}M</p>
+                      <p className="text-3xl font-bold">${Math.round(([] as CapTableEntry[]).reduce((s, c) => s + (c.shares * c.sharePrice), 0) / 1000000)}M</p>
                       <p className="text-emerald-200 text-sm">Valuation</p>
                     </div>
                     <div className="text-center">
-                      <p className="text-3xl font-bold">${Math.round(mockFundingRounds.reduce((s, r) => s + r.raisedAmount, 0) / 1000000)}M</p>
+                      <p className="text-3xl font-bold">${Math.round(([] as FundingRound[]).reduce((s, r) => s + r.raisedAmount, 0) / 1000000)}M</p>
                       <p className="text-emerald-200 text-sm">Total Raised</p>
                     </div>
                     <div className="text-center">
-                      <p className="text-3xl font-bold">{mockInvestors.length}</p>
+                      <p className="text-3xl font-bold">{([] as Investor[]).length}</p>
                       <p className="text-emerald-200 text-sm">Investors</p>
                     </div>
                   </div>
@@ -924,7 +924,7 @@ export default function InvestorMetricsClient() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-6">
-                    {mockFundingRounds.map(round => (
+                    {([] as FundingRound[]).map(round => (
                       <div key={round.id} className="space-y-2">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
@@ -965,7 +965,7 @@ export default function InvestorMetricsClient() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      {mockCapTable.slice(0, 6).map(entry => (
+                      {([] as CapTableEntry[]).slice(0, 6).map(entry => (
                         <div key={entry.id} className="flex items-center gap-3">
                           <div className="w-3 h-3 rounded-full" style={{
                             backgroundColor: entry.stakeholderType === 'founder' ? '#f59e0b' :
@@ -983,7 +983,7 @@ export default function InvestorMetricsClient() {
 
               {/* Key Metrics Grid */}
               <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {mockKPIs.slice(0, 8).map(kpi => {
+                {([] as KPIMetric[]).slice(0, 8).map(kpi => {
                   const change = calculateChange(kpi.currentValue, kpi.previousValue)
                   const isInverse = kpi.name.includes('Churn') || kpi.name.includes('CAC') || kpi.name.includes('Burn')
                   return (
@@ -1029,11 +1029,11 @@ export default function InvestorMetricsClient() {
                   </div>
                   <div className="flex items-center gap-6">
                     <div className="text-center">
-                      <p className="text-3xl font-bold">{mockCapTable.length}</p>
+                      <p className="text-3xl font-bold">{([] as CapTableEntry[]).length}</p>
                       <p className="text-blue-200 text-sm">Shareholders</p>
                     </div>
                     <div className="text-center">
-                      <p className="text-3xl font-bold">{mockCapTable.reduce((s, c) => s + c.shares, 0).toLocaleString()}</p>
+                      <p className="text-3xl font-bold">{([] as CapTableEntry[]).reduce((s, c) => s + c.shares, 0).toLocaleString()}</p>
                       <p className="text-blue-200 text-sm">Total Shares</p>
                     </div>
                   </div>
@@ -1055,7 +1055,7 @@ export default function InvestorMetricsClient() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                      {mockCapTable.map(entry => (
+                      {([] as CapTableEntry[]).map(entry => (
                         <tr key={entry.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center gap-3">
@@ -1101,10 +1101,10 @@ export default function InvestorMetricsClient() {
                     <tfoot className="bg-gray-50 dark:bg-gray-700/50 font-medium">
                       <tr>
                         <td className="px-6 py-3" colSpan={3}>Total</td>
-                        <td className="px-6 py-3 text-right">{mockCapTable.reduce((sum, e) => sum + e.shares, 0).toLocaleString()}</td>
+                        <td className="px-6 py-3 text-right">{([] as CapTableEntry[]).reduce((sum, e) => sum + e.shares, 0).toLocaleString()}</td>
                         <td className="px-6 py-3 text-right">100.00%</td>
                         <td className="px-6 py-3 text-right">100.00%</td>
-                        <td className="px-6 py-3 text-right">{formatCurrency(mockCapTable.reduce((sum, e) => sum + (e.investmentAmount || 0), 0), true)}</td>
+                        <td className="px-6 py-3 text-right">{formatCurrency(([] as CapTableEntry[]).reduce((sum, e) => sum + (e.investmentAmount || 0), 0), true)}</td>
                       </tr>
                     </tfoot>
                   </table>
@@ -1124,11 +1124,11 @@ export default function InvestorMetricsClient() {
                   </div>
                   <div className="flex items-center gap-6">
                     <div className="text-center">
-                      <p className="text-3xl font-bold">{mockFundingRounds.length}</p>
+                      <p className="text-3xl font-bold">{([] as FundingRound[]).length}</p>
                       <p className="text-amber-200 text-sm">Rounds</p>
                     </div>
                     <div className="text-center">
-                      <p className="text-3xl font-bold">{mockFundingRounds.filter(r => r.status === 'closed').length}</p>
+                      <p className="text-3xl font-bold">{([] as FundingRound[]).filter(r => r.status === 'closed').length}</p>
                       <p className="text-amber-200 text-sm">Closed</p>
                     </div>
                   </div>
@@ -1136,7 +1136,7 @@ export default function InvestorMetricsClient() {
               </div>
 
               <div className="grid gap-6">
-                {mockFundingRounds.map(round => (
+                {([] as FundingRound[]).map(round => (
                   <Card key={round.id} className="bg-white dark:bg-gray-800 hover:shadow-md transition-shadow cursor-pointer" onClick={() => setSelectedRound(round)}>
                     <CardContent className="p-6">
                       <div className="flex items-start justify-between mb-4">

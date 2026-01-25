@@ -152,8 +152,6 @@ export default function ComponentLibraryClient() {
   const { components: dbComponents = [], stats: componentStats, loading: componentsLoading } = useUIComponents([])
   const { data: showcaseComponents = [], isLoading: showcasesLoading, refresh: refetchShowcases } = useComponentShowcases()
 
-  // MIGRATED: Removed mock data, using empty array
-  const quickActions: { id: string; label: string; icon: string; shortcut: string; action: () => void }[] = []
 
   const filteredComponents = useMemo(() => {
     // MIGRATED: Using database components only, no fallback
@@ -527,7 +525,7 @@ export default function ComponentLibraryClient() {
                 <Button variant={selectedCategory === 'all' ? 'default' : 'outline'} size="sm" onClick={() => setSelectedCategory('all')} className={selectedCategory === 'all' ? 'bg-violet-600' : ''}>
                   All Components
                 </Button>
-                {categories.map(cat => (
+                {[].map((cat: { id: string; name: string; icon: React.ComponentType<{ className?: string }>; count: number }) => (
                   <Button key={cat.id} variant={selectedCategory === cat.id ? 'default' : 'outline'} size="sm" onClick={() => setSelectedCategory(cat.id)} className={selectedCategory === cat.id ? 'bg-violet-600' : ''}>
                     <cat.icon className="h-3 w-3 mr-1" />
                     {cat.name} ({cat.count})
@@ -595,7 +593,7 @@ export default function ComponentLibraryClient() {
           {/* Categories Tab */}
           <TabsContent value="categories" className="space-y-6">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {categories.map(cat => (
+              {[].map((cat: { id: string; name: string; icon: React.ComponentType<{ className?: string }>; count: number }) => (
                 <Card key={cat.id} className="cursor-pointer hover:shadow-md hover:border-violet-300 transition-all" onClick={() => { setSelectedCategory(cat.id); setActiveTab('components') }}>
                   <CardContent className="p-6 text-center">
                     <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-100 to-purple-100 flex items-center justify-center mx-auto mb-3 text-violet-600">
@@ -1767,7 +1765,7 @@ export default function App() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={quickActions}
+            actions={[]}
             variant="grid"
           />
         </div>
@@ -1904,7 +1902,7 @@ export default function App() {
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
                   <SelectContent>
-                    {categories.map(cat => (
+                    {[].map((cat: { id: string; name: string }) => (
                       <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
                     ))}
                   </SelectContent>

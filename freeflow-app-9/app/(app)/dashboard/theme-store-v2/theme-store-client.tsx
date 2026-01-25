@@ -1009,40 +1009,7 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
                   </CardContent>
                 </Card>
 
-                {/* Featured Designer */}
-                {mockDesigners.length > 0 && (
-                  <Card>
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-sm">Featured Designer</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex items-center gap-3 mb-3">
-                        <Avatar>
-                          <AvatarImage src={mockDesigners[0].avatar} alt="User avatar" />
-                          <AvatarFallback>{mockDesigners[0].name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="font-medium flex items-center gap-1">
-                            {mockDesigners[0].name}
-                            {mockDesigners[0].verified && <Check className="h-4 w-4 text-blue-500" />}
-                          </p>
-                          <p className="text-xs text-gray-500">{mockDesigners[0].themesCount} themes</p>
-                        </div>
-                      </div>
-                      <p className="text-sm text-gray-600 mb-3">{mockDesigners[0].bio}</p>
-                      <div className="flex items-center gap-4 text-sm">
-                        <span className="flex items-center gap-1">
-                          <Download className="h-4 w-4 text-gray-400" />
-                          {(mockDesigners[0].totalDownloads / 1000).toFixed(0)}K
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Star className="h-4 w-4 text-yellow-500" />
-                          {mockDesigners[0].rating}
-                        </span>
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
+                {/* Featured Designer - will display when designers data is available */}
               </div>
 
               {/* Main Content */}
@@ -2215,18 +2182,18 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockThemeStoreAIInsights}
+              insights={[]}
               title="Theme Store Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight', { description: insight.description || 'View insight details' })}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockThemeStoreCollaborators}
+              collaborators={[]}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockThemeStorePredictions}
+              predictions={[]}
               title="Marketplace Forecasts"
             />
           </div>
@@ -2234,7 +2201,7 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockThemeStoreActivities}
+            activities={[]}
             title="Marketplace Activity"
             maxItems={5}
           />

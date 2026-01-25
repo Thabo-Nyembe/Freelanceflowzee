@@ -395,14 +395,6 @@ const apiHelpers = {
 
 // Quick actions will be defined inside the component to access state setters
 
-// Empty arrays for mock data placeholders (to be populated from DB or left empty)
-const mockSegments: Segment[] = []
-const mockAutomations: Automation[] = []
-const mockEmailAIInsights: { id: string; type: string; title: string; description: string; impact?: string; priority?: string }[] = []
-const mockEmailCollaborators: { id: string; name: string; avatar?: string; status: 'online' | 'away' | 'offline' }[] = []
-const mockEmailPredictions: { id: string; label: string; current: number; predicted: number; confidence: number; trend: 'up' | 'down' | 'stable' }[] = []
-const mockEmailActivities: { id: string; type: string; title: string; user: string; timestamp: Date }[] = []
-
 export default function EmailMarketingClient() {
   // Use Supabase hooks for real data
   const {
@@ -988,7 +980,7 @@ export default function EmailMarketingClient() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      {mockSegments.map((segment) => (
+                      {([] as Segment[]).map((segment) => (
                         <div key={segment.id} className="p-3 rounded-xl border hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                           <div className="flex items-center justify-between">
                             <div>
@@ -1047,11 +1039,11 @@ export default function EmailMarketingClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockAutomations.length}</p>
+                    <p className="text-3xl font-bold">{0}</p>
                     <p className="text-emerald-200 text-sm">Automations</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockAutomations.filter(a => a.status === 'active').length}</p>
+                    <p className="text-3xl font-bold">{0}</p>
                     <p className="text-emerald-200 text-sm">Active</p>
                   </div>
                 </div>
@@ -1070,7 +1062,7 @@ export default function EmailMarketingClient() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {mockAutomations.map((automation) => (
+              {([] as Automation[]).map((automation) => (
                 <Card key={automation.id} className="border-0 shadow-sm hover:shadow-md transition-all cursor-pointer" onClick={() => setSelectedAutomation(automation)}>
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-4">

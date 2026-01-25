@@ -971,7 +971,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
                 </div>
 
                 <div className="space-y-3">
-                  {mockAlerts.map((alert) => (
+                  {([] as Alert[]).map((alert) => (
                     <Card
                       key={alert.id}
                       className="bg-slate-800/50 border-slate-700 hover:border-green-500/50 cursor-pointer transition-colors"
@@ -1024,25 +1024,25 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-slate-400">Active</span>
                         <Badge className="bg-red-500 text-white">
-                          {mockAlerts.filter(a => a.status === 'active').length}
+                          {([] as Alert[]).filter(a => a.status === 'active').length}
                         </Badge>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-slate-400">Acknowledged</span>
                         <Badge className="bg-yellow-500 text-black">
-                          {mockAlerts.filter(a => a.status === 'acknowledged').length}
+                          {([] as Alert[]).filter(a => a.status === 'acknowledged').length}
                         </Badge>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-slate-400">Resolved</span>
                         <Badge className="bg-green-500 text-white">
-                          {mockAlerts.filter(a => a.status === 'resolved').length}
+                          {([] as Alert[]).filter(a => a.status === 'resolved').length}
                         </Badge>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-slate-400">Suppressed</span>
                         <Badge className="bg-slate-500 text-white">
-                          {mockAlerts.filter(a => a.status === 'suppressed').length}
+                          {([] as Alert[]).filter(a => a.status === 'suppressed').length}
                         </Badge>
                       </div>
                     </div>
@@ -1059,7 +1059,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
                         <div key={action} className="flex items-center justify-between p-2 bg-slate-900/50 rounded-lg">
                           <span className="text-sm text-white capitalize">{action}</span>
                           <Badge variant="outline" className="border-slate-600 text-slate-400">
-                            {mockAlerts.filter(a => a.actions.includes(action)).length} alerts
+                            {([] as Alert[]).filter(a => a.actions.includes(action)).length} alerts
                           </Badge>
                         </div>
                       ))}
@@ -1087,15 +1087,15 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
                   </div>
                   <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6 text-center">
                     <div>
-                      <p className="text-2xl font-bold">{mockSavedSearches.length}</p>
+                      <p className="text-2xl font-bold">{([] as SavedSearch[]).length}</p>
                       <p className="text-sm text-white/80">Total Searches</p>
                     </div>
                     <div>
-                      <p className="text-2xl font-bold">{mockSavedSearches.filter(s => s.isScheduled).length}</p>
+                      <p className="text-2xl font-bold">{([] as SavedSearch[]).filter(s => s.isScheduled).length}</p>
                       <p className="text-sm text-white/80">Scheduled</p>
                     </div>
                     <div>
-                      <p className="text-2xl font-bold">{mockSavedSearches.filter(s => s.starred).length}</p>
+                      <p className="text-2xl font-bold">{([] as SavedSearch[]).filter(s => s.starred).length}</p>
                       <p className="text-sm text-white/80">Starred</p>
                     </div>
                   </div>
@@ -1139,7 +1139,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {mockSavedSearches.map((search) => (
+                {([] as SavedSearch[]).map((search) => (
                   <Card
                     key={search.id}
                     className="bg-slate-800/50 border-slate-700 hover:border-green-500/50 cursor-pointer transition-colors"
@@ -1210,15 +1210,15 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
                   </div>
                   <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-6 text-center">
                     <div>
-                      <p className="text-2xl font-bold">{mockReports.length}</p>
+                      <p className="text-2xl font-bold">{([] as Report[]).length}</p>
                       <p className="text-sm text-white/80">Total Reports</p>
                     </div>
                     <div>
-                      <p className="text-2xl font-bold">{mockReports.filter(r => r.status === 'active').length}</p>
+                      <p className="text-2xl font-bold">{([] as Report[]).filter(r => r.status === 'active').length}</p>
                       <p className="text-sm text-white/80">Active</p>
                     </div>
                     <div>
-                      <p className="text-2xl font-bold">{mockReports.reduce((sum, r) => sum + r.recipients.length, 0)}</p>
+                      <p className="text-2xl font-bold">{([] as Report[]).reduce((sum, r) => sum + r.recipients.length, 0)}</p>
                       <p className="text-sm text-white/80">Recipients</p>
                     </div>
                   </div>
@@ -1262,7 +1262,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {mockReports.map((report) => (
+                {([] as Report[]).map((report) => (
                   <Card key={report.id} className="bg-slate-800/50 border-slate-700">
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between mb-2">

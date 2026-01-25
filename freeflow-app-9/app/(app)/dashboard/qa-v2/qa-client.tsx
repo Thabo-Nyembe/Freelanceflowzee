@@ -1710,7 +1710,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {mockMilestones.map((milestone) => (
+                {([] as Milestone[]).map((milestone) => (
                   <Card key={milestone.id} className="hover:shadow-lg transition-shadow">
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between mb-3">
@@ -1769,10 +1769,10 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                 </Button>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
-                <div className="bg-white/20 rounded-lg p-3 text-center"><p className="text-2xl font-bold">{mockDefects.length}</p><p className="text-xs text-red-100">Total</p></div>
-                <div className="bg-white/20 rounded-lg p-3 text-center"><p className="text-2xl font-bold">{mockDefects.filter(d => d.status === 'open').length}</p><p className="text-xs text-red-100">Open</p></div>
-                <div className="bg-white/20 rounded-lg p-3 text-center"><p className="text-2xl font-bold">{mockDefects.filter(d => d.severity === 'critical').length}</p><p className="text-xs text-red-100">Critical</p></div>
-                <div className="bg-white/20 rounded-lg p-3 text-center"><p className="text-2xl font-bold">{mockDefects.filter(d => d.status === 'resolved').length}</p><p className="text-xs text-red-100">Resolved</p></div>
+                <div className="bg-white/20 rounded-lg p-3 text-center"><p className="text-2xl font-bold">{([] as Defect[]).length}</p><p className="text-xs text-red-100">Total</p></div>
+                <div className="bg-white/20 rounded-lg p-3 text-center"><p className="text-2xl font-bold">{([] as Defect[]).filter(d => d.status === 'open').length}</p><p className="text-xs text-red-100">Open</p></div>
+                <div className="bg-white/20 rounded-lg p-3 text-center"><p className="text-2xl font-bold">{([] as Defect[]).filter(d => d.severity === 'critical').length}</p><p className="text-xs text-red-100">Critical</p></div>
+                <div className="bg-white/20 rounded-lg p-3 text-center"><p className="text-2xl font-bold">{([] as Defect[]).filter(d => d.status === 'resolved').length}</p><p className="text-xs text-red-100">Resolved</p></div>
                 <div className="bg-white/20 rounded-lg p-3 text-center"><p className="text-2xl font-bold">2.4d</p><p className="text-xs text-red-100">Avg Resolve</p></div>
                 <div className="bg-white/20 rounded-lg p-3 text-center"><p className="text-2xl font-bold">89%</p><p className="text-xs text-red-100">Fix Rate</p></div>
               </div>
@@ -1781,9 +1781,9 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
             {/* Severity Distribution */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {[
-                { severity: 'Critical', count: mockDefects.filter(d => d.severity === 'critical').length, color: 'red', icon: AlertTriangle },
-                { severity: 'Major', count: mockDefects.filter(d => d.severity === 'major').length, color: 'orange', icon: Bug },
-                { severity: 'Minor', count: mockDefects.filter(d => d.severity === 'minor').length, color: 'yellow', icon: AlertTriangle },
+                { severity: 'Critical', count: ([] as Defect[]).filter(d => d.severity === 'critical').length, color: 'red', icon: AlertTriangle },
+                { severity: 'Major', count: ([] as Defect[]).filter(d => d.severity === 'major').length, color: 'orange', icon: Bug },
+                { severity: 'Minor', count: ([] as Defect[]).filter(d => d.severity === 'minor').length, color: 'yellow', icon: AlertTriangle },
                 { severity: 'Low', count: 2, color: 'green', icon: Bug },
               ].map((sev, i) => (
                 <Card key={i} className={`border-${sev.color}-200 dark:border-${sev.color}-800`}>
@@ -1816,7 +1816,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
               </CardHeader>
               <CardContent className="p-0">
                 <div className="divide-y">
-                  {mockDefects.map((defect) => (
+                  {([] as Defect[]).map((defect) => (
                     <div key={defect.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                       <div className="flex items-start justify-between">
                         <div className="flex items-start gap-3">
@@ -2002,7 +2002,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                   <CardHeader><CardTitle>Pass Rate by Suite</CardTitle></CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {mockSuites.map((suite) => (
+                      {([] as TestSuite[]).map((suite) => (
                         <div key={suite.id} className="space-y-2">
                           <div className="flex items-center justify-between">
                             <span className="font-medium">{suite.name}</span>
@@ -2065,7 +2065,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                             <AlertTriangle className="w-4 h-4 text-orange-500" />
                             Blocked
                           </span>
-                          <span className="font-semibold text-orange-600">{mockTestCases.filter(t => t.status === 'blocked').length}</span>
+                          <span className="font-semibold text-orange-600">{([] as TestCase[]).filter(t => t.status === 'blocked').length}</span>
                         </div>
                       </div>
                     </CardContent>
@@ -2478,18 +2478,18 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockQAAIInsights}
+              insights={[]}
               title="QA Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockQACollaborators}
+              collaborators={[]}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockQAPredictions}
+              predictions={[]}
               title="Testing Forecasts"
             />
           </div>
@@ -2497,7 +2497,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockQAActivities}
+            activities={[]}
             title="QA Activity"
             maxItems={5}
           />

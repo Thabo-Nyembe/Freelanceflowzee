@@ -208,20 +208,6 @@ const _mockInstructors: Instructor[] = []
 
 const _mockCourses: Course[] = []
 
-const mockLearningPaths: LearningPath[] = []
-
-const mockProgress: UserProgress[] = []
-
-const mockReviews: Review[] = []
-
-const mockAchievements: Achievement[] = []
-
-const mockSubscriptions: Subscription[] = []
-
-const mockGoals: LearningGoal[] = []
-
-const mockNotifications: LearningNotification[] = []
-
 const categories: { id: CourseCategory; name: string; icon: React.ReactNode; count: number }[] = [
   { id: 'development', name: 'Development', icon: <Code className="w-4 h-4" />, count: 156 },
   { id: 'design', name: 'Design', icon: <BookOpen className="w-4 h-4" />, count: 89 },
@@ -961,7 +947,7 @@ export default function TutorialsClient() {
   }
 
   const CourseCard = ({ course }: { course: Course }) => {
-    const progress = mockProgress.find(p => p.courseId === course.id)
+    const progress = ([] as UserProgress[]).find(p => p.courseId === course.id)
     const isBookmarked = bookmarkedCourses.includes(course.id)
     const isCompleted = completedCourses.includes(course.id)
 
@@ -1290,7 +1276,7 @@ export default function TutorialsClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockProgress.length}</p>
+                    <p className="text-3xl font-bold">{0}</p>
                     <p className="text-blue-200 text-sm">In Progress</p>
                   </div>
                   <div className="text-center">
@@ -1306,7 +1292,7 @@ export default function TutorialsClient() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-6">
-              <Card><CardContent className="p-4"><div className="flex items-center gap-3"><div className="p-2 bg-rose-100 rounded-lg"><Play className="w-5 h-5 text-rose-600" /></div><div><div className="text-2xl font-bold">{mockProgress.length}</div><div className="text-sm text-gray-500">In Progress</div></div></div></CardContent></Card>
+              <Card><CardContent className="p-4"><div className="flex items-center gap-3"><div className="p-2 bg-rose-100 rounded-lg"><Play className="w-5 h-5 text-rose-600" /></div><div><div className="text-2xl font-bold">{0}</div><div className="text-sm text-gray-500">In Progress</div></div></div></CardContent></Card>
               <Card><CardContent className="p-4"><div className="flex items-center gap-3"><div className="p-2 bg-green-100 rounded-lg"><CheckCircle className="w-5 h-5 text-green-600" /></div><div><div className="text-2xl font-bold">12</div><div className="text-sm text-gray-500">Completed</div></div></div></CardContent></Card>
               <Card><CardContent className="p-4"><div className="flex items-center gap-3"><div className="p-2 bg-blue-100 rounded-lg"><Clock className="w-5 h-5 text-blue-600" /></div><div><div className="text-2xl font-bold">156h</div><div className="text-sm text-gray-500">Total Watch Time</div></div></div></CardContent></Card>
             </div>

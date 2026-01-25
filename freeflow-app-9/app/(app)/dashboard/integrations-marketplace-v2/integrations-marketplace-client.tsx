@@ -122,9 +122,6 @@ interface IntegrationsMarketplaceClientProps {
   initialStats: MarketplaceStats
 }
 
-// Static data arrays - collections are defined statically
-const mockCollections: Collection[] = []
-
 const categories: { id: AppCategory; name: string; icon: React.ReactNode; count: number }[] = [
   { id: 'payments', name: 'Payments', icon: <CreditCard className="w-4 h-4" />, count: 24 },
   { id: 'analytics', name: 'Analytics', icon: <TrendingUp className="w-4 h-4" />, count: 38 },
@@ -137,15 +134,6 @@ const categories: { id: AppCategory; name: string; icon: React.ReactNode; count:
   { id: 'finance', name: 'Finance', icon: <CreditCard className="w-4 h-4" />, count: 28 },
   { id: 'hr', name: 'HR & Recruiting', icon: <Users className="w-4 h-4" />, count: 22 }
 ]
-
-// Empty arrays for competitive upgrade components - will be populated from real API
-const mockIntegrationsAIInsights: { id: string; type: 'success' | 'warning' | 'info'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
-
-const mockIntegrationsCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }[] = []
-
-const mockIntegrationsPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down'; impact: 'low' | 'medium' | 'high' }[] = []
-
-const mockIntegrationsActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' }[] = []
 
 export default function IntegrationsMarketplaceClient({ initialIntegrations, initialStats }: IntegrationsMarketplaceClientProps) {
   const router = useRouter()
