@@ -170,28 +170,6 @@ interface PermissionsClientProps {
   initialPermissions: Permission[]
 }
 
-// Empty data arrays - real data comes from Supabase hooks
-const mockUsers: User[] = []
-
-const mockGroups: Group[] = []
-
-const mockRoles: OktaRole[] = []
-
-const mockPolicies: Policy[] = []
-
-const mockApplications: Application[] = []
-
-const mockAuditEvents: AuditEvent[] = []
-
-// Empty arrays for competitive upgrade components
-const mockPermissionsAIInsights: { id: string; type: 'success' | 'warning' | 'info'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
-
-const mockPermissionsCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'offline' | 'away'; role: string }[] = []
-
-const mockPermissionsPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: 'low' | 'medium' | 'high' }[] = []
-
-const mockPermissionsActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' | 'error' }[] = []
-
 // Quick actions are defined inside the component to access state setters
 
 // Initialize Supabase client once at module level
@@ -319,7 +297,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
   const [savedAttributeMappings, setSavedAttributeMappings] = useState<Array<{ source: string; target: string; required: boolean }>>([])
 
   const filteredUsers = useMemo(() => {
-    return mockUsers.filter(user => {
+    return ([] as User[]).filter(user => {
       const matchesStatus = userStatusFilter === 'all' || user.status === userStatusFilter
       const matchesSearch = !searchQuery ||
         user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -343,12 +321,12 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
   }, [userStatusFilter, searchQuery, appliedAdvancedFilters])
 
   // Stats
-  const totalUsers = mockUsers.length
-  const activeUsers = mockUsers.filter(u => u.status === 'active').length
-  const mfaEnabledUsers = mockUsers.filter(u => u.mfaEnabled).length
-  const totalGroups = mockGroups.length
-  const totalApps = mockApplications.length
-  const pendingUsers = mockUsers.filter(u => u.status === 'pending').length
+  const totalUsers = 0
+  const activeUsers = 0
+  const mfaEnabledUsers = 0
+  const totalGroups = 0
+  const totalApps = 0
+  const pendingUsers = 0
 
   // Early return for loading state (after all hooks)
   if (dataLoading) {
@@ -642,7 +620,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
   const handleExportAuditLogs = async () => {
     setIsLoading(true)
     try {
-      const blob = new Blob([JSON.stringify(mockAuditEvents, null, 2)], { type: 'application/json' })
+      const blob = new Blob([JSON.stringify([], null, 2)], { type: 'application/json' })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
@@ -1320,7 +1298,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {mockGroups.map((group) => (
+                {([] as Group[]).map((group) => (
                   <Card key={group.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setSelectedGroup(group)}>
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between mb-3">
@@ -1364,7 +1342,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {mockRoles.map((role) => (
+                {([] as OktaRole[]).map((role) => (
                   <Card key={role.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setSelectedRole(role)}>
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between mb-3">
@@ -1411,7 +1389,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {mockPolicies.map((policy) => (
+                {([] as Policy[]).map((policy) => (
                   <Card key={policy.id} className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setSelectedPolicy(policy)}>
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between mb-3">
@@ -1457,7 +1435,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {mockApplications.map((app) => (
+                {([] as Application[]).map((app) => (
                   <Card key={app.id} className="hover:shadow-lg transition-shadow">
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between mb-3">
@@ -1520,7 +1498,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
               <Card>
                 <CardContent className="p-0">
                   <div className="divide-y">
-                    {mockAuditEvents.map((event) => (
+                    {([] as AuditEvent[]).map((event) => (
                       <div key={event.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-4">

@@ -160,21 +160,6 @@ interface SLO {
   errorBudget: { remaining: number; consumed: number }
 }
 
-// Data arrays - populated from API/Supabase
-const mockServices: ServiceHealth[] = []
-
-const mockMetrics: MetricData[] = []
-
-const mockTraces: Trace[] = []
-
-const mockAlerts: Alert[] = []
-
-const mockHosts: Host[] = []
-
-const mockLogs: LogEntry[] = []
-
-const mockSLOs: SLO[] = []
-
 const logLevelColors: Record<string, string> = {
   debug: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
   info: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
@@ -213,12 +198,6 @@ interface Integration {
   dataPoints: number
   icon: string
 }
-
-// Dashboards - populated from API/Supabase
-const mockDashboards: Dashboard[] = []
-
-// Integrations - populated from API/Supabase
-const mockIntegrations: Integration[] = []
 
 const statusColors: Record<string, string> = {
   healthy: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
@@ -380,38 +359,38 @@ export default function PerformanceAnalyticsClient() {
   const [filterSeverity, setFilterSeverity] = useState('all')
   const [filterTimeRange, setFilterTimeRange] = useState('all')
 
-  // Calculate stats - using API data when available, falling back to mock data
-  const healthyServices = mockServices.filter(s => s.status === 'healthy').length
-  const avgLatency = mockServices.reduce((sum, s) => sum + s.latency, 0) / mockServices.length
-  const overallErrorRate = mockServices.reduce((sum, s) => sum + s.errorRate, 0) / mockServices.length
-  const firingAlerts = mockAlerts.filter(a => a.status === 'firing').length
-  const totalThroughput = mockServices.reduce((sum, s) => sum + s.throughput, 0)
-  const slosMet = mockSLOs.filter(s => s.status === 'met').length
-  const activeHosts = mockHosts.filter(h => h.status === 'running').length
-  const connectedIntegrations = mockIntegrations.filter(i => i.status === 'connected').length
+  // Calculate stats - using API data when available
+  const healthyServices = ([] as ServiceHealth[]).filter(s => s.status === 'healthy').length
+  const avgLatency = ([] as ServiceHealth[]).reduce((sum, s) => sum + s.latency, 0) / (([] as ServiceHealth[]).length || 1)
+  const overallErrorRate = ([] as ServiceHealth[]).reduce((sum, s) => sum + s.errorRate, 0) / (([] as ServiceHealth[]).length || 1)
+  const firingAlerts = ([] as Alert[]).filter(a => a.status === 'firing').length
+  const totalThroughput = ([] as ServiceHealth[]).reduce((sum, s) => sum + s.throughput, 0)
+  const slosMet = ([] as SLO[]).filter(s => s.status === 'met').length
+  const activeHosts = ([] as Host[]).filter(h => h.status === 'running').length
+  const connectedIntegrations = ([] as Integration[]).filter(i => i.status === 'connected').length
 
   // Merge API data with computed stats
   const stats = useMemo(() => {
     const baseStats = {
-      totalServices: mockServices.length,
+      totalServices: 0,
       healthyServices,
       avgLatency: Math.round(avgLatency),
       errorRate: overallErrorRate.toFixed(2),
       firingAlerts,
-      acknowledgedAlerts: mockAlerts.filter(a => a.status === 'acknowledged').length,
+      acknowledgedAlerts: ([] as Alert[]).filter(a => a.status === 'acknowledged').length,
       totalThroughput,
       slosMet,
-      totalSLOs: mockSLOs.length,
+      totalSLOs: 0,
       activeHosts,
-      totalHosts: mockHosts.length,
+      totalHosts: 0,
       connectedIntegrations,
-      totalIntegrations: mockIntegrations.length,
-      totalTraces: mockTraces.length,
-      errorTraces: mockTraces.filter(t => t.status === 'error' || t.status === 'timeout').length,
-      totalLogs: mockLogs.length,
-      errorLogs: mockLogs.filter(l => l.level === 'error' || l.level === 'fatal').length,
-      totalDashboards: mockDashboards.length,
-      favoriteDashboards: mockDashboards.filter(d => d.isFavorite).length,
+      totalIntegrations: 0,
+      totalTraces: 0,
+      errorTraces: ([] as Trace[]).filter(t => t.status === 'error' || t.status === 'timeout').length,
+      totalLogs: 0,
+      errorLogs: ([] as LogEntry[]).filter(l => l.level === 'error' || l.level === 'fatal').length,
+      totalDashboards: 0,
+      favoriteDashboards: ([] as Dashboard[]).filter(d => d.isFavorite).length,
     }
 
     // Override with API performance metrics if available
@@ -457,7 +436,7 @@ export default function PerformanceAnalyticsClient() {
   }, [stats, apiPerformanceMetrics])
 
   const filteredMetrics = useMemo(() => {
-    return mockMetrics.filter(m => {
+    return ([] as MetricData[]).filter(m => {
       const matchesSearch = searchQuery === '' || m.name.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesCategory = categoryFilter === 'all' || m.category === categoryFilter
       return matchesSearch && matchesCategory
@@ -1091,7 +1070,7 @@ export default function PerformanceAnalyticsClient() {
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Service Health Map</h3>
                 </div>
                 <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                  {mockServices.map((service) => (
+                  {([] as ServiceHealth[]).map((service) => (
                     <div
                       key={service.name}
                       className={`p-4 rounded-lg border-2 ${

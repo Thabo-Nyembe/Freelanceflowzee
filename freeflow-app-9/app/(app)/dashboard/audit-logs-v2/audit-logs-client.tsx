@@ -226,16 +226,6 @@ interface GeoDistribution {
 }
 
 // ============================================================================
-// EMPTY DATA ARRAYS (For types not yet backed by Supabase)
-// ============================================================================
-
-const mockAlerts: Alert[] = []
-
-const mockComplianceReports: ComplianceReport[] = []
-
-const mockSessions: UserSession[] = []
-
-// ============================================================================
 // HELPER FUNCTIONS
 // ============================================================================
 
@@ -300,17 +290,6 @@ const formatDuration = (ms: number): string => {
   if (ms < 60000) return `${(ms / 1000).toFixed(1)}s`
   return `${Math.floor(ms / 60000)}m ${Math.floor((ms % 60000) / 1000)}s`
 }
-
-// Empty arrays for competitive upgrade components (real data comes from Supabase)
-const mockAuditAIInsights: AIInsight[] = []
-
-const mockAuditCollaborators: Collaborator[] = []
-
-const mockAuditPredictions: Prediction[] = []
-
-const mockAuditActivities: ActivityItem[] = []
-
-const mockAuditQuickActions: QuickAction[] = []
 
 // ============================================================================
 // MAIN COMPONENT
@@ -598,7 +577,7 @@ export default function AuditLogsClient() {
     const errors = hookStats?.error ?? allLogs.filter(l => l.severity === 'error').length
     const anomalies = allLogs.filter(l => l.is_anomaly).length
     const blocked = hookStats?.blocked ?? allLogs.filter(l => l.status === 'blocked').length
-    const activeAlerts = mockAlerts.filter(a => a.status === 'active').length
+    const activeAlerts = ([] as Alert[]).filter(a => a.status === 'active').length
     const avgRisk = allLogs.length > 0 ? allLogs.reduce((acc, l) => acc + l.risk_score, 0) / allLogs.length : 0
 
     return { total, critical, warnings, errors, anomalies, blocked, activeAlerts, avgRisk }
@@ -1235,15 +1214,15 @@ export default function AuditLogsClient() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
                   <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
                     <p className="text-white/70 text-sm">Active</p>
-                    <p className="text-2xl font-bold">{mockAlerts.filter(a => a.status === 'active').length}</p>
+                    <p className="text-2xl font-bold">{([] as Alert[]).filter(a => a.status === 'active').length}</p>
                   </div>
                   <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
                     <p className="text-white/70 text-sm">Acknowledged</p>
-                    <p className="text-2xl font-bold">{mockAlerts.filter(a => a.status === 'acknowledged').length}</p>
+                    <p className="text-2xl font-bold">{([] as Alert[]).filter(a => a.status === 'acknowledged').length}</p>
                   </div>
                   <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
                     <p className="text-white/70 text-sm">Resolved</p>
-                    <p className="text-2xl font-bold">{mockAlerts.filter(a => a.status === 'resolved').length}</p>
+                    <p className="text-2xl font-bold">{([] as Alert[]).filter(a => a.status === 'resolved').length}</p>
                   </div>
                   <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
                     <p className="text-white/70 text-sm">Rules</p>
@@ -1262,7 +1241,7 @@ export default function AuditLogsClient() {
                   </CardHeader>
                   <CardContent className="p-0">
                     <div className="divide-y">
-                      {mockAlerts.map(alert => (
+                      {([] as Alert[]).map(alert => (
                         <div
                           key={alert.id}
                           className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer"
@@ -1354,15 +1333,15 @@ export default function AuditLogsClient() {
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
                         <span className="text-gray-500">Active</span>
-                        <span className="font-bold text-red-600">{mockAlerts.filter(a => a.status === 'active').length}</span>
+                        <span className="font-bold text-red-600">{([] as Alert[]).filter(a => a.status === 'active').length}</span>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-gray-500">Acknowledged</span>
-                        <span className="font-bold text-yellow-600">{mockAlerts.filter(a => a.status === 'acknowledged').length}</span>
+                        <span className="font-bold text-yellow-600">{([] as Alert[]).filter(a => a.status === 'acknowledged').length}</span>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-gray-500">Resolved (24h)</span>
-                        <span className="font-bold text-green-600">{mockAlerts.filter(a => a.status === 'resolved').length}</span>
+                        <span className="font-bold text-green-600">{([] as Alert[]).filter(a => a.status === 'resolved').length}</span>
                       </div>
                     </div>
                   </CardContent>
@@ -1413,7 +1392,7 @@ export default function AuditLogsClient() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {mockComplianceReports.map(report => (
+              {([] as ComplianceReport[]).map(report => (
                 <Card key={report.id}>
                   <CardHeader>
                     <div className="flex items-center justify-between">
@@ -1541,7 +1520,7 @@ export default function AuditLogsClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {mockSessions.map(session => (
+                    {([] as UserSession[]).map(session => (
                       <div key={session.id} className="flex items-center gap-3 p-3 border rounded-lg">
                         <Avatar className="w-10 h-10">
                           <AvatarFallback>{session.user_name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
@@ -1977,18 +1956,18 @@ export default function AuditLogsClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockAuditAIInsights}
+              insights={[] as AIInsight[]}
               title="Audit Intelligence"
               onInsightAction={(insight) => toast.info(insight.title || 'AI Insight')}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockAuditCollaborators}
+              collaborators={[] as Collaborator[]}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockAuditPredictions}
+              predictions={[] as Prediction[]}
               title="Audit Forecasts"
             />
           </div>
@@ -1996,12 +1975,12 @@ export default function AuditLogsClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockAuditActivities}
+            activities={[] as ActivityItem[]}
             title="Audit Activity"
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockAuditQuickActions}
+            actions={[] as QuickAction[]}
             variant="grid"
           />
         </div>

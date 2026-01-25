@@ -162,30 +162,6 @@ interface DocLocale {
   status: 'active' | 'draft' | 'review'
 }
 
-// Empty arrays (real data comes from Supabase)
-const mockSpaces: DocSpace[] = []
-
-const mockPages: DocPage[] = []
-
-const mockVersions: DocVersion[] = []
-
-const mockTemplates: DocTemplate[] = []
-
-const mockIntegrations: DocIntegration[] = []
-
-const mockChangelogs: DocChangelog[] = []
-
-const mockLocales: DocLocale[] = []
-
-const mockDocsAIInsights: AIInsight[] = []
-
-const mockDocsCollaborators: Collaborator[] = []
-
-const mockDocsPredictions: Prediction[] = []
-
-const mockDocsActivities: ActivityItem[] = []
-
-const mockDocsQuickActions: QuickAction[] = []
 
 // Quick actions are defined as a function to allow access to component state
 const getDocsQuickActions = (
@@ -476,7 +452,7 @@ export default function DocumentationClient() {
       }
     }
     // For mock pages, just set them as selected for viewing/editing
-    const page = mockPages.find(p => p.title === pageTitle)
+    const page = ([] as DocPage[]).find(p => p.title === pageTitle)
     if (page) {
       setSelectedPage(page)
       toast.success(`Opened "${pageTitle}" for editing`)
@@ -532,7 +508,7 @@ export default function DocumentationClient() {
     toast.promise(
       (async () => {
         // Generate markdown content from all pages
-        const markdownContent = mockPages.map(page =>
+        const markdownContent = ([] as DocPage[]).map(page =>
           `# ${page.title}\n\n${page.content}\n\n---\n`
         ).join('\n')
 

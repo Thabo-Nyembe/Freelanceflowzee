@@ -175,11 +175,6 @@ interface FeedbackAnalytics {
   categoryBreakdown: Record<IdeaCategory, number>
 }
 
-// Static empty arrays for features not yet backed by Supabase tables
-const mockNPSResponses: NPSResponse[] = []
-const mockSegments: Segment[] = []
-const mockRoadmap: RoadmapItem[] = []
-
 // Helper functions
 const getStatusColor = (status: IdeaStatus): string => {
   const colors: Record<IdeaStatus, string> = {
@@ -599,9 +594,10 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
 
   // Calculate NPS score
   const npsScore = useMemo(() => {
-    const promoters = mockNPSResponses.filter(r => r.category === 'promoter').length
-    const detractors = mockNPSResponses.filter(r => r.category === 'detractor').length
-    const total = mockNPSResponses.length
+    const npsResponses: NPSResponse[] = []
+    const promoters = npsResponses.filter(r => r.category === 'promoter').length
+    const detractors = npsResponses.filter(r => r.category === 'detractor').length
+    const total = npsResponses.length
     if (total === 0) return 0
     return Math.round(((promoters - detractors) / total) * 100)
   }, [])
@@ -1377,9 +1373,9 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                       'bg-gray-500'
                     }`} />
                     <h3 className="font-semibold capitalize text-gray-900 dark:text-white">{status}</h3>
-                    <Badge variant="secondary">{mockRoadmap.filter(r => r.status === status).length}</Badge>
+                    <Badge variant="secondary">{([] as RoadmapItem[]).filter(r => r.status === status).length}</Badge>
                   </div>
-                  {mockRoadmap.filter(r => r.status === status).map(item => (
+                  {([] as RoadmapItem[]).filter(r => r.status === status).map(item => (
                     <Card key={item.id} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm">
                       <CardContent className="p-4">
                         <h4 className="font-medium text-gray-900 dark:text-white mb-2">{item.title}</h4>
@@ -1416,15 +1412,15 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                   <div className="text-sm text-gray-600 dark:text-gray-400">NPS Score</div>
                   <div className="mt-4 flex justify-center gap-4">
                     <div>
-                      <div className="text-lg font-semibold text-green-600">{mockNPSResponses.filter(r => r.category === 'promoter').length}</div>
+                      <div className="text-lg font-semibold text-green-600">{([] as NPSResponse[]).filter(r => r.category === 'promoter').length}</div>
                       <div className="text-xs text-gray-500">Promoters</div>
                     </div>
                     <div>
-                      <div className="text-lg font-semibold text-yellow-600">{mockNPSResponses.filter(r => r.category === 'passive').length}</div>
+                      <div className="text-lg font-semibold text-yellow-600">{([] as NPSResponse[]).filter(r => r.category === 'passive').length}</div>
                       <div className="text-xs text-gray-500">Passives</div>
                     </div>
                     <div>
-                      <div className="text-lg font-semibold text-red-600">{mockNPSResponses.filter(r => r.category === 'detractor').length}</div>
+                      <div className="text-lg font-semibold text-red-600">{([] as NPSResponse[]).filter(r => r.category === 'detractor').length}</div>
                       <div className="text-xs text-gray-500">Detractors</div>
                     </div>
                   </div>
@@ -1438,7 +1434,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                 <CardContent>
                   <ScrollArea className="h-[300px]">
                     <div className="space-y-3">
-                      {mockNPSResponses.map(response => (
+                      {([] as NPSResponse[]).map(response => (
                         <div key={response.id} className="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
                           <div className="flex items-center justify-between mb-2">
                             <div className="flex items-center gap-2">
@@ -1485,7 +1481,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
               </Button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {mockSegments.map(segment => (
+              {([] as Segment[]).map(segment => (
                 <Card key={segment.id} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm">
                   <CardContent className="p-4">
                     <div className="flex items-center gap-3 mb-3">

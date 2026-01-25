@@ -200,26 +200,6 @@ interface QAClientProps {
   initialTestCases: QATestCase[]
 }
 
-// Empty arrays with proper types - data loaded from Supabase
-const mockSuites: TestSuite[] = []
-
-const mockTestCases: TestCase[] = []
-
-const mockRuns: TestRun[] = []
-
-const mockMilestones: Milestone[] = []
-
-const mockDefects: Defect[] = []
-
-// Empty arrays for competitive upgrade components
-const mockQAAIInsights: { id: string; type: 'success' | 'info' | 'warning'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
-
-const mockQACollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string; lastActive: string }[] = []
-
-const mockQAPredictions: { id: string; label: string; current: number; target: number; predicted: number; confidence: number; trend: 'up' | 'down' }[] = []
-
-const mockQAActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' }[] = []
-
 // Mock quick actions removed - using state-driven qaQuickActions instead
 
 export default function QAClient({ initialTestCases }: QAClientProps) {

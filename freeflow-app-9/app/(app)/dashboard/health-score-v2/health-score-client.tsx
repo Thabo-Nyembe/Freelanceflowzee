@@ -199,26 +199,6 @@ const initialFormState: HealthScoreFormState = {
   notes: '',
 }
 
-// Empty data arrays (to be populated from real data sources)
-const mockServices: ServiceHealth[] = []
-
-const mockHosts: HostMetrics[] = []
-
-const mockAlerts: AlertRule[] = []
-
-const mockIncidents: Incident[] = []
-
-const mockSLOs: SLO[] = []
-
-// Enhanced Competitive Upgrade Data (empty arrays)
-const mockHealthScoreAIInsights: { id: string; type: 'success' | 'info' | 'warning'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
-
-const mockHealthScoreCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string; lastActive: string }[] = []
-
-const mockHealthScorePredictions: { id: string; label: string; current: number; target: number; predicted: number; confidence: number; trend: 'up' | 'down' | 'stable' }[] = []
-
-const mockHealthScoreActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' }[] = []
-
 // Quick actions will be defined inside the component to access state setters
 
 export default function HealthScoreClient() {
@@ -271,7 +251,7 @@ export default function HealthScoreClient() {
     return (100 - healthStats.avgScore) / 100
   }, [dbHealthScores, healthStats])
 
-  const openIncidents = mockIncidents.filter(i => i.status !== 'resolved').length
+  const openIncidents = ([] as Incident[]).filter(i => i.status !== 'resolved').length
 
   // Create health score using mutation hook
   const handleCreateHealthScore = async () => {
@@ -450,7 +430,7 @@ export default function HealthScoreClient() {
   const handleRunDiagnostics = async () => {
     const result = await apiCall('/api/health-score/check', {
       method: 'POST',
-      body: JSON.stringify({ services: mockServices.map(s => s.id) })
+      body: JSON.stringify({ services: ([] as ServiceHealth[]).map(s => s.id) })
     }, {
       loading: 'Running diagnostics...',
       success: 'System health check completed',
@@ -464,7 +444,7 @@ export default function HealthScoreClient() {
   // Export health data as CSV
   const handleExportHealth = () => {
     const exportData = [
-      ...mockServices.map(s => ({
+      ...([] as ServiceHealth[]).map(s => ({
         type: 'Service',
         name: s.name,
         status: s.status,
@@ -552,7 +532,7 @@ export default function HealthScoreClient() {
       // Collect enabled alerts from the form
       const alertConfig = {
         userId: user.id,
-        alerts: mockAlerts.slice(0, 3).map(alert => ({
+        alerts: ([] as AlertRule[]).slice(0, 3).map(alert => ({
           id: alert.id,
           name: alert.name,
           enabled: alert.enabled
@@ -576,21 +556,21 @@ export default function HealthScoreClient() {
       avgApdex,
       avgErrorRate,
       openIncidents,
-      services: mockServices.map(s => ({
+      services: ([] as ServiceHealth[]).map(s => ({
         name: s.name,
         status: s.status,
         apdexScore: s.apdexScore,
         errorRate: s.errorRate,
         uptime: s.uptime
       })),
-      hosts: mockHosts.map(h => ({
+      hosts: ([] as HostMetrics[]).map(h => ({
         hostname: h.hostname,
         status: h.status,
         cpu: h.cpu,
         memory: h.memory,
         disk: h.disk
       })),
-      slos: mockSLOs.map(s => ({
+      slos: ([] as SLO[]).map(s => ({
         name: s.name,
         target: s.target,
         current: s.current,
