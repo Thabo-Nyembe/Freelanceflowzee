@@ -1706,7 +1706,7 @@ export default function CiCdClient() {
                       <span className="text-3xl font-bold">{usage.usedMinutes}</span>
                       <span className="text-gray-500 mb-1">/ {usage.totalMinutes}</span>
                     </div>
-                    <Progress value={(usage.usedMinutes / usage.totalMinutes) * 100} className="mt-2" />
+                    <Progress value={usage.totalMinutes > 0 ? (usage.usedMinutes / usage.totalMinutes) * 100 : 0} className="mt-2" />
                   </div>
                   <div>
                     <p className="text-sm text-gray-500 mb-2">Storage Used</p>
@@ -1714,7 +1714,7 @@ export default function CiCdClient() {
                       <span className="text-3xl font-bold">{usage.storageUsed}GB</span>
                       <span className="text-gray-500 mb-1">/ {usage.storageLimit}GB</span>
                     </div>
-                    <Progress value={(usage.storageUsed / usage.storageLimit) * 100} className="mt-2" />
+                    <Progress value={usage.storageLimit > 0 ? (usage.storageUsed / usage.storageLimit) * 100 : 0} className="mt-2" />
                   </div>
                   <div>
                     <p className="text-sm text-gray-500 mb-2">Concurrent Jobs</p>
@@ -1722,7 +1722,7 @@ export default function CiCdClient() {
                       <span className="text-3xl font-bold">{usage.concurrentJobs}</span>
                       <span className="text-gray-500 mb-1">/ {usage.maxConcurrentJobs} max</span>
                     </div>
-                    <Progress value={(usage.concurrentJobs / usage.maxConcurrentJobs) * 100} className="mt-2" />
+                    <Progress value={usage.maxConcurrentJobs > 0 ? (usage.concurrentJobs / usage.maxConcurrentJobs) * 100 : 0} className="mt-2" />
                   </div>
                 </div>
               </CardContent>

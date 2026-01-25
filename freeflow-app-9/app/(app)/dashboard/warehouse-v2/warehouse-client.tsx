@@ -1827,7 +1827,7 @@ export default function WarehouseClient() {
             <div className="grid gap-4">
               {activeInboundShipments.map((shipment) => {
                 const statusBadge = getShipmentStatusBadge(shipment.status)
-                const progress = (shipment.received_units / shipment.total_units) * 100
+                const progress = shipment.total_units > 0 ? (shipment.received_units / shipment.total_units) * 100 : 0
                 return (
                   <Card key={shipment.id} className="bg-white dark:bg-gray-800 border-0 shadow-sm hover:shadow-md transition-shadow">
                     <CardContent className="p-6">
@@ -1939,7 +1939,7 @@ export default function WarehouseClient() {
               {activeOutboundOrders.map((order) => {
                 const statusBadge = getOrderStatusBadge(order.status)
                 const priorityBadge = getPriorityBadge(order.priority)
-                const progress = (order.picked_units / order.total_units) * 100
+                const progress = order.total_units > 0 ? (order.picked_units / order.total_units) * 100 : 0
                 return (
                   <Card key={order.id} className="bg-white dark:bg-gray-800 border-0 shadow-sm hover:shadow-md transition-shadow">
                     <CardContent className="p-6">

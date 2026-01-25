@@ -622,7 +622,12 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
     await toast.promise(
       (async () => {
         // Store bookmark in localStorage for now
-        const bookmarks = JSON.parse(localStorage.getItem('log-bookmarks') || '[]')
+        let bookmarks: Array<{ id: string; message: string; timestamp: string; level: string; bookmarkedAt: string }> = []
+        try {
+          bookmarks = JSON.parse(localStorage.getItem('log-bookmarks') || '[]')
+        } catch {
+          bookmarks = []
+        }
         bookmarks.push({
           id: log.id,
           message: log.message,
@@ -791,7 +796,12 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
 
     await toast.promise(
       (async () => {
-        const savedQueries = JSON.parse(localStorage.getItem('saved-log-queries') || '[]')
+        let savedQueries: Array<{ id: string; name: string; query: string; filters: Record<string, string>; createdAt: string; isDefault: boolean }> = []
+        try {
+          savedQueries = JSON.parse(localStorage.getItem('saved-log-queries') || '[]')
+        } catch {
+          savedQueries = []
+        }
         savedQueries.push({
           id: `sq_${Date.now()}`,
           name: queryName,

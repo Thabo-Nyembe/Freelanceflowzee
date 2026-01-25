@@ -1021,7 +1021,7 @@ export default function SprintsClient() {
                       </div>
                       <div className="text-right">
                         <div className="text-3xl font-bold text-teal-600">
-                          {Math.round((sprint.completed_story_points / sprint.total_story_points) * 100)}%
+                          {sprint.total_story_points > 0 ? Math.round((sprint.completed_story_points / sprint.total_story_points) * 100) : 0}%
                         </div>
                         <div className="text-sm text-slate-500">Complete</div>
                       </div>
@@ -1039,7 +1039,7 @@ export default function SprintsClient() {
                           </span>
                         )}
                       </div>
-                      <Progress value={(sprint.completed_story_points / sprint.total_story_points) * 100} className="h-2" />
+                      <Progress value={sprint.total_story_points > 0 ? (sprint.completed_story_points / sprint.total_story_points) * 100 : 0} className="h-2" />
                     </div>
 
                     {/* Task Stats */}

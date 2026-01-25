@@ -772,6 +772,15 @@ export default function WebhooksClient({
   const handleSendTestWebhook = async () => {
     if (!webhookToTest) return
 
+    // Validate JSON payload before sending
+    let parsedPayload
+    try {
+      parsedPayload = JSON.parse(testPayload)
+    } catch {
+      toast.error('Invalid JSON payload. Please check your syntax.')
+      return
+    }
+
     try {
       toast.loading('Sending test payload...')
 
@@ -782,7 +791,7 @@ export default function WebhooksClient({
           action: 'test',
           webhookId: webhookToTest,
           eventType: selectedTestEvent,
-          payload: JSON.parse(testPayload)
+          payload: parsedPayload
         })
       })
 
