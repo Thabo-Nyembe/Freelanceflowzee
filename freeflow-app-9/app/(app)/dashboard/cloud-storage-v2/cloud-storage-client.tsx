@@ -2,7 +2,7 @@
 
 import { createClient } from '@/lib/supabase/client'
 
-import { useState, useMemo, useRef } from 'react'
+import { useState, useMemo, useRef, useEffect } from 'react'
 import { toast } from 'sonner'
 import { useCloudStorage } from '@/lib/hooks/use-cloud-storage'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -84,7 +84,8 @@ import {
 
 // Real data integration via Supabase hooks
 
-
+// Initialize Supabase client once at module level
+const supabase = createClient()
 
 // Types
 type FileType = 'document' | 'image' | 'video' | 'audio' | 'archive' | 'code' | 'spreadsheet' | 'presentation' | 'folder' | 'other'
@@ -234,9 +235,8 @@ const getStorageQuickActions = (onUpload: () => void, onNewFolder: () => void, o
 ]
 
 export default function CloudStorageClient() {
-  // Initialize Supabase client and hook
-
-  const { files: dbFiles, loading: filesLoading, addFile, updateFile, deleteFile, toggleStarred, refetch } = useCloudStorage()
+  // Use the cloud storage hook for data fetching and mutations
+  const { files: dbFiles, loading: filesLoading, error: filesError, addFile, updateFile, deleteFile, toggleStarred, refetch } = useCloudStorage()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // UI State
@@ -270,8 +270,69 @@ export default function CloudStorageClient() {
   const [isUploading, setIsUploading] = useState(false)
   const [commentText, setCommentText] = useState('')
 
+  // Show error toast if there's an error loading files
+  useEffect(() => {
+    if (filesError) {
+      toast.error('Failed to load cloud storage files')
+    }
+  }, [filesError])
+
+  // MIGRATED: Map database files to UI CloudFile type for filtering
+  // Helper function to map DB file to UI CloudFile type (defined inline for useMemo)
+  const mappedFiles = useMemo(() => {
+    return (dbFiles || []).map((dbFile): CloudFile => {
+      const getFileType = (): FileType => {
+        if (dbFile.file_type === 'folder') return 'folder'
+        if (dbFile.is_image) return 'image'
+        if (dbFile.is_video) return 'video'
+        if (dbFile.is_audio) return 'audio'
+        if (dbFile.is_document) return 'document'
+        if (dbFile.mime_type?.includes('zip') || dbFile.mime_type?.includes('archive')) return 'archive'
+        if (dbFile.mime_type?.includes('code') || ['js', 'ts', 'py', 'java', 'cpp', 'c', 'h', 'css', 'html', 'jsx', 'tsx'].includes(dbFile.extension || '')) return 'code'
+        if (dbFile.mime_type?.includes('spreadsheet') || ['xlsx', 'xls', 'csv'].includes(dbFile.extension || '')) return 'spreadsheet'
+        if (dbFile.mime_type?.includes('presentation') || ['pptx', 'ppt'].includes(dbFile.extension || '')) return 'presentation'
+        return 'other'
+      }
+
+      const getSyncStatus = (): SyncStatus => {
+        if (dbFile.processing_status === 'processing') return 'syncing'
+        if (dbFile.processing_status === 'failed') return 'error'
+        if (dbFile.processing_status === 'completed') return 'synced'
+        return 'pending'
+      }
+
+      return {
+        id: dbFile.id,
+        name: dbFile.original_name || dbFile.file_name,
+        type: getFileType(),
+        size: dbFile.file_size,
+        mimeType: dbFile.mime_type || 'application/octet-stream',
+        path: dbFile.file_path,
+        parentId: null,
+        isFolder: dbFile.file_type === 'folder',
+        isStarred: dbFile.is_starred || false,
+        isShared: dbFile.is_shared,
+        syncStatus: getSyncStatus(),
+        thumbnail: dbFile.thumbnail_url || null,
+        owner: {
+          id: dbFile.user_id,
+          name: 'Current User',
+          avatar: ''
+        },
+        sharedWith: [],
+        versions: dbFile.version || 1,
+        currentVersion: dbFile.version || 1,
+        createdAt: dbFile.created_at,
+        modifiedAt: dbFile.updated_at,
+        lastAccessedAt: dbFile.last_accessed_at || dbFile.updated_at,
+        downloadCount: dbFile.download_count,
+        viewCount: dbFile.view_count
+      }
+    })
+  }, [dbFiles])
+
   const filteredFiles = useMemo(() => {
-    return files.filter(file => {
+    return mappedFiles.filter(file => {
       const matchesSearch = file.name.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesType = selectedType === 'all' || file.type === selectedType
       return matchesSearch && matchesType
@@ -281,13 +342,13 @@ export default function CloudStorageClient() {
       if (sortBy === 'size') return b.size - a.size
       return 0
     })
-  }, [searchQuery, selectedType, sortBy])
+  }, [mappedFiles, searchQuery, selectedType, sortBy])
 
-  const starredFiles = useMemo(() => files.filter(f => f.isStarred), [])
+  const starredFiles = useMemo(() => mappedFiles.filter(f => f.isStarred), [mappedFiles])
   const recentFiles = useMemo(() =>
-    [...files].sort((a, b) => new Date(b.lastAccessedAt).getTime() - new Date(a.lastAccessedAt).getTime()).slice(0, 5),
-  [])
-  const sharedFiles = useMemo(() => files.filter(f => f.isShared), [])
+    [...mappedFiles].sort((a, b) => new Date(b.lastAccessedAt).getTime() - new Date(a.lastAccessedAt).getTime()).slice(0, 10),
+  [mappedFiles])
+  const sharedFiles = useMemo(() => mappedFiles.filter(f => f.isShared), [mappedFiles])
 
   const formatSize = (bytes: number) => {
     if (bytes < 1024) return `${bytes} B`
@@ -355,7 +416,33 @@ export default function CloudStorageClient() {
     setShowFileDialog(true)
   }
 
-  const usedPercentage = quota.total > 0 ? (quota.used / quota.total) * 100 : 0
+  // MIGRATED: Computed quota from real database data
+  const computedQuota = useMemo(() => {
+    const allFiles = dbFiles || []
+    const used = allFiles.reduce((sum, f) => sum + (f.file_size || 0), 0)
+    const total = 100 * 1024 * 1024 * 1024 // 100GB default quota
+
+    // Compute breakdown by file type
+    const imageSize = allFiles.filter(f => f.is_image).reduce((sum, f) => sum + (f.file_size || 0), 0)
+    const videoSize = allFiles.filter(f => f.is_video).reduce((sum, f) => sum + (f.file_size || 0), 0)
+    const audioSize = allFiles.filter(f => f.is_audio).reduce((sum, f) => sum + (f.file_size || 0), 0)
+    const docSize = allFiles.filter(f => f.is_document).reduce((sum, f) => sum + (f.file_size || 0), 0)
+    const otherSize = used - imageSize - videoSize - audioSize - docSize
+
+    return {
+      used,
+      total,
+      breakdown: [
+        { type: 'Images', size: imageSize, count: allFiles.filter(f => f.is_image).length, color: 'bg-purple-500' },
+        { type: 'Videos', size: videoSize, count: allFiles.filter(f => f.is_video).length, color: 'bg-red-500' },
+        { type: 'Audio', size: audioSize, count: allFiles.filter(f => f.is_audio).length, color: 'bg-green-500' },
+        { type: 'Documents', size: docSize, count: allFiles.filter(f => f.is_document).length, color: 'bg-blue-500' },
+        { type: 'Other', size: otherSize, count: allFiles.filter(f => !f.is_image && !f.is_video && !f.is_audio && !f.is_document).length, color: 'bg-gray-500' }
+      ].filter(b => b.size > 0)
+    }
+  }, [dbFiles])
+
+  const usedPercentage = computedQuota.total > 0 ? (computedQuota.used / computedQuota.total) * 100 : 0
 
   // ============ REAL SUPABASE HANDLERS ============
 
@@ -1103,16 +1190,41 @@ export default function CloudStorageClient() {
     }
   }
 
-  const stats = [
-    { label: 'Storage Used', value: formatSize(quota.used), icon: HardDrive, change: '+0 GB', color: 'text-blue-600' },
-    { label: 'Total Files', value: files.length.toString(), icon: File, change: '+0', color: 'text-indigo-600' },
-    { label: 'Shared Files', value: sharedFiles.length.toString(), icon: Share2, change: '+0', color: 'text-green-600' },
-    { label: 'Team Folders', value: folders.filter(f => f.isTeamFolder).length.toString(), icon: Users, change: '+0', color: 'text-purple-600' },
-    { label: 'Active Shares', value: shareLinks.length.toString(), icon: LinkIcon, change: '+0', color: 'text-cyan-600' },
-    { label: 'Downloads', value: '0', icon: Download, change: '+0', color: 'text-pink-600' },
-    { label: 'Sync Status', value: '0%', icon: RefreshCw, change: '+0%', color: 'text-orange-600' },
-    { label: 'Comments', value: comments.length.toString(), icon: MessageSquare, change: '+0', color: 'text-teal-600' }
-  ]
+  // MIGRATED: Computed stats from real database data
+  const computedStats = useMemo(() => {
+    const allFiles = dbFiles || []
+    const totalFiles = allFiles.filter(f => f.file_type !== 'folder').length
+    const totalFolders = allFiles.filter(f => f.file_type === 'folder').length
+    const sharedCount = allFiles.filter(f => f.is_shared).length
+    const totalDownloads = allFiles.reduce((sum, f) => sum + (f.download_count || 0), 0)
+    const storageUsed = allFiles.reduce((sum, f) => sum + (f.file_size || 0), 0)
+    const syncedCount = allFiles.filter(f => f.processing_status === 'completed').length
+    const syncPercentage = allFiles.length > 0 ? Math.round((syncedCount / allFiles.length) * 100) : 100
+
+    return {
+      totalFiles,
+      totalFolders,
+      sharedFiles: sharedCount,
+      storageUsed: storageUsed / (1024 * 1024 * 1024), // Convert to GB
+      totalDownloads,
+      syncPercentage
+    }
+  }, [dbFiles])
+
+  // Stats array for the stats grid - now uses real data
+  const stats = {
+    ...computedStats,
+    gridStats: [
+      { label: 'Storage Used', value: formatSize(computedStats.storageUsed * 1024 * 1024 * 1024), icon: HardDrive, change: '+0 GB', color: 'text-blue-600' },
+      { label: 'Total Files', value: computedStats.totalFiles.toString(), icon: File, change: '+0', color: 'text-indigo-600' },
+      { label: 'Shared Files', value: computedStats.sharedFiles.toString(), icon: Share2, change: '+0', color: 'text-green-600' },
+      { label: 'Total Folders', value: computedStats.totalFolders.toString(), icon: Users, change: '+0', color: 'text-purple-600' },
+      { label: 'Active Shares', value: sharedFiles.length.toString(), icon: LinkIcon, change: '+0', color: 'text-cyan-600' },
+      { label: 'Downloads', value: computedStats.totalDownloads.toString(), icon: Download, change: '+0', color: 'text-pink-600' },
+      { label: 'Sync Status', value: `${computedStats.syncPercentage}%`, icon: RefreshCw, change: '+0%', color: 'text-orange-600' },
+      { label: 'Total Items', value: (dbFiles || []).length.toString(), icon: MessageSquare, change: '+0', color: 'text-teal-600' }
+    ]
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 dark:bg-none dark:bg-gray-900 p-6">
@@ -1154,7 +1266,7 @@ export default function CloudStorageClient() {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
-          {stats.map((stat, index) => (
+          {stats.gridStats.map((stat, index) => (
             <Card key={index} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-2">
@@ -1176,14 +1288,14 @@ export default function CloudStorageClient() {
                 <HardDrive className="w-5 h-5 text-sky-500" />
                 <div>
                   <h3 className="font-semibold text-gray-900 dark:text-white">Storage</h3>
-                  <p className="text-sm text-gray-500">{formatSize(quota.used)} of {formatSize(quota.total)} used</p>
+                  <p className="text-sm text-gray-500">{formatSize(computedQuota.used)} of {formatSize(computedQuota.total)} used</p>
                 </div>
               </div>
               <Button variant="outline" size="sm" onClick={handleUpgrade}>Upgrade</Button>
             </div>
             <Progress value={usedPercentage} className="h-3 mb-4" />
             <div className="flex items-center gap-4 flex-wrap">
-              {quota.breakdown.map(item => (
+              {computedQuota.breakdown.map(item => (
                 <div key={item.type} className="flex items-center gap-2">
                   <div className={`w-3 h-3 rounded-full ${item.color}`} />
                   <span className="text-sm text-gray-600 dark:text-gray-400">
@@ -1530,7 +1642,7 @@ export default function CloudStorageClient() {
                     <p className="text-sm text-green-200">Shared</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{files.filter(f => f.sharedWith.length > 0).length}</p>
+                    <p className="text-3xl font-bold">{mappedFiles.filter(f => f.sharedWith.length > 0).length}</p>
                     <p className="text-sm text-green-200">By Me</p>
                   </div>
                 </div>
@@ -1611,7 +1723,7 @@ export default function CloudStorageClient() {
                   </div>
                 </div>
                 <div className="text-center">
-                  <p className="text-3xl font-bold">{files.length}</p>
+                  <p className="text-3xl font-bold">{recentFiles.length}</p>
                   <p className="text-sm text-purple-200">Recent</p>
                 </div>
               </div>

@@ -1,8 +1,9 @@
 'use client'
 
 import { createClient } from '@/lib/supabase/client'
+import { useSocialPosts, useSocialAccounts, type SocialPost as HookSocialPost, type SocialAccount as HookSocialAccount } from '@/lib/hooks/use-social-media'
 
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -58,7 +59,9 @@ import {
   Upload,
   TrendingDown,
   Activity,
-  Sliders
+  Sliders,
+  Loader2,
+  AlertCircle
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -77,7 +80,7 @@ import {
 type PostStatus = 'draft' | 'scheduled' | 'published' | 'failed' | 'pending_approval'
 type ContentType = 'text' | 'image' | 'video' | 'carousel' | 'story' | 'reel' | 'thread' | 'poll'
 type Platform = 'twitter' | 'facebook' | 'instagram' | 'linkedin' | 'tiktok' | 'youtube' | 'pinterest'
-type EngagementType = 'like' | 'comment' | 'share' | 'save' | 'click' | 'view'
+type _EngagementType = 'like' | 'comment' | 'share' | 'save' | 'click' | 'view'
 type CampaignStatus = 'active' | 'paused' | 'completed' | 'draft'
 type MentionSentiment = 'positive' | 'neutral' | 'negative'
 
@@ -270,8 +273,7 @@ interface Integration {
 }
 
 // Empty arrays with proper typing (no mock data)
-const emptyPosts: SocialPost[] = []
-const emptyAccounts: SocialAccount[] = []
+// emptyPosts and emptyAccounts now replaced by Supabase hooks
 const emptyCampaigns: Campaign[] = []
 const emptyMentions: Mention[] = []
 const emptyAssets: ContentAsset[] = []
@@ -284,8 +286,86 @@ const emptyActivities: ActivityItem[] = []
 // Quick actions are defined inside the component to access state setters
 
 export default function SocialMediaClient() {
-  const [posts, setPosts] = useState<SocialPost[]>(emptyPosts)
-  const [accounts, setAccounts] = useState<SocialAccount[]>(emptyAccounts)
+  // Use Supabase hooks for data fetching
+  const {
+    posts: dbPosts,
+    loading: postsLoading,
+    error: postsError,
+    fetchPosts,
+    createPost: createDbPost,
+    updatePost: updateDbPost,
+    deletePost: deleteDbPost,
+    schedulePost: scheduleDbPost,
+    publishPost: publishDbPost,
+    getStats
+  } = useSocialPosts()
+
+  const {
+    accounts: dbAccounts,
+    loading: accountsLoading,
+    connectAccount,
+    disconnectAccount,
+    getTotalFollowers
+  } = useSocialAccounts()
+
+  // Map database posts to UI types
+  const posts: SocialPost[] = useMemo(() => {
+    return dbPosts.map((p: HookSocialPost) => ({
+      id: p.id,
+      content: p.content,
+      contentType: (p.content_type || 'text') as ContentType,
+      platforms: (p.platforms || []) as Platform[],
+      status: (p.status === 'publishing' ? 'pending_approval' : p.status || 'draft') as PostStatus,
+      scheduledAt: p.scheduled_at,
+      publishedAt: p.published_at,
+      mediaUrls: p.media_urls || [],
+      hashtags: p.hashtags || [],
+      mentions: p.mentions || [],
+      link: p.link_url,
+      likes: p.likes || 0,
+      comments: p.comments || 0,
+      shares: p.shares || 0,
+      saves: p.saves || 0,
+      views: p.views || 0,
+      clicks: p.clicks || 0,
+      engagementRate: p.engagement_rate || 0,
+      reach: p.reach || 0,
+      impressions: p.impressions || 0,
+      isTrending: p.is_trending || false,
+      createdBy: p.author || 'Unknown',
+      approvedBy: null
+    }))
+  }, [dbPosts])
+
+  // Map database accounts to UI types
+  const accounts: SocialAccount[] = useMemo(() => {
+    return dbAccounts.map((a: HookSocialAccount) => ({
+      id: a.id,
+      platform: a.platform as Platform,
+      username: a.account_username || a.account_name,
+      displayName: a.account_name,
+      avatar: a.avatar_url || `/avatars/${a.platform}.png`,
+      followers: a.followers_count || 0,
+      following: a.following_count || 0,
+      posts: a.posts_count || 0,
+      isVerified: a.is_verified || false,
+      isConnected: a.is_active || false,
+      lastSync: a.last_synced_at || a.updated_at,
+      engagementRate: 0
+    }))
+  }, [dbAccounts])
+
+  // Combined loading state
+  const loading = postsLoading || accountsLoading
+  const error = postsError
+
+  // Show error toast when error occurs
+  useEffect(() => {
+    if (error) {
+      toast.error('Failed to load social media data')
+    }
+  }, [error])
+
   const [campaigns, setCampaigns] = useState<Campaign[]>(emptyCampaigns)
   const [mentions, setMentions] = useState<Mention[]>(emptyMentions)
   const [assets] = useState<ContentAsset[]>(emptyAssets)
@@ -471,146 +551,101 @@ export default function SocialMediaClient() {
     setIsComposerOpen(true)
   }
 
-  const handleSaveComposerPost = (asDraft: boolean = true) => {
+  const handleSaveComposerPost = async (asDraft: boolean = true) => {
     if (!composerContent.trim()) {
       toast.error('Please enter post content')
       return
     }
-    const newPost: SocialPost = {
-      id: `post-${Date.now()}`,
-      content: composerContent,
-      contentType: composerContentType,
-      platforms: composerPlatforms,
-      status: asDraft ? 'draft' : 'pending_approval',
-      scheduledAt: null,
-      publishedAt: null,
-      mediaUrls: [],
-      hashtags: composerHashtags.split(' ').filter(h => h.startsWith('#')).map(h => h.slice(1)),
-      mentions: [],
-      link: null,
-      likes: 0,
-      comments: 0,
-      shares: 0,
-      saves: 0,
-      views: 0,
-      clicks: 0,
-      engagementRate: 0,
-      reach: 0,
-      impressions: 0,
-      isTrending: false,
-      createdBy: 'Current User',
-      approvedBy: null
+    try {
+      await createDbPost({
+        content: composerContent,
+        content_type: composerContentType as HookSocialPost['content_type'],
+        platforms: composerPlatforms,
+        status: asDraft ? 'draft' : 'publishing',
+        hashtags: composerHashtags.split(' ').filter(h => h.startsWith('#')).map(h => h.slice(1)),
+        mentions: [],
+        media_urls: [],
+      })
+      setIsComposerOpen(false)
+      toast.success(asDraft ? 'Post saved as draft!' : 'Post submitted for approval!')
+    } catch (err) {
+      // Error is handled by the hook
     }
-    setPosts(prev => [newPost, ...prev])
-    setIsComposerOpen(false)
-    toast.success(asDraft ? 'Post saved as draft!' : 'Post submitted for approval!')
   }
 
-  const handlePublishFromComposer = () => {
+  const handlePublishFromComposer = async () => {
     if (!composerContent.trim()) {
       toast.error('Please enter post content')
       return
     }
-    const newPost: SocialPost = {
-      id: `post-${Date.now()}`,
-      content: composerContent,
-      contentType: composerContentType,
-      platforms: composerPlatforms,
-      status: 'published',
-      scheduledAt: null,
-      publishedAt: new Date().toISOString(),
-      mediaUrls: [],
-      hashtags: composerHashtags.split(' ').filter(h => h.startsWith('#')).map(h => h.slice(1)),
-      mentions: [],
-      link: null,
-      likes: Math.floor(Math.random() * 100),
-      comments: Math.floor(Math.random() * 20),
-      shares: Math.floor(Math.random() * 10),
-      saves: Math.floor(Math.random() * 5),
-      views: Math.floor(Math.random() * 1000),
-      clicks: Math.floor(Math.random() * 50),
-      engagementRate: parseFloat((Math.random() * 5).toFixed(1)),
-      reach: Math.floor(Math.random() * 5000),
-      impressions: Math.floor(Math.random() * 8000),
-      isTrending: false,
-      createdBy: 'Current User',
-      approvedBy: 'Current User'
+    try {
+      await createDbPost({
+        content: composerContent,
+        content_type: composerContentType as HookSocialPost['content_type'],
+        platforms: composerPlatforms,
+        status: 'published',
+        published_at: new Date().toISOString(),
+        hashtags: composerHashtags.split(' ').filter(h => h.startsWith('#')).map(h => h.slice(1)),
+        mentions: [],
+        media_urls: [],
+      })
+      setIsComposerOpen(false)
+      toast.success('Post published to all selected platforms!')
+    } catch (err) {
+      // Error is handled by the hook
     }
-    setPosts(prev => [newPost, ...prev])
-    setIsComposerOpen(false)
-    toast.success('Post published to all selected platforms!')
   }
 
-  const handleSchedulePost = (postId: string, postContent: string) => {
-    const scheduleOperation = async () => {
-      // Update the post status to scheduled
-      setPosts(prev => prev.map(p =>
-        p.id === postId
-          ? { ...p, status: 'scheduled' as PostStatus, scheduledAt: new Date(Date.now() + 86400000).toISOString() }
-          : p
-      ))
-      return `"${postContent.slice(0, 30)}..." scheduled for tomorrow`
+  const handleSchedulePost = async (postId: string, postContent: string) => {
+    try {
+      const scheduledAt = new Date(Date.now() + 86400000).toISOString()
+      await scheduleDbPost(postId, scheduledAt)
+      toast.success(`"${postContent.slice(0, 30)}..." scheduled for tomorrow`)
+    } catch (err) {
+      toast.error('Failed to schedule post')
     }
-    toast.promise(scheduleOperation(), {
-      loading: 'Scheduling post...',
-      success: (msg) => msg,
-      error: 'Failed to schedule post'
-    })
   }
 
-  const handlePublishPost = (postId: string, postContent: string) => {
-    const publishOperation = async () => {
-      // Update the post status to published
-      setPosts(prev => prev.map(p =>
-        p.id === postId
-          ? {
-              ...p,
-              status: 'published' as PostStatus,
-              publishedAt: new Date().toISOString(),
-              scheduledAt: null,
-              views: Math.floor(Math.random() * 10000),
-              likes: Math.floor(Math.random() * 500),
-              comments: Math.floor(Math.random() * 100),
-              shares: Math.floor(Math.random() * 50),
-              reach: Math.floor(Math.random() * 20000),
-              engagementRate: parseFloat((Math.random() * 10).toFixed(1))
-            }
-          : p
-      ))
-      return `"${postContent.slice(0, 30)}..." is now live!`
+  const handlePublishPost = async (postId: string, postContent: string) => {
+    try {
+      await publishDbPost(postId)
+      toast.success(`"${postContent.slice(0, 30)}..." is now live!`)
+    } catch (err) {
+      toast.error('Failed to publish post')
     }
-    toast.promise(publishOperation(), {
-      loading: 'Publishing to all platforms...',
-      success: (msg) => msg,
-      error: 'Failed to publish post'
-    })
   }
 
-  const handleConnectAccount = (platform: string) => {
-    const connectOperation = async () => {
-      // Simulate OAuth flow - in real app this would open OAuth popup
-      const newAccount: SocialAccount = {
-        id: `new-${Date.now()}`,
-        platform: platform.toLowerCase() as Platform,
-        username: `@new_${platform.toLowerCase()}`,
-        displayName: 'New Account',
-        avatar: `/avatars/${platform.toLowerCase()}.png`,
-        followers: 0,
-        following: 0,
-        posts: 0,
-        isVerified: false,
-        isConnected: true,
-        lastSync: new Date().toISOString(),
-        engagementRate: 0
-      }
-      setAccounts(prev => [...prev, newAccount])
-      return `${platform} connected successfully!`
+  const handleDeletePostDb = async (postId: string) => {
+    try {
+      await deleteDbPost(postId)
+      setSelectedPost(null)
+      toast.success('Post permanently deleted!')
+    } catch (err) {
+      toast.error('Failed to delete post')
     }
-    toast.promise(connectOperation(), {
-      loading: `Connecting ${platform}...`,
-      success: (msg) => msg,
-      error: `Failed to connect ${platform}`
-    })
+  }
+
+  const handleConnectAccountDb = async (platform: string) => {
+    try {
+      await connectAccount({
+        platform: platform.toLowerCase() as HookSocialAccount['platform'],
+        account_name: `New ${platform} Account`,
+        account_id: `${platform.toLowerCase()}-${Date.now()}`,
+        is_active: true,
+      })
+      toast.success(`${platform} connected successfully!`)
+    } catch (err) {
+      toast.error(`Failed to connect ${platform}`)
+    }
+  }
+
+  const handleDisconnectAccountDb = async (accountId: string) => {
+    try {
+      await disconnectAccount(accountId)
+      toast.success('Account disconnected')
+    } catch (err) {
+      toast.error('Failed to disconnect account')
+    }
   }
 
   const handleExportAnalytics = () => {
@@ -832,82 +867,67 @@ export default function SocialMediaClient() {
     })
   }
 
-  const handleDeleteDrafts = () => {
-    const deleteOperation = async () => {
-      const draftCount = posts.filter(p => p.status === 'draft').length
-      setPosts(prev => prev.filter(p => p.status !== 'draft'))
-      return `${draftCount} draft posts deleted!`
+  const handleDeleteDrafts = async () => {
+    const draftPosts = posts.filter(p => p.status === 'draft')
+    const draftCount = draftPosts.length
+    if (draftCount === 0) {
+      toast.info('No draft posts to delete')
+      return
     }
-    toast.promise(deleteOperation(), {
-      loading: 'Deleting all draft posts...',
-      success: (msg) => msg,
-      error: 'Failed to delete drafts'
-    })
-  }
-
-  const handleDisconnectAccounts = () => {
-    const disconnectOperation = async () => {
-      const accountCount = accounts.length
-      setAccounts(prev => prev.map(a => ({ ...a, isConnected: false })))
-      return `${accountCount} accounts disconnected!`
-    }
-    toast.promise(disconnectOperation(), {
-      loading: 'Disconnecting all accounts...',
-      success: (msg) => msg,
-      error: 'Failed to disconnect accounts'
-    })
-  }
-
-  const handleResetAnalytics = () => {
-    const resetOperation = async () => {
-      setPosts(prev => prev.map(p => ({
-        ...p,
-        likes: 0,
-        comments: 0,
-        shares: 0,
-        saves: 0,
-        views: 0,
-        clicks: 0,
-        engagementRate: 0,
-        reach: 0,
-        impressions: 0
-      })))
-      return 'All analytics data cleared!'
-    }
-    toast.promise(resetOperation(), {
-      loading: 'Resetting analytics data...',
-      success: (msg) => msg,
-      error: 'Failed to reset analytics'
-    })
-  }
-
-  const handleDuplicatePost = (post: SocialPost) => {
-    const duplicateOperation = async () => {
-      const newPost: SocialPost = {
-        ...post,
-        id: `dup-${Date.now()}`,
-        status: 'draft',
-        scheduledAt: null,
-        publishedAt: null,
-        likes: 0,
-        comments: 0,
-        shares: 0,
-        saves: 0,
-        views: 0,
-        clicks: 0,
-        engagementRate: 0,
-        reach: 0,
-        impressions: 0,
-        isTrending: false
+    toast.loading('Deleting all draft posts...')
+    try {
+      for (const post of draftPosts) {
+        await deleteDbPost(post.id)
       }
-      setPosts(prev => [...prev, newPost])
-      return 'Post duplicated to drafts!'
+      toast.dismiss()
+      toast.success(`${draftCount} draft posts deleted!`)
+    } catch (err) {
+      toast.dismiss()
+      toast.error('Failed to delete drafts')
     }
-    toast.promise(duplicateOperation(), {
-      loading: 'Duplicating post...',
-      success: (msg) => msg,
-      error: 'Failed to duplicate post'
-    })
+  }
+
+  const handleDisconnectAccounts = async () => {
+    const accountCount = accounts.length
+    if (accountCount === 0) {
+      toast.info('No accounts to disconnect')
+      return
+    }
+    toast.loading('Disconnecting all accounts...')
+    try {
+      for (const account of accounts) {
+        await disconnectAccount(account.id)
+      }
+      toast.dismiss()
+      toast.success(`${accountCount} accounts disconnected!`)
+    } catch (err) {
+      toast.dismiss()
+      toast.error('Failed to disconnect accounts')
+    }
+  }
+
+  const handleResetAnalytics = async () => {
+    // Note: This would need a backend endpoint to reset analytics
+    // For now, show info message
+    toast.info('Analytics reset requires backend support')
+  }
+
+  const handleDuplicatePost = async (post: SocialPost) => {
+    try {
+      await createDbPost({
+        content: post.content,
+        content_type: post.contentType as HookSocialPost['content_type'],
+        platforms: post.platforms,
+        status: 'draft',
+        hashtags: post.hashtags,
+        mentions: post.mentions,
+        media_urls: post.mediaUrls,
+        link_url: post.link,
+      })
+      toast.success('Post duplicated to drafts!')
+    } catch (err) {
+      toast.error('Failed to duplicate post')
+    }
   }
 
   const handleViewPostAnalytics = (postId: string) => {
@@ -920,17 +940,14 @@ export default function SocialMediaClient() {
     }
   }
 
-  const handleDeletePost = (postId: string) => {
-    const deleteOperation = async () => {
-      setPosts(prev => prev.filter(p => p.id !== postId))
+  const handleDeletePost = async (postId: string) => {
+    try {
+      await deleteDbPost(postId)
       setSelectedPost(null)
-      return 'Post permanently deleted!'
+      toast.success('Post permanently deleted!')
+    } catch (err) {
+      toast.error('Failed to delete post')
     }
-    toast.promise(deleteOperation(), {
-      loading: 'Deleting post...',
-      success: (msg) => msg,
-      error: 'Failed to delete post'
-    })
   }
 
   const handleLoadNotifications = () => {
@@ -954,6 +971,31 @@ export default function SocialMediaClient() {
     { id: '3', label: 'Analytics', icon: 'chart', action: () => setIsAnalyticsOpen(true), variant: 'outline' as const },
   ]
 
+  // Show error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-violet-50 via-fuchsia-50/30 to-pink-50/40 dark:bg-none dark:bg-gray-900 flex items-center justify-center">
+        <Card className="w-full max-w-md mx-4">
+          <CardContent className="pt-6">
+            <div className="flex flex-col items-center text-center space-y-4">
+              <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                <AlertCircle className="w-6 h-6 text-red-600 dark:text-red-400" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Failed to Load Social Media</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{error}</p>
+              </div>
+              <Button onClick={() => fetchPosts()} className="bg-gradient-to-r from-violet-500 to-fuchsia-500">
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Try Again
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-violet-50 via-fuchsia-50/30 to-pink-50/40 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">
@@ -969,6 +1011,12 @@ export default function SocialMediaClient() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            {loading && (
+              <Badge variant="outline" className="text-violet-600 border-violet-200">
+                <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                Loading...
+              </Badge>
+            )}
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
               <Input
@@ -978,6 +1026,9 @@ export default function SocialMediaClient() {
                 className="pl-10 w-64"
               />
             </div>
+            <Button variant="outline" size="icon" onClick={() => fetchPosts()} disabled={loading}>
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            </Button>
             <Button variant="outline" size="icon" onClick={handleLoadNotifications}>
               <Bell className="w-4 h-4" />
             </Button>

@@ -1,8 +1,14 @@
 'use client'
 
 import { createClient } from '@/lib/supabase/client'
+import {
+  useDashboardStats,
+  useDashboardNotifications,
+  useDashboardActivities,
+  useDashboardInsights
+} from '@/lib/hooks/use-dashboard-extended'
 
-import { useState, useMemo, useEffect, useCallback } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -42,8 +48,8 @@ import {
   BusinessMetricsWidget,
 } from '@/components/dashboard/dynamic-content-widgets'
 
-
-
+// Initialize Supabase client once at module level
+const supabase = createClient()
 
 // ============================================================================
 // DATABASE TYPES
@@ -378,7 +384,111 @@ const overviewActivities: { id: string; type: 'status_change' | 'update' | 'crea
 // ============================================================================
 
 export default function OverviewClient() {
+  // User state for hooks
+  const [userId, setUserId] = useState<string | undefined>(undefined)
 
+  // Fetch current user on mount
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        setUserId(user.id)
+      }
+    }
+    fetchUser()
+  }, [])
+
+  // Use dashboard hooks for Supabase data
+  const {
+    data: hookStats,
+    isLoading: statsLoading,
+    refresh: refreshStats
+  } = useDashboardStats(userId)
+
+  const {
+    data: hookNotifications,
+    isLoading: notificationsLoading,
+    refresh: refreshNotifications
+  } = useDashboardNotifications(userId)
+
+  const {
+    data: hookActivities,
+    isLoading: activitiesLoading,
+    refresh: refreshActivities
+  } = useDashboardActivities(userId)
+
+  const {
+    data: hookInsights,
+    isLoading: insightsLoading,
+    refresh: refreshInsights
+  } = useDashboardInsights(userId)
+
+  // Computed loading state from all hooks
+  const isLoading = statsLoading || notificationsLoading || activitiesLoading || insightsLoading
+
+  // Map DB stats to component state
+  const dbStats: DbDashboardStats | null = hookStats ? {
+    id: hookStats.id || '',
+    user_id: hookStats.user_id || '',
+    earnings: hookStats.earnings || 0,
+    earnings_trend: hookStats.earnings_trend || 0,
+    active_projects: hookStats.active_projects || 0,
+    active_projects_trend: hookStats.active_projects_trend || 0,
+    completed_projects: hookStats.completed_projects || 0,
+    completed_projects_trend: hookStats.completed_projects_trend || 0,
+    total_clients: hookStats.total_clients || 0,
+    total_clients_trend: hookStats.total_clients_trend || 0,
+    hours_this_month: hookStats.hours_this_month || 0,
+    hours_this_month_trend: hookStats.hours_this_month_trend || 0,
+    revenue_this_month: hookStats.revenue_this_month || 0,
+    revenue_this_month_trend: hookStats.revenue_this_month_trend || 0,
+    average_project_value: hookStats.average_project_value || 0,
+    average_project_value_trend: hookStats.average_project_value_trend || 0,
+    productivity_score: hookStats.productivity_score || 0,
+    productivity_score_trend: hookStats.productivity_score_trend || 0,
+    pending_tasks: hookStats.pending_tasks || 0,
+    overdue_tasks: hookStats.overdue_tasks || 0,
+    upcoming_meetings: hookStats.upcoming_meetings || 0,
+    unread_messages: hookStats.unread_messages || 0,
+    last_updated: hookStats.last_updated || new Date().toISOString(),
+    created_at: hookStats.created_at || new Date().toISOString()
+  } : null
+
+  // Map DB notifications to component state
+  const dbNotifications: DbDashboardNotification[] = (hookNotifications || []).map((n: any) => ({
+    id: n.id || '',
+    user_id: n.user_id || '',
+    title: n.title || '',
+    message: n.message || '',
+    type: n.type || 'info',
+    is_read: n.is_read || false,
+    created_at: n.created_at || new Date().toISOString(),
+    action_url: n.action_url || null,
+    action_label: n.action_label || null,
+    priority: n.priority || 'normal'
+  }))
+
+  // Map DB metrics from activities/insights for display
+  const dbMetrics: DbDashboardMetric[] = (hookInsights || []).map((insight: any) => ({
+    id: insight.id || '',
+    user_id: insight.user_id || '',
+    name: insight.title || insight.name || '',
+    value: insight.value || 0,
+    previous_value: insight.previous_value || 0,
+    change: insight.change || 0,
+    change_percent: insight.change_percent || 0,
+    trend: insight.trend || 'stable',
+    unit: insight.unit || '',
+    icon: insight.icon || null,
+    color: insight.color || null,
+    is_positive: insight.is_positive || false,
+    target: insight.target || null,
+    target_progress: insight.target_progress || null,
+    last_updated: insight.updated_at || new Date().toISOString(),
+    category: insight.category || '',
+    description: insight.description || null,
+    created_at: insight.created_at || new Date().toISOString()
+  }))
 
   // UI State
   const [activeTab, setActiveTab] = useState('dashboard')
@@ -411,14 +521,8 @@ export default function OverviewClient() {
   const [showDeleteWebhookDialog, setShowDeleteWebhookDialog] = useState<string | null>(null)
   const [showAddWebhookDialog, setShowAddWebhookDialog] = useState(false)
 
-  // Loading States
-  const [isLoading, setIsLoading] = useState(true)
+  // Additional Loading States
   const [isSaving, setIsSaving] = useState(false)
-
-  // Data State
-  const [dbMetrics, setDbMetrics] = useState<DbDashboardMetric[]>([])
-  const [dbStats, setDbStats] = useState<DbDashboardStats | null>(null)
-  const [dbNotifications, setDbNotifications] = useState<DbDashboardNotification[]>([])
 
   // Settings Form State
   const [settingsForm, setSettingsForm] = useState({
@@ -482,98 +586,38 @@ export default function OverviewClient() {
     { id: '4', label: 'Deploy', icon: 'Rocket', shortcut: '⌘D', action: () => setShowDeployDialog(true) },
   ], [])
 
-  // Fetch dashboard metrics from Supabase
-  const fetchMetrics = useCallback(async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-
-      const { data, error } = await supabase
-        .from('dashboard_metrics')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-
-      if (error) throw error
-      setDbMetrics(data || [])
-    } catch (error) {
-      console.error('Error fetching metrics:', error)
-    }
-  }, [])
-
-  // Fetch dashboard stats from Supabase
-  const fetchStats = useCallback(async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-
-      const { data, error } = await supabase
-        .from('dashboard_stats')
-        .select('*')
-        .eq('user_id', user.id)
-        .single()
-
-      if (error && error.code !== 'PGRST116') throw error
-      setDbStats(data)
-    } catch (error) {
-      console.error('Error fetching stats:', error)
-    }
-  }, [])
-
-  // Fetch notifications from Supabase
-  const fetchNotifications = useCallback(async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-
-      const { data, error } = await supabase
-        .from('dashboard_notifications')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('is_read', false)
-        .order('created_at', { ascending: false })
-        .limit(10)
-
-      if (error) throw error
-      setDbNotifications(data || [])
-    } catch (error) {
-      console.error('Error fetching notifications:', error)
-    }
-  }, [])
-
-  // Initial data fetch
-  useEffect(() => {
-    const loadData = async () => {
-      setIsLoading(true)
-      await Promise.all([fetchMetrics(), fetchStats(), fetchNotifications()])
-      setIsLoading(false)
-    }
-    loadData()
-  }, [fetchMetrics, fetchStats, fetchNotifications])
-
-  // Real-time subscription
+  // Real-time subscription for dashboard changes
   useEffect(() => {
     const channel = supabase
       .channel('dashboard_changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'dashboard_metrics' }, () => {
-        fetchMetrics()
+        refreshInsights()
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'dashboard_stats' }, () => {
-        fetchStats()
+        refreshStats()
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'dashboard_notifications' }, () => {
-        fetchNotifications()
+        refreshNotifications()
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'dashboard_activities' }, () => {
+        refreshActivities()
       })
       .subscribe()
 
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [ fetchMetrics, fetchStats, fetchNotifications])
+  }, [refreshStats, refreshNotifications, refreshActivities, refreshInsights])
 
+  // Handle refresh using hooks
   const handleRefresh = async () => {
     setIsRefreshing(true)
-    await Promise.all([fetchMetrics(), fetchStats(), fetchNotifications()])
+    await Promise.all([
+      refreshStats(),
+      refreshNotifications(),
+      refreshActivities(),
+      refreshInsights()
+    ])
     toast.success('Dashboard refreshed')
     setIsRefreshing(false)
   }
@@ -649,9 +693,9 @@ export default function OverviewClient() {
         .eq('id', notificationId)
 
       if (error) throw error
-      setDbNotifications(prev => prev.filter(n => n.id !== notificationId))
+      await refreshNotifications()
       toast.success('Notification dismissed')
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error marking notification read:', error)
       toast.error('Failed to dismiss notification')
     }
@@ -660,18 +704,17 @@ export default function OverviewClient() {
   // Clear all metrics (danger zone)
   const handleClearMetrics = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
+      if (!userId) return
 
       const { error } = await supabase
-        .from('dashboard_metrics')
+        .from('dashboard_insights')
         .delete()
-        .eq('user_id', user.id)
+        .eq('user_id', userId)
 
       if (error) throw error
-      setDbMetrics([])
+      await refreshInsights()
       toast.success('Metrics cleared')
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error clearing metrics:', error)
       toast.error('Failed to clear metrics')
     }
@@ -680,18 +723,17 @@ export default function OverviewClient() {
   // Reset dashboard stats (danger zone)
   const handleResetDashboards = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
+      if (!userId) return
 
       const { error } = await supabase
         .from('dashboard_stats')
         .delete()
-        .eq('user_id', user.id)
+        .eq('user_id', userId)
 
       if (error) throw error
-      setDbStats(null)
+      await refreshStats()
       toast.success('Dashboard reset')
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error resetting dashboard:', error)
       toast.error('Failed to reset dashboard')
     }
@@ -700,20 +742,21 @@ export default function OverviewClient() {
   // Delete all data (danger zone)
   const handleDeleteAllData = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
+      if (!userId) return
 
       await Promise.all([
-        supabase.from('dashboard_metrics').delete().eq('user_id', user.id),
-        supabase.from('dashboard_stats').delete().eq('user_id', user.id),
-        supabase.from('dashboard_notifications').delete().eq('user_id', user.id)
+        supabase.from('dashboard_insights').delete().eq('user_id', userId),
+        supabase.from('dashboard_stats').delete().eq('user_id', userId),
+        supabase.from('dashboard_notifications').delete().eq('user_id', userId)
       ])
 
-      setDbMetrics([])
-      setDbStats(null)
-      setDbNotifications([])
+      await Promise.all([
+        refreshInsights(),
+        refreshStats(),
+        refreshNotifications()
+      ])
       toast.success('All data deleted')
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error deleting all data:', error)
       toast.error('Failed to delete data')
     }

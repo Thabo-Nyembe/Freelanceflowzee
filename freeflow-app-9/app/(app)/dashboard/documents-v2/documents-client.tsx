@@ -1,5 +1,6 @@
 'use client'
-import React, { useState, useMemo, useRef } from 'react'
+import React, { useState, useMemo, useRef, useEffect } from 'react'
+import { Loader2 } from 'lucide-react'
 import { useDocuments, useDocumentMutations, type Document, type DocumentType } from '@/lib/hooks/use-documents'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -166,9 +167,8 @@ interface RecentActivity {
 
 // ============================================================================
 // EMPTY DATA ARRAYS - Real data comes from Supabase hooks
+// Note: documentFiles is now computed from DB data inside the component
 // ============================================================================
-
-const documentFiles: DocumentFile[] = []
 
 const folders: DocumentFolder[] = []
 
@@ -310,6 +310,73 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
     downloadDocument,
     loading: mutating
   } = useDocumentMutations()
+
+  // Show error toast if there's an error loading documents
+  useEffect(() => {
+    if (error) {
+      toast.error('Failed to load documents', {
+        description: 'Please check your connection and try again'
+      })
+    }
+  }, [error])
+
+  // Map database documents to UI DocumentFile type
+  const documentFiles: DocumentFile[] = useMemo(() => {
+    if (!documents || documents.length === 0) return []
+    return documents.map((doc: Document): DocumentFile => {
+      // Map document_type to UI file type
+      const typeMap: Record<string, DocumentFile['type']> = {
+        'contract': 'pdf',
+        'proposal': 'document',
+        'report': 'document',
+        'policy': 'document',
+        'invoice': 'pdf',
+        'presentation': 'presentation',
+        'spreadsheet': 'spreadsheet',
+        'other': 'other'
+      }
+      // Map status to UI status
+      const statusMap: Record<string, DocumentFile['status']> = {
+        'draft': 'draft',
+        'review': 'review',
+        'approved': 'approved',
+        'archived': 'archived',
+        'rejected': 'draft',
+        'published': 'published'
+      }
+      // Map access_level to sharing type
+      const sharingMap: Record<string, DocumentFile['sharingType']> = {
+        'public': 'public',
+        'internal': 'team',
+        'confidential': 'private',
+        'restricted': 'private',
+        'secret': 'private'
+      }
+      return {
+        id: doc.id,
+        name: doc.document_title || 'Untitled Document',
+        type: typeMap[doc.document_type] || 'other',
+        extension: doc.file_extension || 'unknown',
+        size: doc.file_size_bytes || 0,
+        folderId: doc.parent_folder_id || undefined,
+        ownerId: doc.user_id,
+        ownerName: doc.owner || doc.created_by || 'Unknown',
+        ownerAvatar: undefined,
+        status: statusMap[doc.status] || 'draft',
+        starred: (doc as any).starred || false,
+        shared: (doc.shared_with && doc.shared_with.length > 0) || doc.access_level === 'public',
+        sharingType: sharingMap[doc.access_level] || 'private',
+        permissions: doc.permissions ? (Array.isArray(doc.permissions) ? doc.permissions : []) : [],
+        version: doc.version_number || 1,
+        createdAt: new Date(doc.created_at),
+        updatedAt: new Date(doc.updated_at),
+        lastAccessedAt: doc.last_accessed_at ? new Date(doc.last_accessed_at) : undefined,
+        tags: doc.tags || [],
+        comments: doc.comment_count || 0,
+        thumbnail: undefined
+      }
+    })
+  }, [documents])
 
   // Handle creating a new document - REAL SUPABASE OPERATION
   const handleCreateDocument = async (docType: 'document' | 'spreadsheet' | 'presentation' | 'folder') => {
@@ -471,7 +538,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
     const reviewDocs = documentFiles.filter(d => d.status === 'review').length
     const totalComments = documentFiles.reduce((sum, d) => sum + d.comments, 0)
     const totalFolders = folders.length
-    const storageUsedGB = storageInfo.used / (1024 * 1024 * 1024)
+    const storageUsedGB = documentFiles.reduce((sum, d) => sum + d.size, 0) / (1024 * 1024 * 1024)
 
     return {
       totalDocs,
@@ -483,7 +550,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
       totalFolders,
       storageUsedGB: storageUsedGB.toFixed(1),
     }
-  }, [])
+  }, [documentFiles])
 
   // Filter documents
   const filteredDocuments = useMemo(() => {
@@ -495,12 +562,12 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
       const matchesType = typeFilter === 'all' || doc.type === typeFilter
       return matchesSearch && matchesStatus && matchesType
     })
-  }, [searchQuery, statusFilter, typeFilter])
+  }, [documentFiles, searchQuery, statusFilter, typeFilter])
 
-  const starredDocuments = useMemo(() => documentFiles.filter(d => d.starred), [])
+  const starredDocuments = useMemo(() => documentFiles.filter(d => d.starred), [documentFiles])
   const recentDocuments = useMemo(() =>
     [...documentFiles].sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime()).slice(0, 6),
-    []
+    [documentFiles]
   )
 
   // Handler to show upload dialog
@@ -786,9 +853,26 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
     if (sharingFilter === 'public') return shared.filter(d => d.sharingType === 'public' || d.sharingType === 'organization')
     if (sharingFilter === 'private') return documentFiles.filter(d => d.sharingType === 'private')
     return shared
-  }, [sharingFilter])
+  }, [documentFiles, sharingFilter])
 
-  // In demo mode, continue with empty documents instead of showing error
+  // Loading state - early return (after all hooks are defined)
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-full min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-cyan-600" />
+      </div>
+    )
+  }
+
+  // Error state - early return (after all hooks are defined)
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full min-h-screen gap-4">
+        <p className="text-red-500">Error loading documents data</p>
+        <Button onClick={() => refetch()}>Retry</Button>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-blue-50 to-indigo-50 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">

@@ -3,7 +3,10 @@
 import { createClient } from '@/lib/supabase/client'
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
+import { useSupabaseQuery, useSupabaseMutation } from '@/lib/hooks/use-supabase-query'
+import type { KnowledgeBaseArticle } from '@/lib/hooks/use-knowledge-base'
 import { toast } from 'sonner'
+import { Loader2 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -77,8 +80,8 @@ import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { CardDescription } from '@/components/ui/card'
 
-// Initialize Supabase client once at module level
-const supabase = createClient()
+// Supabase client (used by hooks internally)
+const _supabase = createClient()
 
 // Types
 type SpaceType = 'team' | 'personal' | 'project' | 'documentation' | 'archive'
@@ -271,8 +274,8 @@ const knowledgeBaseActivities: { id: string; user: string; action: string; targe
 
 // Quick actions will be defined inside the component to access state setters
 
-// Database types
-interface DbArticle {
+// Database types (kept for reference - using KnowledgeBaseArticle from hooks instead)
+interface _DbArticle {
   id: string
   user_id: string
   article_title: string
@@ -300,6 +303,36 @@ interface DbArticle {
 
 export default function KnowledgeBaseClient() {
 
+  // Use the knowledge base hook for data fetching
+  const {
+    data: dbArticles,
+    loading: hookLoading,
+    error: hookError,
+    refetch: fetchArticles
+  } = useSupabaseQuery<KnowledgeBaseArticle>({
+    table: 'knowledge_base',
+    orderBy: { column: 'created_at', ascending: false },
+    softDelete: true
+  })
+
+  // Mutation hooks for CRUD operations
+  const { mutate: articleMutate, remove: articleRemove } = useSupabaseMutation<KnowledgeBaseArticle>({
+    table: 'knowledge_base',
+    onSuccess: () => fetchArticles()
+  })
+
+  // Wrapper functions for mutations
+  const createArticle = useCallback(async (data: Partial<KnowledgeBaseArticle>) => {
+    return articleMutate(data)
+  }, [articleMutate])
+
+  const updateArticle = useCallback(async (id: string, data: Partial<KnowledgeBaseArticle>) => {
+    return articleMutate(data, id)
+  }, [articleMutate])
+
+  const hookDeleteArticle = useCallback(async (id: string) => {
+    return articleRemove(id)
+  }, [articleRemove])
 
   // UI State
   const [activeTab, setActiveTab] = useState('pages')
@@ -319,9 +352,55 @@ export default function KnowledgeBaseClient() {
   const [selectedVersion, setSelectedVersion] = useState<PageVersion | null>(null)
   const [showCreateSpaceDialog, setShowCreateSpaceDialog] = useState(false)
 
-  // Data State
-  const [pages, setPages] = useState<Page[]>([])
-  const [loading, setLoading] = useState(true)
+  // Data State - pages derived from hook data
+  const [localPages, setLocalPages] = useState<Page[]>([])
+
+  // Show error toast if there's an error loading articles
+  useEffect(() => {
+    if (hookError) {
+      toast.error('Failed to load knowledge base articles')
+    }
+  }, [hookError])
+
+  // Map DB articles to UI Page type
+  useEffect(() => {
+    if (dbArticles && dbArticles.length > 0) {
+      const mappedPages: Page[] = dbArticles.map((a: KnowledgeBaseArticle) => ({
+        id: a.id,
+        title: a.article_title,
+        excerpt: a.description || '',
+        content: a.content || '',
+        spaceId: '1',
+        spaceName: a.category || 'General',
+        spaceKey: (a.category || 'GEN').substring(0, 3).toUpperCase(),
+        parentId: a.parent_article_id || null,
+        type: (a.article_type === 'guide' ? 'how-to' : a.article_type === 'tutorial' ? 'how-to' : 'page') as PageType,
+        status: (a.status || 'draft') as PageStatus,
+        author: { id: a.user_id, name: a.author || 'You', avatar: '' },
+        contributors: [],
+        labels: a.tags || [],
+        version: a.version || 1,
+        views: a.view_count || 0,
+        likes: a.helpful_count || 0,
+        comments: a.comment_count || 0,
+        isLiked: false,
+        isWatching: false,
+        isBookmarked: a.is_featured,
+        createdAt: a.created_at,
+        updatedAt: a.updated_at,
+        publishedAt: a.published_at,
+        readTime: a.read_time_minutes || 5,
+        children: [],
+        restrictions: a.visibility === 'private' ? { view: ['owner'], edit: ['owner'] } : null
+      }))
+      setLocalPages(mappedPages)
+    } else {
+      setLocalPages([])
+    }
+  }, [dbArticles])
+
+  // Use localPages as the pages array
+  const pages = localPages
 
   // Form State
   const [showCreateDialog, setShowCreateDialog] = useState(false)
@@ -331,62 +410,8 @@ export default function KnowledgeBaseClient() {
   const [newPageCategory, setNewPageCategory] = useState('general')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // Fetch articles from Supabase
-  const fetchData = useCallback(async () => {
-    try {
-      setLoading(true)
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-
-      const { data, error } = await supabase
-        .from('knowledge_base')
-        .select('*')
-        .eq('user_id', user.id)
-        .is('deleted_at', null)
-        .order('updated_at', { ascending: false })
-
-      if (error) throw error
-
-      if (data && data.length > 0) {
-        setPages(data.map((a: DbArticle) => ({
-          id: a.id,
-          title: a.article_title,
-          excerpt: a.description || '',
-          content: a.content || '',
-          spaceId: '1',
-          spaceName: a.category || 'General',
-          spaceKey: (a.category || 'GEN').substring(0, 3).toUpperCase(),
-          parentId: null,
-          type: (a.article_type === 'guide' ? 'how-to' : a.article_type === 'tutorial' ? 'how-to' : 'page') as PageType,
-          status: (a.status || 'draft') as PageStatus,
-          author: { id: a.user_id, name: a.author || 'You', avatar: '' },
-          contributors: [],
-          labels: a.tags || [],
-          version: a.version || 1,
-          views: a.view_count || 0,
-          likes: a.helpful_count || 0,
-          comments: a.comment_count || 0,
-          isLiked: false,
-          isWatching: false,
-          isBookmarked: a.is_featured,
-          createdAt: a.created_at,
-          updatedAt: a.updated_at,
-          publishedAt: a.published_at,
-          readTime: a.read_time_minutes || 5,
-          children: [],
-          restrictions: a.visibility === 'private' ? { view: ['owner'], edit: ['owner'] } : null
-        })))
-      }
-    } catch (error) {
-      console.error('Error fetching articles:', error)
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
-  useEffect(() => {
-    fetchData()
-  }, [fetchData])
+  // Alias for refetching data
+  const fetchData = fetchArticles
 
   const filteredPages = useMemo(() => {
     return pages.filter(page => {
@@ -458,27 +483,20 @@ export default function KnowledgeBaseClient() {
     }
     setIsSubmitting(true)
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('Not authenticated')
-
       const slug = newPageTitle.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
-      const { error } = await supabase.from('knowledge_base').insert({
-        user_id: user.id,
+      await createArticle({
         article_title: newPageTitle.trim(),
         article_slug: slug,
         description: newPageContent.trim() || null,
         content: newPageContent.trim() || null,
-        category: newPageCategory,
-        status: 'draft',
-        author: user.email?.split('@')[0] || 'User'
+        category: newPageCategory as any,
+        status: 'draft' as any,
       })
 
-      if (error) throw error
       toast.success('Page created', { description: `"${newPageTitle}" has been created` })
       setNewPageTitle('')
       setNewPageContent('')
       setShowCreateDialog(false)
-      fetchData()
     } catch (error) {
       toast.error('Failed to create page', { description: error instanceof Error ? error.message : 'Unknown error' })
     } finally {
@@ -488,15 +506,9 @@ export default function KnowledgeBaseClient() {
 
   const handleDeletePage = async (pageId: string, pageTitle: string) => {
     try {
-      const { error } = await supabase
-        .from('knowledge_base')
-        .update({ deleted_at: new Date().toISOString() })
-        .eq('id', pageId)
-
-      if (error) throw error
+      await hookDeleteArticle(pageId)
       toast.success('Page deleted', { description: `"${pageTitle}" moved to trash` })
       setShowPageDialog(false)
-      fetchData()
     } catch (error) {
       toast.error('Failed to delete page', { description: error instanceof Error ? error.message : 'Unknown error' })
     }
@@ -504,14 +516,12 @@ export default function KnowledgeBaseClient() {
 
   const handlePublishPage = async (pageId: string, pageTitle: string) => {
     try {
-      const { error } = await supabase
-        .from('knowledge_base')
-        .update({ status: 'published', is_published: true, published_at: new Date().toISOString() })
-        .eq('id', pageId)
-
-      if (error) throw error
+      await updateArticle(pageId, {
+        status: 'published' as any,
+        is_published: true,
+        published_at: new Date().toISOString()
+      })
       toast.success('Page published', { description: `"${pageTitle}" is now live` })
-      fetchData()
     } catch (error) {
       toast.error('Failed to publish page', { description: error instanceof Error ? error.message : 'Unknown error' })
     }
@@ -519,14 +529,8 @@ export default function KnowledgeBaseClient() {
 
   const handleBookmark = async (page: Page) => {
     try {
-      const { error } = await supabase
-        .from('knowledge_base')
-        .update({ is_featured: !page.isBookmarked })
-        .eq('id', page.id)
-
-      if (error) throw error
+      await updateArticle(page.id, { is_featured: !page.isBookmarked })
       toast.success(page.isBookmarked ? 'Removed from bookmarks' : 'Added to bookmarks')
-      fetchData()
     } catch (error) {
       toast.error('Failed to update bookmark')
     }
@@ -629,7 +633,7 @@ export default function KnowledgeBaseClient() {
   const handleToggleWatch = async (page: Page) => {
     try {
       // Update in database if applicable
-      setPages(prev => prev.map(p =>
+      setLocalPages(prev => prev.map(p =>
         p.id === page.id ? { ...p, isWatching: !p.isWatching } : p
       ))
       if (selectedPage && selectedPage.id === page.id) {
@@ -752,6 +756,39 @@ export default function KnowledgeBaseClient() {
     { label: 'Templates', value: templates.length.toString(), icon: Layout, change: '+3', trend: 'up', color: 'text-orange-600' },
     { label: 'Comments', value: formatNumber(comments.length * 24), icon: MessageSquare, change: '+15.2%', trend: 'up', color: 'text-teal-600' }
   ]
+
+  // Loading state
+  if (hookLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 dark:bg-none dark:bg-gray-900 p-6">
+        <div className="max-w-7xl mx-auto flex items-center justify-center min-h-[60vh]">
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+            <p className="text-gray-500 dark:text-gray-400">Loading knowledge base...</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Error state
+  if (hookError) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 dark:bg-none dark:bg-gray-900 p-6">
+        <div className="max-w-7xl mx-auto flex items-center justify-center min-h-[60vh]">
+          <Card className="p-8 text-center">
+            <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Failed to load knowledge base</h2>
+            <p className="text-gray-500 dark:text-gray-400 mb-4">There was an error loading your articles. Please try again.</p>
+            <Button onClick={() => fetchData()} className="bg-gradient-to-r from-indigo-500 to-blue-600 text-white">
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Retry
+            </Button>
+          </Card>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 dark:bg-none dark:bg-gray-900 p-6">

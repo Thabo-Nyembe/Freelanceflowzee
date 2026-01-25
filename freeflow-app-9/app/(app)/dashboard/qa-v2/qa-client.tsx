@@ -341,41 +341,61 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
   const [isResumingRun, setIsResumingRun] = useState(false)
   const [isDownloadingReport, setIsDownloadingReport] = useState(false)
 
-  const { testCases: hookTestCases, stats, isLoading, refetch } = useQATestCases(initialTestCases, {
+  const { testCases: hookTestCases, stats, isLoading, error, refetch } = useQATestCases(initialTestCases, {
     status: status === 'all' ? undefined : status,
     testType: testType === 'all' ? undefined : testType
   })
 
   const {
     createTestCase,
-    isCreating,
     updateTestCase,
-    isUpdating,
     deleteTestCase,
-    isDeleting,
     executeTest,
-    isExecuting
   } = useQAMutations()
 
-  // Calculate stats
-  const totalTests = mockTestCases.length
-  const passedTests = mockTestCases.filter(t => t.status === 'passed').length
-  const failedTests = mockTestCases.filter(t => t.status === 'failed').length
-  const automatedTests = mockTestCases.filter(t => t.automationStatus === 'automated').length
-  const overallPassRate = (passedTests / totalTests) * 100
+  // Map DB data to UI types - use stats from hook
+  const totalTests = stats.total
+  const passedTests = stats.passed
+  const failedTests = stats.failed
+  const automatedTests = stats.automated
+  const overallPassRate = stats.total > 0 ? (stats.passed / stats.total) * 100 : 0
   const activeRuns = mockRuns.filter(r => r.status === 'active').length
   const openDefects = mockDefects.filter(d => d.status === 'open' || d.status === 'in_progress').length
 
+  // Map hookTestCases to UI TestCase type for display
+  const mappedTestCases: TestCase[] = useMemo(() => hookTestCases.map(tc => ({
+    id: tc.id,
+    suiteId: 'default',
+    title: tc.test_name,
+    type: (tc.test_type || 'functional') as TestType,
+    priority: (tc.priority || 'medium') as TestPriority,
+    status: (tc.status || 'untested') as TestStatus,
+    preconditions: tc.preconditions || undefined,
+    steps: Array.isArray(tc.test_steps) ? tc.test_steps.map((step: unknown, idx: number) => {
+      const s = step as { action?: string; expectedResult?: string }
+      return {
+        id: `step-${idx}`,
+        stepNumber: idx + 1,
+        action: s?.action || '',
+        expectedResult: s?.expectedResult || ''
+      }
+    }) : [],
+    expectedResult: tc.expected_result || '',
+    estimate: undefined,
+    automationStatus: tc.is_automated ? 'automated' : 'manual',
+    refs: [],
+    createdBy: tc.assignee_name || 'Unknown',
+    updatedAt: tc.updated_at
+  })), [hookTestCases])
+
   const filteredTestCases = useMemo(() => {
-    return mockTestCases.filter(test => {
-      const matchesStatus = status === 'all' || test.status === status
-      const matchesType = testType === 'all' || test.type === testType
+    return mappedTestCases.filter(test => {
       const matchesSearch = !searchQuery ||
         test.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         test.id.toLowerCase().includes(searchQuery.toLowerCase())
-      return matchesStatus && matchesType && matchesSearch
+      return matchesSearch
     })
-  }, [status, testType, searchQuery])
+  }, [mappedTestCases, searchQuery])
 
   const getStatusColor = (s: TestStatus) => {
     switch (s) {
@@ -1109,6 +1129,29 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
             </Button>
           </div>
         </div>
+
+        {/* Loading indicator */}
+        {isLoading && (
+          <div className="flex items-center justify-center py-4">
+            <Loader2 className="w-6 h-6 animate-spin text-green-500 mr-2" />
+            <span className="text-sm text-gray-500">Loading QA data...</span>
+          </div>
+        )}
+
+        {/* Error state */}
+        {error && (
+          <Card className="border-red-200 bg-red-50 dark:bg-red-900/20 dark:border-red-800">
+            <CardContent className="p-6 text-center">
+              <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Failed to Load QA Data</h2>
+              <p className="text-gray-600 dark:text-gray-400 mb-4">There was an error loading the test cases. Please try again.</p>
+              <Button onClick={() => refetch()} className="bg-green-600 hover:bg-green-700">
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Retry
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
         {/* QA Overview Banner */}
         <div className="bg-gradient-to-r from-green-600 to-emerald-600 rounded-xl p-6 text-white">

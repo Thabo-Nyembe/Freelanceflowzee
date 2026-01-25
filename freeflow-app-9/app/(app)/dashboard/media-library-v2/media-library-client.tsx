@@ -1,7 +1,11 @@
 "use client"
 
 import { useState, useMemo, useRef, useCallback } from 'react'
+import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
+
+// Initialize Supabase client once at module level
+const supabase = createClient()
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -27,6 +31,8 @@ import {
   useMediaStats,
   type FileType as MediaFileType,
   type AccessLevel as MediaAccessLevel,
+  type MediaFile,
+  type MediaFolder as DBMediaFolder,
 } from '@/lib/hooks/use-media-library'
 import { useSupabaseMutation } from '@/lib/hooks/use-supabase-mutation'
 import {
@@ -381,8 +387,8 @@ export default function MediaLibraryClient({
 
 
   // Supabase hooks for real data
-  const { files: supabaseFiles, loading: filesLoading, refetch: refetchFiles } = useMediaFiles({ status: 'active' })
-  const { folders: supabaseFolders, loading: foldersLoading, refetch: refetchFolders } = useMediaFolders()
+  const { files: supabaseFiles, loading: filesLoading, error: filesError, refetch: refetchFiles } = useMediaFiles({ status: 'active' })
+  const { folders: supabaseFolders, loading: foldersLoading, error: foldersError, refetch: refetchFolders } = useMediaFolders()
   const mediaStats = useMediaStats()
 
   // Mutation hooks
@@ -395,7 +401,98 @@ export default function MediaLibraryClient({
     onSuccess: () => refetchFolders(),
   })
 
-  // Use Supabase data (no fallback to mock data)
+  // Map DB MediaFile to UI MediaAsset type
+  const mapFileToAsset = useCallback((file: MediaFile): MediaAsset => {
+    const fileTypeMap: Record<MediaFileType, FileType> = {
+      image: 'image',
+      video: 'video',
+      audio: 'audio',
+      document: 'document',
+      archive: 'archive',
+      other: 'other',
+    }
+    const statusMap: Record<string, AssetStatus> = {
+      uploading: 'processing',
+      processing: 'processing',
+      active: 'ready',
+      archived: 'archived',
+      deleted: 'archived',
+      quarantined: 'failed',
+    }
+    const accessMap: Record<string, AccessLevel> = {
+      private: 'private',
+      team: 'team',
+      organization: 'team',
+      public: 'public',
+      link_only: 'restricted',
+    }
+    return {
+      id: file.id,
+      fileName: file.file_name,
+      fileType: fileTypeMap[file.file_type] || 'other',
+      mimeType: file.mime_type || 'application/octet-stream',
+      fileSize: file.file_size || 0,
+      width: file.width || undefined,
+      height: file.height || undefined,
+      duration: file.duration_seconds || undefined,
+      thumbnailUrl: file.thumbnail_url || file.cdn_url || file.storage_url || '/placeholder.svg',
+      originalUrl: file.cdn_url || file.storage_url || '',
+      status: statusMap[file.status] || 'draft',
+      tags: file.tags || [],
+      metadata: {
+        title: file.file_name,
+        description: file.description || undefined,
+        alt: file.alt_text || undefined,
+        copyright: undefined,
+      },
+      aiTags: file.ai_tags || [],
+      colors: [],
+      license: 'royalty_free',
+      accessLevel: accessMap[file.access_level] || 'private',
+      uploadedBy: { id: file.user_id, name: 'User', avatar: undefined },
+      uploadedAt: file.uploaded_at || file.created_at,
+      modifiedAt: file.updated_at,
+      viewCount: file.view_count || 0,
+      downloadCount: file.download_count || 0,
+      isStarred: file.is_starred || false,
+      isFavorite: file.is_featured || false,
+      versions: [],
+      collections: [],
+    }
+  }, [])
+
+  // Map DB MediaFolder to UI MediaFolder type
+  const mapDbFolder = useCallback((folder: DBMediaFolder): MediaFolder => {
+    const accessMap: Record<string, AccessLevel> = {
+      private: 'private',
+      team: 'team',
+      organization: 'team',
+      public: 'public',
+      link_only: 'restricted',
+    }
+    return {
+      id: folder.id,
+      name: folder.folder_name,
+      path: folder.folder_path || `/${folder.folder_name}`,
+      parentId: folder.parent_id || undefined,
+      color: folder.color || 'from-blue-500 to-cyan-500',
+      assetCount: folder.file_count || 0,
+      totalSize: folder.total_size || 0,
+      createdAt: folder.created_at,
+      accessLevel: accessMap[folder.access_level] || 'private',
+    }
+  }, [])
+
+  // Map Supabase data to UI types
+  const mappedAssets: MediaAsset[] = useMemo(() => {
+    return (supabaseFiles || []).map(mapFileToAsset)
+  }, [supabaseFiles, mapFileToAsset])
+
+  const mappedFolders: MediaFolder[] = useMemo(() => {
+    return (supabaseFolders || []).map(mapDbFolder)
+  }, [supabaseFolders, mapDbFolder])
+
+  // Use mapped Supabase data (no fallback to mock data)
   const displayFiles = supabaseFiles
   const displayFolders = supabaseFolders
 
@@ -485,16 +582,16 @@ export default function MediaLibraryClient({
   })
 
   const stats = useMemo(() => {
-    const totalViews = initialAssets.reduce((sum, a) => sum + a.viewCount, 0)
-    const totalDownloads = initialAssets.reduce((sum, a) => sum + a.downloadCount, 0)
-    const totalSize = initialAssets.reduce((sum, a) => sum + a.fileSize, 0)
-    const imageCount = initialAssets.filter(a => a.fileType === 'image').length
-    const videoCount = initialAssets.filter(a => a.fileType === 'video').length
-    const audioCount = initialAssets.filter(a => a.fileType === 'audio').length
-    const docCount = initialAssets.filter(a => a.fileType === 'document').length
+    const totalViews = mappedAssets.reduce((sum, a) => sum + a.viewCount, 0)
+    const totalDownloads = mappedAssets.reduce((sum, a) => sum + a.downloadCount, 0)
+    const totalSize = mappedAssets.reduce((sum, a) => sum + a.fileSize, 0)
+    const imageCount = mappedAssets.filter(a => a.fileType === 'image').length
+    const videoCount = mappedAssets.filter(a => a.fileType === 'video').length
+    const audioCount = mappedAssets.filter(a => a.fileType === 'audio').length
+    const docCount = mappedAssets.filter(a => a.fileType === 'document').length
 
     return {
-      totalAssets: initialAssets.length,
+      totalAssets: mappedAssets.length,
       totalViews,
       totalDownloads,
       totalSize,
@@ -504,17 +601,17 @@ export default function MediaLibraryClient({
       audioCount,
       docCount
     }
-  }, [initialAssets])
+  }, [mappedAssets])
 
   const filteredAssets = useMemo(() => {
-    return initialAssets.filter(asset => {
+    return mappedAssets.filter(asset => {
       const matchesSearch = asset.fileName.toLowerCase().includes(searchQuery.toLowerCase()) ||
         asset.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())) ||
         asset.metadata.title?.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesType = selectedType === 'all' || asset.fileType === selectedType
       return matchesSearch && matchesType
     })
-  }, [initialAssets, searchQuery, selectedType])
+  }, [mappedAssets, searchQuery, selectedType])
 
   const statCards = [
     { label: 'Total Assets', value: stats.totalAssets.toLocaleString(), change: 0, icon: ImageIcon, color: 'from-indigo-500 to-purple-600' },
@@ -1040,7 +1137,7 @@ export default function MediaLibraryClient({
       const result = await response.json()
 
       // Also perform local matching for enhanced results
-      const aiResults = initialAssets.filter(asset => {
+      const aiResults = mappedAssets.filter(asset => {
         const query = searchQuery.toLowerCase()
         const matchesName = asset.fileName.toLowerCase().includes(query)
         const matchesTags = asset.tags.some(tag => tag.toLowerCase().includes(query))
@@ -1070,7 +1167,7 @@ export default function MediaLibraryClient({
       let taggedCount = 0
       const errors: string[] = []
 
-      for (const asset of initialAssets) {
+      for (const asset of mappedAssets) {
         try {
           const response = await fetch('/api/files', {
             method: 'POST',
@@ -1337,7 +1434,7 @@ export default function MediaLibraryClient({
       let clearedCount = 0
       const errors: string[] = []
 
-      for (const asset of initialAssets) {
+      for (const asset of mappedAssets) {
         try {
           const response = await fetch('/api/files', {
             method: 'POST',
@@ -1386,7 +1483,7 @@ export default function MediaLibraryClient({
 
     try {
       // Get all asset IDs for deletion
-      const allAssetIds = initialAssets.map(asset => asset.id)
+      const allAssetIds = mappedAssets.map(asset => asset.id)
 
       if (allAssetIds.length === 0) {
         toast.dismiss()
@@ -1812,6 +1909,25 @@ export default function MediaLibraryClient({
     { id: '3', label: 'Collection', icon: 'Layers', shortcut: 'C', action: handleOpenNewCollection },
     { id: '4', label: 'AI Tag', icon: 'Sparkles', shortcut: 'T', action: handleAITagAll },
   ], [])
+
+  // Loading state
+  if (filesLoading || foldersLoading) {
+    return (
+      <div className="flex items-center justify-center h-full min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+      </div>
+    )
+  }
+
+  // Error state
+  if (filesError || foldersError) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full min-h-[400px] gap-4">
+        <p className="text-red-500">Error loading media library data</p>
+        <Button onClick={() => { refetchFiles(); refetchFolders(); }}>Retry</Button>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50/30 to-pink-50/40 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 dark:bg-none dark:bg-gray-900 p-6">
@@ -2417,7 +2533,7 @@ export default function MediaLibraryClient({
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {initialAssets.slice(0, 5).map((asset) => (
+                  {mappedAssets.slice(0, 5).map((asset) => (
                     <div key={asset.id} className="flex items-center gap-4 p-3 rounded-lg bg-gray-50 dark:bg-gray-800/50">
                       <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${getFileTypeColor(asset.fileType)} flex items-center justify-center`}>
                         {getFileTypeIcon(asset.fileType)}
@@ -2518,9 +2634,9 @@ export default function MediaLibraryClient({
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {initialAssets.length === 0 ? (
+                    {mappedAssets.length === 0 ? (
                       <p className="text-center text-gray-500 py-4">No assets yet</p>
-                    ) : initialAssets
+                    ) : mappedAssets
                       .sort((a, b) => b.viewCount - a.viewCount)
                       .slice(0, 5)
                       .map((asset, idx) => (
@@ -4191,7 +4307,7 @@ export default function MediaLibraryClient({
               </div>
               <div className="space-y-2">
                 <h4 className="font-medium">Top Viewed Assets</h4>
-                {initialAssets
+                {mappedAssets
                   .sort((a, b) => b.viewCount - a.viewCount)
                   .slice(0, 3)
                   .map((asset, idx) => (

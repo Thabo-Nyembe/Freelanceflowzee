@@ -7,6 +7,13 @@ import { toast } from 'sonner'
 import { downloadAsJson, copyToClipboard } from '@/lib/button-handlers'
 import { useAuth } from '@/lib/hooks/use-auth'
 import {
+  useProfileByUserId,
+  useProfileSkills,
+  useProfileExperience,
+  useProfileEducation,
+  useProfileSettings,
+} from '@/lib/hooks/use-profiles-extended'
+import {
   User, Edit, Camera, Phone, Mail, MapPin, Calendar, Globe,
   Briefcase, Award, Star, Users, Shield, MessageSquare, Settings,
   Share2, Download, Plus, Search, Eye, Link2, TrendingUp,
@@ -16,7 +23,7 @@ import {
   ArrowUpRight, ArrowDownRight, MoreHorizontal, Twitter, Github, Youtube,
   Mic, Podcast, Newspaper, Hash, Database, Terminal, Crown, ChevronRight, Play, Sliders,
   Webhook, Key, History, RefreshCw,
-  Trash2
+  Trash2, AlertCircle, Loader2
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -551,20 +558,108 @@ export default function ProfileClient() {
 
   const { user } = useAuth()
 
+  // Use Supabase hooks for data fetching
+  const { profile: hookProfile, isLoading: profileLoading, refresh: refreshProfile } = useProfileByUserId(user?.id)
+  const { skills: hookSkills, isLoading: skillsLoading, refresh: refreshSkills } = useProfileSkills(hookProfile?.id)
+  const { experience: hookExperience, isLoading: experienceLoading, refresh: refreshExperience } = useProfileExperience(hookProfile?.id)
+  const { education: hookEducation, isLoading: educationLoading, refresh: refreshEducation } = useProfileEducation(hookProfile?.id)
+  const { settings: hookSettings, isLoading: settingsLoading, refresh: refreshSettings } = useProfileSettings(hookProfile?.id)
+
+  // Combined loading state
+  const loading = profileLoading || skillsLoading || experienceLoading || educationLoading || settingsLoading
+
+  // Map hook data to component state types with useMemo to prevent re-renders
+  const profile: UserProfile | null = useMemo(() => hookProfile ? {
+    id: hookProfile.id,
+    user_id: hookProfile.user_id,
+    first_name: hookProfile.display_name?.split(' ')[0] || hookProfile.username || '',
+    last_name: hookProfile.display_name?.split(' ').slice(1).join(' ') || '',
+    display_name: hookProfile.display_name || hookProfile.username || '',
+    email: hookProfile.email || '',
+    phone: hookProfile.phone || null,
+    bio: hookProfile.bio || null,
+    avatar: hookProfile.avatar_url || null,
+    cover_image: hookProfile.cover_url || null,
+    location: hookProfile.location || null,
+    timezone: hookProfile.timezone || 'UTC',
+    website: hookProfile.website || null,
+    company: hookProfile.company || null,
+    title: hookProfile.headline || null,
+    status: hookProfile.status || 'active',
+    account_type: hookProfile.account_type || 'personal',
+    created_at: hookProfile.created_at,
+    updated_at: hookProfile.updated_at
+  } : null, [hookProfile])
+
+  const skills: DBSkill[] = useMemo(() => (hookSkills || []).map((s: any) => ({
+    id: s.id,
+    user_id: s.profile_id,
+    name: s.skill_name || s.name,
+    category: s.category || 'General',
+    level: s.proficiency_level || s.level || 'intermediate',
+    years_of_experience: s.years_experience || 0,
+    endorsements: s.endorsement_count || 0
+  })), [hookSkills])
+
+  const experiences: DBExperience[] = useMemo(() => (hookExperience || []).map((e: any) => ({
+    id: e.id,
+    user_id: e.profile_id,
+    company: e.company_name || e.company,
+    title: e.job_title || e.title,
+    location: e.location || null,
+    start_date: e.start_date,
+    end_date: e.end_date || null,
+    current: e.is_current || false,
+    description: e.description || null,
+    achievements: e.achievements || []
+  })), [hookExperience])
+
+  const education: DBEducation[] = useMemo(() => (hookEducation || []).map((e: any) => ({
+    id: e.id,
+    user_id: e.profile_id,
+    school: e.institution_name || e.school,
+    degree: e.degree_type || e.degree,
+    field: e.field_of_study || e.field,
+    start_date: e.start_date || `${e.start_year}-01-01`,
+    end_date: e.end_date || (e.end_year ? `${e.end_year}-12-31` : null),
+    current: e.is_current || false,
+    grade: e.grade || null,
+    activities: e.activities || []
+  })), [hookEducation])
+
+  const settings: ProfileSettings | null = useMemo(() => hookSettings ? {
+    id: hookSettings.id,
+    user_id: hookSettings.profile_id,
+    privacy_level: hookSettings.privacy_level || 'public',
+    show_email: hookSettings.show_email ?? false,
+    show_phone: hookSettings.show_phone ?? false,
+    show_location: hookSettings.show_location ?? true,
+    allow_messages: hookSettings.allow_messages ?? true,
+    allow_connections: hookSettings.allow_connections ?? true,
+    email_notifications: hookSettings.email_notifications ?? true,
+    push_notifications: hookSettings.push_notifications ?? true,
+    marketing_emails: hookSettings.marketing_emails ?? false,
+    language: hookSettings.language || 'en',
+    theme: hookSettings.theme || 'system'
+  } : null, [hookSettings])
+
+  // Refresh all data
+  const fetchProfileData = useCallback(() => {
+    refreshProfile()
+    if (hookProfile?.id) {
+      refreshSkills()
+      refreshExperience()
+      refreshEducation()
+      refreshSettings()
+    }
+  }, [refreshProfile, refreshSkills, refreshExperience, refreshEducation, refreshSettings, hookProfile?.id])
+
   // UI State
   const [activeTab, setActiveTab] = useState('overview')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedSkillCategory, setSelectedSkillCategory] = useState<string | 'all'>('all')
   const [showAnalytics, setShowAnalytics] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')
-
-  // Data State
-  const [profile, setProfile] = useState<UserProfile | null>(null)
-  const [skills, setSkills] = useState<DBSkill[]>([])
-  const [experiences, setExperiences] = useState<DBExperience[]>([])
-  const [education, setEducation] = useState<DBEducation[]>([])
-  const [settings, setSettings] = useState<ProfileSettings | null>(null)
-  const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
 
   // Form State for Settings
@@ -581,50 +676,23 @@ export default function ProfileClient() {
     bio: ''
   })
 
-  // Fetch profile data
-  const fetchProfileData = useCallback(async () => {
-    if (!user?.id) return
-
-    setLoading(true)
-    try {
-      const [profileRes, skillsRes, expRes, eduRes, settingsRes] = await Promise.all([
-        supabase.from('user_profiles').select('*').eq('user_id', user.id).single(),
-        supabase.from('skills').select('*').eq('user_id', user.id).order('endorsements', { ascending: false }),
-        supabase.from('experience').select('*').eq('user_id', user.id).order('start_date', { ascending: false }),
-        supabase.from('education').select('*').eq('user_id', user.id).order('start_date', { ascending: false }),
-        supabase.from('profile_settings').select('*').eq('user_id', user.id).single()
-      ])
-
-      if (profileRes.data) {
-        setProfile(profileRes.data)
-        setFormData({
-          firstName: profileRes.data.first_name || '',
-          lastName: profileRes.data.last_name || '',
-          headline: profileRes.data.title || '',
-          location: profileRes.data.location || '',
-          industry: '',
-          customUrl: '',
-          email: profileRes.data.email || '',
-          phone: profileRes.data.phone || '',
-          website: profileRes.data.website || '',
-          bio: profileRes.data.bio || ''
-        })
-      }
-      if (skillsRes.data) setSkills(skillsRes.data)
-      if (expRes.data) setExperiences(expRes.data)
-      if (eduRes.data) setEducation(eduRes.data)
-      if (settingsRes.data) setSettings(settingsRes.data)
-    } catch (error) {
-      console.error('Error fetching profile:', error)
-      toast.error('Failed to load profile data')
-    } finally {
-      setLoading(false)
-    }
-  }, [user?.id, ])
-
+  // Update form data when profile loads
   useEffect(() => {
-    fetchProfileData()
-  }, [fetchProfileData])
+    if (profile) {
+      setFormData({
+        firstName: profile.first_name || '',
+        lastName: profile.last_name || '',
+        headline: profile.title || '',
+        location: profile.location || '',
+        industry: '',
+        customUrl: '',
+        email: profile.email || '',
+        phone: profile.phone || '',
+        website: profile.website || '',
+        bio: profile.bio || ''
+      })
+    }
+  }, [profile])
 
   // Update profile
   const handleUpdateProfile = async () => {
@@ -1072,6 +1140,40 @@ export default function ProfileClient() {
   }))
   const displayEducation = dbEducation || []
 
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:bg-none dark:bg-gray-900 flex items-center justify-center">
+        <Card className="max-w-md mx-auto">
+          <CardContent className="p-6 text-center">
+            <Loader2 className="w-12 h-12 text-blue-500 mx-auto mb-4 animate-spin" />
+            <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">Loading Profile</h2>
+            <p className="text-slate-600 dark:text-slate-400">Please wait while we load your profile data...</p>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  // Error state - show if no profile found after loading
+  if (!loading && !profile && user?.id) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:bg-none dark:bg-gray-900 flex items-center justify-center">
+        <Card className="max-w-md mx-auto">
+          <CardContent className="p-6 text-center">
+            <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">Error Loading Profile</h2>
+            <p className="text-slate-600 dark:text-slate-400 mb-4">Failed to load profile data. Please try again.</p>
+            <Button onClick={() => fetchProfileData()} className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Try Again
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:bg-none dark:bg-gray-900">
       <div className="p-6">
@@ -1087,7 +1189,17 @@ export default function ProfileClient() {
                 <p className="text-sm text-gray-600 dark:text-gray-400">LinkedIn-level professional networking</p>
               </div>
             </div>
-            <div className="flex gap-3">
+            <div className="flex items-center gap-3">
+              {profileLoading && (
+                <Badge variant="outline" className="text-blue-600 border-blue-200">
+                  <RefreshCw className="w-3 h-3 mr-1 animate-spin" />
+                  Loading...
+                </Badge>
+              )}
+              <Button variant="outline" size="sm" onClick={() => fetchProfileData()} disabled={profileLoading}>
+                <RefreshCw className={`w-4 h-4 mr-2 ${profileLoading ? 'animate-spin' : ''}`} />
+                Sync
+              </Button>
               <Button variant="outline" onClick={() => setShowAnalytics(true)} disabled={loading}>
                 <BarChart3 className="w-4 h-4 mr-2" />
                 Analytics

@@ -1,6 +1,9 @@
 'use client'
 
-import React, { useState, useMemo } from 'react'
+// MIGRATED: Wired to Supabase with useVideoProjects hook
+// Hooks used: useVideoProjects, useVideoEffects, useVideoTemplates, useVideoRenderJobs, useVideoAssets
+
+import React, { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -78,8 +81,9 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-
-
+// Supabase hooks for real data
+import { useVideoProjects, type VideoProject as DbVideoProject } from '@/lib/hooks/use-video-projects'
+import { useVideoEffects, useVideoTemplates, useVideoRenderJobs, useVideoAssets } from '@/lib/hooks/use-video-extended'
 
 // Types
 type ProjectStatus = 'draft' | 'editing' | 'rendering' | 'ready' | 'published' | 'archived'
@@ -186,12 +190,7 @@ interface Collaborator {
   lastActive: string
 }
 
-// Empty data arrays - data will be fetched from API/database
-const emptyProjects: VideoProject[] = []
-const emptyAssets: Asset[] = []
-const emptyTemplates: Template[] = []
-const emptyRenderJobs: RenderJob[] = []
-const emptyEffects: Effect[] = []
+// MIGRATED: Removed mock data - now using Supabase hooks
 
 // Empty competitive upgrade data arrays
 const emptyAIInsights: { id: string; type: 'success' | 'info' | 'warning' | 'error'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
@@ -202,11 +201,132 @@ const emptyActivities: { id: string; user: string; action: string; target: strin
 // Quick actions will be initialized in the component to access state setters
 
 export default function VideoStudioClient() {
-  const [projects] = useState<VideoProject[]>(emptyProjects)
-  const [assets] = useState<Asset[]>(emptyAssets)
-  const [templates] = useState<Template[]>(emptyTemplates)
-  const [renderJobs] = useState<RenderJob[]>(emptyRenderJobs)
-  const [effects] = useState<Effect[]>(emptyEffects)
+  // ============================================================================
+  // REAL SUPABASE DATA HOOKS
+  // ============================================================================
+  const {
+    projects: dbProjects,
+    stats: dbStats,
+    loading: isLoadingProjects,
+    fetchProjects,
+    createProject,
+    updateProject,
+    deleteProject,
+    processVideo
+  } = useVideoProjects()
+
+  const { data: dbEffects, isLoading: isLoadingEffects, refresh: refetchEffects } = useVideoEffects()
+  const { data: dbTemplates, isLoading: isLoadingTemplates, refresh: refetchTemplates } = useVideoTemplates()
+  const { data: dbRenderJobs, isLoading: isLoadingRenderJobs, refresh: refetchRenderJobs } = useVideoRenderJobs()
+  const { data: dbAssets, isLoading: isLoadingAssets, refresh: refetchAssets } = useVideoAssets()
+
+  // Fetch data on mount
+  useEffect(() => {
+    fetchProjects()
+  }, [fetchProjects])
+
+  // Combined loading state
+  const loading = isLoadingProjects || isLoadingEffects || isLoadingTemplates || isLoadingRenderJobs || isLoadingAssets
+
+  // ============================================================================
+  // MAP DATABASE DATA TO UI TYPES
+  // ============================================================================
+  const projects: VideoProject[] = useMemo(() => {
+    return (dbProjects || []).map((dbProject: DbVideoProject) => {
+      // Map DB status to UI status
+      const statusMap: Record<string, ProjectStatus> = {
+        draft: 'draft',
+        processing: 'rendering',
+        ready: 'ready',
+        failed: 'draft',
+        archived: 'archived'
+      }
+      return {
+        id: dbProject.id,
+        title: dbProject.title,
+        description: dbProject.description || '',
+        status: statusMap[dbProject.status] || 'draft',
+        thumbnail: dbProject.thumbnail_url || '',
+        duration: dbProject.duration_seconds,
+        fps: (dbProject.metadata as any)?.fps || 30,
+        resolution: (dbProject.metadata as any)?.resolution || '1920x1080',
+        tracks: [],
+        lastEdited: dbProject.updated_at,
+        createdAt: dbProject.created_at,
+        size: dbProject.file_size_bytes,
+        collaborators: [],
+        version: 1,
+        isLocked: false,
+        tags: dbProject.tags || []
+      }
+    })
+  }, [dbProjects])
+
+  const assets: Asset[] = useMemo(() => {
+    return (dbAssets || []).map((asset: any) => ({
+      id: asset.id,
+      name: asset.name || 'Untitled Asset',
+      type: asset.type || 'video',
+      duration: asset.duration_seconds || 0,
+      size: asset.file_size_bytes || 0,
+      thumbnail: asset.thumbnail_url || '',
+      resolution: asset.resolution || '',
+      createdAt: asset.created_at,
+      usageCount: asset.usage_count || 0,
+      tags: asset.tags || []
+    }))
+  }, [dbAssets])
+
+  const templates: Template[] = useMemo(() => {
+    return (dbTemplates || []).map((template: any) => ({
+      id: template.id,
+      name: template.name || 'Untitled Template',
+      description: template.description || '',
+      thumbnail: template.thumbnail_url || '',
+      category: template.category || 'general',
+      duration: template.duration_seconds || 0,
+      downloads: template.downloads_count || 0,
+      rating: template.rating || 0,
+      isPremium: template.is_premium || false,
+      tags: template.tags || []
+    }))
+  }, [dbTemplates])
+
+  const renderJobs: RenderJob[] = useMemo(() => {
+    return (dbRenderJobs || []).map((job: any) => {
+      const statusMap: Record<string, RenderStatus> = {
+        pending: 'queued',
+        processing: 'rendering',
+        completed: 'completed',
+        failed: 'failed',
+        paused: 'paused'
+      }
+      return {
+        id: job.id,
+        projectId: job.project_id || job.video_id || '',
+        projectName: job.project_name || 'Untitled',
+        preset: job.preset || '1080p',
+        status: statusMap[job.status] || 'queued',
+        progress: job.progress || 0,
+        startTime: job.started_at || job.created_at,
+        estimatedTime: job.estimated_duration_seconds || 0,
+        outputSize: job.output_size_bytes || 0,
+        outputPath: job.output_url || ''
+      }
+    })
+  }, [dbRenderJobs])
+
+  const effects: Effect[] = useMemo(() => {
+    return (dbEffects || []).map((effect: any) => ({
+      id: effect.id,
+      name: effect.name || 'Untitled Effect',
+      category: effect.category || 'color',
+      intensity: effect.default_intensity || 50,
+      enabled: effect.is_active ?? true,
+      parameters: effect.parameters || {}
+    }))
+  }, [dbEffects])
+
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedProject, setSelectedProject] = useState<VideoProject | null>(null)
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null)
@@ -485,6 +605,38 @@ export default function VideoStudioClient() {
     )
   }
 
+  // Sync/refresh handler
+  const handleSync = async () => {
+    toast.promise(
+      Promise.all([
+        fetchProjects(),
+        refetchEffects(),
+        refetchTemplates(),
+        refetchRenderJobs(),
+        refetchAssets()
+      ]),
+      {
+        loading: 'Syncing video studio data...',
+        success: 'Video studio synced with database',
+        error: 'Failed to sync data'
+      }
+    )
+  }
+
+  // ============================================================================
+  // LOADING STATE - After all hooks
+  // ============================================================================
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50/30 to-rose-50/40 dark:bg-none dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <RefreshCw className="w-12 h-12 text-purple-600 animate-spin mx-auto mb-4" />
+          <p className="text-slate-600 dark:text-slate-400">Loading video studio...</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50/30 to-rose-50/40 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">
@@ -496,7 +648,12 @@ export default function VideoStudioClient() {
             </div>
             <div>
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Video Studio</h1>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Adobe Premiere-level video production</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Adobe Premiere-level video production
+                {dbProjects && dbProjects.length > 0 && (
+                  <span className="ml-2 text-xs text-purple-600">(Live data)</span>
+                )}
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -518,6 +675,10 @@ export default function VideoStudioClient() {
               }}
             >
               <Filter className="w-4 h-4" />
+            </Button>
+            <Button onClick={handleSync} variant="outline" size="sm" disabled={loading}>
+              <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+              Sync
             </Button>
             <Button className="bg-gradient-to-r from-purple-500 to-pink-500 text-white" onClick={handleCreateProject}>
               <Plus className="w-4 h-4 mr-2" />

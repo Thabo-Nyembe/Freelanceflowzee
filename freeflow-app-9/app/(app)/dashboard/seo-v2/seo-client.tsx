@@ -1,7 +1,9 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
+import { useSEOKeywords, useSEOBacklinks, useSEOPages, type SEOKeyword, type SEOBacklink, type SEOPage } from '@/lib/hooks/use-seo'
+import { Loader2 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -149,7 +151,7 @@ interface AuditIssue {
   priority: number
 }
 
-interface SerpFeature {
+interface _SerpFeature {
   name: string
   icon: string
   keywords: number
@@ -202,11 +204,8 @@ const formatNumber = (num: number): string => {
   return num.toString()
 }
 
-// Empty arrays (no mock data)
-const emptyKeywords: Keyword[] = []
-const emptyBacklinks: Backlink[] = []
+// Empty arrays for features not yet connected to database
 const emptyCompetitors: Competitor[] = []
-const emptyContentPages: ContentPage[] = []
 const emptyAuditIssues: AuditIssue[] = []
 
 interface SEOClientProps {
@@ -301,13 +300,152 @@ const seoPredictions: Prediction[] = []
 const seoActivities: ActivityItem[] = []
 const seoQuickActions: QuickAction[] = []
 
-export default function SEOClient({ initialKeywords, initialBacklinks }: SEOClientProps) {
+// Helper function to map DB keyword to UI Keyword type
+const mapDbKeywordToUi = (dbKeyword: SEOKeyword): Keyword => {
+  const getDifficultyLabel = (difficulty: number): KeywordDifficulty => {
+    if (difficulty <= 30) return 'easy'
+    if (difficulty <= 50) return 'medium'
+    if (difficulty <= 70) return 'hard'
+    return 'very_hard'
+  }
+
+  const getTrend = (posChange: number): KeywordTrend => {
+    if (posChange > 0) return 'up'
+    if (posChange < 0) return 'down'
+    return 'stable'
+  }
+
+  return {
+    id: dbKeyword.id,
+    keyword: dbKeyword.keyword,
+    currentPosition: dbKeyword.current_position,
+    previousPosition: dbKeyword.previous_position,
+    bestPosition: dbKeyword.best_position || 100,
+    searchVolume: dbKeyword.search_volume || 0,
+    difficulty: dbKeyword.keyword_difficulty || 0,
+    difficultyLabel: getDifficultyLabel(dbKeyword.keyword_difficulty || 0),
+    cpc: dbKeyword.cpc || 0,
+    trend: getTrend(dbKeyword.position_change || 0),
+    traffic: dbKeyword.actual_traffic || 0,
+    trafficValue: (dbKeyword.actual_traffic || 0) * (dbKeyword.cpc || 0),
+    url: dbKeyword.target_url || '',
+    serpFeatures: [],
+    lastUpdated: dbKeyword.last_checked_at || dbKeyword.updated_at,
+    isTracked: dbKeyword.is_tracking
+  }
+}
+
+// Helper function to map DB backlink to UI Backlink type
+const mapDbBacklinkToUi = (dbBacklink: SEOBacklink): Backlink => {
+  const getStatus = (isActive: boolean, lostAt: string | null, firstSeenAt: string | null): BacklinkStatus => {
+    if (!isActive && lostAt) return 'lost'
+    if (firstSeenAt) {
+      const seenDate = new Date(firstSeenAt)
+      const weekAgo = new Date()
+      weekAgo.setDate(weekAgo.getDate() - 7)
+      if (seenDate > weekAgo) return 'new'
+    }
+    return isActive ? 'active' : 'broken'
+  }
+
+  const isNew = (firstSeenAt: string | null): boolean => {
+    if (!firstSeenAt) return false
+    const seenDate = new Date(firstSeenAt)
+    const weekAgo = new Date()
+    weekAgo.setDate(weekAgo.getDate() - 7)
+    return seenDate > weekAgo
+  }
+
+  return {
+    id: dbBacklink.id,
+    sourceDomain: dbBacklink.source_domain,
+    sourceUrl: dbBacklink.source_url,
+    targetUrl: dbBacklink.target_url,
+    anchorText: dbBacklink.anchor_text || '',
+    domainRating: dbBacklink.domain_authority || 0,
+    pageRating: dbBacklink.page_authority || 0,
+    traffic: dbBacklink.referral_traffic || 0,
+    type: dbBacklink.link_type || 'dofollow',
+    status: getStatus(dbBacklink.is_active, dbBacklink.lost_at, dbBacklink.first_seen_at),
+    firstSeen: dbBacklink.first_seen_at || dbBacklink.created_at,
+    lastChecked: dbBacklink.last_seen_at || dbBacklink.updated_at,
+    isNew: isNew(dbBacklink.first_seen_at)
+  }
+}
+
+// Helper function to map DB page to UI ContentPage type
+const mapDbPageToUi = (dbPage: SEOPage): ContentPage => {
+  const getStatus = (traffic: number, avgPosition: number | null): ContentStatus => {
+    if (avgPosition && avgPosition <= 10 && traffic > 1000) return 'performing'
+    if (avgPosition && avgPosition <= 20) return 'opportunity'
+    if (traffic < 100) return 'underperforming'
+    return 'declining'
+  }
+
+  return {
+    id: dbPage.id,
+    url: dbPage.url,
+    title: dbPage.title || dbPage.url,
+    traffic: dbPage.organic_traffic || 0,
+    keywords: dbPage.internal_links || 0,
+    position: dbPage.avg_position || 0,
+    backlinks: dbPage.external_links || 0,
+    wordCount: dbPage.word_count || 0,
+    lastUpdated: dbPage.last_crawled_at || dbPage.updated_at,
+    status: getStatus(dbPage.organic_traffic || 0, dbPage.avg_position),
+    score: dbPage.page_speed_score || 0,
+    opportunities: dbPage.recommendations?.map((r: { title?: string } | string) => typeof r === 'string' ? r : r.title || '') || []
+  }
+}
+
+export default function SEOClient({ initialKeywords: _initialKeywords, initialBacklinks: _initialBacklinks }: SEOClientProps) {
+  // Database hooks for real data
+  const {
+    keywords: dbKeywords,
+    loading: keywordsLoading,
+    error: keywordsError,
+    fetchKeywords,
+    createKeyword: _createKeyword,
+    updateKeyword: _updateKeyword,
+    deleteKeyword: _deleteKeyword
+  } = useSEOKeywords()
+
+  const {
+    backlinks: dbBacklinks,
+    loading: backlinksLoading,
+    createBacklink: _createBacklink,
+    updateBacklink: _updateBacklink,
+    markLost: _markLost
+  } = useSEOBacklinks()
+
+  const {
+    pages: dbPages,
+    loading: pagesLoading,
+    createPage: _createPage,
+    updatePage: _updatePage
+  } = useSEOPages()
+
+  // Combined loading and error states
+  const isLoading = keywordsLoading || backlinksLoading || pagesLoading
+  const hasError = keywordsError
+
+  // Show error toast
+  useEffect(() => {
+    if (hasError) {
+      toast.error('Failed to load SEO data')
+    }
+  }, [hasError])
+
+  // Map database data to UI types
+  const keywords: Keyword[] = useMemo(() => dbKeywords.map(mapDbKeywordToUi), [dbKeywords])
+  const backlinks: Backlink[] = useMemo(() => dbBacklinks.map(mapDbBacklinkToUi), [dbBacklinks])
+  const content: ContentPage[] = useMemo(() => dbPages.map(mapDbPageToUi), [dbPages])
+
+  // Empty arrays for features not yet connected to database
+  const competitors: Competitor[] = emptyCompetitors
+  const auditIssues: AuditIssue[] = emptyAuditIssues
+
   const [activeTab, setActiveTab] = useState('overview')
-  const [keywords, setKeywords] = useState<Keyword[]>(emptyKeywords)
-  const [backlinks] = useState<Backlink[]>(emptyBacklinks)
-  const [competitors] = useState<Competitor[]>(emptyCompetitors)
-  const [content] = useState<ContentPage[]>(emptyContentPages)
-  const [auditIssues] = useState<AuditIssue[]>(emptyAuditIssues)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedKeyword, setSelectedKeyword] = useState<Keyword | null>(null)
   const [showKeywordDialog, setShowKeywordDialog] = useState(false)
@@ -374,8 +512,8 @@ export default function SEOClient({ initialKeywords, initialBacklinks }: SEOClie
     { label: 'Health Score', value: `${healthScore}%`, icon: ShieldCheck, color: 'from-emerald-500 to-green-600', change: '+5%' }
   ]
 
-  // Handlers
-  const handleRunAnalysis = async () => {
+  // Handlers (prefixed with _ if not yet connected to UI)
+  const _handleRunAnalysis = async () => {
     toast.promise(
       fetch('/api/seo/analyze', {
         method: 'POST',
@@ -389,7 +527,7 @@ export default function SEOClient({ initialKeywords, initialBacklinks }: SEOClie
     );
   };
 
-  const handleOptimize = async (n: string) => {
+  const _handleOptimize = async (n: string) => {
     toast.promise(
       fetch('/api/seo/optimize', {
         method: 'POST',
@@ -403,7 +541,7 @@ export default function SEOClient({ initialKeywords, initialBacklinks }: SEOClie
     );
   };
 
-  const handleGenerateSitemap = async () => {
+  const _handleGenerateSitemap = async () => {
     toast.promise(
       fetch('/api/seo/sitemap', {
         method: 'POST',
@@ -440,7 +578,7 @@ export default function SEOClient({ initialKeywords, initialBacklinks }: SEOClie
   };
 
   // Toast handlers for unconnected buttons
-  const handleOptimizePage = async (pageName: string) => {
+  const _handleOptimizePage = async (pageName: string) => {
     toast.promise(
       fetch('/api/seo/optimize', {
         method: 'POST',
@@ -737,6 +875,38 @@ export default function SEOClient({ initialKeywords, initialBacklinks }: SEOClie
       { loading: `Loading options for "${backlink.sourceDomain}"...`, success: 'Options: Check status, Export, Disavow, Remove', error: 'Failed to load options' }
     );
   };
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50/30 to-purple-50/40 dark:bg-none dark:bg-gray-900 p-6 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 animate-spin text-blue-500 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold mb-2">Loading SEO Data</h2>
+          <p className="text-muted-foreground">Fetching keywords, backlinks, and page analytics...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Error state
+  if (hasError) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50/30 to-purple-50/40 dark:bg-none dark:bg-gray-900 p-6 flex items-center justify-center">
+        <Card className="p-8 max-w-md text-center">
+          <div className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mx-auto mb-4">
+            <XCircle className="w-8 h-8 text-red-500" />
+          </div>
+          <h2 className="text-xl font-semibold mb-2">Failed to Load SEO Data</h2>
+          <p className="text-muted-foreground mb-4">There was an error loading your SEO analytics. Please try again.</p>
+          <Button onClick={() => fetchKeywords()} className="gap-2">
+            <RefreshCw className="w-4 h-4" />
+            Retry
+          </Button>
+        </Card>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50/30 to-purple-50/40 dark:bg-none dark:bg-gray-900 p-6">

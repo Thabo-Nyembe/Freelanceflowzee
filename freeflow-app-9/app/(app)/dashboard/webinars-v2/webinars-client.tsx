@@ -1,9 +1,13 @@
 'use client'
 
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
 
-// Real-time video collaboration API hooks
+// Supabase webinars hooks for real data
+import { useWebinars as useSupabaseWebinars, type Webinar as DbWebinar, type WebinarStatus as DbWebinarStatus } from '@/lib/hooks/use-webinars'
+import { useUpcomingWebinars } from '@/lib/hooks/use-webinars-extended'
+
+// Real-time video collaboration API hooks (fallback)
 import {
   useEvents,
   useCreateEvent,
@@ -284,10 +288,29 @@ const webinarsActivities: { id: string; user: string; action: string; target: st
 export default function WebinarsClient() {
 
   // ==========================================================================
-  // REAL-TIME VIDEO COLLABORATION HOOKS - Wired to Supabase APIs
+  // SUPABASE DATABASE HOOKS - Real data from webinars table
   // ==========================================================================
 
-  // Events/Webinars from API
+  // Primary Supabase hooks for webinars data
+  const {
+    webinars: dbWebinars,
+    loading: isLoadingWebinars,
+    error: webinarsError,
+    mutating: isMutating,
+    createWebinar: createDbWebinar,
+    updateWebinar: updateDbWebinar,
+    deleteWebinar: deleteDbWebinar,
+    refetch: refetchWebinars
+  } = useSupabaseWebinars()
+
+  // Upcoming webinars for scheduling view
+  const { webinars: upcomingWebinars, isLoading: isLoadingUpcoming } = useUpcomingWebinars({ limit: 10 })
+
+  // ==========================================================================
+  // FALLBACK API HOOKS - For extended functionality
+  // ==========================================================================
+
+  // Events/Webinars from API (fallback)
   const { data: eventsData, isLoading: isLoadingEvents } = useEvents()
   const createEventApi = useCreateEvent()
   const updateEventApi = useUpdateEvent()
@@ -307,7 +330,86 @@ export default function WebinarsClient() {
   // Messaging for webinar chat
   const sendMessageApi = useSendMessage()
 
-  // Transform API events to webinar format
+  // ==========================================================================
+  // LOADING AND ERROR STATES
+  // ==========================================================================
+
+  const isLoading = isLoadingWebinars || isLoadingUpcoming
+  const hasError = !!webinarsError
+
+  // Show error toast when there's an error loading webinars
+  useEffect(() => {
+    if (webinarsError) {
+      toast.error('Failed to load webinars', {
+        description: webinarsError.message || 'Please try refreshing the page'
+      })
+    }
+  }, [webinarsError])
+
+  // ==========================================================================
+  // MAP DATABASE DATA TO UI TYPES
+  // ==========================================================================
+
+  // Helper to map DB status to UI status
+  const mapDbStatusToUI = (dbStatus: DbWebinarStatus): WebinarStatus => {
+    switch (dbStatus) {
+      case 'live': return 'live'
+      case 'scheduled': return 'scheduled'
+      case 'ended': return 'ended'
+      case 'cancelled': return 'cancelled'
+      case 'recording': return 'ended' // Treat recording as ended for UI
+      default: return 'scheduled'
+    }
+  }
+
+  // Helper to map DB topic to UI type
+  const mapDbTopicToType = (topic: string | null): WebinarType => {
+    switch (topic) {
+      case 'training': return 'training'
+      case 'demo': return 'demo'
+      case 'onboarding': return 'training'
+      default: return 'webinar'
+    }
+  }
+
+  // Transform Supabase webinars to UI format
+  const mappedWebinars: Webinar[] = useMemo(() => {
+    if (!dbWebinars || dbWebinars.length === 0) return []
+
+    return dbWebinars.map((dbWebinar: DbWebinar) => ({
+      id: dbWebinar.id,
+      title: dbWebinar.title || 'Untitled Webinar',
+      description: dbWebinar.description || '',
+      type: mapDbTopicToType(dbWebinar.topic),
+      status: mapDbStatusToUI(dbWebinar.status),
+      scheduledDate: dbWebinar.scheduled_date,
+      duration: dbWebinar.duration_minutes || 60,
+      timezone: dbWebinar.timezone || 'UTC',
+      host: {
+        id: dbWebinar.user_id,
+        name: dbWebinar.host_name || 'Host',
+        email: '',
+        role: 'host' as const
+      },
+      panelists: (dbWebinar.speakers as Panelist[]) || [],
+      registeredCount: dbWebinar.registered_count || 0,
+      attendedCount: dbWebinar.attended_count || 0,
+      maxParticipants: dbWebinar.max_participants || 1000,
+      registrationRequired: true,
+      approvalRequired: false,
+      recordingEnabled: !!dbWebinar.recording_url,
+      qnaEnabled: dbWebinar.questions_asked > 0,
+      pollsEnabled: dbWebinar.polls_conducted > 0,
+      chatEnabled: dbWebinar.chat_messages > 0,
+      waitingRoomEnabled: true,
+      meetingId: dbWebinar.meeting_id || undefined,
+      joinUrl: dbWebinar.meeting_link || undefined,
+      registrationUrl: dbWebinar.meeting_link || undefined,
+      createdAt: dbWebinar.created_at
+    }))
+  }, [dbWebinars])
+
+  // Transform API events to webinar format (fallback)
   const apiWebinars = useMemo(() => {
     const events = eventsData?.data || []
     return events
@@ -355,63 +457,82 @@ export default function WebinarsClient() {
     }))
   }, [bookingsData])
 
-  // Enhanced stats from API
+  // Enhanced stats from Supabase data
   const enhancedWebinarStats = useMemo(() => ({
-    totalWebinars: apiWebinars.length,
-    scheduledWebinars: apiWebinars.filter(w => w.status === 'scheduled').length,
-    liveWebinars: apiWebinars.filter(w => w.status === 'live').length,
-    totalRegistrations: apiRegistrations.length,
-    totalAttendees: apiRegistrations.filter(r => r.attended).length,
+    totalWebinars: mappedWebinars.length,
+    scheduledWebinars: mappedWebinars.filter(w => w.status === 'scheduled').length,
+    liveWebinars: mappedWebinars.filter(w => w.status === 'live').length,
+    totalRegistrations: mappedWebinars.reduce((sum, w) => sum + (w.registeredCount || 0), 0),
+    totalAttendees: mappedWebinars.reduce((sum, w) => sum + (w.attendedCount || 0), 0),
     totalRecordings: recordingsData.length
-  }), [apiWebinars, apiRegistrations])
+  }), [mappedWebinars])
 
-  // Use API data directly
-  const effectiveWebinars = apiWebinars
+  // Use Supabase data as primary, fall back to API data
+  const effectiveWebinars = mappedWebinars.length > 0 ? mappedWebinars : apiWebinars
   const effectiveRegistrations = apiRegistrations
 
-  // Create webinar using API hook
+  // Create webinar using Supabase hook (primary) with API fallback
   const handleCreateWebinarWithAPI = useCallback(async (webinarData: Partial<Webinar>) => {
     try {
-      await createEventApi.mutateAsync({
+      // Try Supabase first
+      await createDbWebinar({
         title: webinarData.title || 'New Webinar',
         description: webinarData.description || '',
-        start_date: webinarData.startTime || new Date(Date.now() + 86400000).toISOString(),
-        end_date: webinarData.endTime || new Date(Date.now() + 86400000 + 3600000).toISOString(),
-        type: 'webinar',
-        is_all_day: false
+        topic: 'other',
+        status: 'scheduled',
+        scheduled_date: webinarData.scheduledDate || new Date(Date.now() + 86400000).toISOString(),
+        duration_minutes: webinarData.duration || 60,
+        timezone: webinarData.timezone || 'UTC',
+        max_participants: webinarData.maxParticipants || 1000,
+        host_name: webinarData.host?.name || 'Host',
       })
       toast.success('Webinar created successfully')
       setShowScheduleDialog(false)
-    } catch (error) {
-      // Add to local state as fallback
-      const newWebinar: Webinar = {
-        id: `webinar-${Date.now()}`,
-        title: webinarData.title || 'New Webinar',
-        description: webinarData.description || '',
-        status: 'scheduled',
-        type: 'webinar',
-        startTime: webinarData.startTime || new Date(Date.now() + 86400000).toISOString(),
-        endTime: webinarData.endTime || new Date(Date.now() + 86400000 + 3600000).toISOString(),
-        duration: 60,
-        host: { id: '1', name: 'Host', email: 'host@example.com', role: 'host' as const },
-        presenters: [],
-        maxAttendees: 1000,
-        currentAttendees: 0,
-        registrationUrl: `https://app.freeflow.io/webinar/${Date.now()}/register`,
-        joinUrl: '',
-        recordingEnabled: true,
-        chatEnabled: true,
-        qnaEnabled: true,
-        category: 'general',
-        tags: [],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+      refetchWebinars()
+    } catch (supabaseError) {
+      // Fall back to API
+      try {
+        await createEventApi.mutateAsync({
+          title: webinarData.title || 'New Webinar',
+          description: webinarData.description || '',
+          start_date: webinarData.scheduledDate || new Date(Date.now() + 86400000).toISOString(),
+          end_date: new Date(Date.now() + 86400000 + 3600000).toISOString(),
+          type: 'webinar',
+          is_all_day: false
+        })
+        toast.success('Webinar created successfully')
+        setShowScheduleDialog(false)
+      } catch (apiError) {
+        // Add to local state as final fallback
+        const newWebinar: Webinar = {
+          id: `webinar-${Date.now()}`,
+          title: webinarData.title || 'New Webinar',
+          description: webinarData.description || '',
+          status: 'scheduled',
+          type: 'webinar',
+          scheduledDate: webinarData.scheduledDate || new Date(Date.now() + 86400000).toISOString(),
+          duration: 60,
+          timezone: 'UTC',
+          host: { id: '1', name: 'Host', email: 'host@example.com', role: 'host' as const },
+          panelists: [],
+          registeredCount: 0,
+          attendedCount: 0,
+          maxParticipants: 1000,
+          registrationRequired: true,
+          approvalRequired: false,
+          recordingEnabled: true,
+          qnaEnabled: true,
+          pollsEnabled: true,
+          chatEnabled: true,
+          waitingRoomEnabled: true,
+          createdAt: new Date().toISOString()
+        }
+        setWebinars(prev => [...prev, newWebinar])
+        toast.success('Webinar created successfully')
+        setShowScheduleDialog(false)
       }
-      setWebinars(prev => [...prev, newWebinar])
-      toast.success('Webinar created successfully')
-      setShowScheduleDialog(false)
     }
-  }, [createEventApi])
+  }, [createDbWebinar, createEventApi, refetchWebinars])
 
   // Register for webinar using API hook
   const handleRegisterForWebinar = useCallback(async (webinarId: string) => {
@@ -461,6 +582,13 @@ export default function WebinarsClient() {
   const [qaItems, setQaItems] = useState<QAItem[]>([])
   const [showEditDialog, setShowEditDialog] = useState(false)
   const [editingWebinar, setEditingWebinar] = useState<Webinar | null>(null)
+
+  // Sync Supabase data to local state when it loads
+  useEffect(() => {
+    if (mappedWebinars.length > 0) {
+      setWebinars(mappedWebinars)
+    }
+  }, [mappedWebinars])
 
   // Helper functions for real functionality
   const copyToClipboard = async (text: string, successMessage: string) => {
@@ -762,6 +890,10 @@ export default function WebinarsClient() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <Button variant="outline" className="gap-2" onClick={refetchWebinars} disabled={isLoading}>
+              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
             <Button variant="outline" className="gap-2" onClick={() => {
               // Open calendar view - could integrate with Google Calendar or native calendar
               const scheduledWebinars = webinars.filter(w => w.status === 'scheduled')
@@ -770,12 +902,41 @@ export default function WebinarsClient() {
               <Calendar className="w-4 h-4" />
               View Calendar
             </Button>
-            <Button className="gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700" onClick={handleCreateWebinar}>
+            <Button className="gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700" onClick={handleCreateWebinar} disabled={isMutating}>
               <Plus className="w-4 h-4" />
               Schedule Webinar
             </Button>
           </div>
         </div>
+
+        {/* Loading State */}
+        {isLoading && (
+          <div className="flex items-center justify-center py-8">
+            <RefreshCw className="w-6 h-6 animate-spin text-purple-500 mr-2" />
+            <span className="text-gray-500">Loading webinars...</span>
+          </div>
+        )}
+
+        {/* Error State */}
+        {hasError && !isLoading && (
+          <Card className="border-red-200 bg-red-50 dark:bg-red-950/20">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-3">
+                <AlertTriangle className="w-6 h-6 text-red-500" />
+                <div>
+                  <h3 className="font-semibold text-red-800 dark:text-red-200">Failed to load webinars</h3>
+                  <p className="text-sm text-red-600 dark:text-red-300">
+                    {webinarsError?.message || 'There was an error loading your webinars. Please try again.'}
+                  </p>
+                </div>
+                <Button variant="outline" className="ml-auto" onClick={refetchWebinars}>
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Retry
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">

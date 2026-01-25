@@ -1,12 +1,16 @@
 'use client'
 
 import { createClient } from '@/lib/supabase/client'
+
+// Create Supabase client for direct database operations
+const supabase = createClient()
 // MIGRATED: Batch #17 - Verified database hook integration
 // Hooks: useSecurity
 
 import React, { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
-import { useSecurity, SecuritySettings } from '@/lib/hooks/use-security'
+import { useSecurity, SecuritySettings, SecurityEvent, UserSession } from '@/lib/hooks/use-security'
+import { Loader2 } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -244,6 +248,68 @@ const formatTimeAgo = (dateString: string): string => {
 }
 
 // ============================================================================
+// DATA MAPPING FUNCTIONS - Map DB data to UI types
+// ============================================================================
+
+// Map SecurityEvent to SecurityIssue
+const mapEventToSecurityIssue = (event: SecurityEvent): SecurityIssue => {
+  const typeMap: Record<string, SecurityIssue['type']> = {
+    'failed_login': 'weak_password',
+    'suspicious_activity': 'compromised',
+    'new_device': '2fa_missing',
+    'password_change': 'old_password',
+    '2fa_enabled': '2fa_missing',
+    'session_terminated': 'insecure_website'
+  }
+
+  return {
+    id: event.id,
+    type: typeMap[event.event_type] || 'weak_password',
+    severity: event.severity === 'info' ? 'low' : event.severity as SecurityIssue['severity'],
+    itemId: event.id,
+    itemName: event.description || 'Security Event',
+    description: event.description || `${event.event_type} detected`,
+    recommendation: event.resolution_notes || 'Review and resolve this security event',
+    detectedAt: event.created_at,
+    resolved: event.is_resolved
+  }
+}
+
+// Map UserSession to AuthorizedDevice
+const mapSessionToDevice = (session: UserSession): AuthorizedDevice => ({
+  id: session.id,
+  name: session.device_name || 'Unknown Device',
+  type: (session.device_type as AuthorizedDevice['type']) || 'desktop',
+  os: session.os || 'Unknown OS',
+  browser: session.browser || undefined,
+  location: session.location || 'Unknown',
+  ipAddress: session.ip_address || '0.0.0.0',
+  lastActive: session.last_active_at,
+  firstSeen: session.created_at,
+  isCurrent: session.is_current,
+  trusted: session.is_active
+})
+
+// Map SecurityEvent to ActivityLogEntry
+const mapEventToActivityLog = (event: SecurityEvent): ActivityLogEntry => {
+  const statusMap: Record<string, ActivityLogEntry['status']> = {
+    'failed_login': 'failed',
+    'suspicious_activity': 'blocked',
+  }
+
+  return {
+    id: event.id,
+    action: event.event_type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+    itemName: event.description || undefined,
+    deviceName: event.device_info?.device_name || event.user_agent?.split(' ')[0] || 'Unknown',
+    location: event.location || 'Unknown',
+    ipAddress: event.ip_address || '0.0.0.0',
+    timestamp: event.created_at,
+    status: event.is_blocked ? 'blocked' : (statusMap[event.event_type] || 'success')
+  }
+}
+
+// ============================================================================
 // COMPETITIVE UPGRADE DATA (Empty - will be populated from database)
 // ============================================================================
 
@@ -311,15 +377,36 @@ export default function SecurityClient() {
     fetchSessions()
   }, [fetchSettings, fetchEvents, fetchSessions])
 
+  // ============================================================================
+  // MAP DATABASE DATA TO UI TYPES
+  // ============================================================================
+
+  // Map sessions from hook to devices for UI
+  const mappedDevices: AuthorizedDevice[] = useMemo(() => {
+    return sessions.map(mapSessionToDevice)
+  }, [sessions])
+
+  // Map events to security issues for UI
+  const mappedSecurityIssues: SecurityIssue[] = useMemo(() => {
+    return events
+      .filter(e => !e.is_resolved && (e.severity === 'high' || e.severity === 'critical' || e.severity === 'medium'))
+      .map(mapEventToSecurityIssue)
+  }, [events])
+
+  // Map events to activity log for UI
+  const mappedActivityLog: ActivityLogEntry[] = useMemo(() => {
+    return events.map(mapEventToActivityLog)
+  }, [events])
+
   // Stats calculations - combines real data from database
   const stats = useMemo(() => {
     const totalItems = vaultItems.length
     const compromised = vaultItems.filter(i => i.compromised).length
     const weakPasswords = vaultItems.filter(i => i.strength === 'weak' || i.strength === 'fair').length
     const reusedPasswords = vaultItems.filter(i => i.reused).length
-    const criticalIssues = securityIssues.filter(i => i.severity === 'critical' && !i.resolved).length
-    const totalIssues = securityIssues.filter(i => !i.resolved).length
-    const activeDevices = sessions.length || devices.length
+    const criticalIssues = mappedSecurityIssues.filter(i => i.severity === 'critical' && !i.resolved).length
+    const totalIssues = mappedSecurityIssues.filter(i => !i.resolved).length
+    const activeDevices = mappedDevices.length || sessions.length
     const activeKeys = secretKeys.filter(k => k.status === 'active').length
 
     // Use real security score if available
@@ -343,7 +430,7 @@ export default function SecurityClient() {
       activeKeys,
       securityScore: score
     }
-  }, [sessions, securityStats])
+  }, [sessions, securityStats, mappedSecurityIssues, mappedDevices])
 
   // Filtered items
   const filteredItems = useMemo(() => {
@@ -831,6 +918,39 @@ export default function SecurityClient() {
           ))}
         </div>
 
+        {/* Loading State */}
+        {loading && (
+          <div className="flex items-center justify-center gap-3 py-4 px-6 bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-800">
+            <Loader2 className="h-5 w-5 animate-spin text-red-600" />
+            <span className="text-red-700 dark:text-red-400 font-medium">Loading security data...</span>
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && (
+          <div className="flex items-center justify-between gap-3 py-4 px-6 bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-800">
+            <div className="flex items-center gap-3">
+              <AlertCircle className="h-5 w-5 text-red-600" />
+              <span className="text-red-700 dark:text-red-400 font-medium">
+                {error || 'Failed to load security data'}
+              </span>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                fetchSettings()
+                fetchEvents()
+                fetchSessions()
+              }}
+              className="border-red-300 text-red-600 hover:bg-red-100"
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Retry
+            </Button>
+          </div>
+        )}
+
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
           {[
@@ -1093,7 +1213,7 @@ export default function SecurityClient() {
                   <CardDescription>Issues requiring your attention</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {securityIssues.filter(i => !i.resolved).map((issue) => (
+                  {mappedSecurityIssues.filter(i => !i.resolved).map((issue) => (
                     <div key={issue.id} className="p-4 rounded-lg border bg-muted/30">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
@@ -1164,7 +1284,7 @@ export default function SecurityClient() {
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-sm">Missing 2FA</span>
-                      <Badge variant="outline">{securityIssues.filter(i => i.type === '2fa_missing').length}</Badge>
+                      <Badge variant="outline">{mappedSecurityIssues.filter(i => i.type === '2fa_missing').length}</Badge>
                     </div>
                   </CardContent>
                 </Card>
@@ -1196,15 +1316,15 @@ export default function SecurityClient() {
                   <div className="text-sm text-teal-100">Total</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{devices.filter(d => d.trusted).length}</div>
+                  <div className="text-2xl font-bold">{mappedDevices.filter(d => d.trusted).length}</div>
                   <div className="text-sm text-teal-100">Trusted</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{devices.filter(d => d.type === 'desktop').length}</div>
+                  <div className="text-2xl font-bold">{mappedDevices.filter(d => d.type === 'desktop').length}</div>
                   <div className="text-sm text-teal-100">Desktops</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{devices.filter(d => d.type === 'mobile').length}</div>
+                  <div className="text-2xl font-bold">{mappedDevices.filter(d => d.type === 'mobile').length}</div>
                   <div className="text-sm text-teal-100">Mobile</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
@@ -1226,7 +1346,7 @@ export default function SecurityClient() {
             </div>
 
             <div className="grid gap-4">
-              {devices.map((device) => (
+              {mappedDevices.map((device) => (
                 <Card key={device.id} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setSelectedDevice(device)}>
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
@@ -1397,15 +1517,15 @@ export default function SecurityClient() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6 mt-6">
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{activityLog.length}</div>
+                  <div className="text-2xl font-bold">{mappedActivityLog.length}</div>
                   <div className="text-sm text-gray-300">Total Events</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold text-green-400">{activityLog.filter(l => l.status === 'success').length}</div>
+                  <div className="text-2xl font-bold text-green-400">{mappedActivityLog.filter(l => l.status === 'success').length}</div>
                   <div className="text-sm text-gray-300">Successful</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold text-red-400">{activityLog.filter(l => l.status === 'blocked').length}</div>
+                  <div className="text-2xl font-bold text-red-400">{mappedActivityLog.filter(l => l.status === 'blocked').length}</div>
                   <div className="text-sm text-gray-300">Blocked</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
@@ -1429,7 +1549,7 @@ export default function SecurityClient() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {activityLog.map((entry) => (
+                  {mappedActivityLog.map((entry) => (
                     <div key={entry.id} className="flex items-center justify-between py-3 border-b last:border-0">
                       <div className="flex items-center gap-4">
                         <div className={`w-2 h-2 rounded-full ${entry.status === 'success' ? 'bg-green-500' : entry.status === 'blocked' ? 'bg-red-500' : 'bg-yellow-500'}`} />
