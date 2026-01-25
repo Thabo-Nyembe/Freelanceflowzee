@@ -24,6 +24,7 @@ import { useAnnouncer } from '@/lib/accessibility'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import { createFeatureLogger } from '@/lib/logger'
 import { toast } from 'sonner'
+import { sanitizeHtml } from '@/lib/sanitize'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 
 const logger = createFeatureLogger('EmailMarketingPage')
@@ -1088,7 +1089,7 @@ export default function EmailMarketingPage() {
               {previewTemplate?.html_content ? (
                 <div
                   className="prose max-w-none"
-                  dangerouslySetInnerHTML={{ __html: previewTemplate.html_content }}
+                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(previewTemplate.html_content) }}
                 />
               ) : (
                 <div className="flex items-center justify-center h-64 text-muted-foreground">

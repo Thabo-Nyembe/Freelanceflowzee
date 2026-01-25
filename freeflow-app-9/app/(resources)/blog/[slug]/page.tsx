@@ -8,15 +8,16 @@ import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { 
-  Calendar, 
-  Clock, 
-  User, 
-  ArrowLeft, 
-  Share2, 
+import {
+  Calendar,
+  Clock,
+  User,
+  ArrowLeft,
+  Share2,
   BookOpen,
   Heart
 } from 'lucide-react'
+import { sanitizeHtml } from '@/lib/sanitize'
 
 // Mock blog data - replace with actual data fetching
 const blogPosts = [
@@ -1239,7 +1240,7 @@ export default function BlogPostPage({ params }: BlogPostPageProps) {
             {/* Article Content */}
             <div
               className="prose prose-lg max-w-none mb-12"
-              dangerouslySetInnerHTML={{ __html: post.content }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(post.content) }}
               role="article"
             />
 
