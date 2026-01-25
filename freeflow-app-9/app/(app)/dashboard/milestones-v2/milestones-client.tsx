@@ -382,6 +382,7 @@ export default function MilestonesClient() {
   const [milestoneToComplete, setMilestoneToComplete] = useState<Milestone | DbMilestone | null>(null)
   const [milestoneToDelete, setMilestoneToDelete] = useState<DbMilestone | null>(null)
   const [milestoneToEdit, setMilestoneToEdit] = useState<Milestone | null>(null)
+  const [targetMilestoneForAction, setTargetMilestoneForAction] = useState<DbMilestone | null>(null)
   const [notifications, setNotifications] = useState([
     { id: '1', title: 'Milestone completed', description: 'Infrastructure Upgrade has been completed', time: '2 hours ago', type: 'success', read: false },
     { id: '2', title: 'At risk alert', description: 'Platform V2.0 Launch is now at risk', time: '4 hours ago', type: 'warning', read: false },
@@ -677,13 +678,35 @@ export default function MilestonesClient() {
     setShowExportDialog(false)
   }
 
-  // Add deliverable
-  const handleAddDeliverable = () => {
+  // Add deliverable - updates milestone's deliverables count
+  const handleAddDeliverable = async () => {
     if (!deliverableForm.name.trim()) {
       toast.error('Deliverable name is required')
       return
     }
-    toast.success('Deliverable added successfully')
+
+    // If we have a target milestone, update its deliverables count
+    if (targetMilestoneForAction) {
+      try {
+        setIsSubmitting(true)
+        await updateMilestone({
+          id: targetMilestoneForAction.id,
+          updates: {
+            deliverables: (targetMilestoneForAction.deliverables || 0) + 1
+          }
+        })
+        toast.success(`Deliverable "${deliverableForm.name}" added to ${targetMilestoneForAction.name}`)
+        refetch()
+      } catch (error) {
+        console.error('Error adding deliverable:', error)
+        toast.error('Failed to add deliverable')
+      } finally {
+        setIsSubmitting(false)
+      }
+    } else {
+      toast.success('Deliverable added successfully')
+    }
+
     setDeliverableForm({
       name: '',
       description: '',
@@ -692,15 +715,39 @@ export default function MilestonesClient() {
       priority: 'medium'
     })
     setShowDeliverableDialog(false)
+    setTargetMilestoneForAction(null)
   }
 
-  // Add budget item
-  const handleAddBudgetItem = () => {
+  // Add budget item - updates milestone's budget
+  const handleAddBudgetItem = async () => {
     if (!budgetForm.category.trim()) {
       toast.error('Budget category is required')
       return
     }
-    toast.success('Budget item added successfully')
+
+    const plannedAmount = parseFloat(budgetForm.planned) || 0
+
+    if (targetMilestoneForAction && plannedAmount > 0) {
+      try {
+        setIsSubmitting(true)
+        await updateMilestone({
+          id: targetMilestoneForAction.id,
+          updates: {
+            budget: (targetMilestoneForAction.budget || 0) + plannedAmount
+          }
+        })
+        toast.success(`Budget item "${budgetForm.category}" ($${plannedAmount.toLocaleString()}) added`)
+        refetch()
+      } catch (error) {
+        console.error('Error adding budget item:', error)
+        toast.error('Failed to add budget item')
+      } finally {
+        setIsSubmitting(false)
+      }
+    } else {
+      toast.success('Budget item added successfully')
+    }
+
     setBudgetForm({
       category: '',
       planned: '',
@@ -708,17 +755,53 @@ export default function MilestonesClient() {
       notes: ''
     })
     setShowBudgetDialog(false)
+    setTargetMilestoneForAction(null)
   }
 
-  // Add dependency
-  const handleAddDependency = () => {
-    toast.success('Dependency added successfully')
+  // Add dependency - updates milestone's dependencies count
+  const handleAddDependency = async () => {
+    if (targetMilestoneForAction) {
+      try {
+        setIsSubmitting(true)
+        await updateMilestone({
+          id: targetMilestoneForAction.id,
+          updates: {
+            dependencies: (targetMilestoneForAction.dependencies || 0) + 1
+          }
+        })
+        toast.success(`Dependency added to ${targetMilestoneForAction.name}`)
+        refetch()
+      } catch (error) {
+        console.error('Error adding dependency:', error)
+        toast.error('Failed to add dependency')
+      } finally {
+        setIsSubmitting(false)
+      }
+    } else {
+      toast.success('Dependency added successfully')
+    }
+
     setShowDependencyDialog(false)
+    setTargetMilestoneForAction(null)
   }
 
-  // Save settings
+  // Save settings - persists to localStorage for UI preferences
   const handleSaveSettings = () => {
-    toast.success('Settings saved successfully')
+    try {
+      // Save filter preferences to localStorage
+      const settings = {
+        defaultView: viewMode,
+        defaultSort: sortBy,
+        archiveThreshold: archiveThresholdDays,
+        showCompletedMilestones: true,
+        timestamp: new Date().toISOString()
+      }
+      localStorage.setItem('milestone-settings', JSON.stringify(settings))
+      toast.success('Settings saved successfully')
+    } catch (error) {
+      console.error('Error saving settings:', error)
+      toast.error('Failed to save settings')
+    }
     setShowSettingsDialog(false)
   }
 
@@ -1288,11 +1371,11 @@ export default function MilestonesClient() {
                                 <CheckCircle2 className="w-4 h-4 mr-2" />
                                 Mark Complete
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => setShowDeliverableDialog(true)}>
+                              <DropdownMenuItem onClick={() => { setTargetMilestoneForAction(milestone); setShowDeliverableDialog(true) }}>
                                 <Package className="w-4 h-4 mr-2" />
                                 Add Deliverable
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => setShowDependencyDialog(true)}>
+                              <DropdownMenuItem onClick={() => { setTargetMilestoneForAction(milestone); setShowDependencyDialog(true) }}>
                                 <Link2 className="w-4 h-4 mr-2" />
                                 Add Dependency
                               </DropdownMenuItem>

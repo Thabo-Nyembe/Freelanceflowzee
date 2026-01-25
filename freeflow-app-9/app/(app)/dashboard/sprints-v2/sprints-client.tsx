@@ -34,6 +34,7 @@ import {
   useSprintTasks,
   useSprintMutations,
 } from '@/lib/hooks/use-sprints'
+import { useApiKeys } from '@/lib/hooks/use-api-keys'
 
 // Enhanced & Competitive Upgrade Components
 import {
@@ -280,6 +281,7 @@ export default function SprintsClient() {
   // ============================================================================
   const { sprints: dbSprints, stats: dbStats, isLoading: isLoadingSprints, refetch: refetchSprints } = useSprints()
   const { tasks: dbTasks, isLoading: isLoadingTasks, refetch: refetchTasks } = useSprintTasks()
+  const { keys: apiKeys, createKey: createApiKey, isLoading: isLoadingApiKeys } = useApiKeys([], { keyType: 'api' })
   const {
     createSprint,
     updateSprint,
@@ -748,8 +750,9 @@ export default function SprintsClient() {
   }
 
   const handleCopyApiKey = () => {
+    const currentKey = apiKeys?.[0]?.key || 'No API key available'
     toast.promise(
-      navigator.clipboard.writeText('sprint_xxxxxxxxxxxxxxxxxxxxx'),
+      navigator.clipboard.writeText(currentKey),
       {
         loading: 'Copying API key...',
         success: 'API key copied to clipboard',
@@ -759,21 +762,18 @@ export default function SprintsClient() {
   }
 
   const handleRegenerateApiKey = async () => {
-    toast.promise(
-      fetch('/api/sprints/api-key', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'regenerate' })
-      }).then(async (res) => {
-        if (!res.ok) throw new Error('Failed to regenerate API key')
-        return res.json()
-      }),
-      {
-        loading: 'Regenerating API key...',
-        success: 'New API key has been generated',
-        error: 'Failed to regenerate API key'
-      }
-    )
+    try {
+      await createApiKey({
+        name: 'Sprint Integration Key',
+        key_type: 'api',
+        permissions: ['sprints:read', 'sprints:write', 'tasks:read', 'tasks:write'],
+        environment: 'production'
+      })
+      toast.success('New API key has been generated')
+    } catch (error) {
+      console.error('Error regenerating API key:', error)
+      toast.error('Failed to regenerate API key')
+    }
   }
 
   // Export sprint data as JSON/CSV
@@ -2096,7 +2096,7 @@ export default function SprintsClient() {
                         <div className="space-y-2">
                           <Label>API Key</Label>
                           <div className="flex gap-2">
-                            <Input type="password" value="sprint_xxxxxxxxxxxxxxxxxxxxx" readOnly />
+                            <Input type="password" value={apiKeys?.[0]?.key || 'No API key generated'} readOnly />
                             <Button variant="outline" onClick={handleCopyApiKey}>
                               <Copy className="w-4 h-4" />
                             </Button>

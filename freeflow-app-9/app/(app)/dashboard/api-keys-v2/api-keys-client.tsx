@@ -411,6 +411,32 @@ export default function ApiKeysClient() {
     return []
   }, [searchQuery])
 
+  // Computed data for competitive upgrade components
+  const mockApiKeysAIInsights = useMemo(() => apiKeys.length > 0 ? [
+    { id: '1', title: 'API Usage Trend', description: `${stats.requestsToday} requests today across ${stats.activeKeys} active keys`, type: 'info' as const, priority: 'medium' as const },
+    { id: '2', title: stats.expiringSoon > 0 ? 'Keys Expiring Soon' : 'Keys Healthy', description: stats.expiringSoon > 0 ? `${stats.expiringSoon} keys expiring within 30 days` : 'All keys have valid expiration dates', type: stats.expiringSoon > 0 ? 'warning' as const : 'success' as const, priority: stats.expiringSoon > 0 ? 'high' as const : 'low' as const },
+  ] : [], [apiKeys, stats])
+
+  const mockApiKeysCollaborators = useMemo(() => apiKeys.slice(0, 4).map(key => ({
+    id: key.id,
+    name: key.created_by || 'System',
+    avatar: '',
+    status: key.status === 'active' ? 'online' as const : 'offline' as const
+  })), [apiKeys])
+
+  const mockApiKeysPredictions = useMemo(() => [
+    { id: '1', label: 'Monthly API Calls', current: stats.totalRequests, predicted: Math.round(stats.totalRequests * 1.15), trend: 'up' as const },
+    { id: '2', label: 'Active Integrations', current: stats.activeKeys, predicted: stats.activeKeys, trend: 'stable' as const },
+  ], [stats])
+
+  const mockApiKeysActivities = useMemo(() => apiKeys.slice(0, 5).map(key => ({
+    id: key.id,
+    type: key.status === 'active' ? 'create' as const : 'update' as const,
+    message: `API key "${key.name}" ${key.last_used_at ? 'used' : 'created'}`,
+    timestamp: key.last_used_at || key.created_at,
+    user: { name: key.created_by || 'System', avatar: '' }
+  })), [apiKeys])
+
   // Handlers
   const handleCreateApiKey = async () => {
     try {

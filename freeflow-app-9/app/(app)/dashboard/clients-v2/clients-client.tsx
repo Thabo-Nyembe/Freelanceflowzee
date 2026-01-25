@@ -2519,7 +2519,12 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={[]} // TODO: Wire to real collaborators if available
+              collaborators={filteredClients.slice(0, 6).map(client => ({
+                id: client.id,
+                name: client.contactName || client.company,
+                avatar: '',
+                status: client.status === 'active' ? 'online' as const : 'offline' as const
+              }))}
               maxVisible={4}
             />
             <PredictiveAnalytics
@@ -2540,12 +2545,23 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={[]} // TODO: Wire to real activities
+            activities={activities.slice(0, 5).map(activity => ({
+              id: activity.id,
+              type: activity.type === 'email' ? 'create' as const : activity.type === 'call' ? 'update' as const : 'comment' as const,
+              message: activity.title || activity.description,
+              timestamp: activity.createdAt,
+              user: { name: activity.createdBy || 'System', avatar: '' }
+            }))}
             title="Client Activity"
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={[]} // TODO: Wire actions
+            actions={[
+              { id: 'add-client', label: 'Add Client', icon: 'plus', onClick: () => setShowNewClientDialog(true) },
+              { id: 'export', label: 'Export Clients', icon: 'download', onClick: () => handleExportClients() },
+              { id: 'refresh', label: 'Refresh Data', icon: 'refresh', onClick: () => { refetch(); fetchActivities(); } },
+              { id: 'filter', label: 'Apply Filters', icon: 'filter', onClick: () => setShowFilters(true) }
+            ]}
             variant="grid"
           />
         </div>

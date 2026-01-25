@@ -41,6 +41,7 @@ import {
 
 
 import { useClients, type Client } from '@/lib/hooks/use-clients'
+import { useApiKeys } from '@/lib/hooks/use-api-keys'
 
 // Map client status/segment to display types for backward compatibility
 type CustomerSegment = 'vip' | 'active' | 'new' | 'inactive' | 'churned' | 'at_risk' | 'prospect'
@@ -453,6 +454,10 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
     updateClient,
     deleteClient
   } = useClients()
+
+  // API Keys hook for CRM integration
+  const { keys: apiKeys, createKey: createApiKey, isLoading: isLoadingApiKeys } = useApiKeys([], { keyType: 'api' })
+  const currentApiKey = apiKeys?.[0]?.key_prefix || 'No API key generated'
 
   // Alias for backward compatibility
   const dbCustomers = dbClients
@@ -2058,23 +2063,35 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                               <Label className="text-base">API Key</Label>
                               <p className="text-xs text-gray-500">Use this key for API access</p>
                             </div>
-                            <Button size="sm" variant="outline" onClick={() => {
+                            <Button size="sm" variant="outline" disabled={isLoadingApiKeys} onClick={async () => {
                               if (confirm('Are you sure you want to regenerate your API key? This will invalidate the current key.')) {
-                                toast.success('API Key Regenerated')
+                                try {
+                                  await createApiKey({
+                                    name: 'CRM Integration Key',
+                                    key_type: 'api',
+                                    permission: 'full-access',
+                                    scopes: ['crm:read', 'crm:write', 'contacts:read', 'contacts:write'],
+                                    environment: 'production'
+                                  })
+                                  toast.success('API Key Regenerated')
+                                } catch (error) {
+                                  console.error('Error regenerating API key:', error)
+                                  toast.error('Failed to regenerate API key')
+                                }
                               }
                             }}>
-                              <RefreshCw className="h-4 w-4 mr-2" />
+                              <RefreshCw className={`h-4 w-4 mr-2 ${isLoadingApiKeys ? 'animate-spin' : ''}`} />
                               Regenerate
                             </Button>
                           </div>
                           <div className="flex items-center gap-2">
                             <Input
                               type="password"
-                              defaultValue="crm_api_key_xxxxxxxxxxxxxxxxxxxxx"
+                              value={currentApiKey}
                               readOnly
                               className="font-mono"
                             />
-                            <Button size="sm" variant="ghost" onClick={() => handleCopyToClipboard('crm_api_key_xxxxxxxxxxxxxxxxxxxxx', 'API Key')}>
+                            <Button size="sm" variant="ghost" onClick={() => handleCopyToClipboard(currentApiKey, 'API Key')}>
                               <Copy className="h-4 w-4" />
                             </Button>
                           </div>
@@ -2184,10 +2201,53 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                             const input = document.createElement('input')
                             input.type = 'file'
                             input.accept = '.csv,.json'
-                            input.onchange = (e) => {
+                            input.onchange = async (e) => {
                               const file = (e.target as HTMLInputElement).files?.[0]
                               if (file) {
-                                toast.success(`File Selected`)
+                                try {
+                                  const text = await file.text()
+                                  let contacts: { name: string; email?: string; phone?: string; company?: string }[] = []
+
+                                  if (file.name.endsWith('.json')) {
+                                    contacts = JSON.parse(text)
+                                  } else if (file.name.endsWith('.csv')) {
+                                    // Parse CSV
+                                    const lines = text.split('\n')
+                                    const headers = lines[0].split(',').map(h => h.trim().toLowerCase())
+                                    contacts = lines.slice(1).filter(line => line.trim()).map(line => {
+                                      const values = line.split(',').map(v => v.trim())
+                                      const contact: Record<string, string> = {}
+                                      headers.forEach((header, idx) => {
+                                        contact[header] = values[idx] || ''
+                                      })
+                                      return contact as { name: string; email?: string; phone?: string; company?: string }
+                                    })
+                                  }
+
+                                  // Import contacts to database
+                                  let imported = 0
+                                  for (const contact of contacts) {
+                                    try {
+                                      await createCustomer({
+                                        name: contact.name || `${contact.firstName || ''} ${contact.lastName || ''}`.trim(),
+                                        email: contact.email,
+                                        phone: contact.phone,
+                                        company: contact.company,
+                                        status: 'active',
+                                        segment: 'new'
+                                      })
+                                      imported++
+                                    } catch (err) {
+                                      console.error('Error importing contact:', err)
+                                    }
+                                  }
+
+                                  toast.success(`Imported ${imported} of ${contacts.length} contacts`)
+                                  refetch()
+                                } catch (error) {
+                                  console.error('Error parsing file:', error)
+                                  toast.error('Failed to parse import file')
+                                }
                               }
                             }
                             input.click()
@@ -2214,10 +2274,26 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                             <Label className="text-base text-red-700 dark:text-red-400">Delete All Contacts</Label>
                             <p className="text-sm text-red-600/70 dark:text-red-400/70">Permanently remove all contacts</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400" onClick={() => {
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400" disabled={isDeleting} onClick={async () => {
                             if (confirm('WARNING: This will permanently delete ALL contacts. This action cannot be undone. Are you sure?')) {
                               if (confirm('Final confirmation: Delete all contacts?')) {
-                                toast.success('All Contacts Deleted')
+                                try {
+                                  const allClients = dbClients || []
+                                  let deleted = 0
+                                  for (const client of allClients) {
+                                    try {
+                                      await deleteCustomer(client.id)
+                                      deleted++
+                                    } catch (err) {
+                                      console.error('Error deleting contact:', err)
+                                    }
+                                  }
+                                  toast.success(`All ${deleted} Contacts Deleted`)
+                                  refetch()
+                                } catch (error) {
+                                  console.error('Error deleting all contacts:', error)
+                                  toast.error('Failed to delete contacts')
+                                }
                               }
                             }
                           }}>
@@ -2233,6 +2309,9 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                           </div>
                           <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400" onClick={() => {
                             if (confirm('WARNING: This will permanently clear all activity history. Are you sure?')) {
+                              // Clear local activity state
+                              setActivities([])
+                              localStorage.removeItem('crm-activity-history')
                               toast.success('History Cleared')
                             }
                           }}>
@@ -2249,6 +2328,29 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                           <Button variant="destructive" onClick={() => {
                             if (confirm('WARNING: This will reset ALL CRM settings to defaults. Are you sure?')) {
                               if (confirm('Final confirmation: Reset all CRM settings?')) {
+                                // Clear all CRM-related localStorage settings
+                                const crmKeys = ['crm-settings', 'crm-filters', 'crm-pipeline-stages', 'crm-activity-history', 'crm-view-preferences', 'crm-custom-fields']
+                                crmKeys.forEach(key => localStorage.removeItem(key))
+
+                                // Reset all state to defaults
+                                setActiveTab('overview')
+                                setSettingsTab('general')
+                                setSearchQuery('')
+                                setSegmentFilter('all')
+                                setViewMode('grid')
+                                setSortBy('name')
+                                setShowFilters(false)
+                                setActivities([])
+                                setTasks([])
+                                setCampaigns([])
+                                setPipelineStages([
+                                  { id: '1', name: 'Lead', color: 'gray', probability: 10, order: 1 },
+                                  { id: '2', name: 'Qualified', color: 'blue', probability: 25, order: 2 },
+                                  { id: '3', name: 'Proposal', color: 'purple', probability: 50, order: 3 },
+                                  { id: '4', name: 'Negotiation', color: 'orange', probability: 75, order: 4 },
+                                  { id: '5', name: 'Closed Won', color: 'green', probability: 100, order: 5 }
+                                ])
+
                                 toast.success('Factory Reset Complete')
                               }
                             }

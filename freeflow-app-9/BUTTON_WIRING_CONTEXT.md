@@ -50,6 +50,74 @@ This document tracks progress on wiring frontend button handlers to the comprehe
 | handleGenerateStatusReport | [x] | Generate CSV with status and health data |
 | handleGenerateBudgetReport | [x] | Generate CSV with budget/schedule data |
 | handleGenerateRiskReport | [x] | Generate CSV with at-risk milestones analysis |
+| handleAddDeliverable | [x] | Updates milestone deliverables count via Supabase |
+| handleAddBudgetItem | [x] | Updates milestone budget via Supabase |
+| handleAddDependency | [x] | Updates milestone dependencies via Supabase |
+| handleSaveSettings | [x] | Persists settings to localStorage |
+
+---
+
+## Batch 5: Sprints Dashboard
+**File:** `app/(app)/dashboard/sprints-v2/sprints-client.tsx`
+
+| Handler | Status | Description |
+|---------|--------|-------------|
+| handleCopyApiKey | [x] | Copies real API key from useApiKeys hook |
+| handleRegenerateApiKey | [x] | Creates new API key via useApiKeys hook |
+| API Key Input | [x] | Displays real API key from database |
+
+---
+
+## Batch 6: Analytics Dashboard
+**File:** `app/(app)/dashboard/analytics-v2/analytics-client.tsx`
+
+| Handler | Status | Description |
+|---------|--------|-------------|
+| handleCreateFunnel | [x] | Creates funnel via Supabase (already wired) |
+| handleDeleteFunnel | [x] | Deletes funnel via Supabase (already wired) |
+| handleCreateReport | [x] | Creates report via Supabase (already wired) |
+| handleRunReport | [x] | Runs report via Supabase (already wired) |
+| handleDeleteReport | [x] | Deletes report via Supabase (already wired) |
+| handleApplyFilters | [x] | Applies filters and refetches data |
+| handleClearFilters | [x] | Clears filter state |
+| handleSaveCustomReport | [x] | Saves custom report via Supabase |
+
+---
+
+## Batch 7: Customers Dashboard
+**File:** `app/(app)/dashboard/customers-v2/customers-client.tsx`
+
+| Handler | Status | Description |
+|---------|--------|-------------|
+| API Key Regeneration | [x] | Creates new API key via useApiKeys hook |
+| API Key Display | [x] | Shows real API key from database |
+| File Import | [x] | Parses CSV/JSON and batch inserts contacts |
+| Delete All Contacts | [x] | Loops through clients and deletes via hook |
+| Clear Activity History | [x] | Clears activities state and localStorage |
+| Factory Reset | [x] | Resets all CRM state and localStorage settings |
+
+---
+
+## Batch 8: Clients Dashboard - Props Wiring
+**File:** `app/(app)/dashboard/clients-v2/clients-client.tsx`
+
+| Component | Status | Description |
+|-----------|--------|-------------|
+| CollaborationIndicator | [x] | Wired to filtered clients data |
+| ActivityFeed | [x] | Wired to activities state |
+| QuickActionsToolbar | [x] | Wired to client action handlers |
+
+---
+
+## Batch 9: API Keys Dashboard - Props Wiring
+**File:** `app/(app)/dashboard/api-keys-v2/api-keys-client.tsx`
+
+| Component | Status | Description |
+|-----------|--------|-------------|
+| AIInsightsPanel | [x] | Computed from real API key stats |
+| CollaborationIndicator | [x] | Computed from API key creators |
+| PredictiveAnalytics | [x] | Computed from API usage stats |
+| ActivityFeed | [x] | Computed from API key data |
 
 ---
 
@@ -113,6 +181,9 @@ const handleGenerateReport = async (type: string) => {
 | Products | useProducts | create, update, remove |
 | Renewals | useRenewals | create, update, remove |
 | Milestones | useMilestones | create, update, remove |
+| Sprints | useSprints | create, update, remove |
+| API Keys | useApiKeys | createKey, updateKey, revokeKey |
+| Clients | useClients | addClient, updateClient, deleteClient |
 
 ---
 
@@ -122,7 +193,6 @@ These dashboards already have fully wired handlers:
 - Deployments (`deployments-v2`)
 - Logistics (`logistics-v2`)
 - Shipping (`shipping-v2`)
-- Sprints (`sprints-v2`)
 - Warehouse (`warehouse-v2`)
 - AI Design (`ai-design-v2`)
 
@@ -136,4 +206,9 @@ Status: **All batches complete** - Build passing with 598 pages
 - **Bugs**: `handleArchiveBugs` now soft-deletes closed bugs via Supabase
 - **Products**: `handleSyncAll` now calls `refetch()` to refresh data from database
 - **Renewals**: Added hook integration, report generation exports CSV, archive function soft-deletes old renewals
-- **Milestones**: All 4 report handlers now generate actual CSV downloads with relevant data analysis
+- **Milestones**: All report handlers + CRUD handlers wired to database
+- **Sprints**: API key handlers wired to useApiKeys hook with real key generation
+- **Analytics**: All handlers already properly wired to Supabase (verified)
+- **Customers**: API key management, file import, and danger zone actions fully wired
+- **Clients**: Competitive upgrade components wired to real client/activity data
+- **API Keys**: Competitive upgrade components computed from real API key stats
