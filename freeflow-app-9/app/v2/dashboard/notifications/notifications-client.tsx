@@ -337,8 +337,155 @@ export default function NotificationsClient() {
     { label: 'Automations', value: stats.activeAutomations.toString(), icon: Workflow, color: 'from-rose-500 to-rose-600' }
   ]
 
+  // Computed AI insights from notification data
+  const computedInsights = useMemo(() => {
+    const insights: Array<{
+      id: string
+      type: 'recommendation' | 'alert' | 'opportunity' | 'prediction' | 'success' | 'info' | 'warning' | 'error'
+      title: string
+      description: string
+      impact?: 'high' | 'medium' | 'low'
+      priority?: 'high' | 'medium' | 'low'
+      metric?: string
+      change?: number
+      confidence?: number
+      action?: string
+      category?: string
+    }> = []
+
+    // Insight: Unread notifications alert
+    if (stats.unread > 5) {
+      insights.push({
+        id: 'unread-alert',
+        type: 'alert',
+        title: 'High Unread Count',
+        description: `You have ${stats.unread} unread notifications. Consider reviewing them to stay on top of important updates.`,
+        impact: stats.unread > 10 ? 'high' : 'medium',
+        priority: 'high',
+        metric: `${stats.unread} unread`,
+        action: 'Review Inbox',
+        category: 'engagement'
+      })
+    }
+
+    // Insight: Open rate performance
+    const openRateNum = parseFloat(stats.openRate)
+    if (openRateNum > 0) {
+      if (openRateNum >= 25) {
+        insights.push({
+          id: 'open-rate-success',
+          type: 'success',
+          title: 'Great Open Rate Performance',
+          description: `Your open rate of ${stats.openRate}% is above industry average. Keep up the engaging content!`,
+          impact: 'high',
+          metric: `${stats.openRate}%`,
+          confidence: 85,
+          category: 'performance'
+        })
+      } else if (openRateNum < 15) {
+        insights.push({
+          id: 'open-rate-recommendation',
+          type: 'recommendation',
+          title: 'Improve Open Rates',
+          description: `Your open rate is ${stats.openRate}%. Consider A/B testing subject lines or optimizing send times.`,
+          impact: 'medium',
+          priority: 'medium',
+          metric: `${stats.openRate}%`,
+          action: 'Try A/B Testing',
+          category: 'optimization'
+        })
+      }
+    }
+
+    // Insight: Click rate analysis
+    const clickRateNum = parseFloat(stats.clickRate)
+    if (clickRateNum > 0 && clickRateNum < 5) {
+      insights.push({
+        id: 'click-rate-opportunity',
+        type: 'opportunity',
+        title: 'Click Rate Opportunity',
+        description: `Click rate is ${stats.clickRate}%. Adding clearer CTAs could improve engagement.`,
+        impact: 'medium',
+        metric: `${stats.clickRate}%`,
+        action: 'Optimize CTAs',
+        category: 'optimization'
+      })
+    }
+
+    // Insight: Delivery rate health
+    const deliveryRateNum = parseFloat(stats.deliveryRate)
+    if (deliveryRateNum > 0) {
+      if (deliveryRateNum >= 95) {
+        insights.push({
+          id: 'delivery-health',
+          type: 'success',
+          title: 'Excellent Delivery Rate',
+          description: `${stats.deliveryRate}% delivery rate indicates healthy sender reputation.`,
+          impact: 'low',
+          metric: `${stats.deliveryRate}%`,
+          confidence: 90,
+          category: 'health'
+        })
+      } else if (deliveryRateNum < 90) {
+        insights.push({
+          id: 'delivery-warning',
+          type: 'warning',
+          title: 'Delivery Rate Needs Attention',
+          description: `Delivery rate of ${stats.deliveryRate}% is below optimal. Review your contact list quality.`,
+          impact: 'high',
+          priority: 'high',
+          metric: `${stats.deliveryRate}%`,
+          action: 'Clean Contact List',
+          category: 'health'
+        })
+      }
+    }
+
+    // Insight: Starred notifications reminder
+    if (stats.starred > 0 && stats.starred > stats.unread) {
+      insights.push({
+        id: 'starred-reminder',
+        type: 'info',
+        title: 'Starred Items Pending',
+        description: `You have ${stats.starred} starred notifications saved for later review.`,
+        impact: 'low',
+        metric: `${stats.starred} starred`,
+        category: 'organization'
+      })
+    }
+
+    // Insight: Campaign volume prediction
+    if (stats.totalSent > 1000) {
+      insights.push({
+        id: 'volume-prediction',
+        type: 'prediction',
+        title: 'Campaign Performance Trend',
+        description: `Based on ${(stats.totalSent / 1000).toFixed(1)}k sent notifications, engagement is trending ${openRateNum >= 20 ? 'positively' : 'stable'}.`,
+        impact: 'medium',
+        confidence: 75,
+        metric: `${(stats.totalSent / 1000).toFixed(1)}k sent`,
+        category: 'analytics'
+      })
+    }
+
+    // Default insight if no data
+    if (insights.length === 0 && stats.totalNotifications === 0) {
+      insights.push({
+        id: 'getting-started',
+        type: 'info',
+        title: 'Get Started with Notifications',
+        description: 'Create your first campaign to start engaging with your audience and see insights here.',
+        impact: 'medium',
+        action: 'Create Campaign',
+        category: 'onboarding'
+      })
+    }
+
+    return insights
+  }, [stats])
+
   // Define adapter variables for competitive upgrade components
-  const notificationsAIInsights = []
+  const notificationsAIInsights = computedInsights
   const notificationsCollaborators = []
   const notificationsPredictions = []
   const notificationsActivities = activeNotifications.slice(0, 5).map(n => ({
@@ -606,7 +753,7 @@ export default function NotificationsClient() {
               className="overflow-hidden mb-6"
             >
               <AIInsightsPanel
-                insights={[]} // TODO: Wire real AI insights from analytics
+                insights={computedInsights}
                 className="mb-0"
               />
             </motion.div>

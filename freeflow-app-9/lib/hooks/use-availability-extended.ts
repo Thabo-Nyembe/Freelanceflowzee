@@ -94,9 +94,17 @@ export function useAvailableSlots(userId?: string, date?: string, duration?: num
       const result: string[] = []
       let currentTime = daySchedule.start_time
       const slotDuration = duration || 30
-      while (currentTime < daySchedule.end_time) {
-        result.push(currentTime)
+      const MAX_ITERATIONS = 100 // Safety guard: max slots per day (100 * 30min = 50 hours)
+      let iterations = 0
+      while (currentTime < daySchedule.end_time && iterations < MAX_ITERATIONS) {
+        iterations++
         const [hours, minutes] = currentTime.split(':').map(Number)
+        // Guard against invalid time parsing
+        if (isNaN(hours) || isNaN(minutes)) {
+          console.warn('Invalid time format detected in availability slot generation:', currentTime)
+          break
+        }
+        result.push(currentTime)
         const newMinutes = minutes + slotDuration
         const newHours = hours + Math.floor(newMinutes / 60)
         currentTime = `${String(newHours).padStart(2, '0')}:${String(newMinutes % 60).padStart(2, '0')}`
