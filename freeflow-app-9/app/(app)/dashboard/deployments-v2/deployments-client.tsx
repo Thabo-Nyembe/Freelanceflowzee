@@ -1642,38 +1642,7 @@ export default function DeploymentsClient() {
               </CardHeader>
               <CardContent className="p-0">
                 <div className="divide-y divide-gray-100 dark:divide-gray-800">
-                  {mockBlobs.map(blob => (
-                    <div key={blob.id} className="flex items-center gap-4 p-4 hover:bg-gray-50 dark:hover:bg-gray-800">
-                      <input type="checkbox" className="rounded" />
-                      <div className="w-10 h-10 rounded-lg bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center">
-                        <File className="h-5 w-5 text-indigo-600" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-medium font-mono text-sm">{blob.name}</p>
-                        <p className="text-xs text-gray-500">{blob.contentType} • {formatSize(blob.size)}</p>
-                      </div>
-                      <Badge variant={blob.isPublic ? 'default' : 'outline'}>{blob.isPublic ? 'Public' : 'Private'}</Badge>
-                      <span className="text-sm text-gray-500">{blob.downloadCount} downloads</span>
-                      <div className="flex gap-1">
-                        <Button variant="ghost" size="icon" onClick={async () => {
-                          try {
-                            await navigator.clipboard.writeText(`https://storage.freeflow.app/${blob.name}`)
-                            toast.success(`Copied: URL copied to clipboard`)
-                          } catch {
-                            toast.error('Copy Failed')
-                          }
-                        }}><Copy className="h-4 w-4" /></Button>
-                        <Button variant="ghost" size="icon" onClick={() => {
-                          const link = document.createElement('a')
-                          link.href = `https://storage.freeflow.app/${blob.name}`
-                          link.download = blob.name.split('/').pop() || blob.name
-                          link.click()
-                          toast.success(`Download Started`)
-                        }}><Download className="h-4 w-4" /></Button>
-                        <Button variant="ghost" size="icon" onClick={() => { setSelectedBlob(blob); setShowDeleteBlobDialog(true); }}><Trash2 className="h-4 w-4 text-red-500" /></Button>
-                      </div>
-                    </div>
-                  ))}
+                  {/* Blobs list - connect to real data source */}
                 </div>
               </CardContent>
             </Card>
@@ -1765,7 +1734,7 @@ export default function DeploymentsClient() {
                 <div className="flex gap-2">
                   <Button variant="ghost" size="sm" className="text-white hover:bg-gray-700" onClick={async () => {
                     try {
-                      const logsText = mockBuildLogs.map(l => `[${l.timestamp}] [${l.level.toUpperCase()}] [${l.step}] ${l.message}`).join('\n')
+                      const logsText = realTimeLogs.map(l => `[${l.timestamp}] [${l.level.toUpperCase()}] [${l.step}] ${l.message}`).join('\n')
                       await navigator.clipboard.writeText(logsText)
                       toast.success(`Copied: log entries copied to clipboard`)
                     } catch {
@@ -1773,7 +1742,7 @@ export default function DeploymentsClient() {
                     }
                   }}><Copy className="h-4 w-4" /></Button>
                   <Button variant="ghost" size="sm" className="text-white hover:bg-gray-700" onClick={() => {
-                    const logsText = mockBuildLogs.map(l => `[${l.timestamp}] [${l.level.toUpperCase()}] [${l.step}] ${l.message}`).join('\n')
+                    const logsText = realTimeLogs.map(l => `[${l.timestamp}] [${l.level.toUpperCase()}] [${l.step}] ${l.message}`).join('\n')
                     const blob = new Blob([logsText], { type: 'text/plain' })
                     const url = URL.createObjectURL(blob)
                     const link = document.createElement('a')
@@ -2104,23 +2073,7 @@ export default function DeploymentsClient() {
               </CardHeader>
               <CardContent className="p-0">
                 <div className="divide-y divide-gray-100 dark:divide-gray-800">
-                  {mockProtections.map(protection => (
-                    <div key={protection.id} className="flex items-center justify-between p-6 hover:bg-gray-50 dark:hover:bg-gray-800">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-lg bg-amber-100 dark:bg-amber-900 flex items-center justify-center">
-                          <Shield className="h-6 w-6 text-amber-600" />
-                        </div>
-                        <div>
-                          <h4 className="font-semibold">{protection.name}</h4>
-                          <p className="text-sm text-gray-500">{protection.type.replace('_', ' ')}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <Badge className={protection.enabled ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>{protection.enabled ? 'Enabled' : 'Disabled'}</Badge>
-                        <Switch checked={protection.enabled} />
-                      </div>
-                    </div>
-                  ))}
+                  {/* Protection rules list - connect to real data source */}
                 </div>
               </CardContent>
             </Card>
