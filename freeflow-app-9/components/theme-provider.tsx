@@ -80,12 +80,24 @@ export function withTheme<T extends object>(
 export function useThemeTransition(duration: number = 200) {
   const [isTransitioning, setIsTransitioning] = React.useState<any>(false)
   const { setTheme } = useTheme()
+  const timeoutRef = React.useRef<NodeJS.Timeout | null>(null)
+
+  React.useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current)
+      }
+    }
+  }, [])
 
   const toggleTheme = React.useCallback((newTheme: string) => {
     setIsTransitioning(true)
     setTheme(newTheme)
-    
-    setTimeout(() => {
+
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current)
+    }
+    timeoutRef.current = setTimeout(() => {
       setIsTransitioning(false)
     }, duration)
   }, [setTheme, duration])

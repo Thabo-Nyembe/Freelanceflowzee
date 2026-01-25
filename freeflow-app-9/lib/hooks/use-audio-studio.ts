@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
 export interface AudioTrack {
@@ -78,6 +78,16 @@ export function useAudioStudio(initialTracks: AudioTrack[] = [], options: UseAud
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const supabase = createClient()
+  const processingTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  // Cleanup processing timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (processingTimeoutRef.current) {
+        clearTimeout(processingTimeoutRef.current)
+      }
+    }
+  }, [])
 
   const stats: AudioStudioStats = {
     totalTracks: tracks.length,
@@ -243,8 +253,11 @@ export function useAudioStudio(initialTracks: AudioTrack[] = [], options: UseAud
       } : t
     ))
 
-    // Simulate processing completion
-    setTimeout(async () => {
+    // Simulate processing completion with cleanup
+    if (processingTimeoutRef.current) {
+      clearTimeout(processingTimeoutRef.current)
+    }
+    processingTimeoutRef.current = setTimeout(async () => {
       await supabase
         .from('audio_tracks')
         .update({

@@ -574,6 +574,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
             return { ready: true, method: 'camera' }
           }
         } catch (err) {
+          console.error('Camera access failed:', err)
         }
       }
 

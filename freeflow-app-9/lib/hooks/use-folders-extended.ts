@@ -137,7 +137,10 @@ export function useFolderBreadcrumbs(folderId?: string) {
     try {
       const crumbs: any[] = []
       let currentId: string | null = folderId
+      const visited = new Set<string>()
       while (currentId) {
+        if (visited.has(currentId)) break // Cycle detected
+        visited.add(currentId)
         const { data } = await supabase.from('folders').select('id, name, parent_id').eq('id', currentId).single()
         if (!data) break
         crumbs.unshift(data)

@@ -99,7 +99,10 @@ export function useTypeHierarchy(typeId?: string) {
     try {
       const result: any[] = []
       let currentId: string | null = typeId
+      const visited = new Set<string>()
       while (currentId) {
+        if (visited.has(currentId)) break // Cycle detected
+        visited.add(currentId)
         const { data } = await supabase.from('types').select('*').eq('id', currentId).single()
         if (!data) break
         result.unshift(data)
