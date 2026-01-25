@@ -248,7 +248,10 @@ const mockHealthScoreActivities: { id: string; user: string; action: string; tar
 // Quick actions will be defined inside the component to access state setters
 
 export default function HealthScoreClient() {
-
+  // Supabase hooks for real health score data
+  const { healthScores: dbHealthScores, stats: healthStats, isLoading: isLoadingHealthScores, error: healthScoresError, refetch: fetchHealthScores } = useHealthScores()
+  const { health: systemHealth, isLoading: isLoadingSystemHealth, refresh: refreshSystemHealth } = useSystemHealth()
+  const { createHealthScore: createHealthScoreMutation, updateHealthScore: updateHealthScoreMutation, deleteHealthScore: deleteHealthScoreMutation, isCreating, isUpdating, isDeleting } = useHealthScoreMutations()
 
   // UI State
   const [activeTab, setActiveTab] = useState('overview')
@@ -259,9 +262,7 @@ export default function HealthScoreClient() {
   const [isLiveMode, setIsLiveMode] = useState(true)
   const [timeRange, setTimeRange] = useState<'1h' | '4h' | '1d' | '7d' | '30d'>('1d')
 
-  // Database State
-  const [dbHealthScores, setDbHealthScores] = useState<DbHealthScore[]>([])
-  const [loading, setLoading] = useState(true)
+  // Dialog State
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [showSettingsDialog, setShowSettingsDialog] = useState(false)
@@ -271,74 +272,46 @@ export default function HealthScoreClient() {
   const [formState, setFormState] = useState<HealthScoreFormState>(initialFormState)
   const [editingId, setEditingId] = useState<string | null>(null)
 
-  // Computed stats
+  // Combined loading state
+  const isLoading = isLoadingHealthScores || isLoadingSystemHealth
+
+  // Show error toast if there's an error loading health scores
+  useEffect(() => {
+    if (healthScoresError) {
+      toast.error('Failed to load health scores')
+    }
+  }, [healthScoresError])
+
+  // Computed stats from hook data
   const overallHealth = useMemo(() => {
-    if (mockServices.length === 0) return 0
-    const healthyCount = mockServices.filter(s => s.status === 'healthy').length
-    const totalCount = mockServices.length
-    return Math.round((healthyCount / totalCount) * 100)
-  }, [])
+    if (dbHealthScores.length === 0) return systemHealth.status === 'healthy' ? 100 : systemHealth.status === 'degraded' ? 50 : 0
+    return Math.round(healthStats.avgScore)
+  }, [dbHealthScores, healthStats, systemHealth])
 
   const avgApdex = useMemo(() => {
-    if (mockServices.length === 0) return 0
-    return mockServices.reduce((sum, s) => sum + s.apdexScore, 0) / mockServices.length
-  }, [])
+    if (dbHealthScores.length === 0) return 0
+    return healthStats.avgScore / 100
+  }, [dbHealthScores, healthStats])
 
   const avgErrorRate = useMemo(() => {
-    if (mockServices.length === 0) return 0
-    return mockServices.reduce((sum, s) => sum + s.errorRate, 0) / mockServices.length
-  }, [])
+    if (dbHealthScores.length === 0) return 0
+    return (100 - healthStats.avgScore) / 100
+  }, [dbHealthScores, healthStats])
 
   const openIncidents = mockIncidents.filter(i => i.status !== 'resolved').length
 
   // Generate health code
   const generateHealthCode = () => `HS-${Date.now().toString(36).toUpperCase()}`
 
-  // Fetch health scores from Supabase
-  const fetchHealthScores = useCallback(async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-
-      const { data, error } = await supabase
-        .from('health_scores')
-        .select('*')
-        .eq('user_id', user.id)
-        .is('deleted_at', null)
-        .order('created_at', { ascending: false })
-
-      if (error) throw error
-      setDbHealthScores(data || [])
-    } catch (error) {
-      console.error('Error fetching health scores:', error)
-      toast.error('Failed to load health scores')
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
-  useEffect(() => {
-    fetchHealthScores()
-  }, [fetchHealthScores])
-
-  // Create health score
+  // Create health score using mutation hook
   const handleCreateHealthScore = async () => {
     if (!formState.customer_name.trim()) {
       toast.error('Customer name is required')
       return
     }
 
-    setIsSubmitting(true)
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        toast.error('Please sign in to create health scores')
-        return
-      }
-
-      const { error } = await supabase.from('health_scores').insert({
-        user_id: user.id,
-        health_code: generateHealthCode(),
+      await createHealthScoreMutation({
         customer_name: formState.customer_name,
         account_type: formState.account_type,
         overall_score: formState.overall_score,
@@ -349,10 +322,8 @@ export default function HealthScoreClient() {
         support_health: formState.support_health,
         financial: formState.financial,
         sentiment: formState.sentiment,
-        notes: formState.notes || null,
+        notes: formState.notes || undefined,
       })
-
-      if (error) throw error
 
       toast.success('Health score created successfully')
       setShowCreateDialog(false)
@@ -361,42 +332,30 @@ export default function HealthScoreClient() {
     } catch (error) {
       console.error('Error creating health score:', error)
       toast.error('Failed to create health score')
-    } finally {
-      setIsSubmitting(false)
     }
   }
 
-  // Update health score
+  // Update health score using mutation hook
   const handleUpdateHealthScore = async () => {
     if (!editingId || !formState.customer_name.trim()) {
       toast.error('Customer name is required')
       return
     }
 
-    setIsSubmitting(true)
     try {
-      const current = dbHealthScores.find(h => h.id === editingId)
-      const { error } = await supabase
-        .from('health_scores')
-        .update({
-          customer_name: formState.customer_name,
-          account_type: formState.account_type,
-          overall_score: formState.overall_score,
-          previous_score: current?.overall_score || 0,
-          score_change: formState.overall_score - (current?.overall_score || 0),
-          category: formState.category,
-          trend: formState.trend,
-          product_usage: formState.product_usage,
-          engagement: formState.engagement,
-          support_health: formState.support_health,
-          financial: formState.financial,
-          sentiment: formState.sentiment,
-          notes: formState.notes || null,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', editingId)
-
-      if (error) throw error
+      await updateHealthScoreMutation(editingId, {
+        customer_name: formState.customer_name,
+        account_type: formState.account_type,
+        overall_score: formState.overall_score,
+        category: formState.category,
+        trend: formState.trend,
+        product_usage: formState.product_usage,
+        engagement: formState.engagement,
+        support_health: formState.support_health,
+        financial: formState.financial,
+        sentiment: formState.sentiment,
+        notes: formState.notes || undefined,
+      })
 
       toast.success('Health score updated successfully')
       setShowCreateDialog(false)
@@ -406,21 +365,13 @@ export default function HealthScoreClient() {
     } catch (error) {
       console.error('Error updating health score:', error)
       toast.error('Failed to update health score')
-    } finally {
-      setIsSubmitting(false)
     }
   }
 
-  // Delete health score (soft delete)
+  // Delete health score using mutation hook
   const handleDeleteHealthScore = async (id: string) => {
     try {
-      const { error } = await supabase
-        .from('health_scores')
-        .update({ deleted_at: new Date().toISOString() })
-        .eq('id', id)
-
-      if (error) throw error
-
+      await deleteHealthScoreMutation(id)
       toast.success('Health score deleted')
       fetchHealthScores()
     } catch (error) {
@@ -429,8 +380,8 @@ export default function HealthScoreClient() {
     }
   }
 
-  // Edit health score
-  const handleEditHealthScore = (healthScore: DbHealthScore) => {
+  // Edit health score - populate form with existing data
+  const handleEditHealthScore = (healthScore: HealthScore) => {
     setFormState({
       customer_name: healthScore.customer_name,
       account_type: healthScore.account_type,
@@ -450,10 +401,10 @@ export default function HealthScoreClient() {
 
   // Refresh metrics handler
   const handleRefreshMetrics = () => {
-    setLoading(true)
     toast.promise(
       (async () => {
         await fetchHealthScores()
+        refreshSystemHealth()
       })(),
       {
         loading: 'Refreshing metrics...',
@@ -463,13 +414,14 @@ export default function HealthScoreClient() {
     )
   }
 
-  // Combined stats from DB + mock data
+  // Combined stats from DB + system health
   const combinedOverallHealth = useMemo(() => {
-    const dbAvg = dbHealthScores.length > 0
-      ? dbHealthScores.reduce((sum, h) => sum + h.overall_score, 0) / dbHealthScores.length
-      : 0
-    return dbHealthScores.length > 0 ? Math.round((overallHealth + dbAvg) / 2) : overallHealth
-  }, [overallHealth, dbHealthScores])
+    if (dbHealthScores.length > 0) {
+      return Math.round(healthStats.avgScore)
+    }
+    // Fallback to system health status
+    return systemHealth.status === 'healthy' ? 100 : systemHealth.status === 'degraded' ? 50 : 0
+  }, [dbHealthScores, healthStats, systemHealth])
 
   const getStatusColor = (status: ServiceStatus) => {
     switch (status) {
@@ -832,11 +784,18 @@ export default function HealthScoreClient() {
                   <option value="7d" className="text-gray-900">Last 7 days</option>
                   <option value="30d" className="text-gray-900">Last 30 days</option>
                 </select>
+                {isLoading && (
+                  <div className="flex items-center gap-2 px-3 py-1.5 bg-white/20 rounded-lg text-white text-sm">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Loading...
+                  </div>
+                )}
                 <button
                   onClick={handleRefreshMetrics}
                   className="p-2 bg-white/20 rounded-lg hover:bg-white/30 transition-colors"
+                  disabled={isLoading}
                 >
-                  <RefreshCw className={`w-5 h-5 text-white ${loading ? 'animate-spin' : ''}`} />
+                  <RefreshCw className={`w-5 h-5 text-white ${isLoading ? 'animate-spin' : ''}`} />
                 </button>
               </div>
             </div>
@@ -931,7 +890,7 @@ export default function HealthScoreClient() {
                 onClick={handleRefreshMetrics}
                 className="h-20 flex-col gap-2 bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400 hover:scale-105 transition-all duration-200"
               >
-                <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
                 <span className="text-xs font-medium">Refresh</span>
               </Button>
               <Button

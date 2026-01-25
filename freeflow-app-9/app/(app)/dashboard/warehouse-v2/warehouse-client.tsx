@@ -51,7 +51,8 @@ import {
   Printer,
   Mail,
   Upload,
-  Terminal
+  Terminal,
+  Loader2
 } from 'lucide-react'
 
 // Lazy-loaded Enhanced & Competitive Upgrade Components for code splitting
@@ -1442,6 +1443,18 @@ export default function WarehouseClient() {
   const handleStartInventoryCount = () => {
     setShowCycleCountDialog(true)
     toast.success('Inventory count started - Count session is now active')
+  }
+
+  // Loading state UI
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-white to-teal-50 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-cyan-600" />
+          <p className="text-muted-foreground">Loading warehouse data...</p>
+        </div>
+      </div>
+    )
   }
 
   return (

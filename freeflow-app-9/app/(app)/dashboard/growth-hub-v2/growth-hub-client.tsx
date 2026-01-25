@@ -52,7 +52,8 @@ import {
   Webhook,
   Database,
   Trash2,
-  Terminal
+  Terminal,
+  Loader2
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -303,21 +304,43 @@ export default function GrowthHubClient() {
   const { funnels: dbFunnels, isLoading: funnelsLoading, refresh: refreshFunnels } = useConversionFunnels()
   const { goals: dbGoals, refresh: refreshGoals } = useConversionGoals()
 
+  // Supabase client for direct operations
+  const supabase = createClient()
+
+  // Combined loading state
+  const isDataLoading = expLoading || metricsLoading || cohortsLoading || funnelsLoading
+
+  // Loading state - show after all hooks are called
+  if (isDataLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-emerald-50/30 to-teal-50/40 dark:bg-none dark:bg-gray-900">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-8 h-8 animate-spin text-green-600" />
+          <p className="text-muted-foreground">Loading growth analytics...</p>
+        </div>
+      </div>
+    )
+  }
+
   // Fetch user ID on mount
   useEffect(() => {
     getUserId().then(setUserId)
   }, [getUserId])
 
-  // Stats calculations
+  // Stats calculations using database data
   const stats = useMemo(() => {
-    const totalFunnels = mockFunnels.length
-    const avgConversion = mockFunnels.reduce((acc, f) => acc + f.totalConversion, 0) / totalFunnels
-    const totalCohortSize = mockCohorts.reduce((acc, c) => acc + c.size, 0)
-    const activeExperiments = mockExperiments.filter(e => e.status === 'running').length
-    const avgRetention = mockRetentionAnalyses.reduce((acc, r) => acc + r.avgRetention, 0) / mockRetentionAnalyses.length
-    const totalExperimentUsers = mockExperiments.reduce((acc, e) => acc + e.totalUsers, 0)
-    const completedExperiments = mockExperiments.filter(e => e.status === 'completed').length
-    const dashboardCount = mockDashboards.length
+    const totalFunnels = dbFunnels?.length || 0
+    const avgConversion = totalFunnels > 0
+      ? dbFunnels.reduce((acc: number, f: any) => acc + (f.conversion_rate || 0), 0) / totalFunnels
+      : 0
+    const totalCohortSize = dbCohorts?.reduce((acc: number, c: any) => acc + (c.size || 0), 0) || 0
+    const activeExperiments = dbExperiments?.filter((e: any) => e.status === 'running').length || 0
+    const avgRetention = dbMetrics?.length > 0
+      ? dbMetrics.reduce((acc: number, m: any) => acc + (m.retention_rate || 0), 0) / dbMetrics.length
+      : 0
+    const totalExperimentUsers = dbExperiments?.reduce((acc: number, e: any) => acc + (e.total_users || 0), 0) || 0
+    const completedExperiments = dbExperiments?.filter((e: any) => e.status === 'completed').length || 0
+    const dashboardCount = dbPlaybooks?.length || 0
 
     return {
       totalFunnels,
@@ -329,17 +352,17 @@ export default function GrowthHubClient() {
       completedExperiments,
       dashboardCount
     }
-  }, [])
+  }, [dbFunnels, dbCohorts, dbExperiments, dbMetrics, dbPlaybooks])
 
-  // Filtered data
+  // Filtered data using database experiments
   const filteredExperiments = useMemo(() => {
-    return mockExperiments.filter(exp => {
-      const matchesSearch = exp.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        exp.description.toLowerCase().includes(searchQuery.toLowerCase())
+    return (dbExperiments || []).filter((exp: any) => {
+      const matchesSearch = (exp.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (exp.description || '').toLowerCase().includes(searchQuery.toLowerCase())
       const matchesStatus = statusFilter === 'all' || exp.status === statusFilter
       return matchesSearch && matchesStatus
     })
-  }, [searchQuery, statusFilter])
+  }, [dbExperiments, searchQuery, statusFilter])
 
   // CRUD Handlers
   const handleCreateExperiment = async () => {
@@ -714,7 +737,7 @@ export default function GrowthHubClient() {
                   try {
                     const { data, error } = await supabase.from('growth_metrics').select('*').limit(100)
                     if (error) throw error
-                    const reportData = data || mockFunnels.map(f => ({ name: f.name, conversion: f.totalConversion, users: f.totalUsers }))
+                    const reportData = data || (dbFunnels || []).map((f: any) => ({ name: f.name, conversion: f.conversion_rate || 0, users: f.total_users || 0 }))
                     const csvContent = [
                       ['Report Name', 'Conversion Rate', 'Total Users', 'Generated At'].join(','),
                       ...reportData.map((r: any) => [r.name || 'Growth Metric', r.conversion || r.value || 0, r.users || 0, new Date().toISOString()].join(','))

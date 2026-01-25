@@ -8,6 +8,8 @@ import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { useServers, useSystemAlerts, useServerMutations, useAlertMutations } from '@/lib/hooks/use-monitoring'
 import type { Server as DbServer, SystemAlert as DbAlert } from '@/lib/hooks/use-monitoring'
+import { useSystemLogs } from '@/lib/hooks/use-system-logs'
+import type { SystemLog } from '@/lib/hooks/use-system-logs'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -56,7 +58,8 @@ import {
   AlertOctagon,
   Sliders,
   Mail,
-  Copy
+  Copy,
+  Loader2
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -344,10 +347,11 @@ export default function MonitoringClient() {
     status: statusFilter !== 'all' ? statusFilter : undefined
   })
   const { alerts: dbAlerts, isLoading: alertsLoading, error: alertsError, refetch: refetchAlerts } = useSystemAlerts()
+  const { data: systemLogs, isLoading: logsLoading, error: logsError, refetch: refetchLogs } = useSystemLogs()
   const { createServer, deleteServer, isCreating, isDeleting } = useServerMutations()
   const { acknowledgeAlert, resolveAlert, isAcknowledging, isResolving } = useAlertMutations()
 
-  const isLoading = serversLoading || alertsLoading
+  const isLoading = serversLoading || alertsLoading || logsLoading
 
   // Dialog state
   const [showAddServerDialog, setShowAddServerDialog] = useState(false)
@@ -447,7 +451,7 @@ export default function MonitoringClient() {
   // Refresh metrics via hooks
   const handleRefreshMetrics = async () => {
     try {
-      await Promise.all([refetchServers(), refetchAlerts()])
+      await Promise.all([refetchServers(), refetchAlerts(), refetchLogs()])
       toast.success('Metrics refreshed', { description: 'Infrastructure data updated' })
     } catch (error) {
       toast.error('Failed to refresh', { description: error instanceof Error ? error.message : 'Unknown error' })
@@ -531,7 +535,7 @@ export default function MonitoringClient() {
         )}
 
         {/* Error State */}
-        {(serversError || alertsError) && (
+        {(serversError || alertsError || logsError) && (
           <Card className="border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/20">
             <CardContent className="p-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -539,7 +543,7 @@ export default function MonitoringClient() {
                 <div>
                   <p className="font-medium text-red-900 dark:text-red-200">Error loading data</p>
                   <p className="text-sm text-red-700 dark:text-red-400">
-                    {serversError?.message || alertsError?.message || 'Failed to load monitoring data'}
+                    {serversError?.message || alertsError?.message || logsError?.message || 'Failed to load monitoring data'}
                   </p>
                 </div>
               </div>

@@ -708,6 +708,46 @@ export default function InvestorMetricsClient() {
     { id: '3', label: 'Export Data', icon: 'download', action: () => setShowExportDataDialog(true), variant: 'outline' as const },
   ]
 
+  // Show loading state
+  if ((loading || hookLoading) && dbMetrics.length === 0 && hookMetrics.length === 0) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-yellow-50/30 to-orange-50/40 dark:bg-none dark:bg-gray-900 p-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-center h-[60vh]">
+            <div className="text-center">
+              <Loader2 className="w-12 h-12 animate-spin text-amber-600 mx-auto mb-4" />
+              <p className="text-lg text-muted-foreground">Loading investor metrics...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Show error state
+  if (hookError && dbMetrics.length === 0 && hookMetrics.length === 0) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-amber-50 via-yellow-50/30 to-orange-50/40 dark:bg-none dark:bg-gray-900 p-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-center h-[60vh]">
+            <div className="text-center">
+              <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+              <p className="text-lg text-red-600 mb-2">Failed to load investor metrics</p>
+              <p className="text-muted-foreground mb-4">{hookError}</p>
+              <Button
+                onClick={() => fetchMetrics()}
+                className="bg-amber-600 text-white"
+              >
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Try Again
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-yellow-50/30 to-orange-50/40 dark:bg-none dark:bg-gray-900">
       <div className="p-8">

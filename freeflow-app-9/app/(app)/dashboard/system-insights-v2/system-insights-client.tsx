@@ -20,8 +20,14 @@ import {
   FileText, BarChart3, ArrowUpRight, ArrowDownRight, CheckCircle,
   AlertCircle, Play, Pause, Download,
   Plus, Trash2, Edit3, Copy, ExternalLink, Mail, Webhook,
-  Key, Sliders, Archive, AlertOctagon
+  Key, Sliders, Archive, AlertOctagon, Loader2
 } from 'lucide-react'
+
+// Database hooks for Supabase integration
+import { useSystemInsights } from '@/lib/hooks/use-system-insights'
+import { useServers, useSystemAlerts as useMonitoringAlerts } from '@/lib/hooks/use-monitoring'
+import { useSystems, useActiveAlerts, useSystemStatus } from '@/lib/hooks/use-systems-extended'
+import { useInsights } from '@/lib/hooks/use-insights-extended'
 
 // Enhanced & Competitive Upgrade Components
 import {
@@ -197,6 +203,110 @@ interface DbSystemSettings {
 }
 
 export default function SystemInsightsClient() {
+  // Supabase hooks for data fetching
+  const { insights: systemInsightsData, loading: insightsLoading, error: insightsError, refetch: refetchInsights } = useSystemInsights()
+  const { servers, stats: serverStats, loading: serversLoading, error: serversError, refetch: refetchServers } = useServers()
+  const { alerts: monitoringAlerts, loading: alertsLoading, error: alertsError, refetch: refetchAlerts } = useMonitoringAlerts()
+  const { systems, isLoading: systemsLoading } = useSystems()
+  const { alerts: activeAlertsData, counts: alertCounts, isLoading: activeAlertsLoading, refresh: refreshActiveAlerts } = useActiveAlerts()
+  const { status: systemStatusData, isLoading: statusLoading, refresh: refreshStatus } = useSystemStatus()
+  const { insights: extendedInsights, isLoading: extendedInsightsLoading, refresh: refreshExtendedInsights } = useInsights()
+
+  // Combined loading and error states
+  const hookLoading = insightsLoading || serversLoading || alertsLoading || systemsLoading || activeAlertsLoading || statusLoading || extendedInsightsLoading
+  const hookError = insightsError || serversError || alertsError
+
+  // Transform hook data to component format
+  const metrics: Metric[] = servers?.map((server: any) => ({
+    id: server.id,
+    name: server.server_name || 'Server',
+    value: server.cpu_usage || 0,
+    unit: '%',
+    change: 0,
+    changePercent: 0,
+    trend: 'stable' as const,
+    sparkline: [],
+    thresholds: { warning: 70, critical: 90 },
+    status: server.cpu_usage > 90 ? 'critical' : server.cpu_usage > 70 ? 'warning' : 'normal',
+    host: server.server_name
+  })) || []
+
+  const alerts: Alert[] = monitoringAlerts?.map((alert: any) => ({
+    id: alert.id,
+    name: alert.title || alert.alert_type || 'Alert',
+    severity: alert.severity || 'warning',
+    status: alert.status === 'acknowledged' ? 'pending' : alert.status === 'resolved' ? 'resolved' : 'firing',
+    message: alert.description || alert.title || '',
+    metric: alert.alert_type || 'custom',
+    value: 0,
+    threshold: 0,
+    startedAt: alert.created_at,
+    resolvedAt: alert.resolved_at,
+    tags: {}
+  })) || []
+
+  const logs: LogEntry[] = []
+
+  const services: ServiceHealth[] = systems?.map((system: any) => ({
+    id: system.id,
+    name: system.name || 'Service',
+    status: system.status === 'active' ? 'healthy' : system.status === 'degraded' ? 'degraded' : 'down',
+    uptime: 99.9,
+    latency: 0,
+    errorRate: 0,
+    requestsPerSecond: 0,
+    apdex: 0.95,
+    lastChecked: system.updated_at || new Date().toISOString(),
+    dependencies: []
+  })) || []
+
+  const traces: Trace[] = []
+  const hosts: Host[] = servers?.map((server: any) => ({
+    id: server.id,
+    name: server.server_name || 'Host',
+    status: server.status === 'healthy' ? 'running' : server.status === 'warning' ? 'warning' : server.status === 'critical' ? 'critical' : 'offline',
+    cpu: server.cpu_usage || 0,
+    memory: server.memory_usage || 0,
+    disk: server.disk_usage || 0,
+    network: { in: 0, out: 0 },
+    apps: 0,
+    os: 'Linux',
+    uptime: `${Math.floor(server.uptime_percentage || 0)}%`
+  })) || []
+
+  const apmServices: APMService[] = systems?.map((system: any) => ({
+    id: system.id,
+    name: system.name || 'Service',
+    language: 'TypeScript',
+    requestCount: 0,
+    errorRate: 0,
+    avgLatency: 0,
+    p99Latency: 0,
+    apdex: 0.95,
+    status: system.status === 'active' ? 'healthy' : system.status === 'degraded' ? 'degraded' : 'critical'
+  })) || []
+
+  // Transform for AI insights panel
+  const aiInsights = systemInsightsData?.map((insight: any) => ({
+    id: insight.id,
+    type: insight.severity === 'critical' ? 'error' : insight.severity === 'high' ? 'warning' : insight.severity === 'medium' ? 'info' : 'success',
+    title: insight.title,
+    description: insight.description || '',
+    priority: insight.priority || 'medium',
+    timestamp: insight.detected_at || insight.created_at,
+    category: insight.category || 'system'
+  })) || []
+
+  const collaborators = []
+  const predictions = []
+  const activities = extendedInsights?.map((insight: any) => ({
+    id: insight.id,
+    user: 'System',
+    action: insight.title || 'Activity',
+    target: insight.category || 'system',
+    timestamp: insight.created_at,
+    type: insight.type === 'alert' ? 'warning' : insight.type === 'anomaly' ? 'error' : 'info'
+  })) || []
 
   const [activeTab, setActiveTab] = useState('overview')
   const [timeRange, setTimeRange] = useState('1h')
