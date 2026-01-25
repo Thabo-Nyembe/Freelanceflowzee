@@ -146,13 +146,13 @@ interface APMService {
 }
 
 // Data arrays - populated from Supabase
-const mockMetrics: Metric[] = []
+const metrics: Metric[] = []
 
-const mockAlerts: Alert[] = []
+const alerts: Alert[] = []
 
 const mockLogs: LogEntry[] = []
 
-const mockServices: ServiceHealth[] = []
+const services: ServiceHealth[] = []
 
 const mockTraces: Trace[] = []
 
@@ -457,27 +457,27 @@ export default function SystemInsightsClient() {
 
   // Calculate stats
   const stats = useMemo(() => {
-    const firing = mockAlerts.filter(a => a.status === 'firing').length
-    const criticalAlerts = mockAlerts.filter(a => a.severity === 'critical' && a.status === 'firing').length
-    const healthyServices = mockServices.filter(s => s.status === 'healthy').length
-    const avgUptime = mockServices.length > 0 ? mockServices.reduce((sum, s) => sum + s.uptime, 0) / mockServices.length : 0
-    const totalRps = mockServices.reduce((sum, s) => sum + s.requestsPerSecond, 0)
-    const avgApdex = mockServices.length > 0 ? mockServices.reduce((sum, s) => sum + s.apdex, 0) / mockServices.length : 0
+    const firing = alerts.filter(a => a.status === 'firing').length
+    const criticalAlerts = alerts.filter(a => a.severity === 'critical' && a.status === 'firing').length
+    const healthyServices = services.filter(s => s.status === 'healthy').length
+    const avgUptime = services.length > 0 ? services.reduce((sum, s) => sum + s.uptime, 0) / services.length : 0
+    const totalRps = services.reduce((sum, s) => sum + s.requestsPerSecond, 0)
+    const avgApdex = services.length > 0 ? services.reduce((sum, s) => sum + s.apdex, 0) / services.length : 0
 
     return {
       firingAlerts: firing,
       criticalAlerts,
       healthyServices,
-      totalServices: mockServices.length,
+      totalServices: services.length,
       avgUptime: avgUptime.toFixed(2),
       totalRps,
-      errorLogs: mockLogs.filter(l => l.level === 'error' || l.level === 'fatal').length,
-      warningMetrics: mockMetrics.filter(m => m.status === 'warning').length,
-      totalHosts: mockHosts.length,
-      healthyHosts: mockHosts.filter(h => h.status === 'running').length,
+      errorLogs: logs.filter(l => l.level === 'error' || l.level === 'fatal').length,
+      warningMetrics: metrics.filter(m => m.status === 'warning').length,
+      totalHosts: hosts.length,
+      healthyHosts: hosts.filter(h => h.status === 'running').length,
       avgApdex: avgApdex.toFixed(2)
     }
-  }, [])
+  }, [alerts, services, logs, metrics, hosts])
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -515,8 +515,8 @@ export default function SystemInsightsClient() {
     { label: 'Healthy Services', value: `${stats.healthyServices}/${stats.totalServices}`, icon: CheckCircle, gradient: 'from-emerald-500 to-emerald-600', positive: true },
     { label: 'Avg Uptime', value: `${stats.avgUptime}%`, icon: Activity, gradient: 'from-blue-500 to-blue-600', positive: true },
     { label: 'Total RPS', value: stats.totalRps.toLocaleString(), icon: Zap, gradient: 'from-purple-500 to-purple-600', positive: true },
-    { label: 'CPU Usage', value: `${mockMetrics[0]?.value ?? 0}%`, icon: Cpu, gradient: 'from-indigo-500 to-indigo-600', positive: mockMetrics[0]?.status === 'normal' },
-    { label: 'Memory', value: `${mockMetrics[1]?.value ?? 0}%`, icon: Server, gradient: 'from-amber-500 to-amber-600', positive: mockMetrics[1]?.status === 'normal' },
+    { label: 'CPU Usage', value: `${metrics[0]?.value ?? 0}%`, icon: Cpu, gradient: 'from-indigo-500 to-indigo-600', positive: metrics[0]?.status === 'normal' },
+    { label: 'Memory', value: `${metrics[1]?.value ?? 0}%`, icon: Server, gradient: 'from-amber-500 to-amber-600', positive: metrics[1]?.status === 'normal' },
     { label: 'Hosts', value: `${stats.healthyHosts}/${stats.totalHosts}`, icon: Box, gradient: 'from-cyan-500 to-cyan-600', positive: true },
     { label: 'Apdex', value: stats.avgApdex, icon: TrendingUp, gradient: 'from-pink-500 to-pink-600', positive: parseFloat(stats.avgApdex) >= 0.9 }
   ]
@@ -991,6 +991,12 @@ export default function SystemInsightsClient() {
     )
   }
 
+  // Loading state
+  if (hookLoading && loading) return <div className="flex items-center justify-center h-full"><Loader2 className="h-8 w-8 animate-spin" /></div>
+
+  // Error state
+  if (hookError) return <div className="flex flex-col items-center justify-center h-full gap-4"><p className="text-red-500">Error loading data</p><Button onClick={() => { refetchInsights(); refetchServers(); refetchAlerts(); refreshActiveAlerts(); refreshStatus(); refreshExtendedInsights(); }}>Retry</Button></div>
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-zinc-50 dark:bg-none dark:bg-gray-900 p-4 md:p-6 lg:p-8">
       <div className="max-w-[1800px] mx-auto space-y-8">
@@ -1114,7 +1120,7 @@ export default function SystemInsightsClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-6">
-                    {mockServices.map(service => (
+                    {services.map(service => (
                       <div key={service.id} className={`p-3 rounded-lg border ${
                         service.status === 'healthy' ? 'border-emerald-200 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-900/20' :
                         service.status === 'degraded' ? 'border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/20' :
@@ -1146,7 +1152,7 @@ export default function SystemInsightsClient() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {mockAlerts.filter(a => a.status === 'firing').slice(0, 4).map(alert => (
+                  {alerts.filter(a => a.status === 'firing').slice(0, 4).map(alert => (
                     <div key={alert.id} className={`p-3 rounded-lg border ${
                       alert.severity === 'critical' ? 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20' :
                       'border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/20'
@@ -1158,7 +1164,7 @@ export default function SystemInsightsClient() {
                       <p className="text-sm text-gray-600 dark:text-gray-400">{alert.message}</p>
                     </div>
                   ))}
-                  {mockAlerts.filter(a => a.status === 'firing').length === 0 && (
+                  {alerts.filter(a => a.status === 'firing').length === 0 && (
                     <div className="text-center py-8 text-gray-500">
                       <CheckCircle className="h-8 w-8 mx-auto mb-2 text-emerald-500" />
                       No active alerts
@@ -1176,7 +1182,7 @@ export default function SystemInsightsClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                    {mockMetrics.slice(0, 4).map(metric => (
+                    {metrics.slice(0, 4).map(metric => (
                       <div key={metric.id} className={`p-4 rounded-lg ${
                         metric.status === 'critical' ? 'bg-red-50 dark:bg-red-900/20' :
                         metric.status === 'warning' ? 'bg-amber-50 dark:bg-amber-900/20' :
@@ -1219,7 +1225,7 @@ export default function SystemInsightsClient() {
           {/* Metrics Tab */}
           <TabsContent value="metrics" className="space-y-6">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {mockMetrics.map(metric => (
+              {metrics.map(metric => (
                 <Card key={metric.id} className={metric.status !== 'normal' ? 'border-amber-300 dark:border-amber-700' : ''}>
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between mb-2">
@@ -1398,7 +1404,7 @@ export default function SystemInsightsClient() {
                   </CardContent>
                 </Card>
               ))}
-              {mockAlerts.map(alert => (
+              {alerts.map(alert => (
                 <Card key={alert.id} className={
                   alert.status === 'firing' ? (
                     alert.severity === 'critical' ? 'border-red-300 dark:border-red-700' : 'border-amber-300 dark:border-amber-700'
@@ -2921,7 +2927,7 @@ docker run -d --name kazi-agent \\
             <div className="space-y-2">
               <Label>Select Services to Restart</Label>
               <div className="space-y-2 max-h-48 overflow-y-auto border rounded-lg p-3">
-                {mockServices.map(service => (
+                {services.map(service => (
                   <div key={service.id} className="flex items-center justify-between py-1">
                     <div className="flex items-center gap-2">
                       <input type="checkbox" id={service.id} className="rounded" defaultChecked />
@@ -2992,7 +2998,7 @@ docker run -d --name kazi-agent \\
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Services</SelectItem>
-                  {mockServices.map(s => (
+                  {services.map(s => (
                     <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>
                   ))}
                 </SelectContent>
@@ -3057,7 +3063,7 @@ docker run -d --name kazi-agent \\
               </Button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-              {mockMetrics.slice(0, 4).map(metric => (
+              {metrics.slice(0, 4).map(metric => (
                 <div key={metric.id} className={`p-4 rounded-lg ${
                   metric.status === 'critical' ? 'bg-red-50 dark:bg-red-900/20' :
                   metric.status === 'warning' ? 'bg-amber-50 dark:bg-amber-900/20' :

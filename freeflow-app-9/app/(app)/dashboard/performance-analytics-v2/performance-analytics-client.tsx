@@ -35,7 +35,8 @@ import {
   Trash2,
   PieChart,
   Workflow,
-  FileText
+  FileText,
+  Loader2
 } from 'lucide-react'
 
 // Production-ready API hooks for performance analytics
@@ -46,6 +47,9 @@ import {
   type PerformanceMetrics as ApiPerformanceMetrics,
   type PredictiveInsights
 } from '@/lib/api-clients'
+
+// Supabase hook for performance analytics data
+import { usePerformanceAnalytics, type PerformanceAnalytic } from '@/lib/hooks/use-performance-analytics'
 
 // Enhanced & Competitive Upgrade Components
 import {
@@ -286,15 +290,27 @@ export default function PerformanceAnalyticsClient() {
     refetch: refetchApiPredictive
   } = usePredictiveInsights()
 
+  // Supabase hook for performance analytics data
+  const {
+    performanceAnalytics: dbPerformanceAnalytics,
+    loading: analyticsLoading,
+    error: analyticsError,
+    refetch: refetchAnalytics,
+    createPerformanceAnalytic,
+    updatePerformanceAnalytic,
+    deletePerformanceAnalytic
+  } = usePerformanceAnalytics()
+
   // Refetch all API data
   const refetchAllApiData = useCallback(async () => {
     await Promise.all([
       refetchApiPerformance(),
       refetchApiDashboard(),
-      refetchApiPredictive()
+      refetchApiPredictive(),
+      refetchAnalytics()
     ])
     toast.success('Performance data refreshed')
-  }, [refetchApiPerformance, refetchApiDashboard, refetchApiPredictive])
+  }, [refetchApiPerformance, refetchApiDashboard, refetchApiPredictive, refetchAnalytics])
 
   // New dialog states for quick actions
   const [showNewAlertDialog, setShowNewAlertDialog] = useState(false)

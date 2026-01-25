@@ -792,10 +792,10 @@ export default function GrowthHubClient() {
                   toast.loading('Preparing export...')
                   try {
                     const exportData = {
-                      funnels: mockFunnels,
-                      cohorts: mockCohorts,
-                      experiments: mockExperiments,
-                      retention: mockRetentionAnalyses,
+                      funnels: dbFunnels || [],
+                      cohorts: dbCohorts || [],
+                      experiments: dbExperiments || [],
+                      metrics: dbMetrics || [],
                       exportedAt: new Date().toISOString()
                     }
                     const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
@@ -833,18 +833,21 @@ export default function GrowthHubClient() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {mockFunnels.slice(0, 3).map((funnel) => (
+                  {(dbFunnels || []).slice(0, 3).map((funnel: any) => (
                     <div key={funnel.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted cursor-pointer" onClick={() => setSelectedFunnel(funnel)}>
                       <div>
                         <p className="font-medium">{funnel.name}</p>
-                        <p className="text-xs text-muted-foreground">{funnel.steps.length} steps</p>
+                        <p className="text-xs text-muted-foreground">{(funnel.steps?.length || 0)} steps</p>
                       </div>
                       <div className="text-right">
-                        <p className="font-bold text-green-600">{funnel.totalConversion.toFixed(1)}%</p>
-                        <p className="text-xs text-muted-foreground">{funnel.totalUsers.toLocaleString()} users</p>
+                        <p className="font-bold text-green-600">{(funnel.conversion_rate || 0).toFixed(1)}%</p>
+                        <p className="text-xs text-muted-foreground">{(funnel.total_users || 0).toLocaleString()} users</p>
                       </div>
                     </div>
                   ))}
+                  {(!dbFunnels || dbFunnels.length === 0) && (
+                    <p className="text-sm text-muted-foreground text-center py-4">No funnels yet</p>
+                  )}
                 </CardContent>
               </Card>
 
@@ -857,18 +860,21 @@ export default function GrowthHubClient() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {mockExperiments.filter(e => e.status === 'running').map((exp) => (
+                  {(dbExperiments || []).filter((e: any) => e.status === 'running').map((exp: any) => (
                     <div key={exp.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted cursor-pointer" onClick={() => setSelectedExperiment(exp)}>
                       <div>
                         <p className="font-medium">{exp.name}</p>
-                        <p className="text-xs text-muted-foreground">{exp.variants.length} variants</p>
+                        <p className="text-xs text-muted-foreground">{(exp.variants?.length || 0)} variants</p>
                       </div>
                       <div className="text-right">
-                        <p className="font-bold">{exp.statisticalSignificance.toFixed(1)}%</p>
+                        <p className="font-bold">{(exp.statistical_significance || 0).toFixed(1)}%</p>
                         <p className="text-xs text-muted-foreground">confidence</p>
                       </div>
                     </div>
                   ))}
+                  {(!dbExperiments || dbExperiments.filter((e: any) => e.status === 'running').length === 0) && (
+                    <p className="text-sm text-muted-foreground text-center py-4">No active experiments</p>
+                  )}
                 </CardContent>
               </Card>
 
@@ -881,20 +887,23 @@ export default function GrowthHubClient() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {mockCohorts.slice(0, 3).map((cohort) => (
+                  {(dbCohorts || []).slice(0, 3).map((cohort: any) => (
                     <div key={cohort.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted cursor-pointer" onClick={() => setSelectedCohort(cohort)}>
                       <div className="flex items-center gap-3">
-                        <Badge className={getCohortTypeColor(cohort.type)}>{cohort.type}</Badge>
+                        <Badge className={getCohortTypeColor(cohort.type || 'behavioral')}>{cohort.type || 'behavioral'}</Badge>
                         <p className="font-medium">{cohort.name}</p>
                       </div>
                       <div className="text-right">
-                        <p className="font-bold">{cohort.size.toLocaleString()}</p>
-                        <p className={`text-xs ${cohort.growth >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                          {cohort.growth >= 0 ? '+' : ''}{cohort.growth}%
+                        <p className="font-bold">{(cohort.size || 0).toLocaleString()}</p>
+                        <p className={`text-xs ${(cohort.growth || 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {(cohort.growth || 0) >= 0 ? '+' : ''}{cohort.growth || 0}%
                         </p>
                       </div>
                     </div>
                   ))}
+                  {(!dbCohorts || dbCohorts.length === 0) && (
+                    <p className="text-sm text-muted-foreground text-center py-4">No cohorts yet</p>
+                  )}
                 </CardContent>
               </Card>
             </div>
@@ -923,11 +932,11 @@ export default function GrowthHubClient() {
                       </tr>
                     </thead>
                     <tbody>
-                      {mockRetentionAnalyses[0].data.map((row, idx) => (
+                      {(dbMetrics || []).slice(0, 5).map((metric: any, idx: number) => (
                         <tr key={idx}>
-                          <td className="p-2 font-medium">{row.cohortDate}</td>
-                          <td className="text-center p-2">{row.cohortSize.toLocaleString()}</td>
-                          {row.retentionByDay.slice(0, 5).map((val, i) => (
+                          <td className="p-2 font-medium">{new Date(metric.recorded_at || metric.created_at).toLocaleDateString()}</td>
+                          <td className="text-center p-2">{(metric.total_users || 0).toLocaleString()}</td>
+                          {[100, metric.week_1_retention || 80, metric.week_2_retention || 60, metric.week_3_retention || 45, metric.week_4_retention || 35].map((val, i) => (
                             <td key={i} className="p-2">
                               <div className={`rounded px-2 py-1 text-center text-xs font-medium ${getRetentionCellColor(val)}`}>
                                 {val}%
@@ -936,6 +945,11 @@ export default function GrowthHubClient() {
                           ))}
                         </tr>
                       ))}
+                      {(!dbMetrics || dbMetrics.length === 0) && (
+                        <tr>
+                          <td colSpan={7} className="text-center py-4 text-muted-foreground">No retention data yet</td>
+                        </tr>
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -958,7 +972,7 @@ export default function GrowthHubClient() {
                   </div>
                   <div className="hidden md:flex items-center gap-4">
                     <div className="text-center">
-                      <div className="text-3xl font-bold">{mockFunnels.length}</div>
+                      <div className="text-3xl font-bold">{dbFunnels?.length || 0}</div>
                       <div className="text-sm text-white/80">Total Funnels</div>
                     </div>
                     <div className="text-center">

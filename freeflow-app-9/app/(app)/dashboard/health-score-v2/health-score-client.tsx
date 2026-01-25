@@ -263,7 +263,6 @@ export default function HealthScoreClient() {
   const [timeRange, setTimeRange] = useState<'1h' | '4h' | '1d' | '7d' | '30d'>('1d')
 
   // Dialog State
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [showSettingsDialog, setShowSettingsDialog] = useState(false)
   const [showAlertsDialog, setShowAlertsDialog] = useState(false)
@@ -2192,8 +2191,8 @@ export default function HealthScoreClient() {
               </div>
               <div className="flex justify-end gap-2 pt-4">
                 <Button variant="outline" onClick={() => setShowCreateDialog(false)}>Cancel</Button>
-                <Button onClick={editingId ? handleUpdateHealthScore : handleCreateHealthScore} disabled={isSubmitting}>
-                  {isSubmitting ? 'Saving...' : editingId ? 'Update' : 'Create'}
+                <Button onClick={editingId ? handleUpdateHealthScore : handleCreateHealthScore} disabled={isCreating || isUpdating}>
+                  {(isCreating || isUpdating) ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Saving...</> : editingId ? 'Update' : 'Create'}
                 </Button>
               </div>
             </div>

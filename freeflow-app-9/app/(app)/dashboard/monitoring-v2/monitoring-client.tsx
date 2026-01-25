@@ -525,10 +525,10 @@ export default function MonitoringClient() {
         {isLoading && (
           <Card className="border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/20">
             <CardContent className="p-4 flex items-center gap-3">
-              <RefreshCw className="w-5 h-5 text-blue-600 animate-spin" />
+              <Loader2 className="w-5 h-5 text-blue-600 animate-spin" />
               <div>
                 <p className="font-medium text-blue-900 dark:text-blue-200">Loading monitoring data...</p>
-                <p className="text-sm text-blue-700 dark:text-blue-400">Fetching servers and alerts from database</p>
+                <p className="text-sm text-blue-700 dark:text-blue-400">Fetching servers, alerts, and logs from database</p>
               </div>
             </CardContent>
           </Card>
@@ -835,47 +835,52 @@ export default function MonitoringClient() {
             <Card>
               <CardHeader className="border-b">
                 <div className="flex items-center justify-between">
-                  <CardTitle>Log Stream</CardTitle>
+                  <CardTitle>Log Stream ({systemLogs?.length || 0} entries)</CardTitle>
                   <div className="flex items-center gap-3">
                     <Input placeholder="Search logs..." className="w-64" />
-                    <Button variant="outline" size="sm" onClick={async () => {
-                      try {
-                        await supabase.from('monitoring_logs').select('count')
-                        toast.success('Filters applied successfully')
-                      } catch (err) {
-                        toast.error('Failed to apply filters')
-                      }
-                    }}>
-                      <Filter className="w-4 h-4 mr-2" />
-                      Filter
+                    <Button variant="outline" size="sm" onClick={() => refetchLogs()}>
+                      <RefreshCw className={`w-4 h-4 mr-2 ${logsLoading ? 'animate-spin' : ''}`} />
+                      Refresh
                     </Button>
                   </div>
                 </div>
               </CardHeader>
               <CardContent className="p-0">
+                {logsLoading && (
+                  <div className="p-8 text-center">
+                    <Loader2 className="w-8 h-8 mx-auto mb-2 animate-spin text-gray-400" />
+                    <p className="text-gray-500">Loading logs...</p>
+                  </div>
+                )}
                 <div className="divide-y font-mono text-sm">
-                  {mockLogs.map(log => (
+                  {(systemLogs || []).map((log: SystemLog) => (
                     <div key={log.id} className="p-3 hover:bg-gray-50 dark:hover:bg-gray-800/50">
                       <div className="flex items-start gap-3">
                         <span className="text-gray-400 text-xs">
-                          {new Date(log.timestamp).toLocaleTimeString()}
+                          {new Date(log.logged_at).toLocaleTimeString()}
                         </span>
-                        <Badge className={getLogLevelColor(log.level)}>
-                          {log.level.toUpperCase()}
+                        <Badge className={getLogLevelColor(log.log_level as LogLevel)}>
+                          {log.log_level.toUpperCase()}
                         </Badge>
-                        <span className="text-blue-600">[{log.service}]</span>
-                        <span className="text-purple-600">{log.host}</span>
+                        <span className="text-blue-600">[{log.log_source}]</span>
+                        <span className="text-purple-600">{log.server_hostname || 'system'}</span>
                         <span className="flex-1 text-gray-700 dark:text-gray-300">
                           {log.message}
                         </span>
                       </div>
-                      {log.trace_id && (
+                      {log.request_id && (
                         <div className="mt-1 ml-20 text-xs text-gray-400">
-                          trace_id: {log.trace_id}
+                          request_id: {log.request_id}
                         </div>
                       )}
                     </div>
                   ))}
+                  {!logsLoading && (!systemLogs || systemLogs.length === 0) && (
+                    <div className="p-8 text-center text-gray-500">
+                      <FileText className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                      <p>No logs found. System logs will appear here when generated.</p>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
