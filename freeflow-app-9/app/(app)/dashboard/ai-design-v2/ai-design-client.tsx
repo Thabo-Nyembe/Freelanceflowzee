@@ -1521,14 +1521,14 @@ export default function AIDesignClient() {
                           <div className="font-medium">Auto-save Generations</div>
                           <div className="text-sm text-muted-foreground">Automatically save to gallery</div>
                         </div>
-                        <input type="checkbox" defaultChecked className="w-5 h-5" />
+                        <input type="checkbox" defaultChecked className="w-5 h-5" aria-label="Auto-save generations" />
                       </div>
                       <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
                         <div>
                           <div className="font-medium">Show Seed Number</div>
                           <div className="text-sm text-muted-foreground">Display seed for reproducibility</div>
                         </div>
-                        <input type="checkbox" defaultChecked className="w-5 h-5" />
+                        <input type="checkbox" defaultChecked className="w-5 h-5" aria-label="Show seed number" />
                       </div>
                     </CardContent>
                   </Card>

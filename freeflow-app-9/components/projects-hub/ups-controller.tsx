@@ -666,28 +666,28 @@ export const UPSController: React.FC<UPSControllerProps> = ({
                           <p className="font-medium">Show Resolved Comments</p>
                           <p className="text-sm text-muted-foreground">Display resolved comments in the list</p>
                         </div>
-                        <input type="checkbox" defaultChecked className="h-5 w-5 rounded" />
+                        <input type="checkbox" defaultChecked className="h-5 w-5 rounded" aria-label="Show resolved comments" />
                       </div>
                       <div className="flex items-center justify-between p-4 rounded-lg border">
                         <div>
                           <p className="font-medium">Real-time Updates</p>
                           <p className="text-sm text-muted-foreground">Enable live sync for comments</p>
                         </div>
-                        <input type="checkbox" defaultChecked className="h-5 w-5 rounded" />
+                        <input type="checkbox" defaultChecked className="h-5 w-5 rounded" aria-label="Real-time updates" />
                       </div>
                       <div className="flex items-center justify-between p-4 rounded-lg border">
                         <div>
                           <p className="font-medium">Email Notifications</p>
                           <p className="text-sm text-muted-foreground">Receive email for new comments</p>
                         </div>
-                        <input type="checkbox" className="h-5 w-5 rounded" />
+                        <input type="checkbox" className="h-5 w-5 rounded" aria-label="Email notifications" />
                       </div>
                       <div className="flex items-center justify-between p-4 rounded-lg border">
                         <div>
                           <p className="font-medium">Compact View</p>
                           <p className="text-sm text-muted-foreground">Show less details in comment cards</p>
                         </div>
-                        <input type="checkbox" className="h-5 w-5 rounded" />
+                        <input type="checkbox" className="h-5 w-5 rounded" aria-label="Compact view" />
                       </div>
                     </div>
                   </div>

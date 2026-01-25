@@ -1704,22 +1704,22 @@ export default defineConfig({
                         <Label>Notification Threshold</Label>
                         <p className="text-sm text-gray-500 mb-3">Only notify when conditions are met</p>
                         <div className="grid md:grid-cols-2 gap-4">
-                          <div className="flex items-center gap-2">
+                          <label className="flex items-center gap-2 cursor-pointer">
                             <input type="checkbox" defaultChecked className="rounded" />
                             <span className="text-sm text-gray-700 dark:text-gray-300">On failure</span>
-                          </div>
-                          <div className="flex items-center gap-2">
+                          </label>
+                          <label className="flex items-center gap-2 cursor-pointer">
                             <input type="checkbox" className="rounded" />
                             <span className="text-sm text-gray-700 dark:text-gray-300">On success</span>
-                          </div>
-                          <div className="flex items-center gap-2">
+                          </label>
+                          <label className="flex items-center gap-2 cursor-pointer">
                             <input type="checkbox" defaultChecked className="rounded" />
                             <span className="text-sm text-gray-700 dark:text-gray-300">Coverage below threshold</span>
-                          </div>
-                          <div className="flex items-center gap-2">
+                          </label>
+                          <label className="flex items-center gap-2 cursor-pointer">
                             <input type="checkbox" defaultChecked className="rounded" />
                             <span className="text-sm text-gray-700 dark:text-gray-300">Flaky tests detected</span>
-                          </div>
+                          </label>
                         </div>
                       </div>
                     </CardContent>
