@@ -100,23 +100,30 @@ export async function updateSession(request: NextRequest) {
     const { data: { user }, error: userError } = await supabase.auth.getUser()
 
     if (userError) {
-      console.error('User data error in middleware: ', userError);
-      // Clear any corrupted session data
-      await supabase.auth.signOut()
+      // AuthSessionMissingError is expected for unauthenticated users - don't log it
+      const isAuthSessionMissing = userError.name === 'AuthSessionMissingError' ||
+        userError.message?.includes('Auth session missing')
 
-      // Clear all auth cookies
-      request.cookies.getAll().forEach(cookie => {
-        if (cookie.name.startsWith('sb-')) {
-          request.cookies.delete(cookie.name)
-          supabaseResponse.cookies.delete(cookie.name)
-        }
-      })
+      if (!isAuthSessionMissing) {
+        console.error('User data error in middleware: ', userError)
+        // Clear any corrupted session data only for actual errors
+        await supabase.auth.signOut()
 
-      // Redirect to login with error message
-      const loginUrl = request.nextUrl.clone()
-      loginUrl.pathname = '/login'
-      loginUrl.searchParams.set('error', 'Failed to get user data. Please log in again.')
-      return NextResponse.redirect(loginUrl)
+        // Clear all auth cookies
+        request.cookies.getAll().forEach(cookie => {
+          if (cookie.name.startsWith('sb-')) {
+            request.cookies.delete(cookie.name)
+            supabaseResponse.cookies.delete(cookie.name)
+          }
+        })
+
+        // Redirect to login with error message for actual errors
+        const loginUrl = request.nextUrl.clone()
+        loginUrl.pathname = '/login'
+        loginUrl.searchParams.set('error', 'Failed to get user data. Please log in again.')
+        return NextResponse.redirect(loginUrl)
+      }
+      // For AuthSessionMissingError, just continue - the route protection below will handle it
     }
 
     // If no session and user is trying to access protected route, redirect to login
