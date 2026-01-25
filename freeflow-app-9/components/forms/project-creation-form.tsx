@@ -12,15 +12,29 @@ interface ProjectCreationFormProps {
   loading?: boolean
 }
 
+// Basic HTML sanitization to prevent XSS
+function sanitizeInput(input: string | null): string {
+  if (!input) return ''
+  return input
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;')
+    .replace(/\//g, '&#x2F;')
+    .trim()
+}
+
 export function ProjectCreationForm({ onSubmit, loading = false }: ProjectCreationFormProps) {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
+
+    // Sanitize all string inputs to prevent XSS
     const data = {
-      title: formData.get('title'),
-      description: formData.get('description'),
-      client_name: formData.get('client_name'),
-      client_email: formData.get('client_email'),
+      title: sanitizeInput(formData.get('title') as string),
+      description: sanitizeInput(formData.get('description') as string),
+      client_name: sanitizeInput(formData.get('client_name') as string),
+      client_email: sanitizeInput(formData.get('client_email') as string),
       budget: formData.get('budget'),
       start_date: formData.get('start_date'),
       end_date: formData.get('end_date'),
@@ -39,6 +53,7 @@ export function ProjectCreationForm({ onSubmit, loading = false }: ProjectCreati
           name="title"
           placeholder="Enter project title"
           required
+          maxLength={200}
           data-testid="project-title-input"
         />
       </div>
@@ -50,6 +65,7 @@ export function ProjectCreationForm({ onSubmit, loading = false }: ProjectCreati
           name="description"
           placeholder="Enter project description"
           required
+          maxLength={5000}
           data-testid="project-description-input"
         />
       </div>
@@ -60,6 +76,7 @@ export function ProjectCreationForm({ onSubmit, loading = false }: ProjectCreati
           id="client_name"
           name="client_name"
           placeholder="Enter client name"
+          maxLength={100}
           data-testid="project-client-name-input"
         />
       </div>
@@ -71,6 +88,8 @@ export function ProjectCreationForm({ onSubmit, loading = false }: ProjectCreati
           name="client_email"
           type="email"
           placeholder="Enter client email"
+          maxLength={254}
+          pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
           data-testid="project-client-email-input"
         />
       </div>
@@ -82,6 +101,7 @@ export function ProjectCreationForm({ onSubmit, loading = false }: ProjectCreati
           name="budget"
           type="number"
           min="0"
+          max="999999999"
           placeholder="Enter project budget"
           data-testid="project-budget-input"
         />

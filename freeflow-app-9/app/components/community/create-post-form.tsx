@@ -17,13 +17,23 @@ interface CreatePostFormProps {
   isLoading?: boolean
 }
 
+// Basic HTML sanitization to prevent XSS
+function sanitizeInput(input: string): string {
+  return input
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;')
+    .replace(/\//g, '&#x2F;')
+}
+
 export function CreatePostForm({ onSubmit, isLoading }: CreatePostFormProps) {
-  const [title, setTitle] = useState<any>('')
-  const [content, setContent] = useState<any>('')
-  const [category, setCategory] = useState<any>('general')
+  const [title, setTitle] = useState<string>('')
+  const [content, setContent] = useState<string>('')
+  const [category, setCategory] = useState<string>('general')
   const [mediaUrls, setMediaUrls] = useState<string[]>([])
   const [mediaType, setMediaType] = useState<'image' | 'video' | 'link'>('image')
-  const [mediaUrl, setMediaUrl] = useState<any>('')
+  const [mediaUrl, setMediaUrl] = useState<string>('')
 
   const handleAddMedia = () => {
     if (mediaUrl && !mediaUrls.includes(mediaUrl)) {
@@ -38,13 +48,16 @@ export function CreatePostForm({ onSubmit, isLoading }: CreatePostFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!title || !content) return
+    const trimmedTitle = title.trim()
+    const trimmedContent = content.trim()
+    if (!trimmedTitle || !trimmedContent) return
 
+    // Sanitize inputs to prevent XSS
     await onSubmit({
-      title,
-      content,
+      title: sanitizeInput(trimmedTitle),
+      content: sanitizeInput(trimmedContent),
       category,
-      mediaUrls
+      mediaUrls: mediaUrls.map(url => sanitizeInput(url))
     })
 
     // Reset form
@@ -62,6 +75,8 @@ export function CreatePostForm({ onSubmit, isLoading }: CreatePostFormProps) {
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         required
+        maxLength={200}
+        aria-label="Post title"
       />
 
       <Textarea
@@ -70,6 +85,8 @@ export function CreatePostForm({ onSubmit, isLoading }: CreatePostFormProps) {
         onChange={(e) => setContent(e.target.value)}
         required
         rows={4}
+        maxLength={10000}
+        aria-label="Post content"
       />
 
       <Select value={category} onValueChange={setCategory}>

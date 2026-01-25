@@ -6,6 +6,17 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'sonner'
 
+// Basic HTML sanitization to prevent XSS
+function sanitizeInput(input: string): string {
+  return input
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;')
+    .replace(/\//g, '&#x2F;')
+    .trim()
+}
+
 export function ContactForm() {
   const [formData, setFormData] = useState({
     name: '',
@@ -25,7 +36,8 @@ export function ContactForm() {
       newErrors.name = 'Name must be at least 2 characters'
     }
     
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    // More robust email validation regex
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
     if (!formData.email.trim()) {
       newErrors.email = 'Email is required'
     } else if (!emailRegex.test(formData.email)) {
@@ -56,10 +68,11 @@ export function ContactForm() {
       // Import contact queries dynamically for code splitting
       const { createContactMessage } = await import('@/lib/contact-queries')
 
+      // Sanitize inputs to prevent XSS
       const { data, error } = await createContactMessage({
-        name: formData.name,
-        email: formData.email,
-        message: formData.message,
+        name: sanitizeInput(formData.name),
+        email: sanitizeInput(formData.email),
+        message: sanitizeInput(formData.message),
         source: 'contact_form'
       }, {
         user_agent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
