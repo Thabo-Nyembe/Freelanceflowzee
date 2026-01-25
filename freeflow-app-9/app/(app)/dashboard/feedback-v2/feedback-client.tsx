@@ -53,7 +53,9 @@ import {
   Globe,
   Download,
   Copy,
-  RefreshCw
+  RefreshCw,
+  Loader2,
+  AlertCircle
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -285,7 +287,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
 
   // --- Real Supabase data via hooks ---
   const { feedbacks: feedbackItems, isLoading: feedbackLoading, refresh: refreshFeedback } = useFeedbacks()
-  const { feedback: _mutationData, loading: hookMutating, createFeedback, updateFeedback, deleteFeedback, refetch: refetchMutations } = useFeedbackMutations()
+  const { feedback: _mutationData, loading: hookMutating, error: feedbackError, createFeedback, updateFeedback, deleteFeedback, refetch: refetchMutations } = useFeedbackMutations()
   const { stats: feedbackStats, isLoading: statsLoading, refresh: refreshStats } = useFeedbackStats()
 
   const loading = feedbackLoading || statsLoading
@@ -1052,6 +1054,34 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
     { id: '3', label: 'Merge', icon: 'GitMerge', shortcut: 'M', action: () => setShowMergeDialog(true) },
     { id: '4', label: 'Export', icon: 'Download', shortcut: 'E', action: handleExportCSV },
   ]
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 dark:bg-none dark:bg-gray-900 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-orange-600" />
+          <p className="text-gray-600 dark:text-gray-400">Loading feedback...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Error state
+  if (feedbackError) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 dark:bg-none dark:bg-gray-900 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <AlertCircle className="h-8 w-8 text-red-500" />
+          <p className="text-gray-600 dark:text-gray-400">Failed to load feedback</p>
+          <Button variant="outline" onClick={() => fetchFeedback()}>
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Retry
+          </Button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 dark:bg-none dark:bg-gray-900">
