@@ -12,7 +12,7 @@
     "dev:webpack": "NODE_OPTIONS='--max-old-space-size=16384' next dev -p 9323",
     "dev:debug": "NODE_OPTIONS='--inspect --max-old-space-size=8192' next dev --turbo -p 9323",
     "dev:debug-full": "NODE_OPTIONS='--inspect=0.0.0.0 --max-old-space-size=8192' next dev --turbo -p 9323",
-    "build": "NODE_OPTIONS='--max-old-space-size=4096' next build",
+    "build": "NODE_OPTIONS='--max-old-space-size=4096 --no-deprecation' next build",
     "start": "node .next/standalone/server.js",
     "lint": "next lint",
     "test": "jest --config jest.config.ts",

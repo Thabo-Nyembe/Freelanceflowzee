@@ -64,9 +64,11 @@ export type ProgressCallback = (progress: RenderProgress) => void
 // Configuration
 // ============================================================================
 
-const OUTPUT_DIR = process.env.REMOTION_OUTPUT_DIR || '/tmp/remotion-renders'
-const BUNDLE_DIR = process.env.REMOTION_BUNDLE_DIR || '/tmp/remotion-bundles'
-const COMPOSITIONS_PATH = path.join(process.cwd(), 'lib/remotion/compositions.tsx')
+// Use explicit paths to avoid Turbopack pattern matching warnings
+// These directories are created at runtime and should not be bundled
+const OUTPUT_DIR = '/tmp/remotion-renders' as const
+const BUNDLE_DIR = '/tmp/remotion-bundles' as const
+const COMPOSITIONS_PATH = path.resolve(process.cwd(), 'lib', 'remotion', 'compositions.tsx')
 
 // Default render settings
 const DEFAULT_RENDER_CONFIG = {
@@ -201,9 +203,9 @@ export class RemotionService {
       job.progress = 10
       onProgress?.({ jobId, stage: 'rendering', progress: 10 })
 
-      // Determine output path
+      // Determine output path - use string concatenation to avoid Turbopack glob warnings
       const extension = job.config.outputFormat || 'mp4'
-      const outputPath = path.join(OUTPUT_DIR, `${jobId}.${extension}`)
+      const outputPath = `${OUTPUT_DIR}/${jobId}.${extension}`
 
       // Render the video
       await renderMedia({
