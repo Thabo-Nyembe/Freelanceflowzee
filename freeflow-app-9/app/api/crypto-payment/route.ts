@@ -8,6 +8,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('crypto-payment')
 import {
   getCryptoWallets,
   createCryptoWallet,
@@ -152,7 +155,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid type parameter' }, { status: 400 })
     }
   } catch (error) {
-    console.error('Crypto Payment API error:', error)
+    logger.error('Failed to fetch Crypto Payment data', { error })
     return NextResponse.json(
       { error: 'Failed to fetch Crypto Payment data' },
       { status: 500 }
@@ -244,7 +247,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
   } catch (error) {
-    console.error('Crypto Payment API error:', error)
+    logger.error('Failed to process Crypto Payment request', { error })
     return NextResponse.json(
       { error: 'Failed to process Crypto Payment request' },
       { status: 500 }

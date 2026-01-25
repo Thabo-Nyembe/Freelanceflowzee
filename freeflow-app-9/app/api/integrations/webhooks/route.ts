@@ -6,6 +6,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { integrationService } from '@/lib/integrations/integration-service';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('webhooks');
 
 // =====================================================
 // GET - List webhooks or get deliveries
@@ -93,7 +96,7 @@ export async function GET(request: NextRequest) {
       }
     }
   } catch (error: any) {
-    console.error('Webhooks GET error:', error);
+    logger.error('Webhooks GET error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to fetch webhooks' },
       { status: 500 }
@@ -228,7 +231,7 @@ export async function POST(request: NextRequest) {
         );
     }
   } catch (error: any) {
-    console.error('Webhooks POST error:', error);
+    logger.error('Webhooks POST error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Operation failed' },
       { status: 500 }
@@ -277,7 +280,7 @@ export async function PUT(request: NextRequest) {
       message: 'Webhook updated successfully',
     });
   } catch (error: any) {
-    console.error('Webhooks PUT error:', error);
+    logger.error('Webhooks PUT error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to update webhook' },
       { status: 500 }
@@ -313,7 +316,7 @@ export async function DELETE(request: NextRequest) {
       message: 'Webhook deleted successfully',
     });
   } catch (error: any) {
-    console.error('Webhooks DELETE error:', error);
+    logger.error('Webhooks DELETE error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to delete webhook' },
       { status: 500 }

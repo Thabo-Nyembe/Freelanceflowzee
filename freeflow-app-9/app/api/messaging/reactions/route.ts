@@ -11,6 +11,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('messaging-reactions')
 
 // ============================================================================
 // Types
@@ -146,7 +149,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
   } catch (error) {
-    console.error('Reaction error:', error)
+    logger.error('Reaction error', { error })
     return NextResponse.json(
       { error: 'Failed to process reaction request' },
       { status: 500 }
@@ -449,7 +452,7 @@ export async function GET(request: NextRequest) {
       frequentEmojis: FREQUENTLY_USED_EMOJIS,
     })
   } catch (error) {
-    console.error('Error fetching reaction data:', error)
+    logger.error('Error fetching reaction data', { error })
     return NextResponse.json(
       { error: 'Failed to fetch reaction data' },
       { status: 500 }
@@ -480,7 +483,7 @@ export async function DELETE(request: NextRequest) {
 
     return handleRemoveReaction({ messageId, emoji }, user.id)
   } catch (error) {
-    console.error('Error removing reaction:', error)
+    logger.error('Error removing reaction', { error })
     return NextResponse.json(
       { error: 'Failed to remove reaction' },
       { status: 500 }

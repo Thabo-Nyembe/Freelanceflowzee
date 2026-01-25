@@ -6,6 +6,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { calendarService } from '@/lib/calendar/calendar-service';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('calendar-events');
 
 // =====================================================
 // GET - Get event details
@@ -38,7 +41,7 @@ export async function GET(
 
     return NextResponse.json({ event });
   } catch (error: any) {
-    console.error('Event GET error:', error);
+    logger.error('Event GET error', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to fetch event' },
       { status: 500 }
@@ -66,7 +69,7 @@ export async function PUT(
     const event = await calendarService.updateEvent(eventId, user.id, body);
     return NextResponse.json({ event });
   } catch (error: any) {
-    console.error('Event PUT error:', error);
+    logger.error('Event PUT error', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to update event' },
       { status: 500 }
@@ -112,7 +115,7 @@ export async function PATCH(
     const event = await calendarService.updateEvent(eventId, user.id, body);
     return NextResponse.json({ event });
   } catch (error: any) {
-    console.error('Event PATCH error:', error);
+    logger.error('Event PATCH error', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to update event' },
       { status: 500 }
@@ -142,7 +145,7 @@ export async function DELETE(
     await calendarService.deleteEvent(eventId, user.id, deleteRecurring);
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    console.error('Event DELETE error:', error);
+    logger.error('Event DELETE error', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to delete event' },
       { status: 500 }

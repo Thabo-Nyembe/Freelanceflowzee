@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('enterprise-soc2-compliance');
 
 // Phase 8 Gap #1: SOC 2 Type II Compliance
 // Priority: HIGH | Competitor: Enterprise platforms
@@ -397,7 +400,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ success: false, error: 'Unknown action' }, { status: 400 });
     }
   } catch (error) {
-    console.error('SOC 2 Compliance API error:', error);
+    logger.error('SOC 2 Compliance API error', { error });
     return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }
 }

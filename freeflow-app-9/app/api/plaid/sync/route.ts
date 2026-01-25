@@ -5,7 +5,10 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
 import { performFullSync } from '@/lib/plaid/service';
+
+const logger = createFeatureLogger('plaid-api');
 
 // POST - Trigger sync for a connection
 export async function POST(request: NextRequest) {
@@ -44,7 +47,7 @@ export async function POST(request: NextRequest) {
           try {
             return await performFullSync(conn.id, conn.plaid_access_token, conn.plaid_cursor);
           } catch (err) {
-            console.error(`Sync failed for connection ${conn.id}:`, err);
+            logger.error('Sync failed for connection', { connectionId: conn.id, error: err });
             return {
               connectionId: conn.id,
               errors: [err instanceof Error ? err.message : 'Unknown error'],
@@ -109,7 +112,7 @@ export async function POST(request: NextRequest) {
       data: result,
     });
   } catch (error) {
-    console.error('Sync failed:', error);
+    logger.error('Sync failed', { error });
     return NextResponse.json(
       { error: 'Sync failed' },
       { status: 500 }
@@ -186,7 +189,7 @@ export async function GET(request: NextRequest) {
       data: logs || [],
     });
   } catch (error) {
-    console.error('Failed to fetch sync history:', error);
+    logger.error('Failed to fetch sync history', { error });
     return NextResponse.json(
       { error: 'Failed to fetch sync history' },
       { status: 500 }

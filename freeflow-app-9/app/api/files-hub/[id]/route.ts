@@ -8,6 +8,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('files-hub')
 import {
   getFile,
   updateFile,
@@ -42,7 +45,7 @@ export async function GET(
 
     return NextResponse.json({ data })
   } catch (error) {
-    console.error('Files Hub API error:', error)
+    logger.error('Files Hub API error', { error })
     return NextResponse.json(
       { error: 'Failed to fetch file' },
       { status: 500 }
@@ -101,7 +104,7 @@ export async function PUT(
 
     return NextResponse.json({ data: result?.data, success: true })
   } catch (error) {
-    console.error('Files Hub API error:', error)
+    logger.error('Files Hub API error', { error })
     return NextResponse.json(
       { error: 'Failed to update file' },
       { status: 500 }
@@ -137,7 +140,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Files Hub API error:', error)
+    logger.error('Files Hub API error', { error })
     return NextResponse.json(
       { error: 'Failed to delete file' },
       { status: 500 }

@@ -5,6 +5,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('account-deactivate');
 
 // =====================================================
 // POST - Deactivate account
@@ -30,7 +33,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     // Handle if table doesn't exist
     if (profileError && profileError.code !== '42P01') {
-      console.error('Profile update error:', profileError);
+      logger.error('Profile update error', { error: profileError });
     }
 
     // Also update user_settings if it exists
@@ -44,7 +47,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       .eq('user_id', user.id);
 
     if (settingsError && settingsError.code !== '42P01' && settingsError.code !== '42703') {
-      console.error('Settings update error:', settingsError);
+      logger.error('Settings update error', { error: settingsError });
     }
 
     // Invalidate all sessions except current
@@ -57,7 +60,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       .eq('user_id', user.id);
 
     if (sessionError && sessionError.code !== '42P01') {
-      console.error('Session invalidation error:', sessionError);
+      logger.error('Session invalidation error', { error: sessionError });
     }
 
     // Sign out user
@@ -69,7 +72,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       deactivatedAt: new Date().toISOString()
     });
   } catch (error: any) {
-    console.error('Account deactivation error:', error);
+    logger.error('Account deactivation error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to deactivate account' },
       { status: 500 }
@@ -100,7 +103,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
       .eq('user_id', user.id);
 
     if (profileError && profileError.code !== '42P01') {
-      console.error('Profile reactivation error:', profileError);
+      logger.error('Profile reactivation error', { error: profileError });
     }
 
     // Reactivate in user_settings
@@ -114,7 +117,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
       .eq('user_id', user.id);
 
     if (settingsError && settingsError.code !== '42P01' && settingsError.code !== '42703') {
-      console.error('Settings reactivation error:', settingsError);
+      logger.error('Settings reactivation error', { error: settingsError });
     }
 
     return NextResponse.json({
@@ -122,7 +125,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
       message: 'Account reactivated successfully'
     });
   } catch (error: any) {
-    console.error('Account reactivation error:', error);
+    logger.error('Account reactivation error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to reactivate account' },
       { status: 500 }

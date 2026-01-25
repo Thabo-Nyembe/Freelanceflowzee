@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('team')
 
 const mockTeam = [
   { id: '1', name: 'John Smith', email: 'john@freeflow.io', role: 'Designer', avatar: '/avatars/john.png', status: 'online' },
@@ -109,7 +112,7 @@ export async function POST(request: NextRequest) {
         })
     }
   } catch (error) {
-    console.error('Team API Error:', error)
+    logger.error('Team API Error', { error })
     return NextResponse.json(
       { success: false, error: 'Failed to process team request' },
       { status: 500 }
@@ -140,7 +143,7 @@ export async function PUT(request: NextRequest) {
       message: 'Team member updated successfully'
     })
   } catch (error) {
-    console.error('Team API PUT Error:', error)
+    logger.error('Team API PUT Error', { error })
     return NextResponse.json(
       { success: false, error: 'Failed to update team member' },
       { status: 500 }
@@ -170,7 +173,7 @@ export async function DELETE(request: NextRequest) {
       message: 'Team member removed successfully'
     })
   } catch (error) {
-    console.error('Team API DELETE Error:', error)
+    logger.error('Team API DELETE Error', { error })
     return NextResponse.json(
       { success: false, error: 'Failed to remove team member' },
       { status: 500 }

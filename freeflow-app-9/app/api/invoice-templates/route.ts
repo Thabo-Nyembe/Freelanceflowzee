@@ -11,6 +11,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { unstable_cache } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('invoice-templates')
 
 // Cached function for user's invoice templates (user-specific, 30 minutes cache)
 const getCachedInvoiceTemplates = unstable_cache(
@@ -85,7 +88,7 @@ export async function GET(request: NextRequest) {
       },
     })
   } catch (error) {
-    console.error('Invoice Templates API error:', error)
+    logger.error('Invoice Templates API error', { error })
     return NextResponse.json(
       { error: 'Failed to fetch invoice templates' },
       { status: 500 }
@@ -145,7 +148,7 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('Create invoice template error:', error)
+      logger.error('Create invoice template error', { error })
       return NextResponse.json(
         { error: 'Failed to create invoice template' },
         { status: 500 }
@@ -154,7 +157,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ data }, { status: 201 })
   } catch (error) {
-    console.error('Invoice Templates API error:', error)
+    logger.error('Invoice Templates API error', { error })
     return NextResponse.json(
       { error: 'Failed to process invoice template request' },
       { status: 500 }
@@ -191,7 +194,7 @@ export async function PUT(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('Update invoice template error:', error)
+      logger.error('Update invoice template error', { error })
       return NextResponse.json(
         { error: 'Template not found or update failed' },
         { status: 404 }
@@ -200,7 +203,7 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({ data })
   } catch (error) {
-    console.error('Invoice Templates API error:', error)
+    logger.error('Invoice Templates API error', { error })
     return NextResponse.json(
       { error: 'Failed to update invoice template' },
       { status: 500 }
@@ -247,7 +250,7 @@ export async function DELETE(request: NextRequest) {
       .eq('user_id', user.id)
 
     if (error) {
-      console.error('Delete invoice template error:', error)
+      logger.error('Delete invoice template error', { error })
       return NextResponse.json(
         { error: 'Failed to delete invoice template' },
         { status: 500 }
@@ -259,7 +262,7 @@ export async function DELETE(request: NextRequest) {
       message: `Template "${template.name}" deleted successfully`,
     })
   } catch (error) {
-    console.error('Invoice Templates API error:', error)
+    logger.error('Invoice Templates API error', { error })
     return NextResponse.json(
       { error: 'Failed to delete invoice template' },
       { status: 500 }

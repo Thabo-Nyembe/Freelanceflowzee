@@ -5,6 +5,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('analytics');
 
 // =====================================================
 // GET - Fetch analytics overview
@@ -39,7 +42,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       timestamp: new Date().toISOString()
     });
   } catch (error: any) {
-    console.error('Analytics GET error:', error);
+    logger.error('Analytics GET error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to fetch analytics' },
       { status: 500 }
@@ -360,7 +363,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         );
     }
   } catch (error: any) {
-    console.error('Analytics POST error:', error);
+    logger.error('Analytics POST error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Operation failed' },
       { status: 500 }

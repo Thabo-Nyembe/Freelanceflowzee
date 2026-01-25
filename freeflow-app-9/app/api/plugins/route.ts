@@ -1,5 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('plugins')
 
 export async function GET(request: NextRequest) {
   try {
@@ -78,7 +81,7 @@ export async function GET(request: NextRequest) {
       }
     }
   } catch (error: any) {
-    console.error('Plugins API error:', error)
+    logger.error('Plugins API error', { error })
     return NextResponse.json(
       { error: error.message || 'Failed to fetch plugins' },
       { status: 500 }
@@ -279,7 +282,7 @@ export async function POST(request: NextRequest) {
         )
     }
   } catch (error: any) {
-    console.error('Plugins API error:', error)
+    logger.error('Plugins API error', { error })
     return NextResponse.json(
       { error: error.message || 'Operation failed' },
       { status: 500 }

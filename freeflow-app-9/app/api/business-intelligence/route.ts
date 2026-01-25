@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('business-intelligence')
 
 // ============================================================================
 // Business Intelligence API
@@ -42,7 +45,7 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: 'Invalid type parameter' }, { status: 400 })
     }
   } catch (error) {
-    console.error('Business Intelligence API Error:', error)
+    logger.error('Failed to fetch business intelligence data', { error })
     return NextResponse.json(
       { error: 'Failed to fetch business intelligence data' },
       { status: 500 }
@@ -825,7 +828,7 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
   } catch (error) {
-    console.error('Business Intelligence POST Error:', error)
+    logger.error('Failed to process POST request', { error })
     return NextResponse.json(
       { error: 'Failed to process request' },
       { status: 500 }

@@ -6,6 +6,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { calendarService } from '@/lib/calendar/calendar-service';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('calendar-bookings');
 
 // =====================================================
 // GET - List bookings or get public booking info
@@ -101,7 +104,7 @@ export async function GET(request: NextRequest) {
     const bookings = await calendarService.getBookings(user.id, params);
     return NextResponse.json({ bookings });
   } catch (error: any) {
-    console.error('Bookings GET error:', error);
+    logger.error('Bookings GET error', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to fetch bookings' },
       { status: 500 }
@@ -207,7 +210,7 @@ export async function POST(request: NextRequest) {
         );
     }
   } catch (error: any) {
-    console.error('Bookings POST error:', error);
+    logger.error('Bookings POST error', { error });
     return NextResponse.json(
       { error: error.message || 'Operation failed' },
       { status: 500 }

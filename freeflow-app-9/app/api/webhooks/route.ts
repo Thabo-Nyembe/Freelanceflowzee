@@ -7,6 +7,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { WebhookService, WebhookEventType } from '@/lib/webhooks/webhook-service';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('webhooks');
 
 const webhookService = new WebhookService();
 
@@ -38,7 +41,7 @@ export async function GET(request: NextRequest) {
       }))
     });
   } catch (error) {
-    console.error('Webhooks GET error:', error);
+    logger.error('Webhooks GET error', { error });
     return NextResponse.json(
       { error: 'Failed to fetch webhooks' },
       { status: 500 }
@@ -113,7 +116,7 @@ export async function POST(request: NextRequest) {
       }
     }, { status: 201 });
   } catch (error) {
-    console.error('Webhooks POST error:', error);
+    logger.error('Webhooks POST error', { error });
     return NextResponse.json(
       { error: 'Failed to create webhook' },
       { status: 500 }

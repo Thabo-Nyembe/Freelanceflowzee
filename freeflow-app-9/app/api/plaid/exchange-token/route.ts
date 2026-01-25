@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
 import { z } from 'zod';
 import {
   exchangePublicToken,
@@ -13,6 +14,8 @@ import {
   getInstitution,
   performFullSync
 } from '@/lib/plaid/service';
+
+const logger = createFeatureLogger('plaid-api');
 
 const exchangeTokenSchema = z.object({
   publicToken: z.string().min(1, 'Public token is required'),
@@ -104,7 +107,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (connError) {
-      console.error('Failed to create connection:', connError);
+      logger.error('Failed to create connection', { error: connError });
       return NextResponse.json(
         { error: 'Failed to create bank connection' },
         { status: 500 }
@@ -138,16 +141,16 @@ export async function POST(request: NextRequest) {
       .select();
 
     if (accountsError) {
-      console.error('Failed to create accounts:', accountsError);
+      logger.error('Failed to create accounts', { error: accountsError });
     }
 
     // Trigger initial sync in background (don't wait)
     performFullSync(connection.id, exchangeResult.accessToken)
       .then(result => {
-        console.log('Initial sync completed:', result);
+        logger.info('Initial sync completed', { result });
       })
       .catch(err => {
-        console.error('Initial sync failed:', err);
+        logger.error('Initial sync failed', { error: err });
       });
 
     return NextResponse.json({
@@ -176,7 +179,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    console.error('Failed to exchange token:', error);
+    logger.error('Failed to exchange token', { error });
     return NextResponse.json(
       { error: 'Failed to complete bank connection' },
       { status: 500 }

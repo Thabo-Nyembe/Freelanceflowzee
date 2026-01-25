@@ -13,6 +13,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('video-hdr-raw');
 
 // ============================================================================
 // TYPES
@@ -354,7 +357,7 @@ export async function GET(request: NextRequest) {
       source: 'demo',
     });
   } catch (err) {
-    console.error('HDR/RAW GET error:', err);
+    logger.error('HDR/RAW GET error', { error: err });
     return NextResponse.json({
       success: true,
       data: getDemoRAWClip(),
@@ -691,7 +694,7 @@ export async function POST(request: NextRequest) {
         );
     }
   } catch (err) {
-    console.error('HDR/RAW POST error:', err);
+    logger.error('HDR/RAW POST error', { error: err });
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

@@ -5,6 +5,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('user-profile');
 
 // =====================================================
 // GET - Get user profile, skills, experience, portfolio
@@ -103,7 +106,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       }
     }
   } catch (error: any) {
-    console.error('Profile GET error:', error);
+    logger.error('Profile GET error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to fetch profile data' },
       { status: 500 }
@@ -259,7 +262,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         );
     }
   } catch (error: any) {
-    console.error('Profile POST error:', error);
+    logger.error('Profile POST error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Operation failed' },
       { status: 500 }
@@ -344,7 +347,7 @@ export async function PUT(request: NextRequest): Promise<NextResponse> {
         );
     }
   } catch (error: any) {
-    console.error('Profile PUT error:', error);
+    logger.error('Profile PUT error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to update' },
       { status: 500 }
@@ -408,7 +411,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
         );
     }
   } catch (error: any) {
-    console.error('Profile DELETE error:', error);
+    logger.error('Profile DELETE error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to delete' },
       { status: 500 }

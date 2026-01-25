@@ -6,6 +6,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { videoStudioService } from '@/lib/video/video-studio-service';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('video-studio');
 
 // =====================================================
 // GET - List videos, get video, or get analytics
@@ -147,7 +150,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       }
     }
   } catch (error: any) {
-    console.error('Video Studio GET error:', error);
+    logger.error('Failed to fetch video data', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to fetch video data' },
       { status: 500 }
@@ -361,7 +364,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             break;
           case 'video.asset.errored':
             // Handle error
-            console.error('Mux asset error:', eventData);
+            logger.error('Mux asset error', { eventData });
             break;
           // Add more event handlers as needed
         }
@@ -376,7 +379,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         );
     }
   } catch (error: any) {
-    console.error('Video Studio POST error:', error);
+    logger.error('POST operation failed', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Operation failed' },
       { status: 500 }
@@ -422,7 +425,7 @@ export async function PUT(request: NextRequest): Promise<NextResponse> {
       { status: 400 }
     );
   } catch (error: any) {
-    console.error('Video Studio PUT error:', error);
+    logger.error('Failed to update', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to update' },
       { status: 500 }
@@ -476,7 +479,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
       { status: 400 }
     );
   } catch (error: any) {
-    console.error('Video Studio DELETE error:', error);
+    logger.error('Failed to delete', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to delete' },
       { status: 500 }

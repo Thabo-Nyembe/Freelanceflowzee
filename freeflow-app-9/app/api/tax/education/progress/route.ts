@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('tax-education-progress')
 
 /**
  * GET /api/tax/education/progress
@@ -20,13 +23,13 @@ export async function GET(request: NextRequest) {
       .eq('user_id', user.id)
 
     if (error) {
-      console.error('Error fetching education progress:', error)
+      logger.error('Error fetching education progress', { error })
       return NextResponse.json({ error: 'Failed to fetch progress' }, { status: 500 })
     }
 
     return NextResponse.json({ data: progress || [] })
   } catch (error) {
-    console.error('Tax education progress GET error:', error)
+    logger.error('Tax education progress GET error', { error })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -74,7 +77,7 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('Error updating education progress:', error)
+      logger.error('Error updating education progress', { error })
       return NextResponse.json({ error: 'Failed to update progress' }, { status: 500 })
     }
 
@@ -83,7 +86,7 @@ export async function POST(request: NextRequest) {
       message: 'Progress updated successfully'
     })
   } catch (error) {
-    console.error('Tax education progress POST error:', error)
+    logger.error('Tax education progress POST error', { error })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

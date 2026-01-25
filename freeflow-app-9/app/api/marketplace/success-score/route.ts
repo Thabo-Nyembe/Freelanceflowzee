@@ -5,6 +5,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('marketplace-success-score')
 
 // Demo success score data
 const demoSuccessScores = {
@@ -132,7 +135,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
   } catch (error) {
-    console.error('Success Score API error:', error)
+    logger.error('Success Score API error', { error })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

@@ -5,6 +5,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('ai-copywriting');
 
 // =====================================================
 // Types
@@ -193,7 +196,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       }
     }
   } catch (error: any) {
-    console.error('AI Copywriting GET error:', error);
+    logger.error('AI Copywriting GET error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to fetch copywriting data' },
       { status: 500 }
@@ -506,7 +509,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         );
     }
   } catch (error: any) {
-    console.error('AI Copywriting POST error:', error);
+    logger.error('AI Copywriting POST error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Copywriting operation failed' },
       { status: 500 }
@@ -581,7 +584,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
       { status: 400 }
     );
   } catch (error: any) {
-    console.error('AI Copywriting DELETE error:', error);
+    logger.error('AI Copywriting DELETE error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to delete' },
       { status: 500 }

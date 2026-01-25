@@ -10,6 +10,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('analytics-realtime')
 
 export async function GET(request: NextRequest) {
   try {
@@ -80,7 +83,7 @@ export async function GET(request: NextRequest) {
         })
     }
   } catch (error) {
-    console.error('Realtime API error:', error)
+    logger.error('Realtime API error', { error })
     return NextResponse.json(
       { success: false, error: 'Failed to fetch real-time data' },
       { status: 500 }
@@ -158,7 +161,7 @@ export async function POST(request: NextRequest) {
         )
     }
   } catch (error) {
-    console.error('Realtime POST error:', error)
+    logger.error('Realtime POST error', { error })
     return NextResponse.json(
       { success: false, error: 'Failed to process request' },
       { status: 500 }

@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('tax-profile')
 
 /**
  * GET /api/tax/profile
@@ -28,7 +31,7 @@ export async function GET(request: NextRequest) {
 
     if (error && error.code !== 'PGRST116') {
       // PGRST116 = no rows returned, which is OK
-      console.error('Tax profile fetch error:', error)
+      logger.error('Tax profile fetch error', { error })
       return NextResponse.json({ error: 'Failed to fetch tax profile' }, { status: 500 })
     }
 
@@ -37,7 +40,7 @@ export async function GET(request: NextRequest) {
       data: profile || null
     })
   } catch (error) {
-    console.error('Tax profile GET error:', error)
+    logger.error('Tax profile GET error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -112,7 +115,7 @@ export async function PUT(request: NextRequest) {
     }
 
     if (result.error) {
-      console.error('Tax profile update error:', result.error)
+      logger.error('Tax profile update error', { error: result.error })
       return NextResponse.json(
         { error: 'Failed to update tax profile' },
         { status: 500 }
@@ -124,7 +127,7 @@ export async function PUT(request: NextRequest) {
       data: result.data
     })
   } catch (error) {
-    console.error('Tax profile PUT error:', error)
+    logger.error('Tax profile PUT error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

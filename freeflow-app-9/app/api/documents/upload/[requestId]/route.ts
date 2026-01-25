@@ -5,6 +5,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { documentService } from '@/lib/documents/document-service';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('documents-upload');
 
 // =====================================================
 // GET - Get upload request details (for clients)
@@ -63,7 +66,7 @@ export async function GET(
       },
     });
   } catch (error: any) {
-    console.error('Upload request GET error:', error);
+    logger.error('Upload request GET error', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to fetch upload request' },
       { status: 500 }
@@ -167,7 +170,7 @@ export async function POST(
       },
     }, { status: 201 });
   } catch (error: any) {
-    console.error('Upload request POST error:', error);
+    logger.error('Upload request POST error', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to upload documents' },
       { status: 500 }

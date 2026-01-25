@@ -7,6 +7,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { emailAnalyticsService } from '@/lib/email/email-analytics-service'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('email-analytics')
 
 export async function GET(request: NextRequest) {
   try {
@@ -119,7 +122,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid analytics type' }, { status: 400 })
     }
   } catch (error) {
-    console.error('Error fetching analytics:', error)
+    logger.error('Failed to fetch analytics', { error })
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to fetch analytics' },
       { status: 500 }
@@ -172,7 +175,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
   } catch (error) {
-    console.error('Error with analytics action:', error)
+    logger.error('Analytics action failed', { error })
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Analytics action failed' },
       { status: 500 }

@@ -13,6 +13,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('messaging-channels')
 
 // ============================================================================
 // Types
@@ -186,7 +189,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
   } catch (error) {
-    console.error('Channel error:', error)
+    logger.error('Channel error', { error })
     return NextResponse.json(
       { error: 'Failed to process channel request' },
       { status: 500 }
@@ -965,7 +968,7 @@ export async function GET(request: NextRequest) {
       },
     })
   } catch (error) {
-    console.error('Error fetching channels:', error)
+    logger.error('Error fetching channels', { error })
     return NextResponse.json(
       { error: 'Failed to fetch channels' },
       { status: 500 }
@@ -995,7 +998,7 @@ export async function DELETE(request: NextRequest) {
 
     return handleDeleteChannel({ channelId }, user.id)
   } catch (error) {
-    console.error('Error deleting channel:', error)
+    logger.error('Error deleting channel', { error })
     return NextResponse.json(
       { error: 'Failed to delete channel' },
       { status: 500 }

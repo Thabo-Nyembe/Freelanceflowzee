@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('client-gallery');
 
 // ============================================================================
 // WORLD-CLASS CLIENT GALLERY API
@@ -988,7 +991,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ success: false, error: `Unknown action: ${action}` }, { status: 400 });
     }
   } catch (error) {
-    console.error('Client Gallery API error:', error);
+    logger.error('Client Gallery API error', { error });
     return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }
 }

@@ -7,6 +7,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('ai-investor-metrics');
 
 export const runtime = 'nodejs';
 export const maxDuration = 30;
@@ -34,7 +37,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Error calculating investor metrics:', error);
+    logger.error('Error calculating investor metrics', { error });
     return NextResponse.json(
       {
         error: 'Failed to calculate investor metrics',
@@ -82,7 +85,7 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Error recording metrics event:', error);
+    logger.error('Error recording metrics event', { error });
     return NextResponse.json(
       {
         error: 'Failed to record metrics event',

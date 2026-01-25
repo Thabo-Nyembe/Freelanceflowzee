@@ -9,6 +9,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth.config'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('investor-metrics')
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
@@ -185,7 +188,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       trends: trends.reverse()
     })
   } catch (error: any) {
-    console.error('Investor metrics error:', error)
+    logger.error('Investor metrics error', { error })
     return NextResponse.json(
       { success: false, error: error.message },
       { status: 500 }

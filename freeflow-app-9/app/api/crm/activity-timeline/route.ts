@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('crm-activity-timeline');
 
 // Phase 7 Gap #6: Contact Activity Timeline
 // Priority: HIGH | Competitor: HubSpot
@@ -634,7 +637,7 @@ export async function POST(request: NextRequest) {
         );
     }
   } catch (error) {
-    console.error('Activity Timeline API error:', error);
+    logger.error('Activity Timeline API error', { error });
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

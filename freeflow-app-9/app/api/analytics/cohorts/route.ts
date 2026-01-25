@@ -10,6 +10,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('analytics-cohorts')
 
 export async function GET(request: NextRequest) {
   try {
@@ -85,7 +88,7 @@ export async function GET(request: NextRequest) {
         })
     }
   } catch (error) {
-    console.error('Cohort API error:', error)
+    logger.error('Cohort API error', { error })
     return NextResponse.json(
       { success: false, error: 'Failed to process cohort request' },
       { status: 500 }
@@ -176,7 +179,7 @@ export async function POST(request: NextRequest) {
         )
     }
   } catch (error) {
-    console.error('Cohort POST error:', error)
+    logger.error('Cohort POST error', { error })
     return NextResponse.json(
       { success: false, error: 'Failed to process request' },
       { status: 500 }

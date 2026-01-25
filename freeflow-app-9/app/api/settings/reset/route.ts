@@ -5,6 +5,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('settings-reset');
 
 // Default settings configurations
 const defaultNotificationSettings = {
@@ -132,7 +135,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       // Check for any failures
       const failures = results.filter(r => r.status === 'rejected');
       if (failures.length > 0) {
-        console.warn('Some settings failed to reset:', failures);
+        logger.warn('Some settings failed to reset', { failures });
       }
 
       return NextResponse.json({
@@ -223,7 +226,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         );
     }
   } catch (error: any) {
-    console.error('Settings reset error:', error);
+    logger.error('Settings reset error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to reset settings' },
       { status: 500 }
@@ -267,7 +270,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       }
     });
   } catch (error: any) {
-    console.error('Get defaults error:', error);
+    logger.error('Get defaults error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to get defaults' },
       { status: 500 }

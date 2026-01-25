@@ -98,15 +98,13 @@ export async function POST(request: NextRequest) {
 
     // In development, log the email content for debugging
     if (process.env.NODE_ENV === 'development') {
-      console.log('\n=== EMAIL SENT (SIMULATED) ===')
-      console.log('To:', to)
-      console.log('Subject:', subject)
-      console.log('Has Attachments:', !!attachments && attachments.length > 0)
-      if (attachments && attachments.length > 0) {
-        console.log('Attachments:', attachments.map(a => a.filename).join(', '))
-      }
-      console.log('HTML Preview (first 200 chars):', html.substring(0, 200) + '...')
-      console.log('=============================\n')
+      logger.info('Email sent (simulated)', {
+        to,
+        subject,
+        hasAttachments: !!attachments && attachments.length > 0,
+        attachments: attachments?.map(a => a.filename).join(', ') || 'none',
+        htmlPreview: html.substring(0, 200) + '...'
+      })
     }
 
     // Return success response

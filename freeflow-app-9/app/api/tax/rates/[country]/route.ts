@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('tax-rates')
 
 /**
  * GET /api/tax/rates/[country]
@@ -39,7 +42,7 @@ export async function GET(
     const { data: rates, error } = await query
 
     if (error) {
-      console.error('Tax rates fetch error:', error)
+      logger.error('Tax rates fetch error', { error })
       return NextResponse.json(
         { error: 'Failed to fetch tax rates' },
         { status: 500 }
@@ -77,7 +80,7 @@ export async function GET(
       count: rates.length
     })
   } catch (error) {
-    console.error('Tax rates API error:', error)
+    logger.error('Tax rates API error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

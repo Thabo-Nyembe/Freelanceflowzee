@@ -6,6 +6,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { documentService } from '@/lib/documents/document-service';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('documents');
 
 // =====================================================
 // GET - List documents with filters
@@ -103,7 +106,7 @@ export async function GET(request: NextRequest) {
       }
     }
   } catch (error: any) {
-    console.error('Documents GET error:', error);
+    logger.error('Documents GET error', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to fetch documents' },
       { status: 500 }
@@ -280,7 +283,7 @@ export async function POST(request: NextRequest) {
         );
     }
   } catch (error: any) {
-    console.error('Documents POST error:', error);
+    logger.error('Documents POST error', { error });
     return NextResponse.json(
       { error: error.message || 'Operation failed' },
       { status: 500 }
@@ -313,7 +316,7 @@ export async function DELETE(request: NextRequest) {
     await documentService.bulkDelete(document_ids, user.id);
     return NextResponse.json({ success: true, deleted: document_ids.length });
   } catch (error: any) {
-    console.error('Documents DELETE error:', error);
+    logger.error('Documents DELETE error', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to delete documents' },
       { status: 500 }

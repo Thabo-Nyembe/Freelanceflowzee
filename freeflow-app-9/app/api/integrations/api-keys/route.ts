@@ -6,6 +6,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { integrationService } from '@/lib/integrations/integration-service';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('api-keys');
 
 // =====================================================
 // GET - List API keys
@@ -41,7 +44,7 @@ export async function GET(request: NextRequest) {
       total: sanitizedKeys.length,
     });
   } catch (error: any) {
-    console.error('API Keys GET error:', error);
+    logger.error('API Keys GET error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to fetch API keys' },
       { status: 500 }
@@ -168,7 +171,7 @@ export async function POST(request: NextRequest) {
         );
     }
   } catch (error: any) {
-    console.error('API Keys POST error:', error);
+    logger.error('API Keys POST error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Operation failed' },
       { status: 500 }
@@ -204,7 +207,7 @@ export async function DELETE(request: NextRequest) {
       message: 'API key deleted successfully',
     });
   } catch (error: any) {
-    console.error('API Keys DELETE error:', error);
+    logger.error('API Keys DELETE error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to delete API key' },
       { status: 500 }

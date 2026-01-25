@@ -13,6 +13,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('video-drm');
 
 // ============================================================================
 // TYPES
@@ -416,7 +419,7 @@ export async function GET(request: NextRequest) {
       source: 'demo',
     });
   } catch (err) {
-    console.error('DRM GET error:', err);
+    logger.error('DRM GET error', { error: err });
     return NextResponse.json({
       success: true,
       data: getDemoPolicies(),
@@ -847,7 +850,7 @@ export async function POST(request: NextRequest) {
         );
     }
   } catch (err) {
-    console.error('DRM POST error:', err);
+    logger.error('DRM POST error', { error: err });
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('tax-deductions')
 
 /**
  * GET /api/tax/deductions/[id]
@@ -39,7 +42,7 @@ export async function GET(
           { status: 404 }
         )
       }
-      console.error('Tax deduction fetch error:', error)
+      logger.error('Tax deduction fetch error', { error })
       return NextResponse.json(
         { error: 'Failed to fetch tax deduction' },
         { status: 500 }
@@ -51,7 +54,7 @@ export async function GET(
       data: deduction
     })
   } catch (error) {
-    console.error('Tax deduction GET error:', error)
+    logger.error('Tax deduction GET error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -126,7 +129,7 @@ export async function PUT(
           { status: 404 }
         )
       }
-      console.error('Tax deduction update error:', error)
+      logger.error('Tax deduction update error', { error })
       return NextResponse.json(
         { error: 'Failed to update tax deduction' },
         { status: 500 }
@@ -138,7 +141,7 @@ export async function PUT(
       data: deduction
     })
   } catch (error) {
-    console.error('Tax deduction PUT error:', error)
+    logger.error('Tax deduction PUT error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -177,7 +180,7 @@ export async function DELETE(
       .eq('user_id', user.id) // Ensure user owns this deduction
 
     if (error) {
-      console.error('Tax deduction delete error:', error)
+      logger.error('Tax deduction delete error', { error })
       return NextResponse.json(
         { error: 'Failed to delete tax deduction' },
         { status: 500 }
@@ -189,7 +192,7 @@ export async function DELETE(
       message: 'Deduction deleted successfully'
     })
   } catch (error) {
-    console.error('Tax deduction DELETE error:', error)
+    logger.error('Tax deduction DELETE error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

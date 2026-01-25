@@ -1,5 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('kazi-workflow')
 
 export async function GET(
   request: NextRequest,
@@ -26,13 +29,13 @@ export async function GET(
       .single()
 
     if (error) {
-      console.error('Error fetching workflow:', error)
+      logger.error('Error fetching workflow', { error })
       return NextResponse.json({ error: error.message }, { status: 404 })
     }
 
     return NextResponse.json({ data })
   } catch (error) {
-    console.error('Error in GET /api/kazi/workflows/[id]:', error)
+    logger.error('Error in GET /api/kazi/workflows/[id]', { error })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -78,7 +81,7 @@ export async function PATCH(
       .single()
 
     if (workflowError) {
-      console.error('Error updating workflow:', workflowError)
+      logger.error('Error updating workflow', { error: workflowError })
       return NextResponse.json({ error: workflowError.message }, { status: 500 })
     }
 
@@ -105,7 +108,7 @@ export async function PATCH(
           .insert(actionRecords)
 
         if (actionsError) {
-          console.error('Error updating workflow actions:', actionsError)
+          logger.error('Error updating workflow actions', { error: actionsError })
         }
       }
     }
@@ -122,7 +125,7 @@ export async function PATCH(
 
     return NextResponse.json({ data: completeWorkflow })
   } catch (error) {
-    console.error('Error in PATCH /api/kazi/workflows/[id]:', error)
+    logger.error('Error in PATCH /api/kazi/workflows/[id]', { error })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -149,13 +152,13 @@ export async function DELETE(
       .eq('user_id', user.id)
 
     if (error) {
-      console.error('Error deleting workflow:', error)
+      logger.error('Error deleting workflow', { error })
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Error in DELETE /api/kazi/workflows/[id]:', error)
+    logger.error('Error in DELETE /api/kazi/workflows/[id]', { error })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

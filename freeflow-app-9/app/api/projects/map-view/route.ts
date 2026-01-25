@@ -11,6 +11,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('projects-map-view');
 
 // ============================================================================
 // TYPES
@@ -344,7 +347,7 @@ export async function GET(request: NextRequest) {
       source: 'demo',
     });
   } catch (err) {
-    console.error('Map View GET error:', err);
+    logger.error('Map View GET error', { error: err });
     return NextResponse.json({
       success: true,
       data: { markers: getDemoMarkers(), center: { latitude: 37.7749, longitude: -122.4194 }, zoom: 11 },
@@ -618,7 +621,7 @@ export async function POST(request: NextRequest) {
         );
     }
   } catch (err) {
-    console.error('Map View POST error:', err);
+    logger.error('Map View POST error', { error: err });
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

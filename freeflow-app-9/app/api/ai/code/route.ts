@@ -11,6 +11,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('ai-code')
 
 // Types
 interface CodeRequest {
@@ -128,7 +131,7 @@ export async function POST(request: NextRequest) {
         )
     }
   } catch (error) {
-    console.error('AI Code API error:', error)
+    logger.error('AI Code API error', { error })
     return NextResponse.json(
       { success: false, error: 'Failed to process code request' },
       { status: 500 }

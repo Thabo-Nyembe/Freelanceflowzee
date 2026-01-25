@@ -5,6 +5,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('events');
 
 // =====================================================
 // GET - List events or export data
@@ -109,7 +112,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       }
     }
   } catch (error: any) {
-    console.error('Events GET error:', error);
+    logger.error('Events GET error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to fetch events' },
       { status: 500 }
@@ -179,7 +182,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       message: 'Event created successfully',
     }, { status: 201 });
   } catch (error: any) {
-    console.error('Events POST error:', error);
+    logger.error('Events POST error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to create event' },
       { status: 500 }
@@ -225,7 +228,7 @@ export async function PUT(request: NextRequest): Promise<NextResponse> {
       message: 'Event updated successfully',
     });
   } catch (error: any) {
-    console.error('Events PUT error:', error);
+    logger.error('Events PUT error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to update event' },
       { status: 500 }
@@ -283,7 +286,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
       message: 'Event deleted successfully',
     });
   } catch (error: any) {
-    console.error('Events DELETE error:', error);
+    logger.error('Events DELETE error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to delete event' },
       { status: 500 }

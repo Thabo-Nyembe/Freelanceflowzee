@@ -6,6 +6,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { z } from 'zod';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('recurring-invoice');
 
 // ============ Validation Schema ============
 
@@ -127,7 +130,7 @@ export async function GET(
 
     return NextResponse.json({ data });
   } catch (error) {
-    console.error('GET recurring-invoice error:', error);
+    logger.error('GET recurring-invoice error', { error });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -241,7 +244,7 @@ export async function PUT(
 
     return NextResponse.json({ data: updated });
   } catch (error) {
-    console.error('PUT recurring-invoice error:', error);
+    logger.error('PUT recurring-invoice error', { error });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -287,7 +290,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('DELETE recurring-invoice error:', error);
+    logger.error('DELETE recurring-invoice error', { error });
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

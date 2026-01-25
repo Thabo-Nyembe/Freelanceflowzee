@@ -6,6 +6,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('sync');
 
 // ============ Types ============
 
@@ -84,7 +87,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<SyncRespo
         );
     }
   } catch (error) {
-    console.error('Sync error:', error);
+    logger.error('Sync error', { error });
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }
@@ -342,7 +345,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       },
     });
   } catch (error) {
-    console.error('Sync fetch error:', error);
+    logger.error('Sync fetch error', { error });
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

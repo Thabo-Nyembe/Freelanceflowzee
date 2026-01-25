@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { z } from 'zod'
 import crypto from 'crypto'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('webauthn')
 
 // =============================================================================
 // TYPES & INTERFACES
@@ -334,7 +337,7 @@ export async function GET(request: NextRequest) {
           .order('created_at', { ascending: false })
 
         if (error) {
-          console.error('Credentials fetch error:', error)
+          logger.error('Credentials fetch error', { error })
           return NextResponse.json({ credentials: [] })
         }
 
@@ -542,7 +545,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
   } catch (error) {
-    console.error('WebAuthn GET error:', error)
+    logger.error('WebAuthn GET error', { error })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -644,7 +647,7 @@ export async function POST(request: NextRequest) {
           .single()
 
         if (insertError) {
-          console.error('Credential insert error:', insertError)
+          logger.error('Credential insert error', { error: insertError })
           return NextResponse.json({ error: 'Failed to register credential' }, { status: 500 })
         }
 
@@ -724,7 +727,7 @@ export async function POST(request: NextRequest) {
         // Verify counter (replay attack protection)
         if (authData.signCount <= credential.counter && credential.counter !== 0) {
           // Possible cloned authenticator
-          console.warn('Possible cloned authenticator detected', {
+          logger.warn('Possible cloned authenticator detected', {
             credentialId: credential.id,
             expectedCounter: credential.counter,
             receivedCounter: authData.signCount,
@@ -774,7 +777,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
   } catch (error) {
-    console.error('WebAuthn POST error:', error)
+    logger.error('WebAuthn POST error', { error })
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: 'Validation failed', details: error.errors }, { status: 400 })
     }
@@ -834,7 +837,7 @@ export async function PUT(request: NextRequest) {
           .single()
 
         if (updateError) {
-          console.error('Credential update error:', updateError)
+          logger.error('Credential update error', { error: updateError })
           return NextResponse.json({ error: 'Failed to update credential' }, { status: 500 })
         }
 
@@ -859,7 +862,7 @@ export async function PUT(request: NextRequest) {
           .single()
 
         if (updateError) {
-          console.error('Settings update error:', updateError)
+          logger.error('Settings update error', { error: updateError })
           return NextResponse.json({ error: 'Failed to update settings' }, { status: 500 })
         }
 
@@ -870,7 +873,7 @@ export async function PUT(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
   } catch (error) {
-    console.error('WebAuthn PUT error:', error)
+    logger.error('WebAuthn PUT error', { error })
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: 'Validation failed', details: error.errors }, { status: 400 })
     }
@@ -926,7 +929,7 @@ export async function DELETE(request: NextRequest) {
       .eq('id', credential.id)
 
     if (deleteError) {
-      console.error('Credential delete error:', deleteError)
+      logger.error('Credential delete error', { error: deleteError })
       return NextResponse.json({ error: 'Failed to delete credential' }, { status: 500 })
     }
 
@@ -957,7 +960,7 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('WebAuthn DELETE error:', error)
+    logger.error('WebAuthn DELETE error', { error })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

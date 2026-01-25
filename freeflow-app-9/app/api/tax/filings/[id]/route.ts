@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('tax-filings')
 
 /**
  * GET /api/tax/filings/[id]
@@ -32,7 +35,7 @@ export async function GET(
 
     return NextResponse.json({ data: filing })
   } catch (error) {
-    console.error('Tax filing GET error:', error)
+    logger.error('Tax filing GET error', { error })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -69,7 +72,7 @@ export async function PATCH(
       .single()
 
     if (error) {
-      console.error('Error updating tax filing:', error)
+      logger.error('Error updating tax filing', { error })
       return NextResponse.json({ error: 'Failed to update filing' }, { status: 500 })
     }
 
@@ -78,7 +81,7 @@ export async function PATCH(
       message: 'Filing updated successfully'
     })
   } catch (error) {
-    console.error('Tax filing PATCH error:', error)
+    logger.error('Tax filing PATCH error', { error })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -108,7 +111,7 @@ export async function DELETE(
       .eq('user_id', user.id)
 
     if (error) {
-      console.error('Error deleting tax filing:', error)
+      logger.error('Error deleting tax filing', { error })
       return NextResponse.json({ error: 'Failed to delete filing' }, { status: 500 })
     }
 
@@ -116,7 +119,7 @@ export async function DELETE(
       message: 'Filing deleted successfully'
     })
   } catch (error) {
-    console.error('Tax filing DELETE error:', error)
+    logger.error('Tax filing DELETE error', { error })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

@@ -9,6 +9,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { releaseFileEscrow } from '@/lib/payments/file-payment'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('files-escrow')
 
 export interface ReleaseEscrowRequest {
   deliveryId: string
@@ -55,7 +58,7 @@ export async function POST(request: NextRequest) {
       message: 'Escrow released successfully. File is now accessible to buyer.'
     })
   } catch (error: any) {
-    console.error('Escrow release error:', error)
+    logger.error('Escrow release error', { error })
 
     return NextResponse.json(
       {
@@ -114,7 +117,7 @@ export async function GET(request: NextRequest) {
       deliveryStatus: delivery.status
     })
   } catch (error: any) {
-    console.error('Get escrow status error:', error)
+    logger.error('Get escrow status error', { error })
 
     return NextResponse.json(
       {

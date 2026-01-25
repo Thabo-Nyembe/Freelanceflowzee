@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('canvas-collaboration');
 
 // ============================================================================
 // WORLD-CLASS CANVAS COLLABORATION API
@@ -1580,7 +1583,7 @@ export async function POST(request: NextRequest) {
         );
     }
   } catch (error) {
-    console.error('Canvas Collaboration API error:', error);
+    logger.error('Canvas Collaboration API error', { error });
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

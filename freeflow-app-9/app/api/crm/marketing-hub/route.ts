@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('crm-marketing-hub');
 
 // Phase 7 Gap #1: Marketing Hub Integration
 // Priority: HIGH | Competitor: HubSpot
@@ -659,7 +662,7 @@ export async function POST(request: NextRequest) {
         );
     }
   } catch (error) {
-    console.error('Marketing Hub API error:', error);
+    logger.error('Marketing Hub API error', { error });
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

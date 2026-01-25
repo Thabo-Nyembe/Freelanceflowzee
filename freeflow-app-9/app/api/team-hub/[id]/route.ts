@@ -8,6 +8,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('team-hub')
 import {
   getTeamMember,
   updateTeamMember,
@@ -51,7 +54,7 @@ export async function GET(
 
     return NextResponse.json({ data })
   } catch (error) {
-    console.error('Team Hub API error:', error)
+    logger.error('Team Hub API error', { error })
     return NextResponse.json(
       { error: 'Failed to fetch resource' },
       { status: 500 }
@@ -99,7 +102,7 @@ export async function PUT(
 
     return NextResponse.json({ data: result?.data })
   } catch (error) {
-    console.error('Team Hub API error:', error)
+    logger.error('Team Hub API error', { error })
     return NextResponse.json(
       { error: 'Failed to update resource' },
       { status: 500 }
@@ -135,7 +138,7 @@ export async function DELETE(
 
     return NextResponse.json({ success })
   } catch (error) {
-    console.error('Team Hub API error:', error)
+    logger.error('Team Hub API error', { error })
     return NextResponse.json(
       { error: 'Failed to delete resource' },
       { status: 500 }

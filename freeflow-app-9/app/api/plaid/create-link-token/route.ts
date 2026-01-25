@@ -5,7 +5,10 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
 import { createLinkToken } from '@/lib/plaid/service';
+
+const logger = createFeatureLogger('plaid-api');
 
 export async function POST(request: NextRequest) {
   try {
@@ -56,7 +59,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Failed to create link token:', error);
+    logger.error('Failed to create link token', { error });
     return NextResponse.json(
       { error: 'Failed to create link token' },
       { status: 500 }

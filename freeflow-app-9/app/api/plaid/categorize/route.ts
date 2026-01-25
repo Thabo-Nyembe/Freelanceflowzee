@@ -5,11 +5,14 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
 import {
   categorizeTransaction,
   processCategorizationFeedback,
   recategorizeUncategorized,
 } from '@/lib/ai/categorization-service';
+
+const logger = createFeatureLogger('plaid-api');
 
 // POST - Categorize transaction(s) or process feedback
 export async function POST(request: NextRequest) {
@@ -127,7 +130,7 @@ export async function POST(request: NextRequest) {
         );
     }
   } catch (error) {
-    console.error('Categorization error:', error);
+    logger.error('Categorization error', { error });
     return NextResponse.json(
       { error: 'Categorization failed' },
       { status: 500 }
@@ -217,7 +220,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Failed to fetch categorization data:', error);
+    logger.error('Failed to fetch categorization data', { error });
     return NextResponse.json(
       { error: 'Failed to fetch data' },
       { status: 500 }

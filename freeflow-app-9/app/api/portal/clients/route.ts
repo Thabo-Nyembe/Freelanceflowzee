@@ -7,6 +7,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('portal-clients')
 
 export async function GET(request: NextRequest) {
   try {
@@ -155,7 +158,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
   } catch (error) {
-    console.error('Portal clients GET error:', error)
+    logger.error('Portal clients GET error', { error })
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Internal server error' },
       { status: 500 }
@@ -276,7 +279,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
   } catch (error) {
-    console.error('Portal clients POST error:', error)
+    logger.error('Portal clients POST error', { error })
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Internal server error' },
       { status: 500 }
@@ -331,7 +334,7 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({ client })
   } catch (error) {
-    console.error('Portal clients PUT error:', error)
+    logger.error('Portal clients PUT error', { error })
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Internal server error' },
       { status: 500 }
@@ -385,7 +388,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ client, archived: true })
     }
   } catch (error) {
-    console.error('Portal clients DELETE error:', error)
+    logger.error('Portal clients DELETE error', { error })
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Internal server error' },
       { status: 500 }

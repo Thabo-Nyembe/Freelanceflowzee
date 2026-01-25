@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { z } from 'zod'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('crm-api')
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -377,7 +380,7 @@ export async function GET(request: NextRequest) {
     const { data: pipelines, error } = await query
 
     if (error) {
-      console.error('Error fetching pipelines:', error)
+      logger.error('Error fetching pipelines', { error })
       return NextResponse.json({ error: 'Failed to fetch pipelines' }, { status: 500 })
     }
 
@@ -420,7 +423,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ pipelines: processedPipelines })
 
   } catch (error) {
-    console.error('Pipelines GET error:', error)
+    logger.error('Pipelines GET error', { error })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -550,7 +553,7 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (pipelineError) {
-      console.error('Error creating pipeline:', pipelineError)
+      logger.error('Error creating pipeline', { error: pipelineError })
       return NextResponse.json({ error: 'Failed to create pipeline' }, { status: 500 })
     }
 
@@ -568,7 +571,7 @@ export async function POST(request: NextRequest) {
       .select()
 
     if (stagesError) {
-      console.error('Error creating stages:', stagesError)
+      logger.error('Error creating stages', { error: stagesError })
       // Rollback pipeline creation
       await supabase.from('crm_pipelines').delete().eq('id', pipeline.id)
       return NextResponse.json({ error: 'Failed to create pipeline stages' }, { status: 500 })
@@ -583,7 +586,7 @@ export async function POST(request: NextRequest) {
     }, { status: 201 })
 
   } catch (error) {
-    console.error('Pipelines POST error:', error)
+    logger.error('Pipelines POST error', { error })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -663,7 +666,7 @@ export async function PUT(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('Error updating pipeline:', error)
+      logger.error('Error updating pipeline', { error })
       return NextResponse.json({ error: 'Failed to update pipeline' }, { status: 500 })
     }
 
@@ -674,7 +677,7 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ pipeline })
 
   } catch (error) {
-    console.error('Pipelines PUT error:', error)
+    logger.error('Pipelines PUT error', { error })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -746,14 +749,14 @@ export async function DELETE(request: NextRequest) {
       .eq('user_id', user.id)
 
     if (error) {
-      console.error('Error deleting pipeline:', error)
+      logger.error('Error deleting pipeline', { error })
       return NextResponse.json({ error: 'Failed to delete pipeline' }, { status: 500 })
     }
 
     return NextResponse.json({ success: true })
 
   } catch (error) {
-    console.error('Pipelines DELETE error:', error)
+    logger.error('Pipelines DELETE error', { error })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

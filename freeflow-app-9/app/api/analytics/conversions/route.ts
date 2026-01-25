@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('analytics-conversions')
 
 /**
  * Conversion Tracking API
@@ -25,7 +28,7 @@ export async function POST(request: NextRequest) {
     const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'
 
     // Log conversion
-    console.log('[Conversion]', {
+    logger.info('Conversion tracked', {
       goal: conversion.goal,
       value: conversion.value,
       currency: conversion.currency,
@@ -78,7 +81,7 @@ export async function POST(request: NextRequest) {
       goal: conversion.goal
     })
   } catch (error) {
-    console.error('Conversion tracking error:', error)
+    logger.error('Conversion tracking error', { error })
     return NextResponse.json(
       { error: 'Failed to track conversion' },
       { status: 500 }
@@ -140,7 +143,7 @@ export async function GET(request: NextRequest) {
       message: 'Database integration pending'
     })
   } catch (error) {
-    console.error('Failed to retrieve conversions:', error)
+    logger.error('Failed to retrieve conversions', { error })
     return NextResponse.json(
       { error: 'Failed to retrieve conversions' },
       { status: 500 }

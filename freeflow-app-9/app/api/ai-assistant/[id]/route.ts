@@ -8,6 +8,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('ai-assistant')
 import {
   getConversation,
   updateConversation,
@@ -56,7 +59,7 @@ export async function GET(
       }
     })
   } catch (error) {
-    console.error('AI Assistant API error:', error)
+    logger.error('AI Assistant API error', { error })
     return NextResponse.json(
       { error: 'Failed to fetch conversation' },
       { status: 500 }
@@ -103,7 +106,7 @@ export async function PUT(
 
     return NextResponse.json({ data: result.data })
   } catch (error) {
-    console.error('AI Assistant API error:', error)
+    logger.error('AI Assistant API error', { error })
     return NextResponse.json(
       { error: 'Failed to update conversation' },
       { status: 500 }
@@ -129,7 +132,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('AI Assistant API error:', error)
+    logger.error('AI Assistant API error', { error })
     return NextResponse.json(
       { error: 'Failed to delete conversation' },
       { status: 500 }

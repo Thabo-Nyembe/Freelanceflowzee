@@ -5,6 +5,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('performance')
 
 // =====================================================
 // TYPES
@@ -252,7 +255,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       }
     }
   } catch (error: unknown) {
-    console.error('Performance GET error:', error)
+    logger.error('Performance GET error', { error })
     const message = error instanceof Error ? error.message : 'Failed to fetch performance data'
     return NextResponse.json(
       { success: false, error: message },
@@ -426,7 +429,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         )
     }
   } catch (error: unknown) {
-    console.error('Performance POST error:', error)
+    logger.error('Performance POST error', { error })
     const message = error instanceof Error ? error.message : 'Operation failed'
     return NextResponse.json(
       { success: false, error: message },
@@ -462,7 +465,7 @@ async function getPageTests(supabase: ReturnType<typeof createClient> extends Pr
 
     return data.map(transformTestToPageTest)
   } catch (error) {
-    console.error('Error fetching page tests:', error)
+    logger.error('Error fetching page tests', { error })
     return mockPageTests
   }
 }
@@ -511,7 +514,7 @@ async function getAudits(supabase: ReturnType<typeof createClient> extends Promi
       savings: record.savings as { time?: number; bytes?: number } | undefined
     }))
   } catch (error) {
-    console.error('Error fetching audits:', error)
+    logger.error('Error fetching audits', { error })
     return mockAudits
   }
 }
@@ -552,7 +555,7 @@ async function getPerformanceBudgets(supabase: ReturnType<typeof createClient> e
       }
     })
   } catch (error) {
-    console.error('Error fetching budgets:', error)
+    logger.error('Error fetching budgets', { error })
     return mockBudgets
   }
 }
@@ -595,7 +598,7 @@ async function getHistoricalData(
       cls: record.cls as number
     }))
   } catch (error) {
-    console.error('Error fetching historical data:', error)
+    logger.error('Error fetching historical data', { error })
     return mockHistorical
   }
 }
@@ -633,7 +636,7 @@ async function getPerformanceSummary(supabase: ReturnType<typeof createClient> e
       trend: 'stable'
     }
   } catch (error) {
-    console.error('Error fetching summary:', error)
+    logger.error('Error fetching summary', { error })
     return {
       averagePerformance: 78,
       averageAccessibility: 92,
@@ -662,7 +665,7 @@ async function getPerformanceAlerts(supabase: ReturnType<typeof createClient> ex
 
     return data || []
   } catch (error) {
-    console.error('Error fetching alerts:', error)
+    logger.error('Error fetching alerts', { error })
     return []
   }
 }
@@ -703,7 +706,7 @@ async function runPerformanceTest(
       duration: mockResult.duration
     })
   } catch (error) {
-    console.error('Error storing test result:', error)
+    logger.error('Error storing test result', { error })
   }
 
   return mockResult

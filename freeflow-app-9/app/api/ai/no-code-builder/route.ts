@@ -12,6 +12,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('ai-no-code-builder');
 
 // ============================================================================
 // TYPES
@@ -375,7 +378,7 @@ export async function GET(request: NextRequest) {
       source: 'demo',
     });
   } catch (err) {
-    console.error('No-Code Builder GET error:', err);
+    logger.error('No-Code Builder GET error', { error: err });
     return NextResponse.json({
       success: true,
       data: { apps: [getDemoApp()] },
@@ -705,7 +708,7 @@ export async function POST(request: NextRequest) {
         );
     }
   } catch (err) {
-    console.error('No-Code Builder POST error:', err);
+    logger.error('No-Code Builder POST error', { error: err });
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

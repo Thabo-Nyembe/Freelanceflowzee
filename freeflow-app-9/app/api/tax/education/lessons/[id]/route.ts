@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('tax-education-lessons')
 
 /**
  * GET /api/tax/education/lessons/[id]
@@ -25,7 +28,7 @@ export async function GET(
 
     return NextResponse.json({ data: lesson })
   } catch (error) {
-    console.error('Tax education lesson GET error:', error)
+    logger.error('Tax education lesson GET error', { error })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

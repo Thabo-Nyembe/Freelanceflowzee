@@ -13,6 +13,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('video-presets-social');
 
 // ============================================================================
 // TYPES
@@ -460,7 +463,7 @@ export async function GET(request: NextRequest) {
       source: 'demo',
     });
   } catch (err) {
-    console.error('Social Presets GET error:', err);
+    logger.error('Social Presets GET error', { error: err });
     return NextResponse.json({
       success: true,
       data: getPlatformPresets(),
@@ -743,7 +746,7 @@ export async function POST(request: NextRequest) {
         );
     }
   } catch (err) {
-    console.error('Social Presets POST error:', err);
+    logger.error('Social Presets POST error', { error: err });
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

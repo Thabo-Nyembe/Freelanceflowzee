@@ -1,5 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('ai-advisor')
 
 export async function GET(request: NextRequest) {
   try {
@@ -52,7 +55,7 @@ export async function GET(request: NextRequest) {
       }
     }
   } catch (error: any) {
-    console.error('AI Advisor API error:', error)
+    logger.error('AI Advisor API error', { error })
     return NextResponse.json(
       { error: error.message || 'Failed to fetch insights' },
       { status: 500 }
@@ -122,7 +125,7 @@ export async function POST(request: NextRequest) {
         )
     }
   } catch (error: any) {
-    console.error('AI Advisor API error:', error)
+    logger.error('AI Advisor API error', { error })
     return NextResponse.json(
       { error: error.message || 'Operation failed' },
       { status: 500 }

@@ -7,7 +7,10 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
 import Stripe from 'stripe';
+
+const logger = createFeatureLogger('billing-time-to-invoice');
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
   apiVersion: '2024-11-20.acacia',
@@ -91,7 +94,7 @@ export async function POST(request: NextRequest) {
       .in('id', timeEntryIds);
 
     if (entriesError) {
-      console.error('Error fetching time entries:', entriesError);
+      logger.error('Error fetching time entries', { error: entriesError });
       // Return demo data if table doesn't exist
       return handleDemoMode(action, clientId, timeEntryIds, includeDetails, discountPercent);
     }
@@ -217,7 +220,7 @@ export async function POST(request: NextRequest) {
         .single();
 
       if (invoiceError) {
-        console.error('Invoice creation error:', invoiceError);
+        logger.error('Invoice creation error', { error: invoiceError });
         return NextResponse.json({
           success: true,
           demo: true,
@@ -351,7 +354,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Time-to-Invoice API error:', error);
+    logger.error('Time-to-Invoice API error', { error });
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to create invoice' },
       { status: 500 }
@@ -461,7 +464,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Get unbilled entries error:', error);
+    logger.error('Get unbilled entries error', { error });
     return NextResponse.json(
       { error: 'Failed to fetch unbilled time entries' },
       { status: 500 }

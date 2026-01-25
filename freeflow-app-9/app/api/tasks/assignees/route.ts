@@ -11,6 +11,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('tasks-assignees');
 
 // ============================================================================
 // TYPES
@@ -218,7 +221,7 @@ export async function GET(request: NextRequest) {
       source: 'database',
     });
   } catch (err) {
-    console.error('Task Assignees GET error:', err);
+    logger.error('Task Assignees GET error', { error: err });
     return NextResponse.json({
       success: true,
       data: getDemoAssignees('demo-task'),
@@ -498,7 +501,7 @@ export async function POST(request: NextRequest) {
         );
     }
   } catch (err) {
-    console.error('Task Assignees POST error:', err);
+    logger.error('Task Assignees POST error', { error: err });
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

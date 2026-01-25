@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { z } from 'zod'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('crm-api')
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -476,7 +479,7 @@ export async function GET(request: NextRequest) {
     const { data: contacts, error, count } = await query
 
     if (error) {
-      console.error('Error fetching contacts:', error)
+      logger.error('Error fetching contacts', { error })
       return NextResponse.json({ error: 'Failed to fetch contacts' }, { status: 500 })
     }
 
@@ -524,7 +527,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Contacts GET error:', error)
+    logger.error('Contacts GET error', { error })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -661,7 +664,7 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('Error creating contact:', error)
+      logger.error('Error creating contact', { error })
       return NextResponse.json({ error: 'Failed to create contact' }, { status: 500 })
     }
 
@@ -687,7 +690,7 @@ export async function POST(request: NextRequest) {
     }, { status: 201 })
 
   } catch (error) {
-    console.error('Contacts POST error:', error)
+    logger.error('Contacts POST error', { error })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -793,7 +796,7 @@ export async function PUT(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('Error updating contact:', error)
+      logger.error('Error updating contact', { error })
       return NextResponse.json({ error: 'Failed to update contact' }, { status: 500 })
     }
 
@@ -822,7 +825,7 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ contact })
 
   } catch (error) {
-    console.error('Contacts PUT error:', error)
+    logger.error('Contacts PUT error', { error })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -878,7 +881,7 @@ export async function DELETE(request: NextRequest) {
         .eq('user_id', user.id)
 
       if (error) {
-        console.error('Error deleting contact:', error)
+        logger.error('Error deleting contact', { error })
         return NextResponse.json({ error: 'Failed to delete contact' }, { status: 500 })
       }
 
@@ -898,7 +901,7 @@ export async function DELETE(request: NextRequest) {
         .eq('user_id', user.id)
 
       if (error) {
-        console.error('Error archiving contact:', error)
+        logger.error('Error archiving contact', { error })
         return NextResponse.json({ error: 'Failed to archive contact' }, { status: 500 })
       }
     }
@@ -910,7 +913,7 @@ export async function DELETE(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Contacts DELETE error:', error)
+    logger.error('Contacts DELETE error', { error })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

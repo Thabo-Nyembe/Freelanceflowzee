@@ -5,6 +5,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('account-delete');
 
 // =====================================================
 // DELETE - Request permanent account deletion
@@ -44,7 +47,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
         .eq('user_id', user.id);
 
       if (settingsError && settingsError.code !== '42703') {
-        console.error('Settings update error:', settingsError);
+        logger.error('Settings update error', { error: settingsError });
       }
     } else if (insertError) {
       throw insertError;
@@ -70,7 +73,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
       gracePeriodDays: 30
     });
   } catch (error: any) {
-    console.error('Account deletion request error:', error);
+    logger.error('Account deletion request error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to request account deletion' },
       { status: 500 }
@@ -134,7 +137,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       { status: 400 }
     );
   } catch (error: any) {
-    console.error('Cancel deletion error:', error);
+    logger.error('Cancel deletion error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to cancel deletion' },
       { status: 500 }

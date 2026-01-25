@@ -1,4 +1,7 @@
 import { NextResponse } from 'next/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('analytics-vitals')
 
 interface WebVitalMetric {
   name: string
@@ -17,7 +20,7 @@ export async function POST(request: Request) {
     const metric: WebVitalMetric = await request.json()
 
     // Log metrics for monitoring
-    console.log('[Web Vitals]', {
+    logger.info('Web Vitals metric received', {
       name: metric.name,
       value: metric.value,
       rating: metric.rating,
@@ -46,7 +49,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ received: true })
   } catch (error) {
-    console.error('[Web Vitals] Error processing metric:', error)
+    logger.error('Error processing Web Vitals metric', { error })
     return NextResponse.json(
       { error: 'Failed to process metric' },
       { status: 400 }

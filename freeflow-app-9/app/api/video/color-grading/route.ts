@@ -14,6 +14,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('video-color-grading');
 
 // ============================================================================
 // TYPES
@@ -477,7 +480,7 @@ export async function GET(request: NextRequest) {
       source: 'demo',
     });
   } catch (err) {
-    console.error('Color Grading GET error:', err);
+    logger.error('Color Grading GET error', { error: err });
     return NextResponse.json({
       success: true,
       data: getDemoGrade(),
@@ -811,7 +814,7 @@ export async function POST(request: NextRequest) {
         );
     }
   } catch (err) {
-    console.error('Color Grading POST error:', err);
+    logger.error('Color Grading POST error', { error: err });
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

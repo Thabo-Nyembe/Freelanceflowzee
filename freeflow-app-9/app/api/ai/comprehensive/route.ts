@@ -6,6 +6,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { aiService } from '@/lib/ai/ai-service';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('ai-comprehensive');
 
 // =====================================================
 // GET - List conversations, generations, templates
@@ -152,7 +155,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       }
     }
   } catch (error: any) {
-    console.error('AI Service GET error:', error);
+    logger.error('AI Service GET error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to fetch AI data' },
       { status: 500 }
@@ -446,7 +449,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         );
     }
   } catch (error: any) {
-    console.error('AI Service POST error:', error);
+    logger.error('AI Service POST error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Operation failed' },
       { status: 500 }
@@ -492,7 +495,7 @@ export async function PUT(request: NextRequest): Promise<NextResponse> {
       { status: 400 }
     );
   } catch (error: any) {
-    console.error('AI Service PUT error:', error);
+    logger.error('AI Service PUT error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to update' },
       { status: 500 }
@@ -546,7 +549,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
       { status: 400 }
     );
   } catch (error: any) {
-    console.error('AI Service DELETE error:', error);
+    logger.error('AI Service DELETE error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to delete' },
       { status: 500 }

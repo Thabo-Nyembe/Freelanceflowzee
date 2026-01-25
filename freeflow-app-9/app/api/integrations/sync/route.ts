@@ -6,6 +6,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { integrationService } from '@/lib/integrations/integration-service';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('integrations-sync');
 
 // =====================================================
 // GET - List sync jobs
@@ -43,7 +46,7 @@ export async function GET(request: NextRequest) {
       total: jobs.length,
     });
   } catch (error: any) {
-    console.error('Sync Jobs GET error:', error);
+    logger.error('Sync Jobs GET error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to fetch sync jobs' },
       { status: 500 }
@@ -210,7 +213,7 @@ export async function POST(request: NextRequest) {
         );
     }
   } catch (error: any) {
-    console.error('Sync Jobs POST error:', error);
+    logger.error('Sync Jobs POST error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Operation failed' },
       { status: 500 }

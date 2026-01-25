@@ -15,6 +15,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { hashPassword } from '@/lib/security/file-password'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('files-delivery')
 
 export interface CreateDeliveryRequest {
   fileId: string
@@ -242,7 +245,7 @@ export async function POST(request: NextRequest) {
       }
     })
   } catch (error: any) {
-    console.error('Delivery creation error:', error)
+    logger.error('Delivery creation error', { error })
 
     return NextResponse.json(
       {
@@ -326,7 +329,7 @@ export async function GET(request: NextRequest) {
       })
     }
   } catch (error: any) {
-    console.error('Get delivery error:', error)
+    logger.error('Get delivery error', { error })
 
     return NextResponse.json(
       {

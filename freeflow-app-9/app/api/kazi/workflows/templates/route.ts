@@ -1,5 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('kazi-workflow-templates')
 
 export async function GET(request: NextRequest) {
   try {
@@ -22,13 +25,13 @@ export async function GET(request: NextRequest) {
     const { data, error } = await query
 
     if (error) {
-      console.error('Error fetching workflow templates:', error)
+      logger.error('Error fetching workflow templates', { error })
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
     return NextResponse.json({ data })
   } catch (error) {
-    console.error('Error in GET /api/kazi/workflows/templates:', error)
+    logger.error('Error in GET /api/kazi/workflows/templates', { error })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

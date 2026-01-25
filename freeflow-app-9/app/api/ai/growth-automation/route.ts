@@ -6,6 +6,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { growthAutomationEngine } from '@/lib/ai/growth-automation-engine';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('ai-growth-automation');
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
@@ -146,7 +149,7 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Error in growth automation:', error);
+    logger.error('Error in growth automation', { error });
     return NextResponse.json(
       {
         error: 'Failed to process growth automation request',

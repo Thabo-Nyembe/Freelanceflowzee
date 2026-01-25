@@ -8,6 +8,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('access-logs')
 
 export async function GET(request: NextRequest) {
   try {
@@ -79,7 +82,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
   } catch (error) {
-    console.error('Access Logs GET error:', error)
+    logger.error('Access Logs GET error', { error })
     return NextResponse.json(
       { error: 'Failed to fetch access logs' },
       { status: 500 }
@@ -224,7 +227,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
   } catch (error) {
-    console.error('Access Logs POST error:', error)
+    logger.error('Access Logs POST error', { error })
     return NextResponse.json(
       { error: 'Failed to process access logs request' },
       { status: 500 }

@@ -8,6 +8,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('admin-analytics')
 import {
   getRevenueData,
   recordRevenueData,
@@ -146,7 +149,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid type parameter' }, { status: 400 })
     }
   } catch (error) {
-    console.error('Admin Analytics API error:', error)
+    logger.error('Failed to fetch Admin Analytics data', { error })
     return NextResponse.json(
       { error: 'Failed to fetch Admin Analytics data' },
       { status: 500 }
@@ -191,7 +194,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
   } catch (error) {
-    console.error('Admin Analytics API error:', error)
+    logger.error('Failed to process Admin Analytics request', { error })
     return NextResponse.json(
       { error: 'Failed to process Admin Analytics request' },
       { status: 500 }

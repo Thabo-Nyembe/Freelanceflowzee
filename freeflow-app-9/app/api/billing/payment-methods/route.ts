@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('billing-payment-methods');
 
 // Types
 interface PaymentMethod {
@@ -86,7 +89,7 @@ export async function GET(request: NextRequest) {
       defaultMethod: maskedMethods.find(pm => pm.is_default) || null
     });
   } catch (error) {
-    console.error('Fetch payment methods error:', error);
+    logger.error('Fetch payment methods error', { error });
     return NextResponse.json(
       { error: 'Failed to fetch payment methods' },
       { status: 500 }
@@ -476,7 +479,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
     }
   } catch (error) {
-    console.error('Payment method action error:', error);
+    logger.error('Payment method action error', { error });
     return NextResponse.json(
       { error: 'Failed to perform payment method action' },
       { status: 500 }

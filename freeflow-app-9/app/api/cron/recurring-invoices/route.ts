@@ -6,6 +6,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { runRecurringInvoiceJob, getRecurringInvoiceProcessor } from '@/lib/jobs/recurring-invoice-processor';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('cron-recurring-invoices');
 
 // ============ Security ============
 
@@ -44,14 +47,14 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    console.log('[Cron] Starting recurring invoice processing...');
+    logger.info('Starting recurring invoice processing');
     const startTime = Date.now();
 
     // Run the job
     const result = await runRecurringInvoiceJob();
 
     const duration = Date.now() - startTime;
-    console.log(`[Cron] Completed in ${duration}ms:`, result);
+    logger.info('Recurring invoice processing completed', { duration, result });
 
     return NextResponse.json({
       success: true,
@@ -59,7 +62,7 @@ export async function GET(request: NextRequest) {
       ...result,
     });
   } catch (error) {
-    console.error('[Cron] Recurring invoice job error:', error);
+    logger.error('Recurring invoice job error', { error });
     return NextResponse.json(
       {
         success: false,
@@ -118,7 +121,7 @@ export async function POST(request: NextRequest) {
         );
     }
   } catch (error) {
-    console.error('[Cron] Manual trigger error:', error);
+    logger.error('Manual trigger error', { error });
     return NextResponse.json(
       {
         success: false,

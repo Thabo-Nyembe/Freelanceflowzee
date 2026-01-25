@@ -13,6 +13,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('video-watermark');
 
 // ============================================================================
 // TYPES
@@ -326,7 +329,7 @@ export async function GET(request: NextRequest) {
       source: 'demo',
     });
   } catch (err) {
-    console.error('Watermark GET error:', err);
+    logger.error('Watermark GET error', { error: err });
     return NextResponse.json({
       success: true,
       data: getDemoWatermarks(),
@@ -651,7 +654,7 @@ export async function POST(request: NextRequest) {
         );
     }
   } catch (err) {
-    console.error('Watermark POST error:', err);
+    logger.error('Watermark POST error', { error: err });
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

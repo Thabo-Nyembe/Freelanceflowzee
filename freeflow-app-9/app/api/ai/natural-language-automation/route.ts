@@ -11,6 +11,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('ai-natural-language-automation');
 
 // ============================================================================
 // TYPES
@@ -394,7 +397,7 @@ export async function GET(request: NextRequest) {
       source: 'demo',
     });
   } catch (err) {
-    console.error('NLA GET error:', err);
+    logger.error('NLA GET error', { error: err });
     return NextResponse.json({
       success: true,
       data: getDemoCapabilities(),
@@ -575,7 +578,7 @@ export async function POST(request: NextRequest) {
         );
     }
   } catch (err) {
-    console.error('NLA POST error:', err);
+    logger.error('NLA POST error', { error: err });
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

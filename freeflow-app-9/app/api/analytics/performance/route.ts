@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('analytics-performance')
 
 /**
  * Performance Analytics API
@@ -20,7 +23,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Log performance metrics
-    console.log('[Performance Metric]', {
+    logger.info('Performance metric received', {
       name: metric.name,
       value: metric.value,
       rating: metric.rating,
@@ -48,7 +51,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Performance tracking error:', error)
+    logger.error('Performance tracking error', { error })
     return NextResponse.json(
       { error: 'Failed to track performance metric' },
       { status: 500 }

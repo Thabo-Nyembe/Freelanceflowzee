@@ -1,5 +1,8 @@
 import { createAdminClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('kazi-automations')
 
 // Demo user for unauthenticated access
 const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
@@ -92,7 +95,7 @@ export async function GET(request: NextRequest) {
     const { data, error } = await query
 
     if (error) {
-      console.error('Error fetching automations:', error)
+      logger.error('Error fetching automations', { error })
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
@@ -101,7 +104,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ data: transformedData })
   } catch (error) {
-    console.error('Error in GET /api/kazi/automations:', error)
+    logger.error('Error in GET /api/kazi/automations', { error })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -126,7 +129,7 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('Error creating automation:', error)
+      logger.error('Error creating automation', { error })
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
@@ -135,7 +138,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ data: transformedData }, { status: 201 })
   } catch (error) {
-    console.error('Error in POST /api/kazi/automations:', error)
+    logger.error('Error in POST /api/kazi/automations', { error })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('tax-insights')
 
 /**
  * GET /api/tax/insights
@@ -45,7 +48,7 @@ export async function GET(request: NextRequest) {
     const { data: insights, error } = await query
 
     if (error) {
-      console.error('Tax insights fetch error:', error)
+      logger.error('Tax insights fetch error', { error })
       return NextResponse.json(
         { error: 'Failed to fetch tax insights' },
         { status: 500 }
@@ -58,7 +61,7 @@ export async function GET(request: NextRequest) {
       count: insights?.length || 0
     })
   } catch (error) {
-    console.error('Tax insights GET error:', error)
+    logger.error('Tax insights GET error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -112,7 +115,7 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('Tax insight creation error:', error)
+      logger.error('Tax insight creation error', { error })
       return NextResponse.json(
         { error: 'Failed to create tax insight' },
         { status: 500 }
@@ -124,7 +127,7 @@ export async function POST(request: NextRequest) {
       data: insight
     })
   } catch (error) {
-    console.error('Tax insights POST error:', error)
+    logger.error('Tax insights POST error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

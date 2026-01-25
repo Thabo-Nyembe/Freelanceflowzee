@@ -12,6 +12,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('ai-proposal-writer');
 
 // ============================================================================
 // TYPES
@@ -312,7 +315,7 @@ export async function GET(request: NextRequest) {
       source: 'demo',
     });
   } catch (err) {
-    console.error('Proposal Writer GET error:', err);
+    logger.error('Proposal Writer GET error', { error: err });
     return NextResponse.json({
       success: true,
       data: getDemoStats(),
@@ -466,7 +469,7 @@ export async function POST(request: NextRequest) {
         );
     }
   } catch (err) {
-    console.error('Proposal Writer POST error:', err);
+    logger.error('Proposal Writer POST error', { error: err });
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

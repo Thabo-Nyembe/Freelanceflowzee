@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('crm-email-sequences');
 
 // Phase 7 Gap #2: Email Sequences/Drip Campaigns
 // Priority: HIGH | Competitor: HubSpot
@@ -670,7 +673,7 @@ export async function POST(request: NextRequest) {
         );
     }
   } catch (error) {
-    console.error('Email Sequences API error:', error);
+    logger.error('Email Sequences API error', { error });
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

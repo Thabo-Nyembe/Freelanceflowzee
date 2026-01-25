@@ -7,6 +7,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { campaignSenderService } from '@/lib/email/campaign-sender-service'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('email-campaigns')
 
 export async function GET(request: NextRequest) {
   try {
@@ -37,7 +40,7 @@ export async function GET(request: NextRequest) {
       offset
     })
   } catch (error) {
-    console.error('Error fetching campaigns:', error)
+    logger.error('Failed to fetch campaigns', { error })
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to fetch campaigns' },
       { status: 500 }
@@ -148,7 +151,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
   } catch (error) {
-    console.error('Error with campaign action:', error)
+    logger.error('Campaign action failed', { error })
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Campaign action failed' },
       { status: 500 }
@@ -175,7 +178,7 @@ export async function PUT(request: NextRequest) {
     const campaign = await campaignSenderService.updateCampaign(campaignId, updates)
     return NextResponse.json({ campaign })
   } catch (error) {
-    console.error('Error updating campaign:', error)
+    logger.error('Failed to update campaign', { error })
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to update campaign' },
       { status: 500 }

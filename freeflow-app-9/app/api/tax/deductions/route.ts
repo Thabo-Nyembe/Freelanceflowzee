@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('tax-deductions')
 
 /**
  * GET /api/tax/deductions
@@ -48,7 +51,7 @@ export async function GET(request: NextRequest) {
     const { data: deductions, error } = await query
 
     if (error) {
-      console.error('Tax deductions fetch error:', error)
+      logger.error('Tax deductions fetch error', { error })
       return NextResponse.json(
         { error: 'Failed to fetch tax deductions' },
         { status: 500 }
@@ -71,7 +74,7 @@ export async function GET(request: NextRequest) {
       }
     })
   } catch (error) {
-    console.error('Tax deductions GET error:', error)
+    logger.error('Tax deductions GET error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -141,7 +144,7 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('Tax deduction creation error:', error)
+      logger.error('Tax deduction creation error', { error })
       return NextResponse.json(
         { error: 'Failed to create tax deduction' },
         { status: 500 }
@@ -153,7 +156,7 @@ export async function POST(request: NextRequest) {
       data: deduction
     })
   } catch (error) {
-    console.error('Tax deductions POST error:', error)
+    logger.error('Tax deductions POST error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

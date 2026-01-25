@@ -6,6 +6,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('user-report')
 
 export async function POST(request: NextRequest) {
   try {
@@ -72,7 +75,7 @@ export async function POST(request: NextRequest) {
       message: 'Report submitted. Our team will review it within 24-48 hours.'
     })
   } catch (error) {
-    console.error('User report error:', error)
+    logger.error('User report error', { error })
     return NextResponse.json({ error: 'Failed to submit report' }, { status: 500 })
   }
 }

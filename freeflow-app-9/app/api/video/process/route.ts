@@ -14,6 +14,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('video-process')
 
 // Types
 export interface VideoProcessingJob {
@@ -372,7 +375,7 @@ async function processVideoJob(job: VideoProcessingJob): Promise<void> {
 
     // Build FFmpeg command
     const ffmpegArgs = buildFFmpegCommand(job.settings)
-    console.log('FFmpeg args:', ffmpegArgs)
+    logger.info('FFmpeg args', { ffmpegArgs })
 
     // Simulate processing
     for (let i = 10; i <= 90; i += 10) {
@@ -461,7 +464,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
   } catch (error) {
-    console.error('Video processing error:', error)
+    logger.error('Video processing error', { error })
     return NextResponse.json(
       { error: 'Failed to process video' },
       { status: 500 }
@@ -725,7 +728,7 @@ export async function GET(request: NextRequest) {
       })),
     })
   } catch (error) {
-    console.error('Error getting job status:', error)
+    logger.error('Error getting job status', { error })
     return NextResponse.json(
       { error: 'Failed to get job status' },
       { status: 500 }
@@ -772,7 +775,7 @@ export async function DELETE(request: NextRequest) {
       message: 'Job cancelled',
     })
   } catch (error) {
-    console.error('Error cancelling job:', error)
+    logger.error('Error cancelling job', { error })
     return NextResponse.json(
       { error: 'Failed to cancel job' },
       { status: 500 }

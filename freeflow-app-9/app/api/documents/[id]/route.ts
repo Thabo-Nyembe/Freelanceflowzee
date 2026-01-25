@@ -6,6 +6,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { documentService } from '@/lib/documents/document-service';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('documents');
 
 // =====================================================
 // GET - Get single document with details
@@ -87,7 +90,7 @@ export async function GET(
       }
     }
   } catch (error: any) {
-    console.error('Document GET error:', error);
+    logger.error('Document GET error', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to fetch document' },
       { status: 500 }
@@ -189,7 +192,7 @@ export async function PUT(
       }
     }
   } catch (error: any) {
-    console.error('Document PUT error:', error);
+    logger.error('Document PUT error', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to update document' },
       { status: 500 }
@@ -226,7 +229,7 @@ export async function DELETE(
     await documentService.deleteDocument(id, user.id);
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    console.error('Document DELETE error:', error);
+    logger.error('Document DELETE error', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to delete document' },
       { status: 500 }
@@ -284,7 +287,7 @@ export async function PATCH(
     const document = await documentService.updateDocument(id, user.id, body);
     return NextResponse.json({ document });
   } catch (error: any) {
-    console.error('Document PATCH error:', error);
+    logger.error('Document PATCH error', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to update document' },
       { status: 500 }

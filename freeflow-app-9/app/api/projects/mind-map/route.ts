@@ -11,6 +11,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('projects-mind-map');
 
 // ============================================================================
 // TYPES
@@ -292,7 +295,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ success: true, data, source: 'database' });
   } catch (err) {
-    console.error('Mind Map GET error:', err);
+    logger.error('Mind Map GET error', { error: err });
     return NextResponse.json({
       success: true,
       data: [getDemoMindMap()],
@@ -532,7 +535,7 @@ export async function POST(request: NextRequest) {
         );
     }
   } catch (err) {
-    console.error('Mind Map POST error:', err);
+    logger.error('Mind Map POST error', { error: err });
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

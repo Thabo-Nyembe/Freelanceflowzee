@@ -5,6 +5,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('settings');
 
 // =====================================================
 // GET - Get all settings or specific category
@@ -103,7 +106,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       }
     }
   } catch (error: any) {
-    console.error('Settings GET error:', error);
+    logger.error('Settings GET error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to fetch settings' },
       { status: 500 }
@@ -233,7 +236,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         );
     }
   } catch (error: any) {
-    console.error('Settings POST error:', error);
+    logger.error('Settings POST error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Operation failed' },
       { status: 500 }
@@ -314,7 +317,7 @@ export async function PUT(request: NextRequest): Promise<NextResponse> {
         );
     }
   } catch (error: any) {
-    console.error('Settings PUT error:', error);
+    logger.error('Settings PUT error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to update settings' },
       { status: 500 }

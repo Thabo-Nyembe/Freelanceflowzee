@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('portfolio-builder');
 
 // ============================================================================
 // WORLD-CLASS PORTFOLIO BUILDER API
@@ -945,7 +948,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ success: false, error: `Unknown action: ${action}` }, { status: 400 });
     }
   } catch (error) {
-    console.error('Portfolio Builder API error:', error);
+    logger.error('Portfolio Builder API error', { error });
     return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }
 }

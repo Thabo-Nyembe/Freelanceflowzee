@@ -114,7 +114,7 @@ export async function POST(
       .single()
 
     if (execError || !execution) {
-      console.error('Error creating execution:', execError)
+      logger.error('Error creating execution', { error: execError })
       return NextResponse.json({ error: 'Failed to create execution' }, { status: 500 })
     }
 
@@ -219,7 +219,7 @@ export async function POST(
       outputs
     })
   } catch (error) {
-    console.error('Error in POST /api/kazi/workflows/[id]/execute:', error)
+    logger.error('Error in POST /api/kazi/workflows/[id]/execute', { error })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

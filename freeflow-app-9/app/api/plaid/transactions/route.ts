@@ -5,7 +5,10 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
 import { z } from 'zod';
+
+const logger = createFeatureLogger('plaid-api');
 
 // Query params schema
 const querySchema = z.object({
@@ -119,7 +122,7 @@ export async function GET(request: NextRequest) {
     const { data: transactions, count, error } = await query;
 
     if (error) {
-      console.error('Failed to fetch transactions:', error);
+      logger.error('Failed to fetch transactions', { error });
       return NextResponse.json(
         { error: 'Failed to fetch transactions' },
         { status: 500 }
@@ -147,7 +150,7 @@ export async function GET(request: NextRequest) {
         { status: 400 }
       );
     }
-    console.error('Failed to fetch transactions:', error);
+    logger.error('Failed to fetch transactions', { error });
     return NextResponse.json(
       { error: 'Failed to fetch transactions' },
       { status: 500 }
@@ -236,7 +239,7 @@ export async function PATCH(request: NextRequest) {
       .select();
 
     if (error) {
-      console.error('Failed to update transactions:', error);
+      logger.error('Failed to update transactions', { error });
       return NextResponse.json(
         { error: 'Failed to update transactions' },
         { status: 500 }
@@ -266,7 +269,7 @@ export async function PATCH(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Failed to update transactions:', error);
+    logger.error('Failed to update transactions', { error });
     return NextResponse.json(
       { error: 'Failed to update transactions' },
       { status: 500 }

@@ -21,6 +21,9 @@ import {
   verifyAccessToken,
   generateAccessToken
 } from '@/lib/security/file-password'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('files-download')
 
 export interface DownloadRequest {
   password?: string
@@ -243,7 +246,7 @@ export async function POST(
       accessToken: newAccessToken
     })
   } catch (error: any) {
-    console.error('Download error:', error)
+    logger.error('Download error', { error })
 
     return NextResponse.json(
       {
@@ -308,7 +311,7 @@ export async function GET(
       }
     })
   } catch (error: any) {
-    console.error('Get download status error:', error)
+    logger.error('Get download status error', { error })
 
     return NextResponse.json(
       {

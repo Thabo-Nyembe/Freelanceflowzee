@@ -8,6 +8,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('collaboration-feedback')
 import {
   getFeedbackById,
   updateFeedback,
@@ -33,7 +36,7 @@ export async function GET(
     const result = await getFeedbackById(id, user.id)
     return NextResponse.json({ data: result.data })
   } catch (error) {
-    console.error('Collaboration Feedback API error:', error)
+    logger.error('Failed to fetch feedback', { error })
     return NextResponse.json(
       { error: 'Failed to fetch feedback' },
       { status: 500 }
@@ -79,7 +82,7 @@ export async function PUT(
         return NextResponse.json({ error: 'Invalid type' }, { status: 400 })
     }
   } catch (error) {
-    console.error('Collaboration Feedback API error:', error)
+    logger.error('Failed to update feedback', { error })
     return NextResponse.json(
       { error: 'Failed to update feedback' },
       { status: 500 }
@@ -118,7 +121,7 @@ export async function DELETE(
         return NextResponse.json({ error: 'Invalid type' }, { status: 400 })
     }
   } catch (error) {
-    console.error('Collaboration Feedback API error:', error)
+    logger.error('Failed to delete', { error })
     return NextResponse.json(
       { error: 'Failed to delete' },
       { status: 500 }

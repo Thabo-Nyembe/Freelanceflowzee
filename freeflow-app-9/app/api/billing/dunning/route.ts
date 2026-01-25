@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('billing-dunning');
 
 // Types
 interface DunningSettings {
@@ -104,7 +107,7 @@ export async function GET(request: NextRequest) {
       stats
     });
   } catch (error) {
-    console.error('Dunning fetch error:', error);
+    logger.error('Dunning fetch error', { error });
     return NextResponse.json(
       { error: 'Failed to fetch dunning data' },
       { status: 500 }
@@ -524,7 +527,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
     }
   } catch (error) {
-    console.error('Dunning action error:', error);
+    logger.error('Dunning action error', { error });
     return NextResponse.json(
       { error: 'Failed to perform dunning action' },
       { status: 500 }

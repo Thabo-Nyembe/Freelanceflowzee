@@ -8,6 +8,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('growth-hub')
 import {
   getGrowthStrategies,
   createGrowthStrategy,
@@ -150,7 +153,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid type parameter' }, { status: 400 })
     }
   } catch (error) {
-    console.error('Growth Hub API error:', error)
+    logger.error('Growth Hub API error', { error })
     return NextResponse.json(
       { error: 'Failed to fetch Growth Hub data' },
       { status: 500 }
@@ -241,7 +244,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
   } catch (error) {
-    console.error('Growth Hub API error:', error)
+    logger.error('Growth Hub API error', { error })
     return NextResponse.json(
       { error: 'Failed to process Growth Hub request' },
       { status: 500 }

@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('tax-insights-dismiss')
 
 /**
  * POST /api/tax/insights/[id]/dismiss
@@ -40,7 +43,7 @@ export async function POST(
           { status: 404 }
         )
       }
-      console.error('Tax insight dismiss error:', error)
+      logger.error('Tax insight dismiss error', { error })
       return NextResponse.json(
         { error: 'Failed to dismiss tax insight' },
         { status: 500 }
@@ -52,7 +55,7 @@ export async function POST(
       data: insight
     })
   } catch (error) {
-    console.error('Tax insight dismiss error:', error)
+    logger.error('Tax insight dismiss error', { error })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('crm-lead-scoring');
 
 // Phase 7 Gap #4: Lead Scoring
 // Priority: HIGH | Competitor: Salesforce, HubSpot
@@ -568,7 +571,7 @@ export async function POST(request: NextRequest) {
         );
     }
   } catch (error) {
-    console.error('Lead Scoring API error:', error);
+    logger.error('Lead Scoring API error', { error });
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

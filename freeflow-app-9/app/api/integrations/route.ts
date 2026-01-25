@@ -6,6 +6,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { integrationService, IntegrationType } from '@/lib/integrations/integration-service';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('integrations');
 
 // =====================================================
 // GET - List integrations or get stats
@@ -62,7 +65,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       }
     }
   } catch (error: any) {
-    console.error('Integrations GET error:', error);
+    logger.error('Integrations GET error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to fetch integrations' },
       { status: 500 }
@@ -350,7 +353,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         );
     }
   } catch (error: any) {
-    console.error('Integrations POST error:', error);
+    logger.error('Integrations POST error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Operation failed' },
       { status: 500 }
@@ -387,7 +390,7 @@ export async function PUT(request: NextRequest): Promise<NextResponse> {
       message: 'Integration updated successfully',
     });
   } catch (error: any) {
-    console.error('Integrations PUT error:', error);
+    logger.error('Integrations PUT error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to update integration' },
       { status: 500 }
@@ -423,7 +426,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
       message: 'Integration deleted successfully',
     });
   } catch (error: any) {
-    console.error('Integrations DELETE error:', error);
+    logger.error('Integrations DELETE error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to delete integration' },
       { status: 500 }

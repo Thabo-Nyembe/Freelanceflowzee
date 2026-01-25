@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('tax-education-lessons')
 
 /**
  * GET /api/tax/education/lessons
@@ -476,7 +479,7 @@ These handle VAT/GST collection and remittance automatically.`,
 
     return NextResponse.json({ data: lessons })
   } catch (error) {
-    console.error('Tax education lessons GET error:', error)
+    logger.error('Tax education lessons GET error', { error })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

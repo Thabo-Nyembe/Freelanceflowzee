@@ -14,6 +14,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('video-transcribe')
 
 // Types
 export interface TranscriptionJob {
@@ -331,7 +334,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
   } catch (error) {
-    console.error('Transcription error:', error)
+    logger.error('Transcription error', { error })
     return NextResponse.json(
       { error: 'Failed to process transcription request' },
       { status: 500 }
@@ -572,7 +575,7 @@ export async function GET(request: NextRequest) {
       })),
     })
   } catch (error) {
-    console.error('Error getting transcription status:', error)
+    logger.error('Error getting transcription status', { error })
     return NextResponse.json(
       { error: 'Failed to get transcription status' },
       { status: 500 }
@@ -626,7 +629,7 @@ export async function DELETE(request: NextRequest) {
       message: 'Job cancelled',
     })
   } catch (error) {
-    console.error('Error cancelling transcription:', error)
+    logger.error('Error cancelling transcription', { error })
     return NextResponse.json(
       { error: 'Failed to cancel transcription' },
       { status: 500 }

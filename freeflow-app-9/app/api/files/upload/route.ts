@@ -15,6 +15,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createWasabiClient } from '@/lib/storage/wasabi-client'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('files-upload')
 
 const MAX_FILE_SIZE = 100 * 1024 * 1024 // 100MB
 const ALLOWED_TYPES = [
@@ -166,7 +169,7 @@ export async function POST(request: NextRequest) {
       try {
         await wasabi.deleteFile(fileKey)
       } catch (cleanupError) {
-        console.error('Failed to cleanup uploaded file:', cleanupError)
+        logger.error('Failed to cleanup uploaded file', { error: cleanupError })
       }
 
       return NextResponse.json(
@@ -197,7 +200,7 @@ export async function POST(request: NextRequest) {
       }
     })
   } catch (error: any) {
-    console.error('File upload error:', error)
+    logger.error('File upload error', { error })
 
     return NextResponse.json(
       {

@@ -8,6 +8,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('ai-video')
 import {
   getGeneratedVideos,
   createGeneratedVideo,
@@ -98,7 +101,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid type parameter' }, { status: 400 })
     }
   } catch (error) {
-    console.error('AI Video API error:', error)
+    logger.error('AI Video API error', { error })
     return NextResponse.json(
       { error: 'Failed to fetch AI Video data' },
       { status: 500 }
@@ -148,7 +151,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
   } catch (error) {
-    console.error('AI Video API error:', error)
+    logger.error('AI Video API error', { error })
     return NextResponse.json(
       { error: 'Failed to process AI Video request' },
       { status: 500 }

@@ -8,6 +8,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
 import {
   getProject,
   updateProject,
@@ -32,6 +33,8 @@ import {
   unpublishDistribution,
   getFramework
 } from '@/lib/desktop-app-queries'
+
+const logger = createFeatureLogger('desktop-app')
 
 export async function GET(
   request: NextRequest,
@@ -79,7 +82,7 @@ export async function GET(
         return NextResponse.json({ error: 'Invalid type' }, { status: 400 })
     }
   } catch (error) {
-    console.error('Desktop App API error:', error)
+    logger.error('Desktop App GET error', { error })
     return NextResponse.json(
       { error: 'Failed to fetch resource' },
       { status: 500 }
@@ -165,7 +168,7 @@ export async function PUT(
         return NextResponse.json({ error: 'Invalid type' }, { status: 400 })
     }
   } catch (error) {
-    console.error('Desktop App API error:', error)
+    logger.error('Desktop App PUT error', { error })
     return NextResponse.json(
       { error: 'Failed to update resource' },
       { status: 500 }
@@ -211,7 +214,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Desktop App API error:', error)
+    logger.error('Desktop App DELETE error', { error })
     return NextResponse.json(
       { error: 'Failed to delete resource' },
       { status: 500 }

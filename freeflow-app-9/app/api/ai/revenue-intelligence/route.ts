@@ -6,6 +6,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { revenueIntelligenceEngine, type RevenueData } from '@/lib/ai/revenue-intelligence-engine';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('ai-revenue-intelligence');
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
@@ -35,7 +38,7 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Error generating revenue intelligence:', error);
+    logger.error('Error generating revenue intelligence', { error });
     return NextResponse.json(
       {
         error: 'Failed to generate revenue intelligence',
@@ -141,7 +144,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Error generating forecast:', error);
+    logger.error('Error generating forecast', { error });
     return NextResponse.json(
       {
         error: 'Failed to generate forecast',

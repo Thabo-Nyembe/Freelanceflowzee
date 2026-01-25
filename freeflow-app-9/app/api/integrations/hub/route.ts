@@ -12,6 +12,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('integrations-hub');
 
 // ============================================================================
 // TYPES
@@ -450,7 +453,7 @@ export async function GET(request: NextRequest) {
       source: 'demo',
     });
   } catch (err) {
-    console.error('Integrations Hub GET error:', err);
+    logger.error('Integrations Hub GET error', { error: err });
     return NextResponse.json({
       success: true,
       data: { integrations: getDemoIntegrations() },
@@ -674,7 +677,7 @@ export async function POST(request: NextRequest) {
         );
     }
   } catch (err) {
-    console.error('Integrations Hub POST error:', err);
+    logger.error('Integrations Hub POST error', { error: err });
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

@@ -5,6 +5,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('account');
 
 // =====================================================
 // GET - Get account status
@@ -47,7 +50,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       }
     });
   } catch (error: any) {
-    console.error('Account GET error:', error);
+    logger.error('Account GET error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to get account status' },
       { status: 500 }
@@ -123,7 +126,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
       scheduledDeletion
     });
   } catch (error: any) {
-    console.error('Account DELETE error:', error);
+    logger.error('Account DELETE error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to request account deletion' },
       { status: 500 }
@@ -221,7 +224,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         );
     }
   } catch (error: any) {
-    console.error('Account POST error:', error);
+    logger.error('Account POST error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Operation failed' },
       { status: 500 }

@@ -6,6 +6,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { subscriberService } from '@/lib/email/subscriber-service';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('email-subscribers');
 
 // =====================================================
 // GET - List subscribers with filters
@@ -61,7 +64,7 @@ export async function GET(request: NextRequest) {
       }
     }
   } catch (error: any) {
-    console.error('Subscribers GET error:', error);
+    logger.error('Failed to fetch subscribers', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to fetch subscribers' },
       { status: 500 }
@@ -235,7 +238,7 @@ export async function POST(request: NextRequest) {
         );
     }
   } catch (error: any) {
-    console.error('Subscribers POST error:', error);
+    logger.error('Subscriber operation failed', { error });
     return NextResponse.json(
       { error: error.message || 'Operation failed' },
       { status: 500 }
@@ -265,7 +268,7 @@ export async function PUT(request: NextRequest) {
     const subscriber = await subscriberService.updateSubscriber(subscriber_id, updates);
     return NextResponse.json({ subscriber });
   } catch (error: any) {
-    console.error('Subscribers PUT error:', error);
+    logger.error('Failed to update subscriber', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to update subscriber' },
       { status: 500 }
@@ -295,7 +298,7 @@ export async function DELETE(request: NextRequest) {
     await subscriberService.deleteSubscriber(subscriberId);
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    console.error('Subscribers DELETE error:', error);
+    logger.error('Failed to delete subscriber', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to delete subscriber' },
       { status: 500 }

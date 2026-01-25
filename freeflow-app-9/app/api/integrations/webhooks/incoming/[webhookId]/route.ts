@@ -5,6 +5,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('webhooks-incoming');
 
 // =====================================================
 // POST - Receive incoming webhook
@@ -130,7 +133,7 @@ export async function POST(
     });
 
   } catch (error: any) {
-    console.error('Incoming webhook error:', error);
+    logger.error('Incoming webhook error', { error });
     return NextResponse.json(
       { success: false, error: 'Failed to process webhook' },
       { status: 500 }

@@ -8,6 +8,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('ai-enhanced')
 import {
   getAIEnhancedTool,
   updateAIEnhancedTool,
@@ -34,7 +37,7 @@ export async function GET(
     const result = await getAIEnhancedTool(id)
     return NextResponse.json({ data: result.data })
   } catch (error) {
-    console.error('AI Enhanced API error:', error)
+    logger.error('AI Enhanced API error', { error })
     return NextResponse.json(
       { error: 'Failed to fetch tool' },
       { status: 500 }
@@ -80,7 +83,7 @@ export async function PUT(
       }
     }
   } catch (error) {
-    console.error('AI Enhanced API error:', error)
+    logger.error('AI Enhanced API error', { error })
     return NextResponse.json(
       { error: 'Failed to update tool' },
       { status: 500 }
@@ -113,7 +116,7 @@ export async function DELETE(
     await deleteAIEnhancedTool(id)
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('AI Enhanced API error:', error)
+    logger.error('AI Enhanced API error', { error })
     return NextResponse.json(
       { error: 'Failed to delete tool' },
       { status: 500 }

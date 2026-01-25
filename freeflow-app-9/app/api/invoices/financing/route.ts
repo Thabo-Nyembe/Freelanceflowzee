@@ -12,6 +12,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('invoices-financing');
 
 // ============================================================================
 // TYPES
@@ -260,7 +263,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ success: true, data, source: 'database' });
   } catch (err) {
-    console.error('Invoice Financing GET error:', err);
+    logger.error('Invoice Financing GET error', { error: err });
     return NextResponse.json({
       success: true,
       data: getDemoApplications(),
@@ -535,7 +538,7 @@ export async function POST(request: NextRequest) {
         );
     }
   } catch (err) {
-    console.error('Invoice Financing POST error:', err);
+    logger.error('Invoice Financing POST error', { error: err });
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

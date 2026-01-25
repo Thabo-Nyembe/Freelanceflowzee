@@ -5,7 +5,10 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
 import { removeItem } from '@/lib/plaid/service';
+
+const logger = createFeatureLogger('plaid-api');
 
 // GET - List all bank connections for user
 export async function GET(request: NextRequest) {
@@ -53,7 +56,7 @@ export async function GET(request: NextRequest) {
     const { data: connections, error } = await query;
 
     if (error) {
-      console.error('Failed to fetch connections:', error);
+      logger.error('Failed to fetch connections', { error });
       return NextResponse.json(
         { error: 'Failed to fetch connections' },
         { status: 500 }
@@ -116,7 +119,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Failed to fetch connections:', error);
+    logger.error('Failed to fetch connections', { error });
     return NextResponse.json(
       { error: 'Failed to fetch connections' },
       { status: 500 }
@@ -189,7 +192,7 @@ export async function DELETE(request: NextRequest) {
       message: 'Bank connection removed',
     });
   } catch (error) {
-    console.error('Failed to remove connection:', error);
+    logger.error('Failed to remove connection', { error });
     return NextResponse.json(
       { error: 'Failed to remove connection' },
       { status: 500 }

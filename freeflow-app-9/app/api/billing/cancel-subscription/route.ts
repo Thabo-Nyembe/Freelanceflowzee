@@ -5,6 +5,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('billing-cancel-subscription');
 
 // =====================================================
 // POST - Cancel subscription
@@ -81,7 +84,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       note: 'You will retain access to premium features until the end of your current billing period.'
     });
   } catch (error: any) {
-    console.error('Subscription cancellation error:', error);
+    logger.error('Subscription cancellation error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to cancel subscription' },
       { status: 500 }
@@ -145,7 +148,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
       message: 'Subscription reactivated successfully'
     });
   } catch (error: any) {
-    console.error('Subscription reactivation error:', error);
+    logger.error('Subscription reactivation error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to reactivate subscription' },
       { status: 500 }

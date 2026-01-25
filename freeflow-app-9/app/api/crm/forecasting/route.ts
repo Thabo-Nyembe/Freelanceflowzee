@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { z } from 'zod'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('crm-api')
 
 // =============================================================================
 // TYPES & INTERFACES
@@ -568,7 +571,7 @@ export async function GET(request: NextRequest) {
         const { data: deals, error: dealsError } = await dealsQuery
 
         if (dealsError) {
-          console.error('Deals fetch error:', dealsError)
+          logger.error('Deals fetch error', { error: dealsError })
           // Return empty forecast if table doesn't exist
           return NextResponse.json({
             period: formatPeriodLabel(startDate, queryParams.granularity),
@@ -1072,7 +1075,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
   } catch (error) {
-    console.error('Forecasting GET error:', error)
+    logger.error('Forecasting GET error', { error })
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: 'Invalid parameters', details: error.errors }, { status: 400 })
     }
@@ -1112,7 +1115,7 @@ export async function POST(request: NextRequest) {
           .single()
 
         if (error) {
-          console.error('Quota create error:', error)
+          logger.error('Quota create error', { error })
           return NextResponse.json({ error: 'Failed to create quota' }, { status: 500 })
         }
 
@@ -1135,7 +1138,7 @@ export async function POST(request: NextRequest) {
           .single()
 
         if (error) {
-          console.error('Submission create error:', error)
+          logger.error('Submission create error', { error })
           return NextResponse.json({ error: 'Failed to submit forecast' }, { status: 500 })
         }
 
@@ -1160,7 +1163,7 @@ export async function POST(request: NextRequest) {
           .single()
 
         if (error) {
-          console.error('Settings update error:', error)
+          logger.error('Settings update error', { error })
           return NextResponse.json({ error: 'Failed to update settings' }, { status: 500 })
         }
 
@@ -1192,7 +1195,7 @@ export async function POST(request: NextRequest) {
           .select()
 
         if (error) {
-          console.error('Bulk quota error:', error)
+          logger.error('Bulk quota error', { error })
           return NextResponse.json({ error: 'Failed to create quotas' }, { status: 500 })
         }
 
@@ -1206,7 +1209,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
   } catch (error) {
-    console.error('Forecasting POST error:', error)
+    logger.error('Forecasting POST error', { error })
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: 'Validation failed', details: error.errors }, { status: 400 })
     }
@@ -1248,7 +1251,7 @@ export async function PUT(request: NextRequest) {
         .single()
 
       if (error) {
-        console.error('Submission update error:', error)
+        logger.error('Submission update error', { error })
         return NextResponse.json({ error: 'Failed to update submission' }, { status: 500 })
       }
 
@@ -1270,7 +1273,7 @@ export async function PUT(request: NextRequest) {
         .single()
 
       if (error) {
-        console.error('Submission update error:', error)
+        logger.error('Submission update error', { error })
         return NextResponse.json({ error: 'Failed to update submission' }, { status: 500 })
       }
 
@@ -1279,7 +1282,7 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
   } catch (error) {
-    console.error('Forecasting PUT error:', error)
+    logger.error('Forecasting PUT error', { error })
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: 'Validation failed', details: error.errors }, { status: 400 })
     }
@@ -1313,13 +1316,13 @@ export async function DELETE(request: NextRequest) {
       .eq('id', id)
 
     if (error) {
-      console.error('Delete error:', error)
+      logger.error('Delete error', { error })
       return NextResponse.json({ error: 'Failed to delete' }, { status: 500 })
     }
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Forecasting DELETE error:', error)
+    logger.error('Forecasting DELETE error', { error })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

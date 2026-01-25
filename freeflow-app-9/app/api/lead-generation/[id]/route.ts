@@ -7,6 +7,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('lead-generation')
 import {
   updateLeadGenLead,
   convertLead,
@@ -68,7 +71,7 @@ export async function PUT(
 
     return NextResponse.json({ data: result?.data })
   } catch (error) {
-    console.error('Lead Generation API error:', error)
+    logger.error('Failed to update resource', { error })
     return NextResponse.json(
       { error: 'Failed to update resource' },
       { status: 500 }
@@ -101,7 +104,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Lead Generation API error:', error)
+    logger.error('Failed to delete resource', { error })
     return NextResponse.json(
       { error: 'Failed to delete resource' },
       { status: 500 }

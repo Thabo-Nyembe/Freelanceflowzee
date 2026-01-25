@@ -6,6 +6,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('user-follow')
 
 export async function POST(request: NextRequest) {
   try {
@@ -78,7 +81,7 @@ export async function POST(request: NextRequest) {
       })
     }
   } catch (error) {
-    console.error('User follow error:', error)
+    logger.error('User follow error', { error })
     return NextResponse.json({ error: 'Failed to process follow request' }, { status: 500 })
   }
 }

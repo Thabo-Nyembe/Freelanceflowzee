@@ -6,6 +6,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { collaborationService } from '@/lib/collaboration/collaboration-service';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('collaboration-sessions');
 
 // =====================================================
 // GET - List sessions, get session details, participants
@@ -137,7 +140,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       }
     }
   } catch (error: any) {
-    console.error('Collaboration GET error:', error);
+    logger.error('Failed to fetch collaboration data', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to fetch collaboration data' },
       { status: 500 }
@@ -415,7 +418,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         );
     }
   } catch (error: any) {
-    console.error('Collaboration POST error:', error);
+    logger.error('Collaboration POST operation failed', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Operation failed' },
       { status: 500 }
@@ -476,7 +479,7 @@ export async function PUT(request: NextRequest): Promise<NextResponse> {
       { status: 400 }
     );
   } catch (error: any) {
-    console.error('Collaboration PUT error:', error);
+    logger.error('Collaboration PUT operation failed', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to update' },
       { status: 500 }
@@ -523,7 +526,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
       { status: 400 }
     );
   } catch (error: any) {
-    console.error('Collaboration DELETE error:', error);
+    logger.error('Collaboration DELETE operation failed', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to delete' },
       { status: 500 }

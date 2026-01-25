@@ -1,5 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('kazi-automation')
 
 // Transform database record to API format
 function transformToApiFormat(record: Record<string, unknown>): Record<string, unknown> {
@@ -83,13 +86,13 @@ export async function GET(
       .single()
 
     if (error) {
-      console.error('Error fetching automation:', error)
+      logger.error('Error fetching automation', { error })
       return NextResponse.json({ error: error.message }, { status: 404 })
     }
 
     return NextResponse.json({ data: transformToApiFormat(data) })
   } catch (error) {
-    console.error('Error in GET /api/kazi/automations/[id]:', error)
+    logger.error('Error in GET /api/kazi/automations/[id]', { error })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -145,13 +148,13 @@ export async function PATCH(
       .single()
 
     if (error) {
-      console.error('Error updating automation:', error)
+      logger.error('Error updating automation', { error })
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
     return NextResponse.json({ data: transformToApiFormat(data) })
   } catch (error) {
-    console.error('Error in PATCH /api/kazi/automations/[id]:', error)
+    logger.error('Error in PATCH /api/kazi/automations/[id]', { error })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -178,13 +181,13 @@ export async function DELETE(
       .eq('user_id', user.id)
 
     if (error) {
-      console.error('Error deleting automation:', error)
+      logger.error('Error deleting automation', { error })
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Error in DELETE /api/kazi/automations/[id]:', error)
+    logger.error('Error in DELETE /api/kazi/automations/[id]', { error })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

@@ -1,5 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('roles')
 
 export async function GET(request: NextRequest) {
   try {
@@ -73,7 +76,7 @@ export async function GET(request: NextRequest) {
       }
     }
   } catch (error: any) {
-    console.error('Roles API error:', error)
+    logger.error('Roles API error', { error })
     return NextResponse.json(
       { error: error.message || 'Failed to fetch roles' },
       { status: 500 }
@@ -160,7 +163,7 @@ export async function POST(request: NextRequest) {
         )
     }
   } catch (error: any) {
-    console.error('Roles API error:', error)
+    logger.error('Roles API error', { error })
     return NextResponse.json(
       { error: error.message || 'Operation failed' },
       { status: 500 }

@@ -6,6 +6,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { calendarService } from '@/lib/calendar/calendar-service';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('calendar-bookings');
 
 // =====================================================
 // GET - Get booking details
@@ -62,7 +65,7 @@ export async function GET(
       } : null,
     });
   } catch (error: any) {
-    console.error('Booking GET error:', error);
+    logger.error('Booking GET error', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to fetch booking' },
       { status: 500 }
@@ -114,7 +117,7 @@ export async function PUT(
       { status: 400 }
     );
   } catch (error: any) {
-    console.error('Booking PUT error:', error);
+    logger.error('Booking PUT error', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to update booking' },
       { status: 500 }
@@ -181,7 +184,7 @@ export async function PATCH(
       { status: 400 }
     );
   } catch (error: any) {
-    console.error('Booking PATCH error:', error);
+    logger.error('Booking PATCH error', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to update booking' },
       { status: 500 }
@@ -211,7 +214,7 @@ export async function DELETE(
     await calendarService.updateBookingStatus(bookingId, user.id, 'cancelled', reason);
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    console.error('Booking DELETE error:', error);
+    logger.error('Booking DELETE error', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to cancel booking' },
       { status: 500 }

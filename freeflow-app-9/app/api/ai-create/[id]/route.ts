@@ -22,7 +22,7 @@ import {
   deleteModelComparison
 } from '@/lib/ai-create-queries'
 
-const logger = createFeatureLogger('AICreateAPI')
+const logger = createFeatureLogger('ai-create')
 
 export async function GET(
   request: NextRequest,

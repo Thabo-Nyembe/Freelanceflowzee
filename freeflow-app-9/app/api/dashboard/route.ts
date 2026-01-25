@@ -7,6 +7,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth.config';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('dashboard');
 
 // Demo user for unauthenticated access (development only)
 const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001';
@@ -146,7 +149,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       }
     }
   } catch (error: any) {
-    console.error('Dashboard GET error:', error);
+    logger.error('Dashboard GET error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to fetch dashboard data' },
       { status: 500 }
@@ -317,7 +320,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         );
     }
   } catch (error: any) {
-    console.error('Dashboard POST error:', error);
+    logger.error('Dashboard POST error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Operation failed' },
       { status: 500 }
@@ -394,7 +397,7 @@ async function getRevenueStats(supabase: any, userId: string) {
 
   if (error) {
     // Return empty stats if table doesn't exist or has different schema
-    console.error('Error fetching client_invoices:', error);
+    logger.error('Error fetching client_invoices', { error });
     return { total: 0, pending: 0, thisMonth: 0, lastMonth: 0, growth: 0 };
   }
 

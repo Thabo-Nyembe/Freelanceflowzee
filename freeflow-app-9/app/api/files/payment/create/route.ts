@@ -8,6 +8,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createFilePayment } from '@/lib/payments/file-payment'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('files-payment')
 
 export interface CreatePaymentRequest {
   deliveryId: string
@@ -60,7 +63,7 @@ export async function POST(request: NextRequest) {
       escrowDepositId: result.escrowDepositId
     })
   } catch (error: any) {
-    console.error('Payment creation error:', error)
+    logger.error('Payment creation error', { error })
 
     return NextResponse.json(
       {

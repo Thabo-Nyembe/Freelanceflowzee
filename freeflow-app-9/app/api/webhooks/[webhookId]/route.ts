@@ -7,6 +7,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { WebhookService, WebhookEventType } from '@/lib/webhooks/webhook-service';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('webhooks');
 
 const webhookService = new WebhookService();
 
@@ -65,7 +68,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       }))
     });
   } catch (error) {
-    console.error('Webhook GET error:', error);
+    logger.error('Webhook GET error', { error });
     return NextResponse.json(
       { error: 'Failed to fetch webhook' },
       { status: 500 }
@@ -157,7 +160,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
       }
     });
   } catch (error) {
-    console.error('Webhook PATCH error:', error);
+    logger.error('Webhook PATCH error', { error });
     return NextResponse.json(
       { error: 'Failed to update webhook' },
       { status: 500 }
@@ -198,7 +201,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       message: 'Webhook deleted successfully'
     });
   } catch (error) {
-    console.error('Webhook DELETE error:', error);
+    logger.error('Webhook DELETE error', { error });
     return NextResponse.json(
       { error: 'Failed to delete webhook' },
       { status: 500 }

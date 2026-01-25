@@ -8,6 +8,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('investor-metrics')
 import {
   getInvestorMetric,
   updateInvestorMetric,
@@ -56,7 +59,7 @@ export async function GET(
         return NextResponse.json({ error: 'Invalid type' }, { status: 400 })
     }
   } catch (error) {
-    console.error('Investor Metrics API error:', error)
+    logger.error('Investor Metrics API error', { error })
     return NextResponse.json(
       { error: 'Failed to fetch resource' },
       { status: 500 }
@@ -115,7 +118,7 @@ export async function PUT(
         return NextResponse.json({ error: 'Invalid type' }, { status: 400 })
     }
   } catch (error) {
-    console.error('Investor Metrics API error:', error)
+    logger.error('Investor Metrics API error', { error })
     return NextResponse.json(
       { error: 'Failed to update resource' },
       { status: 500 }
@@ -182,7 +185,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Investor Metrics API error:', error)
+    logger.error('Investor Metrics API error', { error })
     return NextResponse.json(
       { error: 'Failed to delete resource' },
       { status: 500 }

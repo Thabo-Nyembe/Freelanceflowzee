@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { z } from 'zod'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('crm-api')
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -499,7 +502,7 @@ export async function GET(request: NextRequest) {
     const { data: activities, error, count } = await query
 
     if (error) {
-      console.error('Error fetching activities:', error)
+      logger.error('Error fetching activities', { error })
       return NextResponse.json({ error: 'Failed to fetch activities' }, { status: 500 })
     }
 
@@ -526,7 +529,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Activities GET error:', error)
+    logger.error('Activities GET error', { error })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -624,7 +627,7 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('Error creating activity:', error)
+      logger.error('Error creating activity', { error })
       return NextResponse.json({ error: 'Failed to create activity' }, { status: 500 })
     }
 
@@ -661,7 +664,7 @@ export async function POST(request: NextRequest) {
     }, { status: 201 })
 
   } catch (error) {
-    console.error('Activities POST error:', error)
+    logger.error('Activities POST error', { error })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -736,7 +739,7 @@ export async function PUT(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('Error updating activity:', error)
+      logger.error('Error updating activity', { error })
       return NextResponse.json({ error: 'Failed to update activity' }, { status: 500 })
     }
 
@@ -748,7 +751,7 @@ export async function PUT(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Activities PUT error:', error)
+    logger.error('Activities PUT error', { error })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -794,7 +797,7 @@ export async function DELETE(request: NextRequest) {
       .eq('user_id', user.id)
 
     if (error) {
-      console.error('Error deleting activity:', error)
+      logger.error('Error deleting activity', { error })
       return NextResponse.json({ error: 'Failed to delete activity' }, { status: 500 })
     }
 
@@ -810,7 +813,7 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ success: true })
 
   } catch (error) {
-    console.error('Activities DELETE error:', error)
+    logger.error('Activities DELETE error', { error })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

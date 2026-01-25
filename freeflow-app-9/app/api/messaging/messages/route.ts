@@ -15,6 +15,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('messaging-messages')
 
 // ============================================================================
 // Types
@@ -191,7 +194,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
   } catch (error) {
-    console.error('Message error:', error)
+    logger.error('Message error', { error })
     return NextResponse.json(
       { error: 'Failed to process message request' },
       { status: 500 }
@@ -738,7 +741,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ error: 'Channel ID required' }, { status: 400 })
   } catch (error) {
-    console.error('Error fetching messages:', error)
+    logger.error('Error fetching messages', { error })
     return NextResponse.json(
       { error: 'Failed to fetch messages' },
       { status: 500 }
@@ -768,7 +771,7 @@ export async function DELETE(request: NextRequest) {
 
     return handleDeleteMessage({ messageId }, user.id)
   } catch (error) {
-    console.error('Error deleting message:', error)
+    logger.error('Error deleting message', { error })
     return NextResponse.json(
       { error: 'Failed to delete message' },
       { status: 500 }
@@ -798,7 +801,7 @@ export async function PUT(request: NextRequest) {
 
     return handleEditMessage({ messageId, content }, user.id)
   } catch (error) {
-    console.error('Error updating message:', error)
+    logger.error('Error updating message', { error })
     return NextResponse.json(
       { error: 'Failed to update message' },
       { status: 500 }

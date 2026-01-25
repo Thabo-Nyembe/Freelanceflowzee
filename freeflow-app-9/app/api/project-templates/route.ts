@@ -9,6 +9,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { unstable_cache } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('project-templates')
 import {
   getTemplates,
   createTemplate,
@@ -215,7 +218,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid type parameter' }, { status: 400 })
     }
   } catch (error) {
-    console.error('Project Templates API error:', error)
+    logger.error('Project Templates API error', { error })
     return NextResponse.json(
       { error: 'Failed to fetch Project Templates data' },
       { status: 500 }
@@ -295,7 +298,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
   } catch (error) {
-    console.error('Project Templates API error:', error)
+    logger.error('Project Templates API error', { error })
     return NextResponse.json(
       { error: 'Failed to process Project Templates request' },
       { status: 500 }

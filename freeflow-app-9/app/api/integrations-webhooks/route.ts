@@ -8,6 +8,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('integrations-webhooks')
 import {
   getIntegrations,
   getIntegrationByType,
@@ -113,7 +116,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid type parameter' }, { status: 400 })
     }
   } catch (error) {
-    console.error('Integrations Webhooks API error:', error)
+    logger.error('Integrations Webhooks API error', { error })
     return NextResponse.json(
       { error: 'Failed to fetch Integrations Webhooks data' },
       { status: 500 }
@@ -183,7 +186,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
   } catch (error) {
-    console.error('Integrations Webhooks API error:', error)
+    logger.error('Integrations Webhooks API error', { error })
     return NextResponse.json(
       { error: 'Failed to process Integrations Webhooks request' },
       { status: 500 }

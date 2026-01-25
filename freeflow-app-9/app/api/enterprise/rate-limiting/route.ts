@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('enterprise-rate-limiting');
 
 // Phase 8 Gap #9: API Rate Limiting Dashboard
 // Priority: MEDIUM | Competitor: Enterprise platforms
@@ -589,7 +592,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ success: false, error: 'Unknown action' }, { status: 400 });
     }
   } catch (error) {
-    console.error('Rate Limiting API error:', error);
+    logger.error('Rate Limiting API error', { error });
     return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });
   }
 }

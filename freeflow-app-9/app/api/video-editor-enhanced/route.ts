@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('video-editor-enhanced');
 
 // ============================================================================
 // WORLD-CLASS VIDEO EDITOR ENHANCED API
@@ -2005,7 +2008,7 @@ export async function POST(request: NextRequest) {
         );
     }
   } catch (error) {
-    console.error('Video Editor API error:', error);
+    logger.error('Video Editor API error', { error });
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

@@ -8,6 +8,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('crm-resource')
 import {
   updateCRMContact,
   deleteCRMContact,
@@ -85,7 +88,7 @@ export async function PUT(
 
     return NextResponse.json({ data: result?.data })
   } catch (error) {
-    console.error('CRM API error:', error)
+    logger.error('CRM API error', { error })
     return NextResponse.json(
       { error: 'Failed to update CRM record' },
       { status: 500 }
@@ -140,7 +143,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('CRM API error:', error)
+    logger.error('CRM API error', { error })
     return NextResponse.json(
       { error: 'Failed to delete CRM record' },
       { status: 500 }

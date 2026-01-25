@@ -1,5 +1,8 @@
 import { createAdminClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('kazi-workflow-executions')
 
 // Demo user for unauthenticated access
 const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
@@ -48,7 +51,7 @@ export async function GET(request: NextRequest) {
     const { data, error } = await query
 
     if (error) {
-      console.error('Error fetching workflow executions:', error)
+      logger.error('Error fetching workflow executions', { error })
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
@@ -66,7 +69,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ data: transformedData })
   } catch (error) {
-    console.error('Error in GET /api/kazi/workflows/executions:', error)
+    logger.error('Error in GET /api/kazi/workflows/executions', { error })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

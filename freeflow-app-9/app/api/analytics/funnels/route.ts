@@ -10,6 +10,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('analytics-funnels')
 
 export async function GET(request: NextRequest) {
   try {
@@ -95,7 +98,7 @@ export async function GET(request: NextRequest) {
         })
     }
   } catch (error) {
-    console.error('Funnel API error:', error)
+    logger.error('Funnel API error', { error })
     return NextResponse.json(
       { success: false, error: 'Failed to process funnel request' },
       { status: 500 }
@@ -212,7 +215,7 @@ export async function POST(request: NextRequest) {
         )
     }
   } catch (error) {
-    console.error('Funnel POST error:', error)
+    logger.error('Funnel POST error', { error })
     return NextResponse.json(
       { success: false, error: 'Failed to process request' },
       { status: 500 }

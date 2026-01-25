@@ -1,5 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('kazi-metrics')
 
 export async function GET() {
   try {
@@ -99,7 +102,7 @@ export async function GET() {
       }
     })
   } catch (error) {
-    console.error('Error in GET /api/kazi/metrics:', error)
+    logger.error('Error in GET /api/kazi/metrics', { error })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

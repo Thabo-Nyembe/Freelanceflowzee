@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { z } from 'zod'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('crm-api')
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -508,7 +511,7 @@ export async function GET(request: NextRequest) {
     const { data: deals, error, count } = await query
 
     if (error) {
-      console.error('Error fetching deals:', error)
+      logger.error('Error fetching deals', { error })
       return NextResponse.json({ error: 'Failed to fetch deals' }, { status: 500 })
     }
 
@@ -611,7 +614,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(response)
 
   } catch (error) {
-    console.error('Deals GET error:', error)
+    logger.error('Deals GET error', { error })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -693,7 +696,7 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('Error creating deal:', error)
+      logger.error('Error creating deal', { error })
       return NextResponse.json({ error: 'Failed to create deal' }, { status: 500 })
     }
 
@@ -723,7 +726,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ deal }, { status: 201 })
 
   } catch (error) {
-    console.error('Deals POST error:', error)
+    logger.error('Deals POST error', { error })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -840,7 +843,7 @@ export async function PUT(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('Error updating deal:', error)
+      logger.error('Error updating deal', { error })
       return NextResponse.json({ error: 'Failed to update deal' }, { status: 500 })
     }
 
@@ -894,7 +897,7 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ deal })
 
   } catch (error) {
-    console.error('Deals PUT error:', error)
+    logger.error('Deals PUT error', { error })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -940,7 +943,7 @@ export async function DELETE(request: NextRequest) {
       .eq('user_id', user.id)
 
     if (error) {
-      console.error('Error deleting deal:', error)
+      logger.error('Error deleting deal', { error })
       return NextResponse.json({ error: 'Failed to delete deal' }, { status: 500 })
     }
 
@@ -955,7 +958,7 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ success: true })
 
   } catch (error) {
-    console.error('Deals DELETE error:', error)
+    logger.error('Deals DELETE error', { error })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

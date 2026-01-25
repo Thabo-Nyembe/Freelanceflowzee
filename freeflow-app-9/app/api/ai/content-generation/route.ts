@@ -5,6 +5,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('ai-content-generation');
 
 // =====================================================
 // Types
@@ -170,7 +173,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       }
     }
   } catch (error: any) {
-    console.error('AI Content Generation GET error:', error);
+    logger.error('AI Content Generation GET error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to fetch content data' },
       { status: 500 }
@@ -408,7 +411,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         );
     }
   } catch (error: any) {
-    console.error('AI Content Generation POST error:', error);
+    logger.error('AI Content Generation POST error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Content generation failed' },
       { status: 500 }
@@ -467,7 +470,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
       { status: 400 }
     );
   } catch (error: any) {
-    console.error('AI Content Generation DELETE error:', error);
+    logger.error('AI Content Generation DELETE error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to delete' },
       { status: 500 }
@@ -528,7 +531,7 @@ async function generateContent(
     .single();
 
   if (error) {
-    console.error('Error saving content:', error);
+    logger.error('Error saving content', { error });
   }
 
   // Generate improvement suggestions

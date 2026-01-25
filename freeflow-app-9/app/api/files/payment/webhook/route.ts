@@ -10,6 +10,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { headers } from 'next/headers'
 import Stripe from 'stripe'
 import { handlePaymentWebhook } from '@/lib/payments/file-payment'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('payment-webhook')
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2024-11-20.acacia'
@@ -36,9 +39,10 @@ export async function POST(request: NextRequest) {
     try {
       event = stripe.webhooks.constructEvent(body, signature, webhookSecret)
     } catch (err: unknown) {
-      console.error('Webhook signature verification failed:', err.message)
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error'
+      logger.error('Webhook signature verification failed', { error: errorMessage })
       return NextResponse.json(
-        { error: `Webhook Error: ${err.message}` },
+        { error: `Webhook Error: ${errorMessage}` },
         { status: 400 }
       )
     }
@@ -52,8 +56,8 @@ export async function POST(request: NextRequest) {
 
     // Event not handled, but acknowledged
     return NextResponse.json({ received: true, processed: false })
-  } catch (error: any) {
-    console.error('Webhook processing error:', error)
+  } catch (error: unknown) {
+    logger.error('Webhook processing error', { error })
     return NextResponse.json(
       { error: 'Webhook processing failed' },
       { status: 500 }

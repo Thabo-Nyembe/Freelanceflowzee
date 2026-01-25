@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('suno')
 
 const SUNO_API_URL = 'https://apibox.erweima.ai/api/v1'
 
@@ -86,7 +89,7 @@ export async function POST(request: NextRequest) {
     const data = await response.json()
     return NextResponse.json(data)
   } catch (error) {
-    console.error('Suno API error:', error)
+    logger.error('Suno API error', { error })
     return NextResponse.json(
       { error: 'Failed to process Suno request' },
       { status: 500 }
@@ -119,7 +122,7 @@ export async function GET(request: NextRequest) {
     const data = await response.json()
     return NextResponse.json(data)
   } catch (error) {
-    console.error('Suno status check error:', error)
+    logger.error('Suno status check error', { error })
     return NextResponse.json(
       { error: 'Failed to check status' },
       { status: 500 }

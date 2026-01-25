@@ -5,6 +5,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { documentService } from '@/lib/documents/document-service';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('documents-share');
 
 // =====================================================
 // GET - Access document via public link
@@ -69,7 +72,7 @@ export async function GET(
 
     return NextResponse.json(response);
   } catch (error: any) {
-    console.error('Share link GET error:', error);
+    logger.error('Share link GET error', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to access shared document' },
       { status: 500 }
@@ -136,7 +139,7 @@ export async function POST(
 
     return NextResponse.json({ comment }, { status: 201 });
   } catch (error: any) {
-    console.error('Share link POST error:', error);
+    logger.error('Share link POST error', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to add comment' },
       { status: 500 }

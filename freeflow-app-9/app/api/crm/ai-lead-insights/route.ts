@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('crm-ai-lead-insights');
 
 // Phase 7 Gap #10: AI-Powered Lead Insights
 // Priority: MEDIUM | Competitor: Salesforce Einstein
@@ -694,7 +697,7 @@ export async function POST(request: NextRequest) {
         );
     }
   } catch (error) {
-    console.error('AI Lead Insights API error:', error);
+    logger.error('AI Lead Insights API error', { error });
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

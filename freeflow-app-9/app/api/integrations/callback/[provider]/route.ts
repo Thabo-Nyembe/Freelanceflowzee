@@ -5,6 +5,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { integrationService } from '@/lib/integrations/integration-service';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('integrations-oauth-callback');
 
 // =====================================================
 // GET - OAuth callback handler
@@ -24,7 +27,7 @@ export async function GET(
 
     // Handle OAuth errors
     if (error) {
-      console.error(`OAuth error from ${provider}:`, error, errorDescription);
+      logger.error('OAuth error from provider', { provider, error, errorDescription });
       return NextResponse.redirect(
         new URL(
           `/dashboard/settings/integrations?error=${encodeURIComponent(errorDescription || error)}`,
@@ -57,7 +60,7 @@ export async function GET(
     );
 
   } catch (error: any) {
-    console.error('OAuth callback error:', error);
+    logger.error('OAuth callback error', { error });
 
     // Redirect to error page
     return NextResponse.redirect(

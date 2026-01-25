@@ -12,6 +12,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('ai-email-summarization');
 
 // ============================================================================
 // TYPES
@@ -261,7 +264,7 @@ export async function GET(request: NextRequest) {
       source: 'demo',
     });
   } catch (err) {
-    console.error('Email Summarization GET error:', err);
+    logger.error('Email Summarization GET error', { error: err });
     return NextResponse.json({
       success: true,
       data: getDemoInboxOverview(),
@@ -458,7 +461,7 @@ export async function POST(request: NextRequest) {
         );
     }
   } catch (err) {
-    console.error('Email Summarization POST error:', err);
+    logger.error('Email Summarization POST error', { error: err });
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

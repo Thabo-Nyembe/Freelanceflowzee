@@ -8,6 +8,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('performance-analytics')
 import {
   getPerformanceMetric,
   updatePerformanceMetric,
@@ -46,7 +49,7 @@ export async function GET(
 
     return NextResponse.json({ data })
   } catch (error) {
-    console.error('Performance Analytics API error:', error)
+    logger.error('Failed to fetch metric', { error })
     return NextResponse.json(
       { error: 'Failed to fetch metric' },
       { status: 500 }
@@ -107,7 +110,7 @@ export async function PUT(
 
     return NextResponse.json({ data: result?.data })
   } catch (error) {
-    console.error('Performance Analytics API error:', error)
+    logger.error('Failed to update resource', { error })
     return NextResponse.json(
       { error: 'Failed to update resource' },
       { status: 500 }
@@ -162,7 +165,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Performance Analytics API error:', error)
+    logger.error('Failed to delete resource', { error })
     return NextResponse.json(
       { error: 'Failed to delete resource' },
       { status: 500 }

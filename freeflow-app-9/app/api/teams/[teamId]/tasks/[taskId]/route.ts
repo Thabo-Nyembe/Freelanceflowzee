@@ -6,6 +6,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { teamService } from '@/lib/teams/team-service';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('team-task');
 
 // =====================================================
 // GET - Get task details
@@ -62,7 +65,7 @@ export async function GET(
       }
     }
   } catch (error: any) {
-    console.error('Task GET error:', error);
+    logger.error('Task GET error', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to fetch task' },
       { status: 500 }
@@ -90,7 +93,7 @@ export async function PUT(
     const task = await teamService.updateTask(teamId, taskId, user.id, body);
     return NextResponse.json({ task });
   } catch (error: any) {
-    console.error('Task PUT error:', error);
+    logger.error('Task PUT error', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to update task' },
       { status: 500 }
@@ -136,7 +139,7 @@ export async function PATCH(
     const task = await teamService.updateTask(teamId, taskId, user.id, body);
     return NextResponse.json({ task });
   } catch (error: any) {
-    console.error('Task PATCH error:', error);
+    logger.error('Task PATCH error', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to update task' },
       { status: 500 }
@@ -163,7 +166,7 @@ export async function DELETE(
     await teamService.deleteTask(teamId, taskId, user.id);
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    console.error('Task DELETE error:', error);
+    logger.error('Task DELETE error', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to delete task' },
       { status: 500 }

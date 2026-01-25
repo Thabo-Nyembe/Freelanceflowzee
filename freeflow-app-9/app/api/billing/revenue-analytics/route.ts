@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('billing-revenue-analytics');
 
 // Types
 interface RevenueMetrics {
@@ -196,7 +199,7 @@ export async function GET(request: NextRequest) {
       }
     });
   } catch (error) {
-    console.error('Revenue analytics error:', error);
+    logger.error('Revenue analytics error', { error });
     return NextResponse.json(
       { error: 'Failed to fetch revenue analytics' },
       { status: 500 }
@@ -513,7 +516,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
     }
   } catch (error) {
-    console.error('Revenue analytics action error:', error);
+    logger.error('Revenue analytics action error', { error });
     return NextResponse.json(
       { error: 'Failed to perform revenue analytics action' },
       { status: 500 }

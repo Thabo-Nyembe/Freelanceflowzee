@@ -8,6 +8,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('time-tracking')
 import {
   getTimeEntry,
   updateTimeEntry,
@@ -40,7 +43,7 @@ export async function GET(
 
     return NextResponse.json({ data })
   } catch (error) {
-    console.error('Time Tracking API error:', error)
+    logger.error('Time Tracking API error', { error })
     return NextResponse.json(
       { error: 'Failed to fetch time entry' },
       { status: 500 }
@@ -91,7 +94,7 @@ export async function PUT(
 
     return NextResponse.json({ data: result.data })
   } catch (error) {
-    console.error('Time Tracking API error:', error)
+    logger.error('Time Tracking API error', { error })
     return NextResponse.json(
       { error: 'Failed to update time entry' },
       { status: 500 }
@@ -117,7 +120,7 @@ export async function DELETE(
 
     return NextResponse.json({ success })
   } catch (error) {
-    console.error('Time Tracking API error:', error)
+    logger.error('Time Tracking API error', { error })
     return NextResponse.json(
       { error: 'Failed to delete time entry' },
       { status: 500 }

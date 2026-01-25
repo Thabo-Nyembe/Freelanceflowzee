@@ -11,6 +11,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('ai-board-creator');
 
 // ============================================================================
 // TYPES
@@ -296,7 +299,7 @@ export async function GET(request: NextRequest) {
       source: 'demo',
     });
   } catch (err) {
-    console.error('Board Creator GET error:', err);
+    logger.error('Board Creator GET error', { error: err });
     return NextResponse.json({
       success: true,
       data: getDemoTemplates(),
@@ -517,7 +520,7 @@ export async function POST(request: NextRequest) {
         );
     }
   } catch (err) {
-    console.error('Board Creator POST error:', err);
+    logger.error('Board Creator POST error', { error: err });
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

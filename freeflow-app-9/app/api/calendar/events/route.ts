@@ -6,6 +6,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { calendarService } from '@/lib/calendar/calendar-service';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('calendar-events');
 
 // =====================================================
 // GET - List calendar events
@@ -73,7 +76,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       }
     }
   } catch (error: any) {
-    console.error('Calendar GET error:', error);
+    logger.error('Calendar GET error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to fetch calendar data' },
       { status: 500 }
@@ -361,7 +364,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         );
     }
   } catch (error: any) {
-    console.error('Calendar POST error:', error);
+    logger.error('Calendar POST error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Operation failed' },
       { status: 500 }
@@ -392,7 +395,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
     await calendarService.deleteEvent(eventId, user.id, deleteRecurring);
     return NextResponse.json({ success: true, message: 'Event deleted' });
   } catch (error: any) {
-    console.error('Calendar DELETE error:', error);
+    logger.error('Calendar DELETE error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to delete event' },
       { status: 500 }

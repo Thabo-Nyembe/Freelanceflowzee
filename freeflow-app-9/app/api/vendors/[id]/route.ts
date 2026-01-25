@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('vendors')
 
 export async function GET(
   request: NextRequest,
@@ -25,7 +28,7 @@ export async function GET(
 
     return NextResponse.json({ vendor: data })
   } catch (error) {
-    console.error('Error fetching vendor:', error)
+    logger.error('Error fetching vendor', { error })
     return NextResponse.json({ error: 'Failed to fetch vendor' }, { status: 500 })
   }
 }
@@ -67,7 +70,7 @@ export async function PUT(
 
     return NextResponse.json({ vendor: data })
   } catch (error) {
-    console.error('Error updating vendor:', error)
+    logger.error('Error updating vendor', { error })
     return NextResponse.json({ error: 'Failed to update vendor' }, { status: 500 })
   }
 }
@@ -96,7 +99,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Error deleting vendor:', error)
+    logger.error('Error deleting vendor', { error })
     return NextResponse.json({ error: 'Failed to delete vendor' }, { status: 500 })
   }
 }

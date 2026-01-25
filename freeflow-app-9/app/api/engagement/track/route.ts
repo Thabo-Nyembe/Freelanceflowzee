@@ -8,6 +8,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth.config'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('engagement')
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
@@ -198,7 +201,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         )
     }
   } catch (error: any) {
-    console.error('Engagement tracking error:', error)
+    logger.error('Engagement tracking error', { error })
     return NextResponse.json(
       { success: false, error: error.message },
       { status: 500 }
@@ -304,7 +307,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         )
     }
   } catch (error: any) {
-    console.error('Engagement fetch error:', error)
+    logger.error('Engagement fetch error', { error })
     return NextResponse.json(
       { success: false, error: error.message },
       { status: 500 }

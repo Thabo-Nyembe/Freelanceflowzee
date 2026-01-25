@@ -8,6 +8,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('time-tracking')
 import {
   getTimeEntries,
   getRunningTimeEntry,
@@ -93,7 +96,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid type parameter' }, { status: 400 })
     }
   } catch (error) {
-    console.error('Time Tracking API error:', error)
+    logger.error('Time Tracking API error', { error })
     return NextResponse.json(
       { error: 'Failed to fetch time tracking data' },
       { status: 500 }
@@ -141,7 +144,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ data }, { status: 201 })
   } catch (error) {
-    console.error('Time Tracking API error:', error)
+    logger.error('Time Tracking API error', { error })
     return NextResponse.json(
       { error: 'Failed to create time entry' },
       { status: 500 }

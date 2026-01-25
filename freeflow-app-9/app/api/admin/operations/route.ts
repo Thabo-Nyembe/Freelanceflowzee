@@ -1,5 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('admin-operations')
 
 export async function GET() {
   return NextResponse.json({
@@ -163,7 +166,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ success: true, data: body })
     }
   } catch (error: any) {
-    console.error('Admin operations error:', error)
+    logger.error('Admin operations error', { error })
     return NextResponse.json(
       { success: false, error: error.message || 'Operation failed' },
       { status: 500 }

@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { nanoid } from 'nanoid'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('collaboration-comments')
 
 // Types
 interface Comment {
@@ -107,7 +110,7 @@ export async function GET(request: NextRequest) {
       }
     })
   } catch (error) {
-    console.error('Comments fetch error:', error)
+    logger.error('Comments fetch error', { error })
     return NextResponse.json(
       { error: 'Failed to fetch comments' },
       { status: 500 }
@@ -557,7 +560,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
   } catch (error) {
-    console.error('Comment action error:', error)
+    logger.error('Comment action error', { error })
     return NextResponse.json(
       { error: 'Failed to perform comment action' },
       { status: 500 }

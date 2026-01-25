@@ -5,8 +5,11 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
 import { performFullSync, getAccounts } from '@/lib/plaid/service';
 import crypto from 'crypto';
+
+const logger = createFeatureLogger('plaid-api');
 
 // Webhook types from Plaid
 type PlaidWebhookType =
@@ -64,7 +67,7 @@ export async function POST(request: NextRequest) {
 
     // Verify webhook signature
     if (!verifyPlaidWebhook(rawBody, signature)) {
-      console.error('Invalid webhook signature');
+      logger.error('Invalid webhook signature');
       return NextResponse.json(
         { error: 'Invalid signature' },
         { status: 401 }
@@ -74,7 +77,7 @@ export async function POST(request: NextRequest) {
     const body: PlaidWebhookBody = JSON.parse(rawBody);
     const { webhook_type, webhook_code, item_id, error } = body;
 
-    console.log(`Plaid webhook received: ${webhook_type}/${webhook_code} for item ${item_id}`);
+    logger.info('Plaid webhook received', { webhook_type, webhook_code, item_id });
 
     const supabase = await createClient();
 
@@ -86,7 +89,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (connError || !connection) {
-      console.error('Connection not found for item:', item_id);
+      logger.error('Connection not found for item', { item_id });
       return NextResponse.json({ received: true });
     }
 
@@ -101,7 +104,7 @@ export async function POST(request: NextRequest) {
         break;
 
       default:
-        console.log(`Unhandled webhook type: ${webhook_type}`);
+        logger.info('Unhandled webhook type', { webhook_type });
     }
 
     // Log the webhook
@@ -117,7 +120,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ received: true });
   } catch (error) {
-    console.error('Webhook processing error:', error);
+    logger.error('Webhook processing error', { error });
     return NextResponse.json(
       { error: 'Webhook processing failed' },
       { status: 500 }
@@ -143,7 +146,7 @@ async function handleTransactionWebhook(
     case 'DEFAULT_UPDATE':
     case 'SYNC_UPDATES_AVAILABLE':
       // Trigger a sync
-      console.log(`Triggering sync for connection ${connection.id} due to ${webhookCode}`);
+      logger.info('Triggering sync for connection', { connectionId: connection.id, webhookCode });
       await performFullSync(
         connection.id,
         connection.plaid_access_token,
@@ -165,7 +168,7 @@ async function handleTransactionWebhook(
       break;
 
     default:
-      console.log(`Unhandled transaction webhook: ${webhookCode}`);
+      logger.info('Unhandled transaction webhook', { webhookCode });
   }
 }
 
@@ -248,11 +251,11 @@ async function handleItemWebhook(
             })));
         }
       } catch (err) {
-        console.error('Failed to add new accounts:', err);
+        logger.error('Failed to add new accounts', { error: err });
       }
       break;
 
     default:
-      console.log(`Unhandled item webhook: ${webhookCode}`);
+      logger.info('Unhandled item webhook', { webhookCode });
   }
 }

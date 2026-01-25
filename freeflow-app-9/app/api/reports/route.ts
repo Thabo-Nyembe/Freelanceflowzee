@@ -6,6 +6,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { reportsService } from '@/lib/reports/reports-service';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('reports');
 
 // =====================================================
 // GET - List reports or get dashboard metrics
@@ -57,7 +60,7 @@ export async function GET(request: NextRequest) {
       }
     }
   } catch (error: any) {
-    console.error('Reports GET error:', error);
+    logger.error('Reports GET error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to fetch reports' },
       { status: 500 }
@@ -244,7 +247,7 @@ export async function POST(request: NextRequest) {
         );
     }
   } catch (error: any) {
-    console.error('Reports POST error:', error);
+    logger.error('Reports POST error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Operation failed' },
       { status: 500 }

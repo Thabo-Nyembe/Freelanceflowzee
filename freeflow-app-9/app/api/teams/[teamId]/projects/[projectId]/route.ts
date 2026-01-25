@@ -6,6 +6,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { teamService } from '@/lib/teams/team-service';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('team-project');
 
 // =====================================================
 // GET - Get project details
@@ -66,7 +69,7 @@ export async function GET(
       }
     }
   } catch (error: any) {
-    console.error('Project GET error:', error);
+    logger.error('Project GET error', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to fetch project' },
       { status: 500 }
@@ -94,7 +97,7 @@ export async function PUT(
     const project = await teamService.updateProject(teamId, projectId, user.id, body);
     return NextResponse.json({ project });
   } catch (error: any) {
-    console.error('Project PUT error:', error);
+    logger.error('Project PUT error', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to update project' },
       { status: 500 }
@@ -121,7 +124,7 @@ export async function DELETE(
     await teamService.deleteProject(teamId, projectId, user.id);
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    console.error('Project DELETE error:', error);
+    logger.error('Project DELETE error', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to delete project' },
       { status: 500 }

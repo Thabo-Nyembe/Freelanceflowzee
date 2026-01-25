@@ -8,6 +8,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('team-collaboration')
 import {
   getTeams,
   getTeamBySlug,
@@ -119,7 +122,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid type parameter' }, { status: 400 })
     }
   } catch (error) {
-    console.error('Team Collaboration API error:', error)
+    logger.error('Failed to fetch Team Collaboration data', { error })
     return NextResponse.json(
       { error: 'Failed to fetch Team Collaboration data' },
       { status: 500 }
@@ -174,7 +177,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
   } catch (error) {
-    console.error('Team Collaboration API error:', error)
+    logger.error('Failed to process Team Collaboration request', { error })
     return NextResponse.json(
       { error: 'Failed to process Team Collaboration request' },
       { status: 500 }

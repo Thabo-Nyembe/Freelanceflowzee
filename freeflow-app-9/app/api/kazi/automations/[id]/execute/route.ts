@@ -146,7 +146,7 @@ export async function POST(
       .single()
 
     if (execError || !execution) {
-      console.error('Error creating execution:', execError)
+      logger.error('Error creating execution', { error: execError })
       // If workflow_executions fails, continue without tracking
       // This allows the automation to run even without the execution table
     }
@@ -280,7 +280,7 @@ export async function POST(
       outputs
     })
   } catch (error) {
-    console.error('Error in POST /api/kazi/automations/[id]/execute:', error)
+    logger.error('Error in POST /api/kazi/automations/[id]/execute', { error })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

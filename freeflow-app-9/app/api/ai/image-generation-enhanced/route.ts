@@ -5,6 +5,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('ai-image-generation-enhanced');
 
 // =====================================================
 // Types
@@ -212,7 +215,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       }
     }
   } catch (error: any) {
-    console.error('AI Image Generation GET error:', error);
+    logger.error('AI Image Generation GET error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to fetch image data' },
       { status: 500 }
@@ -537,7 +540,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         );
     }
   } catch (error: any) {
-    console.error('AI Image Generation POST error:', error);
+    logger.error('AI Image Generation POST error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Image generation failed' },
       { status: 500 }
@@ -612,7 +615,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
       { status: 400 }
     );
   } catch (error: any) {
-    console.error('AI Image Generation DELETE error:', error);
+    logger.error('AI Image Generation DELETE error', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to delete' },
       { status: 500 }
@@ -703,7 +706,7 @@ async function generateImage(
     .single();
 
   if (error) {
-    console.error('Error saving image:', error);
+    logger.error('Error saving image', { error });
   }
 
   return {
@@ -1109,7 +1112,7 @@ async function callImageAPI(
         };
       }
     } catch (error) {
-      console.error('DALL-E API error:', error);
+      logger.error('DALL-E API error', { error });
     }
   }
 

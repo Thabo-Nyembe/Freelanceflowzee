@@ -9,6 +9,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { SignJWT, jwtVerify } from 'jose'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('collaboration-token')
 
 // =====================================================
 // Configuration
@@ -140,7 +143,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     })
 
   } catch (error: any) {
-    console.error('Collaboration token error:', error)
+    logger.error('Collaboration token error', { error })
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to generate token' },
       { status: 500 }
@@ -191,7 +194,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     }
 
   } catch (error: any) {
-    console.error('Token verification error:', error)
+    logger.error('Token verification error', { error })
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to verify token' },
       { status: 500 }
@@ -271,7 +274,7 @@ async function verifyDocumentAccess(
     return { allowed: true, role: 'viewer' }
 
   } catch (error) {
-    console.error('Document access check error:', error)
+    logger.error('Document access check error', { error })
     // Default allow in development, deny in production
     if (process.env.NODE_ENV === 'development') {
       return { allowed: true, role: 'editor' }
@@ -369,7 +372,7 @@ async function createCollaborationSession(
       .single()
 
     if (error) {
-      console.error('Session creation error:', error)
+      logger.error('Session creation error', { error })
       return null
     }
 
@@ -388,7 +391,7 @@ async function createCollaborationSession(
     return newSession.id
 
   } catch (error) {
-    console.error('Session creation error:', error)
+    logger.error('Session creation error', { error })
     return null
   }
 }

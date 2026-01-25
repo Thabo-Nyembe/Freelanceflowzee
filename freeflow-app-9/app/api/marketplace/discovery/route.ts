@@ -5,6 +5,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('marketplace-discovery')
 
 // Category hierarchy with rich metadata
 const categoryHierarchy = {
@@ -282,7 +285,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
   } catch (error) {
-    console.error('Discovery API error:', error)
+    logger.error('Discovery API error', { error })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

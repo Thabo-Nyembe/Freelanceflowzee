@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { z } from 'zod'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('crm-api')
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -395,7 +398,7 @@ export async function GET(request: NextRequest) {
     const { data: companies, error, count } = await query
 
     if (error) {
-      console.error('Error fetching companies:', error)
+      logger.error('Error fetching companies', { error })
       return NextResponse.json({ error: 'Failed to fetch companies' }, { status: 500 })
     }
 
@@ -438,7 +441,7 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Companies GET error:', error)
+    logger.error('Companies GET error', { error })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -568,7 +571,7 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('Error creating company:', error)
+      logger.error('Error creating company', { error })
       return NextResponse.json({ error: 'Failed to create company' }, { status: 500 })
     }
 
@@ -588,7 +591,7 @@ export async function POST(request: NextRequest) {
     }, { status: 201 })
 
   } catch (error) {
-    console.error('Companies POST error:', error)
+    logger.error('Companies POST error', { error })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -660,7 +663,7 @@ export async function PUT(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('Error updating company:', error)
+      logger.error('Error updating company', { error })
       return NextResponse.json({ error: 'Failed to update company' }, { status: 500 })
     }
 
@@ -678,7 +681,7 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ company })
 
   } catch (error) {
-    console.error('Companies PUT error:', error)
+    logger.error('Companies PUT error', { error })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -734,7 +737,7 @@ export async function DELETE(request: NextRequest) {
         .eq('user_id', user.id)
 
       if (error) {
-        console.error('Error deleting company:', error)
+        logger.error('Error deleting company', { error })
         return NextResponse.json({ error: 'Failed to delete company' }, { status: 500 })
       }
     } else {
@@ -749,7 +752,7 @@ export async function DELETE(request: NextRequest) {
         .eq('user_id', user.id)
 
       if (error) {
-        console.error('Error archiving company:', error)
+        logger.error('Error archiving company', { error })
         return NextResponse.json({ error: 'Failed to archive company' }, { status: 500 })
       }
     }
@@ -761,7 +764,7 @@ export async function DELETE(request: NextRequest) {
     })
 
   } catch (error) {
-    console.error('Companies DELETE error:', error)
+    logger.error('Companies DELETE error', { error })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

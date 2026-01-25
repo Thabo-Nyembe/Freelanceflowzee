@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('tax-filings')
 
 /**
  * GET /api/tax/filings
@@ -35,7 +38,7 @@ export async function GET(request: NextRequest) {
     const { data: filings, error } = await query
 
     if (error) {
-      console.error('Error fetching tax filings:', error)
+      logger.error('Error fetching tax filings', { error })
       return NextResponse.json({ error: 'Failed to fetch filings' }, { status: 500 })
     }
 
@@ -44,7 +47,7 @@ export async function GET(request: NextRequest) {
       count: filings?.length || 0
     })
   } catch (error) {
-    console.error('Tax filings GET error:', error)
+    logger.error('Tax filings GET error', { error })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -103,7 +106,7 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('Error creating tax filing:', error)
+      logger.error('Error creating tax filing', { error })
       return NextResponse.json({ error: 'Failed to create filing' }, { status: 500 })
     }
 
@@ -112,7 +115,7 @@ export async function POST(request: NextRequest) {
       message: 'Filing created successfully'
     }, { status: 201 })
   } catch (error) {
-    console.error('Tax filings POST error:', error)
+    logger.error('Tax filings POST error', { error })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

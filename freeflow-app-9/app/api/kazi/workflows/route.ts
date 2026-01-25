@@ -1,5 +1,8 @@
 import { createAdminClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('kazi-workflows')
 
 // Demo user for unauthenticated access
 const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
@@ -36,13 +39,13 @@ export async function GET(request: NextRequest) {
     const { data, error } = await query
 
     if (error) {
-      console.error('Error fetching workflows:', error)
+      logger.error('Error fetching workflows', { error })
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
     return NextResponse.json({ data })
   } catch (error) {
-    console.error('Error in GET /api/kazi/workflows:', error)
+    logger.error('Error in GET /api/kazi/workflows', { error })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -85,7 +88,7 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (workflowError || !workflow) {
-      console.error('Error creating workflow:', workflowError)
+      logger.error('Error creating workflow', { error: workflowError })
       return NextResponse.json({ error: workflowError?.message || 'Failed to create workflow' }, { status: 500 })
     }
 
@@ -104,7 +107,7 @@ export async function POST(request: NextRequest) {
         .insert(actionRecords)
 
       if (actionsError) {
-        console.error('Error creating workflow actions:', actionsError)
+        logger.error('Error creating workflow actions', { error: actionsError })
         // Rollback workflow creation
         await supabase.from('workflows').delete().eq('id', workflow.id)
         return NextResponse.json({ error: 'Failed to create workflow actions' }, { status: 500 })
@@ -123,7 +126,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ data: completeWorkflow }, { status: 201 })
   } catch (error) {
-    console.error('Error in POST /api/kazi/workflows:', error)
+    logger.error('Error in POST /api/kazi/workflows', { error })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

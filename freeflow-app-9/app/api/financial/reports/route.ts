@@ -6,6 +6,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { reportsService } from '@/lib/reports/reports-service';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('financial-reports');
 
 // =====================================================
 // GET - Get reports and dashboard metrics
@@ -100,7 +103,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       }
     }
   } catch (error: any) {
-    console.error('Reports GET error:', error);
+    logger.error('Failed to fetch report', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to fetch report' },
       { status: 500 }
@@ -225,7 +228,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       }
     }
   } catch (error: any) {
-    console.error('Reports POST error:', error);
+    logger.error('Failed to generate report', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to generate report' },
       { status: 500 }
@@ -255,7 +258,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
     await reportsService.deleteReport(reportId, user.id);
     return NextResponse.json({ success: true, message: 'Report deleted' });
   } catch (error: any) {
-    console.error('Reports DELETE error:', error);
+    logger.error('Failed to delete report', { error });
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to delete report' },
       { status: 500 }

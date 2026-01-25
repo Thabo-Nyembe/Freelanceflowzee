@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('billing-invoices');
 
 // Types
 interface LineItem {
@@ -131,7 +134,7 @@ export async function GET(request: NextRequest) {
       }
     });
   } catch (error) {
-    console.error('Fetch invoices error:', error);
+    logger.error('Fetch invoices error', { error });
     return NextResponse.json(
       { error: 'Failed to fetch invoices' },
       { status: 500 }
@@ -618,7 +621,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
     }
   } catch (error) {
-    console.error('Invoice action error:', error);
+    logger.error('Invoice action error', { error });
     return NextResponse.json(
       { error: 'Failed to perform invoice action' },
       { status: 500 }

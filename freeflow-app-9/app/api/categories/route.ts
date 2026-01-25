@@ -9,6 +9,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { unstable_cache } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('categories')
 
 // Cached function for categories (static data, 1 hour cache)
 const getCachedCategories = unstable_cache(
@@ -78,7 +81,7 @@ export async function GET(request: NextRequest) {
       },
     })
   } catch (error) {
-    console.error('Categories API error:', error)
+    logger.error('Categories API error', { error })
     return NextResponse.json(
       { error: 'Failed to fetch categories' },
       { status: 500 }
@@ -118,7 +121,7 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('Create category error:', error)
+      logger.error('Create category error', { error })
       return NextResponse.json(
         { error: 'Failed to create category' },
         { status: 500 }
@@ -127,7 +130,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ data }, { status: 201 })
   } catch (error) {
-    console.error('Categories API error:', error)
+    logger.error('Categories API error', { error })
     return NextResponse.json(
       { error: 'Failed to process category request' },
       { status: 500 }

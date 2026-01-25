@@ -6,6 +6,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { teamService } from '@/lib/teams/team-service';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('teams');
 
 // =====================================================
 // GET - List user's teams
@@ -47,7 +50,7 @@ export async function GET(request: NextRequest) {
       }
     }
   } catch (error: any) {
-    console.error('Teams GET error:', error);
+    logger.error('Teams GET error', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to fetch teams' },
       { status: 500 }
@@ -100,7 +103,7 @@ export async function POST(request: NextRequest) {
         );
     }
   } catch (error: any) {
-    console.error('Teams POST error:', error);
+    logger.error('Teams POST error', { error });
     return NextResponse.json(
       { error: error.message || 'Operation failed' },
       { status: 500 }

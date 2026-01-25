@@ -7,6 +7,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { automationEngine } from '@/lib/email/automation-engine'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('email-automations')
 
 export async function GET(request: NextRequest) {
   try {
@@ -31,7 +34,7 @@ export async function GET(request: NextRequest) {
     const automations = await automationEngine.getAutomationsByUser(user.id)
     return NextResponse.json({ automations })
   } catch (error) {
-    console.error('Error fetching automations:', error)
+    logger.error('Failed to fetch automations', { error })
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to fetch automations' },
       { status: 500 }
@@ -112,7 +115,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
   } catch (error) {
-    console.error('Error with automation action:', error)
+    logger.error('Automation action failed', { error })
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Automation action failed' },
       { status: 500 }
@@ -139,7 +142,7 @@ export async function PUT(request: NextRequest) {
     const automation = await automationEngine.updateAutomation(automationId, updates)
     return NextResponse.json({ automation })
   } catch (error) {
-    console.error('Error updating automation:', error)
+    logger.error('Failed to update automation', { error })
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Failed to update automation' },
       { status: 500 }

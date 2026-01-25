@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('3d-modeling');
 
 // ============================================================================
 // WORLD-CLASS 3D MODELING API
@@ -1726,7 +1729,7 @@ export async function POST(request: NextRequest) {
         );
     }
   } catch (error) {
-    console.error('3D Modeling API error:', error);
+    logger.error('3D Modeling API error', { error });
     return NextResponse.json(
       { success: false, error: 'Internal server error' },
       { status: 500 }

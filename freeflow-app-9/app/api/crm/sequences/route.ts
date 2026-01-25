@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { z } from 'zod'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('crm-api')
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -508,7 +511,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ sequences: processedSequences })
 
   } catch (error) {
-    console.error('Sequences GET error:', error)
+    logger.error('Sequences GET error', { error })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -796,7 +799,7 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (sequenceError) {
-      console.error('Error creating sequence:', sequenceError)
+      logger.error('Error creating sequence', { error: sequenceError })
       return NextResponse.json({ error: 'Failed to create sequence' }, { status: 500 })
     }
 
@@ -824,7 +827,7 @@ export async function POST(request: NextRequest) {
         .select()
 
       if (stepsError) {
-        console.error('Error creating steps:', stepsError)
+        logger.error('Error creating steps', { error: stepsError })
         // Rollback sequence creation
         await supabase.from('crm_email_sequences').delete().eq('id', sequence.id)
         return NextResponse.json({ error: 'Failed to create sequence steps' }, { status: 500 })
@@ -838,7 +841,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ sequence }, { status: 201 })
 
   } catch (error) {
-    console.error('Sequences POST error:', error)
+    logger.error('Sequences POST error', { error })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -956,7 +959,7 @@ async function enrollContacts(
     .select()
 
   if (error) {
-    console.error('Error enrolling contacts:', error)
+    logger.error('Error enrolling contacts', { error })
     return NextResponse.json({ error: 'Failed to enroll contacts' }, { status: 500 })
   }
 
@@ -1136,7 +1139,7 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ sequence })
 
   } catch (error) {
-    console.error('Sequences PUT error:', error)
+    logger.error('Sequences PUT error', { error })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -1312,7 +1315,7 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ success: true, archived: true })
 
   } catch (error) {
-    console.error('Sequences DELETE error:', error)
+    logger.error('Sequences DELETE error', { error })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

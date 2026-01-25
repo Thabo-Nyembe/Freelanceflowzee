@@ -1,5 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('resources')
 
 export async function GET(request: NextRequest) {
   try {
@@ -59,7 +62,7 @@ export async function GET(request: NextRequest) {
       }
     }
   } catch (error: any) {
-    console.error('Resources API error:', error)
+    logger.error('Resources API error', { error })
     return NextResponse.json(
       { error: error.message || 'Failed to fetch resources' },
       { status: 500 }
@@ -346,7 +349,7 @@ export async function POST(request: NextRequest) {
         )
     }
   } catch (error: any) {
-    console.error('Resources API error:', error)
+    logger.error('Resources API error', { error })
     return NextResponse.json(
       { error: error.message || 'Operation failed' },
       { status: 500 }
@@ -372,7 +375,7 @@ export async function DELETE(request: NextRequest) {
     if (error) throw error
     return NextResponse.json({ success: true })
   } catch (error: any) {
-    console.error('Resources API error:', error)
+    logger.error('Resources API error', { error })
     return NextResponse.json(
       { error: error.message || 'Delete failed' },
       { status: 500 }

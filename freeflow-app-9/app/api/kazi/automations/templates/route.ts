@@ -1,5 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('kazi-automation-templates')
 
 // Default templates if none exist in database
 const defaultTemplates = [
@@ -115,7 +118,7 @@ export async function GET(request: NextRequest) {
     const { data, error } = await query
 
     if (error) {
-      console.error('Error fetching templates:', error)
+      logger.error('Error fetching templates', { error })
       // Return default templates on error
       return NextResponse.json({ data: defaultTemplates })
     }
@@ -147,7 +150,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ data: transformedData })
   } catch (error) {
-    console.error('Error in GET /api/kazi/automations/templates:', error)
+    logger.error('Error in GET /api/kazi/automations/templates', { error })
     // Return default templates on error
     return NextResponse.json({ data: defaultTemplates })
   }

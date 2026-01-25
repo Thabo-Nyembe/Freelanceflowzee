@@ -6,6 +6,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('user-block')
 
 export async function POST(request: NextRequest) {
   try {
@@ -84,7 +87,7 @@ export async function POST(request: NextRequest) {
       })
     }
   } catch (error) {
-    console.error('User block error:', error)
+    logger.error('User block error', { error })
     return NextResponse.json({ error: 'Failed to process block request' }, { status: 500 })
   }
 }

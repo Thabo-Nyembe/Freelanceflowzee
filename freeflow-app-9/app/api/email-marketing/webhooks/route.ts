@@ -7,6 +7,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { eventTrackingService } from '@/lib/email/event-tracking-service'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('email-webhooks')
 
 // Disable body parsing for raw webhook payload access
 export const runtime = 'nodejs'
@@ -77,7 +80,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(result)
   } catch (error) {
-    console.error('Webhook processing error:', error)
+    logger.error('Webhook processing failed', { error })
     // Return 200 to acknowledge receipt even if processing fails
     // This prevents providers from retrying unnecessarily
     return NextResponse.json({

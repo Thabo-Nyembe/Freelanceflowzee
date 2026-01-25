@@ -8,6 +8,9 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('system-insights')
 import {
   getSystemMetrics,
   logMetric,
@@ -211,7 +214,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid type parameter' }, { status: 400 })
     }
   } catch (error) {
-    console.error('System Insights API error:', error)
+    logger.error('Failed to fetch System Insights data', { error })
     return NextResponse.json(
       { error: 'Failed to fetch System Insights data' },
       { status: 500 }
@@ -266,7 +269,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
   } catch (error) {
-    console.error('System Insights API error:', error)
+    logger.error('Failed to process System Insights request', { error })
     return NextResponse.json(
       { error: 'Failed to process System Insights request' },
       { status: 500 }

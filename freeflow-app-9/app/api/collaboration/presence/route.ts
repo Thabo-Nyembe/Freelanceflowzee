@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('collaboration-presence')
 
 // Types
 interface UserPresence {
@@ -85,7 +88,7 @@ export async function GET(request: NextRequest) {
       timestamp: new Date().toISOString()
     })
   } catch (error) {
-    console.error('Presence fetch error:', error)
+    logger.error('Presence fetch error', { error })
     return NextResponse.json(
       { error: 'Failed to fetch presence data' },
       { status: 500 }
@@ -396,7 +399,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
     }
   } catch (error) {
-    console.error('Presence action error:', error)
+    logger.error('Presence action error', { error })
     return NextResponse.json(
       { error: 'Failed to perform presence action' },
       { status: 500 }
@@ -433,7 +436,7 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Presence delete error:', error)
+    logger.error('Presence delete error', { error })
     return NextResponse.json(
       { error: 'Failed to remove presence' },
       { status: 500 }

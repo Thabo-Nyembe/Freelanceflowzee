@@ -5,6 +5,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { z } from 'zod'
 import { v4 as uuidv4 } from 'uuid'
+import { createFeatureLogger } from '@/lib/logger'
+
+const logger = createFeatureLogger('scim')
 
 // ============================================================================
 // SCIM 2.0 Core Schema Types
@@ -822,7 +825,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
     return createSCIMError(404, 'Resource not found')
   } catch (error) {
-    console.error('SCIM GET error:', error)
+    logger.error('SCIM GET error', { error })
     return createSCIMError(500, 'Internal server error')
   }
 }
@@ -1254,7 +1257,7 @@ async function handleListUsers(
   const { data: users, count: totalCount, error } = await query
 
   if (error) {
-    console.error('SCIM list users error:', error)
+    logger.error('SCIM list users error', { error })
     return createSCIMError(500, 'Failed to list users')
   }
 
@@ -1355,7 +1358,7 @@ async function handleListGroups(
   const { data: groups, count: totalCount, error } = await query
 
   if (error) {
-    console.error('SCIM list groups error:', error)
+    logger.error('SCIM list groups error', { error })
     return createSCIMError(500, 'Failed to list groups')
   }
 
@@ -1415,7 +1418,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     return createSCIMError(404, 'Resource not found')
   } catch (error) {
-    console.error('SCIM POST error:', error)
+    logger.error('SCIM POST error', { error })
     return createSCIMError(500, 'Internal server error')
   }
 }
@@ -1463,7 +1466,7 @@ async function handleCreateUser(
     })
 
   if (insertError) {
-    console.error('SCIM create user error:', insertError)
+    logger.error('SCIM create user error', { error: insertError })
     return createSCIMError(500, 'Failed to create user')
   }
 
@@ -1536,7 +1539,7 @@ async function handleCreateGroup(
     })
 
   if (insertError) {
-    console.error('SCIM create group error:', insertError)
+    logger.error('SCIM create group error', { error: insertError })
     return createSCIMError(500, 'Failed to create group')
   }
 
@@ -1823,7 +1826,7 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
 
     return createSCIMError(404, 'Resource not found')
   } catch (error) {
-    console.error('SCIM PUT error:', error)
+    logger.error('SCIM PUT error', { error })
     return createSCIMError(500, 'Internal server error')
   }
 }
@@ -1869,7 +1872,7 @@ async function handleReplaceUser(
     .eq('organization_id', organizationId)
 
   if (updateError) {
-    console.error('SCIM replace user error:', updateError)
+    logger.error('SCIM replace user error', { error: updateError })
     return createSCIMError(500, 'Failed to replace user')
   }
 
@@ -1936,7 +1939,7 @@ async function handleReplaceGroup(
     .eq('organization_id', organizationId)
 
   if (updateError) {
-    console.error('SCIM replace group error:', updateError)
+    logger.error('SCIM replace group error', { error: updateError })
     return createSCIMError(500, 'Failed to replace group')
   }
 
@@ -2013,7 +2016,7 @@ export async function PATCH(req: NextRequest): Promise<NextResponse> {
 
     return createSCIMError(404, 'Resource not found')
   } catch (error) {
-    console.error('SCIM PATCH error:', error)
+    logger.error('SCIM PATCH error', { error })
     return createSCIMError(500, 'Internal server error')
   }
 }
@@ -2110,7 +2113,7 @@ async function handlePatchUser(
       .eq('organization_id', organizationId)
 
     if (updateError) {
-      console.error('SCIM patch user error:', updateError)
+      logger.error('SCIM patch user error', { error: updateError })
       return createSCIMError(500, 'Failed to patch user')
     }
   }
@@ -2244,7 +2247,7 @@ async function handlePatchGroup(
       .eq('organization_id', organizationId)
 
     if (updateError) {
-      console.error('SCIM patch group error:', updateError)
+      logger.error('SCIM patch group error', { error: updateError })
       return createSCIMError(500, 'Failed to patch group')
     }
   }
@@ -2301,7 +2304,7 @@ export async function DELETE(req: NextRequest): Promise<NextResponse> {
 
     return createSCIMError(404, 'Resource not found')
   } catch (error) {
-    console.error('SCIM DELETE error:', error)
+    logger.error('SCIM DELETE error', { error })
     return createSCIMError(500, 'Internal server error')
   }
 }
@@ -2344,7 +2347,7 @@ async function handleDeleteUser(
     .eq('organization_id', organizationId)
 
   if (deleteError) {
-    console.error('SCIM delete user error:', deleteError)
+    logger.error('SCIM delete user error', { error: deleteError })
     return createSCIMError(500, 'Failed to delete user')
   }
 
@@ -2394,7 +2397,7 @@ async function handleDeleteGroup(
     .eq('organization_id', organizationId)
 
   if (deleteError) {
-    console.error('SCIM delete group error:', deleteError)
+    logger.error('SCIM delete group error', { error: deleteError })
     return createSCIMError(500, 'Failed to delete group')
   }
 

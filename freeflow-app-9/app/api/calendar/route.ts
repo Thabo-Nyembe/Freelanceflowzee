@@ -6,6 +6,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { calendarService } from '@/lib/calendar/calendar-service';
+import { createFeatureLogger } from '@/lib/logger';
+
+const logger = createFeatureLogger('calendar');
 
 // =====================================================
 // GET - List events and calendar data
@@ -80,7 +83,7 @@ export async function GET(request: NextRequest) {
       }
     }
   } catch (error: any) {
-    console.error('Calendar GET error:', error);
+    logger.error('Calendar GET error', { error });
     return NextResponse.json(
       { error: error.message || 'Failed to fetch calendar data' },
       { status: 500 }
@@ -193,7 +196,7 @@ export async function POST(request: NextRequest) {
         );
     }
   } catch (error: any) {
-    console.error('Calendar POST error:', error);
+    logger.error('Calendar POST error', { error });
     return NextResponse.json(
       { error: error.message || 'Operation failed' },
       { status: 500 }
