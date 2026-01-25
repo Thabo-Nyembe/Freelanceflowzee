@@ -346,6 +346,25 @@ export default function TimeTrackingClient() {
     error: goalsError
   } = useGoals()
 
+  // Track database connection status for UI feedback
+  const [isDbConnected, setIsDbConnected] = useState<boolean | null>(null)
+
+  // Track the active running entry ID
+  const [activeTimerEntryId, setActiveTimerEntryId] = useState<string | null>(null)
+  const [activeTimerStartTime, setActiveTimerStartTime] = useState<string | null>(null)
+  const [editingEntryId, setEditingEntryId] = useState<string | null>(null)
+
+  // Form state for new time entry
+  const [newEntryForm, setNewEntryForm] = useState({
+    description: '',
+    projectId: '',
+    date: new Date().toISOString().split('T')[0],
+    duration: '',
+    startTime: '',
+    endTime: '',
+    isBillable: true
+  })
+
   // Fetch data on mount
   useEffect(() => {
     fetchProjects()
@@ -353,8 +372,125 @@ export default function TimeTrackingClient() {
     fetchClients()
   }, [fetchProjects, fetchTeam, fetchClients])
 
+  // Check database connection on mount
+  useEffect(() => {
+    if (entriesError) {
+      setIsDbConnected(false)
+      console.error('Time tracking database error:', entriesError)
+    } else if (dbTimeEntries !== undefined) {
+      setIsDbConnected(true)
+    }
+  }, [entriesError, dbTimeEntries])
+
+  // Fetch time entries on mount
+  useEffect(() => {
+    refetch()
+  }, [refetch])
+
+  // Check for running timer entries on load
+  useEffect(() => {
+    if (dbTimeEntries && dbTimeEntries.length > 0) {
+      const runningEntry = dbTimeEntries.find((entry: any) => entry.status === 'running')
+      if (runningEntry) {
+        setActiveTimerEntryId(runningEntry.id)
+        setActiveTimerStartTime(runningEntry.start_time)
+        setTimerDescription(runningEntry.title || '')
+        setTimerProject(runningEntry.project_id || '')
+        setTimerBillable(runningEntry.is_billable ?? true)
+
+        // Calculate elapsed time
+        const startTime = new Date(runningEntry.start_time).getTime()
+        const elapsed = Math.floor((Date.now() - startTime) / 1000)
+        setTimerSeconds(elapsed)
+        setIsTimerRunning(true)
+      }
+    }
+  }, [dbTimeEntries])
+
   // Combined loading state
   const isLoading = entriesLoading || projectsLoading || teamLoading || invoicesLoading || clientsLoading || goalsLoading
+
+  // Map database data to component-expected formats
+  const projects = useMemo(() => (dbProjects || []).map(p => ({
+    id: p.id,
+    name: p.name,
+    client: p.client_id || 'No Client',
+    color: p.color || '#3b82f6',
+    status: p.status as any,
+    billable: true,
+    hourlyRate: 150,
+    budget: p.budget || 0,
+    spent: p.spent || 0,
+    totalHours: 0
+  })), [dbProjects])
+
+  const team = useMemo(() => (dbTeamMembers || []).map(m => ({
+    id: m.id,
+    name: m.name,
+    email: m.email || '',
+    role: m.role || 'Member',
+    avatar: m.avatar_url,
+    todayHours: 0,
+    weekHours: m.performance_score || 0,
+    activeProject: undefined,
+    isOnline: m.status === 'active'
+  })), [dbTeamMembers])
+
+  const invoices = useMemo(() => (dbInvoices || []).map(inv => ({
+    id: inv.id,
+    number: inv.invoice_number,
+    client: inv.client_name || 'Unknown',
+    project: inv.title || '',
+    amount: inv.total_amount || 0,
+    hours: 0,
+    status: inv.status as any,
+    dueDate: inv.due_date,
+    createdAt: inv.created_at
+  })), [dbInvoices])
+
+  const clients = useMemo(() => (dbClients || []).map(c => ({
+    id: c.id,
+    name: c.name,
+    email: c.email,
+    phone: c.phone || '',
+    address: c.address || '',
+    currency: c.currency || 'USD',
+    projects: c.projects_count || 0,
+    totalBilled: c.total_revenue || 0,
+    outstandingBalance: 0,
+    status: c.status as any,
+    createdAt: c.created_at,
+    color: '#3b82f6'
+  })), [dbClients])
+
+  const goals = useMemo(() => (dbGoals || []).map(g => ({
+    id: g.id,
+    label: g.title,
+    target: g.target_value || 100,
+    current: g.current_value || 0,
+    unit: g.unit || '%'
+  })), [dbGoals])
+
+  // Map time entries to component format
+  const entries = useMemo(() => (dbTimeEntries || []).map(e => ({
+    id: e.id,
+    title: e.title,
+    description: e.description,
+    projectId: e.project_id || '',
+    projectName: projects.find(p => p.id === e.project_id)?.name || 'No Project',
+    startTime: e.start_time,
+    endTime: e.end_time,
+    durationSeconds: e.duration_seconds || 0,
+    durationHours: e.duration_hours || 0,
+    status: e.status as any,
+    isBillable: e.is_billable,
+    billableAmount: e.billable_amount || 0,
+    hourlyRate: e.hourly_rate || 0,
+    tags: e.tags || []
+  })), [dbTimeEntries, projects])
+
+  // Tags - placeholder until tags hook is available
+  const tags: Tag[] = []
 
   // Loading state UI
   if (isLoading) {
@@ -383,142 +519,6 @@ export default function TimeTrackingClient() {
       </div>
     )
   }
-
-  // Map database data to component-expected formats
-  const projects = (dbProjects || []).map(p => ({
-    id: p.id,
-    name: p.name,
-    client: p.client_id || 'No Client',
-    color: p.color || '#3b82f6',
-    status: p.status as any,
-    billable: true,
-    hourlyRate: 150,
-    budget: p.budget || 0,
-    spent: p.spent || 0,
-    totalHours: 0
-  }))
-
-  const team = (dbTeamMembers || []).map(m => ({
-    id: m.id,
-    name: m.name,
-    email: m.email || '',
-    role: m.role || 'Member',
-    avatar: m.avatar_url,
-    todayHours: 0,
-    weekHours: m.performance_score || 0,
-    activeProject: undefined,
-    isOnline: m.status === 'active'
-  }))
-
-  const invoices = (dbInvoices || []).map(inv => ({
-    id: inv.id,
-    number: inv.invoice_number,
-    client: inv.client_name || 'Unknown',
-    project: inv.title || '',
-    amount: inv.total_amount || 0,
-    hours: 0,
-    status: inv.status as any,
-    dueDate: inv.due_date,
-    createdAt: inv.created_at
-  }))
-
-  const clients = (dbClients || []).map(c => ({
-    id: c.id,
-    name: c.name,
-    email: c.email,
-    phone: c.phone || '',
-    address: c.address || '',
-    currency: c.currency || 'USD',
-    projects: c.projects_count || 0,
-    totalBilled: c.total_revenue || 0,
-    outstandingBalance: 0,
-    status: c.status as any,
-    createdAt: c.created_at,
-    color: '#3b82f6'
-  }))
-
-  const goals = (dbGoals || []).map(g => ({
-    id: g.id,
-    label: g.title,
-    target: g.target_value || 100,
-    current: g.current_value || 0,
-    unit: g.unit || '%'
-  }))
-
-  // Map time entries to component format
-  const entries = (dbTimeEntries || []).map(e => ({
-    id: e.id,
-    title: e.title,
-    description: e.description,
-    projectId: e.project_id || '',
-    projectName: projects.find(p => p.id === e.project_id)?.name || 'No Project',
-    startTime: e.start_time,
-    endTime: e.end_time,
-    durationSeconds: e.duration_seconds || 0,
-    durationHours: e.duration_hours || 0,
-    status: e.status as any,
-    isBillable: e.is_billable,
-    billableAmount: e.billable_amount || 0,
-    hourlyRate: e.hourly_rate || 0,
-    tags: e.tags || []
-  }))
-
-  // Tags - placeholder until tags hook is available
-  const tags: Tag[] = []
-
-  // Track database connection status for UI feedback
-  const [isDbConnected, setIsDbConnected] = useState<boolean | null>(null)
-
-  // Check database connection on mount
-  useEffect(() => {
-    if (entriesError) {
-      setIsDbConnected(false)
-      console.error('Time tracking database error:', entriesError)
-    } else if (dbTimeEntries !== undefined) {
-      setIsDbConnected(true)
-    }
-  }, [entriesError, dbTimeEntries])
-
-  // Track the active running entry ID
-  const [activeTimerEntryId, setActiveTimerEntryId] = useState<string | null>(null)
-  const [activeTimerStartTime, setActiveTimerStartTime] = useState<string | null>(null)
-  const [editingEntryId, setEditingEntryId] = useState<string | null>(null)
-
-  // Form state for new time entry
-  const [newEntryForm, setNewEntryForm] = useState({
-    description: '',
-    projectId: '',
-    date: new Date().toISOString().split('T')[0],
-    duration: '',
-    startTime: '',
-    endTime: '',
-    isBillable: true
-  })
-
-  // Fetch time entries on mount
-  useEffect(() => {
-    refetch()
-  }, [refetch])
-
-  // Check for running timer entries on load
-  useEffect(() => {
-    if (dbTimeEntries && dbTimeEntries.length > 0) {
-      const runningEntry = dbTimeEntries.find((entry: any) => entry.status === 'running')
-      if (runningEntry) {
-        setActiveTimerEntryId(runningEntry.id)
-        setActiveTimerStartTime(runningEntry.start_time)
-        setTimerDescription(runningEntry.title || '')
-        setTimerProject(runningEntry.project_id || '')
-        setTimerBillable(runningEntry.is_billable ?? true)
-
-        // Calculate elapsed time
-        const startTime = new Date(runningEntry.start_time).getTime()
-        const elapsed = Math.floor((Date.now() - startTime) / 1000)
-        setTimerSeconds(elapsed)
-        setIsTimerRunning(true)
-      }
-    }
-  }, [dbTimeEntries])
 
   // Handle creating a new manual time entry - WIRED TO SUPABASE
   const handleCreateManualEntry = async () => {

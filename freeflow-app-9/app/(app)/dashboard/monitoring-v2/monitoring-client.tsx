@@ -210,7 +210,7 @@ interface SLO {
 
 const mockServices: Service[] = []
 
-const mockLogs: LogEntry[] = []
+// mockLogs removed - using real Supabase data via systemLogs state
 
 const mockSLOs: SLO[] = []
 

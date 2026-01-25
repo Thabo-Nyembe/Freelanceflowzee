@@ -148,6 +148,9 @@ interface APMService {
 // Data arrays are now populated from Supabase hooks inside the component
 // Quick actions will be defined inside the component to use state setters
 
+// Initialize Supabase client once at module level
+const supabase = createClient()
+
 // Database types
 interface DbSystemAlert {
   id: string
