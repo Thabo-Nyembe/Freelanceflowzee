@@ -3,6 +3,8 @@
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { useAuditEvents, useComplianceChecks, type AuditEvent, type AuditAction, type ComplianceCheck } from '@/lib/hooks/use-audit-events'
+import { useTeam } from '@/lib/hooks/use-team'
+import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -181,6 +183,10 @@ const mockAuditActivities: Array<{ id: string; user: { id: string; name: string;
 const mockAuditQuickActions: Array<{ id: string; label: string; icon: React.ReactNode; action: () => void; shortcut?: string }> = []
 
 export default function AuditClient({ initialEvents, initialComplianceChecks }: AuditClientProps) {
+  // Team and activity data hooks
+  const { members: teamMembers } = useTeam()
+  const { logs: activityLogs } = useActivityLogs()
+
   const [activeTab, setActiveTab] = useState('events')
   const [selectedAction, setSelectedAction] = useState<AuditAction | 'all'>('all')
   const [searchQuery, setSearchQuery] = useState('')
@@ -1954,7 +1960,12 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockAuditCollaborators}
+              collaborators={teamMembers.map(member => ({
+                id: member.id,
+                name: member.name,
+                avatar: member.avatar_url || undefined,
+                status: member.status === 'active' ? 'online' as const : member.status === 'on_leave' ? 'away' as const : 'offline' as const
+              }))}
               maxVisible={4}
             />
             <PredictiveAnalytics
@@ -1966,7 +1977,15 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockAuditActivities}
+            activities={activityLogs.slice(0, 10).map(log => ({
+              id: log.id,
+              type: log.activity_type === 'create' ? 'create' as const : log.activity_type === 'update' ? 'update' as const : log.activity_type === 'delete' ? 'delete' as const : 'update' as const,
+              title: log.action,
+              description: log.resource_name || undefined,
+              user: { name: log.user_name || 'System', avatar: undefined },
+              timestamp: log.created_at,
+              isUnread: log.status === 'pending'
+            }))}
             title="Audit Activity"
             maxItems={5}
           />

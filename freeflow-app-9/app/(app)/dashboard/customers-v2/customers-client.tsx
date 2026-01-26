@@ -3362,8 +3362,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
               </div>
               <div className="flex items-center gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                 <FileText className="h-4 w-4 text-blue-600" />
-                <a href="#" className="text-sm text-blue-600 hover:underline" onClick={(e) => {
-                  e.preventDefault()
+                <button type="button" className="text-sm text-blue-600 hover:underline bg-transparent border-none cursor-pointer p-0" onClick={() => {
                   // Generate and download CSV template
                   const template = 'Name,Email,Phone,Company,Notes\nJohn Doe,john@example.com,+1234567890,Acme Inc,Sample contact\nJane Smith,jane@example.com,+0987654321,Tech Corp,Another contact'
                   const blob = new Blob([template], { type: 'text/csv' })
@@ -3376,7 +3375,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                   toast.success('Template Downloaded')
                 }}>
                   Download sample CSV template
-                </a>
+                </button>
               </div>
             </div>
             <DialogFooter>

@@ -90,6 +90,7 @@ import {
   CommentPriority,
 } from '@/lib/video/frame-comments';
 import { cn } from '@/lib/utils';
+import { logger } from '@/lib/logger';
 
 // Demo video for development/preview
 const DEMO_VIDEO: VideoAsset = {
@@ -663,7 +664,7 @@ export function VideoReviewClient() {
                 width={video.width || 1920}
                 height={video.height || 1080}
                 onSave={(drawing) => {
-                  console.log('Drawing saved:', drawing);
+                  logger.debug('Drawing saved', { drawing });
                   setIsDrawingMode(false);
                 }}
                 onCancel={() => setIsDrawingMode(false)}

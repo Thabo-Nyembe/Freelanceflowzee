@@ -2,6 +2,8 @@
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { useContracts, type Contract } from '@/lib/hooks/use-contracts'
+import { useTeam } from '@/lib/hooks/use-team'
+import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
 import {
   FileText, Send, Eye, CheckCircle, CheckCircle2, Clock, Users,
   FileSignature, Download, Copy, MoreVertical, Search, Filter,
@@ -151,6 +153,10 @@ const contractsPredictions: { id: string; title: string; prediction: string; con
 const contractsActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' | 'error' | 'update' }[] = []
 
 export default function ContractsClient({ initialContracts }: { initialContracts: Contract[] }) {
+  // Team and activity data hooks
+  const { members: teamMembers } = useTeam()
+  const { logs: activityLogs } = useActivityLogs()
+
   const [activeTab, setActiveTab] = useState('dashboard')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedEnvelope, setSelectedEnvelope] = useState<Envelope | null>(null)
@@ -2176,7 +2182,12 @@ export default function ContractsClient({ initialContracts }: { initialContracts
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={contractsCollaborators}
+              collaborators={teamMembers.map(member => ({
+                id: member.id,
+                name: member.name,
+                avatar: member.avatar_url || undefined,
+                status: member.status === 'active' ? 'online' as const : member.status === 'on_leave' ? 'away' as const : 'offline' as const
+              }))}
               maxVisible={4}
             />
             <PredictiveAnalytics
@@ -2188,7 +2199,15 @@ export default function ContractsClient({ initialContracts }: { initialContracts
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={contractsActivities}
+            activities={activityLogs.slice(0, 10).map(log => ({
+              id: log.id,
+              type: log.activity_type === 'create' ? 'create' as const : log.activity_type === 'update' ? 'update' as const : log.activity_type === 'delete' ? 'delete' as const : 'update' as const,
+              title: log.action,
+              description: log.resource_name || undefined,
+              user: { name: log.user_name || 'System', avatar: undefined },
+              timestamp: log.created_at,
+              isUnread: log.status === 'pending'
+            }))}
             title="Contract Activity"
             maxItems={5}
           />

@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import { useAuthUserId } from '@/lib/hooks/use-auth-user-id'
+import { useTeam } from '@/lib/hooks/use-team'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -295,6 +296,9 @@ export default function AnalyticsClient() {
   const [dashboardMetricsData, setDashboardMetricsData] = useState<any[]>([])
   const [analyticsError, setAnalyticsError] = useState<string | null>(null)
   const [isAnalyticsLoading, setIsAnalyticsLoading] = useState(true)
+
+  // Team hook for CollaborationIndicator
+  const { members: teamMembers } = useTeam()
 
   // Use extended analytics hooks for real-time data
   const { data: dailyMetrics, isLoading: dailyMetricsLoading, refresh: refreshDailyMetrics } = useAnalyticsDailyMetrics(userId || undefined)
@@ -1952,9 +1956,8 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
               </div>
               <div className="flex items-center gap-3">
                 {/* Collaboration Indicator */}
-                {/* CollaborationIndicator - using empty array until real collaboration data is wired */}
                 <CollaborationIndicator
-                  collaborators={[]}
+                  collaborators={teamMembers?.map(m => ({ id: m.id, name: m.name, avatar: m.avatar_url, status: m.status === 'active' ? 'online' : 'offline' })) || []}
                   maxVisible={3}
                 />
                 <Button

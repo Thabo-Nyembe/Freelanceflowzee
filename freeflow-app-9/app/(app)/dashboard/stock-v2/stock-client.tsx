@@ -91,6 +91,8 @@ import {
 
 // Stock Hooks
 import { useStockMovements, useStockLevels, useStockMovementMutations, useStockLevelMutations } from '@/lib/hooks/use-stock'
+import { useTeam } from '@/lib/hooks/use-team'
+import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
 
 
 
@@ -394,6 +396,10 @@ export default function StockClient() {
   const { stockLevels, lowStockItems, stats: levelStats, isLoading: levelsLoading, refetch: refetchLevels } = useStockLevels()
   const { createMovement, isCreating } = useStockMovementMutations()
   const { createStockLevel, updateStockLevel } = useStockLevelMutations()
+
+  // Team and activity data hooks
+  const { members: teamMembers } = useTeam()
+  const { logs: activityLogs } = useActivityLogs()
 
   const [activeTab, setActiveTab] = useState('inventory')
   const [products] = useState<Product[]>(stockLevels || [])
@@ -1865,7 +1871,12 @@ export default function StockClient() {
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={stockCollaborators}
+              collaborators={teamMembers.map(member => ({
+                id: member.id,
+                name: member.name,
+                avatar: member.avatar_url || undefined,
+                status: member.status === 'active' ? 'online' as const : member.status === 'on_leave' ? 'away' as const : 'offline' as const
+              }))}
               maxVisible={4}
             />
             <PredictiveAnalytics
@@ -1877,7 +1888,15 @@ export default function StockClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={stockActivities}
+            activities={activityLogs.slice(0, 10).map(log => ({
+              id: log.id,
+              type: log.activity_type === 'create' ? 'create' as const : log.activity_type === 'update' ? 'update' as const : log.activity_type === 'delete' ? 'delete' as const : 'update' as const,
+              title: log.action,
+              description: log.resource_name || undefined,
+              user: { name: log.user_name || 'System', avatar: undefined },
+              timestamp: log.created_at,
+              isUnread: log.status === 'pending'
+            }))}
             title="Inventory Activity"
             maxItems={5}
           />

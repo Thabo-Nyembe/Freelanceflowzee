@@ -34,6 +34,8 @@ import {
   useSprintMutations,
 } from '@/lib/hooks/use-sprints'
 import { useApiKeys } from '@/lib/hooks/use-api-keys'
+import { useTeam } from '@/lib/hooks/use-team'
+import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
 
 // Enhanced & Competitive Upgrade Components
 import {
@@ -299,6 +301,12 @@ export default function SprintsClient() {
     isUpdatingTask,
     isCompletingTask,
   } = useSprintMutations()
+
+  // Team members integration
+  const { members: teamMembers } = useTeam()
+
+  // Activity logs integration
+  const { logs: activityLogs } = useActivityLogs()
 
   // Calculate stats - combine DB data with mock fallback (stats depends on sprintsData, defined below)
 
@@ -2317,7 +2325,7 @@ export default function SprintsClient() {
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={[] as any[]}
+              collaborators={teamMembers?.map(m => ({ id: m.id, name: m.name, avatar: m.avatar_url, status: m.status === 'active' ? 'online' : 'offline' })) || []}
               maxVisible={4}
             />
             <PredictiveAnalytics
@@ -2329,7 +2337,7 @@ export default function SprintsClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={[] as any[]}
+            activities={activityLogs?.slice(0, 10).map(l => ({ id: l.id, type: l.activity_type, title: l.action, user: { name: l.user_name || 'System' }, timestamp: l.created_at })) || []}
             title="Sprint Activity"
             maxItems={5}
           />

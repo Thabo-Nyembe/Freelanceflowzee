@@ -43,6 +43,8 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useBilling, type BillingTransaction, type BillingStatus } from '@/lib/hooks/use-billing'
+import { useTeam } from '@/lib/hooks/use-team'
+import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
 import { useCreateSubscription, useActiveSubscriptions } from '@/lib/hooks/use-subscriptions-extended'
 import { useCreateCoupon, useCoupons } from '@/lib/hooks/use-coupon-extended'
 import { useInvoices } from '@/lib/hooks/use-invoices-extended'
@@ -208,6 +210,10 @@ const billingActivities: ActivityItem[] = []
 // Quick actions are defined inside the component to access state setters and handlers
 
 export default function BillingClient({ initialBilling }: { initialBilling: BillingTransaction[] }) {
+  // Team and activity data hooks
+  const { members: teamMembers } = useTeam()
+  const { logs: activityLogs } = useActivityLogs()
+
   const [activeTab, setActiveTab] = useState('dashboard')
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<BillingStatus | 'all'>('all')
@@ -2831,7 +2837,12 @@ ${invoice.paid_at ? `PAID ON: ${new Date(invoice.paid_at).toLocaleDateString()}`
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={billingCollaborators}
+              collaborators={teamMembers.map(member => ({
+                id: member.id,
+                name: member.name,
+                avatar: member.avatar_url || undefined,
+                status: member.status === 'active' ? 'online' as const : member.status === 'on_leave' ? 'away' as const : 'offline' as const
+              }))}
               maxVisible={4}
             />
             <PredictiveAnalytics
@@ -2843,7 +2854,15 @@ ${invoice.paid_at ? `PAID ON: ${new Date(invoice.paid_at).toLocaleDateString()}`
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={billingActivities}
+            activities={activityLogs.slice(0, 10).map(log => ({
+              id: log.id,
+              type: log.activity_type === 'create' ? 'create' as const : log.activity_type === 'update' ? 'update' as const : log.activity_type === 'delete' ? 'delete' as const : 'update' as const,
+              title: log.action,
+              description: log.resource_name || undefined,
+              user: { name: log.user_name || 'System', avatar: undefined },
+              timestamp: log.created_at,
+              isUnread: log.status === 'pending'
+            }))}
             title="Billing Activity"
             maxItems={5}
           />

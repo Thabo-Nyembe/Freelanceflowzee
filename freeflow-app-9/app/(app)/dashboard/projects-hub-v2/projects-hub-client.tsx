@@ -26,6 +26,8 @@ import { useMilestones, useMilestoneMutations } from '@/lib/hooks/use-milestones
 import { useRoadmapInitiatives } from '@/lib/hooks/use-roadmap'
 import { useAutomations } from '@/lib/hooks/use-automations'
 import { useTimeTracking } from '@/lib/hooks/use-time-tracking'
+import { useTeam } from '@/lib/hooks/use-team'
+import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -711,6 +713,12 @@ export default function ProjectsHubClient() {
 
   // Time tracking integration
   const { timeEntries, loading: timeTrackingLoading, createEntry: createTimeEntry, updateEntry: updateTimeEntry } = useTimeTracking()
+
+  // Team members integration
+  const { members: teamMembers } = useTeam()
+
+  // Activity logs integration
+  const { logs: activityLogs } = useActivityLogs()
 
   // New project form state
   const [newProjectForm, setNewProjectForm] = useState({
@@ -2667,7 +2675,7 @@ export default function ProjectsHubClient() {
           {/* Team Collaboration & Activity */}
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={[].map(c => ({ ...c, color: c.color || '#6366f1' })) as any}
+              collaborators={teamMembers?.map(m => ({ id: m.id, name: m.name, avatar: m.avatar_url, status: m.status === 'active' ? 'online' : 'offline' })) || []}
               maxVisible={4}
             />
             <PredictiveAnalytics
@@ -2679,7 +2687,7 @@ export default function ProjectsHubClient() {
         {/* Activity Feed & Quick Actions */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={[] as any}
+            activities={activityLogs?.slice(0, 10).map(l => ({ id: l.id, type: l.activity_type, title: l.action, user: { name: l.user_name || 'System' }, timestamp: l.created_at })) || []}
             maxItems={5}
           />
           <QuickActionsToolbar

@@ -8,6 +8,7 @@ import { useOrders, type Order as DBOrder } from '@/lib/hooks/use-orders'
 import { useShipments, type Shipment as DBShipment } from '@/lib/hooks/use-shipments'
 import { useTasks, type Task as DBTask, type TaskPriority as DBTaskPriority } from '@/lib/hooks/use-tasks'
 import { useActivityLogs, type ActivityLog } from '@/lib/hooks/use-activity-logs'
+import { useTeam } from '@/lib/hooks/use-team'
 import dynamic from 'next/dynamic'
 import { toast } from 'sonner'
 import {
@@ -277,6 +278,9 @@ export default function WarehouseClient() {
   const { shipments: dbShipments, loading: isLoadingShipments, fetchShipments: refetchShipments } = useShipments()
   const { tasks: dbTasks, isLoading: isLoadingTasks, refresh: refetchTasks, stats: taskStats } = useTasks()
   const { logs: dbActivityLogs, isLoading: isLoadingActivities, refetch: refetchActivities } = useActivityLogs()
+
+  // Team data hook
+  const { members: teamMembers } = useTeam()
 
   const [activeTab, setActiveTab] = useState('inventory')
   const [searchQuery, setSearchQuery] = useState('')
@@ -2836,7 +2840,12 @@ export default function WarehouseClient() {
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockWarehouseCollaborators}
+              collaborators={teamMembers.map(member => ({
+                id: member.id,
+                name: member.name,
+                avatar: member.avatar_url || undefined,
+                status: member.status === 'active' ? 'online' as const : member.status === 'on_leave' ? 'away' as const : 'offline' as const
+              }))}
               maxVisible={4}
             />
             <PredictiveAnalytics

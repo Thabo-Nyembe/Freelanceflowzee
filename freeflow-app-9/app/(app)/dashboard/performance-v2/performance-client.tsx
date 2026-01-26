@@ -5,6 +5,8 @@ import { createClient } from '@/lib/supabase/client'
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import { useAuthUserId } from '@/lib/hooks/use-auth-user-id'
+import { useTeam } from '@/lib/hooks/use-team'
+import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
 import { usePerformanceMetrics, usePerformanceBenchmarks, usePerformanceAlerts } from '@/lib/hooks/use-performance-extended'
 import {
   Gauge,
@@ -254,6 +256,10 @@ export default function PerformanceClient() {
   const { data: performanceMetrics, isLoading: metricsLoading, refresh: refreshMetrics } = usePerformanceMetrics()
   const { data: performanceBenchmarks, isLoading: benchmarksLoading, refresh: refreshBenchmarks } = usePerformanceBenchmarks()
   const { data: performanceAlerts, isLoading: alertsLoading, refresh: refreshAlerts } = usePerformanceAlerts(userId || undefined)
+
+  // Team and activity hooks for ActivityFeed
+  const { members: teamMembers } = useTeam()
+  const { logs: activityLogs } = useActivityLogs()
 
   // Refetch all data
   const refetchAll = useCallback(() => {
@@ -2198,7 +2204,7 @@ export default function PerformanceClient() {
       {/* Activity Feed */}
       <div className="mt-6">
         <ActivityFeed
-          activities={[]}
+          activities={activityLogs?.slice(0, 10).map(l => ({ id: l.id, type: l.activity_type, title: l.action, user: { name: l.user_name || 'System' }, timestamp: l.created_at })) || []}
           maxItems={5}
           showFilters={true}
         />
