@@ -10,6 +10,7 @@
 
 import { createClient } from '@/lib/supabase/client'
 import { createFeatureLogger } from '@/lib/logger'
+import { DatabaseError, toDbError, JsonValue } from '@/lib/types/database'
 
 const logger = createFeatureLogger('CollaborationMedia')
 
@@ -36,7 +37,7 @@ export interface CollaborationMedia {
   download_count: number
   view_count: number
   tags: string[]
-  metadata: Record<string, any>
+  metadata: Record<string, JsonValue>
   created_at: string
   updated_at: string
 }
@@ -69,7 +70,7 @@ export async function getMedia(
     tags?: string[]
     search?: string
   }
-): Promise<{ data: CollaborationMedia[] | null; error: any }> {
+): Promise<{ data: CollaborationMedia[] | null; error: DatabaseError | null }> {
   const startTime = performance.now()
 
   try {
@@ -104,7 +105,7 @@ export async function getMedia(
 
     if (error) {
       logger.error('Failed to fetch media files', { error: error.message, userId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     const duration = performance.now() - startTime
@@ -116,9 +117,10 @@ export async function getMedia(
     })
 
     return { data, error: null }
-  } catch (error: any) {
-    logger.error('Exception in getMedia', { error: error.message, userId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getMedia', { error: dbError.message, userId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -128,7 +130,7 @@ export async function getMedia(
 export async function getMediaById(
   mediaId: string,
   userId: string
-): Promise<{ data: CollaborationMedia | null; error: any }> {
+): Promise<{ data: CollaborationMedia | null; error: DatabaseError | null }> {
   try {
     logger.info('Fetching media by ID', { mediaId, userId })
 
@@ -143,15 +145,16 @@ export async function getMediaById(
 
     if (error) {
       logger.error('Failed to fetch media', { error: error.message, mediaId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Media fetched successfully', { mediaId })
 
     return { data, error: null }
-  } catch (error: any) {
-    logger.error('Exception in getMediaById', { error: error.message, mediaId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getMediaById', { error: dbError.message, mediaId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -169,9 +172,9 @@ export async function createMedia(
     duration_seconds?: number
     dimensions?: { width: number; height: number }
     tags?: string[]
-    metadata?: Record<string, any>
+    metadata?: Record<string, JsonValue>
   }
-): Promise<{ data: CollaborationMedia | null; error: any }> {
+): Promise<{ data: CollaborationMedia | null; error: DatabaseError | null }> {
   try {
     logger.info('Creating media file', { userId, name: media.name, type: media.media_type })
 
@@ -196,7 +199,7 @@ export async function createMedia(
 
     if (error) {
       logger.error('Failed to create media', { error: error.message, userId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Media created successfully', {
@@ -206,9 +209,10 @@ export async function createMedia(
     })
 
     return { data, error: null }
-  } catch (error: any) {
-    logger.error('Exception in createMedia', { error: error.message, userId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in createMedia', { error: dbError.message, userId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -222,9 +226,9 @@ export async function updateMedia(
     name?: string
     is_favorite?: boolean
     tags?: string[]
-    metadata?: Record<string, any>
+    metadata?: Record<string, JsonValue>
   }
-): Promise<{ data: CollaborationMedia | null; error: any }> {
+): Promise<{ data: CollaborationMedia | null; error: DatabaseError | null }> {
   try {
     logger.info('Updating media file', { mediaId, userId, updates })
 
@@ -240,15 +244,16 @@ export async function updateMedia(
 
     if (error) {
       logger.error('Failed to update media', { error: error.message, mediaId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Media updated successfully', { mediaId })
 
     return { data, error: null }
-  } catch (error: any) {
-    logger.error('Exception in updateMedia', { error: error.message, mediaId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in updateMedia', { error: dbError.message, mediaId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -258,7 +263,7 @@ export async function updateMedia(
 export async function deleteMedia(
   mediaId: string,
   userId: string
-): Promise<{ success: boolean; error: any }> {
+): Promise<{ success: boolean; error: DatabaseError | null }> {
   try {
     logger.info('Deleting media file', { mediaId, userId })
 
@@ -272,15 +277,16 @@ export async function deleteMedia(
 
     if (error) {
       logger.error('Failed to delete media', { error: error.message, mediaId })
-      return { success: false, error }
+      return { success: false, error: toDbError(error) }
     }
 
     logger.info('Media deleted successfully', { mediaId })
 
     return { success: true, error: null }
-  } catch (error: any) {
-    logger.error('Exception in deleteMedia', { error: error.message, mediaId })
-    return { success: false, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in deleteMedia', { error: dbError.message, mediaId })
+    return { success: false, error: dbError }
   }
 }
 
@@ -291,7 +297,7 @@ export async function toggleFavorite(
   mediaId: string,
   userId: string,
   isFavorite: boolean
-): Promise<{ data: CollaborationMedia | null; error: any }> {
+): Promise<{ data: CollaborationMedia | null; error: DatabaseError | null }> {
   try {
     logger.info('Toggling favorite status', { mediaId, userId, isFavorite })
 
@@ -307,15 +313,16 @@ export async function toggleFavorite(
 
     if (error) {
       logger.error('Failed to toggle favorite', { error: error.message, mediaId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Favorite toggled successfully', { mediaId, isFavorite })
 
     return { data, error: null }
-  } catch (error: any) {
-    logger.error('Exception in toggleFavorite', { error: error.message, mediaId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in toggleFavorite', { error: dbError.message, mediaId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -324,7 +331,7 @@ export async function toggleFavorite(
  */
 export async function incrementViewCount(
   mediaId: string
-): Promise<{ success: boolean; error: any }> {
+): Promise<{ success: boolean; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
 
@@ -351,9 +358,10 @@ export async function incrementViewCount(
     }
 
     return { success: true, error: null }
-  } catch (error: any) {
-    logger.error('Exception in incrementViewCount', { error: error.message, mediaId })
-    return { success: false, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in incrementViewCount', { error: dbError.message, mediaId })
+    return { success: false, error: dbError }
   }
 }
 
@@ -362,7 +370,7 @@ export async function incrementViewCount(
  */
 export async function incrementDownloadCount(
   mediaId: string
-): Promise<{ success: boolean; error: any }> {
+): Promise<{ success: boolean; error: DatabaseError | null }> {
   try {
     logger.info('Incrementing download count', { mediaId })
 
@@ -382,9 +390,10 @@ export async function incrementDownloadCount(
     }
 
     return { success: true, error: null }
-  } catch (error: any) {
-    logger.error('Exception in incrementDownloadCount', { error: error.message, mediaId })
-    return { success: false, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in incrementDownloadCount', { error: dbError.message, mediaId })
+    return { success: false, error: dbError }
   }
 }
 
@@ -399,7 +408,7 @@ export async function shareMedia(
   mediaId: string,
   sharedWithUserId: string,
   sharedBy: string
-): Promise<{ data: MediaShare | null; error: any }> {
+): Promise<{ data: MediaShare | null; error: DatabaseError | null }> {
   try {
     logger.info('Sharing media', { mediaId, sharedWithUserId, sharedBy })
 
@@ -417,15 +426,16 @@ export async function shareMedia(
 
     if (error) {
       logger.error('Failed to share media', { error: error.message, mediaId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Media shared successfully', { mediaId, sharedWithUserId })
 
     return { data, error: null }
-  } catch (error: any) {
-    logger.error('Exception in shareMedia', { error: error.message, mediaId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in shareMedia', { error: dbError.message, mediaId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -435,7 +445,7 @@ export async function shareMedia(
 export async function unshareMedia(
   mediaId: string,
   sharedWithUserId: string
-): Promise<{ success: boolean; error: any }> {
+): Promise<{ success: boolean; error: DatabaseError | null }> {
   try {
     logger.info('Unsharing media', { mediaId, sharedWithUserId })
 
@@ -449,15 +459,16 @@ export async function unshareMedia(
 
     if (error) {
       logger.error('Failed to unshare media', { error: error.message, mediaId })
-      return { success: false, error }
+      return { success: false, error: toDbError(error) }
     }
 
     logger.info('Media unshared successfully', { mediaId, sharedWithUserId })
 
     return { success: true, error: null }
-  } catch (error: any) {
-    logger.error('Exception in unshareMedia', { error: error.message, mediaId })
-    return { success: false, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in unshareMedia', { error: dbError.message, mediaId })
+    return { success: false, error: dbError }
   }
 }
 
@@ -466,7 +477,7 @@ export async function unshareMedia(
  */
 export async function getSharedMedia(
   userId: string
-): Promise<{ data: MediaWithShares[] | null; error: any }> {
+): Promise<{ data: MediaWithShares[] | null; error: DatabaseError | null }> {
   try {
     logger.info('Fetching shared media', { userId })
 
@@ -480,7 +491,7 @@ export async function getSharedMedia(
 
     if (sharesError) {
       logger.error('Failed to fetch shares', { error: sharesError.message })
-      return { data: null, error: sharesError }
+      return { data: null, error: toDbError(sharesError) }
     }
 
     if (!shares || shares.length === 0) {
@@ -498,15 +509,16 @@ export async function getSharedMedia(
 
     if (mediaError) {
       logger.error('Failed to fetch shared media', { error: mediaError.message })
-      return { data: null, error: mediaError }
+      return { data: null, error: toDbError(mediaError) }
     }
 
     logger.info('Shared media fetched successfully', { userId, count: media?.length || 0 })
 
     return { data: media, error: null }
-  } catch (error: any) {
-    logger.error('Exception in getSharedMedia', { error: error.message, userId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getSharedMedia', { error: dbError.message, userId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -515,7 +527,7 @@ export async function getSharedMedia(
  */
 export async function getMediaShares(
   mediaId: string
-): Promise<{ data: MediaShare[] | null; error: any }> {
+): Promise<{ data: MediaShare[] | null; error: DatabaseError | null }> {
   try {
     logger.info('Fetching media shares', { mediaId })
 
@@ -529,15 +541,16 @@ export async function getMediaShares(
 
     if (error) {
       logger.error('Failed to fetch media shares', { error: error.message, mediaId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Media shares fetched successfully', { mediaId, count: data?.length || 0 })
 
     return { data, error: null }
-  } catch (error: any) {
-    logger.error('Exception in getMediaShares', { error: error.message, mediaId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getMediaShares', { error: dbError.message, mediaId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -559,7 +572,7 @@ export async function getMediaStats(
     totalViews: number
     totalDownloads: number
   } | null
-  error: any
+  error: DatabaseError | null
 }> {
   try {
     logger.info('Fetching media statistics', { userId })
@@ -573,7 +586,7 @@ export async function getMediaStats(
 
     if (error) {
       logger.error('Failed to fetch media stats', { error: error.message })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     const stats = {
@@ -593,8 +606,9 @@ export async function getMediaStats(
     logger.info('Media statistics calculated', { userId, stats })
 
     return { data: stats, error: null }
-  } catch (error: any) {
-    logger.error('Exception in getMediaStats', { error: error.message, userId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getMediaStats', { error: dbError.message, userId })
+    return { data: null, error: dbError }
   }
 }

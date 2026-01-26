@@ -1,6 +1,7 @@
 'use client'
 
 import { createClient } from '@/lib/supabase/client'
+import { toDbError } from '@/lib/types/database'
 
 export type PlanType = 'free' | 'professional' | 'enterprise'
 
@@ -164,8 +165,8 @@ export class SubscriptionManager {
         createdAt: new Date(data.created_at),
         updatedAt: new Date(data.updated_at)
       }
-    } catch (error) {
-      console.error('Error fetching user subscription:', error)
+    } catch (error: unknown) {
+      console.error('Error fetching user subscription:', toDbError(error))
       return this.createDefaultFreeSubscription(userId)
     }
   }
@@ -245,8 +246,8 @@ export class SubscriptionManager {
         .eq('user_id', userId)
 
       return !error
-    } catch (error) {
-      console.error('Error incrementing usage:', error)
+    } catch (error: unknown) {
+      console.error('Error incrementing usage:', toDbError(error))
       return false
     }
   }

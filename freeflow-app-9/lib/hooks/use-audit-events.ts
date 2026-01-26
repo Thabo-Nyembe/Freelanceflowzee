@@ -1,10 +1,23 @@
 'use client'
 
 import { useSupabaseQuery, useSupabaseMutation } from './use-supabase-helpers'
+import type { JsonValue } from '@/lib/types/database'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 export type AuditAction = 'create' | 'read' | 'update' | 'delete' | 'access' | 'login' | 'logout' | 'export' | 'import' | 'approve' | 'reject'
 export type AuditSeverity = 'critical' | 'high' | 'medium' | 'low'
 export type AuditStatus = 'success' | 'failure' | 'pending' | 'blocked'
+
+/** Represents change tracking data in audit events */
+export interface AuditChangeData {
+  field?: string
+  old_value?: JsonValue
+  new_value?: JsonValue
+  [key: string]: JsonValue | undefined
+}
+
+/** Metadata associated with audit events */
+export type AuditMetadata = Record<string, JsonValue>
 
 export interface AuditEvent {
   id: string
@@ -29,12 +42,12 @@ export interface AuditEvent {
   status: AuditStatus
 
   // Change Tracking
-  changes: any
-  previous_values: any
-  new_values: any
+  changes: AuditChangeData | null
+  previous_values: AuditChangeData | null
+  new_values: AuditChangeData | null
 
   // Metadata
-  metadata: any
+  metadata: AuditMetadata | null
   reason: string | null
   notes: string | null
   tags: string[] | null
@@ -63,6 +76,33 @@ export interface AuditEvent {
   deleted_at: string | null
 }
 
+/** Evidence data for compliance checks */
+export interface ComplianceEvidence {
+  type?: string
+  source?: string
+  data?: JsonValue
+  collected_at?: string
+  [key: string]: JsonValue | undefined
+}
+
+/** Findings from compliance checks */
+export interface ComplianceFinding {
+  id?: string
+  severity?: string
+  description?: string
+  control_id?: string
+  [key: string]: JsonValue | undefined
+}
+
+/** Recommendations from compliance checks */
+export interface ComplianceRecommendation {
+  id?: string
+  priority?: string
+  description?: string
+  action_required?: string
+  [key: string]: JsonValue | undefined
+}
+
 export interface ComplianceCheck {
   id: string
   user_id: string
@@ -82,9 +122,9 @@ export interface ComplianceCheck {
   passed_controls: number
   total_controls: number
 
-  evidence: any
-  findings: any
-  recommendations: any
+  evidence: ComplianceEvidence[] | null
+  findings: ComplianceFinding[] | null
+  recommendations: ComplianceRecommendation[] | null
 
   remediation_required: boolean
   remediation_status: string | null
@@ -110,7 +150,7 @@ export interface UseAuditEventsOptions {
 export function useAuditEvents(options: UseAuditEventsOptions = {}) {
   const { action, severity, status, resource } = options
 
-  const buildQuery = (supabase: any) => {
+  const buildQuery = (supabase: SupabaseClient) => {
     let query = supabase
       .from('audit_events')
       .select('*')
@@ -140,7 +180,7 @@ export function useAuditEvents(options: UseAuditEventsOptions = {}) {
 }
 
 export function useComplianceChecks(framework?: string) {
-  const buildQuery = (supabase: any) => {
+  const buildQuery = (supabase: SupabaseClient) => {
     let query = supabase
       .from('compliance_checks')
       .select('*')

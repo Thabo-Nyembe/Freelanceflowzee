@@ -3,6 +3,7 @@
 
 import { createClient } from '@/lib/supabase/client'
 import { createFeatureLogger } from '@/lib/logger'
+import { DatabaseError, toDbError, JsonValue } from '@/lib/types/database'
 
 const logger = createFeatureLogger('reports')
 
@@ -24,7 +25,7 @@ export interface Report {
   status: ReportStatus
   date_range_start?: string
   date_range_end?: string
-  filters: Record<string, any>
+  filters: Record<string, JsonValue>
   metrics: string[]
   grouping: string[]
   frequency: ReportFrequency
@@ -92,7 +93,7 @@ export async function getReports(
     tags?: string[]
     search?: string
   }
-): Promise<{ data: Report[]; error: any }> {
+): Promise<{ data: Report[]; error: DatabaseError | null }> {
   const startTime = performance.now()
 
   try {
@@ -129,16 +130,17 @@ export async function getReports(
 
     logger.info('Reports fetched successfully', { userId, count: data.length, filters, duration })
     return { data: data as Report[], error: null }
-  } catch (error: any) {
-    logger.error('Exception in getReports', { error: error.message, userId })
-    return { data: [], error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getReports', { error: dbError.message, userId })
+    return { data: [], error: dbError }
   }
 }
 
 /**
  * Get a single report by ID
  */
-export async function getReport(reportId: string, userId: string): Promise<{ data: Report | null; error: any }> {
+export async function getReport(reportId: string, userId: string): Promise<{ data: Report | null; error: DatabaseError | null }> {
   const startTime = performance.now()
 
   try {
@@ -160,9 +162,10 @@ export async function getReport(reportId: string, userId: string): Promise<{ dat
 
     logger.info('Report fetched successfully', { reportId, userId, duration })
     return { data: data as Report, error: null }
-  } catch (error: any) {
-    logger.error('Exception in getReport', { error: error.message, reportId, userId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getReport', { error: dbError.message, reportId, userId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -178,7 +181,7 @@ export async function createReport(
     status?: ReportStatus
     date_range_start?: string
     date_range_end?: string
-    filters?: Record<string, any>
+    filters?: Record<string, JsonValue>
     metrics?: string[]
     grouping?: string[]
     frequency?: ReportFrequency
@@ -186,7 +189,7 @@ export async function createReport(
     tags?: string[]
     created_by?: string
   }
-): Promise<{ data: Report | null; error: any }> {
+): Promise<{ data: Report | null; error: DatabaseError | null }> {
   const startTime = performance.now()
 
   try {
@@ -217,14 +220,15 @@ export async function createReport(
 
     if (error) {
       logger.error('Error creating report', { error: error.message, userId, reportName: report.name, duration })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Report created successfully', { reportId: data.id, userId, reportName: report.name, duration })
     return { data: data as Report, error: null }
-  } catch (error: any) {
-    logger.error('Exception in createReport', { error: error.message, userId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in createReport', { error: dbError.message, userId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -235,7 +239,7 @@ export async function updateReport(
   reportId: string,
   userId: string,
   updates: Partial<Omit<Report, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
-): Promise<{ data: Report | null; error: any }> {
+): Promise<{ data: Report | null; error: DatabaseError | null }> {
   const startTime = performance.now()
 
   try {
@@ -253,21 +257,22 @@ export async function updateReport(
 
     if (error) {
       logger.error('Error updating report', { error: error.message, reportId, userId, duration })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Report updated successfully', { reportId, userId, updates: Object.keys(updates), duration })
     return { data: data as Report, error: null }
-  } catch (error: any) {
-    logger.error('Exception in updateReport', { error: error.message, reportId, userId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in updateReport', { error: dbError.message, reportId, userId })
+    return { data: null, error: dbError }
   }
 }
 
 /**
  * Delete a report
  */
-export async function deleteReport(reportId: string, userId: string): Promise<{ success: boolean; error: any }> {
+export async function deleteReport(reportId: string, userId: string): Promise<{ success: boolean; error: DatabaseError | null }> {
   const startTime = performance.now()
 
   try {
@@ -283,21 +288,22 @@ export async function deleteReport(reportId: string, userId: string): Promise<{ 
 
     if (error) {
       logger.error('Error deleting report', { error: error.message, reportId, userId, duration })
-      return { success: false, error }
+      return { success: false, error: toDbError(error) }
     }
 
     logger.info('Report deleted successfully', { reportId, userId, duration })
     return { success: true, error: null }
-  } catch (error: any) {
-    logger.error('Exception in deleteReport', { error: error.message, reportId, userId })
-    return { success: false, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in deleteReport', { error: dbError.message, reportId, userId })
+    return { success: false, error: dbError }
   }
 }
 
 /**
  * Duplicate a report
  */
-export async function duplicateReport(reportId: string, userId: string): Promise<{ data: Report | null; error: any }> {
+export async function duplicateReport(reportId: string, userId: string): Promise<{ data: Report | null; error: DatabaseError | null }> {
   const startTime = performance.now()
 
   try {
@@ -313,7 +319,7 @@ export async function duplicateReport(reportId: string, userId: string): Promise
 
     if (fetchError) {
       logger.error('Error fetching report to duplicate', { error: fetchError.message, reportId, userId })
-      return { data: null, error: fetchError }
+      return { data: null, error: toDbError(fetchError) }
     }
 
     // Create duplicate with modified name
@@ -342,14 +348,15 @@ export async function duplicateReport(reportId: string, userId: string): Promise
 
     if (error) {
       logger.error('Error duplicating report', { error: error.message, reportId, userId, duration })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Report duplicated successfully', { originalId: reportId, newId: data.id, userId, duration })
     return { data: data as Report, error: null }
-  } catch (error: any) {
-    logger.error('Exception in duplicateReport', { error: error.message, reportId, userId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in duplicateReport', { error: dbError.message, reportId, userId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -360,7 +367,7 @@ export async function duplicateReport(reportId: string, userId: string): Promise
 /**
  * Get all exports for a report
  */
-export async function getReportExports(reportId: string, userId: string): Promise<{ data: ReportExport[]; error: any }> {
+export async function getReportExports(reportId: string, userId: string): Promise<{ data: ReportExport[]; error: DatabaseError | null }> {
   const startTime = performance.now()
 
   try {
@@ -377,14 +384,15 @@ export async function getReportExports(reportId: string, userId: string): Promis
 
     if (error) {
       logger.error('Error fetching report exports', { error: error.message, reportId, userId, duration })
-      return { data: [], error }
+      return { data: [], error: toDbError(error) }
     }
 
     logger.info('Report exports fetched successfully', { reportId, userId, count: data.length, duration })
     return { data: data as ReportExport[], error: null }
-  } catch (error: any) {
-    logger.error('Exception in getReportExports', { error: error.message, reportId, userId })
-    return { data: [], error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getReportExports', { error: dbError.message, reportId, userId })
+    return { data: [], error: dbError }
   }
 }
 
@@ -404,7 +412,7 @@ export async function createReportExport(
     data_points?: number
     expires_at?: string
   }
-): Promise<{ data: ReportExport | null; error: any }> {
+): Promise<{ data: ReportExport | null; error: DatabaseError | null }> {
   const startTime = performance.now()
 
   try {
@@ -432,14 +440,15 @@ export async function createReportExport(
 
     if (error) {
       logger.error('Error creating report export', { error: error.message, reportId, userId, duration })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Report export created successfully', { exportId: data.id, reportId, userId, format: exportData.format, duration })
     return { data: data as ReportExport, error: null }
-  } catch (error: any) {
-    logger.error('Exception in createReportExport', { error: error.message, reportId, userId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in createReportExport', { error: dbError.message, reportId, userId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -453,13 +462,13 @@ export async function updateReportExportStatus(
   fileUrl?: string,
   fileSize?: number,
   errorMessage?: string
-): Promise<{ data: ReportExport | null; error: any }> {
+): Promise<{ data: ReportExport | null; error: DatabaseError | null }> {
   const startTime = performance.now()
 
   try {
     const supabase = createClient()
 
-    const updates: any = {
+    const updates: Partial<ReportExport> = {
       status,
       generated_at: status === 'ready' ? new Date().toISOString() : undefined,
       file_url: fileUrl,
@@ -479,21 +488,22 @@ export async function updateReportExportStatus(
 
     if (error) {
       logger.error('Error updating export status', { error: error.message, exportId, userId, status, duration })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Export status updated successfully', { exportId, userId, status, duration })
     return { data: data as ReportExport, error: null }
-  } catch (error: any) {
-    logger.error('Exception in updateReportExportStatus', { error: error.message, exportId, userId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in updateReportExportStatus', { error: dbError.message, exportId, userId })
+    return { data: null, error: dbError }
   }
 }
 
 /**
  * Track export download
  */
-export async function trackExportDownload(exportId: string, userId: string): Promise<{ success: boolean; error: any }> {
+export async function trackExportDownload(exportId: string, userId: string): Promise<{ success: boolean; error: DatabaseError | null }> {
   const startTime = performance.now()
 
   try {
@@ -529,16 +539,17 @@ export async function trackExportDownload(exportId: string, userId: string): Pro
     const duration = performance.now() - startTime
     logger.info('Export download tracked', { exportId, userId, duration })
     return { success: true, error: null }
-  } catch (error: any) {
-    logger.error('Exception in trackExportDownload', { error: error.message, exportId, userId })
-    return { success: false, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in trackExportDownload', { error: dbError.message, exportId, userId })
+    return { success: false, error: dbError }
   }
 }
 
 /**
  * Delete expired exports (cleanup function)
  */
-export async function deleteExpiredExports(userId: string): Promise<{ count: number; error: any }> {
+export async function deleteExpiredExports(userId: string): Promise<{ count: number; error: DatabaseError | null }> {
   const startTime = performance.now()
 
   try {
@@ -555,14 +566,15 @@ export async function deleteExpiredExports(userId: string): Promise<{ count: num
 
     if (error) {
       logger.error('Error deleting expired exports', { error: error.message, userId, duration })
-      return { count: 0, error }
+      return { count: 0, error: toDbError(error) }
     }
 
     logger.info('Expired exports deleted successfully', { userId, count: data.length, duration })
     return { count: data.length, error: null }
-  } catch (error: any) {
-    logger.error('Exception in deleteExpiredExports', { error: error.message, userId })
-    return { count: 0, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in deleteExpiredExports', { error: dbError.message, userId })
+    return { count: 0, error: dbError }
   }
 }
 
@@ -573,7 +585,7 @@ export async function deleteExpiredExports(userId: string): Promise<{ count: num
 /**
  * Get all schedules for a report
  */
-export async function getReportSchedules(reportId: string, userId: string): Promise<{ data: ReportSchedule[]; error: any }> {
+export async function getReportSchedules(reportId: string, userId: string): Promise<{ data: ReportSchedule[]; error: DatabaseError | null }> {
   const startTime = performance.now()
 
   try {
@@ -590,14 +602,15 @@ export async function getReportSchedules(reportId: string, userId: string): Prom
 
     if (error) {
       logger.error('Error fetching report schedules', { error: error.message, reportId, userId, duration })
-      return { data: [], error }
+      return { data: [], error: toDbError(error) }
     }
 
     logger.info('Report schedules fetched successfully', { reportId, userId, count: data.length, duration })
     return { data: data as ReportSchedule[], error: null }
-  } catch (error: any) {
-    logger.error('Exception in getReportSchedules', { error: error.message, reportId, userId })
-    return { data: [], error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getReportSchedules', { error: dbError.message, reportId, userId })
+    return { data: [], error: dbError }
   }
 }
 
@@ -615,7 +628,7 @@ export async function createReportSchedule(
     hour?: number
     timezone?: string
   }
-): Promise<{ data: ReportSchedule | null; error: any }> {
+): Promise<{ data: ReportSchedule | null; error: DatabaseError | null }> {
   const startTime = performance.now()
 
   try {
@@ -632,7 +645,7 @@ export async function createReportSchedule(
 
     if (nextRunError) {
       logger.error('Error calculating next run time', { error: nextRunError.message, reportId, userId })
-      return { data: null, error: nextRunError }
+      return { data: null, error: toDbError(nextRunError) }
     }
 
     const { data, error } = await supabase
@@ -656,14 +669,15 @@ export async function createReportSchedule(
 
     if (error) {
       logger.error('Error creating report schedule', { error: error.message, reportId, userId, duration })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Report schedule created successfully', { scheduleId: data.id, reportId, userId, frequency: schedule.frequency, duration })
     return { data: data as ReportSchedule, error: null }
-  } catch (error: any) {
-    logger.error('Exception in createReportSchedule', { error: error.message, reportId, userId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in createReportSchedule', { error: dbError.message, reportId, userId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -674,7 +688,7 @@ export async function updateReportSchedule(
   scheduleId: string,
   userId: string,
   updates: Partial<Omit<ReportSchedule, 'id' | 'report_id' | 'user_id' | 'created_at' | 'updated_at'>>
-): Promise<{ data: ReportSchedule | null; error: any }> {
+): Promise<{ data: ReportSchedule | null; error: DatabaseError | null }> {
   const startTime = performance.now()
 
   try {
@@ -692,21 +706,22 @@ export async function updateReportSchedule(
 
     if (error) {
       logger.error('Error updating report schedule', { error: error.message, scheduleId, userId, duration })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Report schedule updated successfully', { scheduleId, userId, updates: Object.keys(updates), duration })
     return { data: data as ReportSchedule, error: null }
-  } catch (error: any) {
-    logger.error('Exception in updateReportSchedule', { error: error.message, scheduleId, userId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in updateReportSchedule', { error: dbError.message, scheduleId, userId })
+    return { data: null, error: dbError }
   }
 }
 
 /**
  * Toggle schedule active status
  */
-export async function toggleReportSchedule(scheduleId: string, userId: string, isActive: boolean): Promise<{ success: boolean; error: any }> {
+export async function toggleReportSchedule(scheduleId: string, userId: string, isActive: boolean): Promise<{ success: boolean; error: DatabaseError | null }> {
   const startTime = performance.now()
 
   try {
@@ -722,21 +737,22 @@ export async function toggleReportSchedule(scheduleId: string, userId: string, i
 
     if (error) {
       logger.error('Error toggling report schedule', { error: error.message, scheduleId, userId, isActive, duration })
-      return { success: false, error }
+      return { success: false, error: toDbError(error) }
     }
 
     logger.info('Report schedule toggled successfully', { scheduleId, userId, isActive, duration })
     return { success: true, error: null }
-  } catch (error: any) {
-    logger.error('Exception in toggleReportSchedule', { error: error.message, scheduleId, userId })
-    return { success: false, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in toggleReportSchedule', { error: dbError.message, scheduleId, userId })
+    return { success: false, error: dbError }
   }
 }
 
 /**
  * Delete a report schedule
  */
-export async function deleteReportSchedule(scheduleId: string, userId: string): Promise<{ success: boolean; error: any }> {
+export async function deleteReportSchedule(scheduleId: string, userId: string): Promise<{ success: boolean; error: DatabaseError | null }> {
   const startTime = performance.now()
 
   try {
@@ -752,21 +768,22 @@ export async function deleteReportSchedule(scheduleId: string, userId: string): 
 
     if (error) {
       logger.error('Error deleting report schedule', { error: error.message, scheduleId, userId, duration })
-      return { success: false, error }
+      return { success: false, error: toDbError(error) }
     }
 
     logger.info('Report schedule deleted successfully', { scheduleId, userId, duration })
     return { success: true, error: null }
-  } catch (error: any) {
-    logger.error('Exception in deleteReportSchedule', { error: error.message, scheduleId, userId })
-    return { success: false, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in deleteReportSchedule', { error: dbError.message, scheduleId, userId })
+    return { success: false, error: dbError }
   }
 }
 
 /**
  * Get all active schedules that need to run (for cron jobs)
  */
-export async function getSchedulesToRun(): Promise<{ data: ReportSchedule[]; error: any }> {
+export async function getSchedulesToRun(): Promise<{ data: ReportSchedule[]; error: DatabaseError | null }> {
   const startTime = performance.now()
 
   try {
@@ -782,14 +799,15 @@ export async function getSchedulesToRun(): Promise<{ data: ReportSchedule[]; err
 
     if (error) {
       logger.error('Error fetching schedules to run', { error: error.message, duration })
-      return { data: [], error }
+      return { data: [], error: toDbError(error) }
     }
 
     logger.info('Schedules to run fetched successfully', { count: data.length, duration })
     return { data: data as ReportSchedule[], error: null }
-  } catch (error: any) {
-    logger.error('Exception in getSchedulesToRun', { error: error.message })
-    return { data: [], error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getSchedulesToRun', { error: dbError.message })
+    return { data: [], error: dbError }
   }
 }
 
@@ -807,7 +825,7 @@ export async function getReportStatistics(userId: string): Promise<{
     totalExports: number
     storageUsed: number
   } | null
-  error: any
+  error: DatabaseError | null
 }> {
   const startTime = performance.now()
 
@@ -856,8 +874,9 @@ export async function getReportStatistics(userId: string): Promise<{
       },
       error: null,
     }
-  } catch (error: any) {
-    logger.error('Exception in getReportStatistics', { error: error.message, userId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getReportStatistics', { error: dbError.message, userId })
+    return { data: null, error: dbError }
   }
 }

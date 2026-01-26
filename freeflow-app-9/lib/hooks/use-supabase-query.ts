@@ -7,7 +7,7 @@ import { createClient } from '@/lib/supabase/client'
 interface UseSupabaseQueryOptions<T> {
   table: string
   select?: string
-  filters?: Record<string, any>
+  filters?: Record<string, unknown>
   orderBy?: { column: string; ascending?: boolean }
   limit?: number
   realtime?: boolean
@@ -82,10 +82,10 @@ export function useSupabaseQuery<T>({
               setData(prev => [payload.new as T, ...prev])
             } else if (payload.eventType === 'UPDATE') {
               setData(prev => prev.map(item =>
-                (item as any).id === payload.new.id ? payload.new as T : item
+                (item as { id?: string }).id === payload.new.id ? payload.new as T : item
               ))
             } else if (payload.eventType === 'DELETE') {
-              setData(prev => prev.filter(item => (item as any).id !== payload.old.id))
+              setData(prev => prev.filter(item => (item as { id?: string }).id !== payload.old.id))
             }
           }
         )

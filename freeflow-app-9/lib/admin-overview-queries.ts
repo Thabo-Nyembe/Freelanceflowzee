@@ -3,6 +3,7 @@
 // Modules: Analytics, CRM, Invoicing, Marketing, Operations, Automation
 
 import { createClient } from '@/lib/supabase/client'
+import { DatabaseError, toDbError, JsonValue } from '@/lib/types/database'
 
 // ============================================================================
 // TYPES
@@ -15,7 +16,7 @@ export interface AdminAnalyticsEvent {
   event_type: 'page_view' | 'conversion' | 'purchase' | 'signup' | 'custom'
   event_name: string
   event_value: number
-  properties: Record<string, any>
+  properties: Record<string, JsonValue>
   source?: string
   medium?: string
   campaign?: string
@@ -35,7 +36,7 @@ export interface AdminAnalyticsReport {
   date_from: string
   date_to: string
   format: 'csv' | 'pdf' | 'json'
-  data: Record<string, any>
+  data: Record<string, JsonValue>
   file_url?: string
   status: 'pending' | 'processing' | 'completed' | 'failed'
   created_at: string
@@ -72,7 +73,7 @@ export interface AdminCrmDeal {
   lost_reason?: string
   notes?: string
   tags: string[]
-  custom_fields: Record<string, any>
+  custom_fields: Record<string, JsonValue>
   created_at: string
   updated_at: string
   last_activity_at: string
@@ -93,7 +94,7 @@ export interface AdminCrmContact {
   status: 'new' | 'contacted' | 'qualified' | 'customer' | 'inactive'
   tags: string[]
   notes?: string
-  custom_fields: Record<string, any>
+  custom_fields: Record<string, JsonValue>
   created_at: string
   updated_at: string
   last_contact_at?: string
@@ -129,7 +130,7 @@ export interface AdminInvoice {
   issue_date: string
   due_date: string
   paid_date?: string
-  items: Record<string, any>[]
+  items: Record<string, JsonValue>[]
   notes?: string
   terms?: string
   created_at: string
@@ -173,7 +174,7 @@ export interface AdminMarketingLead {
   lead_score: number
   status: 'new' | 'contacted' | 'qualified' | 'converted' | 'lost'
   tags: string[]
-  custom_fields: Record<string, any>
+  custom_fields: Record<string, JsonValue>
   created_at: string
   updated_at: string
   last_contact_at?: string
@@ -248,7 +249,7 @@ export interface AdminActivityLog {
   action: string
   entity_type: string
   entity_id?: string
-  changes: Record<string, any>
+  changes: Record<string, JsonValue>
   ip_address?: string
   user_agent?: string
   created_at: string
@@ -261,8 +262,8 @@ export interface AdminWorkflow {
   workflow_name: string
   description?: string
   trigger_type: 'manual' | 'scheduled' | 'webhook' | 'event'
-  trigger_config: Record<string, any>
-  actions: Record<string, any>[]
+  trigger_config: Record<string, JsonValue>
+  actions: Record<string, JsonValue>[]
   status: 'active' | 'inactive' | 'draft'
   total_runs: number
   successful_runs: number
@@ -280,7 +281,7 @@ export interface AdminWorkflowExecution {
   completed_at?: string
   duration_ms?: number
   error_message?: string
-  logs: Record<string, any>[]
+  logs: Record<string, JsonValue>[]
   created_at: string
 }
 
@@ -289,7 +290,7 @@ export interface AdminIntegration {
   user_id: string
   integration_name: string
   integration_type: string
-  config: Record<string, any>
+  config: Record<string, JsonValue>
   status: 'connected' | 'disconnected' | 'error'
   last_sync_at?: string
   error_message?: string
@@ -483,7 +484,11 @@ export async function getHighValueDeals(userId: string, minValue: number) {
 
 export async function updateDealStage(dealId: string, stage: AdminCrmDeal['stage']) {
   const supabase = createClient()
-  const updates: any = {
+  const updates: {
+    stage: AdminCrmDeal['stage']
+    last_activity_at: string
+    actual_close_date?: string
+  } = {
     stage,
     last_activity_at: new Date().toISOString()
   }
@@ -695,7 +700,10 @@ export async function deleteInvoice(invoiceId: string) {
 
 export async function updateInvoiceStatus(invoiceId: string, status: AdminInvoice['status']) {
   const supabase = createClient()
-  const updates: any = { status }
+  const updates: {
+    status: AdminInvoice['status']
+    paid_date?: string
+  } = { status }
 
   if (status === 'paid') {
     updates.paid_date = new Date().toISOString()
@@ -1186,7 +1194,7 @@ export interface AdminAlert {
   acknowledged_at?: string
   dismissed_at?: string
   resolved_at?: string
-  metadata?: Record<string, any>
+  metadata?: Record<string, JsonValue>
   expires_at?: string
   created_at: string
   updated_at: string
@@ -1225,7 +1233,7 @@ export async function createAdminAlert(
     action?: string
     path?: string
     expires_at?: string
-    metadata?: Record<string, any>
+    metadata?: Record<string, JsonValue>
   }
 ): Promise<AdminAlert> {
   const supabase = createClient()
@@ -1463,9 +1471,10 @@ export async function getPlatformConfig(userId: string): Promise<{ data: Platfor
     }
 
     return { data, error: null }
-  } catch (error: any) {
-    console.error('Error in getPlatformConfig:', error)
-    return { data: null, error: error.message }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    console.error('Error in getPlatformConfig:', dbError)
+    return { data: null, error: dbError.message }
   }
 }
 
@@ -1505,8 +1514,9 @@ export async function savePlatformConfig(
     }
 
     return { data, error: null }
-  } catch (error: any) {
-    console.error('Error in savePlatformConfig:', error)
-    return { data: null, error: error.message }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    console.error('Error in savePlatformConfig:', dbError)
+    return { data: null, error: dbError.message }
   }
 }

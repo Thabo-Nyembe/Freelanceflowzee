@@ -9,6 +9,7 @@
  */
 
 import { createClient } from '@/lib/supabase/client'
+import { DatabaseError, toDbError } from '@/lib/types/database'
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -45,6 +46,19 @@ export interface AIEnhancedTool {
   updated_at: string
 }
 
+export interface AIToolStatistics {
+  total_tools: number
+  active_tools: number
+  favorite_tools: number
+  popular_tools: number
+  total_usage: number
+  avg_success_rate: number
+  avg_response_time: number
+  by_type: Record<string, number>
+  by_category: Record<string, number>
+  by_provider: Record<string, number>
+}
+
 // ============================================================================
 // AI TOOLS (10 functions)
 // ============================================================================
@@ -59,7 +73,7 @@ export async function getAIEnhancedTools(
     is_popular?: boolean
     search?: string
   }
-): Promise<{ data: AIEnhancedTool[] | null; error: any }> {
+): Promise<{ data: AIEnhancedTool[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   let query = supabase
     .from('ai_enhanced_tools')
@@ -87,12 +101,12 @@ export async function getAIEnhancedTools(
   }
 
   const { data, error } = await query
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 export async function getAIEnhancedTool(
   toolId: string
-): Promise<{ data: AIEnhancedTool | null; error: any }> {
+): Promise<{ data: AIEnhancedTool | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_enhanced_tools')
@@ -100,7 +114,7 @@ export async function getAIEnhancedTool(
     .eq('id', toolId)
     .single()
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 export async function createAIEnhancedTool(
@@ -119,7 +133,7 @@ export async function createAIEnhancedTool(
     tags?: string[]
     version?: string
   }
-): Promise<{ data: AIEnhancedTool | null; error: any }> {
+): Promise<{ data: AIEnhancedTool | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_enhanced_tools')
@@ -130,13 +144,13 @@ export async function createAIEnhancedTool(
     .select()
     .single()
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 export async function updateAIEnhancedTool(
   toolId: string,
   updates: Partial<Omit<AIEnhancedTool, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
-): Promise<{ data: AIEnhancedTool | null; error: any }> {
+): Promise<{ data: AIEnhancedTool | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_enhanced_tools')
@@ -145,25 +159,25 @@ export async function updateAIEnhancedTool(
     .select()
     .single()
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 export async function deleteAIEnhancedTool(
   toolId: string
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   const supabase = createClient()
   const { error } = await supabase
     .from('ai_enhanced_tools')
     .delete()
     .eq('id', toolId)
 
-  return { error }
+  return { error: error ? toDbError(error) : null }
 }
 
 export async function toggleFavorite(
   toolId: string,
   isFavorite: boolean
-): Promise<{ data: AIEnhancedTool | null; error: any }> {
+): Promise<{ data: AIEnhancedTool | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_enhanced_tools')
@@ -172,12 +186,12 @@ export async function toggleFavorite(
     .select()
     .single()
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 export async function incrementUsageCount(
   toolId: string
-): Promise<{ data: AIEnhancedTool | null; error: any }> {
+): Promise<{ data: AIEnhancedTool | null; error: DatabaseError | null }> {
   const supabase = createClient()
 
   // Get current count
@@ -188,7 +202,7 @@ export async function incrementUsageCount(
     .single()
 
   if (!currentTool) {
-    return { data: null, error: new Error('Tool not found') }
+    return { data: null, error: toDbError(new Error('Tool not found')) }
   }
 
   const { data, error } = await supabase
@@ -201,7 +215,7 @@ export async function incrementUsageCount(
     .select()
     .single()
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 export async function updateToolPerformance(
@@ -211,7 +225,7 @@ export async function updateToolPerformance(
     avg_response_time?: number
     performance?: PerformanceLevel
   }
-): Promise<{ data: AIEnhancedTool | null; error: any }> {
+): Promise<{ data: AIEnhancedTool | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_enhanced_tools')
@@ -220,25 +234,25 @@ export async function updateToolPerformance(
     .select()
     .single()
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 export async function bulkDeleteTools(
   toolIds: string[]
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   const supabase = createClient()
   const { error } = await supabase
     .from('ai_enhanced_tools')
     .delete()
     .in('id', toolIds)
 
-  return { error }
+  return { error: error ? toDbError(error) : null }
 }
 
 export async function searchToolsByTags(
   userId: string,
   tags: string[]
-): Promise<{ data: AIEnhancedTool[] | null; error: any }> {
+): Promise<{ data: AIEnhancedTool[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_enhanced_tools')
@@ -247,7 +261,7 @@ export async function searchToolsByTags(
     .contains('tags', tags)
     .order('usage_count', { ascending: false })
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 // ============================================================================
@@ -256,7 +270,7 @@ export async function searchToolsByTags(
 
 export async function getToolStatistics(
   userId: string
-): Promise<{ data: any; error: any }> {
+): Promise<{ data: AIToolStatistics | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_enhanced_tools')
@@ -264,26 +278,26 @@ export async function getToolStatistics(
     .eq('user_id', userId)
 
   if (error) {
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 
-  const stats = {
+  const stats: AIToolStatistics = {
     total_tools: data.length,
-    active_tools: data.filter(t => t.status === 'active').length,
-    favorite_tools: data.filter(t => t.is_favorite).length,
-    popular_tools: data.filter(t => t.is_popular).length,
-    total_usage: data.reduce((sum, t) => sum + t.usage_count, 0),
-    avg_success_rate: data.length > 0 ? data.reduce((sum, t) => sum + t.success_rate, 0) / data.length : 0,
-    avg_response_time: data.length > 0 ? data.reduce((sum, t) => sum + t.avg_response_time, 0) / data.length : 0,
-    by_type: data.reduce((acc, t) => {
+    active_tools: data.filter((t: AIEnhancedTool) => t.status === 'active').length,
+    favorite_tools: data.filter((t: AIEnhancedTool) => t.is_favorite).length,
+    popular_tools: data.filter((t: AIEnhancedTool) => t.is_popular).length,
+    total_usage: data.reduce((sum: number, t: AIEnhancedTool) => sum + t.usage_count, 0),
+    avg_success_rate: data.length > 0 ? data.reduce((sum: number, t: AIEnhancedTool) => sum + t.success_rate, 0) / data.length : 0,
+    avg_response_time: data.length > 0 ? data.reduce((sum: number, t: AIEnhancedTool) => sum + t.avg_response_time, 0) / data.length : 0,
+    by_type: data.reduce((acc: Record<string, number>, t: AIEnhancedTool) => {
       acc[t.type] = (acc[t.type] || 0) + 1
       return acc
     }, {} as Record<string, number>),
-    by_category: data.reduce((acc, t) => {
+    by_category: data.reduce((acc: Record<string, number>, t: AIEnhancedTool) => {
       acc[t.category] = (acc[t.category] || 0) + 1
       return acc
     }, {} as Record<string, number>),
-    by_provider: data.reduce((acc, t) => {
+    by_provider: data.reduce((acc: Record<string, number>, t: AIEnhancedTool) => {
       acc[t.provider] = (acc[t.provider] || 0) + 1
       return acc
     }, {} as Record<string, number>)
@@ -295,7 +309,7 @@ export async function getToolStatistics(
 export async function getTopPerformingTools(
   userId: string,
   limit: number = 10
-): Promise<{ data: AIEnhancedTool[] | null; error: any }> {
+): Promise<{ data: AIEnhancedTool[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_enhanced_tools')
@@ -306,5 +320,5 @@ export async function getTopPerformingTools(
     .order('usage_count', { ascending: false })
     .limit(limit)
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }

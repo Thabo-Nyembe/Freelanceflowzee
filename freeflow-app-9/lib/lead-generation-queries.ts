@@ -3,6 +3,7 @@
  */
 
 import { createClient } from '@/lib/supabase/client'
+import type { JsonValue } from '@/lib/types/database'
 
 export type LeadGenSource = 'website' | 'landing-page' | 'social-media' | 'email' | 'referral' | 'paid-ads' | 'organic' | 'other'
 export type LeadGenStatus = 'new' | 'contacted' | 'qualified' | 'unqualified' | 'converted' | 'lost'
@@ -25,7 +26,7 @@ export interface LeadGenLead {
   score: number
   score_label: LeadGenScore
   tags: string[]
-  custom_fields: Record<string, any>
+  custom_fields: Record<string, JsonValue>
   assigned_to?: string
   page_views: number
   form_submissions: number
@@ -33,7 +34,7 @@ export interface LeadGenLead {
   email_clicks: number
   time_on_site: number
   device_type?: string
-  location: Record<string, any>
+  location: Record<string, JsonValue>
   last_contacted_at?: string
   converted_at?: string
   created_at: string
@@ -69,8 +70,8 @@ export interface LeadGenLandingPage {
   description?: string
   status: LandingPageStatus
   template: string
-  sections: any[]
-  seo: Record<string, any>
+  sections: JsonValue[]
+  seo: Record<string, JsonValue>
   views: number
   unique_visitors: number
   submissions: number
@@ -87,7 +88,7 @@ export interface LeadGenForm {
   landing_page_id?: string
   name: string
   description?: string
-  settings: Record<string, any>
+  settings: Record<string, JsonValue>
   submissions: number
   conversion_rate: number
   is_active: boolean
@@ -103,7 +104,7 @@ export interface LeadGenFormField {
   placeholder?: string
   is_required: boolean
   options: string[]
-  validation: Record<string, any>
+  validation: Record<string, JsonValue>
   field_order: number
   created_at: string
 }
@@ -206,7 +207,7 @@ export async function deleteFormField(fieldId: string) {
 }
 
 // SUBMISSIONS
-export async function submitForm(formId: string, leadId: string | null, data: Record<string, any>, metadata?: { ip_address?: string; user_agent?: string }) {
+export async function submitForm(formId: string, leadId: string | null, data: Record<string, JsonValue>, metadata?: { ip_address?: string; user_agent?: string }) {
   const supabase = createClient()
   return await supabase.from('lead_gen_form_submissions').insert({ form_id: formId, lead_id: leadId, data, ...metadata }).select().single()
 }

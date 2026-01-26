@@ -3,6 +3,7 @@
  */
 
 import { createClient } from '@/lib/supabase/client'
+import type { JsonValue } from '@/lib/types/database'
 
 export type ThemePresetCategory = 'minimal' | 'modern' | 'classic' | 'bold' | 'professional' | 'creative' | 'custom'
 export type CustomizationType = 'theme' | 'color' | 'font' | 'spacing' | 'layout' | 'component' | 'css'
@@ -28,7 +29,7 @@ export interface ThemeCustomization {
   border_radius: number
   sidebar_width: number
   max_content_width: number
-  custom_properties: Record<string, any>
+  custom_properties: Record<string, JsonValue>
   is_active: boolean
   is_default: boolean
   created_at: string
@@ -41,7 +42,7 @@ export interface ThemePreset {
   preset_name: string
   preset_category: ThemePresetCategory
   description?: string
-  config: Record<string, any>
+  config: Record<string, JsonValue>
   thumbnail_url?: string
   author?: string
   usage_count: number
@@ -75,7 +76,7 @@ export interface ColorScheme {
   scheme_name: string
   scheme_type: ColorSchemeType
   description?: string
-  colors: any[]
+  colors: JsonValue[]
   is_light_mode: boolean
   contrast_ratio?: number
   is_active: boolean

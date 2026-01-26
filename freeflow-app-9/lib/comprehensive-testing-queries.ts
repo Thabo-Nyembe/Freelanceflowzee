@@ -13,6 +13,7 @@
  */
 
 import { createClient } from '@/lib/supabase/client'
+import type { JsonValue } from '@/lib/types/database'
 import {
   createFeatureTest,
   updateFeatureTest,
@@ -171,7 +172,7 @@ export async function updateComprehensiveFeatureTest(
     buttons?: string[]
     icon_name?: string
     status?: TestStatus
-    [key: string]: any
+    [key: string]: JsonValue | undefined
   }
 ): Promise<ComprehensiveFeatureTest> {
   const { buttons, icon_name, ...otherUpdates } = updates

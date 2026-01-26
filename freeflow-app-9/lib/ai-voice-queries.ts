@@ -13,6 +13,7 @@
  */
 
 import { createClient } from '@/lib/supabase/client'
+import { DatabaseError, toDbError } from '@/lib/types/database'
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -126,6 +127,19 @@ export interface VoiceAnalytics {
   updated_at: string
 }
 
+export interface UserVoiceStats {
+  total_syntheses: number
+  total_characters: number
+  total_duration: number
+  total_cost: number
+  favorite_syntheses: number
+  total_projects: number
+  completed_projects: number
+  total_clones: number
+  ready_clones: number
+  by_voice: Record<string, number>
+}
+
 // ============================================================================
 // VOICES (10 functions)
 // ============================================================================
@@ -139,7 +153,7 @@ export async function getVoices(
     is_public?: boolean
     search?: string
   }
-): Promise<{ data: Voice[] | null; error: any }> {
+): Promise<{ data: Voice[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   let query = supabase
     .from('voices')
@@ -171,7 +185,7 @@ export async function getVoices(
 
 export async function getVoice(
   voiceId: string
-): Promise<{ data: Voice | null; error: any }> {
+): Promise<{ data: Voice | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('voices')
@@ -198,7 +212,7 @@ export async function createVoice(
     is_public?: boolean
     tags?: string[]
   }
-): Promise<{ data: Voice | null; error: any }> {
+): Promise<{ data: Voice | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('voices')
@@ -212,7 +226,7 @@ export async function createVoice(
 export async function updateVoice(
   voiceId: string,
   updates: Partial<Omit<Voice, 'id' | 'created_at' | 'updated_at'>>
-): Promise<{ data: Voice | null; error: any }> {
+): Promise<{ data: Voice | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('voices')
@@ -226,7 +240,7 @@ export async function updateVoice(
 
 export async function deleteVoice(
   voiceId: string
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   const supabase = createClient()
   const { error } = await supabase
     .from('voices')
@@ -238,7 +252,7 @@ export async function deleteVoice(
 
 export async function getPopularVoices(
   limit: number = 10
-): Promise<{ data: Voice[] | null; error: any }> {
+): Promise<{ data: Voice[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('voices')
@@ -252,7 +266,7 @@ export async function getPopularVoices(
 
 export async function getNewVoices(
   limit: number = 10
-): Promise<{ data: Voice[] | null; error: any }> {
+): Promise<{ data: Voice[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('voices')
@@ -267,7 +281,7 @@ export async function getNewVoices(
 
 export async function searchVoicesByTags(
   tags: string[]
-): Promise<{ data: Voice[] | null; error: any }> {
+): Promise<{ data: Voice[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('voices')
@@ -281,7 +295,7 @@ export async function searchVoicesByTags(
 
 export async function getVoicesByLanguage(
   language: string
-): Promise<{ data: Voice[] | null; error: any }> {
+): Promise<{ data: Voice[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('voices')
@@ -295,7 +309,7 @@ export async function getVoicesByLanguage(
 
 export async function bulkDeleteVoices(
   voiceIds: string[]
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   const supabase = createClient()
   const { error } = await supabase
     .from('voices')
@@ -316,7 +330,7 @@ export async function getVoiceSyntheses(
     is_favorite?: boolean
     search?: string
   }
-): Promise<{ data: VoiceSynthesis[] | null; error: any }> {
+): Promise<{ data: VoiceSynthesis[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   let query = supabase
     .from('voice_syntheses')
@@ -340,7 +354,7 @@ export async function getVoiceSyntheses(
 
 export async function getVoiceSynthesis(
   synthesisId: string
-): Promise<{ data: VoiceSynthesis | null; error: any }> {
+): Promise<{ data: VoiceSynthesis | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('voice_syntheses')
@@ -363,7 +377,7 @@ export async function createVoiceSynthesis(
     format?: AudioFormat
     quality?: AudioQuality
   }
-): Promise<{ data: VoiceSynthesis | null; error: any }> {
+): Promise<{ data: VoiceSynthesis | null; error: DatabaseError | null }> {
   const supabase = createClient()
 
   // Calculate character count
@@ -385,7 +399,7 @@ export async function createVoiceSynthesis(
 export async function updateVoiceSynthesis(
   synthesisId: string,
   updates: Partial<Omit<VoiceSynthesis, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
-): Promise<{ data: VoiceSynthesis | null; error: any }> {
+): Promise<{ data: VoiceSynthesis | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('voice_syntheses')
@@ -399,7 +413,7 @@ export async function updateVoiceSynthesis(
 
 export async function deleteVoiceSynthesis(
   synthesisId: string
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   const supabase = createClient()
   const { error } = await supabase
     .from('voice_syntheses')
@@ -412,7 +426,7 @@ export async function deleteVoiceSynthesis(
 export async function toggleSynthesisFavorite(
   synthesisId: string,
   isFavorite: boolean
-): Promise<{ data: VoiceSynthesis | null; error: any }> {
+): Promise<{ data: VoiceSynthesis | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('voice_syntheses')
@@ -427,7 +441,7 @@ export async function toggleSynthesisFavorite(
 export async function getFavoriteSyntheses(
   userId: string,
   limit: number = 20
-): Promise<{ data: VoiceSynthesis[] | null; error: any }> {
+): Promise<{ data: VoiceSynthesis[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('voice_syntheses')
@@ -443,7 +457,7 @@ export async function getFavoriteSyntheses(
 export async function getRecentSyntheses(
   userId: string,
   limit: number = 10
-): Promise<{ data: VoiceSynthesis[] | null; error: any }> {
+): Promise<{ data: VoiceSynthesis[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('voice_syntheses')
@@ -457,7 +471,7 @@ export async function getRecentSyntheses(
 
 export async function bulkDeleteSyntheses(
   synthesisIds: string[]
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   const supabase = createClient()
   const { error } = await supabase
     .from('voice_syntheses')
@@ -470,7 +484,7 @@ export async function bulkDeleteSyntheses(
 export async function getSynthesesByVoice(
   userId: string,
   voiceId: string
-): Promise<{ data: VoiceSynthesis[] | null; error: any }> {
+): Promise<{ data: VoiceSynthesis[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('voice_syntheses')
@@ -491,7 +505,7 @@ export async function getVoiceClones(
   filters?: {
     status?: CloneStatus
   }
-): Promise<{ data: VoiceClone[] | null; error: any }> {
+): Promise<{ data: VoiceClone[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   let query = supabase
     .from('voice_clones')
@@ -509,7 +523,7 @@ export async function getVoiceClones(
 
 export async function getVoiceClone(
   cloneId: string
-): Promise<{ data: VoiceClone | null; error: any }> {
+): Promise<{ data: VoiceClone | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('voice_clones')
@@ -528,7 +542,7 @@ export async function createVoiceClone(
     language: string
     sample_count: number
   }
-): Promise<{ data: VoiceClone | null; error: any }> {
+): Promise<{ data: VoiceClone | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('voice_clones')
@@ -545,7 +559,7 @@ export async function createVoiceClone(
 export async function updateVoiceClone(
   cloneId: string,
   updates: Partial<Omit<VoiceClone, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'completed_at'>>
-): Promise<{ data: VoiceClone | null; error: any }> {
+): Promise<{ data: VoiceClone | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('voice_clones')
@@ -559,7 +573,7 @@ export async function updateVoiceClone(
 
 export async function deleteVoiceClone(
   cloneId: string
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   const supabase = createClient()
   const { error } = await supabase
     .from('voice_clones')
@@ -573,9 +587,9 @@ export async function updateCloneProgress(
   cloneId: string,
   progress: number,
   status?: CloneStatus
-): Promise<{ data: VoiceClone | null; error: any }> {
+): Promise<{ data: VoiceClone | null; error: DatabaseError | null }> {
   const supabase = createClient()
-  const updates: any = { progress }
+  const updates: { progress: number; status?: CloneStatus } = { progress }
   if (status) {
     updates.status = status
   }
@@ -599,7 +613,7 @@ export async function getVoiceProjects(
   filters?: {
     status?: ProjectStatus
   }
-): Promise<{ data: VoiceProject[] | null; error: any }> {
+): Promise<{ data: VoiceProject[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   let query = supabase
     .from('voice_projects')
@@ -617,7 +631,7 @@ export async function getVoiceProjects(
 
 export async function getVoiceProject(
   projectId: string
-): Promise<{ data: VoiceProject | null; error: any }> {
+): Promise<{ data: VoiceProject | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('voice_projects')
@@ -635,7 +649,7 @@ export async function createVoiceProject(
     description?: string
     status?: ProjectStatus
   }
-): Promise<{ data: VoiceProject | null; error: any }> {
+): Promise<{ data: VoiceProject | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('voice_projects')
@@ -652,7 +666,7 @@ export async function createVoiceProject(
 export async function updateVoiceProject(
   projectId: string,
   updates: Partial<Omit<VoiceProject, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
-): Promise<{ data: VoiceProject | null; error: any }> {
+): Promise<{ data: VoiceProject | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('voice_projects')
@@ -666,7 +680,7 @@ export async function updateVoiceProject(
 
 export async function deleteVoiceProject(
   projectId: string
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   const supabase = createClient()
   const { error } = await supabase
     .from('voice_projects')
@@ -678,7 +692,7 @@ export async function deleteVoiceProject(
 
 export async function bulkDeleteProjects(
   projectIds: string[]
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   const supabase = createClient()
   const { error } = await supabase
     .from('voice_projects')
@@ -694,7 +708,7 @@ export async function bulkDeleteProjects(
 
 export async function getVoiceScripts(
   projectId: string
-): Promise<{ data: VoiceScript[] | null; error: any }> {
+): Promise<{ data: VoiceScript[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('voice_scripts')
@@ -707,7 +721,7 @@ export async function getVoiceScripts(
 
 export async function getVoiceScript(
   scriptId: string
-): Promise<{ data: VoiceScript | null; error: any }> {
+): Promise<{ data: VoiceScript | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('voice_scripts')
@@ -729,7 +743,7 @@ export async function createVoiceScript(
     volume?: number
     order_index: number
   }
-): Promise<{ data: VoiceScript | null; error: any }> {
+): Promise<{ data: VoiceScript | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('voice_scripts')
@@ -743,7 +757,7 @@ export async function createVoiceScript(
 export async function updateVoiceScript(
   scriptId: string,
   updates: Partial<Omit<VoiceScript, 'id' | 'project_id' | 'created_at' | 'updated_at'>>
-): Promise<{ data: VoiceScript | null; error: any }> {
+): Promise<{ data: VoiceScript | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('voice_scripts')
@@ -757,7 +771,7 @@ export async function updateVoiceScript(
 
 export async function deleteVoiceScript(
   scriptId: string
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   const supabase = createClient()
   const { error } = await supabase
     .from('voice_scripts')
@@ -770,7 +784,7 @@ export async function deleteVoiceScript(
 export async function reorderVoiceScripts(
   projectId: string,
   scriptOrders: { id: string; order_index: number }[]
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   const supabase = createClient()
 
   // Update each script's order
@@ -796,7 +810,7 @@ export async function getVoiceAnalytics(
   userId: string,
   startDate?: string,
   endDate?: string
-): Promise<{ data: VoiceAnalytics[] | null; error: any }> {
+): Promise<{ data: VoiceAnalytics[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   let query = supabase
     .from('voice_analytics')
@@ -825,7 +839,7 @@ export async function createVoiceAnalytics(
     total_cost?: number
     voice_usage?: Record<string, number>
   }
-): Promise<{ data: VoiceAnalytics | null; error: any }> {
+): Promise<{ data: VoiceAnalytics | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('voice_analytics')
@@ -841,7 +855,7 @@ export async function createVoiceAnalytics(
 
 export async function getUserVoiceStats(
   userId: string
-): Promise<{ data: any; error: any }> {
+): Promise<{ data: UserVoiceStats | null; error: DatabaseError | null }> {
   const supabase = createClient()
 
   // Get all syntheses
@@ -899,7 +913,7 @@ export async function getUserVoiceStats(
  */
 export async function incrementVoiceUsage(
   voiceId: string
-): Promise<{ data: Voice | null; error: any }> {
+): Promise<{ data: Voice | null; error: DatabaseError | null }> {
   const supabase = createClient()
 
   // First, get current usage count
@@ -910,7 +924,7 @@ export async function incrementVoiceUsage(
     .single()
 
   if (!currentVoice) {
-    return { data: null, error: new Error('Voice not found') }
+    return { data: null, error: toDbError(new Error('Voice not found')) }
   }
 
   // Increment usage count and update popularity
@@ -941,7 +955,7 @@ export async function trackVoiceAnalytics(
     total_cost?: number
     voice_usage?: Record<string, number>
   }
-): Promise<{ data: VoiceAnalytics | null; error: any }> {
+): Promise<{ data: VoiceAnalytics | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const today = new Date().toISOString().split('T')[0]
 

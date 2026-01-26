@@ -13,6 +13,7 @@
  */
 
 import { createClient } from '@/lib/supabase/client'
+import { DatabaseError, toDbError } from '@/lib/types/database'
 
 // ============================================================================
 // TYPES
@@ -182,7 +183,7 @@ export async function getProjects(
     is_public?: boolean
     search?: string
   }
-): Promise<{ data: ModelingProject[] | null; error: any }> {
+): Promise<{ data: ModelingProject[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   let query = supabase
     .from('modeling_projects')
@@ -199,12 +200,12 @@ export async function getProjects(
   }
 
   const { data, error } = await query
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 export async function getProject(
   projectId: string
-): Promise<{ data: ModelingProject | null; error: any }> {
+): Promise<{ data: ModelingProject | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('modeling_projects')
@@ -212,7 +213,7 @@ export async function getProject(
     .eq('id', projectId)
     .single()
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 export async function createProject(
@@ -224,7 +225,7 @@ export async function createProject(
     tags?: string[]
     is_public?: boolean
   }
-): Promise<{ data: ModelingProject | null; error: any }> {
+): Promise<{ data: ModelingProject | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('modeling_projects')
@@ -235,13 +236,13 @@ export async function createProject(
     .select()
     .single()
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 export async function updateProject(
   projectId: string,
   updates: Partial<Omit<ModelingProject, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
-): Promise<{ data: ModelingProject | null; error: any }> {
+): Promise<{ data: ModelingProject | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('modeling_projects')
@@ -250,19 +251,19 @@ export async function updateProject(
     .select()
     .single()
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 export async function deleteProject(
   projectId: string
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   const supabase = createClient()
   const { error } = await supabase
     .from('modeling_projects')
     .delete()
     .eq('id', projectId)
 
-  return { error }
+  return { error: error ? toDbError(error) : null }
 }
 
 // ============================================================================
@@ -271,7 +272,7 @@ export async function deleteProject(
 
 export async function getScenes(
   projectId: string
-): Promise<{ data: ModelingScene[] | null; error: any }> {
+): Promise<{ data: ModelingScene[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('modeling_scenes')
@@ -279,12 +280,12 @@ export async function getScenes(
     .eq('project_id', projectId)
     .order('created_at', { ascending: false })
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 export async function getScene(
   sceneId: string
-): Promise<{ data: ModelingScene | null; error: any }> {
+): Promise<{ data: ModelingScene | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('modeling_scenes')
@@ -292,7 +293,7 @@ export async function getScene(
     .eq('id', sceneId)
     .single()
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 export async function createScene(
@@ -305,7 +306,7 @@ export async function createScene(
     grid_size?: number
     grid_divisions?: number
   }
-): Promise<{ data: ModelingScene | null; error: any }> {
+): Promise<{ data: ModelingScene | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('modeling_scenes')
@@ -317,13 +318,13 @@ export async function createScene(
     .select()
     .single()
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 export async function updateScene(
   sceneId: string,
   updates: Partial<Omit<ModelingScene, 'id' | 'project_id' | 'user_id' | 'created_at' | 'updated_at'>>
-): Promise<{ data: ModelingScene | null; error: any }> {
+): Promise<{ data: ModelingScene | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('modeling_scenes')
@@ -332,19 +333,19 @@ export async function updateScene(
     .select()
     .single()
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 export async function deleteScene(
   sceneId: string
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   const supabase = createClient()
   const { error } = await supabase
     .from('modeling_scenes')
     .delete()
     .eq('id', sceneId)
 
-  return { error }
+  return { error: error ? toDbError(error) : null }
 }
 
 // ============================================================================
@@ -357,7 +358,7 @@ export async function getSceneObjects(
     type?: ObjectType
     visible?: boolean
   }
-): Promise<{ data: SceneObject[] | null; error: any }> {
+): Promise<{ data: SceneObject[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   let query = supabase
     .from('scene_objects')
@@ -369,7 +370,7 @@ export async function getSceneObjects(
   if (filters?.visible !== undefined) query = query.eq('visible', filters.visible)
 
   const { data, error } = await query
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 export async function createSceneObject(
@@ -389,7 +390,7 @@ export async function createSceneObject(
     material_id?: string
     parent_id?: string
   }
-): Promise<{ data: SceneObject | null; error: any }> {
+): Promise<{ data: SceneObject | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('scene_objects')
@@ -400,13 +401,13 @@ export async function createSceneObject(
     .select()
     .single()
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 export async function updateSceneObject(
   objectId: string,
   updates: Partial<Omit<SceneObject, 'id' | 'scene_id' | 'created_at' | 'updated_at'>>
-): Promise<{ data: SceneObject | null; error: any }> {
+): Promise<{ data: SceneObject | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('scene_objects')
@@ -415,7 +416,20 @@ export async function updateSceneObject(
     .select()
     .single()
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
+}
+
+// Interface for transform updates
+interface TransformUpdates {
+  position_x?: number
+  position_y?: number
+  position_z?: number
+  rotation_x?: number
+  rotation_y?: number
+  rotation_z?: number
+  scale_x?: number
+  scale_y?: number
+  scale_z?: number
 }
 
 export async function updateObjectTransform(
@@ -425,9 +439,9 @@ export async function updateObjectTransform(
     rotation?: { x: number; y: number; z: number }
     scale?: { x: number; y: number; z: number }
   }
-): Promise<{ data: SceneObject | null; error: any }> {
+): Promise<{ data: SceneObject | null; error: DatabaseError | null }> {
   const supabase = createClient()
-  const updates: any = {}
+  const updates: TransformUpdates = {}
 
   if (transform.position) {
     updates.position_x = transform.position.x
@@ -454,13 +468,13 @@ export async function updateObjectTransform(
     .select()
     .single()
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 export async function toggleObjectVisibility(
   objectId: string,
   visible: boolean
-): Promise<{ data: SceneObject | null; error: any }> {
+): Promise<{ data: SceneObject | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('scene_objects')
@@ -469,13 +483,13 @@ export async function toggleObjectVisibility(
     .select()
     .single()
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 export async function toggleObjectLock(
   objectId: string,
   locked: boolean
-): Promise<{ data: SceneObject | null; error: any }> {
+): Promise<{ data: SceneObject | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('scene_objects')
@@ -484,19 +498,19 @@ export async function toggleObjectLock(
     .select()
     .single()
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 export async function deleteSceneObject(
   objectId: string
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   const supabase = createClient()
   const { error } = await supabase
     .from('scene_objects')
     .delete()
     .eq('id', objectId)
 
-  return { error }
+  return { error: error ? toDbError(error) : null }
 }
 
 // ============================================================================
@@ -508,7 +522,7 @@ export async function getMaterials(
   filters?: {
     type?: MaterialType
   }
-): Promise<{ data: Material[] | null; error: any }> {
+): Promise<{ data: Material[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   let query = supabase
     .from('materials')
@@ -519,7 +533,7 @@ export async function getMaterials(
   if (filters?.type) query = query.eq('type', filters.type)
 
   const { data, error } = await query
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 export async function createMaterial(
@@ -536,7 +550,7 @@ export async function createMaterial(
     normal_map_url?: string
     bump_map_url?: string
   }
-): Promise<{ data: Material | null; error: any }> {
+): Promise<{ data: Material | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('materials')
@@ -547,13 +561,13 @@ export async function createMaterial(
     .select()
     .single()
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 export async function updateMaterial(
   materialId: string,
   updates: Partial<Omit<Material, 'id' | 'scene_id' | 'created_at' | 'updated_at'>>
-): Promise<{ data: Material | null; error: any }> {
+): Promise<{ data: Material | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('materials')
@@ -562,19 +576,19 @@ export async function updateMaterial(
     .select()
     .single()
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 export async function deleteMaterial(
   materialId: string
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   const supabase = createClient()
   const { error } = await supabase
     .from('materials')
     .delete()
     .eq('id', materialId)
 
-  return { error }
+  return { error: error ? toDbError(error) : null }
 }
 
 // ============================================================================
@@ -587,7 +601,7 @@ export async function getLights(
     type?: LightType
     enabled?: boolean
   }
-): Promise<{ data: Light[] | null; error: any }> {
+): Promise<{ data: Light[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   let query = supabase
     .from('lights')
@@ -599,7 +613,7 @@ export async function getLights(
   if (filters?.enabled !== undefined) query = query.eq('enabled', filters.enabled)
 
   const { data, error } = await query
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 export async function createLight(
@@ -617,7 +631,7 @@ export async function createLight(
     rotation_z?: number
     cast_shadow?: boolean
   }
-): Promise<{ data: Light | null; error: any }> {
+): Promise<{ data: Light | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('lights')
@@ -628,13 +642,13 @@ export async function createLight(
     .select()
     .single()
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 export async function updateLight(
   lightId: string,
   updates: Partial<Omit<Light, 'id' | 'scene_id' | 'created_at' | 'updated_at'>>
-): Promise<{ data: Light | null; error: any }> {
+): Promise<{ data: Light | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('lights')
@@ -643,13 +657,13 @@ export async function updateLight(
     .select()
     .single()
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 export async function toggleLight(
   lightId: string,
   enabled: boolean
-): Promise<{ data: Light | null; error: any }> {
+): Promise<{ data: Light | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('lights')
@@ -658,19 +672,19 @@ export async function toggleLight(
     .select()
     .single()
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 export async function deleteLight(
   lightId: string
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   const supabase = createClient()
   const { error } = await supabase
     .from('lights')
     .delete()
     .eq('id', lightId)
 
-  return { error }
+  return { error: error ? toDbError(error) : null }
 }
 
 // ============================================================================
@@ -679,7 +693,7 @@ export async function deleteLight(
 
 export async function getCameras(
   sceneId: string
-): Promise<{ data: Camera[] | null; error: any }> {
+): Promise<{ data: Camera[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('cameras')
@@ -687,7 +701,7 @@ export async function getCameras(
     .eq('scene_id', sceneId)
     .order('created_at', { ascending: true })
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 export async function createCamera(
@@ -705,7 +719,7 @@ export async function createCamera(
     near_plane?: number
     far_plane?: number
   }
-): Promise<{ data: Camera | null; error: any }> {
+): Promise<{ data: Camera | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('cameras')
@@ -716,13 +730,13 @@ export async function createCamera(
     .select()
     .single()
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 export async function updateCamera(
   cameraId: string,
   updates: Partial<Omit<Camera, 'id' | 'scene_id' | 'created_at' | 'updated_at'>>
-): Promise<{ data: Camera | null; error: any }> {
+): Promise<{ data: Camera | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('cameras')
@@ -731,13 +745,13 @@ export async function updateCamera(
     .select()
     .single()
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 export async function setActiveCamera(
   sceneId: string,
   cameraId: string
-): Promise<{ data: Camera | null; error: any }> {
+): Promise<{ data: Camera | null; error: DatabaseError | null }> {
   const supabase = createClient()
 
   // First, deactivate all cameras in the scene
@@ -754,19 +768,19 @@ export async function setActiveCamera(
     .select()
     .single()
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 export async function deleteCamera(
   cameraId: string
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   const supabase = createClient()
   const { error } = await supabase
     .from('cameras')
     .delete()
     .eq('id', cameraId)
 
-  return { error }
+  return { error: error ? toDbError(error) : null }
 }
 
 // ============================================================================
@@ -779,7 +793,7 @@ export async function getRenderJobs(
     scene_id?: string
     status?: JobStatus
   }
-): Promise<{ data: RenderJob[] | null; error: any }> {
+): Promise<{ data: RenderJob[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   let query = supabase
     .from('render_jobs')
@@ -791,7 +805,7 @@ export async function getRenderJobs(
   if (filters?.status) query = query.eq('status', filters.status)
 
   const { data, error } = await query
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 export async function createRenderJob(
@@ -809,7 +823,7 @@ export async function createRenderJob(
     background_color?: string
     output_format?: string
   }
-): Promise<{ data: RenderJob | null; error: any }> {
+): Promise<{ data: RenderJob | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('render_jobs')
@@ -821,7 +835,15 @@ export async function createRenderJob(
     .select()
     .single()
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
+}
+
+// Interface for render job status updates
+interface RenderJobStatusUpdates {
+  status: JobStatus
+  progress?: number
+  output_url?: string
+  error_message?: string
 }
 
 export async function updateRenderJobStatus(
@@ -830,9 +852,9 @@ export async function updateRenderJobStatus(
   progress?: number,
   output_url?: string,
   error_message?: string
-): Promise<{ data: RenderJob | null; error: any }> {
+): Promise<{ data: RenderJob | null; error: DatabaseError | null }> {
   const supabase = createClient()
-  const updates: any = { status }
+  const updates: RenderJobStatusUpdates = { status }
 
   if (progress !== undefined) updates.progress = progress
   if (output_url) updates.output_url = output_url
@@ -845,7 +867,7 @@ export async function updateRenderJobStatus(
     .select()
     .single()
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 // ============================================================================
@@ -858,7 +880,7 @@ export async function getExportJobs(
     scene_id?: string
     status?: JobStatus
   }
-): Promise<{ data: ExportJob[] | null; error: any }> {
+): Promise<{ data: ExportJob[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   let query = supabase
     .from('export_jobs')
@@ -870,7 +892,7 @@ export async function getExportJobs(
   if (filters?.status) query = query.eq('status', filters.status)
 
   const { data, error } = await query
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 export async function createExportJob(
@@ -884,7 +906,7 @@ export async function createExportJob(
     include_camera?: boolean
     scale?: number
   }
-): Promise<{ data: ExportJob | null; error: any }> {
+): Promise<{ data: ExportJob | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('export_jobs')
@@ -896,7 +918,15 @@ export async function createExportJob(
     .select()
     .single()
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
+}
+
+// Interface for export job status updates
+interface ExportJobStatusUpdates {
+  status: JobStatus
+  output_url?: string
+  error_message?: string
+  file_size?: number
 }
 
 export async function updateExportJobStatus(
@@ -905,9 +935,9 @@ export async function updateExportJobStatus(
   output_url?: string,
   error_message?: string,
   file_size?: number
-): Promise<{ data: ExportJob | null; error: any }> {
+): Promise<{ data: ExportJob | null; error: DatabaseError | null }> {
   const supabase = createClient()
-  const updates: any = { status }
+  const updates: ExportJobStatusUpdates = { status }
 
   if (output_url) updates.output_url = output_url
   if (error_message) updates.error_message = error_message
@@ -920,7 +950,7 @@ export async function updateExportJobStatus(
     .select()
     .single()
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 // ============================================================================
@@ -936,7 +966,7 @@ export async function getProjectStats(
     total_objects: number
     total_renders: number
   } | null
-  error: any
+  error: DatabaseError | null
 }> {
   const supabase = createClient()
 
@@ -949,10 +979,11 @@ export async function getProjectStats(
     supabase.from('render_jobs').select('id', { count: 'exact', head: true }).eq('user_id', userId)
   ])
 
-  if (projectsResult.error || scenesResult.error || objectsResult.error || rendersResult.error) {
+  const firstError = projectsResult.error || scenesResult.error || objectsResult.error || rendersResult.error
+  if (firstError) {
     return {
       data: null,
-      error: projectsResult.error || scenesResult.error || objectsResult.error || rendersResult.error
+      error: toDbError(firstError)
     }
   }
 

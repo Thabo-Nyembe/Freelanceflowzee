@@ -14,6 +14,7 @@
  */
 
 import { createClient } from '@/lib/supabase/client'
+import { DatabaseError, toDbError, JsonValue } from '@/lib/types/database'
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -123,8 +124,34 @@ export interface GenerationHistory {
   status: GenerationStatus
   progress: number
   message: string | null
-  error_details: any
+  error_details: JsonValue
   created_at: string
+}
+
+// Summary interfaces for statistics functions
+export interface VideoAnalyticsSummary {
+  total_views: number
+  total_unique_views: number
+  total_downloads: number
+  total_shares: number
+  total_likes: number
+  avg_watch_time: number
+  avg_completion_rate: number
+  avg_engagement_score: number
+}
+
+export interface UserVideoStats {
+  total_videos: number
+  completed_videos: number
+  in_progress: number
+  failed_videos: number
+  total_views: number
+  total_likes: number
+  total_downloads: number
+  total_shares: number
+  by_category: Record<string, number>
+  by_style: Record<string, number>
+  by_quality: Record<string, number>
 }
 
 // ============================================================================
@@ -140,7 +167,7 @@ export async function getGeneratedVideos(
     is_public?: boolean
     search?: string
   }
-): Promise<{ data: GeneratedVideo[] | null; error: any }> {
+): Promise<{ data: GeneratedVideo[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   let query = supabase
     .from('generated_videos')
@@ -170,7 +197,7 @@ export async function getGeneratedVideos(
 
 export async function getGeneratedVideo(
   videoId: string
-): Promise<{ data: GeneratedVideo | null; error: any }> {
+): Promise<{ data: GeneratedVideo | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('generated_videos')
@@ -193,7 +220,7 @@ export async function createGeneratedVideo(
     category?: VideoCategory
     tags?: string[]
   }
-): Promise<{ data: GeneratedVideo | null; error: any }> {
+): Promise<{ data: GeneratedVideo | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('generated_videos')
@@ -210,7 +237,7 @@ export async function createGeneratedVideo(
 export async function updateGeneratedVideo(
   videoId: string,
   updates: Partial<Omit<GeneratedVideo, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
-): Promise<{ data: GeneratedVideo | null; error: any }> {
+): Promise<{ data: GeneratedVideo | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('generated_videos')
@@ -224,7 +251,7 @@ export async function updateGeneratedVideo(
 
 export async function deleteGeneratedVideo(
   videoId: string
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   const supabase = createClient()
   const { error } = await supabase
     .from('generated_videos')
@@ -238,7 +265,7 @@ export async function updateVideoProgress(
   videoId: string,
   status: GenerationStatus,
   progress: number
-): Promise<{ data: GeneratedVideo | null; error: any }> {
+): Promise<{ data: GeneratedVideo | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('generated_videos')
@@ -255,7 +282,7 @@ export async function updateVideoProgress(
 
 export async function incrementVideoViews(
   videoId: string
-): Promise<{ data: GeneratedVideo | null; error: any }> {
+): Promise<{ data: GeneratedVideo | null; error: DatabaseError | null }> {
   const supabase = createClient()
 
   const { data: currentVideo } = await supabase
@@ -265,7 +292,7 @@ export async function incrementVideoViews(
     .single()
 
   if (!currentVideo) {
-    return { data: null, error: new Error('Video not found') }
+    return { data: null, error: toDbError(new Error('Video not found')) }
   }
 
   const { data, error } = await supabase
@@ -282,7 +309,7 @@ export async function incrementVideoViews(
 
 export async function incrementVideoLikes(
   videoId: string
-): Promise<{ data: GeneratedVideo | null; error: any }> {
+): Promise<{ data: GeneratedVideo | null; error: DatabaseError | null }> {
   const supabase = createClient()
 
   const { data: currentVideo } = await supabase
@@ -292,7 +319,7 @@ export async function incrementVideoLikes(
     .single()
 
   if (!currentVideo) {
-    return { data: null, error: new Error('Video not found') }
+    return { data: null, error: toDbError(new Error('Video not found')) }
   }
 
   const { data, error } = await supabase
@@ -310,7 +337,7 @@ export async function incrementVideoLikes(
 export async function searchVideosByTags(
   userId: string,
   tags: string[]
-): Promise<{ data: GeneratedVideo[] | null; error: any }> {
+): Promise<{ data: GeneratedVideo[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('generated_videos')
@@ -325,7 +352,7 @@ export async function searchVideosByTags(
 export async function getPublicVideos(
   limit: number = 20,
   category?: VideoCategory
-): Promise<{ data: GeneratedVideo[] | null; error: any }> {
+): Promise<{ data: GeneratedVideo[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   let query = supabase
     .from('generated_videos')
@@ -345,7 +372,7 @@ export async function getPublicVideos(
 
 export async function bulkDeleteVideos(
   videoIds: string[]
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   const supabase = createClient()
   const { error } = await supabase
     .from('generated_videos')
@@ -365,7 +392,7 @@ export async function getVideoTemplates(
     style?: VideoStyle
     premium?: boolean
   }
-): Promise<{ data: VideoTemplate[] | null; error: any }> {
+): Promise<{ data: VideoTemplate[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   let query = supabase
     .from('video_templates')
@@ -388,7 +415,7 @@ export async function getVideoTemplates(
 
 export async function getVideoTemplate(
   templateId: string
-): Promise<{ data: VideoTemplate | null; error: any }> {
+): Promise<{ data: VideoTemplate | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('video_templates')
@@ -413,7 +440,7 @@ export async function createVideoTemplate(
     tags?: string[]
     price?: number
   }
-): Promise<{ data: VideoTemplate | null; error: any }> {
+): Promise<{ data: VideoTemplate | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('video_templates')
@@ -427,7 +454,7 @@ export async function createVideoTemplate(
 export async function updateVideoTemplate(
   templateId: string,
   updates: Partial<Omit<VideoTemplate, 'id' | 'created_at' | 'updated_at'>>
-): Promise<{ data: VideoTemplate | null; error: any }> {
+): Promise<{ data: VideoTemplate | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('video_templates')
@@ -441,7 +468,7 @@ export async function updateVideoTemplate(
 
 export async function incrementTemplateUsage(
   templateId: string
-): Promise<{ data: VideoTemplate | null; error: any }> {
+): Promise<{ data: VideoTemplate | null; error: DatabaseError | null }> {
   const supabase = createClient()
 
   const { data: currentTemplate } = await supabase
@@ -451,7 +478,7 @@ export async function incrementTemplateUsage(
     .single()
 
   if (!currentTemplate) {
-    return { data: null, error: new Error('Template not found') }
+    return { data: null, error: toDbError(new Error('Template not found')) }
   }
 
   const { data, error } = await supabase
@@ -468,7 +495,7 @@ export async function incrementTemplateUsage(
 
 export async function searchTemplatesByTags(
   tags: string[]
-): Promise<{ data: VideoTemplate[] | null; error: any }> {
+): Promise<{ data: VideoTemplate[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('video_templates')
@@ -485,7 +512,7 @@ export async function searchTemplatesByTags(
 
 export async function getVideoMetadata(
   videoId: string
-): Promise<{ data: VideoMetadata | null; error: any }> {
+): Promise<{ data: VideoMetadata | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('video_metadata')
@@ -509,7 +536,7 @@ export async function createVideoMetadata(
     audio_codec?: string
     audio_bitrate?: string
   }
-): Promise<{ data: VideoMetadata | null; error: any }> {
+): Promise<{ data: VideoMetadata | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('video_metadata')
@@ -523,7 +550,7 @@ export async function createVideoMetadata(
 export async function updateVideoMetadata(
   videoId: string,
   updates: Partial<Omit<VideoMetadata, 'id' | 'video_id' | 'created_at' | 'updated_at'>>
-): Promise<{ data: VideoMetadata | null; error: any }> {
+): Promise<{ data: VideoMetadata | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('video_metadata')
@@ -541,7 +568,7 @@ export async function updateVideoMetadata(
 
 export async function getGenerationSettings(
   userId: string
-): Promise<{ data: GenerationSettings | null; error: any }> {
+): Promise<{ data: GenerationSettings | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('generation_settings')
@@ -563,7 +590,7 @@ export async function createGenerationSettings(
     watermark_enabled?: boolean
     max_concurrent_generations?: number
   }
-): Promise<{ data: GenerationSettings | null; error: any }> {
+): Promise<{ data: GenerationSettings | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('generation_settings')
@@ -580,7 +607,7 @@ export async function createGenerationSettings(
 export async function updateGenerationSettings(
   userId: string,
   updates: Partial<Omit<GenerationSettings, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
-): Promise<{ data: GenerationSettings | null; error: any }> {
+): Promise<{ data: GenerationSettings | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('generation_settings')
@@ -594,7 +621,7 @@ export async function updateGenerationSettings(
 
 export async function getOrCreateGenerationSettings(
   userId: string
-): Promise<{ data: GenerationSettings | null; error: any }> {
+): Promise<{ data: GenerationSettings | null; error: DatabaseError | null }> {
   const { data, error } = await getGenerationSettings(userId)
 
   if (error && error.code === 'PGRST116') {
@@ -612,7 +639,7 @@ export async function getOrCreateGenerationSettings(
 export async function getVideoAnalytics(
   videoId: string,
   days: number = 30
-): Promise<{ data: VideoAnalytics[] | null; error: any }> {
+): Promise<{ data: VideoAnalytics[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
 
   const startDate = new Date()
@@ -641,7 +668,7 @@ export async function createVideoAnalytics(
     completion_rate?: number
     engagement_score?: number
   }
-): Promise<{ data: VideoAnalytics | null; error: any }> {
+): Promise<{ data: VideoAnalytics | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('video_analytics')
@@ -656,7 +683,7 @@ export async function updateVideoAnalytics(
   videoId: string,
   date: string,
   updates: Partial<Omit<VideoAnalytics, 'id' | 'video_id' | 'date' | 'created_at' | 'updated_at'>>
-): Promise<{ data: VideoAnalytics | null; error: any }> {
+): Promise<{ data: VideoAnalytics | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('video_analytics')
@@ -671,7 +698,7 @@ export async function updateVideoAnalytics(
 
 export async function getVideoAnalyticsSummary(
   videoId: string
-): Promise<{ data: any; error: any }> {
+): Promise<{ data: VideoAnalyticsSummary | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('video_analytics')
@@ -702,7 +729,7 @@ export async function getVideoAnalyticsSummary(
 
 export async function getGenerationHistory(
   videoId: string
-): Promise<{ data: GenerationHistory[] | null; error: any }> {
+): Promise<{ data: GenerationHistory[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('generation_history')
@@ -719,9 +746,9 @@ export async function createGenerationHistory(
     status: GenerationStatus
     progress?: number
     message?: string
-    error_details?: any
+    error_details?: JsonValue
   }
-): Promise<{ data: GenerationHistory | null; error: any }> {
+): Promise<{ data: GenerationHistory | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('generation_history')
@@ -734,7 +761,7 @@ export async function createGenerationHistory(
 
 export async function getLatestGenerationStatus(
   videoId: string
-): Promise<{ data: GenerationHistory | null; error: any }> {
+): Promise<{ data: GenerationHistory | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('generation_history')
@@ -753,7 +780,7 @@ export async function getLatestGenerationStatus(
 
 export async function getUserVideoStats(
   userId: string
-): Promise<{ data: any; error: any }> {
+): Promise<{ data: UserVideoStats | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('generated_videos')
@@ -793,7 +820,7 @@ export async function getUserVideoStats(
 export async function getTrendingVideos(
   limit: number = 10,
   days: number = 7
-): Promise<{ data: GeneratedVideo[] | null; error: any }> {
+): Promise<{ data: GeneratedVideo[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
 
   const startDate = new Date()

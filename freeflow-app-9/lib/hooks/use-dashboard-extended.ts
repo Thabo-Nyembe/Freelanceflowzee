@@ -6,9 +6,140 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import type { JsonValue } from '@/lib/types/database'
+
+// Type definitions for dashboard entities
+export interface DashboardActivity {
+  id: string
+  user_id: string
+  activity_type: string
+  title: string
+  description: string | null
+  metadata: Record<string, JsonValue> | null
+  created_at: string
+}
+
+export interface DashboardGoalMilestone {
+  id: string
+  goal_id: string
+  title: string
+  target_date: string
+  is_completed: boolean
+  completed_at: string | null
+  created_at: string
+}
+
+export interface DashboardGoal {
+  id: string
+  user_id: string
+  title: string
+  description: string | null
+  target_value: number | null
+  current_value: number | null
+  goal_type: string
+  status: string
+  start_date: string | null
+  end_date: string | null
+  created_at: string
+}
+
+export interface DashboardInsight {
+  id: string
+  user_id: string
+  insight_type: string
+  title: string
+  description: string
+  priority: number
+  is_active: boolean
+  metadata: Record<string, JsonValue> | null
+  created_at: string
+}
+
+export interface DashboardMetric {
+  id: string
+  dashboard_id: string
+  metric_name: string
+  metric_value: number | string
+  metric_type: string
+  order_index: number
+  config: Record<string, JsonValue> | null
+  created_at: string
+}
+
+export interface DashboardNotification {
+  id: string
+  user_id: string
+  title: string
+  message: string
+  notification_type: string
+  is_read: boolean
+  link: string | null
+  created_at: string
+}
+
+export interface DashboardProject {
+  id: string
+  user_id: string
+  name: string
+  status: string
+  progress: number
+  priority: string | null
+  deadline: string | null
+  updated_at: string
+  created_at: string
+}
+
+export interface DashboardQuickAction {
+  id: string
+  user_id: string
+  action_type: string
+  label: string
+  icon: string | null
+  path: string | null
+  order_index: number
+  is_enabled: boolean
+  created_at: string
+}
+
+export interface DashboardStat {
+  id: string
+  user_id: string
+  total_projects: number
+  active_projects: number
+  completed_projects: number
+  total_revenue: number
+  pending_revenue: number
+  total_clients: number
+  active_clients: number
+  updated_at: string
+}
+
+export interface DashboardTimelineEvent {
+  id: string
+  user_id: string
+  event_type: string
+  title: string
+  description: string | null
+  event_date: string
+  metadata: Record<string, JsonValue> | null
+  created_at: string
+}
+
+export interface Dashboard {
+  id: string
+  user_id: string
+  name: string
+  description: string | null
+  type: string | null
+  is_default: boolean
+  is_public: boolean
+  layout: Record<string, JsonValue> | null
+  created_at: string
+  updated_at: string
+}
 
 export function useDashboardActivities(userId?: string) {
-  const [data, setData] = useState<any[]>([])
+  const [data, setData] = useState<DashboardActivity[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
   const supabase = createClient()
@@ -21,7 +152,7 @@ export function useDashboardActivities(userId?: string) {
 }
 
 export function useDashboardGoalMilestones(goalId?: string) {
-  const [data, setData] = useState<any[]>([])
+  const [data, setData] = useState<DashboardGoalMilestone[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
   const supabase = createClient()
@@ -34,7 +165,7 @@ export function useDashboardGoalMilestones(goalId?: string) {
 }
 
 export function useDashboardGoals(userId?: string) {
-  const [data, setData] = useState<any[]>([])
+  const [data, setData] = useState<DashboardGoal[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
   const supabase = createClient()
@@ -47,7 +178,7 @@ export function useDashboardGoals(userId?: string) {
 }
 
 export function useDashboardInsights(userId?: string) {
-  const [data, setData] = useState<any[]>([])
+  const [data, setData] = useState<DashboardInsight[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
   const supabase = createClient()
@@ -60,7 +191,7 @@ export function useDashboardInsights(userId?: string) {
 }
 
 export function useDashboardMetrics(dashboardId?: string) {
-  const [data, setData] = useState<any[]>([])
+  const [data, setData] = useState<DashboardMetric[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
   const supabase = createClient()
@@ -73,7 +204,7 @@ export function useDashboardMetrics(dashboardId?: string) {
 }
 
 export function useDashboardNotifications(userId?: string) {
-  const [data, setData] = useState<any[]>([])
+  const [data, setData] = useState<DashboardNotification[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
   const supabase = createClient()
@@ -86,7 +217,7 @@ export function useDashboardNotifications(userId?: string) {
 }
 
 export function useDashboardProjects(userId?: string) {
-  const [data, setData] = useState<any[]>([])
+  const [data, setData] = useState<DashboardProject[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
   const supabase = createClient()
@@ -99,7 +230,7 @@ export function useDashboardProjects(userId?: string) {
 }
 
 export function useDashboardQuickActions(userId?: string) {
-  const [data, setData] = useState<any[]>([])
+  const [data, setData] = useState<DashboardQuickAction[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
   const supabase = createClient()
@@ -112,7 +243,7 @@ export function useDashboardQuickActions(userId?: string) {
 }
 
 export function useDashboardStats(userId?: string) {
-  const [data, setData] = useState<any>(null)
+  const [data, setData] = useState<DashboardStat | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
   const supabase = createClient()
@@ -125,7 +256,7 @@ export function useDashboardStats(userId?: string) {
 }
 
 export function useDashboardTimelineEvents(userId?: string) {
-  const [data, setData] = useState<any[]>([])
+  const [data, setData] = useState<DashboardTimelineEvent[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
   const supabase = createClient()
@@ -138,7 +269,7 @@ export function useDashboardTimelineEvents(userId?: string) {
 }
 
 export function useDashboards(userId?: string) {
-  const [data, setData] = useState<any[]>([])
+  const [data, setData] = useState<Dashboard[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
   const supabase = createClient()

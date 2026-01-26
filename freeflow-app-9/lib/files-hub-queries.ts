@@ -6,6 +6,7 @@
 
 import { createClient } from '@/lib/supabase/client'
 import { createFeatureLogger } from './logger'
+import { DatabaseError, toDbError } from '@/lib/types/database'
 
 const supabase = createClient()
 const logger = createFeatureLogger('FilesHub')
@@ -91,7 +92,7 @@ export async function getFiles(
   sort?: FileSortOptions,
   limit: number = 50,
   offset: number = 0
-): Promise<{ data: File[]; error: any; count: number }> {
+): Promise<{ data: File[]; error: DatabaseError | null; count: number }> {
   logger.info('Fetching files', { userId, filters, sort, limit, offset })
 
   try {
@@ -129,7 +130,7 @@ export async function getFiles(
 
     if (error) {
       logger.error('Failed to fetch files', { error, userId })
-      return { data: [], error, count: 0 }
+      return { data: [], error: toDbError(error), count: 0 }
     }
 
     logger.info('Files fetched successfully', {
@@ -139,9 +140,9 @@ export async function getFiles(
     })
 
     return { data: data || [], error: null, count: count || 0 }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching files', { error, userId })
-    return { data: [], error, count: 0 }
+    return { data: [], error: toDbError(error), count: 0 }
   }
 }
 
@@ -150,7 +151,7 @@ export async function getFiles(
  */
 export async function getFile(
   fileId: string
-): Promise<{ data: File | null; error: any }> {
+): Promise<{ data: File | null; error: DatabaseError | null }> {
   logger.info('Fetching file', { fileId })
 
   try {
@@ -162,14 +163,14 @@ export async function getFile(
 
     if (error) {
       logger.error('Failed to fetch file', { error, fileId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('File fetched successfully', { fileId })
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching file', { error, fileId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -179,7 +180,7 @@ export async function getFile(
 export async function createFile(
   userId: string,
   fileData: Partial<File>
-): Promise<{ data: File | null; error: any }> {
+): Promise<{ data: File | null; error: DatabaseError | null }> {
   logger.info('Creating file', { userId, name: fileData.name })
 
   try {
@@ -207,7 +208,7 @@ export async function createFile(
 
     if (error) {
       logger.error('Failed to create file', { error, userId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('File created successfully', {
@@ -217,9 +218,9 @@ export async function createFile(
     })
 
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception creating file', { error, userId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -229,7 +230,7 @@ export async function createFile(
 export async function updateFile(
   fileId: string,
   updates: Partial<File>
-): Promise<{ data: File | null; error: any }> {
+): Promise<{ data: File | null; error: DatabaseError | null }> {
   logger.info('Updating file', { fileId, updates })
 
   try {
@@ -245,14 +246,14 @@ export async function updateFile(
 
     if (error) {
       logger.error('Failed to update file', { error, fileId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('File updated successfully', { fileId })
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception updating file', { error, fileId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -261,7 +262,7 @@ export async function updateFile(
  */
 export async function deleteFile(
   fileId: string
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   logger.info('Deleting file', { fileId })
 
   try {
@@ -272,14 +273,14 @@ export async function deleteFile(
 
     if (error) {
       logger.error('Failed to delete file', { error, fileId })
-      return { error }
+      return { error: toDbError(error) }
     }
 
     logger.info('File deleted successfully', { fileId })
     return { error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception deleting file', { error, fileId })
-    return { error }
+    return { error: toDbError(error) }
   }
 }
 
@@ -288,7 +289,7 @@ export async function deleteFile(
  */
 export async function permanentlyDeleteFile(
   fileId: string
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   logger.info('Permanently deleting file', { fileId })
 
   try {
@@ -299,14 +300,14 @@ export async function permanentlyDeleteFile(
 
     if (error) {
       logger.error('Failed to permanently delete file', { error, fileId })
-      return { error }
+      return { error: toDbError(error) }
     }
 
     logger.info('File permanently deleted', { fileId })
     return { error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception permanently deleting file', { error, fileId })
-    return { error }
+    return { error: toDbError(error) }
   }
 }
 
@@ -315,7 +316,7 @@ export async function permanentlyDeleteFile(
  */
 export async function bulkDeleteFiles(
   fileIds: string[]
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   logger.info('Bulk deleting files', { count: fileIds.length })
 
   try {
@@ -326,14 +327,14 @@ export async function bulkDeleteFiles(
 
     if (error) {
       logger.error('Failed to bulk delete files', { error, count: fileIds.length })
-      return { error }
+      return { error: toDbError(error) }
     }
 
     logger.info('Files bulk deleted successfully', { count: fileIds.length })
     return { error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception bulk deleting files', { error })
-    return { error }
+    return { error: toDbError(error) }
   }
 }
 
@@ -343,7 +344,7 @@ export async function bulkDeleteFiles(
 export async function toggleFileStar(
   fileId: string,
   starred: boolean
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   logger.info('Toggling file star', { fileId, starred })
 
   try {
@@ -354,14 +355,14 @@ export async function toggleFileStar(
 
     if (error) {
       logger.error('Failed to toggle file star', { error, fileId })
-      return { error }
+      return { error: toDbError(error) }
     }
 
     logger.info('File star toggled successfully', { fileId, starred })
     return { error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception toggling file star', { error, fileId })
-    return { error }
+    return { error: toDbError(error) }
   }
 }
 
@@ -371,7 +372,7 @@ export async function toggleFileStar(
 export async function moveFileToFolder(
   fileId: string,
   folderId: string | null
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   logger.info('Moving file to folder', { fileId, folderId })
 
   try {
@@ -382,14 +383,14 @@ export async function moveFileToFolder(
 
     if (error) {
       logger.error('Failed to move file', { error, fileId, folderId })
-      return { error }
+      return { error: toDbError(error) }
     }
 
     logger.info('File moved successfully', { fileId, folderId })
     return { error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception moving file', { error, fileId, folderId })
-    return { error }
+    return { error: toDbError(error) }
   }
 }
 
@@ -398,7 +399,7 @@ export async function moveFileToFolder(
  */
 export async function incrementFileDownloads(
   fileId: string
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   logger.info('Incrementing file downloads', { fileId })
 
   try {
@@ -416,17 +417,17 @@ export async function incrementFileDownloads(
 
       if (error) {
         logger.error('Failed to increment downloads', { error, fileId })
-        return { error }
+        return { error: toDbError(error) }
       }
 
       logger.info('File downloads incremented', { fileId })
       return { error: null }
     }
 
-    return { error: new Error('File not found') }
-  } catch (error) {
+    return { error: toDbError(new Error('File not found')) }
+  } catch (error: unknown) {
     logger.error('Exception incrementing downloads', { error, fileId })
-    return { error }
+    return { error: toDbError(error) }
   }
 }
 
@@ -435,7 +436,7 @@ export async function incrementFileDownloads(
  */
 export async function incrementFileViews(
   fileId: string
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   logger.info('Incrementing file views', { fileId })
 
   try {
@@ -453,17 +454,17 @@ export async function incrementFileViews(
 
       if (error) {
         logger.error('Failed to increment views', { error, fileId })
-        return { error }
+        return { error: toDbError(error) }
       }
 
       logger.info('File views incremented', { fileId })
       return { error: null }
     }
 
-    return { error: new Error('File not found') }
-  } catch (error) {
+    return { error: toDbError(new Error('File not found')) }
+  } catch (error: unknown) {
     logger.error('Exception incrementing views', { error, fileId })
-    return { error }
+    return { error: toDbError(error) }
   }
 }
 
@@ -497,7 +498,7 @@ export async function getFileStats(userId: string): Promise<FileStats> {
 
     logger.info('File statistics fetched', { stats, userId })
     return stats
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Failed to fetch file statistics', { error, userId })
     return {
       total: 0,
@@ -522,7 +523,7 @@ export async function searchFiles(
   userId: string,
   searchTerm: string,
   limit: number = 20
-): Promise<{ data: File[]; error: any }> {
+): Promise<{ data: File[]; error: DatabaseError | null }> {
   logger.info('Searching files', { userId, searchTerm, limit })
 
   try {
@@ -536,7 +537,7 @@ export async function searchFiles(
 
     if (error) {
       logger.error('Failed to search files', { error, userId, searchTerm })
-      return { data: [], error }
+      return { data: [], error: toDbError(error) }
     }
 
     logger.info('Files search completed', {
@@ -546,9 +547,9 @@ export async function searchFiles(
     })
 
     return { data: data || [], error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception searching files', { error, userId, searchTerm })
-    return { data: [], error }
+    return { data: [], error: toDbError(error) }
   }
 }
 
@@ -558,7 +559,7 @@ export async function searchFiles(
 export async function getRecentFiles(
   userId: string,
   limit: number = 10
-): Promise<{ data: File[]; error: any }> {
+): Promise<{ data: File[]; error: DatabaseError | null }> {
   logger.info('Fetching recent files', { userId, limit })
 
   try {
@@ -571,14 +572,14 @@ export async function getRecentFiles(
 
     if (error) {
       logger.error('Failed to fetch recent files', { error, userId })
-      return { data: [], error }
+      return { data: [], error: toDbError(error) }
     }
 
     logger.info('Recent files fetched', { count: data?.length || 0, userId })
     return { data: data || [], error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching recent files', { error, userId })
-    return { data: [], error }
+    return { data: [], error: toDbError(error) }
   }
 }
 
@@ -587,7 +588,7 @@ export async function getRecentFiles(
  */
 export async function getFolders(
   userId: string
-): Promise<{ data: Folder[]; error: any }> {
+): Promise<{ data: Folder[]; error: DatabaseError | null }> {
   logger.info('Fetching folders', { userId })
 
   try {
@@ -599,14 +600,14 @@ export async function getFolders(
 
     if (error) {
       logger.error('Failed to fetch folders', { error, userId })
-      return { data: [], error }
+      return { data: [], error: toDbError(error) }
     }
 
     logger.info('Folders fetched', { count: data?.length || 0, userId })
     return { data: data || [], error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching folders', { error, userId })
-    return { data: [], error }
+    return { data: [], error: toDbError(error) }
   }
 }
 
@@ -616,7 +617,7 @@ export async function getFolders(
 export async function createFolder(
   userId: string,
   folderData: Partial<Folder>
-): Promise<{ data: Folder | null; error: any }> {
+): Promise<{ data: Folder | null; error: DatabaseError | null }> {
   logger.info('Creating folder', { userId, name: folderData.name })
 
   try {
@@ -638,7 +639,7 @@ export async function createFolder(
 
     if (error) {
       logger.error('Failed to create folder', { error, userId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Folder created successfully', {
@@ -648,8 +649,8 @@ export async function createFolder(
     })
 
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception creating folder', { error, userId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }

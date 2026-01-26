@@ -12,6 +12,7 @@
 
 import { createFeatureLogger } from '@/lib/logger'
 import { createClient } from '@/lib/supabase/server'
+import { JsonValue, toDbError } from '@/lib/types/database'
 
 const logger = createFeatureLogger('ActivityLogService')
 
@@ -100,8 +101,8 @@ export interface ActivityLogEntry {
   changes: ActivityChange[]
 
   // State info (for undo/redo)
-  previousState?: any
-  newState?: any
+  previousState?: JsonValue
+  newState?: JsonValue
 
   // Affected elements
   affectedElements: string[]
@@ -115,7 +116,7 @@ export interface ActivityLogEntry {
   }
 
   // Metadata
-  metadata: Record<string, any>
+  metadata: Record<string, JsonValue>
 
   // Timestamps
   timestamp: Date
@@ -129,8 +130,8 @@ export interface ActivityLogEntry {
 export interface ActivityChange {
   path: string[]
   type: 'add' | 'remove' | 'update' | 'move'
-  oldValue?: any
-  newValue?: any
+  oldValue?: JsonValue
+  newValue?: JsonValue
   elementId?: string
 }
 
@@ -166,6 +167,29 @@ export interface UndoRedoState {
   canRedo: boolean
   lastUndoAt?: Date
   lastRedoAt?: Date
+}
+
+/** Database row shape for activity log entries */
+interface ActivityLogDbRow {
+  id: string
+  document_id: string
+  session_id: string
+  activity_type: ActivityType
+  category: ActivityCategory
+  action: string
+  description: string
+  user_id: string
+  user_name: string
+  user_color: string
+  user_avatar?: string
+  changes?: ActivityChange[]
+  previous_state?: JsonValue
+  new_state?: JsonValue
+  affected_elements?: string[]
+  position?: ActivityLogEntry['position']
+  metadata?: Record<string, JsonValue>
+  timestamp: string
+  server_timestamp?: string
 }
 
 // ============================================================================
@@ -222,11 +246,11 @@ export class ActivityLogManager {
     description: string,
     options: {
       changes?: ActivityChange[]
-      previousState?: any
-      newState?: any
+      previousState?: JsonValue
+      newState?: JsonValue
       affectedElements?: string[]
       position?: ActivityLogEntry['position']
-      metadata?: Record<string, any>
+      metadata?: Record<string, JsonValue>
       undoable?: boolean
     } = {}
   ): ActivityLogEntry {
@@ -270,7 +294,7 @@ export class ActivityLogManager {
   logTextInsert(
     text: string,
     position: { start: number; end: number; line?: number; column?: number },
-    previousState?: any
+    previousState?: JsonValue
   ): ActivityLogEntry {
     return this.log('edit.text_insert', `Inserted "${text.substring(0, 50)}${text.length > 50 ? '...' : ''}"`, {
       changes: [{ path: ['content'], type: 'add', newValue: text }],
@@ -284,7 +308,7 @@ export class ActivityLogManager {
   logTextDelete(
     deletedText: string,
     position: { start: number; end: number; line?: number; column?: number },
-    previousState?: any
+    previousState?: JsonValue
   ): ActivityLogEntry {
     return this.log('edit.text_delete', `Deleted "${deletedText.substring(0, 50)}${deletedText.length > 50 ? '...' : ''}"`, {
       changes: [{ path: ['content'], type: 'remove', oldValue: deletedText }],
@@ -297,7 +321,7 @@ export class ActivityLogManager {
   logObjectAdd(
     elementId: string,
     elementType: string,
-    elementData: any
+    elementData: JsonValue
   ): ActivityLogEntry {
     return this.log('edit.object_add', `Added ${elementType}`, {
       changes: [{ path: ['elements', elementId], type: 'add', newValue: elementData, elementId }],
@@ -310,7 +334,7 @@ export class ActivityLogManager {
   logObjectRemove(
     elementId: string,
     elementType: string,
-    elementData: any
+    elementData: JsonValue
   ): ActivityLogEntry {
     return this.log('edit.object_remove', `Removed ${elementType}`, {
       changes: [{ path: ['elements', elementId], type: 'remove', oldValue: elementData, elementId }],
@@ -754,7 +778,7 @@ export async function getActivityLog(filter: ActivityFilter): Promise<ActivityLo
   return (data || []).map(mapDbToActivityEntry)
 }
 
-function mapDbToActivityEntry(row: any): ActivityLogEntry {
+function mapDbToActivityEntry(row: ActivityLogDbRow): ActivityLogEntry {
   return {
     id: row.id,
     documentId: row.document_id,

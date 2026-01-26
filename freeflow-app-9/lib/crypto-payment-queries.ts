@@ -14,6 +14,7 @@
  */
 
 import { createClient } from '@/lib/supabase/client'
+import type { JsonValue } from '@/lib/types/database'
 
 // ============================================================================
 // TYPE DEFINITIONS (matching database schema)
@@ -73,7 +74,7 @@ export interface CryptoTransaction {
   nonce?: number
   description?: string
   memo?: string
-  metadata: Record<string, any>
+  metadata: Record<string, JsonValue>
   error_message?: string
   retry_count: number
   created_at: string
@@ -114,7 +115,7 @@ export interface PaymentLink {
   link_code: string
   success_url?: string
   cancel_url?: string
-  metadata: Record<string, any>
+  metadata: Record<string, JsonValue>
   created_at: string
   updated_at: string
 }
@@ -133,7 +134,7 @@ export interface RecurringPayment {
   max_payments?: number
   is_active: boolean
   description?: string
-  metadata: Record<string, any>
+  metadata: Record<string, JsonValue>
   created_at: string
   updated_at: string
 }
@@ -378,7 +379,7 @@ export async function createCryptoTransaction(txData: {
   required_confirmations?: number
   description?: string
   memo?: string
-  metadata?: Record<string, any>
+  metadata?: Record<string, JsonValue>
   expires_at?: string
 }): Promise<CryptoTransaction> {
   const supabase = createClient()
@@ -589,7 +590,7 @@ export async function createPaymentLink(linkData: {
   expires_at?: string
   success_url?: string
   cancel_url?: string
-  metadata?: Record<string, any>
+  metadata?: Record<string, JsonValue>
 }): Promise<PaymentLink> {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -708,7 +709,7 @@ export async function createRecurringPayment(paymentData: {
   next_payment_at: string
   max_payments?: number
   description?: string
-  metadata?: Record<string, any>
+  metadata?: Record<string, JsonValue>
 }): Promise<RecurringPayment> {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()

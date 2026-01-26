@@ -2,6 +2,7 @@
 // Comprehensive queries for lead management, campaign tracking, email automation, and marketing analytics
 
 import { createClient } from '@/lib/supabase/client'
+import { DatabaseError, toDbError, JsonValue } from '@/lib/types/database'
 
 // ============================================================================
 // TYPES
@@ -34,8 +35,8 @@ export interface MarketingLead {
   assigned_to?: string
   estimated_value?: number
   notes?: string
-  settings?: any
-  metadata?: any
+  settings?: Record<string, JsonValue>
+  metadata?: Record<string, JsonValue>
   created_at: string
   updated_at: string
 }
@@ -55,8 +56,8 @@ export interface MarketingCampaign {
   channels?: string[]
   tags?: string[]
   created_by?: string
-  settings?: any
-  metadata?: any
+  settings?: Record<string, JsonValue>
+  metadata?: Record<string, JsonValue>
   created_at: string
   updated_at: string
 }
@@ -68,7 +69,7 @@ export interface CampaignGoal {
   target: number
   current: number
   unit: string
-  settings?: any
+  settings?: Record<string, JsonValue>
   created_at: string
   updated_at: string
 }
@@ -87,8 +88,8 @@ export interface CampaignMetrics {
   cost_per_lead: number
   cost_per_conversion: number
   date: string
-  settings?: any
-  metadata?: any
+  settings?: Record<string, JsonValue>
+  metadata?: Record<string, JsonValue>
   created_at: string
   updated_at: string
 }
@@ -109,8 +110,8 @@ export interface EmailCampaign {
   clicked_count: number
   bounced_count: number
   unsubscribed_count: number
-  settings?: any
-  metadata?: any
+  settings?: Record<string, JsonValue>
+  metadata?: Record<string, JsonValue>
   created_at: string
   updated_at: string
 }
@@ -129,8 +130,8 @@ export interface MarketingStats {
   leads_this_month: number
   campaigns_this_month: number
   date: string
-  settings?: any
-  metadata?: any
+  settings?: Record<string, JsonValue>
+  metadata?: Record<string, JsonValue>
   created_at: string
   updated_at: string
 }
@@ -717,7 +718,7 @@ export async function updateEmailCampaign(emailCampaignId: string, updates: Part
 export async function updateEmailCampaignStatus(emailCampaignId: string, status: EmailCampaignStatus) {
   const supabase = createClient()
 
-  const updates: any = { status }
+  const updates: { status: EmailCampaignStatus; sent_at?: string } = { status }
 
   if (status === 'sent') {
     updates.sent_at = new Date().toISOString()
@@ -1010,9 +1011,42 @@ export async function getCampaignPerformanceComparison(userId: string) {
 
 // Missing function stubs - to be fully implemented
 
+// Interfaces for function return types
+interface ConvertedLead {
+  id: string
+  status: string
+  converted_at: string
+  [key: string]: JsonValue
+}
+
+interface CampaignRecord {
+  id: string
+  status: string
+  updated_at: string
+  [key: string]: JsonValue
+}
+
+interface EmailCampaignRecord {
+  id: string
+  status: string
+  sent_at?: string
+  [key: string]: JsonValue
+}
+
+interface CampaignMetricRecord {
+  id: string
+  user_id?: string
+  campaign_id: string
+  metric_name?: string
+  metric_value?: number
+  date?: string
+  updated_at?: string
+  [key: string]: JsonValue
+}
+
 export async function convertLead(
   leadId: string
-): Promise<{ data: any; error: any }> {
+): Promise<{ data: ConvertedLead | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('leads')
@@ -1020,12 +1054,12 @@ export async function convertLead(
     .eq('id', leadId)
     .select()
     .single()
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 export async function pauseCampaign(
   campaignId: string
-): Promise<{ data: any; error: any }> {
+): Promise<{ data: CampaignRecord | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('campaigns')
@@ -1033,12 +1067,12 @@ export async function pauseCampaign(
     .eq('id', campaignId)
     .select()
     .single()
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 export async function resumeCampaign(
   campaignId: string
-): Promise<{ data: any; error: any }> {
+): Promise<{ data: CampaignRecord | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('campaigns')
@@ -1046,12 +1080,12 @@ export async function resumeCampaign(
     .eq('id', campaignId)
     .select()
     .single()
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 export async function sendEmailCampaign(
   campaignId: string
-): Promise<{ data: any; error: any }> {
+): Promise<{ data: EmailCampaignRecord | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('email_campaigns')
@@ -1059,7 +1093,7 @@ export async function sendEmailCampaign(
     .eq('id', campaignId)
     .select()
     .single()
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 export async function createCampaignMetric(
@@ -1070,20 +1104,20 @@ export async function createCampaignMetric(
     metric_value: number
     date?: string
   }
-): Promise<{ data: any; error: any }> {
+): Promise<{ data: CampaignMetricRecord | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('campaign_metrics')
     .insert({ user_id: userId, ...metric })
     .select()
     .single()
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 export async function updateCampaignMetric(
   metricId: string,
   updates: Partial<{ metric_value: number; metric_name: string }>
-): Promise<{ data: any; error: any }> {
+): Promise<{ data: CampaignMetricRecord | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('campaign_metrics')
@@ -1091,24 +1125,24 @@ export async function updateCampaignMetric(
     .eq('id', metricId)
     .select()
     .single()
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 export async function deleteCampaignMetric(
   metricId: string
-): Promise<{ data: any; error: any }> {
+): Promise<{ data: null; error: DatabaseError | null }> {
   const supabase = createClient()
-  const { data, error } = await supabase
+  const { error } = await supabase
     .from('campaign_metrics')
     .delete()
     .eq('id', metricId)
-  return { data, error }
+  return { data: null, error: error ? toDbError(error) : null }
 }
 
 export async function getEmailCampaignsByStatus(
   userId: string,
   status: string
-): Promise<any[]> {
+): Promise<EmailCampaignRecord[]> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('email_campaigns')
@@ -1116,7 +1150,7 @@ export async function getEmailCampaignsByStatus(
     .eq('user_id', userId)
     .eq('status', status)
   if (error) return []
-  return data || []
+  return (data as EmailCampaignRecord[]) || []
 }
 
 export async function getLeadConversionRate(

@@ -7,6 +7,7 @@
 
 import { createClient } from '@/lib/supabase/client'
 import { createFeatureLogger } from '@/lib/logger'
+import { DatabaseError, toDbError, JsonValue } from '@/lib/types/database'
 
 const logger = createFeatureLogger('TeamManagement')
 
@@ -37,7 +38,7 @@ export interface UserRole {
   assigned_at: string
   expires_at?: string
   notes?: string
-  metadata: Record<string, any>
+  metadata: Record<string, JsonValue>
   created_at: string
   updated_at: string
 }
@@ -50,7 +51,7 @@ export interface RolePermission {
   resource_id?: string
   allowed_actions: PermissionAction[]
   scope: string
-  conditions: Record<string, any>
+  conditions: Record<string, JsonValue>
   priority: number
   inherited_from?: string
   is_active: boolean
@@ -67,7 +68,7 @@ export interface UserPermission {
   allowed_actions: PermissionAction[]
   denied_actions: PermissionAction[]
   scope: string
-  conditions: Record<string, any>
+  conditions: Record<string, JsonValue>
   granted_by?: string
   granted_at: string
   expires_at?: string
@@ -76,7 +77,7 @@ export interface UserPermission {
   revoke_reason?: string
   is_active: boolean
   notes?: string
-  metadata: Record<string, any>
+  metadata: Record<string, JsonValue>
   created_at: string
   updated_at: string
 }
@@ -95,6 +96,15 @@ export interface EffectivePermission {
   source: 'role' | 'direct'
 }
 
+export interface UserWithRole {
+  user_id: string
+  role_name: UserRoleType
+  email?: string
+  full_name?: string
+  assigned_at: string
+  is_active: boolean
+}
+
 // ============================================================================
 // USER ROLES CRUD
 // ============================================================================
@@ -109,7 +119,7 @@ export async function getUserRoles(
     team_id?: string
     role_name?: UserRoleType
   }
-): Promise<{ data: UserRole[]; error: any }> {
+): Promise<{ data: UserRole[]; error: DatabaseError | null }> {
   try {
     logger.info('Fetching user roles from Supabase', { userId, filters })
 
@@ -135,7 +145,7 @@ export async function getUserRoles(
 
     if (error) {
       logger.error('Failed to fetch user roles', { error, userId })
-      return { data: [], error }
+      return { data: [], error: toDbError(error) }
     }
 
     logger.info('User roles fetched successfully', {
@@ -144,9 +154,9 @@ export async function getUserRoles(
     })
 
     return { data: data || [], error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching user roles', { error, userId })
-    return { data: [], error }
+    return { data: [], error: toDbError(error) }
   }
 }
 
@@ -156,7 +166,7 @@ export async function getUserRoles(
 export async function getUserRole(
   roleId: string,
   userId: string
-): Promise<{ data: UserRole | null; error: any }> {
+): Promise<{ data: UserRole | null; error: DatabaseError | null }> {
   try {
     logger.info('Fetching single user role', { roleId, userId })
 
@@ -170,13 +180,13 @@ export async function getUserRole(
 
     if (error) {
       logger.error('Failed to fetch user role', { error, roleId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching user role', { error, roleId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -200,7 +210,7 @@ export async function createUserRole(
     expires_at?: string
     notes?: string
   }
-): Promise<{ data: UserRole | null; error: any }> {
+): Promise<{ data: UserRole | null; error: DatabaseError | null }> {
   try {
     logger.info('Creating user role in Supabase', { userId, role_name: role.role_name })
 
@@ -229,7 +239,7 @@ export async function createUserRole(
 
     if (error) {
       logger.error('Failed to create user role', { error, userId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('User role created successfully', {
@@ -238,9 +248,9 @@ export async function createUserRole(
     })
 
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception creating user role', { error, userId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -251,7 +261,7 @@ export async function updateUserRole(
   roleId: string,
   userId: string,
   updates: Partial<UserRole>
-): Promise<{ data: UserRole | null; error: any }> {
+): Promise<{ data: UserRole | null; error: DatabaseError | null }> {
   try {
     logger.info('Updating user role', { roleId, userId, updates })
 
@@ -266,15 +276,15 @@ export async function updateUserRole(
 
     if (error) {
       logger.error('Failed to update user role', { error, roleId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('User role updated successfully', { roleId })
 
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception updating user role', { error, roleId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -284,7 +294,7 @@ export async function updateUserRole(
 export async function deleteUserRole(
   roleId: string,
   userId: string
-): Promise<{ success: boolean; error: any }> {
+): Promise<{ success: boolean; error: DatabaseError | null }> {
   try {
     logger.info('Deleting user role', { roleId, userId })
 
@@ -297,15 +307,15 @@ export async function deleteUserRole(
 
     if (error) {
       logger.error('Failed to delete user role', { error, roleId })
-      return { success: false, error }
+      return { success: false, error: toDbError(error) }
     }
 
     logger.info('User role deleted successfully', { roleId })
 
     return { success: true, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception deleting user role', { error, roleId })
-    return { success: false, error }
+    return { success: false, error: toDbError(error) }
   }
 }
 
@@ -315,7 +325,7 @@ export async function deleteUserRole(
 export async function deactivateUserRole(
   roleId: string,
   userId: string
-): Promise<{ success: boolean; error: any }> {
+): Promise<{ success: boolean; error: DatabaseError | null }> {
   try {
     logger.info('Deactivating user role', { roleId, userId })
 
@@ -328,15 +338,15 @@ export async function deactivateUserRole(
 
     if (error) {
       logger.error('Failed to deactivate user role', { error, roleId })
-      return { success: false, error }
+      return { success: false, error: toDbError(error) }
     }
 
     logger.info('User role deactivated successfully', { roleId })
 
     return { success: true, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception deactivating user role', { error, roleId })
-    return { success: false, error }
+    return { success: false, error: toDbError(error) }
   }
 }
 
@@ -354,7 +364,7 @@ export async function getRolePermissions(
     resource_type?: string
     is_active?: boolean
   }
-): Promise<{ data: RolePermission[]; error: any }> {
+): Promise<{ data: RolePermission[]; error: DatabaseError | null }> {
   try {
     logger.info('Fetching role permissions from Supabase', { userId, filters })
 
@@ -380,7 +390,7 @@ export async function getRolePermissions(
 
     if (error) {
       logger.error('Failed to fetch role permissions', { error, userId })
-      return { data: [], error }
+      return { data: [], error: toDbError(error) }
     }
 
     logger.info('Role permissions fetched successfully', {
@@ -389,9 +399,9 @@ export async function getRolePermissions(
     })
 
     return { data: data || [], error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching role permissions', { error, userId })
-    return { data: [], error }
+    return { data: [], error: toDbError(error) }
   }
 }
 
@@ -406,10 +416,10 @@ export async function createRolePermission(
     resource_id?: string
     allowed_actions: PermissionAction[]
     scope?: string
-    conditions?: Record<string, any>
+    conditions?: Record<string, JsonValue>
     priority?: number
   }
-): Promise<{ data: RolePermission | null; error: any }> {
+): Promise<{ data: RolePermission | null; error: DatabaseError | null }> {
   try {
     logger.info('Creating role permission in Supabase', {
       userId,
@@ -436,7 +446,7 @@ export async function createRolePermission(
 
     if (error) {
       logger.error('Failed to create role permission', { error, userId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Role permission created successfully', {
@@ -445,9 +455,9 @@ export async function createRolePermission(
     })
 
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception creating role permission', { error, userId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -458,7 +468,7 @@ export async function updateRolePermission(
   permissionId: string,
   userId: string,
   updates: Partial<RolePermission>
-): Promise<{ data: RolePermission | null; error: any }> {
+): Promise<{ data: RolePermission | null; error: DatabaseError | null }> {
   try {
     logger.info('Updating role permission', { permissionId, userId })
 
@@ -473,15 +483,15 @@ export async function updateRolePermission(
 
     if (error) {
       logger.error('Failed to update role permission', { error, permissionId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Role permission updated successfully', { permissionId })
 
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception updating role permission', { error, permissionId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -491,7 +501,7 @@ export async function updateRolePermission(
 export async function deleteRolePermission(
   permissionId: string,
   userId: string
-): Promise<{ success: boolean; error: any }> {
+): Promise<{ success: boolean; error: DatabaseError | null }> {
   try {
     logger.info('Deleting role permission', { permissionId, userId })
 
@@ -504,15 +514,15 @@ export async function deleteRolePermission(
 
     if (error) {
       logger.error('Failed to delete role permission', { error, permissionId })
-      return { success: false, error }
+      return { success: false, error: toDbError(error) }
     }
 
     logger.info('Role permission deleted successfully', { permissionId })
 
     return { success: true, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception deleting role permission', { error, permissionId })
-    return { success: false, error }
+    return { success: false, error: toDbError(error) }
   }
 }
 
@@ -530,7 +540,7 @@ export async function getUserPermissions(
     resource_type?: string
     is_active?: boolean
   }
-): Promise<{ data: UserPermission[]; error: any }> {
+): Promise<{ data: UserPermission[]; error: DatabaseError | null }> {
   try {
     logger.info('Fetching user permissions from Supabase', { userId, filters })
 
@@ -556,7 +566,7 @@ export async function getUserPermissions(
 
     if (error) {
       logger.error('Failed to fetch user permissions', { error, userId })
-      return { data: [], error }
+      return { data: [], error: toDbError(error) }
     }
 
     logger.info('User permissions fetched successfully', {
@@ -565,9 +575,9 @@ export async function getUserPermissions(
     })
 
     return { data: data || [], error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching user permissions', { error, userId })
-    return { data: [], error }
+    return { data: [], error: toDbError(error) }
   }
 }
 
@@ -583,11 +593,11 @@ export async function grantUserPermission(
     allowed_actions: PermissionAction[]
     denied_actions?: PermissionAction[]
     scope?: string
-    conditions?: Record<string, any>
+    conditions?: Record<string, JsonValue>
     expires_at?: string
     notes?: string
   }
-): Promise<{ data: UserPermission | null; error: any }> {
+): Promise<{ data: UserPermission | null; error: DatabaseError | null }> {
   try {
     logger.info('Granting user permission in Supabase', {
       userId,
@@ -617,7 +627,7 @@ export async function grantUserPermission(
 
     if (error) {
       logger.error('Failed to grant user permission', { error, userId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('User permission granted successfully', {
@@ -626,9 +636,9 @@ export async function grantUserPermission(
     })
 
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception granting user permission', { error, userId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -639,7 +649,7 @@ export async function revokeUserPermission(
   permissionId: string,
   userId: string,
   reason?: string
-): Promise<{ success: boolean; error: any }> {
+): Promise<{ success: boolean; error: DatabaseError | null }> {
   try {
     logger.info('Revoking user permission', { permissionId, userId, reason })
 
@@ -657,15 +667,15 @@ export async function revokeUserPermission(
 
     if (error) {
       logger.error('Failed to revoke user permission', { error, permissionId })
-      return { success: false, error }
+      return { success: false, error: toDbError(error) }
     }
 
     logger.info('User permission revoked successfully', { permissionId })
 
     return { success: true, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception revoking user permission', { error, permissionId })
-    return { success: false, error }
+    return { success: false, error: toDbError(error) }
   }
 }
 
@@ -675,7 +685,7 @@ export async function revokeUserPermission(
 export async function deleteUserPermission(
   permissionId: string,
   userId: string
-): Promise<{ success: boolean; error: any }> {
+): Promise<{ success: boolean; error: DatabaseError | null }> {
   try {
     logger.info('Deleting user permission', { permissionId, userId })
 
@@ -688,15 +698,15 @@ export async function deleteUserPermission(
 
     if (error) {
       logger.error('Failed to delete user permission', { error, permissionId })
-      return { success: false, error }
+      return { success: false, error: toDbError(error) }
     }
 
     logger.info('User permission deleted successfully', { permissionId })
 
     return { success: true, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception deleting user permission', { error, permissionId })
-    return { success: false, error }
+    return { success: false, error: toDbError(error) }
   }
 }
 
@@ -712,7 +722,7 @@ export async function checkUserPermission(
   resourceType: string,
   action: PermissionAction,
   resourceId?: string
-): Promise<{ hasPermission: boolean; error: any }> {
+): Promise<{ hasPermission: boolean; error: DatabaseError | null }> {
   try {
     logger.info('Checking user permission', { userId, resourceType, action, resourceId })
 
@@ -726,15 +736,15 @@ export async function checkUserPermission(
 
     if (error) {
       logger.error('Failed to check user permission', { error, userId })
-      return { hasPermission: false, error }
+      return { hasPermission: false, error: toDbError(error) }
     }
 
     logger.info('Permission check completed', { userId, hasPermission: data })
 
     return { hasPermission: data as boolean, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception checking user permission', { error, userId })
-    return { hasPermission: false, error }
+    return { hasPermission: false, error: toDbError(error) }
   }
 }
 
@@ -744,7 +754,7 @@ export async function checkUserPermission(
 export async function getEffectivePermissions(
   userId: string,
   resourceType?: string
-): Promise<{ data: EffectivePermission[]; error: any }> {
+): Promise<{ data: EffectivePermission[]; error: DatabaseError | null }> {
   try {
     logger.info('Fetching effective permissions', { userId, resourceType })
 
@@ -756,7 +766,7 @@ export async function getEffectivePermissions(
 
     if (error) {
       logger.error('Failed to fetch effective permissions', { error, userId })
-      return { data: [], error }
+      return { data: [], error: toDbError(error) }
     }
 
     logger.info('Effective permissions fetched', {
@@ -765,9 +775,9 @@ export async function getEffectivePermissions(
     })
 
     return { data: data as EffectivePermission[] || [], error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching effective permissions', { error, userId })
-    return { data: [], error }
+    return { data: [], error: toDbError(error) }
   }
 }
 
@@ -777,7 +787,7 @@ export async function getEffectivePermissions(
 export async function getUsersByRole(
   ownerUserId: string,
   roleName: UserRoleType
-): Promise<{ data: any[]; error: any }> {
+): Promise<{ data: UserWithRole[]; error: DatabaseError | null }> {
   try {
     logger.info('Fetching users by role', { ownerUserId, roleName })
 
@@ -789,7 +799,7 @@ export async function getUsersByRole(
 
     if (error) {
       logger.error('Failed to fetch users by role', { error, ownerUserId })
-      return { data: [], error }
+      return { data: [], error: toDbError(error) }
     }
 
     logger.info('Users by role fetched', {
@@ -797,10 +807,10 @@ export async function getUsersByRole(
       count: data?.length || 0
     })
 
-    return { data: data || [], error: null }
-  } catch (error) {
+    return { data: (data as UserWithRole[]) || [], error: null }
+  } catch (error: unknown) {
     logger.error('Exception fetching users by role', { error, ownerUserId })
-    return { data: [], error }
+    return { data: [], error: toDbError(error) }
   }
 }
 
@@ -809,7 +819,7 @@ export async function getUsersByRole(
  */
 export async function getRoleSummary(
   userId: string
-): Promise<{ data: RoleSummary[]; error: any }> {
+): Promise<{ data: RoleSummary[]; error: DatabaseError | null }> {
   try {
     logger.info('Fetching role summary', { userId })
 
@@ -820,7 +830,7 @@ export async function getRoleSummary(
 
     if (error) {
       logger.error('Failed to fetch role summary', { error, userId })
-      return { data: [], error }
+      return { data: [], error: toDbError(error) }
     }
 
     logger.info('Role summary fetched', {
@@ -829,9 +839,9 @@ export async function getRoleSummary(
     })
 
     return { data: data as RoleSummary[] || [], error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching role summary', { error, userId })
-    return { data: [], error }
+    return { data: [], error: toDbError(error) }
   }
 }
 
@@ -848,7 +858,7 @@ export async function batchGrantPermissions(
     scope?: string
     expires_at?: string
   }
-): Promise<{ success: boolean; count: number; error: any }> {
+): Promise<{ success: boolean; count: number; error: DatabaseError | null }> {
   try {
     logger.info('Batch granting permissions', {
       userId,
@@ -863,7 +873,7 @@ export async function batchGrantPermissions(
       resource_type: permission.resource_type,
       resource_id: permission.resource_id,
       allowed_actions: permission.allowed_actions,
-      denied_actions: [],
+      denied_actions: [] as PermissionAction[],
       scope: permission.scope || 'personal',
       conditions: {},
       granted_by: userId,
@@ -878,7 +888,7 @@ export async function batchGrantPermissions(
 
     if (error) {
       logger.error('Failed to batch grant permissions', { error, userId })
-      return { success: false, count: 0, error }
+      return { success: false, count: 0, error: toDbError(error) }
     }
 
     logger.info('Batch permissions granted successfully', {
@@ -887,8 +897,8 @@ export async function batchGrantPermissions(
     })
 
     return { success: true, count: data.length, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception batch granting permissions', { error, userId })
-    return { success: false, count: 0, error }
+    return { success: false, count: 0, error: toDbError(error) }
   }
 }

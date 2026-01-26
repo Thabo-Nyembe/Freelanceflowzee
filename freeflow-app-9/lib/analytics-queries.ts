@@ -8,6 +8,8 @@
 import { createClient } from '@/lib/supabase/client'
 import { createFeatureLogger } from '@/lib/logger'
 import type { Metric, Insight, Goal, FunnelStage, TimeRange } from '@/lib/analytics-types'
+import type { DatabaseError } from '@/lib/types/database'
+import { toDbError } from '@/lib/types/database'
 
 const logger = createFeatureLogger('AnalyticsQueries')
 
@@ -35,7 +37,7 @@ export interface DailyMetric {
   billable_hours: number
   completion_rate: number
   satisfaction_score: number
-  metadata: Record<string, any>
+  metadata: Record<string, unknown>
   created_at: string
   updated_at: string
 }
@@ -62,9 +64,9 @@ export interface MonthlyMetric {
   on_time_delivery_rate: number
   client_satisfaction: number
   profit_margin: number
-  category_breakdown: Record<string, any>
-  top_clients: any[]
-  metadata: Record<string, any>
+  category_breakdown: Record<string, unknown>
+  top_clients: unknown[]
+  metadata: Record<string, unknown>
   created_at: string
   updated_at: string
 }
@@ -123,7 +125,7 @@ export interface PerformanceMetrics {
  */
 export async function getAnalyticsOverview(
   userId: string
-): Promise<{ data: AnalyticsOverview | null; error: any }> {
+): Promise<{ data: AnalyticsOverview | null; error: DatabaseError | null }> {
   const startTime = performance.now()
 
   try {
@@ -209,9 +211,10 @@ export async function getAnalyticsOverview(
     })
 
     return { data: overview, error: null }
-  } catch (error: any) {
-    logger.error('Exception in getAnalyticsOverview', { error: error.message, userId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getAnalyticsOverview', { error: dbError.message, userId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -221,7 +224,7 @@ export async function getAnalyticsOverview(
 export async function getMonthlyRevenue(
   userId: string,
   months: number = 6
-): Promise<{ data: MonthlyRevenue[]; error: any }> {
+): Promise<{ data: MonthlyRevenue[]; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
     const currentDate = new Date()
@@ -259,9 +262,10 @@ export async function getMonthlyRevenue(
     })
 
     return { data: monthlyRevenue, error: null }
-  } catch (error: any) {
-    logger.error('Exception in getMonthlyRevenue', { error: error.message, userId })
-    return { data: [], error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getMonthlyRevenue', { error: dbError.message, userId })
+    return { data: [], error: dbError }
   }
 }
 
@@ -270,7 +274,7 @@ export async function getMonthlyRevenue(
  */
 export async function getProjectCategories(
   userId: string
-): Promise<{ data: ProjectCategory[]; error: any }> {
+): Promise<{ data: ProjectCategory[]; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
 
@@ -326,9 +330,10 @@ export async function getProjectCategories(
     })
 
     return { data: categories, error: null }
-  } catch (error: any) {
-    logger.error('Exception in getProjectCategories', { error: error.message, userId })
-    return { data: [], error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getProjectCategories', { error: dbError.message, userId })
+    return { data: [], error: dbError }
   }
 }
 
@@ -338,7 +343,7 @@ export async function getProjectCategories(
 export async function getTopClients(
   userId: string,
   limit: number = 10
-): Promise<{ data: TopClient[]; error: any }> {
+): Promise<{ data: TopClient[]; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
 
@@ -361,9 +366,9 @@ export async function getTopClients(
       return { data: [], error: null }
     }
 
-    const topClients: TopClient[] = clients.map((client: any) => {
+    const topClients: TopClient[] = clients.map((client: { id: string; name: string; projects?: Array<{ id: string; budget?: number; status?: string }> }) => {
       const projects = client.projects || []
-      const revenue = projects.reduce((sum: number, p: any) => sum + Number(p.budget || 0), 0)
+      const revenue = projects.reduce((sum: number, p: { budget?: number }) => sum + Number(p.budget || 0), 0)
 
       return {
         name: client.name,
@@ -382,9 +387,10 @@ export async function getTopClients(
     })
 
     return { data: topClients.slice(0, limit), error: null }
-  } catch (error: any) {
-    logger.error('Exception in getTopClients', { error: error.message, userId })
-    return { data: [], error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getTopClients', { error: dbError.message, userId })
+    return { data: [], error: dbError }
   }
 }
 
@@ -393,7 +399,7 @@ export async function getTopClients(
  */
 export async function getPerformanceMetrics(
   userId: string
-): Promise<{ data: PerformanceMetrics | null; error: any }> {
+): Promise<{ data: PerformanceMetrics | null; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
 
@@ -422,9 +428,10 @@ export async function getPerformanceMetrics(
     logger.info('Performance metrics fetched successfully', { userId })
 
     return { data: metrics, error: null }
-  } catch (error: any) {
-    logger.error('Exception in getPerformanceMetrics', { error: error.message, userId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getPerformanceMetrics', { error: dbError.message, userId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -440,7 +447,7 @@ export async function recordDailyMetric(
   date: string,
   category: MetricCategory,
   metrics: Partial<DailyMetric>
-): Promise<{ data: DailyMetric | null; error: any }> {
+): Promise<{ data: DailyMetric | null; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
 
@@ -466,9 +473,10 @@ export async function recordDailyMetric(
     logger.info('Daily metric recorded successfully', { userId, date, category })
 
     return { data, error: null }
-  } catch (error: any) {
-    logger.error('Exception in recordDailyMetric', { error: error.message, userId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in recordDailyMetric', { error: dbError.message, userId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -480,7 +488,7 @@ export async function recordMonthlyMetric(
   year: number,
   month: number,
   metrics: Partial<MonthlyMetric>
-): Promise<{ data: MonthlyMetric | null; error: any }> {
+): Promise<{ data: MonthlyMetric | null; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
 
@@ -506,9 +514,10 @@ export async function recordMonthlyMetric(
     logger.info('Monthly metric recorded successfully', { userId, year, month })
 
     return { data, error: null }
-  } catch (error: any) {
-    logger.error('Exception in recordMonthlyMetric', { error: error.message, userId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in recordMonthlyMetric', { error: dbError.message, userId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -520,7 +529,7 @@ export async function getDailyMetrics(
   startDate: string,
   endDate: string,
   category?: MetricCategory
-): Promise<{ data: DailyMetric[]; error: any }> {
+): Promise<{ data: DailyMetric[]; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
 
@@ -551,9 +560,10 @@ export async function getDailyMetrics(
     })
 
     return { data: data || [], error: null }
-  } catch (error: any) {
-    logger.error('Exception in getDailyMetrics', { error: error.message, userId })
-    return { data: [], error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getDailyMetrics', { error: dbError.message, userId })
+    return { data: [], error: dbError }
   }
 }
 
@@ -563,7 +573,7 @@ export async function getDailyMetrics(
 export async function getMonthlyMetrics(
   userId: string,
   year: number
-): Promise<{ data: MonthlyMetric[]; error: any }> {
+): Promise<{ data: MonthlyMetric[]; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
 
@@ -586,9 +596,10 @@ export async function getMonthlyMetrics(
     })
 
     return { data: data || [], error: null }
-  } catch (error: any) {
-    logger.error('Exception in getMonthlyMetrics', { error: error.message, userId })
-    return { data: [], error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getMonthlyMetrics', { error: dbError.message, userId })
+    return { data: [], error: dbError }
   }
 }
 
@@ -614,7 +625,7 @@ export interface AnalyticsUserPreferences {
  */
 export async function getAnalyticsPreferences(
   userId: string
-): Promise<{ data: AnalyticsUserPreferences | null; error: any }> {
+): Promise<{ data: AnalyticsUserPreferences | null; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
 
@@ -630,9 +641,10 @@ export async function getAnalyticsPreferences(
     }
 
     return { data, error: null }
-  } catch (error: any) {
-    logger.error('Exception in getAnalyticsPreferences', { error: error.message, userId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getAnalyticsPreferences', { error: dbError.message, userId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -641,7 +653,7 @@ export async function getAnalyticsPreferences(
  */
 export async function updateAnalyticsLastRefresh(
   userId: string
-): Promise<{ data: AnalyticsUserPreferences | null; error: any }> {
+): Promise<{ data: AnalyticsUserPreferences | null; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
     const now = new Date().toISOString()
@@ -665,9 +677,10 @@ export async function updateAnalyticsLastRefresh(
 
     logger.info('Analytics last refresh updated', { userId, timestamp: now })
     return { data, error: null }
-  } catch (error: any) {
-    logger.error('Exception in updateAnalyticsLastRefresh', { error: error.message, userId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in updateAnalyticsLastRefresh', { error: dbError.message, userId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -677,7 +690,7 @@ export async function updateAnalyticsLastRefresh(
 export async function updateAnalyticsPreferences(
   userId: string,
   preferences: Partial<AnalyticsUserPreferences>
-): Promise<{ data: AnalyticsUserPreferences | null; error: any }> {
+): Promise<{ data: AnalyticsUserPreferences | null; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
 
@@ -700,9 +713,10 @@ export async function updateAnalyticsPreferences(
 
     logger.info('Analytics preferences updated', { userId, fields: Object.keys(preferences) })
     return { data, error: null }
-  } catch (error: any) {
-    logger.error('Exception in updateAnalyticsPreferences', { error: error.message, userId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in updateAnalyticsPreferences', { error: dbError.message, userId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -717,7 +731,7 @@ export async function updateAnalyticsPreferences(
 export async function computeDailyMetrics(
   userId: string,
   date: string = new Date().toISOString().split('T')[0]
-): Promise<{ success: boolean; error: any }> {
+): Promise<{ success: boolean; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
 
@@ -770,9 +784,10 @@ export async function computeDailyMetrics(
     logger.info('Daily metrics computed successfully', { userId, date })
 
     return { success: true, error: null }
-  } catch (error: any) {
-    logger.error('Exception in computeDailyMetrics', { error: error.message, userId, date })
-    return { success: false, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in computeDailyMetrics', { error: dbError.message, userId, date })
+    return { success: false, error: dbError }
   }
 }
 
@@ -787,7 +802,7 @@ export async function computeDailyMetrics(
 export async function getAnalyticsMetrics(
   userId: string,
   timeRange: TimeRange = 'month'
-): Promise<{ data: Metric[] | null; error: any }> {
+): Promise<{ data: Metric[] | null; error: DatabaseError | null }> {
   try {
     // Get overview data for metrics
     const { data: overview } = await getAnalyticsOverview(userId)
@@ -876,9 +891,10 @@ export async function getAnalyticsMetrics(
 
     logger.info('Analytics metrics fetched', { userId, timeRange, count: metrics.length })
     return { data: metrics, error: null }
-  } catch (error: any) {
-    logger.error('Exception in getAnalyticsMetrics', { error: error.message, userId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getAnalyticsMetrics', { error: dbError.message, userId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -888,7 +904,7 @@ export async function getAnalyticsMetrics(
 export async function getRevenueChart(
   userId: string,
   timeRange: TimeRange = 'month'
-): Promise<{ data: { label: string; value: number }[]; error: any }> {
+): Promise<{ data: { label: string; value: number }[]; error: DatabaseError | null }> {
   try {
     const { data: monthlyData } = await getMonthlyRevenue(userId, 6)
 
@@ -912,9 +928,10 @@ export async function getRevenueChart(
 
     logger.info('Revenue chart data fetched', { userId, timeRange, points: chartData.length })
     return { data: chartData, error: null }
-  } catch (error: any) {
-    logger.error('Exception in getRevenueChart', { error: error.message, userId })
-    return { data: [], error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getRevenueChart', { error: dbError.message, userId })
+    return { data: [], error: dbError }
   }
 }
 
@@ -924,7 +941,7 @@ export async function getRevenueChart(
 export async function getUsersChart(
   userId: string,
   timeRange: TimeRange = 'month'
-): Promise<{ data: { label: string; value: number }[]; error: any }> {
+): Promise<{ data: { label: string; value: number }[]; error: DatabaseError | null }> {
   try {
     // Get client counts over time (simplified - returns mock for now)
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun']
@@ -935,9 +952,10 @@ export async function getUsersChart(
 
     logger.info('Users chart data fetched', { userId, timeRange, points: chartData.length })
     return { data: chartData, error: null }
-  } catch (error: any) {
-    logger.error('Exception in getUsersChart', { error: error.message, userId })
-    return { data: [], error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getUsersChart', { error: dbError.message, userId })
+    return { data: [], error: dbError }
   }
 }
 
@@ -947,7 +965,7 @@ export async function getUsersChart(
 export async function getTrafficSources(
   userId: string,
   timeRange: TimeRange = 'month'
-): Promise<{ data: { label: string; value: number }[]; error: any }> {
+): Promise<{ data: { label: string; value: number }[]; error: DatabaseError | null }> {
   try {
     // Return mock traffic sources data
     const sources = [
@@ -960,9 +978,10 @@ export async function getTrafficSources(
 
     logger.info('Traffic sources data fetched', { userId, timeRange })
     return { data: sources, error: null }
-  } catch (error: any) {
-    logger.error('Exception in getTrafficSources', { error: error.message, userId })
-    return { data: [], error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getTrafficSources', { error: dbError.message, userId })
+    return { data: [], error: dbError }
   }
 }
 
@@ -971,7 +990,7 @@ export async function getTrafficSources(
  */
 export async function getConversionFunnel(
   userId: string
-): Promise<{ data: FunnelStage[]; error: any }> {
+): Promise<{ data: FunnelStage[]; error: DatabaseError | null }> {
   try {
     // Return mock funnel data
     const funnel: FunnelStage[] = [
@@ -984,9 +1003,10 @@ export async function getConversionFunnel(
 
     logger.info('Conversion funnel data fetched', { userId })
     return { data: funnel, error: null }
-  } catch (error: any) {
-    logger.error('Exception in getConversionFunnel', { error: error.message, userId })
-    return { data: [], error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getConversionFunnel', { error: dbError.message, userId })
+    return { data: [], error: dbError }
   }
 }
 
@@ -995,7 +1015,7 @@ export async function getConversionFunnel(
  */
 export async function getInsights(
   userId: string
-): Promise<{ data: Insight[]; error: any }> {
+): Promise<{ data: Insight[]; error: DatabaseError | null }> {
   try {
     // Return mock insights data
     const insights: Insight[] = [
@@ -1044,9 +1064,10 @@ export async function getInsights(
 
     logger.info('Insights data fetched', { userId, count: insights.length })
     return { data: insights, error: null }
-  } catch (error: any) {
-    logger.error('Exception in getInsights', { error: error.message, userId })
-    return { data: [], error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getInsights', { error: dbError.message, userId })
+    return { data: [], error: dbError }
   }
 }
 
@@ -1055,7 +1076,7 @@ export async function getInsights(
  */
 export async function getGoals(
   userId: string
-): Promise<{ data: Goal[]; error: any }> {
+): Promise<{ data: Goal[]; error: DatabaseError | null }> {
   try {
     // Return mock goals data
     const goals: Goal[] = [
@@ -1123,19 +1144,35 @@ export async function getGoals(
 
     logger.info('Goals data fetched', { userId, count: goals.length })
     return { data: goals, error: null }
-  } catch (error: any) {
-    logger.error('Exception in getGoals', { error: error.message, userId })
-    return { data: [], error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getGoals', { error: dbError.message, userId })
+    return { data: [], error: dbError }
   }
 }
 
 /**
  * Get comprehensive analytics stats
  */
+interface AnalyticsStats {
+  totalRevenue: number
+  monthlyRecurringRevenue: number
+  annualRecurringRevenue: number
+  averageOrderValue: number
+  revenueGrowth: number
+  totalUsers: number
+  activeUsers: number
+  userGrowth: number
+  retentionRate: number
+  conversionRate: number
+  customerLifetimeValue: number
+  churnRate: number
+}
+
 export async function getAnalyticsStats(
   userId: string,
   timeRange: TimeRange = 'month'
-): Promise<{ data: any | null; error: any }> {
+): Promise<{ data: AnalyticsStats | null; error: DatabaseError | null }> {
   try {
     const { data: overview } = await getAnalyticsOverview(userId)
 
@@ -1158,8 +1195,9 @@ export async function getAnalyticsStats(
 
     logger.info('Analytics stats fetched', { userId, timeRange })
     return { data: stats, error: null }
-  } catch (error: any) {
-    logger.error('Exception in getAnalyticsStats', { error: error.message, userId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getAnalyticsStats', { error: dbError.message, userId })
+    return { data: null, error: dbError }
   }
 }

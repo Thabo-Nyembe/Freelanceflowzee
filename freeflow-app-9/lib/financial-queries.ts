@@ -3,6 +3,8 @@
 
 import { createClient } from '@/lib/supabase/client'
 import { createFeatureLogger } from '@/lib/logger'
+import type { DatabaseError } from '@/lib/types/database'
+import { toDbError } from '@/lib/types/database'
 
 const logger = createFeatureLogger('financial')
 
@@ -67,7 +69,7 @@ export interface FinancialInsight {
   confidence: number
   is_actionable: boolean
   category: string
-  action_steps: any[]
+  action_steps: Array<{ step: string; completed?: boolean }>
   status: 'active' | 'implemented' | 'dismissed' | 'archived'
   implemented_at?: string
   dismissed_at?: string
@@ -115,6 +117,32 @@ export interface MonthlyTrend {
   profit_margin: number
 }
 
+export interface InvoiceLineItem {
+  description: string
+  quantity: number
+  unit_price: number
+  amount: number
+}
+
+export interface Invoice {
+  id: string
+  user_id: string
+  client_name: string
+  client_email?: string
+  amount: number
+  currency: string
+  due_date: string
+  description?: string
+  line_items?: InvoiceLineItem[]
+  tax_rate?: number
+  discount?: number
+  status: 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled'
+  paid_date?: string
+  paid_amount?: number
+  created_at: string
+  updated_at: string
+}
+
 // ============================================================================
 // Transaction Management
 // ============================================================================
@@ -132,7 +160,7 @@ export async function getTransactions(
     endDate?: string
     search?: string
   }
-): Promise<{ data: FinancialTransaction[]; error: any }> {
+): Promise<{ data: FinancialTransaction[]; error: DatabaseError | null }> {
   const startTime = performance.now()
 
   try {
@@ -170,21 +198,22 @@ export async function getTransactions(
 
     if (error) {
       logger.error('Error fetching transactions', { error: error.message, userId, filters, duration })
-      return { data: [], error }
+      return { data: [], error: toDbError(error) }
     }
 
     logger.info('Transactions fetched successfully', { userId, count: data.length, filters, duration })
     return { data: data as FinancialTransaction[], error: null }
-  } catch (error: any) {
-    logger.error('Exception in getTransactions', { error: error.message, userId })
-    return { data: [], error }
+  } catch (err: unknown) {
+    const dbError = toDbError(err)
+    logger.error('Exception in getTransactions', { error: dbError.message, userId })
+    return { data: [], error: dbError }
   }
 }
 
 /**
  * Get a single transaction by ID
  */
-export async function getTransaction(transactionId: string, userId: string): Promise<{ data: FinancialTransaction | null; error: any }> {
+export async function getTransaction(transactionId: string, userId: string): Promise<{ data: FinancialTransaction | null; error: DatabaseError | null }> {
   const startTime = performance.now()
 
   try {
@@ -201,14 +230,15 @@ export async function getTransaction(transactionId: string, userId: string): Pro
 
     if (error) {
       logger.error('Error fetching transaction', { error: error.message, transactionId, userId, duration })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Transaction fetched successfully', { transactionId, userId, duration })
     return { data: data as FinancialTransaction, error: null }
-  } catch (error: any) {
-    logger.error('Exception in getTransaction', { error: error.message, transactionId, userId })
-    return { data: null, error }
+  } catch (err: unknown) {
+    const dbError = toDbError(err)
+    logger.error('Exception in getTransaction', { error: dbError.message, transactionId, userId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -241,7 +271,7 @@ export async function createTransaction(
     receipt_url?: string
     created_by?: string
   }
-): Promise<{ data: FinancialTransaction | null; error: any }> {
+): Promise<{ data: FinancialTransaction | null; error: DatabaseError | null }> {
   const startTime = performance.now()
 
   try {
@@ -281,14 +311,15 @@ export async function createTransaction(
 
     if (error) {
       logger.error('Error creating transaction', { error: error.message, userId, duration })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Transaction created successfully', { transactionId: data.id, userId, type: transaction.type, amount: transaction.amount, duration })
     return { data: data as FinancialTransaction, error: null }
-  } catch (error: any) {
-    logger.error('Exception in createTransaction', { error: error.message, userId })
-    return { data: null, error }
+  } catch (err: unknown) {
+    const dbError = toDbError(err)
+    logger.error('Exception in createTransaction', { error: dbError.message, userId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -299,7 +330,7 @@ export async function updateTransaction(
   transactionId: string,
   userId: string,
   updates: Partial<Omit<FinancialTransaction, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
-): Promise<{ data: FinancialTransaction | null; error: any }> {
+): Promise<{ data: FinancialTransaction | null; error: DatabaseError | null }> {
   const startTime = performance.now()
 
   try {
@@ -317,21 +348,22 @@ export async function updateTransaction(
 
     if (error) {
       logger.error('Error updating transaction', { error: error.message, transactionId, userId, duration })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Transaction updated successfully', { transactionId, userId, updates: Object.keys(updates), duration })
     return { data: data as FinancialTransaction, error: null }
-  } catch (error: any) {
-    logger.error('Exception in updateTransaction', { error: error.message, transactionId, userId })
-    return { data: null, error }
+  } catch (err: unknown) {
+    const dbError = toDbError(err)
+    logger.error('Exception in updateTransaction', { error: dbError.message, transactionId, userId })
+    return { data: null, error: dbError }
   }
 }
 
 /**
  * Delete a transaction
  */
-export async function deleteTransaction(transactionId: string, userId: string): Promise<{ success: boolean; error: any }> {
+export async function deleteTransaction(transactionId: string, userId: string): Promise<{ success: boolean; error: DatabaseError | null }> {
   const startTime = performance.now()
 
   try {
@@ -347,14 +379,15 @@ export async function deleteTransaction(transactionId: string, userId: string): 
 
     if (error) {
       logger.error('Error deleting transaction', { error: error.message, transactionId, userId, duration })
-      return { success: false, error }
+      return { success: false, error: toDbError(error) }
     }
 
     logger.info('Transaction deleted successfully', { transactionId, userId, duration })
     return { success: true, error: null }
-  } catch (error: any) {
-    logger.error('Exception in deleteTransaction', { error: error.message, transactionId, userId })
-    return { success: false, error }
+  } catch (err: unknown) {
+    const dbError = toDbError(err)
+    logger.error('Exception in deleteTransaction', { error: dbError.message, transactionId, userId })
+    return { success: false, error: dbError }
   }
 }
 
@@ -369,7 +402,7 @@ export async function getFinancialOverview(
   userId: string,
   startDate?: string,
   endDate?: string
-): Promise<{ data: FinancialOverview | null; error: any }> {
+): Promise<{ data: FinancialOverview | null; error: DatabaseError | null }> {
   const startTime = performance.now()
 
   try {
@@ -385,15 +418,16 @@ export async function getFinancialOverview(
 
     if (error) {
       logger.error('Error fetching financial overview', { error: error.message, userId, duration })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     const overview = data[0] as FinancialOverview
     logger.info('Financial overview fetched successfully', { userId, overview, duration })
     return { data: overview, error: null }
-  } catch (error: any) {
-    logger.error('Exception in getFinancialOverview', { error: error.message, userId })
-    return { data: null, error }
+  } catch (err: unknown) {
+    const dbError = toDbError(err)
+    logger.error('Exception in getFinancialOverview', { error: dbError.message, userId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -405,7 +439,7 @@ export async function getCategoryBreakdown(
   type: TransactionType,
   startDate?: string,
   endDate?: string
-): Promise<{ data: CategoryBreakdown[]; error: any }> {
+): Promise<{ data: CategoryBreakdown[]; error: DatabaseError | null }> {
   const startTime = performance.now()
 
   try {
@@ -422,14 +456,15 @@ export async function getCategoryBreakdown(
 
     if (error) {
       logger.error('Error fetching category breakdown', { error: error.message, userId, type, duration })
-      return { data: [], error }
+      return { data: [], error: toDbError(error) }
     }
 
     logger.info('Category breakdown fetched successfully', { userId, type, count: data.length, duration })
     return { data: data as CategoryBreakdown[], error: null }
-  } catch (error: any) {
-    logger.error('Exception in getCategoryBreakdown', { error: error.message, userId })
-    return { data: [], error }
+  } catch (err: unknown) {
+    const dbError = toDbError(err)
+    logger.error('Exception in getCategoryBreakdown', { error: dbError.message, userId })
+    return { data: [], error: dbError }
   }
 }
 
@@ -439,7 +474,7 @@ export async function getCategoryBreakdown(
 export async function getMonthlyTrend(
   userId: string,
   months: number = 6
-): Promise<{ data: MonthlyTrend[]; error: any }> {
+): Promise<{ data: MonthlyTrend[]; error: DatabaseError | null }> {
   const startTime = performance.now()
 
   try {
@@ -454,14 +489,15 @@ export async function getMonthlyTrend(
 
     if (error) {
       logger.error('Error fetching monthly trend', { error: error.message, userId, months, duration })
-      return { data: [], error }
+      return { data: [], error: toDbError(error) }
     }
 
     logger.info('Monthly trend fetched successfully', { userId, months, count: data.length, duration })
     return { data: data as MonthlyTrend[], error: null }
-  } catch (error: any) {
-    logger.error('Exception in getMonthlyTrend', { error: error.message, userId })
-    return { data: [], error }
+  } catch (err: unknown) {
+    const dbError = toDbError(err)
+    logger.error('Exception in getMonthlyTrend', { error: dbError.message, userId })
+    return { data: [], error: dbError }
   }
 }
 
@@ -479,7 +515,7 @@ export async function getFinancialInsights(
     impact?: InsightImpact
     status?: string
   }
-): Promise<{ data: FinancialInsight[]; error: any }> {
+): Promise<{ data: FinancialInsight[]; error: DatabaseError | null }> {
   const startTime = performance.now()
 
   try {
@@ -507,14 +543,15 @@ export async function getFinancialInsights(
 
     if (error) {
       logger.error('Error fetching insights', { error: error.message, userId, duration })
-      return { data: [], error }
+      return { data: [], error: toDbError(error) }
     }
 
     logger.info('Insights fetched successfully', { userId, count: data.length, duration })
     return { data: data as FinancialInsight[], error: null }
-  } catch (error: any) {
-    logger.error('Exception in getFinancialInsights', { error: error.message, userId })
-    return { data: [], error }
+  } catch (err: unknown) {
+    const dbError = toDbError(err)
+    logger.error('Exception in getFinancialInsights', { error: dbError.message, userId })
+    return { data: [], error: dbError }
   }
 }
 
@@ -532,9 +569,9 @@ export async function createFinancialInsight(
     confidence?: number
     is_actionable?: boolean
     category: string
-    action_steps?: any[]
+    action_steps?: Array<{ step: string; completed?: boolean }>
   }
-): Promise<{ data: FinancialInsight | null; error: any }> {
+): Promise<{ data: FinancialInsight | null; error: DatabaseError | null }> {
   const startTime = performance.now()
 
   try {
@@ -561,14 +598,15 @@ export async function createFinancialInsight(
 
     if (error) {
       logger.error('Error creating insight', { error: error.message, userId, duration })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Insight created successfully', { insightId: data.id, userId, type: insight.type, duration })
     return { data: data as FinancialInsight, error: null }
-  } catch (error: any) {
-    logger.error('Exception in createFinancialInsight', { error: error.message, userId })
-    return { data: null, error }
+  } catch (err: unknown) {
+    const dbError = toDbError(err)
+    logger.error('Exception in createFinancialInsight', { error: dbError.message, userId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -579,13 +617,13 @@ export async function updateInsightStatus(
   insightId: string,
   userId: string,
   status: 'active' | 'implemented' | 'dismissed' | 'archived'
-): Promise<{ success: boolean; error: any }> {
+): Promise<{ success: boolean; error: DatabaseError | null }> {
   const startTime = performance.now()
 
   try {
     const supabase = createClient()
 
-    const updates: any = { status }
+    const updates: { status: string; implemented_at?: string; dismissed_at?: string } = { status }
     if (status === 'implemented') {
       updates.implemented_at = new Date().toISOString()
     } else if (status === 'dismissed') {
@@ -602,14 +640,15 @@ export async function updateInsightStatus(
 
     if (error) {
       logger.error('Error updating insight status', { error: error.message, insightId, userId, status, duration })
-      return { success: false, error }
+      return { success: false, error: toDbError(error) }
     }
 
     logger.info('Insight status updated successfully', { insightId, userId, status, duration })
     return { success: true, error: null }
-  } catch (error: any) {
-    logger.error('Exception in updateInsightStatus', { error: error.message, insightId, userId })
-    return { success: false, error }
+  } catch (err: unknown) {
+    const dbError = toDbError(err)
+    logger.error('Exception in updateInsightStatus', { error: dbError.message, insightId, userId })
+    return { success: false, error: dbError }
   }
 }
 
@@ -626,7 +665,7 @@ export async function getFinancialGoals(
     status?: string
     goal_type?: string
   }
-): Promise<{ data: FinancialGoal[]; error: any }> {
+): Promise<{ data: FinancialGoal[]; error: DatabaseError | null }> {
   const startTime = performance.now()
 
   try {
@@ -651,14 +690,15 @@ export async function getFinancialGoals(
 
     if (error) {
       logger.error('Error fetching goals', { error: error.message, userId, duration })
-      return { data: [], error }
+      return { data: [], error: toDbError(error) }
     }
 
     logger.info('Goals fetched successfully', { userId, count: data.length, duration })
     return { data: data as FinancialGoal[], error: null }
-  } catch (error: any) {
-    logger.error('Exception in getFinancialGoals', { error: error.message, userId })
-    return { data: [], error }
+  } catch (err: unknown) {
+    const dbError = toDbError(err)
+    logger.error('Exception in getFinancialGoals', { error: dbError.message, userId })
+    return { data: [], error: dbError }
   }
 }
 
@@ -676,7 +716,7 @@ export async function createFinancialGoal(
     start_date?: string
     target_date: string
   }
-): Promise<{ data: FinancialGoal | null; error: any }> {
+): Promise<{ data: FinancialGoal | null; error: DatabaseError | null }> {
   const startTime = performance.now()
 
   try {
@@ -701,14 +741,15 @@ export async function createFinancialGoal(
 
     if (error) {
       logger.error('Error creating goal', { error: error.message, userId, duration })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Goal created successfully', { goalId: data.id, userId, name: goal.name, duration })
     return { data: data as FinancialGoal, error: null }
-  } catch (error: any) {
-    logger.error('Exception in createFinancialGoal', { error: error.message, userId })
-    return { data: null, error }
+  } catch (err: unknown) {
+    const dbError = toDbError(err)
+    logger.error('Exception in createFinancialGoal', { error: dbError.message, userId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -719,7 +760,7 @@ export async function updateGoalProgress(
   goalId: string,
   userId: string,
   currentAmount: number
-): Promise<{ data: FinancialGoal | null; error: any }> {
+): Promise<{ data: FinancialGoal | null; error: DatabaseError | null }> {
   const startTime = performance.now()
 
   try {
@@ -737,14 +778,15 @@ export async function updateGoalProgress(
 
     if (error) {
       logger.error('Error updating goal progress', { error: error.message, goalId, userId, duration })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Goal progress updated successfully', { goalId, userId, currentAmount, progress: data.progress_percentage, duration })
     return { data: data as FinancialGoal, error: null }
-  } catch (error: any) {
-    logger.error('Exception in updateGoalProgress', { error: error.message, goalId, userId })
-    return { data: null, error }
+  } catch (err: unknown) {
+    const dbError = toDbError(err)
+    logger.error('Exception in updateGoalProgress', { error: dbError.message, goalId, userId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -761,7 +803,7 @@ export async function getInvoices(
     endDate?: string
     limit?: number
   }
-): Promise<{ data: any[]; error: any }> {
+): Promise<{ data: Invoice[]; error: DatabaseError | null }> {
   const startTime = performance.now()
 
   try {
@@ -803,17 +845,21 @@ export async function getInvoices(
       duration: `${duration.toFixed(2)}ms`
     })
 
-    return { data: data || [], error }
-  } catch (error) {
-    logger.error('Failed to fetch invoices', { error, userId })
-    return { data: [], error }
+    if (error) {
+      return { data: [], error: toDbError(error) }
+    }
+    return { data: (data || []) as Invoice[], error: null }
+  } catch (err: unknown) {
+    const dbError = toDbError(err)
+    logger.error('Failed to fetch invoices', { error: dbError, userId })
+    return { data: [], error: dbError }
   }
 }
 
 export async function getInvoice(
   invoiceId: string,
   userId: string
-): Promise<{ data: any | null; error: any }> {
+): Promise<{ data: Invoice | null; error: DatabaseError | null }> {
   const startTime = performance.now()
 
   try {
@@ -829,10 +875,14 @@ export async function getInvoice(
     const duration = performance.now() - startTime
     logger.info('Invoice fetched', { invoiceId, userId, duration: `${duration.toFixed(2)}ms` })
 
-    return { data, error }
-  } catch (error) {
-    logger.error('Failed to fetch invoice', { error, invoiceId, userId })
-    return { data: null, error }
+    if (error) {
+      return { data: null, error: toDbError(error) }
+    }
+    return { data: data as Invoice, error: null }
+  } catch (err: unknown) {
+    const dbError = toDbError(err)
+    logger.error('Failed to fetch invoice', { error: dbError, invoiceId, userId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -845,12 +895,12 @@ export async function createInvoice(
     currency?: string
     due_date: string
     description?: string
-    line_items?: any[]
+    line_items?: InvoiceLineItem[]
     tax_rate?: number
     discount?: number
     status?: 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled'
   }
-): Promise<{ data: any | null; error: any }> {
+): Promise<{ data: Invoice | null; error: DatabaseError | null }> {
   const startTime = performance.now()
 
   try {
@@ -875,10 +925,14 @@ export async function createInvoice(
       duration: `${duration.toFixed(2)}ms`
     })
 
-    return { data, error }
-  } catch (error) {
-    logger.error('Failed to create invoice', { error, userId })
-    return { data: null, error }
+    if (error) {
+      return { data: null, error: toDbError(error) }
+    }
+    return { data: data as Invoice, error: null }
+  } catch (err: unknown) {
+    const dbError = toDbError(err)
+    logger.error('Failed to create invoice', { error: dbError, userId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -891,14 +945,14 @@ export async function updateInvoice(
     amount: number
     due_date: string
     description: string
-    line_items: any[]
+    line_items: InvoiceLineItem[]
     tax_rate: number
     discount: number
     status: 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled'
     paid_date: string
     paid_amount: number
   }>
-): Promise<{ data: any | null; error: any }> {
+): Promise<{ data: Invoice | null; error: DatabaseError | null }> {
   const startTime = performance.now()
 
   try {
@@ -915,17 +969,21 @@ export async function updateInvoice(
     const duration = performance.now() - startTime
     logger.info('Invoice updated', { invoiceId, userId, duration: `${duration.toFixed(2)}ms` })
 
-    return { data, error }
-  } catch (error) {
-    logger.error('Failed to update invoice', { error, invoiceId, userId })
-    return { data: null, error }
+    if (error) {
+      return { data: null, error: toDbError(error) }
+    }
+    return { data: data as Invoice, error: null }
+  } catch (err: unknown) {
+    const dbError = toDbError(err)
+    logger.error('Failed to update invoice', { error: dbError, invoiceId, userId })
+    return { data: null, error: dbError }
   }
 }
 
 export async function deleteInvoice(
   invoiceId: string,
   userId: string
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   const startTime = performance.now()
 
   try {
@@ -940,9 +998,13 @@ export async function deleteInvoice(
     const duration = performance.now() - startTime
     logger.info('Invoice deleted', { invoiceId, userId, duration: `${duration.toFixed(2)}ms` })
 
-    return { error }
-  } catch (error) {
-    logger.error('Failed to delete invoice', { error, invoiceId, userId })
-    return { error }
+    if (error) {
+      return { error: toDbError(error) }
+    }
+    return { error: null }
+  } catch (err: unknown) {
+    const dbError = toDbError(err)
+    logger.error('Failed to delete invoice', { error: dbError, invoiceId, userId })
+    return { error: dbError }
   }
 }

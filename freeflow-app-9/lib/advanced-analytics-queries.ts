@@ -3,6 +3,7 @@
  */
 
 import { createClient } from '@/lib/supabase/client'
+import type { JsonValue } from '@/lib/types/database'
 
 export type MetricType = 'revenue' | 'users' | 'engagement' | 'conversion' | 'retention' | 'performance'
 export type TimeRange = 'today' | 'week' | 'month' | 'quarter' | 'year' | 'custom'
@@ -52,7 +53,7 @@ export interface DashboardWidget {
   title: string
   description?: string
   data_source: string
-  config: Record<string, any>
+  config: Record<string, JsonValue>
   position_x: number
   position_y: number
   width: number
@@ -67,8 +68,8 @@ export interface DashboardFilter {
   dashboard_id: string
   name: string
   type: FilterType
-  value?: any
-  options?: any[]
+  value?: JsonValue
+  options?: JsonValue[]
   created_at: string
 }
 
@@ -85,7 +86,7 @@ export interface AnalyticsReport {
   schedule_day_of_month?: number
   schedule_time?: string
   recipients: string[]
-  sections: any[]
+  sections: JsonValue[]
   last_generated_at?: string
   created_at: string
   updated_at: string
@@ -145,7 +146,7 @@ export interface AnalyticsCohort {
   start_date: string
   end_date: string
   size: number
-  retention_data: any[]
+  retention_data: JsonValue[]
   created_at: string
   updated_at: string
 }
@@ -155,7 +156,7 @@ export interface AnalyticsSegment {
   user_id: string
   name: string
   description?: string
-  criteria: any[]
+  criteria: JsonValue[]
   size: number
   created_at: string
   updated_at: string

@@ -11,6 +11,7 @@
 
 import { createClient } from '@/lib/supabase/client'
 import { createFeatureLogger } from '@/lib/logger'
+import { DatabaseError, toDbError } from '@/lib/types/database'
 
 const logger = createFeatureLogger('CommunityHub')
 
@@ -188,7 +189,7 @@ export async function getMembers(
     skills?: string[]
     search?: string
   }
-): Promise<{ data: CommunityMember[] | null; error: any }> {
+): Promise<{ data: CommunityMember[] | null; error: DatabaseError | null }> {
   const startTime = performance.now()
 
   try {
@@ -230,7 +231,7 @@ export async function getMembers(
 
     if (error) {
       logger.error('Failed to fetch members', { error: error.message })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     const duration = performance.now() - startTime
@@ -241,9 +242,10 @@ export async function getMembers(
     })
 
     return { data, error: null }
-  } catch (error: any) {
-    logger.error('Exception in getMembers', { error: error.message })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getMembers', { error: dbError.message })
+    return { data: null, error: dbError }
   }
 }
 
@@ -252,7 +254,7 @@ export async function getMembers(
  */
 export async function getMemberById(
   memberId: string
-): Promise<{ data: CommunityMember | null; error: any }> {
+): Promise<{ data: CommunityMember | null; error: DatabaseError | null }> {
   try {
     logger.info('Fetching member by ID', { memberId })
 
@@ -266,15 +268,16 @@ export async function getMemberById(
 
     if (error) {
       logger.error('Failed to fetch member', { error: error.message, memberId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Member fetched successfully', { memberId })
 
     return { data, error: null }
-  } catch (error: any) {
-    logger.error('Exception in getMemberById', { error: error.message, memberId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getMemberById', { error: dbError.message, memberId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -283,7 +286,7 @@ export async function getMemberById(
  */
 export async function getMemberByUserId(
   userId: string
-): Promise<{ data: CommunityMember | null; error: any }> {
+): Promise<{ data: CommunityMember | null; error: DatabaseError | null }> {
   try {
     logger.info('Fetching member by user ID', { userId })
 
@@ -297,15 +300,16 @@ export async function getMemberByUserId(
 
     if (error) {
       logger.error('Failed to fetch member by user ID', { error: error.message, userId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Member fetched successfully', { userId })
 
     return { data, error: null }
-  } catch (error: any) {
-    logger.error('Exception in getMemberByUserId', { error: error.message, userId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getMemberByUserId', { error: dbError.message, userId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -326,7 +330,7 @@ export async function createMember(
     hourly_rate?: number
     portfolio_url?: string
   }
-): Promise<{ data: CommunityMember | null; error: any }> {
+): Promise<{ data: CommunityMember | null; error: DatabaseError | null }> {
   try {
     logger.info('Creating member profile', { userId, name: member.name })
 
@@ -352,15 +356,16 @@ export async function createMember(
 
     if (error) {
       logger.error('Failed to create member', { error: error.message, userId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Member created successfully', { memberId: data.id, name: member.name })
 
     return { data, error: null }
-  } catch (error: any) {
-    logger.error('Exception in createMember', { error: error.message, userId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in createMember', { error: dbError.message, userId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -370,7 +375,7 @@ export async function createMember(
 export async function updateMember(
   memberId: string,
   updates: Partial<CommunityMember>
-): Promise<{ data: CommunityMember | null; error: any }> {
+): Promise<{ data: CommunityMember | null; error: DatabaseError | null }> {
   try {
     logger.info('Updating member profile', { memberId, updates })
 
@@ -385,15 +390,16 @@ export async function updateMember(
 
     if (error) {
       logger.error('Failed to update member', { error: error.message, memberId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Member updated successfully', { memberId })
 
     return { data, error: null }
-  } catch (error: any) {
-    logger.error('Exception in updateMember', { error: error.message, memberId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in updateMember', { error: dbError.message, memberId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -412,7 +418,7 @@ export async function getPosts(
     tags?: string[]
     search?: string
   }
-): Promise<{ data: CommunityPost[] | null; error: any }> {
+): Promise<{ data: CommunityPost[] | null; error: DatabaseError | null }> {
   try {
     logger.info('Fetching posts', { filters })
 
@@ -448,15 +454,16 @@ export async function getPosts(
 
     if (error) {
       logger.error('Failed to fetch posts', { error: error.message })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Posts fetched successfully', { count: data?.length || 0 })
 
     return { data, error: null }
-  } catch (error: any) {
-    logger.error('Exception in getPosts', { error: error.message })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getPosts', { error: dbError.message })
+    return { data: null, error: dbError }
   }
 }
 
@@ -473,7 +480,7 @@ export async function createPost(
     hashtags?: string[]
     mentions?: string[]
   }
-): Promise<{ data: CommunityPost | null; error: any }> {
+): Promise<{ data: CommunityPost | null; error: DatabaseError | null }> {
   try {
     logger.info('Creating post', { authorId, type: post.type })
 
@@ -495,15 +502,16 @@ export async function createPost(
 
     if (error) {
       logger.error('Failed to create post', { error: error.message, authorId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Post created successfully', { postId: data.id })
 
     return { data, error: null }
-  } catch (error: any) {
-    logger.error('Exception in createPost', { error: error.message, authorId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in createPost', { error: dbError.message, authorId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -513,7 +521,7 @@ export async function createPost(
 export async function updatePost(
   postId: string,
   updates: Partial<CommunityPost>
-): Promise<{ data: CommunityPost | null; error: any }> {
+): Promise<{ data: CommunityPost | null; error: DatabaseError | null }> {
   try {
     logger.info('Updating post', { postId, updates })
 
@@ -528,15 +536,16 @@ export async function updatePost(
 
     if (error) {
       logger.error('Failed to update post', { error: error.message, postId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Post updated successfully', { postId })
 
     return { data, error: null }
-  } catch (error: any) {
-    logger.error('Exception in updatePost', { error: error.message, postId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in updatePost', { error: dbError.message, postId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -545,7 +554,7 @@ export async function updatePost(
  */
 export async function deletePost(
   postId: string
-): Promise<{ success: boolean; error: any }> {
+): Promise<{ success: boolean; error: DatabaseError | null }> {
   try {
     logger.info('Deleting post', { postId })
 
@@ -558,15 +567,16 @@ export async function deletePost(
 
     if (error) {
       logger.error('Failed to delete post', { error: error.message, postId })
-      return { success: false, error }
+      return { success: false, error: toDbError(error) }
     }
 
     logger.info('Post deleted successfully', { postId })
 
     return { success: true, error: null }
-  } catch (error: any) {
-    logger.error('Exception in deletePost', { error: error.message, postId })
-    return { success: false, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in deletePost', { error: dbError.message, postId })
+    return { success: false, error: dbError }
   }
 }
 
@@ -576,7 +586,7 @@ export async function deletePost(
 export async function togglePostLike(
   postId: string,
   userId: string
-): Promise<{ data: PostLike | null; removed: boolean; error: any }> {
+): Promise<{ data: PostLike | null; removed: boolean; error: DatabaseError | null }> {
   try {
     logger.info('Toggling post like', { postId, userId })
 
@@ -599,7 +609,7 @@ export async function togglePostLike(
 
       if (error) {
         logger.error('Failed to remove like', { error: error.message })
-        return { data: null, removed: false, error }
+        return { data: null, removed: false, error: toDbError(error) }
       }
 
       logger.info('Like removed', { postId })
@@ -614,15 +624,16 @@ export async function togglePostLike(
 
       if (error) {
         logger.error('Failed to add like', { error: error.message })
-        return { data: null, removed: false, error }
+        return { data: null, removed: false, error: toDbError(error) }
       }
 
       logger.info('Like added', { postId })
       return { data, removed: false, error: null }
     }
-  } catch (error: any) {
-    logger.error('Exception in togglePostLike', { error: error.message, postId })
-    return { data: null, removed: false, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in togglePostLike', { error: dbError.message, postId })
+    return { data: null, removed: false, error: dbError }
   }
 }
 
@@ -635,7 +646,7 @@ export async function togglePostLike(
  */
 export async function getComments(
   postId: string
-): Promise<{ data: Comment[] | null; error: any }> {
+): Promise<{ data: Comment[] | null; error: DatabaseError | null }> {
   try {
     logger.info('Fetching comments', { postId })
 
@@ -649,15 +660,16 @@ export async function getComments(
 
     if (error) {
       logger.error('Failed to fetch comments', { error: error.message, postId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Comments fetched successfully', { postId, count: data?.length || 0 })
 
     return { data, error: null }
-  } catch (error: any) {
-    logger.error('Exception in getComments', { error: error.message, postId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getComments', { error: dbError.message, postId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -669,7 +681,7 @@ export async function addComment(
   authorId: string,
   content: string,
   parentId?: string
-): Promise<{ data: Comment | null; error: any }> {
+): Promise<{ data: Comment | null; error: DatabaseError | null }> {
   try {
     logger.info('Adding comment', { postId, authorId, parentId })
 
@@ -688,15 +700,16 @@ export async function addComment(
 
     if (error) {
       logger.error('Failed to add comment', { error: error.message, postId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Comment added successfully', { commentId: data.id })
 
     return { data, error: null }
-  } catch (error: any) {
-    logger.error('Exception in addComment', { error: error.message, postId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in addComment', { error: dbError.message, postId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -705,7 +718,7 @@ export async function addComment(
  */
 export async function deleteComment(
   commentId: string
-): Promise<{ success: boolean; error: any }> {
+): Promise<{ success: boolean; error: DatabaseError | null }> {
   try {
     logger.info('Deleting comment', { commentId })
 
@@ -718,15 +731,16 @@ export async function deleteComment(
 
     if (error) {
       logger.error('Failed to delete comment', { error: error.message, commentId })
-      return { success: false, error }
+      return { success: false, error: toDbError(error) }
     }
 
     logger.info('Comment deleted successfully', { commentId })
 
     return { success: true, error: null }
-  } catch (error: any) {
-    logger.error('Exception in deleteComment', { error: error.message, commentId })
-    return { success: false, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in deleteComment', { error: dbError.message, commentId })
+    return { success: false, error: dbError }
   }
 }
 
@@ -743,7 +757,7 @@ export async function getGroups(
     category?: string
     search?: string
   }
-): Promise<{ data: CommunityGroup[] | null; error: any }> {
+): Promise<{ data: CommunityGroup[] | null; error: DatabaseError | null }> {
   try {
     logger.info('Fetching groups', { filters })
 
@@ -770,15 +784,16 @@ export async function getGroups(
 
     if (error) {
       logger.error('Failed to fetch groups', { error: error.message })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Groups fetched successfully', { count: data?.length || 0 })
 
     return { data, error: null }
-  } catch (error: any) {
-    logger.error('Exception in getGroups', { error: error.message })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getGroups', { error: dbError.message })
+    return { data: null, error: dbError }
   }
 }
 
@@ -795,7 +810,7 @@ export async function createGroup(
     cover_image?: string
     tags?: string[]
   }
-): Promise<{ data: CommunityGroup | null; error: any }> {
+): Promise<{ data: CommunityGroup | null; error: DatabaseError | null }> {
   try {
     logger.info('Creating group', { name: group.name })
 
@@ -817,15 +832,16 @@ export async function createGroup(
 
     if (error) {
       logger.error('Failed to create group', { error: error.message })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Group created successfully', { groupId: data.id })
 
     return { data, error: null }
-  } catch (error: any) {
-    logger.error('Exception in createGroup', { error: error.message })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in createGroup', { error: dbError.message })
+    return { data: null, error: dbError }
   }
 }
 
@@ -836,7 +852,7 @@ export async function joinGroup(
   groupId: string,
   memberId: string,
   role: string = 'member'
-): Promise<{ data: GroupMember | null; error: any }> {
+): Promise<{ data: GroupMember | null; error: DatabaseError | null }> {
   try {
     logger.info('Joining group', { groupId, memberId })
 
@@ -854,15 +870,16 @@ export async function joinGroup(
 
     if (error) {
       logger.error('Failed to join group', { error: error.message, groupId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Joined group successfully', { groupId, memberId })
 
     return { data, error: null }
-  } catch (error: any) {
-    logger.error('Exception in joinGroup', { error: error.message, groupId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in joinGroup', { error: dbError.message, groupId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -872,7 +889,7 @@ export async function joinGroup(
 export async function leaveGroup(
   groupId: string,
   memberId: string
-): Promise<{ success: boolean; error: any }> {
+): Promise<{ success: boolean; error: DatabaseError | null }> {
   try {
     logger.info('Leaving group', { groupId, memberId })
 
@@ -886,15 +903,16 @@ export async function leaveGroup(
 
     if (error) {
       logger.error('Failed to leave group', { error: error.message, groupId })
-      return { success: false, error }
+      return { success: false, error: toDbError(error) }
     }
 
     logger.info('Left group successfully', { groupId, memberId })
 
     return { success: true, error: null }
-  } catch (error: any) {
-    logger.error('Exception in leaveGroup', { error: error.message, groupId })
-    return { success: false, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in leaveGroup', { error: dbError.message, groupId })
+    return { success: false, error: dbError }
   }
 }
 
@@ -912,7 +930,7 @@ export async function getEvents(
     upcoming?: boolean
     search?: string
   }
-): Promise<{ data: CommunityEvent[] | null; error: any }> {
+): Promise<{ data: CommunityEvent[] | null; error: DatabaseError | null }> {
   try {
     logger.info('Fetching events', { filters })
 
@@ -943,15 +961,16 @@ export async function getEvents(
 
     if (error) {
       logger.error('Failed to fetch events', { error: error.message })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Events fetched successfully', { count: data?.length || 0 })
 
     return { data, error: null }
-  } catch (error: any) {
-    logger.error('Exception in getEvents', { error: error.message })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getEvents', { error: dbError.message })
+    return { data: null, error: dbError }
   }
 }
 
@@ -972,7 +991,7 @@ export async function createEvent(
     price?: number
     tags?: string[]
   }
-): Promise<{ data: CommunityEvent | null; error: any }> {
+): Promise<{ data: CommunityEvent | null; error: DatabaseError | null }> {
   try {
     logger.info('Creating event', { organizerId, title: event.title })
 
@@ -998,15 +1017,16 @@ export async function createEvent(
 
     if (error) {
       logger.error('Failed to create event', { error: error.message })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Event created successfully', { eventId: data.id })
 
     return { data, error: null }
-  } catch (error: any) {
-    logger.error('Exception in createEvent', { error: error.message })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in createEvent', { error: dbError.message })
+    return { data: null, error: dbError }
   }
 }
 
@@ -1018,7 +1038,7 @@ export async function rsvpEvent(
   memberId: string,
   isAttending: boolean = true,
   isInterested: boolean = false
-): Promise<{ data: EventAttendee | null; error: any }> {
+): Promise<{ data: EventAttendee | null; error: DatabaseError | null }> {
   try {
     logger.info('RSVP to event', { eventId, memberId, isAttending })
 
@@ -1037,15 +1057,16 @@ export async function rsvpEvent(
 
     if (error) {
       logger.error('Failed to RSVP', { error: error.message, eventId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('RSVP successful', { eventId, memberId })
 
     return { data, error: null }
-  } catch (error: any) {
-    logger.error('Exception in rsvpEvent', { error: error.message, eventId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in rsvpEvent', { error: dbError.message, eventId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -1059,7 +1080,7 @@ export async function rsvpEvent(
 export async function sendConnectionRequest(
   requesterId: string,
   recipientId: string
-): Promise<{ data: Connection | null; error: any }> {
+): Promise<{ data: Connection | null; error: DatabaseError | null }> {
   try {
     logger.info('Sending connection request', { requesterId, recipientId })
 
@@ -1077,15 +1098,16 @@ export async function sendConnectionRequest(
 
     if (error) {
       logger.error('Failed to send connection request', { error: error.message })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Connection request sent', { connectionId: data.id })
 
     return { data, error: null }
-  } catch (error: any) {
-    logger.error('Exception in sendConnectionRequest', { error: error.message })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in sendConnectionRequest', { error: dbError.message })
+    return { data: null, error: dbError }
   }
 }
 
@@ -1094,7 +1116,7 @@ export async function sendConnectionRequest(
  */
 export async function acceptConnectionRequest(
   connectionId: string
-): Promise<{ data: Connection | null; error: any }> {
+): Promise<{ data: Connection | null; error: DatabaseError | null }> {
   try {
     logger.info('Accepting connection request', { connectionId })
 
@@ -1112,15 +1134,16 @@ export async function acceptConnectionRequest(
 
     if (error) {
       logger.error('Failed to accept connection', { error: error.message })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Connection accepted', { connectionId })
 
     return { data, error: null }
-  } catch (error: any) {
-    logger.error('Exception in acceptConnectionRequest', { error: error.message })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in acceptConnectionRequest', { error: dbError.message })
+    return { data: null, error: dbError }
   }
 }
 
@@ -1130,7 +1153,7 @@ export async function acceptConnectionRequest(
 export async function getConnections(
   memberId: string,
   status?: string
-): Promise<{ data: Connection[] | null; error: any }> {
+): Promise<{ data: Connection[] | null; error: DatabaseError | null }> {
   try {
     logger.info('Fetching connections', { memberId, status })
 
@@ -1149,15 +1172,16 @@ export async function getConnections(
 
     if (error) {
       logger.error('Failed to fetch connections', { error: error.message })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Connections fetched successfully', { count: data?.length || 0 })
 
     return { data, error: null }
-  } catch (error: any) {
-    logger.error('Exception in getConnections', { error: error.message })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getConnections', { error: dbError.message })
+    return { data: null, error: dbError }
   }
 }
 
@@ -1177,7 +1201,7 @@ export async function getCommunityStats(): Promise<{
     onlineMembers: number
     verifiedMembers: number
   } | null
-  error: any
+  error: DatabaseError | null
 }> {
   try {
     logger.info('Fetching community statistics')
@@ -1214,8 +1238,9 @@ export async function getCommunityStats(): Promise<{
     logger.info('Community statistics calculated', { stats })
 
     return { data: stats, error: null }
-  } catch (error: any) {
-    logger.error('Exception in getCommunityStats', { error: error.message })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getCommunityStats', { error: dbError.message })
+    return { data: null, error: dbError }
   }
 }

@@ -6,6 +6,22 @@
 
 import { createClient } from './supabase/client'
 
+/**
+ * Raw project data from Supabase query with client join
+ */
+interface ProjectWithClient {
+  id: string
+  name: string
+  status: string | null
+  budget: number | null
+  deadline: string | null
+  progress: number | null
+  priority: string | null
+  category: string | null
+  client_id: string | null
+  clients: { id: string; name: string }[] | null
+}
+
 export interface DashboardStats {
   projects: {
     total: number
@@ -260,10 +276,10 @@ export async function getRecentProjects(userId: string, limit: number = 3) {
     if (error) throw error
 
     // Transform to match the expected format
-    const projects = (data || []).map((project: any) => ({
+    const projects = (data || []).map((project: ProjectWithClient) => ({
       id: project.id,
       name: project.name,
-      client: project.clients?.name || 'No Client',
+      client: project.clients?.[0]?.name || 'No Client',
       progress: project.progress || 0,
       status: project.status || 'active',
       value: project.budget || 0,
@@ -272,7 +288,7 @@ export async function getRecentProjects(userId: string, limit: number = 3) {
       category: project.category || 'general',
       aiAutomation: false, // TODO: Implement AI automation tracking
       collaboration: 0, // TODO: Implement collaboration count
-      estimatedCompletion: calculateEstimatedCompletion(project.progress, project.deadline)
+      estimatedCompletion: calculateEstimatedCompletion(project.progress || 0, project.deadline || '')
     }))
 
     return projects

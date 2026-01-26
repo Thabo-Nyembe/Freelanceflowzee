@@ -3,6 +3,7 @@
  */
 
 import { createClient } from '@/lib/supabase/client'
+import type { JsonValue } from '@/lib/types/database'
 
 export type InsightType = 'trend' | 'anomaly' | 'forecast' | 'pattern' | 'recommendation' | 'alert'
 export type MetricCategory = 'revenue' | 'users' | 'performance' | 'engagement' | 'conversion' | 'retention' | 'churn'
@@ -90,7 +91,7 @@ export interface MLPattern {
   description: string
   frequency: PatternFrequency
   confidence: PredictionConfidence
-  occurrences: any[]
+  occurrences: JsonValue[]
   next_occurrence_date?: string
   next_occurrence_probability?: number
   insights: string[]

@@ -14,6 +14,7 @@
  */
 
 import { createClient } from '@/lib/supabase/client'
+import type { DatabaseError } from '@/lib/types/database'
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -138,7 +139,7 @@ export async function getProjectAnalyses(
     min_profitability?: number
     max_risk?: number
   }
-): Promise<{ data: ProjectAnalysis[] | null; error: any }> {
+): Promise<{ data: ProjectAnalysis[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   let query = supabase
     .from('project_analyses')
@@ -162,7 +163,7 @@ export async function getProjectAnalyses(
 
 export async function getProjectAnalysis(
   analysisId: string
-): Promise<{ data: ProjectAnalysis | null; error: any }> {
+): Promise<{ data: ProjectAnalysis | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('project_analyses')
@@ -188,7 +189,7 @@ export async function createProjectAnalysis(
     estimated_margin: number
     recommendations?: string[]
   }
-): Promise<{ data: ProjectAnalysis | null; error: any }> {
+): Promise<{ data: ProjectAnalysis | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('project_analyses')
@@ -205,7 +206,7 @@ export async function createProjectAnalysis(
 export async function updateProjectAnalysis(
   analysisId: string,
   updates: Partial<Omit<ProjectAnalysis, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
-): Promise<{ data: ProjectAnalysis | null; error: any }> {
+): Promise<{ data: ProjectAnalysis | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('project_analyses')
@@ -219,7 +220,7 @@ export async function updateProjectAnalysis(
 
 export async function deleteProjectAnalysis(
   analysisId: string
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   const supabase = createClient()
   const { error } = await supabase
     .from('project_analyses')
@@ -232,7 +233,7 @@ export async function deleteProjectAnalysis(
 export async function getTopProfitableProjects(
   userId: string,
   limit: number = 10
-): Promise<{ data: ProjectAnalysis[] | null; error: any }> {
+): Promise<{ data: ProjectAnalysis[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('project_analyses')
@@ -248,7 +249,7 @@ export async function getHighRiskProjects(
   userId: string,
   riskThreshold: number = 70,
   limit: number = 10
-): Promise<{ data: ProjectAnalysis[] | null; error: any }> {
+): Promise<{ data: ProjectAnalysis[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('project_analyses')
@@ -263,7 +264,7 @@ export async function getHighRiskProjects(
 
 export async function bulkDeleteAnalyses(
   analysisIds: string[]
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   const supabase = createClient()
   const { error } = await supabase
     .from('project_analyses')
@@ -285,7 +286,7 @@ export async function getBusinessInsights(
     is_actionable?: boolean
     is_implemented?: boolean
   }
-): Promise<{ data: BusinessInsight[] | null; error: any }> {
+): Promise<{ data: BusinessInsight[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   let query = supabase
     .from('business_insights')
@@ -320,7 +321,7 @@ export async function createBusinessInsight(
     is_actionable?: boolean
     recommendation?: string
   }
-): Promise<{ data: BusinessInsight | null; error: any }> {
+): Promise<{ data: BusinessInsight | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('business_insights')
@@ -334,7 +335,7 @@ export async function createBusinessInsight(
 export async function updateBusinessInsight(
   insightId: string,
   updates: Partial<Omit<BusinessInsight, 'id' | 'analysis_id' | 'created_at' | 'updated_at' | 'implemented_at'>>
-): Promise<{ data: BusinessInsight | null; error: any }> {
+): Promise<{ data: BusinessInsight | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('business_insights')
@@ -348,7 +349,7 @@ export async function updateBusinessInsight(
 
 export async function markInsightImplemented(
   insightId: string
-): Promise<{ data: BusinessInsight | null; error: any }> {
+): Promise<{ data: BusinessInsight | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('business_insights')
@@ -362,7 +363,7 @@ export async function markInsightImplemented(
 
 export async function getActionableInsights(
   analysisId: string
-): Promise<{ data: BusinessInsight[] | null; error: any }> {
+): Promise<{ data: BusinessInsight[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('business_insights')
@@ -385,7 +386,7 @@ export async function bulkCreateInsights(
     is_actionable?: boolean
     recommendation?: string
   }[]
-): Promise<{ data: BusinessInsight[] | null; error: any }> {
+): Promise<{ data: BusinessInsight[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('business_insights')
@@ -397,7 +398,7 @@ export async function bulkCreateInsights(
 
 export async function deleteBusinessInsight(
   insightId: string
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   const supabase = createClient()
   const { error } = await supabase
     .from('business_insights')
@@ -413,7 +414,7 @@ export async function deleteBusinessInsight(
 
 export async function getPricingRecommendations(
   userId: string
-): Promise<{ data: PricingRecommendation[] | null; error: any }> {
+): Promise<{ data: PricingRecommendation[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('pricing_recommendations')
@@ -439,7 +440,7 @@ export async function createPricingRecommendation(
     experience_years?: number
     market?: string
   }
-): Promise<{ data: PricingRecommendation | null; error: any }> {
+): Promise<{ data: PricingRecommendation | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('pricing_recommendations')
@@ -456,7 +457,7 @@ export async function createPricingRecommendation(
 export async function updatePricingRecommendation(
   recommendationId: string,
   updates: Partial<Omit<PricingRecommendation, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
-): Promise<{ data: PricingRecommendation | null; error: any }> {
+): Promise<{ data: PricingRecommendation | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('pricing_recommendations')
@@ -470,7 +471,7 @@ export async function updatePricingRecommendation(
 
 export async function deletePricingRecommendation(
   recommendationId: string
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   const supabase = createClient()
   const { error } = await supabase
     .from('pricing_recommendations')
@@ -482,7 +483,7 @@ export async function deletePricingRecommendation(
 
 export async function getLatestPricingRecommendation(
   userId: string
-): Promise<{ data: PricingRecommendation | null; error: any }> {
+): Promise<{ data: PricingRecommendation | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('pricing_recommendations')
@@ -505,7 +506,7 @@ export async function bulkCreatePricingRecommendations(
     target_client: string
     market_analysis: string
   }[]
-): Promise<{ data: PricingRecommendation[] | null; error: any }> {
+): Promise<{ data: PricingRecommendation[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const withUserId = recommendations.map(r => ({ user_id: userId, ...r }))
   const { data, error } = await supabase
@@ -525,7 +526,7 @@ export async function getAdvisorySessions(
   filters?: {
     status?: SessionStatus
   }
-): Promise<{ data: AdvisorySession[] | null; error: any }> {
+): Promise<{ data: AdvisorySession[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   let query = supabase
     .from('advisory_sessions')
@@ -543,7 +544,7 @@ export async function getAdvisorySessions(
 
 export async function getAdvisorySession(
   sessionId: string
-): Promise<{ data: AdvisorySession | null; error: any }> {
+): Promise<{ data: AdvisorySession | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('advisory_sessions')
@@ -560,7 +561,7 @@ export async function createAdvisorySession(
     title: string
     topic: string
   }
-): Promise<{ data: AdvisorySession | null; error: any }> {
+): Promise<{ data: AdvisorySession | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('advisory_sessions')
@@ -577,7 +578,7 @@ export async function createAdvisorySession(
 export async function updateAdvisorySession(
   sessionId: string,
   updates: Partial<Omit<AdvisorySession, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'completed_at'>>
-): Promise<{ data: AdvisorySession | null; error: any }> {
+): Promise<{ data: AdvisorySession | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('advisory_sessions')
@@ -591,7 +592,7 @@ export async function updateAdvisorySession(
 
 export async function completeAdvisorySession(
   sessionId: string
-): Promise<{ data: AdvisorySession | null; error: any }> {
+): Promise<{ data: AdvisorySession | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('advisory_sessions')
@@ -605,7 +606,7 @@ export async function completeAdvisorySession(
 
 export async function deleteAdvisorySession(
   sessionId: string
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   const supabase = createClient()
   const { error } = await supabase
     .from('advisory_sessions')
@@ -617,7 +618,7 @@ export async function deleteAdvisorySession(
 
 export async function getActiveSessions(
   userId: string
-): Promise<{ data: AdvisorySession[] | null; error: any }> {
+): Promise<{ data: AdvisorySession[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('advisory_sessions')
@@ -631,7 +632,7 @@ export async function getActiveSessions(
 
 export async function bulkDeleteSessions(
   sessionIds: string[]
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   const supabase = createClient()
   const { error } = await supabase
     .from('advisory_sessions')
@@ -647,7 +648,7 @@ export async function bulkDeleteSessions(
 
 export async function getSessionMessages(
   sessionId: string
-): Promise<{ data: SessionMessage[] | null; error: any }> {
+): Promise<{ data: SessionMessage[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('session_messages')
@@ -664,7 +665,7 @@ export async function createSessionMessage(
     role: string
     content: string
   }
-): Promise<{ data: SessionMessage | null; error: any }> {
+): Promise<{ data: SessionMessage | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('session_messages')
@@ -681,7 +682,7 @@ export async function bulkCreateSessionMessages(
     role: string
     content: string
   }[]
-): Promise<{ data: SessionMessage[] | null; error: any }> {
+): Promise<{ data: SessionMessage[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('session_messages')
@@ -693,7 +694,7 @@ export async function bulkCreateSessionMessages(
 
 export async function deleteSessionMessage(
   messageId: string
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   const supabase = createClient()
   const { error } = await supabase
     .from('session_messages')
@@ -713,7 +714,7 @@ export async function getGrowthForecasts(
     period?: ForecastPeriod
     year?: number
   }
-): Promise<{ data: GrowthForecast[] | null; error: any }> {
+): Promise<{ data: GrowthForecast[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   let query = supabase
     .from('growth_forecasts')
@@ -746,7 +747,7 @@ export async function createGrowthForecast(
     assumptions?: string[]
     milestones?: string[]
   }
-): Promise<{ data: GrowthForecast | null; error: any }> {
+): Promise<{ data: GrowthForecast | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('growth_forecasts')
@@ -763,7 +764,7 @@ export async function createGrowthForecast(
 export async function updateGrowthForecast(
   forecastId: string,
   updates: Partial<Omit<GrowthForecast, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
-): Promise<{ data: GrowthForecast | null; error: any }> {
+): Promise<{ data: GrowthForecast | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('growth_forecasts')
@@ -777,7 +778,7 @@ export async function updateGrowthForecast(
 
 export async function deleteGrowthForecast(
   forecastId: string
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   const supabase = createClient()
   const { error } = await supabase
     .from('growth_forecasts')
@@ -790,7 +791,7 @@ export async function deleteGrowthForecast(
 export async function getLatestForecasts(
   userId: string,
   limit: number = 5
-): Promise<{ data: GrowthForecast[] | null; error: any }> {
+): Promise<{ data: GrowthForecast[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('growth_forecasts')
@@ -816,7 +817,7 @@ export async function bulkCreateForecasts(
     assumptions?: string[]
     milestones?: string[]
   }[]
-): Promise<{ data: GrowthForecast[] | null; error: any }> {
+): Promise<{ data: GrowthForecast[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const withUserId = forecasts.map(f => ({ user_id: userId, ...f }))
   const { data, error } = await supabase
@@ -835,7 +836,7 @@ export async function getAdvisoryAnalytics(
   userId: string,
   startDate?: string,
   endDate?: string
-): Promise<{ data: AdvisoryAnalytics[] | null; error: any }> {
+): Promise<{ data: AdvisoryAnalytics[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   let query = supabase
     .from('advisory_analytics')
@@ -854,9 +855,20 @@ export async function getAdvisoryAnalytics(
   return { data, error }
 }
 
+export interface UserBusinessStats {
+  total_analyses: number
+  avg_profitability_score: number
+  avg_risk_score: number
+  total_revenue_analyzed: number
+  total_estimated_profit: number
+  total_sessions: number
+  active_sessions: number
+  completed_sessions: number
+}
+
 export async function getUserBusinessStats(
   userId: string
-): Promise<{ data: any; error: any }> {
+): Promise<{ data: UserBusinessStats | null; error: DatabaseError | null }> {
   const supabase = createClient()
 
   // Get all analyses
@@ -901,7 +913,7 @@ export async function getUserBusinessStats(
 
 export async function getBusinessInsight(
   insightId: string
-): Promise<{ data: any; error: any }> {
+): Promise<{ data: BusinessInsight | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('business_insights')
@@ -913,7 +925,7 @@ export async function getBusinessInsight(
 
 export async function getPricingRecommendation(
   recommendationId: string
-): Promise<{ data: any; error: any }> {
+): Promise<{ data: PricingRecommendation | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('pricing_recommendations')
@@ -925,7 +937,7 @@ export async function getPricingRecommendation(
 
 export async function getGrowthForecast(
   forecastId: string
-): Promise<{ data: any; error: any }> {
+): Promise<{ data: GrowthForecast | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('growth_forecasts')
@@ -939,7 +951,7 @@ export async function getGrowthForecast(
 
 export async function acceptRecommendation(
   recommendationId: string
-): Promise<{ data: any; error: any }> {
+): Promise<{ data: PricingRecommendation | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('pricing_recommendations')
@@ -952,7 +964,7 @@ export async function acceptRecommendation(
 
 export async function rejectRecommendation(
   recommendationId: string
-): Promise<{ data: any; error: any }> {
+): Promise<{ data: PricingRecommendation | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('pricing_recommendations')
@@ -967,7 +979,7 @@ export async function rejectRecommendation(
 
 export async function endAdvisorySession(
   sessionId: string
-): Promise<{ data: any; error: any }> {
+): Promise<{ data: AdvisorySession | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('advisory_sessions')
@@ -986,7 +998,7 @@ export async function endAdvisorySession(
 
 export async function getAnalysesByProject(
   projectId: string
-): Promise<{ data: any[]; error: any }> {
+): Promise<{ data: ProjectAnalysis[]; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('project_analyses')
@@ -999,7 +1011,7 @@ export async function getAnalysesByProject(
 export async function getInsightsByType(
   userId: string,
   type: string
-): Promise<{ data: any[]; error: any }> {
+): Promise<{ data: BusinessInsight[]; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('business_insights')
@@ -1012,7 +1024,7 @@ export async function getInsightsByType(
 
 export async function getRecommendationsByProject(
   projectId: string
-): Promise<{ data: any[]; error: any }> {
+): Promise<{ data: PricingRecommendation[]; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('pricing_recommendations')
@@ -1024,7 +1036,7 @@ export async function getRecommendationsByProject(
 
 export async function getActiveSession(
   userId: string
-): Promise<{ data: any; error: any }> {
+): Promise<{ data: AdvisorySession | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('advisory_sessions')
@@ -1038,7 +1050,7 @@ export async function getActiveSession(
 export async function getForecastsByType(
   userId: string,
   type: string
-): Promise<{ data: any[]; error: any }> {
+): Promise<{ data: GrowthForecast[]; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('growth_forecasts')
@@ -1051,15 +1063,23 @@ export async function getForecastsByType(
 
 export async function getAIBusinessStats(
   userId: string
-): Promise<{ data: any; error: any }> {
+): Promise<{ data: UserBusinessStats | null; error: DatabaseError | null }> {
   // Alias for getUserBusinessStats
   return getUserBusinessStats(userId)
+}
+
+export interface UserActivity {
+  id: string
+  user_id: string
+  type: string
+  description: string
+  created_at: string
 }
 
 export async function getRecentActivity(
   userId: string,
   limit: number = 10
-): Promise<{ data: any[]; error: any }> {
+): Promise<{ data: UserActivity[]; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('user_activity')

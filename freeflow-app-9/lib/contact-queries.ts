@@ -7,6 +7,7 @@
 
 import { createClient } from '@/lib/supabase/client'
 import { createFeatureLogger } from '@/lib/logger'
+import { DatabaseError } from '@/lib/types/database'
 
 const logger = createFeatureLogger('ContactQueries')
 
@@ -59,7 +60,7 @@ export async function createContactMessage(
     user_agent?: string
     referrer?: string
   }
-): Promise<{ data: ContactMessage | null; error: any }> {
+): Promise<{ data: ContactMessage | null; error: DatabaseError | null }> {
   const supabase = createClient()
 
   logger.info('Creating contact message', {
@@ -112,7 +113,7 @@ export async function getContactMessages(
     limit?: number
     offset?: number
   }
-): Promise<{ data: ContactMessage[] | null; count: number; error: any }> {
+): Promise<{ data: ContactMessage[] | null; count: number; error: DatabaseError | null }> {
   const supabase = createClient()
 
   let query = supabase
@@ -158,7 +159,7 @@ export async function getContactMessages(
 
 export async function getContactMessage(
   messageId: string
-): Promise<{ data: ContactMessage | null; error: any }> {
+): Promise<{ data: ContactMessage | null; error: DatabaseError | null }> {
   const supabase = createClient()
 
   const { data, error } = await supabase
@@ -182,7 +183,7 @@ export async function getContactMessage(
 export async function updateMessageStatus(
   messageId: string,
   status: MessageStatus
-): Promise<{ data: ContactMessage | null; error: any }> {
+): Promise<{ data: ContactMessage | null; error: DatabaseError | null }> {
   const supabase = createClient()
 
   logger.info('Updating message status', { messageId, status })
@@ -209,7 +210,7 @@ export async function replyToMessage(
   messageId: string,
   replyMessage: string,
   assignedTo?: string
-): Promise<{ data: ContactMessage | null; error: any }> {
+): Promise<{ data: ContactMessage | null; error: DatabaseError | null }> {
   const supabase = createClient()
 
   logger.info('Replying to message', { messageId })
@@ -242,7 +243,7 @@ export async function replyToMessage(
 
 export async function deleteContactMessage(
   messageId: string
-): Promise<{ success: boolean; error: any }> {
+): Promise<{ success: boolean; error: DatabaseError | null }> {
   const supabase = createClient()
 
   logger.info('Deleting contact message', { messageId })
@@ -274,7 +275,7 @@ export async function getContactStats(): Promise<{
     archived: number
     avgResponseTime?: number
   } | null
-  error: any
+  error: DatabaseError | null
 }> {
   const supabase = createClient()
 

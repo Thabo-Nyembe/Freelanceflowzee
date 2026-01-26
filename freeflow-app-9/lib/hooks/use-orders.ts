@@ -3,11 +3,22 @@
 import { useSupabaseQuery } from './use-supabase-query'
 import { useSupabaseMutation } from './use-supabase-mutation'
 import { useCallback, useState } from 'react'
+import type { JsonValue } from '@/lib/types/database'
 
 // Types
 export type OrderStatus = 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'refunded' | 'on_hold'
 export type PaymentStatus = 'pending' | 'paid' | 'failed' | 'refunded' | 'partial'
 export type PaymentMethod = 'credit_card' | 'debit_card' | 'paypal' | 'bank_transfer' | 'crypto' | 'cash' | 'other'
+
+// Address type for shipping and billing
+export interface Address {
+  street?: string
+  city?: string
+  state?: string
+  postal_code?: string
+  country?: string
+  [key: string]: JsonValue | undefined
+}
 
 export interface Order {
   id: string
@@ -16,8 +27,8 @@ export interface Order {
   customer_name: string | null
   customer_email: string | null
   customer_phone: string | null
-  shipping_address: Record<string, any>
-  billing_address: Record<string, any>
+  shipping_address: Address
+  billing_address: Address
   subtotal: number
   tax_amount: number
   shipping_cost: number
@@ -33,7 +44,7 @@ export interface Order {
   actual_delivery: string | null
   notes: string | null
   internal_notes: string | null
-  metadata: Record<string, any>
+  metadata: Record<string, JsonValue>
   created_at: string
   updated_at: string
   deleted_at: string | null
@@ -50,7 +61,7 @@ export interface OrderItem {
   total_price: number
   discount: number
   tax: number
-  product_metadata: Record<string, any>
+  product_metadata: Record<string, JsonValue>
   created_at: string
 }
 
@@ -59,8 +70,8 @@ export interface CreateOrderInput {
   customer_name?: string
   customer_email?: string
   customer_phone?: string
-  shipping_address?: Record<string, any>
-  billing_address?: Record<string, any>
+  shipping_address?: Address
+  billing_address?: Address
   subtotal?: number
   tax_amount?: number
   shipping_cost?: number
@@ -79,8 +90,8 @@ export interface UpdateOrderInput {
   customer_name?: string
   customer_email?: string
   customer_phone?: string
-  shipping_address?: Record<string, any>
-  billing_address?: Record<string, any>
+  shipping_address?: Address
+  billing_address?: Address
   subtotal?: number
   tax_amount?: number
   shipping_cost?: number
@@ -105,17 +116,27 @@ export interface UseOrdersOptions {
   limit?: number
 }
 
+// Query options type for useSupabaseQuery
+interface OrderQueryOptions {
+  table: string
+  filters: Record<string, string | undefined>
+  orderBy: { column: string; ascending: boolean }
+  limit: number
+  realtime: boolean
+  softDelete: boolean
+}
+
 // Orders Hook
 export function useOrders(options: UseOrdersOptions = {}) {
   const { status, paymentStatus, limit } = options
   const [mutationLoading, setMutationLoading] = useState(false)
   const [mutationError, setMutationError] = useState<Error | null>(null)
 
-  const filters: Record<string, any> = {}
+  const filters: Record<string, string | undefined> = {}
   if (status && status !== 'all') filters.status = status
   if (paymentStatus && paymentStatus !== 'all') filters.payment_status = paymentStatus
 
-  const queryOptions: any = {
+  const queryOptions: OrderQueryOptions = {
     table: 'orders',
     filters,
     orderBy: { column: 'created_at', ascending: false },

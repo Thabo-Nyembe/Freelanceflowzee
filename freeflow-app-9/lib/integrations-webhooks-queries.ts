@@ -5,6 +5,7 @@
 
 import { supabase } from './supabase'
 import * as crypto from 'crypto'
+import { JsonValue } from '@/lib/types/database'
 
 // =====================================================
 // TYPES
@@ -17,7 +18,7 @@ export interface Integration {
   name: string
   description?: string
   status: 'pending' | 'active' | 'error' | 'disconnected'
-  credentials: Record<string, any>
+  credentials: Record<string, JsonValue>
   settings: IntegrationSettings
   scopes: string[]
   access_token?: string
@@ -26,7 +27,7 @@ export interface Integration {
   last_sync_at?: string
   sync_frequency?: 'realtime' | 'hourly' | 'daily' | 'weekly' | 'manual'
   error_message?: string
-  metadata: Record<string, any>
+  metadata: Record<string, JsonValue>
   created_at: string
   updated_at: string
 }
@@ -60,7 +61,7 @@ export interface IntegrationSettings {
     on_error?: boolean
   }
   field_mapping?: Record<string, string>
-  filters?: Record<string, any>
+  filters?: Record<string, JsonValue>
 }
 
 export interface Webhook {
@@ -91,7 +92,7 @@ export interface WebhookDelivery {
   id: string
   webhook_id: string
   event_type: string
-  payload: Record<string, any>
+  payload: Record<string, JsonValue>
   response_status?: number
   response_body?: string
   response_time_ms?: number
@@ -125,11 +126,11 @@ export interface WebhookProcessingRule {
   condition: {
     field: string
     operator: 'equals' | 'contains' | 'matches' | 'exists'
-    value?: any
+    value?: JsonValue
   }
   action: {
     type: 'create_task' | 'send_notification' | 'trigger_workflow' | 'update_record' | 'custom'
-    config: Record<string, any>
+    config: Record<string, JsonValue>
   }
 }
 
@@ -139,7 +140,7 @@ export interface IncomingWebhookLog {
   status: 'received' | 'processed' | 'rejected' | 'error'
   rejection_reason?: string
   event_type?: string
-  payload?: Record<string, any>
+  payload?: Record<string, JsonValue>
   payload_preview?: string
   request_headers?: Record<string, string>
   response_time_ms?: number
@@ -169,7 +170,7 @@ export interface SyncJob {
 export interface SyncError {
   item_id?: string
   message: string
-  details?: Record<string, any>
+  details?: Record<string, JsonValue>
 }
 
 export interface APIKey {
@@ -524,7 +525,7 @@ export async function regenerateWebhookSecret(webhookId: string): Promise<string
 export async function triggerWebhook(
   userId: string,
   eventType: string,
-  payload: Record<string, any>
+  payload: Record<string, JsonValue>
 ): Promise<number> {
   try {
     // Get all active webhooks subscribed to this event

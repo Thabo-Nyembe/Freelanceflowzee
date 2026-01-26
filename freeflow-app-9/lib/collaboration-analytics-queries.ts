@@ -11,6 +11,7 @@
 
 import { createClient } from '@/lib/supabase/client'
 import { createFeatureLogger } from '@/lib/logger'
+import { DatabaseError, toDbError } from '@/lib/types/database'
 
 const logger = createFeatureLogger('CollaborationAnalytics')
 
@@ -59,7 +60,7 @@ export interface CollaborationStats {
 export async function getCollaborationAnalytics(
   userId: string,
   dateRange: '7days' | '30days' | '90days' | 'year' = '7days'
-): Promise<{ data: CollaborationAnalyticsData[] | null; error: any }> {
+): Promise<{ data: CollaborationAnalyticsData[] | null; error: DatabaseError | null }> {
   const startTime = performance.now()
 
   try {
@@ -260,9 +261,10 @@ export async function getCollaborationAnalytics(
 
     return { data: result, error: null }
 
-  } catch (error: any) {
-    logger.error('Exception in getCollaborationAnalytics', { error: error.message, userId, dateRange })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getCollaborationAnalytics', { error: dbError.message, userId, dateRange })
+    return { data: null, error: dbError }
   }
 }
 
@@ -273,7 +275,7 @@ export async function getCollaborationAnalytics(
 export async function getTeamMemberStats(
   userId: string,
   dateRange: '7days' | '30days' | '90days' | 'year' = '7days'
-): Promise<{ data: TeamMemberStats[] | null; error: any }> {
+): Promise<{ data: TeamMemberStats[] | null; error: DatabaseError | null }> {
   try {
     logger.info('Fetching team member stats', { userId, dateRange })
 
@@ -377,9 +379,10 @@ export async function getTeamMemberStats(
 
     return { data: stats, error: null }
 
-  } catch (error: any) {
-    logger.error('Exception in getTeamMemberStats', { error: error.message, userId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getTeamMemberStats', { error: dbError.message, userId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -390,7 +393,7 @@ export async function getTeamMemberStats(
 export async function getCollaborationStats(
   userId: string,
   dateRange: '7days' | '30days' | '90days' | 'year' = '7days'
-): Promise<{ data: CollaborationStats | null; error: any }> {
+): Promise<{ data: CollaborationStats | null; error: DatabaseError | null }> {
   try {
     logger.info('Fetching collaboration stats', { userId, dateRange })
 
@@ -434,9 +437,10 @@ export async function getCollaborationStats(
 
     return { data: stats, error: null }
 
-  } catch (error: any) {
-    logger.error('Exception in getCollaborationStats', { error: error.message, userId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getCollaborationStats', { error: dbError.message, userId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -448,7 +452,7 @@ export async function exportCollaborationReport(
   userId: string,
   dateRange: '7days' | '30days' | '90days' | 'year',
   format: 'csv' | 'json' = 'csv'
-): Promise<{ data: string | null; error: any }> {
+): Promise<{ data: string | null; error: DatabaseError | null }> {
   try {
     logger.info('Exporting collaboration report', { userId, dateRange, format })
 
@@ -500,9 +504,10 @@ export async function exportCollaborationReport(
       return { data: json, error: null }
     }
 
-  } catch (error: any) {
-    logger.error('Exception in exportCollaborationReport', { error: error.message, userId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in exportCollaborationReport', { error: dbError.message, userId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -529,7 +534,7 @@ export interface ReportSchedule {
 export async function upsertReportSchedule(
   userId: string,
   frequency: ReportFrequency
-): Promise<{ data: ReportSchedule | null; error: any }> {
+): Promise<{ data: ReportSchedule | null; error: DatabaseError | null }> {
   const supabase = createClient()
 
   // Calculate next run based on frequency
@@ -560,7 +565,7 @@ export async function upsertReportSchedule(
     .select()
     .single()
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 /**
@@ -568,7 +573,7 @@ export async function upsertReportSchedule(
  */
 export async function getReportSchedule(
   userId: string
-): Promise<{ data: ReportSchedule | null; error: any }> {
+): Promise<{ data: ReportSchedule | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('collaboration_report_schedules')
@@ -576,7 +581,7 @@ export async function getReportSchedule(
     .eq('user_id', userId)
     .single()
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 /**
@@ -584,12 +589,12 @@ export async function getReportSchedule(
  */
 export async function cancelReportSchedule(
   userId: string
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   const supabase = createClient()
   const { error } = await supabase
     .from('collaboration_report_schedules')
     .update({ is_active: false })
     .eq('user_id', userId)
 
-  return { error }
+  return { error: error ? toDbError(error) : null }
 }

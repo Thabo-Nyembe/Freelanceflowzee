@@ -3,6 +3,8 @@
  * Unified overview for all admin features
  */
 
+import type { JsonValue } from '@/lib/types/database'
+
 export type ModuleStatus = 'active' | 'warning' | 'critical' | 'inactive'
 export type MetricTrend = 'up' | 'down' | 'stable'
 export type AlertLevel = 'info' | 'warning' | 'error' | 'success'
@@ -42,7 +44,7 @@ export interface Activity {
   timestamp: Date
   userId?: string
   userName?: string
-  metadata?: Record<string, any>
+  metadata?: Record<string, JsonValue>
 }
 
 export interface QuickAction {

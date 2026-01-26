@@ -12,6 +12,7 @@
  */
 
 import { createClient } from '@/lib/supabase/client'
+import { DatabaseError, toDbError } from '@/lib/types/database'
 
 // ============================================================================
 // TYPES
@@ -82,9 +83,9 @@ export async function getCalendarEvents(
 
     if (error) throw error
 
-    return { data: data as CalendarEvent[], error: null }
-  } catch (error: any) {
-    return { data: null, error }
+    return { data: data as CalendarEvent[], error: null as DatabaseError | null }
+  } catch (error: unknown) {
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -131,9 +132,9 @@ export async function createCalendarEvent(
 
     if (error) throw error
 
-    return { data: data as CalendarEvent, error: null }
-  } catch (error: any) {
-    return { data: null, error }
+    return { data: data as CalendarEvent, error: null as DatabaseError | null }
+  } catch (error: unknown) {
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -159,9 +160,9 @@ export async function updateCalendarEvent(
 
     if (error) throw error
 
-    return { data: data as CalendarEvent, error: null }
-  } catch (error: any) {
-    return { data: null, error }
+    return { data: data as CalendarEvent, error: null as DatabaseError | null }
+  } catch (error: unknown) {
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -184,9 +185,9 @@ export async function deleteCalendarEvent(
 
     if (error) throw error
 
-    return { success: true, error: null }
-  } catch (error: any) {
-    return { success: false, error }
+    return { success: true, error: null as DatabaseError | null }
+  } catch (error: unknown) {
+    return { success: false, error: toDbError(error) }
   }
 }
 
@@ -248,9 +249,9 @@ export async function createRecurringEvents(
 
     if (error) throw error
 
-    return { data: data as CalendarEvent[], error: null }
-  } catch (error: any) {
-    return { data: null, error }
+    return { data: data as CalendarEvent[], error: null as DatabaseError | null }
+  } catch (error: unknown) {
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -280,7 +281,7 @@ export async function getCalendarStatistics(
           most_common_location: 'N/A',
           productivity_index: 0
         } as CalendarStats,
-        error: null
+        error: null as DatabaseError | null
       }
     }
 
@@ -322,10 +323,10 @@ export async function getCalendarStatistics(
         most_common_location: mostCommonLocation,
         productivity_index: productivityIndex
       } as CalendarStats,
-      error: null
+      error: null as DatabaseError | null
     }
-  } catch (error: any) {
-    return { data: null, error }
+  } catch (error: unknown) {
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -349,8 +350,8 @@ export async function searchCalendarEvents(
 
     if (error) throw error
 
-    return { data: data as CalendarEvent[], error: null }
-  } catch (error: any) {
-    return { data: null, error }
+    return { data: data as CalendarEvent[], error: null as DatabaseError | null }
+  } catch (error: unknown) {
+    return { data: null, error: toDbError(error) }
   }
 }

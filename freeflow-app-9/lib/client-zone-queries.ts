@@ -20,6 +20,7 @@
  */
 
 import { createClient } from '@/lib/supabase/client'
+import { DatabaseError, toDbError, JsonValue } from '@/lib/types/database'
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -33,6 +34,14 @@ export type InvoiceStatus = 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled' 
 export type PaymentStatus = 'pending' | 'paid' | 'failed' | 'refunded'
 export type NotificationType = 'project' | 'message' | 'invoice' | 'payment' | 'system'
 export type NotificationPriority = 'low' | 'medium' | 'high' | 'urgent'
+
+export interface MessageAttachment {
+  id: string
+  name: string
+  url: string
+  type: string
+  size: number
+}
 
 export interface ClientProject {
   id: string
@@ -94,7 +103,7 @@ export interface ClientMessage {
   message_type: MessageType
   read: boolean
   read_at: string | null
-  attachments: any[]
+  attachments: MessageAttachment[]
   reply_to: string | null
   created_at: string
   updated_at: string
@@ -180,7 +189,7 @@ export interface ClientNotification {
   link: string | null
   read: boolean
   read_at: string | null
-  metadata: Record<string, any>
+  metadata: Record<string, JsonValue>
   created_at: string
   updated_at: string
 }
@@ -615,7 +624,7 @@ export async function sendMessage(message: {
   recipient_id: string
   message: string
   message_type?: MessageType
-  attachments?: any[]
+  attachments?: MessageAttachment[]
   reply_to?: string
 }): Promise<ClientMessage> {
   const supabase = createClient()
@@ -957,10 +966,10 @@ export async function markInvoiceAsPaid(
 export async function disputeInvoice(
   invoiceId: string,
   reason: string
-): Promise<{ data: any; error: any }> {
+): Promise<{ data: ClientInvoice | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { data: null, error: new Error('Not authenticated') }
+  if (!user) return { data: null, error: toDbError(new Error('Not authenticated')) }
 
   try {
     // Update invoice status to disputed
@@ -977,7 +986,7 @@ export async function disputeInvoice(
       .select()
       .single()
 
-    if (error) return { data: null, error }
+    if (error) return { data: null, error: toDbError(error) }
 
     // Create a notification for the freelancer
     await supabase.from('client_notifications').insert({
@@ -995,8 +1004,8 @@ export async function disputeInvoice(
     })
 
     return { data, error: null }
-  } catch (err) {
-    return { data: null, error: err }
+  } catch (error: unknown) {
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -1007,10 +1016,10 @@ export async function resolveInvoiceDispute(
   invoiceId: string,
   resolution: 'accepted' | 'rejected',
   notes?: string
-): Promise<{ data: any; error: any }> {
+): Promise<{ data: ClientInvoice | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { data: null, error: new Error('Not authenticated') }
+  if (!user) return { data: null, error: toDbError(new Error('Not authenticated')) }
 
   try {
     const newStatus = resolution === 'accepted' ? 'cancelled' : 'sent'
@@ -1029,10 +1038,10 @@ export async function resolveInvoiceDispute(
       .select()
       .single()
 
-    if (error) return { data: null, error }
+    if (error) return { data: null, error: toDbError(error) }
     return { data, error: null }
-  } catch (err) {
-    return { data: null, error: err }
+  } catch (error: unknown) {
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -1255,7 +1264,7 @@ export async function createNotification(notification: {
   title: string
   message: string
   link?: string
-  metadata?: Record<string, any>
+  metadata?: Record<string, JsonValue>
 }): Promise<ClientNotification> {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()

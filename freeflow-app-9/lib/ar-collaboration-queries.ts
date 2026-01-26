@@ -11,6 +11,7 @@
  */
 
 import { createClient } from '@/lib/supabase/client'
+import { DatabaseError, toDbError, JsonValue } from '@/lib/types/database'
 
 // ============================================================================
 // TYPES
@@ -43,8 +44,8 @@ export interface ARSession {
   is_locked: boolean
   password?: string
   tags: string[]
-  features: Record<string, any>
-  settings: Record<string, any>
+  features: Record<string, JsonValue>
+  settings: Record<string, JsonValue>
   created_at: string
   updated_at: string
 }
@@ -74,7 +75,7 @@ export interface ARParticipant {
   bandwidth: number
   fps: number
   quality: ARQualityLevel
-  permissions: Record<string, any>
+  permissions: Record<string, JsonValue>
   created_at: string
   updated_at: string
 }
@@ -97,7 +98,7 @@ export interface ARObject {
   color: string
   model_url?: string
   texture_url?: string
-  data: Record<string, any>
+  data: Record<string, JsonValue>
   is_locked: boolean
   is_visible: boolean
   is_interactive: boolean
@@ -114,7 +115,7 @@ export interface ARInteraction {
   position_x?: number
   position_y?: number
   position_z?: number
-  data: Record<string, any>
+  data: Record<string, JsonValue>
   duration?: number
   created_at: string
 }
@@ -147,7 +148,7 @@ export async function getSessions(
     environment?: AREnvironment
     search?: string
   }
-): Promise<{ data: ARSession[] | null; error: any }> {
+): Promise<{ data: ARSession[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   let query = supabase
     .from('ar_sessions')
@@ -167,7 +168,7 @@ export async function getSessions(
 
 export async function getSession(
   sessionId: string
-): Promise<{ data: ARSession | null; error: any }> {
+): Promise<{ data: ARSession | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ar_sessions')
@@ -190,10 +191,10 @@ export async function createSession(
     is_locked?: boolean
     password?: string
     tags?: string[]
-    features?: Record<string, any>
-    settings?: Record<string, any>
+    features?: Record<string, JsonValue>
+    settings?: Record<string, JsonValue>
   }
-): Promise<{ data: ARSession | null; error: any }> {
+): Promise<{ data: ARSession | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ar_sessions')
@@ -211,7 +212,7 @@ export async function createSession(
 export async function updateSession(
   sessionId: string,
   updates: Partial<Omit<ARSession, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
-): Promise<{ data: ARSession | null; error: any }> {
+): Promise<{ data: ARSession | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ar_sessions')
@@ -226,7 +227,7 @@ export async function updateSession(
 export async function updateSessionStatus(
   sessionId: string,
   status: ARSessionStatus
-): Promise<{ data: ARSession | null; error: any }> {
+): Promise<{ data: ARSession | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ar_sessions')
@@ -240,7 +241,7 @@ export async function updateSessionStatus(
 
 export async function deleteSession(
   sessionId: string
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   const supabase = createClient()
   const { error } = await supabase
     .from('ar_sessions')
@@ -259,7 +260,7 @@ export async function getParticipants(
   filters?: {
     status?: ARParticipantStatus
   }
-): Promise<{ data: ARParticipant[] | null; error: any }> {
+): Promise<{ data: ARParticipant[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   let query = supabase
     .from('ar_participants')
@@ -284,7 +285,7 @@ export async function createParticipant(
     position_y?: number
     position_z?: number
   }
-): Promise<{ data: ARParticipant | null; error: any }> {
+): Promise<{ data: ARParticipant | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ar_participants')
@@ -302,7 +303,7 @@ export async function createParticipant(
 export async function updateParticipantStatus(
   participantId: string,
   status: ARParticipantStatus
-): Promise<{ data: ARParticipant | null; error: any }> {
+): Promise<{ data: ARParticipant | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ar_participants')
@@ -324,7 +325,7 @@ export async function updateParticipantPosition(
     rotation_y?: number
     rotation_z?: number
   }
-): Promise<{ data: ARParticipant | null; error: any }> {
+): Promise<{ data: ARParticipant | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ar_participants')
@@ -339,7 +340,7 @@ export async function updateParticipantPosition(
 export async function toggleParticipantMute(
   participantId: string,
   is_muted: boolean
-): Promise<{ data: ARParticipant | null; error: any }> {
+): Promise<{ data: ARParticipant | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ar_participants')
@@ -354,7 +355,7 @@ export async function toggleParticipantMute(
 export async function toggleParticipantVideo(
   participantId: string,
   is_video_enabled: boolean
-): Promise<{ data: ARParticipant | null; error: any }> {
+): Promise<{ data: ARParticipant | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ar_participants')
@@ -376,7 +377,7 @@ export async function getARObjects(
     type?: ARObjectType
     is_visible?: boolean
   }
-): Promise<{ data: ARObject[] | null; error: any }> {
+): Promise<{ data: ARObject[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   let query = supabase
     .from('ar_objects')
@@ -409,9 +410,9 @@ export async function createARObject(
     color?: string
     model_url?: string
     texture_url?: string
-    data?: Record<string, any>
+    data?: Record<string, JsonValue>
   }
-): Promise<{ data: ARObject | null; error: any }> {
+): Promise<{ data: ARObject | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ar_objects')
@@ -429,7 +430,7 @@ export async function createARObject(
 export async function updateARObject(
   objectId: string,
   updates: Partial<Omit<ARObject, 'id' | 'session_id' | 'user_id' | 'created_at' | 'updated_at'>>
-): Promise<{ data: ARObject | null; error: any }> {
+): Promise<{ data: ARObject | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ar_objects')
@@ -448,9 +449,9 @@ export async function updateARObjectTransform(
     rotation?: { x: number; y: number; z: number }
     scale?: { x: number; y: number; z: number }
   }
-): Promise<{ data: ARObject | null; error: any }> {
+): Promise<{ data: ARObject | null; error: DatabaseError | null }> {
   const supabase = createClient()
-  const updates: any = {}
+  const updates: Record<string, number> = {}
 
   if (transform.position) {
     updates.position_x = transform.position.x
@@ -483,7 +484,7 @@ export async function updateARObjectTransform(
 export async function toggleARObjectVisibility(
   objectId: string,
   is_visible: boolean
-): Promise<{ data: ARObject | null; error: any }> {
+): Promise<{ data: ARObject | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ar_objects')
@@ -498,7 +499,7 @@ export async function toggleARObjectVisibility(
 export async function toggleARObjectLock(
   objectId: string,
   is_locked: boolean
-): Promise<{ data: ARObject | null; error: any }> {
+): Promise<{ data: ARObject | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ar_objects')
@@ -512,7 +513,7 @@ export async function toggleARObjectLock(
 
 export async function deleteARObject(
   objectId: string
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   const supabase = createClient()
   const { error } = await supabase
     .from('ar_objects')
@@ -532,7 +533,7 @@ export async function getInteractions(
     user_id?: string
     type?: ARInteractionType
   }
-): Promise<{ data: ARInteraction[] | null; error: any }> {
+): Promise<{ data: ARInteraction[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   let query = supabase
     .from('ar_interactions')
@@ -557,10 +558,10 @@ export async function createInteraction(
     position_x?: number
     position_y?: number
     position_z?: number
-    data?: Record<string, any>
+    data?: Record<string, JsonValue>
     duration?: number
   }
-): Promise<{ data: ARInteraction | null; error: any }> {
+): Promise<{ data: ARInteraction | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ar_interactions')
@@ -585,7 +586,7 @@ export async function getRecordings(
     session_id?: string
     is_public?: boolean
   }
-): Promise<{ data: ARRecording[] | null; error: any }> {
+): Promise<{ data: ARRecording[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   let query = supabase
     .from('ar_recordings')
@@ -613,7 +614,7 @@ export async function createRecording(
     thumbnail_url?: string
     is_public?: boolean
   }
-): Promise<{ data: ARRecording | null; error: any }> {
+): Promise<{ data: ARRecording | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ar_recordings')
@@ -631,7 +632,7 @@ export async function createRecording(
 export async function updateRecording(
   recordingId: string,
   updates: Partial<Omit<ARRecording, 'id' | 'session_id' | 'user_id' | 'created_at' | 'updated_at'>>
-): Promise<{ data: ARRecording | null; error: any }> {
+): Promise<{ data: ARRecording | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ar_recordings')
@@ -645,7 +646,7 @@ export async function updateRecording(
 
 export async function incrementRecordingViews(
   recordingId: string
-): Promise<{ data: ARRecording | null; error: any }> {
+): Promise<{ data: ARRecording | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .rpc('increment', { row_id: recordingId })
@@ -668,7 +669,7 @@ export async function getARStats(
     total_objects: number
     total_recordings: number
   } | null
-  error: any
+  error: DatabaseError | null
 }> {
   const supabase = createClient()
 

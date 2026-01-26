@@ -11,6 +11,7 @@
  */
 
 import { createClient } from '@/lib/supabase/client'
+import { DatabaseError, toDbError, JsonValue } from '@/lib/types/database'
 
 // ============================================================================
 // TYPES
@@ -43,7 +44,7 @@ export interface AIConversation {
   avg_rating: number | null
   last_message_at: string | null
   tags: string[]
-  metadata: any
+  metadata: Record<string, JsonValue>
   created_at: string
   updated_at: string
 }
@@ -64,7 +65,7 @@ export interface AIMessage {
   response_time: number | null
   context_length: number | null
   suggestions: string[]
-  metadata: any
+  metadata: Record<string, JsonValue>
   created_at: string
   updated_at: string
 }
@@ -77,7 +78,7 @@ export interface MessageAttachment {
   size: number
   url: string
   mime_type: string | null
-  metadata: any
+  metadata: Record<string, JsonValue>
   created_at: string
 }
 
@@ -98,7 +99,7 @@ export interface AIInsight {
   comparison: string | null
   confidence: number | null
   data_source: string | null
-  metadata: any
+  metadata: Record<string, JsonValue>
   dismissed_at: string | null
   implemented_at: string | null
   created_at: string
@@ -121,7 +122,7 @@ export interface ProjectAnalysis {
   profit_margin: number | null
   efficiency: number | null
   risk_level: 'low' | 'medium' | 'high' | null
-  metadata: any
+  metadata: Record<string, JsonValue>
   generated_at: string
   created_at: string
 }
@@ -135,7 +136,7 @@ export interface QuickAction {
   category: string
   is_default: boolean
   usage_count: number
-  metadata: any
+  metadata: Record<string, JsonValue>
   created_at: string
   updated_at: string
 }
@@ -155,7 +156,7 @@ export async function getConversations(
     is_archived?: boolean
     search?: string
   }
-): Promise<{ data: AIConversation[] | null; error: any }> {
+): Promise<{ data: AIConversation[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   let query = supabase
     .from('ai_conversations')
@@ -182,7 +183,7 @@ export async function getConversations(
 
   const { data, error } = await query
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 /**
@@ -190,7 +191,7 @@ export async function getConversations(
  */
 export async function getConversation(
   conversationId: string
-): Promise<{ data: AIConversation | null; error: any }> {
+): Promise<{ data: AIConversation | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_conversations')
@@ -198,7 +199,7 @@ export async function getConversation(
     .eq('id', conversationId)
     .single()
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 /**
@@ -210,9 +211,9 @@ export async function createConversation(
   options?: {
     model?: AIProvider
     tags?: string[]
-    metadata?: any
+    metadata?: Record<string, JsonValue>
   }
-): Promise<{ data: AIConversation | null; error: any }> {
+): Promise<{ data: AIConversation | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_conversations')
@@ -226,7 +227,7 @@ export async function createConversation(
     .select()
     .single()
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 /**
@@ -235,7 +236,7 @@ export async function createConversation(
 export async function updateConversation(
   conversationId: string,
   updates: Partial<Pick<AIConversation, 'title' | 'status' | 'is_pinned' | 'is_archived' | 'tags' | 'metadata'>>
-): Promise<{ data: AIConversation | null; error: any }> {
+): Promise<{ data: AIConversation | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_conversations')
@@ -244,7 +245,7 @@ export async function updateConversation(
     .select()
     .single()
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 /**
@@ -252,14 +253,14 @@ export async function updateConversation(
  */
 export async function deleteConversation(
   conversationId: string
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   const supabase = createClient()
   const { error } = await supabase
     .from('ai_conversations')
     .delete()
     .eq('id', conversationId)
 
-  return { error }
+  return { error: error ? toDbError(error) : null }
 }
 
 /**
@@ -267,7 +268,7 @@ export async function deleteConversation(
  */
 export async function archiveConversation(
   conversationId: string
-): Promise<{ data: AIConversation | null; error: any }> {
+): Promise<{ data: AIConversation | null; error: DatabaseError | null }> {
   return updateConversation(conversationId, { is_archived: true, status: 'archived' })
 }
 
@@ -277,7 +278,7 @@ export async function archiveConversation(
 export async function togglePinConversation(
   conversationId: string,
   isPinned: boolean
-): Promise<{ data: AIConversation | null; error: any }> {
+): Promise<{ data: AIConversation | null; error: DatabaseError | null }> {
   return updateConversation(conversationId, {
     is_pinned: isPinned,
     status: isPinned ? 'pinned' : 'active'
@@ -297,7 +298,7 @@ export async function getMessages(
     limit?: number
     offset?: number
   }
-): Promise<{ data: AIMessage[] | null; error: any }> {
+): Promise<{ data: AIMessage[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   let query = supabase
     .from('ai_messages')
@@ -315,7 +316,7 @@ export async function getMessages(
 
   const { data, error } = await query
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 /**
@@ -334,9 +335,9 @@ export async function createMessage(
     response_time?: number
     context_length?: number
     suggestions?: string[]
-    metadata?: any
+    metadata?: Record<string, JsonValue>
   }
-): Promise<{ data: AIMessage | null; error: any }> {
+): Promise<{ data: AIMessage | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_messages')
@@ -357,7 +358,7 @@ export async function createMessage(
     .select()
     .single()
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 /**
@@ -366,7 +367,7 @@ export async function createMessage(
 export async function rateMessage(
   messageId: string,
   rating: MessageRating | null
-): Promise<{ data: AIMessage | null; error: any }> {
+): Promise<{ data: AIMessage | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_messages')
@@ -375,7 +376,7 @@ export async function rateMessage(
     .select()
     .single()
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 /**
@@ -384,7 +385,7 @@ export async function rateMessage(
 export async function updateMessageLoading(
   messageId: string,
   isLoading: boolean
-): Promise<{ data: AIMessage | null; error: any }> {
+): Promise<{ data: AIMessage | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_messages')
@@ -393,7 +394,7 @@ export async function updateMessageLoading(
     .select()
     .single()
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 // ============================================================================
@@ -405,7 +406,7 @@ export async function updateMessageLoading(
  */
 export async function getMessageAttachments(
   messageId: string
-): Promise<{ data: MessageAttachment[] | null; error: any }> {
+): Promise<{ data: MessageAttachment[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_message_attachments')
@@ -413,7 +414,7 @@ export async function getMessageAttachments(
     .eq('message_id', messageId)
     .order('created_at', { ascending: true })
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 /**
@@ -427,9 +428,9 @@ export async function createAttachment(
     size: number
     url: string
     mime_type?: string
-    metadata?: any
+    metadata?: Record<string, JsonValue>
   }
-): Promise<{ data: MessageAttachment | null; error: any }> {
+): Promise<{ data: MessageAttachment | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_message_attachments')
@@ -445,7 +446,7 @@ export async function createAttachment(
     .select()
     .single()
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 /**
@@ -453,14 +454,14 @@ export async function createAttachment(
  */
 export async function deleteAttachment(
   attachmentId: string
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   const supabase = createClient()
   const { error } = await supabase
     .from('ai_message_attachments')
     .delete()
     .eq('id', attachmentId)
 
-  return { error }
+  return { error: error ? toDbError(error) : null }
 }
 
 // ============================================================================
@@ -477,7 +478,7 @@ export async function getInsights(
     priority?: InsightPriority
     status?: InsightStatus
   }
-): Promise<{ data: AIInsight[] | null; error: any }> {
+): Promise<{ data: AIInsight[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   let query = supabase
     .from('ai_insights')
@@ -500,7 +501,7 @@ export async function getInsights(
 
   const { data, error } = await query
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 /**
@@ -522,9 +523,9 @@ export async function createInsight(
     comparison?: string
     confidence?: number
     data_source?: string
-    metadata?: any
+    metadata?: Record<string, JsonValue>
   }
-): Promise<{ data: AIInsight | null; error: any }> {
+): Promise<{ data: AIInsight | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_insights')
@@ -536,7 +537,7 @@ export async function createInsight(
     .select()
     .single()
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 /**
@@ -544,7 +545,7 @@ export async function createInsight(
  */
 export async function dismissInsight(
   insightId: string
-): Promise<{ data: AIInsight | null; error: any }> {
+): Promise<{ data: AIInsight | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_insights')
@@ -556,7 +557,7 @@ export async function dismissInsight(
     .select()
     .single()
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 /**
@@ -564,7 +565,7 @@ export async function dismissInsight(
  */
 export async function implementInsight(
   insightId: string
-): Promise<{ data: AIInsight | null; error: any }> {
+): Promise<{ data: AIInsight | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_insights')
@@ -576,7 +577,7 @@ export async function implementInsight(
     .select()
     .single()
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 // ============================================================================
@@ -593,7 +594,7 @@ export async function getProjectAnalyses(
     status?: string
     risk_level?: 'low' | 'medium' | 'high'
   }
-): Promise<{ data: ProjectAnalysis[] | null; error: any }> {
+): Promise<{ data: ProjectAnalysis[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   let query = supabase
     .from('ai_project_analyses')
@@ -615,7 +616,7 @@ export async function getProjectAnalyses(
 
   const { data, error } = await query
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 /**
@@ -637,9 +638,9 @@ export async function createProjectAnalysis(
     profit_margin?: number
     efficiency?: number
     risk_level?: 'low' | 'medium' | 'high'
-    metadata?: any
+    metadata?: Record<string, JsonValue>
   }
-): Promise<{ data: ProjectAnalysis | null; error: any }> {
+): Promise<{ data: ProjectAnalysis | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_project_analyses')
@@ -663,7 +664,7 @@ export async function createProjectAnalysis(
     .select()
     .single()
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 /**
@@ -671,14 +672,14 @@ export async function createProjectAnalysis(
  */
 export async function deleteProjectAnalysis(
   analysisId: string
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   const supabase = createClient()
   const { error } = await supabase
     .from('ai_project_analyses')
     .delete()
     .eq('id', analysisId)
 
-  return { error }
+  return { error: error ? toDbError(error) : null }
 }
 
 // ============================================================================
@@ -693,7 +694,7 @@ export async function getQuickActions(
     category?: string
     is_default?: boolean
   }
-): Promise<{ data: QuickAction[] | null; error: any }> {
+): Promise<{ data: QuickAction[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   let query = supabase
     .from('ai_quick_actions')
@@ -711,7 +712,7 @@ export async function getQuickActions(
 
   const { data, error } = await query
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 /**
@@ -725,9 +726,9 @@ export async function createQuickAction(
     prompt: string
     category: string
     is_default?: boolean
-    metadata?: any
+    metadata?: Record<string, JsonValue>
   }
-): Promise<{ data: QuickAction | null; error: any }> {
+): Promise<{ data: QuickAction | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_quick_actions')
@@ -743,7 +744,7 @@ export async function createQuickAction(
     .select()
     .single()
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 /**
@@ -751,7 +752,7 @@ export async function createQuickAction(
  */
 export async function incrementQuickActionUsage(
   actionId: string
-): Promise<{ data: QuickAction | null; error: any }> {
+): Promise<{ data: QuickAction | null; error: DatabaseError | null }> {
   const supabase = createClient()
 
   // Get current usage count
@@ -762,7 +763,7 @@ export async function incrementQuickActionUsage(
     .single()
 
   if (!currentAction) {
-    return { data: null, error: new Error('Quick action not found') }
+    return { data: null, error: { message: 'Quick action not found' } }
   }
 
   // Increment usage count
@@ -773,7 +774,7 @@ export async function incrementQuickActionUsage(
     .select()
     .single()
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 /**
@@ -782,7 +783,7 @@ export async function incrementQuickActionUsage(
 export async function updateQuickAction(
   actionId: string,
   updates: Partial<Pick<QuickAction, 'label' | 'description' | 'icon' | 'prompt' | 'category' | 'metadata'>>
-): Promise<{ data: QuickAction | null; error: any }> {
+): Promise<{ data: QuickAction | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_quick_actions')
@@ -791,7 +792,7 @@ export async function updateQuickAction(
     .select()
     .single()
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 /**
@@ -799,14 +800,14 @@ export async function updateQuickAction(
  */
 export async function deleteQuickAction(
   actionId: string
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   const supabase = createClient()
   const { error } = await supabase
     .from('ai_quick_actions')
     .delete()
     .eq('id', actionId)
 
-  return { error }
+  return { error: error ? toDbError(error) : null }
 }
 
 // ============================================================================
@@ -828,7 +829,7 @@ export async function getConversationStats(
     total_tokens: number
     avg_rating: number | null
   } | null
-  error: any
+  error: DatabaseError | null
 }> {
   const supabase = createClient()
 
@@ -838,7 +839,7 @@ export async function getConversationStats(
     .eq('user_id', userId)
 
   if (error || !conversations) {
-    return { data: null, error }
+    return { data: null, error: error ? toDbError(error) : null }
   }
 
   const stats = {
@@ -871,7 +872,7 @@ export async function getInsightStats(
     medium_priority: number
     low_priority: number
   } | null
-  error: any
+  error: DatabaseError | null
 }> {
   const supabase = createClient()
 
@@ -881,7 +882,7 @@ export async function getInsightStats(
     .eq('user_id', userId)
 
   if (error || !insights) {
-    return { data: null, error }
+    return { data: null, error: error ? toDbError(error) : null }
   }
 
   const stats = {

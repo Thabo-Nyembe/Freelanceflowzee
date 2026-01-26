@@ -3,6 +3,7 @@
  */
 
 import { createClient } from '@/lib/supabase/client'
+import type { JsonValue } from '@/lib/types/database'
 
 export type MetricCategory = 'revenue' | 'productivity' | 'client' | 'project' | 'financial' | 'efficiency'
 export type TrendDirection = 'up' | 'down' | 'stable'
@@ -51,8 +52,8 @@ export interface PerformanceSnapshot {
   total_projects: number
   total_clients: number
   avg_efficiency: number
-  top_performing_projects: any[]
-  top_clients: any[]
+  top_performing_projects: JsonValue[]
+  top_clients: JsonValue[]
   performance_summary?: string
   created_at: string
 }

@@ -9,6 +9,10 @@
  */
 
 import { createClient } from '@/lib/supabase/client'
+import { DatabaseError, toDbError, JsonValue } from '@/lib/types/database'
+
+// Type alias for JSON metadata fields
+type Metadata = Record<string, JsonValue>
 
 // ============================================================================
 // TYPES
@@ -123,11 +127,11 @@ export interface AICreateAsset {
   color_scheme: ColorScheme | null
   custom_prompt: string | null
   model_used: string | null
-  generation_params: any
+  generation_params: Metadata
   is_favorite: boolean
   download_count: number
   view_count: number
-  metadata: any
+  metadata: Metadata
   created_at: string
   updated_at: string
 }
@@ -148,7 +152,7 @@ export interface AICreateGeneration {
   error_message: string | null
   generation_time_ms: number | null
   input_file_url: string | null
-  generation_params: any
+  generation_params: Metadata
   created_at: string
   completed_at: string | null
 }
@@ -164,7 +168,7 @@ export interface AICreatePreferences {
   quality_preset: string
   favorite_fields: CreativeField[]
   recent_prompts: string[]
-  metadata: any
+  metadata: Metadata
   created_at: string
   updated_at: string
 }
@@ -192,7 +196,7 @@ export async function getAssets(
     search?: string
     tags?: string[]
   }
-): Promise<{ data: AICreateAsset[] | null; error: any }> {
+): Promise<{ data: AICreateAsset[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   let query = supabase
     .from('ai_create_assets')
@@ -222,17 +226,17 @@ export async function getAssets(
 
   const { data, error } = await query
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 /**
  * Get a single asset by ID
  */
-export async function getAsset(assetId: string): Promise<{ data: AICreateAsset | null; error: any }> {
+export async function getAsset(assetId: string): Promise<{ data: AICreateAsset | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase.from('ai_create_assets').select('*').eq('id', assetId).single()
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 /**
@@ -255,10 +259,10 @@ export async function createAsset(
     color_scheme?: ColorScheme
     custom_prompt?: string
     model_used?: string
-    generation_params?: any
-    metadata?: any
+    generation_params?: Metadata
+    metadata?: Metadata
   }
-): Promise<{ data: AICreateAsset | null; error: any }> {
+): Promise<{ data: AICreateAsset | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_create_assets')
@@ -284,7 +288,7 @@ export async function createAsset(
     .select()
     .single()
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 /**
@@ -305,7 +309,7 @@ export async function updateAsset(
       | 'metadata'
     >
   >
-): Promise<{ data: AICreateAsset | null; error: any }> {
+): Promise<{ data: AICreateAsset | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_create_assets')
@@ -314,23 +318,23 @@ export async function updateAsset(
     .select()
     .single()
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 /**
  * Delete an asset
  */
-export async function deleteAsset(assetId: string): Promise<{ error: any }> {
+export async function deleteAsset(assetId: string): Promise<{ error: DatabaseError | null }> {
   const supabase = createClient()
   const { error } = await supabase.from('ai_create_assets').delete().eq('id', assetId)
 
-  return { error }
+  return { error: error ? toDbError(error) : null }
 }
 
 /**
  * Increment asset download count
  */
-export async function incrementDownloadCount(assetId: string): Promise<{ data: AICreateAsset | null; error: any }> {
+export async function incrementDownloadCount(assetId: string): Promise<{ data: AICreateAsset | null; error: DatabaseError | null }> {
   const supabase = createClient()
 
   // Get current count
@@ -341,7 +345,7 @@ export async function incrementDownloadCount(assetId: string): Promise<{ data: A
     .single()
 
   if (!currentAsset) {
-    return { data: null, error: new Error('Asset not found') }
+    return { data: null, error: toDbError(new Error('Asset not found')) }
   }
 
   // Increment
@@ -352,13 +356,13 @@ export async function incrementDownloadCount(assetId: string): Promise<{ data: A
     .select()
     .single()
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 /**
  * Increment asset view count
  */
-export async function incrementViewCount(assetId: string): Promise<{ data: AICreateAsset | null; error: any }> {
+export async function incrementViewCount(assetId: string): Promise<{ data: AICreateAsset | null; error: DatabaseError | null }> {
   const supabase = createClient()
 
   // Get current count
@@ -369,7 +373,7 @@ export async function incrementViewCount(assetId: string): Promise<{ data: AICre
     .single()
 
   if (!currentAsset) {
-    return { data: null, error: new Error('Asset not found') }
+    return { data: null, error: toDbError(new Error('Asset not found')) }
   }
 
   // Increment
@@ -380,7 +384,7 @@ export async function incrementViewCount(assetId: string): Promise<{ data: AICre
     .select()
     .single()
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 // ============================================================================
@@ -393,7 +397,7 @@ export async function incrementViewCount(assetId: string): Promise<{ data: AICre
 export async function addFavorite(
   userId: string,
   assetId: string
-): Promise<{ data: AICreateFavorite | null; error: any }> {
+): Promise<{ data: AICreateFavorite | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_create_favorites')
@@ -404,13 +408,13 @@ export async function addFavorite(
     .select()
     .single()
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 /**
  * Remove asset from favorites
  */
-export async function removeFavorite(userId: string, assetId: string): Promise<{ error: any }> {
+export async function removeFavorite(userId: string, assetId: string): Promise<{ error: DatabaseError | null }> {
   const supabase = createClient()
   const { error } = await supabase
     .from('ai_create_favorites')
@@ -418,7 +422,7 @@ export async function removeFavorite(userId: string, assetId: string): Promise<{
     .eq('user_id', userId)
     .eq('asset_id', assetId)
 
-  return { error }
+  return { error: error ? toDbError(error) : null }
 }
 
 /**
@@ -427,7 +431,7 @@ export async function removeFavorite(userId: string, assetId: string): Promise<{
 export async function toggleFavorite(
   userId: string,
   assetId: string
-): Promise<{ data: AICreateFavorite | null; removed: boolean; error: any }> {
+): Promise<{ data: AICreateFavorite | null; removed: boolean; error: DatabaseError | null }> {
   const supabase = createClient()
 
   // Check if already favorited
@@ -449,14 +453,14 @@ export async function toggleFavorite(
       .insert({ user_id: userId, asset_id: assetId })
       .select()
       .single()
-    return { data, removed: false, error }
+    return { data, removed: false, error: error ? toDbError(error) : null }
   }
 }
 
 /**
  * Get user's favorite assets
  */
-export async function getFavorites(userId: string): Promise<{ data: AICreateAsset[] | null; error: any }> {
+export async function getFavorites(userId: string): Promise<{ data: AICreateAsset[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_create_assets')
@@ -465,7 +469,7 @@ export async function getFavorites(userId: string): Promise<{ data: AICreateAsse
     .eq('is_favorite', true)
     .order('created_at', { ascending: false })
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 // ============================================================================
@@ -481,7 +485,7 @@ export async function getGenerations(
     status?: GenerationStatus
     creative_field?: CreativeField
   }
-): Promise<{ data: AICreateGeneration[] | null; error: any }> {
+): Promise<{ data: AICreateGeneration[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   let query = supabase
     .from('ai_create_generations')
@@ -499,7 +503,7 @@ export async function getGenerations(
 
   const { data, error } = await query
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 /**
@@ -517,9 +521,9 @@ export async function createGeneration(
     batch_mode?: boolean
     assets_requested?: number
     input_file_url?: string
-    generation_params?: any
+    generation_params?: Metadata
   }
-): Promise<{ data: AICreateGeneration | null; error: any }> {
+): Promise<{ data: AICreateGeneration | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_create_generations')
@@ -540,7 +544,7 @@ export async function createGeneration(
     .select()
     .single()
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 /**
@@ -554,7 +558,7 @@ export async function updateGenerationStatus(
     error_message?: string
     generation_time_ms?: number
   }
-): Promise<{ data: AICreateGeneration | null; error: any }> {
+): Promise<{ data: AICreateGeneration | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_create_generations')
@@ -563,17 +567,17 @@ export async function updateGenerationStatus(
     .select()
     .single()
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 /**
  * Delete a generation record
  */
-export async function deleteGeneration(generationId: string): Promise<{ error: any }> {
+export async function deleteGeneration(generationId: string): Promise<{ error: DatabaseError | null }> {
   const supabase = createClient()
   const { error } = await supabase.from('ai_create_generations').delete().eq('id', generationId)
 
-  return { error }
+  return { error: error ? toDbError(error) : null }
 }
 
 // ============================================================================
@@ -585,7 +589,7 @@ export async function deleteGeneration(generationId: string): Promise<{ error: a
  */
 export async function getPreferences(
   userId: string
-): Promise<{ data: AICreatePreferences | null; error: any }> {
+): Promise<{ data: AICreatePreferences | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_create_preferences')
@@ -593,7 +597,7 @@ export async function getPreferences(
     .eq('user_id', userId)
     .single()
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 /**
@@ -615,7 +619,7 @@ export async function upsertPreferences(
       | 'metadata'
     >
   >
-): Promise<{ data: AICreatePreferences | null; error: any }> {
+): Promise<{ data: AICreatePreferences | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_create_preferences')
@@ -631,7 +635,7 @@ export async function upsertPreferences(
     .select()
     .single()
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 /**
@@ -653,14 +657,14 @@ export async function updatePreferences(
       | 'metadata'
     >
   >
-): Promise<{ data: AICreatePreferences | null; error: any }> {
+): Promise<{ data: AICreatePreferences | null; error: DatabaseError | null }> {
   return upsertPreferences(userId, preferences)
 }
 
 /**
  * Add to recent prompts (max 10)
  */
-export async function addRecentPrompt(userId: string, prompt: string): Promise<{ data: AICreatePreferences | null; error: any }> {
+export async function addRecentPrompt(userId: string, prompt: string): Promise<{ data: AICreatePreferences | null; error: DatabaseError | null }> {
   const supabase = createClient()
 
   // Get current preferences
@@ -690,7 +694,7 @@ export async function addRecentPrompt(userId: string, prompt: string): Promise<{
     .select()
     .single()
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 // ============================================================================
@@ -711,7 +715,7 @@ export async function getAssetStats(
     by_field: Record<string, number>
     by_type: Record<string, number>
   } | null
-  error: any
+  error: DatabaseError | null
 }> {
   const supabase = createClient()
 
@@ -721,7 +725,7 @@ export async function getAssetStats(
     .eq('user_id', userId)
 
   if (error || !assets) {
-    return { data: null, error }
+    return { data: null, error: error ? toDbError(error) : null }
   }
 
   const stats = {
@@ -756,7 +760,7 @@ export async function getGenerationStats(
     avg_generation_time_ms: number | null
     by_status: Record<string, number>
   } | null
-  error: any
+  error: DatabaseError | null
 }> {
   const supabase = createClient()
 
@@ -766,7 +770,7 @@ export async function getGenerationStats(
     .eq('user_id', userId)
 
   if (error || !generations) {
-    return { data: null, error }
+    return { data: null, error: error ? toDbError(error) : null }
   }
 
   const completedGenerations = generations.filter((g) => g.status === 'completed')
@@ -825,7 +829,7 @@ export async function saveModelComparison(
     results: ComparisonResult[]
     ratings: Record<string, 'up' | 'down' | null>
   }
-): Promise<{ data: ModelComparison | null; error: any }> {
+): Promise<{ data: ModelComparison | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_model_comparisons')
@@ -838,7 +842,7 @@ export async function saveModelComparison(
     .select()
     .single()
 
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 /**
@@ -847,7 +851,7 @@ export async function saveModelComparison(
 export async function getModelComparisons(
   userId: string,
   limit: number = 20
-): Promise<{ data: ModelComparison[]; error: any }> {
+): Promise<{ data: ModelComparison[]; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_model_comparisons')
@@ -856,7 +860,7 @@ export async function getModelComparisons(
     .order('created_at', { ascending: false })
     .limit(limit)
 
-  return { data: data || [], error }
+  return { data: data || [], error: error ? toDbError(error) : null }
 }
 
 /**
@@ -864,12 +868,12 @@ export async function getModelComparisons(
  */
 export async function deleteModelComparison(
   comparisonId: string
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   const supabase = createClient()
   const { error } = await supabase
     .from('ai_model_comparisons')
     .delete()
     .eq('id', comparisonId)
 
-  return { error }
+  return { error: error ? toDbError(error) : null }
 }

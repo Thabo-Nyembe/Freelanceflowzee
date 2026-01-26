@@ -18,6 +18,7 @@
  */
 
 import { createClient } from '@/lib/supabase/client'
+import type { JsonValue } from '@/lib/types/database'
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -201,7 +202,7 @@ export interface ClientActivity {
   user_id: string
   activity_type: string
   description: string
-  metadata?: Record<string, any>
+  metadata?: Record<string, JsonValue>
   created_at: string
 }
 
@@ -682,7 +683,7 @@ export async function updateProjectProgress(
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Not authenticated')
 
-  const updates: any = {
+  const updates: { progress: number; updated_at: string; status?: ProjectStatus } = {
     progress,
     updated_at: new Date().toISOString()
   }
@@ -1439,7 +1440,7 @@ export async function logClientActivity(activityData: {
   client_id: string
   activity_type: string
   description: string
-  metadata?: Record<string, any>
+  metadata?: Record<string, JsonValue>
 }): Promise<ClientActivity> {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()

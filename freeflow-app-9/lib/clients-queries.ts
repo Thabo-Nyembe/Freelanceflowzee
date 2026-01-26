@@ -7,6 +7,7 @@
 
 import { createClient } from '@/lib/supabase/client'
 import { createFeatureLogger } from './logger'
+import { DatabaseError, toDbError } from '@/lib/types/database'
 
 const supabase = createClient()
 const logger = createFeatureLogger('ClientsQueries')
@@ -101,7 +102,7 @@ export async function getClients(
   sort?: ClientSortOptions,
   limit?: number,
   offset?: number
-): Promise<{ data: Client[]; error: any; count: number }> {
+): Promise<{ data: Client[]; error: DatabaseError | null; count: number }> {
   logger.info('Fetching clients', { userId, filters, sort, limit, offset })
 
   try {
@@ -156,21 +157,21 @@ export async function getClients(
 
     if (error) {
       logger.error('Failed to fetch clients', { error, userId })
-      return { data: [], error, count: 0 }
+      return { data: [], error: toDbError(error), count: 0 }
     }
 
     logger.info('Clients fetched successfully', { count: data?.length || 0, total: count })
     return { data: data || [], error: null, count: count || 0 }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching clients', { error, userId })
-    return { data: [], error, count: 0 }
+    return { data: [], error: toDbError(error), count: 0 }
   }
 }
 
 /**
  * Get a single client by ID
  */
-export async function getClient(clientId: string): Promise<{ data: Client | null; error: any }> {
+export async function getClient(clientId: string): Promise<{ data: Client | null; error: DatabaseError | null }> {
   logger.info('Fetching client', { clientId })
 
   try {
@@ -182,14 +183,14 @@ export async function getClient(clientId: string): Promise<{ data: Client | null
 
     if (error) {
       logger.error('Failed to fetch client', { error, clientId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Client fetched successfully', { clientId, name: data?.name })
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching client', { error, clientId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -199,7 +200,7 @@ export async function getClient(clientId: string): Promise<{ data: Client | null
 export async function addClient(
   userId: string,
   clientData: Partial<Client>
-): Promise<{ data: Client | null; error: any }> {
+): Promise<{ data: Client | null; error: DatabaseError | null }> {
   logger.info('Creating client', { userId, name: clientData.name, email: clientData.email })
 
   try {
@@ -241,14 +242,14 @@ export async function addClient(
 
     if (error) {
       logger.error('Failed to create client', { error, userId, name: clientData.name })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Client created successfully', { clientId: data?.id, name: data?.name })
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception creating client', { error, userId, name: clientData.name })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -259,7 +260,7 @@ export async function updateClient(
   userId: string,
   clientId: string,
   updates: Partial<Client>
-): Promise<{ data: Client | null; error: any }> {
+): Promise<{ data: Client | null; error: DatabaseError | null }> {
   logger.info('Updating client', { userId, clientId, updates: Object.keys(updates) })
 
   try {
@@ -276,21 +277,21 @@ export async function updateClient(
 
     if (error) {
       logger.error('Failed to update client', { error, userId, clientId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Client updated successfully', { userId, clientId, name: data?.name })
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception updating client', { error, userId, clientId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
 /**
  * Delete a client
  */
-export async function deleteClient(userId: string, clientId: string): Promise<{ success: boolean; error: any }> {
+export async function deleteClient(userId: string, clientId: string): Promise<{ success: boolean; error: DatabaseError | null }> {
   logger.info('Deleting client', { userId, clientId })
 
   try {
@@ -302,14 +303,14 @@ export async function deleteClient(userId: string, clientId: string): Promise<{ 
 
     if (error) {
       logger.error('Failed to delete client', { error, userId, clientId })
-      return { success: false, error }
+      return { success: false, error: toDbError(error) }
     }
 
     logger.info('Client deleted successfully', { userId, clientId })
     return { success: true, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception deleting client', { error, userId, clientId })
-    return { success: false, error }
+    return { success: false, error: toDbError(error) }
   }
 }
 
@@ -320,7 +321,7 @@ export async function updateClientStatus(
   userId: string,
   clientId: string,
   status: Client['status']
-): Promise<{ data: Client | null; error: any }> {
+): Promise<{ data: Client | null; error: DatabaseError | null }> {
   logger.info('Updating client status', { userId, clientId, status })
 
   return updateClient(userId, clientId, { status })
@@ -333,7 +334,7 @@ export async function updateClientHealthScore(
   userId: string,
   clientId: string,
   healthScore: number
-): Promise<{ data: Client | null; error: any }> {
+): Promise<{ data: Client | null; error: DatabaseError | null }> {
   logger.info('Updating client health score', { userId, clientId, healthScore })
 
   return updateClient(userId, clientId, { health_score: healthScore })
@@ -346,7 +347,7 @@ export async function updateClientLeadScore(
   userId: string,
   clientId: string,
   leadScore: number
-): Promise<{ data: Client | null; error: any }> {
+): Promise<{ data: Client | null; error: DatabaseError | null }> {
   logger.info('Updating client lead score', { userId, clientId, leadScore })
 
   return updateClient(userId, clientId, { lead_score: leadScore })
@@ -389,7 +390,7 @@ export async function getClientStats(userId: string): Promise<ClientStats> {
 
     logger.info('Client stats calculated', { stats })
     return stats
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception calculating client stats', { error, userId })
     return {
       total: 0,
@@ -412,7 +413,7 @@ export async function searchClients(
   userId: string,
   searchTerm: string,
   limit: number = 10
-): Promise<{ data: Client[]; error: any }> {
+): Promise<{ data: Client[]; error: DatabaseError | null }> {
   logger.info('Searching clients', { userId, searchTerm, limit })
 
   return getClients(
@@ -429,7 +430,7 @@ export async function searchClients(
 export async function getClientsByStatus(
   userId: string,
   status: Client['status'][]
-): Promise<{ data: Client[]; error: any }> {
+): Promise<{ data: Client[]; error: DatabaseError | null }> {
   logger.info('Fetching clients by status', { userId, status })
 
   return getClients(
@@ -444,7 +445,7 @@ export async function getClientsByStatus(
  */
 export async function getVIPClients(
   userId: string
-): Promise<{ data: Client[]; error: any }> {
+): Promise<{ data: Client[]; error: DatabaseError | null }> {
   logger.info('Fetching VIP clients', { userId })
 
   return getClientsByStatus(userId, ['vip'])
@@ -456,7 +457,7 @@ export async function getVIPClients(
 export async function getRecentClients(
   userId: string,
   limit: number = 5
-): Promise<{ data: Client[]; error: any }> {
+): Promise<{ data: Client[]; error: DatabaseError | null }> {
   logger.info('Fetching recent clients', { userId, limit })
 
   return getClients(
@@ -472,7 +473,7 @@ export async function getRecentClients(
  */
 export async function getClientsNeedingFollowUp(
   userId: string
-): Promise<{ data: Client[]; error: any }> {
+): Promise<{ data: Client[]; error: DatabaseError | null }> {
   logger.info('Fetching clients needing follow-up', { userId })
 
   try {
@@ -486,13 +487,13 @@ export async function getClientsNeedingFollowUp(
 
     if (error) {
       logger.error('Failed to fetch clients needing follow-up', { error, userId })
-      return { data: [], error }
+      return { data: [], error: toDbError(error) }
     }
 
     logger.info('Clients needing follow-up fetched', { count: data?.length || 0 })
     return { data: data || [], error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching clients needing follow-up', { error, userId })
-    return { data: [], error }
+    return { data: [], error: toDbError(error) }
   }
 }

@@ -3,6 +3,7 @@
  */
 
 import { createClient } from '@/lib/supabase/client'
+import type { JsonValue } from '@/lib/types/database'
 
 export type LoginAttemptStatus = 'success' | 'failed' | 'blocked' | 'suspicious'
 export type SecurityEventType = 'login' | 'logout' | 'password_change' | '2fa_enabled' | '2fa_disabled' | 'password_reset' | 'device_trusted' | 'device_removed' | 'settings_changed' | 'suspicious_activity'
@@ -51,9 +52,9 @@ export interface SecurityAuditLog {
   ip_address?: string
   user_agent?: string
   device_id?: string
-  old_value: Record<string, any>
-  new_value: Record<string, any>
-  additional_data: Record<string, any>
+  old_value: Record<string, JsonValue>
+  new_value: Record<string, JsonValue>
+  additional_data: Record<string, JsonValue>
   is_suspicious: boolean
   risk_score?: number
   created_at: string
@@ -107,7 +108,7 @@ export interface SecurityAlert {
   related_ip?: string
   related_device_id?: string
   related_event_id?: string
-  alert_data: Record<string, any>
+  alert_data: Record<string, JsonValue>
   created_at: string
   updated_at: string
 }

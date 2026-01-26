@@ -7,6 +7,7 @@
 
 import { createClient } from '@/lib/supabase/client'
 import { createFeatureLogger } from '@/lib/logger'
+import type { JsonValue } from '@/lib/types/database'
 
 const logger = createFeatureLogger('VideoQueries')
 
@@ -38,7 +39,7 @@ export interface VideoAsset {
   duration?: number
   size: number // bytes
   mime_type: string
-  metadata?: Record<string, any>
+  metadata?: Record<string, JsonValue>
   created_at: string
 }
 
@@ -51,8 +52,8 @@ export interface TimelineClip {
   end_time: number
   trim_start?: number // trim from original
   trim_end?: number
-  effects?: any[]
-  transitions?: any[]
+  effects?: JsonValue[]
+  transitions?: JsonValue[]
   position: number
   created_at: string
 }
@@ -253,7 +254,7 @@ export async function addProjectAsset(
     duration?: number
     size: number
     mime_type: string
-    metadata?: Record<string, any>
+    metadata?: Record<string, JsonValue>
   }
 ): Promise<VideoAsset> {
   const supabase = createClient()
@@ -482,7 +483,15 @@ export async function getProjectRenderJobs(projectId: string): Promise<RenderJob
 // ANALYTICS
 // ============================================================================
 
-export async function getVideoAnalytics(projectId: string): Promise<any> {
+export interface VideoAnalyticsData {
+  views: number
+  watch_time: number
+  completion_rate: number
+  shares: number
+  likes: number
+}
+
+export async function getVideoAnalytics(projectId: string): Promise<VideoAnalyticsData> {
   const supabase = createClient()
 
   const { data, error } = await supabase

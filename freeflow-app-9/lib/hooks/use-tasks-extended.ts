@@ -7,22 +7,108 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import type { JsonValue } from '@/lib/types/database'
+
+// ============================================================================
+// TYPES
+// ============================================================================
+
+export interface TaskUser {
+  id: string
+  name: string
+  email: string
+  avatar_url?: string | null
+}
+
+export interface TaskProject {
+  id: string
+  name: string
+  description?: string | null
+}
+
+export interface TaskAssignment {
+  id: string
+  task_id: string
+  user_id: string
+  role?: string | null
+  assigned_at: string
+}
+
+export interface TaskDependency {
+  id: string
+  task_id: string
+  depends_on_id: string
+  dependency_type?: string | null
+  created_at: string
+  depends_on?: ExtendedTask | null
+  task?: ExtendedTask | null
+}
+
+export interface TaskChecklistItem {
+  id: string
+  task_id: string
+  title: string
+  is_completed: boolean
+  order_index: number
+  created_at: string
+}
+
+export interface TaskComment {
+  id: string
+  task_id: string
+  user_id: string
+  content: string
+  parent_id?: string | null
+  created_at: string
+  updated_at: string
+  users?: TaskUser | null
+}
+
+export interface TaskTimeLog {
+  id: string
+  task_id: string
+  user_id: string
+  hours: number
+  description?: string | null
+  logged_date: string
+  created_at: string
+  users?: TaskUser | null
+}
+
+export interface ExtendedTask {
+  id: string
+  title: string
+  description?: string | null
+  status: string
+  priority?: string | null
+  due_date?: string | null
+  project_id?: string | null
+  parent_id?: string | null
+  created_at: string
+  updated_at: string
+  task_assignments?: TaskAssignment[]
+  task_dependencies?: TaskDependency[]
+  task_checklists?: TaskChecklistItem[]
+  users?: TaskUser | null
+  projects?: TaskProject | null
+  metadata?: Record<string, JsonValue>
+}
 
 export function useTask(taskId?: string) {
-  const [task, setTask] = useState<any>(null)
+  const [task, setTask] = useState<ExtendedTask | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
   const supabase = createClient()
     if (!taskId) { setIsLoading(false); return }
     setIsLoading(true)
-    try { const { data } = await supabase.from('tasks').select('*, task_assignments(*), task_dependencies(*), task_checklists(*), users(*), projects(*)').eq('id', taskId).single(); setTask(data) } finally { setIsLoading(false) }
+    try { const { data } = await supabase.from('tasks').select('*, task_assignments(*), task_dependencies(*), task_checklists(*), users(*), projects(*)').eq('id', taskId).single(); setTask(data as ExtendedTask | null) } finally { setIsLoading(false) }
   }, [taskId])
   useEffect(() => { fetch() }, [fetch])
   return { task, isLoading, refresh: fetch }
 }
 
 export function useTasks(options?: { project_id?: string; status?: string; priority?: string; assignee_id?: string; parent_id?: string | null; overdue?: boolean; search?: string; limit?: number }) {
-  const [tasks, setTasks] = useState<any[]>([])
+  const [tasks, setTasks] = useState<ExtendedTask[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
   const supabase = createClient()
@@ -39,10 +125,10 @@ export function useTasks(options?: { project_id?: string; status?: string; prior
       if (options?.overdue) query = query.lt('due_date', new Date().toISOString()).neq('status', 'done')
       if (options?.search) query = query.ilike('title', `%${options.search}%`)
       const { data } = await query.order('created_at', { ascending: false }).limit(options?.limit || 100)
-      let result = data || []
+      let result = (data || []) as ExtendedTask[]
       if (options?.assignee_id) {
         const { data: assignments } = await supabase.from('task_assignments').select('task_id').eq('user_id', options.assignee_id)
-        const taskIds = assignments?.map(a => a.task_id) || []
+        const taskIds = assignments?.map((a: { task_id: string }) => a.task_id) || []
         result = result.filter(t => taskIds.includes(t.id))
       }
       setTasks(result)
@@ -53,7 +139,7 @@ export function useTasks(options?: { project_id?: string; status?: string; prior
 }
 
 export function useMyTasks(userId?: string, options?: { status?: string; priority?: string; limit?: number }) {
-  const [tasks, setTasks] = useState<any[]>([])
+  const [tasks, setTasks] = useState<ExtendedTask[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
   const supabase = createClient()
@@ -61,13 +147,13 @@ export function useMyTasks(userId?: string, options?: { status?: string; priorit
     setIsLoading(true)
     try {
       const { data: assignments } = await supabase.from('task_assignments').select('task_id').eq('user_id', userId)
-      const taskIds = assignments?.map(a => a.task_id) || []
+      const taskIds = assignments?.map((a: { task_id: string }) => a.task_id) || []
       if (taskIds.length === 0) { setTasks([]); return }
       let query = supabase.from('tasks').select('*, task_assignments(*), projects(*)').in('id', taskIds)
       if (options?.status) query = query.eq('status', options.status)
       if (options?.priority) query = query.eq('priority', options.priority)
       const { data } = await query.order('due_date', { ascending: true }).limit(options?.limit || 100)
-      setTasks(data || [])
+      setTasks((data || []) as ExtendedTask[])
     } finally { setIsLoading(false) }
   }, [userId, options?.status, options?.priority, options?.limit])
   useEffect(() => { fetch() }, [fetch])
@@ -75,21 +161,21 @@ export function useMyTasks(userId?: string, options?: { status?: string; priorit
 }
 
 export function useSubtasks(taskId?: string) {
-  const [subtasks, setSubtasks] = useState<any[]>([])
+  const [subtasks, setSubtasks] = useState<ExtendedTask[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
   const supabase = createClient()
     if (!taskId) { setIsLoading(false); return }
     setIsLoading(true)
-    try { const { data } = await supabase.from('tasks').select('*, task_assignments(*)').eq('parent_id', taskId).order('created_at', { ascending: true }); setSubtasks(data || []) } finally { setIsLoading(false) }
+    try { const { data } = await supabase.from('tasks').select('*, task_assignments(*)').eq('parent_id', taskId).order('created_at', { ascending: true }); setSubtasks((data || []) as ExtendedTask[]) } finally { setIsLoading(false) }
   }, [taskId])
   useEffect(() => { fetch() }, [fetch])
   return { subtasks, isLoading, refresh: fetch }
 }
 
 export function useTaskDependencies(taskId?: string) {
-  const [dependencies, setDependencies] = useState<any[]>([])
-  const [dependents, setDependents] = useState<any[]>([])
+  const [dependencies, setDependencies] = useState<TaskDependency[]>([])
+  const [dependents, setDependents] = useState<TaskDependency[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
   const supabase = createClient()
@@ -100,8 +186,8 @@ export function useTaskDependencies(taskId?: string) {
         supabase.from('task_dependencies').select('*, depends_on:depends_on_id(*)').eq('task_id', taskId),
         supabase.from('task_dependencies').select('*, task:task_id(*)').eq('depends_on_id', taskId)
       ])
-      setDependencies(depsRes.data || [])
-      setDependents(dependentsRes.data || [])
+      setDependencies((depsRes.data || []) as TaskDependency[])
+      setDependents((dependentsRes.data || []) as TaskDependency[])
     } finally { setIsLoading(false) }
   }, [taskId])
   useEffect(() => { fetch() }, [fetch])
@@ -109,20 +195,20 @@ export function useTaskDependencies(taskId?: string) {
 }
 
 export function useTaskComments(taskId?: string, options?: { limit?: number }) {
-  const [comments, setComments] = useState<any[]>([])
+  const [comments, setComments] = useState<TaskComment[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
   const supabase = createClient()
     if (!taskId) { setIsLoading(false); return }
     setIsLoading(true)
-    try { const { data } = await supabase.from('task_comments').select('*, users(*)').eq('task_id', taskId).is('parent_id', null).order('created_at', { ascending: true }).limit(options?.limit || 100); setComments(data || []) } finally { setIsLoading(false) }
+    try { const { data } = await supabase.from('task_comments').select('*, users(*)').eq('task_id', taskId).is('parent_id', null).order('created_at', { ascending: true }).limit(options?.limit || 100); setComments((data || []) as TaskComment[]) } finally { setIsLoading(false) }
   }, [taskId, options?.limit])
   useEffect(() => { fetch() }, [fetch])
   return { comments, isLoading, refresh: fetch }
 }
 
 export function useTaskTimeLogs(taskId?: string, options?: { user_id?: string; from_date?: string; to_date?: string }) {
-  const [timeLogs, setTimeLogs] = useState<any[]>([])
+  const [timeLogs, setTimeLogs] = useState<TaskTimeLog[]>([])
   const [totalHours, setTotalHours] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
@@ -135,7 +221,7 @@ export function useTaskTimeLogs(taskId?: string, options?: { user_id?: string; f
       if (options?.from_date) query = query.gte('logged_date', options.from_date)
       if (options?.to_date) query = query.lte('logged_date', options.to_date)
       const { data } = await query.order('logged_date', { ascending: false })
-      const logs = data || []
+      const logs = (data || []) as TaskTimeLog[]
       setTimeLogs(logs)
       setTotalHours(logs.reduce((sum, l) => sum + (l.hours || 0), 0))
     } finally { setIsLoading(false) }
@@ -145,7 +231,7 @@ export function useTaskTimeLogs(taskId?: string, options?: { user_id?: string; f
 }
 
 export function useTaskChecklist(taskId?: string) {
-  const [items, setItems] = useState<any[]>([])
+  const [items, setItems] = useState<TaskChecklistItem[]>([])
   const [progress, setProgress] = useState<{ completed: number; total: number; percentage: number }>({ completed: 0, total: 0, percentage: 0 })
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
@@ -154,7 +240,7 @@ export function useTaskChecklist(taskId?: string) {
     setIsLoading(true)
     try {
       const { data } = await supabase.from('task_checklists').select('*').eq('task_id', taskId).order('order_index', { ascending: true })
-      const checklistItems = data || []
+      const checklistItems = (data || []) as TaskChecklistItem[]
       setItems(checklistItems)
       const completed = checklistItems.filter(i => i.is_completed).length
       const total = checklistItems.length
@@ -166,7 +252,7 @@ export function useTaskChecklist(taskId?: string) {
 }
 
 export function useOverdueTasks(options?: { project_id?: string; assignee_id?: string; limit?: number }) {
-  const [tasks, setTasks] = useState<any[]>([])
+  const [tasks, setTasks] = useState<ExtendedTask[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
   const supabase = createClient()
@@ -175,10 +261,10 @@ export function useOverdueTasks(options?: { project_id?: string; assignee_id?: s
       let query = supabase.from('tasks').select('*, task_assignments(*), projects(*)').lt('due_date', new Date().toISOString()).neq('status', 'done')
       if (options?.project_id) query = query.eq('project_id', options.project_id)
       const { data } = await query.order('due_date', { ascending: true }).limit(options?.limit || 50)
-      let result = data || []
+      let result = (data || []) as ExtendedTask[]
       if (options?.assignee_id) {
         const { data: assignments } = await supabase.from('task_assignments').select('task_id').eq('user_id', options.assignee_id)
-        const taskIds = assignments?.map(a => a.task_id) || []
+        const taskIds = assignments?.map((a: { task_id: string }) => a.task_id) || []
         result = result.filter(t => taskIds.includes(t.id))
       }
       setTasks(result)

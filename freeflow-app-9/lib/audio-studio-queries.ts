@@ -3,6 +3,7 @@
  */
 
 import { createClient } from '@/lib/supabase/client'
+import type { JsonValue } from '@/lib/types/database'
 
 export type AudioFormat = 'mp3' | 'wav' | 'aac' | 'flac' | 'ogg' | 'm4a'
 export type AudioQuality = 'low' | 'medium' | 'high' | 'lossless'
@@ -80,7 +81,7 @@ export interface AudioEffectInstance {
   track_id: string
   type: AudioEffect
   is_enabled: boolean
-  parameters: Record<string, any>
+  parameters: Record<string, JsonValue>
   preset_name?: string
   effect_order: number
   created_at: string
@@ -284,7 +285,7 @@ export async function createAudioRecording(userId: string, recording: Partial<Au
 
 export async function updateRecordingStatus(recordingId: string, status: RecordingStatus, url?: string) {
   const supabase = createClient()
-  const updates: any = { status }
+  const updates: { status: RecordingStatus; url?: string } = { status }
   if (url) updates.url = url
   return await supabase.from('audio_recordings').update(updates).eq('id', recordingId).select().single()
 }
@@ -307,7 +308,7 @@ export async function createAudioExport(projectId: string, userId: string, expor
 
 export async function updateExportStatus(exportId: string, status: ExportStatus, fileUrl?: string, error?: string) {
   const supabase = createClient()
-  const updates: any = { status }
+  const updates: { status: ExportStatus; file_url?: string; error_message?: string } = { status }
   if (fileUrl) updates.file_url = fileUrl
   if (error) updates.error_message = error
   return await supabase.from('audio_exports').update(updates).eq('id', exportId).select().single()

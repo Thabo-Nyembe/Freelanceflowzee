@@ -2,6 +2,7 @@
 // Coming soon features, user requests, voting, and notifications
 
 import { createClient } from '@/lib/supabase/client'
+import type { JsonValue } from '@/lib/types/database'
 
 // ============================================================================
 // TYPES
@@ -32,7 +33,7 @@ export interface RoadmapFeature {
   views_count: number
   is_public: boolean
   is_featured: boolean
-  metadata?: any
+  metadata?: Record<string, JsonValue>
   created_at: string
   updated_at: string
 }
@@ -93,7 +94,7 @@ export interface FeatureUpdate {
   new_progress?: number
   old_status?: FeatureStatus
   new_status?: FeatureStatus
-  metadata?: any
+  metadata?: Record<string, JsonValue>
   created_at: string
 }
 
@@ -590,7 +591,7 @@ export async function createFeatureUpdate(updateData: {
   new_progress?: number
   old_status?: FeatureStatus
   new_status?: FeatureStatus
-  metadata?: any
+  metadata?: Record<string, JsonValue>
 }) {
   const supabase = createClient()
 

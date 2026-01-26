@@ -3,10 +3,36 @@
 import { useSupabaseQuery } from './use-supabase-query'
 import { useSupabaseMutation } from './use-supabase-mutation'
 import { useCallback, useState } from 'react'
+import type { JsonValue } from '@/lib/types/database'
 
 export type EventType = 'meeting' | 'appointment' | 'task' | 'reminder' | 'deadline' | 'milestone' | 'holiday' | 'birthday' | 'custom'
 export type EventStatus = 'tentative' | 'confirmed' | 'cancelled' | 'rescheduled' | 'completed'
 export type LocationType = 'in_person' | 'virtual' | 'hybrid' | 'tbd'
+
+/** Attendee information for calendar events */
+export interface CalendarAttendee {
+  id?: string
+  email: string
+  name?: string
+  status?: 'pending' | 'accepted' | 'declined' | 'tentative'
+  required?: boolean
+}
+
+/** Reminder configuration for calendar events */
+export interface CalendarReminder {
+  id?: string
+  type: 'email' | 'push' | 'sms'
+  minutes_before: number
+}
+
+/** Attachment for calendar events */
+export interface CalendarAttachment {
+  id?: string
+  name: string
+  url: string
+  type?: string
+  size?: number
+}
 
 export interface CalendarEvent {
   id: string
@@ -34,7 +60,7 @@ export interface CalendarEvent {
   recurrence_count?: number | null
   parent_event_id?: string | null
   organizer_id?: string | null
-  attendees: any
+  attendees: CalendarAttendee[] | null
   required_attendees?: string[]
   optional_attendees?: string[]
   total_attendees: number
@@ -46,12 +72,12 @@ export interface CalendarEvent {
   calendar_id?: string | null
   calendar_name?: string | null
   color?: string | null
-  reminders: any
+  reminders: CalendarReminder[] | null
   reminder_sent: boolean
   category?: string | null
   priority: string
   tags?: string[]
-  attachments: any
+  attachments: CalendarAttachment[] | null
   resources?: string[]
   agenda?: string | null
   notes?: string | null
@@ -60,7 +86,7 @@ export interface CalendarEvent {
   external_calendar_id?: string | null
   sync_status?: string | null
   last_synced_at?: string | null
-  metadata: any
+  metadata: Record<string, JsonValue> | null
   created_at: string
   updated_at: string
   deleted_at?: string | null
@@ -80,8 +106,8 @@ export interface CreateCalendarEventInput {
   status?: EventStatus
   visibility?: string
   color?: string | null
-  reminders?: any
-  attendees?: any
+  reminders?: CalendarReminder[]
+  attendees?: CalendarAttendee[]
   calendar_id?: string | null
 }
 
@@ -100,8 +126,8 @@ export interface UpdateCalendarEventInput {
   status?: EventStatus
   visibility?: string
   color?: string | null
-  reminders?: any
-  attendees?: any
+  reminders?: CalendarReminder[]
+  attendees?: CalendarAttendee[]
 }
 
 export interface UseCalendarEventsOptions {
@@ -112,15 +138,28 @@ export interface UseCalendarEventsOptions {
   limit?: number
 }
 
+interface CalendarEventFilters {
+  status?: EventStatus
+}
+
+interface CalendarEventQueryOptions {
+  table: string
+  filters: CalendarEventFilters
+  orderBy: { column: string; ascending: boolean }
+  limit: number
+  realtime: boolean
+  softDelete: boolean
+}
+
 export function useCalendarEvents(options: UseCalendarEventsOptions = {}) {
   const { status, limit } = options
   const [mutationLoading, setMutationLoading] = useState(false)
   const [mutationError, setMutationError] = useState<Error | null>(null)
 
-  const filters: Record<string, any> = {}
+  const filters: CalendarEventFilters = {}
   if (status && status !== 'all') filters.status = status
 
-  const queryOptions: any = {
+  const queryOptions: CalendarEventQueryOptions = {
     table: 'calendar_events',
     filters,
     orderBy: { column: 'start_time', ascending: true },

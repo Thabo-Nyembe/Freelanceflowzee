@@ -6,6 +6,7 @@
  */
 
 import { createClient } from '@/lib/supabase/client'
+import { DatabaseError, toDbError } from '@/lib/types/database'
 
 // ==================== TYPES ====================
 
@@ -111,9 +112,33 @@ export interface PortfolioAnalytics {
   updated_at: string
 }
 
+export interface PublicPortfolioData {
+  settings: {
+    user_id: string
+    is_public: boolean
+    theme: string
+    show_contact: boolean
+  }
+  projects: PortfolioProject[] | null
+  skills: Skill[] | null
+  experience: Experience[] | null
+  education: Education[] | null
+  certifications: Certification[] | null
+}
+
+export interface CompletePortfolioData {
+  projects: PortfolioProject[]
+  skills: Skill[]
+  experience: Experience[]
+  education: Education[]
+  certifications: Certification[]
+  settings: PortfolioSettings | null
+  analytics: PortfolioAnalytics | null
+}
+
 // ==================== PROJECTS ====================
 
-export async function getPortfolioProjects(userId: string) {
+export async function getPortfolioProjects(userId: string): Promise<{ data: PortfolioProject[] | null; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
     const { data, error } = await supabase
@@ -124,13 +149,13 @@ export async function getPortfolioProjects(userId: string) {
 
     if (error) throw error
     return { data: data as PortfolioProject[], error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching portfolio projects:', error)
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
-export async function getFeaturedProjects(userId: string) {
+export async function getFeaturedProjects(userId: string): Promise<{ data: PortfolioProject[] | null; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
     const { data, error } = await supabase
@@ -142,13 +167,13 @@ export async function getFeaturedProjects(userId: string) {
 
     if (error) throw error
     return { data: data as PortfolioProject[], error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching featured projects:', error)
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
-export async function addProject(userId: string, project: Partial<PortfolioProject>) {
+export async function addProject(userId: string, project: Partial<PortfolioProject>): Promise<{ data: PortfolioProject | null; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
 
@@ -177,13 +202,13 @@ export async function addProject(userId: string, project: Partial<PortfolioProje
 
     if (error) throw error
     return { data: data as PortfolioProject, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error adding project:', error)
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
-export async function updateProject(projectId: string, updates: Partial<PortfolioProject>) {
+export async function updateProject(projectId: string, updates: Partial<PortfolioProject>): Promise<{ data: PortfolioProject | null; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
     const { data, error } = await supabase
@@ -195,13 +220,13 @@ export async function updateProject(projectId: string, updates: Partial<Portfoli
 
     if (error) throw error
     return { data: data as PortfolioProject, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error updating project:', error)
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
-export async function deleteProject(projectId: string) {
+export async function deleteProject(projectId: string): Promise<{ data: boolean; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
     const { error } = await supabase
@@ -211,13 +236,13 @@ export async function deleteProject(projectId: string) {
 
     if (error) throw error
     return { data: true, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error deleting project:', error)
-    return { data: false, error }
+    return { data: false, error: toDbError(error) }
   }
 }
 
-export async function reorderProjects(userId: string, projectIds: string[]) {
+export async function reorderProjects(userId: string, projectIds: string[]): Promise<{ data: boolean; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
 
@@ -232,13 +257,13 @@ export async function reorderProjects(userId: string, projectIds: string[]) {
 
     await Promise.all(updates)
     return { data: true, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error reordering projects:', error)
-    return { data: false, error }
+    return { data: false, error: toDbError(error) }
   }
 }
 
-export async function toggleProjectFeatured(projectId: string, isFeatured: boolean) {
+export async function toggleProjectFeatured(projectId: string, isFeatured: boolean): Promise<{ data: PortfolioProject | null; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
     const { data, error} = await supabase
@@ -250,15 +275,15 @@ export async function toggleProjectFeatured(projectId: string, isFeatured: boole
 
     if (error) throw error
     return { data: data as PortfolioProject, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error toggling project featured status:', error)
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
 // ==================== SKILLS ====================
 
-export async function getSkills(userId: string) {
+export async function getSkills(userId: string): Promise<{ data: Skill[] | null; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
     const { data, error } = await supabase
@@ -270,13 +295,13 @@ export async function getSkills(userId: string) {
 
     if (error) throw error
     return { data: data as Skill[], error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching skills:', error)
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
-export async function addSkill(userId: string, skill: Partial<Skill>) {
+export async function addSkill(userId: string, skill: Partial<Skill>): Promise<{ data: Skill | null; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
 
@@ -303,13 +328,13 @@ export async function addSkill(userId: string, skill: Partial<Skill>) {
 
     if (error) throw error
     return { data: data as Skill, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error adding skill:', error)
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
-export async function updateSkill(skillId: string, updates: Partial<Skill>) {
+export async function updateSkill(skillId: string, updates: Partial<Skill>): Promise<{ data: Skill | null; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
     const { data, error } = await supabase
@@ -321,13 +346,13 @@ export async function updateSkill(skillId: string, updates: Partial<Skill>) {
 
     if (error) throw error
     return { data: data as Skill, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error updating skill:', error)
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
-export async function deleteSkill(skillId: string) {
+export async function deleteSkill(skillId: string): Promise<{ data: boolean; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
     const { error } = await supabase
@@ -337,15 +362,15 @@ export async function deleteSkill(skillId: string) {
 
     if (error) throw error
     return { data: true, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error deleting skill:', error)
-    return { data: false, error }
+    return { data: false, error: toDbError(error) }
   }
 }
 
 // ==================== EXPERIENCE ====================
 
-export async function getExperience(userId: string) {
+export async function getExperience(userId: string): Promise<{ data: Experience[] | null; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
     const { data, error } = await supabase
@@ -357,13 +382,13 @@ export async function getExperience(userId: string) {
 
     if (error) throw error
     return { data: data as Experience[], error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching experience:', error)
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
-export async function addExperience(userId: string, experience: Partial<Experience>) {
+export async function addExperience(userId: string, experience: Partial<Experience>): Promise<{ data: Experience | null; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
 
@@ -389,13 +414,13 @@ export async function addExperience(userId: string, experience: Partial<Experien
 
     if (error) throw error
     return { data: data as Experience, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error adding experience:', error)
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
-export async function updateExperience(experienceId: string, updates: Partial<Experience>) {
+export async function updateExperience(experienceId: string, updates: Partial<Experience>): Promise<{ data: Experience | null; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
     const { data, error } = await supabase
@@ -407,13 +432,13 @@ export async function updateExperience(experienceId: string, updates: Partial<Ex
 
     if (error) throw error
     return { data: data as Experience, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error updating experience:', error)
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
-export async function deleteExperience(experienceId: string) {
+export async function deleteExperience(experienceId: string): Promise<{ data: boolean; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
     const { error } = await supabase
@@ -423,15 +448,15 @@ export async function deleteExperience(experienceId: string) {
 
     if (error) throw error
     return { data: true, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error deleting experience:', error)
-    return { data: false, error }
+    return { data: false, error: toDbError(error) }
   }
 }
 
 // ==================== EDUCATION ====================
 
-export async function getEducation(userId: string) {
+export async function getEducation(userId: string): Promise<{ data: Education[] | null; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
     const { data, error } = await supabase
@@ -443,13 +468,13 @@ export async function getEducation(userId: string) {
 
     if (error) throw error
     return { data: data as Education[], error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching education:', error)
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
-export async function addEducation(userId: string, education: Partial<Education>) {
+export async function addEducation(userId: string, education: Partial<Education>): Promise<{ data: Education | null; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
 
@@ -475,13 +500,13 @@ export async function addEducation(userId: string, education: Partial<Education>
 
     if (error) throw error
     return { data: data as Education, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error adding education:', error)
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
-export async function updateEducation(educationId: string, updates: Partial<Education>) {
+export async function updateEducation(educationId: string, updates: Partial<Education>): Promise<{ data: Education | null; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
     const { data, error } = await supabase
@@ -493,13 +518,13 @@ export async function updateEducation(educationId: string, updates: Partial<Educ
 
     if (error) throw error
     return { data: data as Education, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error updating education:', error)
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
-export async function deleteEducation(educationId: string) {
+export async function deleteEducation(educationId: string): Promise<{ data: boolean; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
     const { error } = await supabase
@@ -509,15 +534,15 @@ export async function deleteEducation(educationId: string) {
 
     if (error) throw error
     return { data: true, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error deleting education:', error)
-    return { data: false, error }
+    return { data: false, error: toDbError(error) }
   }
 }
 
 // ==================== CERTIFICATIONS ====================
 
-export async function getCertifications(userId: string) {
+export async function getCertifications(userId: string): Promise<{ data: Certification[] | null; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
     const { data, error } = await supabase
@@ -528,13 +553,13 @@ export async function getCertifications(userId: string) {
 
     if (error) throw error
     return { data: data as Certification[], error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching certifications:', error)
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
-export async function addCertification(userId: string, certification: Partial<Certification>) {
+export async function addCertification(userId: string, certification: Partial<Certification>): Promise<{ data: Certification | null; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
 
@@ -560,13 +585,13 @@ export async function addCertification(userId: string, certification: Partial<Ce
 
     if (error) throw error
     return { data: data as Certification, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error adding certification:', error)
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
-export async function updateCertification(certificationId: string, updates: Partial<Certification>) {
+export async function updateCertification(certificationId: string, updates: Partial<Certification>): Promise<{ data: Certification | null; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
     const { data, error } = await supabase
@@ -578,13 +603,13 @@ export async function updateCertification(certificationId: string, updates: Part
 
     if (error) throw error
     return { data: data as Certification, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error updating certification:', error)
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
-export async function deleteCertification(certificationId: string) {
+export async function deleteCertification(certificationId: string): Promise<{ data: boolean; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
     const { error } = await supabase
@@ -594,15 +619,15 @@ export async function deleteCertification(certificationId: string) {
 
     if (error) throw error
     return { data: true, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error deleting certification:', error)
-    return { data: false, error }
+    return { data: false, error: toDbError(error) }
   }
 }
 
 // ==================== SETTINGS ====================
 
-export async function getPortfolioSettings(userId: string) {
+export async function getPortfolioSettings(userId: string): Promise<{ data: PortfolioSettings | null; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
     const { data, error } = await supabase
@@ -620,13 +645,13 @@ export async function getPortfolioSettings(userId: string) {
     }
 
     return { data: data as PortfolioSettings, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching portfolio settings:', error)
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
-async function createDefaultPortfolioSettings(userId: string) {
+async function createDefaultPortfolioSettings(userId: string): Promise<{ data: PortfolioSettings | null; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
     const { data, error } = await supabase
@@ -643,13 +668,13 @@ async function createDefaultPortfolioSettings(userId: string) {
 
     if (error) throw error
     return { data: data as PortfolioSettings, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error creating default settings:', error)
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
-export async function updatePortfolioSettings(userId: string, updates: Partial<PortfolioSettings>) {
+export async function updatePortfolioSettings(userId: string, updates: Partial<PortfolioSettings>): Promise<{ data: PortfolioSettings | null; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
     const { data, error } = await supabase
@@ -661,15 +686,15 @@ export async function updatePortfolioSettings(userId: string, updates: Partial<P
 
     if (error) throw error
     return { data: data as PortfolioSettings, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error updating portfolio settings:', error)
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
 // ==================== ANALYTICS ====================
 
-export async function getPortfolioAnalytics(userId: string) {
+export async function getPortfolioAnalytics(userId: string): Promise<{ data: PortfolioAnalytics | null; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
     const { data, error } = await supabase
@@ -680,13 +705,13 @@ export async function getPortfolioAnalytics(userId: string) {
 
     if (error) throw error
     return { data: data as PortfolioAnalytics, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching portfolio analytics:', error)
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
-export async function incrementProjectViews(projectId: string) {
+export async function incrementProjectViews(projectId: string): Promise<{ data: boolean; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
     const { data, error } = await supabase
@@ -694,15 +719,15 @@ export async function incrementProjectViews(projectId: string) {
 
     if (error) throw error
     return { data: true, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error incrementing project views:', error)
-    return { data: false, error }
+    return { data: false, error: toDbError(error) }
   }
 }
 
 // ==================== PUBLIC PORTFOLIO ====================
 
-export async function getPublicPortfolio(urlSlug: string) {
+export async function getPublicPortfolio(urlSlug: string): Promise<{ data: PublicPortfolioData | null; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
 
@@ -744,15 +769,15 @@ export async function getPublicPortfolio(urlSlug: string) {
       },
       error: null
     }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching public portfolio:', error)
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
 // ==================== COMPLETE PORTFOLIO DATA ====================
 
-export async function getCompletePortfolioData(userId: string) {
+export async function getCompletePortfolioData(userId: string): Promise<{ data: CompletePortfolioData | null; error: DatabaseError | null }> {
   try {
     // Fetch all data in parallel
     const [
@@ -785,9 +810,9 @@ export async function getCompletePortfolioData(userId: string) {
       },
       error: null
     }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching complete portfolio data:', error)
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -814,22 +839,27 @@ export async function createShareLink(
   shareId: string,
   shareUrl: string,
   expiresAt: string
-): Promise<{ data: PortfolioShareLink | null; error: any }> {
-  const supabase = createClient()
-  const { data, error } = await supabase
-    .from('portfolio_share_links')
-    .insert({
-      user_id: userId,
-      share_id: shareId,
-      share_url: shareUrl,
-      expires_at: expiresAt,
-      is_active: true,
-      view_count: 0
-    })
-    .select()
-    .single()
+): Promise<{ data: PortfolioShareLink | null; error: DatabaseError | null }> {
+  try {
+    const supabase = createClient()
+    const { data, error } = await supabase
+      .from('portfolio_share_links')
+      .insert({
+        user_id: userId,
+        share_id: shareId,
+        share_url: shareUrl,
+        expires_at: expiresAt,
+        is_active: true,
+        view_count: 0
+      })
+      .select()
+      .single()
 
-  return { data, error }
+    if (error) throw error
+    return { data, error: null }
+  } catch (error: unknown) {
+    return { data: null, error: toDbError(error) }
+  }
 }
 
 /**
@@ -837,15 +867,20 @@ export async function createShareLink(
  */
 export async function getShareLinks(
   userId: string
-): Promise<{ data: PortfolioShareLink[]; error: any }> {
-  const supabase = createClient()
-  const { data, error } = await supabase
-    .from('portfolio_share_links')
-    .select('*')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false })
+): Promise<{ data: PortfolioShareLink[]; error: DatabaseError | null }> {
+  try {
+    const supabase = createClient()
+    const { data, error } = await supabase
+      .from('portfolio_share_links')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
 
-  return { data: data || [], error }
+    if (error) throw error
+    return { data: data || [], error: null }
+  } catch (error: unknown) {
+    return { data: [], error: toDbError(error) }
+  }
 }
 
 /**
@@ -853,14 +888,19 @@ export async function getShareLinks(
  */
 export async function deactivateShareLink(
   shareId: string
-): Promise<{ error: any }> {
-  const supabase = createClient()
-  const { error } = await supabase
-    .from('portfolio_share_links')
-    .update({ is_active: false })
-    .eq('share_id', shareId)
+): Promise<{ error: DatabaseError | null }> {
+  try {
+    const supabase = createClient()
+    const { error } = await supabase
+      .from('portfolio_share_links')
+      .update({ is_active: false })
+      .eq('share_id', shareId)
 
-  return { error }
+    if (error) throw error
+    return { error: null }
+  } catch (error: unknown) {
+    return { error: toDbError(error) }
+  }
 }
 
 /**
@@ -868,12 +908,17 @@ export async function deactivateShareLink(
  */
 export async function incrementShareViewCount(
   shareId: string
-): Promise<{ error: any }> {
-  const supabase = createClient()
-  const { error } = await supabase
-    .rpc('increment_share_view_count', { p_share_id: shareId })
+): Promise<{ error: DatabaseError | null }> {
+  try {
+    const supabase = createClient()
+    const { error } = await supabase
+      .rpc('increment_share_view_count', { p_share_id: shareId })
 
-  return { error }
+    if (error) throw error
+    return { error: null }
+  } catch (error: unknown) {
+    return { error: toDbError(error) }
+  }
 }
 
 // ==================== FILE UPLOAD ====================
@@ -882,7 +927,7 @@ export async function uploadPortfolioImage(
   userId: string,
   file: File,
   type: 'project' | 'avatar' | 'cover' = 'project'
-): Promise<{ data: { url: string } | null; error: any }> {
+): Promise<{ data: { url: string } | null; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
 
@@ -906,22 +951,22 @@ export async function uploadPortfolioImage(
       .getPublicUrl(fileName)
 
     return { data: { url: urlData.publicUrl }, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error uploading portfolio image:', error)
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
 export async function deletePortfolioImage(
   imageUrl: string
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   try {
     const supabase = createClient()
 
     // Extract path from URL
     const urlParts = imageUrl.split('/portfolio-images/')
     if (urlParts.length < 2) {
-      return { error: new Error('Invalid image URL') }
+      return { error: { message: 'Invalid image URL' } }
     }
 
     const filePath = urlParts[1]
@@ -932,8 +977,8 @@ export async function deletePortfolioImage(
 
     if (error) throw error
     return { error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error deleting portfolio image:', error)
-    return { error }
+    return { error: toDbError(error) }
   }
 }

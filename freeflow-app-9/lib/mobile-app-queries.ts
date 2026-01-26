@@ -2,10 +2,100 @@
 // Comprehensive queries for mobile devices, screens, builds, templates, and testing
 
 import { createClient } from '@/lib/supabase/client'
+import type { JsonValue } from '@/lib/types/database'
 
 // ============================================================================
 // TYPES
 // ============================================================================
+
+// Specific interfaces for complex nested objects
+export interface ScreenElement {
+  id: string
+  type: string
+  props: Record<string, JsonValue>
+  children?: ScreenElement[]
+  style?: Record<string, JsonValue>
+}
+
+export interface NavigationConfig {
+  routes?: string[]
+  defaultRoute?: string
+  params?: Record<string, JsonValue>
+  [key: string]: JsonValue | undefined
+}
+
+export interface DataBindingConfig {
+  source?: string
+  bindings?: Record<string, string>
+  transformations?: Record<string, JsonValue>
+  [key: string]: JsonValue | undefined
+}
+
+export interface BuildConfig {
+  signing?: Record<string, JsonValue>
+  permissions?: string[]
+  features?: string[]
+  environment?: Record<string, string>
+  [key: string]: JsonValue | undefined
+}
+
+export interface TemplateConfig {
+  layout?: string
+  components?: string[]
+  settings?: Record<string, JsonValue>
+  [key: string]: JsonValue | undefined
+}
+
+export interface ColorScheme {
+  primary?: string
+  secondary?: string
+  background?: string
+  surface?: string
+  text?: string
+  [key: string]: string | undefined
+}
+
+export interface Typography {
+  fontFamily?: string
+  fontSize?: Record<string, number>
+  fontWeight?: Record<string, number>
+  lineHeight?: Record<string, number>
+  [key: string]: JsonValue | undefined
+}
+
+export interface TestConfig {
+  timeout?: number
+  retries?: number
+  viewport?: { width: number; height: number }
+  [key: string]: JsonValue | undefined
+}
+
+export interface TestStep {
+  id: string
+  action: string
+  target?: string
+  value?: JsonValue
+  expected?: JsonValue
+}
+
+export interface TestResult {
+  summary?: string
+  details?: Record<string, JsonValue>
+  metrics?: Record<string, number>
+  [key: string]: JsonValue | undefined
+}
+
+export interface TestError {
+  code: string
+  message: string
+  stack?: string
+  screenshot?: string
+}
+
+// Record type for groupByField function
+interface GroupableRecord {
+  [key: string]: string | number | boolean | null | undefined
+}
 
 export type DeviceCategory = 'phone' | 'tablet' | 'wearable' | 'tv' | 'desktop'
 export type OrientationType = 'portrait' | 'landscape' | 'auto'
@@ -32,7 +122,7 @@ export interface MobileDevice {
   total_tests: number
   total_previews: number
   last_used_at?: string
-  metadata: Record<string, any>
+  metadata: Record<string, JsonValue>
   created_at: string
   updated_at: string
 }
@@ -46,9 +136,9 @@ export interface MobileAppScreen {
   background_color?: string
   theme: string
   layout_type?: string
-  elements: any[]
-  navigation: Record<string, any>
-  data_binding: Record<string, any>
+  elements: ScreenElement[]
+  navigation: NavigationConfig
+  data_binding: DataBindingConfig
   preview_url?: string
   screenshot_url?: string
   orientation: OrientationType
@@ -78,7 +168,7 @@ export interface MobileAppBuild {
   included_screens: string[]
   entry_screen?: string
   build_status: BuildStatus
-  build_config: Record<string, any>
+  build_config: BuildConfig
   build_output_url?: string
   build_size?: number
   build_log?: string
@@ -107,9 +197,9 @@ export interface MobileAppTemplate {
   demo_url?: string
   features: string[]
   screens: string[]
-  default_config: Record<string, any>
-  color_scheme: Record<string, any>
-  typography: Record<string, any>
+  default_config: TemplateConfig
+  color_scheme: ColorScheme
+  typography: Typography
   supported_platforms: PlatformType[]
   is_published: boolean
   is_premium: boolean
@@ -132,17 +222,17 @@ export interface MobileAppTesting {
   screen_id?: string
   device_id?: string
   build_id?: string
-  test_config: Record<string, any>
-  test_steps: any[]
+  test_config: TestConfig
+  test_steps: TestStep[]
   status: string
-  result: Record<string, any>
+  result: TestResult
   duration_ms?: number
   passed_checks: number
   failed_checks: number
   warnings: number
   screenshots: string[]
   video_url?: string
-  errors: any[]
+  errors: TestError[]
   started_at?: string
   completed_at?: string
   created_at: string
@@ -811,7 +901,7 @@ export async function startTest(testId: string) {
   })
 }
 
-export async function passTest(testId: string, passedChecks: number, result: Record<string, any>) {
+export async function passTest(testId: string, passedChecks: number, result: TestResult) {
   return updateTest(testId, {
     status: 'passed',
     passed_checks: passedChecks,
@@ -820,7 +910,7 @@ export async function passTest(testId: string, passedChecks: number, result: Rec
   })
 }
 
-export async function failTest(testId: string, failedChecks: number, errors: any[], result: Record<string, any>) {
+export async function failTest(testId: string, failedChecks: number, errors: TestError[], result: TestResult) {
   return updateTest(testId, {
     status: 'failed',
     failed_checks: failedChecks,
@@ -1021,10 +1111,11 @@ export async function getTestStats(userId: string) {
 }
 
 // Helper function to group results by field
-function groupByField(data: any[], field: string): Record<string, number> {
-  return data.reduce((acc, item) => {
-    const key = item[field] || 'unknown'
-    acc[key] = (acc[key] || 0) + 1
-    return acc
-  }, {} as Record<string, number>)
+function groupByField(data: GroupableRecord[], field: string): Record<string, number> {
+  const result: Record<string, number> = {}
+  for (const item of data) {
+    const key = String(item[field] ?? 'unknown')
+    result[key] = (result[key] || 0) + 1
+  }
+  return result
 }

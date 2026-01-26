@@ -3,6 +3,7 @@
 
 import { createClient } from '@/lib/supabase/client'
 import { createFeatureLogger } from '@/lib/logger'
+import { DatabaseError, toDbError, JsonValue } from '@/lib/types/database'
 
 const logger = createFeatureLogger('invoicing')
 
@@ -21,7 +22,7 @@ export interface Invoice {
   client_id?: string
   client_name: string
   client_email: string
-  client_address: Record<string, any>
+  client_address: Record<string, JsonValue>
   items: InvoiceItem[]
   subtotal: number
   tax_rate: number
@@ -41,7 +42,7 @@ export interface Invoice {
   terms?: string
   pdf_url?: string
   is_recurring: boolean
-  recurring_config: Record<string, any>
+  recurring_config: Record<string, JsonValue>
   reminders_sent: number
   last_reminder_at?: string
   created_at: string
@@ -137,7 +138,7 @@ export async function getInvoices(
     search?: string
     dateRange?: { from: string; to: string }
   }
-): Promise<{ data: Invoice[]; error: any }> {
+): Promise<{ data: Invoice[]; error: DatabaseError | null }> {
   const startTime = performance.now()
 
   try {
@@ -174,16 +175,17 @@ export async function getInvoices(
 
     logger.info('Invoices fetched successfully', { userId, count: data.length, filters, duration })
     return { data: data as Invoice[], error: null }
-  } catch (error: any) {
-    logger.error('Exception in getInvoices', { error: error.message, userId })
-    return { data: [], error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getInvoices', { error: dbError.message, userId })
+    return { data: [], error: dbError }
   }
 }
 
 /**
  * Get a single invoice by ID
  */
-export async function getInvoice(invoiceId: string, userId: string): Promise<{ data: Invoice | null; error: any }> {
+export async function getInvoice(invoiceId: string, userId: string): Promise<{ data: Invoice | null; error: DatabaseError | null }> {
   const startTime = performance.now()
 
   try {
@@ -205,9 +207,10 @@ export async function getInvoice(invoiceId: string, userId: string): Promise<{ d
 
     logger.info('Invoice fetched successfully', { invoiceId, userId, duration })
     return { data: data as Invoice, error: null }
-  } catch (error: any) {
-    logger.error('Exception in getInvoice', { error: error.message, invoiceId, userId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getInvoice', { error: dbError.message, invoiceId, userId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -220,7 +223,7 @@ export async function createInvoice(
     client_id?: string
     client_name: string
     client_email: string
-    client_address?: Record<string, any>
+    client_address?: Record<string, JsonValue>
     items: InvoiceItem[]
     subtotal: number
     tax_rate?: number
@@ -234,10 +237,10 @@ export async function createInvoice(
     notes?: string
     terms?: string
     is_recurring?: boolean
-    recurring_config?: Record<string, any>
+    recurring_config?: Record<string, JsonValue>
     created_by?: string
   }
-): Promise<{ data: Invoice | null; error: any }> {
+): Promise<{ data: Invoice | null; error: DatabaseError | null }> {
   const startTime = performance.now()
 
   try {
@@ -291,9 +294,10 @@ export async function createInvoice(
 
     logger.info('Invoice created successfully', { invoiceId: data.id, invoiceNumber, userId, total: invoice.total, duration })
     return { data: data as Invoice, error: null }
-  } catch (error: any) {
-    logger.error('Exception in createInvoice', { error: error.message, userId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in createInvoice', { error: dbError.message, userId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -304,7 +308,7 @@ export async function updateInvoice(
   invoiceId: string,
   userId: string,
   updates: Partial<Omit<Invoice, 'id' | 'user_id' | 'invoice_number' | 'created_at' | 'updated_at'>>
-): Promise<{ data: Invoice | null; error: any }> {
+): Promise<{ data: Invoice | null; error: DatabaseError | null }> {
   const startTime = performance.now()
 
   try {
@@ -327,16 +331,17 @@ export async function updateInvoice(
 
     logger.info('Invoice updated successfully', { invoiceId, userId, updates: Object.keys(updates), duration })
     return { data: data as Invoice, error: null }
-  } catch (error: any) {
-    logger.error('Exception in updateInvoice', { error: error.message, invoiceId, userId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in updateInvoice', { error: dbError.message, invoiceId, userId })
+    return { data: null, error: dbError }
   }
 }
 
 /**
  * Delete an invoice
  */
-export async function deleteInvoice(invoiceId: string, userId: string): Promise<{ success: boolean; error: any }> {
+export async function deleteInvoice(invoiceId: string, userId: string): Promise<{ success: boolean; error: DatabaseError | null }> {
   const startTime = performance.now()
 
   try {
@@ -357,16 +362,17 @@ export async function deleteInvoice(invoiceId: string, userId: string): Promise<
 
     logger.info('Invoice deleted successfully', { invoiceId, userId, duration })
     return { success: true, error: null }
-  } catch (error: any) {
-    logger.error('Exception in deleteInvoice', { error: error.message, invoiceId, userId })
-    return { success: false, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in deleteInvoice', { error: dbError.message, invoiceId, userId })
+    return { success: false, error: dbError }
   }
 }
 
 /**
  * Mark invoice as sent
  */
-export async function markInvoiceAsSent(invoiceId: string, userId: string): Promise<{ success: boolean; error: any }> {
+export async function markInvoiceAsSent(invoiceId: string, userId: string): Promise<{ success: boolean; error: DatabaseError | null }> {
   const startTime = performance.now()
 
   try {
@@ -390,9 +396,10 @@ export async function markInvoiceAsSent(invoiceId: string, userId: string): Prom
 
     logger.info('Invoice marked as sent', { invoiceId, userId, duration })
     return { success: true, error: null }
-  } catch (error: any) {
-    logger.error('Exception in markInvoiceAsSent', { error: error.message, invoiceId, userId })
-    return { success: false, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in markInvoiceAsSent', { error: dbError.message, invoiceId, userId })
+    return { success: false, error: dbError }
   }
 }
 
@@ -406,7 +413,7 @@ export async function markInvoiceAsPaid(
     payment_method?: PaymentMethod
     payment_reference?: string
   }
-): Promise<{ success: boolean; error: any }> {
+): Promise<{ success: boolean; error: DatabaseError | null }> {
   const startTime = performance.now()
 
   try {
@@ -432,16 +439,17 @@ export async function markInvoiceAsPaid(
 
     logger.info('Invoice marked as paid', { invoiceId, userId, duration })
     return { success: true, error: null }
-  } catch (error: any) {
-    logger.error('Exception in markInvoiceAsPaid', { error: error.message, invoiceId, userId })
-    return { success: false, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in markInvoiceAsPaid', { error: dbError.message, invoiceId, userId })
+    return { success: false, error: dbError }
   }
 }
 
 /**
  * Get overdue invoices
  */
-export async function getOverdueInvoices(userId: string): Promise<{ data: any[]; error: any }> {
+export async function getOverdueInvoices(userId: string): Promise<{ data: Invoice[]; error: DatabaseError | null }> {
   const startTime = performance.now()
 
   try {
@@ -460,9 +468,10 @@ export async function getOverdueInvoices(userId: string): Promise<{ data: any[];
 
     logger.info('Overdue invoices fetched successfully', { userId, count: data.length, duration })
     return { data, error: null }
-  } catch (error: any) {
-    logger.error('Exception in getOverdueInvoices', { error: error.message, userId })
-    return { data: [], error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getOverdueInvoices', { error: dbError.message, userId })
+    return { data: [], error: dbError }
   }
 }
 
@@ -473,7 +482,7 @@ export async function getOverdueInvoices(userId: string): Promise<{ data: any[];
 /**
  * Get all payments for an invoice
  */
-export async function getInvoicePayments(invoiceId: string, userId: string): Promise<{ data: InvoicePayment[]; error: any }> {
+export async function getInvoicePayments(invoiceId: string, userId: string): Promise<{ data: InvoicePayment[]; error: DatabaseError | null }> {
   const startTime = performance.now()
 
   try {
@@ -495,9 +504,10 @@ export async function getInvoicePayments(invoiceId: string, userId: string): Pro
 
     logger.info('Invoice payments fetched successfully', { invoiceId, userId, count: data.length, duration })
     return { data: data as InvoicePayment[], error: null }
-  } catch (error: any) {
-    logger.error('Exception in getInvoicePayments', { error: error.message, invoiceId, userId })
-    return { data: [], error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getInvoicePayments', { error: dbError.message, invoiceId, userId })
+    return { data: [], error: dbError }
   }
 }
 
@@ -516,7 +526,7 @@ export async function recordInvoicePayment(
     processing_fee?: number
     notes?: string
   }
-): Promise<{ data: InvoicePayment | null; error: any }> {
+): Promise<{ data: InvoicePayment | null; error: DatabaseError | null }> {
   const startTime = performance.now()
 
   try {
@@ -558,9 +568,10 @@ export async function recordInvoicePayment(
 
     logger.info('Invoice payment recorded successfully', { paymentId: data.id, invoiceId, userId, amount: payment.amount, duration })
     return { data: data as InvoicePayment, error: null }
-  } catch (error: any) {
-    logger.error('Exception in recordInvoicePayment', { error: error.message, invoiceId, userId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in recordInvoicePayment', { error: dbError.message, invoiceId, userId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -571,7 +582,7 @@ export async function recordInvoicePayment(
 /**
  * Get all invoice templates for a user
  */
-export async function getInvoiceTemplates(userId: string): Promise<{ data: InvoiceTemplate[]; error: any }> {
+export async function getInvoiceTemplates(userId: string): Promise<{ data: InvoiceTemplate[]; error: DatabaseError | null }> {
   const startTime = performance.now()
 
   try {
@@ -592,9 +603,10 @@ export async function getInvoiceTemplates(userId: string): Promise<{ data: Invoi
 
     logger.info('Invoice templates fetched successfully', { userId, count: data.length, duration })
     return { data: data as InvoiceTemplate[], error: null }
-  } catch (error: any) {
-    logger.error('Exception in getInvoiceTemplates', { error: error.message, userId })
-    return { data: [], error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getInvoiceTemplates', { error: dbError.message, userId })
+    return { data: [], error: dbError }
   }
 }
 
@@ -612,7 +624,7 @@ export async function createInvoiceTemplate(
     terms?: string
     notes?: string
   }
-): Promise<{ data: InvoiceTemplate | null; error: any }> {
+): Promise<{ data: InvoiceTemplate | null; error: DatabaseError | null }> {
   const startTime = performance.now()
 
   try {
@@ -642,16 +654,17 @@ export async function createInvoiceTemplate(
 
     logger.info('Invoice template created successfully', { templateId: data.id, userId, name: template.name, duration })
     return { data: data as InvoiceTemplate, error: null }
-  } catch (error: any) {
-    logger.error('Exception in createInvoiceTemplate', { error: error.message, userId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in createInvoiceTemplate', { error: dbError.message, userId })
+    return { data: null, error: dbError }
   }
 }
 
 /**
  * Update template usage count
  */
-export async function incrementTemplateUsage(templateId: string, userId: string): Promise<{ success: boolean; error: any }> {
+export async function incrementTemplateUsage(templateId: string, userId: string): Promise<{ success: boolean; error: DatabaseError | null }> {
   const startTime = performance.now()
 
   try {
@@ -675,9 +688,10 @@ export async function incrementTemplateUsage(templateId: string, userId: string)
 
     logger.info('Template usage incremented', { templateId, userId, duration })
     return { success: true, error: null }
-  } catch (error: any) {
-    logger.error('Exception in incrementTemplateUsage', { error: error.message, templateId, userId })
-    return { success: false, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in incrementTemplateUsage', { error: dbError.message, templateId, userId })
+    return { success: false, error: dbError }
   }
 }
 
@@ -688,7 +702,7 @@ export async function incrementTemplateUsage(templateId: string, userId: string)
 /**
  * Get billing statistics for dashboard
  */
-export async function getBillingStats(userId: string): Promise<{ data: BillingStats | null; error: any }> {
+export async function getBillingStats(userId: string): Promise<{ data: BillingStats | null; error: DatabaseError | null }> {
   const startTime = performance.now()
 
   try {
@@ -737,8 +751,9 @@ export async function getBillingStats(userId: string): Promise<{ data: BillingSt
     logger.info('Billing stats calculated successfully', { userId, stats, duration })
 
     return { data: stats, error: null }
-  } catch (error: any) {
-    logger.error('Exception in getBillingStats', { error: error.message, userId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getBillingStats', { error: dbError.message, userId })
+    return { data: null, error: dbError }
   }
 }

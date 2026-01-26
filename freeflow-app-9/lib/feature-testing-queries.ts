@@ -12,6 +12,7 @@
  */
 
 import { createClient } from '@/lib/supabase/client'
+import type { JsonValue, Metadata } from '@/lib/types/database'
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -42,7 +43,7 @@ export interface FeatureTest {
   success_rate: number
   avg_duration_ms: number
   tags: string[]
-  metadata?: any
+  metadata?: Metadata
   created_at: string
   updated_at: string
 }
@@ -88,9 +89,9 @@ export interface TestRun {
   os?: string
   error_message?: string
   stack_trace?: string
-  screenshots?: any[]
-  logs?: any[]
-  metadata?: any
+  screenshots?: JsonValue[]
+  logs?: JsonValue[]
+  metadata?: Metadata
   created_at: string
 }
 
@@ -106,7 +107,7 @@ export interface TestStepResult {
   actual_value?: string
   error_message?: string
   screenshot_url?: string
-  metadata?: any
+  metadata?: Metadata
   created_at: string
 }
 
@@ -129,7 +130,7 @@ export interface TestIssue {
   affected_browsers: string[]
   affected_os: string[]
   stack_trace?: string
-  metadata?: any
+  metadata?: Metadata
   created_at: string
   updated_at: string
 }
@@ -147,7 +148,7 @@ export interface TestCoverage {
   avg_test_duration_ms: number
   total_issues: number
   critical_issues: number
-  metadata?: any
+  metadata?: Metadata
   created_at: string
 }
 
@@ -266,7 +267,7 @@ export async function createFeatureTest(testData: {
   retry_count?: number
   is_critical?: boolean
   tags?: string[]
-  metadata?: any
+  metadata?: Metadata
 }): Promise<FeatureTest> {
   const supabase = createClient()
 
@@ -332,9 +333,9 @@ export async function createTestRun(runData: {
   os?: string
   error_message?: string
   stack_trace?: string
-  screenshots?: any[]
-  logs?: any[]
-  metadata?: any
+  screenshots?: JsonValue[]
+  logs?: JsonValue[]
+  metadata?: Metadata
 }): Promise<TestRun> {
   const supabase = createClient()
 
@@ -424,7 +425,7 @@ export async function createTestStepResult(resultData: {
   actual_value?: string
   error_message?: string
   screenshot_url?: string
-  metadata?: any
+  metadata?: Metadata
 }): Promise<TestStepResult> {
   const supabase = createClient()
 
@@ -480,7 +481,7 @@ export async function createTestIssue(issueData: {
   affected_browsers?: string[]
   affected_os?: string[]
   stack_trace?: string
-  metadata?: any
+  metadata?: Metadata
 }): Promise<TestIssue> {
   const supabase = createClient()
 

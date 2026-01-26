@@ -7,6 +7,7 @@
 
 import { createClient } from '@/lib/supabase/client'
 import { createFeatureLogger } from '@/lib/logger'
+import type { DatabaseError } from '@/lib/types/database'
 
 const logger = createFeatureLogger('MessagesQueries')
 
@@ -127,7 +128,7 @@ export async function getChats(
   filters?: ChatFilters,
   limit: number = 50,
   offset: number = 0
-): Promise<{ data: Chat[]; error: any; count: number }> {
+): Promise<{ data: Chat[]; error: DatabaseError | null; count: number }> {
   const startTime = performance.now()
 
   try {
@@ -179,9 +180,10 @@ export async function getChats(
     })
 
     return { data: data || [], error: null, count: count || 0 }
-  } catch (error: any) {
-    logger.error('Exception in getChats', { error: error.message, userId })
-    return { data: [], error, count: 0 }
+  } catch (error: unknown) {
+    const err = error as Error
+    logger.error('Exception in getChats', { error: err.message, userId })
+    return { data: [], error: { message: err.message }, count: 0 }
   }
 }
 
@@ -191,7 +193,7 @@ export async function getChats(
 export async function createChat(
   userId: string,
   chatData: Partial<Chat>
-): Promise<{ data: Chat | null; error: any }> {
+): Promise<{ data: Chat | null; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
 
@@ -228,9 +230,10 @@ export async function createChat(
     })
 
     return { data, error: null }
-  } catch (error: any) {
-    logger.error('Exception in createChat', { error: error.message, userId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const err = error as Error
+    logger.error('Exception in createChat', { error: err.message, userId })
+    return { data: null, error: { message: err.message } }
   }
 }
 
@@ -240,7 +243,7 @@ export async function createChat(
 export async function updateChat(
   chatId: string,
   updates: Partial<Chat>
-): Promise<{ data: Chat | null; error: any }> {
+): Promise<{ data: Chat | null; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
 
@@ -262,16 +265,17 @@ export async function updateChat(
     logger.info('Chat updated successfully', { chatId, updates })
 
     return { data, error: null }
-  } catch (error: any) {
-    logger.error('Exception in updateChat', { error: error.message, chatId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const err = error as Error
+    logger.error('Exception in updateChat', { error: err.message, chatId })
+    return { data: null, error: { message: err.message } }
   }
 }
 
 /**
  * Delete a chat
  */
-export async function deleteChat(chatId: string): Promise<{ error: any }> {
+export async function deleteChat(chatId: string): Promise<{ error: DatabaseError | null }> {
   try {
     const supabase = createClient()
 
@@ -288,9 +292,10 @@ export async function deleteChat(chatId: string): Promise<{ error: any }> {
     logger.info('Chat deleted successfully', { chatId })
 
     return { error: null }
-  } catch (error: any) {
-    logger.error('Exception in deleteChat', { error: error.message, chatId })
-    return { error }
+  } catch (error: unknown) {
+    const err = error as Error
+    logger.error('Exception in deleteChat', { error: err.message, chatId })
+    return { error: { message: err.message } }
   }
 }
 
@@ -300,7 +305,7 @@ export async function deleteChat(chatId: string): Promise<{ error: any }> {
 export async function toggleChatPin(
   chatId: string,
   isPinned: boolean
-): Promise<{ data: Chat | null; error: any }> {
+): Promise<{ data: Chat | null; error: DatabaseError | null }> {
   return updateChat(chatId, { is_pinned: isPinned })
 }
 
@@ -310,7 +315,7 @@ export async function toggleChatPin(
 export async function toggleChatMute(
   chatId: string,
   isMuted: boolean
-): Promise<{ data: Chat | null; error: any }> {
+): Promise<{ data: Chat | null; error: DatabaseError | null }> {
   return updateChat(chatId, { is_muted: isMuted })
 }
 
@@ -320,7 +325,7 @@ export async function toggleChatMute(
 export async function toggleChatArchive(
   chatId: string,
   isArchived: boolean
-): Promise<{ data: Chat | null; error: any }> {
+): Promise<{ data: Chat | null; error: DatabaseError | null }> {
   return updateChat(chatId, { is_archived: isArchived })
 }
 
@@ -330,7 +335,7 @@ export async function toggleChatArchive(
 export async function updateUnreadCount(
   chatId: string,
   count: number
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   try {
     const supabase = createClient()
 
@@ -347,9 +352,10 @@ export async function updateUnreadCount(
     logger.debug('Unread count updated', { chatId, count })
 
     return { error: null }
-  } catch (error: any) {
-    logger.error('Exception in updateUnreadCount', { error: error.message, chatId })
-    return { error }
+  } catch (error: unknown) {
+    const err = error as Error
+    logger.error('Exception in updateUnreadCount', { error: err.message, chatId })
+    return { error: { message: err.message } }
   }
 }
 
@@ -365,7 +371,7 @@ export async function getMessages(
   filters?: MessageFilters,
   limit: number = 50,
   offset: number = 0
-): Promise<{ data: Message[]; error: any; count: number }> {
+): Promise<{ data: Message[]; error: DatabaseError | null; count: number }> {
   const startTime = performance.now()
 
   try {
@@ -417,9 +423,10 @@ export async function getMessages(
     })
 
     return { data: data || [], error: null, count: count || 0 }
-  } catch (error: any) {
-    logger.error('Exception in getMessages', { error: error.message, chatId })
-    return { data: [], error, count: 0 }
+  } catch (error: unknown) {
+    const err = error as Error
+    logger.error('Exception in getMessages', { error: err.message, chatId })
+    return { data: [], error: { message: err.message }, count: 0 }
   }
 }
 
@@ -430,7 +437,7 @@ export async function sendMessage(
   chatId: string,
   senderId: string,
   messageData: Partial<Message>
-): Promise<{ data: Message | null; error: any }> {
+): Promise<{ data: Message | null; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
 
@@ -473,9 +480,10 @@ export async function sendMessage(
     })
 
     return { data, error: null }
-  } catch (error: any) {
-    logger.error('Exception in sendMessage', { error: error.message, chatId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const err = error as Error
+    logger.error('Exception in sendMessage', { error: err.message, chatId })
+    return { data: null, error: { message: err.message } }
   }
 }
 
@@ -485,7 +493,7 @@ export async function sendMessage(
 export async function editMessage(
   messageId: string,
   text: string
-): Promise<{ data: Message | null; error: any }> {
+): Promise<{ data: Message | null; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
 
@@ -508,16 +516,17 @@ export async function editMessage(
     logger.info('Message edited successfully', { messageId })
 
     return { data, error: null }
-  } catch (error: any) {
-    logger.error('Exception in editMessage', { error: error.message, messageId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const err = error as Error
+    logger.error('Exception in editMessage', { error: err.message, messageId })
+    return { data: null, error: { message: err.message } }
   }
 }
 
 /**
  * Delete a message (soft delete)
  */
-export async function deleteMessage(messageId: string): Promise<{ error: any }> {
+export async function deleteMessage(messageId: string): Promise<{ error: DatabaseError | null }> {
   try {
     const supabase = createClient()
 
@@ -534,16 +543,17 @@ export async function deleteMessage(messageId: string): Promise<{ error: any }> 
     logger.info('Message deleted successfully', { messageId })
 
     return { error: null }
-  } catch (error: any) {
-    logger.error('Exception in deleteMessage', { error: error.message, messageId })
-    return { error }
+  } catch (error: unknown) {
+    const err = error as Error
+    logger.error('Exception in deleteMessage', { error: err.message, messageId })
+    return { error: { message: err.message } }
   }
 }
 
 /**
  * Bulk delete messages
  */
-export async function bulkDeleteMessages(messageIds: string[]): Promise<{ error: any }> {
+export async function bulkDeleteMessages(messageIds: string[]): Promise<{ error: DatabaseError | null }> {
   try {
     const supabase = createClient()
 
@@ -563,9 +573,10 @@ export async function bulkDeleteMessages(messageIds: string[]): Promise<{ error:
     logger.info('Messages bulk deleted successfully', { count: messageIds.length })
 
     return { error: null }
-  } catch (error: any) {
-    logger.error('Exception in bulkDeleteMessages', { error: error.message })
-    return { error }
+  } catch (error: unknown) {
+    const err = error as Error
+    logger.error('Exception in bulkDeleteMessages', { error: err.message })
+    return { error: { message: err.message } }
   }
 }
 
@@ -575,7 +586,7 @@ export async function bulkDeleteMessages(messageIds: string[]): Promise<{ error:
 export async function toggleMessagePin(
   messageId: string,
   isPinned: boolean
-): Promise<{ data: Message | null; error: any }> {
+): Promise<{ data: Message | null; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
 
@@ -594,9 +605,10 @@ export async function toggleMessagePin(
     logger.info('Message pin toggled', { messageId, isPinned })
 
     return { data, error: null }
-  } catch (error: any) {
-    logger.error('Exception in toggleMessagePin', { error: error.message, messageId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const err = error as Error
+    logger.error('Exception in toggleMessagePin', { error: err.message, messageId })
+    return { data: null, error: { message: err.message } }
   }
 }
 
@@ -606,7 +618,7 @@ export async function toggleMessagePin(
 export async function updateMessageStatus(
   messageId: string,
   status: MessageStatus
-): Promise<{ data: Message | null; error: any }> {
+): Promise<{ data: Message | null; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
 
@@ -625,9 +637,10 @@ export async function updateMessageStatus(
     logger.debug('Message status updated', { messageId, status })
 
     return { data, error: null }
-  } catch (error: any) {
-    logger.error('Exception in updateMessageStatus', { error: error.message, messageId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const err = error as Error
+    logger.error('Exception in updateMessageStatus', { error: err.message, messageId })
+    return { data: null, error: { message: err.message } }
   }
 }
 
@@ -638,7 +651,7 @@ export async function searchMessages(
   userId: string,
   searchTerm: string,
   limit: number = 20
-): Promise<{ data: Message[]; error: any }> {
+): Promise<{ data: Message[]; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
 
@@ -652,7 +665,7 @@ export async function searchMessages(
       return { data: [], error: null }
     }
 
-    const chatIds = chats.map(c => c.id)
+    const chatIds = chats.map((c: { id: string }) => c.id)
 
     const { data, error } = await supabase
       .from('messages')
@@ -679,9 +692,10 @@ export async function searchMessages(
     })
 
     return { data: data || [], error: null }
-  } catch (error: any) {
-    logger.error('Exception in searchMessages', { error: error.message, userId })
-    return { data: [], error }
+  } catch (error: unknown) {
+    const err = error as Error
+    logger.error('Exception in searchMessages', { error: err.message, userId })
+    return { data: [], error: { message: err.message } }
   }
 }
 
@@ -696,7 +710,7 @@ export async function addReaction(
   messageId: string,
   userId: string,
   emoji: string
-): Promise<{ data: MessageReaction | null; error: any }> {
+): Promise<{ data: MessageReaction | null; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
 
@@ -722,9 +736,10 @@ export async function addReaction(
     logger.info('Reaction added successfully', { messageId, emoji })
 
     return { data, error: null }
-  } catch (error: any) {
-    logger.error('Exception in addReaction', { error: error.message, messageId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const err = error as Error
+    logger.error('Exception in addReaction', { error: err.message, messageId })
+    return { data: null, error: { message: err.message } }
   }
 }
 
@@ -735,7 +750,7 @@ export async function removeReaction(
   messageId: string,
   userId: string,
   emoji: string
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   try {
     const supabase = createClient()
 
@@ -758,9 +773,10 @@ export async function removeReaction(
     logger.info('Reaction removed successfully', { messageId, emoji })
 
     return { error: null }
-  } catch (error: any) {
-    logger.error('Exception in removeReaction', { error: error.message, messageId })
-    return { error }
+  } catch (error: unknown) {
+    const err = error as Error
+    logger.error('Exception in removeReaction', { error: err.message, messageId })
+    return { error: { message: err.message } }
   }
 }
 
@@ -769,7 +785,7 @@ export async function removeReaction(
  */
 export async function getReactions(
   messageId: string
-): Promise<{ data: MessageReaction[]; error: any }> {
+): Promise<{ data: MessageReaction[]; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
 
@@ -785,9 +801,10 @@ export async function getReactions(
     }
 
     return { data: data || [], error: null }
-  } catch (error: any) {
-    logger.error('Exception in getReactions', { error: error.message, messageId })
-    return { data: [], error }
+  } catch (error: unknown) {
+    const err = error as Error
+    logger.error('Exception in getReactions', { error: err.message, messageId })
+    return { data: [], error: { message: err.message } }
   }
 }
 
@@ -801,7 +818,7 @@ export async function getReactions(
 export async function addAttachment(
   messageId: string,
   attachmentData: Partial<MessageAttachment>
-): Promise<{ data: MessageAttachment | null; error: any }> {
+): Promise<{ data: MessageAttachment | null; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
 
@@ -835,9 +852,10 @@ export async function addAttachment(
     })
 
     return { data, error: null }
-  } catch (error: any) {
-    logger.error('Exception in addAttachment', { error: error.message, messageId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const err = error as Error
+    logger.error('Exception in addAttachment', { error: err.message, messageId })
+    return { data: null, error: { message: err.message } }
   }
 }
 
@@ -846,7 +864,7 @@ export async function addAttachment(
  */
 export async function getAttachments(
   messageId: string
-): Promise<{ data: MessageAttachment[]; error: any }> {
+): Promise<{ data: MessageAttachment[]; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
 
@@ -862,9 +880,10 @@ export async function getAttachments(
     }
 
     return { data: data || [], error: null }
-  } catch (error: any) {
-    logger.error('Exception in getAttachments', { error: error.message, messageId })
-    return { data: [], error }
+  } catch (error: unknown) {
+    const err = error as Error
+    logger.error('Exception in getAttachments', { error: err.message, messageId })
+    return { data: [], error: { message: err.message } }
   }
 }
 
@@ -874,7 +893,7 @@ export async function getAttachments(
 export async function getChatAttachments(
   chatId: string,
   type?: string
-): Promise<{ data: MessageAttachment[]; error: any }> {
+): Promise<{ data: MessageAttachment[]; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
 
@@ -889,7 +908,7 @@ export async function getChatAttachments(
       return { data: [], error: null }
     }
 
-    const messageIds = messages.map(m => m.id)
+    const messageIds = messages.map((m: { id: string }) => m.id)
 
     let query = supabase
       .from('message_attachments')
@@ -909,9 +928,10 @@ export async function getChatAttachments(
     }
 
     return { data: data || [], error: null }
-  } catch (error: any) {
-    logger.error('Exception in getChatAttachments', { error: error.message, chatId })
-    return { data: [], error }
+  } catch (error: unknown) {
+    const err = error as Error
+    logger.error('Exception in getChatAttachments', { error: err.message, chatId })
+    return { data: [], error: { message: err.message } }
   }
 }
 
@@ -925,7 +945,7 @@ export async function getChatAttachments(
 export async function markMessageAsRead(
   messageId: string,
   userId: string
-): Promise<{ data: MessageReadReceipt | null; error: any }> {
+): Promise<{ data: MessageReadReceipt | null; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
 
@@ -953,9 +973,10 @@ export async function markMessageAsRead(
     logger.debug('Message marked as read', { messageId, userId })
 
     return { data, error: null }
-  } catch (error: any) {
-    logger.error('Exception in markMessageAsRead', { error: error.message, messageId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const err = error as Error
+    logger.error('Exception in markMessageAsRead', { error: err.message, messageId })
+    return { data: null, error: { message: err.message } }
   }
 }
 
@@ -964,7 +985,7 @@ export async function markMessageAsRead(
  */
 export async function getReadReceipts(
   messageId: string
-): Promise<{ data: MessageReadReceipt[]; error: any }> {
+): Promise<{ data: MessageReadReceipt[]; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
 
@@ -980,9 +1001,10 @@ export async function getReadReceipts(
     }
 
     return { data: data || [], error: null }
-  } catch (error: any) {
-    logger.error('Exception in getReadReceipts', { error: error.message, messageId })
-    return { data: [], error }
+  } catch (error: unknown) {
+    const err = error as Error
+    logger.error('Exception in getReadReceipts', { error: err.message, messageId })
+    return { data: [], error: { message: err.message } }
   }
 }
 
@@ -997,7 +1019,7 @@ export async function addChatMember(
   chatId: string,
   userId: string,
   role: MemberRole = 'member'
-): Promise<{ data: ChatMember | null; error: any }> {
+): Promise<{ data: ChatMember | null; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
 
@@ -1023,9 +1045,10 @@ export async function addChatMember(
     logger.info('Chat member added successfully', { chatId, userId, role })
 
     return { data, error: null }
-  } catch (error: any) {
-    logger.error('Exception in addChatMember', { error: error.message, chatId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const err = error as Error
+    logger.error('Exception in addChatMember', { error: err.message, chatId })
+    return { data: null, error: { message: err.message } }
   }
 }
 
@@ -1035,7 +1058,7 @@ export async function addChatMember(
 export async function removeChatMember(
   chatId: string,
   userId: string
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   try {
     const supabase = createClient()
 
@@ -1057,9 +1080,10 @@ export async function removeChatMember(
     logger.info('Chat member removed successfully', { chatId, userId })
 
     return { error: null }
-  } catch (error: any) {
-    logger.error('Exception in removeChatMember', { error: error.message, chatId })
-    return { error }
+  } catch (error: unknown) {
+    const err = error as Error
+    logger.error('Exception in removeChatMember', { error: err.message, chatId })
+    return { error: { message: err.message } }
   }
 }
 
@@ -1068,7 +1092,7 @@ export async function removeChatMember(
  */
 export async function getChatMembers(
   chatId: string
-): Promise<{ data: ChatMember[]; error: any }> {
+): Promise<{ data: ChatMember[]; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
 
@@ -1084,9 +1108,10 @@ export async function getChatMembers(
     }
 
     return { data: data || [], error: null }
-  } catch (error: any) {
-    logger.error('Exception in getChatMembers', { error: error.message, chatId })
-    return { data: [], error }
+  } catch (error: unknown) {
+    const err = error as Error
+    logger.error('Exception in getChatMembers', { error: err.message, chatId })
+    return { data: [], error: { message: err.message } }
   }
 }
 
@@ -1096,7 +1121,7 @@ export async function getChatMembers(
 export async function updateLastReadAt(
   chatId: string,
   userId: string
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   try {
     const supabase = createClient()
 
@@ -1118,9 +1143,10 @@ export async function updateLastReadAt(
     logger.debug('Last read timestamp updated', { chatId, userId })
 
     return { error: null }
-  } catch (error: any) {
-    logger.error('Exception in updateLastReadAt', { error: error.message, chatId })
-    return { error }
+  } catch (error: unknown) {
+    const err = error as Error
+    logger.error('Exception in updateLastReadAt', { error: err.message, chatId })
+    return { error: { message: err.message } }
   }
 }
 
@@ -1155,17 +1181,17 @@ export async function getChatStats(userId: string): Promise<ChatStats> {
 
     const stats: ChatStats = {
       total_chats: chats.length,
-      direct_chats: chats.filter(c => c.type === 'direct').length,
-      group_chats: chats.filter(c => c.type === 'group').length,
-      channels: chats.filter(c => c.type === 'channel').length,
-      unread_count: chats.reduce((sum, c) => sum + (c.unread_count || 0), 0),
-      pinned_count: chats.filter(c => c.is_pinned).length,
-      archived_count: chats.filter(c => c.is_archived).length,
+      direct_chats: chats.filter((c: Chat) => c.type === 'direct').length,
+      group_chats: chats.filter((c: Chat) => c.type === 'group').length,
+      channels: chats.filter((c: Chat) => c.type === 'channel').length,
+      unread_count: chats.reduce((sum: number, c: Chat) => sum + (c.unread_count || 0), 0),
+      pinned_count: chats.filter((c: Chat) => c.is_pinned).length,
+      archived_count: chats.filter((c: Chat) => c.is_archived).length,
       total_messages: 0
     }
 
     // Get total message count
-    const chatIds = chats.map(c => c.id)
+    const chatIds = chats.map((c: Chat) => c.id)
     if (chatIds.length > 0) {
       const { count } = await supabase
         .from('messages')
@@ -1179,8 +1205,9 @@ export async function getChatStats(userId: string): Promise<ChatStats> {
     logger.info('Chat stats calculated', { userId, stats })
 
     return stats
-  } catch (error: any) {
-    logger.error('Exception in getChatStats', { error: error.message, userId })
+  } catch (error: unknown) {
+    const err = error as Error
+    logger.error('Exception in getChatStats', { error: err.message, userId })
     return {
       total_chats: 0,
       direct_chats: 0,

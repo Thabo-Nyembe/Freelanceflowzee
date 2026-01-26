@@ -10,6 +10,7 @@
  */
 
 import { createClient } from '@/lib/supabase/client'
+import type { JsonValue } from '@/lib/types/database'
 import type {
   Workflow,
   WorkflowAction,
@@ -21,8 +22,38 @@ import type {
   ActionType,
   WorkflowStatus,
   ExecutionStatus,
-  WorkflowCategory
+  WorkflowCategory,
+  TriggerConfig,
+  ActionConfig,
+  Condition
 } from './automation-types'
+
+// ============================================================================
+// LOCAL INTERFACES FOR QUERY OPERATIONS
+// ============================================================================
+
+/**
+ * Workflow log entry structure
+ */
+interface WorkflowLog {
+  id: string
+  workflow_id: string
+  execution_id?: string
+  level: 'info' | 'warn' | 'error' | 'debug'
+  message: string
+  metadata?: Record<string, JsonValue>
+  created_at: string
+}
+
+/**
+ * Template action structure for creating workflows from templates
+ */
+interface TemplateAction {
+  type: ActionType
+  position: number
+  config: ActionConfig
+  conditions?: Condition[]
+}
 
 // ============================================================================
 // WORKFLOW MANAGEMENT MODULE
@@ -108,7 +139,7 @@ export async function createWorkflow(workflowData: {
   name: string
   description?: string
   trigger_type: TriggerType
-  trigger_config: any
+  trigger_config: TriggerConfig
   category?: WorkflowCategory
   tags?: string[]
 }): Promise<Workflow> {
@@ -201,8 +232,8 @@ export async function createWorkflowAction(actionData: {
   workflow_id: string
   action_type: ActionType
   position: number
-  config: any
-  conditions?: any[]
+  config: ActionConfig
+  conditions?: Condition[]
 }): Promise<WorkflowAction> {
   const supabase = createClient()
 
@@ -331,7 +362,7 @@ export async function getExecutionDetails(executionId: string): Promise<Workflow
 export async function createWorkflowExecution(executionData: {
   workflow_id: string
   triggered_by?: string
-  input?: any
+  input?: Record<string, JsonValue>
 }): Promise<WorkflowExecution> {
   const supabase = createClient()
 
@@ -351,7 +382,7 @@ export async function createWorkflowExecution(executionData: {
 export async function updateExecutionStatus(
   executionId: string,
   status: ExecutionStatus,
-  output?: any,
+  output?: Record<string, JsonValue>,
   errorMessage?: string
 ): Promise<WorkflowExecution> {
   const supabase = createClient()
@@ -379,7 +410,7 @@ export async function createExecutionStep(stepData: {
   execution_id: string
   action_id: string
   action_type: ActionType
-  input?: any
+  input?: Record<string, JsonValue>
 }): Promise<ExecutionStep> {
   const supabase = createClient()
 
@@ -399,7 +430,7 @@ export async function createExecutionStep(stepData: {
 export async function updateExecutionStep(
   stepId: string,
   status: ExecutionStatus,
-  output?: any,
+  output?: Record<string, JsonValue>,
   errorMessage?: string
 ): Promise<ExecutionStep> {
   const supabase = createClient()
@@ -502,7 +533,7 @@ export async function createWorkflowFromTemplate(
   })
 
   // Create actions from template
-  const actions = template.actions as any[]
+  const actions = template.actions as TemplateAction[]
   for (const action of actions) {
     await createWorkflowAction({
       workflow_id: workflow.id,
@@ -655,7 +686,7 @@ export async function createWorkflowLog(logData: {
   execution_id?: string
   level: 'info' | 'warn' | 'error' | 'debug'
   message: string
-  metadata?: any
+  metadata?: Record<string, JsonValue>
 }): Promise<void> {
   const supabase = createClient()
 
@@ -676,7 +707,7 @@ export async function getWorkflowLogs(
     level?: string
     limit?: number
   }
-): Promise<any[]> {
+): Promise<WorkflowLog[]> {
   const supabase = createClient()
 
   let query = supabase

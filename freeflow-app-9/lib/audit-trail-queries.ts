@@ -2,6 +2,7 @@
 // Complete activity logging, compliance reporting, and security tracking
 
 import { createClient } from '@/lib/supabase/client'
+import type { JsonValue } from '@/lib/types/database'
 import type {
   ActivityType,
   EntityType,
@@ -30,8 +31,8 @@ export async function logActivity(data: {
   ip_address?: string
   user_agent?: string
   location?: string
-  changes?: any[]
-  metadata?: any
+  changes?: JsonValue[]
+  metadata?: Record<string, JsonValue>
 }) {
   const supabase = createClient()
 

@@ -7,6 +7,7 @@
 
 import { createClient } from '@/lib/supabase/client'
 import { createFeatureLogger } from '@/lib/logger'
+import { DatabaseError, toDbError, JsonValue } from '@/lib/types/database'
 
 const logger = createFeatureLogger('TeamHubQueries')
 
@@ -37,8 +38,8 @@ export interface TeamMember {
   projects_count: number
   tasks_completed: number
   rating: number
-  settings: Record<string, any>
-  metadata: Record<string, any>
+  settings: Record<string, JsonValue>
+  metadata: Record<string, JsonValue>
   created_at: string
   updated_at: string
 }
@@ -55,8 +56,8 @@ export interface Department {
   budget?: number
   location?: string
   goals: string[]
-  settings: Record<string, any>
-  metadata: Record<string, any>
+  settings: Record<string, JsonValue>
+  metadata: Record<string, JsonValue>
   created_at: string
   updated_at: string
 }
@@ -104,7 +105,7 @@ export async function getTeamMembers(
     roleLevel?: RoleLevel
     searchTerm?: string
   }
-): Promise<{ data: TeamMember[]; error: any }> {
+): Promise<{ data: TeamMember[]; error: DatabaseError | null }> {
   try {
     logger.info('Fetching team members from Supabase', { userId, filters })
 
@@ -145,9 +146,9 @@ export async function getTeamMembers(
     })
 
     return { data: data || [], error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching team members', { error, userId })
-    return { data: [], error }
+    return { data: [], error: toDbError(error) }
   }
 }
 
@@ -157,7 +158,7 @@ export async function getTeamMembers(
 export async function getTeamMember(
   memberId: string,
   userId: string
-): Promise<{ data: TeamMember | null; error: any }> {
+): Promise<{ data: TeamMember | null; error: DatabaseError | null }> {
   try {
     logger.info('Fetching team member from Supabase', { memberId, userId })
 
@@ -176,9 +177,9 @@ export async function getTeamMember(
 
     logger.info('Team member fetched successfully', { memberId })
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching team member', { error, memberId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -201,7 +202,7 @@ export async function createTeamMember(
     skills?: string[]
     start_date?: string
   }
-): Promise<{ data: TeamMember | null; error: any }> {
+): Promise<{ data: TeamMember | null; error: DatabaseError | null }> {
   try {
     logger.info('Creating team member in Supabase', { userId, member })
 
@@ -239,9 +240,9 @@ export async function createTeamMember(
     })
 
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception creating team member', { error, userId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -252,7 +253,7 @@ export async function updateTeamMember(
   memberId: string,
   userId: string,
   updates: Partial<Omit<TeamMember, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
-): Promise<{ data: TeamMember | null; error: any }> {
+): Promise<{ data: TeamMember | null; error: DatabaseError | null }> {
   try {
     logger.info('Updating team member in Supabase', { memberId, userId, updates })
 
@@ -272,9 +273,9 @@ export async function updateTeamMember(
 
     logger.info('Team member updated successfully', { memberId })
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception updating team member', { error, memberId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -284,7 +285,7 @@ export async function updateTeamMember(
 export async function deleteTeamMember(
   memberId: string,
   userId: string
-): Promise<{ success: boolean; error: any }> {
+): Promise<{ success: boolean; error: DatabaseError | null }> {
   try {
     logger.info('Deleting team member from Supabase', { memberId, userId })
 
@@ -302,9 +303,9 @@ export async function deleteTeamMember(
 
     logger.info('Team member deleted successfully', { memberId })
     return { success: true, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception deleting team member', { error, memberId })
-    return { success: false, error }
+    return { success: false, error: toDbError(error) }
   }
 }
 
@@ -315,7 +316,7 @@ export async function updateMemberStatus(
   memberId: string,
   userId: string,
   status: MemberStatus
-): Promise<{ success: boolean; error: any }> {
+): Promise<{ success: boolean; error: DatabaseError | null }> {
   try {
     logger.info('Updating member status', { memberId, userId, status })
 
@@ -333,9 +334,9 @@ export async function updateMemberStatus(
 
     logger.info('Member status updated successfully', { memberId, status })
     return { success: true, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception updating member status', { error, memberId })
-    return { success: false, error }
+    return { success: false, error: toDbError(error) }
   }
 }
 
@@ -346,7 +347,7 @@ export async function updateMemberAvailability(
   memberId: string,
   userId: string,
   availability: AvailabilityStatus
-): Promise<{ success: boolean; error: any }> {
+): Promise<{ success: boolean; error: DatabaseError | null }> {
   try {
     logger.info('Updating member availability', { memberId, userId, availability })
 
@@ -364,9 +365,9 @@ export async function updateMemberAvailability(
 
     logger.info('Member availability updated successfully', { memberId, availability })
     return { success: true, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception updating member availability', { error, memberId })
-    return { success: false, error }
+    return { success: false, error: toDbError(error) }
   }
 }
 
@@ -379,7 +380,7 @@ export async function updateMemberAvailability(
  */
 export async function getDepartments(
   userId: string
-): Promise<{ data: Department[]; error: any }> {
+): Promise<{ data: Department[]; error: DatabaseError | null }> {
   try {
     logger.info('Fetching departments from Supabase', { userId })
 
@@ -401,9 +402,9 @@ export async function getDepartments(
     })
 
     return { data: data || [], error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching departments', { error, userId })
-    return { data: [], error }
+    return { data: [], error: toDbError(error) }
   }
 }
 
@@ -413,7 +414,7 @@ export async function getDepartments(
 export async function getDepartment(
   departmentId: string,
   userId: string
-): Promise<{ data: Department | null; error: any }> {
+): Promise<{ data: Department | null; error: DatabaseError | null }> {
   try {
     logger.info('Fetching department from Supabase', { departmentId, userId })
 
@@ -432,9 +433,9 @@ export async function getDepartment(
 
     logger.info('Department fetched successfully', { departmentId })
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching department', { error, departmentId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -452,7 +453,7 @@ export async function createDepartment(
     location?: string
     goals?: string[]
   }
-): Promise<{ data: Department | null; error: any }> {
+): Promise<{ data: Department | null; error: DatabaseError | null }> {
   try {
     logger.info('Creating department in Supabase', { userId, department })
 
@@ -483,9 +484,9 @@ export async function createDepartment(
     })
 
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception creating department', { error, userId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -496,7 +497,7 @@ export async function updateDepartment(
   departmentId: string,
   userId: string,
   updates: Partial<Omit<Department, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
-): Promise<{ data: Department | null; error: any }> {
+): Promise<{ data: Department | null; error: DatabaseError | null }> {
   try {
     logger.info('Updating department in Supabase', { departmentId, userId, updates })
 
@@ -516,9 +517,9 @@ export async function updateDepartment(
 
     logger.info('Department updated successfully', { departmentId })
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception updating department', { error, departmentId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -528,7 +529,7 @@ export async function updateDepartment(
 export async function deleteDepartment(
   departmentId: string,
   userId: string
-): Promise<{ success: boolean; error: any }> {
+): Promise<{ success: boolean; error: DatabaseError | null }> {
   try {
     logger.info('Deleting department from Supabase', { departmentId, userId })
 
@@ -546,9 +547,9 @@ export async function deleteDepartment(
 
     logger.info('Department deleted successfully', { departmentId })
     return { success: true, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception deleting department', { error, departmentId })
-    return { success: false, error }
+    return { success: false, error: toDbError(error) }
   }
 }
 
@@ -561,7 +562,7 @@ export async function deleteDepartment(
  */
 export async function getTeamOverview(
   userId: string
-): Promise<{ data: TeamOverview | null; error: any }> {
+): Promise<{ data: TeamOverview | null; error: DatabaseError | null }> {
   try {
     logger.info('Fetching team overview from Supabase', { userId })
 
@@ -581,9 +582,9 @@ export async function getTeamOverview(
     })
 
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching team overview', { error, userId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -593,7 +594,7 @@ export async function getTeamOverview(
 export async function getDepartmentStats(
   userId: string,
   department: DepartmentType
-): Promise<{ data: DepartmentStats | null; error: any }> {
+): Promise<{ data: DepartmentStats | null; error: DatabaseError | null }> {
   try {
     logger.info('Fetching department stats', { userId, department })
 
@@ -616,9 +617,9 @@ export async function getDepartmentStats(
     })
 
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching department stats', { error, userId, department })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -628,7 +629,7 @@ export async function getDepartmentStats(
 export async function getTopPerformers(
   userId: string,
   limit: number = 10
-): Promise<{ data: TopPerformer[]; error: any }> {
+): Promise<{ data: TopPerformer[]; error: DatabaseError | null }> {
   try {
     logger.info('Fetching top performers', { userId, limit })
 
@@ -649,9 +650,9 @@ export async function getTopPerformers(
     })
 
     return { data: data || [], error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching top performers', { error, userId })
-    return { data: [], error }
+    return { data: [], error: toDbError(error) }
   }
 }
 
@@ -661,7 +662,7 @@ export async function getTopPerformers(
 export async function getMembersByDepartment(
   userId: string,
   department: DepartmentType
-): Promise<{ data: TeamMember[]; error: any }> {
+): Promise<{ data: TeamMember[]; error: DatabaseError | null }> {
   return getTeamMembers(userId, { department })
 }
 
@@ -671,7 +672,7 @@ export async function getMembersByDepartment(
 export async function searchTeamMembers(
   userId: string,
   searchTerm: string
-): Promise<{ data: TeamMember[]; error: any }> {
+): Promise<{ data: TeamMember[]; error: DatabaseError | null }> {
   return getTeamMembers(userId, { searchTerm })
 }
 
@@ -680,7 +681,7 @@ export async function searchTeamMembers(
  */
 export async function getOnlineMembers(
   userId: string
-): Promise<{ data: TeamMember[]; error: any }> {
+): Promise<{ data: TeamMember[]; error: DatabaseError | null }> {
   return getTeamMembers(userId, { status: 'online' })
 }
 
@@ -691,7 +692,7 @@ export async function updateMemberStats(
   memberId: string,
   incrementProjects: boolean = false,
   incrementTasks: boolean = false
-): Promise<{ success: boolean; error: any }> {
+): Promise<{ success: boolean; error: DatabaseError | null }> {
   try {
     logger.info('Updating member stats', { memberId, incrementProjects, incrementTasks })
 
@@ -710,9 +711,9 @@ export async function updateMemberStats(
 
     logger.info('Member stats updated successfully', { memberId })
     return { success: true, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception updating member stats', { error, memberId })
-    return { success: false, error }
+    return { success: false, error: toDbError(error) }
   }
 }
 
@@ -774,7 +775,7 @@ export async function createTeamGoal(
     target: string
     deadline: string
   }
-): Promise<{ data: TeamGoal | null; error: any }> {
+): Promise<{ data: TeamGoal | null; error: DatabaseError | null }> {
   try {
     logger.info('Creating team goal', { userId, goal })
 
@@ -834,9 +835,9 @@ export async function createTeamGoal(
 
     logger.info('Team goal created successfully', { goalId: newGoal.id })
     return { data: newGoal, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception creating team goal', { error, userId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -850,7 +851,7 @@ export async function createTeamMilestone(
     project: string
     date: string
   }
-): Promise<{ data: TeamMilestone | null; error: any }> {
+): Promise<{ data: TeamMilestone | null; error: DatabaseError | null }> {
   try {
     logger.info('Creating team milestone', { userId, milestone })
 
@@ -907,9 +908,9 @@ export async function createTeamMilestone(
 
     logger.info('Team milestone created successfully', { milestoneId: newMilestone.id })
     return { data: newMilestone, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception creating milestone', { error, userId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -923,7 +924,7 @@ export async function submitTeamFeedback(
     rating: number
     comments: string
   }
-): Promise<{ data: TeamFeedback | null; error: any }> {
+): Promise<{ data: TeamFeedback | null; error: DatabaseError | null }> {
   try {
     logger.info('Submitting team feedback', { userId, memberId: feedback.memberId })
 
@@ -973,9 +974,9 @@ export async function submitTeamFeedback(
 
     logger.info('Team feedback submitted successfully', { feedbackId: newFeedback.id })
     return { data: newFeedback, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception submitting feedback', { error, userId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -989,7 +990,7 @@ export async function giveTeamRecognition(
     award: string
     reason: string
   }
-): Promise<{ data: TeamRecognition | null; error: any }> {
+): Promise<{ data: TeamRecognition | null; error: DatabaseError | null }> {
   try {
     logger.info('Giving team recognition', { userId, memberId: recognition.memberId })
 
@@ -1034,9 +1035,9 @@ export async function giveTeamRecognition(
 
     logger.info('Team recognition given successfully', { recognitionId: newRecognition.id })
     return { data: newRecognition, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception giving recognition', { error, userId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -1051,7 +1052,7 @@ export async function assignTeamTask(
     priority: 'low' | 'medium' | 'high'
     dueDate: string
   }
-): Promise<{ data: TeamTask | null; error: any }> {
+): Promise<{ data: TeamTask | null; error: DatabaseError | null }> {
   try {
     logger.info('Assigning team task', { userId, memberId: task.memberId })
 
@@ -1099,8 +1100,8 @@ export async function assignTeamTask(
 
     logger.info('Team task assigned successfully', { taskId: newTask.id })
     return { data: newTask, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception assigning task', { error, userId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }

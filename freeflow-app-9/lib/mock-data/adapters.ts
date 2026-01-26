@@ -27,249 +27,252 @@ export const companyInfo = {
   }
 }
 
+// Type for empty stats objects
+type EmptyStats = Record<string, never>
+
 // Empty arrays for backward compatibility - components should fetch real data
 
 // Analytics
-export const analyticsMetrics: any[] = []
-export const analyticsFunnels: any[] = []
-export const analyticsCohorts: any[] = []
-export const analyticsReports: any[] = []
-export const analyticsDashboards: any[] = []
-export const analyticsAIInsights: any[] = []
-export const analyticsCollaborators: any[] = []
-export const analyticsPredictions: any[] = []
-export const analyticsActivities: any[] = []
-export const analyticsQuickActions: any[] = []
-export const analyticsRealtimeMetrics: any = {}
+export const analyticsMetrics: unknown[] = []
+export const analyticsFunnels: unknown[] = []
+export const analyticsCohorts: unknown[] = []
+export const analyticsReports: unknown[] = []
+export const analyticsDashboards: unknown[] = []
+export const analyticsAIInsights: unknown[] = []
+export const analyticsCollaborators: unknown[] = []
+export const analyticsPredictions: unknown[] = []
+export const analyticsActivities: unknown[] = []
+export const analyticsQuickActions: unknown[] = []
+export const analyticsRealtimeMetrics: EmptyStats = {}
 
 // CRM/Customers
-export const crmCustomers: any[] = []
-export const crmDeals: any[] = []
-export const crmLeads: any[] = []
-export const crmActivities: any[] = []
-export const crmQuickActions: any[] = []
-export const crmStats: any = {}
-export const crmAIInsights: any[] = []
-export const crmPipelineStages: any[] = []
-export const crmCollaborators: any[] = []
-export const crmPredictions: any[] = []
-export const crmAutomations: any[] = []
-export const crmCompanies: any[] = []
-export const crmContacts: any[] = []
-export const crmReports: any[] = []
+export const crmCustomers: unknown[] = []
+export const crmDeals: unknown[] = []
+export const crmLeads: unknown[] = []
+export const crmActivities: unknown[] = []
+export const crmQuickActions: unknown[] = []
+export const crmStats: EmptyStats = {}
+export const crmAIInsights: unknown[] = []
+export const crmPipelineStages: unknown[] = []
+export const crmCollaborators: unknown[] = []
+export const crmPredictions: unknown[] = []
+export const crmAutomations: unknown[] = []
+export const crmCompanies: unknown[] = []
+export const crmContacts: unknown[] = []
+export const crmReports: unknown[] = []
 
 // Projects
-export const projectsProjects: any[] = []
-export const projectsTasks: any[] = []
-export const projectsMilestones: any[] = []
-export const projectsStats: any = {}
-export const projectsAIInsights: any[] = []
-export const projectsQuickActions: any[] = []
-export const projectsKanbanColumns: any[] = []
+export const projectsProjects: unknown[] = []
+export const projectsTasks: unknown[] = []
+export const projectsMilestones: unknown[] = []
+export const projectsStats: EmptyStats = {}
+export const projectsAIInsights: unknown[] = []
+export const projectsQuickActions: unknown[] = []
+export const projectsKanbanColumns: unknown[] = []
 
 // Projects Hub
-export const projectsHubProjects: any[] = []
-export const projectsHubSprints: any[] = []
-export const projectsHubBacklog: any[] = []
-export const projectsHubRoadmap: any[] = []
-export const projectsHubAutomations: any[] = []
-export const projectsHubTemplates: any[] = []
-export const projectsHubIssues: any[] = []
-export const projectsHubEpics: any[] = []
-export const projectsHubReports: any[] = []
-export const projectsHubIntegrations: any[] = []
-export const projectsHubAIInsights: any[] = []
-export const projectsHubCollaborators: any[] = []
-export const projectsHubPredictions: any[] = []
-export const projectsHubActivities: any[] = []
-export const projectsHubQuickActions: any[] = []
-export const projectsStatusColumns: any[] = []
+export const projectsHubProjects: unknown[] = []
+export const projectsHubSprints: unknown[] = []
+export const projectsHubBacklog: unknown[] = []
+export const projectsHubRoadmap: unknown[] = []
+export const projectsHubAutomations: unknown[] = []
+export const projectsHubTemplates: unknown[] = []
+export const projectsHubIssues: unknown[] = []
+export const projectsHubEpics: unknown[] = []
+export const projectsHubReports: unknown[] = []
+export const projectsHubIntegrations: unknown[] = []
+export const projectsHubAIInsights: unknown[] = []
+export const projectsHubCollaborators: unknown[] = []
+export const projectsHubPredictions: unknown[] = []
+export const projectsHubActivities: unknown[] = []
+export const projectsHubQuickActions: unknown[] = []
+export const projectsStatusColumns: unknown[] = []
 
 // Financials
-export const financialsTransactions: any[] = []
-export const financialsInvoices: any[] = []
-export const financialsExpenses: any[] = []
-export const financialsStats: any = {}
-export const financialsAIInsights: any[] = []
-export const financialsQuickActions: any[] = []
-export const financialsKPIs: any[] = []
+export const financialsTransactions: unknown[] = []
+export const financialsInvoices: unknown[] = []
+export const financialsExpenses: unknown[] = []
+export const financialsStats: EmptyStats = {}
+export const financialsAIInsights: unknown[] = []
+export const financialsQuickActions: unknown[] = []
+export const financialsKPIs: unknown[] = []
 
 // Financial (alternate naming)
-export const financialTransactions: any[] = []
-export const financialAccounts: any[] = []
-export const financialActivities: any[] = []
-export const financialAIInsights: any[] = []
-export const financialBankAccounts: any[] = []
-export const financialBudgetItems: any[] = []
-export const financialCashFlow: any[] = []
-export const financialCollaborators: any[] = []
-export const financialPredictions: any[] = []
-export const financialProfitLoss: any[] = []
-export const financialQuickActions: any[] = []
+export const financialTransactions: unknown[] = []
+export const financialAccounts: unknown[] = []
+export const financialActivities: unknown[] = []
+export const financialAIInsights: unknown[] = []
+export const financialBankAccounts: unknown[] = []
+export const financialBudgetItems: unknown[] = []
+export const financialCashFlow: unknown[] = []
+export const financialCollaborators: unknown[] = []
+export const financialPredictions: unknown[] = []
+export const financialProfitLoss: unknown[] = []
+export const financialQuickActions: unknown[] = []
 
 // Team
-export const teamMembers: any[] = []
-export const teamStats: any = {}
-export const teamAIInsights: any[] = []
-export const teamQuickActions: any[] = []
+export const teamMembers: unknown[] = []
+export const teamStats: EmptyStats = {}
+export const teamAIInsights: unknown[] = []
+export const teamQuickActions: unknown[] = []
 
 // Team Hub
-export const teamHubActivities: any[] = []
-export const teamHubAIInsights: any[] = []
-export const teamHubPredictions: any[] = []
-export const teamHubQuickActions: any[] = []
+export const teamHubActivities: unknown[] = []
+export const teamHubAIInsights: unknown[] = []
+export const teamHubPredictions: unknown[] = []
+export const teamHubQuickActions: unknown[] = []
 
 // Team Management
-export const teamManagementActivities: any[] = []
-export const teamManagementAIInsights: any[] = []
-export const teamManagementCollaborators: any[] = []
-export const teamManagementPredictions: any[] = []
-export const teamManagementQuickActions: any[] = []
+export const teamManagementActivities: unknown[] = []
+export const teamManagementAIInsights: unknown[] = []
+export const teamManagementCollaborators: unknown[] = []
+export const teamManagementPredictions: unknown[] = []
+export const teamManagementQuickActions: unknown[] = []
 
 // Products
-export const productsItems: any[] = []
-export const productsOrders: any[] = []
-export const productsStats: any = {}
+export const productsItems: unknown[] = []
+export const productsOrders: unknown[] = []
+export const productsStats: EmptyStats = {}
 
 // Communications
-export const communicationsMessages: any[] = []
-export const communicationsConversations: any[] = []
-export const communicationsEmails: any[] = []
-export const communicationsEvents: any[] = []
-export const communicationsStats: any = {}
+export const communicationsMessages: unknown[] = []
+export const communicationsConversations: unknown[] = []
+export const communicationsEmails: unknown[] = []
+export const communicationsEvents: unknown[] = []
+export const communicationsStats: EmptyStats = {}
 
 // Integrations
-export const integrationsAll: any[] = []
-export const integrationsWebhooks: any[] = []
-export const integrationsApiKeys: any[] = []
-export const integrationsStats: any = {}
+export const integrationsAll: unknown[] = []
+export const integrationsWebhooks: unknown[] = []
+export const integrationsApiKeys: unknown[] = []
+export const integrationsStats: EmptyStats = {}
 
 // Dashboard overview
-export const overviewMetrics: any[] = []
-export const overviewProjects: any[] = []
-export const overviewActivities: any[] = []
-export const overviewAIInsights: any[] = []
-export const overviewQuickActions: any[] = []
+export const overviewMetrics: unknown[] = []
+export const overviewProjects: unknown[] = []
+export const overviewActivities: unknown[] = []
+export const overviewAIInsights: unknown[] = []
+export const overviewQuickActions: unknown[] = []
 
 // Growth hub
-export const growthMetrics: any[] = []
-export const growthRecommendations: any[] = []
-export const growthGoals: any[] = []
+export const growthMetrics: unknown[] = []
+export const growthRecommendations: unknown[] = []
+export const growthGoals: unknown[] = []
 
 // Performance
-export const performanceMetrics: any[] = []
-export const performanceBenchmarks: any[] = []
-export const performanceAlerts: any[] = []
+export const performanceMetrics: unknown[] = []
+export const performanceBenchmarks: unknown[] = []
+export const performanceAlerts: unknown[] = []
 
 // Monitoring
-export const monitoringStatus: any = {}
-export const monitoringAlerts: any[] = []
-export const monitoringLogs: any[] = []
+export const monitoringStatus: EmptyStats = {}
+export const monitoringAlerts: unknown[] = []
+export const monitoringLogs: unknown[] = []
 
 // Calendar
-export const calendarActivities: any[] = []
-export const calendarAIInsights: any[] = []
-export const calendarCollaborators: any[] = []
-export const calendarPredictions: any[] = []
-export const calendarQuickActions: any[] = []
+export const calendarActivities: unknown[] = []
+export const calendarAIInsights: unknown[] = []
+export const calendarCollaborators: unknown[] = []
+export const calendarPredictions: unknown[] = []
+export const calendarQuickActions: unknown[] = []
 
 // Community
-export const communityActivities: any[] = []
-export const communityAIInsights: any[] = []
-export const communityCollaborators: any[] = []
-export const communityPredictions: any[] = []
-export const communityQuickActions: any[] = []
+export const communityActivities: unknown[] = []
+export const communityAIInsights: unknown[] = []
+export const communityCollaborators: unknown[] = []
+export const communityPredictions: unknown[] = []
+export const communityQuickActions: unknown[] = []
 
 // Chat
-export const chatActivities: any[] = []
-export const chatAIInsights: any[] = []
-export const chatCollaborators: any[] = []
-export const chatPredictions: any[] = []
-export const chatQuickActions: any[] = []
+export const chatActivities: unknown[] = []
+export const chatAIInsights: unknown[] = []
+export const chatCollaborators: unknown[] = []
+export const chatPredictions: unknown[] = []
+export const chatQuickActions: unknown[] = []
 
 // Messages
-export const messagesActivities: any[] = []
-export const messagesAIInsights: any[] = []
-export const messagesCollaborators: any[] = []
-export const messagesPredictions: any[] = []
-export const messagesQuickActions: any[] = []
+export const messagesActivities: unknown[] = []
+export const messagesAIInsights: unknown[] = []
+export const messagesCollaborators: unknown[] = []
+export const messagesPredictions: unknown[] = []
+export const messagesQuickActions: unknown[] = []
 
 // Messaging
-export const messagingActivities: any[] = []
-export const messagingAIInsights: any[] = []
-export const messagingCollaborators: any[] = []
-export const messagingPredictions: any[] = []
-export const messagingQuickActions: any[] = []
+export const messagingActivities: unknown[] = []
+export const messagingAIInsights: unknown[] = []
+export const messagingCollaborators: unknown[] = []
+export const messagingPredictions: unknown[] = []
+export const messagingQuickActions: unknown[] = []
 
 // Announcements
-export const announcementsActivities: any[] = []
-export const announcementsAIInsights: any[] = []
-export const announcementsCollaborators: any[] = []
-export const announcementsPredictions: any[] = []
-export const announcementsQuickActions: any[] = []
+export const announcementsActivities: unknown[] = []
+export const announcementsAIInsights: unknown[] = []
+export const announcementsCollaborators: unknown[] = []
+export const announcementsPredictions: unknown[] = []
+export const announcementsQuickActions: unknown[] = []
 
 // Broadcasts
-export const broadcastsActivities: any[] = []
-export const broadcastsAIInsights: any[] = []
-export const broadcastsCollaborators: any[] = []
-export const broadcastsPredictions: any[] = []
-export const broadcastsQuickActions: any[] = []
+export const broadcastsActivities: unknown[] = []
+export const broadcastsAIInsights: unknown[] = []
+export const broadcastsCollaborators: unknown[] = []
+export const broadcastsPredictions: unknown[] = []
+export const broadcastsQuickActions: unknown[] = []
 
 // Training
-export const trainingActivities: any[] = []
-export const trainingAIInsights: any[] = []
-export const trainingCollaborators: any[] = []
-export const trainingPredictions: any[] = []
-export const trainingQuickActions: any[] = []
+export const trainingActivities: unknown[] = []
+export const trainingAIInsights: unknown[] = []
+export const trainingCollaborators: unknown[] = []
+export const trainingPredictions: unknown[] = []
+export const trainingQuickActions: unknown[] = []
 
 // Employees
-export const employeesActivities: any[] = []
-export const employeesAIInsights: any[] = []
-export const employeesCollaborators: any[] = []
-export const employeesPredictions: any[] = []
-export const employeesQuickActions: any[] = []
+export const employeesActivities: unknown[] = []
+export const employeesAIInsights: unknown[] = []
+export const employeesCollaborators: unknown[] = []
+export const employeesPredictions: unknown[] = []
+export const employeesQuickActions: unknown[] = []
 
 // Payroll
-export const payrollActivities: any[] = []
-export const payrollAIInsights: any[] = []
-export const payrollCollaborators: any[] = []
-export const payrollPredictions: any[] = []
-export const payrollQuickActions: any[] = []
+export const payrollActivities: unknown[] = []
+export const payrollAIInsights: unknown[] = []
+export const payrollCollaborators: unknown[] = []
+export const payrollPredictions: unknown[] = []
+export const payrollQuickActions: unknown[] = []
 
 // Logistics
-export const logisticsActivities: any[] = []
-export const logisticsAIInsights: any[] = []
-export const logisticsCollaborators: any[] = []
-export const logisticsPredictions: any[] = []
-export const logisticsQuickActions: any[] = []
+export const logisticsActivities: unknown[] = []
+export const logisticsAIInsights: unknown[] = []
+export const logisticsCollaborators: unknown[] = []
+export const logisticsPredictions: unknown[] = []
+export const logisticsQuickActions: unknown[] = []
 
 // Events
-export const eventsActivities: any[] = []
-export const eventsAIInsights: any[] = []
-export const eventsCollaborators: any[] = []
-export const eventsPredictions: any[] = []
-export const eventsQuickActions: any[] = []
+export const eventsActivities: unknown[] = []
+export const eventsAIInsights: unknown[] = []
+export const eventsCollaborators: unknown[] = []
+export const eventsPredictions: unknown[] = []
+export const eventsQuickActions: unknown[] = []
 
 // Onboarding
-export const onboardingActivities: any[] = []
-export const onboardingAIInsights: any[] = []
-export const onboardingCollaborators: any[] = []
-export const onboardingPredictions: any[] = []
-export const onboardingQuickActions: any[] = []
+export const onboardingActivities: unknown[] = []
+export const onboardingAIInsights: unknown[] = []
+export const onboardingCollaborators: unknown[] = []
+export const onboardingPredictions: unknown[] = []
+export const onboardingQuickActions: unknown[] = []
 
 // Recruitment
-export const recruitmentActivities: any[] = []
-export const recruitmentAIInsights: any[] = []
-export const recruitmentCollaborators: any[] = []
-export const recruitmentPredictions: any[] = []
-export const recruitmentQuickActions: any[] = []
+export const recruitmentActivities: unknown[] = []
+export const recruitmentAIInsights: unknown[] = []
+export const recruitmentCollaborators: unknown[] = []
+export const recruitmentPredictions: unknown[] = []
+export const recruitmentQuickActions: unknown[] = []
 
 // Notifications
-export const notificationsAIInsights: any[] = []
-export const notificationsCollaborators: any[] = []
-export const notificationsPredictions: any[] = []
-export const notificationsActivities: any[] = []
-export const notificationsQuickActions: any[] = []
+export const notificationsAIInsights: unknown[] = []
+export const notificationsCollaborators: unknown[] = []
+export const notificationsPredictions: unknown[] = []
+export const notificationsActivities: unknown[] = []
+export const notificationsQuickActions: unknown[] = []
 
 // Re-export everything for convenience
 export default {

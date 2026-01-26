@@ -6,6 +6,7 @@
 
 import { createClient } from '@/lib/supabase/client'
 import { createFeatureLogger } from './logger'
+import { DatabaseError, toDbError } from '@/lib/types/database'
 
 const supabase = createClient()
 const logger = createFeatureLogger('Bookings')
@@ -78,7 +79,7 @@ export async function getBookings(
   sort?: BookingSortOptions,
   limit: number = 50,
   offset: number = 0
-): Promise<{ data: Booking[]; error: any; count: number }> {
+): Promise<{ data: Booking[]; error: DatabaseError | null; count: number }> {
   logger.info('Fetching bookings', { userId, filters, sort, limit, offset })
 
   try {
@@ -122,7 +123,7 @@ export async function getBookings(
 
     if (error) {
       logger.error('Failed to fetch bookings', { error, userId })
-      return { data: [], error, count: 0 }
+      return { data: [], error: toDbError(error), count: 0 }
     }
 
     logger.info('Bookings fetched successfully', {
@@ -132,9 +133,9 @@ export async function getBookings(
     })
 
     return { data: data || [], error: null, count: count || 0 }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching bookings', { error, userId })
-    return { data: [], error, count: 0 }
+    return { data: [], error: toDbError(error), count: 0 }
   }
 }
 
@@ -143,7 +144,7 @@ export async function getBookings(
  */
 export async function getBooking(
   bookingId: string
-): Promise<{ data: Booking | null; error: any }> {
+): Promise<{ data: Booking | null; error: DatabaseError | null }> {
   logger.info('Fetching booking', { bookingId })
 
   try {
@@ -155,14 +156,14 @@ export async function getBooking(
 
     if (error) {
       logger.error('Failed to fetch booking', { error, bookingId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Booking fetched successfully', { bookingId })
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching booking', { error, bookingId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -172,7 +173,7 @@ export async function getBooking(
 export async function createBooking(
   userId: string,
   bookingData: Partial<Booking>
-): Promise<{ data: Booking | null; error: any }> {
+): Promise<{ data: Booking | null; error: DatabaseError | null }> {
   logger.info('Creating booking', { userId, clientName: bookingData.client_name, service: bookingData.service })
 
   try {
@@ -204,7 +205,7 @@ export async function createBooking(
 
     if (error) {
       logger.error('Failed to create booking', { error, userId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Booking created successfully', {
@@ -216,9 +217,9 @@ export async function createBooking(
     })
 
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception creating booking', { error, userId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -228,7 +229,7 @@ export async function createBooking(
 export async function updateBooking(
   bookingId: string,
   updates: Partial<Booking>
-): Promise<{ data: Booking | null; error: any }> {
+): Promise<{ data: Booking | null; error: DatabaseError | null }> {
   logger.info('Updating booking', { bookingId, updates })
 
   try {
@@ -244,14 +245,14 @@ export async function updateBooking(
 
     if (error) {
       logger.error('Failed to update booking', { error, bookingId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Booking updated successfully', { bookingId })
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception updating booking', { error, bookingId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -261,7 +262,7 @@ export async function updateBooking(
 export async function updateBookingStatus(
   bookingId: string,
   status: BookingStatus
-): Promise<{ data: Booking | null; error: any }> {
+): Promise<{ data: Booking | null; error: DatabaseError | null }> {
   logger.info('Updating booking status', { bookingId, status })
 
   try {
@@ -277,14 +278,14 @@ export async function updateBookingStatus(
 
     if (error) {
       logger.error('Failed to update booking status', { error, bookingId, status })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Booking status updated successfully', { bookingId, status })
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception updating booking status', { error, bookingId, status })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -294,7 +295,7 @@ export async function updateBookingStatus(
 export async function updatePaymentStatus(
   bookingId: string,
   payment: PaymentStatus
-): Promise<{ data: Booking | null; error: any }> {
+): Promise<{ data: Booking | null; error: DatabaseError | null }> {
   logger.info('Updating payment status', { bookingId, payment })
 
   try {
@@ -310,14 +311,14 @@ export async function updatePaymentStatus(
 
     if (error) {
       logger.error('Failed to update payment status', { error, bookingId, payment })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Payment status updated successfully', { bookingId, payment })
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception updating payment status', { error, bookingId, payment })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -326,7 +327,7 @@ export async function updatePaymentStatus(
  */
 export async function deleteBooking(
   bookingId: string
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   logger.info('Deleting booking', { bookingId })
 
   try {
@@ -337,14 +338,14 @@ export async function deleteBooking(
 
     if (error) {
       logger.error('Failed to delete booking', { error, bookingId })
-      return { error }
+      return { error: toDbError(error) }
     }
 
     logger.info('Booking deleted successfully', { bookingId })
     return { error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception deleting booking', { error, bookingId })
-    return { error }
+    return { error: toDbError(error) }
   }
 }
 
@@ -353,7 +354,7 @@ export async function deleteBooking(
  */
 export async function bulkDeleteBookings(
   bookingIds: string[]
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   logger.info('Bulk deleting bookings', { count: bookingIds.length })
 
   try {
@@ -364,14 +365,14 @@ export async function bulkDeleteBookings(
 
     if (error) {
       logger.error('Failed to bulk delete bookings', { error, count: bookingIds.length })
-      return { error }
+      return { error: toDbError(error) }
     }
 
     logger.info('Bookings bulk deleted successfully', { count: bookingIds.length })
     return { error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception bulk deleting bookings', { error })
-    return { error }
+    return { error: toDbError(error) }
   }
 }
 
@@ -414,7 +415,7 @@ export async function getBookingStats(userId: string): Promise<BookingStats> {
 
     logger.info('Booking statistics fetched', { stats, userId })
     return stats
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Failed to fetch booking statistics', { error, userId })
     return {
       total: 0,
@@ -439,7 +440,7 @@ export async function getUpcomingBookings(
   userId: string,
   days: number = 7,
   limit: number = 20
-): Promise<{ data: Booking[]; error: any }> {
+): Promise<{ data: Booking[]; error: DatabaseError | null }> {
   logger.info('Fetching upcoming bookings', { userId, days, limit })
 
   try {
@@ -461,14 +462,14 @@ export async function getUpcomingBookings(
 
     if (error) {
       logger.error('Failed to fetch upcoming bookings', { error, userId })
-      return { data: [], error }
+      return { data: [], error: toDbError(error) }
     }
 
     logger.info('Upcoming bookings fetched', { count: data?.length || 0, userId })
     return { data: data || [], error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching upcoming bookings', { error, userId })
-    return { data: [], error }
+    return { data: [], error: toDbError(error) }
   }
 }
 
@@ -478,7 +479,7 @@ export async function getUpcomingBookings(
 export async function getBookingsByDate(
   userId: string,
   date: string
-): Promise<{ data: Booking[]; error: any }> {
+): Promise<{ data: Booking[]; error: DatabaseError | null }> {
   logger.info('Fetching bookings by date', { userId, date })
 
   try {
@@ -491,14 +492,14 @@ export async function getBookingsByDate(
 
     if (error) {
       logger.error('Failed to fetch bookings by date', { error, userId, date })
-      return { data: [], error }
+      return { data: [], error: toDbError(error) }
     }
 
     logger.info('Bookings by date fetched', { count: data?.length || 0, date, userId })
     return { data: data || [], error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching bookings by date', { error, userId, date })
-    return { data: [], error }
+    return { data: [], error: toDbError(error) }
   }
 }
 
@@ -509,7 +510,7 @@ export async function getBookingsByDateRange(
   userId: string,
   startDate: string,
   endDate: string
-): Promise<{ data: Booking[]; error: any }> {
+): Promise<{ data: Booking[]; error: DatabaseError | null }> {
   logger.info('Fetching bookings by date range', { userId, startDate, endDate })
 
   try {
@@ -524,7 +525,7 @@ export async function getBookingsByDateRange(
 
     if (error) {
       logger.error('Failed to fetch bookings by date range', { error, userId, startDate, endDate })
-      return { data: [], error }
+      return { data: [], error: toDbError(error) }
     }
 
     logger.info('Bookings by date range fetched', {
@@ -534,9 +535,9 @@ export async function getBookingsByDateRange(
       userId,
     })
     return { data: data || [], error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching bookings by date range', { error, userId, startDate, endDate })
-    return { data: [], error }
+    return { data: [], error: toDbError(error) }
   }
 }
 
@@ -547,7 +548,7 @@ export async function searchBookings(
   userId: string,
   searchTerm: string,
   limit: number = 20
-): Promise<{ data: Booking[]; error: any }> {
+): Promise<{ data: Booking[]; error: DatabaseError | null }> {
   logger.info('Searching bookings', { userId, searchTerm, limit })
 
   try {
@@ -561,7 +562,7 @@ export async function searchBookings(
 
     if (error) {
       logger.error('Failed to search bookings', { error, userId, searchTerm })
-      return { data: [], error }
+      return { data: [], error: toDbError(error) }
     }
 
     logger.info('Bookings search completed', {
@@ -571,9 +572,9 @@ export async function searchBookings(
     })
 
     return { data: data || [], error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception searching bookings', { error, userId, searchTerm })
-    return { data: [], error }
+    return { data: [], error: toDbError(error) }
   }
 }
 
@@ -583,7 +584,7 @@ export async function searchBookings(
 export async function getClientBookings(
   userId: string,
   clientId: string
-): Promise<{ data: Booking[]; error: any }> {
+): Promise<{ data: Booking[]; error: DatabaseError | null }> {
   logger.info('Fetching client bookings', { userId, clientId })
 
   try {
@@ -596,14 +597,14 @@ export async function getClientBookings(
 
     if (error) {
       logger.error('Failed to fetch client bookings', { error, userId, clientId })
-      return { data: [], error }
+      return { data: [], error: toDbError(error) }
     }
 
     logger.info('Client bookings fetched', { count: data?.length || 0, clientId, userId })
     return { data: data || [], error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching client bookings', { error, userId, clientId })
-    return { data: [], error }
+    return { data: [], error: toDbError(error) }
   }
 }
 
@@ -614,7 +615,7 @@ export async function calculateRevenue(
   userId: string,
   startDate?: string,
   endDate?: string
-): Promise<{ revenue: number; error: any }> {
+): Promise<{ revenue: number; error: DatabaseError | null }> {
   logger.info('Calculating revenue', { userId, startDate, endDate })
 
   try {
@@ -635,15 +636,15 @@ export async function calculateRevenue(
 
     if (error) {
       logger.error('Failed to calculate revenue', { error, userId })
-      return { revenue: 0, error }
+      return { revenue: 0, error: toDbError(error) }
     }
 
     const revenue = data?.reduce((sum, b) => sum + (b.amount || 0), 0) || 0
 
     logger.info('Revenue calculated', { revenue, userId, startDate, endDate })
     return { revenue, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception calculating revenue', { error, userId })
-    return { revenue: 0, error }
+    return { revenue: 0, error: toDbError(error) }
   }
 }

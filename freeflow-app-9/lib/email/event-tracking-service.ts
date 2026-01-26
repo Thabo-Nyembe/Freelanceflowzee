@@ -90,7 +90,7 @@ export interface EventMetadata {
   // General
   provider?: string
   providerEventId?: string
-  rawEvent?: Record<string, any>
+  rawEvent?: Record<string, unknown>
 }
 
 export interface GeoLocation {
@@ -128,7 +128,7 @@ export interface ProviderEvent {
   timestamp?: string
   messageId?: string
   recipient?: string
-  data: Record<string, any>
+  data: Record<string, unknown>
 }
 
 export interface TrackingPixelData {
@@ -764,7 +764,7 @@ export class EventTrackingService {
   private async verifyWebhookSignature(
     provider: string,
     signature: string,
-    payload: any
+    payload: WebhookPayload
   ): Promise<boolean> {
     // Get webhook secret for provider
     const { data: config } = await this.supabase
@@ -788,19 +788,25 @@ export class EventTrackingService {
     }
   }
 
-  private verifySendGridSignature(signature: string, payload: any, secret: string): boolean {
+  private verifySendGridSignature(signature: string, payload: WebhookPayload, secret: string): boolean {
     // SendGrid uses ECDSA signatures - would need crypto implementation
     // Simplified for this example
+    void payload
+    void secret
     return signature.length > 0
   }
 
-  private verifyPostmarkSignature(signature: string, payload: any, secret: string): boolean {
+  private verifyPostmarkSignature(signature: string, payload: WebhookPayload, secret: string): boolean {
     // Postmark webhook verification
+    void payload
+    void secret
     return signature.length > 0
   }
 
-  private verifyMailgunSignature(signature: string, payload: any, secret: string): boolean {
+  private verifyMailgunSignature(signature: string, payload: WebhookPayload, secret: string): boolean {
     // Mailgun uses HMAC-SHA256
+    void payload
+    void secret
     return signature.length > 0
   }
 
@@ -898,7 +904,7 @@ export class EventTrackingService {
     const triggerType = triggerMap[event.eventType]
     if (triggerType && event.subscriberId) {
       await automationEngine.handleTrigger(
-        triggerType as any,
+        triggerType,
         event.subscriberId,
         {
           emailId: event.emailId,

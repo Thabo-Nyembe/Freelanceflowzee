@@ -7,9 +7,65 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import type { JsonValue } from '@/lib/types/database'
+
+// Type definitions for dashboard entities
+export interface DashboardWidget {
+  id: string
+  dashboard_id: string
+  widget_type: string
+  title: string
+  config: Record<string, JsonValue> | null
+  position: Record<string, JsonValue> | null
+  created_at: string
+  updated_at: string
+}
+
+export interface DashboardFilter {
+  id: string
+  dashboard_id: string
+  name: string
+  filter_type: string
+  config: Record<string, JsonValue> | null
+  is_active: boolean
+  created_at: string
+}
+
+export interface DashboardLayout {
+  id: string
+  name: string
+  description: string | null
+  layout_config: Record<string, JsonValue> | null
+  is_default: boolean
+  created_at: string
+}
+
+export interface DashboardShare {
+  id: string
+  dashboard_id: string
+  user_id: string
+  permission: string
+  created_at: string
+  dashboards?: Dashboard
+}
+
+export interface Dashboard {
+  id: string
+  user_id: string
+  name: string
+  description: string | null
+  type: string | null
+  is_default: boolean
+  is_public: boolean
+  layout: Record<string, JsonValue> | null
+  created_at: string
+  updated_at: string
+  dashboard_widgets?: DashboardWidget[]
+  dashboard_filters?: DashboardFilter[]
+}
 
 export function useDashboard(dashboardId?: string) {
-  const [dashboard, setDashboard] = useState<any>(null)
+  const [dashboard, setDashboard] = useState<Dashboard | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
   const supabase = createClient()
@@ -22,7 +78,7 @@ export function useDashboard(dashboardId?: string) {
 }
 
 export function useUserDashboards(userId?: string, options?: { type?: string; is_default?: boolean }) {
-  const [dashboards, setDashboards] = useState<any[]>([])
+  const [dashboards, setDashboards] = useState<Dashboard[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
   const supabase = createClient()
@@ -40,8 +96,8 @@ export function useUserDashboards(userId?: string, options?: { type?: string; is
   return { dashboards, isLoading, refresh: fetch }
 }
 
-export function useDashboardWidgets(dashboardId?: string) {
-  const [widgets, setWidgets] = useState<any[]>([])
+export function useDashboardWidgetsExtended(dashboardId?: string) {
+  const [widgets, setWidgets] = useState<DashboardWidget[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
   const supabase = createClient()
@@ -54,7 +110,7 @@ export function useDashboardWidgets(dashboardId?: string) {
 }
 
 export function useSharedDashboards(userId?: string) {
-  const [dashboards, setDashboards] = useState<any[]>([])
+  const [dashboards, setDashboards] = useState<DashboardShare[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
   const supabase = createClient()
@@ -67,7 +123,7 @@ export function useSharedDashboards(userId?: string) {
 }
 
 export function useDashboardFilters(dashboardId?: string) {
-  const [filters, setFilters] = useState<any[]>([])
+  const [filters, setFilters] = useState<DashboardFilter[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
   const supabase = createClient()
@@ -80,7 +136,7 @@ export function useDashboardFilters(dashboardId?: string) {
 }
 
 export function useDefaultDashboard(userId?: string, type?: string) {
-  const [dashboard, setDashboard] = useState<any>(null)
+  const [dashboard, setDashboard] = useState<Dashboard | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
   const supabase = createClient()
@@ -98,7 +154,7 @@ export function useDefaultDashboard(userId?: string, type?: string) {
 }
 
 export function usePublicDashboards(options?: { type?: string; limit?: number }) {
-  const [dashboards, setDashboards] = useState<any[]>([])
+  const [dashboards, setDashboards] = useState<Dashboard[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
   const supabase = createClient()
@@ -115,7 +171,7 @@ export function usePublicDashboards(options?: { type?: string; limit?: number })
 }
 
 export function useDashboardLayouts() {
-  const [layouts, setLayouts] = useState<any[]>([])
+  const [layouts, setLayouts] = useState<DashboardLayout[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
   const supabase = createClient()
@@ -127,7 +183,7 @@ export function useDashboardLayouts() {
 }
 
 export function useDashboardShares(dashboardId?: string) {
-  const [shares, setShares] = useState<any[]>([])
+  const [shares, setShares] = useState<DashboardShare[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
   const supabase = createClient()

@@ -2,6 +2,7 @@
 // Comprehensive queries for dashboard widgets, layouts, templates, and customization
 
 import { createClient } from '@/lib/supabase/client'
+import type { JsonValue } from '@/lib/types/database'
 
 // ============================================================================
 // TYPES
@@ -27,7 +28,7 @@ export interface Widget {
   position_y: number
   width: number
   height: number
-  config: Record<string, any>
+  config: Record<string, JsonValue>
   data_source?: string
   refresh_interval?: number
   last_refreshed_at?: string
@@ -57,7 +58,7 @@ export interface WidgetTemplate {
   description: string
   category: WidgetCategory
   preview_image_url?: string
-  template_config: Record<string, any>
+  template_config: Record<string, JsonValue>
   default_size: WidgetSize
   is_published: boolean
   is_premium: boolean
@@ -71,7 +72,7 @@ export interface WidgetTemplate {
 export interface WidgetData {
   id: string
   widget_id: string
-  data: Record<string, any>
+  data: Record<string, JsonValue>
   cached_until?: string
   error_message?: string
   fetched_at: string
@@ -83,7 +84,7 @@ export interface WidgetAnalytics {
   widget_id: string
   user_id: string
   event_type: string // 'view', 'click', 'refresh', 'resize', 'move'
-  event_data: Record<string, any>
+  event_data: Record<string, JsonValue>
   event_timestamp: string
   created_at: string
 }
@@ -503,7 +504,7 @@ export async function incrementTemplateUsage(templateId: string) {
   return data as WidgetTemplate
 }
 
-export async function createWidgetFromTemplate(userId: string, templateId: string, customConfig?: Record<string, any>) {
+export async function createWidgetFromTemplate(userId: string, templateId: string, customConfig?: Record<string, JsonValue>) {
   const template = await getTemplate(templateId)
   await incrementTemplateUsage(templateId)
 
@@ -529,7 +530,7 @@ export async function createWidgetFromTemplate(userId: string, templateId: strin
 // WIDGET DATA - CACHING
 // ============================================================================
 
-export async function cacheWidgetData(widgetId: string, data: Record<string, any>, cacheDuration?: number) {
+export async function cacheWidgetData(widgetId: string, data: Record<string, JsonValue>, cacheDuration?: number) {
   const supabase = createClient()
 
   const cachedUntil = cacheDuration
@@ -597,7 +598,7 @@ export async function clearWidgetCache(widgetId: string) {
 // WIDGET ANALYTICS - TRACKING
 // ============================================================================
 
-export async function trackWidgetEvent(widgetId: string, userId: string, eventType: string, eventData?: Record<string, any>) {
+export async function trackWidgetEvent(widgetId: string, userId: string, eventType: string, eventData?: Record<string, JsonValue>) {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('widget_analytics')
@@ -747,9 +748,9 @@ export async function getTemplateStats() {
 }
 
 // Helper function to group results by field
-function groupByField(data: any[], field: string): Record<string, number> {
+function groupByField(data: Array<Record<string, JsonValue>>, field: string): Record<string, number> {
   return data.reduce((acc, item) => {
-    const key = item[field] || 'unknown'
+    const key = String(item[field]) || 'unknown'
     acc[key] = (acc[key] || 0) + 1
     return acc
   }, {} as Record<string, number>)

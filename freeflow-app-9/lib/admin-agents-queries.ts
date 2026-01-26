@@ -2,6 +2,7 @@
 // Comprehensive queries for agent management, coordination, monitoring, and reporting
 
 import { createClient } from '@/lib/supabase/client'
+import type { JsonValue } from '@/lib/types/database'
 
 // ============================================================================
 // TYPES
@@ -23,7 +24,7 @@ export interface AdminAgent {
   status: AgentStatus
   is_enabled: boolean
   is_critical: boolean
-  config: Record<string, any>
+  config: Record<string, JsonValue>
   execution_interval?: number
   max_concurrent_executions: number
   timeout_seconds: number
@@ -40,7 +41,7 @@ export interface AdminAgent {
   last_success_at?: string
   last_failure_at?: string
   tags: string[]
-  metadata: Record<string, any>
+  metadata: Record<string, JsonValue>
   created_at: string
   updated_at: string
 }
@@ -55,14 +56,14 @@ export interface AgentExecution {
   started_at?: string
   completed_at?: string
   duration_ms?: number
-  result: Record<string, any>
-  output_data: Record<string, any>
+  result: Record<string, JsonValue>
+  output_data: Record<string, JsonValue>
   error_message?: string
   stack_trace?: string
   cpu_usage_percent?: number
   memory_usage_mb?: number
-  context: Record<string, any>
-  metadata: Record<string, any>
+  context: Record<string, JsonValue>
+  metadata: Record<string, JsonValue>
   created_at: string
   updated_at: string
 }
@@ -74,13 +75,13 @@ export interface AgentLog {
   user_id: string
   log_level: LogLevel
   message: string
-  details: Record<string, any>
+  details: Record<string, JsonValue>
   function_name?: string
   line_number?: number
   file_path?: string
   stack_trace?: string
   tags: string[]
-  metadata: Record<string, any>
+  metadata: Record<string, JsonValue>
   timestamp: string
   created_at: string
 }
@@ -93,9 +94,9 @@ export interface AgentMetric {
   metric_value: number
   metric_unit?: string
   metric_type: string
-  dimensions: Record<string, any>
+  dimensions: Record<string, JsonValue>
   tags: string[]
-  metadata: Record<string, any>
+  metadata: Record<string, JsonValue>
   timestamp: string
   created_at: string
 }
@@ -105,19 +106,19 @@ export interface AgentConfiguration {
   agent_id: string
   user_id: string
   config_key: string
-  config_value: any
+  config_value: JsonValue
   config_type: string
   is_secret: boolean
   is_required: boolean
-  default_value?: any
-  validation_schema?: Record<string, any>
+  default_value?: JsonValue
+  validation_schema?: Record<string, JsonValue>
   version: number
-  previous_value?: any
+  previous_value?: JsonValue
   changed_by?: string
   changed_at?: string
   description?: string
   tags: string[]
-  metadata: Record<string, any>
+  metadata: Record<string, JsonValue>
   created_at: string
   updated_at: string
 }
@@ -404,7 +405,7 @@ export async function startExecution(executionId: string) {
   })
 }
 
-export async function completeExecution(executionId: string, result: Record<string, any>) {
+export async function completeExecution(executionId: string, result: Record<string, JsonValue>) {
   return updateExecution(executionId, {
     execution_status: 'completed',
     result

@@ -2,6 +2,7 @@
 // Digital asset management: resources, collections, downloads, ratings, and engagement
 
 import { createClient } from '@/lib/supabase/client'
+import type { JsonValue } from '@/lib/types/database'
 
 // ============================================================================
 // TYPES
@@ -104,9 +105,9 @@ export interface Resource {
   is_published: boolean
   tags?: string[]
   keywords?: string[]
-  requirements?: any
-  compatibility?: any
-  metadata?: any
+  requirements?: Record<string, JsonValue>
+  compatibility?: Record<string, JsonValue>
+  metadata?: Record<string, JsonValue>
   published_at?: string
   created_at: string
   updated_at: string
@@ -141,7 +142,7 @@ export interface ResourceCollection {
   views_count: number
   is_public: boolean
   is_featured: boolean
-  metadata?: any
+  metadata?: Record<string, JsonValue>
   created_at: string
   updated_at: string
 }
@@ -162,7 +163,7 @@ export interface ResourceDownload {
   ip_address?: string
   user_agent?: string
   referrer?: string
-  metadata?: any
+  metadata?: Record<string, JsonValue>
   downloaded_at: string
 }
 
@@ -628,7 +629,7 @@ export async function getCollectionItems(collectionId: string) {
  */
 export async function recordDownload(
   resourceId: string,
-  metadata?: any
+  metadata?: Record<string, JsonValue>
 ) {
   const supabase = createClient()
 

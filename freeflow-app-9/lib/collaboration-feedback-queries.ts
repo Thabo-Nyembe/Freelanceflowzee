@@ -11,6 +11,7 @@
 
 import { createClient } from '@/lib/supabase/client'
 import { createFeatureLogger } from '@/lib/logger'
+import { DatabaseError, toDbError } from '@/lib/types/database'
 
 const logger = createFeatureLogger('CollaborationFeedback')
 
@@ -62,6 +63,34 @@ export interface FeedbackWithDetails extends CollaborationFeedback {
   user_vote?: VoteType | null
 }
 
+export interface FeedbackStats {
+  total: number
+  byCategory: {
+    bug: number
+    feature: number
+    improvement: number
+    question: number
+    other: number
+  }
+  byPriority: {
+    low: number
+    medium: number
+    high: number
+    urgent: number
+  }
+  byStatus: {
+    open: number
+    in_progress: number
+    resolved: number
+    closed: number
+  }
+  totalUpvotes: number
+  totalDownvotes: number
+  starred: number
+  flagged: number
+  assigned: number
+}
+
 // ============================================================================
 // FEEDBACK CRUD OPERATIONS
 // ============================================================================
@@ -79,7 +108,7 @@ export async function getFeedback(
     assigned_to?: string
     search?: string
   }
-): Promise<{ data: CollaborationFeedback[] | null; error: any }> {
+): Promise<{ data: CollaborationFeedback[] | null; error: DatabaseError | null }> {
   const startTime = performance.now()
 
   try {
@@ -130,9 +159,10 @@ export async function getFeedback(
 
     return { data, error: null }
 
-  } catch (error: any) {
-    logger.error('Exception in getFeedback', { error: error.message, userId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getFeedback', { error: dbError.message, userId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -142,7 +172,7 @@ export async function getFeedback(
 export async function getFeedbackById(
   feedbackId: string,
   userId: string
-): Promise<{ data: CollaborationFeedback | null; error: any }> {
+): Promise<{ data: CollaborationFeedback | null; error: DatabaseError | null }> {
   try {
     logger.info('Fetching feedback by ID', { feedbackId, userId })
 
@@ -163,9 +193,10 @@ export async function getFeedbackById(
     logger.info('Feedback fetched successfully', { feedbackId })
     return { data, error: null }
 
-  } catch (error: any) {
-    logger.error('Exception in getFeedbackById', { error: error.message, feedbackId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getFeedbackById', { error: dbError.message, feedbackId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -181,7 +212,7 @@ export async function createFeedback(
     priority: FeedbackPriority
     assigned_to?: string
   }
-): Promise<{ data: CollaborationFeedback | null; error: any }> {
+): Promise<{ data: CollaborationFeedback | null; error: DatabaseError | null }> {
   try {
     logger.info('Creating feedback', { userId, title: feedback.title, category: feedback.category })
 
@@ -214,9 +245,10 @@ export async function createFeedback(
 
     return { data, error: null }
 
-  } catch (error: any) {
-    logger.error('Exception in createFeedback', { error: error.message, userId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in createFeedback', { error: dbError.message, userId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -236,7 +268,7 @@ export async function updateFeedback(
     is_starred?: boolean
     is_flagged?: boolean
   }
-): Promise<{ data: CollaborationFeedback | null; error: any }> {
+): Promise<{ data: CollaborationFeedback | null; error: DatabaseError | null }> {
   try {
     logger.info('Updating feedback', { feedbackId, userId, updates })
 
@@ -262,9 +294,10 @@ export async function updateFeedback(
 
     return { data, error: null }
 
-  } catch (error: any) {
-    logger.error('Exception in updateFeedback', { error: error.message, feedbackId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in updateFeedback', { error: dbError.message, feedbackId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -274,7 +307,7 @@ export async function updateFeedback(
 export async function deleteFeedback(
   feedbackId: string,
   userId: string
-): Promise<{ success: boolean; error: any }> {
+): Promise<{ success: boolean; error: DatabaseError | null }> {
   try {
     logger.info('Deleting feedback', { feedbackId, userId })
 
@@ -294,9 +327,10 @@ export async function deleteFeedback(
     logger.info('Feedback deleted successfully', { feedbackId })
     return { success: true, error: null }
 
-  } catch (error: any) {
-    logger.error('Exception in deleteFeedback', { error: error.message, feedbackId })
-    return { success: false, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in deleteFeedback', { error: dbError.message, feedbackId })
+    return { success: false, error: dbError }
   }
 }
 
@@ -307,7 +341,7 @@ export async function toggleStarred(
   feedbackId: string,
   userId: string,
   isStarred: boolean
-): Promise<{ data: CollaborationFeedback | null; error: any }> {
+): Promise<{ data: CollaborationFeedback | null; error: DatabaseError | null }> {
   try {
     logger.info('Toggling starred status', { feedbackId, userId, isStarred })
 
@@ -329,9 +363,10 @@ export async function toggleStarred(
     logger.info('Starred status toggled', { feedbackId, isStarred })
     return { data, error: null }
 
-  } catch (error: any) {
-    logger.error('Exception in toggleStarred', { error: error.message, feedbackId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in toggleStarred', { error: dbError.message, feedbackId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -344,7 +379,7 @@ export async function toggleStarred(
  */
 export async function getFeedbackReplies(
   feedbackId: string
-): Promise<{ data: FeedbackReply[] | null; error: any }> {
+): Promise<{ data: FeedbackReply[] | null; error: DatabaseError | null }> {
   try {
     logger.info('Fetching feedback replies', { feedbackId })
 
@@ -368,9 +403,10 @@ export async function getFeedbackReplies(
 
     return { data, error: null }
 
-  } catch (error: any) {
-    logger.error('Exception in getFeedbackReplies', { error: error.message, feedbackId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getFeedbackReplies', { error: dbError.message, feedbackId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -382,7 +418,7 @@ export async function addFeedbackReply(
   userId: string,
   replyText: string,
   isSolution: boolean = false
-): Promise<{ data: FeedbackReply | null; error: any }> {
+): Promise<{ data: FeedbackReply | null; error: DatabaseError | null }> {
   try {
     logger.info('Adding feedback reply', { feedbackId, userId, isSolution })
 
@@ -407,9 +443,10 @@ export async function addFeedbackReply(
     logger.info('Reply added successfully', { replyId: data.id, feedbackId })
     return { data, error: null }
 
-  } catch (error: any) {
-    logger.error('Exception in addFeedbackReply', { error: error.message, feedbackId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in addFeedbackReply', { error: dbError.message, feedbackId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -419,7 +456,7 @@ export async function addFeedbackReply(
 export async function markReplyAsSolution(
   replyId: string,
   userId: string
-): Promise<{ data: FeedbackReply | null; error: any }> {
+): Promise<{ data: FeedbackReply | null; error: DatabaseError | null }> {
   try {
     logger.info('Marking reply as solution', { replyId, userId })
 
@@ -441,9 +478,10 @@ export async function markReplyAsSolution(
     logger.info('Reply marked as solution', { replyId })
     return { data, error: null }
 
-  } catch (error: any) {
-    logger.error('Exception in markReplyAsSolution', { error: error.message, replyId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in markReplyAsSolution', { error: dbError.message, replyId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -453,7 +491,7 @@ export async function markReplyAsSolution(
 export async function deleteFeedbackReply(
   replyId: string,
   userId: string
-): Promise<{ success: boolean; error: any }> {
+): Promise<{ success: boolean; error: DatabaseError | null }> {
   try {
     logger.info('Deleting feedback reply', { replyId, userId })
 
@@ -473,9 +511,10 @@ export async function deleteFeedbackReply(
     logger.info('Reply deleted successfully', { replyId })
     return { success: true, error: null }
 
-  } catch (error: any) {
-    logger.error('Exception in deleteFeedbackReply', { error: error.message, replyId })
-    return { success: false, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in deleteFeedbackReply', { error: dbError.message, replyId })
+    return { success: false, error: dbError }
   }
 }
 
@@ -489,7 +528,7 @@ export async function deleteFeedbackReply(
 export async function getUserVote(
   feedbackId: string,
   userId: string
-): Promise<{ data: FeedbackVote | null; error: any }> {
+): Promise<{ data: FeedbackVote | null; error: DatabaseError | null }> {
   try {
     logger.debug('Fetching user vote', { feedbackId, userId })
 
@@ -509,9 +548,10 @@ export async function getUserVote(
 
     return { data, error: null }
 
-  } catch (error: any) {
-    logger.error('Exception in getUserVote', { error: error.message, feedbackId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getUserVote', { error: dbError.message, feedbackId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -523,7 +563,7 @@ export async function voteFeedback(
   feedbackId: string,
   userId: string,
   voteType: VoteType
-): Promise<{ data: FeedbackVote | null; error: any }> {
+): Promise<{ data: FeedbackVote | null; error: DatabaseError | null }> {
   try {
     logger.info('Voting on feedback', { feedbackId, userId, voteType })
 
@@ -586,9 +626,10 @@ export async function voteFeedback(
       return { data, error: null }
     }
 
-  } catch (error: any) {
-    logger.error('Exception in voteFeedback', { error: error.message, feedbackId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in voteFeedback', { error: dbError.message, feedbackId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -601,7 +642,7 @@ export async function voteFeedback(
  */
 export async function getFeedbackStats(
   userId: string
-): Promise<{ data: any | null; error: any }> {
+): Promise<{ data: FeedbackStats | null; error: DatabaseError | null }> {
   try {
     logger.info('Fetching feedback statistics', { userId })
 
@@ -649,9 +690,10 @@ export async function getFeedbackStats(
     logger.info('Feedback statistics calculated', { userId, totalFeedback: stats.total })
     return { data: stats, error: null }
 
-  } catch (error: any) {
-    logger.error('Exception in getFeedbackStats', { error: error.message, userId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getFeedbackStats', { error: dbError.message, userId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -660,7 +702,7 @@ export async function getFeedbackStats(
  */
 export async function getFeedbackReplyCount(
   feedbackId: string
-): Promise<{ count: number; error: any }> {
+): Promise<{ count: number; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
 
@@ -676,8 +718,9 @@ export async function getFeedbackReplyCount(
 
     return { count: count || 0, error: null }
 
-  } catch (error: any) {
-    logger.error('Exception in getFeedbackReplyCount', { error: error.message, feedbackId })
-    return { count: 0, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getFeedbackReplyCount', { error: dbError.message, feedbackId })
+    return { count: 0, error: dbError }
   }
 }

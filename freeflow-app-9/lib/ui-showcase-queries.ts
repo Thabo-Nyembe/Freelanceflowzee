@@ -6,6 +6,7 @@
  */
 
 import { createClient } from '@/lib/supabase/client'
+import type { JsonValue } from '@/lib/types/database'
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -36,7 +37,7 @@ export interface UIComponentInteraction {
   interaction_type: InteractionType
   interacted_at: string
   duration_ms?: number
-  metadata?: any
+  metadata?: Record<string, JsonValue>
   created_at: string
 }
 
@@ -135,7 +136,7 @@ export async function recordComponentInteraction(interactionData: {
   component_category?: ComponentCategory
   interaction_type: InteractionType
   duration_ms?: number
-  metadata?: any
+  metadata?: Record<string, JsonValue>
 }): Promise<UIComponentInteraction> {
   const supabase = createClient()
 

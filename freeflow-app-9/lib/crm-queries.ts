@@ -3,6 +3,49 @@
  */
 
 import { createClient } from '@/lib/supabase/client'
+import type { JsonValue } from '@/lib/types/database'
+
+/**
+ * Address structure for contacts
+ */
+export interface ContactAddress {
+  street?: string
+  city?: string
+  state?: string
+  postal_code?: string
+  country?: string
+  [key: string]: string | undefined
+}
+
+/**
+ * Social profile links for contacts
+ */
+export interface SocialProfiles {
+  linkedin?: string
+  twitter?: string
+  facebook?: string
+  instagram?: string
+  github?: string
+  website?: string
+  [key: string]: string | undefined
+}
+
+/**
+ * Deal close updates structure
+ */
+interface DealCloseUpdates {
+  stage: 'closed-won' | 'closed-lost'
+  won_reason?: string
+  lost_reason?: string
+}
+
+/**
+ * Activity completion updates structure
+ */
+interface ActivityCompleteUpdates {
+  status: 'completed'
+  outcome?: string
+}
 
 export type ContactType = 'lead' | 'prospect' | 'customer' | 'partner' | 'vendor'
 export type LeadStatus = 'new' | 'contacted' | 'qualified' | 'proposal' | 'negotiation' | 'won' | 'lost'
@@ -27,9 +70,9 @@ export interface CRMContact {
   lead_source?: LeadSource
   lead_score: number
   tags: string[]
-  custom_fields: Record<string, any>
-  address: Record<string, any>
-  social_profiles: Record<string, any>
+  custom_fields: Record<string, JsonValue>
+  address: ContactAddress
+  social_profiles: SocialProfiles
   last_contacted_at?: string
   assigned_to?: string
   total_deals: number
@@ -75,7 +118,7 @@ export interface CRMDeal {
   description?: string
   assigned_to: string
   tags: string[]
-  custom_fields: Record<string, any>
+  custom_fields: Record<string, JsonValue>
   lost_reason?: string
   won_reason?: string
   created_at: string
@@ -200,7 +243,7 @@ export async function updateCRMDeal(dealId: string, updates: Partial<CRMDeal>) {
 
 export async function closeDeal(dealId: string, stage: 'closed-won' | 'closed-lost', reason?: string) {
   const supabase = createClient()
-  const updates: any = { stage }
+  const updates: DealCloseUpdates = { stage }
   if (stage === 'closed-won' && reason) updates.won_reason = reason
   if (stage === 'closed-lost' && reason) updates.lost_reason = reason
   return await supabase.from('crm_deals').update(updates).eq('id', dealId).select().single()
@@ -254,7 +297,7 @@ export async function updateCRMActivity(activityId: string, updates: Partial<CRM
 
 export async function completeActivity(activityId: string, outcome?: string) {
   const supabase = createClient()
-  const updates: any = { status: 'completed' }
+  const updates: ActivityCompleteUpdates = { status: 'completed' }
   if (outcome) updates.outcome = outcome
   return await supabase.from('crm_activities').update(updates).eq('id', activityId).select().single()
 }

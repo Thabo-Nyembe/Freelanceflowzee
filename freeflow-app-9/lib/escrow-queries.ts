@@ -19,6 +19,7 @@
  */
 
 import { createClient } from '@/lib/supabase/client'
+import type { JsonValue } from '@/lib/types/database'
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -120,7 +121,7 @@ export interface EscrowTransaction {
   to_user_id?: string
   fees: number
   net_amount: number
-  metadata?: Record<string, any>
+  metadata?: Record<string, JsonValue>
   created_at: string
   completed_at?: string
 }
@@ -415,7 +416,13 @@ export async function updateDepositStatus(
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Not authenticated')
 
-  const updates: any = {
+  const updates: {
+    status: EscrowStatus
+    updated_at: string
+    released_at?: string
+    completed_at?: string
+    cancelled_at?: string
+  } = {
     status,
     updated_at: new Date().toISOString()
   }
@@ -901,7 +908,7 @@ export async function createEscrowTransaction(transactionData: {
   fees?: number
   net_amount?: number
   status?: TransactionStatus
-  metadata?: Record<string, any>
+  metadata?: Record<string, JsonValue>
 }): Promise<EscrowTransaction> {
   const supabase = createClient()
 
@@ -932,7 +939,10 @@ export async function updateTransactionStatus(
 ): Promise<void> {
   const supabase = createClient()
 
-  const updates: any = { status }
+  const updates: {
+    status: TransactionStatus
+    completed_at?: string
+  } = { status }
   if (status === 'completed') {
     updates.completed_at = new Date().toISOString()
   }
@@ -1073,7 +1083,14 @@ export async function updateDisputeStatus(
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  const updates: any = {
+  const updates: {
+    status: DisputeStatus
+    updated_at: string
+    resolution?: string
+    resolved_at?: string
+    resolved_by?: string
+    escalated_at?: string
+  } = {
     status,
     updated_at: new Date().toISOString()
   }
@@ -1194,7 +1211,13 @@ export async function signContract(
 ): Promise<void> {
   const supabase = createClient()
 
-  const updates: any = {
+  const updates: {
+    updated_at: string
+    signed_by_client?: boolean
+    client_signed_at?: string
+    signed_by_freelancer?: boolean
+    freelancer_signed_at?: string
+  } = {
     updated_at: new Date().toISOString()
   }
 
@@ -1239,7 +1262,10 @@ export async function agreeToContractTerm(
 ): Promise<void> {
   const supabase = createClient()
 
-  const updates: any = {}
+  const updates: {
+    agreed_by_client?: boolean
+    agreed_by_freelancer?: boolean
+  } = {}
   if (agreedBy === 'client') {
     updates.agreed_by_client = true
   } else {

@@ -3,6 +3,7 @@
  */
 
 import { createClient } from '@/lib/supabase/client'
+import type { JsonValue } from '@/lib/types/database'
 
 export type MarketPosition = 'leader' | 'challenger' | 'niche' | 'emerging'
 export type TrendDirection = 'up' | 'down' | 'stable'
@@ -128,7 +129,7 @@ export interface GrowthProjection {
   projected_revenue: number
   confidence_score: number
 
-  assumptions: Record<string, any>
+  assumptions: Record<string, JsonValue>
 
   created_at: string
   updated_at: string
@@ -156,14 +157,14 @@ export interface BoardDeckReport {
 
   // Summary Section
   headline: string
-  key_metrics: any[]
+  key_metrics: JsonValue[]
   highlights: string[]
   concerns: string[]
 
   // Charts Data
-  user_growth_chart: Record<string, any>
-  revenue_chart: Record<string, any>
-  revenue_breakdown: Record<string, any>
+  user_growth_chart: Record<string, JsonValue>
+  revenue_chart: Record<string, JsonValue>
+  revenue_breakdown: Record<string, JsonValue>
 
   // Analysis
   user_growth_analysis?: string

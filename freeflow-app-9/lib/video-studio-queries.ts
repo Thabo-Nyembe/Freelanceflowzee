@@ -6,6 +6,7 @@
 
 import { createClient } from '@/lib/supabase/client'
 import { createFeatureLogger } from './logger'
+import { DatabaseError, toDbError, JsonValue } from '@/lib/types/database'
 
 const supabase = createClient()
 const logger = createFeatureLogger('VideoStudio')
@@ -65,7 +66,7 @@ export async function getVideoProjects(
   sort?: VideoSortOptions,
   limit: number = 50,
   offset: number = 0
-): Promise<{ data: VideoProject[]; error: any; count: number }> {
+): Promise<{ data: VideoProject[]; error: DatabaseError | null; count: number }> {
   logger.info('Fetching video projects', { userId, filters, sort, limit, offset })
 
   try {
@@ -103,7 +104,7 @@ export async function getVideoProjects(
 
     if (error) {
       logger.error('Failed to fetch video projects', { error, userId })
-      return { data: [], error, count: 0 }
+      return { data: [], error: toDbError(error), count: 0 }
     }
 
     logger.info('Video projects fetched successfully', {
@@ -113,9 +114,9 @@ export async function getVideoProjects(
     })
 
     return { data: data || [], error: null, count: count || 0 }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching video projects', { error, userId })
-    return { data: [], error, count: 0 }
+    return { data: [], error: toDbError(error), count: 0 }
   }
 }
 
@@ -124,7 +125,7 @@ export async function getVideoProjects(
  */
 export async function getVideoProject(
   projectId: string
-): Promise<{ data: VideoProject | null; error: any }> {
+): Promise<{ data: VideoProject | null; error: DatabaseError | null }> {
   logger.info('Fetching video project', { projectId })
 
   try {
@@ -136,14 +137,14 @@ export async function getVideoProject(
 
     if (error) {
       logger.error('Failed to fetch video project', { error, projectId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Video project fetched successfully', { projectId })
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching video project', { error, projectId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -153,7 +154,7 @@ export async function getVideoProject(
 export async function createVideoProject(
   userId: string,
   projectData: Partial<VideoProject>
-): Promise<{ data: VideoProject | null; error: any }> {
+): Promise<{ data: VideoProject | null; error: DatabaseError | null }> {
   logger.info('Creating video project', { userId, title: projectData.title })
 
   try {
@@ -178,7 +179,7 @@ export async function createVideoProject(
 
     if (error) {
       logger.error('Failed to create video project', { error, userId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Video project created successfully', {
@@ -188,9 +189,9 @@ export async function createVideoProject(
     })
 
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception creating video project', { error, userId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -200,7 +201,7 @@ export async function createVideoProject(
 export async function updateVideoProject(
   projectId: string,
   updates: Partial<VideoProject>
-): Promise<{ data: VideoProject | null; error: any }> {
+): Promise<{ data: VideoProject | null; error: DatabaseError | null }> {
   logger.info('Updating video project', { projectId, updates })
 
   try {
@@ -216,14 +217,14 @@ export async function updateVideoProject(
 
     if (error) {
       logger.error('Failed to update video project', { error, projectId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Video project updated successfully', { projectId })
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception updating video project', { error, projectId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -233,7 +234,7 @@ export async function updateVideoProject(
 export async function updateVideoStatus(
   projectId: string,
   status: VideoProject['status']
-): Promise<{ data: VideoProject | null; error: any }> {
+): Promise<{ data: VideoProject | null; error: DatabaseError | null }> {
   logger.info('Updating video status', { projectId, status })
 
   try {
@@ -249,14 +250,14 @@ export async function updateVideoStatus(
 
     if (error) {
       logger.error('Failed to update video status', { error, projectId, status })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Video status updated successfully', { projectId, status })
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception updating video status', { error, projectId, status })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -265,7 +266,7 @@ export async function updateVideoStatus(
  */
 export async function deleteVideoProject(
   projectId: string
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   logger.info('Deleting video project', { projectId })
 
   try {
@@ -276,14 +277,14 @@ export async function deleteVideoProject(
 
     if (error) {
       logger.error('Failed to delete video project', { error, projectId })
-      return { error }
+      return { error: toDbError(error) }
     }
 
     logger.info('Video project deleted successfully', { projectId })
     return { error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception deleting video project', { error, projectId })
-    return { error }
+    return { error: toDbError(error) }
   }
 }
 
@@ -292,7 +293,7 @@ export async function deleteVideoProject(
  */
 export async function bulkDeleteVideoProjects(
   projectIds: string[]
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   logger.info('Bulk deleting video projects', { count: projectIds.length })
 
   try {
@@ -303,14 +304,14 @@ export async function bulkDeleteVideoProjects(
 
     if (error) {
       logger.error('Failed to bulk delete video projects', { error, count: projectIds.length })
-      return { error }
+      return { error: toDbError(error) }
     }
 
     logger.info('Video projects bulk deleted successfully', { count: projectIds.length })
     return { error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception bulk deleting video projects', { error })
-    return { error }
+    return { error: toDbError(error) }
   }
 }
 
@@ -346,7 +347,7 @@ export async function getVideoStats(userId: string): Promise<VideoStats> {
 
     logger.info('Video statistics fetched', { stats, userId })
     return stats
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Failed to fetch video statistics', { error, userId })
     return {
       total: 0,
@@ -369,7 +370,7 @@ export async function getVideoStats(userId: string): Promise<VideoStats> {
  */
 export async function incrementVideoViews(
   projectId: string
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   logger.info('Incrementing video views', { projectId })
 
   try {
@@ -393,7 +394,7 @@ export async function incrementVideoViews(
 
         if (updateError) {
           logger.error('Failed to increment views (fallback)', { error: updateError, projectId })
-          return { error: updateError }
+          return { error: toDbError(updateError) }
         }
 
         logger.info('Video views incremented (fallback)', { projectId })
@@ -403,14 +404,14 @@ export async function incrementVideoViews(
 
     if (error) {
       logger.error('Failed to increment video views', { error, projectId })
-      return { error }
+      return { error: toDbError(error) }
     }
 
     logger.info('Video views incremented successfully', { projectId })
     return { error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception incrementing video views', { error, projectId })
-    return { error }
+    return { error: toDbError(error) }
   }
 }
 
@@ -420,7 +421,7 @@ export async function incrementVideoViews(
 export async function toggleVideoLike(
   projectId: string,
   increment: boolean
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   logger.info('Toggling video like', { projectId, increment })
 
   try {
@@ -431,7 +432,7 @@ export async function toggleVideoLike(
       .single()
 
     if (!project) {
-      return { error: new Error('Project not found') }
+      return { error: { message: 'Project not found' } }
     }
 
     const newLikes = increment
@@ -445,14 +446,14 @@ export async function toggleVideoLike(
 
     if (error) {
       logger.error('Failed to toggle video like', { error, projectId })
-      return { error }
+      return { error: toDbError(error) }
     }
 
     logger.info('Video like toggled successfully', { projectId, increment, newLikes })
     return { error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception toggling video like', { error, projectId })
-    return { error }
+    return { error: toDbError(error) }
   }
 }
 
@@ -463,7 +464,7 @@ export async function searchVideoProjects(
   userId: string,
   searchTerm: string,
   limit: number = 20
-): Promise<{ data: VideoProject[]; error: any }> {
+): Promise<{ data: VideoProject[]; error: DatabaseError | null }> {
   logger.info('Searching video projects', { userId, searchTerm, limit })
 
   try {
@@ -477,7 +478,7 @@ export async function searchVideoProjects(
 
     if (error) {
       logger.error('Failed to search video projects', { error, userId, searchTerm })
-      return { data: [], error }
+      return { data: [], error: toDbError(error) }
     }
 
     logger.info('Video projects search completed', {
@@ -487,9 +488,9 @@ export async function searchVideoProjects(
     })
 
     return { data: data || [], error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception searching video projects', { error, userId, searchTerm })
-    return { data: [], error }
+    return { data: [], error: toDbError(error) }
   }
 }
 
@@ -499,7 +500,7 @@ export async function searchVideoProjects(
 export async function getRecentVideoProjects(
   userId: string,
   limit: number = 10
-): Promise<{ data: VideoProject[]; error: any }> {
+): Promise<{ data: VideoProject[]; error: DatabaseError | null }> {
   logger.info('Fetching recent video projects', { userId, limit })
 
   try {
@@ -512,14 +513,14 @@ export async function getRecentVideoProjects(
 
     if (error) {
       logger.error('Failed to fetch recent video projects', { error, userId })
-      return { data: [], error }
+      return { data: [], error: toDbError(error) }
     }
 
     logger.info('Recent video projects fetched', { count: data?.length || 0, userId })
     return { data: data || [], error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching recent video projects', { error, userId })
-    return { data: [], error }
+    return { data: [], error: toDbError(error) }
   }
 }
 
@@ -529,7 +530,7 @@ export async function getRecentVideoProjects(
 export async function duplicateVideoProject(
   projectId: string,
   userId: string
-): Promise<{ data: VideoProject | null; error: any }> {
+): Promise<{ data: VideoProject | null; error: DatabaseError | null }> {
   logger.info('Duplicating video project', { projectId, userId })
 
   try {
@@ -564,15 +565,25 @@ export async function duplicateVideoProject(
     })
 
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception duplicating video project', { error, projectId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
 // ============================================================================
 // VIDEO TEMPLATE FUNCTIONS
 // ============================================================================
+
+/**
+ * Feature object for video templates
+ */
+export interface TemplateFeature {
+  name: string
+  description?: string
+  enabled?: boolean
+  [key: string]: JsonValue | undefined
+}
 
 export interface VideoTemplate {
   id: string
@@ -589,7 +600,7 @@ export interface VideoTemplate {
   rating?: number
   reviews_count: number
   tags: string[]
-  features: any[]
+  features: TemplateFeature[]
   created_at: string
   updated_at: string
   created_by?: string
@@ -611,7 +622,7 @@ export async function getVideoTemplates(
   filters?: TemplateFilters,
   limit: number = 50,
   offset: number = 0
-): Promise<{ data: VideoTemplate[]; error: any; count: number }> {
+): Promise<{ data: VideoTemplate[]; error: DatabaseError | null; count: number }> {
   logger.info('Fetching video templates', { filters, limit, offset })
 
   try {
@@ -651,7 +662,7 @@ export async function getVideoTemplates(
 
     if (error) {
       logger.error('Failed to fetch video templates', { error, filters })
-      return { data: [], error, count: 0 }
+      return { data: [], error: toDbError(error), count: 0 }
     }
 
     logger.info('Video templates fetched successfully', {
@@ -661,9 +672,9 @@ export async function getVideoTemplates(
     })
 
     return { data: data || [], error: null, count: count || 0 }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching video templates', { error, filters })
-    return { data: [], error, count: 0 }
+    return { data: [], error: toDbError(error), count: 0 }
   }
 }
 
@@ -672,7 +683,7 @@ export async function getVideoTemplates(
  */
 export async function getVideoTemplate(
   templateId: string
-): Promise<{ data: VideoTemplate | null; error: any }> {
+): Promise<{ data: VideoTemplate | null; error: DatabaseError | null }> {
   logger.info('Fetching video template', { templateId })
 
   try {
@@ -684,14 +695,14 @@ export async function getVideoTemplate(
 
     if (error) {
       logger.error('Failed to fetch video template', { error, templateId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Video template fetched successfully', { templateId })
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching video template', { error, templateId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -701,7 +712,7 @@ export async function getVideoTemplate(
 export async function createVideoTemplate(
   userId: string,
   templateData: Partial<VideoTemplate>
-): Promise<{ data: VideoTemplate | null; error: any }> {
+): Promise<{ data: VideoTemplate | null; error: DatabaseError | null }> {
   logger.info('Creating video template', { userId, name: templateData.name })
 
   try {
@@ -729,7 +740,7 @@ export async function createVideoTemplate(
 
     if (error) {
       logger.error('Failed to create video template', { error, userId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Video template created successfully', {
@@ -739,9 +750,9 @@ export async function createVideoTemplate(
     })
 
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception creating video template', { error, userId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -751,7 +762,7 @@ export async function createVideoTemplate(
 export async function updateVideoTemplate(
   templateId: string,
   updates: Partial<VideoTemplate>
-): Promise<{ data: VideoTemplate | null; error: any }> {
+): Promise<{ data: VideoTemplate | null; error: DatabaseError | null }> {
   logger.info('Updating video template', { templateId, updates })
 
   try {
@@ -767,14 +778,14 @@ export async function updateVideoTemplate(
 
     if (error) {
       logger.error('Failed to update video template', { error, templateId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Video template updated successfully', { templateId })
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception updating video template', { error, templateId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -783,7 +794,7 @@ export async function updateVideoTemplate(
  */
 export async function deleteVideoTemplate(
   templateId: string
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   logger.info('Deleting video template', { templateId })
 
   try {
@@ -794,14 +805,14 @@ export async function deleteVideoTemplate(
 
     if (error) {
       logger.error('Failed to delete video template', { error, templateId })
-      return { error }
+      return { error: toDbError(error) }
     }
 
     logger.info('Video template deleted successfully', { templateId })
     return { error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception deleting video template', { error, templateId })
-    return { error }
+    return { error: toDbError(error) }
   }
 }
 
@@ -810,7 +821,7 @@ export async function deleteVideoTemplate(
  */
 export async function incrementTemplateUsage(
   templateId: string
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   logger.info('Incrementing template usage', { templateId })
 
   try {
@@ -834,7 +845,7 @@ export async function incrementTemplateUsage(
 
         if (updateError) {
           logger.error('Failed to increment usage (fallback)', { error: updateError, templateId })
-          return { error: updateError }
+          return { error: toDbError(updateError) }
         }
 
         logger.info('Template usage incremented (fallback)', { templateId })
@@ -844,14 +855,14 @@ export async function incrementTemplateUsage(
 
     if (error) {
       logger.error('Failed to increment template usage', { error, templateId })
-      return { error }
+      return { error: toDbError(error) }
     }
 
     logger.info('Template usage incremented successfully', { templateId })
     return { error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception incrementing template usage', { error, templateId })
-    return { error }
+    return { error: toDbError(error) }
   }
 }
 
@@ -861,7 +872,7 @@ export async function incrementTemplateUsage(
 export async function getTemplatesByCategory(
   category: string,
   limit: number = 20
-): Promise<{ data: VideoTemplate[]; error: any }> {
+): Promise<{ data: VideoTemplate[]; error: DatabaseError | null }> {
   logger.info('Fetching templates by category', { category, limit })
 
   try {
@@ -874,7 +885,7 @@ export async function getTemplatesByCategory(
 
     if (error) {
       logger.error('Failed to fetch templates by category', { error, category })
-      return { data: [], error }
+      return { data: [], error: toDbError(error) }
     }
 
     logger.info('Templates by category fetched successfully', {
@@ -883,9 +894,9 @@ export async function getTemplatesByCategory(
     })
 
     return { data: data || [], error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching templates by category', { error, category })
-    return { data: [], error }
+    return { data: [], error: toDbError(error) }
   }
 }
 
@@ -895,7 +906,7 @@ export async function getTemplatesByCategory(
 export async function searchTemplatesByTags(
   tags: string[],
   limit: number = 20
-): Promise<{ data: VideoTemplate[]; error: any }> {
+): Promise<{ data: VideoTemplate[]; error: DatabaseError | null }> {
   logger.info('Searching templates by tags', { tags, limit })
 
   try {
@@ -908,7 +919,7 @@ export async function searchTemplatesByTags(
 
     if (error) {
       logger.error('Failed to search templates by tags', { error, tags })
-      return { data: [], error }
+      return { data: [], error: toDbError(error) }
     }
 
     logger.info('Templates search by tags completed', {
@@ -917,8 +928,8 @@ export async function searchTemplatesByTags(
     })
 
     return { data: data || [], error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception searching templates by tags', { error, tags })
-    return { data: [], error }
+    return { data: [], error: toDbError(error) }
   }
 }

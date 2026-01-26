@@ -15,6 +15,7 @@
  */
 
 import { createClient } from '@/lib/supabase/client'
+import { DatabaseError, toDbError, JsonValue } from '@/lib/types/database'
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -41,7 +42,7 @@ export interface AIDesignProject {
   variations: number
   selected_variation: number | null
   prompt: string | null
-  parameters: any
+  parameters: Record<string, JsonValue>
   quality_score: number | null
   feedback: string | null
   created_at: string
@@ -141,6 +142,52 @@ export interface ToolReview {
 }
 
 // ============================================================================
+// STATISTICS INTERFACES
+// ============================================================================
+
+export interface UserProjectAnalyticsTotals {
+  total_views: number
+  total_downloads: number
+  total_shares: number
+  avg_generation_time: number
+}
+
+export interface DesignProjectStats {
+  total_projects: number
+  completed_projects: number
+  active_projects: number
+  avg_quality_score: number
+  total_variations: number
+  by_tool_type: Record<string, number>
+  by_model: Record<string, number>
+}
+
+export interface TemplateStats {
+  total_templates: number
+  ai_ready_templates: number
+  premium_templates: number
+  total_uses: number
+  avg_rating: number
+  by_category: Record<string, number>
+}
+
+export interface AIToolStats {
+  total_tools: number
+  premium_tools: number
+  total_uses: number
+  avg_rating: number
+  avg_estimated_time: number
+  by_model: Record<string, number>
+}
+
+// Interface for project status updates
+interface ProjectStatusUpdate {
+  status: ProjectStatus
+  progress?: number
+  generated_at?: string
+}
+
+// ============================================================================
 // AI DESIGN PROJECTS (9 functions)
 // ============================================================================
 
@@ -155,7 +202,7 @@ export async function getDesignProjects(
     model?: AIModel
     search?: string
   }
-): Promise<{ data: AIDesignProject[] | null; error: any }> {
+): Promise<{ data: AIDesignProject[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   let query = supabase
     .from('ai_design_projects')
@@ -185,7 +232,7 @@ export async function getDesignProjects(
  */
 export async function getDesignProject(
   projectId: string
-): Promise<{ data: AIDesignProject | null; error: any }> {
+): Promise<{ data: AIDesignProject | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_design_projects')
@@ -208,10 +255,10 @@ export async function createDesignProject(
     tool_id: string
     template_id?: string
     prompt?: string
-    parameters?: any
+    parameters?: Record<string, JsonValue>
     variations?: number
   }
-): Promise<{ data: AIDesignProject | null; error: any }> {
+): Promise<{ data: AIDesignProject | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_design_projects')
@@ -239,7 +286,7 @@ export async function createDesignProject(
 export async function updateDesignProject(
   projectId: string,
   updates: Partial<Omit<AIDesignProject, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
-): Promise<{ data: AIDesignProject | null; error: any }> {
+): Promise<{ data: AIDesignProject | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_design_projects')
@@ -258,9 +305,9 @@ export async function updateProjectStatus(
   projectId: string,
   status: ProjectStatus,
   progress?: number
-): Promise<{ data: AIDesignProject | null; error: any }> {
+): Promise<{ data: AIDesignProject | null; error: DatabaseError | null }> {
   const supabase = createClient()
-  const updates: any = { status }
+  const updates: ProjectStatusUpdate = { status }
   if (progress !== undefined) {
     updates.progress = progress
   }
@@ -284,7 +331,7 @@ export async function updateProjectStatus(
 export async function setSelectedVariation(
   projectId: string,
   variationNumber: number
-): Promise<{ data: AIDesignProject | null; error: any }> {
+): Promise<{ data: AIDesignProject | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_design_projects')
@@ -303,7 +350,7 @@ export async function addProjectQualityScore(
   projectId: string,
   qualityScore: number,
   feedback?: string
-): Promise<{ data: AIDesignProject | null; error: any }> {
+): Promise<{ data: AIDesignProject | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_design_projects')
@@ -323,7 +370,7 @@ export async function addProjectQualityScore(
  */
 export async function archiveDesignProject(
   projectId: string
-): Promise<{ data: AIDesignProject | null; error: any }> {
+): Promise<{ data: AIDesignProject | null; error: DatabaseError | null }> {
   return updateProjectStatus(projectId, 'archived')
 }
 
@@ -332,7 +379,7 @@ export async function archiveDesignProject(
  */
 export async function deleteDesignProject(
   projectId: string
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   const supabase = createClient()
   const { error } = await supabase
     .from('ai_design_projects')
@@ -351,7 +398,7 @@ export async function deleteDesignProject(
  */
 export async function getDesignOutputs(
   projectId: string
-): Promise<{ data: DesignOutput[] | null; error: any }> {
+): Promise<{ data: DesignOutput[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('design_outputs')
@@ -377,7 +424,7 @@ export async function createDesignOutput(
     file_size: number
     quality_score: number
   }
-): Promise<{ data: DesignOutput | null; error: any }> {
+): Promise<{ data: DesignOutput | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('design_outputs')
@@ -394,7 +441,7 @@ export async function createDesignOutput(
 export async function selectDesignOutput(
   projectId: string,
   variationNumber: number
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   const supabase = createClient()
 
   // First, deselect all outputs for this project
@@ -418,7 +465,7 @@ export async function selectDesignOutput(
  */
 export async function incrementOutputDownloads(
   outputId: string
-): Promise<{ data: DesignOutput | null; error: any }> {
+): Promise<{ data: DesignOutput | null; error: DatabaseError | null }> {
   const supabase = createClient()
 
   // Get current count
@@ -429,7 +476,7 @@ export async function incrementOutputDownloads(
     .single()
 
   if (!currentOutput) {
-    return { data: null, error: new Error('Output not found') }
+    return { data: null, error: toDbError(new Error('Output not found')) }
   }
 
   const { data, error } = await supabase
@@ -447,7 +494,7 @@ export async function incrementOutputDownloads(
  */
 export async function deleteDesignOutput(
   outputId: string
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   const supabase = createClient()
   const { error } = await supabase
     .from('design_outputs')
@@ -471,7 +518,7 @@ export async function getDesignTemplates(
     is_premium?: boolean
     search?: string
   }
-): Promise<{ data: DesignTemplate[] | null; error: any }> {
+): Promise<{ data: DesignTemplate[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   let query = supabase
     .from('design_templates')
@@ -500,7 +547,7 @@ export async function getDesignTemplates(
  */
 export async function getDesignTemplate(
   templateId: string
-): Promise<{ data: DesignTemplate | null; error: any }> {
+): Promise<{ data: DesignTemplate | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('design_templates')
@@ -516,7 +563,7 @@ export async function getDesignTemplate(
  */
 export async function getPopularTemplates(
   limit: number = 6
-): Promise<{ data: DesignTemplate[] | null; error: any }> {
+): Promise<{ data: DesignTemplate[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('design_templates')
@@ -530,7 +577,7 @@ export async function getPopularTemplates(
 /**
  * Get AI-ready templates
  */
-export async function getAIReadyTemplates(): Promise<{ data: DesignTemplate[] | null; error: any }> {
+export async function getAIReadyTemplates(): Promise<{ data: DesignTemplate[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('design_templates')
@@ -546,7 +593,7 @@ export async function getAIReadyTemplates(): Promise<{ data: DesignTemplate[] | 
  */
 export async function incrementTemplateUses(
   templateId: string
-): Promise<{ data: DesignTemplate | null; error: any }> {
+): Promise<{ data: DesignTemplate | null; error: DatabaseError | null }> {
   const supabase = createClient()
 
   // Get current count
@@ -557,7 +604,7 @@ export async function incrementTemplateUses(
     .single()
 
   if (!currentTemplate) {
-    return { data: null, error: new Error('Template not found') }
+    return { data: null, error: toDbError(new Error('Template not found')) }
   }
 
   const { data, error } = await supabase
@@ -575,7 +622,7 @@ export async function incrementTemplateUses(
  */
 export async function searchTemplatesByTags(
   tags: string[]
-): Promise<{ data: DesignTemplate[] | null; error: any }> {
+): Promise<{ data: DesignTemplate[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('design_templates')
@@ -593,7 +640,7 @@ export async function searchTemplatesByTags(
 /**
  * Get all AI tools
  */
-export async function getAITools(): Promise<{ data: AITool[] | null; error: any }> {
+export async function getAITools(): Promise<{ data: AITool[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_tools')
@@ -608,7 +655,7 @@ export async function getAITools(): Promise<{ data: AITool[] | null; error: any 
  */
 export async function getAITool(
   toolType: AIToolType
-): Promise<{ data: AITool | null; error: any }> {
+): Promise<{ data: AITool | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_tools')
@@ -624,7 +671,7 @@ export async function getAITool(
  */
 export async function incrementToolUses(
   toolType: AIToolType
-): Promise<{ data: AITool | null; error: any }> {
+): Promise<{ data: AITool | null; error: DatabaseError | null }> {
   const supabase = createClient()
 
   // Get current tool
@@ -635,7 +682,7 @@ export async function incrementToolUses(
     .single()
 
   if (!currentTool) {
-    return { data: null, error: new Error('Tool not found') }
+    return { data: null, error: toDbError(new Error('Tool not found')) }
   }
 
   const { data, error } = await supabase
@@ -653,7 +700,7 @@ export async function incrementToolUses(
  */
 export async function getPopularAITools(
   limit: number = 8
-): Promise<{ data: AITool[] | null; error: any }> {
+): Promise<{ data: AITool[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_tools')
@@ -678,7 +725,7 @@ export async function getColorPalettes(
     wcag_compliant?: boolean
     is_public?: boolean
   }
-): Promise<{ data: ColorPalette[] | null; error: any }> {
+): Promise<{ data: ColorPalette[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   let query = supabase
     .from('color_palettes')
@@ -707,7 +754,7 @@ export async function getColorPalettes(
  */
 export async function getColorPalette(
   paletteId: string
-): Promise<{ data: ColorPalette | null; error: any }> {
+): Promise<{ data: ColorPalette | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('color_palettes')
@@ -733,7 +780,7 @@ export async function createColorPalette(
     usage?: string[]
     is_public?: boolean
   }
-): Promise<{ data: ColorPalette | null; error: any }> {
+): Promise<{ data: ColorPalette | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('color_palettes')
@@ -759,7 +806,7 @@ export async function createColorPalette(
  */
 export async function incrementPaletteUses(
   paletteId: string
-): Promise<{ data: ColorPalette | null; error: any }> {
+): Promise<{ data: ColorPalette | null; error: DatabaseError | null }> {
   const supabase = createClient()
 
   // Get current count
@@ -770,7 +817,7 @@ export async function incrementPaletteUses(
     .single()
 
   if (!currentPalette) {
-    return { data: null, error: new Error('Palette not found') }
+    return { data: null, error: toDbError(new Error('Palette not found')) }
   }
 
   const { data, error } = await supabase
@@ -788,7 +835,7 @@ export async function incrementPaletteUses(
  */
 export async function deleteColorPalette(
   paletteId: string
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   const supabase = createClient()
   const { error } = await supabase
     .from('color_palettes')
@@ -808,7 +855,7 @@ export async function deleteColorPalette(
 export async function getProjectAnalytics(
   projectId: string,
   dateRange?: { from: string; to: string }
-): Promise<{ data: ProjectAnalytics[] | null; error: any }> {
+): Promise<{ data: ProjectAnalytics[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   let query = supabase
     .from('project_analytics')
@@ -835,7 +882,7 @@ export async function trackProjectAnalytics(
     shares?: number
     generation_time?: number
   }
-): Promise<{ data: ProjectAnalytics | null; error: any }> {
+): Promise<{ data: ProjectAnalytics | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const today = new Date().toISOString().split('T')[0]
 
@@ -886,7 +933,7 @@ export async function trackProjectAnalytics(
  */
 export async function getUserProjectAnalytics(
   userId: string
-): Promise<{ data: any; error: any }> {
+): Promise<{ data: UserProjectAnalyticsTotals | null; error: DatabaseError | null }> {
   const supabase = createClient()
 
   // Get all user projects
@@ -950,7 +997,7 @@ export async function getUserProjectAnalytics(
  */
 export async function getToolReviews(
   toolId: string
-): Promise<{ data: ToolReview[] | null; error: any }> {
+): Promise<{ data: ToolReview[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('tool_reviews')
@@ -971,7 +1018,7 @@ export async function createToolReview(
     rating: number
     comment: string
   }
-): Promise<{ data: ToolReview | null; error: any }> {
+): Promise<{ data: ToolReview | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('tool_reviews')
@@ -996,7 +1043,7 @@ export async function updateToolReview(
     rating?: number
     comment?: string
   }
-): Promise<{ data: ToolReview | null; error: any }> {
+): Promise<{ data: ToolReview | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('tool_reviews')
@@ -1013,7 +1060,7 @@ export async function updateToolReview(
  */
 export async function deleteToolReview(
   reviewId: string
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   const supabase = createClient()
   const { error } = await supabase
     .from('tool_reviews')
@@ -1032,7 +1079,7 @@ export async function deleteToolReview(
  */
 export async function getDesignProjectStats(
   userId: string
-): Promise<{ data: any; error: any }> {
+): Promise<{ data: DesignProjectStats | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_design_projects')
@@ -1065,7 +1112,7 @@ export async function getDesignProjectStats(
 /**
  * Get template statistics
  */
-export async function getTemplateStats(): Promise<{ data: any; error: any }> {
+export async function getTemplateStats(): Promise<{ data: TemplateStats | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('design_templates')
@@ -1093,7 +1140,7 @@ export async function getTemplateStats(): Promise<{ data: any; error: any }> {
 /**
  * Get AI tool statistics
  */
-export async function getAIToolStats(): Promise<{ data: any; error: any }> {
+export async function getAIToolStats(): Promise<{ data: AIToolStats | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_tools')

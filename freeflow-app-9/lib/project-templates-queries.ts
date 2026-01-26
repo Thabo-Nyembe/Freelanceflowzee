@@ -2,6 +2,37 @@
 // Reusable project templates with tasks, milestones, deliverables, and pricing
 
 import { createClient } from '@/lib/supabase/client'
+import { JsonValue } from '@/lib/types/database'
+
+// ============================================================================
+// HELPER INTERFACES FOR COMPLEX OBJECT SHAPES
+// ============================================================================
+
+export interface ProcessStep {
+  order: number
+  title: string
+  description?: string
+  duration?: string
+  deliverables?: string[]
+}
+
+export interface WorkflowNode {
+  id: string
+  type: string
+  label: string
+  dependencies?: string[]
+  metadata?: Record<string, JsonValue>
+}
+
+export interface TemplateCustomizations {
+  name?: string
+  description?: string
+  duration_override?: number
+  price_override?: number
+  excluded_tasks?: string[]
+  excluded_milestones?: string[]
+  custom_fields?: Record<string, JsonValue>
+}
 
 // ============================================================================
 // TYPES
@@ -52,8 +83,8 @@ export interface ProjectTemplate {
   requirements?: string[]
   prerequisites?: string[]
   overview?: string
-  process_steps?: any
-  workflow?: any
+  process_steps?: ProcessStep[]
+  workflow?: WorkflowNode[]
   usage_count: number
   favorites_count: number
   rating_average: number
@@ -63,7 +94,7 @@ export interface ProjectTemplate {
   is_popular: boolean
   is_verified: boolean
   is_customizable: boolean
-  metadata?: any
+  metadata?: Record<string, JsonValue>
   created_at: string
   updated_at: string
   published_at?: string
@@ -84,7 +115,7 @@ export interface TemplateTask {
   is_milestone: boolean
   is_optional: boolean
   display_order: number
-  metadata?: any
+  metadata?: Record<string, JsonValue>
   created_at: string
 }
 
@@ -137,7 +168,7 @@ export interface TemplateUsage {
   template_id: string
   user_id?: string
   project_id?: string
-  customizations?: any
+  customizations?: TemplateCustomizations
   used_at: string
 }
 
@@ -723,7 +754,7 @@ export async function deletePricingTier(tierId: string) {
 export async function applyTemplateToProject(
   templateId: string,
   projectId?: string,
-  customizations?: any
+  customizations?: TemplateCustomizations
 ) {
   const supabase = createClient()
 

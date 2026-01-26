@@ -3,6 +3,7 @@
  */
 
 import { createClient } from '@/lib/supabase/client'
+import type { JsonValue } from '@/lib/types/database'
 
 export type NotificationChannel = 'email' | 'push' | 'sms' | 'in_app' | 'webhook'
 export type NotificationPriority = 'low' | 'normal' | 'high' | 'urgent'
@@ -18,8 +19,8 @@ export interface NotificationPreference {
   is_enabled: boolean
   priority: NotificationPriority
   digest_frequency: DigestFrequency
-  conditions: Record<string, any>
-  custom_settings: Record<string, any>
+  conditions: Record<string, JsonValue>
+  custom_settings: Record<string, JsonValue>
   created_at: string
   updated_at: string
 }
@@ -51,8 +52,8 @@ export interface NotificationTemplate {
   subject?: string
   body: string
   html_body?: string
-  variables: any[]
-  styles: Record<string, any>
+  variables: JsonValue[]
+  styles: Record<string, JsonValue>
   language: string
   is_active: boolean
   is_system: boolean
@@ -69,7 +70,7 @@ export interface NotificationDeliveryLog {
   priority: NotificationPriority
   subject?: string
   body: string
-  metadata: Record<string, any>
+  metadata: Record<string, JsonValue>
   status: DeliveryStatus
   sent_at?: string
   delivered_at?: string

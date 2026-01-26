@@ -6,6 +6,7 @@
 
 import { createClient } from '@/lib/supabase/client'
 import { createFeatureLogger } from './logger'
+import { DatabaseError, toDbError, JsonValue } from '@/lib/types/database'
 
 const supabase = createClient()
 const logger = createFeatureLogger('VideoAssets')
@@ -23,7 +24,7 @@ export interface VideoAsset {
   thumbnail_path?: string
   category?: string
   tags: string[]
-  metadata?: Record<string, any>
+  metadata?: Record<string, JsonValue>
   created_at: string
   updated_at: string
 }
@@ -65,7 +66,7 @@ export async function getVideoAssets(
   sort?: AssetSortOptions,
   limit: number = 50,
   offset: number = 0
-): Promise<{ data: VideoAsset[]; error: any; count: number }> {
+): Promise<{ data: VideoAsset[]; error: DatabaseError | null; count: number }> {
   logger.info('Fetching video assets', { userId, filters, sort, limit, offset })
 
   try {
@@ -119,9 +120,9 @@ export async function getVideoAssets(
     })
 
     return { data: data || [], error: null, count: count || 0 }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching video assets', { error, userId })
-    return { data: [], error, count: 0 }
+    return { data: [], error: toDbError(error), count: 0 }
   }
 }
 
@@ -130,7 +131,7 @@ export async function getVideoAssets(
  */
 export async function getVideoAsset(
   assetId: string
-): Promise<{ data: VideoAsset | null; error: any }> {
+): Promise<{ data: VideoAsset | null; error: DatabaseError | null }> {
   logger.info('Fetching video asset', { assetId })
 
   try {
@@ -147,9 +148,9 @@ export async function getVideoAsset(
 
     logger.info('Video asset fetched successfully', { assetId })
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching video asset', { error, assetId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -159,7 +160,7 @@ export async function getVideoAsset(
 export async function createVideoAsset(
   userId: string,
   assetData: Partial<VideoAsset>
-): Promise<{ data: VideoAsset | null; error: any }> {
+): Promise<{ data: VideoAsset | null; error: DatabaseError | null }> {
   logger.info('Creating video asset', { userId, name: assetData.name })
 
   try {
@@ -194,9 +195,9 @@ export async function createVideoAsset(
     })
 
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception creating video asset', { error, userId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -206,7 +207,7 @@ export async function createVideoAsset(
 export async function updateVideoAsset(
   assetId: string,
   updates: Partial<VideoAsset>
-): Promise<{ data: VideoAsset | null; error: any }> {
+): Promise<{ data: VideoAsset | null; error: DatabaseError | null }> {
   logger.info('Updating video asset', { assetId, updates })
 
   try {
@@ -227,9 +228,9 @@ export async function updateVideoAsset(
 
     logger.info('Video asset updated successfully', { assetId })
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception updating video asset', { error, assetId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -238,7 +239,7 @@ export async function updateVideoAsset(
  */
 export async function deleteVideoAsset(
   assetId: string
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   logger.info('Deleting video asset', { assetId })
 
   try {
@@ -254,9 +255,9 @@ export async function deleteVideoAsset(
 
     logger.info('Video asset deleted successfully', { assetId })
     return { error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception deleting video asset', { error, assetId })
-    return { error }
+    return { error: toDbError(error) }
   }
 }
 
@@ -265,7 +266,7 @@ export async function deleteVideoAsset(
  */
 export async function bulkDeleteVideoAssets(
   assetIds: string[]
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   logger.info('Bulk deleting video assets', { count: assetIds.length })
 
   try {
@@ -281,9 +282,9 @@ export async function bulkDeleteVideoAssets(
 
     logger.info('Video assets bulk deleted successfully', { count: assetIds.length })
     return { error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception bulk deleting video assets', { error })
-    return { error }
+    return { error: toDbError(error) }
   }
 }
 
@@ -294,7 +295,7 @@ export async function searchVideoAssets(
   userId: string,
   searchTerm: string,
   limit: number = 20
-): Promise<{ data: VideoAsset[]; error: any }> {
+): Promise<{ data: VideoAsset[]; error: DatabaseError | null }> {
   logger.info('Searching video assets', { userId, searchTerm, limit })
 
   try {
@@ -318,9 +319,9 @@ export async function searchVideoAssets(
     })
 
     return { data: data || [], error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception searching video assets', { error, userId, searchTerm })
-    return { data: [], error }
+    return { data: [], error: toDbError(error) }
   }
 }
 
@@ -330,7 +331,7 @@ export async function searchVideoAssets(
 export async function getAssetsByType(
   userId: string,
   type: VideoAsset['type']
-): Promise<{ data: VideoAsset[]; error: any }> {
+): Promise<{ data: VideoAsset[]; error: DatabaseError | null }> {
   logger.info('Fetching assets by type', { userId, type })
 
   try {
@@ -353,9 +354,9 @@ export async function getAssetsByType(
     })
 
     return { data: data || [], error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching assets by type', { error, userId, type })
-    return { data: [], error }
+    return { data: [], error: toDbError(error) }
   }
 }
 
@@ -365,7 +366,7 @@ export async function getAssetsByType(
 export async function getAssetsByCategory(
   userId: string,
   category: string
-): Promise<{ data: VideoAsset[]; error: any }> {
+): Promise<{ data: VideoAsset[]; error: DatabaseError | null }> {
   logger.info('Fetching assets by category', { userId, category })
 
   try {
@@ -388,9 +389,9 @@ export async function getAssetsByCategory(
     })
 
     return { data: data || [], error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching assets by category', { error, userId, category })
-    return { data: [], error }
+    return { data: [], error: toDbError(error) }
   }
 }
 
@@ -400,7 +401,7 @@ export async function getAssetsByCategory(
 export async function getRecentAssets(
   userId: string,
   limit: number = 10
-): Promise<{ data: VideoAsset[]; error: any }> {
+): Promise<{ data: VideoAsset[]; error: DatabaseError | null }> {
   logger.info('Fetching recent assets', { userId, limit })
 
   try {
@@ -418,9 +419,9 @@ export async function getRecentAssets(
 
     logger.info('Recent assets fetched successfully', { count: data?.length || 0, userId })
     return { data: data || [], error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching recent assets', { error, userId })
-    return { data: [], error }
+    return { data: [], error: toDbError(error) }
   }
 }
 
@@ -455,7 +456,7 @@ export async function getAssetStats(userId: string): Promise<AssetStats> {
 
     logger.info('Asset statistics fetched', { stats, userId })
     return stats
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Failed to fetch asset statistics', { error, userId })
     return {
       total: 0,
@@ -478,7 +479,7 @@ export async function getAssetStats(userId: string): Promise<AssetStats> {
 export async function getAssetsByTags(
   userId: string,
   tags: string[]
-): Promise<{ data: VideoAsset[]; error: any }> {
+): Promise<{ data: VideoAsset[]; error: DatabaseError | null }> {
   logger.info('Fetching assets by tags', { userId, tags })
 
   try {
@@ -501,9 +502,9 @@ export async function getAssetsByTags(
     })
 
     return { data: data || [], error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching assets by tags', { error, userId, tags })
-    return { data: [], error }
+    return { data: [], error: toDbError(error) }
   }
 }
 
@@ -513,7 +514,7 @@ export async function getAssetsByTags(
 export async function updateAssetTags(
   assetId: string,
   tags: string[]
-): Promise<{ data: VideoAsset | null; error: any }> {
+): Promise<{ data: VideoAsset | null; error: DatabaseError | null }> {
   logger.info('Updating asset tags', { assetId, tags })
 
   try {
@@ -534,9 +535,9 @@ export async function updateAssetTags(
 
     logger.info('Asset tags updated successfully', { assetId, tagsCount: tags.length })
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception updating asset tags', { error, assetId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -545,7 +546,7 @@ export async function updateAssetTags(
  */
 export async function getAssetCategories(
   userId: string
-): Promise<{ data: string[]; error: any }> {
+): Promise<{ data: string[]; error: DatabaseError | null }> {
   logger.info('Fetching asset categories', { userId })
 
   try {
@@ -569,9 +570,9 @@ export async function getAssetCategories(
     })
 
     return { data: categories, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching asset categories', { error, userId })
-    return { data: [], error }
+    return { data: [], error: toDbError(error) }
   }
 }
 
@@ -580,7 +581,7 @@ export async function getAssetCategories(
  */
 export async function getAssetTags(
   userId: string
-): Promise<{ data: string[]; error: any }> {
+): Promise<{ data: string[]; error: DatabaseError | null }> {
   logger.info('Fetching asset tags', { userId })
 
   try {
@@ -604,9 +605,9 @@ export async function getAssetTags(
     })
 
     return { data: uniqueTags, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching asset tags', { error, userId })
-    return { data: [], error }
+    return { data: [], error: toDbError(error) }
   }
 }
 
@@ -614,7 +615,7 @@ export async function getAssetTags(
 
 export async function archiveVideoAsset(
   assetId: string
-): Promise<{ data: VideoAsset | null; error: any }> {
+): Promise<{ data: VideoAsset | null; error: DatabaseError | null }> {
   try {
     const { data, error } = await supabase
       .from('video_assets')
@@ -630,15 +631,15 @@ export async function archiveVideoAsset(
 
     logger.info('Video asset archived', { assetId })
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception archiving video asset', { error, assetId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
 export async function restoreVideoAsset(
   assetId: string
-): Promise<{ data: VideoAsset | null; error: any }> {
+): Promise<{ data: VideoAsset | null; error: DatabaseError | null }> {
   try {
     const { data, error } = await supabase
       .from('video_assets')
@@ -654,15 +655,15 @@ export async function restoreVideoAsset(
 
     logger.info('Video asset restored', { assetId })
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception restoring video asset', { error, assetId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
 export async function getAssetsByProject(
   projectId: string
-): Promise<{ data: VideoAsset[]; error: any }> {
+): Promise<{ data: VideoAsset[]; error: DatabaseError | null }> {
   try {
     const { data, error } = await supabase
       .from('video_assets')
@@ -676,16 +677,16 @@ export async function getAssetsByProject(
     }
 
     return { data: data || [], error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching assets by project', { error, projectId })
-    return { data: [], error }
+    return { data: [], error: toDbError(error) }
   }
 }
 
 export async function getAssetsByStatus(
   userId: string,
   status: string
-): Promise<{ data: VideoAsset[]; error: any }> {
+): Promise<{ data: VideoAsset[]; error: DatabaseError | null }> {
   try {
     const { data, error } = await supabase
       .from('video_assets')
@@ -700,8 +701,8 @@ export async function getAssetsByStatus(
     }
 
     return { data: data || [], error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching assets by status', { error, status })
-    return { data: [], error }
+    return { data: [], error: toDbError(error) }
   }
 }

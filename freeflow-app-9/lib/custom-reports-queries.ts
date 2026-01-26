@@ -3,6 +3,7 @@
  */
 
 import { createClient } from '@/lib/supabase/client'
+import { JsonValue } from '@/lib/types/database'
 
 export type ReportType = 'financial' | 'project-performance' | 'client-activity' | 'time-tracking' | 'resource-utilization' | 'sales-pipeline' | 'team-productivity' | 'custom'
 export type ChartType = 'line' | 'bar' | 'pie' | 'doughnut' | 'area' | 'scatter' | 'radar' | 'funnel' | 'gauge' | 'heatmap'
@@ -24,7 +25,7 @@ export interface CustomReport {
   last_generated_at?: string
   generation_count: number
   view_count: number
-  settings: Record<string, any>
+  settings: Record<string, JsonValue>
   created_at: string
   updated_at: string
 }
@@ -61,7 +62,7 @@ export interface ReportWidget {
   data_fields: string[]
   aggregation?: string
   group_by: string[]
-  settings: Record<string, any>
+  settings: Record<string, JsonValue>
   widget_order: number
   created_at: string
   updated_at: string
@@ -73,7 +74,7 @@ export interface ReportFilter {
   widget_id?: string
   field: string
   operator: string
-  value: any
+  value: JsonValue
   is_active: boolean
   created_at: string
 }

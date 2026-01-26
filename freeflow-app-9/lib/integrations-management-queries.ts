@@ -4,6 +4,7 @@
  */
 
 import { createClient } from '@/lib/supabase/client'
+import { DatabaseError, toDbError, JsonValue } from '@/lib/types/database'
 
 // ============================================================================
 // TYPES
@@ -21,8 +22,8 @@ export interface IntegrationTemplate {
   template_type: TemplateType
   description: string
   integration_id?: string
-  config_template: Record<string, any>
-  default_settings: Record<string, any>
+  config_template: Record<string, JsonValue>
+  default_settings: Record<string, JsonValue>
   required_variables: string[]
   optional_variables: string[]
   category: string
@@ -35,7 +36,7 @@ export interface IntegrationTemplate {
   version: string
   setup_guide?: string
   video_url?: string
-  examples: any[]
+  examples: JsonValue[]
   created_at: string
   updated_at: string
 }
@@ -68,7 +69,7 @@ export interface IntegrationMarketplace {
   approved_at?: string
   rejected_at?: string
   rejection_reason?: string
-  metadata: Record<string, any>
+  metadata: Record<string, JsonValue>
   created_at: string
   updated_at: string
 }
@@ -739,7 +740,7 @@ export interface IntegrationAPIKey {
 /**
  * Get all API keys for a user's integrations
  */
-export async function getIntegrationAPIKeys(userId: string): Promise<{ data: IntegrationAPIKey[]; error: any }> {
+export async function getIntegrationAPIKeys(userId: string): Promise<{ data: IntegrationAPIKey[]; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
     const { data, error } = await supabase
@@ -751,8 +752,8 @@ export async function getIntegrationAPIKeys(userId: string): Promise<{ data: Int
 
     if (error) throw error
     return { data: data || [], error: null }
-  } catch (error) {
-    return { data: [], error }
+  } catch (error: unknown) {
+    return { data: [], error: toDbError(error) }
   }
 }
 
@@ -763,7 +764,7 @@ export async function createIntegrationAPIKey(
   userId: string,
   integrationId: string,
   integrationName: string
-): Promise<{ data: IntegrationAPIKey | null; error: any; newKey: string | null }> {
+): Promise<{ data: IntegrationAPIKey | null; error: DatabaseError | null; newKey: string | null }> {
   try {
     const supabase = createClient()
 
@@ -795,8 +796,8 @@ export async function createIntegrationAPIKey(
 
     if (error) throw error
     return { data, error: null, newKey }
-  } catch (error) {
-    return { data: null, error, newKey: null }
+  } catch (error: unknown) {
+    return { data: null, error: toDbError(error), newKey: null }
   }
 }
 
@@ -806,7 +807,7 @@ export async function createIntegrationAPIKey(
 export async function deleteIntegrationAPIKey(
   userId: string,
   integrationId: string
-): Promise<{ success: boolean; error: any }> {
+): Promise<{ success: boolean; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
     const { error } = await supabase
@@ -817,8 +818,8 @@ export async function deleteIntegrationAPIKey(
 
     if (error) throw error
     return { success: true, error: null }
-  } catch (error) {
-    return { success: false, error }
+  } catch (error: unknown) {
+    return { success: false, error: toDbError(error) }
   }
 }
 
@@ -828,7 +829,7 @@ export async function deleteIntegrationAPIKey(
 export async function getIntegrationAPIKey(
   userId: string,
   integrationId: string
-): Promise<{ data: IntegrationAPIKey | null; error: any }> {
+): Promise<{ data: IntegrationAPIKey | null; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
     const { data, error } = await supabase
@@ -841,7 +842,7 @@ export async function getIntegrationAPIKey(
 
     if (error && error.code !== 'PGRST116') throw error // PGRST116 = no rows
     return { data: data || null, error: null }
-  } catch (error) {
-    return { data: null, error }
+  } catch (error: unknown) {
+    return { data: null, error: toDbError(error) }
   }
 }

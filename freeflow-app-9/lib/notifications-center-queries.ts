@@ -4,6 +4,7 @@
  */
 
 import { createClient } from '@/lib/supabase/client'
+import type { JsonValue } from '@/lib/types/database'
 
 // ============================================================================
 // TYPES
@@ -24,7 +25,7 @@ export interface NotificationGroup {
   unread_count: number
   is_collapsed: boolean
   sort_order: number
-  metadata: Record<string, any>
+  metadata: Record<string, JsonValue>
   created_at: string
   updated_at: string
 }
@@ -50,7 +51,7 @@ export interface NotificationBulkAction {
   action_description: string
   notification_ids: string[]
   notifications_count: number
-  filters_applied: Record<string, any>
+  filters_applied: Record<string, JsonValue>
   successful_count: number
   failed_count: number
   error_messages?: string[]
@@ -66,7 +67,7 @@ export interface SavedNotificationFilter {
   user_id: string
   filter_name: string
   description?: string
-  filter_criteria: Record<string, any>
+  filter_criteria: Record<string, JsonValue>
   usage_count: number
   last_used_at?: string
   is_default: boolean
@@ -295,7 +296,7 @@ export async function createBulkAction(
   actionType: BulkActionType,
   notificationIds: string[],
   actionDescription: string,
-  filtersApplied?: Record<string, any>
+  filtersApplied?: Record<string, JsonValue>
 ) {
   const supabase = createClient()
   return await supabase

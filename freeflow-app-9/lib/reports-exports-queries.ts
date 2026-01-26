@@ -5,6 +5,7 @@
 
 import { supabase } from './supabase'
 import { format, startOfMonth, endOfMonth, subMonths, startOfYear, endOfYear } from 'date-fns'
+import { JsonValue } from '@/lib/types/database'
 
 // =====================================================
 // TYPES
@@ -151,24 +152,24 @@ export interface Expense {
   is_reimbursed: boolean
   reimbursed_at?: string
   tags: string[]
-  metadata: Record<string, any>
+  metadata: Record<string, JsonValue>
   created_at: string
   updated_at: string
 }
 
 export interface ReportData {
-  summary: Record<string, any>
-  data: any[]
+  summary: Record<string, JsonValue>
+  data: Record<string, JsonValue>[]
   charts?: ChartData[]
   comparison?: {
-    current: Record<string, any>
-    previous: Record<string, any>
+    current: Record<string, JsonValue>
+    previous: Record<string, JsonValue>
     change: Record<string, number>
   }
   metadata: {
     generated_at: string
     date_range: { start: string; end: string }
-    filters_applied: Record<string, any>
+    filters_applied: Record<string, JsonValue>
   }
 }
 
@@ -703,12 +704,17 @@ async function generateInvoiceAgingReport(
     .in('status', ['sent', 'pending', 'overdue'])
 
   const now = new Date()
+  interface AgingInvoice {
+    days_overdue: number
+    [key: string]: JsonValue
+  }
+
   const aging = {
-    current: { count: 0, total: 0, invoices: [] as any[] },
-    '1-30': { count: 0, total: 0, invoices: [] as any[] },
-    '31-60': { count: 0, total: 0, invoices: [] as any[] },
-    '61-90': { count: 0, total: 0, invoices: [] as any[] },
-    '90+': { count: 0, total: 0, invoices: [] as any[] }
+    current: { count: 0, total: 0, invoices: [] as AgingInvoice[] },
+    '1-30': { count: 0, total: 0, invoices: [] as AgingInvoice[] },
+    '31-60': { count: 0, total: 0, invoices: [] as AgingInvoice[] },
+    '61-90': { count: 0, total: 0, invoices: [] as AgingInvoice[] },
+    '90+': { count: 0, total: 0, invoices: [] as AgingInvoice[] }
   }
 
   for (const invoice of invoices || []) {
@@ -1391,7 +1397,7 @@ function resolveDateRange(config: ReportConfig['date_range']): { start: Date; en
 }
 
 function groupByPeriod(
-  items: any[],
+  items: Record<string, unknown>[],
   dateField: string,
   grouping: string,
   sumField: string
@@ -1399,7 +1405,9 @@ function groupByPeriod(
   const groups: Record<string, number> = {}
 
   for (const item of items) {
-    const date = new Date(item[dateField])
+    const dateValue = item[dateField]
+    if (typeof dateValue !== 'string') continue
+    const date = new Date(dateValue)
     let period: string
 
     switch (grouping) {
@@ -1422,7 +1430,8 @@ function groupByPeriod(
         period = format(date, 'yyyy-MM')
     }
 
-    groups[period] = (groups[period] || 0) + (item[sumField] || 0)
+    const sumValue = item[sumField]
+    groups[period] = (groups[period] || 0) + (typeof sumValue === 'number' ? sumValue : 0)
   }
 
   return Object.entries(groups)
@@ -1431,7 +1440,7 @@ function groupByPeriod(
 }
 
 function groupByField(
-  items: any[],
+  items: Record<string, unknown>[],
   groupField: string,
   sumField: string,
   operation: 'sum' | 'count' = 'sum'
@@ -1439,11 +1448,13 @@ function groupByField(
   const groups: Record<string, number> = {}
 
   for (const item of items) {
-    const key = item[groupField] || 'Other'
+    const keyValue = item[groupField]
+    const key = typeof keyValue === 'string' ? keyValue : 'Other'
     if (operation === 'count') {
       groups[key] = (groups[key] || 0) + 1
     } else {
-      groups[key] = (groups[key] || 0) + (item[sumField] || 0)
+      const sumValue = item[sumField]
+      groups[key] = (groups[key] || 0) + (typeof sumValue === 'number' ? sumValue : 0)
     }
   }
 

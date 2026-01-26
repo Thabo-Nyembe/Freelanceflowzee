@@ -45,14 +45,27 @@ interface UseEventsOptions {
   limit?: number
 }
 
+interface EventQueryFilters {
+  status?: EventStatus
+  event_type?: EventType
+}
+
+interface EventQueryOptions {
+  table: string
+  filters: EventQueryFilters
+  orderBy: { column: string; ascending: boolean }
+  realtime: boolean
+  limit?: number
+}
+
 export function useEvents(options: UseEventsOptions = {}) {
   const { status, eventType, limit } = options
 
-  const filters: Record<string, any> = {}
+  const filters: EventQueryFilters = {}
   if (status && status !== 'all') filters.status = status
   if (eventType && eventType !== 'all') filters.event_type = eventType
 
-  const queryOptions: any = {
+  const queryOptions: EventQueryOptions = {
     table: 'events',
     filters,
     orderBy: { column: 'start_date', ascending: false },

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import type { JsonValue } from '@/lib/types/database'
 
 export interface ActivityLog {
   id: string
@@ -21,12 +22,12 @@ export interface ActivityLog {
     oldValue: string
     newValue: string
   }>
-  old_values: Record<string, any>
-  new_values: Record<string, any>
+  old_values: Record<string, JsonValue>
+  new_values: Record<string, JsonValue>
   ip_address: string | null
   user_agent: string | null
   duration: number
-  metadata: Record<string, any>
+  metadata: Record<string, JsonValue>
   created_at: string
 }
 

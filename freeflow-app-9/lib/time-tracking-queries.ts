@@ -7,6 +7,7 @@
 
 import { createClient } from '@/lib/supabase/client'
 import { createFeatureLogger } from '@/lib/logger'
+import { DatabaseError, toDbError, JsonValue } from '@/lib/types/database'
 
 const logger = createFeatureLogger('TimeTrackingQueries')
 
@@ -31,7 +32,7 @@ export interface TimeEntry {
   entry_date: string
   tags: string[]
   notes?: string
-  metadata: Record<string, any>
+  metadata: Record<string, JsonValue>
   created_at: string
   updated_at: string
 }
@@ -87,7 +88,7 @@ export async function getTimeEntries(
     status?: EntryStatus
     isBillable?: boolean
   }
-): Promise<{ data: TimeEntry[]; error: any }> {
+): Promise<{ data: TimeEntry[]; error: DatabaseError | null }> {
   try {
     logger.info('Fetching time entries from Supabase', { userId, filters })
 
@@ -119,7 +120,7 @@ export async function getTimeEntries(
 
     if (error) {
       logger.error('Failed to fetch time entries', { error, userId, filters })
-      return { data: [], error }
+      return { data: [], error: toDbError(error) }
     }
 
     logger.info('Time entries fetched successfully', {
@@ -128,9 +129,9 @@ export async function getTimeEntries(
     })
 
     return { data: data || [], error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching time entries', { error, userId })
-    return { data: [], error }
+    return { data: [], error: toDbError(error) }
   }
 }
 
@@ -140,7 +141,7 @@ export async function getTimeEntries(
 export async function getTimeEntry(
   entryId: string,
   userId: string
-): Promise<{ data: TimeEntry | null; error: any }> {
+): Promise<{ data: TimeEntry | null; error: DatabaseError | null }> {
   try {
     logger.info('Fetching time entry from Supabase', { entryId, userId })
 
@@ -154,14 +155,14 @@ export async function getTimeEntry(
 
     if (error) {
       logger.error('Failed to fetch time entry', { error, entryId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Time entry fetched successfully', { entryId })
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching time entry', { error, entryId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -170,7 +171,7 @@ export async function getTimeEntry(
  */
 export async function getRunningTimeEntry(
   userId: string
-): Promise<{ data: TimeEntry | null; error: any }> {
+): Promise<{ data: TimeEntry | null; error: DatabaseError | null }> {
   try {
     logger.info('Fetching running time entry', { userId })
 
@@ -186,7 +187,7 @@ export async function getRunningTimeEntry(
 
     if (error) {
       logger.error('Failed to fetch running time entry', { error, userId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     if (data) {
@@ -196,9 +197,9 @@ export async function getRunningTimeEntry(
     }
 
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching running time entry', { error, userId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -217,9 +218,9 @@ export async function createTimeEntry(
     hourly_rate?: number
     tags?: string[]
     notes?: string
-    metadata?: Record<string, any>
+    metadata?: Record<string, JsonValue>
   }
-): Promise<{ data: TimeEntry | null; error: any }> {
+): Promise<{ data: TimeEntry | null; error: DatabaseError | null }> {
   try {
     logger.info('Creating time entry in Supabase', { userId, entry })
 
@@ -228,12 +229,12 @@ export async function createTimeEntry(
     // Check if there's already a running timer
     const { data: runningEntry } = await getRunningTimeEntry(userId)
     if (runningEntry) {
-      const error = new Error('Another timer is already running. Please stop it first.')
+      const runningError = toDbError(new Error('Another timer is already running. Please stop it first.'))
       logger.warn('Cannot start timer - another is running', {
         userId,
         runningEntryId: runningEntry.id
       })
-      return { data: null, error }
+      return { data: null, error: runningError }
     }
 
     const { data, error } = await supabase
@@ -259,7 +260,7 @@ export async function createTimeEntry(
 
     if (error) {
       logger.error('Failed to create time entry', { error, userId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Time entry created successfully', {
@@ -268,9 +269,9 @@ export async function createTimeEntry(
     })
 
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception creating time entry', { error, userId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -281,7 +282,7 @@ export async function updateTimeEntry(
   entryId: string,
   userId: string,
   updates: Partial<Omit<TimeEntry, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
-): Promise<{ data: TimeEntry | null; error: any }> {
+): Promise<{ data: TimeEntry | null; error: DatabaseError | null }> {
   try {
     logger.info('Updating time entry in Supabase', { entryId, userId, updates })
 
@@ -296,14 +297,14 @@ export async function updateTimeEntry(
 
     if (error) {
       logger.error('Failed to update time entry', { error, entryId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Time entry updated successfully', { entryId })
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception updating time entry', { error, entryId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -313,7 +314,7 @@ export async function updateTimeEntry(
 export async function stopTimeEntry(
   entryId: string,
   userId: string
-): Promise<{ data: TimeEntry | null; error: any }> {
+): Promise<{ data: TimeEntry | null; error: DatabaseError | null }> {
   try {
     logger.info('Stopping time entry', { entryId, userId })
 
@@ -332,7 +333,7 @@ export async function stopTimeEntry(
 
     if (error) {
       logger.error('Failed to stop time entry', { error, entryId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Time entry stopped successfully', {
@@ -341,9 +342,9 @@ export async function stopTimeEntry(
     })
 
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception stopping time entry', { error, entryId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -353,7 +354,7 @@ export async function stopTimeEntry(
 export async function pauseTimeEntry(
   entryId: string,
   userId: string
-): Promise<{ data: TimeEntry | null; error: any }> {
+): Promise<{ data: TimeEntry | null; error: DatabaseError | null }> {
   try {
     logger.info('Pausing time entry', { entryId, userId })
 
@@ -362,7 +363,7 @@ export async function pauseTimeEntry(
     // Get current entry to calculate elapsed time
     const { data: entry, error: fetchError } = await getTimeEntry(entryId, userId)
     if (fetchError || !entry) {
-      return { data: null, error: fetchError || new Error('Entry not found') }
+      return { data: null, error: fetchError || toDbError(new Error('Entry not found')) }
     }
 
     const currentDuration = entry.duration +
@@ -381,14 +382,14 @@ export async function pauseTimeEntry(
 
     if (error) {
       logger.error('Failed to pause time entry', { error, entryId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Time entry paused successfully', { entryId, duration: currentDuration })
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception pausing time entry', { error, entryId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -398,7 +399,7 @@ export async function pauseTimeEntry(
 export async function resumeTimeEntry(
   entryId: string,
   userId: string
-): Promise<{ data: TimeEntry | null; error: any }> {
+): Promise<{ data: TimeEntry | null; error: DatabaseError | null }> {
   try {
     logger.info('Resuming time entry', { entryId, userId })
 
@@ -417,14 +418,14 @@ export async function resumeTimeEntry(
 
     if (error) {
       logger.error('Failed to resume time entry', { error, entryId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Time entry resumed successfully', { entryId })
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception resuming time entry', { error, entryId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -434,7 +435,7 @@ export async function resumeTimeEntry(
 export async function deleteTimeEntry(
   entryId: string,
   userId: string
-): Promise<{ success: boolean; error: any }> {
+): Promise<{ success: boolean; error: DatabaseError | null }> {
   try {
     logger.info('Deleting time entry from Supabase', { entryId, userId })
 
@@ -447,14 +448,14 @@ export async function deleteTimeEntry(
 
     if (error) {
       logger.error('Failed to delete time entry', { error, entryId })
-      return { success: false, error }
+      return { success: false, error: toDbError(error) }
     }
 
     logger.info('Time entry deleted successfully', { entryId })
     return { success: true, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception deleting time entry', { error, entryId })
-    return { success: false, error }
+    return { success: false, error: toDbError(error) }
   }
 }
 
@@ -463,7 +464,7 @@ export async function deleteTimeEntry(
  */
 export async function deleteAllTimeEntries(
   userId: string
-): Promise<{ success: boolean; deletedCount: number; error: any }> {
+): Promise<{ success: boolean; deletedCount: number; error: DatabaseError | null }> {
   try {
     logger.info('Deleting all time entries from Supabase', { userId })
 
@@ -483,14 +484,14 @@ export async function deleteAllTimeEntries(
 
     if (error) {
       logger.error('Failed to delete all time entries', { error, userId })
-      return { success: false, deletedCount: 0, error }
+      return { success: false, deletedCount: 0, error: toDbError(error) }
     }
 
     logger.info('All time entries deleted successfully', { userId, deletedCount: count || 0 })
     return { success: true, deletedCount: count || 0, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception deleting all time entries', { error, userId })
-    return { success: false, deletedCount: 0, error }
+    return { success: false, deletedCount: 0, error: toDbError(error) }
   }
 }
 
@@ -500,7 +501,7 @@ export async function deleteAllTimeEntries(
 export async function archiveTimeEntry(
   entryId: string,
   userId: string
-): Promise<{ success: boolean; error: any }> {
+): Promise<{ success: boolean; error: DatabaseError | null }> {
   try {
     logger.info('Archiving time entry', { entryId, userId })
 
@@ -516,14 +517,14 @@ export async function archiveTimeEntry(
 
     if (error) {
       logger.error('Failed to archive time entry', { error, entryId })
-      return { success: false, error }
+      return { success: false, error: toDbError(error) }
     }
 
     logger.info('Time entry archived successfully', { entryId })
     return { success: true, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception archiving time entry', { error, entryId })
-    return { success: false, error }
+    return { success: false, error: toDbError(error) }
   }
 }
 
@@ -538,7 +539,7 @@ export async function getTimeTrackingSummary(
   userId: string,
   startDate?: string,
   endDate?: string
-): Promise<{ data: TimeEntrySummary | null; error: any }> {
+): Promise<{ data: TimeEntrySummary | null; error: DatabaseError | null }> {
   try {
     logger.info('Fetching time tracking summary', { userId, startDate, endDate })
 
@@ -553,7 +554,7 @@ export async function getTimeTrackingSummary(
 
     if (error) {
       logger.error('Failed to fetch time tracking summary', { error, userId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Time tracking summary fetched successfully', {
@@ -562,9 +563,9 @@ export async function getTimeTrackingSummary(
     })
 
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching time tracking summary', { error, userId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -574,7 +575,7 @@ export async function getTimeTrackingSummary(
 export async function getDailyTimeEntries(
   userId: string,
   date?: string
-): Promise<{ data: DailyTimeEntry[]; error: any }> {
+): Promise<{ data: DailyTimeEntry[]; error: DatabaseError | null }> {
   try {
     const targetDate = date || new Date().toISOString().split('T')[0]
     logger.info('Fetching daily time entries', { userId, date: targetDate })
@@ -588,7 +589,7 @@ export async function getDailyTimeEntries(
 
     if (error) {
       logger.error('Failed to fetch daily time entries', { error, userId })
-      return { data: [], error }
+      return { data: [], error: toDbError(error) }
     }
 
     logger.info('Daily time entries fetched successfully', {
@@ -597,9 +598,9 @@ export async function getDailyTimeEntries(
     })
 
     return { data: data || [], error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching daily time entries', { error, userId })
-    return { data: [], error }
+    return { data: [], error: toDbError(error) }
   }
 }
 
@@ -609,7 +610,7 @@ export async function getDailyTimeEntries(
 export async function getWeeklyTimeReport(
   userId: string,
   weekStart?: string
-): Promise<{ data: WeeklyTimeReport[]; error: any }> {
+): Promise<{ data: WeeklyTimeReport[]; error: DatabaseError | null }> {
   try {
     logger.info('Fetching weekly time report', { userId, weekStart })
 
@@ -622,7 +623,7 @@ export async function getWeeklyTimeReport(
 
     if (error) {
       logger.error('Failed to fetch weekly time report', { error, userId })
-      return { data: [], error }
+      return { data: [], error: toDbError(error) }
     }
 
     logger.info('Weekly time report fetched successfully', {
@@ -630,9 +631,9 @@ export async function getWeeklyTimeReport(
     })
 
     return { data: data || [], error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching weekly time report', { error, userId })
-    return { data: [], error }
+    return { data: [], error: toDbError(error) }
   }
 }
 
@@ -644,7 +645,7 @@ export async function getTimeEntriesByProject(
   projectId: string,
   startDate?: string,
   endDate?: string
-): Promise<{ data: TimeEntry[]; error: any; stats: { totalHours: number; totalAmount: number } }> {
+): Promise<{ data: TimeEntry[]; error: DatabaseError | null; stats: { totalHours: number; totalAmount: number } }> {
   try {
     logger.info('Fetching time entries by project', { userId, projectId, startDate, endDate })
 
@@ -673,9 +674,9 @@ export async function getTimeEntriesByProject(
       error: null,
       stats: { totalHours, totalAmount }
     }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching time entries by project', { error, userId, projectId })
-    return { data: [], error, stats: { totalHours: 0, totalAmount: 0 } }
+    return { data: [], error: toDbError(error), stats: { totalHours: 0, totalAmount: 0 } }
   }
 }
 
@@ -689,7 +690,7 @@ export async function exportTimeEntries(
     endDate?: string
     projectId?: string
   }
-): Promise<{ data: string | null; error: any }> {
+): Promise<{ data: string | null; error: DatabaseError | null }> {
   try {
     logger.info('Exporting time entries to CSV', { userId, filters })
 
@@ -697,7 +698,7 @@ export async function exportTimeEntries(
 
     if (error || !entries.length) {
       logger.error('Failed to export time entries', { error, userId })
-      return { data: null, error: error || new Error('No entries to export') }
+      return { data: null, error: error || toDbError(new Error('No entries to export')) }
     }
 
     // Create CSV header
@@ -742,8 +743,8 @@ export async function exportTimeEntries(
     })
 
     return { data: csv, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception exporting time entries', { error, userId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }

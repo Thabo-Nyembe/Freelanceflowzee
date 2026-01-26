@@ -13,6 +13,8 @@
  */
 
 import { createClient } from '@/lib/supabase/client'
+import type { SupabaseClient } from '@supabase/supabase-js'
+import { DatabaseError, toDbError, type JsonValue } from '@/lib/types/database'
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -43,9 +45,9 @@ export interface AIProvider {
   total_tokens: number
   total_cost: number
   monthly_budget: number | null
-  rate_limits: any
-  settings: any
-  metadata: any
+  rate_limits: Record<string, JsonValue> | null
+  settings: Record<string, JsonValue> | null
+  metadata: Record<string, JsonValue> | null
   created_at: string
   updated_at: string
 }
@@ -63,8 +65,8 @@ export interface AIModel {
   is_default: boolean
   is_deprecated: boolean
   version: string | null
-  settings: any
-  metadata: any
+  settings: Record<string, JsonValue> | null
+  metadata: Record<string, JsonValue> | null
   created_at: string
   updated_at: string
 }
@@ -80,9 +82,9 @@ export interface AIFeature {
   requires_key: boolean
   usage_count: number
   last_used: string | null
-  config: any
-  settings: any
-  metadata: any
+  config: Record<string, JsonValue> | null
+  settings: Record<string, JsonValue> | null
+  metadata: Record<string, JsonValue> | null
   created_at: string
   updated_at: string
 }
@@ -101,10 +103,10 @@ export interface UsageRecord {
   latency: number
   status: UsageStatus
   error_message: string | null
-  request_data: any
-  response_data: any
+  request_data: Record<string, JsonValue> | null
+  response_data: Record<string, JsonValue> | null
   timestamp: string
-  metadata: any
+  metadata: Record<string, JsonValue> | null
 }
 
 export interface APIKey {
@@ -118,8 +120,8 @@ export interface APIKey {
   expires_at: string | null
   last_used: string | null
   usage_count: number
-  settings: any
-  metadata: any
+  settings: Record<string, JsonValue> | null
+  metadata: Record<string, JsonValue> | null
   created_at: string
   updated_at: string
 }
@@ -133,11 +135,11 @@ export interface UsageStats {
   total_cost: number
   average_latency: number
   success_rate: number
-  provider_breakdown: any
-  model_breakdown: any
-  feature_breakdown: any
-  settings: any
-  metadata: any
+  provider_breakdown: Record<string, JsonValue> | null
+  model_breakdown: Record<string, JsonValue> | null
+  feature_breakdown: Record<string, JsonValue> | null
+  settings: Record<string, JsonValue> | null
+  metadata: Record<string, JsonValue> | null
   created_at: string
   updated_at: string
 }
@@ -148,7 +150,7 @@ export interface UsageStats {
 
 export async function getProviders(
   userId: string
-): Promise<{ data: AIProvider[] | null; error: any }> {
+): Promise<{ data: AIProvider[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_providers')
@@ -161,7 +163,7 @@ export async function getProviders(
 
 export async function getProvider(
   providerId: string
-): Promise<{ data: AIProvider | null; error: any }> {
+): Promise<{ data: AIProvider | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_providers')
@@ -184,7 +186,7 @@ export async function createProvider(
     pricing?: string
     features?: string[]
   }
-): Promise<{ data: AIProvider | null; error: any }> {
+): Promise<{ data: AIProvider | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_providers')
@@ -201,7 +203,7 @@ export async function createProvider(
 export async function updateProvider(
   providerId: string,
   updates: Partial<Omit<AIProvider, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
-): Promise<{ data: AIProvider | null; error: any }> {
+): Promise<{ data: AIProvider | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_providers')
@@ -216,9 +218,9 @@ export async function updateProvider(
 export async function updateProviderStatus(
   providerId: string,
   status: ProviderStatus
-): Promise<{ data: AIProvider | null; error: any }> {
+): Promise<{ data: AIProvider | null; error: DatabaseError | null }> {
   const supabase = createClient()
-  const updates: any = { status }
+  const updates: { status: ProviderStatus; connected_at?: string } = { status }
   if (status === 'connected') {
     updates.connected_at = new Date().toISOString()
   }
@@ -235,7 +237,7 @@ export async function updateProviderStatus(
 
 export async function deleteProvider(
   providerId: string
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   const supabase = createClient()
   const { error } = await supabase
     .from('ai_providers')
@@ -245,9 +247,19 @@ export async function deleteProvider(
   return { error }
 }
 
+interface ProviderStats {
+  total_providers: number
+  connected_providers: number
+  enabled_providers: number
+  total_requests: number
+  total_tokens: number
+  total_cost: number
+  by_provider: Record<string, { requests: number; tokens: number; cost: number }>
+}
+
 export async function getProviderStats(
   userId: string
-): Promise<{ data: any; error: any }> {
+): Promise<{ data: ProviderStats | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_providers')
@@ -272,7 +284,7 @@ export async function getProviderStats(
         cost: p.total_cost
       }
       return acc
-    }, {} as Record<string, any>)
+    }, {} as Record<string, { requests: number; tokens: number; cost: number }>)
   }
 
   return { data: stats, error: null }
@@ -284,7 +296,7 @@ export async function getProviderStats(
 
 export async function getModels(
   providerId: string
-): Promise<{ data: AIModel[] | null; error: any }> {
+): Promise<{ data: AIModel[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_models')
@@ -297,7 +309,7 @@ export async function getModels(
 
 export async function getModel(
   modelId: string
-): Promise<{ data: AIModel | null; error: any }> {
+): Promise<{ data: AIModel | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_models')
@@ -320,7 +332,7 @@ export async function createModel(
     output_cost_per_1k: number
     version?: string
   }
-): Promise<{ data: AIModel | null; error: any }> {
+): Promise<{ data: AIModel | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_models')
@@ -334,7 +346,7 @@ export async function createModel(
 export async function updateModel(
   modelId: string,
   updates: Partial<Omit<AIModel, 'id' | 'provider_id' | 'created_at' | 'updated_at'>>
-): Promise<{ data: AIModel | null; error: any }> {
+): Promise<{ data: AIModel | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_models')
@@ -352,7 +364,7 @@ export async function updateModel(
 
 export async function getFeatures(
   userId: string
-): Promise<{ data: AIFeature[] | null; error: any }> {
+): Promise<{ data: AIFeature[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_features')
@@ -372,7 +384,7 @@ export async function createFeature(
     model_id: string
     requires_key?: boolean
   }
-): Promise<{ data: AIFeature | null; error: any }> {
+): Promise<{ data: AIFeature | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_features')
@@ -389,7 +401,7 @@ export async function createFeature(
 export async function toggleFeature(
   featureId: string,
   isEnabled: boolean
-): Promise<{ data: AIFeature | null; error: any }> {
+): Promise<{ data: AIFeature | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_features')
@@ -404,7 +416,7 @@ export async function toggleFeature(
 export async function updateFeature(
   featureId: string,
   updates: Partial<Omit<AIFeature, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
-): Promise<{ data: AIFeature | null; error: any }> {
+): Promise<{ data: AIFeature | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_features')
@@ -418,7 +430,7 @@ export async function updateFeature(
 
 export async function deleteFeature(
   featureId: string
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   const supabase = createClient()
   const { error } = await supabase
     .from('ai_features')
@@ -441,7 +453,7 @@ export async function getUsageRecords(
     date_from?: string
     date_to?: string
   }
-): Promise<{ data: UsageRecord[] | null; error: any }> {
+): Promise<{ data: UsageRecord[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   let query = supabase
     .from('ai_usage_records')
@@ -484,7 +496,7 @@ export async function createUsageRecord(
     status?: UsageStatus
     error_message?: string
   }
-): Promise<{ data: UsageRecord | null; error: any }> {
+): Promise<{ data: UsageRecord | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_usage_records')
@@ -498,11 +510,20 @@ export async function createUsageRecord(
   return { data, error }
 }
 
+interface UsageSummary {
+  total_requests: number
+  total_tokens: number
+  total_cost: number
+  average_latency: number
+  success_rate: number
+  by_provider: Record<string, { requests: number; tokens: number; cost: number }>
+}
+
 export async function getUsageSummary(
   userId: string,
   dateFrom?: string,
   dateTo?: string
-): Promise<{ data: any; error: any }> {
+): Promise<{ data: UsageSummary | null; error: DatabaseError | null }> {
   const supabase = createClient()
   let query = supabase
     .from('ai_usage_records')
@@ -536,7 +557,7 @@ export async function getUsageSummary(
       acc[r.provider_id].tokens += r.total_tokens
       acc[r.provider_id].cost += r.cost
       return acc
-    }, {} as Record<string, any>)
+    }, {} as Record<string, { requests: number; tokens: number; cost: number }>)
   }
 
   return { data: summary, error: null }
@@ -548,7 +569,7 @@ export async function getUsageSummary(
 
 export async function getAPIKeys(
   userId: string
-): Promise<{ data: APIKey[] | null; error: any }> {
+): Promise<{ data: APIKey[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_api_keys')
@@ -568,7 +589,7 @@ export async function createAPIKey(
     key_last_four: string
     expires_at?: string
   }
-): Promise<{ data: APIKey | null; error: any }> {
+): Promise<{ data: APIKey | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_api_keys')
@@ -585,7 +606,7 @@ export async function createAPIKey(
 export async function updateAPIKey(
   keyId: string,
   updates: Partial<Omit<APIKey, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
-): Promise<{ data: APIKey | null; error: any }> {
+): Promise<{ data: APIKey | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_api_keys')
@@ -599,7 +620,7 @@ export async function updateAPIKey(
 
 export async function deleteAPIKey(
   keyId: string
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   const supabase = createClient()
   const { error } = await supabase
     .from('ai_api_keys')
@@ -617,7 +638,7 @@ export async function getUsageStats(
   userId: string,
   dateFrom?: string,
   dateTo?: string
-): Promise<{ data: UsageStats[] | null; error: any }> {
+): Promise<{ data: UsageStats[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   let query = supabase
     .from('ai_usage_stats')
@@ -638,7 +659,7 @@ export async function getUsageStats(
 
 export async function getTodayUsageStats(
   userId: string
-): Promise<{ data: UsageStats | null; error: any }> {
+): Promise<{ data: UsageStats | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const today = new Date().toISOString().split('T')[0]
 
@@ -661,10 +682,10 @@ export async function updateUsageStats(
     total_cost: number
     average_latency: number
     success_rate: number
-    provider_breakdown?: any
-    model_breakdown?: any
+    provider_breakdown?: Record<string, JsonValue>
+    model_breakdown?: Record<string, JsonValue>
   }
-): Promise<{ data: UsageStats | null; error: any }> {
+): Promise<{ data: UsageStats | null; error: DatabaseError | null }> {
   const supabase = createClient()
 
   // Try to get existing stats for date
@@ -722,7 +743,7 @@ export interface AIUserPreferences {
  */
 export async function getAIPreferences(
   userId: string
-): Promise<{ data: AIUserPreferences | null; error: any }> {
+): Promise<{ data: AIUserPreferences | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_user_preferences')
@@ -739,7 +760,7 @@ export async function getAIPreferences(
 export async function upsertAIPreferences(
   userId: string,
   preferences: Partial<Omit<AIUserPreferences, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
-): Promise<{ data: AIUserPreferences | null; error: any }> {
+): Promise<{ data: AIUserPreferences | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_user_preferences')
@@ -760,7 +781,7 @@ export async function upsertAIPreferences(
 export async function updateAIBudget(
   userId: string,
   monthlyBudget: number
-): Promise<{ data: AIUserPreferences | null; error: any }> {
+): Promise<{ data: AIUserPreferences | null; error: DatabaseError | null }> {
   return upsertAIPreferences(userId, { monthly_budget: monthlyBudget })
 }
 
@@ -771,7 +792,7 @@ export async function updateAIRateLimits(
   userId: string,
   perMinute: number,
   perHour: number
-): Promise<{ data: AIUserPreferences | null; error: any }> {
+): Promise<{ data: AIUserPreferences | null; error: DatabaseError | null }> {
   return upsertAIPreferences(userId, {
     rate_limit_per_minute: perMinute,
     rate_limit_per_hour: perHour
@@ -784,7 +805,7 @@ export async function updateAIRateLimits(
 export async function updateDefaultProviders(
   userId: string,
   defaultProviders: Record<string, string>
-): Promise<{ data: AIUserPreferences | null; error: any }> {
+): Promise<{ data: AIUserPreferences | null; error: DatabaseError | null }> {
   return upsertAIPreferences(userId, { default_providers: defaultProviders })
 }
 
@@ -794,6 +815,6 @@ export async function updateDefaultProviders(
 export async function toggleAILogging(
   userId: string,
   enabled: boolean
-): Promise<{ data: AIUserPreferences | null; error: any }> {
+): Promise<{ data: AIUserPreferences | null; error: DatabaseError | null }> {
   return upsertAIPreferences(userId, { logging_enabled: enabled })
 }

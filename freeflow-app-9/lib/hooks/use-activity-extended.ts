@@ -6,9 +6,22 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import type { JsonValue } from '@/lib/types/database'
+
+/** Activity record from the activities table */
+export interface Activity {
+  id: string
+  user_id: string
+  item_type: string
+  item_id: string
+  action: string
+  metadata?: Record<string, JsonValue>
+  created_at: string
+  updated_at?: string
+}
 
 export function useActivities(userId?: string, itemType?: string) {
-  const [data, setData] = useState<any[]>([])
+  const [data, setData] = useState<Activity[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
   const supabase = createClient()
@@ -26,7 +39,7 @@ export function useActivities(userId?: string, itemType?: string) {
 }
 
 export function useActivityFeed(userId?: string, followingIds: string[] = []) {
-  const [data, setData] = useState<any[]>([])
+  const [data, setData] = useState<Activity[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
   const supabase = createClient()

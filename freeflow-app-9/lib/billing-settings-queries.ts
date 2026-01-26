@@ -4,6 +4,7 @@
  */
 
 import { createClient } from '@/lib/supabase/client'
+import type { JsonValue, DatabaseError } from '@/lib/types/database'
 
 // ============================================================================
 // TYPES
@@ -16,6 +17,21 @@ export type InvoiceStatus = 'draft' | 'open' | 'paid' | 'void' | 'uncollectible'
 export type TransactionStatus = 'pending' | 'processing' | 'succeeded' | 'failed' | 'refunded' | 'disputed'
 export type BillingInterval = 'monthly' | 'quarterly' | 'annual' | 'lifetime'
 export type TransactionType = 'payment' | 'refund' | 'dispute' | 'adjustment'
+
+/**
+ * Line item in an invoice
+ */
+export interface InvoiceLineItem {
+  id?: string
+  description: string
+  quantity: number
+  unit_price: number
+  amount: number
+  tax_rate?: number
+  tax_amount?: number
+  discount_amount?: number
+  metadata?: Record<string, JsonValue>
+}
 
 export interface Subscription {
   id: string
@@ -34,7 +50,7 @@ export interface Subscription {
   cancellation_reason?: string
   stripe_subscription_id?: string
   stripe_customer_id?: string
-  metadata: Record<string, any>
+  metadata: Record<string, JsonValue>
   created_at: string
   updated_at: string
 }
@@ -53,7 +69,7 @@ export interface PaymentMethod {
   is_verified: boolean
   is_active: boolean
   stripe_payment_method_id?: string
-  metadata: Record<string, any>
+  metadata: Record<string, JsonValue>
   created_at: string
   updated_at: string
 }
@@ -90,12 +106,12 @@ export interface Invoice {
   invoice_date: string
   due_date?: string
   paid_at?: string
-  line_items: any[]
+  line_items: InvoiceLineItem[]
   stripe_invoice_id?: string
   invoice_pdf_url?: string
   description?: string
   notes?: string
-  metadata: Record<string, any>
+  metadata: Record<string, JsonValue>
   created_at: string
   updated_at: string
 }
@@ -117,7 +133,7 @@ export interface Transaction {
   stripe_charge_id?: string
   stripe_payment_intent_id?: string
   description?: string
-  metadata: Record<string, any>
+  metadata: Record<string, JsonValue>
   created_at: string
 }
 
@@ -609,7 +625,7 @@ export async function refundTransaction(transactionId: string, amount: number) {
   const { data: originalTx } = await getTransactionById(transactionId)
 
   if (!originalTx) {
-    return { data: null, error: new Error('Original transaction not found') }
+    return { data: null, error: { message: 'Original transaction not found' } as DatabaseError }
   }
 
   // Create refund transaction
@@ -708,7 +724,7 @@ export async function incrementUsage(
   const { data: currentUsage } = await getCurrentUsage(userId)
 
   if (!currentUsage) {
-    return { data: null, error: new Error('No current usage period found') }
+    return { data: null, error: { message: 'No current usage period found' } as DatabaseError }
   }
 
   return await supabase

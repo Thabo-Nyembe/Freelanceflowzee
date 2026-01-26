@@ -12,6 +12,7 @@
  */
 
 import { createClient } from '@/lib/supabase/client'
+import type { JsonValue } from '@/lib/types/database'
 import type {
   Workflow,
   WorkflowAction,
@@ -20,6 +21,29 @@ import type {
   ActionType,
   WorkflowStatus
 } from './automation-types'
+
+// ============================================================================
+// BUILDER-SPECIFIC TYPES
+// ============================================================================
+
+/**
+ * Condition for workflow action branching
+ */
+export interface ActionCondition {
+  field: string
+  operator: string
+  value: JsonValue
+}
+
+/**
+ * Test execution step result
+ */
+export interface TestExecutionStep {
+  action: string
+  status: 'success' | 'failed'
+  output?: Record<string, JsonValue>
+  error?: string
+}
 
 // Re-export core automation queries for convenience
 export {
@@ -171,7 +195,7 @@ export async function saveWorkflowDraft(
     name: string
     description?: string
     trigger_type: TriggerType
-    trigger_config: Record<string, any>
+    trigger_config: Record<string, JsonValue>
     category?: string
   }
 ): Promise<string> {
@@ -220,12 +244,8 @@ export async function addWorkflowAction(
   action: {
     action_type: ActionType
     position: number
-    config: Record<string, any>
-    conditions?: Array<{
-      field: string
-      operator: string
-      value: any
-    }>
+    config: Record<string, JsonValue>
+    conditions?: ActionCondition[]
   }
 ): Promise<WorkflowAction> {
   const supabase = createClient()
@@ -250,12 +270,8 @@ export async function updateWorkflowAction(
   actionId: string,
   updates: {
     position?: number
-    config?: Record<string, any>
-    conditions?: Array<{
-      field: string
-      operator: string
-      value: any
-    }>
+    config?: Record<string, JsonValue>
+    conditions?: ActionCondition[]
     on_success_action_id?: string | null
     on_failure_action_id?: string | null
   }
@@ -414,15 +430,10 @@ export async function pauseWorkflow(workflowId: string): Promise<void> {
  */
 export async function testWorkflow(
   workflowId: string,
-  testInput?: Record<string, any>
+  testInput?: Record<string, JsonValue>
 ): Promise<{
   success: boolean
-  steps: Array<{
-    action: string
-    status: 'success' | 'failed'
-    output?: any
-    error?: string
-  }>
+  steps: TestExecutionStep[]
 }> {
   const supabase = createClient()
 

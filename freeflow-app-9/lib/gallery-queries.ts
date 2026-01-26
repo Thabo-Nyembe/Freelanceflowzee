@@ -6,6 +6,7 @@
 
 import { createClient } from '@/lib/supabase/client'
 import { createFeatureLogger } from './logger'
+import { DatabaseError, toDbError } from '@/lib/types/database'
 
 const supabase = createClient()
 const logger = createFeatureLogger('Gallery')
@@ -103,6 +104,16 @@ export interface ImageSortOptions {
   direction: 'asc' | 'desc'
 }
 
+/** Partial image data returned from stats queries */
+interface ImageStatsRow {
+  type: ImageType
+  file_size: number
+  views: number
+  likes: number
+  downloads: number
+  is_favorite: boolean
+}
+
 // ============================================================================
 // GALLERY IMAGES QUERIES
 // ============================================================================
@@ -116,7 +127,7 @@ export async function getGalleryImages(
   sort?: ImageSortOptions,
   limit: number = 50,
   offset: number = 0
-): Promise<{ data: GalleryImage[]; error: any; count: number }> {
+): Promise<{ data: GalleryImage[]; error: DatabaseError | null; count: number }> {
   logger.info('Fetching gallery images', { userId, filters, sort, limit, offset })
 
   try {
@@ -159,7 +170,7 @@ export async function getGalleryImages(
 
     if (error) {
       logger.error('Failed to fetch gallery images', { error, userId })
-      return { data: [], error, count: 0 }
+      return { data: [], error: toDbError(error), count: 0 }
     }
 
     logger.info('Gallery images fetched successfully', {
@@ -169,9 +180,9 @@ export async function getGalleryImages(
     })
 
     return { data: data || [], error: null, count: count || 0 }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching gallery images', { error, userId })
-    return { data: [], error, count: 0 }
+    return { data: [], error: toDbError(error), count: 0 }
   }
 }
 
@@ -180,7 +191,7 @@ export async function getGalleryImages(
  */
 export async function getGalleryImage(
   imageId: string
-): Promise<{ data: GalleryImage | null; error: any }> {
+): Promise<{ data: GalleryImage | null; error: DatabaseError | null }> {
   logger.info('Fetching gallery image', { imageId })
 
   try {
@@ -192,14 +203,14 @@ export async function getGalleryImage(
 
     if (error) {
       logger.error('Failed to fetch gallery image', { error, imageId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Gallery image fetched successfully', { imageId })
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching gallery image', { error, imageId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -209,7 +220,7 @@ export async function getGalleryImage(
 export async function createGalleryImage(
   userId: string,
   imageData: Partial<GalleryImage>
-): Promise<{ data: GalleryImage | null; error: any }> {
+): Promise<{ data: GalleryImage | null; error: DatabaseError | null }> {
   logger.info('Creating gallery image', { userId, title: imageData.title })
 
   try {
@@ -242,7 +253,7 @@ export async function createGalleryImage(
 
     if (error) {
       logger.error('Failed to create gallery image', { error, userId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Gallery image created successfully', {
@@ -252,9 +263,9 @@ export async function createGalleryImage(
     })
 
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception creating gallery image', { error, userId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -264,7 +275,7 @@ export async function createGalleryImage(
 export async function updateGalleryImage(
   imageId: string,
   updates: Partial<GalleryImage>
-): Promise<{ data: GalleryImage | null; error: any }> {
+): Promise<{ data: GalleryImage | null; error: DatabaseError | null }> {
   logger.info('Updating gallery image', { imageId, updates: Object.keys(updates) })
 
   try {
@@ -280,21 +291,21 @@ export async function updateGalleryImage(
 
     if (error) {
       logger.error('Failed to update gallery image', { error, imageId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Gallery image updated successfully', { imageId })
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception updating gallery image', { error, imageId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
 /**
  * Delete a gallery image
  */
-export async function deleteGalleryImage(imageId: string): Promise<{ error: any }> {
+export async function deleteGalleryImage(imageId: string): Promise<{ error: DatabaseError | null }> {
   logger.info('Deleting gallery image', { imageId })
 
   try {
@@ -302,21 +313,21 @@ export async function deleteGalleryImage(imageId: string): Promise<{ error: any 
 
     if (error) {
       logger.error('Failed to delete gallery image', { error, imageId })
-      return { error }
+      return { error: toDbError(error) }
     }
 
     logger.info('Gallery image deleted successfully', { imageId })
     return { error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception deleting gallery image', { error, imageId })
-    return { error }
+    return { error: toDbError(error) }
   }
 }
 
 /**
  * Bulk delete gallery images
  */
-export async function bulkDeleteGalleryImages(imageIds: string[]): Promise<{ error: any }> {
+export async function bulkDeleteGalleryImages(imageIds: string[]): Promise<{ error: DatabaseError | null }> {
   logger.info('Bulk deleting gallery images', { count: imageIds.length })
 
   try {
@@ -324,14 +335,14 @@ export async function bulkDeleteGalleryImages(imageIds: string[]): Promise<{ err
 
     if (error) {
       logger.error('Failed to bulk delete gallery images', { error, count: imageIds.length })
-      return { error }
+      return { error: toDbError(error) }
     }
 
     logger.info('Gallery images bulk deleted successfully', { count: imageIds.length })
     return { error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception bulk deleting gallery images', { error })
-    return { error }
+    return { error: toDbError(error) }
   }
 }
 
@@ -341,7 +352,7 @@ export async function bulkDeleteGalleryImages(imageIds: string[]): Promise<{ err
 export async function toggleImageFavorite(
   imageId: string,
   isFavorite: boolean
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   logger.info('Toggling image favorite', { imageId, isFavorite })
 
   try {
@@ -352,21 +363,21 @@ export async function toggleImageFavorite(
 
     if (error) {
       logger.error('Failed to toggle image favorite', { error, imageId })
-      return { error }
+      return { error: toDbError(error) }
     }
 
     logger.info('Image favorite toggled successfully', { imageId, isFavorite })
     return { error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception toggling image favorite', { error, imageId })
-    return { error }
+    return { error: toDbError(error) }
   }
 }
 
 /**
  * Increment image views
  */
-export async function incrementImageViews(imageId: string): Promise<{ error: any }> {
+export async function incrementImageViews(imageId: string): Promise<{ error: DatabaseError | null }> {
   logger.info('Incrementing image views', { imageId })
 
   try {
@@ -385,24 +396,24 @@ export async function incrementImageViews(imageId: string): Promise<{ error: any
 
       if (error) {
         logger.error('Failed to increment image views', { error, imageId })
-        return { error }
+        return { error: toDbError(error) }
       }
 
       logger.info('Image views incremented successfully', { imageId })
       return { error: null }
     }
 
-    return { error: new Error('Image not found') }
-  } catch (error) {
+    return { error: toDbError(new Error('Image not found')) }
+  } catch (error: unknown) {
     logger.error('Exception incrementing image views', { error, imageId })
-    return { error }
+    return { error: toDbError(error) }
   }
 }
 
 /**
  * Increment image likes
  */
-export async function incrementImageLikes(imageId: string): Promise<{ error: any }> {
+export async function incrementImageLikes(imageId: string): Promise<{ error: DatabaseError | null }> {
   logger.info('Incrementing image likes', { imageId })
 
   try {
@@ -420,24 +431,24 @@ export async function incrementImageLikes(imageId: string): Promise<{ error: any
 
       if (error) {
         logger.error('Failed to increment image likes', { error, imageId })
-        return { error }
+        return { error: toDbError(error) }
       }
 
       logger.info('Image likes incremented successfully', { imageId })
       return { error: null }
     }
 
-    return { error: new Error('Image not found') }
-  } catch (error) {
+    return { error: toDbError(new Error('Image not found')) }
+  } catch (error: unknown) {
     logger.error('Exception incrementing image likes', { error, imageId })
-    return { error }
+    return { error: toDbError(error) }
   }
 }
 
 /**
  * Increment image downloads
  */
-export async function incrementImageDownloads(imageId: string): Promise<{ error: any }> {
+export async function incrementImageDownloads(imageId: string): Promise<{ error: DatabaseError | null }> {
   logger.info('Incrementing image downloads', { imageId })
 
   try {
@@ -455,17 +466,17 @@ export async function incrementImageDownloads(imageId: string): Promise<{ error:
 
       if (error) {
         logger.error('Failed to increment image downloads', { error, imageId })
-        return { error }
+        return { error: toDbError(error) }
       }
 
       logger.info('Image downloads incremented successfully', { imageId })
       return { error: null }
     }
 
-    return { error: new Error('Image not found') }
-  } catch (error) {
+    return { error: toDbError(new Error('Image not found')) }
+  } catch (error: unknown) {
     logger.error('Exception incrementing image downloads', { error, imageId })
-    return { error }
+    return { error: toDbError(error) }
   }
 }
 
@@ -476,7 +487,7 @@ export async function searchGalleryImages(
   userId: string,
   searchTerm: string,
   limit: number = 20
-): Promise<{ data: GalleryImage[]; error: any }> {
+): Promise<{ data: GalleryImage[]; error: DatabaseError | null }> {
   logger.info('Searching gallery images', { userId, searchTerm, limit })
 
   return getGalleryImages(
@@ -496,7 +507,7 @@ export async function searchGalleryImages(
  */
 export async function getGalleryAlbums(
   userId: string
-): Promise<{ data: GalleryAlbum[]; error: any }> {
+): Promise<{ data: GalleryAlbum[]; error: DatabaseError | null }> {
   logger.info('Fetching gallery albums', { userId })
 
   try {
@@ -508,14 +519,14 @@ export async function getGalleryAlbums(
 
     if (error) {
       logger.error('Failed to fetch gallery albums', { error, userId })
-      return { data: [], error }
+      return { data: [], error: toDbError(error) }
     }
 
     logger.info('Gallery albums fetched successfully', { count: data?.length || 0, userId })
     return { data: data || [], error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching gallery albums', { error, userId })
-    return { data: [], error }
+    return { data: [], error: toDbError(error) }
   }
 }
 
@@ -524,7 +535,7 @@ export async function getGalleryAlbums(
  */
 export async function getGalleryAlbum(
   albumId: string
-): Promise<{ data: GalleryAlbum | null; error: any }> {
+): Promise<{ data: GalleryAlbum | null; error: DatabaseError | null }> {
   logger.info('Fetching gallery album', { albumId })
 
   try {
@@ -536,14 +547,14 @@ export async function getGalleryAlbum(
 
     if (error) {
       logger.error('Failed to fetch gallery album', { error, albumId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Gallery album fetched successfully', { albumId })
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching gallery album', { error, albumId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -553,7 +564,7 @@ export async function getGalleryAlbum(
 export async function createGalleryAlbum(
   userId: string,
   albumData: Partial<GalleryAlbum>
-): Promise<{ data: GalleryAlbum | null; error: any }> {
+): Promise<{ data: GalleryAlbum | null; error: DatabaseError | null }> {
   logger.info('Creating gallery album', { userId, name: albumData.name })
 
   try {
@@ -571,7 +582,7 @@ export async function createGalleryAlbum(
 
     if (error) {
       logger.error('Failed to create gallery album', { error, userId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Gallery album created successfully', {
@@ -581,9 +592,9 @@ export async function createGalleryAlbum(
     })
 
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception creating gallery album', { error, userId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -593,7 +604,7 @@ export async function createGalleryAlbum(
 export async function updateGalleryAlbum(
   albumId: string,
   updates: Partial<GalleryAlbum>
-): Promise<{ data: GalleryAlbum | null; error: any }> {
+): Promise<{ data: GalleryAlbum | null; error: DatabaseError | null }> {
   logger.info('Updating gallery album', { albumId, updates: Object.keys(updates) })
 
   try {
@@ -609,21 +620,21 @@ export async function updateGalleryAlbum(
 
     if (error) {
       logger.error('Failed to update gallery album', { error, albumId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Gallery album updated successfully', { albumId })
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception updating gallery album', { error, albumId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
 /**
  * Delete an album
  */
-export async function deleteGalleryAlbum(albumId: string): Promise<{ error: any }> {
+export async function deleteGalleryAlbum(albumId: string): Promise<{ error: DatabaseError | null }> {
   logger.info('Deleting gallery album', { albumId })
 
   try {
@@ -631,14 +642,14 @@ export async function deleteGalleryAlbum(albumId: string): Promise<{ error: any 
 
     if (error) {
       logger.error('Failed to delete gallery album', { error, albumId })
-      return { error }
+      return { error: toDbError(error) }
     }
 
     logger.info('Gallery album deleted successfully', { albumId })
     return { error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception deleting gallery album', { error, albumId })
-    return { error }
+    return { error: toDbError(error) }
   }
 }
 
@@ -665,21 +676,22 @@ export async function getGalleryStats(userId: string): Promise<GalleryStats> {
 
     if (albumsError) throw albumsError
 
+    const typedImages = (images || []) as ImageStatsRow[]
     const stats: GalleryStats = {
-      total: images?.length || 0,
-      images: images?.filter((i) => i.type === 'image').length || 0,
-      videos: images?.filter((i) => i.type === 'video').length || 0,
-      favorites: images?.filter((i) => i.is_favorite).length || 0,
+      total: typedImages.length,
+      images: typedImages.filter((i: ImageStatsRow) => i.type === 'image').length,
+      videos: typedImages.filter((i: ImageStatsRow) => i.type === 'video').length,
+      favorites: typedImages.filter((i: ImageStatsRow) => i.is_favorite).length,
       albums: albums?.length || 0,
-      totalSize: images?.reduce((sum, i) => sum + (i.file_size || 0), 0) || 0,
-      totalViews: images?.reduce((sum, i) => sum + (i.views || 0), 0) || 0,
-      totalLikes: images?.reduce((sum, i) => sum + (i.likes || 0), 0) || 0,
-      totalDownloads: images?.reduce((sum, i) => sum + (i.downloads || 0), 0) || 0,
+      totalSize: typedImages.reduce((sum: number, i: ImageStatsRow) => sum + (i.file_size || 0), 0),
+      totalViews: typedImages.reduce((sum: number, i: ImageStatsRow) => sum + (i.views || 0), 0),
+      totalLikes: typedImages.reduce((sum: number, i: ImageStatsRow) => sum + (i.likes || 0), 0),
+      totalDownloads: typedImages.reduce((sum: number, i: ImageStatsRow) => sum + (i.downloads || 0), 0),
     }
 
     logger.info('Gallery statistics fetched', { stats, userId })
     return stats
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Failed to fetch gallery statistics', { error, userId })
     return {
       total: 0,

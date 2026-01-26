@@ -11,6 +11,7 @@
 
 import { createClient } from '@/lib/supabase/client'
 import { createFeatureLogger } from '@/lib/logger'
+import { DatabaseError, toDbError, JsonValue } from '@/lib/types/database'
 
 const logger = createFeatureLogger('CollaborationQueries')
 
@@ -38,10 +39,19 @@ export interface Channel {
   member_count: number
   message_count: number
   last_activity_at?: string
-  settings: Record<string, any>
-  metadata: Record<string, any>
+  settings: Record<string, JsonValue>
+  metadata: Record<string, JsonValue>
   created_at: string
   updated_at: string
+}
+
+export interface MessageAttachment {
+  id: string
+  name: string
+  url: string
+  type: string
+  size?: number
+  metadata?: Record<string, JsonValue>
 }
 
 export interface Message {
@@ -50,14 +60,14 @@ export interface Message {
   user_id: string
   content: string
   message_type: MessageType
-  attachments: any[]
-  reactions: Record<string, any>
+  attachments: MessageAttachment[]
+  reactions: Record<string, JsonValue>
   is_pinned: boolean
   is_edited: boolean
   edited_at?: string
   thread_count: number
   parent_message_id?: string
-  metadata: Record<string, any>
+  metadata: Record<string, JsonValue>
   created_at: string
   updated_at: string
 }
@@ -69,7 +79,7 @@ export interface ChannelMember {
   role: ChannelRole
   is_muted: boolean
   last_read_at: string
-  settings: Record<string, any>
+  settings: Record<string, JsonValue>
   joined_at: string
 }
 
@@ -84,8 +94,8 @@ export interface Team {
   status: 'active' | 'archived'
   is_favorite: boolean
   member_count: number
-  settings: Record<string, any>
-  metadata: Record<string, any>
+  settings: Record<string, JsonValue>
+  metadata: Record<string, JsonValue>
   created_at: string
   updated_at: string
 }
@@ -99,7 +109,7 @@ export interface TeamMember {
   performance_score: number
   tasks_completed: number
   last_active_at: string
-  metadata: Record<string, any>
+  metadata: Record<string, JsonValue>
   joined_at: string
 }
 
@@ -113,7 +123,7 @@ export interface WorkspaceFolder {
   is_favorite: boolean
   color?: string
   icon?: string
-  metadata: Record<string, any>
+  metadata: Record<string, JsonValue>
   created_at: string
   updated_at: string
 }
@@ -133,7 +143,7 @@ export interface WorkspaceFile {
   tags: string[]
   version: number
   parent_file_id?: string
-  metadata: Record<string, any>
+  metadata: Record<string, JsonValue>
   created_at: string
   updated_at: string
 }
@@ -148,8 +158,17 @@ export interface FileShare {
   can_download: boolean
   can_share: boolean
   expires_at?: string
-  metadata: Record<string, any>
+  metadata: Record<string, JsonValue>
   shared_at: string
+}
+
+export interface MeetingAgendaItem {
+  id: string
+  title: string
+  description?: string
+  duration_minutes?: number
+  presenter?: string
+  completed?: boolean
 }
 
 export interface Meeting {
@@ -169,9 +188,9 @@ export interface Meeting {
   max_participants?: number
   is_recorded: boolean
   recording_url?: string
-  agenda: any[]
+  agenda: MeetingAgendaItem[]
   notes?: string
-  metadata: Record<string, any>
+  metadata: Record<string, JsonValue>
   created_at: string
   updated_at: string
 }
@@ -185,7 +204,7 @@ export interface MeetingParticipant {
   joined_at?: string
   left_at?: string
   duration_minutes?: number
-  metadata: Record<string, any>
+  metadata: Record<string, JsonValue>
   invited_at: string
 }
 
@@ -203,7 +222,7 @@ export async function getChannels(
     is_archived?: boolean
     search?: string
   }
-): Promise<{ data: Channel[] | null; error: any }> {
+): Promise<{ data: Channel[] | null; error: DatabaseError | null }> {
   try {
     logger.info('Getting channels from Supabase', { userId, filters })
 
@@ -230,7 +249,7 @@ export async function getChannels(
 
     if (error) {
       logger.error('Failed to get channels', { error, userId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Channels retrieved successfully', {
@@ -239,9 +258,9 @@ export async function getChannels(
     })
 
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception getting channels', { error, userId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -255,7 +274,7 @@ export async function createChannel(
     description?: string
     type: ChannelType
   }
-): Promise<{ data: Channel | null; error: any }> {
+): Promise<{ data: Channel | null; error: DatabaseError | null }> {
   try {
     logger.info('Creating channel in Supabase', { userId, channel_name: channel.name })
 
@@ -277,7 +296,7 @@ export async function createChannel(
 
     if (error) {
       logger.error('Failed to create channel', { error, userId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Channel created successfully', {
@@ -286,9 +305,9 @@ export async function createChannel(
     })
 
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception creating channel', { error, userId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -299,7 +318,7 @@ export async function updateChannel(
   channelId: string,
   userId: string,
   updates: Partial<Channel>
-): Promise<{ data: Channel | null; error: any }> {
+): Promise<{ data: Channel | null; error: DatabaseError | null }> {
   try {
     logger.info('Updating channel in Supabase', { channelId, userId })
 
@@ -314,15 +333,15 @@ export async function updateChannel(
 
     if (error) {
       logger.error('Failed to update channel', { error, channelId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Channel updated successfully', { channelId })
 
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception updating channel', { error, channelId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -332,7 +351,7 @@ export async function updateChannel(
 export async function deleteChannel(
   channelId: string,
   userId: string
-): Promise<{ success: boolean; error: any }> {
+): Promise<{ success: boolean; error: DatabaseError | null }> {
   try {
     logger.info('Deleting channel from Supabase', { channelId, userId })
 
@@ -345,15 +364,15 @@ export async function deleteChannel(
 
     if (error) {
       logger.error('Failed to delete channel', { error, channelId })
-      return { success: false, error }
+      return { success: false, error: toDbError(error) }
     }
 
     logger.info('Channel deleted successfully', { channelId })
 
     return { success: true, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception deleting channel', { error, channelId })
-    return { success: false, error }
+    return { success: false, error: toDbError(error) }
   }
 }
 
@@ -371,7 +390,7 @@ export async function getMessages(
     offset?: number
     parent_message_id?: string
   }
-): Promise<{ data: Message[] | null; error: any }> {
+): Promise<{ data: Message[] | null; error: DatabaseError | null }> {
   try {
     logger.info('Getting messages from Supabase', { channelId, options })
 
@@ -400,7 +419,7 @@ export async function getMessages(
 
     if (error) {
       logger.error('Failed to get messages', { error, channelId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Messages retrieved successfully', {
@@ -409,9 +428,9 @@ export async function getMessages(
     })
 
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception getting messages', { error, channelId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -424,10 +443,10 @@ export async function sendMessage(
   message: {
     content: string
     message_type?: MessageType
-    attachments?: any[]
+    attachments?: MessageAttachment[]
     parent_message_id?: string
   }
-): Promise<{ data: Message | null; error: any }> {
+): Promise<{ data: Message | null; error: DatabaseError | null }> {
   try {
     logger.info('Sending message to Supabase', { channelId, userId })
 
@@ -447,7 +466,7 @@ export async function sendMessage(
 
     if (error) {
       logger.error('Failed to send message', { error, channelId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Message sent successfully', {
@@ -456,9 +475,9 @@ export async function sendMessage(
     })
 
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception sending message', { error, channelId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -468,7 +487,7 @@ export async function sendMessage(
 export async function deleteMessage(
   messageId: string,
   userId: string
-): Promise<{ success: boolean; error: any }> {
+): Promise<{ success: boolean; error: DatabaseError | null }> {
   try {
     logger.info('Deleting message from Supabase', { messageId, userId })
 
@@ -481,15 +500,15 @@ export async function deleteMessage(
 
     if (error) {
       logger.error('Failed to delete message', { error, messageId })
-      return { success: false, error }
+      return { success: false, error: toDbError(error) }
     }
 
     logger.info('Message deleted successfully', { messageId })
 
     return { success: true, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception deleting message', { error, messageId })
-    return { success: false, error }
+    return { success: false, error: toDbError(error) }
   }
 }
 
@@ -507,7 +526,7 @@ export async function getTeams(
     status?: 'active' | 'archived'
     is_favorite?: boolean
   }
-): Promise<{ data: Team[] | null; error: any }> {
+): Promise<{ data: Team[] | null; error: DatabaseError | null }> {
   try {
     logger.info('Getting teams from Supabase', { userId, filters })
 
@@ -534,7 +553,7 @@ export async function getTeams(
 
     if (error) {
       logger.error('Failed to get teams', { error, userId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Teams retrieved successfully', {
@@ -543,9 +562,9 @@ export async function getTeams(
     })
 
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception getting teams', { error, userId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -560,7 +579,7 @@ export async function createTeam(
     team_type: TeamType
     avatar_url?: string
   }
-): Promise<{ data: Team | null; error: any }> {
+): Promise<{ data: Team | null; error: DatabaseError | null }> {
   try {
     logger.info('Creating team in Supabase', { userId, team_name: team.name })
 
@@ -582,7 +601,7 @@ export async function createTeam(
 
     if (error) {
       logger.error('Failed to create team', { error, userId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Team created successfully', {
@@ -591,9 +610,9 @@ export async function createTeam(
     })
 
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception creating team', { error, userId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -604,7 +623,7 @@ export async function updateTeam(
   teamId: string,
   userId: string,
   updates: Partial<Team>
-): Promise<{ data: Team | null; error: any }> {
+): Promise<{ data: Team | null; error: DatabaseError | null }> {
   try {
     logger.info('Updating team in Supabase', { teamId, userId })
 
@@ -619,15 +638,15 @@ export async function updateTeam(
 
     if (error) {
       logger.error('Failed to update team', { error, teamId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Team updated successfully', { teamId })
 
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception updating team', { error, teamId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -637,7 +656,7 @@ export async function updateTeam(
 export async function deleteTeam(
   teamId: string,
   userId: string
-): Promise<{ success: boolean; error: any }> {
+): Promise<{ success: boolean; error: DatabaseError | null }> {
   try {
     logger.info('Deleting team from Supabase', { teamId, userId })
 
@@ -650,15 +669,15 @@ export async function deleteTeam(
 
     if (error) {
       logger.error('Failed to delete team', { error, teamId })
-      return { success: false, error }
+      return { success: false, error: toDbError(error) }
     }
 
     logger.info('Team deleted successfully', { teamId })
 
     return { success: true, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception deleting team', { error, teamId })
-    return { success: false, error }
+    return { success: false, error: toDbError(error) }
   }
 }
 
@@ -676,7 +695,7 @@ export async function getWorkspaceFiles(
     visibility?: FileVisibility
     search?: string
   }
-): Promise<{ data: WorkspaceFile[] | null; error: any }> {
+): Promise<{ data: WorkspaceFile[] | null; error: DatabaseError | null }> {
   try {
     logger.info('Getting workspace files from Supabase', { userId, filters })
 
@@ -703,7 +722,7 @@ export async function getWorkspaceFiles(
 
     if (error) {
       logger.error('Failed to get workspace files', { error, userId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Workspace files retrieved successfully', {
@@ -712,9 +731,9 @@ export async function getWorkspaceFiles(
     })
 
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception getting workspace files', { error, userId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -733,7 +752,7 @@ export async function uploadWorkspaceFile(
     visibility?: FileVisibility
     tags?: string[]
   }
-): Promise<{ data: WorkspaceFile | null; error: any }> {
+): Promise<{ data: WorkspaceFile | null; error: DatabaseError | null }> {
   try {
     logger.info('Uploading workspace file to Supabase', { userId, file_name: file.name })
 
@@ -758,7 +777,7 @@ export async function uploadWorkspaceFile(
 
     if (error) {
       logger.error('Failed to upload workspace file', { error, userId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Workspace file uploaded successfully', {
@@ -767,9 +786,9 @@ export async function uploadWorkspaceFile(
     })
 
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception uploading workspace file', { error, userId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -779,7 +798,7 @@ export async function uploadWorkspaceFile(
 export async function deleteWorkspaceFile(
   fileId: string,
   userId: string
-): Promise<{ success: boolean; error: any }> {
+): Promise<{ success: boolean; error: DatabaseError | null }> {
   try {
     logger.info('Deleting workspace file from Supabase', { fileId, userId })
 
@@ -792,15 +811,15 @@ export async function deleteWorkspaceFile(
 
     if (error) {
       logger.error('Failed to delete workspace file', { error, fileId })
-      return { success: false, error }
+      return { success: false, error: toDbError(error) }
     }
 
     logger.info('Workspace file deleted successfully', { fileId })
 
     return { success: true, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception deleting workspace file', { error, fileId })
-    return { success: false, error }
+    return { success: false, error: toDbError(error) }
   }
 }
 
@@ -817,7 +836,7 @@ export async function getMeetings(
     status?: MeetingStatus
     date_range?: { start: string; end: string }
   }
-): Promise<{ data: Meeting[] | null; error: any }> {
+): Promise<{ data: Meeting[] | null; error: DatabaseError | null }> {
   try {
     logger.info('Getting meetings from Supabase', { userId, filters })
 
@@ -842,7 +861,7 @@ export async function getMeetings(
 
     if (error) {
       logger.error('Failed to get meetings', { error, userId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Meetings retrieved successfully', {
@@ -851,9 +870,9 @@ export async function getMeetings(
     })
 
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception getting meetings', { error, userId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -871,7 +890,7 @@ export async function createMeeting(
     is_recurring?: boolean
     max_participants?: number
   }
-): Promise<{ data: Meeting | null; error: any }> {
+): Promise<{ data: Meeting | null; error: DatabaseError | null }> {
   try {
     logger.info('Creating meeting in Supabase', { userId, meeting_title: meeting.title })
 
@@ -896,7 +915,7 @@ export async function createMeeting(
 
     if (error) {
       logger.error('Failed to create meeting', { error, userId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Meeting created successfully', {
@@ -905,9 +924,9 @@ export async function createMeeting(
     })
 
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception creating meeting', { error, userId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -918,7 +937,7 @@ export async function updateMeeting(
   meetingId: string,
   userId: string,
   updates: Partial<Meeting>
-): Promise<{ data: Meeting | null; error: any }> {
+): Promise<{ data: Meeting | null; error: DatabaseError | null }> {
   try {
     logger.info('Updating meeting in Supabase', { meetingId, userId })
 
@@ -933,15 +952,15 @@ export async function updateMeeting(
 
     if (error) {
       logger.error('Failed to update meeting', { error, meetingId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Meeting updated successfully', { meetingId })
 
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception updating meeting', { error, meetingId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -951,7 +970,7 @@ export async function updateMeeting(
 export async function deleteMeeting(
   meetingId: string,
   userId: string
-): Promise<{ success: boolean; error: any }> {
+): Promise<{ success: boolean; error: DatabaseError | null }> {
   try {
     logger.info('Deleting meeting from Supabase', { meetingId, userId })
 
@@ -964,14 +983,14 @@ export async function deleteMeeting(
 
     if (error) {
       logger.error('Failed to delete meeting', { error, meetingId })
-      return { success: false, error }
+      return { success: false, error: toDbError(error) }
     }
 
     logger.info('Meeting deleted successfully', { meetingId })
 
     return { success: true, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception deleting meeting', { error, meetingId })
-    return { success: false, error }
+    return { success: false, error: toDbError(error) }
   }
 }

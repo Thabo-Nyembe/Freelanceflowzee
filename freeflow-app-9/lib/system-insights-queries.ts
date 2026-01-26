@@ -2,6 +2,7 @@
 // System monitoring, performance tracking, error logging, and health metrics
 
 import { createClient } from '@/lib/supabase/client'
+import type { JsonValue } from '@/lib/types/database'
 
 // ============================================================================
 // TYPES
@@ -34,7 +35,7 @@ export interface SystemMetric {
   endpoint?: string
   service?: string
   environment: string
-  metadata?: any
+  metadata?: Record<string, JsonValue>
   tags?: string[]
   timestamp: string
   created_at: string
@@ -54,7 +55,7 @@ export interface PerformanceLog {
   database_time?: number
   memory_mb?: number
   cpu_percent?: number
-  metadata?: any
+  metadata?: Record<string, JsonValue>
   timestamp: string
   created_at: string
 }
@@ -79,7 +80,7 @@ export interface ErrorLog {
   resolved_at?: string
   resolved_by?: string
   resolution_notes?: string
-  metadata?: any
+  metadata?: Record<string, JsonValue>
   timestamp: string
   created_at: string
 }
@@ -98,7 +99,7 @@ export interface SystemHealth {
   active_users: number
   critical_issues: number
   warnings: number
-  metadata?: any
+  metadata?: Record<string, JsonValue>
   checked_at: string
   created_at: string
 }
@@ -117,7 +118,7 @@ export interface ResourceUsage {
   usage_7d_ago?: number
   alert_threshold: number
   is_alerting: boolean
-  metadata?: any
+  metadata?: Record<string, JsonValue>
   timestamp: string
   created_at: string
 }
@@ -138,7 +139,7 @@ export interface ApiPerformance {
   p99_response_time: number
   period_start: string
   period_end: string
-  metadata?: any
+  metadata?: Record<string, JsonValue>
   created_at: string
 }
 
@@ -160,7 +161,7 @@ export interface SystemAlert {
   resolved_at?: string
   resolved_by?: string
   resolution_notes?: string
-  metadata?: any
+  metadata?: Record<string, JsonValue>
   triggered_at: string
   created_at: string
 }
@@ -195,7 +196,7 @@ export async function logMetric(metricData: {
   metric_unit: string
   endpoint?: string
   service?: string
-  metadata?: any
+  metadata?: Record<string, JsonValue>
   tags?: string[]
 }) {
   const supabase = createClient()
@@ -361,7 +362,7 @@ export async function logPerformance(performanceData: {
   database_time?: number
   memory_mb?: number
   cpu_percent?: number
-  metadata?: any
+  metadata?: Record<string, JsonValue>
 }) {
   const supabase = createClient()
 
@@ -520,7 +521,7 @@ export async function logError(errorData: {
   browser?: string
   os?: string
   device?: string
-  metadata?: any
+  metadata?: Record<string, JsonValue>
 }) {
   const supabase = createClient()
 
@@ -886,7 +887,7 @@ export async function createAlert(alertData: {
   resource_id?: string
   threshold_value?: number
   current_value?: number
-  metadata?: any
+  metadata?: Record<string, JsonValue>
 }) {
   const supabase = createClient()
 

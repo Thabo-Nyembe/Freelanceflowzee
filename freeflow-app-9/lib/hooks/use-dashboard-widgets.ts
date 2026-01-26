@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import type { JsonValue } from '@/lib/types/database'
 
 export interface DashboardWidget {
   id: string
@@ -11,7 +12,7 @@ export interface DashboardWidget {
   position: number
   width: string
   height: string
-  config: Record<string, any>
+  config: Record<string, JsonValue>
   is_visible: boolean
   created_at: string
   updated_at: string
@@ -34,7 +35,7 @@ export function useDashboardWidgets(initialWidgets: DashboardWidget[] = []) {
       if (error) throw error
       setWidgets(data || [])
     } catch (err: unknown) {
-      setError(err.message)
+      setError(err instanceof Error ? err.message : 'An unknown error occurred')
     } finally {
       setIsLoading(false)
     }

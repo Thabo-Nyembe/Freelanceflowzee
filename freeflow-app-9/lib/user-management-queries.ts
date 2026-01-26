@@ -2,6 +2,7 @@
 // Admin-level user management: invitations, roles, permissions, activity tracking, and team organization
 
 import { createClient } from '@/lib/supabase/client'
+import type { JsonValue } from '@/lib/types/database'
 
 // ============================================================================
 // TYPES
@@ -29,7 +30,7 @@ export interface ManagedUser {
   storage_used?: number
   projects_count?: number
   is_verified?: boolean
-  metadata?: any
+  metadata?: Record<string, JsonValue>
   created_at: string
   updated_at: string
 }
@@ -45,7 +46,7 @@ export interface UserInvitation {
   expires_at: string
   accepted_at?: string
   created_at: string
-  metadata?: any
+  metadata?: Record<string, JsonValue>
 }
 
 export interface UserActivity {
@@ -58,7 +59,7 @@ export interface UserActivity {
   resource_id?: string
   ip_address?: string
   user_agent?: string
-  metadata?: any
+  metadata?: Record<string, JsonValue>
   created_at: string
 }
 
@@ -94,7 +95,7 @@ export interface RolePermissions {
   can_read: boolean
   can_update: boolean
   can_delete: boolean
-  metadata?: any
+  metadata?: Record<string, JsonValue>
 }
 
 export interface UserStats {
@@ -350,7 +351,7 @@ export async function logActivity(activityData: {
   description: string
   resource?: string
   resource_id?: string
-  metadata?: any
+  metadata?: Record<string, JsonValue>
 }) {
   const supabase = createClient()
 

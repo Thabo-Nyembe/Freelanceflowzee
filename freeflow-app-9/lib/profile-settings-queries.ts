@@ -4,6 +4,7 @@
  */
 
 import { createClient } from '@/lib/supabase/client'
+import { DatabaseError, toDbError, JsonValue } from '@/lib/types/database'
 
 // ============================================================================
 // TYPES
@@ -42,9 +43,9 @@ export interface ProfileActivityLog {
   user_agent?: string
   device?: string
   location?: string
-  metadata: Record<string, any>
-  before_value?: Record<string, any>
-  after_value?: Record<string, any>
+  metadata: Record<string, JsonValue>
+  before_value?: Record<string, JsonValue>
+  after_value?: Record<string, JsonValue>
   created_at: string
 }
 
@@ -684,44 +685,50 @@ const supabase = createClient()
 
 export async function updateActivityLog(
   logId: string,
-  updates: Partial<{ action: string; metadata: any }>
-): Promise<{ data: any; error: any }> {
+  updates: Partial<{ action: string; metadata: Record<string, JsonValue> }>
+): Promise<{ data: ProfileActivityLog | null; error: DatabaseError | null }> {
   const { data, error } = await supabase
     .from('profile_activity_logs')
     .update({ ...updates, updated_at: new Date().toISOString() })
     .eq('id', logId)
     .select()
     .single()
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 export async function deleteActivityLog(
   logId: string
-): Promise<{ data: any; error: any }> {
-  const { data, error } = await supabase
+): Promise<{ data: null; error: DatabaseError | null }> {
+  const { error } = await supabase
     .from('profile_activity_logs')
     .delete()
     .eq('id', logId)
-  return { data, error }
+  return { data: null, error: error ? toDbError(error) : null }
 }
 
 export async function getActivityByType(
   userId: string,
   type: string
-): Promise<any[]> {
+): Promise<ProfileActivityLog[]> {
   const { data } = await supabase
     .from('profile_activity_logs')
     .select('*')
     .eq('user_id', userId)
     .eq('activity_type', type)
     .order('created_at', { ascending: false })
-  return data || []
+  return (data as ProfileActivityLog[] | null) || []
+}
+
+export interface ProfileGrowthMetrics {
+  views: number
+  period: string
+  averagePerDay: number
 }
 
 export async function getProfileGrowth(
   userId: string,
   days: number = 30
-): Promise<any> {
+): Promise<ProfileGrowthMetrics> {
   const startDate = new Date()
   startDate.setDate(startDate.getDate() - days)
 
@@ -741,7 +748,7 @@ export async function getProfileGrowth(
 export async function getViewsByPeriod(
   userId: string,
   period: '7d' | '30d' | '90d' | '365d'
-): Promise<any[]> {
+): Promise<ProfileView[]> {
   const days = parseInt(period) || 30
   const startDate = new Date()
   startDate.setDate(startDate.getDate() - days)
@@ -751,74 +758,74 @@ export async function getViewsByPeriod(
     .select('*')
     .eq('profile_user_id', userId)
     .gte('created_at', startDate.toISOString())
-  return data || []
+  return (data as ProfileView[] | null) || []
 }
 
 export async function deleteProfileView(
   viewId: string
-): Promise<{ data: any; error: any }> {
-  const { data, error } = await supabase
+): Promise<{ data: null; error: DatabaseError | null }> {
+  const { error } = await supabase
     .from('profile_views')
     .delete()
     .eq('id', viewId)
-  return { data, error }
+  return { data: null, error: error ? toDbError(error) : null }
 }
 
 export async function createConnection(
   userId: string,
   connection: { connected_user_id: string; platform?: string }
-): Promise<{ data: any; error: any }> {
+): Promise<{ data: SocialConnection | null; error: DatabaseError | null }> {
   const { data, error } = await supabase
     .from('social_connections')
     .insert({ user_id: userId, ...connection, status: 'pending' })
     .select()
     .single()
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 export async function updateConnection(
   connectionId: string,
-  updates: Partial<{ status: string; notes: string }>
-): Promise<{ data: any; error: any }> {
+  updates: Partial<{ status: ConnectionStatus; notes: string }>
+): Promise<{ data: SocialConnection | null; error: DatabaseError | null }> {
   const { data, error } = await supabase
     .from('social_connections')
     .update({ ...updates, updated_at: new Date().toISOString() })
     .eq('id', connectionId)
     .select()
     .single()
-  return { data, error }
+  return { data, error: error ? toDbError(error) : null }
 }
 
 export async function deleteConnection(
   connectionId: string
-): Promise<{ data: any; error: any }> {
-  const { data, error } = await supabase
+): Promise<{ data: null; error: DatabaseError | null }> {
+  const { error } = await supabase
     .from('social_connections')
     .delete()
     .eq('id', connectionId)
-  return { data, error }
+  return { data: null, error: error ? toDbError(error) : null }
 }
 
 export async function getConnectionsByPlatform(
   userId: string,
   platform: string
-): Promise<any[]> {
+): Promise<SocialConnection[]> {
   const { data } = await supabase
     .from('social_connections')
     .select('*')
     .eq('user_id', userId)
     .eq('platform', platform)
-  return data || []
+  return (data as SocialConnection[] | null) || []
 }
 
 export async function disconnectPlatform(
   userId: string,
   platform: string
-): Promise<{ data: any; error: any }> {
-  const { data, error } = await supabase
+): Promise<{ data: null; error: DatabaseError | null }> {
+  const { error } = await supabase
     .from('social_connections')
     .delete()
     .eq('user_id', userId)
     .eq('platform', platform)
-  return { data, error }
+  return { data: null, error: error ? toDbError(error) : null }
 }

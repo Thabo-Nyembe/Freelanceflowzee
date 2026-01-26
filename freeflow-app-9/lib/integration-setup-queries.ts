@@ -4,6 +4,7 @@
  */
 
 import { createClient } from '@/lib/supabase/client'
+import { DatabaseError, toDbError, JsonValue } from '@/lib/types/database'
 
 // ============================================================================
 // TYPES
@@ -26,8 +27,8 @@ export interface IntegrationSetupSession {
   completed_at?: string
   abandoned_at?: string
   time_spent_seconds: number
-  config_snapshot: Record<string, any>
-  user_selections: Record<string, any>
+  config_snapshot: Record<string, JsonValue>
+  user_selections: Record<string, JsonValue>
   referrer?: string
   device_type?: string
   browser?: string
@@ -45,7 +46,7 @@ export interface IntegrationSetupStep {
   started_at?: string
   completed_at?: string
   time_spent_seconds: number
-  step_data: Record<string, any>
+  step_data: Record<string, JsonValue>
   validation_errors?: string[]
   help_accessed: boolean
   skip_reason?: string
@@ -61,8 +62,8 @@ export interface IntegrationValidationResult {
   validation_type: string
   validation_status: ValidationStatus
   test_endpoint?: string
-  test_request?: Record<string, any>
-  test_response?: Record<string, any>
+  test_request?: Record<string, JsonValue>
+  test_response?: Record<string, JsonValue>
   is_valid: boolean
   error_message?: string
   error_code?: string
@@ -88,7 +89,7 @@ export interface IntegrationOnboardingProgress {
   completed_at?: string
   skipped_optional: boolean
   selected_integrations: string[]
-  onboarding_metadata: Record<string, any>
+  onboarding_metadata: Record<string, JsonValue>
   created_at: string
   updated_at: string
 }
@@ -104,8 +105,8 @@ export interface IntegrationSetupError {
   occurred_at_step?: number
   integration_id?: string
   stack_trace?: string
-  request_data?: Record<string, any>
-  response_data?: Record<string, any>
+  request_data?: Record<string, JsonValue>
+  response_data?: Record<string, JsonValue>
   is_resolved: boolean
   resolved_at?: string
   resolution_notes?: string
@@ -254,7 +255,7 @@ export async function startStep(stepId: string) {
     .single()
 }
 
-export async function completeStep(stepId: string, stepData?: Record<string, any>) {
+export async function completeStep(stepId: string, stepData?: Record<string, JsonValue>) {
   const supabase = createClient()
   return await supabase
     .from('integration_setup_steps')

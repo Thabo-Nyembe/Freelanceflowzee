@@ -7,9 +7,82 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import type { JsonValue, DatabaseError } from '@/lib/types/database'
+import { toDbError } from '@/lib/types/database'
+
+/**
+ * Subscription record from database
+ */
+export interface SubscriptionRecord {
+  id: string
+  user_id: string
+  plan_id?: string
+  plan_type?: string
+  status: string
+  billing_cycle?: string
+  billing_interval?: string
+  amount?: number
+  currency?: string
+  current_period_start?: string
+  current_period_end?: string
+  trial_start?: string
+  trial_end?: string
+  cancel_at_period_end?: boolean
+  canceled_at?: string
+  cancellation_reason?: string
+  stripe_subscription_id?: string
+  stripe_customer_id?: string
+  metadata?: Record<string, JsonValue>
+  created_at: string
+  updated_at?: string
+}
+
+/**
+ * Subscription usage record from database
+ */
+export interface SubscriptionUsageRecord {
+  id: string
+  subscription_id: string
+  feature: string
+  quantity: number
+  timestamp: string
+  metadata?: Record<string, JsonValue>
+  created_at: string
+}
+
+/**
+ * Subscription statistics
+ */
+export interface SubscriptionStats {
+  total: number
+  byStatus: Record<string, number>
+  byPlan: Record<string, number>
+  byBillingCycle: Record<string, number>
+}
+
+/**
+ * Subscription data for create/update operations
+ */
+export interface SubscriptionInput {
+  plan_id?: string
+  plan_type?: string
+  status?: string
+  billing_cycle?: string
+  billing_interval?: string
+  amount?: number
+  currency?: string
+  current_period_start?: string
+  current_period_end?: string
+  trial_start?: string
+  trial_end?: string
+  cancel_at_period_end?: boolean
+  stripe_subscription_id?: string
+  stripe_customer_id?: string
+  metadata?: Record<string, JsonValue>
+}
 
 export function useSubscription(subscriptionId?: string) {
-  const [subscription, setSubscription] = useState<any>(null)
+  const [subscription, setSubscription] = useState<SubscriptionRecord | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
   const supabase = createClient()
@@ -25,7 +98,7 @@ export function useSubscription(subscriptionId?: string) {
 }
 
 export function useUserSubscription(userId?: string) {
-  const [subscription, setSubscription] = useState<any>(null)
+  const [subscription, setSubscription] = useState<SubscriptionRecord | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
   const supabase = createClient()
@@ -41,7 +114,7 @@ export function useUserSubscription(userId?: string) {
 }
 
 export function useUserSubscriptions(userId?: string, options?: { status?: string; includeAll?: boolean }) {
-  const [data, setData] = useState<any[]>([])
+  const [data, setData] = useState<SubscriptionRecord[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
   const supabase = createClient()
@@ -86,7 +159,7 @@ export function useSubscriptionStatus(userId?: string) {
 }
 
 export function useSubscriptionUsage(subscriptionId?: string, options?: { feature?: string; startDate?: string; endDate?: string }) {
-  const [data, setData] = useState<any[]>([])
+  const [data, setData] = useState<SubscriptionUsageRecord[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
   const supabase = createClient()
@@ -143,7 +216,7 @@ export function useSubscriptionFeatureLimit(subscriptionId?: string, feature?: s
 }
 
 export function useActiveSubscriptions(options?: { planId?: string; billingCycle?: string; limit?: number }) {
-  const [data, setData] = useState<any[]>([])
+  const [data, setData] = useState<SubscriptionRecord[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
   const supabase = createClient()
@@ -161,13 +234,13 @@ export function useActiveSubscriptions(options?: { planId?: string; billingCycle
 }
 
 export function useSubscriptionRealtime(subscriptionId?: string) {
-  const [subscription, setSubscription] = useState<any>(null)
+  const [subscription, setSubscription] = useState<SubscriptionRecord | null>(null)
   const supabase = createClient()
   useEffect(() => {
     if (!subscriptionId) return
     supabase.from('subscriptions').select('*').eq('id', subscriptionId).single().then(({ data }) => setSubscription(data))
     const channel = supabase.channel(`subscription_${subscriptionId}`)
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'subscriptions', filter: `id=eq.${subscriptionId}` }, (payload) => setSubscription(payload.new))
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'subscriptions', filter: `id=eq.${subscriptionId}` }, (payload) => setSubscription(payload.new as SubscriptionRecord))
       .subscribe()
     return () => { supabase.removeChannel(channel) }
   }, [subscriptionId])
@@ -175,7 +248,7 @@ export function useSubscriptionRealtime(subscriptionId?: string) {
 }
 
 export function useSubscriptionStats() {
-  const [stats, setStats] = useState<any>(null)
+  const [stats, setStats] = useState<SubscriptionStats | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const fetch = useCallback(async () => {
   const supabase = createClient()
@@ -197,10 +270,10 @@ export function useSubscriptionStats() {
 
 export function useCreateSubscription() {
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<Error | null>(null)
+  const [error, setError] = useState<DatabaseError | null>(null)
   const supabase = createClient()
 
-  const create = useCallback(async (subscriptionData: any) => {
+  const create = useCallback(async (subscriptionData: SubscriptionInput) => {
     setIsLoading(true)
     setError(null)
     try {
@@ -212,8 +285,9 @@ export function useCreateSubscription() {
         .single()
       if (createError) throw createError
       return data
-    } catch (err) {
-      setError(err as Error)
+    } catch (err: unknown) {
+      const dbError = toDbError(err)
+      setError(dbError)
       throw err
     } finally {
       setIsLoading(false)

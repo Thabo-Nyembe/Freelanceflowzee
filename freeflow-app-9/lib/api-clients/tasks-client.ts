@@ -8,6 +8,21 @@
 import { BaseApiClient } from './base-client'
 import { createClient } from '@/lib/supabase/client'
 
+// Type for tasks with completion dates (used in helper functions)
+interface TaskWithDates {
+  id: string
+  title: string
+  status: string
+  priority: string
+  due_date: string | null
+  created_at: string
+  completed_at: string | null
+  estimated_hours: number | null
+  actual_hours: number | null
+  project_id: string | null
+  projects?: { title: string } | null
+}
+
 export interface Task {
   id: string
   user_id: string
@@ -416,7 +431,7 @@ class TasksApiClient extends BaseApiClient {
 
     const comments = [...(task.comments || []), newComment]
 
-    return this.updateTask(taskId, { comments } as any)
+    return this.updateTask(taskId, { comments } as unknown as UpdateTaskData)
   }
 
   /**
@@ -502,13 +517,13 @@ class TasksApiClient extends BaseApiClient {
   /**
    * Helper: Calculate average completion time
    */
-  private calculateAverageCompletionTime(tasks: any[]): number {
+  private calculateAverageCompletionTime(tasks: TaskWithDates[]): number {
     const tasksWithDates = tasks.filter(t => t.created_at && t.completed_at)
     if (tasksWithDates.length === 0) return 0
 
     const totalDays = tasksWithDates.reduce((sum, t) => {
       const created = new Date(t.created_at)
-      const completed = new Date(t.completed_at)
+      const completed = new Date(t.completed_at!)
       const days = Math.floor((completed.getTime() - created.getTime()) / (1000 * 60 * 60 * 24))
       return sum + days
     }, 0)
@@ -519,7 +534,7 @@ class TasksApiClient extends BaseApiClient {
   /**
    * Helper: Group tasks by project
    */
-  private groupTasksByProject(tasks: any[]): Array<{
+  private groupTasksByProject(tasks: TaskWithDates[]): Array<{
     project_id: string
     project_name: string
     tasks: number

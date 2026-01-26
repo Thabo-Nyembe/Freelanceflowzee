@@ -3,6 +3,7 @@
  */
 
 import { createClient } from '@/lib/supabase/client'
+import type { JsonValue } from '@/lib/types/database'
 
 export type ThemeMode = 'light' | 'dark' | 'system'
 export type SessionTimeout = '15m' | '1h' | '4h' | '12h' | '24h' | '7d' | '30d' | 'never'
@@ -12,6 +13,17 @@ export type TwoFactorMethod = 'sms' | 'email' | 'authenticator' | 'none'
 export type DigestFrequency = 'daily' | 'weekly' | 'monthly' | 'never'
 export type TimeFormat = '12h' | '24h'
 export type FontSize = 'small' | 'medium' | 'large' | 'xlarge'
+
+export interface ActiveSession {
+  id: string
+  device: string
+  browser?: string
+  ip_address?: string
+  location?: string
+  last_active: string
+  created_at: string
+  is_current?: boolean
+}
 
 export interface UserProfile {
   id: string
@@ -113,7 +125,7 @@ export interface SecuritySettings {
   password_expiry_days?: number
 
   // Active Sessions
-  active_sessions: any[]
+  active_sessions: ActiveSession[]
 
   created_at: string
   updated_at: string
@@ -144,7 +156,7 @@ export interface AppearanceSettings {
 
   // Layout
   sidebar_collapsed: boolean
-  dashboard_layout: Record<string, any>
+  dashboard_layout: Record<string, JsonValue>
   pinned_items: string[]
 
   created_at: string
@@ -242,7 +254,7 @@ export async function updatePasswordChanged(userId: string) {
   return await supabase.from('security_settings').update({ password_last_changed: new Date().toISOString() }).eq('user_id', userId).select().single()
 }
 
-export async function addActiveSession(userId: string, session: any) {
+export async function addActiveSession(userId: string, session: ActiveSession) {
   const supabase = createClient()
   const { data: settings } = await supabase.from('security_settings').select('active_sessions').eq('user_id', userId).single()
   if (!settings) return { data: null, error: new Error('Security settings not found') }
@@ -256,7 +268,7 @@ export async function removeActiveSession(userId: string, sessionId: string) {
   const { data: settings } = await supabase.from('security_settings').select('active_sessions').eq('user_id', userId).single()
   if (!settings) return { data: null, error: new Error('Security settings not found') }
 
-  const activeSessions = (settings.active_sessions || []).filter((s: any) => s.id !== sessionId)
+  const activeSessions = (settings.active_sessions || []).filter((s: ActiveSession) => s.id !== sessionId)
   return await supabase.from('security_settings').update({ active_sessions: activeSessions }).eq('user_id', userId).select().single()
 }
 

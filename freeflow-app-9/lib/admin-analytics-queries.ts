@@ -2,6 +2,7 @@
 // Comprehensive queries for revenue tracking, conversion analysis, traffic sources, and business intelligence
 
 import { createClient } from '@/lib/supabase/client'
+import { DatabaseError, toDbError, JsonValue } from '@/lib/types/database'
 
 // ============================================================================
 // TYPES
@@ -16,6 +17,61 @@ export type InsightType = 'opportunity' | 'warning' | 'success' | 'info'
 export type InsightPriority = 'high' | 'medium' | 'low'
 export type ReportType = 'revenue' | 'conversion' | 'traffic' | 'full'
 export type ReportFormat = 'pdf' | 'csv' | 'xlsx' | 'json'
+
+// Additional interfaces for structured data
+export interface PageView {
+  path: string
+  title: string
+  views: number
+  avg_time_on_page: number
+}
+
+export interface DeviceInfo {
+  device_type: string
+  browser: string
+  os: string
+  count: number
+  percentage: number
+}
+
+export interface LocationInfo {
+  country: string
+  region?: string
+  city?: string
+  count: number
+  percentage: number
+}
+
+export interface AnalyticsMetricRecord {
+  id: string
+  user_id: string
+  name: string
+  value: number
+  type?: string
+  created_at: string
+  updated_at?: string
+}
+
+export interface AnalyticsReportRecord {
+  id: string
+  user_id: string
+  name: string
+  type?: string
+  status?: string
+  config?: Record<string, JsonValue>
+  completed_at?: string
+  created_at: string
+  updated_at?: string
+}
+
+export interface FunnelStage {
+  id: string
+  user_id: string
+  stage_name: string
+  stage_order: number
+  count: number
+  created_at: string
+}
 
 export interface RevenueData {
   id: string
@@ -97,7 +153,7 @@ export interface AnalyticsReport {
   format: ReportFormat
   custom_start_date?: string
   custom_end_date?: string
-  data: Record<string, any>
+  data: Record<string, JsonValue>
   file_url?: string
   file_size?: number
   generated_at: string
@@ -112,9 +168,9 @@ export interface UserAnalytics {
   total_pageviews: number
   avg_session_duration: number
   bounce_rate: number
-  top_pages: any[]
-  devices: any[]
-  locations: any[]
+  top_pages: PageView[]
+  devices: DeviceInfo[]
+  locations: LocationInfo[]
   updated_at: string
 }
 
@@ -700,180 +756,180 @@ const supabase = createClient()
 
 export async function getAnalyticsMetrics(
   userId: string
-): Promise<{ data: any[]; error: any }> {
+): Promise<{ data: AnalyticsMetricRecord[]; error: DatabaseError | null }> {
   const { data, error } = await supabase
     .from('analytics_metrics')
     .select('*')
     .eq('user_id', userId)
-  return { data: data || [], error }
+  return { data: (data as AnalyticsMetricRecord[]) || [], error: error ? toDbError(error) : null }
 }
 
 export async function createMetric(
   userId: string,
   metric: { name: string; value: number; type?: string }
-): Promise<{ data: any; error: any }> {
+): Promise<{ data: AnalyticsMetricRecord | null; error: DatabaseError | null }> {
   const { data, error } = await supabase
     .from('analytics_metrics')
     .insert({ user_id: userId, ...metric })
     .select()
     .single()
-  return { data, error }
+  return { data: data as AnalyticsMetricRecord | null, error: error ? toDbError(error) : null }
 }
 
 export async function updateMetric(
   metricId: string,
   updates: Partial<{ value: number; name: string }>
-): Promise<{ data: any; error: any }> {
+): Promise<{ data: AnalyticsMetricRecord | null; error: DatabaseError | null }> {
   const { data, error } = await supabase
     .from('analytics_metrics')
     .update({ ...updates, updated_at: new Date().toISOString() })
     .eq('id', metricId)
     .select()
     .single()
-  return { data, error }
+  return { data: data as AnalyticsMetricRecord | null, error: error ? toDbError(error) : null }
 }
 
 export async function deleteMetric(
   metricId: string
-): Promise<{ data: any; error: any }> {
-  const { data, error } = await supabase
+): Promise<{ data: null; error: DatabaseError | null }> {
+  const { error } = await supabase
     .from('analytics_metrics')
     .delete()
     .eq('id', metricId)
-  return { data, error }
+  return { data: null, error: error ? toDbError(error) : null }
 }
 
 export async function getAnalyticsInsights(
   userId: string
-): Promise<{ data: any[]; error: any }> {
+): Promise<{ data: AnalyticsInsight[]; error: DatabaseError | null }> {
   const { data, error } = await supabase
     .from('analytics_insights')
     .select('*')
     .eq('user_id', userId)
-  return { data: data || [], error }
+  return { data: (data as AnalyticsInsight[]) || [], error: error ? toDbError(error) : null }
 }
 
 export async function updateInsight(
   insightId: string,
   updates: Partial<{ content: string; status: string }>
-): Promise<{ data: any; error: any }> {
+): Promise<{ data: AnalyticsInsight | null; error: DatabaseError | null }> {
   const { data, error } = await supabase
     .from('analytics_insights')
     .update({ ...updates, updated_at: new Date().toISOString() })
     .eq('id', insightId)
     .select()
     .single()
-  return { data, error }
+  return { data: data as AnalyticsInsight | null, error: error ? toDbError(error) : null }
 }
 
 export async function deleteInsight(
   insightId: string
-): Promise<{ data: any; error: any }> {
-  const { data, error } = await supabase
+): Promise<{ data: null; error: DatabaseError | null }> {
+  const { error } = await supabase
     .from('analytics_insights')
     .delete()
     .eq('id', insightId)
-  return { data, error }
+  return { data: null, error: error ? toDbError(error) : null }
 }
 
 export async function getInsightsByCategory(
   userId: string,
   category: string
-): Promise<any[]> {
+): Promise<AnalyticsInsight[]> {
   const { data } = await supabase
     .from('analytics_insights')
     .select('*')
     .eq('user_id', userId)
     .eq('category', category)
-  return data || []
+  return (data as AnalyticsInsight[]) || []
 }
 
 export async function getAnalyticsReports(
   userId: string
-): Promise<{ data: any[]; error: any }> {
+): Promise<{ data: AnalyticsReportRecord[]; error: DatabaseError | null }> {
   const { data, error } = await supabase
     .from('analytics_reports')
     .select('*')
     .eq('user_id', userId)
-  return { data: data || [], error }
+  return { data: (data as AnalyticsReportRecord[]) || [], error: error ? toDbError(error) : null }
 }
 
 export async function createReport(
   userId: string,
-  report: { name: string; type?: string; config?: any }
-): Promise<{ data: any; error: any }> {
+  report: { name: string; type?: string; config?: Record<string, JsonValue> }
+): Promise<{ data: AnalyticsReportRecord | null; error: DatabaseError | null }> {
   const { data, error } = await supabase
     .from('analytics_reports')
     .insert({ user_id: userId, ...report })
     .select()
     .single()
-  return { data, error }
+  return { data: data as AnalyticsReportRecord | null, error: error ? toDbError(error) : null }
 }
 
 export async function updateReport(
   reportId: string,
-  updates: Partial<{ name: string; config: any }>
-): Promise<{ data: any; error: any }> {
+  updates: Partial<{ name: string; config: Record<string, JsonValue> }>
+): Promise<{ data: AnalyticsReportRecord | null; error: DatabaseError | null }> {
   const { data, error } = await supabase
     .from('analytics_reports')
     .update({ ...updates, updated_at: new Date().toISOString() })
     .eq('id', reportId)
     .select()
     .single()
-  return { data, error }
+  return { data: data as AnalyticsReportRecord | null, error: error ? toDbError(error) : null }
 }
 
 export async function getReportsByStatus(
   userId: string,
   status: string
-): Promise<any[]> {
+): Promise<AnalyticsReportRecord[]> {
   const { data } = await supabase
     .from('analytics_reports')
     .select('*')
     .eq('user_id', userId)
     .eq('status', status)
-  return data || []
+  return (data as AnalyticsReportRecord[]) || []
 }
 
 export async function markReportComplete(
   reportId: string
-): Promise<{ data: any; error: any }> {
+): Promise<{ data: AnalyticsReportRecord | null; error: DatabaseError | null }> {
   const { data, error } = await supabase
     .from('analytics_reports')
     .update({ status: 'complete', completed_at: new Date().toISOString() })
     .eq('id', reportId)
     .select()
     .single()
-  return { data, error }
+  return { data: data as AnalyticsReportRecord | null, error: error ? toDbError(error) : null }
 }
 
 export async function updateRevenueData(
   revenueId: string,
   updates: Partial<{ amount: number; source: string }>
-): Promise<{ data: any; error: any }> {
+): Promise<{ data: RevenueData | null; error: DatabaseError | null }> {
   const { data, error } = await supabase
     .from('revenue_data')
     .update({ ...updates, updated_at: new Date().toISOString() })
     .eq('id', revenueId)
     .select()
     .single()
-  return { data, error }
+  return { data: data as RevenueData | null, error: error ? toDbError(error) : null }
 }
 
 export async function deleteRevenueData(
   revenueId: string
-): Promise<{ data: any; error: any }> {
-  const { data, error } = await supabase
+): Promise<{ data: null; error: DatabaseError | null }> {
+  const { error } = await supabase
     .from('revenue_data')
     .delete()
     .eq('id', revenueId)
-  return { data, error }
+  return { data: null, error: error ? toDbError(error) : null }
 }
 
 export async function getRevenueByPeriod(
   userId: string,
   period: '7d' | '30d' | '90d' | '365d'
-): Promise<any[]> {
+): Promise<RevenueData[]> {
   const days = parseInt(period) || 30
   const startDate = new Date()
   startDate.setDate(startDate.getDate() - days)
@@ -883,16 +939,16 @@ export async function getRevenueByPeriod(
     .select('*')
     .eq('user_id', userId)
     .gte('date', startDate.toISOString().split('T')[0])
-  return data || []
+  return (data as RevenueData[]) || []
 }
 
 export async function getFunnelStageData(
   userId: string
-): Promise<any[]> {
+): Promise<FunnelStage[]> {
   const { data } = await supabase
     .from('funnel_stages')
     .select('*')
     .eq('user_id', userId)
     .order('stage_order', { ascending: true })
-  return data || []
+  return (data as FunnelStage[]) || []
 }

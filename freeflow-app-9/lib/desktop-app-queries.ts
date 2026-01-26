@@ -2,6 +2,7 @@
 // Comprehensive queries for desktop projects, builds, distributions, frameworks, and analytics
 
 import { createClient } from '@/lib/supabase/client'
+import type { JsonValue } from '@/lib/types/database'
 
 // ============================================================================
 // TYPES
@@ -40,15 +41,15 @@ export interface DesktopProject {
   license?: string
   source_url?: string
   entry_point?: string
-  dependencies: Record<string, any>
-  dev_dependencies: Record<string, any>
-  build_config: Record<string, any>
+  dependencies: Record<string, JsonValue>
+  dev_dependencies: Record<string, JsonValue>
+  build_config: Record<string, JsonValue>
   total_builds: number
   last_build_at?: string
   is_archived: boolean
   is_template: boolean
   tags: string[]
-  metadata: Record<string, any>
+  metadata: Record<string, JsonValue>
   created_at: string
   updated_at: string
 }
@@ -77,7 +78,7 @@ export interface DesktopBuild {
   completed_at?: string
   duration_seconds?: number
   build_machine?: string
-  build_environment: Record<string, any>
+  build_environment: Record<string, JsonValue>
   download_count: number
   install_count: number
   created_at: string
@@ -132,7 +133,7 @@ export interface DesktopFramework {
   requires_python: boolean
   min_node_version?: string
   min_rust_version?: string
-  starter_templates: any[]
+  starter_templates: JsonValue[]
   usage_count: number
   project_count: number
   github_stars?: number
@@ -150,7 +151,7 @@ export interface DesktopAnalytics {
   build_id?: string
   event_type: string
   event_name: string
-  event_data: Record<string, any>
+  event_data: Record<string, JsonValue>
   session_id?: string
   session_duration_seconds?: number
   os_version?: string
@@ -935,10 +936,14 @@ export async function getDistributionStats(userId: string) {
 }
 
 // Helper function to group results by field
-function groupByField(data: any[], field: string): Record<string, number> {
-  return data.reduce((acc, item) => {
-    const key = item[field] || 'unknown'
+interface GroupableRecord {
+  [key: string]: string | number | boolean | null | undefined
+}
+
+function groupByField(data: GroupableRecord[], field: string): Record<string, number> {
+  return data.reduce<Record<string, number>>((acc, item) => {
+    const key = String(item[field] ?? 'unknown')
     acc[key] = (acc[key] || 0) + 1
     return acc
-  }, {} as Record<string, number>)
+  }, {})
 }

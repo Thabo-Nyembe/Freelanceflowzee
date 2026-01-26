@@ -4,6 +4,7 @@
  */
 
 import { supabase } from './supabase'
+import type { JsonValue } from '@/lib/types/database'
 
 // =====================================================
 // TYPES
@@ -22,7 +23,7 @@ export interface Folder {
   is_archived: boolean
   shared_with: string[]
   tags: string[]
-  metadata: Record<string, any>
+  metadata: Record<string, JsonValue>
   created_at: string
   updated_at: string
   // Computed
@@ -48,7 +49,7 @@ export interface Document {
   is_template: boolean
   shared_with: string[]
   tags: string[]
-  metadata: Record<string, any>
+  metadata: Record<string, JsonValue>
   thumbnail_url?: string
   preview_url?: string
   download_count: number
@@ -75,7 +76,7 @@ export interface DocumentComment {
   user_id: string
   content: string
   parent_id?: string
-  position?: Record<string, any>
+  position?: Record<string, JsonValue>
   is_resolved: boolean
   resolved_by?: string
   resolved_at?: string
@@ -104,7 +105,7 @@ export interface DocumentActivity {
   document_id: string
   user_id: string
   action: string
-  details: Record<string, any>
+  details: Record<string, JsonValue>
   ip_address?: string
   user_agent?: string
   created_at: string
@@ -952,7 +953,7 @@ export async function logDocumentActivity(
   documentId: string,
   userId: string,
   action: string,
-  details: Record<string, any>
+  details: Record<string, JsonValue>
 ): Promise<void> {
   try {
     await supabase

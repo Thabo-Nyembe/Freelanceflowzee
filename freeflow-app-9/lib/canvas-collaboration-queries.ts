@@ -15,6 +15,7 @@
 
 import { createClient } from '@/lib/supabase/client'
 import { createFeatureLogger } from '@/lib/logger'
+import { DatabaseError, toDbError, JsonValue } from '@/lib/types/database'
 
 const logger = createFeatureLogger('CanvasCollaboration')
 
@@ -26,6 +27,20 @@ export type LayerType = 'drawing' | 'text' | 'shape' | 'image' | 'group'
 export type CanvasStatus = 'active' | 'archived' | 'template'
 export type CollaboratorPermission = 'view' | 'edit' | 'admin'
 export type ToolType = 'select' | 'hand' | 'brush' | 'eraser' | 'text' | 'rectangle' | 'circle' | 'line' | 'arrow' | 'pen' | 'highlighter'
+
+// Canvas-specific type definitions
+export interface CanvasPoint {
+  x: number
+  y: number
+  pressure?: number
+}
+
+export interface CanvasData {
+  layers?: JsonValue
+  elements?: JsonValue
+  settings?: Record<string, JsonValue>
+  [key: string]: JsonValue | undefined
+}
 
 export interface CanvasProject {
   id: string
@@ -63,7 +78,7 @@ export interface CanvasElement {
   id: string
   layer_id: string
   element_type: string
-  points: any[]
+  points: CanvasPoint[]
   text_content?: string
   shape_type?: string
   color: string
@@ -97,7 +112,7 @@ export interface CanvasVersion {
   version: number
   thumbnail?: string
   comment?: string
-  canvas_data: any
+  canvas_data: CanvasData
   created_by: string
   created_at: string
 }
@@ -110,7 +125,7 @@ export interface CanvasTemplate {
   category: string
   width: number
   height: number
-  canvas_data: any
+  canvas_data: CanvasData
   downloads: number
   rating: number
   review_count: number
@@ -163,7 +178,7 @@ export async function getCanvasProjects(
     search?: string
     tags?: string[]
   }
-): Promise<{ data: CanvasProject[] | null; error: any }> {
+): Promise<{ data: CanvasProject[] | null; error: DatabaseError | null }> {
   try {
     logger.info('Fetching canvas projects', { userId, filters })
 
@@ -194,7 +209,7 @@ export async function getCanvasProjects(
 
     if (error) {
       logger.error('Failed to fetch canvas projects', { error, userId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Canvas projects fetched successfully', {
@@ -203,16 +218,16 @@ export async function getCanvasProjects(
     })
 
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching canvas projects', { error, userId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
 export async function getCanvasProject(
   canvasId: string,
   userId: string
-): Promise<{ data: CanvasProject | null; error: any }> {
+): Promise<{ data: CanvasProject | null; error: DatabaseError | null }> {
   try {
     logger.info('Fetching canvas project', { canvasId, userId })
 
@@ -225,14 +240,14 @@ export async function getCanvasProject(
 
     if (error) {
       logger.error('Failed to fetch canvas project', { error, canvasId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Canvas project fetched successfully', { canvasId })
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching canvas project', { error, canvasId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -246,7 +261,7 @@ export async function createCanvasProject(
     background_color?: string
     tags?: string[]
   }
-): Promise<{ data: CanvasProject | null; error: any }> {
+): Promise<{ data: CanvasProject | null; error: DatabaseError | null }> {
   try {
     logger.info('Creating canvas project', { userId, project_name: project.name })
 
@@ -270,7 +285,7 @@ export async function createCanvasProject(
 
     if (error) {
       logger.error('Failed to create canvas project', { error, userId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Canvas project created successfully', {
@@ -279,9 +294,9 @@ export async function createCanvasProject(
     })
 
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception creating canvas project', { error, userId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -289,7 +304,7 @@ export async function updateCanvasProject(
   canvasId: string,
   userId: string,
   updates: Partial<CanvasProject>
-): Promise<{ data: CanvasProject | null; error: any }> {
+): Promise<{ data: CanvasProject | null; error: DatabaseError | null }> {
   try {
     logger.info('Updating canvas project', { canvasId, userId, updates })
 
@@ -304,21 +319,21 @@ export async function updateCanvasProject(
 
     if (error) {
       logger.error('Failed to update canvas project', { error, canvasId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Canvas project updated successfully', { canvasId })
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception updating canvas project', { error, canvasId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
 export async function deleteCanvasProject(
   canvasId: string,
   userId: string
-): Promise<{ success: boolean; error: any }> {
+): Promise<{ success: boolean; error: DatabaseError | null }> {
   try {
     logger.info('Deleting canvas project', { canvasId, userId })
 
@@ -331,14 +346,14 @@ export async function deleteCanvasProject(
 
     if (error) {
       logger.error('Failed to delete canvas project', { error, canvasId })
-      return { success: false, error }
+      return { success: false, error: toDbError(error) }
     }
 
     logger.info('Canvas project deleted successfully', { canvasId })
     return { success: true, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception deleting canvas project', { error, canvasId })
-    return { success: false, error }
+    return { success: false, error: toDbError(error) }
   }
 }
 
@@ -346,7 +361,7 @@ export async function duplicateCanvasProject(
   canvasId: string,
   userId: string,
   newName: string
-): Promise<{ data: CanvasProject | null; error: any }> {
+): Promise<{ data: CanvasProject | null; error: DatabaseError | null }> {
   try {
     logger.info('Duplicating canvas project', { canvasId, userId, newName })
 
@@ -378,7 +393,7 @@ export async function duplicateCanvasProject(
 
     if (error) {
       logger.error('Failed to duplicate canvas project', { error, canvasId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Canvas project duplicated successfully', {
@@ -388,9 +403,9 @@ export async function duplicateCanvasProject(
     })
 
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception duplicating canvas project', { error, canvasId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -400,7 +415,7 @@ export async function duplicateCanvasProject(
 
 export async function getCanvasLayers(
   canvasId: string
-): Promise<{ data: CanvasLayer[] | null; error: any }> {
+): Promise<{ data: CanvasLayer[] | null; error: DatabaseError | null }> {
   try {
     logger.info('Fetching canvas layers', { canvasId })
 
@@ -413,7 +428,7 @@ export async function getCanvasLayers(
 
     if (error) {
       logger.error('Failed to fetch canvas layers', { error, canvasId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Canvas layers fetched successfully', {
@@ -422,9 +437,9 @@ export async function getCanvasLayers(
     })
 
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching canvas layers', { error, canvasId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -435,7 +450,7 @@ export async function createCanvasLayer(
     type: LayerType
     z_index?: number
   }
-): Promise<{ data: CanvasLayer | null; error: any }> {
+): Promise<{ data: CanvasLayer | null; error: DatabaseError | null }> {
   try {
     logger.info('Creating canvas layer', { canvasId, layer_name: layer.name })
 
@@ -457,7 +472,7 @@ export async function createCanvasLayer(
 
     if (error) {
       logger.error('Failed to create canvas layer', { error, canvasId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Canvas layer created successfully', {
@@ -466,16 +481,16 @@ export async function createCanvasLayer(
     })
 
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception creating canvas layer', { error, canvasId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
 export async function updateCanvasLayer(
   layerId: string,
   updates: Partial<CanvasLayer>
-): Promise<{ data: CanvasLayer | null; error: any }> {
+): Promise<{ data: CanvasLayer | null; error: DatabaseError | null }> {
   try {
     logger.info('Updating canvas layer', { layerId, updates })
 
@@ -489,20 +504,20 @@ export async function updateCanvasLayer(
 
     if (error) {
       logger.error('Failed to update canvas layer', { error, layerId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Canvas layer updated successfully', { layerId })
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception updating canvas layer', { error, layerId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
 export async function deleteCanvasLayer(
   layerId: string
-): Promise<{ success: boolean; error: any }> {
+): Promise<{ success: boolean; error: DatabaseError | null }> {
   try {
     logger.info('Deleting canvas layer', { layerId })
 
@@ -514,14 +529,14 @@ export async function deleteCanvasLayer(
 
     if (error) {
       logger.error('Failed to delete canvas layer', { error, layerId })
-      return { success: false, error }
+      return { success: false, error: toDbError(error) }
     }
 
     logger.info('Canvas layer deleted successfully', { layerId })
     return { success: true, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception deleting canvas layer', { error, layerId })
-    return { success: false, error }
+    return { success: false, error: toDbError(error) }
   }
 }
 
@@ -531,7 +546,7 @@ export async function deleteCanvasLayer(
 
 export async function getCanvasElements(
   layerId: string
-): Promise<{ data: CanvasElement[] | null; error: any }> {
+): Promise<{ data: CanvasElement[] | null; error: DatabaseError | null }> {
   try {
     logger.info('Fetching canvas elements', { layerId })
 
@@ -544,7 +559,7 @@ export async function getCanvasElements(
 
     if (error) {
       logger.error('Failed to fetch canvas elements', { error, layerId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Canvas elements fetched successfully', {
@@ -553,9 +568,9 @@ export async function getCanvasElements(
     })
 
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching canvas elements', { error, layerId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -563,7 +578,7 @@ export async function createCanvasElement(
   layerId: string,
   element: {
     element_type: string
-    points?: any[]
+    points?: CanvasPoint[]
     text_content?: string
     shape_type?: string
     color: string
@@ -571,7 +586,7 @@ export async function createCanvasElement(
     position: { x: number; y: number }
     size?: { width: number; height: number }
   }
-): Promise<{ data: CanvasElement | null; error: any }> {
+): Promise<{ data: CanvasElement | null; error: DatabaseError | null }> {
   try {
     logger.info('Creating canvas element', { layerId, element_type: element.element_type })
 
@@ -596,7 +611,7 @@ export async function createCanvasElement(
 
     if (error) {
       logger.error('Failed to create canvas element', { error, layerId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Canvas element created successfully', {
@@ -605,16 +620,16 @@ export async function createCanvasElement(
     })
 
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception creating canvas element', { error, layerId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
 export async function updateCanvasElement(
   elementId: string,
   updates: Partial<CanvasElement>
-): Promise<{ data: CanvasElement | null; error: any }> {
+): Promise<{ data: CanvasElement | null; error: DatabaseError | null }> {
   try {
     logger.info('Updating canvas element', { elementId, updates })
 
@@ -628,20 +643,20 @@ export async function updateCanvasElement(
 
     if (error) {
       logger.error('Failed to update canvas element', { error, elementId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Canvas element updated successfully', { elementId })
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception updating canvas element', { error, elementId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
 export async function deleteCanvasElement(
   elementId: string
-): Promise<{ success: boolean; error: any }> {
+): Promise<{ success: boolean; error: DatabaseError | null }> {
   try {
     logger.info('Deleting canvas element', { elementId })
 
@@ -653,14 +668,14 @@ export async function deleteCanvasElement(
 
     if (error) {
       logger.error('Failed to delete canvas element', { error, elementId })
-      return { success: false, error }
+      return { success: false, error: toDbError(error) }
     }
 
     logger.info('Canvas element deleted successfully', { elementId })
     return { success: true, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception deleting canvas element', { error, elementId })
-    return { success: false, error }
+    return { success: false, error: toDbError(error) }
   }
 }
 
@@ -670,7 +685,7 @@ export async function deleteCanvasElement(
 
 export async function getCanvasCollaborators(
   canvasId: string
-): Promise<{ data: CanvasCollaborator[] | null; error: any }> {
+): Promise<{ data: CanvasCollaborator[] | null; error: DatabaseError | null }> {
   try {
     logger.info('Fetching canvas collaborators', { canvasId })
 
@@ -684,19 +699,19 @@ export async function getCanvasCollaborators(
 
     if (error) {
       logger.error('Failed to fetch canvas collaborators', { error, canvasId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Canvas collaborators fetched successfully', {
       count: data?.length || 0,
-      active: data?.filter(c => c.is_active).length || 0,
+      active: data?.filter((c: CanvasCollaborator) => c.is_active).length || 0,
       canvasId
     })
 
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching canvas collaborators', { error, canvasId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -704,12 +719,12 @@ export async function joinCanvas(
   canvasId: string,
   userId: string,
   permission: CollaboratorPermission = 'edit'
-): Promise<{ success: boolean; error: any }> {
+): Promise<{ success: boolean; error: DatabaseError | null }> {
   try {
     logger.info('Joining canvas', { canvasId, userId, permission })
 
     const supabase = createClient()
-    const { data, error } = await supabase.rpc('join_canvas_session', {
+    const { error } = await supabase.rpc('join_canvas_session', {
       p_canvas_id: canvasId,
       p_user_id: userId,
       p_permission: permission
@@ -717,40 +732,40 @@ export async function joinCanvas(
 
     if (error) {
       logger.error('Failed to join canvas', { error, canvasId, userId })
-      return { success: false, error }
+      return { success: false, error: toDbError(error) }
     }
 
     logger.info('Joined canvas successfully', { canvasId, userId })
     return { success: true, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception joining canvas', { error, canvasId, userId })
-    return { success: false, error }
+    return { success: false, error: toDbError(error) }
   }
 }
 
 export async function leaveCanvas(
   canvasId: string,
   userId: string
-): Promise<{ success: boolean; error: any }> {
+): Promise<{ success: boolean; error: DatabaseError | null }> {
   try {
     logger.info('Leaving canvas', { canvasId, userId })
 
     const supabase = createClient()
-    const { data, error } = await supabase.rpc('leave_canvas_session', {
+    const { error } = await supabase.rpc('leave_canvas_session', {
       p_canvas_id: canvasId,
       p_user_id: userId
     })
 
     if (error) {
       logger.error('Failed to leave canvas', { error, canvasId, userId })
-      return { success: false, error }
+      return { success: false, error: toDbError(error) }
     }
 
     logger.info('Left canvas successfully', { canvasId, userId })
     return { success: true, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception leaving canvas', { error, canvasId, userId })
-    return { success: false, error }
+    return { success: false, error: toDbError(error) }
   }
 }
 
@@ -760,7 +775,7 @@ export async function updateCursorPosition(
   x: number,
   y: number,
   tool?: ToolType
-): Promise<{ success: boolean; error: any }> {
+): Promise<{ success: boolean; error: DatabaseError | null }> {
   try {
     const supabase = createClient()
     const { error } = await supabase.rpc('update_cursor_position', {
@@ -773,13 +788,13 @@ export async function updateCursorPosition(
 
     if (error) {
       logger.error('Failed to update cursor position', { error, canvasId, userId })
-      return { success: false, error }
+      return { success: false, error: toDbError(error) }
     }
 
     return { success: true, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception updating cursor position', { error, canvasId, userId })
-    return { success: false, error }
+    return { success: false, error: toDbError(error) }
   }
 }
 
@@ -790,7 +805,7 @@ export async function updateCursorPosition(
 export async function getCanvasComments(
   canvasId: string,
   includeReplies: boolean = true
-): Promise<{ data: CanvasComment[] | null; error: any }> {
+): Promise<{ data: CanvasComment[] | null; error: DatabaseError | null }> {
   try {
     logger.info('Fetching canvas comments', { canvasId, includeReplies })
 
@@ -803,7 +818,7 @@ export async function getCanvasComments(
 
     if (error) {
       logger.error('Failed to fetch canvas comments', { error, canvasId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Canvas comments fetched successfully', {
@@ -812,9 +827,9 @@ export async function getCanvasComments(
     })
 
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching canvas comments', { error, canvasId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -825,7 +840,7 @@ export async function createCanvasComment(
     text_content: string
     position: { x: number; y: number }
   }
-): Promise<{ data: CanvasComment | null; error: any }> {
+): Promise<{ data: CanvasComment | null; error: DatabaseError | null }> {
   try {
     logger.info('Creating canvas comment', { canvasId, userId })
 
@@ -844,7 +859,7 @@ export async function createCanvasComment(
 
     if (error) {
       logger.error('Failed to create canvas comment', { error, canvasId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Canvas comment created successfully', {
@@ -853,15 +868,15 @@ export async function createCanvasComment(
     })
 
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception creating canvas comment', { error, canvasId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
 export async function resolveCanvasComment(
   commentId: string
-): Promise<{ success: boolean; error: any }> {
+): Promise<{ success: boolean; error: DatabaseError | null }> {
   try {
     logger.info('Resolving canvas comment', { commentId })
 
@@ -873,20 +888,20 @@ export async function resolveCanvasComment(
 
     if (error) {
       logger.error('Failed to resolve canvas comment', { error, commentId })
-      return { success: false, error }
+      return { success: false, error: toDbError(error) }
     }
 
     logger.info('Canvas comment resolved successfully', { commentId })
     return { success: true, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception resolving canvas comment', { error, commentId })
-    return { success: false, error }
+    return { success: false, error: toDbError(error) }
   }
 }
 
 export async function deleteCanvasComment(
   commentId: string
-): Promise<{ success: boolean; error: any }> {
+): Promise<{ success: boolean; error: DatabaseError | null }> {
   try {
     logger.info('Deleting canvas comment', { commentId })
 
@@ -898,14 +913,14 @@ export async function deleteCanvasComment(
 
     if (error) {
       logger.error('Failed to delete canvas comment', { error, commentId })
-      return { success: false, error }
+      return { success: false, error: toDbError(error) }
     }
 
     logger.info('Canvas comment deleted successfully', { commentId })
     return { success: true, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception deleting canvas comment', { error, commentId })
-    return { success: false, error }
+    return { success: false, error: toDbError(error) }
   }
 }
 
@@ -919,7 +934,7 @@ export async function getCanvasTemplates(
     is_verified?: boolean
     limit?: number
   }
-): Promise<{ data: CanvasTemplate[] | null; error: any }> {
+): Promise<{ data: CanvasTemplate[] | null; error: DatabaseError | null }> {
   try {
     logger.info('Fetching canvas templates', { filters })
 
@@ -945,7 +960,7 @@ export async function getCanvasTemplates(
 
     if (error) {
       logger.error('Failed to fetch canvas templates', { error })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Canvas templates fetched successfully', {
@@ -953,9 +968,9 @@ export async function getCanvasTemplates(
     })
 
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching canvas templates', { error })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -969,7 +984,7 @@ export async function getCanvasTemplates(
  */
 export async function getCanvasDrawingCount(
   canvasId: string
-): Promise<{ count: number; error: any }> {
+): Promise<{ count: number; error: DatabaseError | null }> {
   try {
     logger.info('Counting canvas drawings', { canvasId })
 
@@ -983,7 +998,7 @@ export async function getCanvasDrawingCount(
 
     if (layersError) {
       logger.error('Failed to fetch layers for counting', { error: layersError, canvasId })
-      return { count: 0, error: layersError }
+      return { count: 0, error: toDbError(layersError) }
     }
 
     if (!layers || layers.length === 0) {
@@ -991,7 +1006,7 @@ export async function getCanvasDrawingCount(
     }
 
     // Count elements across all layers
-    const layerIds = layers.map(l => l.id)
+    const layerIds = layers.map((l: { id: string }) => l.id)
     const { count, error: countError } = await supabase
       .from('canvas_elements')
       .select('*', { count: 'exact', head: true })
@@ -999,7 +1014,7 @@ export async function getCanvasDrawingCount(
 
     if (countError) {
       logger.error('Failed to count canvas elements', { error: countError, canvasId })
-      return { count: 0, error: countError }
+      return { count: 0, error: toDbError(countError) }
     }
 
     logger.info('Canvas drawing count retrieved', {
@@ -1008,8 +1023,8 @@ export async function getCanvasDrawingCount(
     })
 
     return { count: count || 0, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception counting canvas drawings', { error, canvasId })
-    return { count: 0, error }
+    return { count: 0, error: toDbError(error) }
   }
 }

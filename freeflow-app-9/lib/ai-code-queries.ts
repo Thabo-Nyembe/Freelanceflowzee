@@ -14,6 +14,7 @@
  */
 
 import { createClient } from '@/lib/supabase/client'
+import { DatabaseError, toDbError } from '@/lib/types/database'
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -148,6 +149,41 @@ export interface AICodeStats {
   updated_at: string
 }
 
+export interface CompletionStatsResult {
+  total_completions: number
+  completed_count: number
+  average_confidence: number
+  total_tokens: number
+  average_processing_time: number
+  by_language: Record<string, number>
+  by_model: Record<string, number>
+}
+
+export interface CodeQualityTrendItem {
+  date: string
+  quality: number
+  maintainability: number
+  complexity: number
+}
+
+/** Row type returned from code_completions query in getCompletionStats */
+interface CompletionRow {
+  status: string
+  confidence: number
+  tokens_used: number
+  processing_time: number
+  language: string
+  model: string
+}
+
+/** Row type returned from code_analysis query in getCodeQualityTrend */
+interface AnalysisRow {
+  analyzed_at: string
+  quality_score: number | null
+  maintainability: number | null
+  complexity: number | null
+}
+
 // ============================================================================
 // CODE COMPLETIONS (8 functions)
 // ============================================================================
@@ -159,7 +195,7 @@ export async function getCodeCompletions(
     status?: CompletionStatus
     model?: AIModel
   }
-): Promise<{ data: CodeCompletion[] | null; error: any }> {
+): Promise<{ data: CodeCompletion[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   let query = supabase
     .from('code_completions')
@@ -183,7 +219,7 @@ export async function getCodeCompletions(
 
 export async function getCodeCompletion(
   completionId: string
-): Promise<{ data: CodeCompletion | null; error: any }> {
+): Promise<{ data: CodeCompletion | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('code_completions')
@@ -207,7 +243,7 @@ export async function createCodeCompletion(
     processing_time?: number
     suggestions?: string[]
   }
-): Promise<{ data: CodeCompletion | null; error: any }> {
+): Promise<{ data: CodeCompletion | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('code_completions')
@@ -224,7 +260,7 @@ export async function createCodeCompletion(
 export async function updateCodeCompletion(
   completionId: string,
   updates: Partial<Omit<CodeCompletion, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
-): Promise<{ data: CodeCompletion | null; error: any }> {
+): Promise<{ data: CodeCompletion | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('code_completions')
@@ -238,7 +274,7 @@ export async function updateCodeCompletion(
 
 export async function deleteCodeCompletion(
   completionId: string
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   const supabase = createClient()
   const { error } = await supabase
     .from('code_completions')
@@ -251,7 +287,7 @@ export async function deleteCodeCompletion(
 export async function getRecentCompletions(
   userId: string,
   limit: number = 10
-): Promise<{ data: CodeCompletion[] | null; error: any }> {
+): Promise<{ data: CodeCompletion[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('code_completions')
@@ -267,7 +303,7 @@ export async function getRecentCompletions(
 export async function getCompletionsByLanguage(
   userId: string,
   language: ProgrammingLanguage
-): Promise<{ data: CodeCompletion[] | null; error: any }> {
+): Promise<{ data: CodeCompletion[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('code_completions')
@@ -281,7 +317,7 @@ export async function getCompletionsByLanguage(
 
 export async function bulkDeleteCompletions(
   completionIds: string[]
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   const supabase = createClient()
   const { error } = await supabase
     .from('code_completions')
@@ -303,7 +339,7 @@ export async function getCodeSnippets(
     is_public?: boolean
     search?: string
   }
-): Promise<{ data: CodeSnippet[] | null; error: any }> {
+): Promise<{ data: CodeSnippet[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   let query = supabase
     .from('code_snippets')
@@ -330,7 +366,7 @@ export async function getCodeSnippets(
 
 export async function getCodeSnippet(
   snippetId: string
-): Promise<{ data: CodeSnippet | null; error: any }> {
+): Promise<{ data: CodeSnippet | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('code_snippets')
@@ -352,7 +388,7 @@ export async function createCodeSnippet(
     tags?: string[]
     is_public?: boolean
   }
-): Promise<{ data: CodeSnippet | null; error: any }> {
+): Promise<{ data: CodeSnippet | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('code_snippets')
@@ -369,7 +405,7 @@ export async function createCodeSnippet(
 export async function updateCodeSnippet(
   snippetId: string,
   updates: Partial<Omit<CodeSnippet, 'id' | 'user_id' | 'created_at' | 'updated_at'>>
-): Promise<{ data: CodeSnippet | null; error: any }> {
+): Promise<{ data: CodeSnippet | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('code_snippets')
@@ -383,7 +419,7 @@ export async function updateCodeSnippet(
 
 export async function deleteCodeSnippet(
   snippetId: string
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   const supabase = createClient()
   const { error } = await supabase
     .from('code_snippets')
@@ -395,7 +431,7 @@ export async function deleteCodeSnippet(
 
 export async function incrementSnippetUsage(
   snippetId: string
-): Promise<{ data: CodeSnippet | null; error: any }> {
+): Promise<{ data: CodeSnippet | null; error: DatabaseError | null }> {
   const supabase = createClient()
 
   const { data: currentSnippet } = await supabase
@@ -405,7 +441,7 @@ export async function incrementSnippetUsage(
     .single()
 
   if (!currentSnippet) {
-    return { data: null, error: new Error('Snippet not found') }
+    return { data: null, error: toDbError(new Error('Snippet not found')) }
   }
 
   const { data, error } = await supabase
@@ -422,7 +458,7 @@ export async function incrementSnippetUsage(
 
 export async function likeSnippet(
   snippetId: string
-): Promise<{ data: CodeSnippet | null; error: any }> {
+): Promise<{ data: CodeSnippet | null; error: DatabaseError | null }> {
   const supabase = createClient()
 
   const { data: currentSnippet } = await supabase
@@ -432,7 +468,7 @@ export async function likeSnippet(
     .single()
 
   if (!currentSnippet) {
-    return { data: null, error: new Error('Snippet not found') }
+    return { data: null, error: toDbError(new Error('Snippet not found')) }
   }
 
   const { data, error } = await supabase
@@ -450,7 +486,7 @@ export async function likeSnippet(
 export async function searchSnippetsByTags(
   userId: string,
   tags: string[]
-): Promise<{ data: CodeSnippet[] | null; error: any }> {
+): Promise<{ data: CodeSnippet[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('code_snippets')
@@ -465,7 +501,7 @@ export async function searchSnippetsByTags(
 export async function getPublicSnippets(
   language?: ProgrammingLanguage,
   limit: number = 20
-): Promise<{ data: CodeSnippet[] | null; error: any }> {
+): Promise<{ data: CodeSnippet[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   let query = supabase
     .from('code_snippets')
@@ -492,7 +528,7 @@ export async function getCodeAnalyses(
     language?: ProgrammingLanguage
     type?: AnalysisType
   }
-): Promise<{ data: CodeAnalysis[] | null; error: any }> {
+): Promise<{ data: CodeAnalysis[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   let query = supabase
     .from('code_analysis')
@@ -513,7 +549,7 @@ export async function getCodeAnalyses(
 
 export async function getCodeAnalysis(
   analysisId: string
-): Promise<{ data: CodeAnalysis | null; error: any }> {
+): Promise<{ data: CodeAnalysis | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('code_analysis')
@@ -541,7 +577,7 @@ export async function createCodeAnalysis(
     function_count?: number
     class_count?: number
   }
-): Promise<{ data: CodeAnalysis | null; error: any }> {
+): Promise<{ data: CodeAnalysis | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('code_analysis')
@@ -557,7 +593,7 @@ export async function createCodeAnalysis(
 
 export async function deleteCodeAnalysis(
   analysisId: string
-): Promise<{ error: any }> {
+): Promise<{ error: DatabaseError | null }> {
   const supabase = createClient()
   const { error } = await supabase
     .from('code_analysis')
@@ -576,7 +612,7 @@ export async function getAnalysisWithIssues(
     suggestions: CodeSuggestion[] | null
     security: SecurityIssue[] | null
   } | null
-  error: any
+  error: DatabaseError | null
 }> {
   const supabase = createClient()
 
@@ -608,7 +644,7 @@ export async function getAnalysisWithIssues(
 
 export async function getBugReports(
   analysisId: string
-): Promise<{ data: BugReport[] | null; error: any }> {
+): Promise<{ data: BugReport[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('bug_reports')
@@ -632,7 +668,7 @@ export async function createBugReport(
     code_snippet?: string
     auto_fixable?: boolean
   }
-): Promise<{ data: BugReport | null; error: any }> {
+): Promise<{ data: BugReport | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('bug_reports')
@@ -645,7 +681,7 @@ export async function createBugReport(
 
 export async function markBugAsFixed(
   bugId: string
-): Promise<{ data: BugReport | null; error: any }> {
+): Promise<{ data: BugReport | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('bug_reports')
@@ -659,7 +695,7 @@ export async function markBugAsFixed(
 
 export async function getCriticalBugs(
   userId: string
-): Promise<{ data: BugReport[] | null; error: any }> {
+): Promise<{ data: BugReport[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('bug_reports')
@@ -678,7 +714,7 @@ export async function getCriticalBugs(
 
 export async function getCodeSuggestions(
   analysisId: string
-): Promise<{ data: CodeSuggestion[] | null; error: any }> {
+): Promise<{ data: CodeSuggestion[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('code_suggestions')
@@ -700,7 +736,7 @@ export async function createCodeSuggestion(
     code_example?: string
     priority?: number
   }
-): Promise<{ data: CodeSuggestion | null; error: any }> {
+): Promise<{ data: CodeSuggestion | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('code_suggestions')
@@ -714,7 +750,7 @@ export async function createCodeSuggestion(
 export async function getSuggestionsByType(
   userId: string,
   type: SuggestionType
-): Promise<{ data: CodeSuggestion[] | null; error: any }> {
+): Promise<{ data: CodeSuggestion[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('code_suggestions')
@@ -732,7 +768,7 @@ export async function getSuggestionsByType(
 
 export async function getSecurityIssues(
   analysisId: string
-): Promise<{ data: SecurityIssue[] | null; error: any }> {
+): Promise<{ data: SecurityIssue[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('security_issues')
@@ -755,7 +791,7 @@ export async function createSecurityIssue(
     cwe?: string
     owasp?: string
   }
-): Promise<{ data: SecurityIssue | null; error: any }> {
+): Promise<{ data: SecurityIssue | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('security_issues')
@@ -768,7 +804,7 @@ export async function createSecurityIssue(
 
 export async function getCriticalSecurityIssues(
   userId: string
-): Promise<{ data: SecurityIssue[] | null; error: any }> {
+): Promise<{ data: SecurityIssue[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('security_issues')
@@ -786,7 +822,7 @@ export async function getCriticalSecurityIssues(
 
 export async function getAICodeStats(
   userId: string
-): Promise<{ data: AICodeStats | null; error: any }> {
+): Promise<{ data: AICodeStats | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('ai_code_stats')
@@ -800,7 +836,7 @@ export async function getAICodeStats(
 export async function getCompletionStats(
   userId: string,
   days: number = 30
-): Promise<{ data: any; error: any }> {
+): Promise<{ data: CompletionStatsResult | null; error: DatabaseError | null }> {
   const supabase = createClient()
 
   const startDate = new Date()
@@ -816,17 +852,18 @@ export async function getCompletionStats(
     return { data: null, error }
   }
 
-  const stats = {
-    total_completions: data.length,
-    completed_count: data.filter(c => c.status === 'completed').length,
-    average_confidence: data.length > 0 ? data.reduce((sum, c) => sum + c.confidence, 0) / data.length : 0,
-    total_tokens: data.reduce((sum, c) => sum + c.tokens_used, 0),
-    average_processing_time: data.length > 0 ? data.reduce((sum, c) => sum + c.processing_time, 0) / data.length : 0,
-    by_language: data.reduce((acc, c) => {
+  const completions = data as CompletionRow[]
+  const stats: CompletionStatsResult = {
+    total_completions: completions.length,
+    completed_count: completions.filter((c: CompletionRow) => c.status === 'completed').length,
+    average_confidence: completions.length > 0 ? completions.reduce((sum: number, c: CompletionRow) => sum + c.confidence, 0) / completions.length : 0,
+    total_tokens: completions.reduce((sum: number, c: CompletionRow) => sum + c.tokens_used, 0),
+    average_processing_time: completions.length > 0 ? completions.reduce((sum: number, c: CompletionRow) => sum + c.processing_time, 0) / completions.length : 0,
+    by_language: completions.reduce((acc: Record<string, number>, c: CompletionRow) => {
       acc[c.language] = (acc[c.language] || 0) + 1
       return acc
     }, {} as Record<string, number>),
-    by_model: data.reduce((acc, c) => {
+    by_model: completions.reduce((acc: Record<string, number>, c: CompletionRow) => {
       acc[c.model] = (acc[c.model] || 0) + 1
       return acc
     }, {} as Record<string, number>)
@@ -838,7 +875,7 @@ export async function getCompletionStats(
 export async function getCodeQualityTrend(
   userId: string,
   limit: number = 10
-): Promise<{ data: any; error: any }> {
+): Promise<{ data: CodeQualityTrendItem[] | null; error: DatabaseError | null }> {
   const supabase = createClient()
   const { data, error } = await supabase
     .from('code_analysis')
@@ -851,7 +888,8 @@ export async function getCodeQualityTrend(
     return { data: null, error }
   }
 
-  const trend = data.reverse().map(analysis => ({
+  const analyses = data as AnalysisRow[]
+  const trend = analyses.reverse().map((analysis: AnalysisRow) => ({
     date: analysis.analyzed_at,
     quality: analysis.quality_score || 0,
     maintainability: analysis.maintainability || 0,
@@ -874,7 +912,7 @@ export async function updateCodeStats(
     total_optimizations?: number
     code_quality_improvement?: number
   }
-): Promise<{ data: AICodeStats | null; error: any }> {
+): Promise<{ data: AICodeStats | null; error: DatabaseError | null }> {
   const supabase = createClient()
 
   // First, get existing stats

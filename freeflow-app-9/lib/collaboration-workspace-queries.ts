@@ -10,6 +10,7 @@
 
 import { createClient } from '@/lib/supabase/client'
 import { createFeatureLogger } from '@/lib/logger'
+import { DatabaseError, toDbError, JsonValue } from '@/lib/types/database'
 
 const logger = createFeatureLogger('CollaborationWorkspace')
 
@@ -29,7 +30,7 @@ export interface WorkspaceFolder {
   is_favorite: boolean
   color: string | null
   icon: string | null
-  metadata: Record<string, any>
+  metadata: Record<string, JsonValue>
   created_at: string
   updated_at: string
 }
@@ -49,7 +50,7 @@ export interface WorkspaceFile {
   tags: string[]
   version: number
   parent_file_id: string | null
-  metadata: Record<string, any>
+  metadata: Record<string, JsonValue>
   created_at: string
   updated_at: string
 }
@@ -73,6 +74,19 @@ export interface FolderWithFiles {
   subfolders: WorkspaceFolder[]
 }
 
+export interface WorkspaceStats {
+  totalFolders: number
+  totalFiles: number
+  totalSize: number
+  favoriteFiles: number
+  byVisibility: {
+    private: number
+    team: number
+    public: number
+  }
+  byType: Record<string, number>
+}
+
 // ============================================================================
 // FOLDER OPERATIONS
 // ============================================================================
@@ -83,7 +97,7 @@ export interface FolderWithFiles {
 export async function getFolders(
   userId: string,
   parentFolderId?: string | null
-): Promise<{ data: WorkspaceFolder[] | null; error: any }> {
+): Promise<{ data: WorkspaceFolder[] | null; error: DatabaseError | null }> {
   const startTime = performance.now()
 
   try {
@@ -121,9 +135,10 @@ export async function getFolders(
 
     return { data, error: null }
 
-  } catch (error: any) {
-    logger.error('Exception in getFolders', { error: error.message, userId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getFolders', { error: dbError.message, userId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -133,7 +148,7 @@ export async function getFolders(
 export async function getFolderById(
   folderId: string,
   userId: string
-): Promise<{ data: WorkspaceFolder | null; error: any }> {
+): Promise<{ data: WorkspaceFolder | null; error: DatabaseError | null }> {
   try {
     logger.info('Fetching folder by ID', { folderId, userId })
 
@@ -153,9 +168,10 @@ export async function getFolderById(
 
     return { data, error: null }
 
-  } catch (error: any) {
-    logger.error('Exception in getFolderById', { error: error.message, folderId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getFolderById', { error: dbError.message, folderId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -171,7 +187,7 @@ export async function createFolder(
     color?: string
     icon?: string
   }
-): Promise<{ data: WorkspaceFolder | null; error: any }> {
+): Promise<{ data: WorkspaceFolder | null; error: DatabaseError | null }> {
   try {
     logger.info('Creating folder', { userId, folderName: folder.name })
 
@@ -203,9 +219,10 @@ export async function createFolder(
 
     return { data, error: null }
 
-  } catch (error: any) {
-    logger.error('Exception in createFolder', { error: error.message, userId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in createFolder', { error: dbError.message, userId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -223,7 +240,7 @@ export async function updateFolder(
     color?: string
     icon?: string
   }
-): Promise<{ data: WorkspaceFolder | null; error: any }> {
+): Promise<{ data: WorkspaceFolder | null; error: DatabaseError | null }> {
   try {
     logger.info('Updating folder', { folderId, userId, updates })
 
@@ -245,9 +262,10 @@ export async function updateFolder(
     logger.info('Folder updated successfully', { folderId })
     return { data, error: null }
 
-  } catch (error: any) {
-    logger.error('Exception in updateFolder', { error: error.message, folderId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in updateFolder', { error: dbError.message, folderId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -257,7 +275,7 @@ export async function updateFolder(
 export async function deleteFolder(
   folderId: string,
   userId: string
-): Promise<{ success: boolean; error: any }> {
+): Promise<{ success: boolean; error: DatabaseError | null }> {
   try {
     logger.info('Deleting folder', { folderId, userId })
 
@@ -277,9 +295,10 @@ export async function deleteFolder(
     logger.info('Folder deleted successfully', { folderId })
     return { success: true, error: null }
 
-  } catch (error: any) {
-    logger.error('Exception in deleteFolder', { error: error.message, folderId })
-    return { success: false, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in deleteFolder', { error: dbError.message, folderId })
+    return { success: false, error: dbError }
   }
 }
 
@@ -300,7 +319,7 @@ export async function getFiles(
     file_type?: string
     search?: string
   }
-): Promise<{ data: WorkspaceFile[] | null; error: any }> {
+): Promise<{ data: WorkspaceFile[] | null; error: DatabaseError | null }> {
   const startTime = performance.now()
 
   try {
@@ -358,9 +377,10 @@ export async function getFiles(
 
     return { data, error: null }
 
-  } catch (error: any) {
-    logger.error('Exception in getFiles', { error: error.message, userId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getFiles', { error: dbError.message, userId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -370,7 +390,7 @@ export async function getFiles(
 export async function getFileById(
   fileId: string,
   userId: string
-): Promise<{ data: WorkspaceFile | null; error: any }> {
+): Promise<{ data: WorkspaceFile | null; error: DatabaseError | null }> {
   try {
     logger.info('Fetching file by ID', { fileId, userId })
 
@@ -390,9 +410,10 @@ export async function getFileById(
 
     return { data, error: null }
 
-  } catch (error: any) {
-    logger.error('Exception in getFileById', { error: error.message, fileId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getFileById', { error: dbError.message, fileId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -411,7 +432,7 @@ export async function createFile(
     visibility?: FileVisibility
     tags?: string[]
   }
-): Promise<{ data: WorkspaceFile | null; error: any }> {
+): Promise<{ data: WorkspaceFile | null; error: DatabaseError | null }> {
   try {
     logger.info('Creating file', { userId, fileName: file.name, fileSize: file.file_size })
 
@@ -447,9 +468,10 @@ export async function createFile(
 
     return { data, error: null }
 
-  } catch (error: any) {
-    logger.error('Exception in createFile', { error: error.message, userId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in createFile', { error: dbError.message, userId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -467,7 +489,7 @@ export async function updateFile(
     is_favorite?: boolean
     tags?: string[]
   }
-): Promise<{ data: WorkspaceFile | null; error: any }> {
+): Promise<{ data: WorkspaceFile | null; error: DatabaseError | null }> {
   try {
     logger.info('Updating file', { fileId, userId, updates })
 
@@ -489,9 +511,10 @@ export async function updateFile(
     logger.info('File updated successfully', { fileId })
     return { data, error: null }
 
-  } catch (error: any) {
-    logger.error('Exception in updateFile', { error: error.message, fileId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in updateFile', { error: dbError.message, fileId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -501,7 +524,7 @@ export async function updateFile(
 export async function deleteFile(
   fileId: string,
   userId: string
-): Promise<{ success: boolean; error: any }> {
+): Promise<{ success: boolean; error: DatabaseError | null }> {
   try {
     logger.info('Deleting file', { fileId, userId })
 
@@ -521,9 +544,10 @@ export async function deleteFile(
     logger.info('File deleted successfully', { fileId })
     return { success: true, error: null }
 
-  } catch (error: any) {
-    logger.error('Exception in deleteFile', { error: error.message, fileId })
-    return { success: false, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in deleteFile', { error: dbError.message, fileId })
+    return { success: false, error: dbError }
   }
 }
 
@@ -534,7 +558,7 @@ export async function moveFile(
   fileId: string,
   userId: string,
   newFolderId: string | null
-): Promise<{ data: WorkspaceFile | null; error: any }> {
+): Promise<{ data: WorkspaceFile | null; error: DatabaseError | null }> {
   try {
     logger.info('Moving file', { fileId, userId, newFolderId })
 
@@ -556,9 +580,10 @@ export async function moveFile(
     logger.info('File moved successfully', { fileId, newFolderId })
     return { data, error: null }
 
-  } catch (error: any) {
-    logger.error('Exception in moveFile', { error: error.message, fileId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in moveFile', { error: dbError.message, fileId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -580,7 +605,7 @@ export async function shareFile(
     can_share?: boolean
     expires_at?: string
   }
-): Promise<{ data: FileShare | null; error: any }> {
+): Promise<{ data: FileShare | null; error: DatabaseError | null }> {
   try {
     logger.info('Sharing file', { fileId, sharedBy, share })
 
@@ -609,9 +634,10 @@ export async function shareFile(
     logger.info('File shared successfully', { shareId: data.id, fileId })
     return { data, error: null }
 
-  } catch (error: any) {
-    logger.error('Exception in shareFile', { error: error.message, fileId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in shareFile', { error: dbError.message, fileId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -620,7 +646,7 @@ export async function shareFile(
  */
 export async function getFileShares(
   fileId: string
-): Promise<{ data: FileShare[] | null; error: any }> {
+): Promise<{ data: FileShare[] | null; error: DatabaseError | null }> {
   try {
     logger.info('Fetching file shares', { fileId })
 
@@ -639,9 +665,10 @@ export async function getFileShares(
 
     return { data, error: null }
 
-  } catch (error: any) {
-    logger.error('Exception in getFileShares', { error: error.message, fileId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getFileShares', { error: dbError.message, fileId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -651,7 +678,7 @@ export async function getFileShares(
 export async function removeFileShare(
   shareId: string,
   userId: string
-): Promise<{ success: boolean; error: any }> {
+): Promise<{ success: boolean; error: DatabaseError | null }> {
   try {
     logger.info('Removing file share', { shareId, userId })
 
@@ -671,9 +698,10 @@ export async function removeFileShare(
     logger.info('File share removed successfully', { shareId })
     return { success: true, error: null }
 
-  } catch (error: any) {
-    logger.error('Exception in removeFileShare', { error: error.message, shareId })
-    return { success: false, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in removeFileShare', { error: dbError.message, shareId })
+    return { success: false, error: dbError }
   }
 }
 
@@ -686,7 +714,7 @@ export async function removeFileShare(
  */
 export async function getWorkspaceStats(
   userId: string
-): Promise<{ data: any | null; error: any }> {
+): Promise<{ data: WorkspaceStats | null; error: DatabaseError | null }> {
   try {
     logger.info('Fetching workspace statistics', { userId })
 
@@ -724,9 +752,10 @@ export async function getWorkspaceStats(
     logger.info('Workspace statistics calculated', { userId, stats })
     return { data: stats, error: null }
 
-  } catch (error: any) {
-    logger.error('Exception in getWorkspaceStats', { error: error.message, userId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getWorkspaceStats', { error: dbError.message, userId })
+    return { data: null, error: dbError }
   }
 }
 
@@ -736,7 +765,7 @@ export async function getWorkspaceStats(
 export async function getFolderContents(
   userId: string,
   folderId: string | null
-): Promise<{ data: FolderWithFiles | null; error: any }> {
+): Promise<{ data: FolderWithFiles | null; error: DatabaseError | null }> {
   try {
     logger.info('Fetching folder contents', { userId, folderId })
 
@@ -779,8 +808,9 @@ export async function getFolderContents(
 
     return { data: result, error: null }
 
-  } catch (error: any) {
-    logger.error('Exception in getFolderContents', { error: error.message, userId, folderId })
-    return { data: null, error }
+  } catch (error: unknown) {
+    const dbError = toDbError(error)
+    logger.error('Exception in getFolderContents', { error: dbError.message, userId, folderId })
+    return { data: null, error: dbError }
   }
 }

@@ -7,6 +7,7 @@
 
 import { createClient } from '@/lib/supabase/client'
 import { createFeatureLogger } from './logger'
+import { DatabaseError, toDbError, JsonValue } from '@/lib/types/database'
 
 const supabase = createClient()
 const logger = createFeatureLogger('ProjectsHubQueries')
@@ -85,7 +86,7 @@ export async function getProjects(
   sort?: ProjectSortOptions,
   limit?: number,
   offset?: number
-): Promise<{ data: Project[]; error: any; count: number }> {
+): Promise<{ data: Project[]; error: DatabaseError | null; count: number }> {
   logger.info('Fetching projects', { userId, filters, sort, limit, offset })
 
   try {
@@ -137,21 +138,21 @@ export async function getProjects(
 
     if (error) {
       logger.error('Failed to fetch projects', { error, userId })
-      return { data: [], error, count: 0 }
+      return { data: [], error: toDbError(error), count: 0 }
     }
 
     logger.info('Projects fetched successfully', { count: data?.length || 0, total: count })
     return { data: data || [], error: null, count: count || 0 }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching projects', { error, userId })
-    return { data: [], error, count: 0 }
+    return { data: [], error: toDbError(error), count: 0 }
   }
 }
 
 /**
  * Get a single project by ID
  */
-export async function getProject(projectId: string): Promise<{ data: Project | null; error: any }> {
+export async function getProject(projectId: string): Promise<{ data: Project | null; error: DatabaseError | null }> {
   logger.info('Fetching project', { projectId })
 
   try {
@@ -163,14 +164,14 @@ export async function getProject(projectId: string): Promise<{ data: Project | n
 
     if (error) {
       logger.error('Failed to fetch project', { error, projectId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Project fetched successfully', { projectId, name: data?.name })
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching project', { error, projectId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -180,7 +181,7 @@ export async function getProject(projectId: string): Promise<{ data: Project | n
 export async function createProject(
   userId: string,
   projectData: Partial<Project>
-): Promise<{ data: Project | null; error: any }> {
+): Promise<{ data: Project | null; error: DatabaseError | null }> {
   logger.info('Creating project', { userId, name: projectData.name })
 
   try {
@@ -220,14 +221,14 @@ export async function createProject(
 
     if (error) {
       logger.error('Failed to create project', { error, userId, name: projectData.name })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Project created successfully', { projectId: data?.id, name: data?.name })
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception creating project', { error, userId, name: projectData.name })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -237,7 +238,7 @@ export async function createProject(
 export async function updateProject(
   projectId: string,
   updates: Partial<Project>
-): Promise<{ data: Project | null; error: any }> {
+): Promise<{ data: Project | null; error: DatabaseError | null }> {
   logger.info('Updating project', { projectId, updates: Object.keys(updates) })
 
   try {
@@ -253,21 +254,21 @@ export async function updateProject(
 
     if (error) {
       logger.error('Failed to update project', { error, projectId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Project updated successfully', { projectId, name: data?.name })
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception updating project', { error, projectId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
 /**
  * Delete a project
  */
-export async function deleteProject(projectId: string): Promise<{ success: boolean; error: any }> {
+export async function deleteProject(projectId: string): Promise<{ success: boolean; error: DatabaseError | null }> {
   logger.info('Deleting project', { projectId })
 
   try {
@@ -278,14 +279,14 @@ export async function deleteProject(projectId: string): Promise<{ success: boole
 
     if (error) {
       logger.error('Failed to delete project', { error, projectId })
-      return { success: false, error }
+      return { success: false, error: toDbError(error) }
     }
 
     logger.info('Project deleted successfully', { projectId })
     return { success: true, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception deleting project', { error, projectId })
-    return { success: false, error }
+    return { success: false, error: toDbError(error) }
   }
 }
 
@@ -295,7 +296,7 @@ export async function deleteProject(projectId: string): Promise<{ success: boole
 export async function updateProjectStatus(
   projectId: string,
   status: Project['status']
-): Promise<{ data: Project | null; error: any }> {
+): Promise<{ data: Project | null; error: DatabaseError | null }> {
   logger.info('Updating project status', { projectId, status })
 
   return updateProject(projectId, { status })
@@ -307,7 +308,7 @@ export async function updateProjectStatus(
 export async function toggleProjectStar(
   projectId: string,
   isStarred: boolean
-): Promise<{ data: Project | null; error: any }> {
+): Promise<{ data: Project | null; error: DatabaseError | null }> {
   logger.info('Toggling project star', { projectId, isStarred })
 
   return updateProject(projectId, { is_starred: isStarred })
@@ -319,7 +320,7 @@ export async function toggleProjectStar(
 export async function toggleProjectPin(
   projectId: string,
   isPinned: boolean
-): Promise<{ data: Project | null; error: any }> {
+): Promise<{ data: Project | null; error: DatabaseError | null }> {
   logger.info('Toggling project pin', { projectId, isPinned })
 
   return updateProject(projectId, { is_pinned: isPinned })
@@ -331,7 +332,7 @@ export async function toggleProjectPin(
 export async function updateProjectProgress(
   projectId: string,
   progress: number
-): Promise<{ data: Project | null; error: any }> {
+): Promise<{ data: Project | null; error: DatabaseError | null }> {
   logger.info('Updating project progress', { projectId, progress })
 
   // Auto-update status based on progress
@@ -382,7 +383,7 @@ export async function getProjectStats(userId: string): Promise<ProjectStats> {
 
     logger.info('Project stats calculated', { stats })
     return stats
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception calculating project stats', { error, userId })
     return {
       total: 0,
@@ -405,7 +406,7 @@ export async function searchProjects(
   userId: string,
   searchTerm: string,
   limit: number = 10
-): Promise<{ data: Project[]; error: any }> {
+): Promise<{ data: Project[]; error: DatabaseError | null }> {
   logger.info('Searching projects', { userId, searchTerm, limit })
 
   return getProjects(
@@ -422,7 +423,7 @@ export async function searchProjects(
 export async function getProjectsByStatus(
   userId: string,
   status: Project['status'][]
-): Promise<{ data: Project[]; error: any }> {
+): Promise<{ data: Project[]; error: DatabaseError | null }> {
   logger.info('Fetching projects by status', { userId, status })
 
   return getProjects(
@@ -438,7 +439,7 @@ export async function getProjectsByStatus(
 export async function getRecentProjects(
   userId: string,
   limit: number = 5
-): Promise<{ data: Project[]; error: any }> {
+): Promise<{ data: Project[]; error: DatabaseError | null }> {
   logger.info('Fetching recent projects', { userId, limit })
 
   return getProjects(
@@ -481,7 +482,7 @@ export interface ProjectTemplate {
  */
 export async function getTemplates(
   userId?: string
-): Promise<{ data: ProjectTemplate[]; error: any }> {
+): Promise<{ data: ProjectTemplate[]; error: DatabaseError | null }> {
   logger.info('Fetching templates', { userId })
 
   try {
@@ -504,13 +505,13 @@ export async function getTemplates(
 
     if (error) {
       logger.error('Failed to fetch templates', { error })
-      return { data: [], error }
+      return { data: [], error: toDbError(error) }
     }
 
     return { data: data || [], error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching templates', { error })
-    return { data: [], error }
+    return { data: [], error: toDbError(error) }
   }
 }
 
@@ -520,7 +521,7 @@ export async function getTemplates(
 export async function createTemplate(
   userId: string,
   templateData: Partial<ProjectTemplate>
-): Promise<{ data: ProjectTemplate | null; error: any }> {
+): Promise<{ data: ProjectTemplate | null; error: DatabaseError | null }> {
   logger.info('Creating template', { userId, title: templateData.title })
 
   try {
@@ -552,14 +553,14 @@ export async function createTemplate(
 
     if (error) {
       logger.error('Failed to create template', { error, userId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Template created successfully', { templateId: data?.id })
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception creating template', { error, userId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -569,7 +570,7 @@ export async function createTemplate(
 export async function duplicateTemplate(
   userId: string,
   templateId: string
-): Promise<{ data: ProjectTemplate | null; error: any }> {
+): Promise<{ data: ProjectTemplate | null; error: DatabaseError | null }> {
   logger.info('Duplicating template', { userId, templateId })
 
   try {
@@ -581,7 +582,7 @@ export async function duplicateTemplate(
       .single()
 
     if (fetchError || !original) {
-      return { data: null, error: fetchError || new Error('Template not found') }
+      return { data: null, error: fetchError ? toDbError(fetchError) : { message: 'Template not found' } }
     }
 
     // Create a duplicate
@@ -613,14 +614,14 @@ export async function duplicateTemplate(
 
     if (error) {
       logger.error('Failed to duplicate template', { error, userId, templateId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Template duplicated successfully', { newTemplateId: data?.id })
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception duplicating template', { error, userId, templateId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -631,7 +632,7 @@ export async function toggleTemplateLike(
   userId: string,
   templateId: string,
   liked: boolean
-): Promise<{ success: boolean; error: any }> {
+): Promise<{ success: boolean; error: DatabaseError | null }> {
   logger.info('Toggling template like', { userId, templateId, liked })
 
   try {
@@ -656,9 +657,9 @@ export async function toggleTemplateLike(
     }
 
     return { success: true, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception toggling template like', { error, userId, templateId })
-    return { success: false, error }
+    return { success: false, error: toDbError(error) }
   }
 }
 
@@ -667,7 +668,7 @@ export async function toggleTemplateLike(
  */
 export async function incrementTemplateDownloads(
   templateId: string
-): Promise<{ success: boolean; error: any }> {
+): Promise<{ success: boolean; error: DatabaseError | null }> {
   logger.info('Incrementing template downloads', { templateId })
 
   try {
@@ -677,13 +678,13 @@ export async function incrementTemplateDownloads(
 
     if (error) {
       logger.error('Failed to increment downloads', { error, templateId })
-      return { success: false, error }
+      return { success: false, error: toDbError(error) }
     }
 
     return { success: true, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception incrementing downloads', { error, templateId })
-    return { success: false, error }
+    return { success: false, error: toDbError(error) }
   }
 }
 
@@ -703,7 +704,7 @@ export interface ProjectImport {
   size_formatted: string
   type: string
   error_message?: string
-  metadata: Record<string, any>
+  metadata: Record<string, JsonValue>
   created_at: string
   updated_at: string
   completed_at?: string
@@ -718,7 +719,7 @@ export interface ImportSource {
   access_token?: string
   refresh_token?: string
   token_expires_at?: string
-  metadata: Record<string, any>
+  metadata: Record<string, JsonValue>
   created_at: string
   updated_at: string
 }
@@ -729,7 +730,7 @@ export interface ImportSource {
 export async function getImportHistory(
   userId: string,
   limit: number = 20
-): Promise<{ data: ProjectImport[]; error: any }> {
+): Promise<{ data: ProjectImport[]; error: DatabaseError | null }> {
   logger.info('Fetching import history', { userId, limit })
 
   try {
@@ -742,13 +743,13 @@ export async function getImportHistory(
 
     if (error) {
       logger.error('Failed to fetch import history', { error, userId })
-      return { data: [], error }
+      return { data: [], error: toDbError(error) }
     }
 
     return { data: data || [], error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching import history', { error, userId })
-    return { data: [], error }
+    return { data: [], error: toDbError(error) }
   }
 }
 
@@ -758,7 +759,7 @@ export async function getImportHistory(
 export async function createImport(
   userId: string,
   importData: Partial<ProjectImport>
-): Promise<{ data: ProjectImport | null; error: any }> {
+): Promise<{ data: ProjectImport | null; error: DatabaseError | null }> {
   logger.info('Creating import record', { userId, name: importData.name })
 
   try {
@@ -783,15 +784,23 @@ export async function createImport(
 
     if (error) {
       logger.error('Failed to create import', { error, userId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Import record created', { importId: data?.id })
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception creating import', { error, userId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
+}
+
+/** Type for import status update fields */
+interface ImportStatusUpdates {
+  status: ProjectImport['status']
+  updated_at: string
+  completed_at?: string
+  error_message?: string
 }
 
 /**
@@ -801,11 +810,11 @@ export async function updateImportStatus(
   importId: string,
   status: ProjectImport['status'],
   errorMessage?: string
-): Promise<{ data: ProjectImport | null; error: any }> {
+): Promise<{ data: ProjectImport | null; error: DatabaseError | null }> {
   logger.info('Updating import status', { importId, status })
 
   try {
-    const updates: Record<string, any> = {
+    const updates: ImportStatusUpdates = {
       status,
       updated_at: new Date().toISOString(),
     }
@@ -827,13 +836,13 @@ export async function updateImportStatus(
 
     if (error) {
       logger.error('Failed to update import status', { error, importId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception updating import status', { error, importId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -843,7 +852,7 @@ export async function updateImportStatus(
 export async function retryImport(
   userId: string,
   importId: string
-): Promise<{ data: ProjectImport | null; error: any }> {
+): Promise<{ data: ProjectImport | null; error: DatabaseError | null }> {
   logger.info('Retrying import', { userId, importId })
 
   try {
@@ -862,14 +871,14 @@ export async function retryImport(
 
     if (error) {
       logger.error('Failed to retry import', { error, importId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Import retry initiated', { importId })
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception retrying import', { error, importId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -879,7 +888,7 @@ export async function retryImport(
 export async function deleteImport(
   userId: string,
   importId: string
-): Promise<{ success: boolean; error: any }> {
+): Promise<{ success: boolean; error: DatabaseError | null }> {
   logger.info('Deleting import', { userId, importId })
 
   try {
@@ -891,14 +900,14 @@ export async function deleteImport(
 
     if (error) {
       logger.error('Failed to delete import', { error, importId })
-      return { success: false, error }
+      return { success: false, error: toDbError(error) }
     }
 
     logger.info('Import deleted successfully', { importId })
     return { success: true, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception deleting import', { error, importId })
-    return { success: false, error }
+    return { success: false, error: toDbError(error) }
   }
 }
 
@@ -907,7 +916,7 @@ export async function deleteImport(
  */
 export async function getImportSources(
   userId: string
-): Promise<{ data: ImportSource[]; error: any }> {
+): Promise<{ data: ImportSource[]; error: DatabaseError | null }> {
   logger.info('Fetching import sources', { userId })
 
   try {
@@ -919,13 +928,13 @@ export async function getImportSources(
 
     if (error) {
       logger.error('Failed to fetch import sources', { error, userId })
-      return { data: [], error }
+      return { data: [], error: toDbError(error) }
     }
 
     return { data: data || [], error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching import sources', { error, userId })
-    return { data: [], error }
+    return { data: [], error: toDbError(error) }
   }
 }
 
@@ -935,7 +944,7 @@ export async function getImportSources(
 export async function connectImportSource(
   userId: string,
   sourceData: Partial<ImportSource>
-): Promise<{ data: ImportSource | null; error: any }> {
+): Promise<{ data: ImportSource | null; error: DatabaseError | null }> {
   logger.info('Connecting import source', { userId, sourceType: sourceData.source_type })
 
   try {
@@ -962,14 +971,14 @@ export async function connectImportSource(
 
     if (error) {
       logger.error('Failed to connect import source', { error, userId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Import source connected', { sourceType: sourceData.source_type })
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception connecting import source', { error, userId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -979,7 +988,7 @@ export async function connectImportSource(
 export async function disconnectImportSource(
   userId: string,
   sourceType: string
-): Promise<{ success: boolean; error: any }> {
+): Promise<{ success: boolean; error: DatabaseError | null }> {
   logger.info('Disconnecting import source', { userId, sourceType })
 
   try {
@@ -997,14 +1006,14 @@ export async function disconnectImportSource(
 
     if (error) {
       logger.error('Failed to disconnect import source', { error, userId, sourceType })
-      return { success: false, error }
+      return { success: false, error: toDbError(error) }
     }
 
     logger.info('Import source disconnected', { sourceType })
     return { success: true, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception disconnecting import source', { error, userId, sourceType })
-    return { success: false, error }
+    return { success: false, error: toDbError(error) }
   }
 }
 
@@ -1030,7 +1039,7 @@ export interface ImportSettings {
  */
 export async function getImportSettings(
   userId: string
-): Promise<{ data: ImportSettings | null; error: any }> {
+): Promise<{ data: ImportSettings | null; error: DatabaseError | null }> {
   logger.info('Fetching import settings', { userId })
 
   try {
@@ -1042,13 +1051,13 @@ export async function getImportSettings(
 
     if (error && error.code !== 'PGRST116') {
       logger.error('Failed to fetch import settings', { error, userId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception fetching import settings', { error, userId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }
 
@@ -1065,7 +1074,7 @@ export async function saveImportSettings(
     maxFileSize?: string
     allowedTypes?: string[]
   }
-): Promise<{ data: ImportSettings | null; error: any }> {
+): Promise<{ data: ImportSettings | null; error: DatabaseError | null }> {
   logger.info('Saving import settings', { userId, fields: Object.keys(settings) })
 
   try {
@@ -1089,13 +1098,13 @@ export async function saveImportSettings(
 
     if (error) {
       logger.error('Failed to save import settings', { error, userId })
-      return { data: null, error }
+      return { data: null, error: toDbError(error) }
     }
 
     logger.info('Import settings saved successfully', { userId })
     return { data, error: null }
-  } catch (error) {
+  } catch (error: unknown) {
     logger.error('Exception saving import settings', { error, userId })
-    return { data: null, error }
+    return { data: null, error: toDbError(error) }
   }
 }

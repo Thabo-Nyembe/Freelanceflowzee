@@ -3,6 +3,7 @@
  */
 
 import { createClient } from '@/lib/supabase/client'
+import type { JsonValue } from '@/lib/types/database'
 
 export type TranslationLanguage = 'en' | 'es' | 'fr' | 'de' | 'it' | 'pt' | 'ru' | 'zh' | 'ja' | 'ko' | 'ar' | 'hi' | 'nl' | 'sv' | 'pl' | 'tr' | 'th' | 'vi' | 'id' | 'ms'
 export type TranslationMode = 'text' | 'voice' | 'video' | 'document' | 'subtitle' | 'live-chat'
@@ -249,7 +250,7 @@ export async function createDocumentTranslation(userId: string, doc: Partial<Doc
 
 export async function updateDocumentProgress(docId: string, progress: number, status?: TranslationStatus) {
   const supabase = createClient()
-  const updates: any = { progress }
+  const updates: { progress: number; status?: TranslationStatus } = { progress }
   if (status) updates.status = status
   return await supabase.from('document_translations').update(updates).eq('id', docId).select().single()
 }
