@@ -665,11 +665,81 @@ export default function StockClient() {
     })
   }
 
-  const handleSubmitExport = () => {
-    toast.success('Export started', {
-      description: `Generating ${exportForm.format.toUpperCase()} inventory report...`
-    })
-    setShowExportDialog(false)
+  const handleSubmitExport = async () => {
+    try {
+      const exportData = {
+        products: products || [],
+        movements: movements || [],
+        exportedAt: new Date().toISOString(),
+        format: exportForm.format,
+        options: {
+          includeQuantities: exportForm.includeQuantities,
+          includeValues: exportForm.includeValues,
+          includeLocations: exportForm.includeLocations,
+          dateRange: exportForm.dateRange
+        }
+      }
+
+      let content: string
+      let mimeType: string
+      let extension: string
+
+      if (exportForm.format === 'csv') {
+        // Build CSV headers based on export options
+        const headers: string[] = ['id', 'sku', 'name', 'category', 'status']
+        if (exportForm.includeQuantities) {
+          headers.push('quantity', 'reservedQuantity', 'availableQuantity', 'reorderPoint')
+        }
+        if (exportForm.includeValues) {
+          headers.push('unitCost', 'sellingPrice', 'margin')
+        }
+        if (exportForm.includeLocations) {
+          headers.push('locations')
+        }
+
+        const rows = (products || []).map(item =>
+          headers.map(h => {
+            if (h === 'locations' && item.locations) {
+              return item.locations.map(loc => `${loc.warehouseName}:${loc.zone}:${loc.bin}`).join(';')
+            }
+            const value = item[h as keyof Product]
+            return value !== undefined && value !== null ? String(value) : ''
+          }).join(',')
+        )
+        content = [headers.join(','), ...rows].join('\n')
+        mimeType = 'text/csv'
+        extension = 'csv'
+      } else if (exportForm.format === 'xlsx') {
+        // For XLSX, export as JSON (would need xlsx library for true xlsx)
+        content = JSON.stringify(exportData, null, 2)
+        mimeType = 'application/json'
+        extension = 'json'
+        toast.info('XLSX export', { description: 'Exporting as JSON format. Install xlsx library for true Excel format.' })
+      } else {
+        content = JSON.stringify(exportData, null, 2)
+        mimeType = 'application/json'
+        extension = 'json'
+      }
+
+      const blob = new Blob([content], { type: mimeType })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `stock-export-${new Date().toISOString().split('T')[0]}.${extension}`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+
+      toast.success('Export completed', {
+        description: `Exported ${products.length} products as ${extension.toUpperCase()}`
+      })
+      setShowExportDialog(false)
+    } catch (err) {
+      toast.error('Export failed', {
+        description: err instanceof Error ? err.message : 'Unknown error occurred'
+      })
+    }
   }
 
   const handleSubmitNewProduct = () => {

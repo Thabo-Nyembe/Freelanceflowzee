@@ -734,9 +734,20 @@ export default function SubscriptionsClient() {
   /**
    * Handle apply filters
    */
-  const handleApplyFilters = () => {
-    toast.success(`Filters applied: Status - ${filterStatus}, Date Range - ${filterDateRange}`)
-    setShowFilterDialog(false)
+  const handleApplyFilters = async () => {
+    try {
+      // Save filter preferences to localStorage
+      localStorage.setItem('subscriptions-filters', JSON.stringify({
+        status: filterStatus,
+        dateRange: filterDateRange
+      }))
+      // Trigger refetch with filters
+      refetch?.()
+      toast.success(`Filters applied: Status - ${filterStatus}, Date Range - ${filterDateRange}`)
+      setShowFilterDialog(false)
+    } catch (err) {
+      toast.error('Failed to apply filters')
+    }
   }
 
   /**
@@ -844,9 +855,13 @@ export default function SubscriptionsClient() {
    * Handle contact support
    */
   const handleContactSupport = () => {
+    // Open mailto link for subscription support
+    window.location.href = 'mailto:support@freeflow.com?subject=Subscription Support Request&body=Please describe your subscription issue below:%0A%0A'
+    // If a chat widget is available (e.g., Intercom), open it
+    if (typeof window !== 'undefined' && (window as Window & { Intercom?: (action: string) => void }).Intercom) {
+      (window as Window & { Intercom?: (action: string) => void }).Intercom?.('show')
+    }
     toast.info('Opening support chat...')
-    // In a real implementation, this would open a support widget or redirect to support page
-    window.open('/support', '_blank')
   }
 
   /**

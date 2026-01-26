@@ -633,8 +633,99 @@ export default function InvoicingClient() {
   }
 
   const handlePrintInvoice = () => {
-    toast.success('Opening print dialog...')
-    window.print()
+    if (!selectedInvoice) {
+      toast.error('No invoice selected')
+      return
+    }
+    const printContent = document.getElementById('invoice-preview-content')
+    if (printContent) {
+      const printWindow = window.open('', '_blank')
+      if (printWindow) {
+        printWindow.document.write(`
+          <html>
+            <head>
+              <title>Invoice ${selectedInvoice.invoiceNumber}</title>
+              <style>
+                body { font-family: Arial, sans-serif; padding: 40px; max-width: 800px; margin: 0 auto; }
+                h1 { font-size: 24px; margin-bottom: 20px; }
+                table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+                th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+                th { background-color: #f5f5f5; font-weight: 600; }
+                .text-right { text-align: right; }
+                .totals { margin-left: auto; width: 250px; }
+                .totals div { display: flex; justify-content: space-between; padding: 8px 0; }
+                .totals .total-row { border-top: 2px solid #333; font-weight: bold; font-size: 18px; }
+                .header { display: flex; justify-content: space-between; margin-bottom: 30px; }
+                .client-info { margin-bottom: 20px; }
+                .invoice-meta { text-align: right; }
+                @media print { body { padding: 20px; } }
+              </style>
+            </head>
+            <body>
+              <div class="header">
+                <div>
+                  <h1>INVOICE</h1>
+                  <p><strong>${selectedInvoice.invoiceNumber}</strong></p>
+                </div>
+                <div class="invoice-meta">
+                  <p>Issue Date: ${new Date(selectedInvoice.issueDate).toLocaleDateString()}</p>
+                  <p>Due Date: ${new Date(selectedInvoice.dueDate).toLocaleDateString()}</p>
+                </div>
+              </div>
+              <div class="client-info">
+                <p><strong>Bill To:</strong></p>
+                <p>${selectedInvoice.client.company || selectedInvoice.client.name}</p>
+                <p>${selectedInvoice.client.email}</p>
+                ${selectedInvoice.client.address ? `<p>${selectedInvoice.client.address}</p>` : ''}
+              </div>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Description</th>
+                    <th class="text-right">Qty</th>
+                    <th class="text-right">Rate</th>
+                    <th class="text-right">Tax</th>
+                    <th class="text-right">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${selectedInvoice.lineItems.map(item => `
+                    <tr>
+                      <td>${item.description}</td>
+                      <td class="text-right">${item.quantity}</td>
+                      <td class="text-right">${selectedInvoice.currency} ${item.unitPrice.toFixed(2)}</td>
+                      <td class="text-right">${item.taxRate}%</td>
+                      <td class="text-right">${selectedInvoice.currency} ${item.total.toFixed(2)}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+              <div class="totals">
+                <div><span>Subtotal</span><span>${selectedInvoice.currency} ${selectedInvoice.subtotal.toFixed(2)}</span></div>
+                ${selectedInvoice.discountAmount > 0 ? `<div><span>Discount</span><span>-${selectedInvoice.currency} ${selectedInvoice.discountAmount.toFixed(2)}</span></div>` : ''}
+                <div><span>Tax</span><span>${selectedInvoice.currency} ${selectedInvoice.taxAmount.toFixed(2)}</span></div>
+                <div class="total-row"><span>Total</span><span>${selectedInvoice.currency} ${selectedInvoice.total.toFixed(2)}</span></div>
+                ${selectedInvoice.amountPaid > 0 ? `
+                  <div><span>Paid</span><span>-${selectedInvoice.currency} ${selectedInvoice.amountPaid.toFixed(2)}</span></div>
+                  <div><span>Balance Due</span><span>${selectedInvoice.currency} ${selectedInvoice.amountDue.toFixed(2)}</span></div>
+                ` : ''}
+              </div>
+              ${selectedInvoice.notes ? `<div style="margin-top: 30px;"><p><strong>Notes:</strong></p><p>${selectedInvoice.notes}</p></div>` : ''}
+              ${selectedInvoice.terms ? `<div style="margin-top: 20px;"><p><strong>Terms:</strong></p><p>${selectedInvoice.terms}</p></div>` : ''}
+            </body>
+          </html>
+        `)
+        printWindow.document.close()
+        printWindow.print()
+        toast.success('Print dialog opened')
+      } else {
+        toast.error('Could not open print window. Please check your popup blocker settings.')
+      }
+    } else {
+      // Fallback: print current window
+      window.print()
+      toast.success('Print dialog opened')
+    }
   }
 
   const handleDuplicateInvoice = async () => {
@@ -658,12 +749,117 @@ export default function InvoicingClient() {
   }
 
   const handleCreateInvoice = () => {
+    setShowNewInvoiceDialog(true)
     toast.info('Opening invoice creation form...')
-    // In production, this would open a creation dialog or navigate to creation page
   }
 
-  const handleExportInvoices = () => {
-    toast.success('Export started')
+  const handleExportInvoices = (format: 'csv' | 'json' = 'csv') => {
+    try {
+      if (!filteredInvoices || filteredInvoices.length === 0) {
+        toast.error('No invoices to export')
+        return
+      }
+
+      let content: string
+      let filename: string
+      let mimeType: string
+
+      if (format === 'json') {
+        // Export as JSON
+        const exportData = filteredInvoices.map(invoice => ({
+          invoiceNumber: invoice.invoiceNumber,
+          status: invoice.status,
+          type: invoice.type,
+          clientName: invoice.client.name,
+          clientEmail: invoice.client.email,
+          clientCompany: invoice.client.company,
+          subtotal: invoice.subtotal,
+          taxAmount: invoice.taxAmount,
+          discountAmount: invoice.discountAmount,
+          total: invoice.total,
+          amountPaid: invoice.amountPaid,
+          amountDue: invoice.amountDue,
+          currency: invoice.currency,
+          issueDate: invoice.issueDate,
+          dueDate: invoice.dueDate,
+          paidDate: invoice.paidDate || null,
+          notes: invoice.notes || '',
+          terms: invoice.terms || '',
+          createdAt: invoice.createdAt,
+        }))
+        content = JSON.stringify(exportData, null, 2)
+        filename = `invoices_export_${new Date().toISOString().split('T')[0]}.json`
+        mimeType = 'application/json'
+      } else {
+        // Export as CSV
+        const headers = [
+          'Invoice Number',
+          'Status',
+          'Type',
+          'Client Name',
+          'Client Email',
+          'Client Company',
+          'Subtotal',
+          'Tax Amount',
+          'Discount Amount',
+          'Total',
+          'Amount Paid',
+          'Amount Due',
+          'Currency',
+          'Issue Date',
+          'Due Date',
+          'Paid Date',
+          'Notes',
+          'Created At'
+        ]
+
+        const csvRows = [headers.join(',')]
+
+        filteredInvoices.forEach(invoice => {
+          const row = [
+            `"${invoice.invoiceNumber}"`,
+            `"${invoice.status}"`,
+            `"${invoice.type}"`,
+            `"${(invoice.client.name || '').replace(/"/g, '""')}"`,
+            `"${invoice.client.email || ''}"`,
+            `"${(invoice.client.company || '').replace(/"/g, '""')}"`,
+            invoice.subtotal.toFixed(2),
+            invoice.taxAmount.toFixed(2),
+            invoice.discountAmount.toFixed(2),
+            invoice.total.toFixed(2),
+            invoice.amountPaid.toFixed(2),
+            invoice.amountDue.toFixed(2),
+            `"${invoice.currency}"`,
+            `"${invoice.issueDate}"`,
+            `"${invoice.dueDate}"`,
+            `"${invoice.paidDate || ''}"`,
+            `"${(invoice.notes || '').replace(/"/g, '""').replace(/\n/g, ' ')}"`,
+            `"${invoice.createdAt}"`
+          ]
+          csvRows.push(row.join(','))
+        })
+
+        content = csvRows.join('\n')
+        filename = `invoices_export_${new Date().toISOString().split('T')[0]}.csv`
+        mimeType = 'text/csv'
+      }
+
+      // Create and download the file
+      const blob = new Blob([content], { type: `${mimeType};charset=utf-8;` })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = filename
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+
+      toast.success(`Exported ${filteredInvoices.length} invoices as ${format.toUpperCase()}`)
+    } catch (error) {
+      console.error('Export error:', error)
+      toast.error('Failed to export invoices')
+    }
   }
 
   const handleVoidInvoice = async () => {

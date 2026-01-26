@@ -311,6 +311,49 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
     dateRange: { start: '', end: '' }
   })
 
+  // Settings state with localStorage initialization
+  const [settings, setSettings] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('renewals-settings')
+      if (saved) {
+        try {
+          return JSON.parse(saved)
+        } catch {
+          // Invalid JSON, use defaults
+        }
+      }
+    }
+    return {
+      general: {
+        defaultRenewalPeriod: '1',
+        advanceNoticeDays: 90,
+        autoCreateRenewals: true,
+        healthyThreshold: 70,
+        atRiskThreshold: 40
+      },
+      automation: {
+        autoAssignRenewals: true,
+        autoEscalateAtRisk: true,
+        autoTriggerPlaybooks: false,
+        autoUpdateForecasts: false
+      },
+      notifications: {
+        renewalDueReminders: true,
+        atRiskAlerts: true,
+        wonLostNotifications: true,
+        weeklyPipelineDigest: false
+      },
+      security: {
+        requireDiscountApproval: true,
+        auditLogging: true
+      },
+      advanced: {
+        multiYearRenewals: true,
+        customHealthMetrics: false
+      }
+    }
+  })
+
   // Quick actions with real functionality
   const handleNewRenewal = () => {
     setIsNewRenewalDialogOpen(true)
@@ -429,12 +472,72 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
     toast.success(`Meeting scheduled with ${selectedRenewal.customerName}`)
   }
 
-  const handleExport = () => {
-    toast.success('Export started')
+  const handleExport = async () => {
+    try {
+      const exportData = {
+        renewals: renewals.map(r => ({
+          id: r.id,
+          customerName: r.customerName,
+          status: r.status,
+          type: r.type,
+          priority: r.priority,
+          healthScore: r.healthScore,
+          healthScoreValue: r.healthScoreValue,
+          currentARR: r.currentARR,
+          proposedARR: r.proposedARR,
+          expansionValue: r.expansionValue,
+          probability: r.probability,
+          renewalDate: r.renewalDate,
+          daysToRenewal: r.daysToRenewal,
+          contractTerm: r.contractTerm,
+          currency: r.currency,
+          csmName: r.csmName,
+          aeName: r.aeName,
+          products: r.products,
+          riskFactors: r.riskFactors,
+          notes: r.notes
+        })),
+        exportedAt: new Date().toISOString(),
+        totalCount: renewals.length,
+        stats: {
+          totalCurrentARR: renewals.reduce((sum, r) => sum + r.currentARR, 0),
+          totalProposedARR: renewals.reduce((sum, r) => sum + r.proposedARR, 0),
+          averageProbability: renewals.length > 0
+            ? renewals.reduce((sum, r) => sum + r.probability, 0) / renewals.length
+            : 0
+        }
+      }
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `renewals-${new Date().toISOString().split('T')[0]}.json`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+      toast.success('Export completed', {
+        description: `${renewals.length} renewals exported successfully`
+      })
+    } catch (err) {
+      console.error('Export failed:', err)
+      toast.error('Export failed', {
+        description: 'Unable to export renewals data'
+      })
+    }
   }
 
-  const handleScheduleRenewal = () => {
-    toast.info('Schedule Renewal')
+  const handleScheduleRenewal = async () => {
+    try {
+      // Open the new renewal dialog to create/schedule a renewal
+      setIsNewRenewalDialogOpen(true)
+      toast.info('Create a new renewal', {
+        description: 'Fill in the renewal details to schedule'
+      })
+    } catch (err) {
+      console.error('Failed to open schedule dialog:', err)
+      toast.error('Failed to open renewal scheduler')
+    }
   }
 
   const handleContactEmail = (email: string, name: string) => {
@@ -449,8 +552,73 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
     toast.success(`Processing renewal: "${contractName}" renewal is being processed`)
   }
 
-  const handleExportRenewals = () => {
-    toast.success('Exporting renewals')
+  const handleExportRenewals = async () => {
+    try {
+      toast.loading('Preparing export...', { id: 'export-renewals' })
+
+      // Generate CSV content for renewals
+      const headers = [
+        'Customer Name',
+        'Status',
+        'Type',
+        'Priority',
+        'Health Score',
+        'Current ARR',
+        'Proposed ARR',
+        'Expansion Value',
+        'Probability (%)',
+        'Renewal Date',
+        'Days to Renewal',
+        'Contract Term',
+        'CSM',
+        'AE',
+        'Products',
+        'Risk Factors',
+        'Notes'
+      ]
+
+      const rows = renewals.map(r => [
+        `"${r.customerName}"`,
+        r.status,
+        r.type,
+        r.priority,
+        r.healthScoreValue,
+        r.currentARR,
+        r.proposedARR,
+        r.expansionValue,
+        r.probability,
+        `"${r.renewalDate}"`,
+        r.daysToRenewal,
+        r.contractTerm,
+        `"${r.csmName}"`,
+        `"${r.aeName}"`,
+        `"${r.products.join(', ')}"`,
+        `"${r.riskFactors.join(', ')}"`,
+        `"${r.notes.replace(/"/g, '""')}"`
+      ])
+
+      const csvContent = [headers.join(','), ...rows.map(row => row.join(','))].join('\n')
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `renewals-export-${new Date().toISOString().split('T')[0]}.csv`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+
+      toast.success('Export completed', {
+        id: 'export-renewals',
+        description: `${renewals.length} renewals exported to CSV`
+      })
+    } catch (err) {
+      console.error('Export renewals failed:', err)
+      toast.error('Export failed', {
+        id: 'export-renewals',
+        description: 'Unable to export renewals data'
+      })
+    }
   }
 
   // Additional handlers for dialogs
@@ -540,9 +708,43 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
     toast.info('Opening renewal settings')
   }
 
-  const handleSaveSettings = () => {
-    toast.success('Settings saved')
-    setIsSettingsDialogOpen(false)
+  const handleSaveSettings = async () => {
+    try {
+      // Persist settings to localStorage
+      localStorage.setItem('renewals-settings', JSON.stringify(settings))
+
+      // Optionally sync to database for cross-device persistence
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        await supabase
+          .from('user_settings')
+          .upsert({
+            user_id: user.id,
+            settings_key: 'renewals-settings',
+            settings_value: settings,
+            updated_at: new Date().toISOString()
+          }, { onConflict: 'user_id,settings_key' })
+      }
+
+      toast.success('Settings saved', {
+        description: 'Your renewal settings have been updated'
+      })
+      setIsSettingsDialogOpen(false)
+    } catch (err) {
+      console.error('Failed to save settings:', err)
+      // Still save to localStorage even if database sync fails
+      try {
+        localStorage.setItem('renewals-settings', JSON.stringify(settings))
+        toast.success('Settings saved locally', {
+          description: 'Settings saved to this browser'
+        })
+        setIsSettingsDialogOpen(false)
+      } catch {
+        toast.error('Failed to save settings', {
+          description: 'Unable to persist your settings'
+        })
+      }
+    }
   }
 
   const handleOpenExportDialog = () => {

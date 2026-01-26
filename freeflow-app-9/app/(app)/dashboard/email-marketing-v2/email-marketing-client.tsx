@@ -635,6 +635,7 @@ export default function EmailMarketingClient() {
 
   // Handlers
   const handleCreateCampaign = () => {
+    setShowCreateCampaignDialog(true)
     toast.info('Create Campaign')
   }
 
@@ -650,8 +651,39 @@ export default function EmailMarketingClient() {
     toast.success(`Campaign duplicated: created`)
   }
 
-  const handleExportSubscribers = () => {
-    toast.success('Exporting subscribers')
+  const handleExportSubscribers = async () => {
+    try {
+      // CSV format for email subscribers
+      const headers = ['email', 'first_name', 'last_name', 'status', 'signup_date', 'tags', 'open_rate', 'click_rate', 'source']
+      const rows = (subscribers || []).map(sub =>
+        [
+          sub.email,
+          sub.firstName || '',
+          sub.lastName || '',
+          sub.status,
+          sub.signupDate,
+          (sub.tags || []).join(';'),
+          sub.openRate.toString(),
+          sub.clickRate.toString(),
+          sub.source || ''
+        ].map(field => `"${String(field).replace(/"/g, '""')}"`).join(',')
+      )
+      const csv = [headers.join(','), ...rows].join('\n')
+
+      const blob = new Blob([csv], { type: 'text/csv' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `subscribers-${new Date().toISOString().split('T')[0]}.csv`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+
+      toast.success(`Exported ${subscribers.length} subscribers`)
+    } catch (err) {
+      toast.error('Export failed')
+    }
   }
 
   return (
