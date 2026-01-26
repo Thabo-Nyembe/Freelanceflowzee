@@ -11,7 +11,6 @@ import type {
   OrganizationContext,
   KnowledgeSource,
   TeamContext,
-  AIConfiguration,
   AIResponseWithContext,
 } from '@/lib/ai/organization-context';
 

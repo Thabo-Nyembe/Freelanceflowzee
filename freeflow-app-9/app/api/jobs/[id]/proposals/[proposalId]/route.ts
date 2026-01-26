@@ -50,7 +50,7 @@ export async function PATCH(
     const body = await request.json();
     const validatedData = updateProposalSchema.parse(body);
 
-    let updateData: Record<string, unknown> = {
+    const updateData: Record<string, unknown> = {
       updated_at: new Date().toISOString(),
     };
 

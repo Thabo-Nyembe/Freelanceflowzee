@@ -15,7 +15,7 @@
  */
 
 import { createClient } from '@/lib/supabase/server'
-import { SignJWT, jwtVerify, importSPKI, importPKCS8 } from 'jose'
+import { jwtVerify, importSPKI } from 'jose'
 
 // Types
 export interface IdentityProvider {

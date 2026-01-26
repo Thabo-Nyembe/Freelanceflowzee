@@ -11,7 +11,7 @@
  */
 
 import { createClient } from '@/lib/supabase/client'
-import { DatabaseError, toDbError, JsonValue } from '@/lib/types/database'
+import { DatabaseError, JsonValue } from '@/lib/types/database'
 
 // ============================================================================
 // TYPES

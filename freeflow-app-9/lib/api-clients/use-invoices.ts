@@ -11,7 +11,7 @@
  */
 
 import { useQuery, useMutation, useQueryClient, type UseQueryOptions } from '@tanstack/react-query'
-import { invoicesClient, type Invoice, type CreateInvoiceData, type UpdateInvoiceData, type InvoiceFilters } from './invoices-client'
+import { invoicesClient, type CreateInvoiceData, type UpdateInvoiceData, type InvoiceFilters } from './invoices-client'
 import { toast } from 'sonner'
 import { STALE_TIMES, userDataQueryOptions, analyticsQueryOptions, invalidationPatterns } from '@/lib/query-client'
 

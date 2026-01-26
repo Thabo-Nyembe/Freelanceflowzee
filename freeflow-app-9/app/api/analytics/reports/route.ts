@@ -25,7 +25,7 @@ interface AnalyticsRequest {
 
 // Helper to fetch data from Supabase
 async function fetchData(supabase: any, table: string, period?: any) {
-  let query = supabase.from(table).select('*')
+  const query = supabase.from(table).select('*')
 
   // Apply date filtering if columns exist (simplified)
   // Real implementation would need to know date column names per table

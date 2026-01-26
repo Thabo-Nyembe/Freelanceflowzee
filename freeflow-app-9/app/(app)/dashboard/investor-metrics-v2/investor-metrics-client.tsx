@@ -80,7 +80,7 @@ import {
 } from '@/components/ui/competitive-upgrades-extended'
 
 // MIGRATED: Batch #13 - Removed mock data, using database hooks
-import { useInvestorMetrics, type InvestorMetric, type InvestorStats } from '@/lib/hooks/use-investor-metrics'
+import { useInvestorMetrics, type InvestorStats } from '@/lib/hooks/use-investor-metrics'
 
 // Initialize Supabase client once at module level
 const supabase = createClient()

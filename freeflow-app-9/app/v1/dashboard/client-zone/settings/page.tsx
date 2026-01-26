@@ -13,13 +13,9 @@ import {
   Shield,
   Download,
   Save,
-  MessageSquare,
-  Clock,
   Lock,
   User,
-  Eye,
   Check,
-  FileText,
   Database,
   Zap
 } from 'lucide-react'

@@ -5,7 +5,7 @@
  * Comprehensive hooks for Fiverr-style service marketplace
  */
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 
 // Types

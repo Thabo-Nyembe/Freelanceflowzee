@@ -156,7 +156,7 @@ export async function PATCH(request: NextRequest) {
       const validatedUpdates = updateKeyResultSchema.parse(updates);
 
       // Handle completion
-      let updateData = { ...validatedUpdates } as Record<string, unknown>;
+      const updateData = { ...validatedUpdates } as Record<string, unknown>;
       if (validatedUpdates.status === 'completed') {
         updateData.completed_date = new Date().toISOString().split('T')[0];
       }

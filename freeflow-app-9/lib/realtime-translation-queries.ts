@@ -3,7 +3,6 @@
  */
 
 import { createClient } from '@/lib/supabase/client'
-import type { JsonValue } from '@/lib/types/database'
 
 export type TranslationLanguage = 'en' | 'es' | 'fr' | 'de' | 'it' | 'pt' | 'ru' | 'zh' | 'ja' | 'ko' | 'ar' | 'hi' | 'nl' | 'sv' | 'pl' | 'tr' | 'th' | 'vi' | 'id' | 'ms'
 export type TranslationMode = 'text' | 'voice' | 'video' | 'document' | 'subtitle' | 'live-chat'

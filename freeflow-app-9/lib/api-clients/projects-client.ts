@@ -5,7 +5,7 @@
  * Replaces setTimeout mock data with real API calls
  */
 
-import { BaseApiClient, type ApiResponse, type PaginatedResponse, createPaginatedQuery } from './base-client'
+import { BaseApiClient, type ApiResponse, type PaginatedResponse } from './base-client'
 
 export interface Project {
   id: string

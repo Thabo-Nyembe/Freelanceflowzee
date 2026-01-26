@@ -197,7 +197,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     // Get specific job
     if (jobId) {
       // Try memory first
-      let job = whisperService.getJob(jobId)
+      const job = whisperService.getJob(jobId)
 
       // If not in memory, check database
       if (!job) {

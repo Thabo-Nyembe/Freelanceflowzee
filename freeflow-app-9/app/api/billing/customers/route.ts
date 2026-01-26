@@ -7,7 +7,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { lagoBilling, syncUserToLago, type LagoCustomer } from '@/lib/billing/lago'
+import { lagoBilling, type LagoCustomer } from '@/lib/billing/lago'
 import { createFeatureLogger } from '@/lib/logger'
 
 const logger = createFeatureLogger('billing-customers')

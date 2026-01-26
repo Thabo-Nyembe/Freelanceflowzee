@@ -4,7 +4,7 @@
  * React hook for security monitoring, alerts, and anomaly detection
  */
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback } from 'react'
 import { toast } from 'sonner'
 
 export type AlertSeverity = 'low' | 'medium' | 'high' | 'critical'

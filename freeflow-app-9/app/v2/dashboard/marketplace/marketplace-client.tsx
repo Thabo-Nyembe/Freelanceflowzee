@@ -1,6 +1,5 @@
 'use client'
 
-import { createClient } from '@/lib/supabase/client'
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { useCreateCoupon, useCoupons } from '@/lib/hooks/use-coupon-extended'

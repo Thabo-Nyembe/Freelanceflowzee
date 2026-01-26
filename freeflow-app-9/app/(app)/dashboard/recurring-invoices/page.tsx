@@ -22,7 +22,6 @@ import {
   CreateTemplateInput,
   UpdateTemplateInput,
 } from '@/lib/hooks/use-recurring-invoices';
-import { toast } from 'sonner';
 
 type ViewState =
   | { type: 'list' }

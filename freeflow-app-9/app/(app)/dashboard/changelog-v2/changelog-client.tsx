@@ -411,19 +411,7 @@ export default function ChangelogClient() {
     }))
   }, [changelog])
 
-  // Loading state - show spinner while data is being fetched
-  if (loading && (!changelog || changelog.length === 0)) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-zinc-50 dark:bg-none dark:bg-gray-900 flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-          <p className="text-sm text-muted-foreground">Loading changelog data...</p>
-        </div>
-      </div>
-    )
-  }
-
-  // Filter releases
+  // Filter releases - must be before any early returns to comply with hooks rules
   const filteredReleases = useMemo(() => {
     return releases.filter(release => {
       if (!showDrafts && release.isDraft) return false
@@ -813,6 +801,18 @@ export default function ChangelogClient() {
 
   // Quick actions for toolbar (empty array - no mock data)
   const changelogQuickActions: { id: string; label: string; icon: React.ReactNode; action: () => void; variant?: 'default' | 'outline' }[] = []
+
+  // Loading state - show spinner while data is being fetched
+  if (loading && (!changelog || changelog.length === 0)) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-zinc-50 dark:bg-none dark:bg-gray-900 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+          <p className="text-sm text-muted-foreground">Loading changelog data...</p>
+        </div>
+      </div>
+    )
+  }
 
   if (error) {
     return (

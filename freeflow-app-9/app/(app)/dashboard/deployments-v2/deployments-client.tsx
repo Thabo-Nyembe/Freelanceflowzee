@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/client'
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import dynamic from 'next/dynamic'
-import { useDeployments, type Deployment as HookDeployment, type DeploymentEnvironment as HookDeploymentEnvironment, type DeploymentStatus as HookDeploymentStatus } from '@/lib/hooks/use-deployments'
+import { useDeployments, type DeploymentEnvironment as HookDeploymentEnvironment } from '@/lib/hooks/use-deployments'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -23,7 +23,7 @@ import {
   RotateCcw, Play, Terminal, Eye, Settings, Trash2, Copy, ExternalLink,
   GitCommit, FileCode, Zap, Shield, RefreshCw, AlertTriangle, Check, X,
   Box, Layers, Database, Lock, Plus, ChevronRight, ChevronDown,
-  Search, Filter, MoreHorizontal, Download, Upload, ArrowUpRight, Timer, Network, User, MessageSquare, FileText, BarChart3, AlertCircle, Webhook,
+  Search, Filter, Download, Upload, ArrowUpRight, Timer, Network, User, MessageSquare, FileText, BarChart3, AlertCircle, Webhook,
   Folder, File, Package, Gauge, MonitorPlay, GitPullRequest, Bell, AlertOctagon, Globe2, Loader2
 } from 'lucide-react'
 

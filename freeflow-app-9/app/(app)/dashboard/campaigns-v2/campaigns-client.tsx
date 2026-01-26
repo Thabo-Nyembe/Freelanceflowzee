@@ -1,6 +1,5 @@
 'use client'
 
-import { createClient } from '@/lib/supabase/client'
 
 import React, { useState, useMemo } from 'react'
 import { useCampaigns, type CampaignType as CampaignTypeDB, type CampaignStatus as CampaignStatusDB } from '@/lib/hooks/use-campaigns'
@@ -29,7 +28,7 @@ import {
 import {
   Mail, Send, BarChart3, Users, Target, Zap, Clock, TrendingUp,
   Plus, Search, Filter, Play, Pause, CheckCircle2, Copy, Trash2, Calendar, DollarSign, Sparkles, MessageSquare,
-  Globe, Settings, Layout, Layers, GitBranch, Split, UserPlus, Tag, Megaphone, ChevronRight,
+  Globe, Settings, Layout, GitBranch, Split, UserPlus, Tag, Megaphone, ChevronRight,
   RefreshCw, Download, Share2, PieChart,
   Palette, Image, Type, Wand2, Shield, Smartphone, ArrowUp, ArrowDown, AlertTriangle, CheckCircle, Timer, MailOpen, MousePointerClick, UserMinus, AreaChart,
   Sliders, Webhook, Database, Terminal, Archive,

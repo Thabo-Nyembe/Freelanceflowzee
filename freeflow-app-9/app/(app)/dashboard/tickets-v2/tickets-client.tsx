@@ -1,6 +1,5 @@
 'use client'
 
-import { createClient } from '@/lib/supabase/client'
 
 // MIGRATED: Batch #18 - Verified database hook integration
 // Hooks: useTickets, useTicketMutations, useTicketMessageMutations

@@ -13,8 +13,6 @@ import { useQuery, useMutation, useQueryClient, UseQueryOptions } from '@tanstac
 import { toast } from 'sonner'
 import {
   messagesClient,
-  Conversation,
-  Message,
   CreateMessageData,
   CreateConversationData,
   ConversationFilters,

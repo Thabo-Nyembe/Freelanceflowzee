@@ -1,10 +1,9 @@
 "use client"
 
-import { createClient } from '@/lib/supabase/client'
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
-import { usePricingPlans, PricingPlan as DBPricingPlan, PricingPlanInput } from '@/lib/hooks/use-pricing-plans'
+import { usePricingPlans } from '@/lib/hooks/use-pricing-plans'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'

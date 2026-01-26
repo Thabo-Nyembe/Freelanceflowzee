@@ -3,8 +3,8 @@
  * Google Docs/Notion-style suggestions mode for collaborative editing
  */
 
-import { Extension, Mark, Node } from '@tiptap/core';
-import { Plugin, PluginKey, Transaction } from '@tiptap/pm/state';
+import { Extension, Mark } from '@tiptap/core';
+import { Plugin, PluginKey } from '@tiptap/pm/state';
 import { Decoration, DecorationSet } from '@tiptap/pm/view';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -260,6 +260,7 @@ export const TrackChangesExtension = Extension.create<TrackChangesOptions>({
   },
 
   addProseMirrorPlugins() {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias -- necessary for access in nested closure
     const extension = this;
 
     return [

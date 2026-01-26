@@ -12,7 +12,6 @@ import {
   useProjectStats,
   useTasks,
   useUpdateTask,
-  type Project as ApiProject,
   type ProjectFilters,
   type Task
 } from '@/lib/api-clients'
@@ -21,9 +20,9 @@ import {
   DataTableColumnHeader,
   type DataTableFilterConfig
 } from '@/components/world-class/data-table/data-table'
-import { useSprints, useSprintMutations, Sprint as SprintDB } from '@/lib/hooks/use-sprints'
-import { useMilestones, useMilestoneMutations, Milestone as MilestoneDB } from '@/lib/hooks/use-milestones'
-import { useRoadmapInitiatives, useRoadmapMutations, RoadmapInitiative } from '@/lib/hooks/use-roadmap'
+import { useSprints, useSprintMutations } from '@/lib/hooks/use-sprints'
+import { useMilestones, useMilestoneMutations } from '@/lib/hooks/use-milestones'
+import { useRoadmapInitiatives } from '@/lib/hooks/use-roadmap'
 import { useAutomations } from '@/lib/hooks/use-automations'
 import { useTimeTracking } from '@/lib/hooks/use-time-tracking'
 import { toast } from 'sonner'

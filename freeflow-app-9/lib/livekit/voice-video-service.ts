@@ -15,7 +15,7 @@
  * - E2E encryption
  */
 
-import { AccessToken, RoomServiceClient, TrackSource, ParticipantInfo } from 'livekit-server-sdk';
+import { AccessToken, RoomServiceClient, TrackSource } from 'livekit-server-sdk';
 import { createClient } from '@/lib/supabase/server';
 
 // ============================================================================
@@ -886,7 +886,7 @@ export class VoiceVideoService {
    */
   private calculateCallAnalytics(call: Call): CallAnalytics {
     const participantStats: ParticipantStats[] = [];
-    let totalSpeakingTime = 0;
+    const totalSpeakingTime = 0;
     let screenShareDuration = 0;
     let peakParticipants = 0;
     let qualitySum = 0;

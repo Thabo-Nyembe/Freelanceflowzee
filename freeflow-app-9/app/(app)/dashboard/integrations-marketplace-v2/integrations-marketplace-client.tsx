@@ -222,6 +222,38 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
     })
   }, [integrations])
 
+  // Filtered apps - move before early returns to comply with hooks rules
+  const filteredApps = useMemo(() => {
+    let filtered = [...apps]
+
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase()
+      filtered = filtered.filter(app =>
+        app.name.toLowerCase().includes(query) ||
+        app.shortDescription.toLowerCase().includes(query) ||
+        app.tags.some(tag => tag.toLowerCase().includes(query))
+      )
+    }
+
+    if (selectedCategory !== 'all') {
+      filtered = filtered.filter(app => app.category === selectedCategory)
+    }
+
+    switch (sortBy) {
+      case 'popular':
+        filtered.sort((a, b) => b.installCount - a.installCount)
+        break
+      case 'rating':
+        filtered.sort((a, b) => b.rating - a.rating)
+        break
+      case 'newest':
+        filtered.sort((a, b) => new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime())
+        break
+    }
+
+    return filtered
+  }, [apps, searchQuery, selectedCategory, sortBy])
+
   // Loading state
   if (loading) {
     return (
@@ -278,37 +310,6 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
       variant: 'outline' as const
     },
   ]
-
-  const filteredApps = useMemo(() => {
-    let filtered = [...apps]
-
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase()
-      filtered = filtered.filter(app =>
-        app.name.toLowerCase().includes(query) ||
-        app.shortDescription.toLowerCase().includes(query) ||
-        app.tags.some(tag => tag.toLowerCase().includes(query))
-      )
-    }
-
-    if (selectedCategory !== 'all') {
-      filtered = filtered.filter(app => app.category === selectedCategory)
-    }
-
-    switch (sortBy) {
-      case 'popular':
-        filtered.sort((a, b) => b.installCount - a.installCount)
-        break
-      case 'rating':
-        filtered.sort((a, b) => b.rating - a.rating)
-        break
-      case 'newest':
-        filtered.sort((a, b) => new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime())
-        break
-    }
-
-    return filtered
-  }, [apps, searchQuery, selectedCategory, sortBy])
 
   const installedApps = installedAppsList.length > 0
     ? installedAppsList

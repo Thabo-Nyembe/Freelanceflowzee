@@ -13,9 +13,6 @@ import {
   interpolate,
   spring,
   Img,
-  Audio,
-  Video,
-  staticFile,
   Easing,
 } from 'remotion'
 
@@ -327,7 +324,7 @@ export const ImageSlide: React.FC<ImageSlideProps> = ({
   const frame = useCurrentFrame()
   const { fps, durationInFrames, width, height } = useVideoConfig()
 
-  let imageStyle: React.CSSProperties = {
+  const imageStyle: React.CSSProperties = {
     width: '100%',
     height: '100%',
     objectFit: 'cover',
@@ -414,7 +411,7 @@ export const LogoReveal: React.FC<LogoRevealProps> = ({
     config: { damping: 12, stiffness: 80 },
   })
 
-  let logoStyle: React.CSSProperties = {
+  const logoStyle: React.CSSProperties = {
     maxWidth: '60%',
     maxHeight: '60%',
   }

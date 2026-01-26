@@ -7,8 +7,8 @@ import React, { useState, useRef, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 // ErrorBoundary removed for build compatibility
 import {
-  Box, Circle as Sphere, Box as Cylinder, Triangle as Cone, Box as Cube,
-  RotateCcw, Scale, Eye, EyeOff, Grid3x3, Download, Share2, Settings, Play, Move, Lightbulb, Copy, Trash2, Plus, Lock, MousePointer
+  Box, Box as Cube,
+  RotateCcw, Scale, Eye, EyeOff, Download, Share2, Settings, Play, Move, Lightbulb, Copy, Trash2, Plus, Lock, MousePointer
 } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Slider } from '@/components/ui/slider'

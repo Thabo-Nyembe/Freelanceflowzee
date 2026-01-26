@@ -17,12 +17,10 @@ import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
   Users, UserPlus, DollarSign, Eye, MessageCircle, Mail, Star,
-  Search, Calendar, Clock, Heart, Target, FileText, CheckCircle, XCircle,
-  ChevronRight, ChevronDown, Building2, MapPin, GraduationCap, Zap, Sparkles,
+  Search, Calendar, Clock, Heart, Target, FileText, Building2, MapPin, GraduationCap, Zap, Sparkles,
   Settings, Download, Upload, Edit3, Trash2, Bell, BookOpen, Cake,
-  Plane, Umbrella, Coffee, Home, BarChart3, TrendingDown, ArrowUpRight,
-  UserCheck, Layers, Wallet, Shield, Lock, Key, Plus,
-  Play, FileCheck, Clipboard, Activity
+  Plane, Umbrella, Coffee, Home, BarChart3,
+  UserCheck, Layers, Shield, Lock, Key, Plus, FileCheck, Clipboard, Activity
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components

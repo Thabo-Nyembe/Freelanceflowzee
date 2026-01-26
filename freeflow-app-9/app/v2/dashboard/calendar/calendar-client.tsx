@@ -16,7 +16,7 @@ import {
   MapPin, Users, Video, Bell,
   Search, Settings, List, CalendarDays,
   Globe, Link2, CheckCircle2, Edit2, Trash2,
-  Copy, ExternalLink, Download, Share2,
+  Copy, Download, Share2,
   BarChart3, Timer, CalendarCheck, CalendarClock, Zap, MessageSquare, FileText
 } from 'lucide-react'
 

@@ -19,10 +19,8 @@ import {
   Globe,
   Palette,
   Key,
-  Webhook,
   Shield,
   FileText,
-  Settings,
   Plus,
   Copy,
   Trash2,
@@ -31,14 +29,11 @@ import {
   RefreshCw,
   Download,
   Upload,
-  Eye,
-  EyeOff,
   Crown,
   AlertTriangle,
   Clock,
   Activity,
   BarChart3,
-  Zap,
 } from 'lucide-react';
 
 export default function WhiteLabelPage() {

@@ -25,10 +25,7 @@ import {
   useOfferMutations,
   useTalentPool,
   useTalentPoolMutations,
-  type JobPosting,
-  type Interview as DBInterview,
-  type JobOffer as DBJobOffer,
-  type TalentPoolCandidate as DBTalentPoolCandidate
+  type JobPosting
 } from '@/lib/hooks/use-recruitment'
 import { useAuth } from '@/lib/hooks/use-auth'
 import {

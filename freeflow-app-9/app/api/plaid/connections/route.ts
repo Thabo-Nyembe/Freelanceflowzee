@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
     const includeAccounts = searchParams.get('includeAccounts') === 'true';
 
     // Base query
-    let query = supabase
+    const query = supabase
       .from('bank_connections')
       .select(`
         id,

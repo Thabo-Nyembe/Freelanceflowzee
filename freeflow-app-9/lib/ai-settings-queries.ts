@@ -13,8 +13,7 @@
  */
 
 import { createClient } from '@/lib/supabase/client'
-import type { SupabaseClient } from '@supabase/supabase-js'
-import { DatabaseError, toDbError, type JsonValue } from '@/lib/types/database'
+import { DatabaseError, type JsonValue } from '@/lib/types/database'
 
 // ============================================================================
 // TYPE DEFINITIONS

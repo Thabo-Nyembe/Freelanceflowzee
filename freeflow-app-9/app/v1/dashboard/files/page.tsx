@@ -52,16 +52,16 @@ import {
   useStorageStats
 } from '@/lib/api-clients'
 
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+
 // Alias useStorageStats as useFileStats for compatibility
 const useFileStats = useStorageStats
 // Create a simple share mutation hook
 const useShareFile = () => {
-  const { useMutation, useQueryClient } = require('@tanstack/react-query')
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: async ({ fileId, email }: { fileId: string; email: string }) => {
       // Share via API or storage
-      const { toast } = require('sonner')
       toast.success('File shared with ' + email)
       return { fileId, email }
     },

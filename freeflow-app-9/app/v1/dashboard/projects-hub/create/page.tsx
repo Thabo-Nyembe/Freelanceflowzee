@@ -7,14 +7,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
-  Plus,
   Layout,
   FileText,
   Palette,
   Globe,
   Smartphone,
   Monitor,
-  Zap,
   Calendar,
   DollarSign,
   Settings,

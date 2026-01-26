@@ -26,9 +26,7 @@ import {
   Sparkles,
   Activity,
   Search,
-  Zap,
   Trophy,
-  BarChart3,
   TrendingUp,
   DollarSign,
   Calendar,
@@ -37,7 +35,6 @@ import {
   FileText,
   Star,
   Rocket,
-  Crown,
 } from 'lucide-react'
 
 // Import all competitive upgrade components

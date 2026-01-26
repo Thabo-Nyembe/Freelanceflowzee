@@ -20,7 +20,6 @@ import {
   Award,
   Zap,
   Mail,
-  Crown,
   Sparkles
 } from 'lucide-react'
 import { CardSkeleton } from '@/components/ui/loading-skeleton'

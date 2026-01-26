@@ -105,11 +105,11 @@ async function handleListProjects(filters?: any): Promise<NextResponse> {
     if (filters?.search) {
       // Post-fetch search for title/desc
       const searchLower = filters.search.toLowerCase()
-      // @ts-ignore
+      // @ts-expect-error - formattedProjects type is inferred
       return NextResponse.json({
         success: true,
         action: 'list',
-        projects: formattedProjects.filter((p: any) =>
+        projects: formattedProjects.filter((p: { title: string; description?: string }) =>
           p.title.toLowerCase().includes(searchLower) ||
           (p.description && p.description.toLowerCase().includes(searchLower))
         ),
@@ -119,13 +119,13 @@ async function handleListProjects(filters?: any): Promise<NextResponse> {
 
     const stats = {
       total: formattedProjects.length,
-      active: formattedProjects.filter((p: any) => p.status === 'active').length,
-      completed: formattedProjects.filter((p: any) => p.status === 'completed').length,
-      totalBudget: formattedProjects.reduce((sum: number, p: any) => sum + (p.budget || 0), 0),
-      // @ts-ignore
-      totalSpent: formattedProjects.reduce((sum: number, p: any) => sum + (p.spent || 0), 0),
-      // @ts-ignore
-      avgProgress: formattedProjects.length > 0 ? Math.round(formattedProjects.reduce((sum, p) => sum + (p.progress || 0), 0) / formattedProjects.length) : 0
+      active: formattedProjects.filter((p: { status: string }) => p.status === 'active').length,
+      completed: formattedProjects.filter((p: { status: string }) => p.status === 'completed').length,
+      totalBudget: formattedProjects.reduce((sum: number, p: { budget?: number }) => sum + (p.budget || 0), 0),
+      // @ts-expect-error - spent property may not exist on all projects
+      totalSpent: formattedProjects.reduce((sum: number, p: { spent?: number }) => sum + (p.spent || 0), 0),
+      // @ts-expect-error - progress property may not exist on all projects
+      avgProgress: formattedProjects.length > 0 ? Math.round(formattedProjects.reduce((sum: number, p: { progress?: number }) => sum + (p.progress || 0), 0) / formattedProjects.length) : 0
     }
 
     return NextResponse.json({

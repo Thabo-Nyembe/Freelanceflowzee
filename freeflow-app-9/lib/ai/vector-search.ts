@@ -94,8 +94,8 @@ export class VectorSearchService {
     }
 
     // Perform searches
-    let vectorResults: SearchResult[] = []
-    let keywordResults: SearchResult[] = []
+    const vectorResults: SearchResult[] = []
+    const keywordResults: SearchResult[] = []
 
     // Vector search
     const queryEmbedding = await this.embeddingsService.embed(query.text)

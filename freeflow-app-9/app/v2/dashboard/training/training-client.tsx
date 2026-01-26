@@ -2,7 +2,6 @@
 // Comprehensive LMS with courses, learning paths, certifications, and gamification
 'use client'
 
-import { createClient } from '@/lib/supabase/client'
 
 import { useState, useMemo, useCallback } from 'react'
 import { toast } from 'sonner'

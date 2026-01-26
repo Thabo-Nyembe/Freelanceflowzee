@@ -3,7 +3,7 @@
 // Modules: Analytics, CRM, Invoicing, Marketing, Operations, Automation
 
 import { createClient } from '@/lib/supabase/client'
-import { DatabaseError, toDbError, JsonValue } from '@/lib/types/database'
+import { toDbError, JsonValue } from '@/lib/types/database'
 
 // ============================================================================
 // TYPES

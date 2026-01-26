@@ -9,13 +9,12 @@ import { useConversations } from '@/lib/hooks/use-conversations'
 import { useAuth } from '@/lib/hooks/use-auth'
 import { useTeam } from '@/lib/hooks/use-team'
 import { useUserThreads, useUnreadThreadsCount } from '@/lib/hooks/use-threads-extended'
-import { useUserFiles, useRecentFiles } from '@/lib/hooks/use-files-extended'
+import { useRecentFiles } from '@/lib/hooks/use-files-extended'
 import { useMentions, useUnreadMentionCount } from '@/lib/hooks/use-mentions-extended'
 import { useRecentCalls } from '@/lib/hooks/use-phones-extended'
 
 // Real-time API hooks for messaging
 import {
-  useConversations as useApiConversations,
   useMessagingStats,
   useSendMessage,
   useMarkAsRead as useMarkAsReadApi,

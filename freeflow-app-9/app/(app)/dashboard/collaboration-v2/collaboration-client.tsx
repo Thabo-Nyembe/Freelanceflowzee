@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useCallback, useEffect } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { toast } from 'sonner'
 import {
   copyToClipboard,
@@ -12,7 +12,6 @@ import {
 // Real-time collaboration API hooks
 import {
   useConversations,
-  useMessages,
   useSendMessage,
   useMarkAsRead,
   useCreateConversation,

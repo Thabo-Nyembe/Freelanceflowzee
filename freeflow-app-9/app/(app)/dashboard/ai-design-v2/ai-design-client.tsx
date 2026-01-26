@@ -1,8 +1,7 @@
 'use client'
 
-import { createClient } from '@/lib/supabase/client'
 
-import { useState, useMemo, useEffect, useCallback } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
 import { useAIDesigns, AIDesign as DBAIDesign } from '@/lib/hooks/use-ai-designs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'

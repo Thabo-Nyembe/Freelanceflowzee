@@ -492,6 +492,43 @@ export default function TimeTrackingClient() {
   // Tags - placeholder until tags hook is available
   const tags: Tag[] = []
 
+  // Timer effect - must be before any early returns (React hooks rules)
+  useEffect(() => {
+    let interval: NodeJS.Timeout
+    if (isTimerRunning) {
+      interval = setInterval(() => setTimerSeconds(prev => prev + 1), 1000)
+    }
+    return () => clearInterval(interval)
+  }, [isTimerRunning])
+
+  // Compute stats from real database entries - must be before any early returns
+  const stats = useMemo(() => {
+    const mappedEntries = (dbTimeEntries || []).map(e => ({
+      duration_hours: e.duration_hours,
+      is_billable: e.is_billable,
+      billable_amount: e.billable_amount,
+      status: e.status
+    }))
+
+    const totalHours = mappedEntries.reduce((sum: number, e: { duration_hours: number }) => sum + (e.duration_hours || 0), 0)
+    const billableEntries = mappedEntries.filter((e: { is_billable: boolean }) => e.is_billable)
+    const billableHours = billableEntries.reduce((sum: number, e: { duration_hours: number }) => sum + (e.duration_hours || 0), 0)
+    const totalRevenue = billableEntries.reduce((sum: number, e: { billable_amount: number }) => sum + (e.billable_amount || 0), 0)
+    const running = mappedEntries.filter((e: { status: string }) => e.status === 'running').length
+
+    return {
+      totalHours: totalHours.toFixed(1),
+      billableHours: billableHours.toFixed(1),
+      billablePercent: totalHours > 0 ? ((billableHours / totalHours) * 100).toFixed(0) : '0',
+      totalRevenue,
+      entries: mappedEntries.length,
+      running,
+      projects: projects.filter(p => p.status === 'active').length,
+      teamOnline: team.filter(t => t.isOnline).length,
+      isUsingRealData: dbTimeEntries && dbTimeEntries.length > 0
+    }
+  }, [dbTimeEntries, projects, team])
+
   // Loading state UI
   if (isLoading) {
     return (
@@ -686,42 +723,6 @@ export default function TimeTrackingClient() {
       toast.error('Failed to lock entry')
     }
   }
-
-  useEffect(() => {
-    let interval: NodeJS.Timeout
-    if (isTimerRunning) {
-      interval = setInterval(() => setTimerSeconds(prev => prev + 1), 1000)
-    }
-    return () => clearInterval(interval)
-  }, [isTimerRunning])
-
-  // Compute stats from real database entries
-  const stats = useMemo(() => {
-    const entries = (dbTimeEntries || []).map(e => ({
-      duration_hours: e.duration_hours,
-      is_billable: e.is_billable,
-      billable_amount: e.billable_amount,
-      status: e.status
-    }))
-
-    const totalHours = entries.reduce((sum: number, e: any) => sum + (e.duration_hours || 0), 0)
-    const billableEntries = entries.filter((e: any) => e.is_billable)
-    const billableHours = billableEntries.reduce((sum: number, e: any) => sum + (e.duration_hours || 0), 0)
-    const totalRevenue = billableEntries.reduce((sum: number, e: any) => sum + (e.billable_amount || 0), 0)
-    const running = entries.filter((e: any) => e.status === 'running').length
-
-    return {
-      totalHours: totalHours.toFixed(1),
-      billableHours: billableHours.toFixed(1),
-      billablePercent: totalHours > 0 ? ((billableHours / totalHours) * 100).toFixed(0) : '0',
-      totalRevenue,
-      entries: entries.length,
-      running,
-      projects: projects.filter(p => p.status === 'active').length,
-      teamOnline: team.filter(t => t.isOnline).length,
-      isUsingRealData: dbTimeEntries && dbTimeEntries.length > 0
-    }
-  }, [dbTimeEntries])
 
   const statsCards = [
     { label: 'Total Hours', value: `${stats.totalHours}h`, icon: Clock, color: 'from-amber-500 to-amber-600', trend: '+2.5h' },

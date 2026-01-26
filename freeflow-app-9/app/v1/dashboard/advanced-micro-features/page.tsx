@@ -83,8 +83,6 @@ import {
   Users,
   MessageSquare,
   Settings,
-  Palette,
-  Bell,
   BarChart3,
   Zap,
   Star,

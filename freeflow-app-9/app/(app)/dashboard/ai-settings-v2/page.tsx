@@ -19,10 +19,6 @@ import {
   Plus,
   Trash2,
   ChevronRight,
-  AlertCircle,
-  CheckCircle,
-  Info,
-  Upload,
   Link2,
   Database,
   FileText,
@@ -35,17 +31,10 @@ import {
   BarChart3,
   PieChart,
   Activity,
-  Lightbulb,
   Target,
   Lock,
   Unlock,
   Edit3,
-  Eye,
-  Search,
-  Filter,
-  MoreVertical,
-  Copy,
-  ExternalLink,
   HelpCircle,
   Building,
   Sliders,
@@ -56,12 +45,8 @@ import { toast } from 'sonner';
 import { useOrganizationContext } from '@/lib/hooks/use-organization-context';
 import type {
   OrganizationContext,
-  KnowledgeSource,
-  TeamContext,
   AIConfiguration,
   AICapability,
-  ContentPolicy,
-  VocabularyTerm,
 } from '@/lib/ai/organization-context';
 
 // ============================================================================

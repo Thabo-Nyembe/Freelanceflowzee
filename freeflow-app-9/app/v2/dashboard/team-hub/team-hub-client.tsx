@@ -1,8 +1,7 @@
 'use client'
 
-import { createClient } from '@/lib/supabase/client'
 
-import { useState, useMemo, useEffect, useCallback } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
 import { useTeamHub } from '@/hooks/use-team-hub'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'

@@ -43,13 +43,11 @@ import {
 import {
   usePerformanceMetrics,
   useDashboardMetrics,
-  usePredictiveInsights,
-  type PerformanceMetrics as ApiPerformanceMetrics,
-  type PredictiveInsights
+  usePredictiveInsights
 } from '@/lib/api-clients'
 
 // Supabase hook for performance analytics data
-import { usePerformanceAnalytics, type PerformanceAnalytic } from '@/lib/hooks/use-performance-analytics'
+import { usePerformanceAnalytics } from '@/lib/hooks/use-performance-analytics'
 
 // Enhanced & Competitive Upgrade Components
 import {

@@ -11,7 +11,6 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { hyperswitchPayments } from '@/lib/payments/hyperswitch'
 import { createFeatureLogger } from '@/lib/logger'
 
 const logger = createFeatureLogger('hyperswitch-api')

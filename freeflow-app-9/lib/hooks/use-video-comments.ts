@@ -8,10 +8,8 @@ import { useEffect, useCallback, useState, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import type {
   VideoComment,
-  VideoAsset,
   VideoMarker,
   VideoReviewSession,
-  ReviewParticipant,
   CommentFilters,
   CommentSortField,
   DrawingData,

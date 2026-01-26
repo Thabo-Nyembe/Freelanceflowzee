@@ -1,4 +1,4 @@
-import { FormSkeleton, SidebarSkeleton } from '@/components/ui/skeletons'
+import { FormSkeleton } from '@/components/ui/skeletons'
 import { Skeleton } from '@/components/ui/skeleton'
 
 export default function Loading() {

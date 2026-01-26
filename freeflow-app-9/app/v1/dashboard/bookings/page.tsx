@@ -29,15 +29,11 @@ import {
   Calendar,
   Clock,
   Plus,
-  Filter,
-  Search,
   MoreHorizontal,
   CheckCircle,
   XCircle,
-  AlertCircle,
   Download,
   Users,
-  History,
   BarChart3,
   Wrench,
   CalendarDays
@@ -64,7 +60,7 @@ import {
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'

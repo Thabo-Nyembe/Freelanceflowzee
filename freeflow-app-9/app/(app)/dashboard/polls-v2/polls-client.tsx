@@ -2,7 +2,7 @@
 
 import { createClient } from '@/lib/supabase/client'
 
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo } from 'react'
 import { usePolls as usePollsHook, type Poll, type PollStatus as HookPollStatus } from '@/lib/hooks/use-polls'
 import { toast } from 'sonner'
 import {

@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
-import { use3DModels, use3DModelMutations, type ThreeDModel, formatFileSize, formatPolygonCount } from '@/lib/hooks/use-3d-models'
+import { use3DModels, use3DModelMutations, formatFileSize } from '@/lib/hooks/use-3d-models'
 import {
   Box,
   Layers,

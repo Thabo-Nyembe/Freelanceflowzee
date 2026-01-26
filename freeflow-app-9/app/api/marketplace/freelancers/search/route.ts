@@ -613,7 +613,7 @@ async function handleFilterBySkills(supabase: any, params: { skills: string[], m
   // Get all freelancers from database
   const allFreelancers = await getFreelancers(supabase, { limit: 100 })
 
-  let results = allFreelancers.filter(freelancer => {
+  const results = allFreelancers.filter(freelancer => {
     const freelancerSkills = freelancer.skills.map(s => s.toLowerCase())
     if (matchAll) {
       return skills.every(skill => freelancerSkills.includes(skill.toLowerCase()))
@@ -641,7 +641,7 @@ async function handleFilterByAvailability(supabase: any, params: {
   // Get all freelancers from database
   const allFreelancers = await getFreelancers(supabase, { limit: 100 })
 
-  let results = allFreelancers.filter(freelancer => {
+  const results = allFreelancers.filter(freelancer => {
     const meetsHours = freelancer.availableHoursPerWeek >= minHoursPerWeek
     const meetsTimezone = !timezone || freelancer.timezone === timezone
     return meetsHours && meetsTimezone

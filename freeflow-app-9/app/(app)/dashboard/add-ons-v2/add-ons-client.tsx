@@ -2,8 +2,8 @@
 
 import { useState, useMemo, useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
-import { apiPost, apiDelete, downloadAsJson } from '@/lib/button-handlers'
-import { useAddOns, type AddOn as DBAddOn } from '@/lib/hooks/use-add-ons'
+import { apiPost, downloadAsJson } from '@/lib/button-handlers'
+import { useAddOns } from '@/lib/hooks/use-add-ons'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -17,7 +17,6 @@ import {
   Download,
   Star,
   TrendingUp,
-  TrendingDown,
   Search,
   Filter,
   Grid3x3,

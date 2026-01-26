@@ -10,7 +10,6 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createAdminClient } from '@/lib/supabase/server'
 import { createFeatureLogger } from '@/lib/logger'
 
 const logger = createFeatureLogger('ai-code')

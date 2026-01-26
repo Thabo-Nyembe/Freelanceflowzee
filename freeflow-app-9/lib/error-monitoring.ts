@@ -9,7 +9,7 @@
  * - Performance monitoring
  */
 
-import { logger, createFeatureLogger } from './logger'
+import { createFeatureLogger } from './logger'
 
 const errorLogger = createFeatureLogger('ErrorMonitoring')
 

@@ -62,7 +62,7 @@ import {
 } from '@/components/ui/competitive-upgrades-extended'
 
 // Supabase hooks for real warehouse data
-import { useWarehouses, useWarehouseZones, type Warehouse as DBWarehouse, type WarehouseZone as DBWarehouseZone } from '@/lib/hooks/use-warehouse'
+import { useWarehouses, type Warehouse as DBWarehouse } from '@/lib/hooks/use-warehouse'
 import { useStockLevels, type StockLevel } from '@/lib/hooks/use-stock'
 
 

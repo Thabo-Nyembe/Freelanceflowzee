@@ -9,10 +9,6 @@ import {
 import type {
   RoadmapInitiative,
   RoadmapMilestone,
-  InitiativeStatus as DBInitiativeStatus,
-  InitiativePriority as DBPriority,
-  InitiativeImpact as DBImpact,
-  InitiativeEffort as DBEffort,
 } from '@/lib/hooks/use-roadmap'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'

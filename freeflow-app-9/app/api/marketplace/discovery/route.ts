@@ -4,7 +4,6 @@
 // Our Advantage: AI-powered discovery, trending insights, skill graphs, personalized recommendations
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
 import { createFeatureLogger } from '@/lib/logger'
 
 const logger = createFeatureLogger('marketplace-discovery')

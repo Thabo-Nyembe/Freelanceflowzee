@@ -1,19 +1,20 @@
 "use client"
 
-import jsPDF from 'jspdf'
-import autoTable from 'jspdf-autotable'
+// jsPDF and autoTable are dynamically imported on demand to reduce bundle size
+// These libraries are ~300KB combined and only needed when generating PDFs
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Textarea } from "@/components/ui/textarea"
-import { FileText, Send, Download, Plus, Trash2, Eye, Palette, Settings } from "lucide-react"
-import { useState } from "react"
+import { FileText, Send, Download, Plus, Trash2, Eye, Palette, Settings, Loader2 } from "lucide-react"
+import { useState, useCallback } from "react"
 
 export function InvoiceCreator() {
   const [selectedTemplate, setSelectedTemplate] = useState("modern")
   const [showTemplateSelector, setShowTemplateSelector] = useState(false)
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false)
   const [lineItems, setLineItems] = useState([
     { id: 1, description: "Logo Design & Brand Identity", quantity: 1, rate: 1500, amount: 1500 },
     { id: 2, description: "Brand Guidelines Document", quantity: 1, rate: 800, amount: 800 },
@@ -50,51 +51,63 @@ export function InvoiceCreator() {
   const tax = subtotal * 0.1
   const total = subtotal + tax
 
-  const handleDownloadPDF = () => {
-    const doc = new jsPDF()
+  // Dynamic import for PDF generation - reduces initial bundle by ~300KB
+  const handleDownloadPDF = useCallback(async () => {
+    setIsGeneratingPDF(true)
+    try {
+      // Dynamically import jsPDF and autoTable only when needed
+      const [{ default: jsPDF }, { default: autoTable }] = await Promise.all([
+        import('jspdf'),
+        import('jspdf-autotable')
+      ])
 
-    // Add branding/header
-    doc.setFontSize(20)
-    doc.text("INVOICE", 14, 22)
+      const doc = new jsPDF()
 
-    doc.setFontSize(10)
-    doc.text(`Invoice #: INV-005`, 14, 30)
-    doc.text(`Date: ${new Date().toLocaleDateString()}`, 14, 35)
-    doc.text(`Due Date: 2024-02-08`, 14, 40)
+      // Add branding/header
+      doc.setFontSize(20)
+      doc.text("INVOICE", 14, 22)
 
-    // Add From/To
-    doc.text("From:", 14, 55)
-    doc.text("Creative Design Studio", 14, 60)
-    doc.text("123 Design Avenue, San Francisco, CA", 14, 65)
+      doc.setFontSize(10)
+      doc.text(`Invoice #: INV-005`, 14, 30)
+      doc.text(`Date: ${new Date().toLocaleDateString()}`, 14, 35)
+      doc.text(`Due Date: 2024-02-08`, 14, 40)
 
-    doc.text("Bill To:", 100, 55)
-    doc.text("Acme Corporation", 100, 60)
-    doc.text("456 Corporate Plaza, New York, NY", 100, 65)
+      // Add From/To
+      doc.text("From:", 14, 55)
+      doc.text("Creative Design Studio", 14, 60)
+      doc.text("123 Design Avenue, San Francisco, CA", 14, 65)
 
-    // Add Line Items Table
-    const tableData = lineItems.map(item => [
-      item.description,
-      item.quantity.toString(),
-      `$${item.rate}`,
-      `$${item.amount}`
-    ])
+      doc.text("Bill To:", 100, 55)
+      doc.text("Acme Corporation", 100, 60)
+      doc.text("456 Corporate Plaza, New York, NY", 100, 65)
 
-    autoTable(doc, {
-      head: [['Description', 'Qty', 'Rate', 'Amount']],
-      body: tableData,
-      startY: 80,
-    })
+      // Add Line Items Table
+      const tableData = lineItems.map(item => [
+        item.description,
+        item.quantity.toString(),
+        `$${item.rate}`,
+        `$${item.amount}`
+      ])
 
-    // Add Totals
-    const finalY = (doc as any).lastAutoTable.finalY + 10
-    doc.text(`Subtotal: $${subtotal.toFixed(2)}`, 140, finalY)
-    doc.text(`Tax (10%): $${tax.toFixed(2)}`, 140, finalY + 5)
-    doc.setFontSize(12)
-    doc.text(`Total: $${total.toFixed(2)}`, 140, finalY + 12)
+      autoTable(doc, {
+        head: [['Description', 'Qty', 'Rate', 'Amount']],
+        body: tableData,
+        startY: 80,
+      })
 
-    // Save
-    doc.save("invoice.pdf")
-  }
+      // Add Totals
+      const finalY = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 10
+      doc.text(`Subtotal: $${subtotal.toFixed(2)}`, 140, finalY)
+      doc.text(`Tax (10%): $${tax.toFixed(2)}`, 140, finalY + 5)
+      doc.setFontSize(12)
+      doc.text(`Total: $${total.toFixed(2)}`, 140, finalY + 12)
+
+      // Save
+      doc.save("invoice.pdf")
+    } finally {
+      setIsGeneratingPDF(false)
+    }
+  }, [lineItems, subtotal, tax, total])
 
   const recentInvoices = [
     {
@@ -220,9 +233,13 @@ export function InvoiceCreator() {
                     <Eye className="h-4 w-4 mr-1" />
                     Preview
                   </Button>
-                  <Button variant="outline" size="sm" className="text-slate-600" onClick={handleDownloadPDF}>
-                    <Download className="h-4 w-4 mr-1" />
-                    Download
+                  <Button variant="outline" size="sm" className="text-slate-600" onClick={handleDownloadPDF} disabled={isGeneratingPDF}>
+                    {isGeneratingPDF ? (
+                      <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                    ) : (
+                      <Download className="h-4 w-4 mr-1" />
+                    )}
+                    {isGeneratingPDF ? 'Generating...' : 'Download'}
                   </Button>
                 </div>
               </div>

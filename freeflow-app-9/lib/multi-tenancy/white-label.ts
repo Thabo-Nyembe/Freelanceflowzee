@@ -487,7 +487,7 @@ export class WhiteLabelService {
 
   async getTenantByDomain(domain: string): Promise<Tenant | null> {
     // Check primary domain
-    let { data } = await this.supabase
+    const { data } = await this.supabase
       .from('tenants')
       .select('*')
       .eq('primary_domain', domain)

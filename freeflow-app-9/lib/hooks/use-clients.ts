@@ -164,8 +164,7 @@ export function useClients(initialClients: Client[] = []) {
 
   const archiveClient = async (id: string) => {
     try {
-      // @ts-ignore - 'churned' is a valid status but TS might complain if strict
-      const result = await updateClient(id, { status: 'churned' as any })
+      const result = await updateClient(id, { status: 'churned' })
       toast.success('Client archived')
       return result
     } catch (err) {

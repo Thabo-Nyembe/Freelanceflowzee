@@ -1,9 +1,22 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { atomDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import React, { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import CommentPopover from './CommentPopover';
+
+// Dynamically import react-syntax-highlighter to reduce initial bundle size (~200KB)
+// This component is heavy and not needed for initial page render
+const SyntaxHighlighter = dynamic(
+  () => import('react-syntax-highlighter').then((mod) => mod.Prism),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="bg-gray-900 rounded-lg p-4 text-gray-400 font-mono text-sm animate-pulse">
+        Loading code viewer...
+      </div>
+    )
+  }
+);
 
 interface CodeBlockViewerProps {
   code: string;
@@ -15,6 +28,14 @@ const CodeBlockViewer: React.FC<CodeBlockViewerProps> = ({ code, language, onAdd
   const [selectedLines, setSelectedLines] = useState<{ from: number; to: number } | null>(null);
   const [lastSelected, setLastSelected] = useState<number | null>(null);
   const [showPopover, setShowPopover] = useState(false);
+  const [style, setStyle] = useState<Record<string, React.CSSProperties> | null>(null);
+
+  // Dynamically import the style to further reduce bundle
+  useEffect(() => {
+    import('react-syntax-highlighter/dist/esm/styles/prism').then((mod) => {
+      setStyle(mod.atomDark);
+    });
+  }, []);
 
   const handleLineClick = (lineNumber: number, isShiftClick: boolean) => {
     setShowPopover(false);
@@ -38,13 +59,13 @@ const CodeBlockViewer: React.FC<CodeBlockViewerProps> = ({ code, language, onAdd
     setSelectedLines(null);
     setLastSelected(null);
   };
-  
+
   const getLineProps = (lineNumber: number) => {
     const isSelected = selectedLines && lineNumber >= selectedLines.from && lineNumber <= selectedLines.to;
     return {
       'data-line-number': lineNumber,
-      style: { 
-        display: 'block', 
+      style: {
+        display: 'block',
         cursor: 'pointer',
         backgroundColor: isSelected ? 'rgba(255, 255, 0, 0.2)' : 'transparent',
       },
@@ -52,11 +73,19 @@ const CodeBlockViewer: React.FC<CodeBlockViewerProps> = ({ code, language, onAdd
     };
   };
 
+  if (!style) {
+    return (
+      <div className="bg-gray-900 rounded-lg p-4 text-gray-400 font-mono text-sm">
+        <pre>{code}</pre>
+      </div>
+    );
+  }
+
   return (
     <div className="relative">
       <SyntaxHighlighter
         language={language}
-        style={atomDark}
+        style={style}
         showLineNumbers
         wrapLines
         lineProps={getLineProps}
@@ -66,7 +95,7 @@ const CodeBlockViewer: React.FC<CodeBlockViewerProps> = ({ code, language, onAdd
 
       {selectedLines && !showPopover && (
         <div className="absolute top-2 right-2">
-            <button 
+            <button
                 onClick={() => setShowPopover(true)}
                 className="px-3 py-1 bg-white text-black rounded-md shadow"
             >
@@ -84,4 +113,4 @@ const CodeBlockViewer: React.FC<CodeBlockViewerProps> = ({ code, language, onAdd
   );
 };
 
-export default CodeBlockViewer; 
+export default CodeBlockViewer;

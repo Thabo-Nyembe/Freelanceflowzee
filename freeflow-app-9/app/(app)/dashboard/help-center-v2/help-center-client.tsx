@@ -76,7 +76,7 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import { useHelpArticles, useHelpCategories, useHelpDocs, useHelpFeedback } from '@/lib/hooks/use-help-extended'
+import { useHelpArticles, useHelpCategories, useHelpDocs } from '@/lib/hooks/use-help-extended'
 import { useAuthUserId } from '@/lib/hooks/use-auth-helpers'
 
 // Initialize Supabase client once at module level

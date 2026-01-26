@@ -79,7 +79,7 @@ export class AwarenessManager {
   private localUser: UserAwareness | null = null
   private idleTimeout: NodeJS.Timeout | null = null
   private idleThreshold = 60000 // 1 minute
-  private listeners: Map<string, Set<Function>> = new Map()
+  private listeners: Map<string, Set<(...args: unknown[]) => void>> = new Map()
   // Store references to event handlers for proper cleanup
   private activityHandler: (() => void) | null = null
   private visibilityHandler: (() => void) | null = null

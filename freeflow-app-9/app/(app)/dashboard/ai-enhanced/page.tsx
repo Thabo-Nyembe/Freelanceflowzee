@@ -58,7 +58,6 @@ import { useCurrentUser } from '@/hooks/use-ai-data'
 import { createFeatureLogger } from '@/lib/logger'
 
 // SUPABASE & QUERIES
-import { createClient } from '@/lib/supabase/client'
 import {
   getAIEnhancedTools,
   createAIEnhancedTool,

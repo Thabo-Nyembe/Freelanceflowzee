@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     const resource = searchParams.get('resource')
 
     // Get roles
-    let rolesQuery = supabase
+    const rolesQuery = supabase
       .from('roles')
       .select('*')
       .eq('user_id', user.id)

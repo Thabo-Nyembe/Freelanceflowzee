@@ -3,7 +3,7 @@
 import { useState, useMemo, useCallback } from 'react'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
-import { useRenewals, useRenewalMutations, type Renewal as DbRenewal } from '@/lib/hooks/use-renewals'
+import { useRenewals, useRenewalMutations } from '@/lib/hooks/use-renewals'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'

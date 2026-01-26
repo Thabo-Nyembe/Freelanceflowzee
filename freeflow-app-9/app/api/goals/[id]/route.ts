@@ -159,7 +159,7 @@ export async function PUT(
     }
 
     // Handle status changes
-    let updateData = { ...validatedData } as Record<string, unknown>;
+    const updateData = { ...validatedData } as Record<string, unknown>;
 
     if (validatedData.status === 'completed' && existing.status !== 'completed') {
       updateData.completed_date = new Date().toISOString().split('T')[0];

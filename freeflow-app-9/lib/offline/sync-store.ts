@@ -400,7 +400,7 @@ export class EntityCacheManager {
     const tableRef = this.getTable(table);
     if (!tableRef) return [];
 
-    let query = tableRef.where('table').equals(table);
+    const query = tableRef.where('table').equals(table);
 
     if (filter) {
       const entities = await query.filter(filter).toArray();

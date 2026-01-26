@@ -11,10 +11,7 @@ import { Card } from '@/components/ui/card'
 import {
   Monitor, Laptop, Download,
   Square, X, Minus,
-  Monitor as Windows, Terminal as Linux, Code, Layout, Layers, ZoomIn, ZoomOut, Share2,
-  Folder,
-  Mail, Calculator, Music, Globe, Terminal,
-  Package, Cpu, Wifi, Volume2
+  Monitor as Windows, Terminal as Linux, Code, Layout, ZoomIn, ZoomOut, Share2, Wifi, Volume2
 } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Slider } from '@/components/ui/slider'

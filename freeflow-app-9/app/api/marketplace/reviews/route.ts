@@ -595,7 +595,7 @@ async function handleGetReviews(supabase: any, params: {
   } = params
 
   // Get reviews from database
-  let reviews = await getReviews(supabase, { freelancerId, clientId, minRating })
+  const reviews = await getReviews(supabase, { freelancerId, clientId, minRating })
 
   // Sort
   switch (sortBy) {

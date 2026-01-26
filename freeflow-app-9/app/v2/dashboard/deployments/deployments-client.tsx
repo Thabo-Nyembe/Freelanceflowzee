@@ -2,7 +2,7 @@
 
 import { createClient } from '@/lib/supabase/client'
 
-import { useState, useMemo, useEffect, useCallback } from 'react'
+import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { useDeployments, Deployment as DBDeployment, useCreateDeployment, useUpdateDeployment, useDeleteDeployment } from '@/lib/hooks/use-deployments'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'

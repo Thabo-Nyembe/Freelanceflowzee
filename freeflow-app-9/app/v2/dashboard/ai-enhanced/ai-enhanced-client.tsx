@@ -1,6 +1,5 @@
 'use client'
 
-import { createClient } from '@/lib/supabase/client'
 // Enhanced & Competitive Upgrade Components
 import {
   AIInsightsPanel,

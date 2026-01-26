@@ -11,8 +11,6 @@ import {
   LinkTokenCreateRequest,
   ItemPublicTokenExchangeRequest,
   TransactionsSyncRequest,
-  Products,
-  CountryCode,
   RemovedTransaction,
   Transaction,
   AccountBase,

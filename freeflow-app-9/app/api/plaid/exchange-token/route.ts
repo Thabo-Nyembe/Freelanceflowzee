@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
     const itemInfo = await getItemInfo(exchangeResult.accessToken);
 
     // Get or create institution
-    let institutionId = validatedData.institutionId || itemInfo.institutionId;
+    const institutionId = validatedData.institutionId || itemInfo.institutionId;
     let institutionData = null;
 
     if (institutionId) {

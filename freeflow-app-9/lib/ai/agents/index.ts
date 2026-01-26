@@ -47,6 +47,11 @@ export type {
   WorkflowStep
 } from '../agent-orchestrator'
 
+// Import agent factory functions for use in createAgentTeam
+import { createPlannerAgent as plannerFactory } from './planner'
+import { createExecutorAgent as executorFactory } from './executor'
+import { createReviewerAgent as reviewerFactory } from './reviewer'
+
 /**
  * Create a complete agent team with all default agents
  */
@@ -55,14 +60,11 @@ export function createAgentTeam(config?: {
   executor?: Parameters<typeof import('./executor').createExecutorAgent>[0]
   reviewer?: Parameters<typeof import('./reviewer').createReviewerAgent>[0]
 }) {
-  const { createPlannerAgent } = require('./planner')
-  const { createExecutorAgent } = require('./executor')
-  const { createReviewerAgent } = require('./reviewer')
 
   return {
-    planner: createPlannerAgent(config?.planner),
-    executor: createExecutorAgent(config?.executor),
-    reviewer: createReviewerAgent(config?.reviewer)
+    planner: plannerFactory(config?.planner),
+    executor: executorFactory(config?.executor),
+    reviewer: reviewerFactory(config?.reviewer)
   }
 }
 

@@ -277,8 +277,7 @@ const mockAICreatePredictions: any[] = []
 const mockAICreateActivities: any[] = []
 
 // Quick actions are now defined inside the component to use dialog state
-import { useAICreate, type AIGeneration } from '@/lib/hooks/use-ai-create'
-import { createClient } from '@/lib/supabase/client'
+import { useAICreate } from '@/lib/hooks/use-ai-create'
 
 // ============================================================================
 // MAIN COMPONENT

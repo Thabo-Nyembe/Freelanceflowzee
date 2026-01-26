@@ -1,6 +1,5 @@
 'use client'
 
-import { createClient } from '@/lib/supabase/client'
 import { useState, useMemo } from 'react'
 import {
   Users, UserPlus, Building2, Target, Award, MessageSquare, Calendar, BarChart3,

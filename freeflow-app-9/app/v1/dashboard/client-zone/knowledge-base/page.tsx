@@ -4,11 +4,7 @@
 import { useState } from 'react'
 import {
   Search,
-  Rocket,
-  FolderKanban,
-  DollarSign,
   Users,
-  BarChart,
   MessageSquare,
   Video,
   FileText,

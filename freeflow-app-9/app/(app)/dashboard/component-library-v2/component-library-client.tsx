@@ -16,8 +16,7 @@ import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Progress } from '@/components/ui/progress'
 import {
-  Search, Code2, Eye, Palette, Settings, Box, Layers, Grid3X3, List,
-  ChevronRight, Copy, Check, ExternalLink, Accessibility,
+  Search, Code2, Eye, Palette, Settings, Box, Layers, Grid3X3, List, Copy, Check, ExternalLink, Accessibility,
   Monitor, Moon, Sun, Play, Download, Heart, MessageSquare,
   GitBranch, FileCode, Shield, Puzzle, BookOpen, Terminal, Figma,
   Github, Plus, CheckCircle, AlertTriangle, Paintbrush,

@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/client'
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
-import { copyToClipboard, downloadAsCsv, downloadAsJson, printContent } from '@/lib/button-handlers'
+import { copyToClipboard, downloadAsJson, printContent } from '@/lib/button-handlers'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'

@@ -11,7 +11,6 @@ import { createClient } from '@/lib/supabase/server'
 import {
   remotionService,
   RenderJobConfig,
-  RenderProgress,
 } from '@/lib/remotion/remotion-service'
 import { createFeatureLogger } from '@/lib/logger'
 
@@ -262,7 +261,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     // Get specific job
     if (jobId) {
       // Try memory first
-      let job = remotionService.getJob(jobId)
+      const job = remotionService.getJob(jobId)
 
       // If not in memory, check database
       if (!job) {

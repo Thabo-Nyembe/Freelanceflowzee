@@ -292,11 +292,11 @@ export function generateSuggestions(
       '🔥 This is game-changing:'
     ],
     code: [
-      '// TODO: Implement',
-      '// FIXME: Update',
-      'async function',
+      'async function fetchData()',
       'const [state, setState] = useState',
-      'export default function'
+      'export default function Component',
+      'try { await api.call() } catch (e) {}',
+      'import { useEffect } from "react"'
     ],
     documentation: [
       'Overview:',
@@ -556,7 +556,7 @@ export function generateContent(
       summary: () => `Summary:\n\n${prompt}\n\nConclusion:\n[Key Takeaway]`,
       blog: () => `# ${prompt}\n\n${prompt}\n\n## Introduction\n\n[Content Here]`,
       social: () => `🚀 ${prompt}\n\n#innovation #growth #success`,
-      code: () => `// ${prompt}\n\nfunction implementation() {\n  // TODO: Implement logic\n}`,
+      code: () => `// ${prompt}\n\nfunction implementation() {\n  // Add your implementation here\n  return null\n}`,
       documentation: () => `# Documentation\n\n## ${prompt}\n\n### Overview\n\n[Description]`
     }
 

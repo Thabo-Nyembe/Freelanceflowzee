@@ -121,6 +121,281 @@ This document tracks progress on wiring frontend button handlers to the comprehe
 
 ---
 
+## Batch 10: Announcements Dashboard
+**File:** `app/(app)/dashboard/announcements-v2/announcements-client.tsx`
+
+| Handler | Status | Description |
+|---------|--------|-------------|
+| handleDeleteWebhook | [x] | Deletes webhook configuration |
+| handleRegenerateApiKey | [x] | Regenerates API key for announcements |
+| handleExportData | [x] | Exports announcements data |
+| handleImportData | [x] | Imports announcements from file |
+| handleClearCache | [x] | Clears announcement cache |
+| handleResetSettings | [x] | Resets all settings to defaults |
+
+---
+
+## Batch 11: Compliance Dashboard
+**File:** `app/(app)/dashboard/compliance-v2/compliance-client.tsx`
+
+| Handler | Status | Description |
+|---------|--------|-------------|
+| handleRunAudit | [x] | Runs compliance audit check |
+| handleGenerateReport | [x] | Generates compliance report |
+| handleExportData | [x] | Exports compliance data |
+| handleRegenerateApiToken | [x] | Regenerates API token |
+| handleResetControls | [x] | Resets compliance controls |
+
+---
+
+## Batch 12: Logistics Dashboard
+**File:** `app/(app)/dashboard/logistics-v2/logistics-client.tsx`
+
+| Handler | Status | Description |
+|---------|--------|-------------|
+| handleBatchPrint | [x] | Batch print with shipping labels generation |
+
+---
+
+## Batch 13: Maintenance Dashboard
+**File:** `app/(app)/dashboard/maintenance-v2/maintenance-client.tsx`
+
+| Handler | Status | Description |
+|---------|--------|-------------|
+| handleAddPart | [x] | Adds new part to inventory |
+| handleAddTechnician | [x] | Adds new technician |
+| handleResetSettings | [x] | Resets maintenance settings |
+
+---
+
+## Batch 14: Roles Dashboard
+**File:** `app/(app)/dashboard/roles-v2/roles-client.tsx`
+
+| Handler | Status | Description |
+|---------|--------|-------------|
+| handleSaveGeneralSettings | [x] | Persists general settings to localStorage |
+| handleSaveSecuritySettings | [x] | Persists security settings to localStorage |
+| handleSavePermissionSettings | [x] | Persists permission settings to localStorage |
+| handleSaveNotificationSettings | [x] | Persists notification settings to localStorage |
+| handleSaveAdvancedSettings | [x] | Persists advanced settings to localStorage |
+| handleRunPermissionAudit | [x] | Runs permission audit and generates report |
+
+---
+
+## Batch 15: Lead Generation Dashboard
+**File:** `app/(app)/dashboard/lead-generation-v2/lead-generation-client.tsx`
+
+| Handler | Status | Description |
+|---------|--------|-------------|
+| handleSendEmailBlast | [x] | Opens email blast dialog with recipient selection |
+| handleApplyAdvancedFilters | [x] | Opens advanced filters dialog |
+| handleManageSegments | [x] | Opens segment management dialog |
+| handleCreateDeal | [x] | Opens deal creation dialog |
+| handleCreateTask | [x] | Opens task creation dialog |
+| handleCreateCampaign | [x] | Opens campaign creation dialog |
+
+---
+
+## Batch 16: Renewals Dashboard (Extended)
+**File:** `app/(app)/dashboard/renewals-v2/renewals-client.tsx`
+
+| Handler | Status | Description |
+|---------|--------|-------------|
+| handleExportJSON | [x] | Exports renewals data as JSON |
+| handleExportCSV | [x] | Exports renewals data as CSV |
+| handleScheduleRenewal | [x] | Opens renewal scheduling dialog |
+| handleSaveSettings | [x] | Persists settings to localStorage |
+
+---
+
+## Batch 17: Invoicing Dashboard
+**File:** `app/(app)/dashboard/invoicing-v2/invoicing-client.tsx`
+
+| Handler | Status | Description |
+|---------|--------|-------------|
+| handlePrintInvoice | [x] | Prints selected invoice |
+| handleCreateInvoice | [x] | Opens invoice creation dialog |
+| handleExportInvoices | [x] | Exports invoices data |
+
+---
+
+## Batch 18: Subscriptions Dashboard
+**File:** `app/(app)/dashboard/subscriptions-v2/subscriptions-client.tsx`
+
+| Handler | Status | Description |
+|---------|--------|-------------|
+| handleFilterPersistence | [x] | Persists filter state to localStorage |
+| handleContactSupport | [x] | Opens support contact dialog |
+
+---
+
+## Batch 19: Stock Dashboard
+**File:** `app/(app)/dashboard/stock-v2/stock-client.tsx`
+
+| Handler | Status | Description |
+|---------|--------|-------------|
+| handleExportCSV | [x] | Exports stock data as CSV |
+| handleExportJSON | [x] | Exports stock data as JSON |
+| handleExportXLSX | [x] | Exports stock data as XLSX |
+
+---
+
+## Batch 20: Email Marketing Dashboard
+**File:** `app/(app)/dashboard/email-marketing-v2/email-marketing-client.tsx`
+
+| Handler | Status | Description |
+|---------|--------|-------------|
+| handleCreateCampaign | [x] | Opens campaign creation dialog |
+| handleExportSubscribers | [x] | Exports subscriber list |
+
+---
+
+## Batch 21: Business Intelligence Dashboard
+**File:** `app/(app)/dashboard/business-intelligence-v2/business-intelligence-client.tsx`
+
+| Handler | Status | Description |
+|---------|--------|-------------|
+| handleExportData | [x] | Exports BI data |
+| handleSaveSettings | [x] | Persists settings to localStorage |
+| handleFilterPersistence | [x] | Persists filter state to localStorage |
+
+---
+
+## Batch 22: Reporting Dashboard
+**File:** `app/(app)/dashboard/reporting-v2/reporting-client.tsx`
+
+| Handler | Status | Description |
+|---------|--------|-------------|
+| handleExportData | [x] | Exports report data |
+
+---
+
+## Batch 23: Features Dashboard
+**File:** `app/(app)/dashboard/features-v2/features-client.tsx`
+
+| Handler | Status | Description |
+|---------|--------|-------------|
+| handleCreateFeature | [x] | Opens feature creation dialog |
+| handleExportRoadmap | [x] | Exports feature roadmap |
+
+---
+
+## Batch 24: Docs Dashboard
+**File:** `app/(app)/dashboard/docs-v2/docs-client.tsx`
+
+| Handler | Status | Description |
+|---------|--------|-------------|
+| handleCreateDocument | [x] | Opens document creation dialog |
+| handleExportDocs | [x] | Exports documentation |
+
+---
+
+## Batch 25: Capacity Dashboard
+**File:** `app/(app)/dashboard/capacity-v2/capacity-client.tsx`
+
+| Handler | Status | Description |
+|---------|--------|-------------|
+| handleSaveSettings | [x] | Persists capacity settings to localStorage |
+
+---
+
+## Batch 26: My Day Dashboard
+**File:** `app/(app)/dashboard/my-day-v2/my-day-client.tsx`
+
+| Handler | Status | Description |
+|---------|--------|-------------|
+| handleSaveSettings | [x] | Persists my day settings to localStorage |
+
+---
+
+## Batch 27: Desktop App Dashboard
+**File:** `app/(app)/dashboard/desktop-app-v2/desktop-app-client.tsx`
+
+| Handler | Status | Description |
+|---------|--------|-------------|
+| handleSavePreferences | [x] | Persists desktop app preferences to localStorage |
+
+---
+
+## Batch 28: Workflow Builder Dashboard
+**File:** `app/(app)/dashboard/workflow-builder-v2/workflow-builder-client.tsx`
+
+| Handler | Status | Description |
+|---------|--------|-------------|
+| handleToggleLiveView | [x] | Toggles live view mode |
+| handleToggleFavorites | [x] | Toggles favorites panel visibility |
+| handleDuplicateVariable | [x] | Duplicates workflow variable |
+
+---
+
+## Batch 29: Team Hub Dashboard
+**File:** `app/(app)/dashboard/team-hub-v2/team-hub-client.tsx`
+
+| Handler | Status | Description |
+|---------|--------|-------------|
+| handleCreateReminder | [x] | Creates team reminder |
+
+---
+
+## Batch 30: Security Audit Dashboard
+**File:** `app/(app)/dashboard/security-audit-v2/security-audit-client.tsx`
+
+| Handler | Status | Description |
+|---------|--------|-------------|
+| handleRunSecurityScan | [x] | Runs comprehensive security scan |
+| handleExportAudit | [x] | Exports security audit report |
+
+---
+
+## Batch 31: Component Library Dashboard
+**File:** `app/(app)/dashboard/component-library-v2/component-library-client.tsx`
+
+| Handler | Status | Description |
+|---------|--------|-------------|
+| handleOpenComponentBuilder | [x] | Opens component builder dialog |
+| handleConfigureWebhook | [x] | Opens webhook configuration dialog |
+| handleDeleteWebhook | [x] | Deletes webhook configuration |
+
+---
+
+## Batch 32: Media Library Dashboard
+**File:** `app/(app)/dashboard/media-library-v2/media-library-client.tsx`
+
+| Handler | Status | Description |
+|---------|--------|-------------|
+| handleUpgradeStorage | [x] | Opens upgrade storage dialog with pricing tiers |
+
+---
+
+## Batch 33: Integrations Marketplace Dashboard
+**File:** `app/(app)/dashboard/integrations-marketplace-v2/integrations-marketplace-client.tsx`
+
+| Handler | Status | Description |
+|---------|--------|-------------|
+| handleConfigureWebhook | [x] | Opens webhook configuration dialog |
+| handleBlockApp | [x] | Opens app blocker dialog |
+| handleUnblockApp | [x] | Unblocks previously blocked app |
+
+---
+
+## Batch 34: Performance Dashboard
+**File:** `app/(app)/dashboard/performance-v2/performance-client.tsx`
+
+| Handler | Status | Description |
+|---------|--------|-------------|
+| handleCompareTests | [x] | Opens test comparison with visual diff dialog |
+
+---
+
+## Batch 35: Milestones Dashboard (Extended)
+**File:** `app/(app)/dashboard/milestones-v2/milestones-client.tsx`
+
+| Handler | Status | Description |
+|---------|--------|-------------|
+| handleExportTimeline | [x] | Exports milestone timeline data |
+
+---
+
 ## Implementation Pattern
 
 ### Standard Button Handler Pattern
@@ -171,6 +446,39 @@ const handleGenerateReport = async (type: string) => {
 }
 ```
 
+### Settings Persistence Pattern
+```typescript
+const handleSaveSettings = () => {
+  try {
+    localStorage.setItem('dashboard-settings', JSON.stringify(settings))
+    toast.success('Settings saved')
+  } catch (error) {
+    toast.error('Failed to save settings')
+  }
+}
+```
+
+### Dialog Handler Pattern
+```typescript
+const handleOpenDialog = () => {
+  setDialogOpen(true)
+}
+
+const handleDialogSubmit = async (data: FormData) => {
+  setIsLoading(true)
+  try {
+    await mutation(data)
+    toast.success('Created successfully')
+    setDialogOpen(false)
+    refetch()
+  } catch (error) {
+    toast.error('Creation failed')
+  } finally {
+    setIsLoading(false)
+  }
+}
+```
+
 ---
 
 ## Hooks Reference
@@ -184,6 +492,9 @@ const handleGenerateReport = async (type: string) => {
 | Sprints | useSprints | create, update, remove |
 | API Keys | useApiKeys | createKey, updateKey, revokeKey |
 | Clients | useClients | addClient, updateClient, deleteClient |
+| Leads | useLeads | create, update, remove |
+| Announcements | useAnnouncements | create, update, remove |
+| Compliance | useCompliance | create, update, remove |
 
 ---
 
@@ -199,16 +510,40 @@ These dashboards already have fully wired handlers:
 ---
 
 ## Last Updated
-Date: 2026-01-25
-Status: **All batches complete** - Build passing with 598 pages
+Date: 2026-01-26
+Status: **All 35 batches complete** - Comprehensive button wiring across all dashboards
 
 ## Summary of Changes
 - **Bugs**: `handleArchiveBugs` now soft-deletes closed bugs via Supabase
 - **Products**: `handleSyncAll` now calls `refetch()` to refresh data from database
-- **Renewals**: Added hook integration, report generation exports CSV, archive function soft-deletes old renewals
-- **Milestones**: All report handlers + CRUD handlers wired to database
+- **Renewals**: Added hook integration, report generation exports CSV, archive function soft-deletes old renewals, JSON/CSV export, scheduling dialog
+- **Milestones**: All report handlers + CRUD handlers wired to database, timeline export added
 - **Sprints**: API key handlers wired to useApiKeys hook with real key generation
 - **Analytics**: All handlers already properly wired to Supabase (verified)
 - **Customers**: API key management, file import, and danger zone actions fully wired
 - **Clients**: Competitive upgrade components wired to real client/activity data
 - **API Keys**: Competitive upgrade components computed from real API key stats
+- **Announcements**: Webhook delete, API key regen, export/import, cache clear, settings reset
+- **Compliance**: Audit run, report generation, export, API token, controls reset
+- **Logistics**: Batch print with shipping labels generation
+- **Maintenance**: Add part/technician, settings reset
+- **Roles**: All settings persistence (general, security, permissions, notifications, advanced), permission audit
+- **Lead Generation**: 6 new dialogs (email blast, filters, segments, deals, tasks, campaigns)
+- **Invoicing**: Print invoice, create dialog, export
+- **Subscriptions**: Filter persistence, contact support
+- **Stock**: Multi-format export (CSV/JSON/XLSX)
+- **Email Marketing**: Create campaign dialog, subscriber export
+- **Business Intelligence**: Export, settings, filter persistence
+- **Reporting**: Data export
+- **Features**: Create feature dialog, roadmap export
+- **Docs**: Create document dialog, docs export
+- **Capacity**: Settings persistence
+- **My Day**: Settings persistence
+- **Desktop App**: Preferences persistence
+- **Workflow Builder**: Live view toggle, favorites panel, variable duplication
+- **Team Hub**: Reminder creation
+- **Security Audit**: Security scan, audit export
+- **Component Library**: Component builder, webhook dialogs
+- **Media Library**: Upgrade storage dialog with pricing tiers
+- **Integrations Marketplace**: Webhook config, app blocker dialogs
+- **Performance**: Test comparison with visual diff dialog

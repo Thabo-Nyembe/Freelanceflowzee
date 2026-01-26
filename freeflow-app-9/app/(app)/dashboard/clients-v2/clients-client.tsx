@@ -15,8 +15,7 @@ import {
   useClientStats,
   useRecordContact,
   useUpdateClientFinancials,
-  type Client as ApiClient,
-  type ClientFilters
+  type Client as ApiClient
 } from '@/lib/api-clients'
 import { useDeals } from '@/lib/hooks/use-deals'
 import { useRevenueIntelligence } from '@/lib/hooks/use-revenue-intelligence'

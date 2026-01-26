@@ -16,16 +16,12 @@ export const dynamic = 'force-dynamic';
  * Competitors: Custom GPTs (OpenAI), Claude Projects, Notion AI
  */
 
-import { useState, useCallback, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { formatDistanceToNow } from 'date-fns';
+import { useState } from 'react';
 import {
-  Bot, Plus, Settings, Play, Pause, Trash2, Copy, Edit2, Save,
-  Sparkles, Brain, Wand2, Code, FileText, Database, Zap,
-  MessageSquare, Search, Filter, MoreVertical, ChevronRight,
-  BookOpen, Globe, Lock, Users, Star, TrendingUp, Clock,
-  CheckCircle, AlertCircle, Loader2, Download, Upload, Share2,
-  Wrench, Puzzle, BarChart3, Terminal, Mic, Eye, ArrowRight,
+  Bot, Plus, Settings, Play, Pause, Trash2, Edit2, Save, Zap,
+  MessageSquare, Search, MoreVertical, Globe, Star, TrendingUp,
+  CheckCircle, Loader2,
+  Wrench, Puzzle, ArrowRight,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -37,7 +33,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
   CardFooter,
@@ -48,7 +43,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogFooter,
 } from '@/components/ui/dialog';
 import {
@@ -66,9 +60,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
 import { Slider } from '@/components/ui/slider';
-import { Progress } from '@/components/ui/progress';
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card';
 import { TextShimmer } from '@/components/ui/text-shimmer';
 import { toast } from 'sonner';

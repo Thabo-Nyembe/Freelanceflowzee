@@ -11,7 +11,7 @@
  */
 
 import { useQuery, useMutation, useQueryClient, type UseQueryOptions } from '@tanstack/react-query'
-import { projectsClient, type Project, type CreateProjectData, type UpdateProjectData, type ProjectFilters } from './projects-client'
+import { projectsClient, type CreateProjectData, type UpdateProjectData, type ProjectFilters } from './projects-client'
 import { toast } from 'sonner'
 import { STALE_TIMES, userDataQueryOptions, analyticsQueryOptions, invalidationPatterns } from '@/lib/query-client'
 

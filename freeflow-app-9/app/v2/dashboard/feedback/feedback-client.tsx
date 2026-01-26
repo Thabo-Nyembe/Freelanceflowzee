@@ -2,7 +2,6 @@
 // Comprehensive customer feedback portal with voting, roadmap, and insights
 'use client'
 
-import { createClient } from '@/lib/supabase/client'
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'

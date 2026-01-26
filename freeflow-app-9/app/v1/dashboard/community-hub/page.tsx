@@ -4,7 +4,7 @@
 
 export const dynamic = 'force-dynamic';
 
-import React, { useState, useReducer, useEffect, useMemo } from 'react'
+import React, { useState, useReducer, useEffect } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'

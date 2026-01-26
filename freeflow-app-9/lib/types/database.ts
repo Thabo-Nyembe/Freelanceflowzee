@@ -7,7 +7,6 @@
  * - Common callback parameter types
  */
 
-import type { SupabaseClient } from '@supabase/supabase-js'
 import type { PostgrestError } from '@supabase/postgrest-js'
 
 // Re-export for convenience

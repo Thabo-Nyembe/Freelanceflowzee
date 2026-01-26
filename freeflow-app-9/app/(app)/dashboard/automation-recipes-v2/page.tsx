@@ -3,7 +3,7 @@
 // Automation Recipe Builder - Visual Workflow Builder
 // Competing with: Zapier, Make (Integromat), n8n, Pipedream
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Workflow,
@@ -21,13 +21,11 @@ import {
   Clock,
   CheckCircle,
   XCircle,
-  AlertTriangle,
   ArrowRight,
   Sparkles,
   Download,
   Upload,
   ExternalLink,
-  Eye,
   Edit,
   RefreshCw,
   Mail,
@@ -49,7 +47,6 @@ import {
   TrendingUp,
   Target,
   Wand2,
-  X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -93,9 +90,8 @@ import {
 } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
-import { useAutomationRecipes, Recipe, RecipeTemplate, RecipeExecution, Integration, DashboardStats, RecipeNode } from '@/lib/hooks/use-automation-recipes';
+import { useAutomationRecipes, Recipe, RecipeTemplate, RecipeExecution, Integration } from '@/lib/hooks/use-automation-recipes';
 
 // Icon mapping
 const iconMap: Record<string, React.ElementType> = {

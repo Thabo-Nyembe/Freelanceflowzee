@@ -3,6 +3,8 @@
 // Send SMS, make calls, and manage voice communications
 // =====================================================
 
+import crypto from 'crypto'
+
 export interface TwilioConfig {
   accountSid: string;
   authToken: string;
@@ -427,7 +429,6 @@ class TwilioService {
     const data = url + sortedParams;
 
     // Create HMAC-SHA1 signature
-    const crypto = require('crypto');
     const expectedSignature = crypto
       .createHmac('sha1', this.config.authToken)
       .update(Buffer.from(data, 'utf-8'))

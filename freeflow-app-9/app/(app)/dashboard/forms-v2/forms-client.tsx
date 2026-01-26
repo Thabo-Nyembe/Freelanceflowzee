@@ -1,6 +1,5 @@
 'use client'
 
-import { createClient } from '@/lib/supabase/client'
 import React, { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { useForms, type Form, type FormStatus, type FormType } from '@/lib/hooks/use-forms'
@@ -17,14 +16,12 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
   FileText, Plus, Search, Eye, Edit3, Copy, Trash2, Share2, Settings,
-  BarChart3, Users, Clock, CheckCircle, XCircle, ChevronDown,
-  Type, List, Hash, Star, Calendar, Upload, ToggleLeft, AlignLeft, MessageSquare,
-  Image as ImageIcon, Link2, Mail, Phone, CreditCard,
+  BarChart3, Users, Clock, CheckCircle, XCircle, List, Hash, Star, Upload, MessageSquare, Link2, Mail,
   Play, Pause, Archive, ExternalLink, Code, Zap, Bell, Download,
-  TrendingUp, PieChart, Activity, Target, Sparkles, Wand2, Palette,
+  TrendingUp, PieChart, Activity, Target, Wand2, Palette,
   Layout, Grid3X3, Smartphone, Monitor, Globe, Lock, RefreshCw,
-  MousePointer, CircleDot, MoreVertical, Send, Webhook, Database, GitBranch, Shuffle,
-  Timer, Gauge, Sliders, ListChecks, FileUp, Save, AlertOctagon
+  MousePointer, MoreVertical, Send, Webhook, Database, GitBranch, Shuffle,
+  Timer, Gauge, Sliders, Save, AlertOctagon
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components

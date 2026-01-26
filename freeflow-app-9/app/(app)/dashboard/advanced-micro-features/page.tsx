@@ -82,15 +82,10 @@ import {
   Sparkles,
   TrendingUp,
   Users,
-  MessageSquare,
   Settings,
-  Palette,
-  Bell,
   BarChart3,
   Zap,
-  Star,
-  Download,
-  Share2
+  Star
 } from 'lucide-react'
 
 const logger = createFeatureLogger('Advanced-Micro-Features')

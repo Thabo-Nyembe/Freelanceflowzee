@@ -12,6 +12,7 @@
  */
 
 import { createClient } from '@/lib/supabase/server'
+import crypto from 'crypto'
 
 // Configuration
 const LAGO_API_URL = process.env.LAGO_API_URL || 'https://api.getlago.com/api/v1'
@@ -758,7 +759,6 @@ export class LagoBillingService {
     signature: string,
     secret: string
   ): boolean {
-    const crypto = require('crypto')
     const expectedSignature = crypto
       .createHmac('sha256', secret)
       .update(payload)

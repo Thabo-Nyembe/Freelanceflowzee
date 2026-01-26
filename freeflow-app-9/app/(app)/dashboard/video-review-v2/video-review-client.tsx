@@ -24,7 +24,6 @@ import {
   Users,
   CheckCircle2,
   XCircle,
-  AlertCircle,
   FileVideo,
   Plus,
   Filter,
@@ -32,7 +31,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Layers,
-  Bookmark,
   Flag,
   Upload,
   MoreVertical,
@@ -45,10 +43,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Slider } from '@/components/ui/slider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
@@ -71,41 +66,20 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogFooter,
 } from '@/components/ui/dialog';
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet';
+
+
 import { Textarea } from '@/components/ui/textarea';
-import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
 import {
-  VideoReviewPlayer,
-  CommentPanel,
   DrawingCanvas,
   VideoTimeline,
   ReviewWorkflow,
   FrameComment,
 } from '@/components/video';
-import {
-  useVideoComments,
-  useCreateComment,
-  useUpdateComment,
-  useDeleteComment,
-  useToggleReaction,
-  useVideoMarkers,
-  useCreateMarker,
-  useReviewSessions,
-  useVideoPlayerState,
-  useDrawingTools,
-  useCommentNavigation,
-} from '@/lib/hooks/use-video-comments';
+
+
 import {
   VideoComment,
   VideoMarker,

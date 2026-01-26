@@ -30,7 +30,6 @@ import {
   AlertCircle,
   CheckCircle,
   Clock,
-  CreditCard,
   ArrowLeft,
   DollarSign,
   Plus,
@@ -39,7 +38,6 @@ import {
   Send,
   FileText,
   Calendar,
-  Filter,
   X as XIcon
 } from 'lucide-react'
 import { CardSkeleton } from '@/components/ui/loading-skeleton'

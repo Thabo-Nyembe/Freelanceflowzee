@@ -12,7 +12,7 @@
 
 import { createFeatureLogger } from '@/lib/logger'
 import { createClient } from '@/lib/supabase/server'
-import { JsonValue, toDbError } from '@/lib/types/database'
+import { JsonValue } from '@/lib/types/database'
 
 const logger = createFeatureLogger('ActivityLogService')
 

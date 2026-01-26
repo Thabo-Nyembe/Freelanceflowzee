@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
-import { useApiKeys, getKeyStatusColor, getKeyTypeColor, formatRequests } from '@/lib/hooks/use-api-keys'
+import { useApiKeys, getKeyTypeColor } from '@/lib/hooks/use-api-keys'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'

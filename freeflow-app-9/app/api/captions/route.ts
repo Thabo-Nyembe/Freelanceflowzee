@@ -13,7 +13,6 @@ const logger = createFeatureLogger('captions-api')
 import {
   generateSRT,
   generateVTT,
-  generateJSON,
   generateASS,
   processCaptionSegments,
   CaptionStyle,

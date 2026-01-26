@@ -18,7 +18,6 @@ import {
   matchJobToFreelancers,
   getMarketInsights,
   getProfileOptimization,
-  createJobEmbedding,
   createProfileEmbedding,
 } from '@/lib/ai/job-matching';
 import { z } from 'zod';

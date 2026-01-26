@@ -1,6 +1,5 @@
 'use client'
 
-import { createClient } from '@/lib/supabase/client'
 
 import React, { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
@@ -27,7 +26,7 @@ import {
 
 // Extended hooks for additional data
 import { useTeamActivity, useTeamMeetings } from '@/lib/hooks/use-team-extended'
-import { useCollaborationChannels, useCollaborationMessages } from '@/lib/hooks/use-collaboration-extended'
+import { useCollaborationChannels } from '@/lib/hooks/use-collaboration-extended'
 import { useWorkflows } from '@/lib/hooks/use-workflows'
 import { useIntegrationMarketplace } from '@/lib/hooks/use-integration-extended'
 import { useNotificationQueue } from '@/lib/hooks/use-notification-extended'

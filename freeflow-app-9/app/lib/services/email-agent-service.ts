@@ -13,7 +13,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { AIService } from './ai-service';
 import logger from '@/lib/logger';
-import { getEmailService, EmailMessage as ServiceEmailMessage } from '@/lib/email/email-service';
+import { getEmailService } from '@/lib/email/email-service';
 
 // ============================================================================
 // TYPES AND INTERFACES

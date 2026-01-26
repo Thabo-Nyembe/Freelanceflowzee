@@ -30,7 +30,6 @@ import {
   Calendar,
   Clock,
   MapPin,
-  Users,
   Video,
   Phone,
   Plus,
@@ -38,8 +37,7 @@ import {
   Edit,
   Trash2,
   CalendarDays,
-  Loader2,
-  AlertCircle
+  Loader2
 } from 'lucide-react'
 import {
   AlertDialog,
@@ -59,13 +57,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+
+
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState, NoDataEmptyState } from '@/components/ui/empty-state'

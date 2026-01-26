@@ -1,6 +1,5 @@
 'use client'
 
-import { createClient } from '@/lib/supabase/client'
 
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'

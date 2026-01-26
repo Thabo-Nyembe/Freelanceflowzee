@@ -53,12 +53,10 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import {
-  Download,
   Edit,
   CheckCircle,
   MessageSquare,
   FolderOpen,
-  AlertCircle,
   Loader2,
   Plus,
   Trash2,

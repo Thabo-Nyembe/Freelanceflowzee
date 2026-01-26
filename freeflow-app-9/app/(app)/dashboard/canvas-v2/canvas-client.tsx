@@ -11,9 +11,7 @@ import {
   MousePointer, Hand, PenTool, Layers,
   Plus, Search, Grid3X3, Users, Clock, Star, Settings, Zap, Play, ZoomIn, ZoomOut,
   Undo, Redo, Copy, Trash2, Edit2, Eye, Download, Share2, Upload,
-  MessageSquare, Lock, ChevronRight, CheckCircle2, MoreVertical, FileText,
-  BarChart3, Workflow, Shapes, Frame, Component,
-  Table2, Monitor, Smartphone, Bell,
+  MessageSquare, Lock, ChevronRight, CheckCircle2, MoreVertical, FileText, Workflow, Shapes, Frame, Component, Monitor, Smartphone, Bell,
   Crown, Wand2
 } from 'lucide-react'
 

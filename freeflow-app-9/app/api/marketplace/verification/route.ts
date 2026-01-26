@@ -4,7 +4,6 @@
 // Our Advantage: Multi-layer verification, skill assessments, background checks, trust scores
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
 import { createFeatureLogger } from '@/lib/logger'
 
 const logger = createFeatureLogger('marketplace-verification')
@@ -594,7 +593,7 @@ async function handleVerifyEmployment(params: {
 async function handleGetAvailableAssessments(params: { category?: string }) {
   const { category } = params
 
-  let assessments = [...skillAssessments]
+  const assessments = [...skillAssessments]
 
   // In production, filter by category
   return NextResponse.json({

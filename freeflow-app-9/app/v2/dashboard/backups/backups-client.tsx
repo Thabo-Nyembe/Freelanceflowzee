@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { useBackups } from '@/lib/hooks/use-backups'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'

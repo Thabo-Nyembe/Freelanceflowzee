@@ -30,7 +30,6 @@ import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
-import { toast } from 'sonner'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 
 const logger = createFeatureLogger('AdvancedAnalytics')

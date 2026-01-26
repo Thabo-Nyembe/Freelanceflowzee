@@ -322,7 +322,7 @@ async function calculateLeadScore(
   }
 
   // Custom scoring rules would be applied here
-  let score = 0
+  const score = 0
   for (const rule of rules) {
     // Evaluate each rule against the contact
     // This would involve evaluating conditions like:

@@ -1146,7 +1146,7 @@ async function handleGetTrending(supabase: any, params: { category?: string, lim
   const { category, limit = 10 } = params
 
   // Get gigs from database
-  let gigs = await getGigs(supabase, { category, status: 'active' });
+  const gigs = await getGigs(supabase, { category, status: 'active' });
 
   // Sort by recent performance (conversion rate)
   gigs.sort((a, b) => b.conversionRate - a.conversionRate)

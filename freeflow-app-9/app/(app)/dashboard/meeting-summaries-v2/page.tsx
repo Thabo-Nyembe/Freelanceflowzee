@@ -29,27 +29,22 @@ import {
   HelpCircle,
   Calendar,
   Send,
-  Play,
   Pause,
   BarChart3,
   PieChart,
   RefreshCw,
   Search,
   Filter,
-  MoreVertical,
-  ExternalLink,
   Share2,
-  Bookmark,
   ThumbsUp,
   ThumbsDown,
   Zap,
   FolderOpen,
   BookOpen,
-  ArrowRight,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useMeetingSummaries } from '@/lib/hooks/use-meeting-summaries';
-import type { MeetingSummary, ActionItem, KeyDecision, TopicSegment } from '@/lib/ai/meeting-summarizer';
+import type { MeetingSummary } from '@/lib/ai/meeting-summarizer';
 
 // ============================================================================
 // TYPES

@@ -10,9 +10,7 @@ import {
   useUpdateTask,
   useCreateTask,
   useDeleteTask,
-  type Task,
-  type Project,
-  type TaskStats
+  type Task
 } from '@/lib/api-clients'
 import { useRevenueIntelligence } from '@/lib/hooks/use-revenue-intelligence'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'

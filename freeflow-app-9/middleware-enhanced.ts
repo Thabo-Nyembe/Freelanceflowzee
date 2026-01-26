@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse, NextFetchEvent } from 'next/server';
 import { geolocation } from '@vercel/edge';
-// TODO: Re-enable Axiom logging when needed
+/**
+ * Axiom logging is disabled by default to reduce costs.
+ * To enable Axiom logging:
+ * 1. Install next-axiom: npm install next-axiom
+ * 2. Add AXIOM_TOKEN to environment variables
+ * 3. Uncomment the import below and wrap middleware with withAxiom
+ * See: https://axiom.co/docs/apps/next
+ */
 // import { withAxiom } from 'next-axiom';
 import { nanoid } from 'nanoid';
 import { createFeatureLogger } from '@/lib/logger';

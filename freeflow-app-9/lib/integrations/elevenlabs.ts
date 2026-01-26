@@ -3,6 +3,8 @@
 // Text-to-speech, voice cloning, and audio generation
 // =====================================================
 
+import { promises as fs } from 'fs'
+
 export interface ElevenLabsConfig {
   apiKey: string;
   defaultVoiceId?: string;
@@ -222,7 +224,6 @@ class ElevenLabsService {
    */
   async textToSpeechFile(request: TextToSpeechRequest, outputPath: string): Promise<void> {
     const audioData = await this.textToSpeech(request);
-    const fs = require('fs').promises;
     await fs.writeFile(outputPath, Buffer.from(audioData));
   }
 

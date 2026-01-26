@@ -10,7 +10,7 @@
  * - Security metrics and reporting
  */
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
 import {
   Shield,
@@ -21,40 +21,28 @@ import {
   Settings,
   Plus,
   Search,
-  Filter,
   RefreshCw,
   Clock,
   MapPin,
-  Monitor,
   User,
   Globe,
   Lock,
-  Unlock,
   CheckCircle,
   XCircle,
   ChevronRight,
   MoreVertical,
   Bell,
-  TrendingUp,
-  TrendingDown,
   Zap,
   Target,
-  FileText,
-  Download,
-  Play,
-  Pause,
   Trash2,
   Edit,
-  Copy,
-  ExternalLink,
   Info,
   History,
   BarChart3,
   PieChart,
-  LineChart,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -98,8 +86,6 @@ import {
 } from '@/components/ui/tooltip'
 import {
   useSecurityMonitoring,
-  type SecurityAlert,
-  type SecurityEvent,
   type AnomalyRule,
   type AlertSeverity,
   type AlertStatus,

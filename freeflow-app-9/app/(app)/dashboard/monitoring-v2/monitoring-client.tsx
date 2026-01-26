@@ -46,7 +46,6 @@ import {
   Database,
   BarChart3,
   Search,
-  Filter,
   RefreshCw,
   Plus,
   ArrowUpRight,

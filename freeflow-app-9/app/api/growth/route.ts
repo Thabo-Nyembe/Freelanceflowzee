@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
         const dateRange = searchParams.get('dateRange') || 'last30'
         const { data: { user } } = await supabase.auth.getUser()
 
-        let exportData: Record<string, any> = {
+        const exportData: Record<string, any> = {
           exportedAt: new Date().toISOString(),
           reportType,
           dateRange,

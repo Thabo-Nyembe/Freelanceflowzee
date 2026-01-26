@@ -11,7 +11,19 @@ import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
 import { createFeatureLogger } from '@/lib/logger'
-// UPS component - now using enhanced version
+/**
+ * Universal Pinpoint System (UPS) - Visual Feedback Component
+ *
+ * The UPS component provides pinpoint visual feedback capabilities for generated assets.
+ * It is currently disabled in the dialog below due to the following reasons:
+ * 1. The component requires additional provider context setup (Supabase auth, theme)
+ * 2. For generated assets, a simpler feedback mechanism may be more appropriate
+ *
+ * To re-enable:
+ * 1. Uncomment the import below
+ * 2. Uncomment the dialog section at the bottom of this component
+ * 3. Ensure the parent component provides required providers
+ */
 // import { UniversalPinpointFeedbackSystemEnhanced } from '@/components/projects-hub/universal-pinpoint-feedback-system-enhanced'
 
 // A+++ SUPABASE INTEGRATION
@@ -993,7 +1005,15 @@ export function CreativeAssetGenerator({ asStandalone = true }: CreativeAssetGen
         </Card>
       )}
 
-      {/* Universal Pinpoint System Dialog - TODO: Re-enable when UPS component syntax is fixed */}
+      {/**
+        * Universal Pinpoint System Dialog
+        *
+        * This dialog is disabled. See the comment at the top of this file for details
+        * on how to re-enable visual feedback functionality for generated assets.
+        *
+        * Alternative: Consider using a simpler feedback component like FeedbackDialog
+        * from @/components/feedback-dialog for basic asset feedback needs.
+        */}
       {/* {showUPS && selectedAssetForUPS && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-7xl max-h-[90vh] flex flex-col">

@@ -57,7 +57,6 @@ import {
 } from '@/components/ui/competitive-upgrades-extended'
 
 // MIGRATED: Batch #13 - Removed mock data, using database hooks
-import { useDesktopApps } from '@/lib/hooks/use-desktop-apps'
 
 // Initialize Supabase client once at module level
 const supabase = createClient()

@@ -11,7 +11,7 @@
  */
 
 import { useQuery, useMutation, useQueryClient, type UseQueryOptions } from '@tanstack/react-query'
-import { tasksClient, type Task, type CreateTaskData, type UpdateTaskData, type TaskFilters } from './tasks-client'
+import { tasksClient, type CreateTaskData, type UpdateTaskData, type TaskFilters } from './tasks-client'
 import { toast } from 'sonner'
 import { STALE_TIMES, userDataQueryOptions, analyticsQueryOptions, invalidationPatterns } from '@/lib/query-client'
 

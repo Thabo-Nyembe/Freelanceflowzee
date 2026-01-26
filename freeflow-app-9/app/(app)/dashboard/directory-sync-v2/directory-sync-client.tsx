@@ -8,11 +8,7 @@ import {
   RefreshCw,
   Settings,
   Trash2,
-  Play,
-  Pause,
   CheckCircle2,
-  XCircle,
-  Clock,
   Users,
   Building2,
   Link2,
@@ -20,8 +16,7 @@ import {
   AlertCircle,
   Loader2,
   Shield,
-  ArrowRight,
-  ExternalLink
+  ArrowRight
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'

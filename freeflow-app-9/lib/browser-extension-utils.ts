@@ -9,7 +9,6 @@ import {
   ExtensionFeatureInfo,
   QuickAction,
   PageCapture,
-  ExtensionStats,
   BrowserExtension,
   ContextMenuAction
 } from './browser-extension-types'

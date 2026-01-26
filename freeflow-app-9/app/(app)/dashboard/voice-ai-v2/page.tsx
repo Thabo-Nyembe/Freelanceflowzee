@@ -21,18 +21,13 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatDistanceToNow, format } from 'date-fns';
 import {
-  Mic, MicOff, Radio, Upload, Download, Play, Pause,
-  Languages, FileText, Sparkles, Clock, Users, Search,
-  Settings, Trash2, Copy, Check, ChevronRight, RefreshCw,
-  MessageSquare, Brain, Wand2, Target, HelpCircle, Loader2,
-  Volume2, VolumeX, ListChecks, LightbulbIcon, Quote,
+  Mic, MicOff, Radio, Upload, FileText, Sparkles, Clock,
+  Settings, Trash2, Copy, Check, ChevronRight,
+  MessageSquare, Target, HelpCircle, Loader2, ListChecks, LightbulbIcon,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Progress } from '@/components/ui/progress';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
@@ -62,7 +57,7 @@ import { Separator } from '@/components/ui/separator';
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card';
 import { TextShimmer } from '@/components/ui/text-shimmer';
 import { toast } from 'sonner';
-import { useVoiceCommands, VoiceCommand } from '@/lib/hooks/use-voice-commands';
+import { useVoiceCommands } from '@/lib/hooks/use-voice-commands';
 import { createFeatureLogger } from '@/lib/logger';
 
 const logger = createFeatureLogger('VoiceAI-Page');

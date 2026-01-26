@@ -10,6 +10,7 @@
  */
 
 import { createClient } from '@/lib/supabase/server'
+import crypto from 'crypto'
 
 // Configuration
 const HYPERSWITCH_API_URL = process.env.HYPERSWITCH_API_URL || 'https://sandbox.hyperswitch.io'
@@ -564,7 +565,6 @@ export class HyperswitchPaymentService {
     signature: string,
     secret: string
   ): boolean {
-    const crypto = require('crypto')
     const expectedSignature = crypto
       .createHmac('sha256', secret)
       .update(payload)

@@ -229,7 +229,7 @@ export function generateMockCodeCompletions(count: number = 30, userId: string =
       id: `completion-${i + 1}`,
       userId,
       language,
-      originalCode: `// Original code snippet ${i + 1}\nfunction process() {\n  // TODO: implement\n}`,
+      originalCode: `// Original code snippet ${i + 1}\nfunction process() {\n  // Initial implementation stub\n  return null\n}`,
       completedCode: `// Completed code snippet ${i + 1}\nfunction process(data) {\n  try {\n    return data.map(item => item.value)\n  } catch (error) {\n    console.error(error)\n    return []\n  }\n}`,
       prompt: samplePrompts[Math.floor(Math.random() * samplePrompts.length)],
       model: models[Math.floor(Math.random() * models.length)],

@@ -19,19 +19,8 @@ import {
   RefreshCw,
   TestTube,
   Target,
-  Zap,
   ArrowRight,
-  Home,
-  Calendar,
-  FolderOpen,
-  Brain,
-  BarChart3,
-  Video,
-  Palette,
-  FileText,
-  Users,
-  DollarSign,
-  MessageSquare
+  BarChart3
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 

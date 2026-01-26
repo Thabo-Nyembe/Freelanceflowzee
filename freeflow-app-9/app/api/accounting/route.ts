@@ -6,11 +6,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import {
-  DoubleEntryAccountingService,
   accountingService,
   ChartOfAccount,
   JournalEntry,
-  JournalLine,
 } from '@/lib/accounting/double-entry';
 import { z } from 'zod';
 import { createFeatureLogger } from '@/lib/logger';
