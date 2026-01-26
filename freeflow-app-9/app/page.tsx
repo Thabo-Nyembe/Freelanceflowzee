@@ -1,13 +1,14 @@
 'use client'
 
 import Link from 'next/link'
-import React from 'react'
+import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { LiquidGlassCard, LiquidGlassCardHeader, LiquidGlassCardTitle, LiquidGlassCardContent } from '@/components/ui/liquid-glass-card'
 import {
   ArrowRight,
@@ -27,7 +28,9 @@ import {
   Sparkles,
   TrendingUp,
   Award,
-  Lock
+  Lock,
+  Menu,
+  X
 } from 'lucide-react'
 
 const features = [
@@ -139,6 +142,7 @@ const trustBadges = [
 
 export default function HomePage() {
   const router = useRouter()
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white via-blue-50/30 to-white dark:bg-none dark:bg-gray-900 relative overflow-hidden">
@@ -227,7 +231,7 @@ export default function HomePage() {
               </Link>
             </div>
             <div className="flex items-center gap-4">
-              <Link href="/login">
+              <Link href="/login" className="hidden sm:block">
                 <Button
                   variant="ghost"
                   aria-label="Log in to your account"
@@ -236,7 +240,7 @@ export default function HomePage() {
                   Log In
                 </Button>
               </Link>
-              <Link href="/signup">
+              <Link href="/signup" className="hidden sm:block">
                 <Button
                   className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                   aria-label="Start your free trial"
@@ -244,6 +248,58 @@ export default function HomePage() {
                   Start Free Trial
                 </Button>
               </Link>
+
+              {/* Mobile Menu */}
+              <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+                <SheetTrigger asChild className="md:hidden">
+                  <Button variant="ghost" size="icon" aria-label="Open menu">
+                    <Menu className="h-6 w-6" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-[300px] bg-white dark:bg-gray-900">
+                  <nav className="flex flex-col gap-4 mt-8">
+                    <Link
+                      href="/features"
+                      className="text-lg font-medium text-gray-700 dark:text-gray-200 hover:text-blue-600 py-2"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Features
+                    </Link>
+                    <Link
+                      href="/pricing"
+                      className="text-lg font-medium text-gray-700 dark:text-gray-200 hover:text-blue-600 py-2"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Pricing
+                    </Link>
+                    <Link
+                      href="/blog"
+                      className="text-lg font-medium text-gray-700 dark:text-gray-200 hover:text-blue-600 py-2"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Blog
+                    </Link>
+                    <Link
+                      href="/contact"
+                      className="text-lg font-medium text-gray-700 dark:text-gray-200 hover:text-blue-600 py-2"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Contact
+                    </Link>
+                    <Separator className="my-4" />
+                    <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
+                      <Button variant="outline" className="w-full">
+                        Log In
+                      </Button>
+                    </Link>
+                    <Link href="/signup" onClick={() => setMobileMenuOpen(false)}>
+                      <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600">
+                        Start Free Trial
+                      </Button>
+                    </Link>
+                  </nav>
+                </SheetContent>
+              </Sheet>
             </div>
           </div>
         </div>

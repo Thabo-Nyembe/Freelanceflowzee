@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
-import { CheckCircle, Sparkles, Zap, Crown, Shield, Lock, Award, ArrowRight } from 'lucide-react'
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
+import { CheckCircle, Sparkles, Zap, Crown, Shield, Lock, Award, ArrowRight, Menu } from 'lucide-react'
 
 const plans = [
   {
@@ -109,6 +110,7 @@ const trustBadges = [
 
 export default function PricingPage() {
   const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'annual'>('monthly')
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white via-blue-50/30 to-white">
@@ -166,7 +168,7 @@ export default function PricingPage() {
               </Link>
             </div>
             <div className="flex items-center gap-4" role="group" aria-label="Account actions">
-              <Link href="/login">
+              <Link href="/login" className="hidden sm:block">
                 <Button
                   variant="ghost"
                   className="focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
@@ -175,7 +177,7 @@ export default function PricingPage() {
                   Log In
                 </Button>
               </Link>
-              <Link href="/signup">
+              <Link href="/signup" className="hidden sm:block">
                 <Button
                   className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                   aria-label="Start your free trial"
@@ -183,6 +185,58 @@ export default function PricingPage() {
                   Start Free Trial
                 </Button>
               </Link>
+
+              {/* Mobile Menu */}
+              <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+                <SheetTrigger asChild className="md:hidden">
+                  <Button variant="ghost" size="icon" aria-label="Open menu">
+                    <Menu className="h-6 w-6" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-[300px] bg-white">
+                  <nav className="flex flex-col gap-4 mt-8">
+                    <Link
+                      href="/features"
+                      className="text-lg font-medium text-gray-700 hover:text-blue-600 py-2"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Features
+                    </Link>
+                    <Link
+                      href="/pricing"
+                      className="text-lg font-medium text-gray-900 py-2"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Pricing
+                    </Link>
+                    <Link
+                      href="/blog"
+                      className="text-lg font-medium text-gray-700 hover:text-blue-600 py-2"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Blog
+                    </Link>
+                    <Link
+                      href="/contact"
+                      className="text-lg font-medium text-gray-700 hover:text-blue-600 py-2"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      Contact
+                    </Link>
+                    <Separator className="my-4" />
+                    <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
+                      <Button variant="outline" className="w-full">
+                        Log In
+                      </Button>
+                    </Link>
+                    <Link href="/signup" onClick={() => setMobileMenuOpen(false)}>
+                      <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600">
+                        Start Free Trial
+                      </Button>
+                    </Link>
+                  </nav>
+                </SheetContent>
+              </Sheet>
             </div>
           </div>
         </div>
