@@ -20,7 +20,21 @@
  * reqLogger.info('Processing request', { action: 'create' })
  */
 
-import { randomUUID } from 'crypto'
+/**
+ * Generate a UUID that works in all environments (browser, Edge Runtime, Node.js)
+ */
+function generateUUID(): string {
+  // Use Web Crypto API (works in browser, Edge Runtime, and Node.js 19+)
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID()
+  }
+  // Fallback for older environments
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0
+    const v = c === 'x' ? r : (r & 0x3) | 0x8
+    return v.toString(16)
+  })
+}
 
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error'
 
@@ -314,13 +328,13 @@ export const createRequestLogger = (
   userId?: string
 ): Logger => {
   return logger.child({
-    requestId: requestId || randomUUID(),
+    requestId: requestId || generateUUID(),
     userId
   })
 }
 
 // Generate a new request ID
-export const generateRequestId = (): string => randomUUID()
+export const generateRequestId = (): string => generateUUID()
 
 // Export default for convenience
 export default logger
