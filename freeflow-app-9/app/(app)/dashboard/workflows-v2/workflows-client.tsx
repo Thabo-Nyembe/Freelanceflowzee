@@ -427,12 +427,27 @@ export default function WorkflowsClient() {
   }
 
   const handleRunWorkflow = async (workflow: Workflow) => {
-    // Activate workflow - sets status to 'active' and started_at timestamp
-    const result = await startWorkflow(workflow.id)
-    if (result.success) {
-      toast.success(`Workflow activated: "${workflow.name}" is now active and running`)
-    } else {
-      toast.error('Failed to activate workflow')
+    // Manually trigger workflow execution via API
+    try {
+      const response = await fetch('/api/workflows', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'execute',
+          workflowId: workflow.id,
+          triggerData: { manual: true, timestamp: new Date().toISOString() }
+        })
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Execution failed')
+      }
+
+      const result = await response.json()
+      toast.success(`Workflow executed: "${workflow.name}" has been triggered${result.execution?.id ? ` (Execution ID: ${result.execution.id.slice(0, 8)}...)` : ''}`)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to execute workflow')
     }
   }
 
@@ -447,13 +462,219 @@ export default function WorkflowsClient() {
   }
 
   const handleActivateWorkflow = async (workflow: Workflow) => {
-    // Activate/Resume workflow
-    const result = await updateWorkflow(workflow.id, { status: 'active' })
-    if (result.success) {
-      toast.success(`Workflow activated: "${workflow.name}" is now active`)
-    } else {
-      toast.error('Failed to activate workflow')
+    // Activate/Resume workflow via API for proper trigger setup
+    try {
+      const response = await fetch('/api/workflows', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'toggle_active',
+          workflowId: workflow.id,
+          isActive: true
+        })
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Activation failed')
+      }
+
+      // Also update local state via hook
+      const result = await resumeWorkflow(workflow.id)
+      if (result.success) {
+        toast.success(`Workflow activated: "${workflow.name}" is now active`)
+      } else {
+        toast.error('Failed to activate workflow')
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to activate workflow')
     }
+  }
+
+  const handleDeactivateWorkflow = async (workflow: Workflow) => {
+    // Deactivate workflow and stop all triggers
+    try {
+      const response = await fetch('/api/workflows', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'toggle_active',
+          workflowId: workflow.id,
+          isActive: false
+        })
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Deactivation failed')
+      }
+
+      // Also update local state via hook
+      const result = await pauseWorkflow(workflow.id)
+      if (result.success) {
+        toast.success(`Workflow deactivated: "${workflow.name}" has been deactivated`)
+      } else {
+        toast.error('Failed to deactivate workflow')
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to deactivate workflow')
+    }
+  }
+
+  const handleUpdateWorkflow = async (workflowId: string, updates: {
+    name?: string
+    description?: string
+    triggerType?: string
+    triggerConfig?: Record<string, unknown>
+    actions?: Array<{ id: string; type: string; config: Record<string, unknown> }>
+    tags?: string[]
+    isActive?: boolean
+  }) => {
+    // Update workflow details via API
+    try {
+      const response = await fetch('/api/workflows', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update',
+          workflowId,
+          ...updates
+        })
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Update failed')
+      }
+
+      // Also update local state via hook for basic fields
+      const hookUpdates: Record<string, unknown> = {}
+      if (updates.name) hookUpdates.name = updates.name
+      if (updates.description !== undefined) hookUpdates.description = updates.description
+      if (updates.tags) hookUpdates.tags = updates.tags
+
+      if (Object.keys(hookUpdates).length > 0) {
+        await updateWorkflow(workflowId, hookUpdates as Parameters<typeof updateWorkflow>[1])
+      }
+
+      toast.success('Workflow updated successfully')
+      return { success: true }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to update workflow')
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
+    }
+  }
+
+  const handleAddStep = async (workflowId: string, step: {
+    type: 'trigger' | 'action' | 'filter' | 'delay' | 'branch'
+    actionType: string
+    name: string
+    description?: string
+    config?: Record<string, unknown>
+  }) => {
+    // Add a new step to workflow via API
+    try {
+      // First get the current workflow to get existing actions
+      const getResponse = await fetch(`/api/workflows?action=get&workflowId=${workflowId}`)
+      if (!getResponse.ok) {
+        throw new Error('Failed to fetch workflow')
+      }
+      const { workflow } = await getResponse.json()
+
+      // Add the new action to the existing ones
+      const newAction = {
+        id: `action_${Date.now()}`,
+        type: step.actionType,
+        category: step.type,
+        name: step.name,
+        config: step.config || {},
+        order: (workflow.actions?.length || 0) + 1
+      }
+
+      const updatedActions = [...(workflow.actions || []), newAction]
+
+      // Update the workflow with new actions
+      const response = await fetch('/api/workflows', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update',
+          workflowId,
+          actions: updatedActions
+        })
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to add step')
+      }
+
+      // Update local state - update steps_config in the hook
+      const currentWorkflow = dbWorkflows.find(w => w.id === workflowId)
+      if (currentWorkflow) {
+        const newStepConfig = {
+          type: step.type,
+          app: step.name,
+          name: step.name,
+          description: step.description || '',
+          config: step.config || {}
+        }
+        await updateWorkflow(workflowId, {
+          steps_config: [...(currentWorkflow.steps_config || []), newStepConfig],
+          total_steps: (currentWorkflow.total_steps || 0) + 1
+        })
+      }
+
+      toast.success(`Step added: "${step.name}" has been added to the workflow`)
+      return { success: true }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to add step')
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
+    }
+  }
+
+  const handleAddTrigger = async (workflowId: string, trigger: {
+    type: 'webhook' | 'schedule' | 'event' | 'manual'
+    config: Record<string, unknown>
+  }) => {
+    // Add or update workflow trigger
+    try {
+      const response = await fetch('/api/workflows', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update',
+          workflowId,
+          triggerType: trigger.type,
+          triggerConfig: trigger.config
+        })
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to set trigger')
+      }
+
+      toast.success(`Trigger set: ${trigger.type} trigger has been configured`)
+      return { success: true }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to set trigger')
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
+    }
+  }
+
+  const handleAddAction = async (workflowId: string, action: {
+    type: string
+    name: string
+    config: Record<string, unknown>
+  }) => {
+    // Wrapper for handleAddStep for action-specific additions
+    return handleAddStep(workflowId, {
+      type: 'action',
+      actionType: action.type,
+      name: action.name,
+      config: action.config
+    })
   }
 
   const handleDuplicateWorkflow = async (workflow: Workflow) => {
@@ -501,9 +722,9 @@ export default function WorkflowsClient() {
   }
 
   const handleToggleWorkflowStatus = async (workflow: Workflow) => {
-    // Toggle between active and paused
+    // Toggle between active and paused/deactivated
     if (workflow.status === 'active') {
-      await handlePauseWorkflow(workflow)
+      await handleDeactivateWorkflow(workflow)
     } else {
       await handleActivateWorkflow(workflow)
     }
@@ -516,30 +737,68 @@ export default function WorkflowsClient() {
   const handleSubmitExport = async () => {
     setIsExporting(true)
     try {
-      // Real API call to export workflows
-      const response = await fetch('/api/workflows/export', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          workflowIds: filteredWorkflows.map(w => w.id),
-          format: exportFormat
-        })
+      // Build export data from database workflows
+      const workflowsToExport = filteredWorkflows.map(w => {
+        const dbWorkflow = dbWorkflows.find(dbw => dbw.id === w.id)
+        return {
+          id: w.id,
+          name: w.name,
+          description: w.description,
+          status: w.status,
+          trigger: w.trigger,
+          steps: w.steps,
+          tags: w.tags,
+          folder: w.folder,
+          // Include raw config for reimport
+          stepsConfig: dbWorkflow?.steps_config || [],
+          type: dbWorkflow?.type || 'processing',
+          priority: dbWorkflow?.priority || 'medium',
+          metadata: dbWorkflow?.metadata || {},
+          exportedAt: new Date().toISOString(),
+          exportVersion: '1.0'
+        }
       })
 
-      if (!response.ok) throw new Error('Export failed')
+      const exportData = {
+        version: '1.0',
+        exportedAt: new Date().toISOString(),
+        workflowCount: workflowsToExport.length,
+        workflows: workflowsToExport
+      }
 
-      // Get export data from API response
-      const exportData = await response.json()
+      // Format based on selected export format
+      let fileContent: string
+      let mimeType: string
+      let fileExtension: string
+
+      switch (exportFormat) {
+        case 'yaml':
+          // Simple YAML-like format (for full YAML, would need a library)
+          fileContent = workflowsToExport.map(w =>
+            `# Workflow: ${w.name}\nname: "${w.name}"\ndescription: "${w.description || ''}"\nstatus: ${w.status}\nsteps:\n${w.steps.map(s => `  - name: "${s.name}"\n    type: ${s.type}\n    app: "${s.app}"`).join('\n')}\n---`
+          ).join('\n')
+          mimeType = 'text/yaml'
+          fileExtension = 'yaml'
+          break
+        case 'xml':
+          fileContent = `<?xml version="1.0" encoding="UTF-8"?>\n<workflows exportedAt="${exportData.exportedAt}" version="${exportData.version}">\n${workflowsToExport.map(w =>
+            `  <workflow id="${w.id}">\n    <name>${w.name}</name>\n    <description>${w.description || ''}</description>\n    <status>${w.status}</status>\n    <steps>\n${w.steps.map(s => `      <step type="${s.type}">\n        <name>${s.name}</name>\n        <app>${s.app}</app>\n      </step>`).join('\n')}\n    </steps>\n  </workflow>`
+          ).join('\n')}\n</workflows>`
+          mimeType = 'application/xml'
+          fileExtension = 'xml'
+          break
+        default:
+          fileContent = JSON.stringify(exportData, null, 2)
+          mimeType = 'application/json'
+          fileExtension = 'json'
+      }
 
       // Create downloadable file
-      const blob = new Blob(
-        [exportFormat === 'json' ? JSON.stringify(exportData, null, 2) : JSON.stringify(exportData)],
-        { type: 'application/json' }
-      )
+      const blob = new Blob([fileContent], { type: mimeType })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `workflows-export-${Date.now()}.${exportFormat}`
+      a.download = `workflows-export-${Date.now()}.${fileExtension}`
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
@@ -548,7 +807,7 @@ export default function WorkflowsClient() {
       toast.success(`Export Complete: ${filteredWorkflows.length} workflows exported successfully`)
       setShowExportDialog(false)
     } catch (error) {
-      toast.error('Export Failed')
+      toast.error(error instanceof Error ? error.message : 'Export Failed')
     } finally {
       setIsExporting(false)
     }
@@ -570,24 +829,39 @@ export default function WorkflowsClient() {
       // Find the selected workflow
       const workflow = filteredWorkflows.find(w => w.id === selectedWorkflowsForTest)
 
-      // Real API call to run workflow test
-      const response = await fetch('/api/workflows/test', {
+      // Use the workflows API with test_workflow action
+      const response = await fetch('/api/workflows', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          action: 'test_workflow',
           workflowId: selectedWorkflowsForTest,
-          testData: { mode: 'sample' }
+          testData: {
+            mode: 'sample',
+            timestamp: new Date().toISOString(),
+            _test_mode: true
+          }
         })
       })
 
-      if (!response.ok) throw new Error('Test failed')
-      const result = await response.json()
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Test failed')
+      }
 
-      toast.success(`Test Completed: ${workflow?.name || 'Workflow'} test passed successfully${result.message ? `: ${result.message}` : ' with sample data'}`)
+      const result = await response.json()
+      const executionStatus = result.execution?.status || 'completed'
+
+      if (executionStatus === 'failed') {
+        toast.error(`Test Failed: ${workflow?.name || 'Workflow'} test encountered errors`)
+      } else {
+        toast.success(`Test Completed: ${workflow?.name || 'Workflow'} test passed successfully${result.execution?.id ? ` (Execution: ${result.execution.id.slice(0, 8)}...)` : ''}`)
+      }
+
       setShowRunTestDialog(false)
       setSelectedWorkflowsForTest('')
     } catch (error) {
-      toast.error('Test Failed')
+      toast.error(error instanceof Error ? error.message : 'Test Failed')
     } finally {
       setIsRunningTest(false)
     }

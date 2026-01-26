@@ -427,6 +427,56 @@ export default function AnalyticsClient() {
     is_default: false
   })
 
+  // Form state for creating goal
+  const [goalForm, setGoalForm] = useState({
+    name: '',
+    description: '',
+    metric_name: '',
+    target_value: 0,
+    current_value: 0,
+    target_date: '',
+    status: 'active' as 'active' | 'completed' | 'paused'
+  })
+
+  // Form state for creating alert
+  const [alertForm, setAlertForm] = useState({
+    metric_name: '',
+    metric_type: 'count' as 'count' | 'currency' | 'percentage' | 'duration',
+    threshold_type: 'above' as 'above' | 'below' | 'equals',
+    threshold_value: 0,
+    notification_channels: ['email', 'in_app'] as string[]
+  })
+
+  // Form state for adding widget
+  const [widgetForm, setWidgetForm] = useState({
+    title: '',
+    type: 'chart' as 'chart' | 'metric' | 'table' | 'funnel',
+    size: 'medium' as 'small' | 'medium' | 'large',
+    metric_id: '',
+    config: {} as Record<string, unknown>
+  })
+
+  // Form state for saving filter preset
+  const [filterPresetForm, setFilterPresetForm] = useState({
+    name: '',
+    description: ''
+  })
+
+  // Form state for scheduling report
+  const [scheduleReportForm, setScheduleReportForm] = useState({
+    report_id: '',
+    frequency: 'weekly' as 'daily' | 'weekly' | 'monthly',
+    send_time: '09:00',
+    recipients: '',
+    is_active: true
+  })
+
+  // Database state for goals, alerts, widgets, filter presets
+  const [dbGoals, setDbGoals] = useState<any[]>([])
+  const [dbAlerts, setDbAlerts] = useState<any[]>([])
+  const [dbWidgets, setDbWidgets] = useState<any[]>([])
+  const [dbFilterPresets, setDbFilterPresets] = useState<any[]>([])
+
   // Fetch user ID on mount
   useEffect(() => {
     const fetchUserId = async () => {
@@ -497,14 +547,80 @@ export default function AnalyticsClient() {
     }
   }, [userId, supabase])
 
+  const fetchGoals = useCallback(async () => {
+    if (!userId) return
+    try {
+      const { data, error } = await supabase
+        .from('analytics_goals')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+      if (error) throw error
+      setDbGoals(data || [])
+    } catch (err) {
+      console.error('Error fetching goals:', err)
+    }
+  }, [userId, supabase])
+
+  const fetchAlerts = useCallback(async () => {
+    if (!userId) return
+    try {
+      const { data, error } = await supabase
+        .from('analytics_alerts')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('is_active', true)
+        .order('created_at', { ascending: false })
+      if (error) throw error
+      setDbAlerts(data || [])
+    } catch (err) {
+      console.error('Error fetching alerts:', err)
+    }
+  }, [userId, supabase])
+
+  const fetchWidgets = useCallback(async (dashboardId?: string) => {
+    if (!userId) return
+    try {
+      let query = supabase
+        .from('analytics_dashboard_widgets')
+        .select('*')
+      if (dashboardId) {
+        query = query.eq('dashboard_id', dashboardId)
+      }
+      const { data, error } = await query.order('position', { ascending: true })
+      if (error) throw error
+      setDbWidgets(data || [])
+    } catch (err) {
+      console.error('Error fetching widgets:', err)
+    }
+  }, [userId, supabase])
+
+  const fetchFilterPresets = useCallback(async () => {
+    if (!userId) return
+    try {
+      const { data, error } = await supabase
+        .from('analytics_dashboard_filters')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+      if (error) throw error
+      setDbFilterPresets(data || [])
+    } catch (err) {
+      console.error('Error fetching filter presets:', err)
+    }
+  }, [userId, supabase])
+
   useEffect(() => {
     if (userId) {
       fetchFunnels()
       fetchReports()
       fetchDashboards()
       fetchMetrics()
+      fetchGoals()
+      fetchAlerts()
+      fetchFilterPresets()
     }
-  }, [userId, fetchFunnels, fetchReports, fetchDashboards, fetchMetrics])
+  }, [userId, fetchFunnels, fetchReports, fetchDashboards, fetchMetrics, fetchGoals, fetchAlerts, fetchFilterPresets])
 
   // Fetch real analytics data from Supabase tables
   const fetchUserAnalytics = useCallback(async () => {
@@ -1429,9 +1545,443 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
           notification_channels: ['email', 'in_app']
         })
       if (error) throw error
-      toast.success(`Alert created for metric "${alertConfig.metric_name}"`)
+      toast.success(`Alert created for metric "${selectedMetric.name}"`)
+      fetchAlerts()
     } catch (err: unknown) {
       toast.error('Error creating alert')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // ==================== GOAL HANDLERS ====================
+  const handleCreateGoal = async () => {
+    if (!userId) {
+      toast.error('Please sign in to create goals')
+      return
+    }
+    if (!goalForm.name.trim() || !goalForm.metric_name.trim()) {
+      toast.error('Please fill in all required fields')
+      return
+    }
+    setIsLoading(true)
+    try {
+      const { data, error } = await supabase
+        .from('analytics_goals')
+        .insert({
+          user_id: userId,
+          name: goalForm.name,
+          description: goalForm.description,
+          metric_name: goalForm.metric_name,
+          target_value: goalForm.target_value,
+          current_value: goalForm.current_value,
+          target_date: goalForm.target_date || null,
+          status: goalForm.status
+        })
+        .select()
+        .single()
+      if (error) throw error
+      toast.success(`Goal "${goalForm.name}" created successfully`)
+      setGoalForm({ name: '', description: '', metric_name: '', target_value: 0, current_value: 0, target_date: '', status: 'active' })
+      fetchGoals()
+      refreshGoals()
+    } catch (err: unknown) {
+      toast.error('Error creating goal')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleUpdateGoal = async (goalId: string, updates: Partial<typeof goalForm>) => {
+    if (!userId) return
+    setIsLoading(true)
+    try {
+      const { error } = await supabase
+        .from('analytics_goals')
+        .update(updates)
+        .eq('id', goalId)
+        .eq('user_id', userId)
+      if (error) throw error
+      toast.success('Goal updated successfully')
+      fetchGoals()
+      refreshGoals()
+    } catch (err: unknown) {
+      toast.error('Error updating goal')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleDeleteGoal = async (goalId: string) => {
+    if (!userId) return
+    if (!confirm('Are you sure you want to delete this goal?')) return
+    setIsLoading(true)
+    try {
+      const { error } = await supabase
+        .from('analytics_goals')
+        .delete()
+        .eq('id', goalId)
+        .eq('user_id', userId)
+      if (error) throw error
+      toast.success('Goal deleted')
+      fetchGoals()
+      refreshGoals()
+    } catch (err: unknown) {
+      toast.error('Error deleting goal')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // ==================== ALERT HANDLERS ====================
+  const handleCreateAlert = async () => {
+    if (!userId) {
+      toast.error('Please sign in to create alerts')
+      return
+    }
+    if (!alertForm.metric_name.trim()) {
+      toast.error('Please select a metric for the alert')
+      return
+    }
+    setIsLoading(true)
+    try {
+      const { data, error } = await supabase
+        .from('analytics_alerts')
+        .insert({
+          user_id: userId,
+          metric_name: alertForm.metric_name,
+          metric_type: alertForm.metric_type,
+          threshold_type: alertForm.threshold_type,
+          threshold_value: alertForm.threshold_value,
+          is_active: true,
+          notification_channels: alertForm.notification_channels
+        })
+        .select()
+        .single()
+      if (error) throw error
+      toast.success(`Alert created for "${alertForm.metric_name}"`)
+      setAlertForm({ metric_name: '', metric_type: 'count', threshold_type: 'above', threshold_value: 0, notification_channels: ['email', 'in_app'] })
+      setShowAlertDialog(false)
+      fetchAlerts()
+    } catch (err: unknown) {
+      toast.error('Error creating alert')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleUpdateAlert = async (alertId: string, updates: { is_active?: boolean; threshold_value?: number; threshold_type?: string }) => {
+    if (!userId) return
+    setIsLoading(true)
+    try {
+      const { error } = await supabase
+        .from('analytics_alerts')
+        .update(updates)
+        .eq('id', alertId)
+        .eq('user_id', userId)
+      if (error) throw error
+      toast.success('Alert updated')
+      fetchAlerts()
+    } catch (err: unknown) {
+      toast.error('Error updating alert')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleDeleteAlert = async (alertId: string) => {
+    if (!userId) return
+    setIsLoading(true)
+    try {
+      const { error } = await supabase
+        .from('analytics_alerts')
+        .delete()
+        .eq('id', alertId)
+        .eq('user_id', userId)
+      if (error) throw error
+      toast.success('Alert deleted')
+      fetchAlerts()
+    } catch (err: unknown) {
+      toast.error('Error deleting alert')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // ==================== FILTER PRESET HANDLERS ====================
+  const handleSaveFilter = async () => {
+    if (!userId) {
+      toast.error('Please sign in to save filter presets')
+      return
+    }
+    if (!filterPresetForm.name.trim()) {
+      toast.error('Please enter a name for the filter preset')
+      return
+    }
+    setIsLoading(true)
+    try {
+      const { data, error } = await supabase
+        .from('analytics_dashboard_filters')
+        .insert({
+          user_id: userId,
+          name: filterPresetForm.name,
+          description: filterPresetForm.description,
+          filter_config: {
+            timeRange,
+            customDateRange,
+            metrics: selectedFilters.metrics,
+            dimensions: selectedFilters.dimensions,
+            segments: selectedFilters.segments,
+            compareMode
+          }
+        })
+        .select()
+        .single()
+      if (error) throw error
+      toast.success(`Filter preset "${filterPresetForm.name}" saved`)
+      setFilterPresetForm({ name: '', description: '' })
+      fetchFilterPresets()
+    } catch (err: unknown) {
+      toast.error('Error saving filter preset')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleLoadFilterPreset = async (preset: { filter_config: { timeRange?: string; customDateRange?: { start: string; end: string }; metrics?: string[]; dimensions?: string[]; segments?: string[]; compareMode?: boolean } }) => {
+    if (!preset.filter_config) return
+    const config = preset.filter_config
+    if (config.timeRange) setTimeRange(config.timeRange)
+    if (config.customDateRange) setCustomDateRange(config.customDateRange)
+    if (config.metrics || config.dimensions || config.segments) {
+      setSelectedFilters({
+        metrics: config.metrics || [],
+        dimensions: config.dimensions || [],
+        segments: config.segments || []
+      })
+    }
+    if (config.compareMode !== undefined) setCompareMode(config.compareMode)
+    toast.success('Filter preset loaded')
+    handleRefresh()
+  }
+
+  const handleDeleteFilterPreset = async (presetId: string) => {
+    if (!userId) return
+    setIsLoading(true)
+    try {
+      const { error } = await supabase
+        .from('analytics_dashboard_filters')
+        .delete()
+        .eq('id', presetId)
+        .eq('user_id', userId)
+      if (error) throw error
+      toast.success('Filter preset deleted')
+      fetchFilterPresets()
+    } catch (err: unknown) {
+      toast.error('Error deleting filter preset')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // ==================== EXPORT DATA HANDLER ====================
+  const handleExportData = async (format: 'json' | 'csv' | 'pdf' = 'csv', reportType: string = 'dashboard') => {
+    setIsLoading(true)
+    try {
+      const response = await fetch('/api/analytics/reports', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          reportType,
+          format,
+          period: {
+            start: dateRangeParams.startDate,
+            end: dateRangeParams.endDate
+          },
+          filters: selectedFilters
+        })
+      })
+
+      if (!response.ok) throw new Error('Export failed')
+
+      if (format === 'json') {
+        const data = await response.json()
+        const jsonContent = JSON.stringify(data, null, 2)
+        const blob = new Blob([jsonContent], { type: 'application/json' })
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = `analytics-${reportType}-${new Date().toISOString().split('T')[0]}.json`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        URL.revokeObjectURL(url)
+      } else {
+        const blob = await response.blob()
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = `analytics-${reportType}-${new Date().toISOString().split('T')[0]}.${format}`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        URL.revokeObjectURL(url)
+      }
+
+      toast.success(`Export completed: ${format.toUpperCase()} file downloaded`)
+    } catch (err: unknown) {
+      toast.error('Error exporting data')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // ==================== WIDGET HANDLERS ====================
+  const handleAddWidget = async (dashboardId: string) => {
+    if (!userId) {
+      toast.error('Please sign in to add widgets')
+      return
+    }
+    if (!widgetForm.title.trim()) {
+      toast.error('Please enter a widget title')
+      return
+    }
+    setIsLoading(true)
+    try {
+      // Get current widget count for position
+      const { data: existingWidgets } = await supabase
+        .from('analytics_dashboard_widgets')
+        .select('position')
+        .eq('dashboard_id', dashboardId)
+        .order('position', { ascending: false })
+        .limit(1)
+
+      const nextPosition = existingWidgets && existingWidgets.length > 0 ? (existingWidgets[0].position || 0) + 1 : 0
+
+      const { data, error } = await supabase
+        .from('analytics_dashboard_widgets')
+        .insert({
+          dashboard_id: dashboardId,
+          title: widgetForm.title,
+          type: widgetForm.type,
+          size: widgetForm.size,
+          position: nextPosition,
+          metric_id: widgetForm.metric_id || null,
+          config: widgetForm.config
+        })
+        .select()
+        .single()
+      if (error) throw error
+      toast.success(`Widget "${widgetForm.title}" added to dashboard`)
+      setWidgetForm({ title: '', type: 'chart', size: 'medium', metric_id: '', config: {} })
+      fetchWidgets(dashboardId)
+    } catch (err: unknown) {
+      toast.error('Error adding widget')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleUpdateWidget = async (widgetId: string, updates: Partial<typeof widgetForm>) => {
+    setIsLoading(true)
+    try {
+      const { error } = await supabase
+        .from('analytics_dashboard_widgets')
+        .update(updates)
+        .eq('id', widgetId)
+      if (error) throw error
+      toast.success('Widget updated')
+      if (viewingDashboardId) fetchWidgets(viewingDashboardId)
+    } catch (err: unknown) {
+      toast.error('Error updating widget')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleDeleteWidget = async (widgetId: string) => {
+    if (!confirm('Are you sure you want to remove this widget?')) return
+    setIsLoading(true)
+    try {
+      const { error } = await supabase
+        .from('analytics_dashboard_widgets')
+        .delete()
+        .eq('id', widgetId)
+      if (error) throw error
+      toast.success('Widget removed')
+      if (viewingDashboardId) fetchWidgets(viewingDashboardId)
+    } catch (err: unknown) {
+      toast.error('Error removing widget')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // ==================== SCHEDULE REPORT HANDLERS ====================
+  const handleScheduleReport = async (reportId: string) => {
+    if (!userId) {
+      toast.error('Please sign in to schedule reports')
+      return
+    }
+    setIsLoading(true)
+    try {
+      const recipients = scheduleReportForm.recipients.split(',').map(r => r.trim()).filter(Boolean)
+
+      const { error } = await supabase
+        .from('analytics_reports')
+        .update({
+          type: 'scheduled',
+          frequency: scheduleReportForm.frequency,
+          schedule_time: scheduleReportForm.send_time,
+          recipients,
+          status: scheduleReportForm.is_active ? 'active' : 'paused'
+        })
+        .eq('id', reportId)
+        .eq('user_id', userId)
+      if (error) throw error
+      toast.success('Report schedule updated')
+      setScheduleReportForm({ report_id: '', frequency: 'weekly', send_time: '09:00', recipients: '', is_active: true })
+      fetchReports()
+    } catch (err: unknown) {
+      toast.error('Error scheduling report')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handlePauseScheduledReport = async (reportId: string) => {
+    if (!userId) return
+    setIsLoading(true)
+    try {
+      const { error } = await supabase
+        .from('analytics_reports')
+        .update({ status: 'paused' })
+        .eq('id', reportId)
+        .eq('user_id', userId)
+      if (error) throw error
+      toast.success('Scheduled report paused')
+      fetchReports()
+    } catch (err: unknown) {
+      toast.error('Error pausing report')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleResumeScheduledReport = async (reportId: string) => {
+    if (!userId) return
+    setIsLoading(true)
+    try {
+      const { error } = await supabase
+        .from('analytics_reports')
+        .update({ status: 'active' })
+        .eq('id', reportId)
+        .eq('user_id', userId)
+      if (error) throw error
+      toast.success('Scheduled report resumed')
+      fetchReports()
+    } catch (err: unknown) {
+      toast.error('Error resuming report')
     } finally {
       setIsLoading(false)
     }
@@ -4473,6 +5023,364 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
 
         {/* Quick Actions Toolbar */}
         <QuickActionsToolbar actions={quickActions} />
+
+        {/* Create Alert Dialog */}
+        <Dialog open={showAlertDialog} onOpenChange={setShowAlertDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Create Alert</DialogTitle>
+              <DialogDescription>
+                Set up an alert to be notified when a metric crosses a threshold.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 mt-4">
+              <div>
+                <Label htmlFor="alert-metric">Metric</Label>
+                <Select
+                  value={alertForm.metric_name}
+                  onValueChange={(v) => setAlertForm({ ...alertForm, metric_name: v })}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select a metric" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {filteredMetrics.map((metric) => (
+                      <SelectItem key={metric.id} value={metric.name}>
+                        {metric.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="alert-threshold-type">Condition</Label>
+                <Select
+                  value={alertForm.threshold_type}
+                  onValueChange={(v: 'above' | 'below' | 'equals') => setAlertForm({ ...alertForm, threshold_type: v })}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="above">Goes above</SelectItem>
+                    <SelectItem value="below">Goes below</SelectItem>
+                    <SelectItem value="equals">Equals</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="alert-threshold">Threshold Value</Label>
+                <Input
+                  id="alert-threshold"
+                  type="number"
+                  value={alertForm.threshold_value}
+                  onChange={(e) => setAlertForm({ ...alertForm, threshold_value: parseFloat(e.target.value) || 0 })}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label>Notification Channels</Label>
+                <div className="flex gap-4 mt-2">
+                  <label className="flex items-center gap-2">
+                    <Checkbox
+                      checked={alertForm.notification_channels.includes('email')}
+                      onCheckedChange={(checked) => {
+                        const channels = checked
+                          ? [...alertForm.notification_channels, 'email']
+                          : alertForm.notification_channels.filter(c => c !== 'email')
+                        setAlertForm({ ...alertForm, notification_channels: channels })
+                      }}
+                    />
+                    <span className="text-sm">Email</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <Checkbox
+                      checked={alertForm.notification_channels.includes('in_app')}
+                      onCheckedChange={(checked) => {
+                        const channels = checked
+                          ? [...alertForm.notification_channels, 'in_app']
+                          : alertForm.notification_channels.filter(c => c !== 'in_app')
+                        setAlertForm({ ...alertForm, notification_channels: channels })
+                      }}
+                    />
+                    <span className="text-sm">In-App</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+            <DialogFooter className="mt-4">
+              <Button variant="outline" onClick={() => setShowAlertDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleCreateAlert} disabled={isLoading || !alertForm.metric_name}>
+                {isLoading ? 'Creating...' : 'Create Alert'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Save Filter Preset Dialog */}
+        <Dialog open={showFilters} onOpenChange={setShowFilters}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Save Filter Preset</DialogTitle>
+              <DialogDescription>
+                Save the current filter configuration for quick access later.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 mt-4">
+              <div>
+                <Label htmlFor="filter-preset-name">Preset Name</Label>
+                <Input
+                  id="filter-preset-name"
+                  placeholder="e.g., Q4 Revenue Analysis"
+                  value={filterPresetForm.name}
+                  onChange={(e) => setFilterPresetForm({ ...filterPresetForm, name: e.target.value })}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="filter-preset-description">Description (optional)</Label>
+                <Textarea
+                  id="filter-preset-description"
+                  placeholder="Describe this filter preset..."
+                  value={filterPresetForm.description}
+                  onChange={(e) => setFilterPresetForm({ ...filterPresetForm, description: e.target.value })}
+                  className="mt-1"
+                />
+              </div>
+              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-sm space-y-2">
+                <h4 className="font-medium mb-2">Current Filters:</h4>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Time Range:</span>
+                  <span>{timeRange}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Selected Metrics:</span>
+                  <span>{selectedFilters.metrics.length || 'All'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Dimensions:</span>
+                  <span>{selectedFilters.dimensions.length || 'All'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">Compare Mode:</span>
+                  <span>{compareMode ? 'On' : 'Off'}</span>
+                </div>
+              </div>
+              {dbFilterPresets.length > 0 && (
+                <div>
+                  <Label>Saved Presets</Label>
+                  <div className="mt-2 space-y-2 max-h-40 overflow-y-auto">
+                    {dbFilterPresets.map((preset) => (
+                      <div key={preset.id} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <button
+                          className="text-sm font-medium text-left flex-1 hover:text-indigo-600"
+                          onClick={() => handleLoadFilterPreset(preset)}
+                        >
+                          {preset.name}
+                        </button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
+                          onClick={() => handleDeleteFilterPreset(preset.id)}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+            <DialogFooter className="mt-4">
+              <Button variant="outline" onClick={() => setShowFilters(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSaveFilter} disabled={isLoading || !filterPresetForm.name.trim()}>
+                {isLoading ? 'Saving...' : 'Save Preset'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Widget Dialog */}
+        {viewingDashboardId && (
+          <Dialog open={!!viewingDashboardId} onOpenChange={() => setViewingDashboardId(null)}>
+            <DialogContent className="max-w-lg">
+              <DialogHeader>
+                <DialogTitle>Add Widget to Dashboard</DialogTitle>
+                <DialogDescription>
+                  Add a new visualization widget to your dashboard.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 mt-4">
+                <div>
+                  <Label htmlFor="widget-title">Widget Title</Label>
+                  <Input
+                    id="widget-title"
+                    placeholder="e.g., Revenue Trend"
+                    value={widgetForm.title}
+                    onChange={(e) => setWidgetForm({ ...widgetForm, title: e.target.value })}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label>Widget Type</Label>
+                  <Select
+                    value={widgetForm.type}
+                    onValueChange={(v: 'chart' | 'metric' | 'table' | 'funnel') => setWidgetForm({ ...widgetForm, type: v })}
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="chart">Chart</SelectItem>
+                      <SelectItem value="metric">Metric Card</SelectItem>
+                      <SelectItem value="table">Data Table</SelectItem>
+                      <SelectItem value="funnel">Funnel</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Size</Label>
+                  <Select
+                    value={widgetForm.size}
+                    onValueChange={(v: 'small' | 'medium' | 'large') => setWidgetForm({ ...widgetForm, size: v })}
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="small">Small (1x1)</SelectItem>
+                      <SelectItem value="medium">Medium (2x1)</SelectItem>
+                      <SelectItem value="large">Large (2x2)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Associated Metric (optional)</Label>
+                  <Select
+                    value={widgetForm.metric_id}
+                    onValueChange={(v) => setWidgetForm({ ...widgetForm, metric_id: v })}
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="Select a metric" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">None</SelectItem>
+                      {filteredMetrics.map((metric) => (
+                        <SelectItem key={metric.id} value={metric.id}>
+                          {metric.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                {dbWidgets.length > 0 && (
+                  <div>
+                    <Label>Current Widgets</Label>
+                    <div className="mt-2 space-y-2 max-h-32 overflow-y-auto">
+                      {dbWidgets.map((widget) => (
+                        <div key={widget.id} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                          <span className="text-sm">{widget.title}</span>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
+                            onClick={() => handleDeleteWidget(widget.id)}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+              <DialogFooter className="mt-4">
+                <Button variant="outline" onClick={() => setViewingDashboardId(null)}>
+                  Close
+                </Button>
+                <Button onClick={() => handleAddWidget(viewingDashboardId)} disabled={isLoading || !widgetForm.title.trim()}>
+                  {isLoading ? 'Adding...' : 'Add Widget'}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        )}
+
+        {/* Schedule Report Dialog */}
+        {editingReportId && (
+          <Dialog open={!!editingReportId} onOpenChange={() => setEditingReportId(null)}>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>Schedule Report</DialogTitle>
+                <DialogDescription>
+                  Configure automated delivery for this report.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 mt-4">
+                <div>
+                  <Label>Delivery Frequency</Label>
+                  <Select
+                    value={scheduleReportForm.frequency}
+                    onValueChange={(v: 'daily' | 'weekly' | 'monthly') => setScheduleReportForm({ ...scheduleReportForm, frequency: v })}
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="daily">Daily</SelectItem>
+                      <SelectItem value="weekly">Weekly</SelectItem>
+                      <SelectItem value="monthly">Monthly</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="schedule-time">Send Time</Label>
+                  <Input
+                    id="schedule-time"
+                    type="time"
+                    value={scheduleReportForm.send_time}
+                    onChange={(e) => setScheduleReportForm({ ...scheduleReportForm, send_time: e.target.value })}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="schedule-recipients">Recipients (comma-separated emails)</Label>
+                  <Input
+                    id="schedule-recipients"
+                    type="text"
+                    placeholder="user1@example.com, user2@example.com"
+                    value={scheduleReportForm.recipients}
+                    onChange={(e) => setScheduleReportForm({ ...scheduleReportForm, recipients: e.target.value })}
+                    className="mt-1"
+                  />
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div>
+                    <Label>Active</Label>
+                    <p className="text-xs text-gray-500">Enable automated delivery</p>
+                  </div>
+                  <Switch
+                    checked={scheduleReportForm.is_active}
+                    onCheckedChange={(checked) => setScheduleReportForm({ ...scheduleReportForm, is_active: checked })}
+                  />
+                </div>
+              </div>
+              <DialogFooter className="mt-4">
+                <Button variant="outline" onClick={() => setEditingReportId(null)}>
+                  Cancel
+                </Button>
+                <Button onClick={() => handleScheduleReport(editingReportId)} disabled={isLoading}>
+                  {isLoading ? 'Saving...' : 'Save Schedule'}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
     </div>
   )

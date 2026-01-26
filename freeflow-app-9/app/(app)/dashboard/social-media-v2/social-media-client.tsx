@@ -422,6 +422,7 @@ export default function SocialMediaClient() {
   const [composerPlatforms, setComposerPlatforms] = useState<Platform[]>(['twitter', 'facebook'])
   const [composerContentType, setComposerContentType] = useState<ContentType>('text')
   const [composerHashtags, setComposerHashtags] = useState('')
+  const [editingPostId, setEditingPostId] = useState<string | null>(null)
 
   // Scheduler state
   const [schedulerDate, setSchedulerDate] = useState('')
@@ -572,10 +573,20 @@ export default function SocialMediaClient() {
 
   // Handlers with real functionality
   const handleCreatePost = () => {
+    setEditingPostId(null)
     setComposerContent('')
     setComposerPlatforms(['twitter', 'facebook'])
     setComposerContentType('text')
     setComposerHashtags('')
+    setIsComposerOpen(true)
+  }
+
+  const handleEditPost = (post: SocialPost) => {
+    setEditingPostId(post.id)
+    setComposerContent(post.content)
+    setComposerPlatforms(post.platforms)
+    setComposerContentType(post.contentType)
+    setComposerHashtags(post.hashtags.map(h => `#${h}`).join(' '))
     setIsComposerOpen(true)
   }
 
@@ -585,17 +596,27 @@ export default function SocialMediaClient() {
       return
     }
     try {
-      await createDbPost({
+      const postData = {
         content: composerContent,
         content_type: composerContentType as HookSocialPost['content_type'],
         platforms: composerPlatforms,
-        status: asDraft ? 'draft' : 'publishing',
+        status: asDraft ? 'draft' as const : 'publishing' as const,
         hashtags: composerHashtags.split(' ').filter(h => h.startsWith('#')).map(h => h.slice(1)),
-        mentions: [],
-        media_urls: [],
-      })
+        mentions: [] as string[],
+        media_urls: [] as string[],
+      }
+
+      if (editingPostId) {
+        // Update existing post
+        await handleUpdatePost(editingPostId, postData)
+        setEditingPostId(null)
+        toast.success('Post updated successfully!')
+      } else {
+        // Create new post
+        await createDbPost(postData)
+        toast.success(asDraft ? 'Post saved as draft!' : 'Post submitted for approval!')
+      }
       setIsComposerOpen(false)
-      toast.success(asDraft ? 'Post saved as draft!' : 'Post submitted for approval!')
     } catch (err) {
       // Error is handled by the hook
     }
@@ -643,17 +664,9 @@ export default function SocialMediaClient() {
     }
   }
 
-  const handleDeletePostDb = async (postId: string) => {
-    try {
-      await deleteDbPost(postId)
-      setSelectedPost(null)
-      toast.success('Post permanently deleted!')
-    } catch (err) {
-      toast.error('Failed to delete post')
-    }
-  }
+  // Note: handleDeletePost is defined below (near line 971) and uses deleteDbPost
 
-  const handleConnectAccountDb = async (platform: string) => {
+  const handleConnectAccount = async (platform: string) => {
     try {
       await connectAccount({
         platform: platform.toLowerCase() as HookSocialAccount['platform'],
@@ -667,7 +680,52 @@ export default function SocialMediaClient() {
     }
   }
 
-  const handleDisconnectAccountDb = async (accountId: string) => {
+  const handleUpdatePost = async (postId: string, updates: Partial<HookSocialPost>) => {
+    try {
+      await updateDbPost(postId, updates)
+      toast.success('Post updated successfully!')
+    } catch (err) {
+      toast.error('Failed to update post')
+    }
+  }
+
+  const handleRefreshMetrics = async () => {
+    try {
+      toast.loading('Refreshing metrics...')
+      // Refresh posts to get latest metrics
+      await fetchPosts()
+      // Also refresh stats calculation
+      const latestStats = getStats()
+      toast.dismiss()
+      toast.success(`Metrics refreshed! Total engagement: ${latestStats.totalEngagement.toLocaleString()}`)
+    } catch (err) {
+      toast.dismiss()
+      toast.error('Failed to refresh metrics')
+    }
+  }
+
+  const handleTogglePlatform = (platform: Platform) => {
+    if (composerPlatforms.includes(platform)) {
+      setComposerPlatforms(prev => prev.filter(p => p !== platform))
+    } else {
+      setComposerPlatforms(prev => [...prev, platform])
+    }
+  }
+
+  const handleAddHashtag = (hashtag: string) => {
+    const normalizedTag = hashtag.startsWith('#') ? hashtag : `#${hashtag}`
+    if (!composerHashtags.includes(normalizedTag)) {
+      setComposerHashtags(prev => prev ? `${prev} ${normalizedTag}` : normalizedTag)
+      toast.success(`Added ${normalizedTag}`)
+    }
+  }
+
+  const handleRemoveHashtag = (hashtag: string) => {
+    const normalizedTag = hashtag.startsWith('#') ? hashtag : `#${hashtag}`
+    setComposerHashtags(prev => prev.split(' ').filter(h => h !== normalizedTag).join(' '))
+  }
+
+  const handleDisconnectAccount = async (accountId: string) => {
     try {
       await disconnectAccount(accountId)
       toast.success('Account disconnected')
@@ -997,9 +1055,10 @@ export default function SocialMediaClient() {
     { id: '1', label: 'Create Post', icon: 'edit', action: () => handleCreatePost(), variant: 'default' as const },
     { id: '2', label: 'Schedule', icon: 'calendar', action: () => setIsSchedulerOpen(true), variant: 'default' as const },
     { id: '3', label: 'Analytics', icon: 'chart', action: () => setIsAnalyticsOpen(true), variant: 'outline' as const },
-    { id: '4', label: 'Email Campaigns', icon: <Mail className="w-4 h-4" />, action: () => router.push('/dashboard/email-marketing-v2'), variant: 'outline' as const },
-    { id: '5', label: 'View Analytics', icon: <BarChart className="w-4 h-4" />, action: () => router.push('/dashboard/analytics-v2?source=social'), variant: 'outline' as const },
-    { id: '6', label: 'SEO Tools', icon: <Search className="w-4 h-4" />, action: () => router.push('/dashboard/seo-v2'), variant: 'outline' as const },
+    { id: '4', label: 'Refresh Metrics', icon: <RefreshCw className="w-4 h-4" />, action: () => handleRefreshMetrics(), variant: 'outline' as const },
+    { id: '5', label: 'Email Campaigns', icon: <Mail className="w-4 h-4" />, action: () => router.push('/dashboard/email-marketing-v2'), variant: 'outline' as const },
+    { id: '6', label: 'View Analytics', icon: <BarChart className="w-4 h-4" />, action: () => router.push('/dashboard/analytics-v2?source=social'), variant: 'outline' as const },
+    { id: '7', label: 'SEO Tools', icon: <Search className="w-4 h-4" />, action: () => router.push('/dashboard/seo-v2'), variant: 'outline' as const },
   ]
 
   // Show error state
@@ -1236,10 +1295,14 @@ export default function SocialMediaClient() {
                   <CardContent>
                     <div className="space-y-3">
                       {hashtags.map(hashtag => (
-                        <div key={hashtag.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
+                        <div
+                          key={hashtag.id}
+                          className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer"
+                          onClick={() => handleAddHashtag(hashtag.tag)}
+                        >
                           <div>
                             <p className="font-medium text-violet-600">{hashtag.tag}</p>
-                            <p className="text-xs text-gray-500">{hashtag.posts} posts • {formatNumber(hashtag.reach)} reach</p>
+                            <p className="text-xs text-gray-500">{hashtag.posts} posts | {formatNumber(hashtag.reach)} reach</p>
                           </div>
                           <div className="flex items-center gap-1">
                             {hashtag.trend === 'up' && <TrendingUp className="w-4 h-4 text-green-500" />}
@@ -2440,6 +2503,17 @@ export default function SocialMediaClient() {
                     variant="outline"
                     className="w-full justify-start"
                     onClick={() => {
+                      handleEditPost(post)
+                      setIsPostOptionsOpen(false)
+                    }}
+                  >
+                    <PenTool className="w-4 h-4 mr-2" />
+                    Edit Post
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start"
+                    onClick={() => {
                       handleSchedulePost(post.id, post.content)
                       setIsPostOptionsOpen(false)
                     }}
@@ -2614,12 +2688,15 @@ export default function SocialMediaClient() {
         </Dialog>
 
         {/* Post Composer Dialog */}
-        <Dialog open={isComposerOpen} onOpenChange={setIsComposerOpen}>
+        <Dialog open={isComposerOpen} onOpenChange={(open) => {
+          setIsComposerOpen(open)
+          if (!open) setEditingPostId(null)
+        }}>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <PenTool className="w-5 h-5" />
-                Create New Post
+                {editingPostId ? 'Edit Post' : 'Create New Post'}
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
@@ -2663,13 +2740,7 @@ export default function SocialMediaClient() {
                       key={platform}
                       variant={composerPlatforms.includes(platform) ? 'default' : 'outline'}
                       className={`cursor-pointer ${composerPlatforms.includes(platform) ? getPlatformColor(platform) : ''}`}
-                      onClick={() => {
-                        if (composerPlatforms.includes(platform)) {
-                          setComposerPlatforms(prev => prev.filter(p => p !== platform))
-                        } else {
-                          setComposerPlatforms(prev => [...prev, platform])
-                        }
-                      }}
+                      onClick={() => handleTogglePlatform(platform)}
                     >
                       {platform}
                     </Badge>
@@ -2955,6 +3026,96 @@ export default function SocialMediaClient() {
                 ))}
               </div>
             </ScrollArea>
+          </DialogContent>
+        </Dialog>
+
+        {/* Account Details Dialog */}
+        <Dialog open={!!selectedAccount} onOpenChange={() => setSelectedAccount(null)}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Users className="w-5 h-5" />
+                Account Details
+              </DialogTitle>
+            </DialogHeader>
+            {selectedAccount && (
+              <div className="space-y-4">
+                <div className="flex items-center gap-4">
+                  <Avatar className="w-16 h-16">
+                    <AvatarFallback className={getPlatformColor(selectedAccount.platform)}>
+                      {selectedAccount.platform[0].toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold text-lg">{selectedAccount.displayName}</h3>
+                      {selectedAccount.isVerified && <CheckCircle2 className="w-5 h-5 text-blue-500" />}
+                    </div>
+                    <p className="text-gray-500">@{selectedAccount.username}</p>
+                    <Badge className={getPlatformColor(selectedAccount.platform)} variant="outline">
+                      {selectedAccount.platform}
+                    </Badge>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="text-center">
+                    <p className="text-2xl font-bold">{formatNumber(selectedAccount.followers)}</p>
+                    <p className="text-sm text-gray-500">Followers</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold">{formatNumber(selectedAccount.following)}</p>
+                    <p className="text-sm text-gray-500">Following</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold">{selectedAccount.posts}</p>
+                    <p className="text-sm text-gray-500">Posts</p>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <span className="text-sm text-gray-600 dark:text-gray-300">Status</span>
+                    <Badge className={selectedAccount.isConnected ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}>
+                      {selectedAccount.isConnected ? 'Connected' : 'Disconnected'}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <span className="text-sm text-gray-600 dark:text-gray-300">Engagement Rate</span>
+                    <span className="font-medium text-green-600">{selectedAccount.engagementRate}%</span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <span className="text-sm text-gray-600 dark:text-gray-300">Last Synced</span>
+                    <span className="text-sm text-gray-500">{formatTimeAgo(selectedAccount.lastSync)}</span>
+                  </div>
+                </div>
+
+                <div className="flex gap-2 pt-4 border-t">
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => {
+                      handleRefreshMetrics()
+                      toast.success(`Syncing ${selectedAccount.displayName}...`)
+                    }}
+                  >
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    Sync Now
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    className="flex-1"
+                    onClick={() => {
+                      handleDisconnectAccount(selectedAccount.id)
+                      setSelectedAccount(null)
+                    }}
+                  >
+                    <XCircle className="w-4 h-4 mr-2" />
+                    Disconnect
+                  </Button>
+                </div>
+              </div>
+            )}
           </DialogContent>
         </Dialog>
       </div>

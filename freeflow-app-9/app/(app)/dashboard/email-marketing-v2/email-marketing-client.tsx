@@ -415,6 +415,8 @@ export default function EmailMarketingClient() {
     loading: campaignsLoading,
     error: campaignsError,
     fetchCampaigns: refetchCampaigns,
+    createCampaign: hookCreateCampaign,
+    updateCampaign: hookUpdateCampaign,
     sendCampaign: hookSendCampaign,
     scheduleCampaign: hookScheduleCampaign,
     deleteCampaign: hookDeleteCampaign
@@ -422,7 +424,8 @@ export default function EmailMarketingClient() {
 
   const {
     subscribers: dbSubscribers,
-    loading: subscribersLoading
+    loading: subscribersLoading,
+    createSubscriber: hookCreateSubscriber
   } = useEmailSubscribers()
 
   const {
@@ -433,7 +436,8 @@ export default function EmailMarketingClient() {
 
   const {
     templates: dbTemplates,
-    loading: templatesLoading
+    loading: templatesLoading,
+    createTemplate: hookCreateTemplate
   } = useEmailTemplates()
 
   // Combined loading and error states
@@ -669,22 +673,355 @@ export default function EmailMarketingClient() {
     { label: 'Engaged Rate', value: `${stats.engagedRate.toFixed(1)}%`, change: 4.8, icon: Star, color: 'from-indigo-500 to-purple-600' }
   ]
 
-  // Handlers
-  const handleCreateCampaign = () => {
-    setShowCreateCampaignDialog(true)
-    toast.info('Create Campaign')
+  // Handlers - Wired to Supabase and API
+
+  // Campaign handlers
+  const handleCreateCampaign = async (campaignData: {
+    name: string
+    subject: string
+    previewText?: string
+    type?: CampaignType
+    templateId?: string
+    listId?: string
+    fromName?: string
+    fromEmail?: string
+    replyTo?: string
+    content_html?: string
+    content_text?: string
+  }) => {
+    try {
+      const result = await hookCreateCampaign({
+        title: campaignData.name,
+        subject: campaignData.subject,
+        preview_text: campaignData.previewText || '',
+        campaign_type: campaignData.type || 'newsletter',
+        template_id: campaignData.templateId || null,
+        list_ids: campaignData.listId ? [campaignData.listId] : [],
+        sender_name: campaignData.fromName || 'FreeFlow Team',
+        sender_email: campaignData.fromEmail || 'hello@freeflow.com',
+        reply_to: campaignData.replyTo || 'support@freeflow.com',
+        content_html: campaignData.content_html || null,
+        content_text: campaignData.content_text || null,
+        status: 'draft',
+        tags: [],
+        tracking_enabled: true,
+        ab_test_enabled: false,
+        ab_test_config: {}
+      })
+      setShowCreateCampaignDialog(false)
+      toast.success(`Campaign "${campaignData.name}" created successfully`)
+      return result
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to create campaign')
+      throw error
+    }
   }
 
-  const handleSendCampaign = (campaignName: string) => {
-    toast.success(`Sending campaign: is being sent...`)
+  const handleUpdateCampaign = async (campaignId: string, updates: {
+    name?: string
+    subject?: string
+    previewText?: string
+    type?: CampaignType
+    templateId?: string
+    listId?: string
+    fromName?: string
+    fromEmail?: string
+    replyTo?: string
+    content_html?: string
+    content_text?: string
+  }) => {
+    try {
+      const dbUpdates: Record<string, unknown> = {}
+      if (updates.name) dbUpdates.title = updates.name
+      if (updates.subject) dbUpdates.subject = updates.subject
+      if (updates.previewText !== undefined) dbUpdates.preview_text = updates.previewText
+      if (updates.type) dbUpdates.campaign_type = updates.type
+      if (updates.templateId) dbUpdates.template_id = updates.templateId
+      if (updates.listId) dbUpdates.list_ids = [updates.listId]
+      if (updates.fromName) dbUpdates.sender_name = updates.fromName
+      if (updates.fromEmail) dbUpdates.sender_email = updates.fromEmail
+      if (updates.replyTo) dbUpdates.reply_to = updates.replyTo
+      if (updates.content_html !== undefined) dbUpdates.content_html = updates.content_html
+      if (updates.content_text !== undefined) dbUpdates.content_text = updates.content_text
+
+      const result = await hookUpdateCampaign(campaignId, dbUpdates)
+      toast.success('Campaign updated successfully')
+      return result
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to update campaign')
+      throw error
+    }
   }
 
-  const handleScheduleCampaign = (campaignName: string) => {
-    toast.success(`Campaign scheduled: has been scheduled`)
+  const handleDeleteCampaign = async (campaignId: string, campaignName: string) => {
+    try {
+      if (!confirm(`Are you sure you want to delete "${campaignName}"? This action cannot be undone.`)) {
+        return
+      }
+      await hookDeleteCampaign(campaignId)
+      setSelectedCampaign(null)
+      toast.success(`Campaign "${campaignName}" deleted successfully`)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to delete campaign')
+      throw error
+    }
   }
 
-  const handleDuplicateCampaign = (campaignName: string) => {
-    toast.success(`Campaign duplicated: created`)
+  const handleSendCampaign = async (campaignId: string, campaignName: string) => {
+    try {
+      if (!confirm(`Are you sure you want to send "${campaignName}" now? This will send to all recipients in the selected lists.`)) {
+        return
+      }
+      // Use API endpoint for sending (handles actual email delivery)
+      await apiHelpers.sendCampaign(campaignId)
+      // Also update local state via hook
+      await hookSendCampaign(campaignId)
+      toast.success(`Campaign "${campaignName}" is being sent to subscribers`)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to send campaign')
+      throw error
+    }
+  }
+
+  const handleScheduleCampaign = async (campaignId: string, campaignName: string, scheduledAt: string) => {
+    try {
+      if (!scheduledAt) {
+        toast.error('Please select a date and time to schedule the campaign')
+        return
+      }
+      // Use API endpoint for scheduling
+      await apiHelpers.scheduleCampaign(campaignId, scheduledAt)
+      // Also update local state via hook
+      await hookScheduleCampaign(campaignId, scheduledAt)
+      setShowScheduleDialog(false)
+      toast.success(`Campaign "${campaignName}" scheduled for ${new Date(scheduledAt).toLocaleString()}`)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to schedule campaign')
+      throw error
+    }
+  }
+
+  const handleDuplicateCampaign = async (campaignId: string, campaignName: string) => {
+    try {
+      await apiHelpers.duplicateCampaign(campaignId)
+      await refetchCampaigns()
+      toast.success(`Campaign "${campaignName}" duplicated successfully`)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to duplicate campaign')
+      throw error
+    }
+  }
+
+  // Template handlers
+  const handleCreateTemplate = async (templateData: {
+    name: string
+    category: TemplateCategory
+    subject?: string
+    content_html?: string
+    content_text?: string
+    description?: string
+  }) => {
+    try {
+      const result = await hookCreateTemplate({
+        name: templateData.name,
+        category: templateData.category,
+        subject: templateData.subject || null,
+        content_html: templateData.content_html || null,
+        content_text: templateData.content_text || null,
+        description: templateData.description || null,
+        is_default: false,
+        variables: []
+      })
+      setShowCreateTemplateDialog(false)
+      toast.success(`Template "${templateData.name}" created successfully`)
+      return result
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to create template')
+      throw error
+    }
+  }
+
+  // Subscriber handlers
+  const handleAddSubscriber = async (subscriberData: {
+    email: string
+    firstName?: string
+    lastName?: string
+    listIds?: string[]
+    tags?: string[]
+    source?: string
+  }) => {
+    try {
+      const result = await hookCreateSubscriber({
+        email: subscriberData.email,
+        first_name: subscriberData.firstName || null,
+        last_name: subscriberData.lastName || null,
+        list_ids: subscriberData.listIds || [],
+        tags: subscriberData.tags || [],
+        source: subscriberData.source || 'manual',
+        status: 'subscribed'
+      })
+      toast.success(`Subscriber "${subscriberData.email}" added successfully`)
+      return result
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to add subscriber')
+      throw error
+    }
+  }
+
+  // List handlers
+  const handleCreateList = async (listData: {
+    name: string
+    description?: string
+    tags?: string[]
+    doubleOptin?: boolean
+  }) => {
+    try {
+      const result = await hookCreateList({
+        name: listData.name,
+        description: listData.description || null,
+        tags: listData.tags || [],
+        double_optin: listData.doubleOptin || false,
+        is_default: false,
+        welcome_email_enabled: false
+      })
+      setShowCreateListDialog(false)
+      toast.success(`List "${listData.name}" created successfully`)
+      return result
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to create list')
+      throw error
+    }
+  }
+
+  // Segment handlers
+  const handleCreateSegment = async (segmentData: {
+    name: string
+    listId: string
+    conditions: { field: string; operator: string; value: string }[]
+    conditionOperator?: 'all' | 'any'
+  }) => {
+    try {
+      const response = await fetch('/api/email-marketing/subscribers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create-segment',
+          name: segmentData.name,
+          type: 'dynamic',
+          conditions: segmentData.conditions,
+          condition_operator: segmentData.conditionOperator || 'all'
+        })
+      })
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to create segment')
+      }
+      const result = await response.json()
+      setShowCreateSegmentDialog(false)
+      toast.success(`Segment "${segmentData.name}" created successfully`)
+      return result.segment
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to create segment')
+      throw error
+    }
+  }
+
+  const handleUpdateSegment = async (segmentId: string, updates: {
+    name?: string
+    conditions?: { field: string; operator: string; value: string }[]
+    conditionOperator?: 'all' | 'any'
+  }) => {
+    try {
+      const response = await fetch('/api/email-marketing/subscribers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update-segment',
+          segment_id: segmentId,
+          updates: {
+            name: updates.name,
+            conditions: updates.conditions,
+            condition_operator: updates.conditionOperator
+          }
+        })
+      })
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to update segment')
+      }
+      toast.success('Segment updated successfully')
+      return (await response.json()).segment
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to update segment')
+      throw error
+    }
+  }
+
+  const handleDeleteSegment = async (segmentId: string, segmentName: string) => {
+    try {
+      if (!confirm(`Are you sure you want to delete segment "${segmentName}"?`)) {
+        return
+      }
+      const response = await fetch('/api/email-marketing/subscribers', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'delete-segment',
+          segment_id: segmentId
+        })
+      })
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to delete segment')
+      }
+      toast.success(`Segment "${segmentName}" deleted successfully`)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to delete segment')
+      throw error
+    }
+  }
+
+  // Automation handlers
+  const handleCreateAutomation = async (automationData: {
+    name: string
+    trigger: AutomationTrigger
+    steps: { type: 'email' | 'delay' | 'condition' | 'action'; config: Record<string, unknown> }[]
+  }) => {
+    try {
+      const response = await fetch('/api/email-marketing/automations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create',
+          name: automationData.name,
+          trigger: automationData.trigger,
+          steps: automationData.steps,
+          status: 'draft'
+        })
+      })
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to create automation')
+      }
+      const result = await response.json()
+      setShowCreateAutomationDialog(false)
+      toast.success(`Automation "${automationData.name}" created successfully`)
+      return result.automation
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to create automation')
+      throw error
+    }
+  }
+
+  const handleToggleAutomation = async (automationId: string, automationName: string, currentStatus: 'active' | 'paused' | 'draft') => {
+    try {
+      const newStatus = currentStatus === 'active' ? 'paused' : 'active'
+      await apiHelpers.updateAutomation(automationId, newStatus)
+      toast.success(`Automation "${automationName}" ${newStatus === 'active' ? 'activated' : 'paused'}`)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to update automation')
+      throw error
+    }
   }
 
   const handleExportSubscribers = async () => {
@@ -1679,38 +2016,34 @@ export default function EmailMarketingClient() {
                     </div>
                   )}
 
-                  <div className="flex gap-3">
+                  <div className="flex gap-3 flex-wrap">
                     {selectedCampaign.status === 'draft' && (
                       <>
                         <Button onClick={() => setShowCampaignEditorDialog(true)}><Edit className="w-4 h-4 mr-2" />Edit</Button>
                         <Button variant="outline" onClick={() => setShowScheduleDialog(true)}><Clock className="w-4 h-4 mr-2" />Schedule</Button>
                         <Button className="bg-gradient-to-r from-rose-500 to-pink-600" onClick={() => {
-                          if (confirm(`Are you sure you want to send "${selectedCampaign.name}" now?`)) {
-                            toast.promise(
-                              apiHelpers.sendCampaign(selectedCampaign.id),
-                              {
-                                loading: `Sending "${selectedCampaign.name}" to subscribers...`,
-                                success: 'Campaign sent successfully! Monitor delivery in real-time',
-                                error: 'Failed to send campaign'
-                              }
-                            )
-                          }
+                          handleSendCampaign(selectedCampaign.id, selectedCampaign.name)
                         }}><Send className="w-4 h-4 mr-2" />Send Now</Button>
+                        <Button variant="outline" className="text-red-600 hover:text-red-700 hover:bg-red-50" onClick={() => {
+                          handleDeleteCampaign(selectedCampaign.id, selectedCampaign.name)
+                        }}><XCircle className="w-4 h-4 mr-2" />Delete</Button>
                       </>
                     )}
                     {selectedCampaign.status === 'sent' && (
                       <>
                         <Button variant="outline" onClick={() => {
-                          toast.promise(
-                            apiHelpers.duplicateCampaign(selectedCampaign.id),
-                            {
-                              loading: `Duplicating "${selectedCampaign.name}"...`,
-                              success: 'Campaign duplicated! Edit and send your copy',
-                              error: 'Failed to duplicate campaign'
-                            }
-                          )
+                          handleDuplicateCampaign(selectedCampaign.id, selectedCampaign.name)
                         }}><Copy className="w-4 h-4 mr-2" />Duplicate</Button>
                         <Button variant="outline" onClick={() => setShowReportDialog(true)}><BarChart3 className="w-4 h-4 mr-2" />Full Report</Button>
+                      </>
+                    )}
+                    {selectedCampaign.status === 'scheduled' && (
+                      <>
+                        <Button variant="outline" onClick={() => setShowCampaignEditorDialog(true)}><Edit className="w-4 h-4 mr-2" />Edit</Button>
+                        <Button variant="outline" onClick={() => setShowScheduleDialog(true)}><Clock className="w-4 h-4 mr-2" />Reschedule</Button>
+                        <Button className="bg-gradient-to-r from-rose-500 to-pink-600" onClick={() => {
+                          handleSendCampaign(selectedCampaign.id, selectedCampaign.name)
+                        }}><Send className="w-4 h-4 mr-2" />Send Now</Button>
                       </>
                     )}
                   </div>
@@ -1888,6 +2221,365 @@ export default function EmailMarketingClient() {
                 </div>
               </div>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Campaign Dialog */}
+        <Dialog open={showCreateCampaignDialog} onOpenChange={setShowCreateCampaignDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Create New Campaign</DialogTitle>
+              <DialogDescription>Set up a new email campaign to send to your subscribers.</DialogDescription>
+            </DialogHeader>
+            <form onSubmit={async (e) => {
+              e.preventDefault()
+              const formData = new FormData(e.currentTarget)
+              await handleCreateCampaign({
+                name: formData.get('name') as string,
+                subject: formData.get('subject') as string,
+                previewText: formData.get('previewText') as string,
+                type: formData.get('type') as CampaignType || 'newsletter',
+                listId: formData.get('listId') as string,
+                fromName: formData.get('fromName') as string,
+                fromEmail: formData.get('fromEmail') as string
+              })
+            }} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium">Campaign Name *</label>
+                  <Input name="name" placeholder="Summer Newsletter" required className="mt-1" />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Campaign Type</label>
+                  <select name="type" className="mt-1 w-full h-10 px-3 rounded-md border border-input bg-background">
+                    <option value="newsletter">Newsletter</option>
+                    <option value="promotional">Promotional</option>
+                    <option value="announcement">Announcement</option>
+                    <option value="welcome">Welcome</option>
+                    <option value="reengagement">Re-engagement</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Email Subject *</label>
+                <Input name="subject" placeholder="Your weekly update is here!" required className="mt-1" />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Preview Text</label>
+                <Input name="previewText" placeholder="A brief preview of your email content..." className="mt-1" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium">From Name</label>
+                  <Input name="fromName" placeholder="FreeFlow Team" defaultValue="FreeFlow Team" className="mt-1" />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">From Email</label>
+                  <Input name="fromEmail" type="email" placeholder="hello@freeflow.com" defaultValue="hello@freeflow.com" className="mt-1" />
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Subscriber List</label>
+                <select name="listId" className="mt-1 w-full h-10 px-3 rounded-md border border-input bg-background">
+                  <option value="">Select a list...</option>
+                  {lists.map(list => (
+                    <option key={list.id} value={list.id}>{list.name} ({list.subscriberCount} subscribers)</option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button type="button" variant="outline" onClick={() => setShowCreateCampaignDialog(false)}>Cancel</Button>
+                <Button type="submit" className="bg-gradient-to-r from-rose-500 to-pink-600">Create Campaign</Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create List Dialog */}
+        <Dialog open={showCreateListDialog} onOpenChange={setShowCreateListDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Create New List</DialogTitle>
+              <DialogDescription>Create a subscriber list to organize your contacts.</DialogDescription>
+            </DialogHeader>
+            <form onSubmit={async (e) => {
+              e.preventDefault()
+              const formData = new FormData(e.currentTarget)
+              await handleCreateList({
+                name: formData.get('name') as string,
+                description: formData.get('description') as string,
+                doubleOptin: formData.get('doubleOptin') === 'true'
+              })
+            }} className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">List Name *</label>
+                <Input name="name" placeholder="Newsletter Subscribers" required className="mt-1" />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Description</label>
+                <Input name="description" placeholder="Main newsletter subscribers" className="mt-1" />
+              </div>
+              <div className="flex items-center gap-2">
+                <input type="checkbox" name="doubleOptin" value="true" id="doubleOptin" className="rounded" />
+                <label htmlFor="doubleOptin" className="text-sm">Enable double opt-in confirmation</label>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button type="button" variant="outline" onClick={() => setShowCreateListDialog(false)}>Cancel</Button>
+                <Button type="submit" className="bg-gradient-to-r from-blue-500 to-indigo-600">Create List</Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Segment Dialog */}
+        <Dialog open={showCreateSegmentDialog} onOpenChange={setShowCreateSegmentDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Create Segment</DialogTitle>
+              <DialogDescription>Create a dynamic segment to target specific subscribers.</DialogDescription>
+            </DialogHeader>
+            <form onSubmit={async (e) => {
+              e.preventDefault()
+              const formData = new FormData(e.currentTarget)
+              await handleCreateSegment({
+                name: formData.get('name') as string,
+                listId: formData.get('listId') as string,
+                conditions: [{
+                  field: formData.get('field') as string,
+                  operator: formData.get('operator') as string,
+                  value: formData.get('value') as string
+                }],
+                conditionOperator: 'all'
+              })
+            }} className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Segment Name *</label>
+                <Input name="name" placeholder="Highly Engaged Subscribers" required className="mt-1" />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Base List</label>
+                <select name="listId" className="mt-1 w-full h-10 px-3 rounded-md border border-input bg-background">
+                  <option value="">All subscribers</option>
+                  {lists.map(list => (
+                    <option key={list.id} value={list.id}>{list.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg space-y-3">
+                <p className="text-sm font-medium">Condition</p>
+                <div className="grid grid-cols-3 gap-2">
+                  <select name="field" className="h-10 px-3 rounded-md border border-input bg-background text-sm">
+                    <option value="open_rate">Open Rate</option>
+                    <option value="click_rate">Click Rate</option>
+                    <option value="status">Status</option>
+                    <option value="tags">Tags</option>
+                    <option value="signup_date">Signup Date</option>
+                  </select>
+                  <select name="operator" className="h-10 px-3 rounded-md border border-input bg-background text-sm">
+                    <option value="greater_than">Greater than</option>
+                    <option value="less_than">Less than</option>
+                    <option value="equals">Equals</option>
+                    <option value="contains">Contains</option>
+                  </select>
+                  <Input name="value" placeholder="Value" className="h-10" />
+                </div>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button type="button" variant="outline" onClick={() => setShowCreateSegmentDialog(false)}>Cancel</Button>
+                <Button type="submit" className="bg-gradient-to-r from-purple-500 to-violet-600">Create Segment</Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Template Dialog */}
+        <Dialog open={showCreateTemplateDialog} onOpenChange={setShowCreateTemplateDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Create Email Template</DialogTitle>
+              <DialogDescription>Create a reusable email template for your campaigns.</DialogDescription>
+            </DialogHeader>
+            <form onSubmit={async (e) => {
+              e.preventDefault()
+              const formData = new FormData(e.currentTarget)
+              await handleCreateTemplate({
+                name: formData.get('name') as string,
+                category: formData.get('category') as TemplateCategory,
+                subject: formData.get('subject') as string,
+                description: formData.get('description') as string
+              })
+            }} className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Template Name *</label>
+                <Input name="name" placeholder="Weekly Newsletter Template" required className="mt-1" />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Category</label>
+                <select name="category" className="mt-1 w-full h-10 px-3 rounded-md border border-input bg-background">
+                  <option value="newsletter">Newsletter</option>
+                  <option value="promotional">Promotional</option>
+                  <option value="welcome">Welcome</option>
+                  <option value="transactional">Transactional</option>
+                  <option value="event">Event</option>
+                  <option value="holiday">Holiday</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Default Subject</label>
+                <Input name="subject" placeholder="Your weekly update" className="mt-1" />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Description</label>
+                <Input name="description" placeholder="Template for weekly newsletters" className="mt-1" />
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button type="button" variant="outline" onClick={() => setShowCreateTemplateDialog(false)}>Cancel</Button>
+                <Button type="submit" className="bg-gradient-to-r from-purple-500 to-pink-600">Create Template</Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Automation Dialog */}
+        <Dialog open={showCreateAutomationDialog} onOpenChange={setShowCreateAutomationDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Create Automation</DialogTitle>
+              <DialogDescription>Set up an automated email sequence triggered by user actions.</DialogDescription>
+            </DialogHeader>
+            <form onSubmit={async (e) => {
+              e.preventDefault()
+              const formData = new FormData(e.currentTarget)
+              await handleCreateAutomation({
+                name: formData.get('name') as string,
+                trigger: formData.get('trigger') as AutomationTrigger,
+                steps: [
+                  { type: 'email', config: { templateId: '', subject: 'Welcome!' } },
+                  { type: 'delay', config: { days: 1 } }
+                ]
+              })
+            }} className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Automation Name *</label>
+                <Input name="name" placeholder="Welcome Series" required className="mt-1" />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Trigger</label>
+                <select name="trigger" className="mt-1 w-full h-10 px-3 rounded-md border border-input bg-background">
+                  <option value="signup">New Subscriber Signup</option>
+                  <option value="purchase">Purchase Made</option>
+                  <option value="abandoned_cart">Abandoned Cart</option>
+                  <option value="birthday">Birthday</option>
+                  <option value="inactivity">Inactivity</option>
+                  <option value="tag_added">Tag Added</option>
+                  <option value="date_based">Date Based</option>
+                </select>
+              </div>
+              <div className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                <p className="text-sm text-gray-500">After creating, you can configure the automation steps in the editor.</p>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button type="button" variant="outline" onClick={() => setShowCreateAutomationDialog(false)}>Cancel</Button>
+                <Button type="submit" className="bg-gradient-to-r from-cyan-500 to-blue-600">Create Automation</Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
+
+        {/* Schedule Campaign Dialog */}
+        <Dialog open={showScheduleDialog} onOpenChange={setShowScheduleDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Schedule Campaign</DialogTitle>
+              <DialogDescription>Choose when to send {selectedCampaign?.name}</DialogDescription>
+            </DialogHeader>
+            <form onSubmit={async (e) => {
+              e.preventDefault()
+              const formData = new FormData(e.currentTarget)
+              const scheduledAt = formData.get('scheduledAt') as string
+              if (selectedCampaign) {
+                await handleScheduleCampaign(selectedCampaign.id, selectedCampaign.name, scheduledAt)
+              }
+            }} className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Schedule Date & Time *</label>
+                <Input
+                  name="scheduledAt"
+                  type="datetime-local"
+                  required
+                  className="mt-1"
+                  min={new Date().toISOString().slice(0, 16)}
+                />
+              </div>
+              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <p className="text-sm text-blue-700 dark:text-blue-300">
+                  The campaign will be sent at the selected time in your local timezone.
+                </p>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button type="button" variant="outline" onClick={() => setShowScheduleDialog(false)}>Cancel</Button>
+                <Button type="submit" className="bg-gradient-to-r from-blue-500 to-indigo-600">
+                  <Clock className="w-4 h-4 mr-2" />
+                  Schedule
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
+
+        {/* All Subscribers Dialog */}
+        <Dialog open={showAllSubscribersDialog} onOpenChange={setShowAllSubscribersDialog}>
+          <DialogContent className="max-w-4xl max-h-[80vh]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center justify-between">
+                <span>All Subscribers ({subscribers.length})</span>
+                <div className="flex gap-2">
+                  <Button size="sm" variant="outline" onClick={handleExportSubscribers}>
+                    <Download className="w-4 h-4 mr-2" />
+                    Export CSV
+                  </Button>
+                  <Button size="sm" onClick={() => {
+                    const email = prompt('Enter subscriber email:')
+                    if (email) {
+                      handleAddSubscriber({ email })
+                    }
+                  }}>
+                    <UserPlus className="w-4 h-4 mr-2" />
+                    Add Subscriber
+                  </Button>
+                </div>
+              </DialogTitle>
+            </DialogHeader>
+            <ScrollArea className="h-[60vh]">
+              <div className="space-y-2">
+                {subscribers.map((subscriber) => (
+                  <div
+                    key={subscriber.id}
+                    className="p-3 rounded-lg border hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer"
+                    onClick={() => {
+                      setShowAllSubscribersDialog(false)
+                      setSelectedSubscriber(subscriber)
+                    }}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="w-8 h-8">
+                          <AvatarFallback>{subscriber.firstName?.[0] || subscriber.email[0]}{subscriber.lastName?.[0] || ''}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-medium">{subscriber.firstName} {subscriber.lastName}</p>
+                          <p className="text-sm text-gray-500">{subscriber.email}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge className={getSubscriberStatusColor(subscriber.status)}>{subscriber.status}</Badge>
+                        <span className="text-sm text-gray-500">{subscriber.openRate}% opens</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
           </DialogContent>
         </Dialog>
       </div>

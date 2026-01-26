@@ -444,26 +444,268 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
     }
   }
 
-  // Run workflow handler
+  // Run workflow handler - executes the automation via API
   const handleRunAutomation = async (workflow: AutomationWorkflow) => {
+    try {
+      toast.loading(`Executing ${workflow.workflow_name}...`, { id: `run-${workflow.id}` })
+
+      const response = await fetch(`/api/kazi/automations/${workflow.id}/execute`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ input: {} })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Execution failed')
+      }
+
+      const result = await response.json()
+      toast.dismiss(`run-${workflow.id}`)
+
+      if (result.success) {
+        toast.success(`${workflow.workflow_name} executed successfully`, {
+          description: `Completed ${result.actions_completed} action(s) in ${result.duration_ms}ms`
+        })
+      } else {
+        toast.warning(`${workflow.workflow_name} completed with issues`, {
+          description: `${result.actions_completed} succeeded, ${result.actions_failed} failed`
+        })
+      }
+
+      fetchWorkflows()
+    } catch (err) {
+      toast.dismiss(`run-${workflow.id}`)
+      console.error('Error running workflow:', err)
+      toast.error('Failed to execute automation', {
+        description: err instanceof Error ? err.message : 'Unknown error'
+      })
+    }
+  }
+
+  // Test automation handler - runs a dry-run test of the automation
+  const handleTestAutomation = async (workflow: AutomationWorkflow) => {
+    try {
+      toast.loading(`Testing ${workflow.workflow_name}...`, { id: `test-${workflow.id}` })
+
+      const response = await fetch(`/api/kazi/automations/${workflow.id}/execute`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ input: {}, test_mode: true })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Test failed')
+      }
+
+      const result = await response.json()
+      toast.dismiss(`test-${workflow.id}`)
+
+      if (result.success) {
+        toast.success(`Test passed for ${workflow.workflow_name}`, {
+          description: `All ${result.actions_completed} action(s) validated successfully`
+        })
+      } else {
+        toast.error(`Test failed for ${workflow.workflow_name}`, {
+          description: result.error_message || `${result.actions_failed} action(s) failed validation`
+        })
+      }
+    } catch (err) {
+      toast.dismiss(`test-${workflow.id}`)
+      console.error('Error testing workflow:', err)
+      toast.error('Failed to test automation', {
+        description: err instanceof Error ? err.message : 'Unknown error'
+      })
+    }
+  }
+
+  // Update automation handler
+  const handleUpdateAutomation = async (
+    workflow: AutomationWorkflow,
+    updates: Partial<{
+      workflow_name: string
+      description: string
+      workflow_type: WorkflowType
+      trigger_type: string
+      trigger_config: Record<string, unknown>
+      steps: unknown[]
+      is_enabled: boolean
+      status: WorkflowStatus
+      schedule_config: Record<string, unknown>
+      is_scheduled: boolean
+      error_handling_strategy: string
+      max_retries: number
+      notify_on_success: boolean
+      notify_on_failure: boolean
+    }>
+  ) => {
     try {
       const { error } = await supabase
         .from('automations')
         .update({
-          status: 'running',
-          is_running: true,
-          last_execution_at: new Date().toISOString(),
+          ...updates,
           updated_at: new Date().toISOString(),
         })
         .eq('id', workflow.id)
 
       if (error) throw error
 
-      toast.success(`${workflow.name} is now executing`)
+      toast.success('Automation updated successfully')
       fetchWorkflows()
+      return true
     } catch (err) {
-      console.error('Error running workflow:', err)
-      toast.error('Failed to start automation')
+      console.error('Error updating workflow:', err)
+      toast.error('Failed to update automation')
+      return false
+    }
+  }
+
+  // Add trigger to automation
+  const handleAddTrigger = async (
+    workflow: AutomationWorkflow,
+    triggerType: string,
+    triggerConfig: Record<string, unknown> = {}
+  ) => {
+    try {
+      const { error } = await supabase
+        .from('automations')
+        .update({
+          trigger_type: triggerType,
+          trigger_config: triggerConfig,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', workflow.id)
+
+      if (error) throw error
+
+      toast.success(`Trigger "${triggerType}" added to ${workflow.workflow_name}`)
+      fetchWorkflows()
+      return true
+    } catch (err) {
+      console.error('Error adding trigger:', err)
+      toast.error('Failed to add trigger')
+      return false
+    }
+  }
+
+  // Add action to automation
+  const handleAddAction = async (
+    workflow: AutomationWorkflow,
+    actionType: string,
+    actionConfig: Record<string, unknown> = {}
+  ) => {
+    try {
+      const currentSteps = Array.isArray(workflow.steps) ? workflow.steps : []
+      const newStep = {
+        id: crypto.randomUUID(),
+        type: actionType,
+        config: actionConfig,
+        order: currentSteps.length
+      }
+
+      const updatedSteps = [...currentSteps, newStep]
+
+      const { error } = await supabase
+        .from('automations')
+        .update({
+          steps: updatedSteps,
+          step_count: updatedSteps.length,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', workflow.id)
+
+      if (error) throw error
+
+      toast.success(`Action "${actionType}" added to ${workflow.workflow_name}`)
+      fetchWorkflows()
+      return true
+    } catch (err) {
+      console.error('Error adding action:', err)
+      toast.error('Failed to add action')
+      return false
+    }
+  }
+
+  // Update schedule configuration
+  const handleUpdateSchedule = async (
+    workflow: AutomationWorkflow,
+    scheduleConfig: {
+      enabled: boolean
+      cron?: string
+      interval?: string
+      timezone?: string
+      start_date?: string
+      end_date?: string
+    }
+  ) => {
+    try {
+      const { error } = await supabase
+        .from('automations')
+        .update({
+          is_scheduled: scheduleConfig.enabled,
+          schedule_config: scheduleConfig,
+          trigger_type: scheduleConfig.enabled ? 'cron' : workflow.trigger_type,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', workflow.id)
+
+      if (error) throw error
+
+      toast.success(scheduleConfig.enabled
+        ? `Schedule enabled for ${workflow.workflow_name}`
+        : `Schedule disabled for ${workflow.workflow_name}`
+      )
+      fetchWorkflows()
+      return true
+    } catch (err) {
+      console.error('Error updating schedule:', err)
+      toast.error('Failed to update schedule')
+      return false
+    }
+  }
+
+  // Add condition to automation steps
+  const handleAddCondition = async (
+    workflow: AutomationWorkflow,
+    condition: {
+      field: string
+      operator: 'equals' | 'not-equals' | 'contains' | 'greater' | 'less' | 'exists'
+      value: unknown
+      then_action?: string
+      else_action?: string
+    }
+  ) => {
+    try {
+      const currentSteps = Array.isArray(workflow.steps) ? workflow.steps : []
+      const conditionStep = {
+        id: crypto.randomUUID(),
+        type: 'condition',
+        config: condition,
+        order: currentSteps.length
+      }
+
+      const updatedSteps = [...currentSteps, conditionStep]
+
+      const { error } = await supabase
+        .from('automations')
+        .update({
+          steps: updatedSteps,
+          step_count: updatedSteps.length,
+          workflow_type: 'conditional',
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', workflow.id)
+
+      if (error) throw error
+
+      toast.success(`Condition added to ${workflow.workflow_name}`)
+      fetchWorkflows()
+      return true
+    } catch (err) {
+      console.error('Error adding condition:', err)
+      toast.error('Failed to add condition')
+      return false
     }
   }
 
@@ -482,7 +724,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
 
       if (error) throw error
 
-      toast.success(`${workflow.name} is now ${newStatus}`)
+      toast.success(`${workflow.workflow_name} is now ${newStatus}`)
       fetchWorkflows()
     } catch (err) {
       console.error('Error toggling workflow:', err)
@@ -534,7 +776,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
 
       if (error) throw error
 
-      toast.success(`Automation duplicated: "${workflow.name} (Copy)" created`)
+      toast.success(`Automation duplicated: "${workflow.workflow_name} (Copy)" created`)
       fetchWorkflows()
     } catch (err) {
       console.error('Error duplicating workflow:', err)
@@ -1404,6 +1646,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                         variant="ghost"
                         size="sm"
                         className="text-green-600"
+                        title="Run automation"
                         onClick={(e) => { e.stopPropagation(); handleRunAutomation(workflow) }}
                       >
                         <Play className="h-4 w-4" />
@@ -1411,13 +1654,24 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={(e) => { e.stopPropagation(); handleToggleAutomation(workflow) }}
+                        className="text-amber-600"
+                        title="Test automation"
+                        onClick={(e) => { e.stopPropagation(); handleTestAutomation(workflow) }}
                       >
-                        <Edit2 className="h-4 w-4" />
+                        <Activity className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="sm"
+                        title={workflow.status === 'active' ? 'Pause automation' : 'Activate automation'}
+                        onClick={(e) => { e.stopPropagation(); handleToggleAutomation(workflow) }}
+                      >
+                        {workflow.status === 'active' ? <PauseCircle className="h-4 w-4" /> : <PlayCircle className="h-4 w-4" />}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        title="Duplicate automation"
                         onClick={(e) => { e.stopPropagation(); handleDuplicateAutomation(workflow) }}
                       >
                         <Copy className="h-4 w-4" />
@@ -1426,6 +1680,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                         variant="ghost"
                         size="sm"
                         className="text-red-600"
+                        title="Delete automation"
                         onClick={(e) => { e.stopPropagation(); handleDeleteAutomation(workflow) }}
                       >
                         <Trash2 className="h-4 w-4" />
@@ -2535,6 +2790,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                 <Tabs defaultValue="overview">
                   <TabsList>
                     <TabsTrigger value="overview">Overview</TabsTrigger>
+                    <TabsTrigger value="builder">Builder</TabsTrigger>
                     <TabsTrigger value="executions">Executions</TabsTrigger>
                     <TabsTrigger value="settings">Settings</TabsTrigger>
                     <TabsTrigger value="versions">Versions</TabsTrigger>
@@ -2573,6 +2829,128 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                       </div>
                     </div>
                   </TabsContent>
+                  <TabsContent value="builder" className="mt-4 space-y-4">
+                    {/* Trigger Section */}
+                    <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800">
+                      <h4 className="font-medium mb-3 flex items-center gap-2">
+                        <Zap className="h-4 w-4 text-amber-600" />
+                        Trigger: {selectedWorkflow.trigger_type || 'Not set'}
+                      </h4>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                        {nodeTypes.filter(n => n.category === 'triggers').map(trigger => (
+                          <Button
+                            key={trigger.id}
+                            variant={selectedWorkflow.trigger_type === trigger.id ? 'default' : 'outline'}
+                            size="sm"
+                            className="justify-start"
+                            onClick={() => handleAddTrigger(selectedWorkflow, trigger.id, {})}
+                          >
+                            {trigger.icon}
+                            <span className="ml-2 text-xs">{trigger.name}</span>
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Actions Section */}
+                    <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                      <h4 className="font-medium mb-3 flex items-center gap-2">
+                        <Play className="h-4 w-4 text-blue-600" />
+                        Actions ({selectedWorkflow.step_count} configured)
+                      </h4>
+                      <div className="space-y-2 mb-4">
+                        {Array.isArray(selectedWorkflow.steps) && selectedWorkflow.steps.map((step: { id: string; type: string; config: Record<string, unknown> }, index: number) => (
+                          <div key={step.id || index} className="flex items-center justify-between p-2 bg-white dark:bg-gray-800 rounded border">
+                            <span className="text-sm flex items-center gap-2">
+                              <Badge variant="outline">{index + 1}</Badge>
+                              {step.type}
+                            </span>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-red-600"
+                              onClick={async () => {
+                                const updatedSteps = selectedWorkflow.steps.filter((_: unknown, i: number) => i !== index)
+                                await handleUpdateAutomation(selectedWorkflow, {
+                                  steps: updatedSteps,
+                                })
+                              }}
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                        {nodeTypes.filter(n => n.category === 'actions').slice(0, 4).map(action => (
+                          <Button
+                            key={action.id}
+                            variant="outline"
+                            size="sm"
+                            className="justify-start"
+                            onClick={() => handleAddAction(selectedWorkflow, action.id, {})}
+                          >
+                            {action.icon}
+                            <span className="ml-2 text-xs">{action.name}</span>
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Conditions Section */}
+                    <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                      <h4 className="font-medium mb-3 flex items-center gap-2">
+                        <GitBranch className="h-4 w-4 text-purple-600" />
+                        Flow Control
+                      </h4>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                        {nodeTypes.filter(n => n.category === 'flow').map(flow => (
+                          <Button
+                            key={flow.id}
+                            variant="outline"
+                            size="sm"
+                            className="justify-start"
+                            onClick={() => {
+                              if (flow.id === 'if') {
+                                handleAddCondition(selectedWorkflow, {
+                                  field: 'status',
+                                  operator: 'equals',
+                                  value: 'active'
+                                })
+                              } else {
+                                handleAddAction(selectedWorkflow, flow.id, {})
+                              }
+                            }}
+                          >
+                            {flow.icon}
+                            <span className="ml-2 text-xs">{flow.name}</span>
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Integrations Section */}
+                    <div className="p-4 bg-cyan-50 dark:bg-cyan-900/20 rounded-lg border border-cyan-200 dark:border-cyan-800">
+                      <h4 className="font-medium mb-3 flex items-center gap-2">
+                        <Network className="h-4 w-4 text-cyan-600" />
+                        Integrations
+                      </h4>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                        {nodeTypes.filter(n => n.category === 'integrations').slice(0, 6).map(integration => (
+                          <Button
+                            key={integration.id}
+                            variant="outline"
+                            size="sm"
+                            className="justify-start"
+                            onClick={() => handleAddAction(selectedWorkflow, integration.id, {})}
+                          >
+                            {integration.icon}
+                            <span className="ml-2 text-xs">{integration.name}</span>
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  </TabsContent>
                   <TabsContent value="executions" className="mt-4 space-y-2">
                     {[].slice(0, 5).map(exec => (
                       <div key={exec.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
@@ -2596,7 +2974,15 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                           <span className="font-medium">Enable Scenario</span>
                           <p className="text-sm text-gray-500">Turn on/off this automation</p>
                         </div>
-                        <Switch defaultChecked={selectedWorkflow.is_enabled} />
+                        <Switch
+                          checked={selectedWorkflow.is_enabled}
+                          onCheckedChange={(checked) => {
+                            handleUpdateAutomation(selectedWorkflow, {
+                              is_enabled: checked,
+                              status: checked ? 'active' : 'paused'
+                            })
+                          }}
+                        />
                       </div>
                     </div>
                     <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
@@ -2605,8 +2991,61 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                           <span className="font-medium">Error Notifications</span>
                           <p className="text-sm text-gray-500">Get notified when scenario fails</p>
                         </div>
-                        <Switch defaultChecked />
+                        <Switch
+                          defaultChecked={selectedWorkflow.notify_on_failure}
+                          onCheckedChange={(checked) => {
+                            handleUpdateAutomation(selectedWorkflow, { notify_on_failure: checked })
+                          }}
+                        />
                       </div>
+                    </div>
+                    <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <span className="font-medium">Success Notifications</span>
+                          <p className="text-sm text-gray-500">Get notified when scenario succeeds</p>
+                        </div>
+                        <Switch
+                          defaultChecked={selectedWorkflow.notify_on_success}
+                          onCheckedChange={(checked) => {
+                            handleUpdateAutomation(selectedWorkflow, { notify_on_success: checked })
+                          }}
+                        />
+                      </div>
+                    </div>
+                    <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <span className="font-medium">Scheduled Execution</span>
+                          <p className="text-sm text-gray-500">Run this automation on a schedule</p>
+                        </div>
+                        <Switch
+                          checked={selectedWorkflow.is_scheduled}
+                          onCheckedChange={(checked) => {
+                            handleUpdateSchedule(selectedWorkflow, {
+                              enabled: checked,
+                              interval: 'daily',
+                              timezone: 'UTC'
+                            })
+                          }}
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <Button
+                        variant="outline"
+                        onClick={() => handleTestAutomation(selectedWorkflow)}
+                      >
+                        <Activity className="h-4 w-4 mr-2" />
+                        Test Automation
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => handleRunAutomation(selectedWorkflow)}
+                      >
+                        <Play className="h-4 w-4 mr-2" />
+                        Run Now
+                      </Button>
                     </div>
                   </TabsContent>
                   <TabsContent value="versions" className="mt-4 space-y-2">
