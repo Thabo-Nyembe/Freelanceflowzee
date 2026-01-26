@@ -1,6 +1,6 @@
 'use client'
 
-
+import Link from 'next/link'
 import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
 import { useAIDesigns, AIDesign as DBAIDesign } from '@/lib/hooks/use-ai-designs'
@@ -46,7 +46,9 @@ import {
   Ratio,
   SlidersHorizontal,
   Bell,
-  HelpCircle
+  HelpCircle,
+  Video,
+  ImageIcon
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -491,6 +493,27 @@ export default function AIDesignClient() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            {/* AI Tools Navigation */}
+            <div className="flex items-center gap-2">
+              <Link href="/dashboard/ai-create-v2">
+                <Button variant="outline" size="sm" className="gap-2">
+                  <Sparkles className="w-4 h-4" />
+                  <span className="hidden md:inline">Create with AI</span>
+                </Button>
+              </Link>
+              <Link href="/dashboard/ai-video-v2">
+                <Button variant="outline" size="sm" className="gap-2">
+                  <Video className="w-4 h-4" />
+                  <span className="hidden md:inline">Generate Video</span>
+                </Button>
+              </Link>
+              <Link href="/dashboard/gallery-v2">
+                <Button variant="outline" size="sm" className="gap-2">
+                  <ImageIcon className="w-4 h-4" />
+                  <span className="hidden md:inline">Save to Gallery</span>
+                </Button>
+              </Link>
+            </div>
             <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-r from-fuchsia-100 to-purple-100 dark:from-fuchsia-900/30 dark:to-purple-900/30">
               <Zap className="w-4 h-4 text-fuchsia-600" />
               <span className="text-sm font-medium text-fuchsia-700 dark:text-fuchsia-400">

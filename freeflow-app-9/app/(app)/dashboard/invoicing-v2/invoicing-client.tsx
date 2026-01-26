@@ -5,6 +5,8 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { toast } from 'sonner'
 import { useInvoices, type Invoice as DbInvoice } from '@/lib/hooks/use-invoices'
+import { useTeam } from '@/lib/hooks/use-team'
+import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
 import { Loader2 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -336,6 +338,12 @@ export default function InvoicingClient() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const clientIdFilter = searchParams.get('client')
+
+  // ============================================================================
+  // TEAM & ACTIVITY DATA HOOKS
+  // ============================================================================
+  const { members: teamMembers } = useTeam()
+  const { logs: activityLogs } = useActivityLogs()
 
   // ============================================================================
   // SUPABASE DATA HOOK
@@ -2143,7 +2151,12 @@ export default function InvoicingClient() {
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={[]}
+              collaborators={teamMembers.map(member => ({
+                id: member.id,
+                name: member.name,
+                avatar: member.avatar_url || undefined,
+                status: member.status === 'active' ? 'online' as const : member.status === 'on_leave' ? 'away' as const : 'offline' as const
+              }))}
               maxVisible={4}
             />
             <PredictiveAnalytics
@@ -2155,7 +2168,15 @@ export default function InvoicingClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={[]}
+            activities={activityLogs.slice(0, 10).map(log => ({
+              id: log.id,
+              type: log.activity_type === 'create' ? 'create' as const : log.activity_type === 'update' ? 'update' as const : log.activity_type === 'delete' ? 'delete' as const : 'update' as const,
+              title: log.action,
+              description: log.resource_name || undefined,
+              user: { name: log.user_name || 'System', avatar: undefined },
+              timestamp: log.created_at,
+              isUnread: log.status === 'pending'
+            }))}
             title="Invoicing Activity"
             maxItems={5}
           />

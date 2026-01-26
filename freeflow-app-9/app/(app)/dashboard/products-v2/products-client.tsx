@@ -1,5 +1,6 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -43,7 +44,9 @@ import {
   ToggleRight,
   ArrowUpRight,
   Target,
-  Activity
+  Activity,
+  Warehouse,
+  ShoppingCart,
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -167,6 +170,7 @@ const emptyActivities: { id: string; user: string; action: string; target: strin
 // Quick actions are defined inside component to access state setters
 
 export default function ProductsClient({ initialProducts }: ProductsClientProps) {
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState('catalog')
   const [selectedCategory, setSelectedCategory] = useState<ProductStatus | 'all'>('all')
   const [searchQuery, setSearchQuery] = useState('')
@@ -1847,7 +1851,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 pt-4 border-t">
+                <div className="flex flex-wrap items-center gap-2 pt-4 border-t">
                   <Button className="flex-1 bg-violet-600 hover:bg-violet-700" onClick={() => setShowEditProduct(true)}>
                     <Edit className="w-4 h-4 mr-2" />
                     Edit Product
@@ -1858,6 +1862,24 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                   </Button>
                   <Button variant="outline" onClick={() => { if (selectedProduct) handleArchiveProduct(selectedProduct) }}>
                     <Archive className="w-4 h-4" />
+                  </Button>
+                </div>
+                <div className="flex items-center gap-2 pt-2">
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => { if (selectedProduct) router.push(`/dashboard/inventory-v2?product=${selectedProduct.id}`); }}
+                  >
+                    <Warehouse className="w-4 h-4 mr-2" />
+                    Check Stock
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => { if (selectedProduct) router.push(`/dashboard/orders-v2?product=${selectedProduct.id}`); }}
+                  >
+                    <ShoppingCart className="w-4 h-4 mr-2" />
+                    View Orders
                   </Button>
                 </div>
               </div>

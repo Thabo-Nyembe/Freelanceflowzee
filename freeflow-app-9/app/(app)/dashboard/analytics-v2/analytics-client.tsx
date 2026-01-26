@@ -1,5 +1,6 @@
 'use client'
 import { useState, useMemo, useEffect, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
@@ -91,7 +92,7 @@ import {
   Calendar, Filter, Layers, Zap, Bell, ChevronRight, MoreVertical,
   AreaChart, Gauge, Globe, Smartphone, Monitor, Search, Play, Pause,
   FileText, Layout, Share2, Trash2, Copy, Edit3, Database, GitBranch, Workflow, Mail,
-  Loader2
+  Loader2, ExternalLink
 } from 'lucide-react'
 
 // Lazy-loaded Competitive Upgrade Components for code splitting
@@ -220,6 +221,9 @@ interface Dashboard {
 // (useAnalyticsDailyMetrics, useAnalyticsRealtimeMetrics, useAnalyticsInsights, etc.)
 
 export default function AnalyticsClient() {
+  // Initialize router for navigation
+  const router = useRouter()
+
   // Define adapter variables locally (removed mock data imports)
   const companyInfo = {
     name: 'FreeFlow',
@@ -1559,6 +1563,52 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
     return status === 'up' ? 'text-emerald-600' : status === 'down' ? 'text-red-600' : 'text-gray-600'
   }
 
+  // Navigation helpers for connecting to other dashboards
+  const getSourceDashboardPath = (category: string): string => {
+    const categoryMap: Record<string, string> = {
+      'Revenue': '/dashboard/financial-v2',
+      'revenue': '/dashboard/financial-v2',
+      'Financial': '/dashboard/financial-v2',
+      'financial': '/dashboard/financial-v2',
+      'Customers': '/dashboard/customers-v2',
+      'customers': '/dashboard/customers-v2',
+      'Clients': '/dashboard/customers-v2',
+      'clients': '/dashboard/customers-v2',
+      'Users': '/dashboard/customers-v2',
+      'users': '/dashboard/customers-v2',
+      'Sales': '/dashboard/sales-v2',
+      'sales': '/dashboard/sales-v2',
+      'Engagement': '/dashboard/analytics-v2',
+      'engagement': '/dashboard/analytics-v2',
+      'Projects': '/dashboard/projects-v2',
+      'projects': '/dashboard/projects-v2',
+      'Tasks': '/dashboard/tasks-v2',
+      'tasks': '/dashboard/tasks-v2',
+    }
+    return categoryMap[category] || '/dashboard/analytics-v2'
+  }
+
+  const navigateToSourceDashboard = (category: string) => {
+    const path = getSourceDashboardPath(category)
+    router.push(path)
+    toast.success(`Navigating to ${category} dashboard`)
+  }
+
+  const navigateToReporting = (metricId?: string) => {
+    if (metricId) {
+      router.push(`/dashboard/reporting-v2?source=analytics&metric=${metricId}`)
+      toast.success('Opening metric in Reports')
+    } else {
+      router.push('/dashboard/reporting-v2')
+      toast.success('Opening Reports')
+    }
+  }
+
+  const navigateToFullReport = () => {
+    router.push('/dashboard/reporting-v2')
+    toast.success('Viewing full report')
+  }
+
   // Key metrics for header cards - Using real Supabase data with fallbacks
   const metrics = companyInfo?.metrics || {}
 
@@ -2236,6 +2286,10 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
                     <Download className="h-4 w-4 mr-2" />
                     Export
                   </Button>
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={navigateToFullReport}>
+                    <FileText className="h-4 w-4 mr-2" />
+                    View Full Report
+                  </Button>
                 </div>
               </div>
             </div>
@@ -2349,15 +2403,20 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
                       showLegend={false}
                     />
                   )}
-                  <div className="flex items-center justify-center gap-6 mt-4">
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full bg-indigo-500"></div>
-                      <span className="text-sm text-gray-600">Visitors</span>
+                  <div className="flex items-center justify-between mt-4">
+                    <div className="flex items-center gap-6">
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full bg-indigo-500"></div>
+                        <span className="text-sm text-gray-600">Visitors</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full bg-purple-500"></div>
+                        <span className="text-sm text-gray-600">Page Views</span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full bg-purple-500"></div>
-                      <span className="text-sm text-gray-600">Page Views</span>
-                    </div>
+                    <Button variant="link" size="sm" className="text-indigo-600" onClick={navigateToFullReport}>
+                      View Full Report <ChevronRight className="h-4 w-4" />
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -2481,10 +2540,16 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
                     <p className="text-blue-100">{filteredMetrics.length} active metrics tracked</p>
                   </div>
                 </div>
-                <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={() => setShowMetricCreator(true)}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Metric
-                </Button>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={() => setShowMetricCreator(true)}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Metric
+                  </Button>
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={navigateToFullReport}>
+                    <FileText className="h-4 w-4 mr-2" />
+                    View Full Report
+                  </Button>
+                </div>
               </div>
             </div>
 
@@ -2547,7 +2612,7 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
                   <MoreVertical className="h-3 w-3" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-48">
+                          <DropdownMenuContent align="end" className="w-52">
                             <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleMetricAction('view', metric) }}>
                               <Eye className="h-4 w-4 mr-2" />
                               View Details
@@ -2563,6 +2628,15 @@ Segments: ${selectedFilters.segments.join(', ') || 'All'}`
                             <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleMetricAction('export', metric) }}>
                               <Download className="h-4 w-4 mr-2" />
                               Export Data
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigateToReporting(metric.id) }}>
+                              <FileText className="h-4 w-4 mr-2" />
+                              Export to Reports
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); navigateToSourceDashboard(metric.category) }}>
+                              <ExternalLink className="h-4 w-4 mr-2" />
+                              View Source Data
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem

@@ -2,7 +2,7 @@
 
 
 import React, { useState, useMemo, useEffect, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
 
 // Auth hooks
@@ -31,6 +31,7 @@ import { useCollaborationChannels } from '@/lib/hooks/use-collaboration-extended
 import { useWorkflows } from '@/lib/hooks/use-workflows'
 import { useIntegrationMarketplace } from '@/lib/hooks/use-integration-extended'
 import { useNotificationQueue } from '@/lib/hooks/use-notification-extended'
+import supabase from '@/lib/supabase'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -392,6 +393,8 @@ interface DbTeamMember {
 
 export default function TeamHubClient() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const projectIdFilter = searchParams.get('project')
 
   // Define adapter variables locally (removed mock data imports)
   const teamHubAIInsights: any[] = []
@@ -900,9 +903,12 @@ export default function TeamHubClient() {
         member.jobTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
         member.department.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesStatus = statusFilter === 'all' || member.status === statusFilter
-      return matchesSearch && matchesStatus
+      // Project filter: when projectIdFilter is set, show members with assigned projects
+      // Note: For full project-specific filtering, backend would need to provide project assignments per member
+      const matchesProject = !projectIdFilter || member.projectsCount > 0
+      return matchesSearch && matchesStatus && matchesProject
     })
-  }, [members, searchQuery, statusFilter])
+  }, [members, searchQuery, statusFilter, projectIdFilter])
 
   // Helper functions
   const getStatusColor = (status: MemberStatus) => {
@@ -1146,6 +1152,36 @@ export default function TeamHubClient() {
           </div>
         </div>
 
+        {/* Project Filter Banner */}
+        {projectIdFilter && (
+          <div className="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-950/40 dark:to-emerald-950/40 border border-green-200 dark:border-green-800">
+            <div className="flex items-center gap-2">
+              <Folder className="h-5 w-5 text-green-600 dark:text-green-400" />
+              <span className="text-sm font-medium text-green-700 dark:text-green-300">
+                Showing team for project: <span className="font-bold">{projectIdFilter}</span>
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-green-300 hover:bg-green-200 dark:border-green-700 dark:hover:bg-green-900"
+                onClick={() => router.push(`/dashboard/projects-hub-v2`)}
+              >
+                <Folder className="h-4 w-4 mr-2" />
+                Back to Projects
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => router.push('/dashboard/team-hub-v2')}
+              >
+                Clear Filter
+              </Button>
+            </div>
+          </div>
+        )}
+
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
           {statCards.map((stat, index) => (
@@ -1335,6 +1371,9 @@ export default function TeamHubClient() {
                         <MessageSquare className="w-3.5 h-3.5 mr-1" />
                         Message
                       </Button>
+                      <Button variant="outline" size="sm" className="h-8 px-2" onClick={(e) => { e.stopPropagation(); router.push(`/dashboard/projects-hub-v2?member=${member.id}`) }}>
+                        <Folder className="w-3.5 h-3.5" />
+                      </Button>
                       <Button variant="outline" size="sm" className="h-8 px-2" onClick={(e) => { e.stopPropagation(); if (member.phone) { window.location.href = `tel:${member.phone}`; toast.success(`Calling ${member.name}`) } else { toast.error('No phone number available') } }}>
                         <Headphones className="w-3.5 h-3.5" />
                       </Button>
@@ -1389,6 +1428,9 @@ export default function TeamHubClient() {
                       <div className="flex gap-2 mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
                         <Button variant="outline" size="sm" className="flex-1 h-8" onClick={(e) => { e.stopPropagation(); handleUpdateMemberStatus(member.id, member.status === 'online' ? 'offline' : 'online') }}>
                           {member.status === 'online' ? 'Set Offline' : 'Set Online'}
+                        </Button>
+                        <Button variant="outline" size="sm" className="h-8 px-2" onClick={(e) => { e.stopPropagation(); router.push(`/dashboard/projects-hub-v2?member=${member.id}`) }}>
+                          <Folder className="w-3.5 h-3.5" />
                         </Button>
                         <Button variant="outline" size="sm" className="h-8 px-2 text-red-500 hover:text-red-600" onClick={(e) => { e.stopPropagation(); handleDeleteMember(member.id) }}>
                           <Trash2 className="w-3.5 h-3.5" />

@@ -43,6 +43,8 @@ import {
 
 import { useClients, type Client } from '@/lib/hooks/use-clients'
 import { useApiKeys } from '@/lib/hooks/use-api-keys'
+import { useTeam } from '@/lib/hooks/use-team'
+import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
 
 // Map client status/segment to display types for backward compatibility
 type CustomerSegment = 'vip' | 'active' | 'new' | 'inactive' | 'churned' | 'at_risk' | 'prospect'
@@ -369,6 +371,10 @@ const getAccountRatingColor = (rating: 'hot' | 'warm' | 'cold') => {
 export default function CustomersClient({ initialCustomers: _initialCustomers }: { initialCustomers?: Client[] }) {
   const router = useRouter()
   const searchParams = useSearchParams()
+
+  // Team and activity data hooks
+  const { members: teamMembers } = useTeam()
+  const { logs: activityLogs } = useActivityLogs()
 
   // Check for incoming navigation from sales or lead generation
   const dealIdParam = searchParams.get('deal')
@@ -2403,7 +2409,12 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={[]}
+              collaborators={teamMembers.map(member => ({
+                id: member.id,
+                name: member.name,
+                avatar: member.avatar_url || undefined,
+                status: member.status === 'active' ? 'online' as const : member.status === 'on_leave' ? 'away' as const : 'offline' as const
+              }))}
               maxVisible={4}
             />
             <PredictiveAnalytics
@@ -2415,7 +2426,15 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={[]}
+            activities={activityLogs.slice(0, 10).map(log => ({
+              id: log.id,
+              type: log.activity_type === 'create' ? 'create' as const : log.activity_type === 'update' ? 'update' as const : log.activity_type === 'delete' ? 'delete' as const : 'update' as const,
+              title: log.action,
+              description: log.resource_name || undefined,
+              user: { name: log.user_name || 'System', avatar: undefined },
+              timestamp: log.created_at,
+              isUnread: log.status === 'pending'
+            }))}
             title="Customer Activity"
             maxItems={5}
           />

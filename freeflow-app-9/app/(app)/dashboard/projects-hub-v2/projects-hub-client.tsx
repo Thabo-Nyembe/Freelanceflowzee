@@ -1127,6 +1127,17 @@ export default function ProjectsHubClient() {
                                       <Users className="h-4 w-4 mr-2" />Add Team Member
                                     </DropdownMenuItem>
                                     <DropdownMenuSeparator />
+                                    <DropdownMenuLabel>Navigate</DropdownMenuLabel>
+                                    <DropdownMenuItem onClick={() => router.push(`/dashboard/tasks-v2?project=${project.id}`)}>
+                                      <CheckSquare className="h-4 w-4 mr-2" />View Tasks
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => router.push(`/dashboard/team-hub-v2?project=${project.id}`)}>
+                                      <Users className="h-4 w-4 mr-2" />View Team
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => router.push(`/dashboard/milestones-v2?project=${project.id}`)}>
+                                      <Milestone className="h-4 w-4 mr-2" />View Timeline
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
                                     <DropdownMenuLabel>Change Status</DropdownMenuLabel>
                                     {statusColumns.filter(col => col.id !== project.status).map(col => (
                                       <DropdownMenuItem key={col.id} onClick={() => {

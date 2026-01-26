@@ -1,5 +1,6 @@
 "use client"
 
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 
 // MIGRATED: Batch #12 - Removed mock data, using database hooks
@@ -649,6 +650,27 @@ export default function AICreateClient() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            {/* AI Tools Navigation */}
+            <div className="flex items-center gap-2">
+              <Link href="/dashboard/ai-design-v2">
+                <Button variant="outline" size="sm" className="gap-2">
+                  <Palette className="w-4 h-4" />
+                  <span className="hidden md:inline">Edit in AI Design</span>
+                </Button>
+              </Link>
+              <Link href="/dashboard/ai-code-builder-v2">
+                <Button variant="outline" size="sm" className="gap-2">
+                  <Code className="w-4 h-4" />
+                  <span className="hidden md:inline">Generate Code</span>
+                </Button>
+              </Link>
+              <Link href="/dashboard/ai-voice-v2">
+                <Button variant="outline" size="sm" className="gap-2">
+                  <Music className="w-4 h-4" />
+                  <span className="hidden md:inline">Add Voice</span>
+                </Button>
+              </Link>
+            </div>
             <div className="px-4 py-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
               <div className="flex items-center gap-2">
                 <Gem className="w-4 h-4 text-purple-500" />

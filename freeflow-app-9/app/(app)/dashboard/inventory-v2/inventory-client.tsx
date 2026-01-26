@@ -1,10 +1,13 @@
 'use client'
 
 import { createClient } from '@/lib/supabase/client'
+import { useRouter } from 'next/navigation'
 
 import { useState, useMemo, useCallback } from 'react'
 import { useInventory, useCreateInventoryItem, useUpdateInventoryItem, useDeleteInventoryItem, type InventoryItem, type InventoryStatus } from '@/lib/hooks/use-inventory'
 import { useInventoryLocations } from '@/lib/hooks/use-inventory-extended'
+import { useTeam } from '@/lib/hooks/use-team'
+import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
 import { toast } from 'sonner'
 import {
   Package,
@@ -42,6 +45,8 @@ import {
   ChevronDown,
   ChevronRight,
   Loader2,
+  ShoppingCart,
+  BookOpen,
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -188,6 +193,12 @@ interface InventoryStats {
 
 
 export default function InventoryClient({ initialInventory: _initialInventory }: { initialInventory: InventoryItem[] }) {
+  const router = useRouter()
+
+  // Team and activity data hooks
+  const { members: teamMembers } = useTeam()
+  const { logs: activityLogs } = useActivityLogs()
+
   const [activeTab, setActiveTab] = useState('products')
   const [settingsTab, setSettingsTab] = useState('general')
   const [searchQuery, setSearchQuery] = useState('')
@@ -1282,8 +1293,23 @@ export default function InventoryClient({ initialInventory: _initialInventory }:
                               <button
                                 onClick={(e) => { e.stopPropagation(); setSelectedProduct(product); setShowProductDialog(true); }}
                                 className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-400"
+                                title="View Details"
                               >
                                 <Eye className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={(e) => { e.stopPropagation(); router.push(`/dashboard/orders-v2?product=${product.id}`); }}
+                                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-400"
+                                title="View Orders"
+                              >
+                                <ShoppingCart className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={(e) => { e.stopPropagation(); router.push(`/dashboard/products-v2?highlight=${product.id}`); }}
+                                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-400"
+                                title="View in Catalog"
+                              >
+                                <BookOpen className="w-4 h-4" />
                               </button>
                               <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-400">
                                 <Edit className="w-4 h-4" />
@@ -2068,7 +2094,12 @@ export default function InventoryClient({ initialInventory: _initialInventory }:
           {/* Team Collaboration & Activity */}
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={[]}
+              collaborators={teamMembers.map(member => ({
+                id: member.id,
+                name: member.name,
+                avatar: member.avatar_url || undefined,
+                status: member.status === 'active' ? 'online' as const : member.status === 'on_leave' ? 'away' as const : 'offline' as const
+              }))}
               maxVisible={4}
             />
             <PredictiveAnalytics
@@ -2081,7 +2112,15 @@ export default function InventoryClient({ initialInventory: _initialInventory }:
         {/* Activity Feed & Quick Actions */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={[]}
+            activities={activityLogs.slice(0, 10).map(log => ({
+              id: log.id,
+              type: log.activity_type === 'create' ? 'create' as const : log.activity_type === 'update' ? 'update' as const : log.activity_type === 'delete' ? 'delete' as const : 'update' as const,
+              title: log.action,
+              description: log.resource_name || undefined,
+              user: { name: log.user_name || 'System', avatar: undefined },
+              timestamp: log.created_at,
+              isUnread: log.status === 'pending'
+            }))}
             title="Warehouse Activity"
             maxItems={5}
           />

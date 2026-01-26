@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
 import {
   useDashboards,
@@ -12,6 +13,8 @@ import {
   type ScheduleType,
   type ExportFormat
 } from '@/lib/hooks/use-reporting'
+import { useTeam } from '@/lib/hooks/use-team'
+import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
 import {
   FileText,
   BarChart3,
@@ -51,7 +54,10 @@ import {
   FileSpreadsheet,
   AlertCircle,
   CheckCircle,
-  XCircle
+  XCircle,
+  ExternalLink,
+  DollarSign,
+  ShoppingCart
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -103,6 +109,18 @@ const DATA_SOURCE_TYPES: { type: DataSourceType; label: string; icon: typeof Dat
 const chartTypes = CHART_TYPES
 
 export default function ReportingClient() {
+  // Initialize router and search params for navigation
+  const router = useRouter()
+  const searchParams = useSearchParams()
+
+  // Get incoming filters from analytics
+  const sourceParam = searchParams.get('source')
+  const metricParam = searchParams.get('metric')
+
+  // Team and activity data hooks
+  const { members: teamMembers } = useTeam()
+  const { logs: activityLogs } = useActivityLogs()
+
   // Hooks for data
   const {
     dashboards,
@@ -214,6 +232,49 @@ export default function ReportingClient() {
     recipients: '',
     format: 'pdf' as ExportFormat
   })
+
+  // Handle incoming filters from analytics dashboard
+  useEffect(() => {
+    if (sourceParam === 'analytics' && metricParam) {
+      toast.info(`Viewing report data for metric: ${metricParam}`)
+      // Could filter dashboards/worksheets based on metric type
+    }
+  }, [sourceParam, metricParam])
+
+  // Navigation helpers
+  const navigateToAnalytics = () => {
+    router.push('/dashboard/analytics-v2')
+    toast.success('Navigating to Analytics')
+  }
+
+  const navigateToSourceDashboard = (reportType: string) => {
+    const dashboardMap: Record<string, string> = {
+      'revenue': '/dashboard/financial-v2',
+      'financial': '/dashboard/financial-v2',
+      'sales': '/dashboard/sales-v2',
+      'customers': '/dashboard/customers-v2',
+      'users': '/dashboard/customers-v2',
+      'projects': '/dashboard/projects-v2',
+      'tasks': '/dashboard/tasks-v2',
+      'engagement': '/dashboard/analytics-v2',
+    }
+    const path = dashboardMap[reportType.toLowerCase()] || '/dashboard/analytics-v2'
+    router.push(path)
+    toast.success(`Viewing source data for ${reportType}`)
+  }
+
+  const getReportTypeIcon = (reportType: string) => {
+    const iconMap: Record<string, any> = {
+      'revenue': DollarSign,
+      'financial': DollarSign,
+      'sales': ShoppingCart,
+      'customers': Users,
+      'users': Users,
+      'projects': Target,
+      'engagement': Activity,
+    }
+    return iconMap[reportType.toLowerCase()] || BarChart3
+  }
 
   // Stats
   const totalDashboards = dashboards.length
@@ -446,6 +507,13 @@ export default function ReportingClient() {
               </div>
               <div className="flex items-center gap-3">
                 <button
+                  onClick={navigateToAnalytics}
+                  className="flex items-center gap-2 px-4 py-2 bg-white/20 text-white rounded-lg font-medium hover:bg-white/30 transition-colors"
+                >
+                  <Activity className="w-4 h-4" />
+                  View in Analytics
+                </button>
+                <button
                   onClick={() => setShowCreateDashboard(true)}
                   className="flex items-center gap-2 px-4 py-2 bg-white text-indigo-600 rounded-lg font-medium hover:bg-white/90 transition-colors"
                 >
@@ -545,6 +613,30 @@ export default function ReportingClient() {
 
           {/* Dashboards Tab */}
           <TabsContent value="dashboards" className="mt-6">
+            {/* Analytics Source Notice */}
+            {sourceParam === 'analytics' && metricParam && (
+              <Card className="bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800 mb-6">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Activity className="w-5 h-5 text-indigo-600" />
+                      <div>
+                        <p className="font-medium text-indigo-900 dark:text-indigo-100">Viewing data from Analytics</p>
+                        <p className="text-sm text-indigo-700 dark:text-indigo-300">Metric: {metricParam}</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={navigateToAnalytics}
+                      className="flex items-center gap-2 px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700"
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                      Back to Analytics
+                    </button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Dashboards Overview Banner */}
             <Card className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white border-0 mb-6">
               <CardContent className="p-6">
@@ -705,6 +797,17 @@ export default function ReportingClient() {
                         <button
                           onClick={(e) => {
                             e.stopPropagation()
+                            const reportType = (dashboard.tags?.[0] || 'engagement').toLowerCase()
+                            navigateToSourceDashboard(reportType)
+                          }}
+                          className="p-2 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+                          title="View Source Data"
+                        >
+                          <ExternalLink className="w-4 h-4 text-gray-500" />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
                             setSelectedDashboard(dashboard)
                           }}
                           className="p-2 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
@@ -781,13 +884,23 @@ export default function ReportingClient() {
                         </td>
                         <td className="px-6 py-4 text-right">
                           <div className="flex items-center justify-end gap-2">
-                            <button onClick={() => setSelectedDashboard(dashboard)} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                            <button onClick={() => setSelectedDashboard(dashboard)} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="View">
                               <Eye className="w-4 h-4 text-gray-500" />
                             </button>
-                            <button onClick={() => setSelectedDashboard(dashboard)} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                            <button
+                              onClick={() => {
+                                const reportType = (dashboard.tags?.[0] || 'engagement').toLowerCase()
+                                navigateToSourceDashboard(reportType)
+                              }}
+                              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                              title="View Source Data"
+                            >
+                              <ExternalLink className="w-4 h-4 text-gray-500" />
+                            </button>
+                            <button onClick={() => setSelectedDashboard(dashboard)} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="Edit">
                               <Edit className="w-4 h-4 text-gray-500" />
                             </button>
-                            <button onClick={() => handleShareDashboard(dashboard)} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                            <button onClick={() => handleShareDashboard(dashboard)} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="Share">
                               <Share2 className="w-4 h-4 text-gray-500" />
                             </button>
                           </div>
@@ -856,13 +969,22 @@ export default function ReportingClient() {
               <div className="flex items-center gap-3">
                 <span className="text-sm text-gray-500 dark:text-gray-400">{worksheets.length} worksheets</span>
               </div>
-              <button
-                onClick={() => setShowCreateWorksheet(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
-              >
-                <Plus className="w-4 h-4" />
-                New Worksheet
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={navigateToAnalytics}
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700"
+                >
+                  <Activity className="w-4 h-4" />
+                  View in Analytics
+                </button>
+                <button
+                  onClick={() => setShowCreateWorksheet(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                >
+                  <Plus className="w-4 h-4" />
+                  New Worksheet
+                </button>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -1640,7 +1762,12 @@ export default function ReportingClient() {
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={[]}
+              collaborators={teamMembers.map(member => ({
+                id: member.id,
+                name: member.name,
+                avatar: member.avatar_url || undefined,
+                status: member.status === 'active' ? 'online' as const : member.status === 'on_leave' ? 'away' as const : 'offline' as const
+              }))}
               maxVisible={4}
             />
             <PredictiveAnalytics
@@ -1652,7 +1779,15 @@ export default function ReportingClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={[]}
+            activities={activityLogs.slice(0, 10).map(log => ({
+              id: log.id,
+              type: log.activity_type === 'create' ? 'create' as const : log.activity_type === 'update' ? 'update' as const : log.activity_type === 'delete' ? 'delete' as const : 'update' as const,
+              title: log.action,
+              description: log.resource_name || undefined,
+              user: { name: log.user_name || 'System', avatar: undefined },
+              timestamp: log.created_at,
+              isUnread: log.status === 'pending'
+            }))}
             title="Report Activity"
             maxItems={5}
           />
