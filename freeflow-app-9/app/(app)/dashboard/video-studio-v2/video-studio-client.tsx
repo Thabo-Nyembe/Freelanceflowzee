@@ -84,6 +84,8 @@ import {
 // Supabase hooks for real data
 import { useVideoProjects, type VideoProject as DbVideoProject } from '@/lib/hooks/use-video-projects'
 import { useVideoEffects, useVideoTemplates, useVideoRenderJobs, useVideoAssets } from '@/lib/hooks/use-video-extended'
+import { useTeam } from '@/lib/hooks/use-team'
+import { useActivityLogs, type ActivityLog } from '@/lib/hooks/use-activity-logs'
 
 // Types
 type ProjectStatus = 'draft' | 'editing' | 'rendering' | 'ready' | 'published' | 'archived'
@@ -222,6 +224,10 @@ export default function VideoStudioClient() {
   const { data: dbRenderJobs = [], isLoading: isLoadingRenderJobs, refresh: refetchRenderJobs } = useVideoRenderJobs()
   const { data: dbAssets = [], isLoading: isLoadingAssets, refresh: refetchAssets } = useVideoAssets()
 
+  // Team and activity hooks for competitive upgrade components
+  const { members: dbTeamMembers } = useTeam()
+  const { logs: dbActivityLogs } = useActivityLogs()
+
   // Fetch data on mount
   useEffect(() => {
     fetchProjects()
@@ -328,6 +334,46 @@ export default function VideoStudioClient() {
       parameters: effect.parameters || {}
     }))
   }, [dbEffects])
+
+  // Map team members to collaborators format for competitive upgrade components
+  const activeCollaborators = useMemo(() => {
+    if (dbTeamMembers && dbTeamMembers.length > 0) {
+      return dbTeamMembers.map(member => ({
+        id: member.id,
+        name: member.name,
+        avatar: member.avatar_url || '',
+        status: member.status === 'active' ? 'online' as const : member.status === 'on_leave' ? 'busy' as const : 'offline' as const,
+        role: member.role || 'member'
+      }))
+    }
+    return emptyCollaborators
+  }, [dbTeamMembers])
+
+  // Map activity logs to activity feed format for competitive upgrade components
+  const activeActivities = useMemo(() => {
+    if (dbActivityLogs && dbActivityLogs.length > 0) {
+      const typeMap: Record<string, 'success' | 'info' | 'warning' | 'error' | 'update'> = {
+        create: 'success',
+        update: 'update',
+        delete: 'error',
+        view: 'info',
+        comment: 'info',
+        login: 'info',
+        logout: 'info',
+        export: 'success',
+        import: 'success'
+      }
+      return dbActivityLogs.slice(0, 20).map(log => ({
+        id: log.id,
+        user: log.user_name || 'System',
+        action: log.action,
+        target: log.resource_name || '',
+        timestamp: log.created_at,
+        type: typeMap[log.activity_type] || 'update'
+      }))
+    }
+    return emptyActivities
+  }, [dbActivityLogs])
 
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedProject, setSelectedProject] = useState<VideoProject | null>(null)
@@ -2312,7 +2358,7 @@ export default function VideoStudioClient() {
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={emptyCollaborators}
+              collaborators={activeCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
@@ -2324,7 +2370,7 @@ export default function VideoStudioClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={emptyActivities}
+            activities={activeActivities}
             title="Studio Activity"
             maxItems={5}
           />

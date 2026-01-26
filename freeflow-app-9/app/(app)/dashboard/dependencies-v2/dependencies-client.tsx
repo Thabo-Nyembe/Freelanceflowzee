@@ -60,6 +60,9 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import { useTeam } from '@/lib/hooks/use-team'
+import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
+
 
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -203,14 +206,34 @@ const defaultScanResult: ScanResult = {
 
 // Empty competitive upgrade data - will be populated from real data
 const dependenciesAIInsights: { id: string; type: 'success' | 'info' | 'warning' | 'error'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
-const dependenciesCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string; lastActive: string }[] = []
 const dependenciesPredictions: { id: string; label: string; current: number; target: number; predicted: number; confidence: number; trend: 'up' | 'down' | 'stable' }[] = []
-const dependenciesActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'warning' | 'error' | 'info' }[] = []
 
 // Quick actions are defined inside the component to access real handlers
 
 export default function DependenciesClient({ initialDependencies }: { initialDependencies: Dependency[] }) {
+  // Team and activity data hooks
+  const { members: teamMembers } = useTeam()
+  const { logs: activityLogs } = useActivityLogs()
 
+  // Transform team members to collaborators format
+  const dependenciesCollaborators = teamMembers.map(member => ({
+    id: member.id,
+    name: member.name,
+    avatar: member.avatar_url || '',
+    status: member.status === 'active' ? 'online' as const : member.status === 'on_leave' ? 'away' as const : 'offline' as const,
+    role: member.role || 'Team Member',
+    lastActive: member.updated_at
+  }))
+
+  // Transform activity logs to activities format
+  const dependenciesActivities = activityLogs.slice(0, 10).map(log => ({
+    id: log.id,
+    user: log.user_name || 'System',
+    action: log.action,
+    target: log.resource_name || '',
+    timestamp: log.created_at,
+    type: log.status === 'success' ? 'success' as const : log.status === 'failed' ? 'error' as const : 'info' as const
+  }))
 
   // Supabase queries for dependencies
   const { data: dbDependencies, isLoading: dependenciesLoading, refetch: refetchDependencies } = useSupabaseQuery<any>({

@@ -75,6 +75,9 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import { useTeam } from '@/lib/hooks/use-team'
+import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
+
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 
@@ -295,6 +298,10 @@ const downloadAsJson = (data: unknown, filename: string) => {
 }
 
 export default function KnowledgeArticlesClient({ initialArticles, initialStats }: KnowledgeArticlesClientProps) {
+  // Team and activity hooks for collaboration components
+  const { members: teamMembers } = useTeam()
+  const { logs: activityLogs } = useActivityLogs()
+
   const [activeTab, setActiveTab] = useState('articles')
   const [articles, setArticles] = useState<Article[]>(emptyArticles)
   const [spaces] = useState<Space[]>(emptySpaces)
@@ -1728,7 +1735,12 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={emptyKnowledgeArticlesCollaborators}
+              collaborators={teamMembers.map(member => ({
+                id: member.id,
+                name: member.name,
+                avatar: member.avatar_url || undefined,
+                status: member.status === 'active' ? 'online' as const : member.status === 'on_leave' ? 'away' as const : 'offline' as const
+              }))}
               maxVisible={4}
             />
             <PredictiveAnalytics
@@ -1740,7 +1752,15 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={emptyKnowledgeArticlesActivities}
+            activities={activityLogs.slice(0, 10).map(log => ({
+              id: log.id,
+              type: log.activity_type === 'create' ? 'create' as const : log.activity_type === 'update' ? 'update' as const : log.activity_type === 'delete' ? 'delete' as const : 'update' as const,
+              title: log.action,
+              description: log.resource_name || undefined,
+              user: { name: log.user_name || 'System', avatar: undefined },
+              timestamp: log.created_at,
+              isUnread: log.status === 'pending'
+            }))}
             title="Knowledge Activity"
             maxItems={5}
           />

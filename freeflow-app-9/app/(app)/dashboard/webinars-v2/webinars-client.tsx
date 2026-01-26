@@ -102,6 +102,10 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+// Real database hooks for collaboration and activity data
+import { useTeam } from '@/lib/hooks/use-team'
+import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
+
 // Types
 type WebinarStatus = 'scheduled' | 'live' | 'ended' | 'cancelled' | 'draft'
 type WebinarType = 'webinar' | 'meeting' | 'training' | 'demo' | 'conference'
@@ -279,11 +283,9 @@ const formatBytes = (bytes: number) => {
   return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`
 }
 
-// Empty arrays for competitive upgrade components - real data comes from API
+// Empty arrays for competitive upgrade components - collaborators and activities now come from hooks
 const webinarsAIInsights: { id: string; type: 'success' | 'warning' | 'info'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
-const webinarsCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }[] = []
 const webinarsPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: 'low' | 'medium' | 'high' }[] = []
-const webinarsActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' | 'error' }[] = []
 
 export default function WebinarsClient() {
 
@@ -305,6 +307,31 @@ export default function WebinarsClient() {
 
   // Upcoming webinars for scheduling view
   const { webinars: upcomingWebinars, isLoading: isLoadingUpcoming } = useUpcomingWebinars({ limit: 10 })
+
+  // Real-time collaboration and activity data
+  const { members: teamMembers } = useTeam()
+  const { logs: activityLogs } = useActivityLogs()
+
+  // Map team members to collaborators format
+  const webinarsCollaborators = useMemo(() =>
+    teamMembers?.map(m => ({
+      id: m.id,
+      name: m.name,
+      avatar: m.avatar_url || '',
+      status: m.status === 'active' ? 'online' as const : m.status === 'on_leave' ? 'away' as const : 'offline' as const,
+      role: m.role || 'Team Member'
+    })) || [], [teamMembers])
+
+  // Map activity logs to activities format
+  const webinarsActivities = useMemo(() =>
+    activityLogs?.slice(0, 20).map(l => ({
+      id: l.id,
+      user: l.user_name || 'System',
+      action: l.action,
+      target: l.resource_name || '',
+      timestamp: l.created_at,
+      type: (l.status === 'success' ? 'success' : l.status === 'failed' ? 'error' : 'info') as 'success' | 'info' | 'warning' | 'error'
+    })) || [], [activityLogs])
 
   // ==========================================================================
   // FALLBACK API HOOKS - For extended functionality

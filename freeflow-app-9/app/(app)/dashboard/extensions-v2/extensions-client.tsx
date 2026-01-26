@@ -88,6 +88,9 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import { useTeam } from '@/lib/hooks/use-team'
+import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
+
 // ============================================================================
 // TYPES & INTERFACES
 // ============================================================================
@@ -200,6 +203,10 @@ export default function ExtensionsClient() {
   const [extensions, setExtensions] = useState<Extension[]>(initialExtensions)
   const [configDialogOpen, setConfigDialogOpen] = useState(false)
   const [configExtension, setConfigExtension] = useState<Extension | null>(null)
+
+  // Team and activity data hooks
+  const { members: teamMembers } = useTeam()
+  const { logs: activityLogs } = useActivityLogs()
 
   // ============================================================================
   // REAL API HANDLERS
@@ -575,11 +582,29 @@ export default function ExtensionsClient() {
   // Empty arrays for competitive upgrade components (no mock data)
   const extensionsAIInsights: { id: string; type: 'success' | 'warning' | 'info' | 'error' | 'recommendation' | 'alert' | 'opportunity' | 'prediction'; title: string; description: string; priority: 'high' | 'medium' | 'low'; timestamp: string; category: string }[] = []
 
-  const extensionsCollaborators: { id: string; name: string; avatar?: string; status: 'online' | 'away' | 'offline'; role?: string }[] = []
+  // Transform team members to collaborators format
+  const extensionsCollaborators = teamMembers.map(member => ({
+    id: member.id,
+    name: member.name,
+    avatar: member.avatar_url || undefined,
+    status: member.status === 'active' ? 'online' as const : member.status === 'on_leave' ? 'away' as const : 'offline' as const,
+    role: member.role || 'Team Member'
+  }))
 
   const extensionsPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: string }[] = []
 
-  const extensionsActivities: { id: string; type: 'comment' | 'update' | 'create' | 'delete' | 'mention' | 'assignment' | 'status_change' | 'milestone' | 'integration'; title: string; user: { id: string; name: string; avatar?: string }; timestamp: string }[] = []
+  // Transform activity logs to activities format
+  const extensionsActivities = activityLogs.slice(0, 10).map(log => ({
+    id: log.id,
+    type: log.activity_type === 'create' ? 'create' as const : log.activity_type === 'update' ? 'update' as const : log.activity_type === 'delete' ? 'delete' as const : 'update' as const,
+    title: log.action,
+    user: {
+      id: log.user_id || 'system',
+      name: log.user_name || 'System',
+      avatar: undefined
+    },
+    timestamp: log.created_at
+  }))
 
   const extensionsQuickActions: { id: string; label: string; icon: React.ReactNode; action: () => void }[] = []
 

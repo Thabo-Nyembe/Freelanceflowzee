@@ -3,6 +3,8 @@
 import React, { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { useForms, type Form, type FormStatus, type FormType } from '@/lib/hooks/use-forms'
+import { useTeam } from '@/lib/hooks/use-team'
+import { useActivityLogs, type ActivityLog } from '@/lib/hooks/use-activity-logs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from '@/components/ui/dialog'
@@ -223,6 +225,10 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
   const { forms, loading, error, createForm, updateForm, deleteForm, mutating } = useForms({ status: statusFilter, formType: typeFilter, limit: 50 })
   const displayForms = forms
 
+  // Team and activity hooks for competitive upgrade components
+  const { members: dbTeamMembers } = useTeam()
+  const { logs: dbActivityLogs } = useActivityLogs()
+
   // Calculate comprehensive stats
   const stats = useMemo(() => {
     const filtered = displayForms.filter(f => statusFilter === 'all' || f.status === statusFilter)
@@ -258,6 +264,46 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
       return matchesSearch && matchesStatus
     })
   }, [displayForms, searchQuery, statusFilter])
+
+  // Map team members to collaborators format for competitive upgrade components
+  const activeCollaborators = useMemo(() => {
+    if (dbTeamMembers && dbTeamMembers.length > 0) {
+      return dbTeamMembers.map(member => ({
+        id: member.id,
+        name: member.name,
+        avatar: member.avatar_url || '',
+        status: member.status === 'active' ? 'online' as const : member.status === 'on_leave' ? 'away' as const : 'offline' as const,
+        role: member.role || 'member'
+      }))
+    }
+    return formsCollaborators
+  }, [dbTeamMembers])
+
+  // Map activity logs to activity feed format for competitive upgrade components
+  const activeActivities = useMemo(() => {
+    if (dbActivityLogs && dbActivityLogs.length > 0) {
+      const typeMap: Record<string, 'success' | 'info' | 'warning' | 'error'> = {
+        create: 'success',
+        update: 'info',
+        delete: 'error',
+        view: 'info',
+        comment: 'info',
+        login: 'info',
+        logout: 'warning',
+        export: 'success',
+        import: 'success'
+      }
+      return dbActivityLogs.slice(0, 20).map(log => ({
+        id: log.id,
+        user: log.user_name || 'System',
+        action: log.action,
+        target: log.resource_name || '',
+        timestamp: log.created_at,
+        type: typeMap[log.activity_type] || 'info'
+      }))
+    }
+    return formsActivities
+  }, [dbActivityLogs])
 
   // Handlers
   const handleCreateForm = async () => {
@@ -1987,7 +2033,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={formsCollaborators}
+              collaborators={activeCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
@@ -1999,7 +2045,7 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={formsActivities}
+            activities={activeActivities}
             title="Forms Activity"
             maxItems={5}
           />

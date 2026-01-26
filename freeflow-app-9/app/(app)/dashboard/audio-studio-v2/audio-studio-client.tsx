@@ -66,6 +66,8 @@ import {
   useAudioStudio,
   type AudioTrack as DbAudioTrack,
 } from '@/lib/hooks/use-audio-studio'
+import { useTeam } from '@/lib/hooks/use-team'
+import { useActivityLogs, type ActivityLog } from '@/lib/hooks/use-activity-logs'
 
 // Enhanced & Competitive Upgrade Components
 import {
@@ -300,6 +302,10 @@ export default function AudioStudioClient({ initialTracks, initialStats }: Audio
     exportProject,
   } = useAudioStudio()
 
+  // Team and activity hooks for competitive upgrade components
+  const { members: dbTeamMembers } = useTeam()
+  const { logs: dbActivityLogs } = useActivityLogs()
+
   // Fetch data on mount
   useEffect(() => {
     fetchTracks()
@@ -331,6 +337,46 @@ export default function AudioStudioClient({ initialTracks, initialStats }: Audio
     memoryUsage: Math.round(dbStats.totalSize / 1073741824 * 10) / 10 || 0,
     diskUsage: Math.round(dbStats.totalSize / 1048576) || 0,
   }), [dbStats, dbTracks])
+
+  // Map team members to collaborators format for competitive upgrade components
+  const activeCollaborators = useMemo(() => {
+    if (dbTeamMembers && dbTeamMembers.length > 0) {
+      return dbTeamMembers.map(member => ({
+        id: member.id,
+        name: member.name,
+        avatar: member.avatar_url || '',
+        status: member.status === 'active' ? 'online' as const : member.status === 'on_leave' ? 'away' as const : 'offline' as const,
+        role: member.role || 'member'
+      }))
+    }
+    return emptyAudioCollaborators
+  }, [dbTeamMembers])
+
+  // Map activity logs to activity feed format for competitive upgrade components
+  const activeActivities = useMemo(() => {
+    if (dbActivityLogs && dbActivityLogs.length > 0) {
+      const typeMap: Record<string, 'success' | 'info' | 'warning' | 'error'> = {
+        create: 'success',
+        update: 'info',
+        delete: 'error',
+        view: 'info',
+        comment: 'info',
+        login: 'info',
+        logout: 'warning',
+        export: 'success',
+        import: 'success'
+      }
+      return dbActivityLogs.slice(0, 20).map(log => ({
+        id: log.id,
+        user: log.user_name || 'System',
+        action: log.action,
+        target: log.resource_name || '',
+        timestamp: log.created_at,
+        type: typeMap[log.activity_type] || 'info'
+      }))
+    }
+    return emptyAudioActivities
+  }, [dbActivityLogs])
 
   const [activeTab, setActiveTab] = useState('tracks')
   const [tracks, setTracks] = useState<Track[]>(initialTracks ?? emptyTracks)
@@ -1895,7 +1941,7 @@ export default function AudioStudioClient({ initialTracks, initialStats }: Audio
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={emptyAudioCollaborators}
+              collaborators={activeCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
@@ -1907,7 +1953,7 @@ export default function AudioStudioClient({ initialTracks, initialStats }: Audio
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={emptyAudioActivities}
+            activities={activeActivities}
             title="Studio Activity"
             maxItems={5}
           />

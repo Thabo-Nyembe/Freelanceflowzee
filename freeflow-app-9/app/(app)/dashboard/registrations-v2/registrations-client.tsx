@@ -79,8 +79,9 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-
-
+// Real database hooks for collaboration and activity data
+import { useTeam } from '@/lib/hooks/use-team'
+import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
 
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
@@ -418,14 +419,10 @@ const formatDate = (dateString: string) => {
   })
 }
 
-// Empty arrays for competitive upgrade components (real data loaded from Supabase)
+// Empty arrays for competitive upgrade components - collaborators and activities now come from hooks
 const emptyAIInsights: { id: string; type: 'success' | 'warning' | 'info' | 'error'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
 
-const emptyCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }[] = []
-
 const emptyPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: 'low' | 'medium' | 'high' }[] = []
-
-const emptyActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' | 'error' }[] = []
 
 // Quick actions base (defined outside component for reuse)
 const emptyQuickActionsBase: { id: string; label: string; icon: string; action: () => void; variant: 'default' | 'outline' | 'secondary' | 'ghost' | 'link' | 'destructive' }[] = [
@@ -451,7 +448,30 @@ const emptyQuickActionsBase: { id: string; label: string; icon: string; action: 
 // ============================================================================
 
 export default function RegistrationsClient() {
+  // Real-time collaboration and activity data
+  const { members: teamMembers } = useTeam()
+  const { logs: activityLogs } = useActivityLogs()
 
+  // Map team members to collaborators format
+  const emptyCollaborators = useMemo(() =>
+    teamMembers?.map(m => ({
+      id: m.id,
+      name: m.name,
+      avatar: m.avatar_url || '',
+      status: m.status === 'active' ? 'online' as const : m.status === 'on_leave' ? 'away' as const : 'offline' as const,
+      role: m.role || 'Team Member'
+    })) || [], [teamMembers])
+
+  // Map activity logs to activities format
+  const emptyActivities = useMemo(() =>
+    activityLogs?.slice(0, 20).map(l => ({
+      id: l.id,
+      user: l.user_name || 'System',
+      action: l.action,
+      target: l.resource_name || '',
+      timestamp: l.created_at,
+      type: (l.status === 'success' ? 'success' : l.status === 'failed' ? 'error' : 'info') as 'success' | 'info' | 'warning' | 'error'
+    })) || [], [activityLogs])
 
   // UI State
   const [activeTab, setActiveTab] = useState('registrations')

@@ -11,6 +11,8 @@ import { useAuthUserId } from '@/lib/hooks/use-auth-user-id'
 import { useDashboardInsights, useDashboardActivities, useDashboardQuickActions } from '@/lib/hooks/use-dashboard-extended'
 import { useMLPredictions } from '@/lib/hooks/use-ml-extended'
 import { useAICollaboration } from '@/lib/hooks/use-ai-extended'
+import { useTeam } from '@/lib/hooks/use-team'
+import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
 import { toast } from 'sonner'
 import {
   Users, Shield, Key, Link2, FileText, Settings, Search, Plus, MoreHorizontal,
@@ -129,10 +131,12 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
 
   // Real database hooks for competitive upgrade components
   const { data: rawInsights, isLoading: insightsLoading } = useDashboardInsights(userId || undefined)
-  const { data: rawCollaborators, isLoading: collaboratorsLoading } = useAICollaboration(userId || undefined)
   const { data: rawPredictions, isLoading: predictionsLoading } = useMLPredictions(userId || undefined)
-  const { data: rawActivities, isLoading: activitiesLoading } = useDashboardActivities(userId || undefined)
   const { data: rawQuickActions, isLoading: quickActionsLoading } = useDashboardQuickActions(userId || undefined)
+
+  // Team and activity logs hooks for collaboration and activity components
+  const { members: teamMembers, loading: teamLoading } = useTeam()
+  const { logs: activityLogsData, isLoading: activityLogsLoading } = useActivityLogs()
 
   // Transform database data to component-expected format with local state
   const [aiInsights, setAIInsights] = useState<any[]>([])
@@ -161,21 +165,21 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
     }
   }, [rawInsights])
 
-  // Sync collaborators from database
+  // Sync collaborators from team members
   useEffect(() => {
-    if (rawCollaborators && rawCollaborators.length > 0) {
-      setCollaborators(rawCollaborators.map((collab: any) => ({
-        id: collab.id,
-        name: collab.name || collab.user_name || collab.collaborator_name || 'Team Member',
-        avatar: collab.avatar || collab.avatar_url || '/avatars/default.jpg',
-        status: collab.status || 'online',
-        role: collab.role || collab.collaboration_role || 'Member',
-        lastActive: collab.last_active || collab.updated_at || 'Recently'
+    if (teamMembers && teamMembers.length > 0) {
+      setCollaborators(teamMembers.map((member) => ({
+        id: member.id,
+        name: member.name,
+        avatar: member.avatar_url || '/avatars/default.jpg',
+        status: member.status === 'active' ? 'online' : member.status === 'on_leave' ? 'away' : 'offline',
+        role: member.role || 'Team Member',
+        lastActive: member.updated_at || 'Recently'
       })))
     } else {
       setCollaborators([])
     }
-  }, [rawCollaborators])
+  }, [teamMembers])
 
   // Sync predictions from database
   useEffect(() => {
@@ -194,21 +198,21 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
     }
   }, [rawPredictions])
 
-  // Sync activities from database
+  // Sync activities from activity logs
   useEffect(() => {
-    if (rawActivities && rawActivities.length > 0) {
-      setActivities(rawActivities.map((activity: any) => ({
-        id: activity.id,
-        user: activity.user_name || activity.actor || 'System',
-        action: activity.action || activity.activity_type || 'performed action',
-        target: activity.target || activity.resource || activity.description || '',
-        timestamp: activity.created_at ? formatTimeAgo(activity.created_at) : 'Recently',
-        type: activity.type || activity.status || 'info'
+    if (activityLogsData && activityLogsData.length > 0) {
+      setActivities(activityLogsData.slice(0, 10).map((log) => ({
+        id: log.id,
+        user: log.user_name || 'System',
+        action: log.action,
+        target: log.resource_name || log.resource_type || '',
+        timestamp: log.created_at ? formatTimeAgo(log.created_at) : 'Recently',
+        type: log.status === 'success' ? 'success' : log.status === 'failed' ? 'error' : 'info'
       })))
     } else {
       setActivities([])
     }
-  }, [rawActivities])
+  }, [activityLogsData])
 
   // Sync quick actions from database
   useEffect(() => {

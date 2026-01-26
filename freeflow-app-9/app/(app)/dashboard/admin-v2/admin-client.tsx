@@ -59,6 +59,8 @@ import { useServers } from '@/lib/hooks/use-monitoring'
 import { useFeatures } from '@/lib/hooks/use-features'
 import { useDeployments } from '@/lib/hooks/use-deployments'
 import { useAdminActivityLog, useAdminWorkflows } from '@/lib/hooks/use-admin-extended'
+import { useTeam } from '@/lib/hooks/use-team'
+import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
 
 // Enhanced & Competitive Upgrade Components
 import {
@@ -249,6 +251,37 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
   const { deployments: deploymentsData, loading: deploymentsLoading, error: deploymentsError, refetch: refetchDeployments } = useDeployments()
   const { data: activityLogData, isLoading: activityLoading, refresh: refreshActivityLog } = useAdminActivityLog()
   const { data: workflowsData, isLoading: workflowsLoading, refresh: refreshWorkflows } = useAdminWorkflows()
+
+  // Team and activity logs hooks for collaboration and activity components
+  const { members: teamMembers, loading: teamLoading, fetchMembers: refetchTeam } = useTeam()
+  const { logs: activityLogsData, isLoading: activityLogsLoading, refetch: refetchActivityLogs } = useActivityLogs()
+
+  // Map team members to collaborators format
+  const adminCollaborators = useMemo(() =>
+    teamMembers.map(member => ({
+      id: member.id,
+      name: member.name,
+      avatar: member.avatar_url || '/avatars/default.jpg',
+      status: member.status === 'active' ? 'online' as const : member.status === 'on_leave' ? 'away' as const : 'offline' as const,
+      role: member.role || 'Team Member'
+    })), [teamMembers])
+
+  // Map activity logs to activities format
+  const adminActivities = useMemo(() =>
+    activityLogsData.slice(0, 10).map(log => ({
+      id: log.id,
+      user: {
+        id: log.user_id || 'system',
+        name: log.user_name || 'System',
+        avatar: undefined
+      },
+      action: log.action,
+      target: log.resource_name || log.resource_type || '',
+      timestamp: log.created_at,
+      type: log.activity_type === 'create' ? 'create' as const :
+            log.activity_type === 'update' ? 'update' as const :
+            log.activity_type === 'delete' ? 'delete' as const : 'status_change' as const
+    })), [activityLogsData])
 
   // Combined loading state
   const isDataLoading = auditLogsLoading || usersLoading || serversLoading || featuresLoading || deploymentsLoading
@@ -1851,7 +1884,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockAdminCollaborators}
+              collaborators={adminCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
@@ -1863,7 +1896,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockAdminActivities}
+            activities={adminActivities}
             title="Admin Activity"
             maxItems={5}
           />

@@ -105,6 +105,9 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import { useTeam } from '@/lib/hooks/use-team'
+import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
+
 // Types
 type ThemeMode = 'light' | 'dark' | 'system'
 type NotificationType = 'all' | 'important' | 'none'
@@ -439,6 +442,31 @@ export default function SettingsClient() {
   const [anonymousAnalytics, setAnonymousAnalytics] = useState(false)
   const [telemetryEnabled, setTelemetryEnabled] = useState(true)
   const [sessionTimeout, setSessionTimeout] = useState('30')
+
+  // Team and activity logs hooks for collaboration and activity components
+  const { members: teamMembers } = useTeam()
+  const { logs: activityLogsData } = useActivityLogs()
+
+  // Map team members to collaborators format
+  const settingsCollaboratorsData = useMemo(() =>
+    teamMembers.map(member => ({
+      id: member.id,
+      name: member.name,
+      avatar: member.avatar_url || '/avatars/default.jpg',
+      status: member.status === 'active' ? 'online' as const : member.status === 'on_leave' ? 'away' as const : 'offline' as const,
+      role: member.role || 'Team Member'
+    })), [teamMembers])
+
+  // Map activity logs to activities format
+  const settingsActivitiesData = useMemo(() =>
+    activityLogsData.slice(0, 10).map(log => ({
+      id: log.id,
+      user: log.user_name || 'System',
+      action: log.action,
+      target: log.resource_name || log.resource_type || '',
+      timestamp: log.created_at,
+      type: log.status === 'success' ? 'success' as const : log.status === 'failed' ? 'error' as const : 'info' as const
+    })), [activityLogsData])
 
   // Load additional settings from localStorage
   useEffect(() => {
@@ -3567,7 +3595,7 @@ export default function SettingsClient() {
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={settingsCollaborators}
+              collaborators={settingsCollaboratorsData}
               maxVisible={4}
             />
             <PredictiveAnalytics
@@ -3579,7 +3607,7 @@ export default function SettingsClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={settingsActivities}
+            activities={settingsActivitiesData}
             title="Account Activity"
             maxItems={5}
           />

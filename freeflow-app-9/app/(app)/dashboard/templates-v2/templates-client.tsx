@@ -13,6 +13,8 @@ import {
   useTemplateMutations,
   TemplateFilters
 } from '@/lib/hooks/use-templates'
+import { useTeam } from '@/lib/hooks/use-team'
+import { useActivityLogs, type ActivityLog } from '@/lib/hooks/use-activity-logs'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -264,6 +266,10 @@ export default function TemplatesClient() {
     isDeleting
   } = useTemplateMutations()
 
+  // Team and activity hooks for competitive upgrade components
+  const { members: dbTeamMembers } = useTeam()
+  const { logs: dbActivityLogs } = useActivityLogs()
+
   // Merge database templates with local UI format
   const templatesFromDB: Template[] = useMemo(() => {
     return dbTemplates.map(t => ({
@@ -307,6 +313,46 @@ export default function TemplatesClient() {
       teamTemplates: (templatesFromDB || []).filter(t => t.accessLevel === 'team').length
     }
   }, [templatesFromDB, dbStats])
+
+  // Map team members to collaborators format for competitive upgrade components
+  const activeCollaborators = useMemo(() => {
+    if (dbTeamMembers && dbTeamMembers.length > 0) {
+      return dbTeamMembers.map(member => ({
+        id: member.id,
+        name: member.name,
+        avatar: member.avatar_url || '',
+        status: member.status === 'active' ? 'online' as const : member.status === 'on_leave' ? 'away' as const : 'offline' as const,
+        role: member.role || 'member'
+      }))
+    }
+    return collaborators
+  }, [dbTeamMembers])
+
+  // Map activity logs to activity feed format for competitive upgrade components
+  const activeActivities = useMemo(() => {
+    if (dbActivityLogs && dbActivityLogs.length > 0) {
+      const typeMap: Record<string, 'success' | 'info' | 'update' | 'warning'> = {
+        create: 'success',
+        update: 'update',
+        delete: 'warning',
+        view: 'info',
+        comment: 'info',
+        login: 'info',
+        logout: 'warning',
+        export: 'success',
+        import: 'success'
+      }
+      return dbActivityLogs.slice(0, 20).map(log => ({
+        id: log.id,
+        user: log.user_name || 'System',
+        action: log.action,
+        target: log.resource_name || '',
+        timestamp: log.created_at,
+        type: typeMap[log.activity_type] || 'update'
+      }))
+    }
+    return activities
+  }, [dbActivityLogs])
 
   // Filter templates
   const filteredTemplates = useMemo(() => {
@@ -1961,7 +2007,7 @@ export default function TemplatesClient() {
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={collaborators}
+              collaborators={activeCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
@@ -1973,7 +2019,7 @@ export default function TemplatesClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={activities}
+            activities={activeActivities}
             title="Template Activity"
             maxItems={5}
           />

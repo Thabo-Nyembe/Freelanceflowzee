@@ -73,6 +73,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import { useTeam } from '@/lib/hooks/use-team'
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   Dialog,
@@ -313,6 +315,32 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
       timeline: []
     }
   }, [activityLogs])
+
+  // Team hook for collaboration component
+  const { members: teamMembers } = useTeam()
+
+  // Map team members to collaborators format
+  const logsCollaborators = useMemo(() =>
+    teamMembers.map(member => ({
+      id: member.id,
+      name: member.name,
+      avatar: member.avatar_url || '/avatars/default.jpg',
+      status: member.status === 'active' ? 'online' as const : member.status === 'on_leave' ? 'away' as const : 'offline' as const,
+      activity: member.role || 'Team Member'
+    })), [teamMembers])
+
+  // Map activity logs to activities format for ActivityFeed
+  const logsActivitiesData = useMemo(() =>
+    activityLogs.slice(0, 10).map(log => ({
+      id: log.id,
+      type: log.activity_type,
+      message: `${log.action} ${log.resource_type || ''} ${log.resource_name || ''}`.trim(),
+      timestamp: log.created_at,
+      user: log.user_name ? {
+        name: log.user_name,
+        avatar: undefined
+      } : undefined
+    })), [activityLogs])
 
   const [activeTab, setActiveTab] = useState('logs')
   const [searchQuery, setSearchQuery] = useState('')
@@ -2336,7 +2364,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={emptyCollaborators}
+              collaborators={logsCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
@@ -2348,7 +2376,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={emptyActivities}
+            activities={logsActivitiesData}
             title="System Activity"
             maxItems={5}
           />

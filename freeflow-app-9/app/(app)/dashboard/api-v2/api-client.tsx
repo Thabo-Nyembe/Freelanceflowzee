@@ -129,6 +129,8 @@ const QuickActionsToolbar = dynamic(
 import { useApiEndpoints } from '@/lib/hooks/use-api-endpoints'
 import { useApiKeys } from '@/lib/hooks/use-api-keys'
 import { useWebhooks } from '@/lib/hooks/use-webhooks'
+import { useTeam } from '@/lib/hooks/use-team'
+import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
 
 // Initialize Supabase client once at module level
 const supabase = createClient()
@@ -278,9 +280,7 @@ const emptyMockServers: MockServer[] = []
 
 // Empty typed arrays for competitive upgrade components
 const emptyApiAIInsights: { id: string; type: 'success' | 'warning' | 'info' | 'error'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
-const emptyApiCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }[] = []
 const emptyApiPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: 'low' | 'medium' | 'high' }[] = []
-const emptyApiActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' | 'error' }[] = []
 
 // Empty quick actions array
 const emptyApiQuickActions: { id: string; label: string; icon: string; action: () => Promise<void>; variant: 'default' | 'outline' }[] = []
@@ -340,6 +340,10 @@ export default function ApiClient() {
     toggleStatus: toggleWebhookStatus,
     testWebhook
   } = useWebhooks()
+
+  // Team and activity data hooks
+  const { members: teamMembers } = useTeam()
+  const { logs: activityLogs } = useActivityLogs()
 
   // Fetch data on mount
   useEffect(() => {
@@ -2949,7 +2953,13 @@ export default KaziApiClient;`
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={emptyApiCollaborators}
+              collaborators={teamMembers.map(member => ({
+                id: member.id,
+                name: member.name,
+                avatar: member.avatar_url || undefined,
+                status: member.status === 'active' ? 'online' as const : member.status === 'on_leave' ? 'away' as const : 'offline' as const,
+                role: member.role || 'Team Member'
+              }))}
               maxVisible={4}
             />
             <PredictiveAnalytics
@@ -2961,7 +2971,17 @@ export default KaziApiClient;`
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={emptyApiActivities}
+            activities={activityLogs.slice(0, 10).map(log => ({
+              id: log.id,
+              type: log.activity_type === 'create' ? 'create' as const : log.activity_type === 'update' ? 'update' as const : log.activity_type === 'delete' ? 'delete' as const : 'update' as const,
+              title: log.action,
+              user: {
+                id: log.user_id || 'system',
+                name: log.user_name || 'System',
+                avatar: undefined
+              },
+              timestamp: log.created_at
+            }))}
             title="API Activity"
             maxItems={5}
           />

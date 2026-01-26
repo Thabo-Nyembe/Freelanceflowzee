@@ -62,6 +62,10 @@ import {
   AlertCircle,
 } from 'lucide-react'
 
+// Real database hooks for collaboration and activity data
+import { useTeam } from '@/lib/hooks/use-team'
+import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
+
 // Lazy-loaded Competitive Upgrades - Beats HubSpot, Salesforce, Monday.com - Code splitting for performance
 import { TabContentSkeleton } from '@/components/dashboard/lazy'
 
@@ -349,12 +353,10 @@ interface ActivityItem {
   isRead: boolean
 }
 
-// Empty typed arrays for competitive upgrades
+// Empty typed arrays for competitive upgrades (collaborators and activities now come from hooks)
 const aiInsights: AIInsight[] = []
-const collaborators: Collaborator[] = []
 const predictions: Prediction[] = []
 const storySegments: StorySegment[] = []
-const activities: ActivityItem[] = []
 
 // Quick actions are now defined inside the component to access state setters
 
@@ -461,6 +463,33 @@ export default function MarketingClient() {
   // MIGRATED: Real database hooks
   const { campaigns: dbCampaigns, loading: campaignsLoading, error: campaignsError, fetchCampaigns } = useMarketingCampaigns()
   const { leads: dbLeads, isLoading: leadsLoading, refresh: refetchLeads } = useLeadsExtended({ limit: 100 })
+
+  // Real-time collaboration and activity data
+  const { members: teamMembers } = useTeam()
+  const { logs: activityLogs } = useActivityLogs()
+
+  // Map team members to collaborators format
+  const collaborators = useMemo(() =>
+    teamMembers?.map(m => ({
+      id: m.id,
+      name: m.name,
+      avatar: m.avatar_url || '',
+      status: m.status === 'active' ? 'online' as const : 'offline' as const,
+      role: m.role || 'Team Member'
+    })) || [], [teamMembers])
+
+  // Map activity logs to activities format
+  const activities = useMemo(() =>
+    activityLogs?.slice(0, 20).map(l => ({
+      id: l.id,
+      type: l.activity_type as 'campaign' | 'lead' | 'email' | 'content' | 'automation' | 'integration',
+      title: l.action,
+      description: l.resource_name || '',
+      user: { id: l.user_id || '', name: l.user_name || 'System' },
+      target: { type: l.resource_type || '', name: l.resource_name || '' },
+      timestamp: new Date(l.created_at),
+      isRead: false
+    })) || [], [activityLogs])
 
   // Transform database data to local types (use empty array when no data)
   const campaigns: Campaign[] = useMemo(() => {

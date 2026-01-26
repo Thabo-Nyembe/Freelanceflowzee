@@ -73,6 +73,9 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import { useTeam } from '@/lib/hooks/use-team'
+import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
+
 // Types
 type PluginStatus = 'active' | 'inactive' | 'updating' | 'error' | 'needs-update'
 type PluginCategory = 'productivity' | 'security' | 'analytics' | 'integration' | 'communication' | 'automation' | 'ui-enhancement' | 'developer-tools' | 'e-commerce' | 'seo' | 'social' | 'media'
@@ -167,13 +170,38 @@ const categories = [
 
 // Empty arrays for competitive upgrade components (real data comes from backend)
 const aiInsights: { id: string; type: 'success' | 'warning' | 'info' | 'error'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
-const collaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }[] = []
 const predictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: string }[] = []
-const activities: { id: string; user: { id: string; name: string; avatar?: string }; action: string; target?: { type: string; name: string }; timestamp: string; type: 'comment' | 'update' | 'create' | 'delete' | 'mention' | 'assignment' | 'status_change' | 'milestone' | 'integration' }[] = []
 
 // Quick actions are now handled with real functions inside the component
 
 export default function PluginsClient() {
+  // Team and activity data hooks
+  const { members: teamMembers } = useTeam()
+  const { logs: activityLogs } = useActivityLogs()
+
+  // Transform team members to collaborators format
+  const collaborators = teamMembers.map(member => ({
+    id: member.id,
+    name: member.name,
+    avatar: member.avatar_url || '',
+    status: member.status === 'active' ? 'online' as const : member.status === 'on_leave' ? 'away' as const : 'offline' as const,
+    role: member.role || 'Team Member'
+  }))
+
+  // Transform activity logs to activities format
+  const activities = activityLogs.slice(0, 10).map(log => ({
+    id: log.id,
+    user: {
+      id: log.user_id || 'system',
+      name: log.user_name || 'System',
+      avatar: undefined
+    },
+    action: log.action,
+    target: log.resource_name ? { type: log.resource_type || 'resource', name: log.resource_name } : undefined,
+    timestamp: log.created_at,
+    type: log.activity_type === 'create' ? 'create' as const : log.activity_type === 'update' ? 'update' as const : log.activity_type === 'delete' ? 'delete' as const : 'update' as const
+  }))
+
   const [activeTab, setActiveTab] = useState('discover')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [searchQuery, setSearchQuery] = useState('')

@@ -66,8 +66,9 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-
-
+// Real database hooks for collaboration and activity data
+import { useTeam } from '@/lib/hooks/use-team'
+import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
 
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
@@ -251,14 +252,10 @@ interface RenewalsClientProps {
   initialRenewals?: any[]
 }
 
-// Empty arrays for competitive upgrade components (real data comes from props or API)
+// Empty arrays for competitive upgrade components - collaborators and activities now come from hooks
 const renewalsAIInsights: { id: string; type: 'success' | 'warning' | 'info'; title: string; description: string; priority: 'low' | 'medium' | 'high'; timestamp: string; category: string }[] = []
 
-const renewalsCollaborators: { id: string; name: string; avatar: string; status: 'online' | 'away' | 'offline'; role: string }[] = []
-
 const renewalsPredictions: { id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down'; impact: 'low' | 'medium' | 'high' }[] = []
-
-const renewalsActivities: { id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'warning' | 'info' }[] = []
 
 // Quick actions are defined inside component to access state setters
 
@@ -268,6 +265,31 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
   // Data hooks
   const { renewals: dbRenewals, stats: renewalStats, isLoading, error, refetch } = useRenewals()
   const { updateRenewal, deleteRenewal, isUpdating, isDeleting } = useRenewalMutations()
+
+  // Real-time collaboration and activity data
+  const { members: teamMembers } = useTeam()
+  const { logs: activityLogs } = useActivityLogs()
+
+  // Map team members to collaborators format
+  const renewalsCollaborators = useMemo(() =>
+    teamMembers?.map(m => ({
+      id: m.id,
+      name: m.name,
+      avatar: m.avatar_url || '',
+      status: m.status === 'active' ? 'online' as const : m.status === 'on_leave' ? 'away' as const : 'offline' as const,
+      role: m.role || 'Team Member'
+    })) || [], [teamMembers])
+
+  // Map activity logs to activities format
+  const renewalsActivities = useMemo(() =>
+    activityLogs?.slice(0, 20).map(l => ({
+      id: l.id,
+      user: l.user_name || 'System',
+      action: l.action,
+      target: l.resource_name || '',
+      timestamp: l.created_at,
+      type: (l.status === 'success' ? 'success' : l.status === 'failed' ? 'warning' : 'info') as 'success' | 'warning' | 'info'
+    })) || [], [activityLogs])
 
   const [activeTab, setActiveTab] = useState('overview')
   const [settingsTab, setSettingsTab] = useState('general')

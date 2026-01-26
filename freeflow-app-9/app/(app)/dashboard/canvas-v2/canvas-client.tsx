@@ -5,6 +5,8 @@ import { useState, useMemo, useCallback, useRef } from 'react'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { useCanvas, type Canvas, type CanvasType, type CanvasStatus } from '@/lib/hooks/use-canvas'
+import { useTeam } from '@/lib/hooks/use-team'
+import { useActivityLogs, type ActivityLog } from '@/lib/hooks/use-activity-logs'
 import { shareContent, apiPost } from '@/lib/button-handlers'
 import {
   Layout, Square, Circle, Minus, Type, Image, StickyNote,
@@ -151,6 +153,10 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
   const { canvases, loading, error, createCanvas, updateCanvas, refetch } = useCanvas({ canvasType: 'all', status: 'all' })
   const displayCanvases = canvases
 
+  // Team and activity hooks for competitive upgrade components
+  const { members: dbTeamMembers } = useTeam()
+  const { logs: dbActivityLogs } = useActivityLogs()
+
   const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const canvasRef = useRef<HTMLDivElement>(null)
@@ -185,6 +191,54 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
 
   // Team members - data loaded from Supabase
   const teamMembers: TeamMember[] = []
+
+  // Map team members to collaborators format for competitive upgrade components
+  const activeCollaborators: Collaborator[] = useMemo(() => {
+    if (dbTeamMembers && dbTeamMembers.length > 0) {
+      return dbTeamMembers.map(member => ({
+        id: member.id,
+        name: member.name,
+        avatar: member.avatar_url || undefined,
+        status: member.status === 'active' ? 'online' as const : member.status === 'on_leave' ? 'away' as const : 'offline' as const,
+        role: member.role || 'member',
+        lastActive: member.updated_at
+      }))
+    }
+    return canvasCollaborators
+  }, [dbTeamMembers])
+
+  // Map activity logs to activity feed format for competitive upgrade components
+  const activeActivities: ActivityItem[] = useMemo(() => {
+    if (dbActivityLogs && dbActivityLogs.length > 0) {
+      const typeMap: Record<string, ActivityItem['type']> = {
+        create: 'create',
+        update: 'update',
+        delete: 'delete',
+        view: 'comment',
+        comment: 'comment',
+        login: 'status_change',
+        logout: 'status_change',
+        export: 'milestone',
+        import: 'integration'
+      }
+      return dbActivityLogs.slice(0, 20).map(log => ({
+        id: log.id,
+        user: {
+          id: log.user_id || 'unknown',
+          name: log.user_name || 'System',
+          avatar: undefined
+        },
+        action: log.action,
+        target: log.resource_name ? {
+          type: log.resource_type || 'item',
+          name: log.resource_name
+        } : undefined,
+        timestamp: log.created_at,
+        type: typeMap[log.activity_type] || 'update'
+      }))
+    }
+    return canvasActivities
+  }, [dbActivityLogs])
 
   const tools = [
     { id: 'select' as ToolType, name: 'Select', icon: MousePointer, shortcut: 'V' },
@@ -2003,7 +2057,7 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={canvasCollaborators}
+              collaborators={activeCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
@@ -2015,7 +2069,7 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={canvasActivities}
+            activities={activeActivities}
             title="Canvas Activity"
             maxItems={5}
           />
