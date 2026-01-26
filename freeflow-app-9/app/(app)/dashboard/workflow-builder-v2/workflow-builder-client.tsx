@@ -6,6 +6,7 @@
 import { createClient } from '@/lib/supabase/client'
 
 import React, { useState, useMemo, useCallback, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -387,6 +388,7 @@ const mockWorkflowActivities: { id: string; user: string; action: string; target
 const mockWorkflowQuickActions: { id: string; label: string; icon: string; action: () => Promise<void>; variant: 'default' | 'outline' }[] = []
 
 export default function WorkflowBuilderClient() {
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState('workflows')
   const [settingsTab, setSettingsTab] = useState('general')
   const [searchQuery, setSearchQuery] = useState('')
@@ -1392,6 +1394,27 @@ export default function WorkflowBuilderClient() {
               <div>
                 <h1 className="text-3xl font-bold">Workflow Builder</h1>
                 <p className="text-violet-100">n8n-Level Visual Automation Platform</p>
+                {/* Quick Links to Related Modules */}
+                <div className="flex items-center gap-2 mt-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-white/90 hover:text-white hover:bg-white/20 h-7 text-xs"
+                    onClick={() => router.push('/dashboard/workflows-v2')}
+                  >
+                    <GitBranch className="h-3 w-3 mr-1" />
+                    Workflows
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-white/90 hover:text-white hover:bg-white/20 h-7 text-xs"
+                    onClick={() => router.push('/dashboard/automations-v2')}
+                  >
+                    <Zap className="h-3 w-3 mr-1" />
+                    Automations
+                  </Button>
+                </div>
               </div>
             </div>
             <div className="flex items-center gap-3">

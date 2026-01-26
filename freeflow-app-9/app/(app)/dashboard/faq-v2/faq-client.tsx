@@ -54,7 +54,9 @@ import {
   ChevronUp,
   ChevronDown,
   HelpCircle,
-  Ticket
+  Ticket,
+  GraduationCap,
+  BookOpen,
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -68,6 +70,9 @@ import {
   ActivityFeed,
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
+
+import { useTeam } from '@/lib/hooks/use-team'
+import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -268,6 +273,8 @@ export default function FAQClient() {
 
   // Supabase hook for FAQs
   const { faqs: dbFaqs, stats: dbStats, loading: isLoading, error, refetch, createFAQ, updateFAQ, deleteFAQ, markHelpful } = useFAQs()
+  const { members: teamMembers } = useTeam()
+  const { logs: activityLogs } = useActivityLogs()
 
   // Convert DB FAQs to Article format for display
   const articles = useMemo(() => {
@@ -736,6 +743,27 @@ export default function FAQClient() {
               </div>
             </div>
             <div className="flex items-center gap-3">
+              {/* Related Knowledge & Learning Navigation */}
+              <div className="flex items-center gap-2">
+                <Link href="/dashboard/learning-v2">
+                  <Button variant="secondary" size="sm" className="gap-2 bg-white/20 hover:bg-white/30 text-white border-0">
+                    <GraduationCap className="w-4 h-4" />
+                    <span className="hidden md:inline">Learning</span>
+                  </Button>
+                </Link>
+                <Link href="/dashboard/docs-v2">
+                  <Button variant="secondary" size="sm" className="gap-2 bg-white/20 hover:bg-white/30 text-white border-0">
+                    <FileText className="w-4 h-4" />
+                    <span className="hidden md:inline">Docs</span>
+                  </Button>
+                </Link>
+                <Link href="/dashboard/tutorials-v2">
+                  <Button variant="secondary" size="sm" className="gap-2 bg-white/20 hover:bg-white/30 text-white border-0">
+                    <BookOpen className="w-4 h-4" />
+                    <span className="hidden md:inline">Tutorials</span>
+                  </Button>
+                </Link>
+              </div>
               <Link href="/dashboard/support-v2">
                 <Button variant="secondary" size="sm" className="gap-2 bg-white/20 hover:bg-white/30 text-white border-0">
                   <HelpCircle className="w-4 h-4" />
@@ -2068,7 +2096,7 @@ export default function FAQClient() {
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={[]}
+              collaborators={teamMembers?.map(m => ({ id: m.id, name: m.name, avatar: m.avatar_url, status: m.status === 'active' ? 'online' : 'offline' })) || []}
               maxVisible={4}
             />
             <PredictiveAnalytics
@@ -2080,7 +2108,7 @@ export default function FAQClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={[]}
+            activities={activityLogs?.slice(0, 10).map(l => ({ id: l.id, type: l.activity_type, title: l.action, user: { name: l.user_name || 'System' }, timestamp: l.created_at })) || []}
             title="Content Activity"
             maxItems={5}
           />

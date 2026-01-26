@@ -31,6 +31,9 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import { useTeam } from '@/lib/hooks/use-team'
+import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
+
 // Stripe Marketplace Level Types
 interface AppListing {
   id: string
@@ -138,6 +141,8 @@ const categories: { id: AppCategory; name: string; icon: React.ReactNode; count:
 export default function IntegrationsMarketplaceClient({ initialIntegrations, initialStats }: IntegrationsMarketplaceClientProps) {
   const router = useRouter()
   const { integrations, stats, loading, error } = useMarketplaceIntegrations(initialIntegrations, initialStats)
+  const { members: teamMembers } = useTeam()
+  const { logs: activityLogs } = useActivityLogs()
   const [activeTab, setActiveTab] = useState('discover')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<AppCategory | 'all'>('all')
@@ -1870,7 +1875,7 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={[]}
+              collaborators={teamMembers?.map(m => ({ id: m.id, name: m.name, avatar: m.avatar_url, status: m.status === 'active' ? 'online' : 'offline' })) || []}
               maxVisible={4}
             />
             <PredictiveAnalytics
@@ -1882,7 +1887,7 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={[]}
+            activities={activityLogs?.slice(0, 10).map(l => ({ id: l.id, type: l.activity_type, title: l.action, user: { name: l.user_name || 'System' }, timestamp: l.created_at })) || []}
             title="Integration Activity"
             maxItems={5}
           />

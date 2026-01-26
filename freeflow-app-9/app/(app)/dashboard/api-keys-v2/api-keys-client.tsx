@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { useApiKeys, ApiKey as DBApiKey } from '@/lib/hooks/use-api-keys'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -23,7 +24,8 @@ import {
   Search, Filter, MoreHorizontal, Webhook, Zap, Activity,
   BarChart3, ExternalLink, Download,
   AlertTriangle, Fingerprint, ShieldCheck,
-  RotateCcw, History, FileText, Layers, Play, LayoutGrid, List, Loader2
+  RotateCcw, History, FileText, Layers, Play, LayoutGrid, List, Loader2,
+  Link2
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -278,6 +280,7 @@ const formatDate = (dateString: string): string => {
 // ============================================================================
 
 export default function ApiKeysClient() {
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState('dashboard')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedKey, setSelectedKey] = useState<ApiKey | null>(null)
@@ -684,6 +687,37 @@ export default function ApiKeysClient() {
               </CardContent>
             </Card>
           ))}
+        </div>
+
+        {/* Related Dashboards Navigation */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Quick Navigation</h3>
+            <ExternalLink className="w-4 h-4 text-gray-400" />
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => router.push('/dashboard/settings-v2')}
+              className="flex items-center gap-2 px-3 py-2 text-sm font-medium bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-slate-50 hover:border-slate-300 dark:hover:bg-slate-900/20 transition-colors"
+            >
+              <Settings className="w-4 h-4 text-slate-600" />
+              Settings
+            </button>
+            <button
+              onClick={() => router.push('/dashboard/third-party-integrations-v2')}
+              className="flex items-center gap-2 px-3 py-2 text-sm font-medium bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-purple-50 hover:border-purple-300 dark:hover:bg-purple-900/20 transition-colors"
+            >
+              <Link2 className="w-4 h-4 text-purple-600" />
+              Integrations
+            </button>
+            <button
+              onClick={() => router.push('/dashboard/webhooks-v2')}
+              className="flex items-center gap-2 px-3 py-2 text-sm font-medium bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-emerald-50 hover:border-emerald-300 dark:hover:bg-emerald-900/20 transition-colors"
+            >
+              <Webhook className="w-4 h-4 text-emerald-600" />
+              Webhooks
+            </button>
+          </div>
         </div>
 
         {/* Tabs */}

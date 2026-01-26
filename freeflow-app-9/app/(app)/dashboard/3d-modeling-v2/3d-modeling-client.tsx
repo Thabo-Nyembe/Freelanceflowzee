@@ -6,6 +6,8 @@ import { useState, useMemo, useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
 import { apiPost, downloadAsJson } from '@/lib/button-handlers'
 import { use3DModels, use3DModelMutations } from '@/lib/hooks/use-3d-models'
+import { useTeam } from '@/lib/hooks/use-team'
+import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
 import {
   Box,
   Layers,
@@ -178,6 +180,8 @@ export default function ThreeDModelingClient() {
   // Database integration
   const { models: dbModels } = use3DModels([], statusFilter !== 'all' ? { status: statusFilter } : {})
   const mutations = use3DModelMutations()
+  const { members: teamMembers } = useTeam()
+  const { logs: activityLogs } = useActivityLogs()
 
   // Expose mutations for future use
   void mutations
@@ -1890,7 +1894,7 @@ export default function ThreeDModelingClient() {
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={[]}
+              collaborators={teamMembers?.map(m => ({ id: m.id, name: m.name, avatar: m.avatar_url, status: m.status === 'active' ? 'online' : 'offline' })) || []}
               maxVisible={4}
             />
             <PredictiveAnalytics
@@ -1902,7 +1906,7 @@ export default function ThreeDModelingClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={[]}
+            activities={activityLogs?.slice(0, 10).map(l => ({ id: l.id, type: l.activity_type, title: l.action, user: { name: l.user_name || 'System' }, timestamp: l.created_at })) || []}
             title="3D Activity"
             maxItems={5}
           />

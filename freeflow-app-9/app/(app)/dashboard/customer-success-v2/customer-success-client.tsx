@@ -2,6 +2,8 @@
 
 import React, { useState, useMemo } from 'react'
 import { useCustomerSuccess, type CustomerSuccess } from '@/lib/hooks/use-customer-success'
+import { useTeam } from '@/lib/hooks/use-team'
+import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -233,6 +235,8 @@ function generateHealthReport(customers: Customer[]) {
 export default function CustomerSuccessClient() {
   // Use the customer success hook for data fetching
   const { customerSuccess: dbCustomerSuccess, isLoading: loading, error, refetch } = useCustomerSuccess()
+  const { members: teamMembers } = useTeam()
+  const { logs: activityLogs } = useActivityLogs()
 
   // Map DB data to UI types using useMemo
   const customers = useMemo(() => {
@@ -1691,7 +1695,7 @@ export default function CustomerSuccessClient() {
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={[]}
+              collaborators={teamMembers?.map(m => ({ id: m.id, name: m.name, avatar: m.avatar_url, status: m.status === 'active' ? 'online' : 'offline' })) || []}
               maxVisible={4}
             />
             <PredictiveAnalytics
@@ -1703,7 +1707,7 @@ export default function CustomerSuccessClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={[]}
+            activities={activityLogs?.slice(0, 10).map(l => ({ id: l.id, type: l.activity_type, title: l.action, user: { name: l.user_name || 'System' }, timestamp: l.created_at })) || []}
             title="Customer Activity"
             maxItems={5}
           />

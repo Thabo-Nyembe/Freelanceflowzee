@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 // Hooks used: useSettings, useState, useMemo, useEffect, useCallback
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { useSettings } from '@/hooks/use-settings'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -88,7 +89,8 @@ import {
   Trash,
   ShieldCheck,
   Ban,
-  BookOpen
+  BookOpen,
+  Users
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -311,6 +313,7 @@ const getSettingsQuickActions = (handleExportData: () => Promise<void>) => [
 
 export default function SettingsClient() {
   const supabase = createClient()
+  const router = useRouter()
 
   const [userId, setUserId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -1393,6 +1396,44 @@ export default function SettingsClient() {
               </CardContent>
             </Card>
           ))}
+        </div>
+
+        {/* Related Dashboards Navigation */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Quick Navigation</h3>
+            <ExternalLink className="w-4 h-4 text-gray-400" />
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => router.push('/dashboard/user-management-v2')}
+              className="flex items-center gap-2 px-3 py-2 text-sm font-medium bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-blue-50 hover:border-blue-300 dark:hover:bg-blue-900/20 transition-colors"
+            >
+              <Users className="w-4 h-4 text-blue-600" />
+              User Management
+            </button>
+            <button
+              onClick={() => router.push('/dashboard/roles-v2')}
+              className="flex items-center gap-2 px-3 py-2 text-sm font-medium bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-purple-50 hover:border-purple-300 dark:hover:bg-purple-900/20 transition-colors"
+            >
+              <Shield className="w-4 h-4 text-purple-600" />
+              Roles
+            </button>
+            <button
+              onClick={() => router.push('/dashboard/security-v2')}
+              className="flex items-center gap-2 px-3 py-2 text-sm font-medium bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-red-50 hover:border-red-300 dark:hover:bg-red-900/20 transition-colors"
+            >
+              <Lock className="w-4 h-4 text-red-600" />
+              Security
+            </button>
+            <button
+              onClick={() => router.push('/dashboard/api-keys-v2')}
+              className="flex items-center gap-2 px-3 py-2 text-sm font-medium bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-amber-50 hover:border-amber-300 dark:hover:bg-amber-900/20 transition-colors"
+            >
+              <Key className="w-4 h-4 text-amber-600" />
+              API Keys
+            </button>
+          </div>
         </div>
 
         {/* Main Tabs */}

@@ -6,6 +6,8 @@ import { useState, useMemo, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { useDeployments, type DeploymentEnvironment as HookDeploymentEnvironment } from '@/lib/hooks/use-deployments'
+import { useTeam } from '@/lib/hooks/use-team'
+import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -335,6 +337,8 @@ export default function DeploymentsClient() {
     rollbackDeployment,
     cancelDeployment
   } = useDeployments()
+  const { members: teamMembers } = useTeam()
+  const { logs: activityLogs } = useActivityLogs()
 
   const [deploymentForm, setDeploymentForm] = useState(defaultDeploymentForm)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
@@ -2305,7 +2309,7 @@ export default function DeploymentsClient() {
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={[]}
+              collaborators={teamMembers?.map(m => ({ id: m.id, name: m.name, avatar: m.avatar_url, status: m.status === 'active' ? 'online' : 'offline' })) || []}
               maxVisible={4}
             />
             <PredictiveAnalytics
@@ -2317,7 +2321,7 @@ export default function DeploymentsClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={[]}
+            activities={activityLogs?.slice(0, 10).map(l => ({ id: l.id, type: l.activity_type, title: l.action, user: { name: l.user_name || 'System' }, timestamp: l.created_at })) || []}
             title="Deploy Activity"
             maxItems={5}
           />

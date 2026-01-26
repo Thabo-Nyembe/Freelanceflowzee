@@ -4,6 +4,8 @@ import { toast } from 'sonner'
 // MIGRATED: Batch #13 - Removed mock data, using database hooks
 import { useComponentShowcases } from '@/lib/hooks/use-component-extended'
 import { useUIComponents } from '@/lib/hooks/use-ui-components'
+import { useTeam } from '@/lib/hooks/use-team'
+import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -151,6 +153,8 @@ export default function ComponentLibraryClient() {
   // MIGRATED: Database hooks for component data - no fallback
   const { components: dbComponents = [], stats: componentStats, loading: componentsLoading } = useUIComponents([])
   const { data: showcaseComponents = [], isLoading: showcasesLoading, refresh: refetchShowcases } = useComponentShowcases()
+  const { members: teamMembers } = useTeam()
+  const { logs: activityLogs } = useActivityLogs()
 
 
   const filteredComponents = useMemo(() => {
@@ -1730,7 +1734,7 @@ export default function App() {
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={[]}
+              collaborators={teamMembers?.map(m => ({ id: m.id, name: m.name, avatar: m.avatar_url, status: m.status === 'active' ? 'online' : 'offline' })) || []}
               maxVisible={4}
             />
             <PredictiveAnalytics
@@ -1742,7 +1746,7 @@ export default function App() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={[]}
+            activities={activityLogs?.slice(0, 10).map(l => ({ id: l.id, type: l.activity_type, title: l.action, user: { name: l.user_name || 'System' }, timestamp: l.created_at })) || []}
             title="Library Activity"
             maxItems={5}
           />

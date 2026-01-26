@@ -4,6 +4,7 @@
 // Hooks: useTutorials
 
 import React, { useState, useMemo, useCallback } from 'react'
+import Link from 'next/link'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -1058,6 +1059,21 @@ export default function TutorialsClient() {
               <p className="text-rose-100 mt-1">Master new skills with expert-led courses</p>
             </div>
             <div className="flex items-center gap-3">
+              {/* Related Knowledge & Learning Navigation */}
+              <div className="flex items-center gap-2">
+                <Link href="/dashboard/learning-v2">
+                  <Button variant="secondary" size="sm" className="gap-2 bg-white/20 hover:bg-white/30 text-white border-0">
+                    <GraduationCap className="w-4 h-4" />
+                    <span className="hidden md:inline">Learning</span>
+                  </Button>
+                </Link>
+                <Link href="/dashboard/docs-v2">
+                  <Button variant="secondary" size="sm" className="gap-2 bg-white/20 hover:bg-white/30 text-white border-0">
+                    <FileText className="w-4 h-4" />
+                    <span className="hidden md:inline">Docs</span>
+                  </Button>
+                </Link>
+              </div>
               <Button variant="secondary" className="bg-white/20 hover:bg-white/30 border-0" onClick={handleMyList}>
                 <Bookmark className="w-4 h-4 mr-2" />
                 My List

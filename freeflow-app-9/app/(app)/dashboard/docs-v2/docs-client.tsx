@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useMemo } from 'react'
+import Link from 'next/link'
 import { toast } from 'sonner'
 import { useDocs } from '@/lib/hooks/use-docs-extended'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -70,6 +71,9 @@ import {
   Palette,
   Type,
   Archive,
+  GraduationCap,
+  BookOpen,
+  HelpCircle,
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -423,6 +427,27 @@ export default function DocsClient() {
               </p>
             </div>
             <div className="flex items-center gap-3">
+              {/* Related Knowledge & Learning Navigation */}
+              <div className="flex items-center gap-2">
+                <Link href="/dashboard/learning-v2">
+                  <Button variant="secondary" size="sm" className="gap-2 bg-white/20 hover:bg-white/30 text-white border-0">
+                    <GraduationCap className="w-4 h-4" />
+                    <span className="hidden md:inline">Learning</span>
+                  </Button>
+                </Link>
+                <Link href="/dashboard/tutorials-v2">
+                  <Button variant="secondary" size="sm" className="gap-2 bg-white/20 hover:bg-white/30 text-white border-0">
+                    <BookOpen className="w-4 h-4" />
+                    <span className="hidden md:inline">Tutorials</span>
+                  </Button>
+                </Link>
+                <Link href="/dashboard/faq-v2">
+                  <Button variant="secondary" size="sm" className="gap-2 bg-white/20 hover:bg-white/30 text-white border-0">
+                    <HelpCircle className="w-4 h-4" />
+                    <span className="hidden md:inline">FAQ</span>
+                  </Button>
+                </Link>
+              </div>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/50" />
                 <Input

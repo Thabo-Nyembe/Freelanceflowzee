@@ -4,6 +4,7 @@
 // Hooks used: useState, useMemo, useCallback, useWebhooks
 
 import { useState, useMemo, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { useWebhooks, Webhook, WebhookEventType } from '@/lib/hooks/use-webhooks'
 import {
@@ -48,7 +49,10 @@ import {
   HardDrive,
   AlertOctagon,
   Sliders,
-  Loader2
+  Loader2,
+  ExternalLink,
+  Link2,
+  ScrollText
 } from 'lucide-react'
 
 
@@ -198,7 +202,7 @@ export default function WebhooksClient({
   initialEventTypes,
   initialStats
 }: WebhooksClientProps) {
-  // Supabase client
+  const router = useRouter()
 
   // Use the webhooks hook for CRUD operations
   const {
@@ -1093,6 +1097,37 @@ export default function WebhooksClient({
       </div>
 
       <div className="max-w-[1800px] mx-auto px-6 py-6">
+        {/* Related Dashboards Navigation */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 mb-6">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Quick Navigation</h3>
+            <ExternalLink className="w-4 h-4 text-gray-400" />
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => router.push('/dashboard/api-keys-v2')}
+              className="flex items-center gap-2 px-3 py-2 text-sm font-medium bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-slate-50 hover:border-slate-300 dark:hover:bg-slate-900/20 transition-colors"
+            >
+              <Key className="w-4 h-4 text-slate-600" />
+              API Keys
+            </button>
+            <button
+              onClick={() => router.push('/dashboard/third-party-integrations-v2')}
+              className="flex items-center gap-2 px-3 py-2 text-sm font-medium bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-purple-50 hover:border-purple-300 dark:hover:bg-purple-900/20 transition-colors"
+            >
+              <Link2 className="w-4 h-4 text-purple-600" />
+              Integrations
+            </button>
+            <button
+              onClick={() => router.push('/dashboard/logs-v2')}
+              className="flex items-center gap-2 px-3 py-2 text-sm font-medium bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-blue-50 hover:border-blue-300 dark:hover:bg-blue-900/20 transition-colors"
+            >
+              <ScrollText className="w-4 h-4 text-blue-600" />
+              Logs
+            </button>
+          </div>
+        </div>
+
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="bg-white dark:bg-gray-800 p-1 rounded-xl shadow-sm border dark:border-gray-700 mb-6">
             <TabsTrigger value="endpoints" className="rounded-lg data-[state=active]:bg-emerald-50 data-[state=active]:text-emerald-600 dark:data-[state=active]:bg-emerald-900/30">

@@ -4,6 +4,8 @@ import { createClient } from '@/lib/supabase/client'
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { useBookings, type Booking, type BookingType, type BookingStatus, type PaymentStatus } from '@/lib/hooks/use-bookings'
+import { useTeam } from '@/lib/hooks/use-team'
+import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -105,6 +107,8 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
     paymentStatus: paymentStatusFilter,
     enableRealtime: true
   })
+  const { members: teamMembers } = useTeam()
+  const { logs: activityLogs } = useActivityLogs()
 
   // Form state for new booking
   const [newBookingForm, setNewBookingForm] = useState({
@@ -142,8 +146,8 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
     { id: '5', name: 'Coaching Call', duration: 45, price: 100, color: 'amber', description: 'Personal coaching session', buffer: 10, maxCapacity: 1 }
   ]
 
-  // Team members
-  const teamMembers: TeamMember[] = [
+  // Team members for booking display (mock data for consultants)
+  const bookingTeamMembers: TeamMember[] = [
     { id: '1', name: 'Sarah Johnson', avatar: 'SJ', role: 'Lead Consultant', availability: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'], bookingsToday: 4 },
     { id: '2', name: 'Michael Chen', avatar: 'MC', role: 'Senior Consultant', availability: ['Mon', 'Tue', 'Wed', 'Thu'], bookingsToday: 3 },
     { id: '3', name: 'Emily Davis', avatar: 'ED', role: 'Consultant', availability: ['Tue', 'Wed', 'Thu', 'Fri'], bookingsToday: 5 },
@@ -205,7 +209,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
         buffer_after_minutes: selectedService.buffer,
         status: 'pending' as BookingStatus,
         provider_id: newBookingForm.teamMember || undefined,
-        provider_name: newBookingForm.teamMember ? teamMembers.find(m => m.id === newBookingForm.teamMember)?.name : undefined,
+        provider_name: newBookingForm.teamMember ? bookingTeamMembers.find(m => m.id === newBookingForm.teamMember)?.name : undefined,
         service_id: selectedService.id,
         service_name: selectedService.name,
         price: selectedService.price,
@@ -615,7 +619,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                               className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
                             >
                               <option value="">Auto-assign (Round Robin)</option>
-                              {teamMembers.map(member => (
+                              {bookingTeamMembers.map(member => (
                                 <option key={member.id} value={member.id}>{member.name}</option>
                               ))}
                             </select>
@@ -1118,7 +1122,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                             </Button>
                           </div>
                           <div className="space-y-3">
-                            {teamMembers.map(member => (
+                            {bookingTeamMembers.map(member => (
                               <div key={member.id} className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-600">
                                 <div className="flex items-center gap-4">
                                   <div className="h-12 w-12 bg-gradient-to-br from-sky-500 to-indigo-600 text-white rounded-full flex items-center justify-center font-medium text-lg">
@@ -2325,7 +2329,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={[]}
+              collaborators={teamMembers?.map(m => ({ id: m.id, name: m.name, avatar: m.avatar_url, status: m.status === 'active' ? 'online' : 'offline' })) || []}
               maxVisible={4}
             />
             <PredictiveAnalytics
@@ -2337,7 +2341,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={[]}
+            activities={activityLogs?.slice(0, 10).map(l => ({ id: l.id, type: l.activity_type, title: l.action, user: { name: l.user_name || 'System' }, timestamp: l.created_at })) || []}
             title="Booking Activity"
             maxItems={5}
           />

@@ -5,6 +5,7 @@
 // Extended hooks available: useLearningPaths, useMyCertificates, useLearningSearch from use-learning-extended
 
 import { useState, useMemo } from 'react'
+import Link from 'next/link'
 import { toast } from 'sonner'
 import { useLearning, useCourses, useUserProgress, useCollections } from '@/lib/hooks/use-learning'
 import { useTeam } from '@/lib/hooks/use-team'
@@ -65,7 +66,8 @@ import {
   RefreshCw,
   AlertTriangle,
   Mail,
-  Globe
+  Globe,
+  HelpCircle
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -655,6 +657,27 @@ export default function LearningClient() {
               </div>
             </div>
             <div className="flex items-center gap-4">
+              {/* Related Knowledge & Learning Navigation */}
+              <div className="flex items-center gap-2">
+                <Link href="/dashboard/tutorials-v2">
+                  <Button variant="secondary" size="sm" className="gap-2 bg-white/20 hover:bg-white/30 text-white border-0">
+                    <BookOpen className="w-4 h-4" />
+                    <span className="hidden md:inline">Tutorials</span>
+                  </Button>
+                </Link>
+                <Link href="/dashboard/docs-v2">
+                  <Button variant="secondary" size="sm" className="gap-2 bg-white/20 hover:bg-white/30 text-white border-0">
+                    <FileText className="w-4 h-4" />
+                    <span className="hidden md:inline">Docs</span>
+                  </Button>
+                </Link>
+                <Link href="/dashboard/faq-v2">
+                  <Button variant="secondary" size="sm" className="gap-2 bg-white/20 hover:bg-white/30 text-white border-0">
+                    <HelpCircle className="w-4 h-4" />
+                    <span className="hidden md:inline">FAQ</span>
+                  </Button>
+                </Link>
+              </div>
               <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-xl px-4 py-2">
                 <Flame className="w-5 h-5 text-orange-300" />
                 <div>

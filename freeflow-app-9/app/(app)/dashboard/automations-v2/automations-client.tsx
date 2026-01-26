@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/client'
 import React, { useState, useMemo, useEffect, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 
 // Initialize Supabase client once at module level
 const supabase = createClient()
@@ -23,7 +24,7 @@ import {
   Workflow, Play, Plus, Settings, Download, Search,
   Zap, GitBranch, Clock, CheckCircle2, XCircle, Activity,
   Code, Database, Mail, Webhook, FileText, Users, Slack,
-  Globe, ShoppingCart, CreditCard, Key, Terminal, Cloud, Bot, Sparkles,
+  Globe, ShoppingCart, CreditCard, Key, Terminal, Cloud, Bot, Sparkles, Plug,
   RotateCcw, Copy, Trash2, MoreVertical, Eye, Edit2, History, Layers,
   Filter, TrendingUp, AlertTriangle, RefreshCw, Share2, Star, BarChart3, Cpu, Gauge, Network,
   Bell, MessageSquare, ExternalLink, PlayCircle, PauseCircle,
@@ -288,6 +289,7 @@ const initialFormState: WorkflowFormState = {
 // ============================================================================
 
 export default function AutomationsClient({ initialWorkflows }: { initialWorkflows: AutomationWorkflow[] }) {
+  const router = useRouter()
   // Team and activity data hooks
   const { members: teamMembers } = useTeam()
   const { logs: activityLogs } = useActivityLogs()
@@ -831,6 +833,27 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                 <p className="text-white/80 max-w-xl">
                   Build powerful automations with 400+ apps, AI nodes, visual workflow builder, and real-time execution monitoring
                 </p>
+                {/* Quick Links to Related Modules */}
+                <div className="flex items-center gap-2 mt-4">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-white/90 hover:text-white hover:bg-white/20"
+                    onClick={() => router.push('/dashboard/workflows-v2')}
+                  >
+                    <Workflow className="h-4 w-4 mr-2" />
+                    Workflows
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-white/90 hover:text-white hover:bg-white/20"
+                    onClick={() => router.push('/dashboard/third-party-integrations-v2')}
+                  >
+                    <Plug className="h-4 w-4 mr-2" />
+                    Integrations
+                  </Button>
+                </div>
               </div>
               <div className="flex items-center gap-3">
                 <Dialog open={showNewWorkflow} onOpenChange={setShowNewWorkflow}>

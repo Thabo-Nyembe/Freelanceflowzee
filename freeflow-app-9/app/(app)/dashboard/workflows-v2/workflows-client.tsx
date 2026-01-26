@@ -3,6 +3,7 @@
 // Hooks used: useWorkflows
 
 import React, { useState, useMemo, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { useWorkflows } from '@/lib/hooks/use-workflows'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -68,7 +69,8 @@ import {
   Cpu,
   Archive,
   Download,
-  Loader2
+  Loader2,
+  Workflow
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -82,6 +84,9 @@ import {
   ActivityFeed,
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
+
+import { useTeam } from '@/lib/hooks/use-team'
+import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -239,6 +244,7 @@ const getStepIcon = (type: WorkflowStep['type']) => {
 // ============================================================================
 
 export default function WorkflowsClient() {
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState('workflows')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedWorkflow, setSelectedWorkflow] = useState<Workflow | null>(null)
@@ -274,6 +280,8 @@ export default function WorkflowsClient() {
     pauseWorkflow,
     resumeWorkflow
   } = useWorkflows()
+  const { members: teamMembers } = useTeam()
+  const { logs: activityLogs } = useActivityLogs()
 
   // Fetch workflows on mount
   useEffect(() => {
@@ -607,6 +615,36 @@ export default function WorkflowsClient() {
               <div>
                 <h1 className="text-2xl font-bold">Workflows</h1>
                 <p className="text-sm text-muted-foreground">Zapier-level automation platform</p>
+                {/* Quick Links to Related Modules */}
+                <div className="flex items-center gap-2 mt-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 text-xs"
+                    onClick={() => router.push('/dashboard/automations-v2')}
+                  >
+                    <Zap className="h-3 w-3 mr-1" />
+                    Automations
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 text-xs"
+                    onClick={() => router.push('/dashboard/workflow-builder-v2')}
+                  >
+                    <Workflow className="h-3 w-3 mr-1" />
+                    Workflow Builder
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 text-xs"
+                    onClick={() => router.push('/dashboard/templates-v2')}
+                  >
+                    <Layers className="h-3 w-3 mr-1" />
+                    Templates
+                  </Button>
+                </div>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -1843,7 +1881,7 @@ export default function WorkflowsClient() {
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={[]}
+              collaborators={teamMembers?.map(m => ({ id: m.id, name: m.name, avatar: m.avatar_url, status: m.status === 'active' ? 'online' : 'offline' })) || []}
               maxVisible={4}
             />
             <PredictiveAnalytics
@@ -1855,7 +1893,7 @@ export default function WorkflowsClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={[]}
+            activities={activityLogs?.slice(0, 10).map(l => ({ id: l.id, type: l.activity_type, title: l.action, user: { name: l.user_name || 'System' }, timestamp: l.created_at })) || []}
             title="Workflow Activity"
             maxItems={5}
           />

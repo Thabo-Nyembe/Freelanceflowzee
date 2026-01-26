@@ -73,6 +73,9 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import { useTeam } from '@/lib/hooks/use-team'
+import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
+
 // Okta-level types
 type UserStatus = 'active' | 'pending' | 'staged' | 'suspended' | 'deprovisioned' | 'locked'
 type GroupType = 'okta' | 'app' | 'built_in' | 'custom'
@@ -279,6 +282,8 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
   const { create: createRoleDb, update: updateRoleDb, remove: deleteRoleDb, loading: roleMutationLoading } = useRoleMutations(() => refetchRoles())
   const { create: createPermissionDb, update: updatePermissionDb, loading: permissionMutationLoading } = usePermissionMutations(() => refetchPermissions())
   const { create: createAssignmentDb, update: updateAssignmentDb, loading: assignmentMutationLoading } = useRoleAssignmentMutations(() => refetchAssignments())
+  const { members: teamMembers } = useTeam()
+  const { logs: activityLogs } = useActivityLogs()
 
   // Combined loading and error states
   const dataLoading = rolesLoading || permissionsLoading || assignmentsLoading
@@ -2419,7 +2424,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={[]}
+              collaborators={teamMembers?.map(m => ({ id: m.id, name: m.name, avatar: m.avatar_url, status: m.status === 'active' ? 'online' : 'offline' })) || []}
               maxVisible={4}
             />
             <PredictiveAnalytics
@@ -2431,7 +2436,7 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={[]}
+            activities={activityLogs?.slice(0, 10).map(l => ({ id: l.id, type: l.activity_type, title: l.action, user: { name: l.user_name || 'System' }, timestamp: l.created_at })) || []}
             title="Security Activity"
             maxItems={5}
           />

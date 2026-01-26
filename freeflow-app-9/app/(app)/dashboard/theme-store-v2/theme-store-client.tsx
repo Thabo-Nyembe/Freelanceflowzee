@@ -39,6 +39,9 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import { useTeam } from '@/lib/hooks/use-team'
+import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
+
 // Types
 type ThemeStatus = 'active' | 'available' | 'installed' | 'preview' | 'deprecated'
 type ThemeCategory = 'minimal' | 'professional' | 'creative' | 'dark' | 'light' | 'colorful' | 'modern' | 'classic' | 'e-commerce' | 'portfolio' | 'blog' | 'dashboard'
@@ -164,6 +167,8 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
 
   // Supabase real-time data
   const { themes: themesData, isLoading } = useThemesData()
+  const { members: teamMembers } = useTeam()
+  const { logs: activityLogs } = useActivityLogs()
 
   // Transform Supabase data to match extended theme format or use empty array
   const themes: ThemeExtended[] = useMemo(() => (themesData || []).map((t: any) => ({
@@ -2189,7 +2194,7 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={[]}
+              collaborators={teamMembers?.map(m => ({ id: m.id, name: m.name, avatar: m.avatar_url, status: m.status === 'active' ? 'online' : 'offline' })) || []}
               maxVisible={4}
             />
             <PredictiveAnalytics
@@ -2201,7 +2206,7 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={[]}
+            activities={activityLogs?.slice(0, 10).map(l => ({ id: l.id, type: l.activity_type, title: l.action, user: { name: l.user_name || 'System' }, timestamp: l.created_at })) || []}
             title="Marketplace Activity"
             maxItems={5}
           />

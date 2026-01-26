@@ -3,6 +3,8 @@
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useCiCd, type CiCd, type PipelineType, type PipelineStatus } from '@/lib/hooks/use-ci-cd'
+import { useTeam } from '@/lib/hooks/use-team'
+import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
 import { toast } from 'sonner'
 import { downloadAsJson, copyToClipboard } from '@/lib/button-handlers'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -487,6 +489,8 @@ export default function CiCdClient() {
 
   // Use the CI/CD hook for data fetching and mutations
   const { pipelines: dbPipelines, loading, error, createPipeline, updatePipeline, deletePipeline, refetch } = useCiCd()
+  const { members: teamMembers } = useTeam()
+  const { logs: activityLogs } = useActivityLogs()
 
   // Create pipeline handler
   const handleCreatePipeline = async () => {
@@ -2192,7 +2196,7 @@ export default function CiCdClient() {
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={[]}
+              collaborators={teamMembers?.map(m => ({ id: m.id, name: m.name, avatar: m.avatar_url, status: m.status === 'active' ? 'online' : 'offline' })) || []}
               maxVisible={4}
             />
             <PredictiveAnalytics
@@ -2204,7 +2208,7 @@ export default function CiCdClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={[]}
+            activities={activityLogs?.slice(0, 10).map(l => ({ id: l.id, type: l.activity_type, title: l.action, user: { name: l.user_name || 'System' }, timestamp: l.created_at })) || []}
             title="Pipeline Activity"
             maxItems={5}
           />

@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 const supabase = createClient()
 
 import React, { useState, useMemo } from 'react'
+import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -186,6 +187,7 @@ const emptyActivities: { id: string; user: string; action: string; target: strin
 // Quick actions will be defined inside the component to access state setters
 
 export default function ThirdPartyIntegrationsClient() {
+  const router = useRouter()
   const [apps] = useState<IntegrationApp[]>(emptyApps)
   const [connections] = useState<Connection[]>(emptyConnections)
   const [zaps] = useState<Zap[]>(emptyZaps)
@@ -898,6 +900,36 @@ export default function ThirdPartyIntegrationsClient() {
               <p className="mt-2 text-white/80">
                 Connect your apps and automate workflows
               </p>
+              {/* Quick Links to Related Modules */}
+              <div className="flex items-center gap-2 mt-3">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-white/90 hover:text-white hover:bg-white/20 h-7 text-xs"
+                  onClick={() => router.push('/dashboard/automations-v2')}
+                >
+                  <Workflow className="h-3 w-3 mr-1" />
+                  Automations
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-white/90 hover:text-white hover:bg-white/20 h-7 text-xs"
+                  onClick={() => router.push('/dashboard/webhooks-v2')}
+                >
+                  <Plug className="h-3 w-3 mr-1" />
+                  Webhooks
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-white/90 hover:text-white hover:bg-white/20 h-7 text-xs"
+                  onClick={() => router.push('/dashboard/api-keys-v2')}
+                >
+                  <Key className="h-3 w-3 mr-1" />
+                  API Keys
+                </Button>
+              </div>
             </div>
             <Button className="bg-white text-orange-600 hover:bg-white/90" onClick={() => setShowCreateZapDialog(true)}>
               <Plus className="h-4 w-4 mr-2" />

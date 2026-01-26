@@ -50,6 +50,9 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import { useTeam } from '@/lib/hooks/use-team'
+import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
+
 // Types
 type ProductStatus = 'active' | 'draft' | 'archived' | 'out_of_stock' | 'pending_review'
 type VendorStatus = 'active' | 'pending' | 'suspended' | 'verified' | 'featured'
@@ -336,6 +339,10 @@ export default function MarketplaceClient() {
   // Coupon hooks
   const { create: createCouponMutation, isLoading: creatingCoupon } = useCreateCoupon()
   const { data: dbCoupons, refresh: refreshCoupons } = useCoupons()
+
+  // Team and activity hooks
+  const { members: teamMembers } = useTeam()
+  const { logs: activityLogs } = useActivityLogs()
 
   // Combined loading state
   const isLoading = loadingApps || loadingReviews || loadingFeatured || loadingOrders
@@ -2112,7 +2119,7 @@ export default function MarketplaceClient() {
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={[]}
+              collaborators={teamMembers?.map(m => ({ id: m.id, name: m.name, avatar: m.avatar_url, status: m.status === 'active' ? 'online' : 'offline' })) || []}
               maxVisible={4}
             />
             <PredictiveAnalytics
@@ -2124,7 +2131,7 @@ export default function MarketplaceClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={[]}
+            activities={activityLogs?.slice(0, 10).map(l => ({ id: l.id, type: l.activity_type, title: l.action, user: { name: l.user_name || 'System' }, timestamp: l.created_at })) || []}
             title="Marketplace Activity"
             maxItems={5}
           />

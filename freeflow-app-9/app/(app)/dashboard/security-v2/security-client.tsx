@@ -8,6 +8,7 @@ const supabase = createClient()
 // Hooks: useSecurity
 
 import React, { useState, useMemo, useEffect, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { useSecurity, SecuritySettings, SecurityEvent, UserSession } from '@/lib/hooks/use-security'
 import { Loader2 } from 'lucide-react'
@@ -60,7 +61,9 @@ import {
   ArrowDownRight,
   Download,
   Upload,
-  Share2
+  Share2,
+  ClipboardList,
+  ScrollText
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -337,7 +340,7 @@ const createSecurityQuickActions = (
 // ============================================================================
 
 export default function SecurityClient() {
-
+  const router = useRouter()
 
   // Use security hook for real CRUD operations
   const {
@@ -916,6 +919,37 @@ export default function SecurityClient() {
               <p className="text-xs font-medium mt-1 text-gray-900 dark:text-white">{action.label}</p>
             </Card>
           ))}
+        </div>
+
+        {/* Related Dashboards Navigation */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Quick Navigation</h3>
+            <ExternalLink className="w-4 h-4 text-gray-400" />
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => router.push('/dashboard/settings-v2')}
+              className="flex items-center gap-2 px-3 py-2 text-sm font-medium bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-slate-50 hover:border-slate-300 dark:hover:bg-slate-900/20 transition-colors"
+            >
+              <Settings className="w-4 h-4 text-slate-600" />
+              Settings
+            </button>
+            <button
+              onClick={() => router.push('/dashboard/security-audit-v2')}
+              className="flex items-center gap-2 px-3 py-2 text-sm font-medium bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-amber-50 hover:border-amber-300 dark:hover:bg-amber-900/20 transition-colors"
+            >
+              <ClipboardList className="w-4 h-4 text-amber-600" />
+              Security Audit
+            </button>
+            <button
+              onClick={() => router.push('/dashboard/logs-v2')}
+              className="flex items-center gap-2 px-3 py-2 text-sm font-medium bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-blue-50 hover:border-blue-300 dark:hover:bg-blue-900/20 transition-colors"
+            >
+              <ScrollText className="w-4 h-4 text-blue-600" />
+              Access Logs
+            </button>
+          </div>
         </div>
 
         {/* Loading State */}

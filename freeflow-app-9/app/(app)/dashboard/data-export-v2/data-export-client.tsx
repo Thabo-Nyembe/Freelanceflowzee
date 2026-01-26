@@ -35,6 +35,8 @@ import {
 
 // MIGRATED: Batch #13 - Removed mock data, using database hooks
 import { useDataExports } from '@/lib/hooks/use-data-exports'
+import { useTeam } from '@/lib/hooks/use-team'
+import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
 
 // Initialize Supabase client once at module level
 const supabase = createClient()
@@ -202,6 +204,8 @@ export default function DataExportClient() {
   // MIGRATED: Batch #13 - Removed mock data, using database hooks
   // Fetch data exports from database via hook
   const { data: dataExports = [], isLoading: loading, error: exportsError, refetch: fetchDataExports } = useDataExports()
+  const { members: teamMembers } = useTeam()
+  const { logs: activityLogs } = useActivityLogs()
 
   const [formData, setFormData] = useState({
     export_name: '',
@@ -2195,7 +2199,7 @@ export default function DataExportClient() {
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={[]}
+              collaborators={teamMembers?.map(m => ({ id: m.id, name: m.name, avatar: m.avatar_url, status: m.status === 'active' ? 'online' : 'offline' })) || []}
               maxVisible={4}
             />
             <PredictiveAnalytics
@@ -2207,7 +2211,7 @@ export default function DataExportClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={[]}
+            activities={activityLogs?.slice(0, 10).map(l => ({ id: l.id, type: l.activity_type, title: l.action, user: { name: l.user_name || 'System' }, timestamp: l.created_at })) || []}
             title="Pipeline Activity"
             maxItems={5}
           />
