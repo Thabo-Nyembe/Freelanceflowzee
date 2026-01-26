@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -64,7 +64,11 @@ import {
 import { useTeam } from '@/lib/hooks/use-team'
 import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
 
-import { useProducts, useProductStats, type Product } from '@/lib/hooks/use-products'
+import { useProducts, useProductStats, useProductMutations, type Product, type ProductCategory, type ProductStatus as DBProductStatus, type BillingCycle } from '@/lib/hooks/use-products'
+import { createClient } from '@/lib/supabase/client'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 // Stripe-level types
 type ProductStatus = 'active' | 'draft' | 'archived' | 'discontinued'
@@ -194,16 +198,90 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
   const [localProducts, setLocalProducts] = useState<StripeProduct[]>([])
   const [localCoupons, setLocalCoupons] = useState<Coupon[]>([])
   const [localTaxRates, setLocalTaxRates] = useState<TaxRate[]>([])
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Form state for product creation/editing
+  const [productForm, setProductForm] = useState({
+    name: '',
+    description: '',
+    category: 'subscription' as ProductCategory,
+    status: 'draft' as DBProductStatus,
+    price: 0,
+    currency: 'USD',
+    billing_cycle: 'monthly' as BillingCycle,
+    features: [] as string[],
+    newFeature: '',
+  })
+
+  // Form state for variant creation
+  const [variantForm, setVariantForm] = useState({
+    variant_name: '',
+    sku: '',
+    price: 0,
+    stock_quantity: 0,
+    track_inventory: true,
+  })
+
+  // Form state for pricing
+  const [pricingForm, setPricingForm] = useState({
+    nickname: '',
+    unitAmount: 0,
+    currency: 'usd',
+    type: 'one_time' as PricingType,
+    billingInterval: 'month' as BillingInterval,
+    trialDays: 0,
+    taxBehavior: 'exclusive' as TaxBehavior,
+  })
+
+  // Form state for coupon
+  const [couponForm, setCouponForm] = useState({
+    name: '',
+    percentOff: 0,
+    amountOff: 0,
+    duration: 'once' as 'once' | 'repeating' | 'forever',
+    maxRedemptions: 0,
+  })
+
+  const supabase = createClient()
 
   const { data: apiProducts, refetch, loading: productsLoading } = useProducts({
-    status: selectedCategory === 'all' ? undefined : selectedCategory,
+    status: selectedCategory === 'all' ? undefined : selectedCategory as DBProductStatus,
     searchQuery: searchQuery || undefined
   })
   const { stats } = useProductStats()
+  const { mutate: mutateProduct, remove: removeProduct, loading: mutationLoading } = useProductMutations()
 
   // Team and activity data hooks
   const { members: teamMembers } = useTeam()
   const { logs: activityLogs } = useActivityLogs()
+
+  // Sync API products to local state for UI operations
+  useEffect(() => {
+    if (apiProducts && apiProducts.length > 0) {
+      const transformedProducts: StripeProduct[] = apiProducts.map((p: Product) => ({
+        id: p.id,
+        name: p.product_name,
+        description: p.description || '',
+        images: p.images || [],
+        status: p.status as ProductStatus,
+        defaultPrice: undefined,
+        prices: [],
+        category: p.category || 'subscription',
+        metadata: p.metadata || {},
+        features: p.features?.map(f => f.name) || [],
+        shippable: false,
+        createdAt: p.created_at,
+        updatedAt: p.updated_at,
+        revenue: p.total_revenue || 0,
+        subscribers: p.active_users || 0,
+        mrr: p.billing_cycle === 'monthly' ? (p.price * (p.active_users || 0)) / 100 : 0,
+        churnRate: 0,
+        conversionRate: 0,
+        averageOrderValue: p.price / 100,
+      }))
+      setLocalProducts(transformedProducts)
+    }
+  }, [apiProducts])
 
   // Calculate stats from local data
   const totalRevenue = localProducts.reduce((sum, p) => sum + p.revenue, 0)
@@ -240,13 +318,549 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
     }).format(amount / 100)
   }
 
-  // Handlers
+  // Reset form state
+  const resetProductForm = () => {
+    setProductForm({
+      name: '',
+      description: '',
+      category: 'subscription',
+      status: 'draft',
+      price: 0,
+      currency: 'USD',
+      billing_cycle: 'monthly',
+      features: [],
+      newFeature: '',
+    })
+  }
+
+  // Handlers - Create Product
   const handleCreateProduct = () => {
+    resetProductForm()
     setShowCreateProduct(true)
   }
 
+  const handleSubmitCreateProduct = async () => {
+    if (!productForm.name.trim()) {
+      toast.error('Product name is required')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const result = await mutateProduct({
+        product_name: productForm.name,
+        description: productForm.description || null,
+        category: productForm.category,
+        status: productForm.status,
+        price: productForm.price * 100, // Convert to cents
+        currency: productForm.currency,
+        billing_cycle: productForm.billing_cycle,
+        features: productForm.features.map(f => ({ name: f, enabled: true })),
+        metadata: {},
+        images: [],
+        thumbnail_url: null,
+        active_users: 0,
+        total_revenue: 0,
+        average_rating: 0,
+        total_reviews: 0,
+        growth_rate: 0,
+      })
+
+      if (result) {
+        toast.success('Product created successfully')
+        setShowCreateProduct(false)
+        resetProductForm()
+        refetch()
+      }
+    } catch (error) {
+      console.error('Error creating product:', error)
+      toast.error('Failed to create product')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Update Product
+  const handleUpdateProduct = async (productId: string) => {
+    if (!productForm.name.trim()) {
+      toast.error('Product name is required')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const result = await mutateProduct({
+        product_name: productForm.name,
+        description: productForm.description || null,
+        category: productForm.category,
+        status: productForm.status,
+        price: productForm.price * 100,
+        currency: productForm.currency,
+        billing_cycle: productForm.billing_cycle,
+        features: productForm.features.map(f => ({ name: f, enabled: true })),
+      }, productId)
+
+      if (result) {
+        toast.success('Product updated successfully')
+        setShowEditProduct(false)
+        setSelectedProduct(null)
+        refetch()
+      }
+    } catch (error) {
+      console.error('Error updating product:', error)
+      toast.error('Failed to update product')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Delete Product
+  const handleDeleteProduct = async (productId: string, productName: string) => {
+    if (!confirm(`Are you sure you want to delete "${productName}"? This action cannot be undone.`)) {
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const success = await removeProduct(productId)
+      if (success) {
+        toast.success(`Product "${productName}" deleted successfully`)
+        setSelectedProduct(null)
+        refetch()
+      }
+    } catch (error) {
+      console.error('Error deleting product:', error)
+      toast.error('Failed to delete product')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Update Inventory / Stock Level
+  const handleUpdateInventory = async (productId: string, quantity: number) => {
+    setIsSubmitting(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to update inventory')
+        return
+      }
+
+      // Check if inventory record exists
+      const { data: existingInventory } = await supabase
+        .from('product_inventory')
+        .select('*')
+        .eq('product_id', productId)
+        .single()
+
+      if (existingInventory) {
+        // Update existing inventory
+        const { error } = await supabase
+          .from('product_inventory')
+          .update({
+            quantity,
+            updated_at: new Date().toISOString()
+          })
+          .eq('product_id', productId)
+
+        if (error) throw error
+      } else {
+        // Create new inventory record
+        const { error } = await supabase
+          .from('product_inventory')
+          .insert({
+            product_id: productId,
+            user_id: user.id,
+            quantity,
+            reserved_quantity: 0,
+            reorder_point: 10,
+          })
+
+        if (error) throw error
+      }
+
+      toast.success('Inventory updated successfully')
+      refetch()
+    } catch (error) {
+      console.error('Error updating inventory:', error)
+      toast.error('Failed to update inventory')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Add Product Variant
+  const handleAddVariant = async (productId: string) => {
+    if (!variantForm.variant_name.trim()) {
+      toast.error('Variant name is required')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to add variants')
+        return
+      }
+
+      const { error } = await supabase
+        .from('product_variants')
+        .insert({
+          product_id: productId,
+          user_id: user.id,
+          variant_name: variantForm.variant_name,
+          sku: variantForm.sku || null,
+          price: variantForm.price * 100,
+          stock_quantity: variantForm.stock_quantity,
+          track_inventory: variantForm.track_inventory,
+          compare_at_price: null,
+          attributes: {},
+          is_active: true,
+        })
+
+      if (error) throw error
+
+      toast.success('Variant added successfully')
+      setVariantForm({
+        variant_name: '',
+        sku: '',
+        price: 0,
+        stock_quantity: 0,
+        track_inventory: true,
+      })
+      refetch()
+    } catch (error) {
+      console.error('Error adding variant:', error)
+      toast.error('Failed to add variant')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Set Pricing
+  const handleSetPricing = async (productId: string) => {
+    if (!pricingForm.nickname.trim()) {
+      toast.error('Price nickname is required')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to set pricing')
+        return
+      }
+
+      const { error } = await supabase
+        .from('product_pricing')
+        .insert({
+          product_id: productId,
+          user_id: user.id,
+          nickname: pricingForm.nickname,
+          unit_amount: pricingForm.unitAmount * 100,
+          currency: pricingForm.currency,
+          pricing_type: pricingForm.type,
+          billing_interval: pricingForm.billingInterval,
+          trial_days: pricingForm.trialDays || null,
+          tax_behavior: pricingForm.taxBehavior,
+          is_active: true,
+        })
+
+      if (error) throw error
+
+      toast.success('Pricing added successfully')
+      setShowCreatePrice(false)
+      setPricingForm({
+        nickname: '',
+        unitAmount: 0,
+        currency: 'usd',
+        type: 'one_time',
+        billingInterval: 'month',
+        trialDays: 0,
+        taxBehavior: 'exclusive',
+      })
+      refetch()
+    } catch (error) {
+      console.error('Error setting pricing:', error)
+      toast.error('Failed to set pricing')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Add Product Image
+  const handleAddImage = async (productId: string, imageUrl: string) => {
+    if (!imageUrl.trim()) {
+      toast.error('Image URL is required')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to add images')
+        return
+      }
+
+      // Get current image count for ordering
+      const { data: existingImages } = await supabase
+        .from('product_images')
+        .select('order')
+        .eq('product_id', productId)
+        .order('order', { ascending: false })
+        .limit(1)
+
+      const nextOrder = existingImages && existingImages.length > 0 ? existingImages[0].order + 1 : 0
+
+      const { error } = await supabase
+        .from('product_images')
+        .insert({
+          product_id: productId,
+          user_id: user.id,
+          url: imageUrl,
+          alt_text: '',
+          order: nextOrder,
+          is_primary: nextOrder === 0,
+        })
+
+      if (error) throw error
+
+      toast.success('Image added successfully')
+      refetch()
+    } catch (error) {
+      console.error('Error adding image:', error)
+      toast.error('Failed to add image')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Category handlers
+  const handleCreateCategory = async (categoryName: string, description?: string) => {
+    if (!categoryName.trim()) {
+      toast.error('Category name is required')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to create categories')
+        return
+      }
+
+      const { error } = await supabase
+        .from('product_categories')
+        .insert({
+          user_id: user.id,
+          name: categoryName,
+          description: description || null,
+          slug: categoryName.toLowerCase().replace(/\s+/g, '-'),
+          is_active: true,
+          order: 0,
+        })
+
+      if (error) throw error
+
+      toast.success('Category created successfully')
+    } catch (error) {
+      console.error('Error creating category:', error)
+      toast.error('Failed to create category')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleUpdateCategory = async (categoryId: string, categoryName: string, description?: string) => {
+    setIsSubmitting(true)
+    try {
+      const { error } = await supabase
+        .from('product_categories')
+        .update({
+          name: categoryName,
+          description: description || null,
+          slug: categoryName.toLowerCase().replace(/\s+/g, '-'),
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', categoryId)
+
+      if (error) throw error
+
+      toast.success('Category updated successfully')
+    } catch (error) {
+      console.error('Error updating category:', error)
+      toast.error('Failed to update category')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleDeleteCategory = async (categoryId: string) => {
+    if (!confirm('Are you sure you want to delete this category?')) {
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const { error } = await supabase
+        .from('product_categories')
+        .delete()
+        .eq('id', categoryId)
+
+      if (error) throw error
+
+      toast.success('Category deleted successfully')
+    } catch (error) {
+      console.error('Error deleting category:', error)
+      toast.error('Failed to delete category')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Tag handlers (using metadata)
+  const handleAddTag = async (productId: string, tag: string) => {
+    if (!tag.trim()) {
+      toast.error('Tag is required')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      // Get current product metadata
+      const { data: product } = await supabase
+        .from('products')
+        .select('metadata')
+        .eq('id', productId)
+        .single()
+
+      if (!product) throw new Error('Product not found')
+
+      const currentTags = (product.metadata?.tags as string[]) || []
+      const updatedTags = [...currentTags, tag]
+
+      const { error } = await supabase
+        .from('products')
+        .update({
+          metadata: { ...product.metadata, tags: updatedTags },
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', productId)
+
+      if (error) throw error
+
+      toast.success('Tag added successfully')
+      refetch()
+    } catch (error) {
+      console.error('Error adding tag:', error)
+      toast.error('Failed to add tag')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleRemoveTag = async (productId: string, tagToRemove: string) => {
+    setIsSubmitting(true)
+    try {
+      // Get current product metadata
+      const { data: product } = await supabase
+        .from('products')
+        .select('metadata')
+        .eq('id', productId)
+        .single()
+
+      if (!product) throw new Error('Product not found')
+
+      const currentTags = (product.metadata?.tags as string[]) || []
+      const updatedTags = currentTags.filter(t => t !== tagToRemove)
+
+      const { error } = await supabase
+        .from('products')
+        .update({
+          metadata: { ...product.metadata, tags: updatedTags },
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', productId)
+
+      if (error) throw error
+
+      toast.success('Tag removed successfully')
+      refetch()
+    } catch (error) {
+      console.error('Error removing tag:', error)
+      toast.error('Failed to remove tag')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Coupon handlers
   const handleCreateCoupon = () => {
+    setCouponForm({
+      name: '',
+      percentOff: 0,
+      amountOff: 0,
+      duration: 'once',
+      maxRedemptions: 0,
+    })
     setShowCreateCoupon(true)
+  }
+
+  const handleSubmitCreateCoupon = async () => {
+    if (!couponForm.name.trim()) {
+      toast.error('Coupon name is required')
+      return
+    }
+
+    if (couponForm.percentOff === 0 && couponForm.amountOff === 0) {
+      toast.error('Please set either percent off or amount off')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to create coupons')
+        return
+      }
+
+      const { error } = await supabase
+        .from('coupons')
+        .insert({
+          user_id: user.id,
+          name: couponForm.name,
+          code: couponForm.name.toUpperCase().replace(/\s+/g, ''),
+          percent_off: couponForm.percentOff || null,
+          amount_off: couponForm.amountOff ? couponForm.amountOff * 100 : null,
+          currency: 'usd',
+          duration: couponForm.duration,
+          max_redemptions: couponForm.maxRedemptions || null,
+          times_redeemed: 0,
+          is_valid: true,
+        })
+
+      if (error) throw error
+
+      toast.success('Coupon created successfully')
+      setShowCreateCoupon(false)
+      setCouponForm({
+        name: '',
+        percentOff: 0,
+        amountOff: 0,
+        duration: 'once',
+        maxRedemptions: 0,
+      })
+    } catch (error) {
+      console.error('Error creating coupon:', error)
+      toast.error('Failed to create coupon')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const handleImportProducts = () => {
@@ -1869,7 +2483,22 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2 pt-4 border-t">
-                  <Button className="flex-1 bg-violet-600 hover:bg-violet-700" onClick={() => setShowEditProduct(true)}>
+                  <Button className="flex-1 bg-violet-600 hover:bg-violet-700" onClick={() => {
+                    if (selectedProduct) {
+                      setProductForm({
+                        name: selectedProduct.name,
+                        description: selectedProduct.description || '',
+                        category: (selectedProduct.category as ProductCategory) || 'subscription',
+                        status: (selectedProduct.status as DBProductStatus) || 'draft',
+                        price: (selectedProduct.defaultPrice?.unitAmount || 0) / 100,
+                        currency: selectedProduct.defaultPrice?.currency?.toUpperCase() || 'USD',
+                        billing_cycle: 'monthly',
+                        features: selectedProduct.features || [],
+                        newFeature: '',
+                      })
+                      setShowEditProduct(true)
+                    }
+                  }}>
                     <Edit className="w-4 h-4 mr-2" />
                     Edit Product
                   </Button>
@@ -1966,6 +2595,640 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                 </div>
               </div>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Product Dialog */}
+        <Dialog open={showCreateProduct} onOpenChange={setShowCreateProduct}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Package className="w-5 h-5 text-violet-600" />
+                Create New Product
+              </DialogTitle>
+              <DialogDescription>
+                Add a new product to your catalog
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="product-name">Product Name *</Label>
+                  <Input
+                    id="product-name"
+                    value={productForm.name}
+                    onChange={(e) => setProductForm(prev => ({ ...prev, name: e.target.value }))}
+                    placeholder="Enter product name"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="product-category">Category</Label>
+                  <Select
+                    value={productForm.category}
+                    onValueChange={(value) => setProductForm(prev => ({ ...prev, category: value as ProductCategory }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="subscription">Subscription</SelectItem>
+                      <SelectItem value="one_time">One Time</SelectItem>
+                      <SelectItem value="add_on">Add-on</SelectItem>
+                      <SelectItem value="bundle">Bundle</SelectItem>
+                      <SelectItem value="freemium">Freemium</SelectItem>
+                      <SelectItem value="enterprise">Enterprise</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="product-description">Description</Label>
+                <Textarea
+                  id="product-description"
+                  value={productForm.description}
+                  onChange={(e) => setProductForm(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Enter product description"
+                  rows={3}
+                />
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="product-price">Price</Label>
+                  <Input
+                    id="product-price"
+                    type="number"
+                    value={productForm.price}
+                    onChange={(e) => setProductForm(prev => ({ ...prev, price: parseFloat(e.target.value) || 0 }))}
+                    placeholder="0.00"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="product-currency">Currency</Label>
+                  <Select
+                    value={productForm.currency}
+                    onValueChange={(value) => setProductForm(prev => ({ ...prev, currency: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select currency" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="USD">USD</SelectItem>
+                      <SelectItem value="EUR">EUR</SelectItem>
+                      <SelectItem value="GBP">GBP</SelectItem>
+                      <SelectItem value="CAD">CAD</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="product-billing">Billing Cycle</Label>
+                  <Select
+                    value={productForm.billing_cycle}
+                    onValueChange={(value) => setProductForm(prev => ({ ...prev, billing_cycle: value as BillingCycle }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select billing cycle" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="one_time">One Time</SelectItem>
+                      <SelectItem value="monthly">Monthly</SelectItem>
+                      <SelectItem value="quarterly">Quarterly</SelectItem>
+                      <SelectItem value="yearly">Yearly</SelectItem>
+                      <SelectItem value="custom">Custom</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="product-status">Status</Label>
+                  <Select
+                    value={productForm.status}
+                    onValueChange={(value) => setProductForm(prev => ({ ...prev, status: value as DBProductStatus }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="draft">Draft</SelectItem>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="archived">Archived</SelectItem>
+                      <SelectItem value="discontinued">Discontinued</SelectItem>
+                      <SelectItem value="coming_soon">Coming Soon</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Features</Label>
+                <div className="flex gap-2">
+                  <Input
+                    value={productForm.newFeature}
+                    onChange={(e) => setProductForm(prev => ({ ...prev, newFeature: e.target.value }))}
+                    placeholder="Add a feature"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && productForm.newFeature.trim()) {
+                        e.preventDefault()
+                        setProductForm(prev => ({
+                          ...prev,
+                          features: [...prev.features, prev.newFeature.trim()],
+                          newFeature: ''
+                        }))
+                      }
+                    }}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      if (productForm.newFeature.trim()) {
+                        setProductForm(prev => ({
+                          ...prev,
+                          features: [...prev.features, prev.newFeature.trim()],
+                          newFeature: ''
+                        }))
+                      }
+                    }}
+                  >
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                </div>
+                {productForm.features.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {productForm.features.map((feature, idx) => (
+                      <Badge key={idx} variant="secondary" className="gap-1">
+                        {feature}
+                        <button
+                          type="button"
+                          onClick={() => setProductForm(prev => ({
+                            ...prev,
+                            features: prev.features.filter((_, i) => i !== idx)
+                          }))}
+                          className="ml-1 hover:text-red-500"
+                        >
+                          x
+                        </button>
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowCreateProduct(false)}>
+                Cancel
+              </Button>
+              <Button
+                className="bg-violet-600 hover:bg-violet-700"
+                onClick={handleSubmitCreateProduct}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Creating...' : 'Create Product'}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Product Dialog */}
+        <Dialog open={showEditProduct} onOpenChange={setShowEditProduct}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Edit className="w-5 h-5 text-violet-600" />
+                Edit Product
+              </DialogTitle>
+              <DialogDescription>
+                Update product details
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-product-name">Product Name *</Label>
+                  <Input
+                    id="edit-product-name"
+                    value={productForm.name}
+                    onChange={(e) => setProductForm(prev => ({ ...prev, name: e.target.value }))}
+                    placeholder="Enter product name"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-product-category">Category</Label>
+                  <Select
+                    value={productForm.category}
+                    onValueChange={(value) => setProductForm(prev => ({ ...prev, category: value as ProductCategory }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="subscription">Subscription</SelectItem>
+                      <SelectItem value="one_time">One Time</SelectItem>
+                      <SelectItem value="add_on">Add-on</SelectItem>
+                      <SelectItem value="bundle">Bundle</SelectItem>
+                      <SelectItem value="freemium">Freemium</SelectItem>
+                      <SelectItem value="enterprise">Enterprise</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit-product-description">Description</Label>
+                <Textarea
+                  id="edit-product-description"
+                  value={productForm.description}
+                  onChange={(e) => setProductForm(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Enter product description"
+                  rows={3}
+                />
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-product-price">Price</Label>
+                  <Input
+                    id="edit-product-price"
+                    type="number"
+                    value={productForm.price}
+                    onChange={(e) => setProductForm(prev => ({ ...prev, price: parseFloat(e.target.value) || 0 }))}
+                    placeholder="0.00"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-product-currency">Currency</Label>
+                  <Select
+                    value={productForm.currency}
+                    onValueChange={(value) => setProductForm(prev => ({ ...prev, currency: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select currency" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="USD">USD</SelectItem>
+                      <SelectItem value="EUR">EUR</SelectItem>
+                      <SelectItem value="GBP">GBP</SelectItem>
+                      <SelectItem value="CAD">CAD</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-product-billing">Billing Cycle</Label>
+                  <Select
+                    value={productForm.billing_cycle}
+                    onValueChange={(value) => setProductForm(prev => ({ ...prev, billing_cycle: value as BillingCycle }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select billing cycle" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="one_time">One Time</SelectItem>
+                      <SelectItem value="monthly">Monthly</SelectItem>
+                      <SelectItem value="quarterly">Quarterly</SelectItem>
+                      <SelectItem value="yearly">Yearly</SelectItem>
+                      <SelectItem value="custom">Custom</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-product-status">Status</Label>
+                  <Select
+                    value={productForm.status}
+                    onValueChange={(value) => setProductForm(prev => ({ ...prev, status: value as DBProductStatus }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="draft">Draft</SelectItem>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="archived">Archived</SelectItem>
+                      <SelectItem value="discontinued">Discontinued</SelectItem>
+                      <SelectItem value="coming_soon">Coming Soon</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Features</Label>
+                <div className="flex gap-2">
+                  <Input
+                    value={productForm.newFeature}
+                    onChange={(e) => setProductForm(prev => ({ ...prev, newFeature: e.target.value }))}
+                    placeholder="Add a feature"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && productForm.newFeature.trim()) {
+                        e.preventDefault()
+                        setProductForm(prev => ({
+                          ...prev,
+                          features: [...prev.features, prev.newFeature.trim()],
+                          newFeature: ''
+                        }))
+                      }
+                    }}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      if (productForm.newFeature.trim()) {
+                        setProductForm(prev => ({
+                          ...prev,
+                          features: [...prev.features, prev.newFeature.trim()],
+                          newFeature: ''
+                        }))
+                      }
+                    }}
+                  >
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                </div>
+                {productForm.features.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {productForm.features.map((feature, idx) => (
+                      <Badge key={idx} variant="secondary" className="gap-1">
+                        {feature}
+                        <button
+                          type="button"
+                          onClick={() => setProductForm(prev => ({
+                            ...prev,
+                            features: prev.features.filter((_, i) => i !== idx)
+                          }))}
+                          className="ml-1 hover:text-red-500"
+                        >
+                          x
+                        </button>
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="flex justify-between pt-4 border-t">
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  if (selectedProduct) {
+                    handleDeleteProduct(selectedProduct.id, selectedProduct.name)
+                    setShowEditProduct(false)
+                  }
+                }}
+                disabled={isSubmitting}
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete
+              </Button>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => setShowEditProduct(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  className="bg-violet-600 hover:bg-violet-700"
+                  onClick={() => selectedProduct && handleUpdateProduct(selectedProduct.id)}
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? 'Saving...' : 'Save Changes'}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Price Dialog */}
+        <Dialog open={showCreatePrice} onOpenChange={setShowCreatePrice}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <DollarSign className="w-5 h-5 text-green-600" />
+                Add Pricing
+              </DialogTitle>
+              <DialogDescription>
+                Add a new price point for a product
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="price-nickname">Price Nickname *</Label>
+                <Input
+                  id="price-nickname"
+                  value={pricingForm.nickname}
+                  onChange={(e) => setPricingForm(prev => ({ ...prev, nickname: e.target.value }))}
+                  placeholder="e.g., Monthly, Annual, Pro Plan"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="price-amount">Amount</Label>
+                  <Input
+                    id="price-amount"
+                    type="number"
+                    value={pricingForm.unitAmount}
+                    onChange={(e) => setPricingForm(prev => ({ ...prev, unitAmount: parseFloat(e.target.value) || 0 }))}
+                    placeholder="0.00"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="price-currency">Currency</Label>
+                  <Select
+                    value={pricingForm.currency}
+                    onValueChange={(value) => setPricingForm(prev => ({ ...prev, currency: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select currency" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="usd">USD</SelectItem>
+                      <SelectItem value="eur">EUR</SelectItem>
+                      <SelectItem value="gbp">GBP</SelectItem>
+                      <SelectItem value="cad">CAD</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="price-type">Pricing Type</Label>
+                  <Select
+                    value={pricingForm.type}
+                    onValueChange={(value) => setPricingForm(prev => ({ ...prev, type: value as PricingType }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="one_time">One Time</SelectItem>
+                      <SelectItem value="recurring">Recurring</SelectItem>
+                      <SelectItem value="metered">Metered</SelectItem>
+                      <SelectItem value="tiered">Tiered</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="price-interval">Billing Interval</Label>
+                  <Select
+                    value={pricingForm.billingInterval}
+                    onValueChange={(value) => setPricingForm(prev => ({ ...prev, billingInterval: value as BillingInterval }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select interval" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="day">Daily</SelectItem>
+                      <SelectItem value="week">Weekly</SelectItem>
+                      <SelectItem value="month">Monthly</SelectItem>
+                      <SelectItem value="year">Yearly</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="price-trial">Trial Days</Label>
+                  <Input
+                    id="price-trial"
+                    type="number"
+                    value={pricingForm.trialDays}
+                    onChange={(e) => setPricingForm(prev => ({ ...prev, trialDays: parseInt(e.target.value) || 0 }))}
+                    placeholder="0"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="price-tax">Tax Behavior</Label>
+                  <Select
+                    value={pricingForm.taxBehavior}
+                    onValueChange={(value) => setPricingForm(prev => ({ ...prev, taxBehavior: value as TaxBehavior }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select tax behavior" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="exclusive">Tax Exclusive</SelectItem>
+                      <SelectItem value="inclusive">Tax Inclusive</SelectItem>
+                      <SelectItem value="unspecified">Unspecified</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowCreatePrice(false)}>
+                Cancel
+              </Button>
+              <Button
+                className="bg-green-600 hover:bg-green-700"
+                onClick={() => selectedProduct && handleSetPricing(selectedProduct.id)}
+                disabled={isSubmitting || !selectedProduct}
+              >
+                {isSubmitting ? 'Adding...' : 'Add Price'}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Coupon Dialog */}
+        <Dialog open={showCreateCoupon} onOpenChange={setShowCreateCoupon}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Tag className="w-5 h-5 text-orange-600" />
+                Create Coupon
+              </DialogTitle>
+              <DialogDescription>
+                Create a new promotional coupon
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="coupon-name">Coupon Name/Code *</Label>
+                <Input
+                  id="coupon-name"
+                  value={couponForm.name}
+                  onChange={(e) => setCouponForm(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="e.g., SUMMER20, NEWUSER"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="coupon-percent">Percent Off</Label>
+                  <Input
+                    id="coupon-percent"
+                    type="number"
+                    value={couponForm.percentOff}
+                    onChange={(e) => setCouponForm(prev => ({ ...prev, percentOff: parseInt(e.target.value) || 0, amountOff: 0 }))}
+                    placeholder="0"
+                    max={100}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="coupon-amount">Amount Off (USD)</Label>
+                  <Input
+                    id="coupon-amount"
+                    type="number"
+                    value={couponForm.amountOff}
+                    onChange={(e) => setCouponForm(prev => ({ ...prev, amountOff: parseFloat(e.target.value) || 0, percentOff: 0 }))}
+                    placeholder="0.00"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="coupon-duration">Duration</Label>
+                  <Select
+                    value={couponForm.duration}
+                    onValueChange={(value) => setCouponForm(prev => ({ ...prev, duration: value as 'once' | 'repeating' | 'forever' }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select duration" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="once">Once</SelectItem>
+                      <SelectItem value="repeating">Repeating</SelectItem>
+                      <SelectItem value="forever">Forever</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="coupon-max">Max Redemptions</Label>
+                  <Input
+                    id="coupon-max"
+                    type="number"
+                    value={couponForm.maxRedemptions}
+                    onChange={(e) => setCouponForm(prev => ({ ...prev, maxRedemptions: parseInt(e.target.value) || 0 }))}
+                    placeholder="Unlimited"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowCreateCoupon(false)}>
+                Cancel
+              </Button>
+              <Button
+                className="bg-orange-600 hover:bg-orange-700"
+                onClick={handleSubmitCreateCoupon}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Creating...' : 'Create Coupon'}
+              </Button>
+            </div>
           </DialogContent>
         </Dialog>
       </div>

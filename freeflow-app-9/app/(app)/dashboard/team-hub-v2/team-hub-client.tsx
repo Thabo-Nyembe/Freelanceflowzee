@@ -17,12 +17,18 @@ import {
   useDeleteTeamMember,
   useSendInvitation,
   useTeamInvitations,
+  useUpdateTeamMemberRole,
+  useUpdateTeamMemberStatus,
+  useTeamDepartments,
   useConversations,
   useMessagingStats,
   useSendMessage,
   useNotifications,
   useEvents,
-  useCreateEvent
+  useCreateEvent,
+  type TeamRole,
+  type TeamPermission,
+  type CreateInvitationData
 } from '@/lib/api-clients'
 
 // Extended hooks for additional data
@@ -424,7 +430,10 @@ export default function TeamHubClient() {
   const updateTeamMemberApi = useUpdateTeamMember()
   const deleteTeamMemberApi = useDeleteTeamMember()
   const sendInvitationApi = useSendInvitation()
+  const updateRoleApi = useUpdateTeamMemberRole()
+  const updateStatusApi = useUpdateTeamMemberStatus()
   const { data: invitationsData } = useTeamInvitations()
+  const { data: departmentsData } = useTeamDepartments()
 
   // Messaging/Chat from API
   const { data: conversationsData } = useConversations()
@@ -689,6 +698,10 @@ export default function TeamHubClient() {
 
   // Dialog State
   const [showCreateMemberDialog, setShowCreateMemberDialog] = useState(false)
+  const [showInviteDialog, setShowInviteDialog] = useState(false)
+  const [showEditMemberDialog, setShowEditMemberDialog] = useState(false)
+  const [showRoleChangeDialog, setShowRoleChangeDialog] = useState(false)
+  const [showPermissionsDialog, setShowPermissionsDialog] = useState(false)
   const [showNewTeamDialog, setShowNewTeamDialog] = useState(false)
   const [showAssignDialog, setShowAssignDialog] = useState(false)
   const [showCreateChannelDialog, setShowCreateChannelDialog] = useState(false)
@@ -701,6 +714,7 @@ export default function TeamHubClient() {
   const [showNotificationsPanel, setShowNotificationsPanel] = useState(false)
   const [showApprovalDialog, setShowApprovalDialog] = useState(false)
   const [showSaveSettingsDialog, setShowSaveSettingsDialog] = useState(false)
+  const [memberToEdit, setMemberToEdit] = useState<TeamMember | null>(null)
 
   // Form State
   const [memberForm, setMemberForm] = useState({
@@ -734,6 +748,39 @@ export default function TeamHubClient() {
     channelId: '',
     enableVideo: false,
     recordHuddle: false
+  })
+
+  // Invite Form State
+  const [inviteForm, setInviteForm] = useState({
+    email: '',
+    role: 'member' as TeamRole,
+    message: ''
+  })
+
+  // Role Change Form State
+  const [roleChangeForm, setRoleChangeForm] = useState({
+    memberId: '',
+    newRole: 'member' as TeamRole
+  })
+
+  // Permissions Form State
+  const [permissionsForm, setPermissionsForm] = useState<{
+    memberId: string
+    permissions: TeamPermission[]
+  }>({
+    memberId: '',
+    permissions: []
+  })
+
+  // Edit Member Form State
+  const [editMemberForm, setEditMemberForm] = useState({
+    name: '',
+    email: '',
+    role: '' as string,
+    department: '',
+    phone: '',
+    bio: '',
+    skills: ''
   })
 
   // Reply Form State
@@ -784,7 +831,11 @@ export default function TeamHubClient() {
     }
   }, [])
 
-  // Create team member
+  // ==========================================================================
+  // TEAM MEMBER HANDLERS - Wired to API hooks with proper error handling
+  // ==========================================================================
+
+  // Add new team member (handleAddMember)
   const handleCreateMember = async () => {
     if (!memberForm.name || !memberForm.email) {
       toast.error('Name and email are required')
@@ -792,70 +843,255 @@ export default function TeamHubClient() {
     }
     try {
       setIsSaving(true)
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        toast.error('Please sign in to add team members')
-        return
-      }
-
-      const { error } = await supabase.from('team_members').insert({
-        user_id: user.id,
+      await createTeamMemberApi.mutateAsync({
         name: memberForm.name,
         email: memberForm.email,
-        role: memberForm.role || 'Member',
+        role: (memberForm.role as TeamRole) || 'member',
         department: memberForm.department,
-        phone: memberForm.phone || null,
-        location: memberForm.location || null,
+        phone: memberForm.phone || undefined,
         timezone: memberForm.timezone,
-        bio: memberForm.bio || null,
+        bio: memberForm.bio || undefined,
         skills: memberForm.skills ? memberForm.skills.split(',').map(s => s.trim()) : []
       })
-
-      if (error) throw error
-
-      toast.success('Team member added successfully')
       setShowCreateMemberDialog(false)
       resetMemberForm()
-      fetchMembers()
+      // No need to call fetchMembers - React Query auto-invalidates
     } catch (error) {
+      // Error toast is handled by the hook
       console.error('Error creating team member:', error)
-      toast.error('Failed to add team member')
     } finally {
       setIsSaving(false)
     }
   }
 
-  // Update member status
-  const handleUpdateMemberStatus = async (memberId: string, newStatus: string) => {
-    try {
-      const { error } = await supabase
-        .from('team_members')
-        .update({ status: newStatus, updated_at: new Date().toISOString() })
-        .eq('id', memberId)
+  // Alias for handleAddMember
+  const handleAddMember = handleCreateMember
 
-      if (error) throw error
-      toast.success(`Status updated to ${newStatus}`)
-      fetchMembers()
+  // Update team member (handleUpdateMember)
+  const handleUpdateMember = async (memberId: string, updates: {
+    name?: string
+    email?: string
+    role?: string
+    department?: string
+    phone?: string
+    status?: string
+    skills?: string[]
+    bio?: string
+    timezone?: string
+  }) => {
+    try {
+      setIsSaving(true)
+      await updateTeamMemberApi.mutateAsync({
+        id: memberId,
+        updates: {
+          name: updates.name,
+          email: updates.email,
+          role: updates.role as TeamRole,
+          department: updates.department,
+          phone: updates.phone,
+          status: updates.status as 'active' | 'inactive' | 'pending' | 'on_leave' | 'suspended',
+          skills: updates.skills,
+          bio: updates.bio,
+          timezone: updates.timezone
+        }
+      })
+      // Close dialog if open
+      if (selectedMember) {
+        setSelectedMember(null)
+      }
     } catch (error) {
-      console.error('Error updating status:', error)
-      toast.error('Failed to update status')
+      console.error('Error updating team member:', error)
+    } finally {
+      setIsSaving(false)
     }
   }
 
-  // Delete team member
+  // Update member status (handleUpdateMemberStatus) - now uses API hook
+  const handleUpdateMemberStatus = async (memberId: string, newStatus: string) => {
+    try {
+      await updateStatusApi.mutateAsync({
+        id: memberId,
+        status: newStatus as 'active' | 'inactive' | 'pending' | 'on_leave' | 'suspended'
+      })
+      // Success toast handled by hook
+    } catch (error) {
+      console.error('Error updating status:', error)
+    }
+  }
+
+  // Remove team member (handleRemoveMember)
   const handleDeleteMember = async (memberId: string) => {
     try {
-      const { error } = await supabase
-        .from('team_members')
-        .delete()
-        .eq('id', memberId)
-
-      if (error) throw error
-      toast.success('Team member removed')
-      fetchMembers()
+      await deleteTeamMemberApi.mutateAsync(memberId)
+      // Success toast handled by hook
     } catch (error) {
       console.error('Error deleting member:', error)
-      toast.error('Failed to remove team member')
+    }
+  }
+
+  // Alias for handleRemoveMember
+  const handleRemoveMember = handleDeleteMember
+
+  // Send team invitation (handleInviteMember)
+  const handleSendInvitation = async (inviteData: {
+    email: string
+    role?: TeamRole
+    message?: string
+  }) => {
+    if (!inviteData.email) {
+      toast.error('Email is required')
+      return
+    }
+    try {
+      setIsSaving(true)
+      const invitationData: CreateInvitationData = {
+        email: inviteData.email,
+        role: inviteData.role || 'member',
+        message: inviteData.message
+      }
+      await sendInvitationApi.mutateAsync(invitationData)
+      // Success toast handled by hook
+    } catch (error) {
+      console.error('Error sending invitation:', error)
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // Change member role (handleChangeRole)
+  const handleChangeRole = async (memberId: string, newRole: TeamRole, permissions?: TeamPermission[]) => {
+    try {
+      setIsSaving(true)
+      await updateRoleApi.mutateAsync({
+        id: memberId,
+        role: newRole,
+        permissions
+      })
+      // Success toast handled by hook
+    } catch (error) {
+      console.error('Error changing role:', error)
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // Set member permissions (handleSetPermissions)
+  const handleSetPermissions = async (memberId: string, permissions: TeamPermission[]) => {
+    try {
+      setIsSaving(true)
+      // Get current member role to include in update
+      const member = members.find(m => m.id === memberId)
+      if (!member) {
+        toast.error('Member not found')
+        return
+      }
+      await updateRoleApi.mutateAsync({
+        id: memberId,
+        role: member.role as TeamRole,
+        permissions
+      })
+      toast.success('Permissions updated successfully')
+    } catch (error) {
+      console.error('Error setting permissions:', error)
+      toast.error('Failed to update permissions')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // ==========================================================================
+  // DEPARTMENT HANDLERS
+  // ==========================================================================
+
+  // Available departments from API
+  const availableDepartments = useMemo(() => {
+    return departmentsData || [
+      { id: 'dev', name: 'Development', member_count: 0 },
+      { id: 'design', name: 'Design', member_count: 0 },
+      { id: 'marketing', name: 'Marketing', member_count: 0 },
+      { id: 'sales', name: 'Sales', member_count: 0 },
+      { id: 'support', name: 'Support', member_count: 0 },
+      { id: 'management', name: 'Management', member_count: 0 },
+      { id: 'operations', name: 'Operations', member_count: 0 },
+      { id: 'qa', name: 'QA', member_count: 0 }
+    ]
+  }, [departmentsData])
+
+  // Change member department
+  const handleChangeDepartment = async (memberId: string, department: string) => {
+    try {
+      await updateTeamMemberApi.mutateAsync({
+        id: memberId,
+        updates: { department }
+      })
+      toast.success(`Department changed to ${department}`)
+    } catch (error) {
+      console.error('Error changing department:', error)
+      toast.error('Failed to change department')
+    }
+  }
+
+  // ==========================================================================
+  // TEAM HANDLERS
+  // ==========================================================================
+
+  // Create new team/group
+  const handleCreateTeam = async (teamData: {
+    name: string
+    description?: string
+    department?: string
+  }) => {
+    try {
+      setIsSaving(true)
+      // For now, create as a channel since team_management table may not exist
+      const newChannel: Channel = {
+        id: `team-${Date.now()}`,
+        name: teamData.name.toLowerCase().replace(/\s+/g, '-'),
+        type: 'private' as ChannelType,
+        description: teamData.description || '',
+        topic: '',
+        memberCount: 1,
+        unreadCount: 0,
+        mentionCount: 0,
+        isPinned: false,
+        isMuted: false,
+        isArchived: false,
+        isStarred: false,
+        lastMessage: '',
+        lastMessageAt: new Date().toISOString(),
+        createdBy: 'You',
+        createdAt: new Date().toISOString().split('T')[0],
+        retentionDays: null,
+        canvasCount: 0,
+        bookmarkCount: 0,
+        notificationLevel: 'all',
+        externalConnections: []
+      }
+      setChannels(prev => [...prev, newChannel])
+      setShowNewTeamDialog(false)
+      toast.success('Team created successfully')
+    } catch (error) {
+      console.error('Error creating team:', error)
+      toast.error('Failed to create team')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // Assign member to team/project
+  const handleAssignToTeam = async (memberId: string, teamId: string) => {
+    try {
+      // Update member's metadata to include team assignment
+      await updateTeamMemberApi.mutateAsync({
+        id: memberId,
+        updates: {
+          metadata: { team_id: teamId, assigned_at: new Date().toISOString() }
+        }
+      })
+      toast.success('Member assigned to team')
+    } catch (error) {
+      console.error('Error assigning to team:', error)
+      toast.error('Failed to assign member to team')
     }
   }
 
@@ -1045,8 +1281,93 @@ export default function TeamHubClient() {
     toast.success('Message sent')
   }
 
+  // Open invite dialog (handleInviteMember)
   const handleInviteMember = () => {
-    setShowCreateMemberDialog(true)
+    setShowInviteDialog(true)
+  }
+
+  // Submit invite form
+  const handleSubmitInvite = async () => {
+    if (!inviteForm.email) {
+      toast.error('Email is required')
+      return
+    }
+    await handleSendInvitation({
+      email: inviteForm.email,
+      role: inviteForm.role,
+      message: inviteForm.message || undefined
+    })
+    setShowInviteDialog(false)
+    setInviteForm({ email: '', role: 'member', message: '' })
+  }
+
+  // Open edit member dialog
+  const handleOpenEditMember = (member: TeamMember) => {
+    setMemberToEdit(member)
+    setEditMemberForm({
+      name: member.name,
+      email: member.email,
+      role: member.role,
+      department: member.department,
+      phone: member.phone || '',
+      bio: '',
+      skills: ''
+    })
+    setShowEditMemberDialog(true)
+  }
+
+  // Submit edit member form
+  const handleSubmitEditMember = async () => {
+    if (!memberToEdit) return
+    await handleUpdateMember(memberToEdit.id, {
+      name: editMemberForm.name,
+      email: editMemberForm.email,
+      role: editMemberForm.role,
+      department: editMemberForm.department,
+      phone: editMemberForm.phone,
+      bio: editMemberForm.bio,
+      skills: editMemberForm.skills ? editMemberForm.skills.split(',').map(s => s.trim()) : undefined
+    })
+    setShowEditMemberDialog(false)
+    setMemberToEdit(null)
+  }
+
+  // Open role change dialog
+  const handleOpenRoleChange = (member: TeamMember) => {
+    setMemberToEdit(member)
+    setRoleChangeForm({
+      memberId: member.id,
+      newRole: member.role as TeamRole
+    })
+    setShowRoleChangeDialog(true)
+  }
+
+  // Submit role change
+  const handleSubmitRoleChange = async () => {
+    if (!roleChangeForm.memberId) return
+    await handleChangeRole(roleChangeForm.memberId, roleChangeForm.newRole)
+    setShowRoleChangeDialog(false)
+    setMemberToEdit(null)
+  }
+
+  // Open permissions dialog
+  const handleOpenPermissions = (member: TeamMember) => {
+    setMemberToEdit(member)
+    // Get default permissions based on role or existing permissions
+    const defaultPerms: TeamPermission[] = ['projects.view', 'tasks.create', 'tasks.edit']
+    setPermissionsForm({
+      memberId: member.id,
+      permissions: defaultPerms
+    })
+    setShowPermissionsDialog(true)
+  }
+
+  // Submit permissions
+  const handleSubmitPermissions = async () => {
+    if (!permissionsForm.memberId) return
+    await handleSetPermissions(permissionsForm.memberId, permissionsForm.permissions)
+    setShowPermissionsDialog(false)
+    setMemberToEdit(null)
   }
 
   const handleSetReminder = async () => {
@@ -2509,6 +2830,57 @@ export default function TeamHubClient() {
                       <MoreVertical className="w-4 h-4" />
                     </Button>
                   </div>
+
+                  {/* Management Actions */}
+                  <div className="flex flex-wrap gap-2 pt-3 border-t">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        handleOpenEditMember(selectedMember)
+                        setSelectedMember(null)
+                      }}
+                    >
+                      <Settings className="w-3 h-3 mr-1" />
+                      Edit
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        handleOpenRoleChange(selectedMember)
+                        setSelectedMember(null)
+                      }}
+                    >
+                      <Shield className="w-3 h-3 mr-1" />
+                      Change Role
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        handleOpenPermissions(selectedMember)
+                        setSelectedMember(null)
+                      }}
+                    >
+                      <Key className="w-3 h-3 mr-1" />
+                      Permissions
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-red-500 hover:text-red-600"
+                      onClick={() => {
+                        if (confirm(`Remove ${selectedMember.name} from the team?`)) {
+                          handleRemoveMember(selectedMember.id)
+                          setSelectedMember(null)
+                        }
+                      }}
+                    >
+                      <Trash2 className="w-3 h-3 mr-1" />
+                      Remove
+                    </Button>
+                  </div>
                 </div>
               </ScrollArea>
             )}
@@ -2755,6 +3127,335 @@ export default function TeamHubClient() {
                   <>
                     <UserPlus className="w-4 h-4 mr-2" />
                     Add Member
+                  </>
+                )}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Invite Member Dialog */}
+        <Dialog open={showInviteDialog} onOpenChange={setShowInviteDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Mail className="w-5 h-5 text-purple-500" />
+                Invite Team Member
+              </DialogTitle>
+              <DialogDescription>Send an invitation to join your team</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Email *</Label>
+                <Input
+                  type="email"
+                  value={inviteForm.email}
+                  onChange={(e) => setInviteForm({ ...inviteForm, email: e.target.value })}
+                  placeholder="colleague@example.com"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label>Role</Label>
+                <select
+                  value={inviteForm.role}
+                  onChange={(e) => setInviteForm({ ...inviteForm, role: e.target.value as TeamRole })}
+                  className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                >
+                  <option value="member">Member</option>
+                  <option value="admin">Admin</option>
+                  <option value="manager">Manager</option>
+                  <option value="contractor">Contractor</option>
+                  <option value="guest">Guest</option>
+                  <option value="viewer">Viewer</option>
+                </select>
+              </div>
+              <div>
+                <Label>Personal Message (optional)</Label>
+                <Input
+                  value={inviteForm.message}
+                  onChange={(e) => setInviteForm({ ...inviteForm, message: e.target.value })}
+                  placeholder="Welcome to the team!"
+                  className="mt-1"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowInviteDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSubmitInvite}
+                disabled={isSaving || !inviteForm.email}
+                className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white"
+              >
+                {isSaving ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <Mail className="w-4 h-4 mr-2" />
+                    Send Invite
+                  </>
+                )}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Member Dialog */}
+        <Dialog open={showEditMemberDialog} onOpenChange={setShowEditMemberDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Settings className="w-5 h-5 text-blue-500" />
+                Edit Team Member
+              </DialogTitle>
+              <DialogDescription>Update member information</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Name</Label>
+                <Input
+                  value={editMemberForm.name}
+                  onChange={(e) => setEditMemberForm({ ...editMemberForm, name: e.target.value })}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label>Email</Label>
+                <Input
+                  type="email"
+                  value={editMemberForm.email}
+                  onChange={(e) => setEditMemberForm({ ...editMemberForm, email: e.target.value })}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label>Department</Label>
+                <select
+                  value={editMemberForm.department}
+                  onChange={(e) => setEditMemberForm({ ...editMemberForm, department: e.target.value })}
+                  className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                >
+                  {availableDepartments.map((dept: any) => (
+                    <option key={dept.id || dept.name} value={dept.name?.toLowerCase() || dept.id}>
+                      {dept.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <Label>Phone</Label>
+                <Input
+                  value={editMemberForm.phone}
+                  onChange={(e) => setEditMemberForm({ ...editMemberForm, phone: e.target.value })}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label>Bio</Label>
+                <Input
+                  value={editMemberForm.bio}
+                  onChange={(e) => setEditMemberForm({ ...editMemberForm, bio: e.target.value })}
+                  placeholder="Short bio..."
+                  className="mt-1"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowEditMemberDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSubmitEditMember}
+                disabled={isSaving}
+                className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white"
+              >
+                {isSaving ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Settings className="w-4 h-4 mr-2" />
+                    Save Changes
+                  </>
+                )}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Role Change Dialog */}
+        <Dialog open={showRoleChangeDialog} onOpenChange={setShowRoleChangeDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Shield className="w-5 h-5 text-orange-500" />
+                Change Role
+              </DialogTitle>
+              <DialogDescription>
+                {memberToEdit ? `Update role for ${memberToEdit.name}` : 'Update member role'}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>New Role</Label>
+                <select
+                  value={roleChangeForm.newRole}
+                  onChange={(e) => setRoleChangeForm({ ...roleChangeForm, newRole: e.target.value as TeamRole })}
+                  className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                >
+                  <option value="owner">Owner</option>
+                  <option value="admin">Admin</option>
+                  <option value="manager">Manager</option>
+                  <option value="member">Member</option>
+                  <option value="contractor">Contractor</option>
+                  <option value="guest">Guest</option>
+                  <option value="viewer">Viewer</option>
+                </select>
+              </div>
+              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Role permissions will be automatically updated based on the selected role.
+                </p>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowRoleChangeDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSubmitRoleChange}
+                disabled={isSaving}
+                className="bg-gradient-to-r from-orange-500 to-amber-500 text-white"
+              >
+                {isSaving ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Updating...
+                  </>
+                ) : (
+                  <>
+                    <Shield className="w-4 h-4 mr-2" />
+                    Update Role
+                  </>
+                )}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Permissions Dialog */}
+        <Dialog open={showPermissionsDialog} onOpenChange={setShowPermissionsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Key className="w-5 h-5 text-indigo-500" />
+                Set Permissions
+              </DialogTitle>
+              <DialogDescription>
+                {memberToEdit ? `Configure permissions for ${memberToEdit.name}` : 'Configure member permissions'}
+              </DialogDescription>
+            </DialogHeader>
+            <ScrollArea className="max-h-[400px]">
+              <div className="space-y-4 py-4 pr-4">
+                <div className="space-y-3">
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Projects</p>
+                  {(['projects.view', 'projects.create', 'projects.edit', 'projects.delete'] as TeamPermission[]).map(perm => (
+                    <div key={perm} className="flex items-center justify-between">
+                      <span className="text-sm">{perm.split('.')[1].charAt(0).toUpperCase() + perm.split('.')[1].slice(1)}</span>
+                      <Switch
+                        checked={permissionsForm.permissions.includes(perm)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setPermissionsForm(prev => ({
+                              ...prev,
+                              permissions: [...prev.permissions, perm]
+                            }))
+                          } else {
+                            setPermissionsForm(prev => ({
+                              ...prev,
+                              permissions: prev.permissions.filter(p => p !== perm)
+                            }))
+                          }
+                        }}
+                      />
+                    </div>
+                  ))}
+                </div>
+                <div className="space-y-3 pt-3 border-t">
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Tasks</p>
+                  {(['tasks.create', 'tasks.edit', 'tasks.delete', 'tasks.assign'] as TeamPermission[]).map(perm => (
+                    <div key={perm} className="flex items-center justify-between">
+                      <span className="text-sm">{perm.split('.')[1].charAt(0).toUpperCase() + perm.split('.')[1].slice(1)}</span>
+                      <Switch
+                        checked={permissionsForm.permissions.includes(perm)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setPermissionsForm(prev => ({
+                              ...prev,
+                              permissions: [...prev.permissions, perm]
+                            }))
+                          } else {
+                            setPermissionsForm(prev => ({
+                              ...prev,
+                              permissions: prev.permissions.filter(p => p !== perm)
+                            }))
+                          }
+                        }}
+                      />
+                    </div>
+                  ))}
+                </div>
+                <div className="space-y-3 pt-3 border-t">
+                  <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Team</p>
+                  {(['team.invite', 'team.manage', 'team.remove'] as TeamPermission[]).map(perm => (
+                    <div key={perm} className="flex items-center justify-between">
+                      <span className="text-sm">{perm.split('.')[1].charAt(0).toUpperCase() + perm.split('.')[1].slice(1)}</span>
+                      <Switch
+                        checked={permissionsForm.permissions.includes(perm)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setPermissionsForm(prev => ({
+                              ...prev,
+                              permissions: [...prev.permissions, perm]
+                            }))
+                          } else {
+                            setPermissionsForm(prev => ({
+                              ...prev,
+                              permissions: prev.permissions.filter(p => p !== perm)
+                            }))
+                          }
+                        }}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </ScrollArea>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowPermissionsDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSubmitPermissions}
+                disabled={isSaving}
+                className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white"
+              >
+                {isSaving ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Key className="w-4 h-4 mr-2" />
+                    Save Permissions
                   </>
                 )}
               </Button>

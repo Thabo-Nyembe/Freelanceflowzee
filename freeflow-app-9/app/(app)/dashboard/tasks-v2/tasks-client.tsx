@@ -26,6 +26,7 @@ import { toast } from 'sonner'
 import { format, formatDistanceToNow, isBefore, isToday, addDays } from 'date-fns'
 import { useTasks, type Task, type TaskStatus, type TaskPriority, type TaskCategory } from '@/lib/hooks/use-tasks'
 import { useTeam, type TeamMember } from '@/lib/hooks/use-team'
+import { useProjects, type Project } from '@/lib/hooks/use-projects'
 import {
   CheckCircle2,
   Circle,
@@ -63,7 +64,8 @@ import {
   Layers,
   SquareCheck,
   Square,
-  X
+  X,
+  FolderInput
 } from 'lucide-react'
 
 // ============================================================================
@@ -203,6 +205,7 @@ interface TaskCardProps {
   onAssign: (taskId: string, assigneeId: string | null) => void
   onUpdateDueDate: (taskId: string, dueDate: Date | null) => void
   onAddSubtask: (parentId: string) => void
+  onMoveTask: (taskId: string) => void
   onViewProject?: (projectId: string) => void
   activeTimerId?: string
   isUpdating?: boolean
@@ -225,6 +228,7 @@ function TaskCard({
   onAssign,
   onUpdateDueDate,
   onAddSubtask,
+  onMoveTask,
   onViewProject,
   activeTimerId,
   isUpdating,
@@ -388,6 +392,11 @@ function TaskCard({
               <DropdownMenuItem onClick={() => onAddSubtask(task.id)}>
                 <Layers className="h-4 w-4 mr-2" />
                 Add Subtask
+              </DropdownMenuItem>
+
+              <DropdownMenuItem onClick={() => onMoveTask(task.id)}>
+                <FolderInput className="h-4 w-4 mr-2" />
+                Move to Project
               </DropdownMenuItem>
 
               <DropdownMenuItem onClick={() => onDuplicate(task.id)}>
@@ -903,10 +912,14 @@ export function TasksClient() {
   // Team members for task assignment
   const { members: teamMembers, loading: teamLoading, fetchMembers } = useTeam()
 
-  // Fetch team members on mount
+  // Projects for task movement
+  const { projects, fetchProjects, isLoading: projectsLoading } = useProjects()
+
+  // Fetch team members and projects on mount
   React.useEffect(() => {
     fetchMembers()
-  }, [fetchMembers])
+    fetchProjects()
+  }, [fetchMembers, fetchProjects])
 
   // Local state
   const [searchQuery, setSearchQuery] = useState('')
@@ -929,6 +942,12 @@ export function TasksClient() {
   const [subtaskDialogOpen, setSubtaskDialogOpen] = useState(false)
   const [parentTaskId, setParentTaskId] = useState<string | null>(null)
   const [subtaskTitle, setSubtaskTitle] = useState('')
+
+  // Move task state
+  const [moveTaskDialogOpen, setMoveTaskDialogOpen] = useState(false)
+  const [taskToMove, setTaskToMove] = useState<string | null>(null)
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null)
+  const [isMoving, setIsMoving] = useState(false)
 
   // Bulk selection state
   const [selectionMode, setSelectionMode] = useState(false)
@@ -1182,6 +1201,35 @@ export function TasksClient() {
       toast.error(result.error || 'Failed to create subtask')
     }
   }, [parentTaskId, subtaskTitle, createTask])
+
+  // Move task handler - opens dialog to select target project
+  const handleMoveTask = useCallback((taskId: string) => {
+    const task = tasks.find(t => t.id === taskId)
+    setTaskToMove(taskId)
+    setSelectedProjectId(task?.project_id || null)
+    setMoveTaskDialogOpen(true)
+  }, [tasks])
+
+  // Confirm move task to selected project
+  const handleConfirmMoveTask = useCallback(async () => {
+    if (!taskToMove) return
+
+    setIsMoving(true)
+    const result = await updateTask(taskToMove, { project_id: selectedProjectId })
+    setIsMoving(false)
+
+    if (result.success) {
+      const projectName = selectedProjectId
+        ? projects.find(p => p.id === selectedProjectId)?.name || 'selected project'
+        : 'no project'
+      toast.success(`Task moved to ${projectName}`)
+      setMoveTaskDialogOpen(false)
+      setTaskToMove(null)
+      setSelectedProjectId(null)
+    } else {
+      toast.error(result.error || 'Failed to move task')
+    }
+  }, [taskToMove, selectedProjectId, updateTask, projects])
 
   // Bulk selection handlers
   const handleToggleSelection = useCallback((taskId: string) => {
@@ -1673,6 +1721,7 @@ export function TasksClient() {
                         onAssign={handleAssignTask}
                         onUpdateDueDate={handleUpdateDueDate}
                         onAddSubtask={handleAddSubtask}
+                        onMoveTask={handleMoveTask}
                         onViewProject={(projectId) => router.push(`/dashboard/crm-v2?tab=projects&highlight=${projectId}`)}
                         activeTimerId={activeTimer?.task_id}
                         isUpdating={updatingTaskId === task.id}
@@ -1715,6 +1764,7 @@ export function TasksClient() {
                         onAssign={handleAssignTask}
                         onUpdateDueDate={handleUpdateDueDate}
                         onAddSubtask={handleAddSubtask}
+                        onMoveTask={handleMoveTask}
                         onViewProject={(projectId) => router.push(`/dashboard/crm-v2?tab=projects&highlight=${projectId}`)}
                         activeTimerId={activeTimer?.task_id}
                         isUpdating={updatingTaskId === task.id}
@@ -1757,6 +1807,7 @@ export function TasksClient() {
                         onAssign={handleAssignTask}
                         onUpdateDueDate={handleUpdateDueDate}
                         onAddSubtask={handleAddSubtask}
+                        onMoveTask={handleMoveTask}
                         onViewProject={(projectId) => router.push(`/dashboard/crm-v2?tab=projects&highlight=${projectId}`)}
                         activeTimerId={activeTimer?.task_id}
                         isUpdating={updatingTaskId === task.id}
@@ -1799,6 +1850,7 @@ export function TasksClient() {
                         onAssign={handleAssignTask}
                         onUpdateDueDate={handleUpdateDueDate}
                         onAddSubtask={handleAddSubtask}
+                        onMoveTask={handleMoveTask}
                         onViewProject={(projectId) => router.push(`/dashboard/crm-v2?tab=projects&highlight=${projectId}`)}
                         activeTimerId={activeTimer?.task_id}
                         isUpdating={updatingTaskId === task.id}
@@ -1889,6 +1941,74 @@ export function TasksClient() {
             <Button onClick={handleCreateSubtask} disabled={isSaving || !subtaskTitle.trim()}>
               {isSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               Create Subtask
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Move Task Dialog */}
+      <Dialog open={moveTaskDialogOpen} onOpenChange={setMoveTaskDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Move Task to Project</DialogTitle>
+            <DialogDescription>
+              Select a project to move this task to, or remove it from any project.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="project-select">Target Project</Label>
+              <Select
+                value={selectedProjectId || 'none'}
+                onValueChange={(value) => setSelectedProjectId(value === 'none' ? null : value)}
+              >
+                <SelectTrigger id="project-select">
+                  <SelectValue placeholder="Select a project..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">
+                    <span className="flex items-center gap-2">
+                      <X className="h-4 w-4 text-muted-foreground" />
+                      No Project (Personal Task)
+                    </span>
+                  </SelectItem>
+                  {projects
+                    .filter(p => p.status !== 'cancelled')
+                    .map((project) => (
+                      <SelectItem key={project.id} value={project.id}>
+                        <span className="flex items-center gap-2">
+                          <div
+                            className="h-3 w-3 rounded-full"
+                            style={{ backgroundColor: project.color || '#6366f1' }}
+                          />
+                          {project.name}
+                        </span>
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+              {projects.length === 0 && !projectsLoading && (
+                <p className="text-sm text-muted-foreground">
+                  No projects available. Create a project first to organize your tasks.
+                </p>
+              )}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setMoveTaskDialogOpen(false)
+                setTaskToMove(null)
+                setSelectedProjectId(null)
+              }}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleConfirmMoveTask} disabled={isMoving}>
+              {isMoving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              <FolderInput className="h-4 w-4 mr-2" />
+              Move Task
             </Button>
           </DialogFooter>
         </DialogContent>

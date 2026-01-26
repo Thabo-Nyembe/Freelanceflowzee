@@ -166,8 +166,8 @@ interface ActivityRecord {
   type: ActivityType
   subject: string
   description: string
-  contactId: string
-  accountId: string
+  contactId: string | null
+  accountId: string | null
   opportunityId: string | null
   ownerId: string
   ownerName: string
@@ -179,6 +179,9 @@ interface ActivityRecord {
   createdDate: string
   priority: TaskPriority
 }
+
+// Type alias for CrmActivity (used in handlers)
+type CrmActivity = ActivityRecord
 
 interface Task {
   id: string
@@ -417,7 +420,15 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
   // Local state for CRM entities
   const [tasks, setTasks] = useState<Task[]>([])
   const [campaigns, setCampaigns] = useState<Campaign[]>([])
+  const [activities, setActivities] = useState<CrmActivity[]>([])
   const [pipelineStages, setPipelineStages] = useState(PIPELINE_STAGES)
+
+  // Filter and view state
+  const [segmentFilter, setSegmentFilter] = useState<CustomerSegment | 'all'>('all')
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('list')
+  const [sortBy, setSortBy] = useState<'name' | 'date' | 'revenue'>('name')
+  const [showFilters, setShowFilters] = useState(false)
+
   const [leadScoringRules, setLeadScoringRules] = useState<LeadScoreRule[]>([
     { id: '1', name: 'Job Title Contains VP/Director', field: 'job_title', operator: 'contains', value: 'VP,Director', points: 15, isActive: true },
     { id: '2', name: 'Company Size > 100', field: 'company_size', operator: 'greater-than', value: '100', points: 10, isActive: true },
@@ -769,25 +780,8 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
 
   // Handlers
   const handleExportCustomers = () => {
-    // Export customers to CSV
-    if (!dbCustomers || dbCustomers.length === 0) {
-      toast.error('No customers to export')
-      return
-    }
-    const csvContent = dbCustomers.map((c: Client) =>
-      `${c.name},${c.email || ''},${c.phone || ''},${c.status || ''},${c.company || ''}`
-    ).join('\n')
-
-    const header = 'Name,Email,Phone,Status,Company\n'
-    const blob = new Blob([header + csvContent], { type: 'text/csv' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `clients-export-${new Date().toISOString().split('T')[0]}.csv`
-    a.click()
-    URL.revokeObjectURL(url)
-
-    toast.success('Export Complete')
+    // Use the improved export function
+    handleExportToCSV()
   }
 
   const handleCreateOpportunity = () => {
@@ -825,7 +819,7 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
 
     try {
       // Create the activity log entry
-      const newActivity: Activity = {
+      const newActivity: CrmActivity = {
         id: `a-${Date.now()}`,
         type: activityLogForm.type,
         subject: activityLogForm.subject,
@@ -844,6 +838,10 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
         priority: 'medium'
       }
 
+      // Add to local state
+      setActivities(prev => [newActivity, ...prev])
+
+      // Also persist to API
       toast.promise(
         fetch('/api/customers/activities', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newActivity) }).then(res => { if (!res.ok) throw new Error('Failed'); }),
         {
@@ -888,6 +886,193 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
   const handleScheduleMeeting = (contactName?: string) => {
     // Open calendar link or modal
     toast.success(`Calendar Opened: Select time slot for meeting`)
+  }
+
+  // Handle adding a note to a customer
+  const handleAddNote = async (customerId: string, note: string) => {
+    if (!note.trim()) {
+      toast.error('Note cannot be empty')
+      return
+    }
+    try {
+      const client = dbCustomers?.find(c => c.id === customerId)
+      if (!client) {
+        toast.error('Customer not found')
+        return
+      }
+      const existingNotes = client.notes || ''
+      const timestamp = new Date().toLocaleString()
+      const newNotes = existingNotes
+        ? `${existingNotes}\n\n[${timestamp}]\n${note}`
+        : `[${timestamp}]\n${note}`
+
+      const result = await updateCustomer(customerId, { notes: newNotes })
+      if (result) {
+        toast.success('Note added successfully')
+        refetch()
+      }
+    } catch (err) {
+      console.error('Failed to add note:', err)
+      toast.error('Failed to add note')
+    }
+  }
+
+  // Handle adding a tag to a customer
+  const handleAddTag = async (customerId: string, tag: string) => {
+    if (!tag.trim()) {
+      toast.error('Tag cannot be empty')
+      return
+    }
+    try {
+      const client = dbCustomers?.find(c => c.id === customerId)
+      if (!client) {
+        toast.error('Customer not found')
+        return
+      }
+      const existingTags = client.tags || []
+      const normalizedTag = tag.trim().toLowerCase()
+
+      // Check if tag already exists
+      if (existingTags.some(t => t.toLowerCase() === normalizedTag)) {
+        toast.error('Tag already exists')
+        return
+      }
+
+      const newTags = [...existingTags, tag.trim()]
+      const result = await updateCustomer(customerId, { tags: newTags })
+      if (result) {
+        toast.success(`Tag "${tag}" added`)
+        refetch()
+      }
+    } catch (err) {
+      console.error('Failed to add tag:', err)
+      toast.error('Failed to add tag')
+    }
+  }
+
+  // Handle removing a tag from a customer
+  const handleRemoveTag = async (customerId: string, tagToRemove: string) => {
+    try {
+      const client = dbCustomers?.find(c => c.id === customerId)
+      if (!client) {
+        toast.error('Customer not found')
+        return
+      }
+      const existingTags = client.tags || []
+      const newTags = existingTags.filter(t => t !== tagToRemove)
+
+      const result = await updateCustomer(customerId, { tags: newTags })
+      if (result) {
+        toast.success(`Tag "${tagToRemove}" removed`)
+        refetch()
+      }
+    } catch (err) {
+      console.error('Failed to remove tag:', err)
+      toast.error('Failed to remove tag')
+    }
+  }
+
+  // Handle bulk import of customers from CSV
+  const handleImportCustomers = async (file: File): Promise<{ imported: number; failed: number }> => {
+    if (!file.name.endsWith('.csv')) {
+      toast.error('Only CSV files are supported')
+      return { imported: 0, failed: 0 }
+    }
+
+    try {
+      const text = await file.text()
+      const lines = text.split('\n').filter(line => line.trim())
+
+      if (lines.length < 2) {
+        toast.error('File is empty or has no data rows')
+        return { imported: 0, failed: 0 }
+      }
+
+      const headers = lines[0].split(',').map(h => h.trim().toLowerCase())
+      const nameIdx = headers.findIndex(h => h.includes('name'))
+      const emailIdx = headers.findIndex(h => h.includes('email'))
+      const phoneIdx = headers.findIndex(h => h.includes('phone'))
+      const companyIdx = headers.findIndex(h => h.includes('company'))
+      const notesIdx = headers.findIndex(h => h.includes('notes'))
+
+      let imported = 0
+      let failed = 0
+
+      for (let i = 1; i < lines.length; i++) {
+        const values = lines[i].split(',').map(v => v.trim().replace(/^["']|["']$/g, ''))
+        const name = nameIdx >= 0 ? values[nameIdx] : `Contact ${i}`
+        const email = emailIdx >= 0 ? values[emailIdx] : null
+        const phone = phoneIdx >= 0 ? values[phoneIdx] : null
+        const company = companyIdx >= 0 ? values[companyIdx] : null
+        const notes = notesIdx >= 0 ? values[notesIdx] : null
+
+        if (name) {
+          try {
+            await createCustomer({
+              name,
+              email: email || null,
+              phone: phone || null,
+              company: company || null,
+              notes: notes || `Imported from ${file.name}`,
+              status: 'active',
+              type: 'individual',
+              tags: ['imported'],
+              total_revenue: 0,
+              total_projects: 0,
+              metadata: {}
+            })
+            imported++
+          } catch (err) {
+            console.error('Failed to import row:', err)
+            failed++
+          }
+        }
+      }
+
+      if (imported > 0) {
+        refetch()
+      }
+
+      return { imported, failed }
+    } catch (err) {
+      console.error('Error parsing file:', err)
+      toast.error('Failed to parse file')
+      return { imported: 0, failed: 0 }
+    }
+  }
+
+  // Handle export to CSV
+  const handleExportToCSV = () => {
+    if (!dbCustomers || dbCustomers.length === 0) {
+      toast.error('No customers to export')
+      return
+    }
+
+    const headers = ['Name', 'Email', 'Phone', 'Status', 'Company', 'Tags', 'Notes', 'Total Revenue', 'Created At']
+    const csvContent = [
+      headers.join(','),
+      ...dbCustomers.map((c: Client) => [
+        `"${(c.name || '').replace(/"/g, '""')}"`,
+        `"${(c.email || '').replace(/"/g, '""')}"`,
+        `"${(c.phone || '').replace(/"/g, '""')}"`,
+        `"${c.status || ''}"`,
+        `"${(c.company || '').replace(/"/g, '""')}"`,
+        `"${(c.tags || []).join('; ')}"`,
+        `"${(c.notes || '').replace(/"/g, '""').replace(/\n/g, ' ')}"`,
+        c.total_revenue || 0,
+        c.created_at || ''
+      ].join(','))
+    ].join('\n')
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `customers-export-${new Date().toISOString().split('T')[0]}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+
+    toast.success(`Exported ${dbCustomers.length} customers`)
   }
 
   return (
@@ -3381,12 +3566,77 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowImportDialog(false)}>Cancel</Button>
               <Button onClick={() => {
-                // Trigger file input
+                // Trigger file input with proper handling
                 const input = document.createElement('input')
                 input.type = 'file'
                 input.accept = '.csv,.xlsx,.xls'
+                input.onchange = async (e) => {
+                  const file = (e.target as HTMLInputElement).files?.[0]
+                  if (file) {
+                    toast.info(`Processing ${file.name}...`)
+                    if (file.name.endsWith('.csv')) {
+                      try {
+                        const text = await file.text()
+                        const lines = text.split('\n').filter(line => line.trim())
+                        if (lines.length > 1) {
+                          const headers = lines[0].split(',').map(h => h.trim().toLowerCase())
+                          const nameIdx = headers.findIndex(h => h.includes('name'))
+                          const emailIdx = headers.findIndex(h => h.includes('email'))
+                          const phoneIdx = headers.findIndex(h => h.includes('phone'))
+                          const companyIdx = headers.findIndex(h => h.includes('company'))
+
+                          let imported = 0
+                          let failed = 0
+                          for (let i = 1; i < lines.length; i++) {
+                            const values = lines[i].split(',').map(v => v.trim().replace(/^["']|["']$/g, ''))
+                            const name = nameIdx >= 0 ? values[nameIdx] : `Contact ${i}`
+                            const email = emailIdx >= 0 ? values[emailIdx] : null
+                            const phone = phoneIdx >= 0 ? values[phoneIdx] : null
+                            const company = companyIdx >= 0 ? values[companyIdx] : null
+
+                            if (name) {
+                              try {
+                                await createCustomer({
+                                  name,
+                                  email: email || null,
+                                  phone: phone || null,
+                                  company: company || null,
+                                  notes: `Imported from ${file.name}`,
+                                  status: 'active',
+                                  type: 'individual',
+                                  tags: ['imported'],
+                                  total_revenue: 0,
+                                  total_projects: 0,
+                                  metadata: {}
+                                })
+                                imported++
+                              } catch (err) {
+                                console.error('Failed to import row:', err)
+                                failed++
+                              }
+                            }
+                          }
+
+                          if (imported > 0) {
+                            refetch()
+                            toast.success(`Imported ${imported} customers${failed > 0 ? ` (${failed} failed)` : ''}`)
+                            setShowImportDialog(false)
+                          } else {
+                            toast.error('No customers could be imported')
+                          }
+                        } else {
+                          toast.error('File appears to be empty or has no data rows')
+                        }
+                      } catch (err) {
+                        console.error('Error parsing CSV:', err)
+                        toast.error('Failed to parse CSV file')
+                      }
+                    } else {
+                      toast.info('Excel support coming soon. Please use CSV format.')
+                    }
+                  }
+                }
                 input.click()
-                toast.info('Select a File')
               }}>
                 <Upload className="h-4 w-4 mr-2" />Select File to Import
               </Button>

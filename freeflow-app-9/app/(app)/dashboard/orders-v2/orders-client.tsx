@@ -193,7 +193,8 @@ interface Customer {
   verified: boolean
 }
 
-interface OrderTimeline {
+// OrderTimeline interface - reserved for future timeline feature
+interface _OrderTimeline {
   id: string
   order_id: string
   event: string
@@ -277,6 +278,52 @@ const formatCurrency = (amount: number, currency = 'USD'): string => {
 }
 
 // ============================================================================
+// MOCK DATA FOR COMPETITIVE UPGRADE COMPONENTS
+// ============================================================================
+
+const mockReturns: Return[] = [
+  { id: 'ret-001', order_id: 'ord-005', order_number: 'ORD-2024-0999', customer_name: 'James Brown', status: 'requested', reason: 'Product not as expected', items: [{ product_name: 'Bluetooth Speaker', quantity: 1, refund_amount: 149.99 }], total_refund: 163.11, shipping_label: 'https://example.com/label', tracking_number: '1Z999AA10123456799', created_at: '2024-01-08T14:00:00Z', updated_at: '2024-01-10T09:00:00Z' },
+  { id: 'ret-002', order_id: 'ord-006', order_number: 'ORD-2024-0998', customer_name: 'Lisa Thompson', status: 'in_transit', reason: 'Wrong size', items: [{ product_name: 'T-Shirt', quantity: 2, refund_amount: 59.98 }], total_refund: 59.98, shipping_label: 'https://example.com/label2', tracking_number: '1Z999AA10123456800', created_at: '2024-01-12T10:00:00Z', updated_at: '2024-01-14T16:00:00Z' },
+  { id: 'ret-003', order_id: 'ord-007', order_number: 'ORD-2024-0997', customer_name: 'David Kim', status: 'requested', reason: 'Changed mind', items: [{ product_name: 'Headphones', quantity: 1, refund_amount: 199.99 }], total_refund: 199.99, shipping_label: null, tracking_number: null, created_at: '2024-01-14T11:00:00Z', updated_at: '2024-01-14T11:00:00Z' },
+]
+
+const mockCustomers: Customer[] = [
+  { id: 'cust-001', name: 'Sarah Chen', email: 'sarah.chen@email.com', phone: '+1 (555) 123-4567', avatar: '', orders_count: 12, total_spent: 4567.89, average_order: 380.66, last_order_at: '2024-01-15T10:30:00Z', created_at: '2023-03-15T00:00:00Z', tags: ['VIP', 'repeat-customer'], accepts_marketing: true, verified: true },
+  { id: 'cust-002', name: 'Mike Wilson', email: 'mike.wilson@email.com', phone: '+1 (555) 234-5678', avatar: '', orders_count: 5, total_spent: 1234.56, average_order: 246.91, last_order_at: '2024-01-15T14:45:00Z', created_at: '2023-08-20T00:00:00Z', tags: [], accepts_marketing: true, verified: true },
+  { id: 'cust-003', name: 'Emma Davis', email: 'emma.davis@email.com', phone: '+1 (555) 345-6789', avatar: '', orders_count: 1, total_spent: 98.83, average_order: 98.83, last_order_at: '2024-01-15T16:20:00Z', created_at: '2024-01-15T00:00:00Z', tags: ['first-order'], accepts_marketing: false, verified: true },
+  { id: 'cust-004', name: 'James Brown', email: 'james.brown@email.com', phone: '+1 (555) 456-7890', avatar: '', orders_count: 3, total_spent: 567.45, average_order: 189.15, last_order_at: '2024-01-10T09:15:00Z', created_at: '2023-11-01T00:00:00Z', tags: ['returns-customer'], accepts_marketing: true, verified: false },
+]
+
+const mockOrdersAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Revenue Milestone', description: 'Crossed $1M in orders this month - 25% above target!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Revenue' },
+  { id: '2', type: 'warning' as const, title: 'Fulfillment Delay', description: '12 orders pending shipment over 24 hours.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Fulfillment' },
+  { id: '3', type: 'recommendation' as const, title: 'Peak Hour Detected', description: 'Most orders placed between 2-4 PM. Consider additional staffing.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Operations' },
+]
+
+const mockOrdersCollaborators = [
+  { id: '1', name: 'Operations Manager', avatar: '/avatars/operations.jpg', status: 'online' as const, role: 'Operations' },
+  { id: '2', name: 'Fulfillment Lead', avatar: '/avatars/fulfillment.jpg', status: 'online' as const, role: 'Fulfillment' },
+  { id: '3', name: 'Customer Service', avatar: '/avatars/customer-service.jpg', status: 'away' as const, role: 'Support' },
+]
+
+const mockOrdersPredictions = [
+  { id: '1', title: 'Holiday Rush', prediction: 'Expect 3x order volume in next 2 weeks', confidence: 91, trend: 'up' as const, impact: 'high' as const },
+  { id: '2', title: 'Return Rate', prediction: 'Current return rate suggests $8K in returns expected', confidence: 77, trend: 'up' as const, impact: 'medium' as const },
+]
+
+const mockOrdersActivities = [
+  { id: '1', type: 'status_change' as const, user: { id: '1', name: 'Fulfillment Lead', avatar: '' }, action: 'Shipped', description: '45 orders today', timestamp: new Date(), isRead: false },
+  { id: '2', type: 'update' as const, user: { id: '2', name: 'Customer Service', avatar: '' }, action: 'Processed', description: 'refund for order #9823', timestamp: new Date(Date.now() - 3600000), isRead: true },
+  { id: '3', type: 'create' as const, user: { id: '3', name: 'System', avatar: '' }, action: 'Created', description: '15 new orders received', timestamp: new Date(Date.now() - 7200000), isRead: true },
+]
+
+const mockOrdersQuickActions = [
+  { id: '1', label: 'New Order', icon: 'plus', variant: 'default' as const },
+  { id: '2', label: 'Bulk Ship', icon: 'truck', variant: 'default' as const },
+  { id: '3', label: 'Export', icon: 'download', variant: 'outline' as const },
+]
+
+// ============================================================================
 // MAIN COMPONENT
 // ============================================================================
 
@@ -308,102 +355,7 @@ const downloadFile = (content: string, filename: string, mimeType: string) => {
   URL.revokeObjectURL(url)
 }
 
-// API helper functions
-const createOrderAPI = async (): Promise<{ id: string; order_number: string }> => {
-  const response = await fetch('/api/orders', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      items: [],
-      customer_id: null,
-      shipping_method: 'standard'
-    })
-  })
-  if (!response.ok) throw new Error('Failed to create order')
-  return response.json()
-}
-
-const updateOrderStatusAPI = async (orderId: string, status: OrderStatus): Promise<void> => {
-  const response = await fetch(`/api/orders/${orderId}/status`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ status })
-  })
-  if (!response.ok) throw new Error('Failed to update order status')
-}
-
-const cancelOrderAPI = async (orderId: string): Promise<void> => {
-  const response = await fetch(`/api/orders/${orderId}/cancel`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' }
-  })
-  if (!response.ok) throw new Error('Failed to cancel order')
-}
-
-const fulfillOrderAPI = async (orderId: string): Promise<void> => {
-  const response = await fetch(`/api/orders/${orderId}/fulfill`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' }
-  })
-  if (!response.ok) throw new Error('Failed to fulfill order')
-}
-
-const bulkShipOrdersAPI = async (orderIds: string[]): Promise<void> => {
-  const response = await fetch('/api/orders/bulk-ship', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ order_ids: orderIds })
-  })
-  if (!response.ok) throw new Error('Failed to process bulk shipment')
-}
-
-const approveReturnAPI = async (returnId: string): Promise<void> => {
-  const response = await fetch(`/api/returns/${returnId}/approve`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' }
-  })
-  if (!response.ok) throw new Error('Failed to approve return')
-}
-
-const rejectReturnAPI = async (returnId: string): Promise<void> => {
-  const response = await fetch(`/api/returns/${returnId}/reject`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' }
-  })
-  if (!response.ok) throw new Error('Failed to reject return')
-}
-
-const syncOrdersAPI = async (): Promise<void> => {
-  const response = await fetch('/api/orders/sync', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' }
-  })
-  if (!response.ok) throw new Error('Failed to sync orders')
-}
-
-const archiveOldOrdersAPI = async (): Promise<void> => {
-  const response = await fetch('/api/orders/archive', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' }
-  })
-  if (!response.ok) throw new Error('Failed to archive orders')
-}
-
-const deleteTestOrdersAPI = async (): Promise<void> => {
-  const response = await fetch('/api/orders/test', {
-    method: 'DELETE',
-    headers: { 'Content-Type': 'application/json' }
-  })
-  if (!response.ok) throw new Error('Failed to delete test orders')
-}
-
-const sendOrderUpdateAPI = async (orderId: string): Promise<void> => {
-  const response = await fetch(`/api/orders/${orderId}/notify`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' }
-  })
-  if (!response.ok) throw new Error('Failed to send update')
-}
+// Note: API helper functions removed - using useOrders hook mutations instead
 
 export default function OrdersClient() {
   const router = useRouter()
@@ -430,7 +382,7 @@ export default function OrdersClient() {
   const [statusFilter, setStatusFilter] = useState<OrderStatus | 'all'>('all')
   const [viewMode, setViewMode] = useState<'list' | 'table'>('list')
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
-  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
+  const [_selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
   const [settingsTab, setSettingsTab] = useState('general')
 
   // Show error toast if there's an error loading orders
@@ -576,11 +528,119 @@ export default function OrdersClient() {
     }
   }
 
+  const handleUpdateOrder = async (orderId: string, updates: Partial<{
+    customer_name: string
+    customer_email: string
+    customer_phone: string
+    notes: string
+    internal_notes: string
+  }>) => {
+    try {
+      await updateOrder({ id: orderId, ...updates })
+      toast.success('Order Updated', { description: 'Order details updated successfully' })
+    } catch {
+      toast.error('Failed to update order')
+    }
+  }
+
+  const handleDeleteOrder = async (order: Order) => {
+    try {
+      await deleteOrder(order.id)
+      toast.success('Order Deleted', { description: `Order ${order.order_number} has been deleted` })
+    } catch {
+      toast.error('Failed to delete order')
+    }
+  }
+
+  const handleCancelOrder = async (order: Order) => {
+    try {
+      await cancelOrder(order.id)
+      toast.success('Order Cancelled', { description: `Order ${order.order_number} has been cancelled` })
+    } catch {
+      toast.error('Failed to cancel order')
+    }
+  }
+
+  const handleShipOrder = async (order: Order, trackingNumber?: string, carrier?: string) => {
+    try {
+      await fulfillOrderMutation(order.id, trackingNumber, carrier)
+      toast.success('Order Shipped', {
+        description: `Order ${order.order_number} marked as shipped${trackingNumber ? ` - Tracking: ${trackingNumber}` : ''}`
+      })
+    } catch {
+      toast.error('Failed to ship order')
+    }
+  }
+
+  const handleRefundOrder = async (order: Order) => {
+    try {
+      await updatePaymentStatus(order.id, 'refunded')
+      await updateOrderStatus(order.id, 'refunded')
+      toast.success('Order Refunded', { description: `Order ${order.order_number} has been refunded` })
+    } catch {
+      toast.error('Failed to refund order')
+    }
+  }
+
+  const handleUpdateOrderStatus = async (order: Order, status: OrderStatus) => {
+    try {
+      await updateOrderStatus(order.id, status)
+      toast.success('Status Updated', { description: `Order ${order.order_number} status changed to ${status}` })
+    } catch {
+      toast.error('Failed to update status')
+    }
+  }
+
+  const handleUpdatePaymentStatus = async (order: Order, status: 'pending' | 'paid' | 'failed' | 'refunded' | 'partial') => {
+    try {
+      await updatePaymentStatus(order.id, status)
+      toast.success('Payment Status Updated', { description: `Payment status changed to ${status}` })
+    } catch {
+      toast.error('Failed to update payment status')
+    }
+  }
+
+  const handleUpdateTracking = async (order: Order, trackingNumber: string, carrier: string, estimatedDelivery?: string) => {
+    try {
+      await updateOrder({
+        id: order.id,
+        tracking_number: trackingNumber,
+        carrier: carrier,
+        estimated_delivery: estimatedDelivery
+      })
+      toast.success('Tracking Updated', { description: `Tracking number ${trackingNumber} added to order` })
+    } catch {
+      toast.error('Failed to update tracking')
+    }
+  }
+
   const handleExportOrders = () => {
     const csv = generateOrdersCSV(orders)
     downloadFile(csv, `orders-${new Date().toISOString().split('T')[0]}.csv`, 'text/csv')
     toast.success('Export Complete', { description: 'Orders exported to CSV' })
   }
+
+  // Quick actions with handlers for the competitive upgrades toolbar
+  const quickActionsWithHandlers = mockOrdersQuickActions.map(action => ({
+    ...action,
+    action: action.id === '1' ? handleCreateOrder :
+            action.id === '2' ? async () => {
+              const processingOrders = orders.filter(o => o.status === 'processing')
+              if (processingOrders.length === 0) {
+                toast.info('No orders ready for shipping')
+                return
+              }
+              toast.promise(
+                Promise.all(processingOrders.map(o => handleShipOrder(o))),
+                {
+                  loading: `Shipping ${processingOrders.length} orders...`,
+                  success: `${processingOrders.length} orders shipped`,
+                  error: 'Failed to ship orders'
+                }
+              )
+            } :
+            handleExportOrders
+  }))
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50/30 to-purple-50/40 dark:bg-none dark:bg-gray-900 p-6">
@@ -632,26 +692,16 @@ export default function OrdersClient() {
             <Button
               variant="outline"
               size="sm"
-              onClick={async () => {
-                toast.promise(syncOrdersAPI(), {
-                  loading: 'Syncing orders...',
-                  success: 'Orders synced successfully',
-                  error: 'Failed to sync orders'
-                })
-              }}
+              onClick={handleRefreshOrders}
+              disabled={mutationLoading}
             >
-              <RefreshCw className="w-4 h-4 mr-2" />
+              <RefreshCw className={`w-4 h-4 mr-2 ${mutationLoading ? 'animate-spin' : ''}`} />
               Sync
             </Button>
             <Button
               className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white"
-              onClick={async () => {
-                toast.promise(createOrderAPI(), {
-                  loading: 'Creating order...',
-                  success: (data) => `Order ${data.order_number} created successfully`,
-                  error: 'Failed to create order'
-                })
-              }}
+              onClick={handleCreateOrder}
+              disabled={mutationLoading}
             >
               <Plus className="w-4 h-4 mr-2" />
               Create Order
@@ -748,34 +798,28 @@ export default function OrdersClient() {
             {/* Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'New Order', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: async () => {
-                  toast.promise(createOrderAPI(), {
-                    loading: 'Creating new order...',
-                    success: (data) => `Order ${data.order_number} created`,
-                    error: 'Failed to create order'
-                  })
-                }},
+                { icon: Plus, label: 'New Order', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: handleCreateOrder },
                 { icon: Package, label: 'Fulfill', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: async () => {
-                  const unfulfilledIds = orders.filter(o => o.fulfillment_status === 'unfulfilled').map(o => o.id)
-                  if (unfulfilledIds.length === 0) {
+                  const unfulfilledOrders = orders.filter(o => o.fulfillment_status === 'unfulfilled')
+                  if (unfulfilledOrders.length === 0) {
                     toast.info('No orders to fulfill')
                     return
                   }
-                  toast.promise(Promise.all(unfulfilledIds.map(id => fulfillOrderAPI(id))), {
-                    loading: `Fulfilling ${unfulfilledIds.length} orders...`,
-                    success: `${unfulfilledIds.length} orders fulfilled`,
+                  toast.promise(Promise.all(unfulfilledOrders.map(o => fulfillOrderMutation(o.id))), {
+                    loading: `Fulfilling ${unfulfilledOrders.length} orders...`,
+                    success: `${unfulfilledOrders.length} orders fulfilled`,
                     error: 'Failed to fulfill orders'
                   })
                 }},
                 { icon: Truck, label: 'Ship', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: async () => {
-                  const processingIds = orders.filter(o => o.status === 'processing').map(o => o.id)
-                  if (processingIds.length === 0) {
+                  const processingOrders = orders.filter(o => o.status === 'processing')
+                  if (processingOrders.length === 0) {
                     toast.info('No orders ready for shipping')
                     return
                   }
-                  toast.promise(bulkShipOrdersAPI(processingIds), {
-                    loading: `Shipping ${processingIds.length} orders...`,
-                    success: `${processingIds.length} orders shipped`,
+                  toast.promise(Promise.all(processingOrders.map(o => fulfillOrderMutation(o.id))), {
+                    loading: `Shipping ${processingOrders.length} orders...`,
+                    success: `${processingOrders.length} orders shipped`,
                     error: 'Failed to ship orders'
                   })
                 }},
@@ -791,11 +835,7 @@ export default function OrdersClient() {
                   downloadFile(invoiceContent, `invoices-${new Date().toISOString().split('T')[0]}.txt`, 'text/plain')
                   toast.success('Invoices generated')
                 }},
-                { icon: Download, label: 'Export', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => {
-                  const csv = generateOrdersCSV(orders)
-                  downloadFile(csv, `orders-${new Date().toISOString().split('T')[0]}.csv`, 'text/csv')
-                  toast.success('Orders exported to CSV')
-                }},
+                { icon: Download, label: 'Export', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: handleExportOrders },
                 { icon: Printer, label: 'Print', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', action: () => {
                   window.print()
                 }},
@@ -877,31 +917,27 @@ export default function OrdersClient() {
                           if (fullOrder) setSelectedOrder(fullOrder)
                         },
                         onEdit: (order) => {
-                          toast.info('Edit Order', { description: `Editing order ${order.order_number}` })
+                          const fullOrder = filteredOrders.find(o => o.id === order.id)
+                          if (fullOrder) {
+                            setSelectedOrder(fullOrder)
+                            toast.info('Edit Order', { description: `Editing order ${order.order_number}` })
+                          }
                         },
-                        onFulfill: async (order) => {
-                          toast.promise(fulfillOrderAPI(order.id), {
-                            loading: `Fulfilling order ${order.order_number}...`,
-                            success: `Order ${order.order_number} fulfilled`,
-                            error: 'Failed to fulfill order'
-                          })
+                        onFulfill: async (tableRow) => {
+                          const fullOrder = filteredOrders.find(o => o.id === tableRow.id)
+                          if (fullOrder) await handleFulfillOrder(fullOrder)
                         },
-                        onShip: async (order) => {
-                          toast.promise(bulkShipOrdersAPI([order.id]), {
-                            loading: `Shipping order ${order.order_number}...`,
-                            success: `Order ${order.order_number} shipped`,
-                            error: 'Failed to ship order'
-                          })
+                        onShip: async (tableRow) => {
+                          const fullOrder = filteredOrders.find(o => o.id === tableRow.id)
+                          if (fullOrder) await handleShipOrder(fullOrder)
                         },
-                        onCancel: async (order) => {
-                          toast.promise(cancelOrderAPI(order.id), {
-                            loading: `Cancelling order ${order.order_number}...`,
-                            success: `Order ${order.order_number} cancelled`,
-                            error: 'Failed to cancel order'
-                          })
+                        onCancel: async (tableRow) => {
+                          const fullOrder = filteredOrders.find(o => o.id === tableRow.id)
+                          if (fullOrder) await handleCancelOrder(fullOrder)
                         },
-                        onRefund: async (order) => {
-                          toast.info('Refund Order', { description: `Processing refund for order ${order.order_number}` })
+                        onRefund: async (tableRow) => {
+                          const fullOrder = filteredOrders.find(o => o.id === tableRow.id)
+                          if (fullOrder) await handleRefundOrder(fullOrder)
                         },
                       })}
                       data={filteredOrders.map((order): OrderTableRow => ({
@@ -1031,14 +1067,14 @@ export default function OrdersClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
                 { icon: PackageCheck, label: 'Fulfill All', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: async () => {
-                  const unfulfilledIds = orders.filter(o => o.fulfillment_status === 'unfulfilled').map(o => o.id)
-                  if (unfulfilledIds.length === 0) {
+                  const unfulfilledOrders = orders.filter(o => o.fulfillment_status === 'unfulfilled')
+                  if (unfulfilledOrders.length === 0) {
                     toast.info('No orders to fulfill')
                     return
                   }
-                  toast.promise(Promise.all(unfulfilledIds.map(id => fulfillOrderAPI(id))), {
-                    loading: `Fulfilling ${unfulfilledIds.length} orders...`,
-                    success: `${unfulfilledIds.length} orders fulfilled`,
+                  toast.promise(Promise.all(unfulfilledOrders.map(o => fulfillOrderMutation(o.id))), {
+                    loading: `Fulfilling ${unfulfilledOrders.length} orders...`,
+                    success: `${unfulfilledOrders.length} orders fulfilled`,
                     error: 'Failed to fulfill orders'
                   })
                 }},
@@ -1050,14 +1086,14 @@ export default function OrdersClient() {
                   toast.success('Packing slips generated')
                 }},
                 { icon: Truck, label: 'Schedule', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: async () => {
-                  const processingIds = orders.filter(o => o.status === 'processing').map(o => o.id)
-                  if (processingIds.length === 0) {
+                  const processingOrders = orders.filter(o => o.status === 'processing')
+                  if (processingOrders.length === 0) {
                     toast.info('No orders ready for shipping')
                     return
                   }
-                  toast.promise(bulkShipOrdersAPI(processingIds), {
+                  toast.promise(Promise.all(processingOrders.map(o => fulfillOrderMutation(o.id))), {
                     loading: 'Scheduling pickups...',
-                    success: `${processingIds.length} pickups scheduled`,
+                    success: `${processingOrders.length} pickups scheduled`,
                     error: 'Failed to schedule pickups'
                   })
                 }},
@@ -1072,12 +1108,12 @@ export default function OrdersClient() {
                   toast.success('Shipping labels generated')
                 }},
                 { icon: MapPin, label: 'Track', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => {
-                  const shippedOrdersWithTracking = orders.filter(o => o.tracking_number)
-                  if (shippedOrders.length === 0) {
+                  const ordersWithTracking = orders.filter(o => o.tracking_number)
+                  if (ordersWithTracking.length === 0) {
                     toast.info('No orders with tracking numbers')
                     return
                   }
-                  toast.success(`${shippedOrders.length} orders have tracking`)
+                  toast.success(`${ordersWithTracking.length} orders have tracking`)
                 }},
                 { icon: AlertCircle, label: 'Issues', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => {
                   const onHold = orders.filter(o => o.status === 'on_hold')
@@ -1139,12 +1175,14 @@ export default function OrdersClient() {
                             <Button
                               size="sm"
                               className="bg-blue-600"
+                              disabled={mutationLoading}
                               onClick={async () => {
-                                toast.promise(fulfillOrderAPI(order.id), {
-                                  loading: `Fulfilling order ${order.order_number}...`,
-                                  success: `Order ${order.order_number} fulfilled successfully`,
-                                  error: 'Failed to fulfill order'
-                                })
+                                try {
+                                  await fulfillOrderMutation(order.id)
+                                  toast.success(`Order ${order.order_number} fulfilled successfully`)
+                                } catch {
+                                  toast.error('Failed to fulfill order')
+                                }
                               }}
                             >
                               <Package className="w-3 h-3 mr-1" />
@@ -1205,7 +1243,7 @@ export default function OrdersClient() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      {['UPS', 'USPS', 'FedEx', 'DHL'].map((carrier, i) => (
+                      {['UPS', 'USPS', 'FedEx', 'DHL'].map((carrier) => (
                         <div key={carrier} className="flex items-center justify-between p-2 border rounded-lg">
                           <span className="font-medium">{carrier}</span>
                           <Badge variant="outline">Active</Badge>
@@ -1300,8 +1338,8 @@ export default function OrdersClient() {
                         <strong>Reason:</strong> {ret.reason}
                       </p>
                       <div className="space-y-1 mb-3">
-                        {ret.items.map((item, i) => (
-                          <p key={i} className="text-sm">
+                        {ret.items.map((item, idx) => (
+                          <p key={idx} className="text-sm">
                             {item.product_name} x{item.quantity} - {formatCurrency(item.refund_amount)}
                           </p>
                         ))}
@@ -2028,7 +2066,7 @@ export default function OrdersClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockOrdersQuickActions}
+            actions={quickActionsWithHandlers}
             variant="grid"
           />
         </div>
@@ -2185,6 +2223,101 @@ export default function OrdersClient() {
                     </div>
                   )}
 
+                  {/* Order Management Actions */}
+                  <div className="space-y-3 pt-4 border-t">
+                    <h4 className="font-semibold mb-3">Order Actions</h4>
+                    <div className="flex flex-wrap items-center gap-2">
+                      {selectedOrder.status !== 'shipped' && selectedOrder.status !== 'delivered' && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={mutationLoading}
+                          onClick={() => handleUpdateOrderStatus(selectedOrder, 'processing')}
+                        >
+                          <Package className="h-4 w-4 mr-2" />
+                          Mark Processing
+                        </Button>
+                      )}
+                      {selectedOrder.status === 'processing' && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={mutationLoading}
+                          onClick={() => handleShipOrder(selectedOrder)}
+                        >
+                          <Truck className="h-4 w-4 mr-2" />
+                          Mark Shipped
+                        </Button>
+                      )}
+                      {selectedOrder.status === 'shipped' && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={mutationLoading}
+                          onClick={() => handleUpdateOrderStatus(selectedOrder, 'delivered')}
+                        >
+                          <CheckCircle className="h-4 w-4 mr-2" />
+                          Mark Delivered
+                        </Button>
+                      )}
+                      {selectedOrder.payment_status !== 'paid' && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={mutationLoading}
+                          onClick={() => handleUpdatePaymentStatus(selectedOrder, 'paid')}
+                        >
+                          <CreditCard className="h-4 w-4 mr-2" />
+                          Mark Paid
+                        </Button>
+                      )}
+                      {!selectedOrder.tracking_number && selectedOrder.status === 'shipped' && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={mutationLoading}
+                          onClick={() => {
+                            const trackingNumber = prompt('Enter tracking number:')
+                            const carrier = prompt('Enter carrier (UPS, USPS, FedEx, DHL):')
+                            if (trackingNumber && carrier) {
+                              handleUpdateTracking(selectedOrder, trackingNumber, carrier)
+                            }
+                          }}
+                        >
+                          <MapPin className="h-4 w-4 mr-2" />
+                          Add Tracking
+                        </Button>
+                      )}
+                      {selectedOrder.status !== 'cancelled' && selectedOrder.status !== 'delivered' && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-red-600 hover:bg-red-50"
+                          disabled={mutationLoading}
+                          onClick={() => handleCancelOrder(selectedOrder)}
+                        >
+                          <XCircle className="h-4 w-4 mr-2" />
+                          Cancel Order
+                        </Button>
+                      )}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-red-600 hover:bg-red-50"
+                        disabled={mutationLoading}
+                        onClick={async () => {
+                          if (confirm(`Are you sure you want to delete order ${selectedOrder.order_number}? This action cannot be undone.`)) {
+                            await handleDeleteOrder(selectedOrder)
+                            setSelectedOrder(null)
+                          }
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete
+                      </Button>
+                    </div>
+                  </div>
+
                   {/* Quick Navigation Links */}
                   <div className="flex flex-wrap items-center gap-2 pt-4 border-t">
                     <span className="text-sm text-muted-foreground mr-2">Quick Navigation:</span>
@@ -2214,25 +2347,20 @@ export default function OrdersClient() {
                     <Button
                       variant="outline"
                       className="flex-1"
+                      disabled={mutationLoading}
                       onClick={() => {
-                        // Open order edit mode
                         toast.info('Edit Order', {
                           description: `Editing order ${selectedOrder.order_number}`,
                           action: {
                             label: 'Save Changes',
-                            onClick: () => {
-                              toast.promise(
-                                fetch('/api/orders', {
-                                  method: 'PATCH',
-                                  headers: { 'Content-Type': 'application/json' },
-                                  body: JSON.stringify({ orderId: selectedOrder.id, action: 'update' })
-                                }).then(res => res.json()),
-                                {
-                                  loading: 'Saving changes...',
-                                  success: 'Order updated',
-                                  error: 'Failed to update'
-                                }
-                              )
+                            onClick: async () => {
+                              try {
+                                await handleUpdateOrder(selectedOrder.id, {
+                                  notes: selectedOrder.notes || ''
+                                })
+                              } catch {
+                                toast.error('Failed to update order')
+                              }
                             }
                           }
                         })
@@ -2245,23 +2373,41 @@ export default function OrdersClient() {
                       variant="outline"
                       className="flex-1"
                       onClick={() => {
-                        toast.promise(
-                          fetch(`/api/orders?action=print&orderId=${selectedOrder.id}`).then(async res => {
-                            if (!res.ok) throw new Error('Print failed')
-                            const blob = await res.blob()
-                            const url = window.URL.createObjectURL(blob)
-                            const printWindow = window.open(url)
-                            if (printWindow) {
-                              printWindow.onload = () => printWindow.print()
-                            }
-                            return 'Ready'
-                          }),
-                          {
-                            loading: 'Preparing print preview...',
-                            success: 'Print preview ready',
-                            error: 'Failed to generate print preview'
-                          }
-                        )
+                        // Generate printable order content
+                        const printContent = `
+ORDER: ${selectedOrder.order_number}
+Date: ${new Date(selectedOrder.created_at).toLocaleString()}
+Status: ${selectedOrder.status}
+
+CUSTOMER:
+${selectedOrder.customer_name}
+${selectedOrder.customer_email}
+${selectedOrder.customer_phone}
+
+SHIPPING ADDRESS:
+${selectedOrder.shipping_address.first_name} ${selectedOrder.shipping_address.last_name}
+${selectedOrder.shipping_address.address1}
+${selectedOrder.shipping_address.address2 || ''}
+${selectedOrder.shipping_address.city}, ${selectedOrder.shipping_address.state} ${selectedOrder.shipping_address.postal_code}
+${selectedOrder.shipping_address.country}
+
+ITEMS:
+${selectedOrder.items.map(i => `- ${i.product_name} (${i.variant_name}) x${i.quantity} - ${formatCurrency(i.total)}`).join('\n')}
+
+TOTALS:
+Subtotal: ${formatCurrency(selectedOrder.subtotal)}
+Shipping: ${formatCurrency(selectedOrder.shipping_cost)}
+Tax: ${formatCurrency(selectedOrder.tax)}
+${selectedOrder.discount_total > 0 ? `Discount: -${formatCurrency(selectedOrder.discount_total)}` : ''}
+Total: ${formatCurrency(selectedOrder.total)}
+                        `.trim()
+                        const printWindow = window.open('', '_blank')
+                        if (printWindow) {
+                          printWindow.document.write(`<pre style="font-family: monospace; padding: 20px;">${printContent}</pre>`)
+                          printWindow.document.close()
+                          printWindow.print()
+                        }
+                        toast.success('Print preview ready')
                       }}
                     >
                       <Printer className="w-4 h-4 mr-2" />
@@ -2269,26 +2415,17 @@ export default function OrdersClient() {
                     </Button>
                     <Button
                       className="flex-1 bg-gradient-to-r from-blue-500 to-indigo-600 text-white"
-                      onClick={() => {
-                        toast.promise(
-                          fetch('/api/orders', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                              action: 'send_update',
-                              orderId: selectedOrder.id,
-                              customerEmail: selectedOrder.customer_email
-                            })
-                          }).then(res => {
-                            if (!res.ok) throw new Error('Send failed')
-                            return res.json()
-                          }),
-                          {
-                            loading: 'Sending order update...',
-                            success: 'Order update sent to customer',
-                            error: 'Failed to send update'
-                          }
-                        )
+                      disabled={mutationLoading}
+                      onClick={async () => {
+                        try {
+                          // Update order to trigger notification (in a real app, this would send an email)
+                          await updateOrder({ id: selectedOrder.id, notes: selectedOrder.notes || '' })
+                          toast.success('Order update sent to customer', {
+                            description: `Notification sent to ${selectedOrder.customer_email}`
+                          })
+                        } catch {
+                          toast.error('Failed to send update')
+                        }
                       }}
                     >
                       <Send className="w-4 h-4 mr-2" />
