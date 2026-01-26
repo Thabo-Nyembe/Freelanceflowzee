@@ -6,7 +6,7 @@
 
 import { createClient } from '@/lib/supabase/client'
 
-import { useState, useCallback, useMemo, useRef } from 'react'
+import { useState, useCallback, useMemo, useRef, useEffect } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -223,6 +223,18 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
   const [showThreadPanel, setShowThreadPanel] = useState(false)
   const [threadParentMessage, setThreadParentMessage] = useState<ChatMessage | null>(null)
   const [threadReplyContent, setThreadReplyContent] = useState('')
+  const [userId, setUserId] = useState<string | null>(null)
+
+  // Fetch current user on mount
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        setUserId(user.id)
+      }
+    }
+    fetchUser()
+  }, [])
 
   // Form state for conversations
   const [conversations, setConversations] = useState<Conversation[]>(CONVERSATIONS)
@@ -280,7 +292,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
         room_id: selectedConversation.id,
         room_name: selectedConversation.subject || 'Conversation',
         room_type: 'support' as RoomType,
-        sender_id: 'current-user',
+        sender_id: userId || 'anonymous',
         sender_name: 'Support Agent',
         message: newMessage.trim(),
         message_type: 'text',
@@ -493,7 +505,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
         {
           content: newNote.trim(),
           created_at: new Date().toISOString(),
-          created_by: 'current-user' // TODO: Get actual user ID
+          created_by: userId || 'anonymous'
         }
       ]
 
@@ -734,7 +746,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
             room_id: roomId,
             room_name: selectedConversation.subject || 'Conversation',
             room_type: 'support' as RoomType,
-            sender_id: 'current-user',
+            sender_id: userId || 'anonymous',
             sender_name: 'Support Agent',
             message: file.name,
             message_type: messageType,
@@ -778,14 +790,14 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
       if (fetchError) throw fetchError
 
       const currentReactions = message?.reactions || {}
-      const userId = 'current-user' // In production, get from auth
+      const currentUserId = userId || 'anonymous'
 
       // Toggle reaction
       if (!currentReactions[emoji]) {
         currentReactions[emoji] = []
       }
 
-      const userIndex = currentReactions[emoji].indexOf(userId)
+      const userIndex = currentReactions[emoji].indexOf(currentUserId)
       if (userIndex > -1) {
         // Remove reaction
         currentReactions[emoji].splice(userIndex, 1)
@@ -794,7 +806,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
         }
       } else {
         // Add reaction
-        currentReactions[emoji].push(userId)
+        currentReactions[emoji].push(currentUserId)
       }
 
       // Calculate total reaction count
@@ -834,7 +846,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
         room_id: selectedConversation.id,
         room_name: selectedConversation.subject || 'Conversation',
         room_type: 'support' as RoomType,
-        sender_id: 'current-user',
+        sender_id: userId || 'anonymous',
         sender_name: 'Support Agent',
         message: replyContent.trim(),
         message_type: 'text',
@@ -879,7 +891,7 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
         room_id: selectedConversation.id,
         room_name: selectedConversation.subject || 'Conversation',
         room_type: 'support' as RoomType,
-        sender_id: 'current-user',
+        sender_id: userId || 'anonymous',
         sender_name: 'Support Agent',
         message: messageContent.trim(),
         message_type: 'text',
