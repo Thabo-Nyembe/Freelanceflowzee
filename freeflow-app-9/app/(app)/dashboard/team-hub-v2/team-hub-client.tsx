@@ -671,6 +671,7 @@ export default function TeamHubClient() {
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null)
   const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null)
   const [selectedApp, setSelectedApp] = useState<SlackApp | null>(null)
+  const [selectedItem, setSelectedItem] = useState<{ id: string; type: string; title: string } | null>(null)
   const [statusFilter, setStatusFilter] = useState<MemberStatus | 'all'>('all')
   const [showSearch, setShowSearch] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')
@@ -1039,8 +1040,27 @@ export default function TeamHubClient() {
     setShowCreateMemberDialog(true)
   }
 
-  const handleSetReminder = () => {
-    toast.success('Reminder set')
+  const handleSetReminder = async () => {
+    if (!selectedItem) {
+      toast.error('No item selected')
+      return
+    }
+    try {
+      // Save reminder to localStorage or database
+      const reminders = JSON.parse(localStorage.getItem('team-reminders') || '[]')
+      reminders.push({
+        id: crypto.randomUUID(),
+        itemId: selectedItem.id,
+        itemType: selectedItem.type,
+        title: selectedItem.title,
+        reminderTime: new Date(Date.now() + 30 * 60 * 1000).toISOString(), // 30 min from now
+        createdAt: new Date().toISOString()
+      })
+      localStorage.setItem('team-reminders', JSON.stringify(reminders))
+      toast.success('Reminder set')
+    } catch (err) {
+      toast.error('Failed to set reminder')
+    }
   }
 
   const handleOpenNotifications = () => {

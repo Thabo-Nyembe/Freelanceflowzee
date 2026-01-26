@@ -518,6 +518,14 @@ export default function WorkflowBuilderClient() {
   const [showShareTemplateDialog, setShowShareTemplateDialog] = useState(false)
   const [showShareCredentialsDialog, setShowShareCredentialsDialog] = useState(false)
 
+  // Live view and favorites state
+  const [isLiveViewEnabled, setIsLiveViewEnabled] = useState(false)
+  const [showFavoritesPanel, setShowFavoritesPanel] = useState(false)
+
+  // Variables state
+  const [variables, setVariables] = useState<WorkflowVariable[]>([])
+  const [selectedVariable, setSelectedVariable] = useState<WorkflowVariable | null>(null)
+
   // New workflow form state
   const [newWorkflowName, setNewWorkflowName] = useState('')
   const [newWorkflowDescription, setNewWorkflowDescription] = useState('')
@@ -698,8 +706,8 @@ export default function WorkflowBuilderClient() {
   }
 
   const handleLiveView = () => {
-    toast.success('Real-time view activated')
-    // Could toggle a live view state
+    setIsLiveViewEnabled(prev => !prev)
+    toast.success(isLiveViewEnabled ? 'Live view deactivated' : 'Real-time view activated')
   }
 
   const handleExportLogs = async () => {
@@ -777,6 +785,7 @@ export default function WorkflowBuilderClient() {
   }
 
   const handleFavoriteNodes = () => {
+    setShowFavoritesPanel(true)
     toast.success('Showing favorite nodes')
   }
 
@@ -945,6 +954,16 @@ export default function WorkflowBuilderClient() {
   }
 
   const handleDuplicateVariable = () => {
+    if (!selectedVariable) {
+      toast.error('No variable selected')
+      return
+    }
+    const duplicated: WorkflowVariable = {
+      ...selectedVariable,
+      id: crypto.randomUUID(),
+      key: `${selectedVariable.key}_copy`
+    }
+    setVariables(prev => [...prev, duplicated])
     toast.success('Variable duplicated')
   }
 

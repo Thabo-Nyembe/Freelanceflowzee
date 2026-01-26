@@ -278,6 +278,13 @@ export default function DesktopAppClient() {
   const [checkingUpdates, setCheckingUpdates] = useState(false)
   const [downloadProgress, setDownloadProgress] = useState(0)
 
+  // Preferences state
+  const [autoBuildOnPush, setAutoBuildOnPush] = useState(true)
+  const [buildNotifications, setBuildNotifications] = useState(true)
+  const [parallelBuilds, setParallelBuilds] = useState(true)
+  const [autoUpdateCheck, setAutoUpdateCheck] = useState(true)
+  const [prereleaseUpdates, setPrereleaseUpdates] = useState(false)
+
   // Supabase state
   const [dbProjects, setDbProjects] = useState<DbProject[]>([])
   const [dbBuilds, setDbBuilds] = useState<DbBuild[]>([])
@@ -323,6 +330,23 @@ export default function DesktopAppClient() {
   useEffect(() => {
     fetchData()
   }, [fetchData])
+
+  // Load preferences from localStorage on mount
+  useEffect(() => {
+    try {
+      const savedPreferences = localStorage.getItem('desktop-app-preferences')
+      if (savedPreferences) {
+        const preferences = JSON.parse(savedPreferences)
+        if (typeof preferences.autoBuildOnPush === 'boolean') setAutoBuildOnPush(preferences.autoBuildOnPush)
+        if (typeof preferences.buildNotifications === 'boolean') setBuildNotifications(preferences.buildNotifications)
+        if (typeof preferences.parallelBuilds === 'boolean') setParallelBuilds(preferences.parallelBuilds)
+        if (typeof preferences.autoUpdateCheck === 'boolean') setAutoUpdateCheck(preferences.autoUpdateCheck)
+        if (typeof preferences.prereleaseUpdates === 'boolean') setPrereleaseUpdates(preferences.prereleaseUpdates)
+      }
+    } catch (error) {
+      console.error('Failed to load preferences:', error)
+    }
+  }, [])
 
   const filteredBuilds = useMemo(() => {
     return builds.filter(build => {
@@ -944,9 +968,23 @@ export default function DesktopAppClient() {
   }
 
   // Save preferences handler
-  const handleSavePreferences = () => {
-    toast.success('Preferences saved successfully')
-    setShowPreferencesDialog(false)
+  const handleSavePreferences = async () => {
+    try {
+      const preferences = {
+        autoBuildOnPush,
+        buildNotifications,
+        parallelBuilds,
+        autoUpdateCheck,
+        prereleaseUpdates,
+        updatedAt: new Date().toISOString()
+      }
+      localStorage.setItem('desktop-app-preferences', JSON.stringify(preferences))
+      toast.success('Preferences saved successfully')
+      setShowPreferencesDialog(false)
+    } catch (err) {
+      console.error('Failed to save preferences:', err)
+      toast.error('Failed to save preferences')
+    }
   }
 
   // Notarize app handler
@@ -2986,21 +3024,21 @@ Date: ${new Date().toISOString().split('T')[0]}
                     <p className="font-medium">Auto-build on Push</p>
                     <p className="text-sm text-muted-foreground">Trigger builds when code is pushed</p>
                   </div>
-                  <Switch defaultChecked />
+                  <Switch checked={autoBuildOnPush} onCheckedChange={setAutoBuildOnPush} />
                 </div>
                 <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                   <div>
                     <p className="font-medium">Build Notifications</p>
                     <p className="text-sm text-muted-foreground">Get notified when builds complete</p>
                   </div>
-                  <Switch defaultChecked />
+                  <Switch checked={buildNotifications} onCheckedChange={setBuildNotifications} />
                 </div>
                 <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                   <div>
                     <p className="font-medium">Parallel Builds</p>
                     <p className="text-sm text-muted-foreground">Build multiple platforms simultaneously</p>
                   </div>
-                  <Switch defaultChecked />
+                  <Switch checked={parallelBuilds} onCheckedChange={setParallelBuilds} />
                 </div>
               </div>
             </div>
@@ -3012,14 +3050,14 @@ Date: ${new Date().toISOString().split('T')[0]}
                     <p className="font-medium">Auto-update Check</p>
                     <p className="text-sm text-muted-foreground">Check for updates on startup</p>
                   </div>
-                  <Switch defaultChecked />
+                  <Switch checked={autoUpdateCheck} onCheckedChange={setAutoUpdateCheck} />
                 </div>
                 <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                   <div>
                     <p className="font-medium">Pre-release Updates</p>
                     <p className="text-sm text-muted-foreground">Include beta and alpha updates</p>
                   </div>
-                  <Switch />
+                  <Switch checked={prereleaseUpdates} onCheckedChange={setPrereleaseUpdates} />
                 </div>
               </div>
             </div>

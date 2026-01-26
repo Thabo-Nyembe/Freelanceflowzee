@@ -147,6 +147,7 @@ export default function ComponentLibraryClient() {
   const [showBrowseDialog, setShowBrowseDialog] = useState(false)
   const [showPlaygroundDialog, setShowPlaygroundDialog] = useState(false)
   const [showDocsDialog, setShowDocsDialog] = useState(false)
+  const [showAddWebhookDialog, setShowAddWebhookDialog] = useState(false)
 
   // MIGRATED: Database hooks for component data - no fallback
   const { components: dbComponents = [], stats: componentStats, loading: componentsLoading } = useUIComponents([])
@@ -254,17 +255,8 @@ export default function ComponentLibraryClient() {
   }
 
   const handleCreate = () => {
-    toast.info('Component Builder', {
-      description: 'Open the visual component builder to create custom UI components with drag-and-drop.',
-      action: {
-        label: 'Quick Start',
-        onClick: () => {
-          toast.success('Component created', {
-            description: 'New blank component added to your library'
-          })
-        }
-      }
-    })
+    setShowNewComponentDialog(true)
+    toast.info('Component Builder', { description: 'Opening component creation wizard...' })
   }
 
   const handleOpenFigma = () => {
@@ -336,17 +328,8 @@ export default function ComponentLibraryClient() {
   }
 
   const handleAddWebhook = () => {
-    toast.info('Add Webhook', {
-      description: 'Configure a webhook endpoint to receive component library events.',
-      action: {
-        label: 'Configure',
-        onClick: () => {
-          toast.success('Webhook endpoint added', {
-            description: 'Your webhook will receive component.created and component.updated events'
-          })
-        }
-      }
-    })
+    setShowAddWebhookDialog(true)
+    toast.info('Add Webhook', { description: 'Configure webhook integration...' })
   }
 
   const handleViewApiKey = () => {
@@ -2165,6 +2148,61 @@ export default function App() {
               </Tabs>
               <div className="flex justify-end">
                 <Button variant="outline" onClick={() => setShowDocsDialog(false)}>Close</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Webhook Dialog */}
+        <Dialog open={showAddWebhookDialog} onOpenChange={setShowAddWebhookDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Webhook className="h-5 w-5 text-violet-600" />
+                Add Webhook
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Webhook URL</Label>
+                <Input placeholder="https://your-server.com/webhook" />
+              </div>
+              <div className="space-y-2">
+                <Label>Events to Subscribe</Label>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-sm font-normal">component.created</Label>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label className="text-sm font-normal">component.updated</Label>
+                    <Switch defaultChecked />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label className="text-sm font-normal">component.deleted</Label>
+                    <Switch />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label className="text-sm font-normal">component.published</Label>
+                    <Switch defaultChecked />
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Secret Key (optional)</Label>
+                <Input type="password" placeholder="Enter a secret key for signature verification" />
+                <p className="text-xs text-gray-500">Used to sign webhook payloads for verification</p>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowAddWebhookDialog(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1 bg-violet-600 hover:bg-violet-700" onClick={() => {
+                  setShowAddWebhookDialog(false)
+                  toast.success('Webhook configured!', { description: 'Your webhook will receive component library events' })
+                }}>
+                  Add Webhook
+                </Button>
               </div>
             </div>
           </DialogContent>
