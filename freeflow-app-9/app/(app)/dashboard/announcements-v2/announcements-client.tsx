@@ -604,59 +604,193 @@ export default function AnnouncementsClient() {
     }
   }
 
-  // Handler for Add Release
-  const handleAddRelease = () => {
+  // Handler for Add Release - Creates an announcement as a changelog/release entry
+  const handleAddRelease = async () => {
     if (!newRelease.version.trim() || !newRelease.title.trim()) {
-      toast.error('Validation Error')
+      toast.error('Validation Error: Version and title are required')
       return
     }
-    toast.success(`Release Added: ${newRelease.version} has been added to the changelog`)
-    setNewRelease({ version: '', title: '', description: '', type: 'feature', changes: [''] })
-    setShowAddReleaseDialog(false)
+
+    try {
+      const releaseContent = `## Version ${newRelease.version}\n\n${newRelease.description}\n\n### Changes\n${newRelease.changes.filter(c => c.trim()).map(c => `- ${c}`).join('\n')}`
+
+      await createAnnouncement({
+        title: `Release ${newRelease.version}: ${newRelease.title}`,
+        content: releaseContent,
+        announcement_type: mapLocalTypeToDb(newRelease.type),
+        priority: 'normal',
+        status: 'published',
+        target_audience: 'all',
+        is_pinned: false,
+        is_featured: true,
+        send_email: false,
+        send_push: false,
+        tags: ['release', 'changelog', newRelease.version]
+      })
+
+      toast.success(`Release Added: ${newRelease.version} has been added to the changelog`)
+      setNewRelease({ version: '', title: '', description: '', type: 'feature', changes: [''] })
+      setShowAddReleaseDialog(false)
+    } catch (error) {
+      toast.error('Failed to add release')
+    }
   }
 
-  // Handler for Create Segment
-  const handleCreateSegment = () => {
+  // Handler for Create Segment - Saves segment to the database
+  const handleCreateSegment = async () => {
     if (!newSegment.name.trim()) {
-      toast.error('Validation Error')
+      toast.error('Validation Error: Segment name is required')
       return
     }
-    toast.success(`Segment Created: "${newSegment.name}" segment has been created`)
-    setNewSegment({ name: '', description: '', attribute: '', operator: '=', value: '' })
-    setShowCreateSegmentDialog(false)
+
+    try {
+      const response = await fetch('/api/segments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: newSegment.name,
+          description: newSegment.description,
+          rules: newSegment.attribute ? [{
+            attribute: newSegment.attribute,
+            operator: newSegment.operator,
+            value: newSegment.value
+          }] : []
+        })
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.message || 'Failed to create segment')
+      }
+
+      toast.success(`Segment Created: "${newSegment.name}" segment has been created`)
+      setNewSegment({ name: '', description: '', attribute: '', operator: '=', value: '' })
+      setShowCreateSegmentDialog(false)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to create segment')
+    }
   }
 
-  // Handler for Edit Segment
-  const handleEditSegment = () => {
+  // Handler for Edit Segment - Updates segment in the database
+  const handleEditSegment = async () => {
     if (!selectedSegment) return
-    toast.success(`Segment Updated: "${selectedSegment.name}" segment has been updated`)
-    setShowEditSegmentDialog(false)
-    setSelectedSegment(null)
+
+    try {
+      const response = await fetch(`/api/segments/${selectedSegment.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: selectedSegment.name,
+          description: selectedSegment.description,
+          rules: selectedSegment.rules
+        })
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.message || 'Failed to update segment')
+      }
+
+      toast.success(`Segment Updated: "${selectedSegment.name}" segment has been updated`)
+      setShowEditSegmentDialog(false)
+      setSelectedSegment(null)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to update segment')
+    }
   }
 
-  // Handler for Send to Segment
-  const handleSendToSegment = () => {
-    if (!selectedSegment) return
-    toast.success(`Announcement Sent to ${selectedSegment.count} users in "${selectedSegment.name}"`)
-    setShowSendToSegmentDialog(false)
-    setSelectedSegment(null)
+  // Handler for Send to Segment - Sends announcement to segment users
+  const handleSendToSegment = async () => {
+    if (!selectedSegment || !selectedAnnouncement) return
+
+    try {
+      const response = await fetch('/api/announcements/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          announcement_id: selectedAnnouncement.id,
+          segment_id: selectedSegment.id,
+          channels: selectedAnnouncement.channels || ['web']
+        })
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.message || 'Failed to send announcement')
+      }
+
+      const result = await response.json()
+      toast.success(`Announcement Sent to ${result.sent_count || selectedSegment.userCount} users in "${selectedSegment.name}"`)
+      setShowSendToSegmentDialog(false)
+      setSelectedSegment(null)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to send announcement to segment')
+    }
   }
 
-  // Handler for Configure Slack
-  const handleConfigureSlack = () => {
-    toast.success('Slack Configuration Updated')
-    setShowConfigureSlackDialog(false)
+  // Handler for Configure Slack - Saves Slack integration configuration
+  const handleConfigureSlack = async () => {
+    try {
+      const response = await fetch('/api/integrations/slack', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'configure',
+          enabled: true,
+          settings: {
+            notifications: true,
+            channel: '#announcements'
+          }
+        })
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.message || 'Failed to configure Slack')
+      }
+
+      toast.success('Slack Configuration Updated')
+      setShowConfigureSlackDialog(false)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to configure Slack')
+    }
   }
 
-  // Handler for Add Webhook
-  const handleAddWebhook = () => {
+  // Handler for Add Webhook - Creates a new webhook subscription
+  const handleAddWebhook = async () => {
     if (!newWebhook.url.trim()) {
-      toast.error('Validation Error')
+      toast.error('Validation Error: Webhook URL is required')
       return
     }
-    toast.success(`Webhook Added: listening to ${newWebhook.events.length} events`)
-    setNewWebhook({ url: '', events: ['published'] })
-    setShowAddWebhookDialog(false)
+
+    // Validate URL format
+    try {
+      new URL(newWebhook.url)
+    } catch {
+      toast.error('Validation Error: Invalid URL format')
+      return
+    }
+
+    try {
+      const result = await createWebhook({
+        name: `Announcements Webhook`,
+        url: newWebhook.url,
+        events: newWebhook.events,
+        status: 'active',
+        description: 'Webhook for announcement events'
+      })
+
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to create webhook')
+      }
+
+      toast.success(`Webhook Added: listening to ${newWebhook.events.length} events`)
+      setNewWebhook({ url: '', events: ['published'] })
+      setShowAddWebhookDialog(false)
+      fetchWebhooks()
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to add webhook')
+    }
   }
 
   // Handler for Delete Webhook
@@ -681,20 +815,59 @@ export default function AnnouncementsClient() {
     }
   }
 
-  // Handler for Configure Integration
-  const handleConfigureIntegration = () => {
+  // Handler for Configure Integration - Saves integration configuration
+  const handleConfigureIntegration = async () => {
     if (!selectedIntegration) return
-    toast.success(`Integration Updated: ${selectedIntegration.name} configuration has been saved`)
-    setShowConfigureIntegrationDialog(false)
-    setSelectedIntegration(null)
+
+    try {
+      const response = await fetch('/api/integrations/configure', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          integration_name: selectedIntegration.name,
+          enabled: selectedIntegration.connected,
+          settings: {}
+        })
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.message || 'Failed to configure integration')
+      }
+
+      toast.success(`Integration Updated: ${selectedIntegration.name} configuration has been saved`)
+      setShowConfigureIntegrationDialog(false)
+      setSelectedIntegration(null)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to configure integration')
+    }
   }
 
-  // Handler for Connect Integration
-  const handleConnectIntegration = () => {
+  // Handler for Connect Integration - Connects a new integration
+  const handleConnectIntegration = async () => {
     if (!selectedIntegration) return
-    toast.success(`Integration Connected: ${selectedIntegration.name} has been successfully connected`)
-    setShowConnectIntegrationDialog(false)
-    setSelectedIntegration(null)
+
+    try {
+      const response = await fetch('/api/integrations/connect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          integration_name: selectedIntegration.name,
+          action: 'connect'
+        })
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.message || 'Failed to connect integration')
+      }
+
+      toast.success(`Integration Connected: ${selectedIntegration.name} has been successfully connected`)
+      setShowConnectIntegrationDialog(false)
+      setSelectedIntegration(null)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to connect integration')
+    }
   }
 
   // Handler for Regenerate API Key
@@ -729,31 +902,96 @@ export default function AnnouncementsClient() {
     toast.success(`Copied to Clipboard: ${label} has been copied to your clipboard`)
   }
 
-  // Handler for New Template
-  const handleNewTemplate = () => {
+  // Handler for New Template - Creates a new announcement template
+  const handleNewTemplate = async () => {
     if (!newTemplate.name.trim()) {
-      toast.error('Validation Error')
+      toast.error('Validation Error: Template name is required')
       return
     }
-    toast.success(`Template Created: "${newTemplate.name}" template has been created`)
-    setNewTemplate({ name: '', type: 'feature', description: '', content: '' })
-    setShowNewTemplateDialog(false)
+
+    try {
+      const response = await fetch('/api/templates', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create',
+          name: newTemplate.name,
+          description: newTemplate.description,
+          category: 'announcements',
+          type: newTemplate.type,
+          features: [newTemplate.content],
+          tags: ['announcement-template']
+        })
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.message || 'Failed to create template')
+      }
+
+      toast.success(`Template Created: "${newTemplate.name}" template has been created`)
+      setNewTemplate({ name: '', type: 'feature', description: '', content: '' })
+      setShowNewTemplateDialog(false)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to create template')
+    }
   }
 
-  // Handler for Edit Template
-  const handleEditTemplate = () => {
+  // Handler for Edit Template - Updates an existing announcement template
+  const handleEditTemplate = async () => {
     if (!selectedTemplate) return
-    toast.success(`Template Updated: "${selectedTemplate.name}" template has been updated`)
-    setShowEditTemplateDialog(false)
-    setSelectedTemplate(null)
+
+    try {
+      const response = await fetch('/api/templates', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update',
+          id: (selectedTemplate as { id?: string }).id,
+          name: selectedTemplate.name,
+          description: selectedTemplate.description,
+          type: selectedTemplate.type
+        })
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.message || 'Failed to update template')
+      }
+
+      toast.success(`Template Updated: "${selectedTemplate.name}" template has been updated`)
+      setShowEditTemplateDialog(false)
+      setSelectedTemplate(null)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to update template')
+    }
   }
 
-  // Handler for Delete Template
-  const handleDeleteTemplate = () => {
+  // Handler for Delete Template - Deletes an announcement template
+  const handleDeleteTemplate = async () => {
     if (!selectedTemplate) return
-    toast.success(`Template Deleted: "${selectedTemplate.name}" template has been deleted`)
-    setShowDeleteTemplateDialog(false)
-    setSelectedTemplate(null)
+
+    try {
+      const response = await fetch('/api/templates', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'delete',
+          id: (selectedTemplate as { id?: string }).id
+        })
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.message || 'Failed to delete template')
+      }
+
+      toast.success(`Template Deleted: "${selectedTemplate.name}" template has been deleted`)
+      setShowDeleteTemplateDialog(false)
+      setSelectedTemplate(null)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to delete template')
+    }
   }
 
   // Handler for Export Data

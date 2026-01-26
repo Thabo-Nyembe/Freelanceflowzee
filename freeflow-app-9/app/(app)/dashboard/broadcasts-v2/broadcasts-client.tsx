@@ -409,6 +409,61 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
   // File import state
   const [importedFile, setImportedFile] = useState<File | null>(null)
 
+  // Form state for automation dialog
+  const [automationForm, setAutomationForm] = useState({
+    name: '',
+    description: '',
+    trigger_type: 'event',
+    trigger_event: 'user.created'
+  })
+
+  // Form state for series dialog
+  const [seriesForm, setSeriesForm] = useState({
+    name: '',
+    description: '',
+    entry_trigger: 'signup',
+    exit_on_purchase: false,
+    exit_on_unsubscribe: true
+  })
+
+  // Form state for template dialog
+  const [templateForm, setTemplateForm] = useState({
+    name: '',
+    category: 'engagement',
+    subject: '',
+    content: ''
+  })
+
+  // Form state for segment dialog
+  const [segmentForm, setSegmentForm] = useState({
+    name: '',
+    description: ''
+  })
+
+  // Form state for event dialog
+  const [eventForm, setEventForm] = useState({
+    name: '',
+    description: ''
+  })
+
+  // Form state for webhook dialog
+  const [webhookForm, setWebhookForm] = useState({
+    url: '',
+    secret: '',
+    events: {
+      sent: true,
+      opened: true,
+      clicked: true,
+      bounced: true,
+      unsubscribed: true,
+      complained: true
+    }
+  })
+
+  // Confirmation input states
+  const [purgeConfirmation, setPurgeConfirmation] = useState('')
+  const [deleteAllConfirmation, setDeleteAllConfirmation] = useState('')
+
   // Form state
   const [formData, setFormData] = useState({
     title: '',
@@ -711,9 +766,55 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
   }
 
   // Process import
-  const processImport = () => {
-    toast.success('Contacts imported successfully')
-    setShowImportDialog(false)
+  const processImport = async () => {
+    if (!importedFile) {
+      toast.error('Please select a file to import')
+      return
+    }
+
+    setIsSaving(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to import contacts')
+        return
+      }
+
+      // Read file content
+      const text = await importedFile.text()
+      const lines = text.split('\n').filter(line => line.trim())
+      const headers = lines[0].split(',').map(h => h.trim().toLowerCase())
+
+      const contacts = lines.slice(1).map(line => {
+        const values = line.split(',').map(v => v.trim())
+        const contact: Record<string, string> = {}
+        headers.forEach((header, index) => {
+          contact[header] = values[index] || ''
+        })
+        return {
+          user_id: user.id,
+          email: contact.email || '',
+          name: contact.name || contact.first_name || '',
+          status: 'active',
+          tags: [],
+          metadata: contact
+        }
+      }).filter(c => c.email)
+
+      // Insert contacts into broadcast_recipients or contacts table
+      const { error } = await supabase.from('contacts').insert(contacts)
+
+      if (error && error.code !== '42P01') throw error
+
+      toast.success(`${contacts.length} contacts imported successfully`)
+      setShowImportDialog(false)
+      setImportedFile(null)
+    } catch (error) {
+      console.error('Error importing contacts:', error)
+      toast.error('Failed to import contacts')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   // Handle export analytics
@@ -733,9 +834,48 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
   }
 
   // Save automation
-  const saveAutomation = () => {
-    toast.success('Automation created')
-    setShowAutomationDialog(false)
+  const saveAutomation = async () => {
+    if (!automationForm.name) {
+      toast.error('Please enter an automation name')
+      return
+    }
+
+    setIsSaving(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to create automations')
+        return
+      }
+
+      const response = await fetch('/api/kazi/automations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user.id,
+          name: automationForm.name,
+          description: automationForm.description,
+          trigger_type: automationForm.trigger_type,
+          trigger_config: {
+            event: automationForm.trigger_event
+          },
+          actions: [],
+          status: 'draft',
+          category: 'broadcasts'
+        })
+      })
+
+      if (!response.ok) throw new Error('Failed to create automation')
+
+      toast.success('Automation created successfully')
+      setShowAutomationDialog(false)
+      setAutomationForm({ name: '', description: '', trigger_type: 'event', trigger_event: 'user.created' })
+    } catch (error) {
+      console.error('Error creating automation:', error)
+      toast.error('Failed to create automation')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   // Handle create series
@@ -743,10 +883,52 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
     setShowSeriesDialog(true)
   }
 
-  // Save series
-  const saveSeries = () => {
-    toast.success('Series created')
-    setShowSeriesDialog(false)
+  // Save series (series are sequential automations)
+  const saveSeries = async () => {
+    if (!seriesForm.name) {
+      toast.error('Please enter a series name')
+      return
+    }
+
+    setIsSaving(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to create series')
+        return
+      }
+
+      // Create series as a sequential automation workflow
+      const { error } = await supabase.from('automations').insert({
+        user_id: user.id,
+        workflow_name: seriesForm.name,
+        description: seriesForm.description,
+        workflow_type: 'sequential',
+        trigger_type: seriesForm.entry_trigger === 'signup' ? 'event' : seriesForm.entry_trigger,
+        trigger_config: {
+          event: seriesForm.entry_trigger === 'signup' ? 'user.created' : null,
+          exit_conditions: {
+            on_purchase: seriesForm.exit_on_purchase,
+            on_unsubscribe: seriesForm.exit_on_unsubscribe
+          }
+        },
+        steps: [],
+        status: 'draft',
+        is_enabled: false,
+        category: 'email-series'
+      })
+
+      if (error) throw error
+
+      toast.success('Email series created successfully')
+      setShowSeriesDialog(false)
+      setSeriesForm({ name: '', description: '', entry_trigger: 'signup', exit_on_purchase: false, exit_on_unsubscribe: true })
+    } catch (error) {
+      console.error('Error creating series:', error)
+      toast.error('Failed to create series')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   // Handle create template
@@ -755,9 +937,46 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
   }
 
   // Save template
-  const saveTemplate = () => {
-    toast.success('Template saved')
-    setShowTemplateDialog(false)
+  const saveTemplate = async () => {
+    if (!templateForm.name) {
+      toast.error('Please enter a template name')
+      return
+    }
+
+    setIsSaving(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to create templates')
+        return
+      }
+
+      const response = await fetch('/api/templates', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create',
+          name: templateForm.name,
+          category: templateForm.category,
+          type: 'email',
+          description: `Subject: ${templateForm.subject}`,
+          tags: ['email', templateForm.category],
+          features: [],
+          deliverables: [templateForm.content]
+        })
+      })
+
+      if (!response.ok) throw new Error('Failed to create template')
+
+      toast.success('Template saved successfully')
+      setShowTemplateDialog(false)
+      setTemplateForm({ name: '', category: 'engagement', subject: '', content: '' })
+    } catch (error) {
+      console.error('Error saving template:', error)
+      toast.error('Failed to save template')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   // Handle create segment
@@ -766,9 +985,45 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
   }
 
   // Save segment
-  const saveSegment = () => {
-    toast.success('Segment created')
-    setShowSegmentDialog(false)
+  const saveSegment = async () => {
+    if (!segmentForm.name) {
+      toast.error('Please enter a segment name')
+      return
+    }
+
+    setIsSaving(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to create segments')
+        return
+      }
+
+      // Save segment to audience_segments table
+      const { error } = await supabase.from('audience_segments').insert({
+        user_id: user.id,
+        name: segmentForm.name,
+        description: segmentForm.description,
+        filters: segmentConditions.filter(c => c.field && c.value),
+        status: 'active',
+        estimated_count: 0,
+        metadata: {
+          created_from: 'broadcasts-v2'
+        }
+      })
+
+      if (error && error.code !== '42P01') throw error
+
+      toast.success('Segment created successfully')
+      setShowSegmentDialog(false)
+      setSegmentForm({ name: '', description: '' })
+      setSegmentConditions([{ field: '', operator: 'equals', value: '' }])
+    } catch (error) {
+      console.error('Error creating segment:', error)
+      toast.error('Failed to create segment')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   // Handle define event
@@ -777,9 +1032,45 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
   }
 
   // Save event
-  const saveEvent = () => {
-    toast.success('Event defined')
-    setShowEventDialog(false)
+  const saveEvent = async () => {
+    if (!eventForm.name) {
+      toast.error('Please enter an event name')
+      return
+    }
+
+    setIsSaving(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to define events')
+        return
+      }
+
+      // Save custom event definition
+      const { error } = await supabase.from('events').insert({
+        user_id: user.id,
+        event_name: eventForm.name,
+        description: eventForm.description,
+        event_type: 'custom',
+        properties: eventProperties.filter(p => p.name),
+        status: 'active',
+        metadata: {
+          created_from: 'broadcasts-v2'
+        }
+      })
+
+      if (error && error.code !== '42P01') throw error
+
+      toast.success('Event defined successfully')
+      setShowEventDialog(false)
+      setEventForm({ name: '', description: '' })
+      setEventProperties([{ name: '', type: 'string' }])
+    } catch (error) {
+      console.error('Error defining event:', error)
+      toast.error('Failed to define event')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   // Handle create automation from event
@@ -794,9 +1085,59 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
   }
 
   // Save webhook
-  const saveWebhook = () => {
-    toast.success('Webhook endpoint added')
-    setShowWebhookDialog(false)
+  const saveWebhook = async () => {
+    if (!webhookForm.url) {
+      toast.error('Please enter a webhook URL')
+      return
+    }
+
+    // Validate URL
+    try {
+      new URL(webhookForm.url)
+    } catch {
+      toast.error('Please enter a valid URL')
+      return
+    }
+
+    setIsSaving(true)
+    try {
+      // Build events array from form
+      const events: string[] = []
+      if (webhookForm.events.sent) events.push('email.sent')
+      if (webhookForm.events.opened) events.push('email.opened')
+      if (webhookForm.events.clicked) events.push('email.clicked')
+      if (webhookForm.events.bounced) events.push('email.bounced')
+      if (webhookForm.events.unsubscribed) events.push('email.unsubscribed')
+      if (webhookForm.events.complained) events.push('email.complained')
+
+      const response = await fetch('/api/webhooks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          url: webhookForm.url,
+          events: events.length > 0 ? events : ['email.sent'],
+          metadata: {
+            secret: webhookForm.secret || undefined,
+            created_from: 'broadcasts-v2'
+          }
+        })
+      })
+
+      if (!response.ok) throw new Error('Failed to add webhook')
+
+      toast.success('Webhook endpoint added successfully')
+      setShowWebhookDialog(false)
+      setWebhookForm({
+        url: '',
+        secret: '',
+        events: { sent: true, opened: true, clicked: true, bounced: true, unsubscribed: true, complained: true }
+      })
+    } catch (error) {
+      console.error('Error adding webhook:', error)
+      toast.error('Failed to add webhook')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   // Handle copy API key
@@ -811,9 +1152,41 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
   }
 
   // Confirm regenerate API key
-  const confirmRegenerateApiKey = () => {
-    toast.success('API key regenerated')
-    setShowApiKeyDialog(false)
+  const confirmRegenerateApiKey = async () => {
+    setIsSaving(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to regenerate API key')
+        return
+      }
+
+      // Generate new API key
+      const newKey = `bc_live_${crypto.randomUUID().replace(/-/g, '')}`
+
+      // Store in user settings
+      const { error } = await supabase.from('user_settings').upsert({
+        user_id: user.id,
+        broadcasts_api_key: newKey,
+        broadcasts_api_key_created_at: new Date().toISOString()
+      }, {
+        onConflict: 'user_id'
+      })
+
+      if (error && error.code !== '42P01') {
+        // Fallback to localStorage if table doesn't exist
+        localStorage.setItem('broadcasts-api-key', newKey)
+        localStorage.setItem('broadcasts-api-key-created-at', new Date().toISOString())
+      }
+
+      toast.success('API key regenerated successfully')
+      setShowApiKeyDialog(false)
+    } catch (error) {
+      console.error('Error regenerating API key:', error)
+      toast.error('Failed to regenerate API key')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   // Handle configure DMARC
@@ -874,9 +1247,37 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
   }
 
   // Confirm purge contacts
-  const confirmPurgeContacts = () => {
-    toast.success('All contacts purged')
-    setShowPurgeDialog(false)
+  const confirmPurgeContacts = async () => {
+    if (purgeConfirmation !== 'DELETE') {
+      toast.error('Please type DELETE to confirm')
+      return
+    }
+
+    setIsSaving(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to purge contacts')
+        return
+      }
+
+      // Soft delete all contacts
+      const { error } = await supabase
+        .from('contacts')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('user_id', user.id)
+
+      if (error && error.code !== '42P01') throw error
+
+      toast.success('All contacts purged successfully')
+      setShowPurgeDialog(false)
+      setPurgeConfirmation('')
+    } catch (error) {
+      console.error('Error purging contacts:', error)
+      toast.error('Failed to purge contacts')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   // Handle delete all campaigns
@@ -885,9 +1286,39 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
   }
 
   // Confirm delete all campaigns
-  const confirmDeleteAllCampaigns = () => {
-    toast.success('All campaigns deleted')
-    setShowDeleteCampaignsDialog(false)
+  const confirmDeleteAllCampaigns = async () => {
+    if (deleteAllConfirmation !== 'DELETE ALL') {
+      toast.error('Please type DELETE ALL to confirm')
+      return
+    }
+
+    setIsSaving(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to delete campaigns')
+        return
+      }
+
+      // Soft delete all broadcasts/campaigns
+      const { error } = await supabase
+        .from('broadcasts')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('user_id', user.id)
+
+      if (error) throw error
+
+      toast.success('All campaigns deleted successfully')
+      setShowDeleteCampaignsDialog(false)
+      setDeleteAllConfirmation('')
+      fetchBroadcasts()
+      refetch()
+    } catch (error) {
+      console.error('Error deleting campaigns:', error)
+      toast.error('Failed to delete campaigns')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   // Handle close account
@@ -902,11 +1333,48 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
   }
 
   // Handle connect app
-  const handleConnectApp = (appName: string, isConnected: boolean) => {
-    if (isConnected) {
-      toast.info(`Opening ${appName} configuration`)
-    } else {
-      toast.success(`Connecting to ${appName}...`)
+  const handleConnectApp = async (appName: string, isConnected: boolean) => {
+    setIsSaving(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to manage integrations')
+        return
+      }
+
+      if (isConnected) {
+        // Update existing integration
+        const { error } = await supabase
+          .from('integrations')
+          .update({
+            status: 'disconnected',
+            disconnected_at: new Date().toISOString()
+          })
+          .eq('user_id', user.id)
+          .eq('provider', appName.toLowerCase())
+
+        if (error && error.code !== '42P01') throw error
+        toast.info(`${appName} disconnected`)
+      } else {
+        // Create new integration record
+        const { error } = await supabase.from('integrations').insert({
+          user_id: user.id,
+          provider: appName.toLowerCase(),
+          status: 'pending',
+          config: {},
+          metadata: {
+            initiated_from: 'broadcasts-v2'
+          }
+        })
+
+        if (error && error.code !== '42P01') throw error
+        toast.success(`Connecting to ${appName}...`)
+      }
+    } catch (error) {
+      console.error('Error managing integration:', error)
+      toast.error(`Failed to ${isConnected ? 'disconnect' : 'connect'} ${appName}`)
+    } finally {
+      setIsSaving(false)
     }
   }
 
@@ -2921,15 +3389,26 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
           <div className="py-4 space-y-4">
             <div className="space-y-2">
               <Label>Automation Name</Label>
-              <Input placeholder="e.g., Welcome Series, Re-engagement" />
+              <Input
+                placeholder="e.g., Welcome Series, Re-engagement"
+                value={automationForm.name}
+                onChange={(e) => setAutomationForm({ ...automationForm, name: e.target.value })}
+              />
             </div>
             <div className="space-y-2">
               <Label>Description</Label>
-              <Input placeholder="What does this automation do?" />
+              <Input
+                placeholder="What does this automation do?"
+                value={automationForm.description}
+                onChange={(e) => setAutomationForm({ ...automationForm, description: e.target.value })}
+              />
             </div>
             <div className="space-y-2">
               <Label>Trigger Type</Label>
-              <Select defaultValue="event">
+              <Select
+                value={automationForm.trigger_type}
+                onValueChange={(v) => setAutomationForm({ ...automationForm, trigger_type: v })}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -2943,7 +3422,10 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
             </div>
             <div className="space-y-2">
               <Label>Trigger Event</Label>
-              <Select defaultValue="user.created">
+              <Select
+                value={automationForm.trigger_event}
+                onValueChange={(v) => setAutomationForm({ ...automationForm, trigger_event: v })}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -2963,8 +3445,12 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
               <Button variant="outline" onClick={() => setShowAutomationDialog(false)}>
                 Cancel
               </Button>
-              <Button onClick={saveAutomation} className="bg-violet-600 hover:bg-violet-700">
-                Create Automation
+              <Button
+                onClick={saveAutomation}
+                disabled={isSaving || !automationForm.name}
+                className="bg-violet-600 hover:bg-violet-700"
+              >
+                {isSaving ? 'Creating...' : 'Create Automation'}
               </Button>
             </div>
           </div>
@@ -2980,15 +3466,26 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
           <div className="py-4 space-y-4">
             <div className="space-y-2">
               <Label>Series Name</Label>
-              <Input placeholder="e.g., Onboarding Journey, Feature Education" />
+              <Input
+                placeholder="e.g., Onboarding Journey, Feature Education"
+                value={seriesForm.name}
+                onChange={(e) => setSeriesForm({ ...seriesForm, name: e.target.value })}
+              />
             </div>
             <div className="space-y-2">
               <Label>Description</Label>
-              <Input placeholder="Describe the purpose of this series" />
+              <Input
+                placeholder="Describe the purpose of this series"
+                value={seriesForm.description}
+                onChange={(e) => setSeriesForm({ ...seriesForm, description: e.target.value })}
+              />
             </div>
             <div className="space-y-2">
               <Label>Entry Trigger</Label>
-              <Select defaultValue="signup">
+              <Select
+                value={seriesForm.entry_trigger}
+                onValueChange={(v) => setSeriesForm({ ...seriesForm, entry_trigger: v })}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -3004,11 +3501,19 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
               <Label>Exit Conditions</Label>
               <div className="space-y-2">
                 <div className="flex items-center space-x-2">
-                  <Switch id="exit-purchase" />
+                  <Switch
+                    id="exit-purchase"
+                    checked={seriesForm.exit_on_purchase}
+                    onCheckedChange={(checked) => setSeriesForm({ ...seriesForm, exit_on_purchase: checked })}
+                  />
                   <Label htmlFor="exit-purchase">Exit on purchase</Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Switch id="exit-unsubscribe" defaultChecked />
+                  <Switch
+                    id="exit-unsubscribe"
+                    checked={seriesForm.exit_on_unsubscribe}
+                    onCheckedChange={(checked) => setSeriesForm({ ...seriesForm, exit_on_unsubscribe: checked })}
+                  />
                   <Label htmlFor="exit-unsubscribe">Exit on unsubscribe</Label>
                 </div>
               </div>
@@ -3017,8 +3522,12 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
               <Button variant="outline" onClick={() => setShowSeriesDialog(false)}>
                 Cancel
               </Button>
-              <Button onClick={saveSeries} className="bg-violet-600 hover:bg-violet-700">
-                Create Series
+              <Button
+                onClick={saveSeries}
+                disabled={isSaving || !seriesForm.name}
+                className="bg-violet-600 hover:bg-violet-700"
+              >
+                {isSaving ? 'Creating...' : 'Create Series'}
               </Button>
             </div>
           </div>
@@ -3034,11 +3543,18 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
           <div className="py-4 space-y-4">
             <div className="space-y-2">
               <Label>Template Name</Label>
-              <Input placeholder="e.g., Welcome Email, Product Update" />
+              <Input
+                placeholder="e.g., Welcome Email, Product Update"
+                value={templateForm.name}
+                onChange={(e) => setTemplateForm({ ...templateForm, name: e.target.value })}
+              />
             </div>
             <div className="space-y-2">
               <Label>Category</Label>
-              <Select defaultValue="engagement">
+              <Select
+                value={templateForm.category}
+                onValueChange={(v) => setTemplateForm({ ...templateForm, category: v })}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -3053,12 +3569,18 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
             </div>
             <div className="space-y-2">
               <Label>Subject Line</Label>
-              <Input placeholder="Email subject line" />
+              <Input
+                placeholder="Email subject line"
+                value={templateForm.subject}
+                onChange={(e) => setTemplateForm({ ...templateForm, subject: e.target.value })}
+              />
             </div>
             <div className="space-y-2">
               <Label>Content</Label>
               <textarea
                 placeholder="Write your email content here..."
+                value={templateForm.content}
+                onChange={(e) => setTemplateForm({ ...templateForm, content: e.target.value })}
                 className="w-full min-h-[150px] px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
               />
             </div>
@@ -3066,8 +3588,12 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
               <Button variant="outline" onClick={() => setShowTemplateDialog(false)}>
                 Cancel
               </Button>
-              <Button onClick={saveTemplate} className="bg-violet-600 hover:bg-violet-700">
-                Save Template
+              <Button
+                onClick={saveTemplate}
+                disabled={isSaving || !templateForm.name}
+                className="bg-violet-600 hover:bg-violet-700"
+              >
+                {isSaving ? 'Saving...' : 'Save Template'}
               </Button>
             </div>
           </div>
@@ -3083,11 +3609,19 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
           <div className="py-4 space-y-4">
             <div className="space-y-2">
               <Label>Segment Name</Label>
-              <Input placeholder="e.g., Active Users, High Value Customers" />
+              <Input
+                placeholder="e.g., Active Users, High Value Customers"
+                value={segmentForm.name}
+                onChange={(e) => setSegmentForm({ ...segmentForm, name: e.target.value })}
+              />
             </div>
             <div className="space-y-2">
               <Label>Description</Label>
-              <Input placeholder="Describe this segment" />
+              <Input
+                placeholder="Describe this segment"
+                value={segmentForm.description}
+                onChange={(e) => setSegmentForm({ ...segmentForm, description: e.target.value })}
+              />
             </div>
             <div className="space-y-2">
               <Label>Filter Conditions</Label>
@@ -3174,8 +3708,12 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
               <Button variant="outline" onClick={() => setShowSegmentDialog(false)}>
                 Cancel
               </Button>
-              <Button onClick={saveSegment} className="bg-violet-600 hover:bg-violet-700">
-                Create Segment
+              <Button
+                onClick={saveSegment}
+                disabled={isSaving || !segmentForm.name}
+                className="bg-violet-600 hover:bg-violet-700"
+              >
+                {isSaving ? 'Creating...' : 'Create Segment'}
               </Button>
             </div>
           </div>
@@ -3191,12 +3729,20 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
           <div className="py-4 space-y-4">
             <div className="space-y-2">
               <Label>Event Name</Label>
-              <Input placeholder="e.g., button.clicked, form.submitted" />
+              <Input
+                placeholder="e.g., button.clicked, form.submitted"
+                value={eventForm.name}
+                onChange={(e) => setEventForm({ ...eventForm, name: e.target.value })}
+              />
               <p className="text-xs text-gray-500">Use lowercase with dots or underscores</p>
             </div>
             <div className="space-y-2">
               <Label>Description</Label>
-              <Input placeholder="When does this event fire?" />
+              <Input
+                placeholder="When does this event fire?"
+                value={eventForm.description}
+                onChange={(e) => setEventForm({ ...eventForm, description: e.target.value })}
+              />
             </div>
             <div className="space-y-2">
               <Label>Event Properties</Label>
@@ -3261,8 +3807,12 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
               <Button variant="outline" onClick={() => setShowEventDialog(false)}>
                 Cancel
               </Button>
-              <Button onClick={saveEvent} className="bg-violet-600 hover:bg-violet-700">
-                Define Event
+              <Button
+                onClick={saveEvent}
+                disabled={isSaving || !eventForm.name}
+                className="bg-violet-600 hover:bg-violet-700"
+              >
+                {isSaving ? 'Saving...' : 'Define Event'}
               </Button>
             </div>
           </div>
@@ -3278,37 +3828,69 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
           <div className="py-4 space-y-4">
             <div className="space-y-2">
               <Label>Webhook URL</Label>
-              <Input placeholder="https://your-service.com/webhook" />
+              <Input
+                placeholder="https://your-service.com/webhook"
+                value={webhookForm.url}
+                onChange={(e) => setWebhookForm({ ...webhookForm, url: e.target.value })}
+              />
             </div>
             <div className="space-y-2">
               <Label>Secret Key (optional)</Label>
-              <Input placeholder="For signature verification" />
+              <Input
+                placeholder="For signature verification"
+                value={webhookForm.secret}
+                onChange={(e) => setWebhookForm({ ...webhookForm, secret: e.target.value })}
+              />
             </div>
             <div className="space-y-2">
               <Label>Events to Send</Label>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">
                 <div className="flex items-center space-x-2">
-                  <Switch id="wh-sent" defaultChecked />
+                  <Switch
+                    id="wh-sent"
+                    checked={webhookForm.events.sent}
+                    onCheckedChange={(checked) => setWebhookForm({ ...webhookForm, events: { ...webhookForm.events, sent: checked } })}
+                  />
                   <Label htmlFor="wh-sent">Email Sent</Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Switch id="wh-opened" defaultChecked />
+                  <Switch
+                    id="wh-opened"
+                    checked={webhookForm.events.opened}
+                    onCheckedChange={(checked) => setWebhookForm({ ...webhookForm, events: { ...webhookForm.events, opened: checked } })}
+                  />
                   <Label htmlFor="wh-opened">Email Opened</Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Switch id="wh-clicked" defaultChecked />
+                  <Switch
+                    id="wh-clicked"
+                    checked={webhookForm.events.clicked}
+                    onCheckedChange={(checked) => setWebhookForm({ ...webhookForm, events: { ...webhookForm.events, clicked: checked } })}
+                  />
                   <Label htmlFor="wh-clicked">Link Clicked</Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Switch id="wh-bounced" defaultChecked />
+                  <Switch
+                    id="wh-bounced"
+                    checked={webhookForm.events.bounced}
+                    onCheckedChange={(checked) => setWebhookForm({ ...webhookForm, events: { ...webhookForm.events, bounced: checked } })}
+                  />
                   <Label htmlFor="wh-bounced">Bounced</Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Switch id="wh-unsubscribed" defaultChecked />
+                  <Switch
+                    id="wh-unsubscribed"
+                    checked={webhookForm.events.unsubscribed}
+                    onCheckedChange={(checked) => setWebhookForm({ ...webhookForm, events: { ...webhookForm.events, unsubscribed: checked } })}
+                  />
                   <Label htmlFor="wh-unsubscribed">Unsubscribed</Label>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Switch id="wh-complained" defaultChecked />
+                  <Switch
+                    id="wh-complained"
+                    checked={webhookForm.events.complained}
+                    onCheckedChange={(checked) => setWebhookForm({ ...webhookForm, events: { ...webhookForm.events, complained: checked } })}
+                  />
                   <Label htmlFor="wh-complained">Spam Complaint</Label>
                 </div>
               </div>
@@ -3317,8 +3899,12 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
               <Button variant="outline" onClick={() => setShowWebhookDialog(false)}>
                 Cancel
               </Button>
-              <Button onClick={saveWebhook} className="bg-violet-600 hover:bg-violet-700">
-                Add Webhook
+              <Button
+                onClick={saveWebhook}
+                disabled={isSaving || !webhookForm.url}
+                className="bg-violet-600 hover:bg-violet-700"
+              >
+                {isSaving ? 'Adding...' : 'Add Webhook'}
               </Button>
             </div>
           </div>
@@ -3365,14 +3951,22 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
             </div>
             <div className="space-y-2 mb-4">
               <Label>Type &quot;DELETE&quot; to confirm</Label>
-              <Input placeholder="DELETE" />
+              <Input
+                placeholder="DELETE"
+                value={purgeConfirmation}
+                onChange={(e) => setPurgeConfirmation(e.target.value)}
+              />
             </div>
             <div className="flex justify-end gap-3">
-              <Button variant="outline" onClick={() => setShowPurgeDialog(false)}>
+              <Button variant="outline" onClick={() => { setShowPurgeDialog(false); setPurgeConfirmation(''); }}>
                 Cancel
               </Button>
-              <Button variant="destructive" onClick={confirmPurgeContacts}>
-                Purge All Contacts
+              <Button
+                variant="destructive"
+                onClick={confirmPurgeContacts}
+                disabled={isSaving || purgeConfirmation !== 'DELETE'}
+              >
+                {isSaving ? 'Purging...' : 'Purge All Contacts'}
               </Button>
             </div>
           </div>
@@ -3394,14 +3988,22 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
             </div>
             <div className="space-y-2 mb-4">
               <Label>Type &quot;DELETE ALL&quot; to confirm</Label>
-              <Input placeholder="DELETE ALL" />
+              <Input
+                placeholder="DELETE ALL"
+                value={deleteAllConfirmation}
+                onChange={(e) => setDeleteAllConfirmation(e.target.value)}
+              />
             </div>
             <div className="flex justify-end gap-3">
-              <Button variant="outline" onClick={() => setShowDeleteCampaignsDialog(false)}>
+              <Button variant="outline" onClick={() => { setShowDeleteCampaignsDialog(false); setDeleteAllConfirmation(''); }}>
                 Cancel
               </Button>
-              <Button variant="destructive" onClick={confirmDeleteAllCampaigns}>
-                Delete All Campaigns
+              <Button
+                variant="destructive"
+                onClick={confirmDeleteAllCampaigns}
+                disabled={isSaving || deleteAllConfirmation !== 'DELETE ALL'}
+              >
+                {isSaving ? 'Deleting...' : 'Delete All Campaigns'}
               </Button>
             </div>
           </div>

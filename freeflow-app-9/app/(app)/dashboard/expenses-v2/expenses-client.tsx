@@ -326,7 +326,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
     try {
       await createExpense({
         expense_title: newExpenseForm.title,
-        expense_category: newExpenseForm.category,
+        expense_category: newExpenseForm.category as 'travel' | 'meals' | 'supplies' | 'software' | 'entertainment' | 'accommodation' | 'transportation' | 'communication' | 'training' | 'other',
         amount: newExpenseForm.amount,
         total_amount: newExpenseForm.amount,
         currency: 'USD',
@@ -334,13 +334,14 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
         payment_method: newExpenseForm.paymentMethod,
         description: newExpenseForm.notes || null,
         expense_date: new Date().toISOString().split('T')[0]
-      } as any)
+      })
       setShowNewExpenseDialog(false)
       setNewExpenseForm({ title: '', paymentMethod: 'corporate_card', notes: '', amount: 0, category: 'travel' })
       toast.success('Expense report created')
       refetch()
     } catch (error) {
       console.error('Failed to create expense:', error)
+      toast.error('Failed to create expense')
     }
   }
 
@@ -429,7 +430,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
         id: expenseId,
         status: 'approved',
         approved_at: new Date().toISOString()
-      } as any)
+      })
       toast.success('Expense approved', {
         description: `Report "${title}" has been approved`
       })
@@ -441,12 +442,13 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
     }
   }
 
-  const handleRejectExpense = async (expenseId: string, title: string) => {
+  const handleRejectExpense = async (expenseId: string, title: string, reason?: string) => {
     try {
       await updateExpense({
         id: expenseId,
-        status: 'rejected'
-      } as any)
+        status: 'rejected',
+        rejection_reason: reason || null
+      })
       toast.success('Expense rejected', {
         description: `Report "${title}" has been rejected`
       })
@@ -465,7 +467,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
         status: 'reimbursed',
         reimbursed_at: new Date().toISOString(),
         reimbursed: true
-      } as any)
+      })
       toast.success('Expense reimbursed', {
         description: `Report "${title}" has been marked as reimbursed`
       })
@@ -479,7 +481,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
 
   const handleDeleteExpense = async (expenseId: string, title: string) => {
     try {
-      await deleteExpense({ id: expenseId } as any)
+      await deleteExpense({ id: expenseId })
       toast.success('Expense deleted', {
         description: `Report "${title}" has been deleted`
       })
@@ -543,7 +545,7 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
         id: expenseId,
         status: 'pending',
         submitted_at: new Date().toISOString()
-      } as any)
+      })
       toast.success('Report submitted', {
         description: `"${title}" submitted for approval`
       })
@@ -554,30 +556,99 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
     }
   }
 
-  const handleAddReceipt = async () => {
+  const handleAddReceipt = async (expenseId?: string) => {
+    const uploadReceiptToStorage = async (file: File): Promise<string | null> => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) {
+          toast.error('You must be logged in to upload receipts')
+          return null
+        }
+
+        // Generate unique file path
+        const fileExt = file.name.split('.').pop()
+        const fileName = `${user.id}/${expenseId || 'temp'}/${Date.now()}.${fileExt}`
+
+        // Upload to Supabase storage
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('receipts')
+          .upload(fileName, file, {
+            cacheControl: '3600',
+            upsert: false
+          })
+
+        if (uploadError) {
+          console.error('Upload error:', uploadError)
+          // If receipts bucket doesn't exist, show helpful message
+          if (uploadError.message.includes('Bucket not found')) {
+            toast.error('Receipt storage not configured', { description: 'Please contact your administrator' })
+          } else {
+            toast.error('Failed to upload receipt', { description: uploadError.message })
+          }
+          return null
+        }
+
+        // Get public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from('receipts')
+          .getPublicUrl(fileName)
+
+        // If we have an expense ID, update the expense with the receipt URL
+        if (expenseId) {
+          const { error: updateError } = await supabase
+            .from('expenses')
+            .update({
+              receipt_url: publicUrl,
+              has_receipt: true,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', expenseId)
+
+          if (updateError) {
+            console.error('Failed to link receipt to expense:', updateError)
+          } else {
+            refetch()
+          }
+        }
+
+        return publicUrl
+      } catch (err) {
+        console.error('Receipt upload failed:', err)
+        toast.error('Failed to upload receipt')
+        return null
+      }
+    }
+
     const openReceiptScanner = async (): Promise<{ ready: boolean; method: string }> => {
       // Check for camera/file input availability
       const hasCamera = 'mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices
 
+      const handleFileSelect = async (file: File) => {
+        toast.info('Uploading receipt...', { description: `File: ${file.name}` })
+        const url = await uploadReceiptToStorage(file)
+        if (url) {
+          toast.success('Receipt uploaded successfully!', {
+            description: `File: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`
+          })
+        }
+      }
+
       if (hasCamera) {
         // Try to access camera for receipt scanning
         try {
-          // Just check if camera is available, don't actually start streaming
           const devices = await navigator.mediaDevices.enumerateDevices()
           const hasVideoInput = devices.some(device => device.kind === 'videoinput')
 
           if (hasVideoInput) {
-            // Create file input for receipt capture
             const input = document.createElement('input')
             input.type = 'file'
             input.accept = 'image/*'
-            input.capture = 'environment' // Use back camera on mobile
+            input.capture = 'environment'
 
-            input.onchange = (e) => {
+            input.onchange = async (e) => {
               const file = (e.target as HTMLInputElement).files?.[0]
               if (file) {
-                toast.success('Receipt captured!', { description: `File: ${file.name} (${(file.size / 1024).toFixed(1)} KB)` })
-                // Here you would typically upload the file to storage
+                await handleFileSelect(file)
               }
             }
 
@@ -594,11 +665,10 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
       input.type = 'file'
       input.accept = 'image/*,.pdf'
 
-      input.onchange = (e) => {
+      input.onchange = async (e) => {
         const file = (e.target as HTMLInputElement).files?.[0]
         if (file) {
-          toast.success('Receipt uploaded!', { description: `File: ${file.name} (${(file.size / 1024).toFixed(1)} KB)` })
-          // Here you would typically upload the file to storage
+          await handleFileSelect(file)
         }
       }
 

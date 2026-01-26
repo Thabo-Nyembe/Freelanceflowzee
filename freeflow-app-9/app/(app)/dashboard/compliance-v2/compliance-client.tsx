@@ -233,6 +233,12 @@ export default function ComplianceClient() {
   const [showImportDialog, setShowImportDialog] = useState(false)
   const [showScheduleDialog, setShowScheduleDialog] = useState(false)
   const [showAssignDialog, setShowAssignDialog] = useState(false)
+  const [showPolicyDialog, setShowPolicyDialog] = useState(false)
+  const [showEvidenceUploadDialog, setShowEvidenceUploadDialog] = useState(false)
+  const [showTrainingDialog, setShowTrainingDialog] = useState(false)
+
+  // Loading states
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   // Form states for dialogs
   const [importFile, setImportFile] = useState<File | null>(null)
@@ -249,6 +255,36 @@ export default function ComplianceClient() {
     selectedMember: '',
     role: 'auditor'
   })
+
+  // Policy form state
+  const [policyForm, setPolicyForm] = useState({
+    name: '',
+    version: '1.0',
+    category: 'security',
+    description: '',
+    status: 'draft' as 'draft' | 'review' | 'approved' | 'published' | 'archived'
+  })
+
+  // Evidence form state
+  const [evidenceForm, setEvidenceForm] = useState({
+    name: '',
+    type: 'document' as 'document' | 'screenshot' | 'log' | 'certificate' | 'report',
+    controlId: '',
+    file: null as File | null
+  })
+
+  // Training form state
+  const [trainingForm, setTrainingForm] = useState({
+    name: '',
+    description: '',
+    dueDate: '',
+    assignedTo: [] as string[],
+    status: 'pending' as 'pending' | 'in_progress' | 'completed'
+  })
+
+  // Selected items for editing
+  const [selectedPolicy, setSelectedPolicy] = useState<Policy | null>(null)
+  const [selectedAudit, setSelectedAudit] = useState<Audit | null>(null)
 
   // State for controls and risks to enable real updates
   const [controls, setControls] = useState([])
@@ -849,6 +885,678 @@ export default function ComplianceClient() {
     }
   }
 
+  // ===== Policy Handlers =====
+  const handleCreatePolicy = async () => {
+    if (!policyForm.name.trim()) {
+      toast.error('Policy name is required')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const response = await fetch('/api/compliance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'policy',
+          name: policyForm.name,
+          version: policyForm.version,
+          category: policyForm.category,
+          description: policyForm.description,
+          status: policyForm.status
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to create policy')
+      }
+
+      const { data } = await response.json()
+
+      // Update local state
+      setPolicies(prev => [...prev, {
+        id: data.id,
+        name: data.name,
+        version: data.version || '1.0',
+        status: data.status || 'draft',
+        category: data.category || 'General',
+        owner: 'Current User',
+        lastUpdated: new Date().toISOString().split('T')[0],
+        nextReview: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        acknowledgements: 0,
+        totalEmployees: 250
+      }])
+
+      // Reset form and close dialog
+      setPolicyForm({
+        name: '',
+        version: '1.0',
+        category: 'security',
+        description: '',
+        status: 'draft'
+      })
+      setShowPolicyDialog(false)
+      toast.success('Policy created successfully')
+      await refetch()
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to create policy')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleUpdatePolicy = async (policyId: string, updates: Partial<Policy>) => {
+    setIsSubmitting(true)
+    try {
+      const response = await fetch('/api/compliance', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: policyId,
+          type: 'policy',
+          ...updates,
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to update policy')
+      }
+
+      // Update local state
+      setPolicies(prev => prev.map(p =>
+        p.id === policyId ? { ...p, ...updates, lastUpdated: new Date().toISOString().split('T')[0] } : p
+      ))
+
+      toast.success('Policy updated successfully')
+      await refetch()
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to update policy')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleDeletePolicy = async (policyId: string) => {
+    if (!confirm('Are you sure you want to delete this policy? This action cannot be undone.')) {
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const response = await fetch(`/api/compliance?id=${policyId}&type=policy`, {
+        method: 'DELETE'
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to delete policy')
+      }
+
+      // Update local state
+      setPolicies(prev => prev.filter(p => p.id !== policyId))
+      toast.success('Policy deleted successfully')
+      await refetch()
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to delete policy')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // ===== Audit Handlers =====
+  const handleCreateAudit = async () => {
+    if (!scheduleForm.name.trim()) {
+      toast.error('Audit name is required')
+      return
+    }
+    if (!scheduleForm.startDate || !scheduleForm.endDate) {
+      toast.error('Start and end dates are required')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const response = await fetch('/api/compliance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'audit',
+          name: scheduleForm.name,
+          audit_type: scheduleForm.type,
+          framework: scheduleForm.framework,
+          audit_date: scheduleForm.startDate,
+          end_date: scheduleForm.endDate,
+          auditor: scheduleForm.auditor || 'Internal Audit Team',
+          status: 'scheduled'
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to create audit')
+      }
+
+      const { data } = await response.json()
+
+      // Update local state
+      const newAudit: Audit = {
+        id: data.id,
+        name: data.name || scheduleForm.name,
+        type: scheduleForm.type,
+        framework: scheduleForm.framework,
+        status: 'planned',
+        startDate: scheduleForm.startDate,
+        endDate: scheduleForm.endDate,
+        auditor: scheduleForm.auditor || 'Internal Audit Team',
+        findings: 0,
+        criticalFindings: 0,
+        progress: 0
+      }
+      setAudits(prev => [...prev, newAudit])
+
+      // Reset form and close dialog
+      setScheduleForm({
+        name: '',
+        framework: 'SOC 2',
+        type: 'internal',
+        startDate: '',
+        endDate: '',
+        auditor: ''
+      })
+      setShowScheduleDialog(false)
+      toast.success(`Audit "${newAudit.name}" scheduled for ${new Date(newAudit.startDate).toLocaleDateString()}`)
+      await refetch()
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to create audit')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleCompleteAudit = async (auditId: string, findings?: { total: number; critical: number }) => {
+    setIsSubmitting(true)
+    try {
+      const response = await fetch('/api/compliance', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: auditId,
+          type: 'audit',
+          status: 'completed',
+          findings: findings?.total || 0,
+          critical_findings: findings?.critical || 0,
+          completed_at: new Date().toISOString()
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to complete audit')
+      }
+
+      // Update local state
+      setAudits(prev => prev.map(a =>
+        a.id === auditId
+          ? {
+              ...a,
+              status: 'completed' as const,
+              progress: 100,
+              findings: findings?.total || a.findings,
+              criticalFindings: findings?.critical || a.criticalFindings
+            }
+          : a
+      ))
+
+      toast.success('Audit marked as completed')
+      await refetch()
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to complete audit')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleDeleteAudit = async (auditId: string) => {
+    if (!confirm('Are you sure you want to delete this audit? This action cannot be undone.')) {
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const response = await fetch(`/api/compliance?id=${auditId}&type=audit`, {
+        method: 'DELETE'
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to delete audit')
+      }
+
+      // Update local state
+      setAudits(prev => prev.filter(a => a.id !== auditId))
+      toast.success('Audit deleted successfully')
+      await refetch()
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to delete audit')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // ===== Evidence Handlers =====
+  const handleAddEvidence = async (controlId: string) => {
+    if (!evidenceForm.name.trim()) {
+      toast.error('Evidence name is required')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      // For file uploads, we'd typically use FormData
+      const formData = new FormData()
+      formData.append('type', 'item')
+      formData.append('name', evidenceForm.name)
+      formData.append('evidence_type', evidenceForm.type)
+      formData.append('control_id', controlId)
+      formData.append('status', 'pending')
+      if (evidenceForm.file) {
+        formData.append('file', evidenceForm.file)
+      }
+
+      const response = await fetch('/api/compliance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'item',
+          name: evidenceForm.name,
+          compliance_type: 'evidence',
+          evidence_type: evidenceForm.type,
+          control_id: controlId,
+          status: 'pending'
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to add evidence')
+      }
+
+      const { data } = await response.json()
+
+      // Update local controls state with new evidence
+      setControls(prev => prev.map(c => {
+        if (c.id === controlId) {
+          return {
+            ...c,
+            evidence: [...c.evidence, {
+              id: data.id,
+              name: evidenceForm.name,
+              type: evidenceForm.type,
+              uploadedAt: new Date().toISOString(),
+              uploadedBy: 'Current User',
+              status: 'pending' as const,
+              fileSize: evidenceForm.file ? `${(evidenceForm.file.size / 1024).toFixed(1)} KB` : '0 KB'
+            }]
+          }
+        }
+        return c
+      }))
+
+      // Reset form and close dialog
+      setEvidenceForm({
+        name: '',
+        type: 'document',
+        controlId: '',
+        file: null
+      })
+      setShowEvidenceUploadDialog(false)
+      toast.success('Evidence added successfully')
+      await refetch()
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to add evidence')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleApproveEvidence = async (evidenceId: string, controlId: string) => {
+    setIsSubmitting(true)
+    try {
+      const response = await fetch('/api/compliance', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: evidenceId,
+          type: 'item',
+          status: 'approved'
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to approve evidence')
+      }
+
+      // Update local state
+      setControls(prev => prev.map(c => {
+        if (c.id === controlId) {
+          return {
+            ...c,
+            evidence: c.evidence.map(e =>
+              e.id === evidenceId ? { ...e, status: 'approved' as const } : e
+            )
+          }
+        }
+        return c
+      }))
+
+      toast.success('Evidence approved')
+      await refetch()
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to approve evidence')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleRejectEvidence = async (evidenceId: string, controlId: string) => {
+    setIsSubmitting(true)
+    try {
+      const response = await fetch('/api/compliance', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: evidenceId,
+          type: 'item',
+          status: 'rejected'
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to reject evidence')
+      }
+
+      // Update local state
+      setControls(prev => prev.map(c => {
+        if (c.id === controlId) {
+          return {
+            ...c,
+            evidence: c.evidence.map(e =>
+              e.id === evidenceId ? { ...e, status: 'rejected' as const } : e
+            )
+          }
+        }
+        return c
+      }))
+
+      toast.success('Evidence rejected')
+      await refetch()
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to reject evidence')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // ===== Training & Certification Handlers =====
+  const handleCreateTraining = async () => {
+    if (!trainingForm.name.trim()) {
+      toast.error('Training name is required')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const response = await fetch('/api/compliance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'item',
+          name: trainingForm.name,
+          description: trainingForm.description,
+          compliance_type: 'training',
+          due_date: trainingForm.dueDate,
+          assigned_to: trainingForm.assignedTo,
+          status: trainingForm.status
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to create training')
+      }
+
+      // Reset form and close dialog
+      setTrainingForm({
+        name: '',
+        description: '',
+        dueDate: '',
+        assignedTo: [],
+        status: 'pending'
+      })
+      setShowTrainingDialog(false)
+      toast.success('Training created successfully')
+      await refetch()
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to create training')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleCompleteTraining = async (trainingId: string) => {
+    setIsSubmitting(true)
+    try {
+      const response = await fetch('/api/compliance', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: trainingId,
+          type: 'item',
+          status: 'completed',
+          completed_at: new Date().toISOString()
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to complete training')
+      }
+
+      toast.success('Training marked as completed')
+      await refetch()
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to complete training')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleCreateCertification = async (certificationData: {
+    name: string
+    certificationNumber?: string
+    certifiedBy: string
+    certificationDate: string
+    expiryDate: string
+  }) => {
+    setIsSubmitting(true)
+    try {
+      const response = await fetch('/api/compliance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'item',
+          name: certificationData.name,
+          compliance_type: 'certification',
+          certification_number: certificationData.certificationNumber,
+          certified_by: certificationData.certifiedBy,
+          certification_date: certificationData.certificationDate,
+          expiry_date: certificationData.expiryDate,
+          status: 'compliant'
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to create certification')
+      }
+
+      toast.success('Certification created successfully')
+      await refetch()
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to create certification')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleRenewCertification = async (certificationId: string, newExpiryDate: string) => {
+    setIsSubmitting(true)
+    try {
+      const response = await fetch('/api/compliance', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: certificationId,
+          type: 'item',
+          expiry_date: newExpiryDate,
+          certification_date: new Date().toISOString(),
+          status: 'compliant'
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to renew certification')
+      }
+
+      toast.success('Certification renewed successfully')
+      await refetch()
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to renew certification')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // ===== Control Handlers =====
+  const handleCreateControl = async (controlData: Partial<Control>) => {
+    setIsSubmitting(true)
+    try {
+      const response = await fetch('/api/compliance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'item',
+          name: controlData.name,
+          description: controlData.description,
+          compliance_type: 'control',
+          framework: controlData.framework,
+          category: controlData.category,
+          risk_level: controlData.riskLevel,
+          status: 'pending'
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to create control')
+      }
+
+      const { data } = await response.json()
+
+      // Update local state
+      setControls(prev => [...prev, {
+        id: data.id,
+        controlId: `CTRL-${Date.now().toString(36).toUpperCase()}`,
+        name: controlData.name || 'New Control',
+        description: controlData.description || '',
+        framework: controlData.framework || 'Custom',
+        category: controlData.category || 'General',
+        status: 'pending' as const,
+        riskLevel: (controlData.riskLevel as Control['riskLevel']) || 'medium',
+        owner: 'Current User',
+        ownerAvatar: '',
+        lastTested: new Date().toISOString().split('T')[0],
+        evidence: [],
+        findings: 0
+      }])
+
+      toast.success('Control created successfully')
+      setShowControlDialog(false)
+      await refetch()
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to create control')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleUpdateControl = async (controlId: string, updates: Partial<Control>) => {
+    setIsSubmitting(true)
+    try {
+      const response = await fetch('/api/compliance', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: controlId,
+          type: 'item',
+          name: updates.name,
+          description: updates.description,
+          status: updates.status,
+          risk_level: updates.riskLevel
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to update control')
+      }
+
+      // Update local state
+      setControls(prev => prev.map(c =>
+        c.id === controlId ? { ...c, ...updates } : c
+      ))
+
+      toast.success('Control updated successfully')
+      await refetch()
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to update control')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleDeleteControl = async (controlId: string) => {
+    if (!confirm('Are you sure you want to delete this control? This action cannot be undone.')) {
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const response = await fetch(`/api/compliance?id=${controlId}&type=item`, {
+        method: 'DELETE'
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to delete control')
+      }
+
+      // Update local state
+      setControls(prev => prev.filter(c => c.id !== controlId))
+      toast.success('Control deleted successfully')
+      await refetch()
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to delete control')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-teal-50 to-cyan-50 dark:bg-none dark:bg-gray-900">
       {/* Header */}
@@ -1406,36 +2114,7 @@ export default function ComplianceClient() {
 
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold">Audit Management</h2>
-              <Button onClick={() => {
-                toast.success('Scheduling audit...')
-                fetch('/api/compliance', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ action: 'schedule_audit' })
-                })
-                  .then(res => {
-                    if (!res.ok) throw new Error('Failed to schedule')
-                    return res.json()
-                  })
-                  .then(() => {
-                    const nextMonth = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-                    setAudits(prev => [...prev, {
-                      id: `audit${prev.length + 1}`,
-                      name: 'New Scheduled Audit',
-                      type: 'internal' as const,
-                      framework: 'Custom',
-                      status: 'planned' as const,
-                      startDate: nextMonth.toISOString().split('T')[0],
-                      endDate: new Date(nextMonth.getTime() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-                      auditor: 'Internal Audit Team',
-                      findings: 0,
-                      criticalFindings: 0,
-                      progress: 0
-                    }])
-                    toast.success('Audit scheduled for next month')
-                  })
-                  .catch(err => toast.error(err.message || 'Failed to schedule'))
-              }}>
+              <Button onClick={() => setShowScheduleDialog(true)} disabled={isSubmitting}>
                 <Plus className="w-4 h-4 mr-2" />
                 Schedule Audit
               </Button>
@@ -1495,43 +2174,34 @@ export default function ComplianceClient() {
 
                   <div className="flex items-center gap-2 pt-4 border-t">
                     <Button variant="outline" size="sm" onClick={() => {
-                      toast.success('Loading audit details...')
-                      fetch(`/api/compliance?action=get_audit&auditId=${audit.id}`)
-                        .then(res => {
-                          if (!res.ok) throw new Error('Failed to load')
-                          return res.json()
-                        })
-                        .then(() => {
-                          downloadAsJson(audit, `audit-${audit.id}-details.json`)
-                          toast.success(`Viewing ${audit.name} - details downloaded`)
-                        })
-                        .catch(err => toast.error(err.message || 'Failed to load'))
-                    }}>
+                      downloadAsJson(audit, `audit-${audit.id}-details.json`)
+                      toast.success(`Viewing ${audit.name} - details downloaded`)
+                    }} disabled={isSubmitting}>
                       <Eye className="w-4 h-4 mr-2" />
                       View Details
                     </Button>
                     <Button variant="outline" size="sm" onClick={() => {
-                      toast.success('Generating findings report...')
-                      fetch(`/api/compliance?action=get_findings&auditId=${audit.id}`)
-                        .then(res => {
-                          if (!res.ok) throw new Error('Failed to generate')
-                          return res.json()
-                        })
-                        .then(() => {
-                          const findingsReport = {
-                            audit: audit.name,
-                            findings: audit.findings,
-                            criticalFindings: audit.criticalFindings,
-                            status: audit.status,
-                            generatedAt: new Date().toISOString()
-                          }
-                          downloadAsJson(findingsReport, `audit-${audit.id}-findings.json`)
-                          toast.success('Findings report downloaded')
-                        })
-                        .catch(err => toast.error(err.message || 'Failed to generate'))
-                    }}>
+                      const findingsReport = {
+                        audit: audit.name,
+                        findings: audit.findings,
+                        criticalFindings: audit.criticalFindings,
+                        status: audit.status,
+                        generatedAt: new Date().toISOString()
+                      }
+                      downloadAsJson(findingsReport, `audit-${audit.id}-findings.json`)
+                      toast.success('Findings report downloaded')
+                    }} disabled={isSubmitting}>
                       <FileText className="w-4 h-4 mr-2" />
                       Findings
+                    </Button>
+                    {audit.status !== 'completed' && (
+                      <Button variant="outline" size="sm" onClick={() => handleCompleteAudit(audit.id)} disabled={isSubmitting}>
+                        <CheckCircle className="w-4 h-4 mr-2" />
+                        Complete
+                      </Button>
+                    )}
+                    <Button variant="ghost" size="sm" onClick={() => handleDeleteAudit(audit.id)} disabled={isSubmitting}>
+                      <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
                 </Card>
@@ -1591,34 +2261,7 @@ export default function ComplianceClient() {
 
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold">Policy Management</h2>
-              <Button onClick={() => {
-                toast.success('Creating policy...')
-                fetch('/api/compliance', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ action: 'create_policy' })
-                })
-                  .then(res => {
-                    if (!res.ok) throw new Error('Failed to create')
-                    return res.json()
-                  })
-                  .then(() => {
-                    setPolicies(prev => [...prev, {
-                      id: `pol${prev.length + 1}`,
-                      name: 'New Policy',
-                      version: '1.0',
-                      status: 'draft' as const,
-                      category: 'General',
-                      owner: 'Current User',
-                      lastUpdated: new Date().toISOString().split('T')[0],
-                      nextReview: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-                      acknowledgements: 0,
-                      totalEmployees: 250
-                    }])
-                    toast.success('Policy created as draft')
-                  })
-                  .catch(err => toast.error(err.message || 'Failed to create'))
-              }}>
+              <Button onClick={() => setShowPolicyDialog(true)} disabled={isSubmitting}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Policy
               </Button>
@@ -1660,15 +2303,29 @@ export default function ComplianceClient() {
                       </div>
                       <div className="flex items-center gap-1">
                         <Button variant="ghost" size="icon" onClick={() => {
-                          downloadAsJson(policy, `policy-${policy.id}.json`)
-                          toast.success(`Viewing ${policy.name}`)
-                        }}>
+                          setSelectedPolicy(policy)
+                          setPolicyForm({
+                            name: policy.name,
+                            version: policy.version,
+                            category: policy.category,
+                            description: '',
+                            status: policy.status
+                          })
+                          setShowPolicyDialog(true)
+                        }} disabled={isSubmitting}>
                           <Eye className="w-4 h-4" />
                         </Button>
                         <Button variant="ghost" size="icon" onClick={() => {
-                          toast.info(`Policy settings: ${policy.name}`)
-                        }}>
-                          <Settings className="w-4 h-4" />
+                          if (policy.status === 'draft' || policy.status === 'review') {
+                            handleUpdatePolicy(policy.id, { status: 'approved' })
+                          } else {
+                            handleUpdatePolicy(policy.id, { status: 'published' })
+                          }
+                        }} disabled={isSubmitting}>
+                          <CheckCircle className="w-4 h-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => handleDeletePolicy(policy.id)} disabled={isSubmitting}>
+                          <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
                     </div>
@@ -2636,51 +3293,14 @@ export default function ComplianceClient() {
               </Button>
               <Button
                 className="flex-1"
-                disabled={!scheduleForm.name || !scheduleForm.startDate || !scheduleForm.endDate}
-                onClick={() => {
-                  toast.success('Scheduling audit...')
-                  fetch('/api/compliance', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      action: 'schedule_audit',
-                      ...scheduleForm
-                    })
-                  })
-                    .then(res => {
-                      if (!res.ok) throw new Error('Failed to schedule audit')
-                      return res.json()
-                    })
-                    .then(() => {
-                      const newAudit: Audit = {
-                        id: `audit${audits.length + 1}`,
-                        name: scheduleForm.name,
-                        type: scheduleForm.type,
-                        framework: scheduleForm.framework,
-                        status: 'planned',
-                        startDate: scheduleForm.startDate,
-                        endDate: scheduleForm.endDate,
-                        auditor: scheduleForm.auditor || 'Internal Audit Team',
-                        findings: 0,
-                        criticalFindings: 0,
-                        progress: 0
-                      }
-                      setAudits(prev => [...prev, newAudit])
-                      setShowScheduleDialog(false)
-                      setScheduleForm({
-                        name: '',
-                        framework: 'SOC 2',
-                        type: 'internal',
-                        startDate: '',
-                        endDate: '',
-                        auditor: ''
-                      })
-                      toast.success(`Audit "${newAudit.name}" scheduled for ${new Date(newAudit.startDate).toLocaleDateString()}`)
-                    })
-                    .catch(err => toast.error(err.message || 'Failed to schedule audit'))
-                }}
+                disabled={!scheduleForm.name || !scheduleForm.startDate || !scheduleForm.endDate || isSubmitting}
+                onClick={handleCreateAudit}
               >
-                <Calendar className="w-4 h-4 mr-2" />
+                {isSubmitting ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Calendar className="w-4 h-4 mr-2" />
+                )}
                 Schedule Audit
               </Button>
             </div>
@@ -2855,6 +3475,400 @@ export default function ComplianceClient() {
               >
                 <Users className="w-4 h-4 mr-2" />
                 Assign Member
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Policy Dialog */}
+      <Dialog open={showPolicyDialog} onOpenChange={(open) => {
+        setShowPolicyDialog(open)
+        if (!open) {
+          setSelectedPolicy(null)
+          setPolicyForm({
+            name: '',
+            version: '1.0',
+            category: 'security',
+            description: '',
+            status: 'draft'
+          })
+        }
+      }}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{selectedPolicy ? 'Edit Policy' : 'Create New Policy'}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="policy-name">Policy Name</Label>
+              <Input
+                id="policy-name"
+                placeholder="e.g., Information Security Policy"
+                value={policyForm.name}
+                onChange={(e) => setPolicyForm(prev => ({ ...prev, name: e.target.value }))}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Version</Label>
+                <Input
+                  value={policyForm.version}
+                  onChange={(e) => setPolicyForm(prev => ({ ...prev, version: e.target.value }))}
+                  placeholder="1.0"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Category</Label>
+                <Select
+                  value={policyForm.category}
+                  onValueChange={(value) => setPolicyForm(prev => ({ ...prev, category: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="security">Security</SelectItem>
+                    <SelectItem value="privacy">Privacy</SelectItem>
+                    <SelectItem value="compliance">Compliance</SelectItem>
+                    <SelectItem value="hr">Human Resources</SelectItem>
+                    <SelectItem value="it">IT Operations</SelectItem>
+                    <SelectItem value="general">General</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="policy-description">Description</Label>
+              <Input
+                id="policy-description"
+                placeholder="Brief description of the policy..."
+                value={policyForm.description}
+                onChange={(e) => setPolicyForm(prev => ({ ...prev, description: e.target.value }))}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Status</Label>
+              <Select
+                value={policyForm.status}
+                onValueChange={(value) => setPolicyForm(prev => ({ ...prev, status: value as typeof policyForm.status }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="draft">Draft</SelectItem>
+                  <SelectItem value="review">Under Review</SelectItem>
+                  <SelectItem value="approved">Approved</SelectItem>
+                  <SelectItem value="published">Published</SelectItem>
+                  <SelectItem value="archived">Archived</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex gap-3 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => {
+                setShowPolicyDialog(false)
+                setSelectedPolicy(null)
+                setPolicyForm({
+                  name: '',
+                  version: '1.0',
+                  category: 'security',
+                  description: '',
+                  status: 'draft'
+                })
+              }}>
+                Cancel
+              </Button>
+              <Button
+                className="flex-1"
+                disabled={!policyForm.name.trim() || isSubmitting}
+                onClick={() => {
+                  if (selectedPolicy) {
+                    handleUpdatePolicy(selectedPolicy.id, {
+                      name: policyForm.name,
+                      version: policyForm.version,
+                      category: policyForm.category,
+                      status: policyForm.status
+                    })
+                    setShowPolicyDialog(false)
+                    setSelectedPolicy(null)
+                  } else {
+                    handleCreatePolicy()
+                  }
+                }}
+              >
+                {isSubmitting ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <FileText className="w-4 h-4 mr-2" />
+                )}
+                {selectedPolicy ? 'Update Policy' : 'Create Policy'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Evidence Upload Dialog */}
+      <Dialog open={showEvidenceUploadDialog} onOpenChange={(open) => {
+        setShowEvidenceUploadDialog(open)
+        if (!open) {
+          setEvidenceForm({
+            name: '',
+            type: 'document',
+            controlId: '',
+            file: null
+          })
+        }
+      }}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Upload Evidence</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="evidence-name">Evidence Name</Label>
+              <Input
+                id="evidence-name"
+                placeholder="e.g., Security Audit Report Q1 2024"
+                value={evidenceForm.name}
+                onChange={(e) => setEvidenceForm(prev => ({ ...prev, name: e.target.value }))}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Evidence Type</Label>
+              <Select
+                value={evidenceForm.type}
+                onValueChange={(value) => setEvidenceForm(prev => ({ ...prev, type: value as typeof evidenceForm.type }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="document">Document</SelectItem>
+                  <SelectItem value="screenshot">Screenshot</SelectItem>
+                  <SelectItem value="log">Log File</SelectItem>
+                  <SelectItem value="certificate">Certificate</SelectItem>
+                  <SelectItem value="report">Report</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Associated Control</Label>
+              <Select
+                value={evidenceForm.controlId}
+                onValueChange={(value) => setEvidenceForm(prev => ({ ...prev, controlId: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select control" />
+                </SelectTrigger>
+                <SelectContent>
+                  {controls.map(control => (
+                    <SelectItem key={control.id} value={control.id}>
+                      {control.controlId} - {control.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="p-6 border-2 border-dashed rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer">
+              <input
+                type="file"
+                id="evidence-file"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0]
+                  if (file) {
+                    setEvidenceForm(prev => ({ ...prev, file, name: prev.name || file.name }))
+                  }
+                }}
+              />
+              <label htmlFor="evidence-file" className="cursor-pointer flex flex-col items-center gap-3">
+                <div className="p-3 bg-cyan-100 dark:bg-cyan-900/30 rounded-full">
+                  <Upload className="w-6 h-6 text-cyan-600 dark:text-cyan-400" />
+                </div>
+                <div className="text-center">
+                  <p className="font-medium text-gray-700 dark:text-gray-300">
+                    {evidenceForm.file ? evidenceForm.file.name : 'Click to select a file'}
+                  </p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    Supports PDF, DOC, XLS, PNG, JPG up to 50MB
+                  </p>
+                </div>
+              </label>
+            </div>
+
+            {evidenceForm.file && (
+              <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <FileText className="w-5 h-5 text-green-600" />
+                  <div>
+                    <p className="font-medium text-green-700 dark:text-green-400">{evidenceForm.file.name}</p>
+                    <p className="text-sm text-green-600 dark:text-green-500">
+                      {(evidenceForm.file.size / 1024).toFixed(1)} KB
+                    </p>
+                  </div>
+                </div>
+                <Button variant="ghost" size="sm" onClick={() => setEvidenceForm(prev => ({ ...prev, file: null }))}>
+                  <XCircle className="w-4 h-4" />
+                </Button>
+              </div>
+            )}
+
+            <div className="flex gap-3 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => {
+                setShowEvidenceUploadDialog(false)
+                setEvidenceForm({
+                  name: '',
+                  type: 'document',
+                  controlId: '',
+                  file: null
+                })
+              }}>
+                Cancel
+              </Button>
+              <Button
+                className="flex-1"
+                disabled={!evidenceForm.name.trim() || !evidenceForm.controlId || isSubmitting}
+                onClick={() => handleAddEvidence(evidenceForm.controlId)}
+              >
+                {isSubmitting ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Upload className="w-4 h-4 mr-2" />
+                )}
+                Upload Evidence
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Training Dialog */}
+      <Dialog open={showTrainingDialog} onOpenChange={(open) => {
+        setShowTrainingDialog(open)
+        if (!open) {
+          setTrainingForm({
+            name: '',
+            description: '',
+            dueDate: '',
+            assignedTo: [],
+            status: 'pending'
+          })
+        }
+      }}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Create Training Program</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="training-name">Training Name</Label>
+              <Input
+                id="training-name"
+                placeholder="e.g., Annual Security Awareness Training"
+                value={trainingForm.name}
+                onChange={(e) => setTrainingForm(prev => ({ ...prev, name: e.target.value }))}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="training-description">Description</Label>
+              <Input
+                id="training-description"
+                placeholder="Brief description of the training..."
+                value={trainingForm.description}
+                onChange={(e) => setTrainingForm(prev => ({ ...prev, description: e.target.value }))}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="training-due-date">Due Date</Label>
+              <Input
+                id="training-due-date"
+                type="date"
+                value={trainingForm.dueDate}
+                onChange={(e) => setTrainingForm(prev => ({ ...prev, dueDate: e.target.value }))}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Assign To</Label>
+              <Select
+                onValueChange={(value) => {
+                  if (!trainingForm.assignedTo.includes(value)) {
+                    setTrainingForm(prev => ({ ...prev, assignedTo: [...prev.assignedTo, value] }))
+                  }
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select team members" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Employees</SelectItem>
+                  <SelectItem value="engineering">Engineering Team</SelectItem>
+                  <SelectItem value="sales">Sales Team</SelectItem>
+                  <SelectItem value="support">Support Team</SelectItem>
+                  <SelectItem value="management">Management</SelectItem>
+                </SelectContent>
+              </Select>
+              {trainingForm.assignedTo.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {trainingForm.assignedTo.map(group => (
+                    <Badge key={group} variant="secondary" className="cursor-pointer" onClick={() => {
+                      setTrainingForm(prev => ({ ...prev, assignedTo: prev.assignedTo.filter(g => g !== group) }))
+                    }}>
+                      {group} <XCircle className="w-3 h-3 ml-1" />
+                    </Badge>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+              <div className="flex items-start gap-3">
+                <Users className="w-5 h-5 text-blue-600 mt-0.5" />
+                <div>
+                  <p className="font-medium text-blue-700 dark:text-blue-400">Training Assignment</p>
+                  <p className="text-sm text-blue-600 dark:text-blue-500 mt-1">
+                    Assigned members will receive email notifications and have the training added to their dashboard.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => {
+                setShowTrainingDialog(false)
+                setTrainingForm({
+                  name: '',
+                  description: '',
+                  dueDate: '',
+                  assignedTo: [],
+                  status: 'pending'
+                })
+              }}>
+                Cancel
+              </Button>
+              <Button
+                className="flex-1"
+                disabled={!trainingForm.name.trim() || isSubmitting}
+                onClick={handleCreateTraining}
+              >
+                {isSubmitting ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Plus className="w-4 h-4 mr-2" />
+                )}
+                Create Training
               </Button>
             </div>
           </div>
