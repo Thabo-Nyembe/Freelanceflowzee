@@ -687,6 +687,25 @@ export default function LogisticsClient() {
     dateRange: 'all'
   })
 
+  // New carrier form state
+  const [newCarrierForm, setNewCarrierForm] = useState({
+    name: '',
+    code: '',
+    accountNumber: '',
+    apiKey: ''
+  })
+
+  // New warehouse form state
+  const [newWarehouseForm, setNewWarehouseForm] = useState({
+    name: '',
+    code: '',
+    type: 'fulfillment' as const,
+    address: '',
+    city: '',
+    state: '',
+    country: ''
+  })
+
   // CRUD Operations
   const handleCreateShipment = async () => {
     setIsSaving(true)
@@ -907,9 +926,77 @@ export default function LogisticsClient() {
     setShowAddCarrierDialog(true)
   }
 
-  const handleSaveNewCarrier = () => {
-    toast.success('Carrier added')
-    setShowAddCarrierDialog(false)
+  const handleSaveNewCarrier = async () => {
+    if (!newCarrierForm.name.trim()) {
+      toast.error('Carrier name is required')
+      return
+    }
+    if (!newCarrierForm.code.trim()) {
+      toast.error('Carrier code is required')
+      return
+    }
+    setIsSaving(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Authentication required')
+        setIsSaving(false)
+        return
+      }
+
+      // Try to insert into Supabase logistics_carriers table
+      const { error } = await supabase
+        .from('logistics_carriers')
+        .insert({
+          user_id: user.id,
+          name: newCarrierForm.name.trim(),
+          code: newCarrierForm.code.trim().toUpperCase(),
+          account_number: newCarrierForm.accountNumber.trim() || null,
+          api_key_encrypted: newCarrierForm.apiKey.trim() || null,
+          is_active: true,
+          status: 'active',
+          total_shipments: 0,
+          on_time_rate: 0,
+          avg_delivery_days: 0,
+          supports_tracking: true,
+          supports_labels: true,
+          supports_rates: true
+        })
+
+      if (error) {
+        // If table doesn't exist or other error, fallback to localStorage
+        if (error.code === '42P01' || error.message.includes('does not exist')) {
+          const storageKey = `logistics_carriers_${user.id}`
+          const existing = JSON.parse(localStorage.getItem(storageKey) || '[]')
+          existing.push({
+            id: crypto.randomUUID(),
+            user_id: user.id,
+            name: newCarrierForm.name.trim(),
+            code: newCarrierForm.code.trim().toUpperCase(),
+            account_number: newCarrierForm.accountNumber.trim() || null,
+            api_key_encrypted: newCarrierForm.apiKey.trim() || null,
+            is_active: true,
+            created_at: new Date().toISOString()
+          })
+          localStorage.setItem(storageKey, JSON.stringify(existing))
+          toast.success('Carrier added (saved locally)')
+        } else {
+          throw error
+        }
+      } else {
+        toast.success('Carrier added successfully')
+      }
+
+      // Reset form and close dialog
+      setNewCarrierForm({ name: '', code: '', accountNumber: '', apiKey: '' })
+      setShowAddCarrierDialog(false)
+      await refreshCarriers()
+    } catch (err) {
+      console.error('Failed to add carrier:', err)
+      toast.error(err instanceof Error ? err.message : 'Failed to add carrier')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   // Warehouse handlers
@@ -929,15 +1016,198 @@ export default function LogisticsClient() {
     setShowAddWarehouseDialog(true)
   }
 
-  const handleSaveNewWarehouse = () => {
-    toast.success('Warehouse added')
-    setShowAddWarehouseDialog(false)
+  const handleSaveNewWarehouse = async () => {
+    if (!newWarehouseForm.name.trim()) {
+      toast.error('Warehouse name is required')
+      return
+    }
+    if (!newWarehouseForm.code.trim()) {
+      toast.error('Warehouse code is required')
+      return
+    }
+    setIsSaving(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Authentication required')
+        setIsSaving(false)
+        return
+      }
+
+      // Try to insert into Supabase logistics_warehouses table
+      const { error } = await supabase
+        .from('logistics_warehouses')
+        .insert({
+          user_id: user.id,
+          name: newWarehouseForm.name.trim(),
+          code: newWarehouseForm.code.trim().toUpperCase(),
+          warehouse_type: newWarehouseForm.type,
+          address: newWarehouseForm.address.trim() || null,
+          city: newWarehouseForm.city.trim() || null,
+          state: newWarehouseForm.state.trim() || null,
+          country: newWarehouseForm.country.trim() || 'US',
+          is_active: true,
+          capacity: 0,
+          used_capacity: 0
+        })
+
+      if (error) {
+        // If table doesn't exist or other error, fallback to localStorage
+        if (error.code === '42P01' || error.message.includes('does not exist')) {
+          const storageKey = `logistics_warehouses_${user.id}`
+          const existing = JSON.parse(localStorage.getItem(storageKey) || '[]')
+          existing.push({
+            id: crypto.randomUUID(),
+            user_id: user.id,
+            name: newWarehouseForm.name.trim(),
+            code: newWarehouseForm.code.trim().toUpperCase(),
+            warehouse_type: newWarehouseForm.type,
+            address: newWarehouseForm.address.trim() || null,
+            city: newWarehouseForm.city.trim() || null,
+            state: newWarehouseForm.state.trim() || null,
+            country: newWarehouseForm.country.trim() || 'US',
+            is_active: true,
+            created_at: new Date().toISOString()
+          })
+          localStorage.setItem(storageKey, JSON.stringify(existing))
+          toast.success('Warehouse added (saved locally)')
+        } else {
+          throw error
+        }
+      } else {
+        toast.success('Warehouse added successfully')
+      }
+
+      // Reset form and close dialog
+      setNewWarehouseForm({ name: '', code: '', type: 'fulfillment', address: '', city: '', state: '', country: '' })
+      setShowAddWarehouseDialog(false)
+      await refreshWarehouses()
+    } catch (err) {
+      console.error('Failed to add warehouse:', err)
+      toast.error(err instanceof Error ? err.message : 'Failed to add warehouse')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   // Batch print handler
-  const handleConfirmBatchPrint = () => {
-    toast.success('Labels printed')
-    setShowBatchPrintDialog(false)
+  const handleConfirmBatchPrint = async () => {
+    setIsSaving(true)
+    try {
+      // Get pending shipments to print
+      const pendingShipments = shipments.filter(s => s.status === 'pending')
+
+      if (pendingShipments.length === 0) {
+        toast.error('No pending shipments to print')
+        setIsSaving(false)
+        return
+      }
+
+      // Generate printable label content
+      const labelContent = pendingShipments.map(shipment => `
+        <div style="page-break-after: always; padding: 20px; border: 2px solid #000; margin-bottom: 20px; font-family: Arial, sans-serif;">
+          <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px;">
+            <h2 style="margin: 0; font-size: 24px;">SHIPPING LABEL</h2>
+            <p style="margin: 5px 0 0 0; font-size: 14px;">${shipment.carrier || 'Standard Shipping'} - ${shipment.carrierService || 'Ground'}</p>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+            <div style="width: 48%;">
+              <h4 style="margin: 0 0 5px 0; font-size: 12px; color: #666;">FROM:</h4>
+              <p style="margin: 0; font-size: 14px; font-weight: bold;">${shipment.origin?.name || 'Warehouse'}</p>
+              <p style="margin: 2px 0; font-size: 12px;">${shipment.origin?.address || ''}</p>
+              <p style="margin: 2px 0; font-size: 12px;">${shipment.origin?.city || ''}, ${shipment.origin?.state || ''} ${shipment.origin?.zip || ''}</p>
+              <p style="margin: 2px 0; font-size: 12px;">${shipment.origin?.country || 'US'}</p>
+            </div>
+            <div style="width: 48%;">
+              <h4 style="margin: 0 0 5px 0; font-size: 12px; color: #666;">TO:</h4>
+              <p style="margin: 0; font-size: 14px; font-weight: bold;">${shipment.destination?.name || 'Customer'}</p>
+              <p style="margin: 2px 0; font-size: 12px;">${shipment.destination?.address || ''}</p>
+              <p style="margin: 2px 0; font-size: 12px;">${shipment.destination?.city || ''}, ${shipment.destination?.state || ''} ${shipment.destination?.zip || ''}</p>
+              <p style="margin: 2px 0; font-size: 12px;">${shipment.destination?.country || 'US'}</p>
+            </div>
+          </div>
+
+          <div style="background: #f5f5f5; padding: 10px; margin-bottom: 15px;">
+            <div style="display: flex; justify-content: space-between;">
+              <span style="font-size: 12px;"><strong>Tracking #:</strong> ${shipment.trackingNumber || 'N/A'}</span>
+              <span style="font-size: 12px;"><strong>Order #:</strong> ${shipment.orderId || 'N/A'}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-top: 5px;">
+              <span style="font-size: 12px;"><strong>Weight:</strong> ${shipment.weight || 0} lbs</span>
+              <span style="font-size: 12px;"><strong>Priority:</strong> ${shipment.priority || 'normal'}</span>
+            </div>
+          </div>
+
+          <div style="text-align: center; padding: 10px; border: 1px dashed #ccc;">
+            <p style="margin: 0; font-size: 10px; color: #666;">Barcode Placeholder</p>
+            <p style="margin: 5px 0; font-size: 18px; font-family: monospace; letter-spacing: 2px;">${shipment.trackingNumber || shipment.id}</p>
+          </div>
+
+          ${shipment.requiresSignature ? '<p style="text-align: center; margin-top: 10px; color: red; font-weight: bold;">SIGNATURE REQUIRED</p>' : ''}
+          ${shipment.fragile ? '<p style="text-align: center; margin-top: 5px; color: orange; font-weight: bold;">FRAGILE - HANDLE WITH CARE</p>' : ''}
+        </div>
+      `).join('')
+
+      // Create print window
+      const printWindow = window.open('', '_blank', 'width=800,height=600')
+      if (!printWindow) {
+        toast.error('Pop-up blocked. Please allow pop-ups to print labels.')
+        setIsSaving(false)
+        return
+      }
+
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>Shipping Labels - ${new Date().toLocaleDateString()}</title>
+            <style>
+              @media print {
+                body { margin: 0; padding: 0; }
+                @page { size: 4in 6in; margin: 0; }
+              }
+              body { font-family: Arial, sans-serif; }
+            </style>
+          </head>
+          <body>
+            ${labelContent}
+          </body>
+        </html>
+      `)
+      printWindow.document.close()
+
+      // Trigger print dialog
+      printWindow.onload = () => {
+        printWindow.print()
+        // Close print window after a short delay (user can cancel print if needed)
+        setTimeout(() => {
+          printWindow.close()
+        }, 1000)
+      }
+
+      // Log the print action
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        // Store print history in localStorage
+        const printHistory = JSON.parse(localStorage.getItem(`logistics_print_history_${user.id}`) || '[]')
+        printHistory.push({
+          id: crypto.randomUUID(),
+          printedAt: new Date().toISOString(),
+          labelCount: pendingShipments.length,
+          shipmentIds: pendingShipments.map(s => s.id)
+        })
+        localStorage.setItem(`logistics_print_history_${user.id}`, JSON.stringify(printHistory.slice(-100))) // Keep last 100 records
+      }
+
+      toast.success(`${pendingShipments.length} label(s) sent to printer`)
+      setShowBatchPrintDialog(false)
+    } catch (err) {
+      console.error('Failed to print labels:', err)
+      toast.error(err instanceof Error ? err.message : 'Failed to print labels')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   // Status update handlers
@@ -982,9 +1252,60 @@ export default function LogisticsClient() {
     setShowSaveSettingsDialog(true)
   }
 
-  const handleConfirmSaveSettings = () => {
-    toast.success('Settings saved')
-    setShowSaveSettingsDialog(false)
+  const handleConfirmSaveSettings = async () => {
+    setIsSaving(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Authentication required')
+        setIsSaving(false)
+        return
+      }
+
+      // Build settings object from current state
+      const logisticsSettings = {
+        userId: user.id,
+        settingsTab,
+        filterOptions,
+        carriers: carriers.map(c => ({ id: c.id, name: c.name, active: c.active })),
+        warehouses: warehouses.map(w => ({ id: w.id, name: w.name, code: w.code, active: w.active })),
+        updatedAt: new Date().toISOString()
+      }
+
+      // Save to localStorage (persistent across sessions)
+      const storageKey = `logistics_settings_${user.id}`
+      localStorage.setItem(storageKey, JSON.stringify(logisticsSettings))
+
+      // Try to save to Supabase user_preferences table if it exists
+      try {
+        const { error } = await supabase
+          .from('user_preferences')
+          .upsert({
+            user_id: user.id,
+            preference_key: 'logistics_settings',
+            preference_value: logisticsSettings,
+            updated_at: new Date().toISOString()
+          }, {
+            onConflict: 'user_id,preference_key'
+          })
+
+        if (error && error.code !== '42P01') {
+          // Log but don't fail - localStorage already saved
+          console.warn('Could not save to database, using localStorage:', error.message)
+        }
+      } catch (dbErr) {
+        // Ignore database errors - settings are already saved locally
+        console.warn('Database save failed, using localStorage backup')
+      }
+
+      toast.success('Settings saved successfully')
+      setShowSaveSettingsDialog(false)
+    } catch (err) {
+      console.error('Failed to save settings:', err)
+      toast.error(err instanceof Error ? err.message : 'Failed to save settings')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   // Danger zone handlers
@@ -2933,25 +3254,50 @@ export default function LogisticsClient() {
           <div className="space-y-4 py-4">
             <div>
               <label className="text-sm font-medium">Carrier Name</label>
-              <Input placeholder="e.g., FedEx" className="mt-1" />
+              <Input
+                placeholder="e.g., FedEx"
+                className="mt-1"
+                value={newCarrierForm.name}
+                onChange={(e) => setNewCarrierForm(prev => ({ ...prev, name: e.target.value }))}
+              />
             </div>
             <div>
               <label className="text-sm font-medium">Carrier Code</label>
-              <Input placeholder="e.g., FEDEX" className="mt-1" />
+              <Input
+                placeholder="e.g., FEDEX"
+                className="mt-1"
+                value={newCarrierForm.code}
+                onChange={(e) => setNewCarrierForm(prev => ({ ...prev, code: e.target.value }))}
+              />
             </div>
             <div>
               <label className="text-sm font-medium">Account Number</label>
-              <Input placeholder="Enter account number" className="mt-1" />
+              <Input
+                placeholder="Enter account number"
+                className="mt-1"
+                value={newCarrierForm.accountNumber}
+                onChange={(e) => setNewCarrierForm(prev => ({ ...prev, accountNumber: e.target.value }))}
+              />
             </div>
             <div>
               <label className="text-sm font-medium">API Key</label>
-              <Input type="password" placeholder="Enter API key" className="mt-1" />
+              <Input
+                type="password"
+                placeholder="Enter API key"
+                className="mt-1"
+                value={newCarrierForm.apiKey}
+                onChange={(e) => setNewCarrierForm(prev => ({ ...prev, apiKey: e.target.value }))}
+              />
             </div>
           </div>
           <div className="flex justify-end gap-3">
             <Button variant="outline" onClick={() => setShowAddCarrierDialog(false)}>Cancel</Button>
-            <Button onClick={handleSaveNewCarrier} className="bg-gradient-to-r from-green-600 to-emerald-600 text-white">
-              Add Carrier
+            <Button
+              onClick={handleSaveNewCarrier}
+              disabled={isSaving || !newCarrierForm.name.trim()}
+              className="bg-gradient-to-r from-green-600 to-emerald-600 text-white"
+            >
+              {isSaving ? 'Adding...' : 'Add Carrier'}
             </Button>
           </div>
         </DialogContent>
@@ -3036,16 +3382,30 @@ export default function LogisticsClient() {
           <div className="space-y-4 py-4">
             <div>
               <label className="text-sm font-medium">Warehouse Name</label>
-              <Input placeholder="e.g., Los Angeles Fulfillment Center" className="mt-1" />
+              <Input
+                placeholder="e.g., Los Angeles Fulfillment Center"
+                className="mt-1"
+                value={newWarehouseForm.name}
+                onChange={(e) => setNewWarehouseForm(prev => ({ ...prev, name: e.target.value }))}
+              />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <label className="text-sm font-medium">Code</label>
-                <Input placeholder="e.g., LAX-FC1" className="mt-1" />
+                <Input
+                  placeholder="e.g., LAX-FC1"
+                  className="mt-1"
+                  value={newWarehouseForm.code}
+                  onChange={(e) => setNewWarehouseForm(prev => ({ ...prev, code: e.target.value }))}
+                />
               </div>
               <div>
                 <label className="text-sm font-medium">Type</label>
-                <select className="w-full mt-1 px-3 py-2 border rounded-lg">
+                <select
+                  className="w-full mt-1 px-3 py-2 border rounded-lg"
+                  value={newWarehouseForm.type}
+                  onChange={(e) => setNewWarehouseForm(prev => ({ ...prev, type: e.target.value as 'fulfillment' | 'distribution' | 'cross_dock' | 'cold_storage' }))}
+                >
                   <option value="fulfillment">Fulfillment</option>
                   <option value="distribution">Distribution</option>
                   <option value="cross_dock">Cross Dock</option>
@@ -3055,27 +3415,51 @@ export default function LogisticsClient() {
             </div>
             <div>
               <label className="text-sm font-medium">Address</label>
-              <Input placeholder="Street address" className="mt-1" />
+              <Input
+                placeholder="Street address"
+                className="mt-1"
+                value={newWarehouseForm.address}
+                onChange={(e) => setNewWarehouseForm(prev => ({ ...prev, address: e.target.value }))}
+              />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               <div>
                 <label className="text-sm font-medium">City</label>
-                <Input placeholder="City" className="mt-1" />
+                <Input
+                  placeholder="City"
+                  className="mt-1"
+                  value={newWarehouseForm.city}
+                  onChange={(e) => setNewWarehouseForm(prev => ({ ...prev, city: e.target.value }))}
+                />
               </div>
               <div>
                 <label className="text-sm font-medium">State</label>
-                <Input placeholder="State" className="mt-1" />
+                <Input
+                  placeholder="State"
+                  className="mt-1"
+                  value={newWarehouseForm.state}
+                  onChange={(e) => setNewWarehouseForm(prev => ({ ...prev, state: e.target.value }))}
+                />
               </div>
               <div>
                 <label className="text-sm font-medium">Country</label>
-                <Input placeholder="Country" className="mt-1" />
+                <Input
+                  placeholder="Country"
+                  className="mt-1"
+                  value={newWarehouseForm.country}
+                  onChange={(e) => setNewWarehouseForm(prev => ({ ...prev, country: e.target.value }))}
+                />
               </div>
             </div>
           </div>
           <div className="flex justify-end gap-3">
             <Button variant="outline" onClick={() => setShowAddWarehouseDialog(false)}>Cancel</Button>
-            <Button onClick={handleSaveNewWarehouse} className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white">
-              Add Warehouse
+            <Button
+              onClick={handleSaveNewWarehouse}
+              disabled={isSaving || !newWarehouseForm.name.trim()}
+              className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white"
+            >
+              {isSaving ? 'Adding...' : 'Add Warehouse'}
             </Button>
           </div>
         </DialogContent>
@@ -3207,8 +3591,12 @@ export default function LogisticsClient() {
           </div>
           <div className="flex justify-end gap-3">
             <Button variant="outline" onClick={() => setShowSaveSettingsDialog(false)}>Cancel</Button>
-            <Button onClick={handleConfirmSaveSettings} className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
-              Save All Settings
+            <Button
+              onClick={handleConfirmSaveSettings}
+              disabled={isSaving}
+              className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white"
+            >
+              {isSaving ? 'Saving...' : 'Save All Settings'}
             </Button>
           </div>
         </DialogContent>

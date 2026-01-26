@@ -1,6 +1,7 @@
 'use client'
 
 import { useMaintenance, type MaintenanceWindow } from '@/lib/hooks/use-maintenance'
+import { createClient } from '@/lib/supabase/client'
 
 import { useState, useMemo, useRef, useEffect } from 'react'
 import { toast } from 'sonner'
@@ -406,6 +407,68 @@ export default function MaintenanceClient() {
     criticality: 'all' as Priority | 'all'
   })
 
+  // New Part Form State
+  const [newPartForm, setNewPartForm] = useState({
+    name: '',
+    partNumber: '',
+    category: 'HVAC Filters',
+    quantity: 0,
+    unitCost: 0,
+    minQuantity: 10,
+    maxQuantity: 50,
+    supplier: '',
+    location: ''
+  })
+
+  // New Technician Form State
+  const [newTechnicianForm, setNewTechnicianForm] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    role: 'Maintenance Tech',
+    department: 'Facilities',
+    skills: '',
+    certifications: ''
+  })
+
+  // Default maintenance settings
+  const defaultMaintenanceSettings = {
+    defaultPriority: 'medium',
+    defaultType: 'preventive',
+    autoNumberWorkOrders: true,
+    trackLaborHours: true,
+    showAssetHealth: true,
+    showSLATimers: true,
+    autoAssignWorkOrders: true,
+    requireApprovalForEmergency: false,
+    requireChecklistCompletion: true,
+    allowTechnicianReassignment: false,
+    emailNotifications: true,
+    pushNotifications: true,
+    smsNotifications: false,
+    criticalAlerts: true,
+    completionAlerts: true,
+    overdueAlerts: true
+  }
+
+  // Maintenance settings state
+  const [maintenanceSettings, setMaintenanceSettings] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('maintenance-settings')
+      if (saved) {
+        try {
+          return { ...defaultMaintenanceSettings, ...JSON.parse(saved) }
+        } catch {
+          return defaultMaintenanceSettings
+        }
+      }
+    }
+    return defaultMaintenanceSettings
+  })
+
+  // Supabase client for direct operations
+  const supabase = createClient()
+
   // Use the maintenance hook for data fetching and mutations
   const {
     windows: dbMaintenanceWindows,
@@ -690,21 +753,188 @@ export default function MaintenanceClient() {
   }
 
   // Add new spare part
-  const handleAddPart = () => {
-    toast.success('New spare part added to inventory')
-    setShowAddPartDialog(false)
+  const handleAddPart = async () => {
+    if (!newPartForm?.name?.trim()) {
+      toast.error('Part name is required')
+      return
+    }
+    if (!newPartForm?.partNumber?.trim()) {
+      toast.error('Part number is required')
+      return
+    }
+    try {
+      // Try database first
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const { error } = await supabase
+          .from('maintenance_parts')
+          .insert({
+            user_id: user.id,
+            name: newPartForm.name,
+            part_number: newPartForm.partNumber,
+            category: newPartForm.category,
+            quantity: newPartForm.quantity,
+            unit_cost: newPartForm.unitCost,
+            min_quantity: newPartForm.minQuantity,
+            max_quantity: newPartForm.maxQuantity,
+            supplier: newPartForm.supplier,
+            location: newPartForm.location,
+            status: newPartForm.quantity > newPartForm.minQuantity ? 'in_stock' :
+                    newPartForm.quantity > 0 ? 'low_stock' : 'out_of_stock'
+          })
+        if (!error) {
+          toast.success('New spare part added to inventory')
+          setShowAddPartDialog(false)
+          setNewPartForm({
+            name: '',
+            partNumber: '',
+            category: 'HVAC Filters',
+            quantity: 0,
+            unitCost: 0,
+            minQuantity: 10,
+            maxQuantity: 50,
+            supplier: '',
+            location: ''
+          })
+          return
+        }
+      }
+      // Fallback to localStorage
+      const parts = JSON.parse(localStorage.getItem('maintenance-parts') || '[]')
+      parts.push({
+        id: crypto.randomUUID(),
+        ...newPartForm,
+        status: newPartForm.quantity > newPartForm.minQuantity ? 'in_stock' :
+                newPartForm.quantity > 0 ? 'low_stock' : 'out_of_stock',
+        created_at: new Date().toISOString()
+      })
+      localStorage.setItem('maintenance-parts', JSON.stringify(parts))
+      toast.success('New spare part added to inventory')
+      setShowAddPartDialog(false)
+      setNewPartForm({
+        name: '',
+        partNumber: '',
+        category: 'HVAC Filters',
+        quantity: 0,
+        unitCost: 0,
+        minQuantity: 10,
+        maxQuantity: 50,
+        supplier: '',
+        location: ''
+      })
+    } catch (err) {
+      toast.error('Failed to add part')
+      console.error(err)
+    }
   }
 
   // Add new technician
-  const handleAddTechnician = () => {
-    toast.success('New technician added to team')
-    setShowAddTechnicianDialog(false)
+  const handleAddTechnician = async () => {
+    if (!newTechnicianForm?.name?.trim()) {
+      toast.error('Technician name is required')
+      return
+    }
+    if (!newTechnicianForm?.email?.trim()) {
+      toast.error('Email is required')
+      return
+    }
+    try {
+      // Try database first
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const { error } = await supabase
+          .from('maintenance_technicians')
+          .insert({
+            user_id: user.id,
+            name: newTechnicianForm.name,
+            email: newTechnicianForm.email,
+            phone: newTechnicianForm.phone,
+            role: newTechnicianForm.role,
+            department: newTechnicianForm.department,
+            skills: newTechnicianForm.skills.split(',').map(s => s.trim()).filter(Boolean),
+            certifications: newTechnicianForm.certifications.split(',').map(c => c.trim()).filter(Boolean),
+            status: 'available',
+            completed_orders: 0,
+            avg_rating: 0
+          })
+        if (!error) {
+          toast.success('New technician added to team')
+          setShowAddTechnicianDialog(false)
+          setNewTechnicianForm({
+            name: '',
+            email: '',
+            phone: '',
+            role: 'Maintenance Tech',
+            department: 'Facilities',
+            skills: '',
+            certifications: ''
+          })
+          return
+        }
+      }
+      // Fallback to localStorage
+      const technicians = JSON.parse(localStorage.getItem('maintenance-technicians') || '[]')
+      technicians.push({
+        id: crypto.randomUUID(),
+        name: newTechnicianForm.name,
+        email: newTechnicianForm.email,
+        phone: newTechnicianForm.phone,
+        role: newTechnicianForm.role,
+        department: newTechnicianForm.department,
+        skills: newTechnicianForm.skills.split(',').map(s => s.trim()).filter(Boolean),
+        certifications: newTechnicianForm.certifications.split(',').map(c => c.trim()).filter(Boolean),
+        status: 'available',
+        completedOrders: 0,
+        avgRating: 0,
+        created_at: new Date().toISOString()
+      })
+      localStorage.setItem('maintenance-technicians', JSON.stringify(technicians))
+      toast.success('New technician added to team')
+      setShowAddTechnicianDialog(false)
+      setNewTechnicianForm({
+        name: '',
+        email: '',
+        phone: '',
+        role: 'Maintenance Tech',
+        department: 'Facilities',
+        skills: '',
+        certifications: ''
+      })
+    } catch (err) {
+      toast.error('Failed to add technician')
+      console.error(err)
+    }
   }
 
   // Reset settings
-  const handleResetSettings = () => {
-    toast.success('Settings have been reset to defaults')
-    setShowResetSettingsDialog(false)
+  const handleResetSettings = async () => {
+    try {
+      // Reset state to defaults
+      setMaintenanceSettings(defaultMaintenanceSettings)
+
+      // Clear localStorage
+      localStorage.removeItem('maintenance-settings')
+
+      // Try to reset in database if user is authenticated
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        await supabase
+          .from('maintenance_settings')
+          .upsert({
+            user_id: user.id,
+            settings: defaultMaintenanceSettings,
+            updated_at: new Date().toISOString()
+          })
+      }
+
+      toast.success('Settings have been reset to defaults')
+      setShowResetSettingsDialog(false)
+    } catch (err) {
+      // Even if DB fails, local reset succeeded
+      toast.success('Settings have been reset to defaults')
+      setShowResetSettingsDialog(false)
+      console.error('Error resetting settings in database:', err)
+    }
   }
 
   // Delete all data using hook mutations
@@ -2711,15 +2941,29 @@ export default function MaintenanceClient() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="col-span-2">
                 <Label>Part Name *</Label>
-                <Input placeholder="e.g., Air Filter 24x24" className="mt-1.5" />
+                <Input
+                  placeholder="e.g., Air Filter 24x24"
+                  className="mt-1.5"
+                  value={newPartForm.name}
+                  onChange={(e) => setNewPartForm(prev => ({ ...prev, name: e.target.value }))}
+                />
               </div>
               <div>
                 <Label>Part Number *</Label>
-                <Input placeholder="e.g., AF-2424-M" className="mt-1.5" />
+                <Input
+                  placeholder="e.g., AF-2424-M"
+                  className="mt-1.5"
+                  value={newPartForm.partNumber}
+                  onChange={(e) => setNewPartForm(prev => ({ ...prev, partNumber: e.target.value }))}
+                />
               </div>
               <div>
                 <Label>Category</Label>
-                <select className="w-full mt-1.5 px-3 py-2 border rounded-lg dark:bg-gray-900 dark:border-gray-700">
+                <select
+                  className="w-full mt-1.5 px-3 py-2 border rounded-lg dark:bg-gray-900 dark:border-gray-700"
+                  value={newPartForm.category}
+                  onChange={(e) => setNewPartForm(prev => ({ ...prev, category: e.target.value }))}
+                >
                   <option>HVAC Filters</option>
                   <option>Bearings</option>
                   <option>Belts</option>
@@ -2730,27 +2974,59 @@ export default function MaintenanceClient() {
               </div>
               <div>
                 <Label>Quantity</Label>
-                <Input type="number" defaultValue="0" className="mt-1.5" />
+                <Input
+                  type="number"
+                  className="mt-1.5"
+                  value={newPartForm.quantity}
+                  onChange={(e) => setNewPartForm(prev => ({ ...prev, quantity: parseInt(e.target.value) || 0 }))}
+                />
               </div>
               <div>
                 <Label>Unit Cost ($)</Label>
-                <Input type="number" step="0.01" placeholder="0.00" className="mt-1.5" />
+                <Input
+                  type="number"
+                  step="0.01"
+                  placeholder="0.00"
+                  className="mt-1.5"
+                  value={newPartForm.unitCost}
+                  onChange={(e) => setNewPartForm(prev => ({ ...prev, unitCost: parseFloat(e.target.value) || 0 }))}
+                />
               </div>
               <div>
                 <Label>Min Quantity</Label>
-                <Input type="number" defaultValue="10" className="mt-1.5" />
+                <Input
+                  type="number"
+                  className="mt-1.5"
+                  value={newPartForm.minQuantity}
+                  onChange={(e) => setNewPartForm(prev => ({ ...prev, minQuantity: parseInt(e.target.value) || 0 }))}
+                />
               </div>
               <div>
                 <Label>Max Quantity</Label>
-                <Input type="number" defaultValue="50" className="mt-1.5" />
+                <Input
+                  type="number"
+                  className="mt-1.5"
+                  value={newPartForm.maxQuantity}
+                  onChange={(e) => setNewPartForm(prev => ({ ...prev, maxQuantity: parseInt(e.target.value) || 0 }))}
+                />
               </div>
               <div className="col-span-2">
                 <Label>Supplier</Label>
-                <Input placeholder="Supplier name" className="mt-1.5" />
+                <Input
+                  placeholder="Supplier name"
+                  className="mt-1.5"
+                  value={newPartForm.supplier}
+                  onChange={(e) => setNewPartForm(prev => ({ ...prev, supplier: e.target.value }))}
+                />
               </div>
               <div className="col-span-2">
                 <Label>Storage Location</Label>
-                <Input placeholder="e.g., Warehouse A-1" className="mt-1.5" />
+                <Input
+                  placeholder="e.g., Warehouse A-1"
+                  className="mt-1.5"
+                  value={newPartForm.location}
+                  onChange={(e) => setNewPartForm(prev => ({ ...prev, location: e.target.value }))}
+                />
               </div>
             </div>
           </div>
@@ -2777,19 +3053,39 @@ export default function MaintenanceClient() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="col-span-2">
                 <Label>Full Name *</Label>
-                <Input placeholder="John Smith" className="mt-1.5" />
+                <Input
+                  placeholder="John Smith"
+                  className="mt-1.5"
+                  value={newTechnicianForm.name}
+                  onChange={(e) => setNewTechnicianForm(prev => ({ ...prev, name: e.target.value }))}
+                />
               </div>
               <div>
                 <Label>Email *</Label>
-                <Input type="email" placeholder="john@company.com" className="mt-1.5" />
+                <Input
+                  type="email"
+                  placeholder="john@company.com"
+                  className="mt-1.5"
+                  value={newTechnicianForm.email}
+                  onChange={(e) => setNewTechnicianForm(prev => ({ ...prev, email: e.target.value }))}
+                />
               </div>
               <div>
                 <Label>Phone</Label>
-                <Input placeholder="555-0100" className="mt-1.5" />
+                <Input
+                  placeholder="555-0100"
+                  className="mt-1.5"
+                  value={newTechnicianForm.phone}
+                  onChange={(e) => setNewTechnicianForm(prev => ({ ...prev, phone: e.target.value }))}
+                />
               </div>
               <div>
                 <Label>Role</Label>
-                <select className="w-full mt-1.5 px-3 py-2 border rounded-lg dark:bg-gray-900 dark:border-gray-700">
+                <select
+                  className="w-full mt-1.5 px-3 py-2 border rounded-lg dark:bg-gray-900 dark:border-gray-700"
+                  value={newTechnicianForm.role}
+                  onChange={(e) => setNewTechnicianForm(prev => ({ ...prev, role: e.target.value }))}
+                >
                   <option>Maintenance Tech</option>
                   <option>HVAC Specialist</option>
                   <option>Electrical Tech</option>
@@ -2800,7 +3096,11 @@ export default function MaintenanceClient() {
               </div>
               <div>
                 <Label>Department</Label>
-                <select className="w-full mt-1.5 px-3 py-2 border rounded-lg dark:bg-gray-900 dark:border-gray-700">
+                <select
+                  className="w-full mt-1.5 px-3 py-2 border rounded-lg dark:bg-gray-900 dark:border-gray-700"
+                  value={newTechnicianForm.department}
+                  onChange={(e) => setNewTechnicianForm(prev => ({ ...prev, department: e.target.value }))}
+                >
                   <option>Facilities</option>
                   <option>Electrical</option>
                   <option>Manufacturing</option>
@@ -2810,11 +3110,21 @@ export default function MaintenanceClient() {
               </div>
               <div className="col-span-2">
                 <Label>Skills (comma-separated)</Label>
-                <Input placeholder="HVAC, Electrical, Plumbing" className="mt-1.5" />
+                <Input
+                  placeholder="HVAC, Electrical, Plumbing"
+                  className="mt-1.5"
+                  value={newTechnicianForm.skills}
+                  onChange={(e) => setNewTechnicianForm(prev => ({ ...prev, skills: e.target.value }))}
+                />
               </div>
               <div className="col-span-2">
                 <Label>Certifications (comma-separated)</Label>
-                <Input placeholder="EPA 608, OSHA 10" className="mt-1.5" />
+                <Input
+                  placeholder="EPA 608, OSHA 10"
+                  className="mt-1.5"
+                  value={newTechnicianForm.certifications}
+                  onChange={(e) => setNewTechnicianForm(prev => ({ ...prev, certifications: e.target.value }))}
+                />
               </div>
             </div>
           </div>

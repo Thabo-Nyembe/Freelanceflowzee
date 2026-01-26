@@ -214,6 +214,32 @@ export function useLeads(initialLeads: Lead[] = [], initialStats: LeadStats) {
     return updateLead(id, { score: Math.max(0, Math.min(100, score)) })
   }, [updateLead])
 
+  const refreshLeads = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const { data, error: fetchError } = await supabase
+        .from('leads')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+
+      if (fetchError) throw fetchError
+
+      setLeads(data || [])
+      setStats(calculateStats(data || []))
+      return data
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to refresh leads')
+      return null
+    } finally {
+      setLoading(false)
+    }
+  }, [supabase, calculateStats])
+
   return {
     leads,
     stats,
@@ -225,6 +251,7 @@ export function useLeads(initialLeads: Lead[] = [], initialStats: LeadStats) {
     qualifyLead,
     contactLead,
     convertLead,
-    updateScore
+    updateScore,
+    refreshLeads
   }
 }

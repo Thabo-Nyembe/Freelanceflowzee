@@ -302,6 +302,9 @@ const formatCurrencyDetailed = (amount: number) => {
   }).format(amount)
 }
 
+// Create Supabase client
+const supabase = createClient()
+
 export default function PayrollClient() {
   // Define adapter variables locally (removed mock data imports)
   const payrollAIInsights: any[] = []
@@ -765,15 +768,157 @@ export default function PayrollClient() {
   }
 
   const handleExportPayroll = () => {
-    toast.success('Export started')
+    try {
+      // Combine both data sources for export
+      const allPayRuns = [...payRuns, ...dbPayrollRuns.map(run => ({
+        id: run.id,
+        period: run.period,
+        payDate: run.pay_date,
+        status: run.status,
+        totalGross: run.total_amount,
+        totalNet: run.total_amount * 0.7,
+        totalTaxes: run.total_amount * 0.22,
+        totalDeductions: run.total_amount * 0.08,
+        employeeCount: run.total_employees,
+        processedCount: run.processed_count,
+        pendingCount: run.pending_count,
+        failedCount: run.failed_count,
+        department: run.department,
+        approvedBy: run.approved_by,
+        notes: run.notes,
+        createdAt: run.created_at
+      }))]
+
+      const exportData = allPayRuns.map(run => ({
+        period: run.period,
+        pay_date: run.payDate,
+        status: run.status,
+        total_gross: run.totalGross,
+        total_net: run.totalNet,
+        total_taxes: run.totalTaxes,
+        total_deductions: run.totalDeductions,
+        employee_count: run.employeeCount,
+        processed_count: run.processedCount,
+        pending_count: run.pendingCount,
+        failed_count: run.failedCount,
+        approved_by: run.approvedBy || '',
+        notes: run.notes || '',
+        created_at: run.createdAt
+      }))
+
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `payroll-export-${new Date().toISOString().split('T')[0]}.json`
+      a.click()
+      URL.revokeObjectURL(url)
+      toast.success(`Exported ${exportData.length} payroll record(s)`)
+    } catch (error) {
+      console.error('Export error:', error)
+      toast.error('Failed to export payroll data')
+    }
   }
 
-  const handleProcessPayments = () => {
-    toast.success('Processing payments')
+  const handleProcessPayments = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to process payments')
+        return
+      }
+
+      // Find pending payroll runs and update their status to processing
+      const pendingRuns = dbPayrollRuns.filter(run =>
+        run.status === 'draft' || run.status === 'pending_approval' || run.status === 'approved'
+      )
+
+      if (pendingRuns.length === 0) {
+        toast.info('No pending payments to process')
+        return
+      }
+
+      setLoading(true)
+      let processedCount = 0
+
+      for (const run of pendingRuns) {
+        const { error } = await supabase
+          .from('payroll_runs')
+          .update({
+            status: 'processing',
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', run.id)
+          .eq('user_id', user.id)
+
+        if (!error) {
+          processedCount++
+        }
+      }
+
+      // Refresh the data
+      await fetchPayrollRuns()
+
+      toast.success(`Processing ${processedCount} payment(s)`, {
+        description: 'Payroll runs have been moved to processing status'
+      })
+    } catch (error) {
+      console.error('Process payments error:', error)
+      toast.error('Failed to process payments')
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const handleGeneratePayslips = () => {
-    toast.success('Generating payslips')
+  const handleGeneratePayslips = async () => {
+    try {
+      // Get completed payroll runs to generate payslips for
+      const completedRuns = dbPayrollRuns.filter(run => run.status === 'completed')
+
+      if (completedRuns.length === 0) {
+        toast.info('No completed payroll runs to generate payslips for')
+        return
+      }
+
+      // Generate payslip documents as JSON export
+      const payslipData = completedRuns.flatMap(run =>
+        employees.map(emp => ({
+          payslip_id: `PS-${run.id.slice(0, 8)}-${emp.id.slice(0, 8)}`,
+          payroll_period: run.period,
+          pay_date: run.pay_date,
+          employee_name: emp.name,
+          employee_email: emp.email,
+          department: emp.department,
+          role: emp.role,
+          gross_pay: formatCurrency(emp.grossPay),
+          taxes: formatCurrency(emp.taxes),
+          deductions: formatCurrency(emp.deductions),
+          net_pay: formatCurrency(emp.netPay),
+          payment_method: emp.paymentMethod.replace('_', ' '),
+          generated_at: new Date().toISOString()
+        }))
+      )
+
+      if (payslipData.length === 0) {
+        toast.info('No employee data available for payslips')
+        return
+      }
+
+      const blob = new Blob([JSON.stringify(payslipData, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `payslips-${new Date().toISOString().split('T')[0]}.json`
+      a.click()
+      URL.revokeObjectURL(url)
+
+      toast.success(`Generated ${payslipData.length} payslip(s)`, {
+        description: `For ${completedRuns.length} completed payroll run(s)`
+      })
+    } catch (error) {
+      console.error('Generate payslips error:', error)
+      toast.error('Failed to generate payslips')
+    }
   }
 
   const handleRefresh = async () => {

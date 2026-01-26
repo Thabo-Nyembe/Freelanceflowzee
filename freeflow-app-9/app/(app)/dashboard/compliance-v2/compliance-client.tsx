@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { useCompliance, type Compliance as HookCompliance } from '@/lib/hooks/use-compliance'
+import { useApiKeys } from '@/lib/hooks/use-api-keys'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -209,6 +210,9 @@ export default function ComplianceClient() {
     refetch
   } = useCompliance()
 
+  // Use the API keys hook for token management
+  const { createKey: createApiKey, deleteKey: deleteApiKey, keys: apiKeys } = useApiKeys()
+
   const [activeTab, setActiveTab] = useState('frameworks')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedFramework, setSelectedFramework] = useState<ComplianceFramework | null>(null)
@@ -344,40 +348,70 @@ export default function ComplianceClient() {
   }
 
   // Handlers with real functionality
-  const handleRunAudit = () => {
-    toast.success('Running compliance audit...')
-    fetch('/api/compliance', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'run_audit' })
-    })
-      .then(res => {
-        if (!res.ok) throw new Error('Audit failed')
-        return res.json()
-      })
-      .then(() => {
-        setControls(prev => prev.map(c => ({
-          ...c,
-          lastTested: new Date().toISOString().split('T')[0]
-        })))
-        toast.success('Audit completed successfully! Controls updated.')
-      })
-      .catch(err => toast.error(err.message || 'Audit failed'))
+  const handleRunAudit = async () => {
+    try {
+      toast.loading('Running compliance audit...', { id: 'audit' })
+
+      // Update all compliance items to mark them as audited
+      const auditDate = new Date().toISOString()
+      const updatePromises = (dbCompliance || []).map(item =>
+        updateCompliance({
+          id: item.id,
+          last_audit_date: auditDate,
+          audit_count: (item.audit_count || 0) + 1,
+          updated_at: auditDate
+        })
+      )
+
+      await Promise.all(updatePromises)
+
+      // Update local controls state
+      setControls(prev => prev.map(c => ({
+        ...c,
+        lastTested: auditDate.split('T')[0]
+      })))
+
+      // Refresh compliance data from database
+      await refetch()
+
+      toast.success('Audit completed successfully! Controls updated.', { id: 'audit' })
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Audit failed', { id: 'audit' })
+    }
   }
 
-  const handleGenerateReport = () => {
-    toast.success('Generating report...')
-    fetch('/api/compliance?action=generate_report')
-      .then(res => {
-        if (!res.ok) throw new Error('Failed to generate report')
-        return res.json()
-      })
-      .then(() => {
-        const report = generateComplianceReport(complianceData)
-        downloadAsJson(report, `compliance-report-${new Date().toISOString().split('T')[0]}.json`)
-        toast.success('Report generated and downloaded!')
-      })
-      .catch(err => toast.error(err.message || 'Failed to generate report'))
+  const handleGenerateReport = async () => {
+    try {
+      toast.loading('Generating report...', { id: 'report' })
+
+      // Generate comprehensive compliance report from current data
+      const report = generateComplianceReport(complianceData)
+
+      // Add additional metadata to report
+      const fullReport = {
+        ...report,
+        metadata: {
+          generatedBy: 'FreeFlow Compliance Module',
+          version: '1.0',
+          format: 'JSON',
+          includesFrameworks: true,
+          includesControls: true,
+          includesRisks: true
+        },
+        frameworks: frameworks,
+        controls: controls,
+        risks: risks,
+        audits: audits,
+        policies: policies
+      }
+
+      // Download the report
+      downloadAsJson(fullReport, `compliance-report-${new Date().toISOString().split('T')[0]}.json`)
+
+      toast.success('Report generated and downloaded!', { id: 'report' })
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to generate report', { id: 'report' })
+    }
   }
 
   const handleResolveIssue = (id: string) => {
@@ -398,26 +432,56 @@ export default function ComplianceClient() {
       .catch(err => toast.error(err.message || 'Failed to resolve'))
   }
 
-  const handleExport = () => {
-    toast.success('Exporting data...')
-    fetch('/api/compliance?action=export')
-      .then(res => {
-        if (!res.ok) throw new Error('Export failed')
-        return res.json()
-      })
-      .then(() => {
-        const exportData = {
-          exportedAt: new Date().toISOString(),
-          frameworks: frameworks,
-          controls: controls,
-          risks: risks,
-          audits: audits,
-          policies: policies
+  const handleExport = async () => {
+    try {
+      toast.loading('Exporting data...', { id: 'export' })
+
+      // Prepare comprehensive export data
+      const exportData = {
+        exportedAt: new Date().toISOString(),
+        exportVersion: '1.0',
+        compliance: complianceData,
+        frameworks: frameworks,
+        controls: controls,
+        risks: risks,
+        audits: audits,
+        policies: policies,
+        summary: {
+          totalCompliance: complianceData.length,
+          totalFrameworks: frameworks.length,
+          totalControls: controls.length,
+          totalRisks: risks.length,
+          totalAudits: audits.length,
+          totalPolicies: policies.length,
+          overallComplianceScore: stats.overallCompliance
         }
-        downloadAsJson(exportData, `compliance-export-${new Date().toISOString().split('T')[0]}.json`)
-        toast.success('Export downloaded!')
-      })
-      .catch(err => toast.error(err.message || 'Export failed'))
+      }
+
+      // Export as JSON
+      downloadAsJson(exportData, `compliance-export-${new Date().toISOString().split('T')[0]}.json`)
+
+      // Also create CSV export for compliance data if available
+      if (complianceData.length > 0) {
+        const csvData = complianceData.map(item => ({
+          id: item.id,
+          name: item.name,
+          type: item.type,
+          framework: item.framework,
+          status: item.status,
+          complianceScore: item.complianceScore,
+          totalRequirements: item.totalRequirements,
+          metRequirements: item.metRequirements,
+          riskLevel: item.riskLevel,
+          lastAuditDate: item.lastAuditDate,
+          nextAuditDate: item.nextAuditDate
+        }))
+        downloadAsCsv(csvData, `compliance-data-${new Date().toISOString().split('T')[0]}.csv`)
+      }
+
+      toast.success('Export downloaded!', { id: 'export' })
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Export failed', { id: 'export' })
+    }
   }
 
   const handleCopyApiToken = () => {
@@ -428,23 +492,38 @@ export default function ComplianceClient() {
     )
   }
 
-  const handleRegenerateToken = () => {
-    toast.success('Regenerating API token...')
-    fetch('/api/compliance', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'regenerate_token' })
-    })
-      .then(res => {
-        if (!res.ok) throw new Error('Failed to regenerate')
-        return res.json()
+  const handleRegenerateToken = async () => {
+    try {
+      toast.loading('Regenerating API token...', { id: 'token' })
+
+      // Delete existing Compliance API Token if it exists
+      const existingKey = apiKeys?.find(k => k.name === 'Compliance API Token')
+      if (existingKey) {
+        await deleteApiKey(existingKey.id)
+      }
+
+      // Create new API key using the useApiKeys hook
+      const result = await createApiKey({
+        name: 'Compliance API Token',
+        description: 'Auto-generated token for compliance module access',
+        key_type: 'api',
+        permission: 'write',
+        scopes: ['compliance:read', 'compliance:write', 'audit:read', 'audit:write'],
+        environment: 'production',
+        rate_limit_per_hour: 1000,
+        tags: ['compliance', 'auto-generated']
       })
-      .then(async () => {
-        const newToken = 'grc_' + Math.random().toString(36).substring(2, 34)
-        await copyToClipboard(newToken)
-        toast.success('New token generated and copied!')
-      })
-      .catch(err => toast.error(err.message || 'Failed to regenerate'))
+
+      // Copy the new token to clipboard if available
+      if (result && result.key_value) {
+        await copyToClipboard(result.key_value)
+        toast.success('New API token generated and copied to clipboard!', { id: 'token', description: `New token: ${result.key_prefix}` })
+      } else {
+        toast.success('New API token generated successfully!', { id: 'token' })
+      }
+    } catch (err) {
+      toast.error('Failed to regenerate token', { id: 'token' })
+    }
   }
 
   const handleTestWebhook = (url?: string) => {
@@ -466,23 +545,48 @@ export default function ComplianceClient() {
       .catch(err => toast.error(err.message || 'Webhook test failed'))
   }
 
-  const handleResetControls = () => {
-    toast.success('Resetting all controls...')
-    fetch('/api/compliance', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'reset_controls' })
-    })
-      .then(res => {
-        if (!res.ok) throw new Error('Reset failed')
-        return res.json()
+  const handleResetControls = async () => {
+    try {
+      // Confirm before reset
+      if (!confirm('Are you sure you want to reset all controls? This will clear local state and refresh from the database.')) {
+        return
+      }
+
+      toast.loading('Resetting all controls...', { id: 'reset' })
+
+      // Reset local state
+      setControls([])
+      setRisks([])
+      setAudits([])
+      setPolicies([])
+      setFrameworks([])
+
+      // Reset selected items
+      setSelectedFramework(null)
+      setSelectedControl(null)
+
+      // Reset form states
+      setScheduleForm({
+        name: '',
+        framework: 'SOC 2',
+        type: 'internal',
+        startDate: '',
+        endDate: '',
+        auditor: ''
       })
-      .then(() => {
-        // Refetch compliance data to reflect the reset
-        refetch()
-        toast.success('Controls reset successfully')
+      setAssignForm({
+        selectedAudit: '',
+        selectedMember: '',
+        role: 'auditor'
       })
-      .catch(err => toast.error(err.message || 'Reset failed'))
+
+      // Refetch compliance data from database to get fresh state
+      await refetch()
+
+      toast.success('Controls reset successfully', { id: 'reset' })
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Reset failed', { id: 'reset' })
+    }
   }
 
   const handleDeleteEvidence = () => {

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef, useEffect } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -28,6 +28,8 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { useAnnouncements, type AnnouncementType as DBAnnouncementTypeEnum, type AnnouncementStatus as DBAnnouncementStatusEnum, type AnnouncementPriority as DBAnnouncementPriorityEnum } from '@/lib/hooks/use-announcements'
+import { useWebhooks, type Webhook as WebhookType } from '@/lib/hooks/use-webhooks'
+import { useApiKeys } from '@/lib/hooks/use-api-keys'
 import {
   Megaphone,
   Bell,
@@ -230,6 +232,48 @@ export default function AnnouncementsClient() {
     refetch
   } = useAnnouncements()
 
+  // Webhooks hook for real webhook operations
+  const {
+    webhooks,
+    loading: webhooksLoading,
+    deleteWebhook,
+    createWebhook,
+    fetchWebhooks
+  } = useWebhooks()
+
+  // API Keys hook for real API key operations
+  const {
+    keys: apiKeys,
+    isLoading: apiKeysLoading,
+    createKey: createApiKey,
+    deleteKey: deleteApiKey,
+    fetchKeys: fetchApiKeys
+  } = useApiKeys()
+
+  // File input ref for import
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Export format state
+  const [exportFormat, setExportFormat] = useState<'json' | 'csv' | 'xml'>('json')
+  const [exportOptions, setExportOptions] = useState({
+    announcements: true,
+    changelog: true,
+    analytics: true,
+    segments: false
+  })
+
+  // Import options state
+  const [importOptions, setImportOptions] = useState({
+    skipDuplicates: true,
+    overwriteExisting: false
+  })
+
+  // Fetch webhooks and API keys on mount
+  useEffect(() => {
+    fetchWebhooks()
+    fetchApiKeys()
+  }, [fetchWebhooks, fetchApiKeys])
+
   // Convert DB announcements to local format for display
   const announcements: Announcement[] = useMemo(() => {
     return dbAnnouncements.map((dbAnn): Announcement => ({
@@ -336,7 +380,7 @@ export default function AnnouncementsClient() {
     events: ['published'] as string[]
   })
 
-  const [selectedWebhookIndex, setSelectedWebhookIndex] = useState<number | null>(null)
+  const [selectedWebhook, setSelectedWebhook] = useState<WebhookType | null>(null)
 
   const [selectedIntegration, setSelectedIntegration] = useState<{ name: string; connected: boolean } | null>(null)
 
@@ -616,10 +660,25 @@ export default function AnnouncementsClient() {
   }
 
   // Handler for Delete Webhook
-  const handleDeleteWebhook = () => {
-    toast.success('Webhook Deleted')
-    setShowDeleteWebhookDialog(false)
-    setSelectedWebhookIndex(null)
+  const handleDeleteWebhook = async () => {
+    if (!selectedWebhook) {
+      toast.error('No webhook selected')
+      return
+    }
+    try {
+      const result = await deleteWebhook(selectedWebhook.id)
+      if (result.success) {
+        toast.success('Webhook Deleted')
+        fetchWebhooks()
+      } else {
+        toast.error(result.error || 'Failed to delete webhook')
+      }
+    } catch (err) {
+      toast.error('Failed to delete webhook')
+    } finally {
+      setShowDeleteWebhookDialog(false)
+      setSelectedWebhook(null)
+    }
   }
 
   // Handler for Configure Integration
@@ -639,9 +698,29 @@ export default function AnnouncementsClient() {
   }
 
   // Handler for Regenerate API Key
-  const handleRegenerateApiKey = () => {
-    toast.success('API Key Regenerated')
-    setShowRegenerateApiKeyDialog(false)
+  const handleRegenerateApiKey = async () => {
+    try {
+      // Delete existing active API key if any
+      const activeKey = apiKeys.find(k => k.status === 'active' && k.key_type === 'api')
+      if (activeKey) {
+        await deleteApiKey(activeKey.id)
+      }
+      // Create a new API key
+      const newKey = await createApiKey({
+        name: 'Announcements API Key',
+        description: 'Auto-generated API key for announcements integration',
+        key_type: 'api',
+        permission: 'write',
+        environment: 'production',
+        scopes: ['announcements:read', 'announcements:write']
+      })
+      toast.success(`API Key Regenerated: New key created (${newKey.key_prefix})`)
+      fetchApiKeys()
+    } catch (err) {
+      toast.error('Failed to regenerate API key')
+    } finally {
+      setShowRegenerateApiKeyDialog(false)
+    }
   }
 
   // Handler for Copy to Clipboard
@@ -678,21 +757,189 @@ export default function AnnouncementsClient() {
   }
 
   // Handler for Export Data
-  const handleExportData = () => {
-    toast.success('Export Started')
-    setShowExportDataDialog(false)
+  const handleExportData = async () => {
+    try {
+      const exportData: Record<string, unknown> = {}
+
+      if (exportOptions.announcements) {
+        exportData.announcements = announcements
+      }
+      if (exportOptions.changelog) {
+        exportData.changelog = changelog
+      }
+      if (exportOptions.analytics) {
+        exportData.analytics = {
+          stats,
+          totalViews: stats.totalViews,
+          totalReactions: stats.totalReactions
+        }
+      }
+      if (exportOptions.segments) {
+        exportData.segments = segments
+      }
+
+      let content: string
+      let mimeType: string
+      let extension: string
+
+      switch (exportFormat) {
+        case 'csv':
+          // Convert to CSV format (announcements only for CSV)
+          const csvHeaders = ['id', 'title', 'content', 'type', 'status', 'priority', 'createdAt', 'publishedAt']
+          const csvRows = announcements.map(a =>
+            csvHeaders.map(h => {
+              const value = a[h as keyof Announcement]
+              return typeof value === 'string' ? `"${value.replace(/"/g, '""')}"` : value
+            }).join(',')
+          )
+          content = [csvHeaders.join(','), ...csvRows].join('\n')
+          mimeType = 'text/csv'
+          extension = 'csv'
+          break
+        case 'xml':
+          // Convert to XML format
+          const xmlContent = Object.entries(exportData).map(([key, value]) =>
+            `<${key}>${JSON.stringify(value)}</${key}>`
+          ).join('\n')
+          content = `<?xml version="1.0" encoding="UTF-8"?>\n<export>\n${xmlContent}\n</export>`
+          mimeType = 'application/xml'
+          extension = 'xml'
+          break
+        case 'json':
+        default:
+          content = JSON.stringify(exportData, null, 2)
+          mimeType = 'application/json'
+          extension = 'json'
+          break
+      }
+
+      // Create and download file
+      const blob = new Blob([content], { type: mimeType })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `announcements-export-${new Date().toISOString().split('T')[0]}.${extension}`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+
+      toast.success(`Export Complete: Data exported as ${extension.toUpperCase()}`)
+    } catch (err) {
+      toast.error('Failed to export data')
+    } finally {
+      setShowExportDataDialog(false)
+    }
   }
 
   // Handler for Import Data
   const handleImportData = () => {
-    toast.success('Import Started')
-    setShowImportDataDialog(false)
+    // Trigger file picker
+    fileInputRef.current?.click()
+  }
+
+  // Handler for file selection during import
+  const handleFileSelected = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    try {
+      const text = await file.text()
+      let data: Record<string, unknown>
+
+      if (file.name.endsWith('.json')) {
+        data = JSON.parse(text)
+      } else if (file.name.endsWith('.csv')) {
+        // Parse CSV - basic implementation
+        const lines = text.split('\n')
+        const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, ''))
+        const rows = lines.slice(1).map(line => {
+          const values = line.split(',').map(v => v.trim().replace(/^"|"$/g, ''))
+          return headers.reduce((obj, header, i) => {
+            obj[header] = values[i]
+            return obj
+          }, {} as Record<string, string>)
+        })
+        data = { announcements: rows }
+      } else {
+        throw new Error('Unsupported file format. Please use JSON or CSV.')
+      }
+
+      // Import announcements if present
+      if (data.announcements && Array.isArray(data.announcements)) {
+        let imported = 0
+        let skipped = 0
+
+        for (const ann of data.announcements as Record<string, unknown>[]) {
+          // Check for duplicates by title if skipDuplicates is enabled
+          if (importOptions.skipDuplicates) {
+            const existing = announcements.find(a => a.title === ann.title)
+            if (existing && !importOptions.overwriteExisting) {
+              skipped++
+              continue
+            }
+          }
+
+          await createAnnouncement({
+            title: String(ann.title || 'Imported Announcement'),
+            content: String(ann.content || ''),
+            announcement_type: 'general',
+            priority: 'normal',
+            status: 'draft'
+          })
+          imported++
+        }
+
+        toast.success(`Import Complete: ${imported} announcements imported, ${skipped} skipped`)
+        refetch?.()
+      } else {
+        toast.error('No valid announcements found in file')
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to import data')
+    } finally {
+      setShowImportDataDialog(false)
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
+    }
   }
 
   // Handler for Clear Cache
-  const handleClearCache = () => {
-    toast.success('Cache Cleared')
-    setShowClearCacheDialog(false)
+  const handleClearCache = async () => {
+    try {
+      // Clear localStorage items related to announcements
+      const keysToRemove: string[] = []
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i)
+        if (key && (key.includes('announcement') || key.includes('cache'))) {
+          keysToRemove.push(key)
+        }
+      }
+      keysToRemove.forEach(key => localStorage.removeItem(key))
+
+      // Clear sessionStorage items related to announcements
+      const sessionKeysToRemove: string[] = []
+      for (let i = 0; i < sessionStorage.length; i++) {
+        const key = sessionStorage.key(i)
+        if (key && (key.includes('announcement') || key.includes('cache'))) {
+          sessionKeysToRemove.push(key)
+        }
+      }
+      sessionKeysToRemove.forEach(key => sessionStorage.removeItem(key))
+
+      // Refetch data to ensure fresh state
+      refetch?.()
+      fetchWebhooks()
+      fetchApiKeys()
+
+      toast.success(`Cache Cleared: ${keysToRemove.length + sessionKeysToRemove.length} cached items removed`)
+    } catch (err) {
+      toast.error('Failed to clear cache')
+    } finally {
+      setShowClearCacheDialog(false)
+    }
   }
 
   // Handler for Archive All
@@ -723,9 +970,59 @@ export default function AnnouncementsClient() {
   }
 
   // Handler for Reset Settings
-  const handleResetSettings = () => {
-    toast.success('Settings Reset')
-    setShowResetSettingsDialog(false)
+  const handleResetSettings = async () => {
+    try {
+      // Reset all local state to defaults
+      setSearchQuery('')
+      setSelectedStatus('all')
+      setSelectedType('all')
+      setSelectedAnnouncement(null)
+      setActiveTab('announcements')
+      setSettingsTab('general')
+
+      // Reset form states
+      setNewAnnouncement({
+        title: '',
+        content: '',
+        announcement_type: 'general',
+        priority: 'normal',
+        status: 'draft',
+        target_audience: 'all',
+        is_pinned: false,
+        is_featured: false,
+        send_email: false,
+        send_push: false
+      })
+      setNewWebhook({ url: '', events: ['published'] })
+      setNewTemplate({ name: '', type: 'feature', description: '', content: '' })
+      setExportFormat('json')
+      setExportOptions({
+        announcements: true,
+        changelog: true,
+        analytics: true,
+        segments: false
+      })
+      setImportOptions({
+        skipDuplicates: true,
+        overwriteExisting: false
+      })
+
+      // Clear announcement-related localStorage items
+      const keysToRemove: string[] = []
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i)
+        if (key && (key.includes('announcement') || key.includes('settings'))) {
+          keysToRemove.push(key)
+        }
+      }
+      keysToRemove.forEach(key => localStorage.removeItem(key))
+
+      toast.success('Settings Reset: All settings have been restored to defaults')
+    } catch (err) {
+      toast.error('Failed to reset settings')
+    } finally {
+      setShowResetSettingsDialog(false)
+    }
   }
 
   // Handler for Edit Announcement
@@ -1698,30 +1995,33 @@ export default function AnnouncementsClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="border rounded-lg divide-y">
-                          {[
-                            { url: 'https://api.company.com/webhooks/announcements', events: ['published', 'updated'], status: 'active' },
-                            { url: 'https://hooks.zapier.com/hooks/catch/123456', events: ['published'], status: 'active' },
-                          ].map((webhook, i) => (
-                            <div key={i} className="p-4 flex items-center justify-between">
-                              <div>
-                                <code className="text-sm bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">{webhook.url}</code>
-                                <div className="flex items-center gap-2 mt-2">
-                                  {webhook.events.map(event => (
-                                    <Badge key={event} variant="secondary" className="text-xs">{event}</Badge>
-                                  ))}
+                          {webhooksLoading ? (
+                            <div className="p-4 text-center text-gray-500">Loading webhooks...</div>
+                          ) : webhooks.length === 0 ? (
+                            <div className="p-4 text-center text-gray-500">No webhooks configured</div>
+                          ) : (
+                            webhooks.map((webhook) => (
+                              <div key={webhook.id} className="p-4 flex items-center justify-between">
+                                <div>
+                                  <code className="text-sm bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">{webhook.url}</code>
+                                  <div className="flex items-center gap-2 mt-2">
+                                    {webhook.events.map(event => (
+                                      <Badge key={event} variant="secondary" className="text-xs">{event}</Badge>
+                                    ))}
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Badge className={webhook.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>{webhook.status}</Badge>
+                                  <Button variant="ghost" size="sm" onClick={() => {
+                                    setSelectedWebhook(webhook)
+                                    setShowDeleteWebhookDialog(true)
+                                  }}>
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
                                 </div>
                               </div>
-                              <div className="flex items-center gap-2">
-                                <Badge className="bg-green-100 text-green-700">{webhook.status}</Badge>
-                                <Button variant="ghost" size="sm" onClick={() => {
-                                  setSelectedWebhookIndex(i)
-                                  setShowDeleteWebhookDialog(true)
-                                }}>
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </div>
-                          ))}
+                            ))
+                          )}
                         </div>
                         <Button variant="outline" className="w-full" onClick={() => setShowAddWebhookDialog(true)}>
                           <Plus className="h-4 w-4 mr-2" />
@@ -1793,23 +2093,33 @@ export default function AnnouncementsClient() {
                               Regenerate
                             </Button>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <code className="flex-1 bg-white dark:bg-gray-900 px-3 py-2 rounded border text-sm">
-                              ann_live_•••••••••••••••••••••••
-                            </code>
-                            <Button variant="outline" size="sm" onClick={() => handleCopyToClipboard('ann_live_sk_1234567890abcdef', 'API Key')}>
-                              <Copy className="h-4 w-4" />
-                            </Button>
-                          </div>
+                          {apiKeysLoading ? (
+                            <div className="text-sm text-gray-500">Loading API keys...</div>
+                          ) : apiKeys.length === 0 ? (
+                            <div className="text-sm text-gray-500">No API key configured. Click Regenerate to create one.</div>
+                          ) : (
+                            <div className="flex items-center gap-2">
+                              <code className="flex-1 bg-white dark:bg-gray-900 px-3 py-2 rounded border text-sm">
+                                {apiKeys[0]?.key_prefix || 'No key available'}
+                              </code>
+                              <Button variant="outline" size="sm" onClick={() => handleCopyToClipboard(apiKeys[0]?.key_prefix || '', 'API Key')}>
+                                <Copy className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          )}
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                            <div className="text-2xl font-bold">12,456</div>
+                            <div className="text-2xl font-bold">
+                              {apiKeys.length > 0 ? apiKeys.reduce((sum, k) => sum + k.requests_this_month, 0).toLocaleString() : '0'}
+                            </div>
                             <div className="text-sm text-gray-500">API Calls (30 days)</div>
                           </div>
                           <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                            <div className="text-2xl font-bold">45ms</div>
-                            <div className="text-sm text-gray-500">Avg Response Time</div>
+                            <div className="text-2xl font-bold">
+                              {apiKeys.length > 0 ? `${apiKeys[0]?.rate_limit_per_hour || 1000}/hr` : 'N/A'}
+                            </div>
+                            <div className="text-sm text-gray-500">Rate Limit</div>
                           </div>
                         </div>
                         <Button variant="outline" className="w-full" onClick={() => window.open('https://docs.freeflow.com/api/announcements', '_blank')}>
@@ -3127,7 +3437,7 @@ export default function AnnouncementsClient() {
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label>Export Format</Label>
-              <Select defaultValue="json">
+              <Select value={exportFormat} onValueChange={(value: 'json' | 'csv' | 'xml') => setExportFormat(value)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -3142,19 +3452,31 @@ export default function AnnouncementsClient() {
               <Label>Data to Include</Label>
               <div className="space-y-2">
                 <div className="flex items-center gap-2 p-2 border rounded-lg">
-                  <Switch defaultChecked />
+                  <Switch
+                    checked={exportOptions.announcements}
+                    onCheckedChange={(checked) => setExportOptions(prev => ({ ...prev, announcements: checked }))}
+                  />
                   <span className="text-sm">Announcements</span>
                 </div>
                 <div className="flex items-center gap-2 p-2 border rounded-lg">
-                  <Switch defaultChecked />
+                  <Switch
+                    checked={exportOptions.changelog}
+                    onCheckedChange={(checked) => setExportOptions(prev => ({ ...prev, changelog: checked }))}
+                  />
                   <span className="text-sm">Changelog Entries</span>
                 </div>
                 <div className="flex items-center gap-2 p-2 border rounded-lg">
-                  <Switch defaultChecked />
+                  <Switch
+                    checked={exportOptions.analytics}
+                    onCheckedChange={(checked) => setExportOptions(prev => ({ ...prev, analytics: checked }))}
+                  />
                   <span className="text-sm">Analytics Data</span>
                 </div>
                 <div className="flex items-center gap-2 p-2 border rounded-lg">
-                  <Switch />
+                  <Switch
+                    checked={exportOptions.segments}
+                    onCheckedChange={(checked) => setExportOptions(prev => ({ ...prev, segments: checked }))}
+                  />
                   <span className="text-sm">User Segments</span>
                 </div>
               </div>
@@ -3177,20 +3499,29 @@ export default function AnnouncementsClient() {
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="border-2 border-dashed rounded-lg p-8 text-center">
+            <div
+              className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:border-violet-400 transition-colors"
+              onClick={handleImportData}
+            >
               <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-              <div className="text-sm text-gray-500">Drop your file here or click to upload</div>
+              <div className="text-sm text-gray-500">Click to select a file</div>
               <div className="text-xs text-gray-400 mt-1">JSON, CSV up to 10MB</div>
             </div>
             <div className="space-y-2">
               <Label>Import Options</Label>
               <div className="space-y-2">
                 <div className="flex items-center gap-2 p-2 border rounded-lg">
-                  <Switch defaultChecked />
+                  <Switch
+                    checked={importOptions.skipDuplicates}
+                    onCheckedChange={(checked) => setImportOptions(prev => ({ ...prev, skipDuplicates: checked }))}
+                  />
                   <span className="text-sm">Skip duplicates</span>
                 </div>
                 <div className="flex items-center gap-2 p-2 border rounded-lg">
-                  <Switch />
+                  <Switch
+                    checked={importOptions.overwriteExisting}
+                    onCheckedChange={(checked) => setImportOptions(prev => ({ ...prev, overwriteExisting: checked }))}
+                  />
                   <span className="text-sm">Overwrite existing data</span>
                 </div>
               </div>
@@ -3198,7 +3529,7 @@ export default function AnnouncementsClient() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowImportDataDialog(false)}>Cancel</Button>
-            <Button onClick={handleImportData}>Import Data</Button>
+            <Button onClick={handleImportData}>Select File</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -3371,6 +3702,15 @@ export default function AnnouncementsClient() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Hidden file input for import */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".json,.csv"
+        onChange={handleFileSelected}
+        className="hidden"
+      />
     </div>
   )
 }

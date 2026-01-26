@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/client'
 
 import React, { useState, useMemo } from 'react'
 import { useExpenses, useCreateExpense, useUpdateExpense, useDeleteExpense } from '@/lib/hooks/use-expenses'
+import { useApiKeys } from '@/lib/hooks/use-api-keys'
 import { toast } from 'sonner'
 import DeductionSuggestionWidget from '@/components/tax/deduction-suggestion-widget'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -288,6 +289,14 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
     dinner: true
   })
   const [webhookUrl, setWebhookUrl] = useState('')
+  const [cardForm, setCardForm] = useState({
+    provider: 'amex',
+    cardholderName: '',
+    lastFourDigits: ''
+  })
+
+  // API Keys hook for regenerating API keys
+  const { createKey: createApiKey } = useApiKeys()
 
   // Database integration - use real expenses hooks
   const { data: dbExpenses, isLoading: expensesLoading, error: expensesError, refetch } = useExpenses({ status: statusFilter as any })
@@ -713,23 +722,48 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
     setShowConnectCardDialog(true)
   }
 
-  const handleSaveCardConnection = () => {
-    toast.promise(
-      (async () => {
-        const { error } = await supabase.from('corporate_cards').insert({
-          card_type: 'corporate',
-          status: 'connected',
-          connected_at: new Date().toISOString()
-        })
-        if (error) throw error
-        setShowConnectCardDialog(false)
-      })(),
-      {
-        loading: 'Connecting corporate card...',
-        success: 'Corporate card connected successfully!',
-        error: 'Failed to connect card'
+  const handleSaveCardConnection = async () => {
+    // Validate form inputs
+    if (!cardForm.cardholderName.trim()) {
+      toast.error('Please enter the cardholder name')
+      return
+    }
+    if (!cardForm.lastFourDigits || cardForm.lastFourDigits.length !== 4) {
+      toast.error('Please enter the last 4 digits of the card')
+      return
+    }
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('You must be logged in to connect a card')
+        return
       }
-    )
+
+      const { error } = await supabase.from('corporate_cards').insert({
+        user_id: user.id,
+        card_type: 'corporate',
+        provider: cardForm.provider,
+        cardholder_name: cardForm.cardholderName,
+        last_four_digits: cardForm.lastFourDigits,
+        status: 'connected',
+        connected_at: new Date().toISOString()
+      })
+
+      if (error) throw error
+
+      toast.success('Corporate card connected successfully!')
+      setShowConnectCardDialog(false)
+      // Reset form
+      setCardForm({
+        provider: 'amex',
+        cardholderName: '',
+        lastFourDigits: ''
+      })
+    } catch (err) {
+      console.error('Failed to connect card:', err)
+      toast.error('Failed to connect card')
+    }
   }
 
   // Handler for integration actions
@@ -805,24 +839,34 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
     toast.success('API key copied to clipboard')
   }
 
-  const handleRegenerateApiKey = () => {
-    toast.promise(
-      (async () => {
-        const newKey = `exp_sk_live_${crypto.randomUUID().replace(/-/g, '')}`
-        const { error } = await supabase.from('api_keys').upsert({
-          id: 'expenses-api',
-          key: newKey,
-          service: 'expenses',
-          regenerated_at: new Date().toISOString()
+  const handleRegenerateApiKey = async () => {
+    try {
+      const result = await createApiKey({
+        name: 'Expenses Integration Key',
+        description: 'API key for expenses module integrations',
+        key_type: 'api',
+        permission: 'write',
+        scopes: ['expenses:read', 'expenses:write', 'expenses:delete'],
+        environment: 'production',
+        rate_limit_per_hour: 1000,
+        tags: ['expenses', 'integration']
+      })
+
+      // Copy the new key to clipboard for user convenience
+      if (result.key_value) {
+        await navigator.clipboard.writeText(result.key_value)
+        toast.success('API key regenerated and copied to clipboard!', {
+          description: 'Please save this key securely - it won\'t be shown again.'
         })
-        if (error) throw error
-      })(),
-      {
-        loading: 'Regenerating API key...',
-        success: 'New API key generated! Please update your integrations.',
-        error: 'Failed to regenerate API key'
+      } else {
+        toast.success('API key regenerated successfully!', {
+          description: 'Please update your integrations with the new key.'
+        })
       }
-    )
+    } catch (err) {
+      console.error('Failed to regenerate API key:', err)
+      toast.error('Failed to regenerate API key')
+    }
   }
 
   // Handler for danger zone actions
@@ -860,41 +904,76 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
   }
 
   // Handler for export all data
-  const handleExportAllData = () => {
-    toast.promise(
-      (async () => {
-        const { data: expenseReports } = await supabase.from('expense_reports').select('*')
-        const { data: expensePolicies } = await supabase.from('expense_policies').select('*')
-        const { data: mileageTrips } = await supabase.from('mileage_trips').select('*')
-        const { data: perDiemRequests } = await supabase.from('per_diem_requests').select('*')
-        const exportData = {
-          exportDate: new Date().toISOString(),
-          expenses: expenseReports || expenses,
-          policies: expensePolicies || [],
-          mileage: mileageTrips || [],
-          perDiems: perDiemRequests || [],
-          settings: {
-            currency: 'USD',
-            fiscalYearStart: 'January',
-            autoApproveThreshold: 50
-          }
+  const handleExportAllData = async () => {
+    try {
+      toast.info('Preparing export...', { description: 'Gathering all expense data' })
+
+      // Fetch all expense-related data from database
+      const [
+        { data: expenseReports, error: reportsError },
+        { data: expensePolicies, error: policiesError },
+        { data: mileageTrips, error: mileageError },
+        { data: perDiemRequests, error: perDiemError }
+      ] = await Promise.all([
+        supabase.from('expense_reports').select('*'),
+        supabase.from('expense_policies').select('*'),
+        supabase.from('mileage_trips').select('*'),
+        supabase.from('per_diem_requests').select('*')
+      ])
+
+      // Use local expenses data as fallback if DB fetch fails
+      const exportData = {
+        exportDate: new Date().toISOString(),
+        exportVersion: '1.0',
+        expenses: expenseReports || expenses.map((e: any) => ({
+          id: e.id,
+          title: e.title,
+          totalAmount: e.totalAmount,
+          currency: e.currency,
+          status: e.status,
+          category: e.lineItems?.[0]?.category || 'other',
+          createdAt: e.createdAt,
+          submittedAt: e.submittedAt,
+          approvedAt: e.approvedAt,
+          lineItems: e.lineItems
+        })),
+        policies: expensePolicies || [],
+        mileage: mileageTrips || [],
+        perDiems: perDiemRequests || [],
+        settings: {
+          currency: 'USD',
+          fiscalYearStart: 'January',
+          autoApproveThreshold: 50
+        },
+        metadata: {
+          totalExpenses: (expenseReports || expenses).length,
+          totalPolicies: (expensePolicies || []).length,
+          totalMileageTrips: (mileageTrips || []).length,
+          totalPerDiems: (perDiemRequests || []).length
         }
-        const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
-        const url = URL.createObjectURL(blob)
-        const link = document.createElement('a')
-        link.href = url
-        link.download = `expenses-full-export-${new Date().toISOString().split('T')[0]}.json`
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
-        return { size: `${(blob.size / 1024).toFixed(1)} KB` }
-      })(),
-      {
-        loading: 'Preparing full data export...',
-        success: (data) => `Export complete! File size: ${data.size}`,
-        error: 'Failed to export data'
       }
-    )
+
+      // Create and download the JSON file
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `expenses-full-export-${new Date().toISOString().split('T')[0]}.json`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url) // Clean up the object URL
+
+      const fileSizeKB = (blob.size / 1024).toFixed(1)
+      toast.success(`Export complete! File size: ${fileSizeKB} KB`, {
+        description: `Exported ${exportData.metadata.totalExpenses} expenses`
+      })
+    } catch (err) {
+      console.error('Failed to export data:', err)
+      toast.error('Failed to export data', {
+        description: 'Please try again or contact support'
+      })
+    }
   }
 
   // Handler for quick filter selection
@@ -2906,7 +2985,11 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
             </div>
             <div>
               <label className="block text-sm font-medium mb-2">Card Provider</label>
-              <select className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+              <select
+                className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+                value={cardForm.provider}
+                onChange={(e) => setCardForm(prev => ({ ...prev, provider: e.target.value }))}
+              >
                 <option value="amex">American Express</option>
                 <option value="visa">Visa Corporate</option>
                 <option value="mastercard">Mastercard Corporate</option>
@@ -2915,17 +2998,30 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
             </div>
             <div>
               <label className="block text-sm font-medium mb-2">Cardholder Name</label>
-              <Input placeholder="Name on card" />
+              <Input
+                placeholder="Name on card"
+                value={cardForm.cardholderName}
+                onChange={(e) => setCardForm(prev => ({ ...prev, cardholderName: e.target.value }))}
+              />
             </div>
             <div>
               <label className="block text-sm font-medium mb-2">Last 4 Digits</label>
-              <Input placeholder="XXXX" maxLength={4} />
+              <Input
+                placeholder="XXXX"
+                maxLength={4}
+                value={cardForm.lastFourDigits}
+                onChange={(e) => setCardForm(prev => ({ ...prev, lastFourDigits: e.target.value.replace(/\D/g, '') }))}
+              />
             </div>
             <div className="flex gap-3">
               <Button variant="outline" className="flex-1" onClick={() => setShowConnectCardDialog(false)}>
                 Cancel
               </Button>
-              <Button className="flex-1 bg-blue-600 hover:bg-blue-700" onClick={handleSaveCardConnection}>
+              <Button
+                className="flex-1 bg-blue-600 hover:bg-blue-700"
+                onClick={handleSaveCardConnection}
+                disabled={!cardForm.cardholderName || cardForm.lastFourDigits.length !== 4}
+              >
                 Connect Card
               </Button>
             </div>

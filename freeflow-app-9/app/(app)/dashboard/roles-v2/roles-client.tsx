@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
 import {
   Shield, Users, Lock, Key, Crown, UserCheck, UserX, Plus,
@@ -10,6 +10,7 @@ import {
   UserPlus, UsersRound, FolderLock, KeyRound, Layers, Bell, Loader2
 } from 'lucide-react'
 import { useRoles, type UserRole } from '@/lib/hooks/use-roles'
+import { createClient } from '@/lib/supabase/client'
 
 // Enhanced & Competitive Upgrade Components
 import {
@@ -216,6 +217,91 @@ const initialRoleFormState = {
   tags: [] as string[],
 }
 
+// Settings state interfaces and defaults
+interface GeneralSettings {
+  defaultRole: string
+  roleHierarchyDepth: number
+  autoAssignDefaultRole: boolean
+  roleInheritance: boolean
+  delegationEnabled: boolean
+  roleExpiration: boolean
+  conflictResolution: boolean
+}
+
+interface SecuritySettings {
+  requireMfaForAdmins: boolean
+  sessionTimeout: boolean
+  ipRestrictions: boolean
+  deviceFingerprinting: boolean
+  auditAllActions: boolean
+}
+
+interface PermissionSettings {
+  defaultAccessLevel: string
+  permissionScope: string
+  implicitDeny: boolean
+  permissionCaching: boolean
+  resourceLevelPermissions: boolean
+  conditionalAccess: boolean
+}
+
+interface NotificationSettings {
+  roleChanges: boolean
+  permissionDenials: boolean
+  policyViolations: boolean
+  userAssignments: boolean
+  securityAlerts: boolean
+}
+
+interface AdvancedSettings {
+  cacheTTL: number
+  maxRolesPerUser: number
+  debugMode: boolean
+  apiRateLimiting: boolean
+}
+
+const defaultGeneralSettings: GeneralSettings = {
+  defaultRole: 'Standard User',
+  roleHierarchyDepth: 5,
+  autoAssignDefaultRole: true,
+  roleInheritance: true,
+  delegationEnabled: true,
+  roleExpiration: false,
+  conflictResolution: true,
+}
+
+const defaultSecuritySettings: SecuritySettings = {
+  requireMfaForAdmins: true,
+  sessionTimeout: true,
+  ipRestrictions: false,
+  deviceFingerprinting: true,
+  auditAllActions: true,
+}
+
+const defaultPermissionSettings: PermissionSettings = {
+  defaultAccessLevel: 'Read',
+  permissionScope: 'Project',
+  implicitDeny: true,
+  permissionCaching: true,
+  resourceLevelPermissions: true,
+  conditionalAccess: false,
+}
+
+const defaultNotificationSettings: NotificationSettings = {
+  roleChanges: true,
+  permissionDenials: true,
+  policyViolations: true,
+  userAssignments: false,
+  securityAlerts: true,
+}
+
+const defaultAdvancedSettings: AdvancedSettings = {
+  cacheTTL: 300,
+  maxRolesPerUser: 10,
+  debugMode: false,
+  apiRateLimiting: true,
+}
+
 export default function RolesClient() {
   const [activeTab, setActiveTab] = useState('dashboard')
   const [searchQuery, setSearchQuery] = useState('')
@@ -250,6 +336,35 @@ export default function RolesClient() {
 
   // Form state
   const [formState, setFormState] = useState(initialRoleFormState)
+
+  // Settings state - persisted to localStorage
+  const [generalSettings, setGeneralSettings] = useState<GeneralSettings>(defaultGeneralSettings)
+  const [securitySettings, setSecuritySettings] = useState<SecuritySettings>(defaultSecuritySettings)
+  const [permissionSettings, setPermissionSettings] = useState<PermissionSettings>(defaultPermissionSettings)
+  const [notificationSettings, setNotificationSettings] = useState<NotificationSettings>(defaultNotificationSettings)
+  const [advancedSettings, setAdvancedSettings] = useState<AdvancedSettings>(defaultAdvancedSettings)
+
+  // Load settings from localStorage on mount
+  useEffect(() => {
+    try {
+      const storedGeneral = localStorage.getItem('roles-general-settings')
+      if (storedGeneral) setGeneralSettings(JSON.parse(storedGeneral))
+
+      const storedSecurity = localStorage.getItem('roles-security-settings')
+      if (storedSecurity) setSecuritySettings(JSON.parse(storedSecurity))
+
+      const storedPermission = localStorage.getItem('roles-permission-settings')
+      if (storedPermission) setPermissionSettings(JSON.parse(storedPermission))
+
+      const storedNotification = localStorage.getItem('roles-notification-settings')
+      if (storedNotification) setNotificationSettings(JSON.parse(storedNotification))
+
+      const storedAdvanced = localStorage.getItem('roles-advanced-settings')
+      if (storedAdvanced) setAdvancedSettings(JSON.parse(storedAdvanced))
+    } catch (err) {
+      console.error('Failed to load settings from localStorage:', err)
+    }
+  }, [])
 
   // Reset form
   const resetForm = () => {
@@ -542,12 +657,17 @@ export default function RolesClient() {
   }
 
   // Handle policy evaluation
-  const handleEvaluatePolicies = () => {
+  const handleEvaluatePolicies = async () => {
     toast.info('Evaluating', { description: 'Evaluating access policies...' })
-    // Simulate policy evaluation
-    setTimeout(() => {
-      toast.success('Evaluated', { description: `0 active policies evaluated` })
-    }, 1000)
+    try {
+      await fetchRoles()
+      const adminRoles = combinedRoles.filter(r => r.type === 'admin').length
+      const activeRoles = combinedRoles.filter(r => r.status === 'active').length
+      toast.success('Evaluated', { description: `${activeRoles} active roles evaluated, ${adminRoles} with admin access` })
+    } catch (err) {
+      toast.error('Evaluation failed', { description: 'Could not evaluate policies' })
+      console.error(err)
+    }
   }
 
   // Handle user group sync
@@ -563,24 +683,194 @@ export default function RolesClient() {
   }
 
   // Settings save handlers
-  const handleSaveGeneralSettings = () => {
-    toast.success('Settings Saved', { description: 'General settings saved successfully' })
+  const handleSaveGeneralSettings = async () => {
+    try {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+
+      // Save to localStorage with user-specific key if available
+      const storageKey = user ? `roles-general-settings_${user.id}` : 'roles-general-settings'
+      localStorage.setItem(storageKey, JSON.stringify(generalSettings))
+
+      // Try to sync to database if user is authenticated
+      if (user) {
+        try {
+          const { error } = await supabase
+            .from('user_preferences')
+            .upsert({
+              user_id: user.id,
+              preference_key: 'roles_general_settings',
+              preference_value: generalSettings,
+              updated_at: new Date().toISOString()
+            }, {
+              onConflict: 'user_id,preference_key'
+            })
+
+          if (error && error.code !== '42P01') {
+            console.warn('Could not save to database, using localStorage:', error.message)
+          }
+        } catch (dbErr) {
+          console.warn('Database save failed, using localStorage backup')
+        }
+      }
+
+      toast.success('Settings Saved', { description: 'General settings saved successfully' })
+    } catch (err) {
+      toast.error('Failed to save settings')
+      console.error(err)
+    }
   }
 
-  const handleSaveSecuritySettings = () => {
-    toast.success('Settings Saved', { description: 'Security settings saved successfully' })
+  const handleSaveSecuritySettings = async () => {
+    try {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+
+      // Save to localStorage with user-specific key if available
+      const storageKey = user ? `roles-security-settings_${user.id}` : 'roles-security-settings'
+      localStorage.setItem(storageKey, JSON.stringify(securitySettings))
+
+      // Try to sync to database if user is authenticated
+      if (user) {
+        try {
+          const { error } = await supabase
+            .from('user_preferences')
+            .upsert({
+              user_id: user.id,
+              preference_key: 'roles_security_settings',
+              preference_value: securitySettings,
+              updated_at: new Date().toISOString()
+            }, {
+              onConflict: 'user_id,preference_key'
+            })
+
+          if (error && error.code !== '42P01') {
+            console.warn('Could not save to database, using localStorage:', error.message)
+          }
+        } catch (dbErr) {
+          console.warn('Database save failed, using localStorage backup')
+        }
+      }
+
+      toast.success('Settings Saved', { description: 'Security settings saved successfully' })
+    } catch (err) {
+      toast.error('Failed to save settings')
+      console.error(err)
+    }
   }
 
-  const handleSavePermissionSettings = () => {
-    toast.success('Settings Saved', { description: 'Permission settings saved successfully' })
+  const handleSavePermissionSettings = async () => {
+    try {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+
+      // Save to localStorage with user-specific key if available
+      const storageKey = user ? `roles-permission-settings_${user.id}` : 'roles-permission-settings'
+      localStorage.setItem(storageKey, JSON.stringify(permissionSettings))
+
+      // Try to sync to database if user is authenticated
+      if (user) {
+        try {
+          const { error } = await supabase
+            .from('user_preferences')
+            .upsert({
+              user_id: user.id,
+              preference_key: 'roles_permission_settings',
+              preference_value: permissionSettings,
+              updated_at: new Date().toISOString()
+            }, {
+              onConflict: 'user_id,preference_key'
+            })
+
+          if (error && error.code !== '42P01') {
+            console.warn('Could not save to database, using localStorage:', error.message)
+          }
+        } catch (dbErr) {
+          console.warn('Database save failed, using localStorage backup')
+        }
+      }
+
+      toast.success('Settings Saved', { description: 'Permission settings saved successfully' })
+    } catch (err) {
+      toast.error('Failed to save settings')
+      console.error(err)
+    }
   }
 
-  const handleSaveNotificationSettings = () => {
-    toast.success('Settings Saved', { description: 'Notification settings saved successfully' })
+  const handleSaveNotificationSettings = async () => {
+    try {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+
+      // Save to localStorage with user-specific key if available
+      const storageKey = user ? `roles-notification-settings_${user.id}` : 'roles-notification-settings'
+      localStorage.setItem(storageKey, JSON.stringify(notificationSettings))
+
+      // Try to sync to database if user is authenticated
+      if (user) {
+        try {
+          const { error } = await supabase
+            .from('user_preferences')
+            .upsert({
+              user_id: user.id,
+              preference_key: 'roles_notification_settings',
+              preference_value: notificationSettings,
+              updated_at: new Date().toISOString()
+            }, {
+              onConflict: 'user_id,preference_key'
+            })
+
+          if (error && error.code !== '42P01') {
+            console.warn('Could not save to database, using localStorage:', error.message)
+          }
+        } catch (dbErr) {
+          console.warn('Database save failed, using localStorage backup')
+        }
+      }
+
+      toast.success('Settings Saved', { description: 'Notification settings saved successfully' })
+    } catch (err) {
+      toast.error('Failed to save settings')
+      console.error(err)
+    }
   }
 
-  const handleSaveAdvancedSettings = () => {
-    toast.success('Settings Saved', { description: 'Advanced settings saved successfully' })
+  const handleSaveAdvancedSettings = async () => {
+    try {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+
+      // Save to localStorage with user-specific key if available
+      const storageKey = user ? `roles-advanced-settings_${user.id}` : 'roles-advanced-settings'
+      localStorage.setItem(storageKey, JSON.stringify(advancedSettings))
+
+      // Try to sync to database if user is authenticated
+      if (user) {
+        try {
+          const { error } = await supabase
+            .from('user_preferences')
+            .upsert({
+              user_id: user.id,
+              preference_key: 'roles_advanced_settings',
+              preference_value: advancedSettings,
+              updated_at: new Date().toISOString()
+            }, {
+              onConflict: 'user_id,preference_key'
+            })
+
+          if (error && error.code !== '42P01') {
+            console.warn('Could not save to database, using localStorage:', error.message)
+          }
+        } catch (dbErr) {
+          console.warn('Database save failed, using localStorage backup')
+        }
+      }
+
+      toast.success('Settings Saved', { description: 'Advanced settings saved successfully' })
+    } catch (err) {
+      toast.error('Failed to save settings')
+      console.error(err)
+    }
   }
 
   // Handle integration connect/configure
@@ -606,11 +896,95 @@ export default function RolesClient() {
   }
 
   // Handle permission audit
-  const handleAuditPermissions = () => {
-    toast.info('Auditing', { description: 'Running permission audit...' })
-    setTimeout(() => {
-      toast.success('Audit Complete', { description: `Audit complete! ${combinedRoles.filter(r => r.type === 'admin').length} roles have elevated access` })
-    }, 1500)
+  const handleAuditPermissions = async () => {
+    toast.info('Auditing', { description: 'Running comprehensive permission audit...' })
+    try {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+
+      // Refresh roles data
+      await fetchRoles()
+
+      // Calculate comprehensive audit metrics
+      const adminRoles = combinedRoles.filter(r => r.type === 'admin').length
+      const activeRoles = combinedRoles.filter(r => r.status === 'active').length
+      const inactiveRoles = combinedRoles.filter(r => r.status === 'inactive').length
+      const deprecatedRoles = combinedRoles.filter(r => r.status === 'deprecated').length
+      const systemRoles = combinedRoles.filter(r => r.isSystem).length
+      const customRoles = combinedRoles.filter(r => r.type === 'custom').length
+      const fullAccessRoles = combinedRoles.filter(r => r.accessLevel === 'full').length
+      const delegatableRoles = combinedRoles.filter(r => r.canDelegate).length
+
+      // Identify potential security issues
+      const securityIssues: string[] = []
+      if (fullAccessRoles > 3) {
+        securityIssues.push(`${fullAccessRoles} roles have full access - consider reducing`)
+      }
+      if (deprecatedRoles > 0) {
+        securityIssues.push(`${deprecatedRoles} deprecated roles should be removed`)
+      }
+      if (inactiveRoles > activeRoles) {
+        securityIssues.push('More inactive roles than active - clean up recommended')
+      }
+
+      // Create audit report
+      const auditReport = {
+        timestamp: new Date().toISOString(),
+        userId: user?.id || 'anonymous',
+        summary: {
+          totalRoles: combinedRoles.length,
+          activeRoles,
+          inactiveRoles,
+          deprecatedRoles,
+          adminRoles,
+          systemRoles,
+          customRoles,
+          fullAccessRoles,
+          delegatableRoles
+        },
+        securityIssues,
+        recommendations: securityIssues.length > 0
+          ? securityIssues
+          : ['All role configurations appear healthy']
+      }
+
+      // Save audit report to localStorage
+      const auditHistory = JSON.parse(localStorage.getItem('roles-audit-history') || '[]')
+      auditHistory.unshift(auditReport)
+      // Keep only last 10 audits
+      if (auditHistory.length > 10) auditHistory.pop()
+      localStorage.setItem('roles-audit-history', JSON.stringify(auditHistory))
+
+      // Try to save to database
+      if (user) {
+        try {
+          await supabase
+            .from('user_preferences')
+            .upsert({
+              user_id: user.id,
+              preference_key: 'roles_audit_history',
+              preference_value: auditHistory,
+              updated_at: new Date().toISOString()
+            }, {
+              onConflict: 'user_id,preference_key'
+            })
+        } catch (dbErr) {
+          console.warn('Could not save audit to database')
+        }
+      }
+
+      // Show comprehensive result
+      const issueText = securityIssues.length > 0
+        ? ` Found ${securityIssues.length} issue(s).`
+        : ' No security issues found.'
+
+      toast.success('Audit Complete', {
+        description: `Analyzed ${combinedRoles.length} roles: ${activeRoles} active, ${adminRoles} admin, ${fullAccessRoles} full-access.${issueText}`
+      })
+    } catch (err) {
+      toast.error('Audit failed', { description: 'Could not complete permission audit' })
+      console.error(err)
+    }
   }
 
   // Quick actions for the QuickActionsToolbar component
@@ -1762,29 +2136,29 @@ export default function RolesClient() {
                       <CardHeader><CardTitle>General Settings</CardTitle><CardDescription>Configure default role behaviors and inheritance</CardDescription></CardHeader>
                       <CardContent className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                          <div><label className="text-sm font-medium">Default Role</label><Input defaultValue="Standard User" className="mt-1" /></div>
-                          <div><label className="text-sm font-medium">Role Hierarchy Depth</label><Input type="number" defaultValue="5" className="mt-1" /></div>
+                          <div><label className="text-sm font-medium">Default Role</label><Input value={generalSettings.defaultRole} onChange={(e) => setGeneralSettings(prev => ({ ...prev, defaultRole: e.target.value }))} className="mt-1" /></div>
+                          <div><label className="text-sm font-medium">Role Hierarchy Depth</label><Input type="number" value={generalSettings.roleHierarchyDepth} onChange={(e) => setGeneralSettings(prev => ({ ...prev, roleHierarchyDepth: parseInt(e.target.value) || 0 }))} className="mt-1" /></div>
                         </div>
                         <div className="space-y-4">
                           <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
                             <div><p className="font-medium">Auto-assign default role</p><p className="text-sm text-gray-500">Automatically assign default role to new users</p></div>
-                            <Switch defaultChecked />
+                            <Switch checked={generalSettings.autoAssignDefaultRole} onCheckedChange={(checked) => setGeneralSettings(prev => ({ ...prev, autoAssignDefaultRole: checked }))} />
                           </div>
                           <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
                             <div><p className="font-medium">Role inheritance</p><p className="text-sm text-gray-500">Allow roles to inherit permissions from parent roles</p></div>
-                            <Switch defaultChecked />
+                            <Switch checked={generalSettings.roleInheritance} onCheckedChange={(checked) => setGeneralSettings(prev => ({ ...prev, roleInheritance: checked }))} />
                           </div>
                           <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
                             <div><p className="font-medium">Delegation enabled</p><p className="text-sm text-gray-500">Allow roles with delegation flag to assign roles</p></div>
-                            <Switch defaultChecked />
+                            <Switch checked={generalSettings.delegationEnabled} onCheckedChange={(checked) => setGeneralSettings(prev => ({ ...prev, delegationEnabled: checked }))} />
                           </div>
                           <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
                             <div><p className="font-medium">Role expiration</p><p className="text-sm text-gray-500">Enable time-limited role assignments</p></div>
-                            <Switch />
+                            <Switch checked={generalSettings.roleExpiration} onCheckedChange={(checked) => setGeneralSettings(prev => ({ ...prev, roleExpiration: checked }))} />
                           </div>
                           <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
                             <div><p className="font-medium">Conflict resolution</p><p className="text-sm text-gray-500">Use most permissive role when conflicts occur</p></div>
-                            <Switch defaultChecked />
+                            <Switch checked={generalSettings.conflictResolution} onCheckedChange={(checked) => setGeneralSettings(prev => ({ ...prev, conflictResolution: checked }))} />
                           </div>
                         </div>
                         <Button className="bg-purple-600 hover:bg-purple-700" onClick={handleSaveGeneralSettings}>Save General Settings</Button>
@@ -1813,23 +2187,23 @@ export default function RolesClient() {
                         <div className="space-y-4">
                           <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
                             <div><p className="font-medium">Require MFA for admins</p><p className="text-sm text-gray-500">Force multi-factor authentication for admin roles</p></div>
-                            <Switch defaultChecked />
+                            <Switch checked={securitySettings.requireMfaForAdmins} onCheckedChange={(checked) => setSecuritySettings(prev => ({ ...prev, requireMfaForAdmins: checked }))} />
                           </div>
                           <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
                             <div><p className="font-medium">Session timeout (30 min)</p><p className="text-sm text-gray-500">Automatically log out inactive users</p></div>
-                            <Switch defaultChecked />
+                            <Switch checked={securitySettings.sessionTimeout} onCheckedChange={(checked) => setSecuritySettings(prev => ({ ...prev, sessionTimeout: checked }))} />
                           </div>
                           <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
                             <div><p className="font-medium">IP restrictions</p><p className="text-sm text-gray-500">Limit access based on IP addresses</p></div>
-                            <Switch />
+                            <Switch checked={securitySettings.ipRestrictions} onCheckedChange={(checked) => setSecuritySettings(prev => ({ ...prev, ipRestrictions: checked }))} />
                           </div>
                           <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
                             <div><p className="font-medium">Device fingerprinting</p><p className="text-sm text-gray-500">Track and verify user devices</p></div>
-                            <Switch defaultChecked />
+                            <Switch checked={securitySettings.deviceFingerprinting} onCheckedChange={(checked) => setSecuritySettings(prev => ({ ...prev, deviceFingerprinting: checked }))} />
                           </div>
                           <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
                             <div><p className="font-medium">Audit all actions</p><p className="text-sm text-gray-500">Log all role and permission changes</p></div>
-                            <Switch defaultChecked />
+                            <Switch checked={securitySettings.auditAllActions} onCheckedChange={(checked) => setSecuritySettings(prev => ({ ...prev, auditAllActions: checked }))} />
                           </div>
                         </div>
                         <Button className="bg-purple-600 hover:bg-purple-700" onClick={handleSaveSecuritySettings}>Save Security Settings</Button>
@@ -1842,25 +2216,25 @@ export default function RolesClient() {
                       <CardHeader><CardTitle>Permission Settings</CardTitle><CardDescription>Configure default permission behaviors</CardDescription></CardHeader>
                       <CardContent className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                          <div><label className="text-sm font-medium">Default Access Level</label><Input defaultValue="Read" className="mt-1" /></div>
-                          <div><label className="text-sm font-medium">Permission Scope</label><Input defaultValue="Project" className="mt-1" /></div>
+                          <div><label className="text-sm font-medium">Default Access Level</label><Input value={permissionSettings.defaultAccessLevel} onChange={(e) => setPermissionSettings(prev => ({ ...prev, defaultAccessLevel: e.target.value }))} className="mt-1" /></div>
+                          <div><label className="text-sm font-medium">Permission Scope</label><Input value={permissionSettings.permissionScope} onChange={(e) => setPermissionSettings(prev => ({ ...prev, permissionScope: e.target.value }))} className="mt-1" /></div>
                         </div>
                         <div className="space-y-4">
                           <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
                             <div><p className="font-medium">Implicit deny</p><p className="text-sm text-gray-500">Deny access when no explicit permission exists</p></div>
-                            <Switch defaultChecked />
+                            <Switch checked={permissionSettings.implicitDeny} onCheckedChange={(checked) => setPermissionSettings(prev => ({ ...prev, implicitDeny: checked }))} />
                           </div>
                           <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
                             <div><p className="font-medium">Permission caching</p><p className="text-sm text-gray-500">Cache permissions for faster access checks</p></div>
-                            <Switch defaultChecked />
+                            <Switch checked={permissionSettings.permissionCaching} onCheckedChange={(checked) => setPermissionSettings(prev => ({ ...prev, permissionCaching: checked }))} />
                           </div>
                           <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
                             <div><p className="font-medium">Resource-level permissions</p><p className="text-sm text-gray-500">Enable fine-grained resource permissions</p></div>
-                            <Switch defaultChecked />
+                            <Switch checked={permissionSettings.resourceLevelPermissions} onCheckedChange={(checked) => setPermissionSettings(prev => ({ ...prev, resourceLevelPermissions: checked }))} />
                           </div>
                           <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
                             <div><p className="font-medium">Conditional access</p><p className="text-sm text-gray-500">Enable time/location-based permissions</p></div>
-                            <Switch />
+                            <Switch checked={permissionSettings.conditionalAccess} onCheckedChange={(checked) => setPermissionSettings(prev => ({ ...prev, conditionalAccess: checked }))} />
                           </div>
                         </div>
                         <Button className="bg-purple-600 hover:bg-purple-700" onClick={handleSavePermissionSettings}>Save Permission Settings</Button>
@@ -1931,23 +2305,23 @@ export default function RolesClient() {
                         <div className="space-y-4">
                           <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
                             <div><p className="font-medium">Role changes</p><p className="text-sm text-gray-500">Notify when roles are created, modified, or deleted</p></div>
-                            <Switch defaultChecked />
+                            <Switch checked={notificationSettings.roleChanges} onCheckedChange={(checked) => setNotificationSettings(prev => ({ ...prev, roleChanges: checked }))} />
                           </div>
                           <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
                             <div><p className="font-medium">Permission denials</p><p className="text-sm text-gray-500">Alert on permission denial events</p></div>
-                            <Switch defaultChecked />
+                            <Switch checked={notificationSettings.permissionDenials} onCheckedChange={(checked) => setNotificationSettings(prev => ({ ...prev, permissionDenials: checked }))} />
                           </div>
                           <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
                             <div><p className="font-medium">Policy violations</p><p className="text-sm text-gray-500">Notify on access policy violations</p></div>
-                            <Switch defaultChecked />
+                            <Switch checked={notificationSettings.policyViolations} onCheckedChange={(checked) => setNotificationSettings(prev => ({ ...prev, policyViolations: checked }))} />
                           </div>
                           <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
                             <div><p className="font-medium">User assignments</p><p className="text-sm text-gray-500">Notify when users are assigned to roles</p></div>
-                            <Switch />
+                            <Switch checked={notificationSettings.userAssignments} onCheckedChange={(checked) => setNotificationSettings(prev => ({ ...prev, userAssignments: checked }))} />
                           </div>
                           <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
                             <div><p className="font-medium">Security alerts</p><p className="text-sm text-gray-500">Immediate alerts for security events</p></div>
-                            <Switch defaultChecked />
+                            <Switch checked={notificationSettings.securityAlerts} onCheckedChange={(checked) => setNotificationSettings(prev => ({ ...prev, securityAlerts: checked }))} />
                           </div>
                         </div>
                         <Button className="bg-purple-600 hover:bg-purple-700" onClick={handleSaveNotificationSettings}>Save Notification Settings</Button>
@@ -1960,17 +2334,17 @@ export default function RolesClient() {
                       <CardHeader><CardTitle>Advanced Settings</CardTitle><CardDescription>Advanced configuration and data management</CardDescription></CardHeader>
                       <CardContent className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                          <div><label className="text-sm font-medium">Cache TTL (seconds)</label><Input type="number" defaultValue="300" className="mt-1" /></div>
-                          <div><label className="text-sm font-medium">Max Roles per User</label><Input type="number" defaultValue="10" className="mt-1" /></div>
+                          <div><label className="text-sm font-medium">Cache TTL (seconds)</label><Input type="number" value={advancedSettings.cacheTTL} onChange={(e) => setAdvancedSettings(prev => ({ ...prev, cacheTTL: parseInt(e.target.value) || 0 }))} className="mt-1" /></div>
+                          <div><label className="text-sm font-medium">Max Roles per User</label><Input type="number" value={advancedSettings.maxRolesPerUser} onChange={(e) => setAdvancedSettings(prev => ({ ...prev, maxRolesPerUser: parseInt(e.target.value) || 0 }))} className="mt-1" /></div>
                         </div>
                         <div className="space-y-4">
                           <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
                             <div><p className="font-medium">Debug mode</p><p className="text-sm text-gray-500">Enable detailed logging for troubleshooting</p></div>
-                            <Switch />
+                            <Switch checked={advancedSettings.debugMode} onCheckedChange={(checked) => setAdvancedSettings(prev => ({ ...prev, debugMode: checked }))} />
                           </div>
                           <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
                             <div><p className="font-medium">API rate limiting</p><p className="text-sm text-gray-500">Limit API calls for role operations</p></div>
-                            <Switch defaultChecked />
+                            <Switch checked={advancedSettings.apiRateLimiting} onCheckedChange={(checked) => setAdvancedSettings(prev => ({ ...prev, apiRateLimiting: checked }))} />
                           </div>
                         </div>
                         <div className="space-y-3">

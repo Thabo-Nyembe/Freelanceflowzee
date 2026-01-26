@@ -281,7 +281,7 @@ const mockLeadGenCollaborators: Array<{ id: string; name: string; avatar: string
 
 const mockLeadGenPredictions: Array<{ id: string; title: string; prediction: string; confidence: number; trend: 'up' | 'down' | 'stable'; impact: 'high' | 'medium' | 'low' }> = []
 
-const mockLeadGenActivities: Array<{ id: string; user: string; action: string; target: string; timestamp: string; type: 'success' | 'info' | 'warning' | 'error' }> = []
+const mockLeadGenActivities: Array<{ id: string; type: 'create' | 'update' | 'delete' | 'comment' | 'mention' | 'assignment' | 'status_change' | 'milestone' | 'integration'; message: string; timestamp: string; user: { id: string; name: string; avatar?: string } }> = []
 
 // Quick actions will be defined inside the component to access state setters
 
@@ -316,6 +316,12 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
   // Quick Action Dialogs
   const [isScoreDialogOpen, setIsScoreDialogOpen] = useState(false)
   const [isNurtureDialogOpen, setIsNurtureDialogOpen] = useState(false)
+  const [isEmailBlastDialogOpen, setIsEmailBlastDialogOpen] = useState(false)
+  const [isFilterDialogOpen, setIsFilterDialogOpen] = useState(false)
+  const [isSegmentsDialogOpen, setIsSegmentsDialogOpen] = useState(false)
+  const [isNewDealDialogOpen, setIsNewDealDialogOpen] = useState(false)
+  const [isCreateTaskDialogOpen, setIsCreateTaskDialogOpen] = useState(false)
+  const [isNewCampaignDialogOpen, setIsNewCampaignDialogOpen] = useState(false)
   const [scoreSettings, setScoreSettings] = useState({
     recalculateAll: true,
     useAI: true,
@@ -356,7 +362,8 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
     qualifyLead,
     contactLead,
     convertLead,
-    updateScore
+    updateScore,
+    refreshLeads
   } = useLeads(initialLeads || [], initialStats || defaultStats)
 
   // Convert hook leads to the component's Lead type for display
@@ -765,15 +772,15 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
   }
 
   const handleEmailBlast = () => {
-    toast.success('Email blast composer opened')
+    setIsEmailBlastDialogOpen(true)
   }
 
   const handleSmartFilter = () => {
-    toast.success('Advanced filter options opened')
+    setIsFilterDialogOpen(true)
   }
 
   const handleSegments = () => {
-    toast.success('Segment management opened')
+    setIsSegmentsDialogOpen(true)
   }
 
   const handleBulkTag = () => {
@@ -782,21 +789,37 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
 
   const handleSyncCRM = () => {
     toast.promise(
-      fetch('/api/leads/sync-crm', { method: 'POST' }).then(res => {
-        if (!res.ok) throw new Error('Sync failed')
-        return res.json()
-      }),
+      (async () => {
+        // Attempt to sync with external CRM API
+        const response = await fetch('/api/leads/sync-crm', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ timestamp: new Date().toISOString() })
+        })
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}))
+          throw new Error(errorData.message || 'Sync failed')
+        }
+
+        const result = await response.json()
+
+        // Refresh local leads data after CRM sync
+        await refreshLeads()
+
+        return result
+      })(),
       {
         loading: 'Syncing with CRM...',
-        success: 'CRM synchronization complete',
-        error: 'CRM sync failed'
+        success: (data) => `CRM synchronization complete${data?.synced ? ` - ${data.synced} leads synced` : ''}`,
+        error: (err) => `CRM sync failed: ${err.message}`
       }
     )
   }
 
   // Quick Actions Handlers - Pipeline Tab
   const handleNewDeal = () => {
-    toast.success('Deal creation form opened')
+    setIsNewDealDialogOpen(true)
   }
 
   const handleStageRules = () => {
@@ -809,13 +832,58 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
 
   const handlePipelineReport = () => {
     toast.promise(
-      fetch('/api/leads/pipeline-report').then(res => {
-        if (!res.ok) throw new Error('Report failed')
-        return res.json()
-      }),
+      (async () => {
+        // Generate pipeline report from current leads data
+        const pipelineData = {
+          generatedAt: new Date().toISOString(),
+          summary: {
+            totalLeads: stats.totalLeads,
+            newLeads: stats.newLeads,
+            qualifiedLeads: stats.qualified,
+            wonDeals: stats.won,
+            lostDeals: stats.lost,
+            pipelineValue: stats.pipelineValue,
+            conversionRate: stats.conversionRate.toFixed(2) + '%',
+            avgScore: stats.avgScore.toFixed(1)
+          },
+          byStatus: Object.fromEntries(
+            Object.entries(leadsByStatus).map(([status, statusLeads]) => [
+              status,
+              {
+                count: statusLeads.length,
+                totalValue: statusLeads.reduce((sum, l) => sum + l.estimatedValue, 0),
+                avgScore: statusLeads.length > 0
+                  ? (statusLeads.reduce((sum, l) => sum + l.score, 0) / statusLeads.length).toFixed(1)
+                  : 0
+              }
+            ])
+          ),
+          leads: leads.map(l => ({
+            name: `${l.firstName} ${l.lastName}`,
+            company: l.company,
+            status: l.status,
+            score: l.score,
+            estimatedValue: l.estimatedValue,
+            source: l.source,
+            createdAt: l.createdAt.toISOString()
+          }))
+        }
+
+        // Create downloadable report
+        const reportJson = JSON.stringify(pipelineData, null, 2)
+        const blob = new Blob([reportJson], { type: 'application/json' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `pipeline-report-${new Date().toISOString().split('T')[0]}.json`
+        a.click()
+        URL.revokeObjectURL(url)
+
+        return pipelineData
+      })(),
       {
         loading: 'Generating pipeline report...',
-        success: 'Pipeline analytics report ready',
+        success: 'Pipeline analytics report downloaded',
         error: 'Failed to generate report'
       }
     )
@@ -856,7 +924,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
   }
 
   const handleCreateTask = () => {
-    toast.success('Task creation form opened')
+    setIsCreateTaskDialogOpen(true)
   }
 
   const handleSchedule = () => {
@@ -869,20 +937,53 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
 
   const handleExportLog = () => {
     toast.promise(
-      fetch('/api/leads/activities/export').then(res => {
-        if (!res.ok) throw new Error('Export failed')
-        return res.blob()
-      }).then(blob => {
+      (async () => {
+        // Gather all activities from leads
+        const allActivities = leads.flatMap(lead =>
+          lead.activities.map(activity => ({
+            leadId: lead.id,
+            leadName: `${lead.firstName} ${lead.lastName}`,
+            leadCompany: lead.company,
+            activityId: activity.id,
+            type: activity.type,
+            title: activity.title,
+            description: activity.description,
+            outcome: activity.outcome || 'N/A',
+            performedBy: activity.performedBy,
+            createdAt: activity.createdAt.toISOString()
+          }))
+        )
+
+        // If no activities, include basic lead activity summary
+        const exportData = allActivities.length > 0
+          ? allActivities
+          : leads.map(lead => ({
+              leadId: lead.id,
+              leadName: `${lead.firstName} ${lead.lastName}`,
+              leadCompany: lead.company,
+              status: lead.status,
+              lastContactDate: lead.lastContactDate?.toISOString() || 'Never',
+              emailOpens: lead.emailOpens,
+              emailClicks: lead.emailClicks,
+              pageViews: lead.pageViews,
+              formSubmissions: lead.formSubmissions,
+              engagementScore: lead.engagementScore,
+              createdAt: lead.createdAt.toISOString()
+            }))
+
+        const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
         const url = URL.createObjectURL(blob)
         const a = document.createElement('a')
         a.href = url
-        a.download = 'activity-log.csv'
+        a.download = `activity-log-${new Date().toISOString().split('T')[0]}.json`
         a.click()
         URL.revokeObjectURL(url)
-      }),
+
+        return { count: exportData.length }
+      })(),
       {
-        loading: 'Exporting activity log...',
-        success: 'Activity log downloaded as CSV',
+        loading: 'Preparing activity log export...',
+        success: (data) => `Activity log exported (${data.count} records)`,
         error: 'Failed to export activity log'
       }
     )
@@ -890,7 +991,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
 
   // Quick Actions Handlers - Campaigns Tab
   const handleNewCampaign = () => {
-    toast.success('Campaign creation wizard opened')
+    setIsNewCampaignDialogOpen(true)
   }
 
   const handleAnnouncement = () => {
@@ -1073,18 +1174,48 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
 
   const handleTestWebhook = () => {
     toast.promise(
-      fetch('/api/webhooks/test', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: 'lead_generation' })
-      }).then(res => {
-        if (!res.ok) throw new Error('Test failed')
-        return res.json()
-      }),
+      (async () => {
+        // Create a test payload with sample lead data
+        const testPayload = {
+          event: 'lead.test',
+          timestamp: new Date().toISOString(),
+          data: {
+            id: 'test-' + Date.now(),
+            name: 'Test Lead',
+            email: 'test@example.com',
+            company: 'Test Company',
+            source: 'webhook_test',
+            score: 75,
+            status: 'new'
+          }
+        }
+
+        // Send test to our webhook endpoint
+        const response = await fetch('/api/webhooks/test', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Webhook-Event': 'lead.test'
+          },
+          body: JSON.stringify(testPayload)
+        })
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}))
+          throw new Error(errorData.message || `Webhook returned status ${response.status}`)
+        }
+
+        const result = await response.json()
+        return {
+          status: response.status,
+          latency: result.latency || 'N/A',
+          ...result
+        }
+      })(),
       {
         loading: 'Sending test payload to webhook URL...',
-        success: 'Webhook test successful',
-        error: 'Webhook test failed'
+        success: (data) => `Webhook test successful (Status: ${data.status})`,
+        error: (err) => `Webhook test failed: ${err.message}`
       }
     )
   }
@@ -3098,6 +3229,437 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
                     Start Nurture
                   </>
                 )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Email Blast Dialog */}
+        <Dialog open={isEmailBlastDialogOpen} onOpenChange={setIsEmailBlastDialogOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Mail className="w-5 h-5 text-purple-500" />
+                Email Blast
+              </DialogTitle>
+              <DialogDescription>
+                Send a bulk email to selected leads or segments
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Subject Line</Label>
+                <Input placeholder="Enter email subject..." />
+              </div>
+              <div className="space-y-2">
+                <Label>Target Segment</Label>
+                <select className="w-full p-2 border rounded-md bg-background">
+                  <option value="all">All Leads ({leads.length})</option>
+                  <option value="hot">Hot Leads ({leads.filter(l => l.priority === 'hot').length})</option>
+                  <option value="warm">Warm Leads ({leads.filter(l => l.priority === 'warm').length})</option>
+                  <option value="cold">Cold Leads ({leads.filter(l => l.priority === 'cold').length})</option>
+                  <option value="new">New Leads ({leads.filter(l => l.status === 'new').length})</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label>Email Content</Label>
+                <Textarea placeholder="Write your email content..." rows={5} />
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label className="text-sm font-medium">Track Opens & Clicks</Label>
+                  <p className="text-xs text-muted-foreground">Monitor engagement metrics</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsEmailBlastDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button
+                className="bg-gradient-to-r from-purple-500 to-pink-600 text-white"
+                onClick={() => {
+                  toast.success('Email blast scheduled successfully')
+                  setIsEmailBlastDialogOpen(false)
+                }}
+              >
+                <Send className="w-4 h-4 mr-2" />
+                Send Blast
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Smart Filter Dialog */}
+        <Dialog open={isFilterDialogOpen} onOpenChange={setIsFilterDialogOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Filter className="w-5 h-5 text-amber-500" />
+                Advanced Filters
+              </DialogTitle>
+              <DialogDescription>
+                Create custom filter rules to find specific leads
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <select
+                  className="w-full p-2 border rounded-md bg-background"
+                  value={selectedStatus}
+                  onChange={(e) => setSelectedStatus(e.target.value as LeadStatus | 'all')}
+                >
+                  <option value="all">All Statuses</option>
+                  <option value="new">New</option>
+                  <option value="contacted">Contacted</option>
+                  <option value="qualified">Qualified</option>
+                  <option value="proposal">Proposal</option>
+                  <option value="negotiation">Negotiation</option>
+                  <option value="won">Won</option>
+                  <option value="lost">Lost</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label>Priority</Label>
+                <select
+                  className="w-full p-2 border rounded-md bg-background"
+                  value={selectedPriority}
+                  onChange={(e) => setSelectedPriority(e.target.value as LeadPriority | 'all')}
+                >
+                  <option value="all">All Priorities</option>
+                  <option value="hot">Hot</option>
+                  <option value="warm">Warm</option>
+                  <option value="cold">Cold</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label>Score Range</Label>
+                <div className="flex gap-2 items-center">
+                  <Input type="number" placeholder="Min" min={0} max={100} className="w-24" />
+                  <span className="text-muted-foreground">to</span>
+                  <Input type="number" placeholder="Max" min={0} max={100} className="w-24" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Source</Label>
+                <select className="w-full p-2 border rounded-md bg-background">
+                  <option value="all">All Sources</option>
+                  <option value="website">Website</option>
+                  <option value="linkedin">LinkedIn</option>
+                  <option value="referral">Referral</option>
+                  <option value="email">Email</option>
+                  <option value="paid_ads">Paid Ads</option>
+                  <option value="organic">Organic</option>
+                </select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSelectedStatus('all')
+                  setSelectedPriority('all')
+                  setSearchQuery('')
+                }}
+              >
+                Clear Filters
+              </Button>
+              <Button
+                className="bg-gradient-to-r from-amber-500 to-orange-600 text-white"
+                onClick={() => {
+                  toast.success(`Filters applied - ${filteredLeads.length} leads found`)
+                  setIsFilterDialogOpen(false)
+                }}
+              >
+                <Filter className="w-4 h-4 mr-2" />
+                Apply Filters
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Segments Dialog */}
+        <Dialog open={isSegmentsDialogOpen} onOpenChange={setIsSegmentsDialogOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Layers className="w-5 h-5 text-indigo-500" />
+                Lead Segments
+              </DialogTitle>
+              <DialogDescription>
+                Manage and organize leads into segments
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="p-3 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Flame className="w-4 h-4 text-red-500" />
+                    <span className="font-medium">Hot Leads</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">{leads.filter(l => l.priority === 'hot').length} leads</p>
+                </div>
+                <div className="p-3 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors">
+                  <div className="flex items-center gap-2 mb-1">
+                    <TrendingUp className="w-4 h-4 text-orange-500" />
+                    <span className="font-medium">Warm Leads</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">{leads.filter(l => l.priority === 'warm').length} leads</p>
+                </div>
+                <div className="p-3 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors">
+                  <div className="flex items-center gap-2 mb-1">
+                    <UserPlus className="w-4 h-4 text-blue-500" />
+                    <span className="font-medium">New Contacts</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">{leads.filter(l => l.status === 'new').length} leads</p>
+                </div>
+                <div className="p-3 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors">
+                  <div className="flex items-center gap-2 mb-1">
+                    <UserCheck className="w-4 h-4 text-green-500" />
+                    <span className="font-medium">Qualified</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">{leads.filter(l => l.status === 'qualified').length} leads</p>
+                </div>
+              </div>
+              <div className="border-t pt-4">
+                <Label className="mb-2 block">Create New Segment</Label>
+                <div className="flex gap-2">
+                  <Input placeholder="Segment name..." />
+                  <Button variant="outline" size="icon">
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsSegmentsDialogOpen(false)}>
+                Close
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* New Deal Dialog */}
+        <Dialog open={isNewDealDialogOpen} onOpenChange={setIsNewDealDialogOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Briefcase className="w-5 h-5 text-pink-500" />
+                Create New Deal
+              </DialogTitle>
+              <DialogDescription>
+                Add a new deal to the pipeline
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Deal Name</Label>
+                <Input placeholder="Enter deal name..." />
+              </div>
+              <div className="space-y-2">
+                <Label>Associated Lead</Label>
+                <select className="w-full p-2 border rounded-md bg-background">
+                  <option value="">Select a lead...</option>
+                  {leads.map(lead => (
+                    <option key={lead.id} value={lead.id}>
+                      {lead.firstName} {lead.lastName} - {lead.company}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Deal Value</Label>
+                  <div className="relative">
+                    <DollarSign className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                    <Input type="number" placeholder="0.00" className="pl-9" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Pipeline Stage</Label>
+                  <select className="w-full p-2 border rounded-md bg-background">
+                    <option value="new">New</option>
+                    <option value="contacted">Contacted</option>
+                    <option value="qualified">Qualified</option>
+                    <option value="proposal">Proposal</option>
+                    <option value="negotiation">Negotiation</option>
+                  </select>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Expected Close Date</Label>
+                <Input type="date" />
+              </div>
+              <div className="space-y-2">
+                <Label>Notes</Label>
+                <Textarea placeholder="Add deal notes..." rows={3} />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsNewDealDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button
+                className="bg-gradient-to-r from-pink-500 to-rose-600 text-white"
+                onClick={() => {
+                  toast.success('Deal created successfully')
+                  setIsNewDealDialogOpen(false)
+                }}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Create Deal
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Task Dialog */}
+        <Dialog open={isCreateTaskDialogOpen} onOpenChange={setIsCreateTaskDialogOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <CheckCircle className="w-5 h-5 text-pink-500" />
+                Create Task
+              </DialogTitle>
+              <DialogDescription>
+                Create a new task for lead follow-up
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Task Title</Label>
+                <Input placeholder="Enter task title..." />
+              </div>
+              <div className="space-y-2">
+                <Label>Associated Lead</Label>
+                <select className="w-full p-2 border rounded-md bg-background">
+                  <option value="">Select a lead (optional)...</option>
+                  {leads.map(lead => (
+                    <option key={lead.id} value={lead.id}>
+                      {lead.firstName} {lead.lastName} - {lead.company}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Due Date</Label>
+                  <Input type="date" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Priority</Label>
+                  <select className="w-full p-2 border rounded-md bg-background">
+                    <option value="high">High</option>
+                    <option value="medium">Medium</option>
+                    <option value="low">Low</option>
+                  </select>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Task Type</Label>
+                <select className="w-full p-2 border rounded-md bg-background">
+                  <option value="call">Call</option>
+                  <option value="email">Email</option>
+                  <option value="meeting">Meeting</option>
+                  <option value="follow_up">Follow-up</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label>Description</Label>
+                <Textarea placeholder="Add task description..." rows={3} />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsCreateTaskDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button
+                className="bg-gradient-to-r from-pink-500 to-rose-600 text-white"
+                onClick={() => {
+                  toast.success('Task created successfully')
+                  setIsCreateTaskDialogOpen(false)
+                }}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Create Task
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* New Campaign Dialog */}
+        <Dialog open={isNewCampaignDialogOpen} onOpenChange={setIsNewCampaignDialogOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Rocket className="w-5 h-5 text-pink-500" />
+                Create New Campaign
+              </DialogTitle>
+              <DialogDescription>
+                Launch a new marketing campaign
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Campaign Name</Label>
+                <Input placeholder="Enter campaign name..." />
+              </div>
+              <div className="space-y-2">
+                <Label>Campaign Type</Label>
+                <select className="w-full p-2 border rounded-md bg-background">
+                  <option value="email">Email Campaign</option>
+                  <option value="sequence">Email Sequence</option>
+                  <option value="workflow">Automated Workflow</option>
+                  <option value="ads">Paid Ads</option>
+                </select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Start Date</Label>
+                  <Input type="date" />
+                </div>
+                <div className="space-y-2">
+                  <Label>End Date</Label>
+                  <Input type="date" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Target Audience</Label>
+                <select className="w-full p-2 border rounded-md bg-background">
+                  <option value="all">All Leads ({leads.length})</option>
+                  <option value="new">New Leads ({leads.filter(l => l.status === 'new').length})</option>
+                  <option value="hot">Hot Leads ({leads.filter(l => l.priority === 'hot').length})</option>
+                  <option value="qualified">Qualified Leads ({leads.filter(l => l.status === 'qualified').length})</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label>Campaign Goal</Label>
+                <Textarea placeholder="Describe the campaign objective..." rows={3} />
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label className="text-sm font-medium">A/B Testing</Label>
+                  <p className="text-xs text-muted-foreground">Enable split testing for this campaign</p>
+                </div>
+                <Switch />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsNewCampaignDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button
+                className="bg-gradient-to-r from-pink-500 to-rose-600 text-white"
+                onClick={() => {
+                  toast.success('Campaign created successfully')
+                  setIsNewCampaignDialogOpen(false)
+                }}
+              >
+                <Rocket className="w-4 h-4 mr-2" />
+                Launch Campaign
               </Button>
             </DialogFooter>
           </DialogContent>

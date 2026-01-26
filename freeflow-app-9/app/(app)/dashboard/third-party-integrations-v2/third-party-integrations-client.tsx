@@ -504,6 +504,8 @@ export default function ThirdPartyIntegrationsClient() {
 
   // Apply zap filters handler
   const handleApplyZapFilters = () => {
+    const filters = { status: filterZapStatus, app: filterZapApp }
+    localStorage.setItem('zap-filters', JSON.stringify(filters))
     toast.success(`Filters Applied: Showing ${filterZapStatus || 'all'} zaps${filterZapApp ? ` for ${apps.find(a => a.id === filterZapApp)?.name}` : ''}`)
     setShowFilterZapsDialog(false)
   }
@@ -561,7 +563,9 @@ export default function ThirdPartyIntegrationsClient() {
 
   // History filter handler
   const handleApplyHistoryFilters = () => {
-    toast.success('Filters Applied: logs for the last ' + historyDateRange)
+    const filters = { dateRange: historyDateRange, status: historyStatus }
+    localStorage.setItem('history-filters', JSON.stringify(filters))
+    toast.success(`Filters Applied: Showing ${historyStatus || 'all'} logs for the last ${historyDateRange}`)
     setShowHistoryFilterDialog(false)
   }
 
@@ -592,7 +596,9 @@ export default function ThirdPartyIntegrationsClient() {
 
   // Upgrade handler
   const handleUpgrade = () => {
-    toast.success('Upgrade Initiated')
+    // Open billing/upgrade page in new tab
+    window.open('/dashboard/settings/billing?upgrade=pro', '_blank')
+    toast.success('Upgrade Initiated: Redirecting to billing page...')
     setShowUpgradeDialog(false)
   }
 
@@ -729,20 +735,82 @@ export default function ThirdPartyIntegrationsClient() {
   }
 
   // Pause all zaps handler
-  const handlePauseAllZaps = () => {
-    toast.success(`All Zaps Paused: active zaps have been paused`)
-    setShowPauseAllDialog(false)
+  const handlePauseAllZaps = async () => {
+    const toastId = toast.loading('Pausing all zaps...')
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      // Update all active zaps to paused status
+      const { error } = await supabase
+        .from('integration_zaps')
+        .update({ status: 'paused', updated_at: new Date().toISOString() })
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+
+      if (error) throw error
+
+      toast.dismiss(toastId)
+      toast.success('All Zaps Paused: Active zaps have been paused')
+      setShowPauseAllDialog(false)
+    } catch (error: any) {
+      toast.dismiss(toastId)
+      toast.error('Failed to pause zaps', { description: error.message })
+    }
   }
 
   // Delete all connections handler
-  const handleDeleteAllConnections = () => {
-    toast.success('Connections Deleted')
-    setShowDeleteConnectionsDialog(false)
+  const handleDeleteAllConnections = async () => {
+    const confirmed = window.confirm(
+      'Are you sure you want to delete ALL connections? This action cannot be undone and will disconnect all your integrations.'
+    )
+    if (!confirmed) return
+
+    const toastId = toast.loading('Deleting all connections...')
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      // Delete all user connections
+      const { error } = await supabase
+        .from('integration_connections')
+        .delete()
+        .eq('user_id', user.id)
+
+      if (error) throw error
+
+      // Clear related localStorage data
+      localStorage.removeItem('zap-filters')
+      localStorage.removeItem('history-filters')
+
+      toast.dismiss(toastId)
+      toast.success('Connections Deleted: All integrations have been disconnected')
+      setShowDeleteConnectionsDialog(false)
+    } catch (error: any) {
+      toast.dismiss(toastId)
+      toast.error('Failed to delete connections', { description: error.message })
+    }
   }
 
   // Reset settings handler
   const handleResetSettings = () => {
-    toast.success('Settings Reset')
+    // Reset all filter states to defaults
+    setFilterZapStatus('all')
+    setFilterZapApp('')
+    setHistoryDateRange('7days')
+    setHistoryStatus('all')
+    setLogsFilterStatus('all')
+    setLogsFilterZapId('')
+    setSelectedCategory('All')
+    setSearchQuery('')
+    setSettingsTab('general')
+
+    // Clear persisted filter settings from localStorage
+    localStorage.removeItem('zap-filters')
+    localStorage.removeItem('history-filters')
+    localStorage.removeItem('integrations-settings')
+
+    toast.success('Settings Reset: All settings have been restored to defaults')
     setShowResetSettingsDialog(false)
   }
 
