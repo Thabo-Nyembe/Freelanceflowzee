@@ -4,6 +4,8 @@ import React, { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { toast } from 'sonner'
 import { useDocs } from '@/lib/hooks/use-docs-extended'
+import { useTeam } from '@/lib/hooks/use-team'
+import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -263,9 +265,7 @@ const emptySpaces: DocSpace[] = []
 const emptyDocs: Doc[] = []
 const languages = ['All', 'JavaScript', 'Python', 'Ruby', 'Go', 'cURL']
 const emptyAIInsights: AIInsight[] = []
-const emptyCollaborators: Collaborator[] = []
 const emptyPredictions: Prediction[] = []
-const emptyActivities: ActivityItem[] = []
 const emptyQuickActions: QuickAction[] = []
 
 export default function DocsClient() {
@@ -277,6 +277,29 @@ export default function DocsClient() {
     is_public: true,
     limit: 100
   })
+
+  // Team and activity data hooks
+  const { members: teamMembers } = useTeam()
+  const { logs: activityLogs } = useActivityLogs()
+
+  // Map team members to collaborators format
+  const emptyCollaborators = teamMembers.map(member => ({
+    id: member.id,
+    name: member.name,
+    avatar: member.avatar_url || undefined,
+    status: member.status === 'active' ? 'online' as const : member.status === 'on_leave' ? 'away' as const : 'offline' as const
+  }))
+
+  // Map activity logs to activities format
+  const emptyActivities = activityLogs.slice(0, 10).map(log => ({
+    id: log.id,
+    type: log.activity_type === 'create' ? 'create' as const : log.activity_type === 'update' ? 'update' as const : log.activity_type === 'delete' ? 'delete' as const : 'update' as const,
+    title: log.action,
+    description: log.resource_name || undefined,
+    user: { id: log.user_id || 'system', name: log.user_name || 'System', avatar: undefined },
+    timestamp: new Date(log.created_at),
+    isUnread: log.status === 'pending'
+  }))
 
   const [docs] = useState<Doc[]>(dbDocs || emptyDocs)
   const [spaces] = useState<DocSpace[]>(emptySpaces)

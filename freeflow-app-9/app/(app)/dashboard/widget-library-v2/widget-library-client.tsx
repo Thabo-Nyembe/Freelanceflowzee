@@ -74,6 +74,8 @@ import { Textarea } from '@/components/ui/textarea'
 
 // Import widget library hook
 import { useWidgetLibrary, LibraryWidget } from '@/lib/hooks/use-widget-library'
+import { useTeam } from '@/lib/hooks/use-team'
+import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
 
 // Types
 type WidgetStatus = 'stable' | 'beta' | 'deprecated' | 'experimental' | 'archived'
@@ -130,9 +132,7 @@ interface Collection {
 
 // Empty arrays for competitive upgrade components (ready for real data integration)
 const widgetLibAIInsights: { id: string; type: 'recommendation' | 'alert' | 'opportunity' | 'prediction'; title: string; description: string; impact?: 'high' | 'medium' | 'low' }[] = []
-const widgetLibCollaborators: { id: string; name: string; status: 'online' | 'away' | 'offline' }[] = []
 const widgetLibPredictions: { label: string; current: number; predicted: number; confidence: number; trend: 'up' | 'down' | 'stable'; timeframe: string }[] = []
-const widgetLibActivities: { id: string; type: 'comment' | 'update' | 'create'; title: string; user: { id: string; name: string }; timestamp: Date }[] = []
 
 // Transform LibraryWidget to local Widget type
 const transformWidget = (w: LibraryWidget, isBookmarked: boolean): Widget => ({
@@ -191,6 +191,29 @@ export default function WidgetLibraryClient() {
     clearCache,
     uninstallAllWidgets
   } = useWidgetLibrary()
+
+  // Team and activity data hooks
+  const { members: teamMembers } = useTeam()
+  const { logs: activityLogs } = useActivityLogs()
+
+  // Map team members to collaborators format
+  const widgetLibCollaborators = teamMembers.map(member => ({
+    id: member.id,
+    name: member.name,
+    avatar: member.avatar_url || undefined,
+    status: member.status === 'active' ? 'online' as const : member.status === 'on_leave' ? 'away' as const : 'offline' as const
+  }))
+
+  // Map activity logs to activities format
+  const widgetLibActivities = activityLogs.slice(0, 10).map(log => ({
+    id: log.id,
+    type: log.activity_type === 'create' ? 'create' as const : log.activity_type === 'update' ? 'update' as const : log.activity_type === 'delete' ? 'delete' as const : 'update' as const,
+    title: log.action,
+    description: log.resource_name || undefined,
+    user: { id: log.user_id || 'system', name: log.user_name || 'System', avatar: undefined },
+    timestamp: new Date(log.created_at),
+    isUnread: log.status === 'pending'
+  }))
 
   const [activeTab, setActiveTab] = useState('browse')
   const [searchQuery, setSearchQuery] = useState('')

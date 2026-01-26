@@ -13,6 +13,8 @@ import {
   type Task
 } from '@/lib/api-clients'
 import { useRevenueIntelligence } from '@/lib/hooks/use-revenue-intelligence'
+import { useTeam } from '@/lib/hooks/use-team'
+import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -155,10 +157,6 @@ type ActivityItem = {
   timestamp: Date | string
 }
 
-// Empty arrays - no mock data
-const collaborators: Collaborator[] = []
-const activities: ActivityItem[] = []
-
 export default function MyDayClient({ initialTasks, initialSessions }: MyDayClientProps) {
   // Data Fetching
   const { data: tasksData, isLoading: tasksLoading } = useTasks(1, 100)
@@ -166,7 +164,29 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
   const { data: statsData } = useTaskStats()
   const { report: revenueReport } = useRevenueIntelligence()
 
-  // Derived State from Real Data
+  // Team and activity data hooks
+  const { members: teamMembers } = useTeam()
+  const { logs: activityLogs } = useActivityLogs()
+
+  // Map team members to collaborators format
+  const collaborators = teamMembers.map(member => ({
+    id: member.id,
+    name: member.name,
+    avatar: member.avatar_url || undefined,
+    status: member.status === 'active' ? 'online' as const : member.status === 'on_leave' ? 'away' as const : 'offline' as const
+  }))
+
+  // Map activity logs to activities format
+  const activities = activityLogs.slice(0, 10).map(log => ({
+    id: log.id,
+    type: log.activity_type === 'create' ? 'create' as const : log.activity_type === 'update' ? 'update' as const : log.activity_type === 'delete' ? 'delete' as const : 'update' as const,
+    title: log.action,
+    description: log.resource_name || undefined,
+    user: { id: log.user_id || 'system', name: log.user_name || 'System', avatar: undefined },
+    timestamp: new Date(log.created_at),
+    isUnread: log.status === 'pending'
+  }))
+
   // Derived State from Real Data
   const tasks = useMemo(() => tasksData?.data || [], [tasksData])
   const projects = useMemo(() => projectsData?.data || [], [projectsData])

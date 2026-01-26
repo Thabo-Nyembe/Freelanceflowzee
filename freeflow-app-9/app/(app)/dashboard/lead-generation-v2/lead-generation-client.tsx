@@ -84,6 +84,9 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import { useTeam } from '@/lib/hooks/use-team'
+import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
+
 // Types
 type LeadStatus = 'new' | 'contacted' | 'qualified' | 'proposal' | 'negotiation' | 'won' | 'lost'
 type LeadStage = 'subscriber' | 'lead' | 'mql' | 'sql' | 'opportunity' | 'customer' | 'evangelist'
@@ -302,6 +305,32 @@ const defaultStats: LeadStats = {
 
 export default function LeadGenerationClient({ initialLeads, initialStats }: LeadGenerationClientProps) {
   const router = useRouter()
+  const { members: teamMembers } = useTeam()
+  const { logs: activityLogs } = useActivityLogs()
+
+  // Transform team members to collaborators format
+  const collaborators = teamMembers.map(member => ({
+    id: member.id,
+    name: member.name,
+    avatar: member.avatar_url || '',
+    status: member.status === 'active' ? 'online' as const : member.status === 'on_leave' ? 'away' as const : 'offline' as const,
+    role: member.role || 'Team Member'
+  }))
+
+  // Transform activity logs to activities format
+  const activities = activityLogs.slice(0, 10).map(log => ({
+    id: log.id,
+    user: {
+      id: log.user_id || 'system',
+      name: log.user_name || 'System',
+      avatar: undefined
+    },
+    action: log.action,
+    target: log.resource_name ? { type: log.resource_type || 'resource', name: log.resource_name } : undefined,
+    timestamp: log.created_at,
+    type: log.activity_type === 'create' ? 'create' as const : log.activity_type === 'update' ? 'update' as const : log.activity_type === 'delete' ? 'delete' as const : 'update' as const
+  }))
+
   const [activeTab, setActiveTab] = useState('leads')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedStatus, setSelectedStatus] = useState<LeadStatus | 'all'>('all')
@@ -2530,7 +2559,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockLeadGenCollaborators}
+              collaborators={collaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
@@ -2542,7 +2571,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockLeadGenActivities}
+            activities={activities}
             title="Lead Activity"
             maxItems={5}
           />

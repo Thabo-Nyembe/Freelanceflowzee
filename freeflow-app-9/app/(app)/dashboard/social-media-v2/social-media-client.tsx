@@ -2,6 +2,8 @@
 
 import { createClient } from '@/lib/supabase/client'
 import { useSocialPosts, useSocialAccounts, type SocialPost as HookSocialPost, type SocialAccount as HookSocialAccount } from '@/lib/hooks/use-social-media'
+import { useTeam } from '@/lib/hooks/use-team'
+import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
 
 import React, { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
@@ -282,9 +284,7 @@ const emptyMentions: Mention[] = []
 const emptyAssets: ContentAsset[] = []
 const emptyHashtags: Hashtag[] = []
 const emptyAIInsights: AIInsight[] = []
-const emptyCollaborators: Collaborator[] = []
 const emptyPredictions: Prediction[] = []
-const emptyActivities: ActivityItem[] = []
 
 // Quick actions are defined inside the component to access state setters
 
@@ -312,6 +312,29 @@ export default function SocialMediaClient() {
     disconnectAccount,
     getTotalFollowers
   } = useSocialAccounts()
+
+  // Team and activity data hooks
+  const { members: teamMembers } = useTeam()
+  const { logs: activityLogs } = useActivityLogs()
+
+  // Map team members to collaborators format
+  const emptyCollaborators = teamMembers.map(member => ({
+    id: member.id,
+    name: member.name,
+    avatar: member.avatar_url || undefined,
+    status: member.status === 'active' ? 'online' as const : member.status === 'on_leave' ? 'away' as const : 'offline' as const
+  }))
+
+  // Map activity logs to activities format
+  const emptyActivities = activityLogs.slice(0, 10).map(log => ({
+    id: log.id,
+    type: log.activity_type === 'create' ? 'create' as const : log.activity_type === 'update' ? 'update' as const : log.activity_type === 'delete' ? 'delete' as const : 'update' as const,
+    title: log.action,
+    description: log.resource_name || undefined,
+    user: { id: log.user_id || 'system', name: log.user_name || 'System', avatar: undefined },
+    timestamp: new Date(log.created_at),
+    isUnread: log.status === 'pending'
+  }))
 
   // Map database posts to UI types
   const posts: SocialPost[] = useMemo(() => {

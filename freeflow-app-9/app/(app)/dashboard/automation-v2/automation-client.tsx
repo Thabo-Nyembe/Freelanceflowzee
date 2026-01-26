@@ -72,6 +72,8 @@ import {
 } from '@/components/ui/competitive-upgrades-extended'
 
 import { useAutomation, type Automation, type AutomationType, type AutomationStatus } from '@/lib/hooks/use-automation'
+import { useTeam } from '@/lib/hooks/use-team'
+import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
 
 // Initialize Supabase client once at module level
 const supabase = createClient()
@@ -210,6 +212,8 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
     automationType: automationTypeFilter,
     status: statusFilter
   })
+  const { members: teamMembers } = useTeam()
+  const { logs: activityLogs } = useActivityLogs()
   const displayAutomations = automations.length > 0 ? automations : initialAutomations
 
   // Form submission loading state
@@ -2008,7 +2012,7 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={automationCollaborators}
+              collaborators={teamMembers?.map(m => ({ id: m.id, name: m.name, avatar: m.avatar_url, status: m.status === 'active' ? 'online' : 'offline' })) || []}
               maxVisible={4}
             />
             <PredictiveAnalytics
@@ -2020,7 +2024,7 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={automationActivities}
+            activities={activityLogs?.slice(0, 10).map(l => ({ id: l.id, type: l.activity_type, title: l.action, user: { name: l.user_name || 'System' }, timestamp: l.created_at })) || []}
             title="Automation Activity"
             maxItems={5}
           />

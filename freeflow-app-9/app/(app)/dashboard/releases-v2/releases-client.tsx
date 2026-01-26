@@ -2,6 +2,8 @@
 
 import { createClient } from '@/lib/supabase/client'
 import { useReleases, type ReleaseType as HookReleaseType, type Environment as HookEnvironment } from '@/lib/hooks/use-releases'
+import { useTeam } from '@/lib/hooks/use-team'
+import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
@@ -310,6 +312,8 @@ export default function ReleasesClient() {
     deployRelease,
     rollbackRelease: rollbackReleaseStatus
   } = useReleases()
+  const { members: teamMembers } = useTeam()
+  const { logs: activityLogs } = useActivityLogs()
 
   // UI State
   const [activeTab, setActiveTab] = useState('releases')
@@ -2061,7 +2065,7 @@ export default function ReleasesClient() {
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={emptyCollaborators}
+              collaborators={teamMembers?.map(m => ({ id: m.id, name: m.name, avatar: m.avatar_url, status: m.status === 'active' ? 'online' : 'offline' })) || []}
               maxVisible={4}
             />
             <PredictiveAnalytics
@@ -2073,7 +2077,7 @@ export default function ReleasesClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={emptyActivities}
+            activities={activityLogs?.slice(0, 10).map(l => ({ id: l.id, type: l.activity_type, title: l.action, user: { name: l.user_name || 'System' }, timestamp: l.created_at })) || []}
             title="Release Activity"
             maxItems={5}
           />
