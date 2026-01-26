@@ -4,6 +4,7 @@
 // Uses: useTasks (real-time task management with database sync)
 
 import React, { useState, useMemo, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -202,6 +203,7 @@ interface TaskCardProps {
   onAssign: (taskId: string, assigneeId: string | null) => void
   onUpdateDueDate: (taskId: string, dueDate: Date | null) => void
   onAddSubtask: (parentId: string) => void
+  onViewProject?: (projectId: string) => void
   activeTimerId?: string
   isUpdating?: boolean
   isSelected?: boolean
@@ -223,6 +225,7 @@ function TaskCard({
   onAssign,
   onUpdateDueDate,
   onAddSubtask,
+  onViewProject,
   activeTimerId,
   isUpdating,
   isSelected,
@@ -616,6 +619,21 @@ function TaskCard({
             </Badge>
           )}
 
+          {/* Project Link */}
+          {task.project_id && task.project && (
+            <Badge
+              variant="outline"
+              className="text-xs cursor-pointer hover:bg-primary/10"
+              onClick={(e) => {
+                e.stopPropagation()
+                onViewProject?.(task.project_id!)
+              }}
+            >
+              <Target className="h-3 w-3 mr-1" />
+              {task.project.name}
+            </Badge>
+          )}
+
           {/* Tags */}
           {task.tags.slice(0, 2).map((tag) => (
             <Badge key={tag} variant="secondary" className="text-xs">
@@ -850,6 +868,8 @@ function TaskDialog({ open, onOpenChange, task, onSave, isSaving }: TaskDialogPr
 // ============================================================================
 
 export function TasksClient() {
+  const router = useRouter()
+
   const {
     tasks,
     stats,
@@ -1653,6 +1673,7 @@ export function TasksClient() {
                         onAssign={handleAssignTask}
                         onUpdateDueDate={handleUpdateDueDate}
                         onAddSubtask={handleAddSubtask}
+                        onViewProject={(projectId) => router.push(`/dashboard/crm-v2?tab=projects&highlight=${projectId}`)}
                         activeTimerId={activeTimer?.task_id}
                         isUpdating={updatingTaskId === task.id}
                         isSelected={selectedTasks.has(task.id)}
@@ -1694,6 +1715,7 @@ export function TasksClient() {
                         onAssign={handleAssignTask}
                         onUpdateDueDate={handleUpdateDueDate}
                         onAddSubtask={handleAddSubtask}
+                        onViewProject={(projectId) => router.push(`/dashboard/crm-v2?tab=projects&highlight=${projectId}`)}
                         activeTimerId={activeTimer?.task_id}
                         isUpdating={updatingTaskId === task.id}
                         isSelected={selectedTasks.has(task.id)}
@@ -1735,6 +1757,7 @@ export function TasksClient() {
                         onAssign={handleAssignTask}
                         onUpdateDueDate={handleUpdateDueDate}
                         onAddSubtask={handleAddSubtask}
+                        onViewProject={(projectId) => router.push(`/dashboard/crm-v2?tab=projects&highlight=${projectId}`)}
                         activeTimerId={activeTimer?.task_id}
                         isUpdating={updatingTaskId === task.id}
                         isSelected={selectedTasks.has(task.id)}
@@ -1776,6 +1799,7 @@ export function TasksClient() {
                         onAssign={handleAssignTask}
                         onUpdateDueDate={handleUpdateDueDate}
                         onAddSubtask={handleAddSubtask}
+                        onViewProject={(projectId) => router.push(`/dashboard/crm-v2?tab=projects&highlight=${projectId}`)}
                         activeTimerId={activeTimer?.task_id}
                         isUpdating={updatingTaskId === task.id}
                         isSelected={selectedTasks.has(task.id)}

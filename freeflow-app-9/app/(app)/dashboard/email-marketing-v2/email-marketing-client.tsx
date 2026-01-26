@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useMemo } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
 import {
@@ -396,6 +397,13 @@ const apiHelpers = {
 // Quick actions will be defined inside the component to access state setters
 
 export default function EmailMarketingClient() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+
+  // Check for incoming navigation from other CRM modules
+  const contactEmailParam = searchParams.get('contact')
+  const segmentParam = searchParams.get('segment')
+
   // Use Supabase hooks for real data
   const {
     campaigns: dbCampaigns,
@@ -996,6 +1004,35 @@ export default function EmailMarketingClient() {
                             <div className="text-right text-sm">
                               <p className="text-gray-500">{subscriber.openRate}% opens</p>
                               <p className="text-gray-500">{subscriber.clickRate}% clicks</p>
+                            </div>
+                            {/* CRM Navigation */}
+                            <div className="flex gap-1">
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-7 px-2"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  router.push(`/dashboard/customers-v2?email=${encodeURIComponent(subscriber.email)}`)
+                                  toast.success('Opening contact profile', { description: 'View in Customer CRM...' })
+                                }}
+                                title="View Contact"
+                              >
+                                <Users className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-7 px-2"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  router.push(`/dashboard/lead-generation-v2?email=${encodeURIComponent(subscriber.email)}`)
+                                  toast.success('Opening lead history', { description: 'View lead data...' })
+                                }}
+                                title="View Lead"
+                              >
+                                <Target className="w-4 h-4" />
+                              </Button>
                             </div>
                           </div>
                         </div>

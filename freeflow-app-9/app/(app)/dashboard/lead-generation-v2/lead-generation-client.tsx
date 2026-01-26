@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useState, useMemo } from 'react'
+import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { useLeads, LeadInput, LeadStats } from '@/lib/hooks/use-leads'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -66,7 +67,9 @@ import {
   Megaphone,
   ListChecks,
   GitBranch,
-  Network
+  Network,
+  ArrowRight,
+  ExternalLink
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -298,6 +301,7 @@ const defaultStats: LeadStats = {
 }
 
 export default function LeadGenerationClient({ initialLeads, initialStats }: LeadGenerationClientProps) {
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState('leads')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedStatus, setSelectedStatus] = useState<LeadStatus | 'all'>('all')
@@ -2736,6 +2740,57 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
                           Follow-up: {formatDate(selectedLead.nextFollowUp)}
                         </Badge>
                       )}
+                    </div>
+
+                    {/* CRM Navigation */}
+                    <div className="pt-4 border-t">
+                      <h4 className="font-semibold mb-3 text-sm text-muted-foreground">CRM Actions</h4>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            router.push(`/dashboard/sales-v2?lead=${selectedLead.id}&action=convert`)
+                            toast.success('Converting lead to deal', { description: 'Opening sales pipeline...' })
+                          }}
+                        >
+                          <DollarSign className="w-4 h-4 mr-2 text-green-500" />
+                          Convert to Deal
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            router.push(`/dashboard/sales-v2?lead=${selectedLead.id}`)
+                            toast.success('Viewing deals', { description: 'Opening sales pipeline...' })
+                          }}
+                        >
+                          <ExternalLink className="w-4 h-4 mr-2 text-blue-500" />
+                          View in Pipeline
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            router.push(`/dashboard/customers-v2?lead=${selectedLead.id}`)
+                            toast.success('Viewing contact', { description: 'Opening customer CRM...' })
+                          }}
+                        >
+                          <Users className="w-4 h-4 mr-2 text-purple-500" />
+                          View Contact
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            router.push(`/dashboard/email-marketing-v2?contact=${selectedLead.email}`)
+                            toast.success('Opening email marketing', { description: 'View email campaigns...' })
+                          }}
+                        >
+                          <Mail className="w-4 h-4 mr-2 text-rose-500" />
+                          Email Campaigns
+                        </Button>
+                      </div>
                     </div>
 
                     {/* Actions */}

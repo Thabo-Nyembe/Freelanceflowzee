@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 const supabase = createClient()
 
 import { useState, useMemo } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
 import { useSalesDeals, SalesDeal } from '@/lib/hooks/use-sales'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -317,6 +318,12 @@ const defaultDealForm = {
 }
 
 export default function SalesClient() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+
+  // Check for incoming lead conversion from lead-generation
+  const leadIdParam = searchParams.get('lead')
+  const actionParam = searchParams.get('action')
 
   // Use the sales hook for real data
   const {
@@ -1259,6 +1266,11 @@ Generated on: ${new Date().toLocaleString()}
                             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); openActivityDialog(deal) }} title="Log activity">
                               <Activity className="w-4 h-4" />
                             </Button>
+                            {deal.stage === 'closed_won' && (
+                              <Button variant="ghost" size="icon" className="h-8 w-8 text-purple-600 hover:text-purple-700 hover:bg-purple-50" onClick={(e) => { e.stopPropagation(); router.push(`/dashboard/customers-v2?deal=${deal.id}&company=${encodeURIComponent(deal.company_name || '')}`); toast.success('Opening customer profile', { description: 'View the associated client...' }) }} title="View Client">
+                                <Users className="w-4 h-4" />
+                              </Button>
+                            )}
                             {!['closed_won', 'closed_lost'].includes(deal.stage) && (
                               <>
                                 <Button variant="ghost" size="icon" className="h-8 w-8 text-green-600 hover:text-green-700 hover:bg-green-50" onClick={(e) => { e.stopPropagation(); openWinLossDialog(deal, 'win') }} title="Mark as won">
@@ -1266,6 +1278,9 @@ Generated on: ${new Date().toLocaleString()}
                                 </Button>
                                 <Button variant="ghost" size="icon" className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50" onClick={(e) => { e.stopPropagation(); openWinLossDialog(deal, 'loss') }} title="Mark as lost">
                                   <XCircle className="w-4 h-4" />
+                                </Button>
+                                <Button variant="ghost" size="icon" className="h-8 w-8 text-pink-600 hover:text-pink-700 hover:bg-pink-50" onClick={(e) => { e.stopPropagation(); router.push(`/dashboard/lead-generation-v2?deal=${deal.id}`); toast.success('Viewing lead history', { description: 'Opening lead generation...' }) }} title="View Lead History">
+                                  <Target className="w-4 h-4" />
                                 </Button>
                               </>
                             )}

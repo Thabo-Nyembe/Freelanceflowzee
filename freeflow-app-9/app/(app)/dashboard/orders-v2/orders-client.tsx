@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { useOrders } from '@/lib/hooks/use-orders'
 import { Loader2 } from 'lucide-react'
@@ -403,6 +404,8 @@ const sendOrderUpdateAPI = async (orderId: string): Promise<void> => {
 }
 
 export default function OrdersClient() {
+  const router = useRouter()
+
   // Supabase hook for orders data
   const {
     orders: dbOrders,
@@ -2135,6 +2138,31 @@ export default function OrdersClient() {
                       </p>
                     </div>
                   )}
+
+                  {/* Quick Navigation Links */}
+                  <div className="flex flex-wrap items-center gap-2 pt-4 border-t">
+                    <span className="text-sm text-muted-foreground mr-2">Quick Navigation:</span>
+                    {selectedOrder.customer_id && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => router.push(`/dashboard/clients-v2?highlight=${selectedOrder.customer_id}`)}
+                      >
+                        <Users className="h-4 w-4 mr-2" />
+                        View Client
+                      </Button>
+                    )}
+                    {selectedOrder.items.length > 0 && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => router.push(`/dashboard/products-v2?highlight=${selectedOrder.items[0]?.product_id}`)}
+                      >
+                        <Package className="h-4 w-4 mr-2" />
+                        View Products
+                      </Button>
+                    )}
+                  </div>
 
                   <div className="flex items-center gap-3 pt-4 border-t">
                     <Button

@@ -1,5 +1,6 @@
 'use client'
 import { useState, useMemo, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { useCalendarEvents, type CalendarEvent, type EventType, type EventStatus } from '@/lib/hooks/use-calendar-events'
 import { useCalendars } from '@/lib/hooks/use-calendars-extended'
 import { useReminders } from '@/lib/hooks/use-reminders-extended'
@@ -190,6 +191,8 @@ const formatDateRange = (start: string, end: string) => {
 // ============================================================================
 
 export default function CalendarClient({ initialEvents }: { initialEvents: CalendarEvent[] }) {
+  const router = useRouter()
+
   // Define adapter variables locally (removed mock data imports)
   const calendarAIInsights: any[] = []
   const calendarCollaborators: any[] = []
@@ -2338,6 +2341,42 @@ END:VCALENDAR`
                   {selectedEvent.description && (
                     <div className="pt-4 border-t dark:border-gray-700">
                       <p className="text-gray-600 dark:text-gray-400">{selectedEvent.description}</p>
+                    </div>
+                  )}
+                  {/* Related Item Navigation */}
+                  {(selectedEvent.metadata?.client_id || selectedEvent.metadata?.project_id || selectedEvent.event_type === 'meeting') && (
+                    <div className="flex flex-wrap items-center gap-2 pt-4 border-t dark:border-gray-700">
+                      <span className="text-sm text-muted-foreground mr-1">Related:</span>
+                      {selectedEvent.metadata?.client_id && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => router.push(`/dashboard/clients-v2?highlight=${selectedEvent.metadata?.client_id}`)}
+                        >
+                          <Users className="h-4 w-4 mr-2" />
+                          View Client
+                        </Button>
+                      )}
+                      {selectedEvent.metadata?.project_id && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => router.push(`/dashboard/crm-v2?tab=projects&highlight=${selectedEvent.metadata?.project_id}`)}
+                        >
+                          <FileText className="h-4 w-4 mr-2" />
+                          View Project
+                        </Button>
+                      )}
+                      {selectedEvent.event_type === 'meeting' && selectedEvent.attendees && selectedEvent.attendees.length > 0 && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => router.push(`/dashboard/clients-v2?search=${encodeURIComponent(selectedEvent.attendees?.[0]?.email || '')}`)}
+                        >
+                          <Users className="h-4 w-4 mr-2" />
+                          Find Attendee
+                        </Button>
+                      )}
                     </div>
                   )}
                   <div className="flex items-center gap-2 pt-4 border-t dark:border-gray-700">

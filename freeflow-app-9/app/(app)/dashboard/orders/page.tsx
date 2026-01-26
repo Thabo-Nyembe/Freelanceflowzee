@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
 
 export default function Page() {
-  redirect('/dashboard/ai-code-builder-v2')
+  redirect('/dashboard/orders-v2')
 }

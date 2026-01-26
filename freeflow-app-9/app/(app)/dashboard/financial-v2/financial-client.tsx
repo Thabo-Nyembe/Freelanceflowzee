@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { useRouter } from 'next/navigation'
 import {
   DollarSign,
   TrendingUp,
@@ -33,7 +34,8 @@ import {
   Search,
   ArrowUp,
   ArrowDown,
-  Trash2
+  Trash2,
+  User
 } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
@@ -141,6 +143,7 @@ const budgetItems: BudgetItem[] = []
 const bankAccounts: BankAccount[] = []
 
 export default function FinancialClient({ initialFinancial }: { initialFinancial: FinancialRecord[] }) {
+  const router = useRouter()
 
   const [activeTab, setActiveTab] = useState('overview')
   const [selectedPeriod, setSelectedPeriod] = useState('this-year')
@@ -1577,6 +1580,15 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-center">
                           <div className="flex items-center justify-center gap-1">
+                            {transaction.payee && (
+                              <button
+                                onClick={() => router.push(`/dashboard/clients-v2?search=${encodeURIComponent(transaction.payee || '')}`)}
+                                className="p-1.5 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
+                                title="View Client"
+                              >
+                                <User className="w-4 h-4" />
+                              </button>
+                            )}
                             {transaction.status === 'pending' && (
                               <button
                                 onClick={() => handleApproveTransaction(transaction)}

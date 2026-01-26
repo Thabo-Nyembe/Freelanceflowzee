@@ -95,7 +95,14 @@ import {
   Folder,
   RefreshCw,
   Edit,
-  ArrowUpRight
+  ArrowUpRight,
+  // Icons for orphaned pages
+  Bot,
+  Calculator,
+  Building,
+  CheckSquare,
+  CreditCard,
+  FolderSync
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -188,7 +195,11 @@ const DEFAULT_CATEGORIES: SidebarCategory[] = [
           { id: 'ai-settings', name: 'AI Settings', href: '/dashboard/ai-settings', icon: Settings, description: 'AI configuration', badge: 'New' },
           { id: 'ai-business-advisor', name: 'AI Business Advisor', href: '/dashboard/ai-business-advisor', icon: Brain, description: 'Business AI advisor', badge: 'New' },
           { id: 'ai-content-studio', name: 'AI Content Studio', href: '/dashboard/ai-content-studio', icon: Sparkles, description: 'Content generation', badge: 'New' },
-          { id: 'real-time-translation', name: 'Real-time Translation', href: '/dashboard/real-time-translation', icon: MessageSquare, description: 'AI translation', badge: 'New' }
+          { id: 'real-time-translation', name: 'Real-time Translation', href: '/dashboard/real-time-translation', icon: MessageSquare, description: 'AI translation', badge: 'New' },
+          { id: 'ai-agents', name: 'AI Agents', href: '/dashboard/ai-agents-v2', icon: Bot, description: 'AI agent automation', badge: 'New' },
+          { id: 'ai-code-builder', name: 'AI Code Builder', href: '/dashboard/ai-code-builder-v2', icon: Code, description: 'AI code generation', badge: 'New' },
+          { id: 'meeting-summaries', name: 'Meeting Summaries', href: '/dashboard/meeting-summaries-v2', icon: FileText, description: 'AI meeting notes', badge: 'New' },
+          { id: 'voice-ai', name: 'Voice AI', href: '/dashboard/voice-ai-v2', icon: Mic, description: 'Voice AI assistant', badge: 'New' }
         ]
       }
     ]
@@ -292,7 +303,11 @@ const DEFAULT_CATEGORIES: SidebarCategory[] = [
           { id: 'transactions', name: 'Transactions', href: '/dashboard/transactions-v2', icon: DollarSign, description: 'Transaction history', badge: 'New' },
           { id: 'budgets', name: 'Budgets', href: '/dashboard/budgets-v2', icon: DollarSign, description: 'Budget planning', badge: 'New' },
           { id: 'billing', name: 'Billing', href: '/dashboard/billing-v2', icon: Receipt, description: 'Billing management', badge: 'New' },
-          { id: 'payroll', name: 'Payroll', href: '/dashboard/payroll-v2', icon: DollarSign, description: 'Payroll management', badge: 'New' }
+          { id: 'payroll', name: 'Payroll', href: '/dashboard/payroll-v2', icon: DollarSign, description: 'Payroll management', badge: 'New' },
+          { id: 'accounting', name: 'Accounting', href: '/dashboard/accounting-v2', icon: Calculator, description: 'Accounting management', badge: 'New' },
+          { id: 'tax-intelligence', name: 'Tax Intelligence', href: '/dashboard/tax-intelligence-v2', icon: Receipt, description: 'Tax planning & analysis', badge: 'New' },
+          { id: 'bank-connections', name: 'Bank Connections', href: '/dashboard/bank-connections', icon: Building, description: 'Bank account linking', badge: 'New' },
+          { id: 'recurring-invoices', name: 'Recurring Invoices', href: '/dashboard/recurring-invoices', icon: RefreshCw, description: 'Automated invoicing', badge: 'New' }
         ]
       },
       {
@@ -445,7 +460,8 @@ const DEFAULT_CATEGORIES: SidebarCategory[] = [
         items: [
           { id: 'video-studio', name: 'Video Studio', href: '/dashboard/video-studio-v2', icon: Video, description: 'Video editing' },
           { id: 'canvas', name: 'Canvas', href: '/dashboard/canvas-v2', icon: Palette, description: 'Design canvas' },
-          { id: 'gallery', name: 'Gallery', href: '/dashboard/gallery-v2', icon: Image, description: 'Media gallery' }
+          { id: 'gallery', name: 'Gallery', href: '/dashboard/gallery-v2', icon: Image, description: 'Media gallery' },
+          { id: 'screen-recording', name: 'Screen Recording', href: '/dashboard/screen-recording-v2', icon: Monitor, description: 'Screen capture', badge: 'New' }
         ]
       },
       {
@@ -555,7 +571,11 @@ const DEFAULT_CATEGORIES: SidebarCategory[] = [
           { id: 'app-store', name: 'App Store', href: '/dashboard/app-store-v2', icon: Store, description: 'Applications', badge: 'New' },
           { id: 'theme-store', name: 'Theme Store', href: '/dashboard/theme-store-v2', icon: Palette, description: 'Themes & templates', badge: 'New' },
           { id: 'pricing', name: 'Pricing', href: '/dashboard/pricing-v2', icon: Tag, description: 'Price management', badge: 'New' },
-          { id: 'add-ons', name: 'Add-ons', href: '/dashboard/add-ons-v2', icon: Puzzle, description: 'Extensions', badge: 'New' }
+          { id: 'add-ons', name: 'Add-ons', href: '/dashboard/add-ons-v2', icon: Puzzle, description: 'Extensions', badge: 'New' },
+          { id: 'subscriptions', name: 'Subscriptions', href: '/dashboard/subscriptions-v2', icon: CreditCard, description: 'Subscription management', badge: 'New' },
+          { id: 'vendors', name: 'Vendors', href: '/dashboard/vendors-v2', icon: Users, description: 'Vendor management', badge: 'New' },
+          { id: 'disputes', name: 'Disputes', href: '/dashboard/disputes', icon: AlertTriangle, description: 'Dispute resolution', badge: 'New' },
+          { id: 'jobs', name: 'Jobs', href: '/dashboard/jobs', icon: Briefcase, description: 'Job postings', badge: 'New' }
         ]
       },
       {
@@ -630,7 +650,8 @@ const DEFAULT_CATEGORIES: SidebarCategory[] = [
           { id: 'kazi-workflows', name: 'Kazi Workflows', href: '/dashboard/kazi-workflows-v2', icon: Workflow, description: 'Visual workflow automation', badge: 'Hot' },
           { id: 'kazi-automations', name: 'Kazi Automations', href: '/dashboard/kazi-automations-v2', icon: Zap, description: 'Business automation rules', badge: 'Hot' },
           { id: 'workflows', name: 'Workflows', href: '/dashboard/workflows-v2', icon: Workflow, description: 'Workflow automation', badge: 'New' },
-          { id: 'automations', name: 'Automations', href: '/dashboard/automations-v2', icon: Zap, description: 'Automation rules', badge: 'New' }
+          { id: 'automations', name: 'Automations', href: '/dashboard/automations-v2', icon: Zap, description: 'Automation rules', badge: 'New' },
+          { id: 'automation-recipes', name: 'Automation Recipes', href: '/dashboard/automation-recipes-v2', icon: Zap, description: 'Pre-built automations', badge: 'New' }
         ]
       }
     ]
@@ -649,7 +670,9 @@ const DEFAULT_CATEGORIES: SidebarCategory[] = [
           { id: 'sprints', name: 'Sprints', href: '/dashboard/sprints-v2', icon: Timer, description: 'Sprint planning', badge: 'New' },
           { id: 'milestones', name: 'Milestones', href: '/dashboard/milestones-v2', icon: Target, description: 'Project milestones', badge: 'New' },
           { id: 'capacity', name: 'Capacity', href: '/dashboard/capacity-v2', icon: Gauge, description: 'Team capacity', badge: 'New' },
-          { id: 'allocation', name: 'Allocation', href: '/dashboard/allocation-v2', icon: PieChart, description: 'Resource allocation', badge: 'New' }
+          { id: 'allocation', name: 'Allocation', href: '/dashboard/allocation-v2', icon: PieChart, description: 'Resource allocation', badge: 'New' },
+          { id: 'tasks', name: 'Tasks', href: '/dashboard/tasks-v2', icon: CheckSquare, description: 'Task management', badge: 'New' },
+          { id: 'goals', name: 'Goals', href: '/dashboard/goals', icon: Target, description: 'Goal tracking', badge: 'New' }
         ]
       },
       {
@@ -700,7 +723,9 @@ const DEFAULT_CATEGORIES: SidebarCategory[] = [
           { id: 'admin', name: 'Admin', href: '/dashboard/admin-v2', icon: Shield, description: 'Admin dashboard', badge: 'New' },
           { id: 'user-management-v2', name: 'User Management', href: '/dashboard/user-management-v2', icon: Users, description: 'Manage users', badge: 'New' },
           { id: 'permissions', name: 'Permissions', href: '/dashboard/permissions-v2', icon: Key, description: 'Permission settings', badge: 'New' },
-          { id: 'security', name: 'Security', href: '/dashboard/security-v2', icon: Lock, description: 'Security settings', badge: 'New' }
+          { id: 'security', name: 'Security', href: '/dashboard/security-v2', icon: Lock, description: 'Security settings', badge: 'New' },
+          { id: 'directory-sync', name: 'Directory Sync', href: '/dashboard/directory-sync-v2', icon: FolderSync, description: 'Directory synchronization', badge: 'New' },
+          { id: 'white-label-v2', name: 'White Label', href: '/dashboard/white-label-v2', icon: Palette, description: 'Platform branding', badge: 'Pro' }
         ]
       },
       {

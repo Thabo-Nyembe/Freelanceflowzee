@@ -4,6 +4,7 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -366,6 +367,14 @@ const getAccountRatingColor = (rating: 'hot' | 'warm' | 'cold') => {
 // ============================================================================
 
 export default function CustomersClient({ initialCustomers: _initialCustomers }: { initialCustomers?: Client[] }) {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+
+  // Check for incoming navigation from sales or lead generation
+  const dealIdParam = searchParams.get('deal')
+  const companyParam = searchParams.get('company')
+  const leadIdParam = searchParams.get('lead')
+
   const [activeTab, setActiveTab] = useState('contacts')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null)
@@ -999,6 +1008,21 @@ export default function CustomersClient({ initialCustomers: _initialCustomers }:
                             </Button>
                             <Button size="sm" variant="ghost" className="text-red-500 hover:text-red-700" onClick={(e) => { e.stopPropagation(); handleDeleteClick(client.id) }}>
                               <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                          {/* CRM Cross-Navigation */}
+                          <div className="flex items-center gap-1 mt-1">
+                            <Button size="sm" variant="outline" className="h-7 text-xs" onClick={(e) => { e.stopPropagation(); router.push(`/dashboard/lead-generation-v2?contact=${client.id}`); toast.success('Opening lead history', { description: 'View lead generation data...' }) }}>
+                              <Target className="h-3 w-3 mr-1" />
+                              Lead History
+                            </Button>
+                            <Button size="sm" variant="outline" className="h-7 text-xs" onClick={(e) => { e.stopPropagation(); router.push(`/dashboard/sales-v2?contact=${client.id}&company=${encodeURIComponent(client.company || '')}`); toast.success('Opening deals', { description: 'View associated deals...' }) }}>
+                              <DollarSign className="h-3 w-3 mr-1" />
+                              Deals
+                            </Button>
+                            <Button size="sm" variant="outline" className="h-7 text-xs" onClick={(e) => { e.stopPropagation(); router.push(`/dashboard/email-marketing-v2?contact=${client.email}`); toast.success('Opening campaigns', { description: 'View email campaigns...' }) }}>
+                              <Megaphone className="h-3 w-3 mr-1" />
+                              Campaigns
                             </Button>
                           </div>
                           <span className="text-xs text-gray-500">

@@ -2297,6 +2297,23 @@ export default function InvoicingClient() {
                   </div>
                 )}
 
+                {/* Client Navigation */}
+                {selectedInvoice.client.id && (
+                  <div className="flex items-center gap-3 pt-4 border-t">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => router.push(`/dashboard/clients-v2?highlight=${selectedInvoice.client.id}`)}
+                    >
+                      <Users className="h-4 w-4 mr-2" />
+                      View Client
+                    </Button>
+                    <span className="text-sm text-muted-foreground">
+                      View full client profile and history
+                    </span>
+                  </div>
+                )}
+
                 {/* Actions */}
                 <div className="flex items-center gap-3 pt-4 border-t">
                   <Button className="flex-1 bg-emerald-600 hover:bg-emerald-700" onClick={handleSendInvoice}>
