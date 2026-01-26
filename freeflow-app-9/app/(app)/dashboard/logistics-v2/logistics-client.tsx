@@ -706,6 +706,59 @@ export default function LogisticsClient() {
     country: ''
   })
 
+  // Route form state
+  const [showAddRouteDialog, setShowAddRouteDialog] = useState(false)
+  const [showRouteDetailsDialog, setShowRouteDetailsDialog] = useState(false)
+  const [selectedRoute, setSelectedRoute] = useState<DbRoute | null>(null)
+  const [newRouteForm, setNewRouteForm] = useState({
+    route_name: '',
+    route_code: '',
+    route_type: 'local' as 'local' | 'regional' | 'national' | 'international' | 'express',
+    origin_city: '',
+    destination_city: '',
+    driver_name: '',
+    driver_phone: '',
+    vehicle_type: 'van' as 'van' | 'truck' | 'semi-truck' | 'cargo-plane' | 'container-ship' | 'motorcycle' | 'drone',
+    total_stops: 0,
+    total_packages: 0,
+    total_distance_miles: 0,
+    estimated_duration_minutes: 0,
+    special_instructions: ''
+  })
+
+  // Fleet vehicle form state
+  const [showAddVehicleDialog, setShowAddVehicleDialog] = useState(false)
+  const [showVehicleDetailsDialog, setShowVehicleDetailsDialog] = useState(false)
+  const [selectedVehicle, setSelectedVehicle] = useState<any | null>(null)
+  const [newVehicleForm, setNewVehicleForm] = useState({
+    vehicle_code: '',
+    vehicle_type: 'van',
+    make: '',
+    model: '',
+    year: new Date().getFullYear(),
+    license_plate: '',
+    capacity_weight: 0,
+    capacity_volume: 0,
+    fuel_type: 'diesel' as 'gasoline' | 'diesel' | 'electric' | 'hybrid' | 'jet-fuel' | 'lng',
+    fuel_efficiency: 0
+  })
+
+  // Assign driver state
+  const [showAssignDriverDialog, setShowAssignDriverDialog] = useState(false)
+  const [assignDriverForm, setAssignDriverForm] = useState({
+    driver_name: '',
+    driver_phone: '',
+    vehicle_id: ''
+  })
+
+  // Complete delivery state
+  const [showCompleteDeliveryDialog, setShowCompleteDeliveryDialog] = useState(false)
+  const [completeDeliveryForm, setCompleteDeliveryForm] = useState({
+    signature_collected: false,
+    delivery_notes: '',
+    photo_proof: false
+  })
+
   // CRUD Operations
   const handleCreateShipment = async () => {
     setIsSaving(true)
@@ -1377,6 +1430,356 @@ export default function LogisticsClient() {
   const handleSyncCarriers = async () => {
     await refreshCarriers()
     toast.success('Carriers synced')
+  }
+
+  // =====================================================
+  // ROUTE HANDLERS - Wire to useLogisticsRoutes hook
+  // =====================================================
+
+  const handleCreateRoute = async () => {
+    if (!newRouteForm.route_name.trim()) {
+      toast.error('Route name is required')
+      return
+    }
+    if (!newRouteForm.route_code.trim()) {
+      toast.error('Route code is required')
+      return
+    }
+    setIsSaving(true)
+    try {
+      await createRoute({
+        route_name: newRouteForm.route_name.trim(),
+        route_code: newRouteForm.route_code.trim().toUpperCase(),
+        route_type: newRouteForm.route_type,
+        origin_city: newRouteForm.origin_city.trim() || null,
+        destination_city: newRouteForm.destination_city.trim() || null,
+        driver_name: newRouteForm.driver_name.trim() || null,
+        driver_phone: newRouteForm.driver_phone.trim() || null,
+        vehicle_type: newRouteForm.vehicle_type,
+        total_stops: newRouteForm.total_stops,
+        total_packages: newRouteForm.total_packages,
+        total_distance_miles: newRouteForm.total_distance_miles,
+        estimated_duration_minutes: newRouteForm.estimated_duration_minutes,
+        special_instructions: newRouteForm.special_instructions.trim() || null,
+        status: 'planned',
+        completed_stops: 0,
+        delivered_packages: 0,
+        completed_distance_miles: 0
+      })
+      toast.success('Route created successfully')
+      setNewRouteForm({
+        route_name: '',
+        route_code: '',
+        route_type: 'local',
+        origin_city: '',
+        destination_city: '',
+        driver_name: '',
+        driver_phone: '',
+        vehicle_type: 'van',
+        total_stops: 0,
+        total_packages: 0,
+        total_distance_miles: 0,
+        estimated_duration_minutes: 0,
+        special_instructions: ''
+      })
+      setShowAddRouteDialog(false)
+    } catch (error) {
+      console.error('Create route error:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to create route')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleUpdateRoute = async (routeId: string, updates: Partial<typeof newRouteForm>) => {
+    setIsSaving(true)
+    try {
+      await updateRoute(routeId, updates)
+      toast.success('Route updated successfully')
+      setShowRouteDetailsDialog(false)
+      setSelectedRoute(null)
+    } catch (error) {
+      console.error('Update route error:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to update route')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleDeleteRoute = async (routeId: string) => {
+    setIsSaving(true)
+    try {
+      await deleteRoute(routeId)
+      toast.success('Route deleted successfully')
+      setShowRouteDetailsDialog(false)
+      setSelectedRoute(null)
+    } catch (error) {
+      console.error('Delete route error:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to delete route')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleStartRoute = async (routeId: string) => {
+    setIsSaving(true)
+    try {
+      await startRoute(routeId)
+      toast.success('Route started - driver is now in transit')
+    } catch (error) {
+      console.error('Start route error:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to start route')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleCompleteRoute = async (routeId: string) => {
+    setIsSaving(true)
+    try {
+      await completeRoute(routeId)
+      toast.success('Route completed successfully')
+      setShowRouteDetailsDialog(false)
+      setSelectedRoute(null)
+    } catch (error) {
+      console.error('Complete route error:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to complete route')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleViewRoute = (route: DbRoute) => {
+    setSelectedRoute(route)
+    setShowRouteDetailsDialog(true)
+  }
+
+  // =====================================================
+  // FLEET VEHICLE HANDLERS - Wire to useFleetVehicles hook
+  // =====================================================
+
+  const handleCreateVehicle = async () => {
+    if (!newVehicleForm.vehicle_code.trim()) {
+      toast.error('Vehicle code is required')
+      return
+    }
+    setIsSaving(true)
+    try {
+      await createVehicle({
+        vehicle_code: newVehicleForm.vehicle_code.trim().toUpperCase(),
+        vehicle_type: newVehicleForm.vehicle_type,
+        make: newVehicleForm.make.trim() || null,
+        model: newVehicleForm.model.trim() || null,
+        year: newVehicleForm.year || null,
+        license_plate: newVehicleForm.license_plate.trim() || null,
+        capacity_weight: newVehicleForm.capacity_weight || null,
+        capacity_volume: newVehicleForm.capacity_volume || null,
+        fuel_type: newVehicleForm.fuel_type,
+        fuel_efficiency: newVehicleForm.fuel_efficiency || null,
+        status: 'available',
+        total_miles: 0
+      })
+      toast.success('Vehicle added to fleet')
+      setNewVehicleForm({
+        vehicle_code: '',
+        vehicle_type: 'van',
+        make: '',
+        model: '',
+        year: new Date().getFullYear(),
+        license_plate: '',
+        capacity_weight: 0,
+        capacity_volume: 0,
+        fuel_type: 'diesel',
+        fuel_efficiency: 0
+      })
+      setShowAddVehicleDialog(false)
+    } catch (error) {
+      console.error('Create vehicle error:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to add vehicle')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleUpdateVehicle = async (vehicleId: string, updates: Record<string, unknown>) => {
+    setIsSaving(true)
+    try {
+      await updateVehicle(vehicleId, updates)
+      toast.success('Vehicle updated successfully')
+      setShowVehicleDetailsDialog(false)
+      setSelectedVehicle(null)
+    } catch (error) {
+      console.error('Update vehicle error:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to update vehicle')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleDeleteVehicle = async (vehicleId: string) => {
+    setIsSaving(true)
+    try {
+      await deleteVehicle(vehicleId)
+      toast.success('Vehicle removed from fleet')
+      setShowVehicleDetailsDialog(false)
+      setSelectedVehicle(null)
+    } catch (error) {
+      console.error('Delete vehicle error:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to remove vehicle')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleViewVehicle = (vehicle: any) => {
+    setSelectedVehicle(vehicle)
+    setShowVehicleDetailsDialog(true)
+  }
+
+  // =====================================================
+  // TRACKING HANDLERS
+  // =====================================================
+
+  const handleTrackShipment = async (shipmentId: string, trackingUpdate: {
+    location: string
+    status: string
+    description: string
+  }) => {
+    setIsSaving(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Authentication required')
+        return
+      }
+
+      // Insert tracking event
+      const { error: trackingError } = await supabase
+        .from('logistics_tracking')
+        .insert({
+          shipment_id: shipmentId,
+          location: trackingUpdate.location,
+          status: trackingUpdate.status,
+          description: trackingUpdate.description,
+          timestamp: new Date().toISOString()
+        })
+
+      if (trackingError) throw trackingError
+
+      // Update shipment status
+      const { error: shipmentError } = await supabase
+        .from('logistics_shipments')
+        .update({
+          status: trackingUpdate.status,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', shipmentId)
+
+      if (shipmentError) throw shipmentError
+
+      toast.success('Tracking information updated')
+      await refreshShipments()
+    } catch (error) {
+      console.error('Track shipment error:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to update tracking')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // =====================================================
+  // ASSIGN DRIVER HANDLER
+  // =====================================================
+
+  const handleAssignDriver = async (routeId: string) => {
+    if (!assignDriverForm.driver_name.trim()) {
+      toast.error('Driver name is required')
+      return
+    }
+    setIsSaving(true)
+    try {
+      await updateRoute(routeId, {
+        driver_name: assignDriverForm.driver_name.trim(),
+        driver_phone: assignDriverForm.driver_phone.trim() || null,
+        vehicle_id: assignDriverForm.vehicle_id || null
+      })
+      toast.success(`Driver ${assignDriverForm.driver_name} assigned to route`)
+      setAssignDriverForm({ driver_name: '', driver_phone: '', vehicle_id: '' })
+      setShowAssignDriverDialog(false)
+    } catch (error) {
+      console.error('Assign driver error:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to assign driver')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleOpenAssignDriver = (route: DbRoute) => {
+    setSelectedRoute(route)
+    setAssignDriverForm({
+      driver_name: route.driver_name || '',
+      driver_phone: route.driver_phone || '',
+      vehicle_id: ''
+    })
+    setShowAssignDriverDialog(true)
+  }
+
+  // =====================================================
+  // COMPLETE DELIVERY HANDLER
+  // =====================================================
+
+  const handleCompleteDelivery = async (shipmentId: string) => {
+    setIsSaving(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Authentication required')
+        return
+      }
+
+      // Update shipment to delivered
+      const { error: shipmentError } = await supabase
+        .from('logistics_shipments')
+        .update({
+          status: 'delivered',
+          actual_delivery: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', shipmentId)
+
+      if (shipmentError) throw shipmentError
+
+      // Add tracking event for delivery
+      const { error: trackingError } = await supabase
+        .from('logistics_tracking')
+        .insert({
+          shipment_id: shipmentId,
+          location: 'Delivery Address',
+          status: 'delivered',
+          description: `Package delivered. ${completeDeliveryForm.signature_collected ? 'Signature collected.' : ''} ${completeDeliveryForm.delivery_notes}`.trim(),
+          timestamp: new Date().toISOString()
+        })
+
+      if (trackingError) {
+        console.warn('Failed to add tracking event:', trackingError)
+      }
+
+      toast.success('Delivery marked as complete')
+      setCompleteDeliveryForm({ signature_collected: false, delivery_notes: '', photo_proof: false })
+      setShowCompleteDeliveryDialog(false)
+      await refreshShipments()
+    } catch (error) {
+      console.error('Complete delivery error:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to complete delivery')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleOpenCompleteDelivery = (shipment: DbShipment) => {
+    setSelectedDbShipment(shipment)
+    setCompleteDeliveryForm({ signature_collected: false, delivery_notes: '', photo_proof: false })
+    setShowCompleteDeliveryDialog(true)
   }
 
   // Quick action handlers from dashboard

@@ -375,6 +375,7 @@ export default function MaintenanceClient() {
   const [showCriticalAlertsDialog, setShowCriticalAlertsDialog] = useState(false)
   const [showReportsDialog, setShowReportsDialog] = useState(false)
   const [selectedPartForReorder, setSelectedPartForReorder] = useState<SparePartInventory | null>(null)
+  const [reorderQuantity, setReorderQuantity] = useState<number>(0)
   const [diagnosticsRunning, setDiagnosticsRunning] = useState(false)
   const [diagnosticsProgress, setDiagnosticsProgress] = useState(0)
   const diagnosticsIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -740,15 +741,49 @@ export default function MaintenanceClient() {
   // Handle reorder part
   const handleReorderPart = (part: SparePartInventory) => {
     setSelectedPartForReorder(part)
+    setReorderQuantity(part.maxQuantity - part.quantity)
     setShowReorderDialog(true)
   }
 
-  // Submit reorder
-  const handleSubmitReorder = () => {
-    if (selectedPartForReorder) {
-      toast.success(`Reorder placed for ${selectedPartForReorder.name}`)
+  // Submit reorder - wired to API
+  const handleSubmitReorder = async () => {
+    if (!selectedPartForReorder) {
+      toast.error('No part selected for reorder')
+      return
+    }
+    if (reorderQuantity <= 0) {
+      toast.error('Please enter a valid quantity')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const response = await fetch('/api/maintenance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'reorder_part',
+          partId: selectedPartForReorder.id,
+          partName: selectedPartForReorder.name,
+          quantity: reorderQuantity
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to place reorder')
+      }
+
+      const result = await response.json()
+      toast.success(`Reorder placed for ${selectedPartForReorder.name} (${reorderQuantity} units)`)
       setShowReorderDialog(false)
       setSelectedPartForReorder(null)
+      setReorderQuantity(0)
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to place reorder')
+      console.error('Error placing reorder:', err)
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -988,10 +1023,39 @@ export default function MaintenanceClient() {
     toast.info('Viewing asset inventory')
   }
 
-  // Archive completed orders using DB data
-  const handleArchiveOrders = () => {
+  // Archive completed orders - wired to API
+  const handleArchiveOrders = async () => {
     const completedCount = dbMaintenanceWindows.filter(w => w.status === 'completed').length
-    toast.success(`${completedCount} completed work orders archived`)
+    if (completedCount === 0) {
+      toast.info('No completed work orders to archive')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const response = await fetch('/api/maintenance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'archive_work_orders'
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to archive work orders')
+      }
+
+      const result = await response.json()
+      toast.success(`${result.archived || completedCount} completed work orders archived`)
+      // Refresh the data to reflect changes
+      fetchWindows()
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Failed to archive work orders')
+      console.error('Error archiving work orders:', err)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   // Quick Actions with real dialog functionality
@@ -2905,7 +2969,13 @@ export default function MaintenanceClient() {
               </div>
               <div>
                 <Label>Order Quantity</Label>
-                <Input type="number" defaultValue={selectedPartForReorder.maxQuantity - selectedPartForReorder.quantity} className="mt-1.5" />
+                <Input
+                  type="number"
+                  value={reorderQuantity}
+                  onChange={(e) => setReorderQuantity(parseInt(e.target.value) || 0)}
+                  min={1}
+                  className="mt-1.5"
+                />
               </div>
               <div>
                 <Label>Supplier</Label>
@@ -2919,9 +2989,16 @@ export default function MaintenanceClient() {
             </div>
           )}
           <div className="flex justify-end gap-3">
-            <Button variant="outline" onClick={() => setShowReorderDialog(false)}>Cancel</Button>
-            <Button onClick={handleSubmitReorder} className="bg-gradient-to-r from-orange-600 to-amber-600 text-white">
-              Place Order
+            <Button variant="outline" onClick={() => setShowReorderDialog(false)} disabled={isSubmitting}>Cancel</Button>
+            <Button onClick={handleSubmitReorder} disabled={isSubmitting} className="bg-gradient-to-r from-orange-600 to-amber-600 text-white">
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Placing Order...
+                </>
+              ) : (
+                'Place Order'
+              )}
             </Button>
           </div>
         </DialogContent>

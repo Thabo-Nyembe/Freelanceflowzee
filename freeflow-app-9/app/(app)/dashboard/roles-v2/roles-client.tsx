@@ -10,7 +10,7 @@ import {
   FileText, AlertTriangle, ShieldCheck, ShieldAlert,
   UserPlus, UsersRound, FolderLock, KeyRound, Layers, Bell, Loader2
 } from 'lucide-react'
-import { useRoles, type UserRole } from '@/lib/hooks/use-roles'
+import { useRoles, useRoleAssignments, useRolePermissions, type UserRole, type RolePermission } from '@/lib/hooks/use-roles'
 import { createClient } from '@/lib/supabase/client'
 
 // Enhanced & Competitive Upgrade Components
@@ -335,11 +335,43 @@ export default function RolesClient() {
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [cloneDialogOpen, setCloneDialogOpen] = useState(false)
+  const [assignDialogOpen, setAssignDialogOpen] = useState(false)
+  const [permissionDialogOpen, setPermissionDialogOpen] = useState(false)
   const [roleToDelete, setRoleToDelete] = useState<string | null>(null)
   const [roleToClone, setRoleToClone] = useState<{ id: string; name: string } | null>(null)
+  const [roleToAssign, setRoleToAssign] = useState<{ id: string; name: string } | null>(null)
+  const [roleForPermissions, setRoleForPermissions] = useState<{ id: string; name: string; permissions: string[] } | null>(null)
   const [cloneName, setCloneName] = useState('')
   const [editingRole, setEditingRole] = useState<UserRole | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Assignment form state
+  const [assignmentUserId, setAssignmentUserId] = useState('')
+  const [assignmentNotes, setAssignmentNotes] = useState('')
+  const [assignmentExpiry, setAssignmentExpiry] = useState('')
+
+  // Permission selection state
+  const [selectedPermissions, setSelectedPermissions] = useState<string[]>([])
+
+  // Role assignments hook - track selected role for assignments
+  const [selectedRoleForAssignments, setSelectedRoleForAssignments] = useState<string>('')
+  const {
+    assignments: roleAssignments,
+    loading: assignmentsLoading,
+    assignRole: assignRoleToUser,
+    revokeAssignment,
+    reactivateAssignment,
+    deleteAssignment
+  } = useRoleAssignments(selectedRoleForAssignments)
+
+  // Role permissions hook
+  const {
+    permissions: availablePermissions,
+    loading: permissionsLoading,
+    createPermission,
+    updatePermission,
+    deletePermission
+  } = useRolePermissions()
 
   // Form state
   const [formState, setFormState] = useState(initialRoleFormState)
@@ -601,8 +633,135 @@ export default function RolesClient() {
     }
   }
 
-  const handleAssignRole = (roleName: string) => {
-    toast.info('Assign Role', { description: `Assigning "${roleName}" to users...` })
+  const handleAssignRole = (roleId: string, roleName: string) => {
+    setRoleToAssign({ id: roleId, name: roleName })
+    setSelectedRoleForAssignments(roleId)
+    setAssignmentUserId('')
+    setAssignmentNotes('')
+    setAssignmentExpiry('')
+    setAssignDialogOpen(true)
+  }
+
+  const handleSubmitAssignment = async () => {
+    if (!roleToAssign || !assignmentUserId.trim()) {
+      toast.error('Validation Error', { description: 'Please select a user to assign the role to' })
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      await assignRoleToUser(
+        assignmentUserId,
+        assignmentNotes || undefined,
+        assignmentExpiry || undefined
+      )
+      setAssignDialogOpen(false)
+      setRoleToAssign(null)
+      setAssignmentUserId('')
+      setAssignmentNotes('')
+      setAssignmentExpiry('')
+      toast.success('Role Assigned', { description: `Role "${roleToAssign.name}" assigned successfully` })
+    } catch (error) {
+      // Error is handled by the hook
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleRevokeAssignment = async (assignmentId: string) => {
+    setIsSubmitting(true)
+    try {
+      await revokeAssignment(assignmentId)
+    } catch (error) {
+      // Error is handled by the hook
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleReactivateAssignment = async (assignmentId: string) => {
+    setIsSubmitting(true)
+    try {
+      await reactivateAssignment(assignmentId)
+    } catch (error) {
+      // Error is handled by the hook
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleDeleteAssignment = async (assignmentId: string) => {
+    if (!confirm('Are you sure you want to permanently delete this assignment?')) return
+    setIsSubmitting(true)
+    try {
+      await deleteAssignment(assignmentId)
+    } catch (error) {
+      // Error is handled by the hook
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Permission management handlers
+  const handleManagePermissions = (roleId: string, roleName: string, currentPermissions: string[]) => {
+    setRoleForPermissions({ id: roleId, name: roleName, permissions: currentPermissions })
+    setSelectedPermissions(currentPermissions)
+    setPermissionDialogOpen(true)
+  }
+
+  const handleSavePermissions = async () => {
+    if (!roleForPermissions) return
+
+    setIsSubmitting(true)
+    try {
+      await updateRole(roleForPermissions.id, { permissions: selectedPermissions })
+      setPermissionDialogOpen(false)
+      setRoleForPermissions(null)
+      setSelectedPermissions([])
+      toast.success('Permissions Updated', { description: `Permissions for "${roleForPermissions.name}" saved successfully` })
+    } catch (error) {
+      // Error is handled by the hook
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleTogglePermission = (permissionKey: string) => {
+    setSelectedPermissions(prev =>
+      prev.includes(permissionKey)
+        ? prev.filter(p => p !== permissionKey)
+        : [...prev, permissionKey]
+    )
+  }
+
+  const handleCreateNewPermission = async (permissionData: { permission_key: string; display_name: string; description?: string; category?: string }) => {
+    setIsSubmitting(true)
+    try {
+      await createPermission({
+        permission_key: permissionData.permission_key,
+        display_name: permissionData.display_name,
+        description: permissionData.description || null,
+        category: permissionData.category || 'General',
+        is_active: true
+      })
+      toast.success('Permission Created', { description: `Permission "${permissionData.display_name}" created successfully` })
+    } catch (error) {
+      // Error is handled by the hook
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleDeletePermission = async (permissionId: string) => {
+    if (!confirm('Are you sure you want to delete this permission?')) return
+    setIsSubmitting(true)
+    try {
+      await deletePermission(permissionId)
+    } catch (error) {
+      // Error is handled by the hook
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const handleRefreshRoles = async () => {
@@ -1326,7 +1485,13 @@ export default function RolesClient() {
                   <CardContent>
                     <div className="space-y-2">
                       <Button onClick={handleCreateRole} variant="outline" className="w-full justify-start text-sm"><Plus className="w-4 h-4 mr-2" />Create New Role</Button>
-                      <Button onClick={() => handleAssignRole('selected role')} variant="outline" className="w-full justify-start text-sm"><UserPlus className="w-4 h-4 mr-2" />Assign Users</Button>
+                      <Button onClick={() => {
+                        if (combinedRoles.length > 0) {
+                          handleAssignRole(combinedRoles[0].id, combinedRoles[0].name)
+                        } else {
+                          toast.info('No Roles', { description: 'Create a role first before assigning users' })
+                        }
+                      }} variant="outline" className="w-full justify-start text-sm"><UserPlus className="w-4 h-4 mr-2" />Assign Users</Button>
                       <Button onClick={handleExportRoles} variant="outline" className="w-full justify-start text-sm"><Download className="w-4 h-4 mr-2" />Export Report</Button>
                       <Button onClick={handleRefreshRoles} variant="outline" className="w-full justify-start text-sm"><RefreshCw className="w-4 h-4 mr-2" />Sync Directory</Button>
                     </div>
@@ -1526,18 +1691,24 @@ export default function RolesClient() {
                           <Badge key={idx} variant="outline" className="text-xs">{tag}</Badge>
                         ))}
                       </div>
-                      <div className="flex gap-2 pt-4 border-t border-gray-100 dark:border-gray-700">
+                      <div className="flex flex-wrap gap-2 pt-4 border-t border-gray-100 dark:border-gray-700">
                         <Button size="sm" variant="outline" className="flex-1" onClick={() => handleEditRole(role)}>
                           <Eye className="w-4 h-4 mr-1" /> View
                         </Button>
-                        <Button size="sm" variant="outline" onClick={() => router.push(`/dashboard/user-management-v2?role=${role.id}`)}>
-                          <Users className="w-4 h-4 mr-1" /> Users
+                        <Button size="sm" variant="outline" onClick={() => handleAssignRole(role.id, role.name)} title="Assign Users">
+                          <UserPlus className="w-4 h-4" />
                         </Button>
-                        <Button size="sm" variant="outline" onClick={() => handleDuplicateRole(role)}>
+                        <Button size="sm" variant="outline" onClick={() => {
+                          const dbRole = dbRoles.find(r => r.id === role.id)
+                          handleManagePermissions(role.id, role.name, dbRole?.permissions || [])
+                        }} title="Manage Permissions">
+                          <KeyRound className="w-4 h-4" />
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={() => handleDuplicateRole(role)} title="Duplicate">
                           <Copy className="w-4 h-4" />
                         </Button>
                         {!role.isSystem && (
-                          <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700" onClick={() => handleDeleteRole(role.id, role.name, role.isSystem)}>
+                          <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700" onClick={() => handleDeleteRole(role.id, role.name, role.isSystem)} title="Delete">
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         )}
@@ -1666,7 +1837,13 @@ export default function RolesClient() {
                   </div>
                   <div className="flex gap-2">
                     <Button variant="outline" className="border-white/50 text-white hover:bg-white/10" onClick={handleExportUserAssignments}><Download className="h-4 w-4 mr-2" />Export</Button>
-                    <Button onClick={() => handleAssignRole('selected user')} className="bg-white text-blue-700 hover:bg-blue-50"><UserPlus className="h-4 w-4 mr-2" />Assign Role</Button>
+                    <Button onClick={() => {
+                      if (combinedRoles.length > 0) {
+                        handleAssignRole(combinedRoles[0].id, combinedRoles[0].name)
+                      } else {
+                        toast.info('No Roles', { description: 'Create a role first before assigning users' })
+                      }
+                    }} className="bg-white text-blue-700 hover:bg-blue-50"><UserPlus className="h-4 w-4 mr-2" />Assign Role</Button>
                   </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6">
@@ -1722,7 +1899,19 @@ export default function RolesClient() {
                       <CardDescription>Manage role assignments for users</CardDescription>
                     </div>
                     <div className="flex gap-2">
-                      <Input placeholder="Search users..." className="w-64" />
+                      <Select
+                        value={selectedRoleForAssignments}
+                        onValueChange={setSelectedRoleForAssignments}
+                      >
+                        <SelectTrigger className="w-48">
+                          <SelectValue placeholder="Select role to view" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {combinedRoles.map(role => (
+                            <SelectItem key={role.id} value={role.id}>{role.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <Button variant="outline" onClick={() => handleApplyFilter('Assignments')}><Filter className="w-4 h-4 mr-2" />Filter</Button>
                     </div>
                   </div>
@@ -1730,39 +1919,94 @@ export default function RolesClient() {
                 <CardContent>
                   <ScrollArea className="h-[500px]">
                     <div className="space-y-4">
-                      {[].map((assignment) => (
-                        <div key={assignment.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
-                          <div className="flex items-center gap-4">
-                            <Avatar>
-                              <AvatarFallback className="bg-gradient-to-br from-purple-500 to-indigo-600 text-white">
-                                {assignment.userName.split(' ').map(n => n[0]).join('')}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <p className="font-semibold text-gray-900 dark:text-white">{assignment.userName}</p>
-                              <p className="text-sm text-gray-500">{assignment.email}</p>
-                            </div>
-                          </div>
-                          <div className="text-center">
-                            <Badge className="bg-purple-100 text-purple-700">{assignment.roleName}</Badge>
-                            <p className="text-xs text-gray-500 mt-1">Since {formatDate(assignment.assignedAt)}</p>
-                          </div>
-                          <div className="text-right">
-                            <Badge className={assignment.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>
-                              {assignment.status}
-                            </Badge>
-                            {assignment.lastAccess && (
-                              <p className="text-xs text-gray-500 mt-1">Last: {formatDateTime(assignment.lastAccess)}</p>
-                            )}
-                          </div>
-                          <div className="flex gap-2">
-                            <Button size="sm" variant="outline" onClick={() => handleEditRole(assignment.roleName)}>Edit</Button>
-                            <Button size="sm" variant="outline" className="text-red-600" onClick={() => handleDeleteRole(assignment.roleName)}>
-                              <UserX className="w-4 h-4" />
-                            </Button>
-                          </div>
+                      {assignmentsLoading ? (
+                        <div className="flex items-center justify-center py-8">
+                          <Loader2 className="w-6 h-6 animate-spin text-purple-600" />
+                          <span className="ml-2 text-gray-500">Loading assignments...</span>
                         </div>
-                      ))}
+                      ) : !selectedRoleForAssignments ? (
+                        <div className="text-center py-8">
+                          <UsersRound className="w-12 h-12 mx-auto text-gray-300 mb-3" />
+                          <p className="text-gray-500">Select a role above to view its assignments</p>
+                        </div>
+                      ) : roleAssignments.length === 0 ? (
+                        <div className="text-center py-8">
+                          <UserPlus className="w-12 h-12 mx-auto text-gray-300 mb-3" />
+                          <p className="text-gray-500 mb-4">No users assigned to this role yet</p>
+                          <Button
+                            variant="outline"
+                            onClick={() => {
+                              const role = combinedRoles.find(r => r.id === selectedRoleForAssignments)
+                              if (role) handleAssignRole(role.id, role.name)
+                            }}
+                          >
+                            <UserPlus className="w-4 h-4 mr-2" />
+                            Assign First User
+                          </Button>
+                        </div>
+                      ) : (
+                        roleAssignments.map((assignment) => {
+                          const assignedUser = teamMembers?.find(m => m.id === assignment.assigned_user_id)
+                          const assignedRole = combinedRoles.find(r => r.id === assignment.role_id)
+                          return (
+                            <div key={assignment.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
+                              <div className="flex items-center gap-4">
+                                <Avatar>
+                                  <AvatarFallback className="bg-gradient-to-br from-purple-500 to-indigo-600 text-white">
+                                    {assignedUser?.name?.split(' ').map(n => n[0]).join('') || '?'}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div>
+                                  <p className="font-semibold text-gray-900 dark:text-white">{assignedUser?.name || 'Unknown User'}</p>
+                                  <p className="text-sm text-gray-500">{assignedUser?.email || assignment.assigned_user_id}</p>
+                                </div>
+                              </div>
+                              <div className="text-center">
+                                <Badge className="bg-purple-100 text-purple-700">{assignedRole?.name || 'Unknown Role'}</Badge>
+                                <p className="text-xs text-gray-500 mt-1">Since {formatDate(assignment.assigned_at)}</p>
+                              </div>
+                              <div className="text-right">
+                                <Badge className={assignment.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>
+                                  {assignment.is_active ? 'active' : 'inactive'}
+                                </Badge>
+                                {assignment.expires_at && (
+                                  <p className="text-xs text-gray-500 mt-1">Expires: {formatDateTime(assignment.expires_at)}</p>
+                                )}
+                              </div>
+                              <div className="flex gap-2">
+                                {assignment.is_active ? (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => handleRevokeAssignment(assignment.id)}
+                                    disabled={isSubmitting}
+                                  >
+                                    Revoke
+                                  </Button>
+                                ) : (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => handleReactivateAssignment(assignment.id)}
+                                    disabled={isSubmitting}
+                                  >
+                                    Reactivate
+                                  </Button>
+                                )}
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="text-red-600"
+                                  onClick={() => handleDeleteAssignment(assignment.id)}
+                                  disabled={isSubmitting}
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          )
+                        })
+                      )}
                     </div>
                   </ScrollArea>
                 </CardContent>
@@ -2103,7 +2347,15 @@ export default function RolesClient() {
                             <Button size="sm" variant="outline" className="flex-1" onClick={() => handleEditRole(group.name)}>
                               <Eye className="w-4 h-4 mr-1" /> View
                             </Button>
-                            <Button size="sm" variant="outline" onClick={() => handleAssignRole(group.name)}>
+                            <Button size="sm" variant="outline" onClick={() => {
+                              // For groups, find matching role by name or use first role
+                              const matchingRole = combinedRoles.find(r => r.name === group.name) || combinedRoles[0]
+                              if (matchingRole) {
+                                handleAssignRole(matchingRole.id, matchingRole.name)
+                              } else {
+                                toast.info('No Roles', { description: 'Create a role first' })
+                              }
+                            }}>
                               <UserPlus className="w-4 h-4" />
                             </Button>
                             {!group.isSystem && (
@@ -2785,6 +3037,213 @@ export default function RolesClient() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Assign Role Dialog */}
+      <Dialog open={assignDialogOpen} onOpenChange={setAssignDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <UserPlus className="w-5 h-5 text-blue-600" />
+              Assign Role to User
+            </DialogTitle>
+            <DialogDescription>
+              Assign "{roleToAssign?.name}" to a user
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="assign-role">Role</Label>
+              <Select
+                value={roleToAssign?.id || ''}
+                onValueChange={(value) => {
+                  const role = combinedRoles.find(r => r.id === value)
+                  if (role) {
+                    setRoleToAssign({ id: role.id, name: role.name })
+                    setSelectedRoleForAssignments(role.id)
+                  }
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a role" />
+                </SelectTrigger>
+                <SelectContent>
+                  {combinedRoles.map(role => (
+                    <SelectItem key={role.id} value={role.id}>{role.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="assign-user">User *</Label>
+              <Select
+                value={assignmentUserId}
+                onValueChange={setAssignmentUserId}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a user to assign" />
+                </SelectTrigger>
+                <SelectContent>
+                  {teamMembers?.map(member => (
+                    <SelectItem key={member.id} value={member.id}>
+                      {member.name} ({member.email})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="assign-notes">Notes (optional)</Label>
+              <Textarea
+                id="assign-notes"
+                placeholder="Add any notes about this assignment..."
+                value={assignmentNotes}
+                onChange={(e) => setAssignmentNotes(e.target.value)}
+                rows={2}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="assign-expiry">Expiry Date (optional)</Label>
+              <Input
+                id="assign-expiry"
+                type="datetime-local"
+                value={assignmentExpiry}
+                onChange={(e) => setAssignmentExpiry(e.target.value)}
+              />
+              <p className="text-xs text-gray-500">Leave empty for permanent assignment</p>
+            </div>
+          </div>
+          <div className="flex justify-end gap-3">
+            <Button variant="outline" onClick={() => { setAssignDialogOpen(false); setRoleToAssign(null) }}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSubmitAssignment}
+              disabled={isSubmitting || !assignmentUserId}
+              className="bg-gradient-to-r from-blue-600 to-cyan-600 text-white"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Assigning...
+                </>
+              ) : (
+                <>
+                  <UserPlus className="w-4 h-4 mr-2" />
+                  Assign Role
+                </>
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Manage Permissions Dialog */}
+      <Dialog open={permissionDialogOpen} onOpenChange={setPermissionDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <KeyRound className="w-5 h-5 text-amber-600" />
+              Manage Permissions
+            </DialogTitle>
+            <DialogDescription>
+              Configure permissions for "{roleForPermissions?.name}"
+            </DialogDescription>
+          </DialogHeader>
+          <ScrollArea className="h-[400px] pr-4">
+            <div className="space-y-4 py-4">
+              {permissionsLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="w-6 h-6 animate-spin text-purple-600" />
+                  <span className="ml-2 text-gray-500">Loading permissions...</span>
+                </div>
+              ) : availablePermissions.length === 0 ? (
+                <div className="text-center py-8">
+                  <KeyRound className="w-12 h-12 mx-auto text-gray-300 mb-3" />
+                  <p className="text-gray-500 mb-4">No permissions defined yet</p>
+                  <Button
+                    variant="outline"
+                    onClick={() => handleCreateNewPermission({
+                      permission_key: 'read_data',
+                      display_name: 'Read Data',
+                      description: 'Ability to read data',
+                      category: 'Data Access'
+                    })}
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create First Permission
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {/* Group permissions by category */}
+                  {Object.entries(
+                    availablePermissions.reduce((acc, perm) => {
+                      const cat = perm.category || 'General'
+                      if (!acc[cat]) acc[cat] = []
+                      acc[cat].push(perm)
+                      return acc
+                    }, {} as Record<string, RolePermission[]>)
+                  ).map(([category, perms]) => (
+                    <div key={category} className="border rounded-lg p-4">
+                      <h4 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                        <FolderLock className="w-4 h-4 text-amber-600" />
+                        {category}
+                      </h4>
+                      <div className="space-y-2">
+                        {perms.map(perm => (
+                          <div
+                            key={perm.id}
+                            className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg"
+                          >
+                            <div className="flex items-center gap-3">
+                              <Switch
+                                checked={selectedPermissions.includes(perm.permission_key)}
+                                onCheckedChange={() => handleTogglePermission(perm.permission_key)}
+                              />
+                              <div>
+                                <p className="font-medium text-sm">{perm.display_name}</p>
+                                <p className="text-xs text-gray-500">{perm.description}</p>
+                              </div>
+                            </div>
+                            <Badge variant="outline" className="text-xs">{perm.permission_key}</Badge>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </ScrollArea>
+          <div className="flex justify-between gap-3 pt-4 border-t">
+            <div className="text-sm text-gray-500">
+              {selectedPermissions.length} permission(s) selected
+            </div>
+            <div className="flex gap-3">
+              <Button variant="outline" onClick={() => { setPermissionDialogOpen(false); setRoleForPermissions(null) }}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSavePermissions}
+                disabled={isSubmitting}
+                className="bg-gradient-to-r from-amber-600 to-orange-600 text-white"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="w-4 h-4 mr-2" />
+                    Save Permissions
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

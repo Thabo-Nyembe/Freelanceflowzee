@@ -188,16 +188,25 @@ const emptyActivities: { id: string; user: string; action: string; target: strin
 
 export default function ThirdPartyIntegrationsClient() {
   const router = useRouter()
-  const [apps] = useState<IntegrationApp[]>(emptyApps)
-  const [connections] = useState<Connection[]>(emptyConnections)
-  const [zaps] = useState<Zap[]>(emptyZaps)
-  const [logs] = useState<ExecutionLog[]>(emptyLogs)
+  const [apps, setApps] = useState<IntegrationApp[]>(emptyApps)
+  const [connections, setConnections] = useState<Connection[]>(emptyConnections)
+  const [zaps, setZaps] = useState<Zap[]>(emptyZaps)
+  const [logs, setLogs] = useState<ExecutionLog[]>(emptyLogs)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('All')
   const [selectedConnection, setSelectedConnection] = useState<Connection | null>(null)
   const [selectedZap, setSelectedZap] = useState<Zap | null>(null)
   const [activeTab, setActiveTab] = useState('zaps')
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Loading states for async operations
+  const [isConnecting, setIsConnecting] = useState(false)
+  const [isDisconnecting, setIsDisconnecting] = useState(false)
+  const [isConfiguring, setIsConfiguring] = useState(false)
+  const [isSyncing, setIsSyncing] = useState(false)
+  const [isCreatingWebhook, setIsCreatingWebhook] = useState(false)
+  const [isCreatingIntegration, setIsCreatingIntegration] = useState(false)
+  const [isRegeneratingKey, setIsRegeneratingKey] = useState(false)
 
   // Dialog states for quick actions
   const [showAddIntegrationDialog, setShowAddIntegrationDialog] = useState(false)
@@ -284,7 +293,7 @@ export default function ThirdPartyIntegrationsClient() {
   ]
 
   // Handler for adding new integration
-  const handleAddIntegration = () => {
+  const handleAddIntegration = async () => {
     if (!newIntegrationApp) {
       toast.error('Please select an app')
       return
@@ -300,16 +309,86 @@ export default function ThirdPartyIntegrationsClient() {
       return
     }
 
+    setIsConnecting(true)
     const selectedApp = apps.find(a => a.id === newIntegrationApp)
-    toast.success(`Integration Connected has been successfully connected using ${newIntegrationAuthType === 'api_key' ? 'API Key' : newIntegrationAuthType === 'basic' ? 'Basic Auth' : 'OAuth'}`)
 
-    // Reset form
-    setNewIntegrationApp('')
-    setNewIntegrationAuthType('oauth')
-    setNewIntegrationApiKey('')
-    setNewIntegrationUsername('')
-    setNewIntegrationPassword('')
-    setShowAddIntegrationDialog(false)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      // Build credentials based on auth type
+      let credentials: Record<string, string> = {}
+      if (newIntegrationAuthType === 'api_key') {
+        credentials = { api_key: newIntegrationApiKey }
+      } else if (newIntegrationAuthType === 'basic') {
+        credentials = { username: newIntegrationUsername, password: newIntegrationPassword }
+      }
+
+      const response = await fetch('/api/integrations/connect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          integration_name: selectedApp?.name || newIntegrationApp,
+          action: newIntegrationAuthType === 'oauth' ? 'oauth' : 'connect',
+          credentials: Object.keys(credentials).length > 0 ? credentials : undefined,
+          settings: {}
+        })
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to connect integration')
+      }
+
+      toast.success(`${selectedApp?.name || 'Integration'} has been successfully connected using ${newIntegrationAuthType === 'api_key' ? 'API Key' : newIntegrationAuthType === 'basic' ? 'Basic Auth' : 'OAuth'}`)
+
+      // Refresh connections list
+      const { data: freshConnections } = await supabase
+        .from('integrations')
+        .select('*')
+        .eq('user_id', user.id)
+
+      if (freshConnections) {
+        // Map to Connection type
+        setConnections(freshConnections.map((c: Record<string, unknown>) => ({
+          id: c.id as string,
+          app: {
+            id: c.type as string,
+            name: c.name as string,
+            description: (c.description as string) || '',
+            icon: '',
+            category: 'productivity' as IntegrationCategory,
+            website: '',
+            docsUrl: '',
+            popular: false
+          },
+          status: (c.status === 'active' ? 'connected' : 'disconnected') as IntegrationStatus,
+          connectedAt: c.connected_at as string || c.created_at as string,
+          lastSync: c.last_synced_at as string | undefined,
+          credentials: {
+            type: 'api_key' as const,
+            expiresAt: undefined
+          },
+          usageThisMonth: 0,
+          rateLimit: 1000,
+          rateLimitRemaining: 1000
+        })))
+      }
+
+      // Reset form
+      setNewIntegrationApp('')
+      setNewIntegrationAuthType('oauth')
+      setNewIntegrationApiKey('')
+      setNewIntegrationUsername('')
+      setNewIntegrationPassword('')
+      setShowAddIntegrationDialog(false)
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to connect integration'
+      toast.error('Connection failed', { description: errorMessage })
+    } finally {
+      setIsConnecting(false)
+    }
   }
 
   // Handler for testing connection
@@ -454,24 +533,176 @@ export default function ThirdPartyIntegrationsClient() {
   }
 
   // Handlers
-  const handleConnectIntegration = (integrationName: string) => {
-    toast.info(`Connecting ${integrationName}...`)
+  const handleConnectIntegration = async (integrationName: string) => {
+    setIsConnecting(true)
+    const toastId = toast.loading(`Connecting ${integrationName}...`)
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const response = await fetch('/api/integrations/connect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          integration_name: integrationName,
+          action: 'connect',
+          settings: {}
+        })
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to connect integration')
+      }
+
+      toast.dismiss(toastId)
+      toast.success(`${integrationName} connected successfully`)
+
+      // Refresh connections
+      const { data: freshConnections } = await supabase
+        .from('integrations')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+
+      if (freshConnections) {
+        setConnections(freshConnections.map((c: Record<string, unknown>) => ({
+          id: c.id as string,
+          app: {
+            id: c.type as string,
+            name: c.name as string,
+            description: (c.description as string) || '',
+            icon: '',
+            category: 'productivity' as IntegrationCategory,
+            website: '',
+            docsUrl: '',
+            popular: false
+          },
+          status: 'connected' as IntegrationStatus,
+          connectedAt: c.connected_at as string || c.created_at as string,
+          lastSync: c.last_synced_at as string | undefined,
+          credentials: { type: 'api_key' as const },
+          usageThisMonth: 0,
+          rateLimit: 1000,
+          rateLimitRemaining: 1000
+        })))
+      }
+    } catch (error: unknown) {
+      toast.dismiss(toastId)
+      const errorMessage = error instanceof Error ? error.message : 'Failed to connect'
+      toast.error('Connection failed', { description: errorMessage })
+    } finally {
+      setIsConnecting(false)
+    }
   }
 
-  const handleDisconnectIntegration = (integrationName: string) => {
-    toast.success(`Integration disconnected has been removed`)
+  const handleDisconnectIntegration = async (integrationId: string) => {
+    setIsDisconnecting(true)
+    const toastId = toast.loading('Disconnecting integration...')
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const response = await fetch('/api/integrations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'disconnect',
+          integration_id: integrationId
+        })
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to disconnect integration')
+      }
+
+      toast.dismiss(toastId)
+      toast.success('Integration disconnected successfully')
+
+      // Remove from local state
+      setConnections(prev => prev.filter(c => c.id !== integrationId))
+    } catch (error: unknown) {
+      toast.dismiss(toastId)
+      const errorMessage = error instanceof Error ? error.message : 'Failed to disconnect'
+      toast.error('Disconnect failed', { description: errorMessage })
+    } finally {
+      setIsDisconnecting(false)
+    }
   }
 
-  const handleRefreshIntegration = (integrationName: string) => {
-    toast.info(`Refreshing integration data...`)
+  const handleRefreshIntegration = async (integrationId: string) => {
+    const toastId = toast.loading('Syncing integration data...')
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const response = await fetch('/api/integrations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'sync',
+          integration_id: integrationId
+        })
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to sync integration')
+      }
+
+      toast.dismiss(toastId)
+      toast.success('Integration data synced successfully')
+    } catch (error: unknown) {
+      toast.dismiss(toastId)
+      const errorMessage = error instanceof Error ? error.message : 'Failed to sync'
+      toast.error('Sync failed', { description: errorMessage })
+    }
   }
 
-  const handleConfigureIntegration = (integrationName: string) => {
-    toast.info(`Opening configuration settings`)
+  const handleConfigureIntegration = async (integrationId: string, settings: Record<string, unknown>) => {
+    setIsConfiguring(true)
+    const toastId = toast.loading('Saving configuration...')
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const response = await fetch('/api/integrations/configure', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          integration_id: integrationId,
+          settings
+        })
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to save configuration')
+      }
+
+      toast.dismiss(toastId)
+      toast.success('Configuration saved successfully')
+    } catch (error: unknown) {
+      toast.dismiss(toastId)
+      const errorMessage = error instanceof Error ? error.message : 'Failed to save'
+      toast.error('Configuration failed', { description: errorMessage })
+    } finally {
+      setIsConfiguring(false)
+    }
   }
 
   const handleViewLogs = (integrationName: string) => {
-    toast.info(`Loading logs activity logs`)
+    setActiveTab('history')
+    toast.info(`Loading ${integrationName} activity logs`)
   }
 
   // Create Zap handler
@@ -513,19 +744,110 @@ export default function ThirdPartyIntegrationsClient() {
   }
 
   // Manage app handler
-  const handleSaveAppSettings = () => {
-    if (showManageAppDialog) {
-      toast.success(`Settings Saved: "${showManageAppDialog}" settings updated`)
+  const handleSaveAppSettings = async () => {
+    if (!showManageAppDialog) return
+
+    setIsConfiguring(true)
+    const toastId = toast.loading(`Saving ${showManageAppDialog.name} settings...`)
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      // Find the connection for this app
+      const connection = connections.find(c => c.app.id === showManageAppDialog.id)
+
+      if (connection) {
+        // Update existing connection settings
+        const response = await fetch('/api/integrations/configure', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            integration_id: connection.id,
+            settings: {
+              sync_enabled: manageAppSyncEnabled,
+              sync_interval: parseInt(manageAppSyncInterval, 10)
+            }
+          })
+        })
+
+        const result = await response.json()
+
+        if (!response.ok) {
+          throw new Error(result.error || 'Failed to save settings')
+        }
+      } else {
+        // No existing connection, save settings to localStorage temporarily
+        const appSettings = JSON.parse(localStorage.getItem('app-settings') || '{}')
+        appSettings[showManageAppDialog.id] = {
+          sync_enabled: manageAppSyncEnabled,
+          sync_interval: parseInt(manageAppSyncInterval, 10)
+        }
+        localStorage.setItem('app-settings', JSON.stringify(appSettings))
+      }
+
+      toast.dismiss(toastId)
+      toast.success(`Settings Saved`, { description: `${showManageAppDialog.name} settings updated successfully` })
+      setShowManageAppDialog(null)
+    } catch (error: unknown) {
+      toast.dismiss(toastId)
+      const errorMessage = error instanceof Error ? error.message : 'Failed to save settings'
+      toast.error('Save failed', { description: errorMessage })
+    } finally {
+      setIsConfiguring(false)
     }
-    setShowManageAppDialog(null)
   }
 
   // Connect app handler
-  const handleConnectApp = () => {
-    if (showConnectAppDialog) {
-      toast.success(`App Connected has been connected`)
+  const handleConnectApp = async () => {
+    if (!showConnectAppDialog) return
+
+    setIsConnecting(true)
+    const toastId = toast.loading(`Connecting ${showConnectAppDialog.name}...`)
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const response = await fetch('/api/integrations/connect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          integration_name: showConnectAppDialog.name,
+          action: 'connect',
+          settings: {}
+        })
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to connect app')
+      }
+
+      toast.dismiss(toastId)
+      toast.success(`${showConnectAppDialog.name} has been connected successfully`)
+
+      // Add to local connections state
+      const newConnection: Connection = {
+        id: result.integration?.id || `conn-${Date.now()}`,
+        app: showConnectAppDialog,
+        status: 'connected',
+        connectedAt: new Date().toISOString(),
+        credentials: { type: 'oauth' },
+        usageThisMonth: 0,
+        rateLimit: 1000,
+        rateLimitRemaining: 1000
+      }
+      setConnections(prev => [...prev, newConnection])
+      setShowConnectAppDialog(null)
+    } catch (error: unknown) {
+      toast.dismiss(toastId)
+      const errorMessage = error instanceof Error ? error.message : 'Failed to connect'
+      toast.error('Connection failed', { description: errorMessage })
+    } finally {
+      setIsConnecting(false)
     }
-    setShowConnectAppDialog(null)
   }
 
   // Refresh connection handler
@@ -605,83 +927,282 @@ export default function ThirdPartyIntegrationsClient() {
   }
 
   // Regenerate API key handler
-  const handleRegenerateApiKey = () => {
+  const handleRegenerateApiKey = async () => {
     const keyType = showRegenerateApiKeyDialog
-    toast.success('API Key Regenerated: API key has been regenerated. Please update your applications.')
-    setShowRegenerateApiKeyDialog(null)
+    if (!keyType) return
+
+    setIsRegeneratingKey(true)
+    const toastId = toast.loading(`Regenerating ${keyType} API key...`)
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      // First, get existing API keys to find the one to revoke
+      const keysResponse = await fetch('/api/integrations/api-keys')
+      const keysResult = await keysResponse.json()
+
+      // Find existing key of this type and revoke it
+      const existingKey = keysResult.api_keys?.find((k: { name: string }) =>
+        k.name.toLowerCase().includes(keyType.toLowerCase())
+      )
+
+      if (existingKey) {
+        await fetch('/api/integrations/api-keys', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'revoke',
+            key_id: existingKey.id
+          })
+        })
+      }
+
+      // Create new API key
+      const response = await fetch('/api/integrations/api-keys', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create',
+          name: `${keyType.charAt(0).toUpperCase() + keyType.slice(1)} API Key`,
+          scopes: keyType === 'production' ? ['read', 'write'] : ['read']
+        })
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to regenerate API key')
+      }
+
+      toast.dismiss(toastId)
+      toast.success('API Key Regenerated', {
+        description: `Your new ${keyType} key: ${result.api_key?.key?.substring(0, 12)}... Save it now!`
+      })
+      setShowRegenerateApiKeyDialog(null)
+    } catch (error: unknown) {
+      toast.dismiss(toastId)
+      const errorMessage = error instanceof Error ? error.message : 'Failed to regenerate key'
+      toast.error('Regeneration failed', { description: errorMessage })
+    } finally {
+      setIsRegeneratingKey(false)
+    }
   }
 
   // Webhook test handler
   const handleTestWebhook = async () => {
-    if (showWebhookTestDialog) {
-      const toastId = toast.loading(`Testing ${showWebhookTestDialog.name}...`)
-      try {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) throw new Error('Not authenticated')
+    if (!showWebhookTestDialog) return
 
-        // Send test webhook
-        const response = await fetch('/api/webhooks/test', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ webhookId: showWebhookTestDialog.id })
-        })
+    const toastId = toast.loading(`Testing ${showWebhookTestDialog.name}...`)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
 
-        const result = await response.json()
+      // First, get the webhook id
+      const webhooksResponse = await fetch('/api/integrations/webhooks')
+      const webhooksResult = await webhooksResponse.json()
 
-        // Log test result
-        await supabase.from('webhook_test_logs').insert({
-          user_id: user.id,
-          webhook_id: showWebhookTestDialog.id,
-          status: result.success ? 'success' : 'failed',
-          response_code: result.statusCode || null
-        })
+      const webhook = webhooksResult.webhooks?.find(
+        (w: { name: string; url: string }) =>
+          w.name === showWebhookTestDialog.name || w.url === showWebhookTestDialog.url
+      )
 
-        toast.dismiss(toastId)
-        if (result.success) {
-          toast.success('Test Successful', { description: `${showWebhookTestDialog.name} responded with ${result.statusCode || 200} OK` })
-        } else {
-          toast.error('Test Failed', { description: result.error })
-        }
-        setShowWebhookTestDialog(null)
-      } catch (error: any) {
-        toast.dismiss(toastId)
-        toast.error('Test failed', { description: error.message })
+      if (!webhook) {
+        throw new Error('Webhook not found')
       }
+
+      // Send test webhook using the webhooks API
+      const response = await fetch('/api/integrations/webhooks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'test',
+          webhook_id: webhook.id
+        })
+      })
+
+      const result = await response.json()
+
+      toast.dismiss(toastId)
+      if (result.success && result.delivery?.status === 'success') {
+        toast.success('Test Successful', { description: `${showWebhookTestDialog.name} responded successfully` })
+      } else {
+        toast.error('Test Failed', { description: result.message || result.error || 'Webhook test failed' })
+      }
+      setShowWebhookTestDialog(null)
+    } catch (error: unknown) {
+      toast.dismiss(toastId)
+      const errorMessage = error instanceof Error ? error.message : 'Test failed'
+      toast.error('Test failed', { description: errorMessage })
     }
   }
 
   // Webhook edit handler
-  const handleSaveWebhook = () => {
-    if (showWebhookEditDialog) {
-      toast.success('Webhook Updated: configuration saved')
+  const handleSaveWebhook = async () => {
+    if (!showWebhookEditDialog) return
+
+    const toastId = toast.loading('Saving webhook configuration...')
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      // First get the webhook id from the name/url combination
+      const webhooksResponse = await fetch('/api/integrations/webhooks')
+      const webhooksResult = await webhooksResponse.json()
+
+      const existingWebhook = webhooksResult.webhooks?.find(
+        (w: { name: string; url: string }) =>
+          w.name === showWebhookEditDialog.name || w.url === showWebhookEditDialog.url
+      )
+
+      if (!existingWebhook) {
+        throw new Error('Webhook not found')
+      }
+
+      const response = await fetch('/api/integrations/webhooks', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          webhook_id: existingWebhook.id,
+          name: showWebhookEditDialog.name,
+          url: showWebhookEditDialog.url,
+          is_active: showWebhookEditDialog.active
+        })
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to save webhook')
+      }
+
+      toast.dismiss(toastId)
+      toast.success('Webhook Updated', { description: 'Configuration saved successfully' })
+      setShowWebhookEditDialog(null)
+    } catch (error: unknown) {
+      toast.dismiss(toastId)
+      const errorMessage = error instanceof Error ? error.message : 'Failed to save webhook'
+      toast.error('Save failed', { description: errorMessage })
     }
-    setShowWebhookEditDialog(null)
   }
 
   // Add webhook handler
-  const handleAddWebhook = () => {
+  const handleAddWebhook = async () => {
     if (!newWebhookName || !newWebhookUrl) {
       toast.error('Please fill in all required fields')
       return
     }
-    toast.success(`Webhook Created has been configured`)
-    setNewWebhookName('')
-    setNewWebhookUrl('')
-    setNewWebhookEvents([])
-    setShowAddWebhookDialog(false)
+
+    // Validate URL format
+    try {
+      new URL(newWebhookUrl)
+    } catch {
+      toast.error('Please enter a valid URL')
+      return
+    }
+
+    setIsCreatingWebhook(true)
+    const toastId = toast.loading('Creating webhook...')
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const response = await fetch('/api/integrations/webhooks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create',
+          name: newWebhookName,
+          url: newWebhookUrl,
+          events: newWebhookEvents.length > 0 ? newWebhookEvents : ['invoice.created', 'project.created'],
+        })
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to create webhook')
+      }
+
+      toast.dismiss(toastId)
+      toast.success('Webhook Created', { description: `${newWebhookName} has been configured successfully` })
+
+      setNewWebhookName('')
+      setNewWebhookUrl('')
+      setNewWebhookEvents([])
+      setShowAddWebhookDialog(false)
+    } catch (error: unknown) {
+      toast.dismiss(toastId)
+      const errorMessage = error instanceof Error ? error.message : 'Failed to create webhook'
+      toast.error('Webhook creation failed', { description: errorMessage })
+    } finally {
+      setIsCreatingWebhook(false)
+    }
   }
 
   // Create custom integration handler
-  const handleCreateCustomIntegration = () => {
+  const handleCreateCustomIntegration = async () => {
     if (!customIntegrationName) {
       toast.error('Please provide an integration name')
       return
     }
-    toast.success(`Custom Integration Created is ready for development`)
-    setCustomIntegrationName('')
-    setCustomIntegrationDescription('')
-    setCustomIntegrationAuthType('api_key')
-    setShowCustomIntegrationDialog(false)
+
+    setIsCreatingIntegration(true)
+    const toastId = toast.loading('Creating custom integration...')
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const response = await fetch('/api/integrations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create',
+          type: 'custom_webhook',
+          name: customIntegrationName,
+          description: customIntegrationDescription,
+          settings: {
+            auth_type: customIntegrationAuthType
+          }
+        })
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to create custom integration')
+      }
+
+      toast.dismiss(toastId)
+      toast.success('Custom Integration Created', { description: `${customIntegrationName} is ready for development` })
+
+      // Add to apps list
+      const newApp: IntegrationApp = {
+        id: result.integration?.id || `custom-${Date.now()}`,
+        name: customIntegrationName,
+        description: customIntegrationDescription,
+        icon: '',
+        category: 'productivity',
+        website: '',
+        docsUrl: '',
+        popular: false
+      }
+      setApps(prev => [...prev, newApp])
+
+      setCustomIntegrationName('')
+      setCustomIntegrationDescription('')
+      setCustomIntegrationAuthType('api_key')
+      setShowCustomIntegrationDialog(false)
+    } catch (error: unknown) {
+      toast.dismiss(toastId)
+      const errorMessage = error instanceof Error ? error.message : 'Failed to create integration'
+      toast.error('Creation failed', { description: errorMessage })
+    } finally {
+      setIsCreatingIntegration(false)
+    }
   }
 
   // Export data handler
@@ -818,46 +1339,129 @@ export default function ThirdPartyIntegrationsClient() {
 
   // Sync connection now handler
   const handleSyncNow = async () => {
-    if (selectedConnection) {
-      const toastId = toast.loading(`Syncing ${selectedConnection.app.name}...`)
-      try {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) throw new Error('Not authenticated')
+    if (!selectedConnection) return
 
-        // Update sync timestamp
-        await supabase.from('integration_connections').update({
-          last_synced_at: new Date().toISOString(),
-          sync_status: 'synced'
-        }).eq('id', selectedConnection.id)
+    setIsSyncing(true)
+    const toastId = toast.loading(`Syncing ${selectedConnection.app.name}...`)
 
-        // Log sync
-        await supabase.from('integration_sync_logs').insert({
-          user_id: user.id,
-          connection_id: selectedConnection.id,
-          status: 'success'
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      // Call sync API
+      const response = await fetch('/api/integrations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'sync',
+          integration_id: selectedConnection.id
         })
+      })
 
-        toast.dismiss(toastId)
-        toast.success('Sync Complete', { description: `${selectedConnection.app.name} data synchronized` })
-      } catch (error: any) {
-        toast.dismiss(toastId)
-        toast.error('Sync failed', { description: error.message })
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Sync failed')
       }
+
+      // Update local state
+      setConnections(prev => prev.map(c =>
+        c.id === selectedConnection.id
+          ? { ...c, lastSync: new Date().toISOString() }
+          : c
+      ))
+
+      toast.dismiss(toastId)
+      toast.success('Sync Complete', { description: `${selectedConnection.app.name} data synchronized successfully` })
+    } catch (error: unknown) {
+      toast.dismiss(toastId)
+      const errorMessage = error instanceof Error ? error.message : 'Sync failed'
+      toast.error('Sync failed', { description: errorMessage })
+    } finally {
+      setIsSyncing(false)
     }
   }
 
   // Reauthorize connection handler
-  const handleReauthorize = () => {
-    if (selectedConnection) {
-      toast.info(`Reauthorizing for authorization...`)
+  const handleReauthorize = async () => {
+    if (!selectedConnection) return
+
+    const toastId = toast.loading(`Initiating reauthorization for ${selectedConnection.app.name}...`)
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      // Initiate OAuth flow for reauthorization
+      const response = await fetch('/api/integrations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'oauth-init',
+          type: selectedConnection.app.id
+        })
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to initiate reauthorization')
+      }
+
+      toast.dismiss(toastId)
+
+      // Redirect to OAuth authorization URL if available
+      if (result.authUrl) {
+        toast.info('Redirecting to authorization page...')
+        window.location.href = result.authUrl
+      } else {
+        toast.success('Reauthorization initiated', { description: 'Please complete the authorization process' })
+      }
+    } catch (error: unknown) {
+      toast.dismiss(toastId)
+      const errorMessage = error instanceof Error ? error.message : 'Reauthorization failed'
+      toast.error('Reauthorization failed', { description: errorMessage })
     }
   }
 
   // Disconnect connection handler
-  const handleDisconnect = () => {
-    if (selectedConnection) {
-      toast.success(`Disconnected has been disconnected`)
+  const handleDisconnect = async () => {
+    if (!selectedConnection) return
+
+    setIsDisconnecting(true)
+    const toastId = toast.loading(`Disconnecting ${selectedConnection.app.name}...`)
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const response = await fetch('/api/integrations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'disconnect',
+          integration_id: selectedConnection.id
+        })
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to disconnect')
+      }
+
+      // Remove from local state
+      setConnections(prev => prev.filter(c => c.id !== selectedConnection.id))
+
+      toast.dismiss(toastId)
+      toast.success('Disconnected', { description: `${selectedConnection.app.name} has been disconnected` })
       setSelectedConnection(null)
+    } catch (error: unknown) {
+      toast.dismiss(toastId)
+      const errorMessage = error instanceof Error ? error.message : 'Failed to disconnect'
+      toast.error('Disconnect failed', { description: errorMessage })
+    } finally {
+      setIsDisconnecting(false)
     }
   }
 
@@ -2331,17 +2935,21 @@ export default function ThirdPartyIntegrationsClient() {
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <Button variant="outline" className="flex-1" onClick={handleSyncNow}>
-                    <RefreshCcw className="h-4 w-4 mr-2" />
-                    Sync Now
+                  <Button variant="outline" className="flex-1" onClick={handleSyncNow} disabled={isSyncing || isDisconnecting}>
+                    <RefreshCcw className={`h-4 w-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
+                    {isSyncing ? 'Syncing...' : 'Sync Now'}
                   </Button>
-                  <Button variant="outline" className="flex-1" onClick={handleReauthorize}>
+                  <Button variant="outline" className="flex-1" onClick={handleReauthorize} disabled={isSyncing || isDisconnecting}>
                     <Key className="h-4 w-4 mr-2" />
                     Reauthorize
                   </Button>
-                  <Button variant="outline" className="text-red-600 hover:text-red-700" onClick={handleDisconnect}>
-                    <Unlink className="h-4 w-4 mr-2" />
-                    Disconnect
+                  <Button variant="outline" className="text-red-600 hover:text-red-700" onClick={handleDisconnect} disabled={isSyncing || isDisconnecting}>
+                    {isDisconnecting ? (
+                      <RefreshCcw className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Unlink className="h-4 w-4 mr-2" />
+                    )}
+                    {isDisconnecting ? 'Disconnecting...' : 'Disconnect'}
                   </Button>
                 </div>
               </div>
@@ -2473,9 +3081,13 @@ export default function ThirdPartyIntegrationsClient() {
               <Button variant="outline" className="flex-1" onClick={() => setShowAddIntegrationDialog(false)}>
                 Cancel
               </Button>
-              <Button className="flex-1 bg-orange-500 hover:bg-orange-600" onClick={handleAddIntegration}>
-                <Link2 className="h-4 w-4 mr-2" />
-                {newIntegrationAuthType === 'oauth' ? 'Continue with OAuth' : 'Connect Integration'}
+              <Button className="flex-1 bg-orange-500 hover:bg-orange-600" onClick={handleAddIntegration} disabled={isConnecting}>
+                {isConnecting ? (
+                  <RefreshCcw className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Link2 className="h-4 w-4 mr-2" />
+                )}
+                {isConnecting ? 'Connecting...' : (newIntegrationAuthType === 'oauth' ? 'Continue with OAuth' : 'Connect Integration')}
               </Button>
             </div>
           </div>
@@ -2870,8 +3482,15 @@ export default function ThirdPartyIntegrationsClient() {
               </Select>
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
-              <Button variant="outline" className="flex-1" onClick={() => setShowManageAppDialog(null)}>Cancel</Button>
-              <Button className="flex-1 bg-orange-500 hover:bg-orange-600" onClick={handleSaveAppSettings}>Save Settings</Button>
+              <Button variant="outline" className="flex-1" onClick={() => setShowManageAppDialog(null)} disabled={isConfiguring}>Cancel</Button>
+              <Button className="flex-1 bg-orange-500 hover:bg-orange-600" onClick={handleSaveAppSettings} disabled={isConfiguring}>
+                {isConfiguring ? (
+                  <>
+                    <RefreshCcw className="h-4 w-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : 'Save Settings'}
+              </Button>
             </div>
           </div>
         </DialogContent>
@@ -2901,8 +3520,15 @@ export default function ThirdPartyIntegrationsClient() {
               </ul>
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
-              <Button variant="outline" className="flex-1" onClick={() => setShowConnectAppDialog(null)}>Cancel</Button>
-              <Button className="flex-1 bg-green-500 hover:bg-green-600" onClick={handleConnectApp}>Connect</Button>
+              <Button variant="outline" className="flex-1" onClick={() => setShowConnectAppDialog(null)} disabled={isConnecting}>Cancel</Button>
+              <Button className="flex-1 bg-green-500 hover:bg-green-600" onClick={handleConnectApp} disabled={isConnecting}>
+                {isConnecting ? (
+                  <>
+                    <RefreshCcw className="h-4 w-4 mr-2 animate-spin" />
+                    Connecting...
+                  </>
+                ) : 'Connect'}
+              </Button>
             </div>
           </div>
         </DialogContent>
@@ -3150,8 +3776,15 @@ export default function ThirdPartyIntegrationsClient() {
               </p>
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
-              <Button variant="outline" className="flex-1" onClick={() => setShowRegenerateApiKeyDialog(null)}>Cancel</Button>
-              <Button className="flex-1 bg-amber-500 hover:bg-amber-600" onClick={handleRegenerateApiKey}>Regenerate Key</Button>
+              <Button variant="outline" className="flex-1" onClick={() => setShowRegenerateApiKeyDialog(null)} disabled={isRegeneratingKey}>Cancel</Button>
+              <Button className="flex-1 bg-amber-500 hover:bg-amber-600" onClick={handleRegenerateApiKey} disabled={isRegeneratingKey}>
+                {isRegeneratingKey ? (
+                  <>
+                    <RefreshCcw className="h-4 w-4 mr-2 animate-spin" />
+                    Regenerating...
+                  </>
+                ) : 'Regenerate Key'}
+              </Button>
             </div>
           </div>
         </DialogContent>
@@ -3309,8 +3942,15 @@ export default function ThirdPartyIntegrationsClient() {
               />
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
-              <Button variant="outline" className="flex-1" onClick={() => setShowAddWebhookDialog(false)}>Cancel</Button>
-              <Button className="flex-1 bg-blue-500 hover:bg-blue-600" onClick={handleAddWebhook}>Add Webhook</Button>
+              <Button variant="outline" className="flex-1" onClick={() => setShowAddWebhookDialog(false)} disabled={isCreatingWebhook}>Cancel</Button>
+              <Button className="flex-1 bg-blue-500 hover:bg-blue-600" onClick={handleAddWebhook} disabled={isCreatingWebhook}>
+                {isCreatingWebhook ? (
+                  <>
+                    <RefreshCcw className="h-4 w-4 mr-2 animate-spin" />
+                    Creating...
+                  </>
+                ) : 'Add Webhook'}
+              </Button>
             </div>
           </div>
         </DialogContent>
@@ -3358,8 +3998,15 @@ export default function ThirdPartyIntegrationsClient() {
               </Select>
             </div>
             <div className="flex items-center gap-3 pt-4 border-t">
-              <Button variant="outline" className="flex-1" onClick={() => setShowCustomIntegrationDialog(false)}>Cancel</Button>
-              <Button className="flex-1 bg-purple-500 hover:bg-purple-600" onClick={handleCreateCustomIntegration}>Create</Button>
+              <Button variant="outline" className="flex-1" onClick={() => setShowCustomIntegrationDialog(false)} disabled={isCreatingIntegration}>Cancel</Button>
+              <Button className="flex-1 bg-purple-500 hover:bg-purple-600" onClick={handleCreateCustomIntegration} disabled={isCreatingIntegration}>
+                {isCreatingIntegration ? (
+                  <>
+                    <RefreshCcw className="h-4 w-4 mr-2 animate-spin" />
+                    Creating...
+                  </>
+                ) : 'Create'}
+              </Button>
             </div>
           </div>
         </DialogContent>

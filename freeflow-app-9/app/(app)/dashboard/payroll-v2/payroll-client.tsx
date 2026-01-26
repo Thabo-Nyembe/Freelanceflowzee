@@ -764,10 +764,296 @@ export default function PayrollClient() {
     setShowCreateDialog(true)
   }
 
-  const handleApprovePayRun = () => {
+  const handleApprovePayRun = async () => {
     if (!selectedPayRun) return
-    toast.success(`Pay run ${selectedPayRun.period} approved!`)
-    setShowPayRunDialog(false)
+
+    try {
+      const response = await fetch('/api/payroll', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'approve',
+          id: selectedPayRun.id
+        })
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to approve pay run')
+      }
+
+      toast.success(`Pay run ${selectedPayRun.period} approved!`)
+      setShowPayRunDialog(false)
+      await fetchPayrollRuns()
+    } catch (error) {
+      console.error('Error approving pay run:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to approve pay run')
+    }
+  }
+
+  // Add employee to payroll system
+  const handleAddEmployee = async () => {
+    if (!newEmployeeName.trim() || !newEmployeeEmail.trim()) {
+      toast.error('Employee name and email are required')
+      return
+    }
+
+    try {
+      const response = await fetch('/api/employees', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          employee_name: newEmployeeName,
+          name: newEmployeeName,
+          email: newEmployeeEmail,
+          department: newEmployeeDepartment || 'General',
+          position: newEmployeeRole || 'Employee',
+          role: newEmployeeRole || 'Employee',
+          salary: parseFloat(newEmployeeSalary) || 0,
+          status: 'active',
+          employment_type: 'full_time',
+          payment_method: 'direct_deposit'
+        })
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to add employee')
+      }
+
+      toast.success(`Employee ${newEmployeeName} added successfully`)
+      setShowAddEmployeeDialog(false)
+      // Reset form fields
+      setNewEmployeeName('')
+      setNewEmployeeEmail('')
+      setNewEmployeeDepartment('')
+      setNewEmployeeRole('')
+      setNewEmployeeSalary('')
+    } catch (error) {
+      console.error('Error adding employee:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to add employee')
+    }
+  }
+
+  // Update employee details
+  const handleUpdateEmployee = async (employeeId: string, updates: Record<string, unknown>) => {
+    try {
+      const response = await fetch('/api/employees', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: employeeId,
+          ...updates
+        })
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to update employee')
+      }
+
+      toast.success('Employee updated successfully')
+      setShowEmployeeDialog(false)
+    } catch (error) {
+      console.error('Error updating employee:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to update employee')
+    }
+  }
+
+  // Add deduction to payroll
+  const handleAddDeduction = async (runId: string, deductionData: { type: string; amount: number; description?: string }) => {
+    try {
+      const run = dbPayrollRuns.find(r => r.id === runId)
+      if (!run) {
+        toast.error('Payroll run not found')
+        return
+      }
+
+      // Update the payroll run configuration with the new deduction
+      const currentConfig = run.configuration || {}
+      const deductions = Array.isArray(currentConfig.deductions) ? currentConfig.deductions : []
+
+      const newDeduction = {
+        id: `DED-${Date.now().toString(36).toUpperCase()}`,
+        ...deductionData,
+        created_at: new Date().toISOString()
+      }
+
+      const { error } = await supabase
+        .from('payroll_runs')
+        .update({
+          configuration: {
+            ...currentConfig,
+            deductions: [...deductions, newDeduction]
+          },
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', runId)
+
+      if (error) throw error
+
+      toast.success(`Deduction of ${formatCurrency(deductionData.amount)} added`)
+      await fetchPayrollRuns()
+    } catch (error) {
+      console.error('Error adding deduction:', error)
+      toast.error('Failed to add deduction')
+    }
+  }
+
+  // Add bonus to payroll
+  const handleAddBonus = async (runId: string, bonusData: { type: string; amount: number; description?: string }) => {
+    try {
+      const run = dbPayrollRuns.find(r => r.id === runId)
+      if (!run) {
+        toast.error('Payroll run not found')
+        return
+      }
+
+      // Update the payroll run configuration with the new bonus
+      const currentConfig = run.configuration || {}
+      const bonuses = Array.isArray(currentConfig.bonuses) ? currentConfig.bonuses : []
+
+      const newBonus = {
+        id: `BON-${Date.now().toString(36).toUpperCase()}`,
+        ...bonusData,
+        created_at: new Date().toISOString()
+      }
+
+      const { error } = await supabase
+        .from('payroll_runs')
+        .update({
+          configuration: {
+            ...currentConfig,
+            bonuses: [...bonuses, newBonus]
+          },
+          total_amount: run.total_amount + bonusData.amount,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', runId)
+
+      if (error) throw error
+
+      toast.success(`Bonus of ${formatCurrency(bonusData.amount)} added`)
+      await fetchPayrollRuns()
+    } catch (error) {
+      console.error('Error adding bonus:', error)
+      toast.error('Failed to add bonus')
+    }
+  }
+
+  // File taxes via API
+  const handleFileTaxes = async (taxData: { tax_type: string; period: string; amount: number }) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to file taxes')
+        return
+      }
+
+      // Insert a new tax filing record
+      const { error } = await supabase
+        .from('tax_filings')
+        .insert({
+          user_id: user.id,
+          filing_type: taxData.tax_type,
+          period: taxData.period,
+          amount: taxData.amount,
+          status: 'pending',
+          agency: 'IRS',
+          due_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+
+      if (error) throw error
+
+      toast.success(`Tax filing for ${taxData.period} submitted successfully`)
+      setShowFileTaxesDialog(false)
+    } catch (error) {
+      console.error('Error filing taxes:', error)
+      toast.error('Failed to submit tax filing')
+    }
+  }
+
+  // Add or update benefits
+  const handleAddBenefit = async () => {
+    if (!benefitName.trim() || !benefitProvider.trim()) {
+      toast.error('Benefit name and provider are required')
+      return
+    }
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to add benefits')
+        return
+      }
+
+      const { error } = await supabase
+        .from('benefits')
+        .insert({
+          user_id: user.id,
+          name: benefitName,
+          type: benefitType,
+          provider: benefitProvider,
+          status: 'active',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+
+      if (error) throw error
+
+      toast.success(`Benefit "${benefitName}" added successfully`)
+      setShowAddBenefitDialog(false)
+      setBenefitName('')
+      setBenefitProvider('')
+      setBenefitType('health')
+    } catch (error) {
+      console.error('Error adding benefit:', error)
+      toast.error('Failed to add benefit')
+    }
+  }
+
+  // Complete payroll run (mark as completed after processing)
+  const handleCompletePayrollRun = async (id: string) => {
+    try {
+      const response = await fetch('/api/payroll', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'process',
+          id
+        })
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to process payroll')
+      }
+
+      // After processing starts, update to completed
+      const { error } = await supabase
+        .from('payroll_runs')
+        .update({
+          status: 'completed',
+          processed_count: data.payroll_run?.total_employees || 0,
+          pending_count: 0,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id)
+
+      if (error) throw error
+
+      toast.success('Payroll run completed successfully')
+      await fetchPayrollRuns()
+    } catch (error) {
+      console.error('Error completing payroll run:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to complete payroll run')
+    }
   }
 
   const handleExportPayroll = () => {
@@ -2600,6 +2886,248 @@ export default function PayrollClient() {
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? 'Saving...' : editingId ? 'Update' : 'Create'}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Employee Dialog */}
+        <Dialog open={showAddEmployeeDialog} onOpenChange={setShowAddEmployeeDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Add Employee</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="employee_name">Full Name *</Label>
+                <Input
+                  id="employee_name"
+                  placeholder="e.g., John Smith"
+                  value={newEmployeeName}
+                  onChange={(e) => setNewEmployeeName(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="employee_email">Email *</Label>
+                <Input
+                  id="employee_email"
+                  type="email"
+                  placeholder="e.g., john.smith@company.com"
+                  value={newEmployeeEmail}
+                  onChange={(e) => setNewEmployeeEmail(e.target.value)}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="employee_department">Department</Label>
+                  <Input
+                    id="employee_department"
+                    placeholder="e.g., Engineering"
+                    value={newEmployeeDepartment}
+                    onChange={(e) => setNewEmployeeDepartment(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="employee_role">Role</Label>
+                  <Input
+                    id="employee_role"
+                    placeholder="e.g., Software Engineer"
+                    value={newEmployeeRole}
+                    onChange={(e) => setNewEmployeeRole(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="employee_salary">Annual Salary ($)</Label>
+                <Input
+                  id="employee_salary"
+                  type="number"
+                  min="0"
+                  step="1000"
+                  placeholder="e.g., 75000"
+                  value={newEmployeeSalary}
+                  onChange={(e) => setNewEmployeeSalary(e.target.value)}
+                />
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => {
+                    setShowAddEmployeeDialog(false)
+                    setNewEmployeeName('')
+                    setNewEmployeeEmail('')
+                    setNewEmployeeDepartment('')
+                    setNewEmployeeRole('')
+                    setNewEmployeeSalary('')
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className="flex-1 bg-gradient-to-r from-blue-500 to-indigo-600 text-white"
+                  onClick={handleAddEmployee}
+                >
+                  Add Employee
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Benefit Dialog */}
+        <Dialog open={showAddBenefitDialog} onOpenChange={setShowAddBenefitDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Add Benefit</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="benefit_name">Benefit Name *</Label>
+                <Input
+                  id="benefit_name"
+                  placeholder="e.g., Health Insurance Premium"
+                  value={benefitName}
+                  onChange={(e) => setBenefitName(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="benefit_provider">Provider *</Label>
+                <Input
+                  id="benefit_provider"
+                  placeholder="e.g., Blue Cross Blue Shield"
+                  value={benefitProvider}
+                  onChange={(e) => setBenefitProvider(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="benefit_type">Benefit Type</Label>
+                <select
+                  id="benefit_type"
+                  className="w-full p-2 border rounded-md dark:bg-gray-800 dark:border-gray-600"
+                  value={benefitType}
+                  onChange={(e) => setBenefitType(e.target.value)}
+                >
+                  <option value="health">Health Insurance</option>
+                  <option value="dental">Dental Insurance</option>
+                  <option value="vision">Vision Insurance</option>
+                  <option value="life">Life Insurance</option>
+                  <option value="401k">401(k)</option>
+                  <option value="hsa">HSA</option>
+                  <option value="fsa">FSA</option>
+                  <option value="pto">PTO</option>
+                  <option value="parental">Parental Leave</option>
+                  <option value="education">Education Assistance</option>
+                </select>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => {
+                    setShowAddBenefitDialog(false)
+                    setBenefitName('')
+                    setBenefitProvider('')
+                    setBenefitType('health')
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className="flex-1 bg-gradient-to-r from-pink-500 to-rose-600 text-white"
+                  onClick={handleAddBenefit}
+                >
+                  Add Benefit
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* File Taxes Dialog */}
+        <Dialog open={showFileTaxesDialog} onOpenChange={setShowFileTaxesDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>File Taxes</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="tax_type">Tax Type</Label>
+                <select
+                  id="tax_type"
+                  className="w-full p-2 border rounded-md dark:bg-gray-800 dark:border-gray-600"
+                  defaultValue="federal"
+                >
+                  <option value="federal">Federal Income Tax</option>
+                  <option value="state">State Income Tax</option>
+                  <option value="fica">FICA (Social Security + Medicare)</option>
+                  <option value="futa">FUTA (Federal Unemployment)</option>
+                  <option value="suta">SUTA (State Unemployment)</option>
+                  <option value="local">Local Tax</option>
+                </select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="tax_year">Tax Year</Label>
+                  <select
+                    id="tax_year"
+                    className="w-full p-2 border rounded-md dark:bg-gray-800 dark:border-gray-600"
+                    value={taxYear}
+                    onChange={(e) => setTaxYear(e.target.value)}
+                  >
+                    <option value="2025">2025</option>
+                    <option value="2024">2024</option>
+                    <option value="2023">2023</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="tax_quarter">Quarter</Label>
+                  <select
+                    id="tax_quarter"
+                    className="w-full p-2 border rounded-md dark:bg-gray-800 dark:border-gray-600"
+                    value={taxQuarter}
+                    onChange={(e) => setTaxQuarter(e.target.value)}
+                  >
+                    <option value="Q1">Q1 (Jan-Mar)</option>
+                    <option value="Q2">Q2 (Apr-Jun)</option>
+                    <option value="Q3">Q3 (Jul-Sep)</option>
+                    <option value="Q4">Q4 (Oct-Dec)</option>
+                  </select>
+                </div>
+              </div>
+              <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+                <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400">
+                  <AlertCircle className="w-5 h-5" />
+                  <span className="font-medium">Estimated Tax Amount</span>
+                </div>
+                <div className="text-2xl font-bold text-amber-800 dark:text-amber-300 mt-2">
+                  {formatCurrency(stats.monthlyTaxes * 3)}
+                </div>
+                <div className="text-sm text-amber-600 dark:text-amber-400 mt-1">
+                  Based on {taxQuarter} {taxYear} payroll data
+                </div>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => setShowFileTaxesDialog(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className="flex-1 bg-gradient-to-r from-amber-500 to-orange-600 text-white"
+                  onClick={() => {
+                    handleFileTaxes({
+                      tax_type: 'federal',
+                      period: `${taxQuarter} ${taxYear}`,
+                      amount: stats.monthlyTaxes * 3
+                    })
+                  }}
+                >
+                  <Send className="w-4 h-4 mr-2" />
+                  Submit Filing
                 </Button>
               </div>
             </div>
