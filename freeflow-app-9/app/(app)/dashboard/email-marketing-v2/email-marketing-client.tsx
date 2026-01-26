@@ -71,7 +71,9 @@ import {
   Star,
   Inbox,
   Bell,
-  Download
+  Download,
+  Share2,
+  BarChart
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -626,6 +628,27 @@ export default function EmailMarketingClient() {
         setActiveTab('subscribers')
         toast.success(`Subscriber lists loaded: ${stats.totalLists.toLocaleString()} total subscribers`)
       },
+      variant: 'outline' as const
+    },
+    {
+      id: '4',
+      label: 'Social Media',
+      icon: <Share2 className="w-4 h-4" />,
+      action: () => router.push('/dashboard/social-media-v2'),
+      variant: 'outline' as const
+    },
+    {
+      id: '5',
+      label: 'Analytics',
+      icon: <BarChart className="w-4 h-4" />,
+      action: () => router.push('/dashboard/analytics-v2?source=email'),
+      variant: 'outline' as const
+    },
+    {
+      id: '6',
+      label: 'SEO',
+      icon: <Search className="w-4 h-4" />,
+      action: () => router.push('/dashboard/seo-v2'),
       variant: 'outline' as const
     },
   ]

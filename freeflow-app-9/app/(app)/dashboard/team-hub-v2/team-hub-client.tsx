@@ -93,7 +93,8 @@ import {
   Database,
   Terminal,
   AlertTriangle,
-  Loader2
+  Loader2,
+  DollarSign
 } from 'lucide-react'
 
 // Competitive Upgrade Components
@@ -1136,6 +1137,18 @@ export default function TeamHubClient() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <Button variant="outline" size="sm" onClick={() => router.push('/dashboard/payroll-v2')}>
+              <DollarSign className="w-4 h-4 mr-2" />
+              Payroll
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => router.push('/dashboard/roles-v2')}>
+              <Shield className="w-4 h-4 mr-2" />
+              Roles & Permissions
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => router.push('/dashboard/user-management-v2')}>
+              <Settings className="w-4 h-4 mr-2" />
+              User Management
+            </Button>
             <Button variant="outline" size="icon" onClick={() => setShowSearch(true)}>
               <Search className="w-4 h-4" />
             </Button>

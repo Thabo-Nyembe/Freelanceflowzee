@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { useSEOKeywords, useSEOBacklinks, useSEOPages, type SEOKeyword, type SEOBacklink, type SEOPage } from '@/lib/hooks/use-seo'
 import { Loader2 } from 'lucide-react'
@@ -53,7 +54,10 @@ import {
   Activity,
   LineChart,
   Bell,
-  MessageSquare
+  MessageSquare,
+  Mail,
+  Share2,
+  BarChart
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -298,7 +302,7 @@ const seoAIInsights: AIInsight[] = []
 const seoCollaborators: Collaborator[] = []
 const seoPredictions: Prediction[] = []
 const seoActivities: ActivityItem[] = []
-const seoQuickActions: QuickAction[] = []
+const _seoQuickActions: QuickAction[] = []
 
 // Helper function to map DB keyword to UI Keyword type
 const mapDbKeywordToUi = (dbKeyword: SEOKeyword): Keyword => {
@@ -399,6 +403,8 @@ const mapDbPageToUi = (dbPage: SEOPage): ContentPage => {
 }
 
 export default function SEOClient({ initialKeywords: _initialKeywords, initialBacklinks: _initialBacklinks }: SEOClientProps) {
+  const router = useRouter()
+
   // Database hooks for real data
   const {
     keywords: dbKeywords,
@@ -907,6 +913,13 @@ export default function SEOClient({ initialKeywords: _initialKeywords, initialBa
       </div>
     )
   }
+
+  // Quick actions for marketing channel navigation
+  const seoQuickActionsWithNav = [
+    { id: '1', label: 'Social Media', icon: <Share2 className="w-4 h-4" />, action: () => router.push('/dashboard/social-media-v2'), variant: 'outline' as const },
+    { id: '2', label: 'Email Marketing', icon: <Mail className="w-4 h-4" />, action: () => router.push('/dashboard/email-marketing-v2'), variant: 'outline' as const },
+    { id: '3', label: 'View Analytics', icon: <BarChart className="w-4 h-4" />, action: () => router.push('/dashboard/analytics-v2?source=seo'), variant: 'outline' as const },
+  ]
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50/30 to-purple-50/40 dark:bg-none dark:bg-gray-900 p-6">
@@ -2181,7 +2194,7 @@ export default function SEOClient({ initialKeywords: _initialKeywords, initialBa
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={seoQuickActions}
+            actions={seoQuickActionsWithNav}
             variant="grid"
           />
         </div>

@@ -35,7 +35,9 @@ import {
   ArrowUp,
   ArrowDown,
   Trash2,
-  User
+  User,
+  ExternalLink,
+  Users
 } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
@@ -636,6 +638,52 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
               {feature}
             </span>
           ))}
+        </div>
+
+        {/* Related Dashboards Navigation */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Related Finance Modules</h3>
+            <ExternalLink className="w-4 h-4 text-gray-400" />
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.push('/dashboard/invoicing-v2')}
+              className="flex items-center gap-2 hover:bg-emerald-50 hover:border-emerald-300 dark:hover:bg-emerald-900/20"
+            >
+              <FileText className="w-4 h-4 text-emerald-600" />
+              View Invoices
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.push('/dashboard/expenses-v2')}
+              className="flex items-center gap-2 hover:bg-purple-50 hover:border-purple-300 dark:hover:bg-purple-900/20"
+            >
+              <Receipt className="w-4 h-4 text-purple-600" />
+              View Expenses
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.push('/dashboard/payroll-v2')}
+              className="flex items-center gap-2 hover:bg-blue-50 hover:border-blue-300 dark:hover:bg-blue-900/20"
+            >
+              <Users className="w-4 h-4 text-blue-600" />
+              View Payroll
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.push('/dashboard/transactions-v2')}
+              className="flex items-center gap-2 hover:bg-teal-50 hover:border-teal-300 dark:hover:bg-teal-900/20"
+            >
+              <CreditCard className="w-4 h-4 text-teal-600" />
+              View Transactions
+            </Button>
+          </div>
         </div>
 
         {/* Quick Stats */}

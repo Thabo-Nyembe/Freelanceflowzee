@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/client'
 
 import React, { useState, useMemo } from 'react'
+import { useRouter } from 'next/navigation'
 import { useExpenses, useCreateExpense, useUpdateExpense, useDeleteExpense } from '@/lib/hooks/use-expenses'
 import { useApiKeys } from '@/lib/hooks/use-api-keys'
 import { toast } from 'sonner'
@@ -26,7 +27,7 @@ import {
   BarChart3, PieChart, Users, Send, Plus, ChevronRight,
   Banknote, MapPin, Shield, ArrowRight, Settings, Bell, Link2,
   Key, Database, RefreshCw, Mail, Webhook, Timer,
-  Wallet, Building2, UserCog
+  Wallet, Building2, UserCog, ExternalLink
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components - temporarily disabled due to Radix UI infinite loop
@@ -251,6 +252,7 @@ const getExpensesQuickActions = (
 
 export default function ExpensesClient({ initialExpenses }: ExpensesClientProps) {
   const supabase = createClient()
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState('reports')
   const [statusFilter, setStatusFilter] = useState<ExpenseStatus | 'all'>('all')
   const [categoryFilter, setCategoryFilter] = useState<ExpenseCategory | 'all'>('all')
@@ -1055,6 +1057,34 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-6">
+        {/* Related Dashboards Navigation */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700 mb-6">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Quick Navigation</h3>
+            <ExternalLink className="w-4 h-4 text-gray-400" />
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.push('/dashboard/financial-v2')}
+              className="flex items-center gap-2 hover:bg-emerald-50 hover:border-emerald-300 dark:hover:bg-emerald-900/20"
+            >
+              <DollarSign className="w-4 h-4 text-emerald-600" />
+              View Financial Overview
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => router.push('/dashboard/invoicing-v2?type=expense')}
+              className="flex items-center gap-2 hover:bg-blue-50 hover:border-blue-300 dark:hover:bg-blue-900/20"
+            >
+              <FileText className="w-4 h-4 text-blue-600" />
+              Create Invoice for Reimbursable
+            </Button>
+          </div>
+        </div>
+
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="mb-6">
             <TabsTrigger value="reports">Expense Reports</TabsTrigger>

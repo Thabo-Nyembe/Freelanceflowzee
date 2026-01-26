@@ -2,6 +2,8 @@
 
 import { createClient } from '@/lib/supabase/client'
 import { useTestRuns, useTestingMutations, type TestRun as DbTestRun } from '@/lib/hooks/use-testing'
+import { useTeam } from '@/lib/hooks/use-team'
+import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
@@ -245,6 +247,10 @@ const getBrowserIcon = (browser: BrowserType): React.ReactNode => {
 
 
 export default function TestingClient() {
+  // Team and activity hooks for collaboration features
+  const { members: teamMembers } = useTeam()
+  const { logs: activityLogs } = useActivityLogs()
+
   // Database hooks - wire to Supabase
   const {
     runs: dbTestRuns,
@@ -2048,7 +2054,7 @@ export default defineConfig({
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={[]}
+              collaborators={teamMembers?.map(m => ({ id: m.id, name: m.name, avatar: m.avatar_url, status: m.status === 'active' ? 'online' : 'offline' })) || []}
               maxVisible={4}
             />
             <PredictiveAnalytics
@@ -2060,7 +2066,7 @@ export default defineConfig({
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={[]}
+            activities={activityLogs?.slice(0, 10).map(l => ({ id: l.id, type: l.activity_type, title: l.action, user: { name: l.user_name || 'System' }, timestamp: l.created_at })) || []}
             title="Testing Activity"
             maxItems={5}
           />

@@ -52,7 +52,9 @@ import {
   Link as LinkIcon,
   Image,
   ChevronUp,
-  ChevronDown
+  ChevronDown,
+  HelpCircle,
+  Ticket
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -734,6 +736,18 @@ export default function FAQClient() {
               </div>
             </div>
             <div className="flex items-center gap-3">
+              <Link href="/dashboard/support-v2">
+                <Button variant="secondary" size="sm" className="gap-2 bg-white/20 hover:bg-white/30 text-white border-0">
+                  <HelpCircle className="w-4 h-4" />
+                  Contact Support
+                </Button>
+              </Link>
+              <Link href="/dashboard/support-tickets-v2?action=create">
+                <Button variant="secondary" size="sm" className="gap-2 bg-white/20 hover:bg-white/30 text-white border-0">
+                  <Ticket className="w-4 h-4" />
+                  Submit Ticket
+                </Button>
+              </Link>
               <button
                 onClick={() => setShowPreview(true)}
                 className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-medium backdrop-blur-sm transition-colors flex items-center gap-2"

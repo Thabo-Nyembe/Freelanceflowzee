@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import {
   Shield, Users, Lock, Key, Crown, UserCheck, UserX, Plus,
@@ -303,6 +304,7 @@ const defaultAdvancedSettings: AdvancedSettings = {
 }
 
 export default function RolesClient() {
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState('dashboard')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedRole, setSelectedRole] = useState<Role | null>(null)
@@ -1033,6 +1035,10 @@ export default function RolesClient() {
               </div>
             </div>
             <div className="flex gap-3">
+              <Button variant="outline" className="flex items-center gap-2" onClick={() => router.push('/dashboard/team-hub-v2')}>
+                <Users className="w-4 h-4" />
+                View Team
+              </Button>
               <Button variant="outline" className="flex items-center gap-2" onClick={handleExportRoles}>
                 <Download className="w-4 h-4" />
                 Export
@@ -1518,6 +1524,9 @@ export default function RolesClient() {
                       <div className="flex gap-2 pt-4 border-t border-gray-100 dark:border-gray-700">
                         <Button size="sm" variant="outline" className="flex-1" onClick={() => handleEditRole(role)}>
                           <Eye className="w-4 h-4 mr-1" /> View
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={() => router.push(`/dashboard/user-management-v2?role=${role.id}`)}>
+                          <Users className="w-4 h-4 mr-1" /> Users
                         </Button>
                         <Button size="sm" variant="outline" onClick={() => handleDuplicateRole(role)}>
                           <Copy className="w-4 h-4" />

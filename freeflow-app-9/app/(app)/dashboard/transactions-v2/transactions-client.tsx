@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 // Hooks used: useTransactions
 
 import { useState, useMemo } from 'react'
+import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import {
   DollarSign,
@@ -45,7 +46,8 @@ import {
   RefreshCw,
   Repeat,
   PieChart,
-  Target
+  Target,
+  ExternalLink
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -218,7 +220,7 @@ const emptyActivities: { id: string; user: string; action: string; target: strin
 // Quick actions will be defined inside the component with proper state access
 
 export default function TransactionsClient({ initialTransactions }: { initialTransactions: Transaction[] }) {
-
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState('overview')
   const [selectedPeriod, setSelectedPeriod] = useState('last-7-days')
   const [searchQuery, setSearchQuery] = useState('')
@@ -757,6 +759,32 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
               {feature}
             </span>
           ))}
+        </div>
+
+        {/* Related Dashboards Navigation */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm border border-gray-100 dark:border-gray-700">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Quick Navigation</h3>
+            <ExternalLink className="w-4 h-4 text-gray-400" />
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => router.push('/dashboard/financial-v2')}
+              className="flex items-center gap-2 px-3 py-2 text-sm font-medium bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-emerald-50 hover:border-emerald-300 dark:hover:bg-emerald-900/20 transition-colors"
+            >
+              <DollarSign className="w-4 h-4 text-emerald-600" />
+              View Financial Dashboard
+            </button>
+            {selectedPayment && selectedPayment.metadata?.invoiceId && (
+              <button
+                onClick={() => router.push(`/dashboard/invoicing-v2?invoice=${selectedPayment.metadata.invoiceId}`)}
+                className="flex items-center gap-2 px-3 py-2 text-sm font-medium bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-blue-50 hover:border-blue-300 dark:hover:bg-blue-900/20 transition-colors"
+              >
+                <FileText className="w-4 h-4 text-blue-600" />
+                View Related Invoice
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Quick Stats */}
@@ -2139,10 +2167,22 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
                 </div>
               </div>
             )}
-            <DialogFooter>
+            <DialogFooter className="flex-wrap gap-2">
               <button onClick={() => setShowPaymentDialog(false)} className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
                 Close
               </button>
+              {selectedPayment?.metadata?.invoiceId && (
+                <button
+                  onClick={() => {
+                    setShowPaymentDialog(false)
+                    router.push(`/dashboard/invoicing-v2?invoice=${selectedPayment.metadata.invoiceId}`)
+                  }}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  <FileText className="w-4 h-4" />
+                  View Related Invoice
+                </button>
+              )}
               {selectedPayment?.status === 'succeeded' && !selectedPayment?.refunded && (
                 <button
                   onClick={() => { setShowPaymentDialog(false); setShowRefundDialog(true); }}

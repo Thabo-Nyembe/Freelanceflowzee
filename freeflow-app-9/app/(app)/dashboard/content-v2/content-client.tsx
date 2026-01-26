@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -13,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
-import { Webhook, Sliders, Globe as GlobeIcon, HardDrive, Trash2 as TrashIcon, RefreshCw, Download, Plus, Settings, Cloud, Code, Layers, FileText, Edit2, Archive, Send } from 'lucide-react'
+import { Webhook, Sliders, Globe as GlobeIcon, HardDrive, Trash2 as TrashIcon, RefreshCw, Download, Plus, Settings, Cloud, Code, Layers, FileText, Edit2, Archive, Send, Mail, Share2, Search, BarChart } from 'lucide-react'
 
 // Import hooks
 import { useContent, Content, ContentType, ContentStatus } from '@/lib/hooks/use-content'
@@ -241,7 +242,7 @@ const contentPredictions: Prediction[] = []
 const contentActivities: ExtendedActivityItem[] = []
 
 export default function ContentClient() {
-
+  const router = useRouter()
 
   // View and filter state
   const [activeView, setActiveView] = useState<'entries' | 'assets' | 'types' | 'locales' | 'webhooks' | 'settings'>('entries')
@@ -922,6 +923,10 @@ export default function ContentClient() {
     { id: '2', label: 'Upload', icon: 'Upload', shortcut: 'U', action: handleUploadAsset },
     { id: '3', label: 'Export', icon: 'Download', shortcut: 'E', action: handleExportContent },
     { id: '4', label: 'Refresh', icon: 'RefreshCw', shortcut: 'R', action: () => refetchContent() },
+    { id: '5', label: 'Email Marketing', icon: <Mail className="w-4 h-4" />, action: () => router.push('/dashboard/email-marketing-v2') },
+    { id: '6', label: 'Social Media', icon: <Share2 className="w-4 h-4" />, action: () => router.push('/dashboard/social-media-v2') },
+    { id: '7', label: 'SEO Tools', icon: <Search className="w-4 h-4" />, action: () => router.push('/dashboard/seo-v2') },
+    { id: '8', label: 'Analytics', icon: <BarChart className="w-4 h-4" />, action: () => router.push('/dashboard/analytics-v2?source=content') },
   ]
 
   return (

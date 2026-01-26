@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useSocialPosts, useSocialAccounts, type SocialPost as HookSocialPost, type SocialAccount as HookSocialAccount } from '@/lib/hooks/use-social-media'
 
 import React, { useState, useMemo, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -61,7 +62,9 @@ import {
   Activity,
   Sliders,
   Loader2,
-  AlertCircle
+  AlertCircle,
+  Mail,
+  BarChart
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -286,6 +289,8 @@ const emptyActivities: ActivityItem[] = []
 // Quick actions are defined inside the component to access state setters
 
 export default function SocialMediaClient() {
+  const router = useRouter()
+
   // Use Supabase hooks for data fetching
   const {
     posts: dbPosts,
@@ -969,6 +974,9 @@ export default function SocialMediaClient() {
     { id: '1', label: 'Create Post', icon: 'edit', action: () => handleCreatePost(), variant: 'default' as const },
     { id: '2', label: 'Schedule', icon: 'calendar', action: () => setIsSchedulerOpen(true), variant: 'default' as const },
     { id: '3', label: 'Analytics', icon: 'chart', action: () => setIsAnalyticsOpen(true), variant: 'outline' as const },
+    { id: '4', label: 'Email Campaigns', icon: <Mail className="w-4 h-4" />, action: () => router.push('/dashboard/email-marketing-v2'), variant: 'outline' as const },
+    { id: '5', label: 'View Analytics', icon: <BarChart className="w-4 h-4" />, action: () => router.push('/dashboard/analytics-v2?source=social'), variant: 'outline' as const },
+    { id: '6', label: 'SEO Tools', icon: <Search className="w-4 h-4" />, action: () => router.push('/dashboard/seo-v2'), variant: 'outline' as const },
   ]
 
   // Show error state

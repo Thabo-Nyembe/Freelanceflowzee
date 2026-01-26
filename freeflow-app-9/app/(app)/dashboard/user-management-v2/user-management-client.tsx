@@ -1,6 +1,7 @@
 'use client'
 
 import { createClient } from '@/lib/supabase/client'
+import { useRouter } from 'next/navigation'
 
 // MIGRATED: Batch #18 - Verified database hook integration
 // Hooks used: useUserManagement, useState, useMemo, useAuthUserId, useDashboardInsights, useDashboardActivities, useDashboardQuickActions, useMLPredictions, useAICollaboration
@@ -97,6 +98,8 @@ interface AuditLog {
 // - mockUserMgmtQuickActions -> useDashboardQuickActions
 
 export default function UserManagementClient({ initialUsers }: { initialUsers: ManagedUser[] }) {
+  const router = useRouter()
+
   // Auth and user ID state
   const { getUserId } = useAuthUserId()
   const [userId, setUserId] = useState<string | null>(null)
@@ -641,6 +644,14 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
             <p className="text-gray-600 dark:text-gray-400">Manage users, roles, connections, and security policies</p>
           </div>
           <div className="flex items-center gap-3">
+            <Button variant="outline" className="gap-2" onClick={() => router.push('/dashboard/team-hub-v2')}>
+              <Users className="w-4 h-4" />
+              View Team
+            </Button>
+            <Button variant="outline" className="gap-2" onClick={() => router.push('/dashboard/roles-v2')}>
+              <Shield className="w-4 h-4" />
+              Manage Roles
+            </Button>
             <Button variant="outline" className="gap-2" onClick={handleExportUsers} disabled={exporting}>
               <Download className="w-4 h-4" />
               {exporting ? 'Exporting...' : 'Export'}

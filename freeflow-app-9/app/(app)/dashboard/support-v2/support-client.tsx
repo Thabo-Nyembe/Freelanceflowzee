@@ -3,8 +3,9 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import Link from 'next/link'
 import { useSupportTickets, type SupportTicket as DbSupportTicket } from '@/lib/hooks/use-support-tickets'
-import { Loader2 } from 'lucide-react'
+import { Loader2, HelpCircle, Ticket, BookOpen } from 'lucide-react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -479,6 +480,28 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
               New Ticket
             </Button>
           </div>
+        </div>
+
+        {/* Quick Navigation */}
+        <div className="flex items-center gap-3">
+          <Link href="/dashboard/support-tickets-v2">
+            <Button variant="outline" size="sm" className="gap-2">
+              <Ticket className="w-4 h-4" />
+              View Tickets
+            </Button>
+          </Link>
+          <Link href="/dashboard/faq-v2">
+            <Button variant="outline" size="sm" className="gap-2">
+              <BookOpen className="w-4 h-4" />
+              Knowledge Base
+            </Button>
+          </Link>
+          <Link href="/dashboard/chat-v2">
+            <Button variant="outline" size="sm" className="gap-2">
+              <MessageSquare className="w-4 h-4" />
+              Chat Support
+            </Button>
+          </Link>
         </div>
 
         {/* Stats Grid */}

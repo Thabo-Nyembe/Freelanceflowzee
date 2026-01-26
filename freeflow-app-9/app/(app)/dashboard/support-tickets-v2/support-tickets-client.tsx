@@ -4,6 +4,7 @@
 // Hooks used: useSupportTickets, useTicketReplies
 
 import React, { useState, useMemo } from 'react'
+import Link from 'next/link'
 import { toast } from 'sonner'
 import { useSupportTickets, useTicketReplies, SupportTicket, SupportStats, TicketReply } from '@/lib/hooks/use-support-tickets'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -17,6 +18,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Progress } from '@/components/ui/progress'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
 import {
   Ticket, Search, Plus, Clock, AlertTriangle, CheckCircle,
   User, Mail, Phone, MessageSquare, Send, Paperclip, Star,
@@ -25,7 +27,7 @@ import {
   Inbox, UserCheck, Hourglass, CheckCheck, AlertCircle,
   Bot, Copy, MessageCircle,
   Bell, Key, Webhook, Shield, Cpu, AlertOctagon, Palette, Globe, Headphones, Sliders,
-  Loader2
+  Loader2, ArrowLeft, HelpCircle
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -644,15 +646,23 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
       <div className="max-w-[1800px] mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-bold mb-2 flex items-center gap-3">
-              <div className="p-2 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-xl">
-                <Ticket className="w-8 h-8 text-white" />
-              </div>
-              Support Center
-              {loading && <RefreshCw className="w-5 h-5 animate-spin text-teal-600 ml-2" />}
-            </h1>
-            <p className="text-muted-foreground">Zendesk-style ticket management and customer support</p>
+          <div className="flex items-center gap-4">
+            <Link href="/dashboard/support-v2">
+              <Button variant="outline" size="sm" className="gap-2">
+                <ArrowLeft className="w-4 h-4" />
+                Back to Support
+              </Button>
+            </Link>
+            <div>
+              <h1 className="text-4xl font-bold mb-2 flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-xl">
+                  <Ticket className="w-8 h-8 text-white" />
+                </div>
+                Support Center
+                {loading && <RefreshCw className="w-5 h-5 animate-spin text-teal-600 ml-2" />}
+              </h1>
+              <p className="text-muted-foreground">Zendesk-style ticket management and customer support</p>
+            </div>
           </div>
           <div className="flex items-center gap-3">
             <button className="px-4 py-2 bg-white dark:bg-gray-800 rounded-lg border flex items-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-700">
@@ -942,6 +952,22 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
                           <p className="text-green-600">4.5 ⭐ avg</p>
                         </div>
                         <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                      </div>
+
+                      {/* Quick Navigation */}
+                      <div className="flex items-center gap-2">
+                        <Link href={`/dashboard/customers-v2?highlight=${selectedTicket.user_id}`}>
+                          <Button variant="outline" size="sm" className="gap-2">
+                            <Users className="w-4 h-4" />
+                            View Customer
+                          </Button>
+                        </Link>
+                        <Link href={`/dashboard/chat-v2?ticket=${selectedTicket.id}`}>
+                          <Button variant="outline" size="sm" className="gap-2">
+                            <MessageSquare className="w-4 h-4" />
+                            Start Chat
+                          </Button>
+                        </Link>
                       </div>
 
                       {/* Conversation - Now using real Supabase data */}
