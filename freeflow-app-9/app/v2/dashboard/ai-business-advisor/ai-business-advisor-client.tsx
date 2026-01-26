@@ -36,14 +36,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch'
 
 import { useBusinessIntelligence } from '@/lib/hooks/use-kazi-ai'
+import { useAIBusinessAdvisorData } from '@/lib/hooks/use-ai-business-advisor'
 
 // Type imports/definitions (would normally be imported)
 // Types removed
-
-
-
-// Mocks removed - utilizing state for real data
-// TODO: Connect to backend persistence for insights/activity
 
 
 // Quick actions will be defined inside the component to access useState setters
@@ -53,7 +49,15 @@ export default function AiBusinessAdvisorClient() {
   // Integrated AI Hook
   const { analyzeProject, generatePricingStrategy, loading: aiLoading } = useBusinessIntelligence(userId || undefined)
 
-  // Dialog states
+  // Backend persistence for insights and activity
+  const {
+    insights,
+    activities,
+    isLoading: dataLoading,
+    refreshAll,
+    createInsight,
+    logActivity
+  } = useAIBusinessAdvisorData(userId || undefined)
 
   // Dialog states
   const [newItemDialogOpen, setNewItemDialogOpen] = useState(false)
@@ -112,35 +116,88 @@ export default function AiBusinessAdvisorClient() {
     { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => setSettingsDialogOpen(true) },
   ]
 
-  // Handle new item creation
-  const handleCreateItem = () => {
+  // Handle new item creation with backend persistence
+  const handleCreateItem = async () => {
     if (!newItemData.name.trim()) {
       toast.error('Please enter an item name')
       return
     }
-    toast.success('Created new ' + newItemData.type + ': "' + newItemData.name + '"')
+
+    // Map form type to insight type
+    const typeMap: Record<string, 'recommendation' | 'alert' | 'opportunity' | 'prediction' | 'info'> = {
+      'insight': 'info',
+      'goal': 'prediction',
+      'metric': 'info',
+      'opportunity': 'opportunity'
+    }
+
+    const insightType = typeMap[newItemData.type] || 'info'
+    const priorityValue = newItemData.priority as 'high' | 'medium' | 'low'
+
+    toast.promise(
+      (async () => {
+        const result = await createInsight({
+          type: insightType,
+          title: newItemData.name,
+          description: newItemData.description || `New ${newItemData.type} created`,
+          priority: priorityValue,
+          impact: priorityValue,
+          category: newItemData.type
+        })
+
+        if (!result) {
+          throw new Error('Failed to create insight')
+        }
+
+        // Log activity for the creation
+        await logActivity({
+          user: 'You',
+          action: 'created',
+          target: newItemData.name,
+          type: 'create'
+        })
+
+        return result
+      })(),
+      {
+        loading: 'Creating ' + newItemData.type + '...',
+        success: 'Created new ' + newItemData.type + ': "' + newItemData.name + '"',
+        error: 'Failed to create ' + newItemData.type
+      }
+    )
+
     setNewItemData({ name: '', type: 'insight', description: '', priority: 'medium' })
     setNewItemDialogOpen(false)
   }
 
-  // Handle export
-  const handleExport = () => {
+  // Handle export with activity logging
+  const handleExport = async () => {
     toast.promise(
-      fetch(`/api/ai-advisor?action=export&format=${exportData.format}`)
-        .then(res => {
-          if (!res.ok) throw new Error('Export failed')
-          return exportData.format === 'csv' ? res.text() : res.json()
+      (async () => {
+        const res = await fetch(`/api/ai-advisor?action=export&format=${exportData.format}`)
+        if (!res.ok) throw new Error('Export failed')
+
+        const data = exportData.format === 'csv' ? await res.text() : await res.json()
+        const content = exportData.format === 'csv' ? data : JSON.stringify(data, null, 2)
+        const blob = new Blob([content], { type: exportData.format === 'csv' ? 'text/csv' : 'application/json' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `ai-insights.${exportData.format}`
+        a.click()
+        URL.revokeObjectURL(url)
+
+        // Log the export activity
+        await logActivity({
+          user: 'You',
+          action: 'exported',
+          target: `AI Insights (${exportData.format.toUpperCase()})`,
+          type: 'create',
+          metadata: { format: exportData.format, dateRange: exportData.dateRange }
         })
-        .then(data => {
-          const content = exportData.format === 'csv' ? data : JSON.stringify(data, null, 2)
-          const blob = new Blob([content], { type: exportData.format === 'csv' ? 'text/csv' : 'application/json' })
-          const url = URL.createObjectURL(blob)
-          const a = document.createElement('a')
-          a.href = url
-          a.download = `ai-insights.${exportData.format}`
-          a.click()
-          URL.revokeObjectURL(url)
-        }),
+
+        return data
+      })(),
       {
         loading: `Generating ${exportData.format.toUpperCase()} report...`,
         success: `AI insights exported as ${exportData.format.toUpperCase()}`,
@@ -164,21 +221,32 @@ export default function AiBusinessAdvisorClient() {
   // Risk handlers removed (placeholder UI)
 
 
-  // Handle share insight
-  const handleShareInsight = () => {
+  // Handle share insight with activity logging
+  const handleShareInsight = async () => {
     if (!shareData.email.trim()) {
       toast.error('Please enter an email address')
       return
     }
     toast.promise(
-      fetch('/api/ai-advisor', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'share_insight', ...shareData })
-      }).then(res => {
+      (async () => {
+        const res = await fetch('/api/ai-advisor', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'share_insight', ...shareData })
+        })
         if (!res.ok) throw new Error('Failed')
+
+        // Log the share activity
+        await logActivity({
+          user: 'You',
+          action: 'shared insights with',
+          target: shareData.email,
+          type: 'comment',
+          metadata: { includeAnalysis: shareData.includeAnalysis }
+        })
+
         return res.json()
-      }),
+      })(),
       {
         loading: 'Sending insight...',
         success: `Insight shared with ${shareData.email}`,
@@ -189,17 +257,28 @@ export default function AiBusinessAdvisorClient() {
     setShareInsightDialogOpen(false)
   }
 
-  // Handle generate report
-  const handleGenerateReport = () => {
+  // Handle generate report with activity logging
+  const handleGenerateReport = async () => {
     toast.promise(
-      fetch('/api/ai-advisor', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'generate_report', ...reportData })
-      }).then(res => {
+      (async () => {
+        const res = await fetch('/api/ai-advisor', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'generate_report', ...reportData })
+        })
         if (!res.ok) throw new Error('Failed')
+
+        // Log the report generation activity
+        await logActivity({
+          user: 'You',
+          action: 'generated',
+          target: `${reportData.reportType} AI Business Report`,
+          type: 'create',
+          metadata: { focus: reportData.focus, timeframe: reportData.timeframe }
+        })
+
         return res.json()
-      }),
+      })(),
       {
         loading: 'Generating AI report...',
         success: 'AI Business Report generated successfully',
@@ -209,13 +288,10 @@ export default function AiBusinessAdvisorClient() {
     setGenerateReportDialogOpen(false)
   }
 
-  // Handle refresh insights
-  // Handle refresh insights
+  // Handle refresh insights with real backend data
   const handleRefreshInsights = async () => {
     toast.promise(
-      // Real AI analysis call would go here
-      // For now we simulate a refresh via the hook's loading state
-      new Promise(resolve => setTimeout(resolve, 1500)),
+      refreshAll(),
       {
         loading: 'Refreshing AI insights...',
         success: 'Insights updated with latest data',
@@ -252,9 +328,9 @@ export default function AiBusinessAdvisorClient() {
               variant="outline"
               size="sm"
               onClick={handleRefreshInsights}
-              disabled={aiLoading}
+              disabled={aiLoading || dataLoading}
             >
-              <RefreshCw className={`h-4 w-4 mr-2 ${aiLoading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`h-4 w-4 mr-2 ${aiLoading || dataLoading ? 'animate-spin' : ''}`} />
               Refresh
             </Button>
             <Button
@@ -316,15 +392,18 @@ export default function AiBusinessAdvisorClient() {
         <TabsContent value="growth" className="mt-6">
           <div className="space-y-6">
 
-            {/* V2 Competitive Upgrade Components - Connected to State (Empty by default) */}
+            {/* V2 Competitive Upgrade Components - Connected to Backend Data */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-              <AIInsightsPanel insights={[]} />
+              <AIInsightsPanel
+                insights={insights}
+                title="AI Business Insights"
+              />
               {/* <PredictiveAnalytics predictions={[]} /> - Hidden until data available */}
               <CollaborationIndicator collaborators={[]} />
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
               <QuickActionsToolbar actions={aiBusinessAdvisorQuickActions} />
-              <ActivityFeed activities={[]} />
+              <ActivityFeed activities={activities} />
             </div>
             {/* Growth Metrics */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

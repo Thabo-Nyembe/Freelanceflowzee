@@ -361,6 +361,7 @@ export async function globalSemanticSearch(options: SemanticSearchOptions) {
 
 /**
  * Get AI content recommendations based on user's history
+ * Uses pgvector cosine similarity for ranking similar content
  */
 export async function getAIContentRecommendations(
   userId: string,
@@ -381,23 +382,59 @@ export async function getAIContentRecommendations(
     return []
   }
 
-  // Average the embeddings for user preference vector
-  const avgEmbedding = averageEmbeddings(
-    userContent.map(c => JSON.parse(c.embedding))
-  )
+  // Average the embeddings to create user preference vector
+  const userEmbeddings = userContent
+    .filter(c => c.embedding)
+    .map(c => {
+      // Handle both string and array formats for embedding
+      if (typeof c.embedding === 'string') {
+        return JSON.parse(c.embedding)
+      }
+      return c.embedding
+    })
 
-  // Find similar content from other users (for discovery)
-  const { data, error } = await supabase
-    .from('ai_content_embeddings')
-    .select('content_id, content_type, style_tags')
-    .neq('user_id', userId)
-    .limit(limit * 2) // Get more to filter
+  if (userEmbeddings.length === 0) {
+    return []
+  }
 
-  if (error) throw error
+  const avgEmbedding = averageEmbeddings(userEmbeddings)
 
-  // TODO: Implement vector similarity ranking when Supabase supports it natively
-  // For now, return random selection
-  return (data || []).slice(0, limit)
+  // Use pgvector similarity search via RPC to find similar content
+  // This uses cosine similarity (1 - cosine distance) for ranking
+  const { data, error } = await supabase.rpc('vector_find_similar_ai_content', {
+    query_embedding: `[${avgEmbedding.join(',')}]`,
+    match_threshold: 0.5, // Lower threshold to include more diverse recommendations
+    match_count: limit,
+    filter_content_type: contentType || null,
+    exclude_user_id: userId, // Exclude user's own content for discovery
+  })
+
+  if (error) {
+    // Fallback to basic query if RPC function doesn't exist yet
+    console.warn('Vector similarity RPC not available, using fallback:', error.message)
+    const { data: fallbackData, error: fallbackError } = await supabase
+      .from('ai_content_embeddings')
+      .select('content_id, content_type, style_tags')
+      .neq('user_id', userId)
+      .limit(limit)
+
+    if (fallbackError) throw fallbackError
+    return fallbackData || []
+  }
+
+  // Return results sorted by similarity score (already sorted by RPC)
+  return (data || []).map((item: {
+    content_id: string
+    content_type: string
+    style_tags: string[]
+    similarity: number
+    user_id: string
+  }) => ({
+    content_id: item.content_id,
+    content_type: item.content_type,
+    style_tags: item.style_tags,
+    similarity: item.similarity,
+  }))
 }
 
 // ============================================

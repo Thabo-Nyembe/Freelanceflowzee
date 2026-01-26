@@ -332,8 +332,20 @@ export default function APlusShowcasePage() {
         setIsLoading(true)
         setError(null)
 
-        // TODO: In production, fetch from /api/components
-        const components: ComponentShowcase[] = []
+        // Fetch components from the API endpoint
+        const response = await fetch('/api/components')
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch components: ${response.status} ${response.statusText}`)
+        }
+
+        const result = await response.json()
+
+        if (!result.success) {
+          throw new Error(result.error || 'Failed to fetch components')
+        }
+
+        const components: ComponentShowcase[] = result.data?.components || []
         dispatch({ type: 'SET_COMPONENTS', components })
 
         logger.info('Components loaded successfully', { count: components.length, userId })

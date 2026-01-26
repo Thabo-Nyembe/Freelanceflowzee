@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createFeatureLogger } from '@/lib/logger';
+import { sendInvoiceEmail } from '@/lib/email/email-templates';
 
 const logger = createFeatureLogger('mobile-api');
 
@@ -903,14 +904,53 @@ export async function POST(request: NextRequest) {
           })
           .eq('id', invoiceId)
           .eq('user_id', userId)
-          .select()
+          .select(`
+            *,
+            clients(id, name, email)
+          `)
           .single();
 
         if (error) {
           return NextResponse.json({ error: error.message }, { status: 500 });
         }
 
-        // TODO: Send email notification to client
+        // Send email notification to client
+        if (data.clients?.email) {
+          const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+          const paymentUrl = `${appUrl}/invoices/${data.id}/pay`;
+
+          // Format invoice items for email
+          const items = Array.isArray(data.items)
+            ? data.items.map((item: { description?: string; quantity?: number; rate?: number }) => ({
+                description: item.description || 'Service',
+                quantity: item.quantity || 1,
+                price: `${data.currency || 'USD'} ${((item.rate || 0) * (item.quantity || 1)).toFixed(2)}`,
+              }))
+            : [{ description: 'Services', quantity: 1, price: `${data.currency || 'USD'} ${data.total_amount}` }];
+
+          try {
+            await sendInvoiceEmail({
+              clientName: data.clients.name,
+              clientEmail: data.clients.email,
+              invoiceNumber: data.invoice_number,
+              amount: data.total_amount.toFixed(2),
+              currency: data.currency || 'USD',
+              dueDate: new Date(data.due_date).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              }),
+              items,
+              paymentUrl,
+            });
+            logger.info('Invoice email sent successfully', { invoiceId: data.id, clientEmail: data.clients.email });
+          } catch (emailError) {
+            logger.error('Failed to send invoice email', { invoiceId: data.id, error: emailError });
+            // Don't fail the request if email fails - invoice was still sent
+          }
+        } else {
+          logger.warn('No client email found for invoice', { invoiceId: data.id });
+        }
 
         return NextResponse.json({ data });
       }

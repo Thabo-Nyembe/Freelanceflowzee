@@ -413,6 +413,44 @@ CREATE POLICY "Users can insert own search logs"
 ON semantic_search_log FOR INSERT
 WITH CHECK (auth.uid() = user_id);
 
+-- Find similar AI content by vector similarity for recommendations
+CREATE OR REPLACE FUNCTION vector_find_similar_ai_content(
+    query_embedding vector(1536),
+    match_threshold FLOAT DEFAULT 0.5,
+    match_count INT DEFAULT 10,
+    filter_content_type TEXT DEFAULT NULL,
+    exclude_user_id UUID DEFAULT NULL
+)
+RETURNS TABLE (
+    id UUID,
+    content_id UUID,
+    content_type TEXT,
+    style_tags TEXT[],
+    similarity FLOAT,
+    user_id UUID
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        ace.id,
+        ace.content_id,
+        ace.content_type,
+        ace.style_tags,
+        1 - (ace.embedding <=> query_embedding) AS similarity,
+        ace.user_id
+    FROM ai_content_embeddings ace
+    WHERE
+        (filter_content_type IS NULL OR ace.content_type = filter_content_type)
+        AND (exclude_user_id IS NULL OR ace.user_id != exclude_user_id)
+        AND ace.embedding IS NOT NULL
+        AND 1 - (ace.embedding <=> query_embedding) > match_threshold
+    ORDER BY ace.embedding <=> query_embedding
+    LIMIT match_count;
+END;
+$$;
+
 -- ============================================
 -- COMMENTS
 -- ============================================
@@ -422,3 +460,4 @@ COMMENT ON TABLE project_embeddings IS 'Vector embeddings for project similarity
 COMMENT ON TABLE ai_content_embeddings IS 'Vector embeddings for AI-generated content recommendations';
 COMMENT ON FUNCTION vector_search_documents IS 'Semantic search across documents using cosine similarity';
 COMMENT ON FUNCTION vector_global_semantic_search IS 'Global semantic search across all content types';
+COMMENT ON FUNCTION vector_find_similar_ai_content IS 'Find similar AI-generated content using cosine similarity for recommendations';

@@ -1,8 +1,11 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
 import { useAllocations, useAllocationMutations } from '@/lib/hooks/use-allocations'
+import { useResources, type Resource as ResourceDB } from '@/lib/hooks/use-resources'
+import { useProjects, type Project as ProjectDB } from '@/lib/hooks/use-projects'
+import { useTimeOff, type TimeOff as TimeOffDB } from '@/lib/hooks/use-time-off'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -198,14 +201,93 @@ interface UtilizationData {
 }
 
 // ============================================================================
-// DATA FROM HOOKS - Resources, Projects, TimeOff (Future Integration)
+// DATA TRANSFORMATION - Transform hook data to UI interfaces
 // ============================================================================
 
-// Placeholder arrays for features not yet implemented
-// TODO: Create hooks for resources, projects, time-off when backend tables are ready
-const resources: Resource[] = []
-const projects: Project[] = []
-const timeOff: TimeOff[] = []
+// Transform database Resource to UI Resource interface
+function transformResource(dbResource: ResourceDB): Resource {
+  // Parse skills from the array or use default
+  const skills: Skill[] = (dbResource.skills || []).map(skillName => ({
+    name: skillName,
+    level: 'intermediate' as SkillLevel,
+    years_experience: 2
+  }))
+
+  // Calculate utilization-based status
+  let status: ResourceStatus = 'available'
+  if (dbResource.utilization >= 100) status = 'unavailable'
+  else if (dbResource.utilization >= 70) status = 'partially_available'
+
+  return {
+    id: dbResource.id,
+    name: dbResource.name,
+    email: dbResource.email || '',
+    phone: dbResource.phone || '',
+    avatar: dbResource.avatar_url || '',
+    role: dbResource.type || 'Team Member',
+    department: dbResource.department || 'General',
+    location: dbResource.location || 'Remote',
+    status,
+    hourly_rate: dbResource.hourly_rate || 0,
+    cost_rate: (dbResource.hourly_rate || 0) * 0.6, // Estimate cost at 60% of rate
+    capacity_hours: dbResource.capacity || 40,
+    allocated_hours: dbResource.allocated || 0,
+    utilization: dbResource.utilization || 0,
+    skills,
+    manager_id: null,
+    manager_name: null,
+    start_date: dbResource.hire_date || dbResource.created_at,
+    timezone: 'UTC',
+    is_billable: true
+  }
+}
+
+// Transform database Project to UI Project interface
+function transformProject(dbProject: ProjectDB): Project {
+  // Estimate hours from budget (assume $150/hr avg rate)
+  const avgRate = 150
+  const budgetHours = dbProject.budget ? Math.round(dbProject.budget / avgRate) : 0
+  const consumedHours = dbProject.spent ? Math.round(dbProject.spent / avgRate) : 0
+
+  return {
+    id: dbProject.id,
+    name: dbProject.name,
+    code: dbProject.project_code || `PRJ-${dbProject.id.slice(0, 4).toUpperCase()}`,
+    client_name: 'Client', // Would need to join with clients table
+    status: dbProject.status === 'planning' ? 'planning' :
+            dbProject.status === 'completed' ? 'completed' :
+            dbProject.status === 'on_hold' ? 'on_hold' : 'active',
+    priority: dbProject.priority as Priority,
+    start_date: dbProject.start_date || '',
+    end_date: dbProject.end_date || '',
+    budget_hours: budgetHours,
+    allocated_hours: consumedHours, // Using consumed as allocated for now
+    consumed_hours: consumedHours,
+    budget_amount: dbProject.budget || 0,
+    spent_amount: dbProject.spent || 0,
+    pm_name: 'Project Manager',
+    pm_avatar: '',
+    color: dbProject.color || '#3b82f6',
+    team_size: (dbProject.team_members || []).length || 1
+  }
+}
+
+// Transform database TimeOff to UI TimeOff interface
+function transformTimeOff(dbTimeOff: TimeOffDB): TimeOff {
+  return {
+    id: dbTimeOff.id,
+    resource_id: dbTimeOff.resource_id,
+    resource_name: dbTimeOff.resource_name,
+    resource_avatar: dbTimeOff.resource_avatar || '',
+    type: dbTimeOff.type as TimeOffType,
+    start_date: dbTimeOff.start_date,
+    end_date: dbTimeOff.end_date,
+    hours: dbTimeOff.hours || 0,
+    status: dbTimeOff.status,
+    notes: dbTimeOff.notes || '',
+    approved_by: dbTimeOff.approved_by
+  }
+}
 
 // ============================================================================
 // HELPER FUNCTIONS
@@ -325,7 +407,7 @@ const initialFormState: AllocationForm = {
 
 export default function AllocationClient() {
 
-  // Supabase hooks
+  // Supabase hooks - Allocations
   const { allocations: dbAllocations, stats: dbStats, isLoading, refetch } = useAllocations()
   const {
     createAllocation,
@@ -338,6 +420,53 @@ export default function AllocationClient() {
     isUpdating,
     isDeleting
   } = useAllocationMutations()
+
+  // Supabase hooks - Resources, Projects, Time-Off (wired up)
+  const { resources: dbResources, stats: resourceStats, isLoading: resourcesLoading } = useResources()
+  const { projects: dbProjects, stats: projectStats, isLoading: projectsLoading, fetchProjects } = useProjects()
+  const { timeOff: dbTimeOff, stats: timeOffStats, isLoading: timeOffLoading } = useTimeOff()
+
+  // Transform database data to UI interfaces
+  const mockResources: Resource[] = useMemo(() =>
+    (dbResources || []).map(transformResource), [dbResources])
+
+  const mockProjects: Project[] = useMemo(() =>
+    (dbProjects || []).map(transformProject), [dbProjects])
+
+  const mockTimeOff: TimeOff[] = useMemo(() =>
+    (dbTimeOff || []).map(transformTimeOff), [dbTimeOff])
+
+  // Transform allocations from DB to include additional UI fields
+  const mockAllocations: Allocation[] = useMemo(() =>
+    (dbAllocations || []).map(alloc => ({
+      id: alloc.id,
+      resource_id: alloc.resource_id || '',
+      resource_name: alloc.resource_name,
+      resource_avatar: '',
+      resource_role: alloc.resource_role || 'Team Member',
+      project_id: alloc.project_id || '',
+      project_name: alloc.project_name,
+      project_code: `PRJ-${(alloc.project_id || alloc.id).slice(0, 4).toUpperCase()}`,
+      project_color: '#3b82f6',
+      status: alloc.status as AllocationStatus,
+      allocation_type: alloc.allocation_type as AllocationType,
+      priority: alloc.priority as Priority,
+      hours_per_week: alloc.hours_per_week,
+      start_date: alloc.start_date || '',
+      end_date: alloc.end_date || '',
+      billable_rate: alloc.billable_rate,
+      cost_rate: alloc.billable_rate * 0.6,
+      notes: alloc.notes || '',
+      created_at: alloc.created_at,
+      updated_at: alloc.updated_at,
+      approved_by: null,
+      approved_at: null
+    })), [dbAllocations])
+
+  // Fetch projects on mount
+  useEffect(() => {
+    fetchProjects()
+  }, [fetchProjects])
 
   const [activeTab, setActiveTab] = useState('allocations')
   const [searchQuery, setSearchQuery] = useState('')
@@ -425,14 +554,16 @@ export default function AllocationClient() {
       const matchesStatus = statusFilter === 'all' || allocation.status === statusFilter
       return matchesSearch && matchesStatus
     })
-  }, [searchQuery, statusFilter])
+  }, [mockAllocations, searchQuery, statusFilter])
 
   // Stats calculations
   const stats = useMemo(() => {
     const activeAllocations = mockAllocations.filter(a => a.status === 'active').length
     const totalHours = mockAllocations.reduce((acc, a) => acc + a.hours_per_week, 0)
     const totalBillable = mockAllocations.reduce((acc, a) => acc + (a.hours_per_week * a.billable_rate), 0)
-    const avgUtilization = mockResources.reduce((acc, r) => acc + r.utilization, 0) / mockResources.length
+    const avgUtilization = mockResources.length > 0
+      ? mockResources.reduce((acc, r) => acc + r.utilization, 0) / mockResources.length
+      : 0
     const availableResources = mockResources.filter(r => r.status === 'available').length
     const overAllocated = mockResources.filter(r => r.utilization > 100).length
     const pendingRequests = mockAllocations.filter(a => a.status === 'pending').length
@@ -449,7 +580,7 @@ export default function AllocationClient() {
       pendingRequests,
       activeProjects
     }
-  }, [])
+  }, [mockAllocations, mockResources, mockProjects])
 
   // CRUD Handlers
   const handleCreateAllocation = async () => {
@@ -472,7 +603,7 @@ export default function AllocationClient() {
         billable_rate: formData.billable_rate,
         notes: formData.notes,
       })
-      toast.success(`Allocation Created`, { description: `${formData.team_member_name} allocated to ${formData.project_name}` })
+      toast.success(`Allocation Created`, { description: `${formData.resource_name} allocated to ${formData.project_name}` })
       setShowCreateDialog(false)
       setFormData(initialFormState)
       refetch()

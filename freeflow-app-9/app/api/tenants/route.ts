@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/server';
 import { z } from 'zod';
 import { createFeatureLogger } from '@/lib/logger';
 import { sendTeamInvite } from '@/lib/email/email-templates';
+import { processDataExportAsync } from '@/lib/jobs/data-export-processor';
 
 const logger = createFeatureLogger('tenants-api');
 
@@ -379,6 +380,41 @@ export async function GET(request: NextRequest) {
           });
 
         return NextResponse.json({ analytics });
+      }
+
+      // Get data exports
+      case 'exports': {
+        if (!tenantId) {
+          return NextResponse.json({ error: 'Tenant ID required' }, { status: 400 });
+        }
+
+        const exportId = searchParams.get('exportId');
+
+        // Get single export by ID
+        if (exportId) {
+          const { data: exportData } = await supabase
+            .from('tenant_data_exports')
+            .select('*')
+            .eq('id', exportId)
+            .eq('tenant_id', tenantId)
+            .single();
+
+          if (!exportData) {
+            return NextResponse.json({ error: 'Export not found' }, { status: 404 });
+          }
+
+          return NextResponse.json({ export: exportData });
+        }
+
+        // Get all exports for tenant
+        const { data: exports } = await supabase
+          .from('tenant_data_exports')
+          .select('*')
+          .eq('tenant_id', tenantId)
+          .order('created_at', { ascending: false })
+          .limit(50);
+
+        return NextResponse.json({ exports: exports || [] });
       }
 
       default:
@@ -910,7 +946,16 @@ export async function POST(request: NextRequest) {
 
         if (error) throw error;
 
-        // TODO: Queue background job to process export
+        // Queue background job to process export
+        // This runs asynchronously and updates the export status in the database
+        processDataExportAsync(exportRequest.id);
+
+        logger.info('Data export queued', {
+          exportId: exportRequest.id,
+          tenantId,
+          exportType,
+          requestedBy: user.id,
+        });
 
         return NextResponse.json({ export: exportRequest }, { status: 201 });
       }
