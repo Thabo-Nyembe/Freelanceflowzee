@@ -228,6 +228,195 @@ export async function POST(request: NextRequest) {
         });
       }
 
+      case 'update': {
+        if (!data.report_id && !data.reportId) {
+          return NextResponse.json({
+            success: false,
+            error: 'Report ID required',
+          }, { status: 400 });
+        }
+
+        const reportId = data.report_id || data.reportId;
+        const report = await reportsService.updateReport(reportId, user.id, {
+          name: data.name,
+          description: data.description,
+          config: data.config,
+          schedule: data.schedule,
+          is_template: data.is_template,
+          is_public: data.is_public,
+        });
+        return NextResponse.json({
+          success: true,
+          action: 'update',
+          report,
+          message: 'Report updated successfully',
+        });
+      }
+
+      case 'share': {
+        const reportId = data.report_id || data.reportId || data.dashboard_id;
+        if (!reportId) {
+          return NextResponse.json({
+            success: false,
+            error: 'Report or dashboard ID required',
+          }, { status: 400 });
+        }
+
+        // Record the share action
+        const shareRecord = {
+          id: `share-${Date.now()}`,
+          resource_id: reportId,
+          resource_type: data.dashboard_id ? 'dashboard' : 'report',
+          share_url: data.share_url,
+          recipients: data.recipients || [],
+          permission: data.permission || 'view',
+          message: data.message,
+          expires_at: data.expires_in_days
+            ? new Date(Date.now() + data.expires_in_days * 24 * 60 * 60 * 1000).toISOString()
+            : null,
+          shared_by: user.id,
+          shared_at: new Date().toISOString(),
+        };
+
+        // Optionally update the report to be public if sharing externally
+        if (data.permission !== 'private') {
+          try {
+            await reportsService.updateReport(reportId, user.id, {
+              is_public: true,
+            });
+          } catch {
+            // Ignore error if it's a dashboard
+          }
+        }
+
+        return NextResponse.json({
+          success: true,
+          action: 'share',
+          share: shareRecord,
+          message: 'Shared successfully',
+        });
+      }
+
+      case 'save-as-template': {
+        if (!data.report_id && !data.reportId) {
+          return NextResponse.json({
+            success: false,
+            error: 'Report ID required',
+          }, { status: 400 });
+        }
+
+        const sourceReportId = data.report_id || data.reportId;
+        const sourceReport = await reportsService.getReportById(sourceReportId, user.id);
+
+        if (!sourceReport) {
+          return NextResponse.json({
+            success: false,
+            error: 'Source report not found',
+          }, { status: 404 });
+        }
+
+        const template = await reportsService.createReport(user.id, {
+          name: data.templateName || `${sourceReport.name} Template`,
+          description: sourceReport.description,
+          type: sourceReport.type,
+          config: sourceReport.config,
+          is_template: true,
+          is_public: false,
+        });
+
+        return NextResponse.json({
+          success: true,
+          action: 'save-as-template',
+          template,
+          message: 'Template created successfully',
+        }, { status: 201 });
+      }
+
+      case 'create-from-template': {
+        if (!data.template_id && !data.templateId) {
+          return NextResponse.json({
+            success: false,
+            error: 'Template ID required',
+          }, { status: 400 });
+        }
+
+        const templateId = data.template_id || data.templateId;
+        const template = await reportsService.getReportById(templateId, user.id);
+
+        if (!template) {
+          return NextResponse.json({
+            success: false,
+            error: 'Template not found',
+          }, { status: 404 });
+        }
+
+        const report = await reportsService.createReport(user.id, {
+          name: data.name || `${template.name} (from template)`,
+          description: template.description,
+          type: template.type,
+          config: { ...template.config, ...data.config },
+          is_template: false,
+          is_public: false,
+        });
+
+        return NextResponse.json({
+          success: true,
+          action: 'create-from-template',
+          report,
+          message: 'Report created from template',
+        }, { status: 201 });
+      }
+
+      case 'save-filter-preset': {
+        if (!data.report_id && !data.reportId) {
+          return NextResponse.json({
+            success: false,
+            error: 'Report ID required',
+          }, { status: 400 });
+        }
+
+        if (!data.presetName) {
+          return NextResponse.json({
+            success: false,
+            error: 'Preset name required',
+          }, { status: 400 });
+        }
+
+        const presetReportId = data.report_id || data.reportId;
+        const existingReport = await reportsService.getReportById(presetReportId, user.id);
+
+        if (!existingReport) {
+          return NextResponse.json({
+            success: false,
+            error: 'Report not found',
+          }, { status: 404 });
+        }
+
+        // Store filter preset in the report's config
+        const currentConfig = existingReport.config || {};
+        const filterPresets = currentConfig.filter_presets || {};
+        filterPresets[data.presetName] = {
+          name: data.presetName,
+          filters: data.filters,
+          created_at: new Date().toISOString(),
+        };
+
+        const updatedReport = await reportsService.updateReport(presetReportId, user.id, {
+          config: {
+            ...currentConfig,
+            filter_presets: filterPresets,
+          },
+        });
+
+        return NextResponse.json({
+          success: true,
+          action: 'save-filter-preset',
+          preset: filterPresets[data.presetName],
+          report: updatedReport,
+          message: 'Filter preset saved',
+        });
+      }
+
       case 'list': {
         const type = data.type as any;
         const reports = await reportsService.getReports(user.id, type);

@@ -47,6 +47,10 @@ import {
   Loader2,
   ShoppingCart,
   BookOpen,
+  Trash2,
+  PackagePlus,
+  MinusCircle,
+  PlusCircle,
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -214,7 +218,7 @@ export default function InventoryClient({ initialInventory: _initialInventory }:
   const { data: dbInventory, loading: inventoryLoading, error: inventoryError, refetch } = useInventory({ status: statusFilter === 'all' ? 'all' : statusFilter as InventoryStatus })
   const { mutate: createInventoryItem, loading: creating } = useCreateInventoryItem()
   const { mutate: updateInventoryItem, loading: _updating } = useUpdateInventoryItem()
-  const { mutate: _deleteInventoryItem, loading: _deleting } = useDeleteInventoryItem()
+  const { mutate: deleteInventoryItem, loading: deleting } = useDeleteInventoryItem()
   const { locations: dbLocations, isLoading: locationsLoading } = useInventoryLocations()
 
   // Form state for new product
@@ -275,8 +279,31 @@ export default function InventoryClient({ initialInventory: _initialInventory }:
   const [creatingSupplier, setCreatingSupplier] = useState(false)
   const [showStockCountDialog, setShowStockCountDialog] = useState(false)
   const [showBarcodeScannerDialog, setShowBarcodeScannerDialog] = useState(false)
+  const [showAdjustStockDialog, setShowAdjustStockDialog] = useState(false)
+  const [showReceiveStockDialog, setShowReceiveStockDialog] = useState(false)
   const [importingInventory, setImportingInventory] = useState(false)
   const [_printingLabels, setPrintingLabels] = useState(false)
+  const [adjustingStock, setAdjustingStock] = useState(false)
+  const [receivingStock, setReceivingStock] = useState(false)
+  const [selectedItemForAction, setSelectedItemForAction] = useState<InventoryItem | null>(null)
+
+  // Form state for stock adjustment
+  const [adjustStockForm, setAdjustStockForm] = useState({
+    quantity: 0,
+    type: 'increase' as 'increase' | 'decrease' | 'correction',
+    reason: '',
+    notes: ''
+  })
+
+  // Form state for receiving stock
+  const [receiveStockForm, setReceiveStockForm] = useState({
+    quantity: 0,
+    poNumber: '',
+    notes: ''
+  })
+
+  // Stock count entries for batch updates
+  const [stockCountEntries, setStockCountEntries] = useState<Record<string, number>>({})
 
   // Compute inventory stats from database data
   const inventoryStats = useMemo(() => {
@@ -608,63 +635,6 @@ export default function InventoryClient({ initialInventory: _initialInventory }:
     }
   }
 
-  const _handleUpdateStock = async (product: Product) => {
-    // Find matching inventory item from DB
-    const inventoryItem = dbInventory?.find(item =>
-      item.product_name === product.title || item.sku === product.variants[0]?.sku
-    )
-
-    if (!inventoryItem) {
-      toast.error('Product not found in database')
-      return
-    }
-
-    try {
-      const newQuantity = product.totalQuantity
-      await updateInventoryItem({
-        id: inventoryItem.id,
-        quantity: newQuantity,
-        available_quantity: newQuantity - (inventoryItem.reserved_quantity || 0),
-        total_value: newQuantity * inventoryItem.unit_price,
-        status: newQuantity === 0 ? 'out-of-stock' : newQuantity <= inventoryItem.reorder_point ? 'low-stock' : 'in-stock',
-        updated_at: new Date().toISOString()
-      } as any)
-
-      toast.success(`Stock updated: "${inventoryItem.product_name}" has been updated`)
-      refetch()
-    } catch (error) {
-      console.error('Stock update error:', error)
-      toast.error('Failed to update stock')
-    }
-  }
-
-  const _handleArchiveProduct = async (product: Product) => {
-    const inventoryItem = dbInventory?.find(item =>
-      item.product_name === product.title || item.sku === product.variants[0]?.sku
-    )
-
-    if (!inventoryItem) {
-      toast.error('Product not found in database')
-      return
-    }
-
-    try {
-      await updateInventoryItem({
-        id: inventoryItem.id,
-        status: 'discontinued',
-        is_active: false,
-        deleted_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      } as any)
-
-      toast.success(`Product archived: "${product.title}" has been archived`)
-      refetch()
-    } catch (error) {
-      console.error('Archive error:', error)
-      toast.error('Failed to archive product')
-    }
-  }
-
   const handleCreateLocation = async () => {
     if (!locationForm.name) {
       toast.error('Please enter a location name')
@@ -748,6 +718,342 @@ export default function InventoryClient({ initialInventory: _initialInventory }:
     toast.info('Syncing...')
     await refetch()
     toast.success('Sync complete')
+  }
+
+  // Delete inventory item handler
+  const handleDeleteItem = async (item: InventoryItem) => {
+    if (!window.confirm(`Are you sure you want to delete "${item.product_name}"? This action cannot be undone.`)) {
+      return
+    }
+
+    try {
+      const success = await deleteInventoryItem(item.id)
+      if (success) {
+        toast.success(`"${item.product_name}" has been deleted`)
+        refetch()
+      } else {
+        toast.error('Failed to delete item')
+      }
+    } catch (error) {
+      console.error('Delete error:', error)
+      toast.error('Failed to delete item')
+    }
+  }
+
+  // Adjust stock handler
+  const handleAdjustStock = async () => {
+    if (!selectedItemForAction) {
+      toast.error('No item selected')
+      return
+    }
+
+    if (!adjustStockForm.reason) {
+      toast.error('Please provide a reason for the adjustment')
+      return
+    }
+
+    setAdjustingStock(true)
+    try {
+      const currentQty = selectedItemForAction.quantity
+      let newQuantity: number
+
+      if (adjustStockForm.type === 'increase') {
+        newQuantity = currentQty + adjustStockForm.quantity
+      } else if (adjustStockForm.type === 'decrease') {
+        newQuantity = Math.max(0, currentQty - adjustStockForm.quantity)
+      } else {
+        // correction - set to exact value
+        newQuantity = adjustStockForm.quantity
+      }
+
+      // Update inventory item
+      await updateInventoryItem({
+        id: selectedItemForAction.id,
+        quantity: newQuantity,
+        available_quantity: newQuantity - (selectedItemForAction.reserved_quantity || 0),
+        total_value: newQuantity * selectedItemForAction.unit_price,
+        status: newQuantity === 0 ? 'out-of-stock' : newQuantity <= selectedItemForAction.reorder_point ? 'low-stock' : 'in-stock',
+        low_stock_alert: newQuantity <= selectedItemForAction.reorder_point,
+        out_of_stock_alert: newQuantity === 0,
+        updated_at: new Date().toISOString()
+      } as Partial<InventoryItem> & { id: string })
+
+      // Log the adjustment in inventory_adjustments table
+      const { error: logError } = await supabase.from('inventory_adjustments').insert({
+        inventory_id: selectedItemForAction.id,
+        type: adjustStockForm.type,
+        quantity_before: currentQty,
+        quantity_after: newQuantity,
+        reason: adjustStockForm.reason,
+        notes: adjustStockForm.notes || null,
+        created_at: new Date().toISOString()
+      })
+
+      if (logError) {
+        console.warn('Failed to log adjustment:', logError)
+      }
+
+      toast.success(`Stock adjusted: ${selectedItemForAction.product_name} updated from ${currentQty} to ${newQuantity}`)
+      setShowAdjustStockDialog(false)
+      setSelectedItemForAction(null)
+      setAdjustStockForm({ quantity: 0, type: 'increase', reason: '', notes: '' })
+      refetch()
+    } catch (error) {
+      console.error('Stock adjustment error:', error)
+      toast.error('Failed to adjust stock')
+    } finally {
+      setAdjustingStock(false)
+    }
+  }
+
+  // Receive stock handler
+  const handleReceiveStock = async () => {
+    if (!selectedItemForAction) {
+      toast.error('No item selected')
+      return
+    }
+
+    if (receiveStockForm.quantity <= 0) {
+      toast.error('Please enter a valid quantity')
+      return
+    }
+
+    setReceivingStock(true)
+    try {
+      const currentQty = selectedItemForAction.quantity
+      const newQuantity = currentQty + receiveStockForm.quantity
+
+      // Update inventory item
+      await updateInventoryItem({
+        id: selectedItemForAction.id,
+        quantity: newQuantity,
+        available_quantity: newQuantity - (selectedItemForAction.reserved_quantity || 0),
+        total_value: newQuantity * selectedItemForAction.unit_price,
+        status: newQuantity === 0 ? 'out-of-stock' : newQuantity <= selectedItemForAction.reorder_point ? 'low-stock' : 'in-stock',
+        low_stock_alert: newQuantity <= selectedItemForAction.reorder_point,
+        out_of_stock_alert: false,
+        last_restocked_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      } as Partial<InventoryItem> & { id: string })
+
+      // Log the receipt in inventory_adjustments table
+      const { error: logError } = await supabase.from('inventory_adjustments').insert({
+        inventory_id: selectedItemForAction.id,
+        type: 'increase',
+        quantity_before: currentQty,
+        quantity_after: newQuantity,
+        reason: `Stock received${receiveStockForm.poNumber ? ` - PO: ${receiveStockForm.poNumber}` : ''}`,
+        notes: receiveStockForm.notes || null,
+        created_at: new Date().toISOString()
+      })
+
+      if (logError) {
+        console.warn('Failed to log receipt:', logError)
+      }
+
+      toast.success(`Stock received: ${receiveStockForm.quantity} units of "${selectedItemForAction.product_name}" added`)
+      setShowReceiveStockDialog(false)
+      setSelectedItemForAction(null)
+      setReceiveStockForm({ quantity: 0, poNumber: '', notes: '' })
+      refetch()
+    } catch (error) {
+      console.error('Receive stock error:', error)
+      toast.error('Failed to receive stock')
+    } finally {
+      setReceivingStock(false)
+    }
+  }
+
+  // Create reorder/purchase order for low stock item
+  const handleReorder = async (item: InventoryItem) => {
+    try {
+      const reorderQty = item.reorder_quantity || 50
+      const supplierId = item.supplier_id
+
+      if (!supplierId) {
+        toast.error('No supplier assigned to this item. Please assign a supplier first.')
+        return
+      }
+
+      const { error } = await supabase.from('purchase_orders').insert({
+        po_number: `PO-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`,
+        supplier_id: supplierId,
+        status: 'draft',
+        expected_date: new Date(Date.now() + (item.lead_time_days || 7) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        notes: `Auto-generated reorder for ${item.product_name}`,
+        subtotal: reorderQty * item.cost_price,
+        tax: 0,
+        total: reorderQty * item.cost_price,
+        created_at: new Date().toISOString()
+      })
+
+      if (error) throw error
+
+      // Also create a PO line item
+      const { data: poData } = await supabase
+        .from('purchase_orders')
+        .select('id')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single()
+
+      if (poData?.id) {
+        await supabase.from('purchase_order_items').insert({
+          po_id: poData.id,
+          inventory_id: item.id,
+          product_name: item.product_name,
+          sku: item.sku,
+          quantity: reorderQty,
+          unit_cost: item.cost_price,
+          total: reorderQty * item.cost_price,
+          created_at: new Date().toISOString()
+        })
+      }
+
+      toast.success(`Reorder created: PO for ${reorderQty} units of "${item.product_name}"`)
+      refetch()
+    } catch (error) {
+      console.error('Reorder error:', error)
+      toast.error('Failed to create reorder')
+    }
+  }
+
+  // Save stock count entries (batch update)
+  const handleSaveStockCount = async () => {
+    const entries = Object.entries(stockCountEntries)
+    if (entries.length === 0) {
+      toast.info('No changes to save')
+      setShowStockCountDialog(false)
+      return
+    }
+
+    setAdjustingStock(true)
+    try {
+      let successCount = 0
+      let errorCount = 0
+
+      for (const [itemId, newQuantity] of entries) {
+        const item = dbInventory?.find(i => i.id === itemId)
+        if (!item || item.quantity === newQuantity) continue
+
+        try {
+          await updateInventoryItem({
+            id: itemId,
+            quantity: newQuantity,
+            available_quantity: newQuantity - (item.reserved_quantity || 0),
+            total_value: newQuantity * item.unit_price,
+            status: newQuantity === 0 ? 'out-of-stock' : newQuantity <= item.reorder_point ? 'low-stock' : 'in-stock',
+            low_stock_alert: newQuantity <= item.reorder_point,
+            out_of_stock_alert: newQuantity === 0,
+            last_counted_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          } as Partial<InventoryItem> & { id: string })
+
+          // Log the count adjustment
+          await supabase.from('inventory_adjustments').insert({
+            inventory_id: itemId,
+            type: 'correction',
+            quantity_before: item.quantity,
+            quantity_after: newQuantity,
+            reason: 'Stock count adjustment',
+            created_at: new Date().toISOString()
+          })
+
+          successCount++
+        } catch (err) {
+          console.error(`Failed to update item ${itemId}:`, err)
+          errorCount++
+        }
+      }
+
+      if (successCount > 0) {
+        toast.success(`Stock count saved: ${successCount} item(s) updated`)
+      }
+      if (errorCount > 0) {
+        toast.error(`Failed to update ${errorCount} item(s)`)
+      }
+
+      setShowStockCountDialog(false)
+      setStockCountEntries({})
+      refetch()
+    } catch (error) {
+      console.error('Stock count error:', error)
+      toast.error('Failed to save stock count')
+    } finally {
+      setAdjustingStock(false)
+    }
+  }
+
+  // Update product handler (for editing existing products)
+  const handleUpdateProduct = async (product: Product) => {
+    const inventoryItem = dbInventory?.find(item =>
+      item.id === product.id || item.product_name === product.title || item.sku === product.variants[0]?.sku
+    )
+
+    if (!inventoryItem) {
+      toast.error('Product not found in database')
+      return
+    }
+
+    try {
+      const variant = product.variants[0]
+      await updateInventoryItem({
+        id: inventoryItem.id,
+        product_name: product.title,
+        description: product.description || null,
+        brand: product.vendor || null,
+        manufacturer: product.vendor || null,
+        category: product.productType || null,
+        sku: variant?.sku || null,
+        quantity: variant?.quantity || inventoryItem.quantity,
+        unit_price: variant?.price || inventoryItem.unit_price,
+        selling_price: variant?.price || inventoryItem.selling_price,
+        cost_price: variant?.costPrice || inventoryItem.cost_price,
+        total_value: (variant?.quantity || inventoryItem.quantity) * (variant?.price || inventoryItem.unit_price),
+        status: product.status === 'active' ? 'in-stock' : product.status === 'archived' ? 'discontinued' : 'out-of-stock',
+        is_active: product.status !== 'archived',
+        updated_at: new Date().toISOString()
+      } as Partial<InventoryItem> & { id: string })
+
+      toast.success(`Product updated: "${product.title}"`)
+      setShowProductDialog(false)
+      setSelectedProduct(null)
+      refetch()
+    } catch (error) {
+      console.error('Update product error:', error)
+      toast.error('Failed to update product')
+    }
+  }
+
+  // Archive product handler
+  const handleArchiveProduct = async (product: Product) => {
+    const inventoryItem = dbInventory?.find(item =>
+      item.id === product.id || item.product_name === product.title || item.sku === product.variants[0]?.sku
+    )
+
+    if (!inventoryItem) {
+      toast.error('Product not found in database')
+      return
+    }
+
+    if (!window.confirm(`Are you sure you want to archive "${product.title}"?`)) {
+      return
+    }
+
+    try {
+      await updateInventoryItem({
+        id: inventoryItem.id,
+        status: 'discontinued',
+        is_active: false,
+        updated_at: new Date().toISOString()
+      } as Partial<InventoryItem> & { id: string })
+
+      toast.success(`Product archived: "${product.title}"`)
+      refetch()
+    } catch (error) {
+      console.error('Archive error:', error)
+      toast.error('Failed to archive product')
+    }
   }
 
   // Handle barcode scanner - opens scanner dialog
@@ -1311,12 +1617,74 @@ export default function InventoryClient({ initialInventory: _initialInventory }:
                               >
                                 <BookOpen className="w-4 h-4" />
                               </button>
-                              <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-400">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  const item = dbInventory?.find(i => i.id === product.id)
+                                  if (item) {
+                                    setSelectedItemForAction(item)
+                                    setShowReceiveStockDialog(true)
+                                  }
+                                }}
+                                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-400"
+                                title="Receive Stock"
+                              >
+                                <PackagePlus className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  const item = dbInventory?.find(i => i.id === product.id)
+                                  if (item) {
+                                    setSelectedItemForAction(item)
+                                    setShowAdjustStockDialog(true)
+                                  }
+                                }}
+                                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-400"
+                                title="Adjust Stock"
+                              >
                                 <Edit className="w-4 h-4" />
                               </button>
-                              <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-400">
-                                <MoreHorizontal className="w-4 h-4" />
-                              </button>
+                              <div className="relative group">
+                                <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-400">
+                                  <MoreHorizontal className="w-4 h-4" />
+                                </button>
+                                <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border dark:border-gray-700 py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      const item = dbInventory?.find(i => i.id === product.id)
+                                      if (item) handleReorder(item)
+                                    }}
+                                    className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
+                                  >
+                                    <RefreshCw className="w-4 h-4" />
+                                    Create Reorder
+                                  </button>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      handleArchiveProduct(product)
+                                    }}
+                                    className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2"
+                                  >
+                                    <PackageX className="w-4 h-4" />
+                                    Archive Product
+                                  </button>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      const item = dbInventory?.find(i => i.id === product.id)
+                                      if (item) handleDeleteItem(item)
+                                    }}
+                                    disabled={deleting}
+                                    className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 text-red-600 dark:text-red-400 disabled:opacity-50"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                    {deleting ? 'Deleting...' : 'Delete Item'}
+                                  </button>
+                                </div>
+                              </div>
                             </div>
                           </td>
                         </tr>
@@ -2267,14 +2635,34 @@ export default function InventoryClient({ initialInventory: _initialInventory }:
           </ScrollArea>
           <div className="flex items-center justify-end gap-3 pt-4 border-t dark:border-gray-700">
             <button
-              onClick={() => setShowProductDialog(false)}
+              onClick={() => {
+                setShowProductDialog(false)
+                setSelectedProduct(null)
+                setNewProductForm({
+                  title: '',
+                  vendor: '',
+                  description: '',
+                  productType: 'Apparel',
+                  status: 'draft',
+                  sku: '',
+                  price: '',
+                  costPrice: '',
+                  quantity: ''
+                })
+              }}
               className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium"
             >
               Cancel
             </button>
             <button
-              onClick={handleCreateProduct}
-              disabled={creating || !newProductForm.title}
+              onClick={() => {
+                if (selectedProduct) {
+                  handleUpdateProduct(selectedProduct)
+                } else {
+                  handleCreateProduct()
+                }
+              }}
+              disabled={creating || (!selectedProduct && !newProductForm.title)}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {creating ? 'Creating...' : selectedProduct ? 'Save Changes' : 'Create Product'}
@@ -2646,7 +3034,7 @@ export default function InventoryClient({ initialInventory: _initialInventory }:
               </div>
             </div>
             <div className="space-y-2 max-h-[300px] overflow-y-auto">
-              {(dbInventory || []).slice(0, 5).map((item) => (
+              {(dbInventory || []).slice(0, 10).map((item) => (
                 <div key={item.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                   <div>
                     <p className="font-medium text-gray-900 dark:text-white">{item.product_name}</p>
@@ -2656,7 +3044,14 @@ export default function InventoryClient({ initialInventory: _initialInventory }:
                     <span className="text-sm text-gray-500">Current: {item.quantity}</span>
                     <input
                       type="number"
-                      defaultValue={item.quantity}
+                      value={stockCountEntries[item.id] ?? item.quantity}
+                      onChange={(e) => {
+                        const newValue = parseInt(e.target.value) || 0
+                        setStockCountEntries(prev => ({
+                          ...prev,
+                          [item.id]: newValue
+                        }))
+                      }}
                       className="w-20 px-2 py-1 text-center border rounded dark:bg-gray-600 dark:border-gray-500 dark:text-white"
                       min="0"
                     />
@@ -2666,19 +3061,20 @@ export default function InventoryClient({ initialInventory: _initialInventory }:
             </div>
             <div className="flex items-center justify-end gap-3 pt-4 border-t dark:border-gray-700">
               <button
-                onClick={() => setShowStockCountDialog(false)}
+                onClick={() => {
+                  setShowStockCountDialog(false)
+                  setStockCountEntries({})
+                }}
                 className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium"
               >
                 Cancel
               </button>
               <button
-                onClick={() => {
-                  toast.success('Stock count saved')
-                  setShowStockCountDialog(false)
-                }}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700"
+                onClick={handleSaveStockCount}
+                disabled={adjustingStock}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Save Counts
+                {adjustingStock ? 'Saving...' : 'Save Counts'}
               </button>
             </div>
           </div>
@@ -2731,6 +3127,226 @@ export default function InventoryClient({ initialInventory: _initialInventory }:
                 className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium"
               >
                 Close
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Adjust Stock Dialog */}
+      <Dialog open={showAdjustStockDialog} onOpenChange={(open) => {
+        setShowAdjustStockDialog(open)
+        if (!open) {
+          setSelectedItemForAction(null)
+          setAdjustStockForm({ quantity: 0, type: 'increase', reason: '', notes: '' })
+        }
+      }}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-500 to-orange-500 flex items-center justify-center text-white">
+                <Edit className="w-5 h-5" />
+              </div>
+              Adjust Stock
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {selectedItemForAction && (
+              <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
+                <p className="font-medium text-gray-900 dark:text-white">{selectedItemForAction.product_name}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  SKU: {selectedItemForAction.sku || 'N/A'} | Current Stock: {selectedItemForAction.quantity}
+                </p>
+              </div>
+            )}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Adjustment Type</label>
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  onClick={() => setAdjustStockForm(prev => ({ ...prev, type: 'increase' }))}
+                  className={`px-3 py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-2 ${
+                    adjustStockForm.type === 'increase'
+                      ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border-2 border-green-500'
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                  }`}
+                >
+                  <PlusCircle className="w-4 h-4" />
+                  Increase
+                </button>
+                <button
+                  onClick={() => setAdjustStockForm(prev => ({ ...prev, type: 'decrease' }))}
+                  className={`px-3 py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-2 ${
+                    adjustStockForm.type === 'decrease'
+                      ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border-2 border-red-500'
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                  }`}
+                >
+                  <MinusCircle className="w-4 h-4" />
+                  Decrease
+                </button>
+                <button
+                  onClick={() => setAdjustStockForm(prev => ({ ...prev, type: 'correction' }))}
+                  className={`px-3 py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-2 ${
+                    adjustStockForm.type === 'correction'
+                      ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-2 border-blue-500'
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                  }`}
+                >
+                  <RefreshCw className="w-4 h-4" />
+                  Set To
+                </button>
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                {adjustStockForm.type === 'correction' ? 'New Quantity' : 'Quantity'}
+              </label>
+              <input
+                type="number"
+                min="0"
+                value={adjustStockForm.quantity}
+                onChange={(e) => setAdjustStockForm(prev => ({ ...prev, quantity: parseInt(e.target.value) || 0 }))}
+                className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
+              />
+              {selectedItemForAction && adjustStockForm.type !== 'correction' && (
+                <p className="text-sm text-gray-500 mt-1">
+                  New total: {adjustStockForm.type === 'increase'
+                    ? selectedItemForAction.quantity + adjustStockForm.quantity
+                    : Math.max(0, selectedItemForAction.quantity - adjustStockForm.quantity)
+                  }
+                </p>
+              )}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Reason *</label>
+              <select
+                value={adjustStockForm.reason}
+                onChange={(e) => setAdjustStockForm(prev => ({ ...prev, reason: e.target.value }))}
+                className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
+              >
+                <option value="">Select a reason...</option>
+                <option value="Cycle count">Cycle count</option>
+                <option value="Physical inventory">Physical inventory</option>
+                <option value="Damaged goods">Damaged goods</option>
+                <option value="Theft/shrinkage">Theft/shrinkage</option>
+                <option value="Return to stock">Return to stock</option>
+                <option value="Internal use">Internal use</option>
+                <option value="Quality control">Quality control</option>
+                <option value="Data correction">Data correction</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Notes (Optional)</label>
+              <textarea
+                rows={2}
+                value={adjustStockForm.notes}
+                onChange={(e) => setAdjustStockForm(prev => ({ ...prev, notes: e.target.value }))}
+                className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
+                placeholder="Additional details..."
+              />
+            </div>
+            <div className="flex items-center justify-end gap-3 pt-4 border-t dark:border-gray-700">
+              <button
+                onClick={() => {
+                  setShowAdjustStockDialog(false)
+                  setSelectedItemForAction(null)
+                  setAdjustStockForm({ quantity: 0, type: 'increase', reason: '', notes: '' })
+                }}
+                className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAdjustStock}
+                disabled={adjustingStock || !adjustStockForm.reason || adjustStockForm.quantity < 0}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {adjustingStock ? 'Adjusting...' : 'Adjust Stock'}
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Receive Stock Dialog */}
+      <Dialog open={showReceiveStockDialog} onOpenChange={(open) => {
+        setShowReceiveStockDialog(open)
+        if (!open) {
+          setSelectedItemForAction(null)
+          setReceiveStockForm({ quantity: 0, poNumber: '', notes: '' })
+        }
+      }}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-teal-500 flex items-center justify-center text-white">
+                <PackagePlus className="w-5 h-5" />
+              </div>
+              Receive Stock
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {selectedItemForAction && (
+              <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg">
+                <p className="font-medium text-gray-900 dark:text-white">{selectedItemForAction.product_name}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  SKU: {selectedItemForAction.sku || 'N/A'} | Current Stock: {selectedItemForAction.quantity}
+                </p>
+              </div>
+            )}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Quantity to Receive *</label>
+              <input
+                type="number"
+                min="1"
+                value={receiveStockForm.quantity}
+                onChange={(e) => setReceiveStockForm(prev => ({ ...prev, quantity: parseInt(e.target.value) || 0 }))}
+                className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
+              />
+              {selectedItemForAction && receiveStockForm.quantity > 0 && (
+                <p className="text-sm text-green-600 mt-1">
+                  New total: {selectedItemForAction.quantity + receiveStockForm.quantity}
+                </p>
+              )}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">PO Number (Optional)</label>
+              <input
+                type="text"
+                value={receiveStockForm.poNumber}
+                onChange={(e) => setReceiveStockForm(prev => ({ ...prev, poNumber: e.target.value }))}
+                className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
+                placeholder="PO-2024-001"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Notes (Optional)</label>
+              <textarea
+                rows={2}
+                value={receiveStockForm.notes}
+                onChange={(e) => setReceiveStockForm(prev => ({ ...prev, notes: e.target.value }))}
+                className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
+                placeholder="Shipment details, condition notes..."
+              />
+            </div>
+            <div className="flex items-center justify-end gap-3 pt-4 border-t dark:border-gray-700">
+              <button
+                onClick={() => {
+                  setShowReceiveStockDialog(false)
+                  setSelectedItemForAction(null)
+                  setReceiveStockForm({ quantity: 0, poNumber: '', notes: '' })
+                }}
+                className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleReceiveStock}
+                disabled={receivingStock || receiveStockForm.quantity <= 0}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {receivingStock ? 'Receiving...' : 'Receive Stock'}
               </button>
             </div>
           </div>

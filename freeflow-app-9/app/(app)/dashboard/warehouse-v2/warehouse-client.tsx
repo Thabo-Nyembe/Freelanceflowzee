@@ -3,6 +3,25 @@
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useWarehouses, useWarehouseMutations, type Warehouse as DBWarehouse } from '@/lib/hooks/use-warehouse'
+import {
+  useWarehouseLocations,
+  useWarehouseLocationMutations,
+  useWarehouseZoneMutations,
+  useWarehouseAisleMutations,
+  useBinAssignmentMutations,
+  useInventoryMovementMutations,
+  useCycleCountMutations,
+  type CreateLocationInput,
+  type UpdateLocationInput,
+  type CreateZoneInput,
+  type UpdateZoneInput,
+  type CreateAisleInput,
+  type UpdateAisleInput,
+  type AssignBinInput,
+  type MoveInventoryInput,
+  type CreateCycleCountInput,
+  type CycleCountItemInput
+} from '@/lib/hooks/use-warehouses-extended'
 import { useStockLevels, type StockLevel } from '@/lib/hooks/use-stock'
 import { useOrders, type Order as DBOrder } from '@/lib/hooks/use-orders'
 import { useShipments, type Shipment as DBShipment } from '@/lib/hooks/use-shipments'
@@ -282,6 +301,18 @@ export default function WarehouseClient() {
   // Team data hook
   const { members: teamMembers } = useTeam()
 
+  // Get first warehouse ID for location queries
+  const firstWarehouseId = dbWarehouses?.[0]?.id
+
+  // Extended warehouse hooks for locations, zones, aisles, bins, movements, and cycle counts
+  const { locations: warehouseLocations, isLoading: isLoadingLocations, refresh: refetchLocations } = useWarehouseLocations(firstWarehouseId)
+  const { createLocation, updateLocation, deleteLocation, isLoading: isLocationMutating } = useWarehouseLocationMutations(() => refetchLocations())
+  const { createZone, updateZone, deleteZone, isLoading: isZoneMutating } = useWarehouseZoneMutations(() => refetchLocations())
+  const { createAisle, updateAisle, deleteAisle, isLoading: isAisleMutating } = useWarehouseAisleMutations(() => refetchLocations())
+  const { assignBin, unassignBin, isLoading: isBinMutating } = useBinAssignmentMutations(() => refetchStock())
+  const { moveInventory, isLoading: isMovingInventory } = useInventoryMovementMutations(() => refetchStock())
+  const { createCycleCount, updateCycleCount, startCycleCount, completeCycleCount, recordCountItem, isLoading: isCycleCountMutating } = useCycleCountMutations(() => refetchStock())
+
   const [activeTab, setActiveTab] = useState('inventory')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null)
@@ -318,6 +349,20 @@ export default function WarehouseClient() {
   const [selectedZone, setSelectedZone] = useState<Zone | null>(null)
   const [selectedCycleCount, setSelectedCycleCount] = useState<CycleCount | null>(null)
   const [configureTarget, setConfigureTarget] = useState<string>('')
+
+  // Dialog states for location, zone, aisle, bin, and movement management
+  const [showCreateLocationDialog, setShowCreateLocationDialog] = useState(false)
+  const [showEditLocationDialog, setShowEditLocationDialog] = useState(false)
+  const [showCreateZoneDialog, setShowCreateZoneDialog] = useState(false)
+  const [showEditZoneDialog, setShowEditZoneDialog] = useState(false)
+  const [showCreateAisleDialog, setShowCreateAisleDialog] = useState(false)
+  const [showEditAisleDialog, setShowEditAisleDialog] = useState(false)
+  const [showAssignBinDialog, setShowAssignBinDialog] = useState(false)
+  const [showMoveInventoryDialog, setShowMoveInventoryDialog] = useState(false)
+  const [showPerformCycleCountDialog, setShowPerformCycleCountDialog] = useState(false)
+  const [selectedLocation, setSelectedLocation] = useState<{ id: string; code: string; name: string; type: string } | null>(null)
+  const [selectedAisle, setSelectedAisle] = useState<{ id: string; code: string; name: string; zone_id: string } | null>(null)
+  const [selectedBin, setSelectedBin] = useState<{ id: string; code: string; zone_name: string } | null>(null)
 
   // Form state for Add Inventory dialog
   const [newInventory, setNewInventory] = useState({
@@ -392,6 +437,106 @@ export default function WarehouseClient() {
     autoRefresh: true,
     unitSystem: 'metric',
     barcodeFormat: 'code128'
+  })
+
+  // Form state for Location management
+  const [locationFormData, setLocationFormData] = useState<{
+    warehouse_id: string
+    code: string
+    name: string
+    type: 'zone' | 'aisle' | 'rack' | 'bin'
+    parent_id: string | null
+    capacity_units: number
+    temperature_min: number | null
+    temperature_max: number | null
+    humidity_max: number | null
+  }>({
+    warehouse_id: '',
+    code: '',
+    name: '',
+    type: 'zone',
+    parent_id: null,
+    capacity_units: 0,
+    temperature_min: null,
+    temperature_max: null,
+    humidity_max: null
+  })
+
+  // Form state for Zone management
+  const [zoneFormData, setZoneFormData] = useState<{
+    warehouse_id: string
+    code: string
+    name: string
+    zone_type: string
+    capacity_sqm: number
+    temperature_min: number | null
+    temperature_max: number | null
+    humidity_max: number | null
+  }>({
+    warehouse_id: '',
+    code: '',
+    name: '',
+    zone_type: 'storage',
+    capacity_sqm: 0,
+    temperature_min: null,
+    temperature_max: null,
+    humidity_max: null
+  })
+
+  // Form state for Aisle management
+  const [aisleFormData, setAisleFormData] = useState<{
+    zone_id: string
+    code: string
+    name: string
+    rack_count: number
+    capacity_units: number
+  }>({
+    zone_id: '',
+    code: '',
+    name: '',
+    rack_count: 0,
+    capacity_units: 0
+  })
+
+  // Form state for Bin Assignment
+  const [binAssignmentData, setBinAssignmentData] = useState<{
+    bin_id: string
+    product_id: string
+    quantity: number
+  }>({
+    bin_id: '',
+    product_id: '',
+    quantity: 0
+  })
+
+  // Form state for Inventory Movement
+  const [inventoryMovementData, setInventoryMovementData] = useState<{
+    product_id: string
+    from_location_id: string
+    to_location_id: string
+    quantity: number
+    reason: string
+  }>({
+    product_id: '',
+    from_location_id: '',
+    to_location_id: '',
+    quantity: 0,
+    reason: ''
+  })
+
+  // Form state for Cycle Count Item
+  const [cycleCountItemData, setCycleCountItemData] = useState<{
+    cycle_count_id: string
+    product_id: string
+    location_id: string
+    expected_quantity: number
+    counted_quantity: number
+  }>({
+    cycle_count_id: '',
+    product_id: '',
+    location_id: '',
+    expected_quantity: 0,
+    counted_quantity: 0
   })
 
   // Quick actions with dialog-based workflows
@@ -1058,6 +1203,582 @@ export default function WarehouseClient() {
       setSelectedItem(null)
       setShowEditInventoryDialog(true)
     }
+  }
+
+  // ==========================================
+  // Location Handlers
+  // ==========================================
+
+  const handleCreateLocation = async () => {
+    if (!locationFormData.code || !locationFormData.name) {
+      toast.error('Missing required fields', { description: 'Please fill in code and name' })
+      return
+    }
+
+    try {
+      const input: CreateLocationInput = {
+        warehouse_id: locationFormData.warehouse_id || firstWarehouseId || '',
+        code: locationFormData.code,
+        name: locationFormData.name,
+        type: locationFormData.type,
+        parent_id: locationFormData.parent_id,
+        capacity_units: locationFormData.capacity_units,
+        temperature_min: locationFormData.temperature_min,
+        temperature_max: locationFormData.temperature_max,
+        humidity_max: locationFormData.humidity_max
+      }
+
+      toast.promise(
+        createLocation(input),
+        {
+          loading: 'Creating location...',
+          success: () => {
+            setShowCreateLocationDialog(false)
+            setLocationFormData({
+              warehouse_id: '',
+              code: '',
+              name: '',
+              type: 'zone',
+              parent_id: null,
+              capacity_units: 0,
+              temperature_min: null,
+              temperature_max: null,
+              humidity_max: null
+            })
+            refetchLocations()
+            return `Location ${locationFormData.code} created successfully`
+          },
+          error: 'Failed to create location'
+        }
+      )
+    } catch (error) {
+      toast.error('Failed to create location', { description: error instanceof Error ? error.message : 'Unknown error' })
+    }
+  }
+
+  const handleUpdateLocation = async () => {
+    if (!selectedLocation?.id) {
+      toast.error('No location selected')
+      return
+    }
+
+    try {
+      const input: UpdateLocationInput = {
+        code: locationFormData.code || undefined,
+        name: locationFormData.name || undefined,
+        type: locationFormData.type,
+        capacity_units: locationFormData.capacity_units,
+        temperature_min: locationFormData.temperature_min,
+        temperature_max: locationFormData.temperature_max,
+        humidity_max: locationFormData.humidity_max
+      }
+
+      toast.promise(
+        updateLocation(selectedLocation.id, input),
+        {
+          loading: 'Updating location...',
+          success: () => {
+            setShowEditLocationDialog(false)
+            setSelectedLocation(null)
+            setLocationFormData({
+              warehouse_id: '',
+              code: '',
+              name: '',
+              type: 'zone',
+              parent_id: null,
+              capacity_units: 0,
+              temperature_min: null,
+              temperature_max: null,
+              humidity_max: null
+            })
+            refetchLocations()
+            return `Location updated successfully`
+          },
+          error: 'Failed to update location'
+        }
+      )
+    } catch (error) {
+      toast.error('Failed to update location', { description: error instanceof Error ? error.message : 'Unknown error' })
+    }
+  }
+
+  const handleDeleteLocation = async (locationId: string, locationCode: string) => {
+    toast.promise(
+      deleteLocation(locationId),
+      {
+        loading: 'Deleting location...',
+        success: () => {
+          refetchLocations()
+          return `Location ${locationCode} deleted successfully`
+        },
+        error: 'Failed to delete location'
+      }
+    )
+  }
+
+  const handleOpenEditLocation = (location: { id: string; code: string; name: string; type: string }) => {
+    setSelectedLocation(location)
+    setLocationFormData({
+      warehouse_id: firstWarehouseId || '',
+      code: location.code,
+      name: location.name,
+      type: location.type as 'zone' | 'aisle' | 'rack' | 'bin',
+      parent_id: null,
+      capacity_units: 0,
+      temperature_min: null,
+      temperature_max: null,
+      humidity_max: null
+    })
+    setShowEditLocationDialog(true)
+  }
+
+  // ==========================================
+  // Zone Handlers
+  // ==========================================
+
+  const handleCreateZone = async () => {
+    if (!zoneFormData.code || !zoneFormData.name) {
+      toast.error('Missing required fields', { description: 'Please fill in code and name' })
+      return
+    }
+
+    try {
+      const input: CreateZoneInput = {
+        warehouse_id: zoneFormData.warehouse_id || firstWarehouseId || '',
+        code: zoneFormData.code,
+        name: zoneFormData.name,
+        zone_type: zoneFormData.zone_type,
+        capacity_sqm: zoneFormData.capacity_sqm,
+        temperature_min: zoneFormData.temperature_min,
+        temperature_max: zoneFormData.temperature_max,
+        humidity_max: zoneFormData.humidity_max
+      }
+
+      toast.promise(
+        createZone(input),
+        {
+          loading: 'Creating zone...',
+          success: () => {
+            setShowCreateZoneDialog(false)
+            setZoneFormData({
+              warehouse_id: '',
+              code: '',
+              name: '',
+              zone_type: 'storage',
+              capacity_sqm: 0,
+              temperature_min: null,
+              temperature_max: null,
+              humidity_max: null
+            })
+            refetchWarehouses()
+            return `Zone ${zoneFormData.code} created successfully`
+          },
+          error: 'Failed to create zone'
+        }
+      )
+    } catch (error) {
+      toast.error('Failed to create zone', { description: error instanceof Error ? error.message : 'Unknown error' })
+    }
+  }
+
+  const handleUpdateZone = async () => {
+    if (!selectedZone?.id) {
+      toast.error('No zone selected')
+      return
+    }
+
+    try {
+      const input: UpdateZoneInput = {
+        code: zoneFormData.code || undefined,
+        name: zoneFormData.name || undefined,
+        zone_type: zoneFormData.zone_type,
+        capacity_sqm: zoneFormData.capacity_sqm,
+        temperature_min: zoneFormData.temperature_min,
+        temperature_max: zoneFormData.temperature_max,
+        humidity_max: zoneFormData.humidity_max
+      }
+
+      toast.promise(
+        updateZone(selectedZone.id, input),
+        {
+          loading: 'Updating zone...',
+          success: () => {
+            setShowEditZoneDialog(false)
+            setSelectedZone(null)
+            setZoneFormData({
+              warehouse_id: '',
+              code: '',
+              name: '',
+              zone_type: 'storage',
+              capacity_sqm: 0,
+              temperature_min: null,
+              temperature_max: null,
+              humidity_max: null
+            })
+            refetchWarehouses()
+            return `Zone updated successfully`
+          },
+          error: 'Failed to update zone'
+        }
+      )
+    } catch (error) {
+      toast.error('Failed to update zone', { description: error instanceof Error ? error.message : 'Unknown error' })
+    }
+  }
+
+  const handleDeleteZone = async (zoneId: string, zoneCode: string) => {
+    toast.promise(
+      deleteZone(zoneId),
+      {
+        loading: 'Deleting zone...',
+        success: () => {
+          refetchWarehouses()
+          return `Zone ${zoneCode} deleted successfully`
+        },
+        error: 'Failed to delete zone'
+      }
+    )
+  }
+
+  const handleOpenEditZone = (zone: Zone) => {
+    setSelectedZone(zone)
+    setZoneFormData({
+      warehouse_id: firstWarehouseId || '',
+      code: zone.code,
+      name: zone.name,
+      zone_type: zone.type,
+      capacity_sqm: zone.capacity_units,
+      temperature_min: zone.temperature_min,
+      temperature_max: zone.temperature_max,
+      humidity_max: null
+    })
+    setShowEditZoneDialog(true)
+  }
+
+  // ==========================================
+  // Aisle Handlers
+  // ==========================================
+
+  const handleCreateAisle = async () => {
+    if (!aisleFormData.code || !aisleFormData.name || !aisleFormData.zone_id) {
+      toast.error('Missing required fields', { description: 'Please fill in zone, code, and name' })
+      return
+    }
+
+    try {
+      const input: CreateAisleInput = {
+        zone_id: aisleFormData.zone_id,
+        code: aisleFormData.code,
+        name: aisleFormData.name,
+        rack_count: aisleFormData.rack_count,
+        capacity_units: aisleFormData.capacity_units
+      }
+
+      toast.promise(
+        createAisle(input),
+        {
+          loading: 'Creating aisle...',
+          success: () => {
+            setShowCreateAisleDialog(false)
+            setAisleFormData({
+              zone_id: '',
+              code: '',
+              name: '',
+              rack_count: 0,
+              capacity_units: 0
+            })
+            refetchLocations()
+            return `Aisle ${aisleFormData.code} created successfully`
+          },
+          error: 'Failed to create aisle'
+        }
+      )
+    } catch (error) {
+      toast.error('Failed to create aisle', { description: error instanceof Error ? error.message : 'Unknown error' })
+    }
+  }
+
+  const handleUpdateAisle = async () => {
+    if (!selectedAisle?.id) {
+      toast.error('No aisle selected')
+      return
+    }
+
+    try {
+      const input: UpdateAisleInput = {
+        code: aisleFormData.code || undefined,
+        name: aisleFormData.name || undefined,
+        rack_count: aisleFormData.rack_count,
+        capacity_units: aisleFormData.capacity_units
+      }
+
+      toast.promise(
+        updateAisle(selectedAisle.id, input),
+        {
+          loading: 'Updating aisle...',
+          success: () => {
+            setShowEditAisleDialog(false)
+            setSelectedAisle(null)
+            setAisleFormData({
+              zone_id: '',
+              code: '',
+              name: '',
+              rack_count: 0,
+              capacity_units: 0
+            })
+            refetchLocations()
+            return `Aisle updated successfully`
+          },
+          error: 'Failed to update aisle'
+        }
+      )
+    } catch (error) {
+      toast.error('Failed to update aisle', { description: error instanceof Error ? error.message : 'Unknown error' })
+    }
+  }
+
+  const handleDeleteAisle = async (aisleId: string, aisleCode: string) => {
+    toast.promise(
+      deleteAisle(aisleId),
+      {
+        loading: 'Deleting aisle...',
+        success: () => {
+          refetchLocations()
+          return `Aisle ${aisleCode} deleted successfully`
+        },
+        error: 'Failed to delete aisle'
+      }
+    )
+  }
+
+  const handleOpenEditAisle = (aisle: { id: string; code: string; name: string; zone_id: string }) => {
+    setSelectedAisle(aisle)
+    setAisleFormData({
+      zone_id: aisle.zone_id,
+      code: aisle.code,
+      name: aisle.name,
+      rack_count: 0,
+      capacity_units: 0
+    })
+    setShowEditAisleDialog(true)
+  }
+
+  // ==========================================
+  // Bin Assignment Handlers
+  // ==========================================
+
+  const handleAssignBin = async () => {
+    if (!binAssignmentData.bin_id || !binAssignmentData.product_id || binAssignmentData.quantity <= 0) {
+      toast.error('Missing required fields', { description: 'Please select bin, product, and enter quantity' })
+      return
+    }
+
+    try {
+      const input: AssignBinInput = {
+        bin_id: binAssignmentData.bin_id,
+        product_id: binAssignmentData.product_id,
+        quantity: binAssignmentData.quantity
+      }
+
+      toast.promise(
+        assignBin(input),
+        {
+          loading: 'Assigning bin...',
+          success: () => {
+            setShowAssignBinDialog(false)
+            setBinAssignmentData({
+              bin_id: '',
+              product_id: '',
+              quantity: 0
+            })
+            refetchStock()
+            return `Bin assigned successfully`
+          },
+          error: 'Failed to assign bin'
+        }
+      )
+    } catch (error) {
+      toast.error('Failed to assign bin', { description: error instanceof Error ? error.message : 'Unknown error' })
+    }
+  }
+
+  const handleUnassignBin = async (binId: string, productId: string) => {
+    toast.promise(
+      unassignBin(binId, productId),
+      {
+        loading: 'Removing bin assignment...',
+        success: () => {
+          refetchStock()
+          return `Bin assignment removed successfully`
+        },
+        error: 'Failed to remove bin assignment'
+      }
+    )
+  }
+
+  const handleOpenAssignBin = (bin: { id: string; code: string; zone_name: string }) => {
+    setSelectedBin(bin)
+    setBinAssignmentData({
+      bin_id: bin.id,
+      product_id: '',
+      quantity: 0
+    })
+    setShowAssignBinDialog(true)
+  }
+
+  // ==========================================
+  // Inventory Movement Handlers
+  // ==========================================
+
+  const handleMoveInventory = async () => {
+    if (!inventoryMovementData.product_id || !inventoryMovementData.from_location_id ||
+        !inventoryMovementData.to_location_id || inventoryMovementData.quantity <= 0) {
+      toast.error('Missing required fields', { description: 'Please fill in all required fields' })
+      return
+    }
+
+    try {
+      const input: MoveInventoryInput = {
+        product_id: inventoryMovementData.product_id,
+        from_location_id: inventoryMovementData.from_location_id,
+        to_location_id: inventoryMovementData.to_location_id,
+        quantity: inventoryMovementData.quantity,
+        reason: inventoryMovementData.reason || 'Manual transfer'
+      }
+
+      toast.promise(
+        moveInventory(input),
+        {
+          loading: 'Moving inventory...',
+          success: () => {
+            setShowMoveInventoryDialog(false)
+            setInventoryMovementData({
+              product_id: '',
+              from_location_id: '',
+              to_location_id: '',
+              quantity: 0,
+              reason: ''
+            })
+            refetchStock()
+            return `Inventory moved successfully: ${inventoryMovementData.quantity} units transferred`
+          },
+          error: 'Failed to move inventory'
+        }
+      )
+    } catch (error) {
+      toast.error('Failed to move inventory', { description: error instanceof Error ? error.message : 'Unknown error' })
+    }
+  }
+
+  const handleOpenMoveInventory = (item?: InventoryItem) => {
+    if (item) {
+      setInventoryMovementData({
+        product_id: item.id,
+        from_location_id: item.bin_location,
+        to_location_id: '',
+        quantity: 0,
+        reason: ''
+      })
+    }
+    setShowMoveInventoryDialog(true)
+  }
+
+  // ==========================================
+  // Cycle Count Handlers
+  // ==========================================
+
+  const handleCycleCount = async () => {
+    if (!cycleCountItemData.cycle_count_id || !cycleCountItemData.product_id || !cycleCountItemData.location_id) {
+      toast.error('Missing required fields', { description: 'Please fill in all required fields' })
+      return
+    }
+
+    try {
+      const input: CycleCountItemInput = {
+        cycle_count_id: cycleCountItemData.cycle_count_id,
+        product_id: cycleCountItemData.product_id,
+        location_id: cycleCountItemData.location_id,
+        expected_quantity: cycleCountItemData.expected_quantity,
+        counted_quantity: cycleCountItemData.counted_quantity,
+        variance: cycleCountItemData.counted_quantity - cycleCountItemData.expected_quantity
+      }
+
+      toast.promise(
+        recordCountItem(input),
+        {
+          loading: 'Recording count...',
+          success: () => {
+            setShowPerformCycleCountDialog(false)
+            setCycleCountItemData({
+              cycle_count_id: '',
+              product_id: '',
+              location_id: '',
+              expected_quantity: 0,
+              counted_quantity: 0
+            })
+            refetchStock()
+            return `Count recorded successfully`
+          },
+          error: 'Failed to record count'
+        }
+      )
+    } catch (error) {
+      toast.error('Failed to record count', { description: error instanceof Error ? error.message : 'Unknown error' })
+    }
+  }
+
+  const handleCreateNewCycleCount = async () => {
+    if (!firstWarehouseId) {
+      toast.error('No warehouse available', { description: 'Please create a warehouse first' })
+      return
+    }
+
+    const input: CreateCycleCountInput = {
+      warehouse_id: firstWarehouseId,
+      scheduled_date: new Date().toISOString(),
+      zone_id: cycleCount.zone || undefined,
+      assigned_to: cycleCount.assignedTo || undefined
+    }
+
+    toast.promise(
+      createCycleCount(input),
+      {
+        loading: 'Creating cycle count...',
+        success: (data) => {
+          setShowCycleCountDialog(false)
+          setCycleCount({
+            zone: '',
+            countType: 'full',
+            priority: 'normal',
+            assignedTo: ''
+          })
+          return `Cycle count ${data?.count_number || ''} created successfully`
+        },
+        error: 'Failed to create cycle count'
+      }
+    )
+  }
+
+  const handleStartCycleCountById = async (id: string, countNumber: string) => {
+    toast.promise(
+      startCycleCount(id),
+      {
+        loading: 'Starting cycle count...',
+        success: () => `Cycle count ${countNumber} started`,
+        error: 'Failed to start cycle count'
+      }
+    )
+  }
+
+  const handleCompleteCycleCountById = async (id: string, countNumber: string) => {
+    toast.promise(
+      completeCycleCount(id),
+      {
+        loading: 'Completing cycle count...',
+        success: () => `Cycle count ${countNumber} completed`,
+        error: 'Failed to complete cycle count'
+      }
+    )
   }
 
   // Map stock levels to InventoryItem format for display

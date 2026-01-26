@@ -1149,6 +1149,323 @@ ${invoice.paid_at ? `PAID ON: ${new Date(invoice.paid_at).toLocaleDateString()}`
     }
   }, [updateSubscription])
 
+  // Handler for updating payment method
+  const handleUpdatePaymentMethod = useCallback(async (paymentMethodId: string, updates: {
+    expMonth?: number
+    expYear?: number
+    billingDetails?: Record<string, string>
+    setAsDefault?: boolean
+  }) => {
+    toast.loading('Updating payment method...', { id: 'update-payment' })
+    try {
+      const response = await fetch('/api/billing/payment-methods', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: updates.setAsDefault ? 'set-default' : 'update',
+          paymentMethodId,
+          ...updates
+        })
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to update payment method')
+      }
+
+      toast.success('Payment method updated', { id: 'update-payment' })
+      return result
+    } catch (error) {
+      console.error('Failed to update payment method:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to update payment method', { id: 'update-payment' })
+      throw error
+    }
+  }, [])
+
+  // Handler for applying coupon to subscription
+  const handleApplyCoupon = useCallback(async (subscriptionId: string, couponCode: string) => {
+    if (!couponCode.trim()) {
+      toast.error('Please enter a coupon code')
+      return
+    }
+
+    toast.loading('Applying coupon...', { id: 'apply-coupon' })
+    try {
+      const response = await fetch('/api/billing/subscriptions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'apply-coupon',
+          subscriptionId,
+          couponCode: couponCode.toUpperCase()
+        })
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Invalid or expired coupon')
+      }
+
+      toast.success(result.message || 'Coupon applied successfully!', { id: 'apply-coupon' })
+      await refreshSubscriptions?.()
+      return result
+    } catch (error) {
+      console.error('Failed to apply coupon:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to apply coupon', { id: 'apply-coupon' })
+      throw error
+    }
+  }, [refreshSubscriptions])
+
+  // Handler for downloading invoice (alias for handleDownloadInvoicePdf)
+  const handleDownloadInvoice = useCallback(async (invoice: Invoice) => {
+    return handleDownloadInvoicePdf(invoice)
+  }, [handleDownloadInvoicePdf])
+
+  // Handler for requesting refund
+  const handleRequestRefund = useCallback(async (
+    transactionOrPaymentId: string,
+    amount: number,
+    reason: 'duplicate' | 'fraudulent' | 'requested_by_customer' | 'expired_uncaptured_charge',
+    notes?: string
+  ) => {
+    toast.loading('Processing refund request...', { id: 'request-refund' })
+    try {
+      await createRefund({
+        payment_id: transactionOrPaymentId,
+        amount,
+        currency: 'USD',
+        status: 'pending',
+        reason,
+        notes: notes || `Refund requested: ${reason.replace(/_/g, ' ')}`
+      })
+
+      toast.success('Refund request submitted', {
+        id: 'request-refund',
+        description: `Refund of ${formatCurrency(amount)} is being processed`
+      })
+      await refreshRefunds?.()
+    } catch (error) {
+      console.error('Failed to request refund:', error)
+      toast.error('Failed to submit refund request', { id: 'request-refund' })
+      throw error
+    }
+  }, [createRefund, refreshRefunds])
+
+  // Handler for upgrading subscription plan
+  const handleUpgradePlan = useCallback(async (subscriptionId: string, newPlanId: string, immediate: boolean = true) => {
+    toast.loading('Upgrading subscription...', { id: 'upgrade-plan' })
+    try {
+      const response = await fetch('/api/billing/subscriptions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'upgrade',
+          subscriptionId,
+          newPlanId,
+          immediate
+        })
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to upgrade subscription')
+      }
+
+      toast.success(result.message || 'Subscription upgraded successfully!', { id: 'upgrade-plan' })
+      await refreshSubscriptions?.()
+      return result
+    } catch (error) {
+      console.error('Failed to upgrade subscription:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to upgrade subscription', { id: 'upgrade-plan' })
+      throw error
+    }
+  }, [refreshSubscriptions])
+
+  // Handler for downgrading subscription plan
+  const handleDowngradePlan = useCallback(async (subscriptionId: string, newPlanId: string) => {
+    toast.loading('Scheduling downgrade...', { id: 'downgrade-plan' })
+    try {
+      const response = await fetch('/api/billing/subscriptions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'downgrade',
+          subscriptionId,
+          newPlanId
+        })
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to schedule downgrade')
+      }
+
+      toast.success(result.message || 'Downgrade scheduled successfully!', { id: 'downgrade-plan' })
+      await refreshSubscriptions?.()
+      return result
+    } catch (error) {
+      console.error('Failed to downgrade subscription:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to schedule downgrade', { id: 'downgrade-plan' })
+      throw error
+    }
+  }, [refreshSubscriptions])
+
+  // Handler for recording usage
+  const handleRecordUsage = useCallback(async (
+    usageType: 'api_calls' | 'storage_gb' | 'ai_tokens' | 'video_minutes' | 'collaboration_minutes' | 'team_members',
+    quantity: number,
+    metadata?: Record<string, unknown>
+  ) => {
+    try {
+      const response = await fetch('/api/billing/usage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'record',
+          usageType,
+          quantity,
+          metadata
+        })
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to record usage')
+      }
+
+      return result
+    } catch (error) {
+      console.error('Failed to record usage:', error)
+      throw error
+    }
+  }, [])
+
+  // Handler for getting usage summary
+  const handleGetUsageSummary = useCallback(async () => {
+    try {
+      const response = await fetch('/api/billing/usage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'summary' })
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to get usage summary')
+      }
+
+      return result.data
+    } catch (error) {
+      console.error('Failed to get usage summary:', error)
+      throw error
+    }
+  }, [])
+
+  // Handler for checking usage limit
+  const handleCheckUsageLimit = useCallback(async (
+    usageType: 'api_calls' | 'storage_gb' | 'ai_tokens' | 'video_minutes' | 'collaboration_minutes' | 'team_members'
+  ) => {
+    try {
+      const response = await fetch('/api/billing/usage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'check-limit',
+          usageType
+        })
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to check usage limit')
+      }
+
+      return result.data
+    } catch (error) {
+      console.error('Failed to check usage limit:', error)
+      throw error
+    }
+  }, [])
+
+  // Handler for adding payment method
+  const handleAddPaymentMethod = useCallback(async (paymentData: {
+    type: 'card' | 'bank_account'
+    cardNumber?: string
+    expMonth?: number
+    expYear?: number
+    cvc?: string
+    billingDetails?: Record<string, string>
+    setAsDefault?: boolean
+    // For bank account
+    accountNumber?: string
+    routingNumber?: string
+    accountType?: string
+    accountHolderName?: string
+    bankName?: string
+  }) => {
+    toast.loading('Adding payment method...', { id: 'add-payment' })
+    try {
+      const action = paymentData.type === 'card' ? 'add-card' : 'add-bank-account'
+
+      const response = await fetch('/api/billing/payment-methods', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action,
+          ...paymentData
+        })
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to add payment method')
+      }
+
+      toast.success('Payment method added successfully', { id: 'add-payment' })
+      return result
+    } catch (error) {
+      console.error('Failed to add payment method:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to add payment method', { id: 'add-payment' })
+      throw error
+    }
+  }, [])
+
+  // Handler for deleting payment method
+  const handleDeletePaymentMethod = useCallback(async (paymentMethodId: string) => {
+    toast.loading('Removing payment method...', { id: 'delete-payment' })
+    try {
+      const response = await fetch('/api/billing/payment-methods', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'delete',
+          paymentMethodId
+        })
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to remove payment method')
+      }
+
+      toast.success('Payment method removed', { id: 'delete-payment' })
+      return result
+    } catch (error) {
+      console.error('Failed to delete payment method:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to remove payment method', { id: 'delete-payment' })
+      throw error
+    }
+  }, [])
+
   // Quick actions with real functionality - properly typed
   const billingQuickActions: QuickAction[] = [
     {

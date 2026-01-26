@@ -220,6 +220,19 @@ class ReportsService {
     return data;
   }
 
+  // Alias for getReport - used for ownership verification
+  async getReportById(reportId: string, userId: string): Promise<Report | null> {
+    const { data, error } = await this.supabase
+      .from('reports')
+      .select('*')
+      .eq('id', reportId)
+      .eq('user_id', userId)
+      .single();
+
+    if (error) return null;
+    return data;
+  }
+
   async updateReport(reportId: string, userId: string, updates: Partial<Report>): Promise<Report> {
     const { data, error } = await this.supabase
       .from('reports')

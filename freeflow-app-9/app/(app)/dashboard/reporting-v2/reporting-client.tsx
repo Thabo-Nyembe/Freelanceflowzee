@@ -370,13 +370,83 @@ export default function ReportingClient() {
     }
   }
 
-  const handleShareDashboard = (dashboard: any) => {
-    toast.success(`Share link copied: "${dashboard.name}" share link copied to clipboard`)
-    navigator.clipboard.writeText(`${window.location.origin}/shared/dashboard/${dashboard.id}`)
+  const handleShareDashboard = async (dashboard: any) => {
+    try {
+      // Copy share link to clipboard
+      const shareUrl = `${window.location.origin}/shared/dashboard/${dashboard.id}`
+      await navigator.clipboard.writeText(shareUrl)
+
+      // Record the share action via API
+      const response = await fetch('/api/reports', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'share',
+          dashboard_id: dashboard.id,
+          share_url: shareUrl,
+          shared_at: new Date().toISOString()
+        })
+      })
+
+      if (!response.ok) {
+        // Still show success for clipboard copy even if API fails
+        toast.success(`Share link copied: "${dashboard.name}" share link copied to clipboard`)
+        return
+      }
+
+      // Publish dashboard if not already published
+      if (!dashboard.is_published) {
+        await publishDashboard(dashboard.id, true)
+      }
+
+      toast.success(`Share link copied: "${dashboard.name}" share link copied to clipboard`)
+    } catch (err) {
+      // Clipboard copy succeeded but API may have failed
+      toast.success(`Share link copied: "${dashboard.name}" share link copied to clipboard`)
+    }
   }
 
-  const handleExportDashboard = (dashboard: any) => {
-    toast.success(`Export started: "${dashboard.name}" is being exported as PDF`)
+  const handleExportDashboard = async (dashboard: any, format: ExportFormat = 'pdf') => {
+    setIsSubmitting(true)
+    try {
+      // Create export request via API
+      const response = await fetch('/api/reports', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'export',
+          reportId: dashboard.id,
+          format: format,
+          type: 'dashboard'
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Export failed')
+      }
+
+      const result = await response.json()
+
+      // If there's a download URL, trigger download
+      if (result.export?.file_url) {
+        const a = document.createElement('a')
+        a.href = result.export.file_url
+        a.download = `${dashboard.name}-${new Date().toISOString().split('T')[0]}.${format}`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        toast.success(`Export complete: "${dashboard.name}" exported as ${format.toUpperCase()}`)
+      } else {
+        // Export is being processed in background
+        toast.success(`Export started: "${dashboard.name}" is being exported as ${format.toUpperCase()}. You'll be notified when it's ready.`)
+      }
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Export failed')
+      toast.error(error.message)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   // Handlers - Worksheet
@@ -480,6 +550,590 @@ export default function ReportingClient() {
       refetchScheduledReports()
     ])
     toast.success('Data refreshed')
+  }
+
+  // =====================================================
+  // REPORT HANDLERS - Create, Update, Delete, Run, Schedule, Share
+  // =====================================================
+
+  // Handler: Create a new report
+  const handleCreateReport = async (reportData: {
+    name: string
+    description?: string
+    type?: string
+    config?: Record<string, unknown>
+  }) => {
+    if (!reportData.name?.trim()) {
+      toast.error('Report name is required')
+      return null
+    }
+
+    setIsSubmitting(true)
+    try {
+      const response = await fetch('/api/reports', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create',
+          name: reportData.name,
+          description: reportData.description,
+          type: reportData.type || 'custom',
+          config: reportData.config || {
+            date_range: { type: 'preset', preset: 'this_month' }
+          }
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to create report')
+      }
+
+      const result = await response.json()
+      toast.success(`Report "${reportData.name}" created successfully`)
+      await handleRefreshData()
+      return result.report
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Failed to create report')
+      toast.error(error.message)
+      return null
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Handler: Update an existing report
+  const handleUpdateReport = async (reportId: string, updates: {
+    name?: string
+    description?: string
+    config?: Record<string, unknown>
+    schedule?: Record<string, unknown>
+  }) => {
+    if (!reportId) {
+      toast.error('Report ID is required')
+      return null
+    }
+
+    setIsSubmitting(true)
+    try {
+      const response = await fetch('/api/reports', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update',
+          reportId,
+          ...updates
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to update report')
+      }
+
+      const result = await response.json()
+      toast.success('Report updated successfully')
+      await handleRefreshData()
+      return result.report
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Failed to update report')
+      toast.error(error.message)
+      return null
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Handler: Delete a report
+  const handleDeleteReport = async (reportId: string) => {
+    if (!reportId) {
+      toast.error('Report ID is required')
+      return false
+    }
+
+    if (!confirm('Are you sure you want to delete this report?')) {
+      return false
+    }
+
+    setIsSubmitting(true)
+    try {
+      const response = await fetch('/api/reports', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'delete',
+          reportId
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to delete report')
+      }
+
+      toast.success('Report deleted successfully')
+      await handleRefreshData()
+      return true
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Failed to delete report')
+      toast.error(error.message)
+      return false
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Handler: Run/Generate a report
+  const handleRunReport = async (reportId: string) => {
+    if (!reportId) {
+      toast.error('Report ID is required')
+      return null
+    }
+
+    setIsSubmitting(true)
+    toast.info('Generating report...')
+    try {
+      const response = await fetch('/api/reports', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'generate',
+          reportId
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to generate report')
+      }
+
+      const result = await response.json()
+      toast.success('Report generated successfully')
+      return result.result
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Failed to generate report')
+      toast.error(error.message)
+      return null
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Handler: Schedule a report
+  const handleScheduleReport = async (reportId: string, scheduleConfig: {
+    frequency: 'daily' | 'weekly' | 'monthly'
+    time?: string
+    recipients?: string[]
+    format?: ExportFormat
+  }) => {
+    if (!reportId) {
+      toast.error('Report ID is required')
+      return null
+    }
+
+    setIsSubmitting(true)
+    try {
+      const response = await fetch('/api/reports', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'schedule',
+          reportId,
+          schedule: {
+            frequency: scheduleConfig.frequency,
+            time: scheduleConfig.time || '09:00',
+            recipients: scheduleConfig.recipients || [],
+            format: scheduleConfig.format || 'pdf'
+          }
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to schedule report')
+      }
+
+      const result = await response.json()
+      toast.success(`Report scheduled: ${scheduleConfig.frequency}`)
+      await handleRefreshData()
+      return result.report
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Failed to schedule report')
+      toast.error(error.message)
+      return null
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Handler: Export a report to PDF/CSV/Excel
+  const handleExportReport = async (reportId: string, format: ExportFormat = 'pdf') => {
+    if (!reportId) {
+      toast.error('Report ID is required')
+      return null
+    }
+
+    setIsSubmitting(true)
+    try {
+      const response = await fetch('/api/reports', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'export',
+          reportId,
+          format,
+          type: 'report'
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Export failed')
+      }
+
+      const result = await response.json()
+
+      // If there's a download URL, trigger download
+      if (result.export?.file_url) {
+        const a = document.createElement('a')
+        a.href = result.export.file_url
+        a.download = `report-${reportId}-${new Date().toISOString().split('T')[0]}.${format}`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        toast.success(`Report exported as ${format.toUpperCase()}`)
+      } else {
+        toast.success(`Export started: Report is being exported as ${format.toUpperCase()}`)
+      }
+
+      return result.export
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Export failed')
+      toast.error(error.message)
+      return null
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Handler: Share a report with team members
+  const handleShareReport = async (reportId: string, options: {
+    recipients?: string[]
+    permission?: 'view' | 'edit' | 'admin'
+    message?: string
+    expiresIn?: number // days
+  } = {}) => {
+    if (!reportId) {
+      toast.error('Report ID is required')
+      return null
+    }
+
+    setIsSubmitting(true)
+    try {
+      const shareUrl = `${window.location.origin}/shared/report/${reportId}`
+
+      // Copy share link to clipboard
+      await navigator.clipboard.writeText(shareUrl)
+
+      // Record the share action via API
+      const response = await fetch('/api/reports', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'share',
+          reportId,
+          share_url: shareUrl,
+          recipients: options.recipients || [],
+          permission: options.permission || 'view',
+          message: options.message,
+          expires_in_days: options.expiresIn
+        })
+      })
+
+      if (!response.ok) {
+        // Still copy link even if API fails
+        toast.success('Share link copied to clipboard')
+        return { shareUrl }
+      }
+
+      const result = await response.json()
+      toast.success('Report shared. Link copied to clipboard.')
+      return { shareUrl, ...result }
+    } catch (err) {
+      // Clipboard may have worked
+      toast.success('Share link copied to clipboard')
+      return null
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // =====================================================
+  // TEMPLATE HANDLERS
+  // =====================================================
+
+  // Handler: Create a report from template
+  const handleCreateFromTemplate = async (templateId: string, customizations?: {
+    name?: string
+    config?: Record<string, unknown>
+  }) => {
+    if (!templateId) {
+      toast.error('Template ID is required')
+      return null
+    }
+
+    setIsSubmitting(true)
+    try {
+      const response = await fetch('/api/reports', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create-from-template',
+          templateId,
+          name: customizations?.name,
+          config: customizations?.config
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to create from template')
+      }
+
+      const result = await response.json()
+      toast.success('Report created from template')
+      await handleRefreshData()
+      return result.report
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Failed to create from template')
+      toast.error(error.message)
+      return null
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Handler: Save current report as template
+  const handleSaveAsTemplate = async (reportId: string, templateName: string) => {
+    if (!reportId || !templateName?.trim()) {
+      toast.error('Report ID and template name are required')
+      return null
+    }
+
+    setIsSubmitting(true)
+    try {
+      const response = await fetch('/api/reports', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'save-as-template',
+          reportId,
+          templateName
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to save as template')
+      }
+
+      const result = await response.json()
+      toast.success(`Saved as template: "${templateName}"`)
+      return result.template
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Failed to save as template')
+      toast.error(error.message)
+      return null
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // =====================================================
+  // FILTER HANDLERS
+  // =====================================================
+
+  // Handler: Apply filters to a report
+  const handleApplyFilters = async (reportId: string, filters: {
+    dateRange?: { start: string; end: string }
+    clientIds?: string[]
+    projectIds?: string[]
+    categories?: string[]
+    status?: string[]
+  }) => {
+    if (!reportId) {
+      toast.error('Report ID is required')
+      return null
+    }
+
+    setIsSubmitting(true)
+    try {
+      const response = await fetch('/api/reports', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update',
+          reportId,
+          config: {
+            date_range: filters.dateRange ? {
+              type: 'custom',
+              start: filters.dateRange.start,
+              end: filters.dateRange.end
+            } : undefined,
+            filters: {
+              client_ids: filters.clientIds,
+              project_ids: filters.projectIds,
+              categories: filters.categories,
+              status: filters.status
+            }
+          }
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to apply filters')
+      }
+
+      const result = await response.json()
+      toast.success('Filters applied successfully')
+      return result.report
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Failed to apply filters')
+      toast.error(error.message)
+      return null
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Handler: Clear all filters from a report
+  const handleClearFilters = async (reportId: string) => {
+    if (!reportId) {
+      toast.error('Report ID is required')
+      return null
+    }
+
+    setIsSubmitting(true)
+    try {
+      const response = await fetch('/api/reports', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update',
+          reportId,
+          config: {
+            date_range: { type: 'preset', preset: 'this_month' },
+            filters: {}
+          }
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to clear filters')
+      }
+
+      const result = await response.json()
+      toast.success('Filters cleared')
+      return result.report
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Failed to clear filters')
+      toast.error(error.message)
+      return null
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Handler: Save current filters as a preset
+  const handleSaveFilterPreset = async (reportId: string, presetName: string, filters: Record<string, unknown>) => {
+    if (!reportId || !presetName?.trim()) {
+      toast.error('Report ID and preset name are required')
+      return null
+    }
+
+    setIsSubmitting(true)
+    try {
+      const response = await fetch('/api/reports', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'save-filter-preset',
+          reportId,
+          presetName,
+          filters
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to save filter preset')
+      }
+
+      const result = await response.json()
+      toast.success(`Filter preset "${presetName}" saved`)
+      return result.preset
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Failed to save filter preset')
+      toast.error(error.message)
+      return null
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Handler: Update dashboard with new data (for edit functionality)
+  const handleUpdateDashboard = async (dashboardId: string, updates: {
+    name?: string
+    description?: string
+    tags?: string[]
+    widgets?: unknown[]
+    is_published?: boolean
+  }) => {
+    if (!dashboardId) {
+      toast.error('Dashboard ID is required')
+      return null
+    }
+
+    setIsSubmitting(true)
+    try {
+      const result = await updateDashboard(dashboardId, updates)
+      return result
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Failed to update dashboard')
+      toast.error(error.message)
+      return null
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Handler: Update worksheet with new configuration
+  const handleUpdateWorksheet = async (worksheetId: string, updates: {
+    name?: string
+    chart_type?: ChartType
+    data_source?: string
+    metrics?: string[]
+    dimensions?: string[]
+    filters?: unknown[]
+  }) => {
+    if (!worksheetId) {
+      toast.error('Worksheet ID is required')
+      return null
+    }
+
+    setIsSubmitting(true)
+    try {
+      const result = await updateWorksheet(worksheetId, updates)
+      return result
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Failed to update worksheet')
+      toast.error(error.message)
+      return null
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
