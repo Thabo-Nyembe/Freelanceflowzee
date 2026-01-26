@@ -248,6 +248,19 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
     }
   }, [userId, fetchMembers, fetchProjects])
 
+  // Load settings from localStorage on mount
+  useEffect(() => {
+    const savedSettings = localStorage.getItem('capacity-settings')
+    if (savedSettings) {
+      try {
+        const parsed = JSON.parse(savedSettings)
+        setCapacitySettings(prev => ({ ...prev, ...parsed }))
+      } catch {
+        // Invalid JSON, ignore
+      }
+    }
+  }, [])
+
   const [activeTab, setActiveTab] = useState('overview')
   const [resourceTypeFilter, setResourceTypeFilter] = useState<ResourceType | 'all'>('all')
   const [statusFilter, setStatusFilter] = useState<CapacityStatus | 'all'>('all')
@@ -268,6 +281,11 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
   const [exportDialogOpen, setExportDialogOpen] = useState(false)
   const [filtersDialogOpen, setFiltersDialogOpen] = useState(false)
   const [settingsDialogOpen, setSettingsDialogOpen] = useState(false)
+  const [capacitySettings, setCapacitySettings] = useState({
+    autoRefresh: true,
+    showUtilizationWarnings: true,
+    compactMode: false
+  })
   const [editAllocationDialogOpen, setEditAllocationDialogOpen] = useState(false)
   const [addDepartmentDialogOpen, setAddDepartmentDialogOpen] = useState(false)
   const [apiKeyDialogOpen, setApiKeyDialogOpen] = useState(false)
@@ -666,8 +684,24 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
     }
   }
 
-  const handleSaveSettings = () => {
-    toast.success('Settings saved', { description: 'Your preferences have been updated' })
+  const handleSaveSettings = async () => {
+    try {
+      // Save to localStorage
+      localStorage.setItem('capacity-settings', JSON.stringify(capacitySettings))
+      // Optionally sync to database
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        await supabase.from('user_preferences').upsert({
+          user_id: user.id,
+          preference_key: 'capacity-settings',
+          preference_value: capacitySettings
+        }, { onConflict: 'user_id,preference_key' })
+      }
+      toast.success('Settings saved', { description: 'Your preferences have been updated' })
+    } catch (err) {
+      toast.error('Failed to save settings')
+    }
   }
 
   const handleColorSelect = (color: string) => {
@@ -2722,21 +2756,30 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
                 <Label>Auto-refresh Dashboard</Label>
                 <p className="text-sm text-gray-500 dark:text-gray-400">Update data automatically</p>
               </div>
-              <Switch defaultChecked />
+              <Switch
+                checked={capacitySettings.autoRefresh}
+                onCheckedChange={(checked) => setCapacitySettings(prev => ({ ...prev, autoRefresh: checked }))}
+              />
             </div>
             <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
               <div>
                 <Label>Show Utilization Warnings</Label>
                 <p className="text-sm text-gray-500 dark:text-gray-400">Alert when team is overbooked</p>
               </div>
-              <Switch defaultChecked />
+              <Switch
+                checked={capacitySettings.showUtilizationWarnings}
+                onCheckedChange={(checked) => setCapacitySettings(prev => ({ ...prev, showUtilizationWarnings: checked }))}
+              />
             </div>
             <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
               <div>
                 <Label>Compact Mode</Label>
                 <p className="text-sm text-gray-500 dark:text-gray-400">Show more data in less space</p>
               </div>
-              <Switch />
+              <Switch
+                checked={capacitySettings.compactMode}
+                onCheckedChange={(checked) => setCapacitySettings(prev => ({ ...prev, compactMode: checked }))}
+              />
             </div>
             <div className="flex justify-end gap-3 pt-4">
               <Button variant="outline" onClick={() => setSettingsDialogOpen(false)}>Close</Button>

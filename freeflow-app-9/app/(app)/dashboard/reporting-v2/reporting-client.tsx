@@ -156,8 +156,28 @@ export default function ReportingClient() {
   const [showScheduleDialog, setShowScheduleDialog] = useState(false)
 
   // Export data handler
-  const handleExportData = () => {
-    toast.success('Exporting dashboard data...')
+  const handleExportData = async () => {
+    try {
+      const exportData = {
+        dashboards: dashboards || [],
+        worksheets: worksheets || [],
+        dataSources: dataSources || [],
+        scheduledReports: scheduledReports || [],
+        exportedAt: new Date().toISOString()
+      }
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `report-export-${new Date().toISOString().split('T')[0]}.json`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+      toast.success('Report data exported successfully')
+    } catch (err) {
+      toast.error('Export failed')
+    }
   }
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [filterFavorites, setFilterFavorites] = useState(false)

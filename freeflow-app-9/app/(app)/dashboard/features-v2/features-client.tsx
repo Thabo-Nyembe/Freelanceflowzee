@@ -311,6 +311,7 @@ export default function FeaturesClient() {
   const [showCreateSegmentDialog, setShowCreateSegmentDialog] = useState(false)
   const [showExperimentDialog, setShowExperimentDialog] = useState(false)
   const [showRolloutDialog, setShowRolloutDialog] = useState(false)
+  const [showCreateFeatureDialog, setShowCreateFeatureDialog] = useState(false)
 
   // Form state for Create Segment dialog
   const [segmentForm, setSegmentForm] = useState({
@@ -337,6 +338,17 @@ export default function FeaturesClient() {
     percentage: 5,
     targetSegments: [] as string[],
     environments: ['staging'] as string[]
+  })
+
+  // Form state for Create Feature dialog
+  const [featureForm, setFeatureForm] = useState({
+    name: '',
+    key: '',
+    description: '',
+    category: 'Integrations',
+    priority: 'medium' as Priority,
+    status: 'idea' as FeatureStatus,
+    tags: '' // comma-separated
   })
 
   // Filtered and sorted features
@@ -511,6 +523,53 @@ export default function FeaturesClient() {
     })
   }, [rolloutForm, selectedFeature])
 
+  // Handler for creating a new feature
+  const handleSubmitFeature = useCallback(() => {
+    if (!featureForm.name.trim()) {
+      toast.error('Feature name is required')
+      return
+    }
+    if (!featureForm.key.trim()) {
+      toast.error('Feature key is required')
+      return
+    }
+
+    // Use the createFeature mutation from the hook
+    createFeature({
+      feature_key: featureForm.key.toLowerCase().replace(/\s+/g, '_'),
+      feature_name: featureForm.name,
+      description: featureForm.description,
+      status: mapUIStatusToDbStatus(featureForm.status),
+      category: featureForm.category,
+      tags: featureForm.tags.split(',').map(t => t.trim()).filter(Boolean),
+      rollout_percentage: 0,
+      environments: ['staging'],
+      target_segments: []
+    }, {
+      onSuccess: () => {
+        toast.success('Feature created successfully', {
+          description: `${featureForm.name} has been added to the feature list`
+        })
+        setShowCreateFeatureDialog(false)
+        setFeatureForm({
+          name: '',
+          key: '',
+          description: '',
+          category: 'Integrations',
+          priority: 'medium',
+          status: 'idea',
+          tags: ''
+        })
+        refetch()
+      },
+      onError: (error: Error) => {
+        toast.error('Failed to create feature', {
+          description: error.message
+        })
+      }
+    })
+  }, [featureForm, createFeature, refetch])
+
   // Quick actions for the toolbar
   const featuresQuickActions = useMemo(() => [
     {
@@ -601,9 +660,8 @@ export default function FeaturesClient() {
 
   // Handlers
   const handleCreateFeature = () => {
-    toast.info('Create Feature', {
-      description: 'Opening feature form...'
-    })
+    setShowCreateFeatureDialog(true)
+    toast.info('Create Feature', { description: 'Opening feature creation form...' })
   }
 
   const handleMoveFeature = (featureId: string, newStatus: string) => {
@@ -612,10 +670,27 @@ export default function FeaturesClient() {
     })
   }
 
-  const handleExportRoadmap = () => {
-    toast.success('Exporting roadmap', {
-      description: 'Roadmap will be downloaded'
-    })
+  const handleExportRoadmap = async () => {
+    try {
+      const roadmapData = featuresState.filter(f => f.targetRelease)
+      const exportData = {
+        features: featuresState || [],
+        roadmap: roadmapData,
+        exportedAt: new Date().toISOString()
+      }
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `roadmap-${new Date().toISOString().split('T')[0]}.json`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+      toast.success('Exporting roadmap', { description: 'Roadmap exported successfully' })
+    } catch (err) {
+      toast.error('Export failed')
+    }
   }
 
   // Loading state
@@ -2009,6 +2084,124 @@ export default function FeaturesClient() {
               </Tabs>
             </>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Feature Dialog */}
+      <Dialog open={showCreateFeatureDialog} onOpenChange={setShowCreateFeatureDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Flag className="h-5 w-5 text-indigo-600" />
+              Create New Feature
+            </DialogTitle>
+            <DialogDescription>
+              Add a new feature to the product roadmap and track its development
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="feature-name">Feature Name *</Label>
+              <Input
+                id="feature-name"
+                placeholder="e.g., Dark Mode, AI Assistant"
+                value={featureForm.name}
+                onChange={(e) => setFeatureForm(prev => ({ ...prev, name: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="feature-key">Feature Key *</Label>
+              <Input
+                id="feature-key"
+                placeholder="e.g., dark_mode, ai_assistant"
+                value={featureForm.key}
+                onChange={(e) => setFeatureForm(prev => ({ ...prev, key: e.target.value }))}
+              />
+              <p className="text-xs text-gray-500">
+                Unique identifier for the feature (lowercase, underscores allowed)
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="feature-description">Description</Label>
+              <Textarea
+                id="feature-description"
+                placeholder="Describe what this feature does..."
+                value={featureForm.description}
+                onChange={(e) => setFeatureForm(prev => ({ ...prev, description: e.target.value }))}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Category</Label>
+                <Select
+                  value={featureForm.category}
+                  onValueChange={(value) => setFeatureForm(prev => ({ ...prev, category: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.filter(c => c !== 'All').map(category => (
+                      <SelectItem key={category} value={category}>{category}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Priority</Label>
+                <Select
+                  value={featureForm.priority}
+                  onValueChange={(value) => setFeatureForm(prev => ({ ...prev, priority: value as Priority }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select priority" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="critical">Critical</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="low">Low</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Initial Status</Label>
+              <Select
+                value={featureForm.status}
+                onValueChange={(value) => setFeatureForm(prev => ({ ...prev, status: value as FeatureStatus }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="idea">Idea</SelectItem>
+                  <SelectItem value="planned">Planned</SelectItem>
+                  <SelectItem value="in_progress">In Progress</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="feature-tags">Tags</Label>
+              <Input
+                id="feature-tags"
+                placeholder="e.g., ui, backend, api (comma-separated)"
+                value={featureForm.tags}
+                onChange={(e) => setFeatureForm(prev => ({ ...prev, tags: e.target.value }))}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCreateFeatureDialog(false)}>Cancel</Button>
+            <Button onClick={handleSubmitFeature} disabled={isCreating} className="bg-indigo-600 hover:bg-indigo-700">
+              {isCreating ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Plus className="h-4 w-4 mr-2" />
+              )}
+              Create Feature
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 

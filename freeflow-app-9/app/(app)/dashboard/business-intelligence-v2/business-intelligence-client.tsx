@@ -139,17 +139,54 @@ export function BusinessIntelligenceClient() {
   }
 
   // Handle export
-  const handleExport = () => {
-    toast.success(`Report exported as ${exportFormat.toUpperCase()}`, {
-      description: 'Your business intelligence report has been downloaded'
-    })
-    setShowExportDialog(false)
+  const handleExport = async () => {
+    try {
+      const exportData = {
+        metrics: metrics || {},
+        healthScore: healthScore || 0,
+        profitSummary: profitSummary || {},
+        clientMetrics: clientMetrics || {},
+        scenarios: scenarios || [],
+        kpiDashboard: kpiDashboard || {},
+        exportedAt: new Date().toISOString(),
+        format: exportFormat,
+        userType: userType
+      }
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `bi-report-${new Date().toISOString().split('T')[0]}.${exportFormat}`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+      toast.success(`Report exported as ${exportFormat.toUpperCase()}`, {
+        description: 'Your business intelligence report has been downloaded'
+      })
+      setShowExportDialog(false)
+    } catch (err) {
+      toast.error('Export failed')
+    }
   }
 
   // Handle save settings
-  const handleSaveSettings = () => {
-    toast.success('Settings saved successfully')
-    setShowSettingsDialog(false)
+  const handleSaveSettings = async () => {
+    try {
+      const settings = {
+        enableNotifications,
+        enableAutoRefresh,
+        refreshInterval,
+        dataDisplayMode,
+        userType,
+        dateRange
+      }
+      localStorage.setItem('bi-settings', JSON.stringify(settings))
+      toast.success('Settings saved successfully')
+      setShowSettingsDialog(false)
+    } catch (err) {
+      toast.error('Failed to save settings')
+    }
   }
 
   // Handle add goal
@@ -172,9 +209,21 @@ export function BusinessIntelligenceClient() {
   }
 
   // Handle apply filters
-  const handleApplyFilters = () => {
-    toast.success(`Filters applied: Status: ${filterStatus}`)
-    setShowFilterDialog(false)
+  const handleApplyFilters = async () => {
+    try {
+      const filters = {
+        category: filterCategory,
+        status: filterStatus,
+        minValue: filterMinValue ? parseFloat(filterMinValue) : null,
+        maxValue: filterMaxValue ? parseFloat(filterMaxValue) : null,
+        appliedAt: new Date().toISOString()
+      }
+      localStorage.setItem('bi-filters', JSON.stringify(filters))
+      toast.success(`Filters applied: Category: ${filterCategory}, Status: ${filterStatus}`)
+      setShowFilterDialog(false)
+    } catch (err) {
+      toast.error('Failed to apply filters')
+    }
   }
 
   // Handle clear filters

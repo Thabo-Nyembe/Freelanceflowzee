@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
+import { createClient } from '@/lib/supabase/client'
 import {
   useTasks,
   useProjects,
@@ -247,6 +248,22 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
   const [settingsLongBreak, setSettingsLongBreak] = useState(15)
   const [settingsNotifications, setSettingsNotifications] = useState(true)
 
+  // Load settings from localStorage on mount
+  useEffect(() => {
+    const savedSettings = localStorage.getItem('my-day-settings')
+    if (savedSettings) {
+      try {
+        const parsed = JSON.parse(savedSettings)
+        if (parsed.timerDuration) setSettingsTimerDuration(parsed.timerDuration)
+        if (parsed.shortBreak) setSettingsShortBreak(parsed.shortBreak)
+        if (parsed.longBreak) setSettingsLongBreak(parsed.longBreak)
+        if (typeof parsed.notifications === 'boolean') setSettingsNotifications(parsed.notifications)
+      } catch {
+        // Invalid JSON, ignore
+      }
+    }
+  }, [])
+
   // Timer effect
   useEffect(() => {
     let interval: NodeJS.Timeout
@@ -480,9 +497,31 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
   }
 
   // Save settings handler
-  const handleSaveSettings = () => {
-    toast.success('Settings saved successfully')
-    setShowSettingsDialog(false)
+  const handleSaveSettings = async () => {
+    try {
+      const myDaySettings = {
+        timerDuration: settingsTimerDuration,
+        shortBreak: settingsShortBreak,
+        longBreak: settingsLongBreak,
+        notifications: settingsNotifications
+      }
+      // Save to localStorage
+      localStorage.setItem('my-day-settings', JSON.stringify(myDaySettings))
+      // Optionally sync to database
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        await supabase.from('user_preferences').upsert({
+          user_id: user.id,
+          preference_key: 'my-day-settings',
+          preference_value: myDaySettings
+        }, { onConflict: 'user_id,preference_key' })
+      }
+      toast.success('Settings saved successfully')
+      setShowSettingsDialog(false)
+    } catch (err) {
+      toast.error('Failed to save settings')
+    }
   }
 
   // Move task handler

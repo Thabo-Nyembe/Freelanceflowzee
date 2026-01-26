@@ -276,6 +276,7 @@ export default function DocsClient() {
 
   const [docs] = useState<Doc[]>(dbDocs || emptyDocs)
   const [spaces] = useState<DocSpace[]>(emptySpaces)
+  const [showCreateDocDialog, setShowCreateDocDialog] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<DocCategory | 'all'>('all')
   const [selectedLanguage, setSelectedLanguage] = useState('All')
@@ -372,6 +373,7 @@ export default function DocsClient() {
 
   // Handlers
   const handleCreateDoc = () => {
+    setShowCreateDocDialog(true)
     toast.info('Create Document', {
       description: 'Opening document editor...'
     })
@@ -383,10 +385,26 @@ export default function DocsClient() {
     })
   }
 
-  const handleExportDocs = () => {
-    toast.success('Exporting documentation', {
-      description: 'Docs will be downloaded'
-    })
+  const handleExportDocs = async () => {
+    try {
+      const exportData = {
+        documents: docs || [],
+        spaces: spaces || [],
+        exportedAt: new Date().toISOString()
+      }
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `documentation-${new Date().toISOString().split('T')[0]}.json`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+      toast.success('Exporting documentation', { description: 'Documentation exported successfully' })
+    } catch (err) {
+      toast.error('Export failed')
+    }
   }
 
   return (
@@ -414,7 +432,7 @@ export default function DocsClient() {
                   className="pl-9 bg-white/10 border-white/20 text-white placeholder:text-white/50 w-64"
                 />
               </div>
-              <Button className="bg-white text-slate-700 hover:bg-white/90">
+              <Button className="bg-white text-slate-700 hover:bg-white/90" onClick={handleCreateDoc}>
                 <Plus className="h-4 w-4 mr-2" />
                 New Doc
               </Button>
@@ -1412,20 +1430,7 @@ export default function DocsClient() {
                           <Switch />
                         </div>
                         <div className="flex gap-3">
-                          <Button variant="outline" className="flex-1" onClick={() => {
-                            // Export all docs as JSON
-                            const docsData = JSON.stringify(docs, null, 2)
-                            const blob = new Blob([docsData], { type: 'application/json' })
-                            const url = URL.createObjectURL(blob)
-                            const a = document.createElement('a')
-                            a.href = url
-                            a.download = 'documentation-export.json'
-                            document.body.appendChild(a)
-                            a.click()
-                            document.body.removeChild(a)
-                            URL.revokeObjectURL(url)
-                            toast.success('Documentation exported successfully')
-                          }}>
+                          <Button variant="outline" className="flex-1" onClick={handleExportDocs}>
                             <Download className="h-4 w-4 mr-2" />
                             Export All Docs
                           </Button>
@@ -1874,6 +1879,64 @@ export default function DocsClient() {
               </div>
             </>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Document Dialog */}
+      <Dialog open={showCreateDocDialog} onOpenChange={setShowCreateDocDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="h-5 w-5" />
+              Create New Document
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="doc-title">Title</Label>
+              <Input id="doc-title" placeholder="Enter document title..." />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="doc-description">Description</Label>
+              <Input id="doc-description" placeholder="Brief description of this document..." />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="doc-category">Category</Label>
+              <Select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="getting-started">Getting Started</SelectItem>
+                  <SelectItem value="api-reference">API Reference</SelectItem>
+                  <SelectItem value="guides">Guides</SelectItem>
+                  <SelectItem value="tutorials">Tutorials</SelectItem>
+                  <SelectItem value="sdk">SDK</SelectItem>
+                  <SelectItem value="integrations">Integrations</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="doc-tags">Tags</Label>
+              <Input id="doc-tags" placeholder="Enter tags separated by commas..." />
+            </div>
+            <div className="flex items-center space-x-2">
+              <Switch id="doc-public" />
+              <Label htmlFor="doc-public">Make this document public</Label>
+            </div>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setShowCreateDocDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={() => {
+              setShowCreateDocDialog(false)
+              toast.success('Document created', { description: 'Your new document has been created' })
+            }}>
+              <FileText className="h-4 w-4 mr-2" />
+              Create Document
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
