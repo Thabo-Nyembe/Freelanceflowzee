@@ -1,7 +1,7 @@
 'use client'
 import React, { useState, useMemo, useRef, useEffect } from 'react'
 import { Loader2 } from 'lucide-react'
-import { useDocuments, useDocumentMutations, type Document, type DocumentType } from '@/lib/hooks/use-documents'
+import { useDocuments, useDocumentMutations, type Document, type DocumentType, type DocumentFolder as DBFolder, type DocumentShare, type DocumentVersion, type PermissionLevel } from '@/lib/hooks/use-documents'
 import { useTeam } from '@/lib/hooks/use-team'
 import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
 import { toast } from 'sonner'
@@ -172,7 +172,8 @@ interface RecentActivity {
 // Note: documentFiles is now computed from DB data inside the component
 // ============================================================================
 
-const folders: DocumentFolder[] = []
+// Note: folders are now loaded dynamically from database via dbFolders state
+const folders: DocumentFolder[] = [] // Kept for backwards compatibility, use dbFolders instead
 
 const templates: DocTemplate[] = []
 
@@ -296,6 +297,14 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
   const [sharingFilter, setSharingFilter] = useState<'all' | 'team' | 'public' | 'private'>('all')
   const [showOrganizeDialog, setShowOrganizeDialog] = useState(false)
   const [folderOrder, setFolderOrder] = useState<DocumentFolder[]>([])
+  const [showFolderDialog, setShowFolderDialog] = useState(false)
+  const [newFolderName, setNewFolderName] = useState('')
+  const [newFolderColor, setNewFolderColor] = useState('#3B82F6')
+  const [showVersionDialog, setShowVersionDialog] = useState(false)
+  const [versionChangeSummary, setVersionChangeSummary] = useState('')
+  const versionFileInputRef = useRef<HTMLInputElement>(null)
+  const [shareEmail, setShareEmail] = useState('')
+  const [sharePermission, setSharePermission] = useState<PermissionLevel>('view')
 
   // Quick actions with real functionality
   const documentsQuickActions = [
@@ -309,11 +318,25 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
     createDocument,
     updateDocument,
     deleteDocument,
+    uploadDocument,
     shareDocument,
     archiveDocument,
     moveToFolder,
     starDocument,
     downloadDocument,
+    // Folder operations
+    createFolder,
+    updateFolder,
+    deleteFolder,
+    getFolders,
+    // Share operations
+    updateSharePermissions,
+    revokeShare,
+    getDocumentShares,
+    // Version operations
+    uploadNewVersion,
+    getDocumentVersions,
+    restoreVersion,
     loading: mutating
   } = useDocumentMutations()
 
@@ -384,67 +407,112 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
     })
   }, [documents])
 
-  // Handle creating a new document - REAL SUPABASE OPERATION
+  // Handle creating a new document or folder - REAL SUPABASE OPERATION
   const handleCreateDocument = async (docType: 'document' | 'spreadsheet' | 'presentation' | 'folder') => {
-    const typeMap: Record<string, DocumentType> = {
-      document: 'report',
-      spreadsheet: 'spreadsheet',
-      presentation: 'presentation',
-      folder: 'other'
-    }
     try {
-      await createDocument({
-        document_title: `Untitled ${docType.charAt(0).toUpperCase() + docType.slice(1)}`,
-        document_type: typeMap[docType],
-        status: 'draft',
-        access_level: 'internal',
-        version: '1.0',
-        version_number: 1,
-        is_latest_version: true,
-        is_encrypted: false,
-        is_archived: false
-      })
+      if (docType === 'folder') {
+        // Create folder using the folder API
+        await handleCreateFolder(`New Folder ${Date.now().toString().slice(-4)}`)
+      } else {
+        const typeMap: Record<string, DocumentType> = {
+          document: 'report',
+          spreadsheet: 'spreadsheet',
+          presentation: 'presentation'
+        }
+        await createDocument({
+          document_title: `Untitled ${docType.charAt(0).toUpperCase() + docType.slice(1)}`,
+          document_type: typeMap[docType],
+          status: 'draft',
+          access_level: 'internal',
+          version: '1.0',
+          version_number: 1,
+          is_latest_version: true,
+          is_encrypted: false,
+          is_archived: false,
+          parent_folder_id: selectedFolder?.id || null
+        })
+      }
       setShowCreateDialog(false)
       refetch()
     } catch (error) {
-      console.error('Failed to create document:', error)
+      console.error('Failed to create:', error)
+      toast.error('Creation failed', {
+        description: error instanceof Error ? error.message : 'Failed to create'
+      })
     }
   }
 
-  // Handle file upload - REAL SUPABASE OPERATION
+  // ============================================================================
+  // FOLDER HANDLERS - WIRED TO SUPABASE
+  // ============================================================================
+
+  // Create folder - REAL SUPABASE OPERATION
+  const handleCreateFolder = async (name: string, options?: { description?: string; color?: string }) => {
+    try {
+      const folder = await createFolder(name, selectedFolder?.id, options)
+      await loadFolders()
+      return folder
+    } catch (error) {
+      console.error('Failed to create folder:', error)
+      toast.error('Failed to create folder', {
+        description: error instanceof Error ? error.message : 'Unknown error'
+      })
+      throw error
+    }
+  }
+
+  // Update folder - REAL SUPABASE OPERATION
+  const handleUpdateFolder = async (folderId: string, updates: { name?: string; description?: string; color?: string }) => {
+    try {
+      await updateFolder(folderId, updates)
+      await loadFolders()
+    } catch (error) {
+      console.error('Failed to update folder:', error)
+      toast.error('Failed to update folder')
+    }
+  }
+
+  // Delete folder - REAL SUPABASE OPERATION
+  const handleDeleteFolder = async (folderId: string) => {
+    try {
+      await deleteFolder(folderId)
+      setSelectedFolder(null)
+      await loadFolders()
+    } catch (error) {
+      console.error('Failed to delete folder:', error)
+      toast.error('Failed to delete folder', {
+        description: error instanceof Error ? error.message : 'Unknown error'
+      })
+    }
+  }
+
+  // Load folders from database
+  const [dbFolders, setDbFolders] = useState<DBFolder[]>([])
+  const loadFolders = async () => {
+    const folders = await getFolders(selectedFolder?.id || null)
+    setDbFolders(folders)
+  }
+
+  // Load folders on mount and when selected folder changes
+  useEffect(() => {
+    loadFolders()
+  }, [selectedFolder?.id])
+
+  // Handle file upload - REAL SUPABASE STORAGE OPERATION
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files
     if (!files || files.length === 0) return
 
+    // Upload each file to Supabase Storage
     for (const file of Array.from(files)) {
-      const fileExtension = file.name.split('.').pop()?.toLowerCase() || ''
-      let docType: DocumentType = 'other'
-
-      // Determine document type from file extension
-      if (['doc', 'docx', 'txt', 'rtf', 'odt'].includes(fileExtension)) {
-        docType = 'report'
-      } else if (['xls', 'xlsx', 'csv', 'ods'].includes(fileExtension)) {
-        docType = 'spreadsheet'
-      } else if (['ppt', 'pptx', 'odp'].includes(fileExtension)) {
-        docType = 'presentation'
-      } else if (['pdf'].includes(fileExtension)) {
-        docType = 'contract'
-      }
-
       try {
-        await createDocument({
-          document_title: file.name.replace(/\.[^/.]+$/, ''),
-          document_type: docType,
-          file_name: file.name,
-          file_extension: fileExtension,
-          file_size_bytes: file.size,
-          file_size_mb: file.size / (1024 * 1024),
-          mime_type: file.type,
-          status: 'draft',
-          access_level: 'internal'
-        })
+        // Use the uploadDocument method which handles storage upload + database record
+        await uploadDocument(file, selectedFolder?.id)
       } catch (error) {
         console.error('Failed to upload document:', error)
+        toast.error('Upload failed', {
+          description: error instanceof Error ? error.message : 'Failed to upload file'
+        })
       }
     }
 
@@ -470,17 +538,116 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
   }
 
   // Handle share document - REAL SUPABASE OPERATION
-  const handleShareDocument = async (doc: DocumentFile) => {
+  const handleShareDocument = async (doc: DocumentFile, options?: {
+    email?: string
+    permissionLevel?: PermissionLevel
+    createPublicLink?: boolean
+  }) => {
     try {
-      await shareDocument(doc.id)
-      toast.success('Share link copied', {
-        description: `Share link for "${doc.name}" copied to clipboard`
+      await shareDocument(doc.id, {
+        email: options?.email,
+        permissionLevel: options?.permissionLevel || 'view',
+        allowDownload: true,
+        createPublicLink: options?.createPublicLink ?? true
       })
       refetch()
     } catch (error) {
       console.error('Failed to share document:', error)
+      toast.error('Failed to share document', {
+        description: error instanceof Error ? error.message : 'Unknown error'
+      })
     }
   }
+
+  // ============================================================================
+  // VERSION HANDLERS - WIRED TO SUPABASE
+  // ============================================================================
+
+  // Upload new version - REAL SUPABASE STORAGE OPERATION
+  const handleUploadVersion = async (documentId: string, file: File, changeSummary?: string) => {
+    try {
+      await uploadNewVersion(documentId, file, changeSummary)
+      refetch()
+    } catch (error) {
+      console.error('Failed to upload version:', error)
+      toast.error('Failed to upload new version', {
+        description: error instanceof Error ? error.message : 'Unknown error'
+      })
+    }
+  }
+
+  // Get version history - REAL SUPABASE QUERY
+  const [documentVersions, setDocumentVersions] = useState<DocumentVersion[]>([])
+  const loadVersions = async (documentId: string) => {
+    const versions = await getDocumentVersions(documentId)
+    setDocumentVersions(versions)
+  }
+
+  // Restore version - REAL SUPABASE OPERATION
+  const handleRestoreVersionAction = async (documentId: string, versionId: string) => {
+    try {
+      await restoreVersion(documentId, versionId)
+      refetch()
+      if (selectedDocument) {
+        loadVersions(selectedDocument.id)
+      }
+    } catch (error) {
+      console.error('Failed to restore version:', error)
+      toast.error('Failed to restore version', {
+        description: error instanceof Error ? error.message : 'Unknown error'
+      })
+    }
+  }
+
+  // ============================================================================
+  // PERMISSION HANDLERS - WIRED TO SUPABASE
+  // ============================================================================
+
+  // Get document shares/permissions
+  const [documentShares, setDocumentShares] = useState<DocumentShare[]>([])
+  const loadShares = async (documentId: string) => {
+    const shares = await getDocumentShares(documentId)
+    setDocumentShares(shares)
+  }
+
+  // Update share permissions - REAL SUPABASE OPERATION
+  const handleUpdatePermissions = async (shareId: string, updates: {
+    permissionLevel?: PermissionLevel
+    allowDownload?: boolean
+    expiresAt?: string
+  }) => {
+    try {
+      await updateSharePermissions(shareId, updates)
+      if (selectedDocument) {
+        loadShares(selectedDocument.id)
+      }
+    } catch (error) {
+      console.error('Failed to update permissions:', error)
+      toast.error('Failed to update permissions')
+    }
+  }
+
+  // Revoke share - REAL SUPABASE OPERATION
+  const handleRevokeShare = async (shareId: string) => {
+    try {
+      await revokeShare(shareId)
+      if (selectedDocument) {
+        loadShares(selectedDocument.id)
+      }
+      refetch()
+    } catch (error) {
+      console.error('Failed to revoke share:', error)
+      toast.error('Failed to revoke share')
+    }
+  }
+
+  // Load versions and shares when document is selected
+  useEffect(() => {
+    if (selectedDocument) {
+      loadVersions(selectedDocument.id)
+      loadShares(selectedDocument.id)
+    }
+  }, [selectedDocument?.id])
 
   // Handle archive document - REAL SUPABASE OPERATION
   const handleArchiveDocument = async (doc: DocumentFile) => {
@@ -494,19 +661,25 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
   }
 
   // Handle move to folder - REAL SUPABASE OPERATION
-  const handleMoveToFolder = async (doc: DocumentFile, folderId: string) => {
+  const handleMoveToFolder = async (doc: DocumentFile, folderId: string | null) => {
     try {
-      const folder = folders.find(f => f.id === folderId)
-      await moveToFolder(doc.id, folderId, folder?.name)
-      toast.success('Document moved', {
-        description: `"${doc.name}" moved to ${folder?.name || 'folder'}`
-      })
+      const folder = dbFolders.find(f => f.id === folderId)
+      await moveToFolder(doc.id, folderId, folder?.path)
       setShowMoveDialog(false)
       setDocumentToAction(null)
       refetch()
     } catch (error) {
       console.error('Failed to move document:', error)
+      toast.error('Failed to move document', {
+        description: error instanceof Error ? error.message : 'Unknown error'
+      })
     }
+  }
+
+  // Handle move document dialog action
+  const handleMoveDocument = (doc: DocumentFile) => {
+    setDocumentToAction(doc)
+    setShowMoveDialog(true)
   }
 
   // Handle star/unstar document - REAL SUPABASE OPERATION
@@ -523,15 +696,16 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
     }
   }
 
-  // Handle download document - REAL SUPABASE OPERATION
+  // Handle download document - REAL SUPABASE STORAGE DOWNLOAD
   const handleDownloadDocument = async (doc: DocumentFile) => {
     try {
+      // This now triggers actual file download from Supabase Storage
       await downloadDocument(doc.id)
-      toast.success('Download started', {
-        description: `Downloading "${doc.name}"...`
-      })
     } catch (error) {
       console.error('Failed to download document:', error)
+      toast.error('Download failed', {
+        description: error instanceof Error ? error.message : 'Could not download document'
+      })
     }
   }
 
@@ -543,7 +717,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
     const draftDocs = documentFiles.filter(d => d.status === 'draft').length
     const reviewDocs = documentFiles.filter(d => d.status === 'review').length
     const totalComments = documentFiles.reduce((sum, d) => sum + d.comments, 0)
-    const totalFolders = folders.length
+    const totalFolders = dbFolders.length
     const storageUsedGB = documentFiles.reduce((sum, d) => sum + d.size, 0) / (1024 * 1024 * 1024)
 
     return {
@@ -556,7 +730,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
       totalFolders,
       storageUsedGB: storageUsedGB.toFixed(1),
     }
-  }, [documentFiles])
+  }, [documentFiles, dbFolders])
 
   // Filter documents
   const filteredDocuments = useMemo(() => {
@@ -774,18 +948,12 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
     window.open(`/documents/${doc.id}`, '_blank')
   }
 
-  // Restore version - REAL API CALL
+  // Restore version - REAL SUPABASE OPERATION
   const handleRestoreVersion = async (version: VersionEntry) => {
+    if (!selectedDocument) return
+
     toast.promise(
-      (async () => {
-        const response = await fetch(`/api/documents/${selectedDocument?.id}/versions/${version.id}/restore`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' }
-        })
-        if (!response.ok) throw new Error('Failed to restore version')
-        await refetch()
-        return true
-      })(),
+      handleRestoreVersionAction(selectedDocument.id, version.id),
       {
         loading: `Restoring version ${version.version}...`,
         success: `Restored to version ${version.version}`,
@@ -1085,7 +1253,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                     <p className="text-blue-200 text-sm">Documents</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{folders.length}</p>
+                    <p className="text-3xl font-bold">{dbFolders.length}</p>
                     <p className="text-blue-200 text-sm">Folders</p>
                   </div>
                   <div className="text-center">
@@ -1500,11 +1668,11 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{folders.length}</p>
+                    <p className="text-3xl font-bold">{dbFolders.length}</p>
                     <p className="text-amber-200 text-sm">Folders</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{folders.filter(f => f.shared).length}</p>
+                    <p className="text-3xl font-bold">{dbFolders.filter(f => f.is_shared).length}</p>
                     <p className="text-amber-200 text-sm">Shared</p>
                   </div>
                 </div>
@@ -1565,28 +1733,36 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {folders.map(folder => (
-                <Card key={folder.id} className="hover:shadow-md transition-all cursor-pointer" onClick={() => setSelectedFolder(folder)}>
+              {dbFolders.length === 0 ? (
+                <div className="col-span-full text-center py-12">
+                  <Folder className="h-16 w-16 mx-auto text-gray-300 mb-4" />
+                  <p className="text-gray-500 mb-4">No folders yet</p>
+                  <Button onClick={() => handleCreateDocument('folder')} disabled={mutating}>
+                    <FolderPlus className="h-4 w-4 mr-2" />
+                    Create your first folder
+                  </Button>
+                </div>
+              ) : dbFolders.map(folder => (
+                <Card key={folder.id} className="hover:shadow-md transition-all cursor-pointer" onClick={() => setSelectedFolder({ id: folder.id, name: folder.name, color: folder.color || 'bg-blue-500', parentId: folder.parent_id || undefined, documentCount: folder.document_count, size: folder.total_size, createdAt: new Date(folder.created_at), shared: folder.is_shared, ownerId: folder.user_id, ownerName: '' })}>
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-4">
-                      <div className={`p-3 rounded-xl ${folder.color}`}>
+                      <div className={`p-3 rounded-xl`} style={{ backgroundColor: folder.color || '#3B82F6' }}>
                         <Folder className="h-6 w-6 text-white" />
                       </div>
                       <Button variant="ghost" size="sm" onClick={(e) => {
                         e.stopPropagation()
-                        setSelectedFolder(folder)
                         // Copy folder share link to clipboard
                         const shareLink = `${window.location.origin}/documents/folder/${folder.id}`
                         navigator.clipboard.writeText(shareLink).then(() => {
                           toast.success(`Folder "${folder.name}" selected`, {
-                            description: `${folder.documentCount} items - ${formatBytes(folder.size)}. Share link copied!`,
+                            description: `${folder.document_count} items - ${formatBytes(folder.total_size)}. Share link copied!`,
                             action: {
                               label: 'Open',
                               onClick: () => setActiveTab('folders')
                             }
                           })
                         }).catch(() => {
-                          toast.info(folder.name, { description: `${folder.documentCount} items - ${formatBytes(folder.size)}` })
+                          toast.info(folder.name, { description: `${folder.document_count} items - ${formatBytes(folder.total_size)}` })
                         })
                       }}>
                         <MoreVertical className="h-4 w-4" />
@@ -1594,16 +1770,19 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                     </div>
                     <h3 className="font-semibold text-lg mb-1">{folder.name}</h3>
                     <p className="text-sm text-gray-500 mb-3">
-                      {folder.documentCount} items • {formatBytes(folder.size)}
+                      {folder.document_count} items • {formatBytes(folder.total_size)}
                     </p>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-gray-500">{folder.ownerName}</span>
-                      {folder.shared && <Users className="h-4 w-4 text-gray-400" />}
+                      <span className="text-xs text-gray-500">{folder.description || 'No description'}</span>
+                      {folder.is_shared && <Users className="h-4 w-4 text-gray-400" />}
                     </div>
                   </CardContent>
                 </Card>
               ))}
-              <Card className="border-2 border-dashed hover:border-cyan-500 hover:bg-cyan-50/50 dark:hover:bg-cyan-900/20 transition-all cursor-pointer">
+              <Card
+                className="border-2 border-dashed hover:border-cyan-500 hover:bg-cyan-50/50 dark:hover:bg-cyan-900/20 transition-all cursor-pointer"
+                onClick={() => handleCreateDocument('folder')}
+              >
                 <CardContent className="p-6 flex flex-col items-center justify-center h-full min-h-[180px]">
                   <FolderPlus className="h-10 w-10 text-gray-400 mb-3" />
                   <p className="font-medium text-gray-600">Create New Folder</p>
@@ -2730,19 +2909,35 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-2 py-4">
-              {folders.map(folder => (
+              {/* Option to move to root */}
+              <button
+                onClick={() => documentToAction && handleMoveToFolder(documentToAction, null)}
+                disabled={mutating}
+                className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-left disabled:opacity-50"
+              >
+                <div className="p-2 rounded-lg bg-gray-400">
+                  <Folder className="h-4 w-4 text-white" />
+                </div>
+                <div>
+                  <p className="font-medium">Root (No folder)</p>
+                  <p className="text-xs text-gray-500">Move to top level</p>
+                </div>
+              </button>
+              {dbFolders.length === 0 ? (
+                <p className="text-center text-gray-500 py-4">No folders available. Create a folder first.</p>
+              ) : dbFolders.map(folder => (
                 <button
                   key={folder.id}
                   onClick={() => documentToAction && handleMoveToFolder(documentToAction, folder.id)}
                   disabled={mutating}
                   className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-left disabled:opacity-50"
                 >
-                  <div className={`p-2 rounded-lg ${folder.color}`}>
+                  <div className="p-2 rounded-lg" style={{ backgroundColor: folder.color || '#3B82F6' }}>
                     <Folder className="h-4 w-4 text-white" />
                   </div>
                   <div>
                     <p className="font-medium">{folder.name}</p>
-                    <p className="text-xs text-gray-500">{folder.documentCount} items</p>
+                    <p className="text-xs text-gray-500">{folder.document_count} items</p>
                   </div>
                 </button>
               ))}
@@ -2889,7 +3084,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
               <Button
                 variant="outline"
                 onClick={() => {
-                  setFolderOrder(folders)
+                  setFolderOrder(dbFolders.map(f => ({ id: f.id, name: f.name, color: f.color || 'bg-blue-500', parentId: f.parent_id || undefined, documentCount: f.document_count, size: f.total_size, createdAt: new Date(f.created_at), shared: f.is_shared, ownerId: f.user_id, ownerName: '' })))
                   setShowOrganizeDialog(false)
                 }}
               >
@@ -2908,6 +3103,271 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                 }}
               >
                 Save Order
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Share Document Dialog - Wired to Supabase */}
+        <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Share2 className="h-5 w-5" />
+                Share Document
+              </DialogTitle>
+              <DialogDescription>
+                Share "{documentToAction?.name || selectedDocument?.name}" with others.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              {/* Share by email */}
+              <div className="space-y-2">
+                <Label htmlFor="share-email">Share with email</Label>
+                <Input
+                  id="share-email"
+                  type="email"
+                  placeholder="Enter email address"
+                  value={shareEmail}
+                  onChange={(e) => setShareEmail(e.target.value)}
+                />
+              </div>
+              {/* Permission level */}
+              <div className="space-y-2">
+                <Label>Permission level</Label>
+                <Select value={sharePermission} onValueChange={(v) => setSharePermission(v as PermissionLevel)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="view">Can view</SelectItem>
+                    <SelectItem value="comment">Can comment</SelectItem>
+                    <SelectItem value="edit">Can edit</SelectItem>
+                    <SelectItem value="admin">Full access</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              {/* Create public link option */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Create public link</Label>
+                  <p className="text-xs text-gray-500">Anyone with the link can view</p>
+                </div>
+                <Switch />
+              </div>
+              {/* Current shares */}
+              {documentShares.length > 0 && (
+                <div className="space-y-2">
+                  <Label>Currently shared with</Label>
+                  <div className="space-y-2 max-h-32 overflow-y-auto">
+                    {documentShares.map(share => (
+                      <div key={share.id} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                        <div className="flex items-center gap-2">
+                          <Users className="h-4 w-4 text-gray-400" />
+                          <span className="text-sm">{share.shared_with_email || 'Public link'}</span>
+                          <Badge variant="outline" className="text-xs">{share.permission_level}</Badge>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleRevokeShare(share.id)}
+                          disabled={mutating}
+                        >
+                          <Trash2 className="h-3 w-3 text-red-500" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowShareDialog(false)
+                  setShareEmail('')
+                  setSharePermission('view')
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={async () => {
+                  const docToShare = documentToAction || selectedDocument
+                  if (docToShare) {
+                    await handleShareDocument(docToShare, {
+                      email: shareEmail || undefined,
+                      permissionLevel: sharePermission,
+                      createPublicLink: !shareEmail
+                    })
+                    setShowShareDialog(false)
+                    setShareEmail('')
+                    setSharePermission('view')
+                  }
+                }}
+                disabled={mutating}
+              >
+                {mutating ? 'Sharing...' : 'Share'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Upload New Version Dialog */}
+        <Dialog open={showVersionDialog} onOpenChange={setShowVersionDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Upload className="h-5 w-5" />
+                Upload New Version
+              </DialogTitle>
+              <DialogDescription>
+                Upload a new version of "{selectedDocument?.name}".
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="version-summary">Change summary</Label>
+                <Input
+                  id="version-summary"
+                  placeholder="What changed in this version?"
+                  value={versionChangeSummary}
+                  onChange={(e) => setVersionChangeSummary(e.target.value)}
+                />
+              </div>
+              <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center">
+                <CloudUpload className="h-10 w-10 mx-auto text-gray-400 mb-3" />
+                <p className="text-sm text-gray-500 mb-3">Select the new version file</p>
+                <input
+                  ref={versionFileInputRef}
+                  type="file"
+                  className="hidden"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0]
+                    if (file && selectedDocument) {
+                      await handleUploadVersion(selectedDocument.id, file, versionChangeSummary)
+                      setShowVersionDialog(false)
+                      setVersionChangeSummary('')
+                    }
+                  }}
+                />
+                <Button
+                  variant="outline"
+                  onClick={() => versionFileInputRef.current?.click()}
+                  disabled={mutating}
+                >
+                  {mutating ? 'Uploading...' : 'Select File'}
+                </Button>
+              </div>
+              {/* Version history */}
+              {documentVersions.length > 0 && (
+                <div className="space-y-2">
+                  <Label>Version history</Label>
+                  <ScrollArea className="h-32">
+                    <div className="space-y-2">
+                      {documentVersions.map((version, i) => (
+                        <div key={version.id} className={`p-2 rounded ${i === 0 ? 'bg-cyan-50 dark:bg-cyan-900/20' : 'bg-gray-50 dark:bg-gray-800'}`}>
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <span className="text-sm font-medium">v{version.version_number}</span>
+                              <span className="text-xs text-gray-500 ml-2">{formatBytes(version.file_size)}</span>
+                            </div>
+                            {i > 0 && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => selectedDocument && handleRestoreVersionAction(selectedDocument.id, version.id)}
+                                disabled={mutating}
+                              >
+                                Restore
+                              </Button>
+                            )}
+                          </div>
+                          <p className="text-xs text-gray-500">{version.change_summary}</p>
+                          <p className="text-xs text-gray-400">{new Date(version.created_at).toLocaleDateString()}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </div>
+              )}
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowVersionDialog(false)
+                  setVersionChangeSummary('')
+                }}
+              >
+                Cancel
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Folder Dialog */}
+        <Dialog open={showFolderDialog} onOpenChange={setShowFolderDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FolderPlus className="h-5 w-5" />
+                Create New Folder
+              </DialogTitle>
+              <DialogDescription>
+                Create a new folder to organize your documents.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="folder-name">Folder name</Label>
+                <Input
+                  id="folder-name"
+                  placeholder="Enter folder name"
+                  value={newFolderName}
+                  onChange={(e) => setNewFolderName(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Folder color</Label>
+                <div className="flex gap-2 flex-wrap">
+                  {['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#06B6D4', '#F97316'].map(color => (
+                    <button
+                      key={color}
+                      className={`w-8 h-8 rounded-full ${newFolderColor === color ? 'ring-2 ring-offset-2 ring-gray-900' : ''}`}
+                      style={{ backgroundColor: color }}
+                      onClick={() => setNewFolderColor(color)}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowFolderDialog(false)
+                  setNewFolderName('')
+                  setNewFolderColor('#3B82F6')
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={async () => {
+                  if (newFolderName.trim()) {
+                    await handleCreateFolder(newFolderName, { color: newFolderColor })
+                    setShowFolderDialog(false)
+                    setNewFolderName('')
+                    setNewFolderColor('#3B82F6')
+                  } else {
+                    toast.error('Please enter a folder name')
+                  }
+                }}
+                disabled={mutating || !newFolderName.trim()}
+              >
+                {mutating ? 'Creating...' : 'Create Folder'}
               </Button>
             </DialogFooter>
           </DialogContent>

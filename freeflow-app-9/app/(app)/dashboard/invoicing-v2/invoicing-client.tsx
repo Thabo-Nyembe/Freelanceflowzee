@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { toast } from 'sonner'
 import { useInvoices, type Invoice as DbInvoice } from '@/lib/hooks/use-invoices'
+import { useClients } from '@/lib/hooks/use-clients'
 import { useTeam } from '@/lib/hooks/use-team'
 import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
 import { Loader2 } from 'lucide-react'
@@ -359,9 +360,46 @@ export default function InvoicingClient() {
     refetch: refetchInvoices
   } = useInvoices()
 
+  // ============================================================================
+  // CLIENTS DATA HOOK
+  // ============================================================================
+  const {
+    clients: dbClients,
+    isLoading: clientsLoading,
+    addClient: addDbClient,
+    updateClient: updateDbClient,
+    deleteClient: deleteDbClient,
+    fetchClients: refetchClients
+  } = useClients()
+
+  // Transform db clients to UI format
+  const clients: Client[] = useMemo(() => {
+    if (!dbClients || dbClients.length === 0) return []
+    return dbClients.map((dbClient): Client => ({
+      id: dbClient.id,
+      name: dbClient.name,
+      email: dbClient.email,
+      phone: dbClient.phone || '',
+      company: dbClient.company || '',
+      address: dbClient.address || '',
+      city: dbClient.city || '',
+      state: dbClient.state || '',
+      zip: dbClient.postal_code || '',
+      country: dbClient.country || '',
+      website: dbClient.website || undefined,
+      taxId: undefined,
+      paymentTerms: 30,
+      creditLimit: 0,
+      balance: 0,
+      totalPaid: dbClient.total_revenue || 0,
+      invoiceCount: dbClient.projects_count || 0,
+      lastInvoiceDate: dbClient.last_contact || undefined,
+      createdAt: dbClient.created_at,
+    }))
+  }, [dbClients])
+
   const [activeTab, setActiveTab] = useState('invoices')
   const [settingsTab, setSettingsTab] = useState('general')
-  const [clients, setClients] = useState<Client[]>([])
   const [expenses, setExpenses] = useState<Expense[]>([])
   const [report, setReport] = useState<Report>({
     period: '',
@@ -2540,7 +2578,7 @@ export default function InvoicingClient() {
 
       {/* Record Payment Dialog */}
       <Dialog open={showRecordPaymentDialog} onOpenChange={setShowRecordPaymentDialog}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg" id="record-payment-dialog">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <DollarSign className="w-5 h-5 text-green-600" />
@@ -2588,9 +2626,55 @@ export default function InvoicingClient() {
             </div>
             <div className="flex justify-end gap-3 pt-4 border-t">
               <Button variant="outline" onClick={() => setShowRecordPaymentDialog(false)}>Cancel</Button>
-              <Button className="bg-green-600 hover:bg-green-700" onClick={() => {
-                toast.success('Payment recorded successfully!')
-                setShowRecordPaymentDialog(false)
+              <Button className="bg-green-600 hover:bg-green-700" onClick={async () => {
+                // Get form values from the dialog
+                const selectElement = document.querySelector('#record-payment-dialog select') as HTMLSelectElement
+                const amountInput = document.querySelector('#record-payment-dialog input[type="number"]') as HTMLInputElement
+                const methodSelect = document.querySelectorAll('#record-payment-dialog select')[1] as HTMLSelectElement
+                const dateInput = document.querySelector('#record-payment-dialog input[type="date"]') as HTMLInputElement
+                const referenceInput = document.querySelectorAll('#record-payment-dialog input')[1] as HTMLInputElement
+
+                const invoiceId = selectElement?.value
+                const amount = parseFloat(amountInput?.value || '0')
+                const paymentMethod = methodSelect?.value || 'credit_card'
+                const paymentDate = dateInput?.value || new Date().toISOString().split('T')[0]
+                const reference = referenceInput?.value || ''
+
+                if (!invoiceId) {
+                  toast.error('Please select an invoice')
+                  return
+                }
+                if (amount <= 0) {
+                  toast.error('Please enter a valid amount')
+                  return
+                }
+
+                try {
+                  const response = await fetch('/api/invoices', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      action: 'add-payment',
+                      invoiceId,
+                      amount,
+                      paymentMethod,
+                      paymentDate,
+                      paymentReference: reference
+                    })
+                  })
+
+                  const result = await response.json()
+                  if (result.success) {
+                    toast.success(result.message || 'Payment recorded successfully!')
+                    refetchInvoices()
+                    setShowRecordPaymentDialog(false)
+                  } else {
+                    toast.error(result.error || 'Failed to record payment')
+                  }
+                } catch (error) {
+                  console.error('Payment recording error:', error)
+                  toast.error('Failed to record payment')
+                }
               }}>
                 <CheckCircle2 className="w-4 h-4 mr-2" />
                 Record Payment
@@ -2645,9 +2729,39 @@ export default function InvoicingClient() {
             </div>
             <div className="flex justify-end gap-3 pt-4 border-t">
               <Button variant="outline" onClick={() => setShowSendRemindersDialog(false)}>Cancel</Button>
-              <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
-                const overdueCount = invoices.filter(inv => inv.status === 'overdue').length
-                toast.success(`${overdueCount} payment reminders sent successfully!`)
+              <Button className="bg-purple-600 hover:bg-purple-700" onClick={async () => {
+                const overdueInvoices = invoices.filter(inv => inv.status === 'overdue' || inv.status === 'sent')
+                let successCount = 0
+                let failCount = 0
+
+                for (const inv of overdueInvoices) {
+                  try {
+                    const response = await fetch('/api/invoices', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        action: 'send-reminder',
+                        invoiceId: inv.id
+                      })
+                    })
+                    const result = await response.json()
+                    if (result.success) {
+                      successCount++
+                    } else {
+                      failCount++
+                    }
+                  } catch (error) {
+                    failCount++
+                  }
+                }
+
+                if (successCount > 0) {
+                  toast.success(`${successCount} payment reminders sent successfully!`)
+                  refetchInvoices()
+                }
+                if (failCount > 0) {
+                  toast.error(`Failed to send ${failCount} reminders`)
+                }
                 setShowSendRemindersDialog(false)
               }}>
                 <Send className="w-4 h-4 mr-2" />
@@ -2725,6 +2839,42 @@ export default function InvoicingClient() {
             <div className="flex justify-end gap-3 pt-4 border-t">
               <Button variant="outline" onClick={() => setShowExportReportDialog(false)}>Cancel</Button>
               <Button className="bg-teal-600 hover:bg-teal-700" onClick={() => {
+                // Generate A/R Report as JSON export
+                const reportData = {
+                  generatedAt: new Date().toISOString(),
+                  period: {
+                    from: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                    to: new Date().toISOString().split('T')[0]
+                  },
+                  summary: {
+                    totalInvoiced: stats.totalInvoiced,
+                    totalPaid: stats.totalPaid,
+                    totalPending: stats.totalPending,
+                    totalOverdue: stats.totalOverdue,
+                    collectionRate: stats.collectionRate
+                  },
+                  invoices: filteredInvoices.map(inv => ({
+                    number: inv.invoiceNumber,
+                    client: inv.client.name,
+                    status: inv.status,
+                    total: inv.total,
+                    paid: inv.amountPaid,
+                    due: inv.amountDue,
+                    issueDate: inv.issueDate,
+                    dueDate: inv.dueDate
+                  }))
+                }
+
+                const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' })
+                const url = URL.createObjectURL(blob)
+                const link = document.createElement('a')
+                link.href = url
+                link.download = `ar_report_${new Date().toISOString().split('T')[0]}.json`
+                document.body.appendChild(link)
+                link.click()
+                document.body.removeChild(link)
+                URL.revokeObjectURL(url)
+
                 toast.success('Report exported successfully!')
                 setShowExportReportDialog(false)
               }}>
@@ -2755,8 +2905,40 @@ export default function InvoicingClient() {
             </div>
             <div className="flex justify-end gap-3 pt-4 border-t">
               <Button variant="outline" onClick={() => setShowSendAllDialog(false)}>Cancel</Button>
-              <Button className="bg-indigo-600 hover:bg-indigo-700" onClick={() => {
-                toast.success('All pending invoices sent successfully!')
+              <Button className="bg-indigo-600 hover:bg-indigo-700" onClick={async () => {
+                const pendingInvoices = invoices.filter(inv => inv.status === 'pending' || inv.status === 'draft')
+                let successCount = 0
+                let failCount = 0
+
+                for (const inv of pendingInvoices) {
+                  try {
+                    const response = await fetch('/api/invoices', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        action: 'send',
+                        invoiceId: inv.id,
+                        email: inv.client.email
+                      })
+                    })
+                    const result = await response.json()
+                    if (result.success) {
+                      successCount++
+                    } else {
+                      failCount++
+                    }
+                  } catch (error) {
+                    failCount++
+                  }
+                }
+
+                if (successCount > 0) {
+                  toast.success(`${successCount} invoices sent successfully!`)
+                  refetchInvoices()
+                }
+                if (failCount > 0) {
+                  toast.error(`Failed to send ${failCount} invoices`)
+                }
                 setShowSendAllDialog(false)
               }}>
                 <Send className="w-4 h-4 mr-2" />
@@ -2793,9 +2975,19 @@ export default function InvoicingClient() {
             </div>
             <div className="flex justify-end gap-3 pt-4 border-t">
               <Button variant="outline" onClick={() => setShowRecurringDialog(false)}>Close</Button>
-              <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
-                toast.success('Creating new recurring invoice...')
-                setShowRecurringDialog(false)
+              <Button className="bg-purple-600 hover:bg-purple-700" onClick={async () => {
+                // Create a new recurring invoice template
+                const result = await createInvoice({
+                  invoiceNumber: `REC-${new Date().getFullYear()}-${String(invoices.filter(i => i.type === 'recurring').length + 1).padStart(3, '0')}`,
+                  status: 'draft',
+                  subtotal: 0,
+                  total: 0,
+                  currency: 'USD',
+                })
+                if (result) {
+                  toast.success('Recurring invoice template created!')
+                  setShowRecurringDialog(false)
+                }
               }}>
                 <Plus className="w-4 h-4 mr-2" />
                 New Recurring
@@ -2831,9 +3023,19 @@ export default function InvoicingClient() {
             </div>
             <div className="flex justify-end gap-3 pt-4 border-t">
               <Button variant="outline" onClick={() => setShowEstimatesDialog(false)}>Close</Button>
-              <Button className="bg-green-600 hover:bg-green-700" onClick={() => {
-                toast.success('Creating new estimate...')
-                setShowEstimatesDialog(false)
+              <Button className="bg-green-600 hover:bg-green-700" onClick={async () => {
+                // Create a new estimate
+                const result = await createInvoice({
+                  invoiceNumber: `EST-${new Date().getFullYear()}-${String(invoices.filter(i => i.type === 'estimate').length + 1).padStart(3, '0')}`,
+                  status: 'draft',
+                  subtotal: 0,
+                  total: 0,
+                  currency: 'USD',
+                })
+                if (result) {
+                  toast.success('Estimate created!')
+                  setShowEstimatesDialog(false)
+                }
               }}>
                 <Plus className="w-4 h-4 mr-2" />
                 New Estimate
@@ -2901,8 +3103,29 @@ export default function InvoicingClient() {
             </div>
             <div className="flex justify-end gap-3 pt-4 border-t">
               <Button variant="outline" onClick={() => setShowOverdueDialog(false)}>Close</Button>
-              <Button className="bg-red-600 hover:bg-red-700" onClick={() => {
-                toast.success('Sending reminders to overdue clients...')
+              <Button className="bg-red-600 hover:bg-red-700" onClick={async () => {
+                const overdueInvoices = invoices.filter(inv => inv.status === 'overdue')
+                let successCount = 0
+
+                for (const inv of overdueInvoices) {
+                  try {
+                    const response = await fetch('/api/invoices', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        action: 'send-reminder',
+                        invoiceId: inv.id
+                      })
+                    })
+                    const result = await response.json()
+                    if (result.success) successCount++
+                  } catch (error) {
+                    console.error('Reminder error:', error)
+                  }
+                }
+
+                toast.success(`Sent ${successCount} reminders to overdue clients`)
+                refetchInvoices()
                 setShowOverdueDialog(false)
               }}>
                 <Send className="w-4 h-4 mr-2" />
@@ -2915,7 +3138,7 @@ export default function InvoicingClient() {
 
       {/* Export Invoices Dialog */}
       <Dialog open={showExportInvoicesDialog} onOpenChange={setShowExportInvoicesDialog}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg" id="export-invoices-dialog">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Download className="w-5 h-5 text-teal-600" />
@@ -2944,7 +3167,10 @@ export default function InvoicingClient() {
             <div className="flex justify-end gap-3 pt-4 border-t">
               <Button variant="outline" onClick={() => setShowExportInvoicesDialog(false)}>Cancel</Button>
               <Button className="bg-teal-600 hover:bg-teal-700" onClick={() => {
-                toast.success('Exporting invoices...')
+                // Get the selected format from the dialog
+                const formatSelect = document.querySelector('#export-invoices-dialog select') as HTMLSelectElement
+                const format = formatSelect?.value === 'csv' ? 'csv' : formatSelect?.value === 'xlsx' ? 'csv' : 'json'
+                handleExportInvoices(format as 'csv' | 'json')
                 setShowExportInvoicesDialog(false)
               }}>
                 <Download className="w-4 h-4 mr-2" />
@@ -2991,7 +3217,7 @@ export default function InvoicingClient() {
 
       {/* Add Client Dialog */}
       <Dialog open={showAddClientDialog} onOpenChange={setShowAddClientDialog}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg" id="add-client-dialog">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Plus className="w-5 h-5 text-green-600" />
@@ -3002,26 +3228,62 @@ export default function InvoicingClient() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label>Client Name</Label>
-                <Input placeholder="Full name" className="mt-1" />
+                <Input id="add-client-name" placeholder="Full name" className="mt-1" />
               </div>
               <div>
                 <Label>Company</Label>
-                <Input placeholder="Company name" className="mt-1" />
+                <Input id="add-client-company" placeholder="Company name" className="mt-1" />
               </div>
             </div>
             <div>
               <Label>Email</Label>
-              <Input type="email" placeholder="email@example.com" className="mt-1" />
+              <Input id="add-client-email" type="email" placeholder="email@example.com" className="mt-1" />
             </div>
             <div>
               <Label>Phone</Label>
-              <Input placeholder="+1 (555) 000-0000" className="mt-1" />
+              <Input id="add-client-phone" placeholder="+1 (555) 000-0000" className="mt-1" />
             </div>
             <div className="flex justify-end gap-3 pt-4 border-t">
               <Button variant="outline" onClick={() => setShowAddClientDialog(false)}>Cancel</Button>
-              <Button className="bg-green-600 hover:bg-green-700" onClick={() => {
-                toast.success('Client added successfully!')
-                setShowAddClientDialog(false)
+              <Button className="bg-green-600 hover:bg-green-700" onClick={async () => {
+                const nameInput = document.getElementById('add-client-name') as HTMLInputElement
+                const companyInput = document.getElementById('add-client-company') as HTMLInputElement
+                const emailInput = document.getElementById('add-client-email') as HTMLInputElement
+                const phoneInput = document.getElementById('add-client-phone') as HTMLInputElement
+
+                const name = nameInput?.value?.trim()
+                const company = companyInput?.value?.trim()
+                const email = emailInput?.value?.trim()
+                const phone = phoneInput?.value?.trim()
+
+                if (!name) {
+                  toast.error('Please enter a client name')
+                  return
+                }
+                if (!email) {
+                  toast.error('Please enter an email address')
+                  return
+                }
+
+                try {
+                  await addDbClient({
+                    name,
+                    company: company || null,
+                    email,
+                    phone: phone || null,
+                    status: 'active',
+                    type: 'individual',
+                    priority: 'medium',
+                  })
+                  setShowAddClientDialog(false)
+                  // Clear form inputs
+                  if (nameInput) nameInput.value = ''
+                  if (companyInput) companyInput.value = ''
+                  if (emailInput) emailInput.value = ''
+                  if (phoneInput) phoneInput.value = ''
+                } catch (error) {
+                  console.error('Failed to add client:', error)
+                }
               }}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Client
@@ -4209,8 +4471,26 @@ export default function InvoicingClient() {
             </div>
             <div className="flex justify-end gap-3 pt-4 border-t">
               <Button variant="outline" onClick={() => setShowDeleteDraftsDialog(false)}>Cancel</Button>
-              <Button variant="destructive" onClick={() => {
-                toast.success('Draft invoices deleted!')
+              <Button variant="destructive" onClick={async () => {
+                const draftInvoices = invoices.filter(inv => inv.status === 'draft')
+                let successCount = 0
+                let failCount = 0
+
+                for (const inv of draftInvoices) {
+                  const success = await deleteInvoice(inv.id)
+                  if (success) {
+                    successCount++
+                  } else {
+                    failCount++
+                  }
+                }
+
+                if (successCount > 0) {
+                  toast.success(`${successCount} draft invoices deleted!`)
+                }
+                if (failCount > 0) {
+                  toast.error(`Failed to delete ${failCount} invoices`)
+                }
                 setShowDeleteDraftsDialog(false)
               }}>
                 Delete All Drafts
@@ -4249,7 +4529,7 @@ export default function InvoicingClient() {
 
       {/* Edit Invoice Dialog */}
       <Dialog open={showEditInvoiceDialog} onOpenChange={setShowEditInvoiceDialog}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl" id="edit-invoice-dialog">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Edit className="w-5 h-5 text-blue-600" />
@@ -4260,7 +4540,7 @@ export default function InvoicingClient() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label>Client</Label>
-                <select className="w-full mt-1 px-3 py-2 border rounded-lg" defaultValue={selectedInvoice?.client.id}>
+                <select id="edit-invoice-client" className="w-full mt-1 px-3 py-2 border rounded-lg" defaultValue={selectedInvoice?.client.id}>
                   {clients.map(client => (
                     <option key={client.id} value={client.id}>{client.name}</option>
                   ))}
@@ -4268,7 +4548,7 @@ export default function InvoicingClient() {
               </div>
               <div>
                 <Label>Status</Label>
-                <select className="w-full mt-1 px-3 py-2 border rounded-lg" defaultValue={selectedInvoice?.status}>
+                <select id="edit-invoice-status" className="w-full mt-1 px-3 py-2 border rounded-lg" defaultValue={selectedInvoice?.status}>
                   <option value="draft">Draft</option>
                   <option value="pending">Pending</option>
                   <option value="sent">Sent</option>
@@ -4278,21 +4558,42 @@ export default function InvoicingClient() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label>Issue Date</Label>
-                <Input type="date" defaultValue={selectedInvoice?.issueDate} className="mt-1" />
+                <Input id="edit-invoice-issue-date" type="date" defaultValue={selectedInvoice?.issueDate} className="mt-1" />
               </div>
               <div>
                 <Label>Due Date</Label>
-                <Input type="date" defaultValue={selectedInvoice?.dueDate} className="mt-1" />
+                <Input id="edit-invoice-due-date" type="date" defaultValue={selectedInvoice?.dueDate} className="mt-1" />
               </div>
             </div>
             <div className="flex justify-end gap-3 pt-4 border-t">
               <Button variant="outline" onClick={() => setShowEditInvoiceDialog(false)}>Cancel</Button>
               <Button className="bg-blue-600 hover:bg-blue-700" onClick={async () => {
                 if (selectedInvoice) {
-                  const success = await updateInvoice(selectedInvoice.id, {
-                    // Updates will be handled by form state in a full implementation
-                    // For now, just close the dialog and show success
-                  })
+                  // Get form values
+                  const clientSelect = document.getElementById('edit-invoice-client') as HTMLSelectElement
+                  const statusSelect = document.getElementById('edit-invoice-status') as HTMLSelectElement
+                  const issueDateInput = document.getElementById('edit-invoice-issue-date') as HTMLInputElement
+                  const dueDateInput = document.getElementById('edit-invoice-due-date') as HTMLInputElement
+
+                  const selectedClientId = clientSelect?.value
+                  const selectedClientData = clients.find(c => c.id === selectedClientId)
+
+                  const updates: Partial<Invoice> = {
+                    status: statusSelect?.value as InvoiceStatus,
+                    issueDate: issueDateInput?.value,
+                    dueDate: dueDateInput?.value,
+                  }
+
+                  if (selectedClientData) {
+                    updates.client = {
+                      id: selectedClientData.id,
+                      name: selectedClientData.name,
+                      email: selectedClientData.email,
+                      company: selectedClientData.company,
+                    }
+                  }
+
+                  const success = await updateInvoice(selectedInvoice.id, updates)
                   if (success) {
                     toast.success('Invoice updated successfully!')
                   }
@@ -4347,7 +4648,7 @@ export default function InvoicingClient() {
 
       {/* Edit Client Dialog */}
       <Dialog open={showEditClientDialog} onOpenChange={setShowEditClientDialog}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg" id="edit-client-dialog">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Edit className="w-5 h-5 text-emerald-600" />
@@ -4358,26 +4659,55 @@ export default function InvoicingClient() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>
                 <Label>Name</Label>
-                <Input defaultValue={selectedClient?.name} className="mt-1" />
+                <Input id="edit-client-name" defaultValue={selectedClient?.name} className="mt-1" />
               </div>
               <div>
                 <Label>Company</Label>
-                <Input defaultValue={selectedClient?.company} className="mt-1" />
+                <Input id="edit-client-company" defaultValue={selectedClient?.company} className="mt-1" />
               </div>
             </div>
             <div>
               <Label>Email</Label>
-              <Input defaultValue={selectedClient?.email} className="mt-1" />
+              <Input id="edit-client-email" defaultValue={selectedClient?.email} className="mt-1" />
             </div>
             <div>
               <Label>Phone</Label>
-              <Input defaultValue={selectedClient?.phone} className="mt-1" />
+              <Input id="edit-client-phone" defaultValue={selectedClient?.phone} className="mt-1" />
             </div>
             <div className="flex justify-end gap-3 pt-4 border-t">
               <Button variant="outline" onClick={() => setShowEditClientDialog(false)}>Cancel</Button>
-              <Button className="bg-emerald-600 hover:bg-emerald-700" onClick={() => {
-                toast.success('Client updated successfully!')
-                setShowEditClientDialog(false)
+              <Button className="bg-emerald-600 hover:bg-emerald-700" onClick={async () => {
+                if (!selectedClient) {
+                  toast.error('No client selected')
+                  return
+                }
+
+                const nameInput = document.getElementById('edit-client-name') as HTMLInputElement
+                const companyInput = document.getElementById('edit-client-company') as HTMLInputElement
+                const emailInput = document.getElementById('edit-client-email') as HTMLInputElement
+                const phoneInput = document.getElementById('edit-client-phone') as HTMLInputElement
+
+                const name = nameInput?.value?.trim()
+                const company = companyInput?.value?.trim()
+                const email = emailInput?.value?.trim()
+                const phone = phoneInput?.value?.trim()
+
+                if (!name) {
+                  toast.error('Please enter a client name')
+                  return
+                }
+
+                try {
+                  await updateDbClient(selectedClient.id, {
+                    name,
+                    company: company || null,
+                    email: email || selectedClient.email,
+                    phone: phone || null,
+                  })
+                  setShowEditClientDialog(false)
+                } catch (error) {
+                  console.error('Failed to update client:', error)
+                }
               }}>
                 Save Changes
               </Button>
@@ -4454,9 +4784,30 @@ export default function InvoicingClient() {
             </div>
             <div className="flex justify-end gap-3 pt-4 border-t">
               <Button variant="outline" onClick={() => setShowCreateClientInvoiceDialog(false)}>Cancel</Button>
-              <Button className="bg-emerald-600 hover:bg-emerald-700" onClick={() => {
-                toast.success(`Invoice created for ${selectedClient?.name}!`)
-                setShowCreateClientInvoiceDialog(false)
+              <Button className="bg-emerald-600 hover:bg-emerald-700" onClick={async () => {
+                if (!selectedClient) {
+                  toast.error('No client selected')
+                  return
+                }
+
+                const result = await createInvoice({
+                  invoiceNumber: `INV-${new Date().getFullYear()}-${String(invoices.length + 1).padStart(3, '0')}`,
+                  client: {
+                    id: selectedClient.id,
+                    name: selectedClient.name,
+                    email: selectedClient.email,
+                    company: selectedClient.company,
+                  },
+                  status: 'draft',
+                  subtotal: 0,
+                  total: 0,
+                  currency: 'USD',
+                })
+
+                if (result) {
+                  toast.success(`Invoice created for ${selectedClient.name}!`)
+                  setShowCreateClientInvoiceDialog(false)
+                }
               }}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Invoice

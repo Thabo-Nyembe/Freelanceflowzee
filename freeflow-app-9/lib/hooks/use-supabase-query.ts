@@ -1,20 +1,91 @@
 // Base hook for Supabase queries with real-time subscriptions
 // Created: December 14, 2024
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { SupabaseClient } from '@supabase/supabase-js'
 
-interface UseSupabaseQueryOptions<T> {
+// TanStack Query-style interface for custom query functions
+interface UseSupabaseQueryWithFnOptions<T> {
+  initialData?: T
+  enabled?: boolean
+}
+
+type QueryFn<T> = (supabase: SupabaseClient) => Promise<T>
+
+// Object-style options interface
+interface UseSupabaseQueryOptionsObject<T> {
   table: string
   select?: string
   filters?: Record<string, unknown>
   orderBy?: { column: string; ascending?: boolean }
   limit?: number
   realtime?: boolean
-  softDelete?: boolean // Set to false for tables without deleted_at column
+  softDelete?: boolean
 }
 
-export function useSupabaseQuery<T>({
+// Overload for TanStack Query-style usage (queryKey, queryFn, options)
+export function useSupabaseQuery<T>(
+  queryKey: string[],
+  queryFn: QueryFn<T>,
+  options?: UseSupabaseQueryWithFnOptions<T>
+): { data: T | null; isLoading: boolean; error: Error | null; refetch: () => Promise<void> }
+
+// Overload for object-style usage ({ table, select, ... })
+export function useSupabaseQuery<T>(
+  options: UseSupabaseQueryOptionsObject<T>
+): { data: T[]; loading: boolean; error: Error | null; refetch: () => Promise<void> }
+
+// Implementation that handles both overloads
+export function useSupabaseQuery<T>(
+  queryKeyOrOptions: string[] | UseSupabaseQueryOptionsObject<T>,
+  queryFn?: QueryFn<T>,
+  fnOptions?: UseSupabaseQueryWithFnOptions<T>
+): { data: T | T[] | null; isLoading?: boolean; loading?: boolean; error: Error | null; refetch: () => Promise<void> } {
+  // If first argument is an array, use TanStack Query-style
+  if (Array.isArray(queryKeyOrOptions)) {
+    return useSupabaseQueryWithFn<T>(queryKeyOrOptions, queryFn!, fnOptions)
+  }
+  // Otherwise use object-style
+  return useSupabaseQueryWithOptions<T>(queryKeyOrOptions)
+}
+
+// TanStack Query-style implementation
+function useSupabaseQueryWithFn<T>(
+  queryKey: string[],
+  queryFn: QueryFn<T>,
+  options?: UseSupabaseQueryWithFnOptions<T>
+): { data: T | null; isLoading: boolean; error: Error | null; refetch: () => Promise<void> } {
+  const [data, setData] = useState<T | null>(options?.initialData ?? null)
+  const [isLoading, setIsLoading] = useState(options?.enabled !== false)
+  const [error, setError] = useState<Error | null>(null)
+  const supabase = createClient()
+
+  const fetchData = useCallback(async () => {
+    if (options?.enabled === false) return
+
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      const result = await queryFn(supabase)
+      setData(result)
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Unknown error'))
+    } finally {
+      setIsLoading(false)
+    }
+  }, [queryFn, supabase, options?.enabled])
+
+  useEffect(() => {
+    fetchData()
+  }, [JSON.stringify(queryKey)])
+
+  return { data, isLoading, error, refetch: fetchData }
+}
+
+// Object-style implementation (original behavior)
+function useSupabaseQueryWithOptions<T>({
   table,
   select = '*',
   filters = {},
@@ -22,7 +93,7 @@ export function useSupabaseQuery<T>({
   limit,
   realtime = true,
   softDelete = false // Default to false since most tables don't have deleted_at column
-}: UseSupabaseQueryOptions<T>) {
+}: UseSupabaseQueryOptionsObject<T>) {
   const [data, setData] = useState<T[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
@@ -137,22 +208,99 @@ export function useSupabaseQuery<T>({
 }
 
 // Mutation hook for create/update/delete operations
-interface UseSupabaseMutationOptions {
+
+// Object-style options interface for mutations
+interface UseSupabaseMutationOptionsObject {
   table: string
   onSuccess?: () => void
   onError?: (error: Error) => void
 }
 
-export function useSupabaseMutation<T = unknown>({
+// Function-style options interface for mutations
+interface UseSupabaseMutationWithFnOptions {
+  invalidateKeys?: string[][]
+  onSuccess?: () => void
+  onError?: (error: Error) => void
+}
+
+type MutationFn<TInput, TOutput> = (supabase: SupabaseClient, data: TInput) => Promise<TOutput>
+
+// Overload for function-style usage (mutationFn, options)
+export function useSupabaseMutation<TInput, TOutput>(
+  mutationFn: MutationFn<TInput, TOutput>,
+  options?: UseSupabaseMutationWithFnOptions
+): { mutate: (data: TInput) => Promise<TOutput | null>; isPending: boolean; error: Error | null }
+
+// Overload for object-style usage ({ table, ... })
+export function useSupabaseMutation<T = unknown>(
+  options: UseSupabaseMutationOptionsObject
+): { mutate: (data: Partial<T>, id?: string) => Promise<T | null>; remove: (id: string) => Promise<boolean>; loading: boolean; error: Error | null }
+
+// Implementation that handles both overloads
+export function useSupabaseMutation<TInput = unknown, TOutput = unknown>(
+  mutationFnOrOptions: MutationFn<TInput, TOutput> | UseSupabaseMutationOptionsObject,
+  fnOptions?: UseSupabaseMutationWithFnOptions
+): {
+  mutate: ((data: TInput) => Promise<TOutput | null>) | ((data: Partial<TInput>, id?: string) => Promise<TInput | null>)
+  remove?: (id: string) => Promise<boolean>
+  isPending?: boolean
+  loading?: boolean
+  error: Error | null
+} {
+  // If first argument is a function, use function-style
+  if (typeof mutationFnOrOptions === 'function') {
+    return useSupabaseMutationWithFn<TInput, TOutput>(mutationFnOrOptions, fnOptions)
+  }
+  // Otherwise use object-style
+  return useSupabaseMutationWithOptions<TInput>(mutationFnOrOptions) as any
+}
+
+// Function-style mutation implementation
+function useSupabaseMutationWithFn<TInput, TOutput>(
+  mutationFn: MutationFn<TInput, TOutput>,
+  options?: UseSupabaseMutationWithFnOptions
+): { mutate: (data: TInput) => Promise<TOutput | null>; isPending: boolean; error: Error | null } {
+  const [isPending, setIsPending] = useState(false)
+  const [error, setError] = useState<Error | null>(null)
+  const supabase = createClient()
+
+  const mutate = useCallback(async (data: TInput): Promise<TOutput | null> => {
+    setIsPending(true)
+    setError(null)
+
+    try {
+      const result = await mutationFn(supabase, data)
+      options?.onSuccess?.()
+      return result
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Unknown error')
+      setError(error)
+      options?.onError?.(error)
+      return null
+    } finally {
+      setIsPending(false)
+    }
+  }, [mutationFn, supabase, options])
+
+  return { mutate, isPending, error }
+}
+
+// Object-style mutation implementation (original behavior)
+function useSupabaseMutationWithOptions<T>({
   table,
   onSuccess,
   onError
-}: UseSupabaseMutationOptions) {
+}: UseSupabaseMutationOptionsObject): {
+  mutate: (data: Partial<T>, id?: string) => Promise<T | null>
+  remove: (id: string) => Promise<boolean>
+  loading: boolean
+  error: Error | null
+} {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<Error | null>(null)
   const supabase = createClient()
 
-  const mutate = async (data: Partial<T>, id?: string): Promise<T | null> => {
+  const mutate = useCallback(async (data: Partial<T>, id?: string): Promise<T | null> => {
     setLoading(true)
     setError(null)
 
@@ -195,9 +343,9 @@ export function useSupabaseMutation<T = unknown>({
     } finally {
       setLoading(false)
     }
-  }
+  }, [supabase, table, onSuccess, onError])
 
-  const remove = async (id: string): Promise<boolean> => {
+  const remove = useCallback(async (id: string): Promise<boolean> => {
     setLoading(true)
     setError(null)
 
@@ -224,7 +372,7 @@ export function useSupabaseMutation<T = unknown>({
     } finally {
       setLoading(false)
     }
-  }
+  }, [supabase, table, onSuccess, onError])
 
   return { mutate, remove, loading, error }
 }

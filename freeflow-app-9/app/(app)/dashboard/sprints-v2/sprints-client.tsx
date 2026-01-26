@@ -257,9 +257,11 @@ export default function SprintsClient() {
 
   // Dialog states for real operations
   const [showCreateSprintDialog, setShowCreateSprintDialog] = useState(false)
+  const [showEditSprintDialog, setShowEditSprintDialog] = useState(false)
   const [showCreateTaskDialog, setShowCreateTaskDialog] = useState(false)
   const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] = useState(false)
   const [sprintToDelete, setSprintToDelete] = useState<string | null>(null)
+  const [sprintToEdit, setSprintToEdit] = useState<string | null>(null)
   const [selectedSprintForTask, setSelectedSprintForTask] = useState<string | null>(null)
 
   // Form states for creating sprint
@@ -269,6 +271,14 @@ export default function SprintsClient() {
   const [newSprintStartDate, setNewSprintStartDate] = useState('')
   const [newSprintEndDate, setNewSprintEndDate] = useState('')
   const [newSprintCapacity, setNewSprintCapacity] = useState('80')
+
+  // Form states for editing sprint
+  const [editSprintName, setEditSprintName] = useState('')
+  const [editSprintGoal, setEditSprintGoal] = useState('')
+  const [editSprintTeamName, setEditSprintTeamName] = useState('')
+  const [editSprintStartDate, setEditSprintStartDate] = useState('')
+  const [editSprintEndDate, setEditSprintEndDate] = useState('')
+  const [editSprintCapacity, setEditSprintCapacity] = useState('80')
 
   // Form states for creating task
   const [newTaskTitle, setNewTaskTitle] = useState('')
@@ -566,6 +576,61 @@ export default function SprintsClient() {
       refetchSprints()
     } catch (error) {
       toast.error('Failed to Delete Sprint', {
+        description: error instanceof Error ? error.message : 'An error occurred'
+      })
+    }
+  }
+
+  // Edit Sprint - opens dialog with pre-filled data
+  const handleEditSprintClick = (sprintId: string) => {
+    const sprint = dbSprints.find(s => s.id === sprintId)
+    if (sprint) {
+      setSprintToEdit(sprintId)
+      setEditSprintName(sprint.name)
+      setEditSprintGoal(sprint.goal || '')
+      setEditSprintTeamName(sprint.team_name || '')
+      setEditSprintStartDate(sprint.start_date || '')
+      setEditSprintEndDate(sprint.end_date || '')
+      setEditSprintCapacity(String(sprint.capacity || 80))
+      setShowEditSprintDialog(true)
+    }
+  }
+
+  // Update Sprint - real Supabase operation
+  const handleUpdateSprint = async () => {
+    if (!sprintToEdit) return
+
+    if (!editSprintName.trim()) {
+      toast.error('Validation Error', {
+        description: 'Sprint name is required'
+      })
+      return
+    }
+
+    try {
+      await updateSprint({
+        id: sprintToEdit,
+        updates: {
+          name: editSprintName,
+          goal: editSprintGoal || null,
+          team_name: editSprintTeamName || null,
+          start_date: editSprintStartDate || null,
+          end_date: editSprintEndDate || null,
+          capacity: parseInt(editSprintCapacity) || 80,
+          days_remaining: editSprintEndDate
+            ? Math.ceil((new Date(editSprintEndDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
+            : undefined,
+        }
+      })
+
+      toast.success('Sprint Updated', {
+        description: `"${editSprintName}" has been updated successfully`
+      })
+      setShowEditSprintDialog(false)
+      setSprintToEdit(null)
+      refetchSprints()
+    } catch (error) {
+      toast.error('Failed to Update Sprint', {
         description: error instanceof Error ? error.message : 'An error occurred'
       })
     }
@@ -1139,6 +1204,18 @@ export default function SprintsClient() {
                       </Button>
                       <Button
                         size="sm"
+                        variant="outline"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleEditSprintClick(sprint.id)
+                        }}
+                        disabled={isUpdatingSprint}
+                      >
+                        <Settings className="w-4 h-4 mr-1" />
+                        Edit
+                      </Button>
+                      <Button
+                        size="sm"
                         variant="destructive"
                         onClick={(e) => {
                           e.stopPropagation()
@@ -1290,6 +1367,18 @@ export default function SprintsClient() {
                         >
                           <Plus className="w-4 h-4 mr-1" />
                           Add Task
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleEditSprintClick(sprint.id)
+                          }}
+                          disabled={isUpdatingSprint}
+                        >
+                          <Settings className="w-4 h-4 mr-1" />
+                          Edit
                         </Button>
                         <Button
                           size="sm"
@@ -2773,6 +2862,110 @@ export default function SprintsClient() {
                   <>
                     <Trash2 className="w-4 h-4 mr-2" />
                     Delete Sprint
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* ============================================================================ */}
+        {/* EDIT SPRINT DIALOG - Real Supabase Operation */}
+        {/* ============================================================================ */}
+        <Dialog open={showEditSprintDialog} onOpenChange={setShowEditSprintDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center">
+                  <Settings className="w-5 h-5 text-white" />
+                </div>
+                Edit Sprint
+              </DialogTitle>
+              <DialogDescription>
+                Update sprint details and configuration
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-sprint-name">Sprint Name *</Label>
+                <Input
+                  id="edit-sprint-name"
+                  placeholder="e.g., Sprint 26 - Mobile Features"
+                  value={editSprintName}
+                  onChange={(e) => setEditSprintName(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-sprint-goal">Sprint Goal</Label>
+                <Textarea
+                  id="edit-sprint-goal"
+                  placeholder="What is the main objective of this sprint?"
+                  value={editSprintGoal}
+                  onChange={(e) => setEditSprintGoal(e.target.value)}
+                  rows={3}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-sprint-team">Team Name</Label>
+                <Input
+                  id="edit-sprint-team"
+                  placeholder="e.g., Platform Team"
+                  value={editSprintTeamName}
+                  onChange={(e) => setEditSprintTeamName(e.target.value)}
+                />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-sprint-start">Start Date</Label>
+                  <Input
+                    id="edit-sprint-start"
+                    type="date"
+                    value={editSprintStartDate}
+                    onChange={(e) => setEditSprintStartDate(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-sprint-end">End Date</Label>
+                  <Input
+                    id="edit-sprint-end"
+                    type="date"
+                    value={editSprintEndDate}
+                    onChange={(e) => setEditSprintEndDate(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-sprint-capacity">Team Capacity (hours)</Label>
+                <Input
+                  id="edit-sprint-capacity"
+                  type="number"
+                  placeholder="80"
+                  value={editSprintCapacity}
+                  onChange={(e) => setEditSprintCapacity(e.target.value)}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => {
+                setShowEditSprintDialog(false)
+                setSprintToEdit(null)
+              }}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleUpdateSprint}
+                disabled={isUpdatingSprint}
+                className="bg-gradient-to-r from-teal-600 to-cyan-600 text-white"
+              >
+                {isUpdatingSprint ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="w-4 h-4 mr-2" />
+                    Save Changes
                   </>
                 )}
               </Button>

@@ -1,7 +1,7 @@
 'use client'
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
-import { useContracts, type Contract } from '@/lib/hooks/use-contracts'
+import { useContracts, type Contract, type ContractType } from '@/lib/hooks/use-contracts'
 import { useTeam } from '@/lib/hooks/use-team'
 import { useActivityLogs } from '@/lib/hooks/use-activity-logs'
 import {
@@ -376,6 +376,129 @@ export default function ContractsClient({ initialContracts }: { initialContracts
       toast.success(`Contract "${contractName}" has been moved to archive.`)
     } catch (err) {
       toast.error('Failed to archive contract')
+    }
+  }
+
+  const handleApproveContract = async (contractId: string, contractName: string) => {
+    try {
+      await updateContract(contractId, {
+        status: 'pending-signature' as const,
+        legal_review_status: 'approved',
+        legal_review_date: new Date().toISOString()
+      })
+      toast.success(`Contract "${contractName}" has been approved and is ready for signatures.`)
+    } catch (err) {
+      toast.error('Failed to approve contract')
+    }
+  }
+
+  const handleRejectContract = async (contractId: string, contractName: string, reason?: string) => {
+    try {
+      await updateContract(contractId, {
+        status: 'draft' as const,
+        legal_review_status: 'rejected',
+        legal_review_date: new Date().toISOString(),
+        notes: reason ? `Review rejected: ${reason}` : 'Review rejected'
+      })
+      toast.success(`Contract "${contractName}" has been rejected and returned to draft.`)
+    } catch (err) {
+      toast.error('Failed to reject contract')
+    }
+  }
+
+  const handleSubmitForReview = async (contractId: string, contractName: string) => {
+    try {
+      await updateContract(contractId, {
+        status: 'pending-review' as const,
+        requires_legal_review: true
+      })
+      toast.success(`Contract "${contractName}" has been submitted for legal review.`)
+    } catch (err) {
+      toast.error('Failed to submit contract for review')
+    }
+  }
+
+  const handleSaveAsTemplate = async (contract: Contract) => {
+    try {
+      const templateContract = {
+        title: `${contract.title} (Template)`,
+        contract_number: `TPL-${Date.now()}`,
+        contract_type: contract.contract_type,
+        status: 'draft' as const,
+        contract_value: 0,
+        currency: contract.currency,
+        start_date: new Date().toISOString(),
+        terms: contract.terms,
+        is_template: true,
+        is_auto_renewable: contract.is_auto_renewable,
+        renewal_notice_period_days: contract.renewal_notice_period_days,
+        termination_notice_period_days: contract.termination_notice_period_days,
+        termination_clause: contract.termination_clause,
+        has_attachments: false,
+        requires_legal_review: false,
+        version: 1,
+      }
+      await createContract(templateContract)
+      toast.success(`Template created from "${contract.title}"`)
+    } catch (err) {
+      toast.error('Failed to save as template')
+    }
+  }
+
+  const handleDeleteTemplate = async (templateId: string, templateName: string) => {
+    if (!confirm(`Are you sure you want to delete the template "${templateName}"? This action cannot be undone.`)) return
+
+    try {
+      await deleteContract(templateId)
+      toast.success(`Template "${templateName}" has been deleted.`)
+    } catch (err) {
+      toast.error('Failed to delete template')
+    }
+  }
+
+  const handleEditTemplate = async (templateId: string, updates: Partial<Contract>) => {
+    try {
+      await updateContract(templateId, updates)
+      toast.success('Template updated successfully')
+    } catch (err) {
+      toast.error('Failed to update template')
+    }
+  }
+
+  const handleDuplicateTemplate = async (template: ContractTemplate) => {
+    try {
+      const newTemplate = {
+        title: `${template.name} (Copy)`,
+        contract_number: `TPL-${Date.now()}`,
+        contract_type: (template.category.toLowerCase() as ContractType) || 'service',
+        status: 'draft' as const,
+        contract_value: 0,
+        currency: 'USD',
+        start_date: new Date().toISOString(),
+        terms: template.description,
+        is_template: true,
+        is_auto_renewable: false,
+        renewal_notice_period_days: 30,
+        termination_notice_period_days: 30,
+        has_attachments: false,
+        requires_legal_review: false,
+        version: 1,
+      }
+      await createContract(newTemplate)
+      toast.success(`Template "${template.name}" has been duplicated.`)
+    } catch (err) {
+      toast.error('Failed to duplicate template')
+    }
+  }
+
+  const handleToggleTemplateShare = async (templateId: string, isShared: boolean, templateName: string) => {
+    try {
+      await updateContract(templateId, {
+        metadata: { is_shared: !isShared }
+      })
+      toast.success(`Template "${templateName}" is now ${!isShared ? 'shared' : 'private'}.`)
+    } catch (err) {
+      toast.error('Failed to update template sharing')
     }
   }
 
@@ -1123,14 +1246,50 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                         </div>
                         <div className="flex items-center gap-1">
                           {contract.status === 'draft' && (
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => handleSendForSignature(contract.id, contract.title)}
-                              disabled={mutating}
-                            >
-                              <Send className="h-3 w-3" />
-                            </Button>
+                            <>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => handleSubmitForReview(contract.id, contract.title)}
+                                disabled={mutating}
+                                title="Submit for Review"
+                              >
+                                <Eye className="h-3 w-3" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => handleSendForSignature(contract.id, contract.title)}
+                                disabled={mutating}
+                                title="Send for Signature"
+                              >
+                                <Send className="h-3 w-3" />
+                              </Button>
+                            </>
+                          )}
+                          {contract.status === 'pending-review' && (
+                            <>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="text-green-600"
+                                onClick={() => handleApproveContract(contract.id, contract.title)}
+                                disabled={mutating}
+                                title="Approve"
+                              >
+                                <CheckCircle className="h-3 w-3" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="text-red-600"
+                                onClick={() => handleRejectContract(contract.id, contract.title)}
+                                disabled={mutating}
+                                title="Reject"
+                              >
+                                <XCircle className="h-3 w-3" />
+                              </Button>
+                            </>
                           )}
                           {contract.status === 'pending-signature' && (
                             <Button
@@ -1138,8 +1297,20 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                               variant="ghost"
                               onClick={() => handleSignContract(contract.id, contract.title)}
                               disabled={mutating}
+                              title="Sign"
                             >
                               <PenTool className="h-3 w-3" />
+                            </Button>
+                          )}
+                          {contract.status === 'active' && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => handleSaveAsTemplate(contract)}
+                              disabled={mutating}
+                              title="Save as Template"
+                            >
+                              <Copy className="h-3 w-3" />
                             </Button>
                           )}
                           <Button
@@ -1148,6 +1319,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                             className="text-red-600"
                             onClick={() => handleDeleteContract(contract.id, contract.title)}
                             disabled={mutating}
+                            title="Delete"
                           >
                             <Trash2 className="h-3 w-3" />
                           </Button>
@@ -1323,15 +1495,50 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                         </div>
                         <div className="flex items-center gap-2">
                           {contract.status === 'draft' && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleSendForSignature(contract.id, contract.title)}
-                              disabled={mutating}
-                            >
-                              <Send className="h-4 w-4 mr-1" />
-                              Send
-                            </Button>
+                            <>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleSubmitForReview(contract.id, contract.title)}
+                                disabled={mutating}
+                                title="Submit for legal review"
+                              >
+                                <Eye className="h-4 w-4 mr-1" />
+                                Review
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleSendForSignature(contract.id, contract.title)}
+                                disabled={mutating}
+                              >
+                                <Send className="h-4 w-4 mr-1" />
+                                Send
+                              </Button>
+                            </>
+                          )}
+                          {contract.status === 'pending-review' && (
+                            <>
+                              <Button
+                                size="sm"
+                                onClick={() => handleApproveContract(contract.id, contract.title)}
+                                disabled={mutating}
+                                className="bg-green-600 hover:bg-green-700"
+                              >
+                                <CheckCircle className="h-4 w-4 mr-1" />
+                                Approve
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-red-600 hover:bg-red-50"
+                                onClick={() => handleRejectContract(contract.id, contract.title)}
+                                disabled={mutating}
+                              >
+                                <XCircle className="h-4 w-4 mr-1" />
+                                Reject
+                              </Button>
+                            </>
                           )}
                           {contract.status === 'pending-signature' && (
                             <Button
@@ -1353,6 +1560,16 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                               >
                                 <RefreshCw className="h-4 w-4 mr-1" />
                                 Renew
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleSaveAsTemplate(contract)}
+                                disabled={mutating}
+                                title="Save as Template"
+                              >
+                                <Copy className="h-4 w-4 mr-1" />
+                                Template
                               </Button>
                               <Button
                                 size="sm"
@@ -1396,7 +1613,15 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                       </div>
                       <div className="flex items-center gap-1">
                         {template.is_starred && <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />}
-                        {template.is_shared && <Globe className="h-4 w-4 text-gray-400" />}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={(e) => { e.stopPropagation(); handleToggleTemplateShare(template.id, template.is_shared, template.name) }}
+                          title={template.is_shared ? 'Make Private' : 'Share Template'}
+                        >
+                          {template.is_shared ? <Globe className="h-4 w-4 text-blue-500" /> : <Share2 className="h-4 w-4 text-gray-400" />}
+                        </Button>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 mb-2">
@@ -1410,9 +1635,30 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                       <span>{template.fields_count} fields</span>
                       <span>Used {template.usage_count}x</span>
                     </div>
-                    <Button className="w-full opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => handleUseTemplate(template)} disabled={mutating}>
-                      Use Template
-                    </Button>
+                    <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button className="flex-1" onClick={() => handleUseTemplate(template)} disabled={mutating}>
+                        Use Template
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={(e) => { e.stopPropagation(); handleDuplicateTemplate(template) }}
+                        disabled={mutating}
+                        title="Duplicate Template"
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="text-red-600 hover:bg-red-50"
+                        onClick={(e) => { e.stopPropagation(); handleDeleteTemplate(template.id, template.name) }}
+                        disabled={mutating}
+                        title="Delete Template"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
               ))}
