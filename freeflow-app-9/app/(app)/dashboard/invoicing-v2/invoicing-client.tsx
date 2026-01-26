@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { toast } from 'sonner'
 import { useInvoices, type Invoice as DbInvoice } from '@/lib/hooks/use-invoices'
@@ -330,6 +331,13 @@ const getDaysOverdue = (dueDate: string) => {
 
 export default function InvoicingClient() {
   // ============================================================================
+  // NAVIGATION & URL PARAMS
+  // ============================================================================
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const clientIdFilter = searchParams.get('client')
+
+  // ============================================================================
   // SUPABASE DATA HOOK
   // ============================================================================
   const {
@@ -577,9 +585,11 @@ export default function InvoicingClient() {
         invoice.client?.company?.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesStatus = statusFilter === 'all' || invoice.status === statusFilter
       const matchesType = typeFilter === 'all' || invoice.type === typeFilter
-      return matchesSearch && matchesStatus && matchesType
+      // Filter by client if clientIdFilter is present from URL params
+      const matchesClient = !clientIdFilter || invoice.client?.id === clientIdFilter
+      return matchesSearch && matchesStatus && matchesType && matchesClient
     })
-  }, [invoices, searchQuery, statusFilter, typeFilter])
+  }, [invoices, searchQuery, statusFilter, typeFilter, clientIdFilter])
 
   // Stats calculations
   const stats = useMemo(() => {
@@ -1099,6 +1109,36 @@ export default function InvoicingClient() {
 
           {/* Invoices Tab */}
           <TabsContent value="invoices" className="space-y-6">
+            {/* Client Filter Banner */}
+            {clientIdFilter && (
+              <div className="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-green-100 to-teal-100 dark:from-green-950/40 dark:to-teal-950/40 border border-green-200 dark:border-green-800">
+                <div className="flex items-center gap-2">
+                  <Users className="h-5 w-5 text-green-600 dark:text-green-400" />
+                  <span className="text-sm font-medium text-green-700 dark:text-green-300">
+                    Showing invoices for client: <span className="font-bold">{clientIdFilter}</span>
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-green-300 hover:bg-green-200 dark:border-green-700 dark:hover:bg-green-900"
+                    onClick={() => router.push(`/dashboard/clients-v2`)}
+                  >
+                    <Users className="h-4 w-4 mr-2" />
+                    Back to Clients
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => router.push('/dashboard/invoicing-v2')}
+                  >
+                    Clear Filter
+                  </Button>
+                </div>
+              </div>
+            )}
+
             {/* Invoices Overview Banner */}
             <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-2xl p-6 text-white mb-6">
               <div className="flex items-center justify-between">

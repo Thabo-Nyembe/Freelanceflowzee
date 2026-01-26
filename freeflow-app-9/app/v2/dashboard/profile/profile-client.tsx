@@ -325,6 +325,24 @@ export default function ProfileClient() {
   const [showSessionSignOutDialog, setShowSessionSignOutDialog] = useState<number | null>(null)
   const [showConnectGoogleDialog, setShowConnectGoogleDialog] = useState(false)
 
+  // New dialog states for "Coming soon" features
+  const [showAddExperienceDialog, setShowAddExperienceDialog] = useState(false)
+  const [showAddCertificationDialog, setShowAddCertificationDialog] = useState(false)
+  const [showAddEducationDialog, setShowAddEducationDialog] = useState(false)
+  const [showAddAwardDialog, setShowAddAwardDialog] = useState(false)
+  const [showAddProjectDialog, setShowAddProjectDialog] = useState(false)
+  const [showAddVolunteerDialog, setShowAddVolunteerDialog] = useState(false)
+  const [showAddPublicationDialog, setShowAddPublicationDialog] = useState(false)
+  const [showAddLanguagesDialog, setShowAddLanguagesDialog] = useState(false)
+  const [showAddContactsDialog, setShowAddContactsDialog] = useState(false)
+  const [showFindPeopleDialog, setShowFindPeopleDialog] = useState(false)
+  const [showSearchJobsDialog, setShowSearchJobsDialog] = useState(false)
+  const [showNewPostDialog, setShowNewPostDialog] = useState(false)
+  const [showUpdatePhotoDialog, setShowUpdatePhotoDialog] = useState(false)
+  const [showUpdateJobsDialog, setShowUpdateJobsDialog] = useState(false)
+  const [showAddFeaturedDialog, setShowAddFeaturedDialog] = useState(false)
+  const [showReorderSkillsDialog, setShowReorderSkillsDialog] = useState(false)
+
   // Form states for dialogs
   const [newSkillName, setNewSkillName] = useState('')
   const [newSkillCategory, setNewSkillCategory] = useState('General')
@@ -358,6 +376,81 @@ export default function ProfileClient() {
     targetLevel: 'advanced',
     deadline: ''
   })
+
+  // Form data for new dialogs
+  const [experienceFormData, setExperienceFormData] = useState({
+    company: '',
+    title: '',
+    location: '',
+    startDate: '',
+    endDate: '',
+    current: false,
+    description: ''
+  })
+  const [certificationFormData, setCertificationFormData] = useState({
+    name: '',
+    issuer: '',
+    issueDate: '',
+    expiryDate: '',
+    credentialId: '',
+    credentialUrl: ''
+  })
+  const [educationFormData, setEducationFormData] = useState({
+    school: '',
+    degree: '',
+    field: '',
+    startDate: '',
+    endDate: '',
+    current: false,
+    grade: '',
+    activities: ''
+  })
+  const [awardFormData, setAwardFormData] = useState({
+    title: '',
+    issuer: '',
+    date: '',
+    description: ''
+  })
+  const [projectFormData, setProjectFormData] = useState({
+    name: '',
+    description: '',
+    url: '',
+    startDate: '',
+    endDate: '',
+    current: false
+  })
+  const [volunteerFormData, setVolunteerFormData] = useState({
+    organization: '',
+    role: '',
+    cause: '',
+    startDate: '',
+    endDate: '',
+    current: false,
+    description: ''
+  })
+  const [publicationFormData, setPublicationFormData] = useState({
+    title: '',
+    publisher: '',
+    date: '',
+    url: '',
+    description: ''
+  })
+  const [languageFormData, setLanguageFormData] = useState({
+    language: '',
+    proficiency: 'intermediate'
+  })
+  const [postFormData, setPostFormData] = useState({
+    content: '',
+    type: 'text' as 'text' | 'article' | 'photo' | 'video'
+  })
+  const [featuredFormData, setFeaturedFormData] = useState({
+    type: 'post' as 'post' | 'article' | 'link' | 'media',
+    title: '',
+    description: '',
+    url: ''
+  })
+  const [jobSearchQuery, setJobSearchQuery] = useState('')
+  const [peopleSearchQuery, setPeopleSearchQuery] = useState('')
 
   // Data State
   const [profile, setProfile] = useState<UserProfile | null>(null)
@@ -1108,12 +1201,12 @@ export default function ProfileClient() {
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
                 {[
                   { icon: Edit, label: 'Edit Profile', color: 'from-blue-500 to-indigo-600', onClick: () => setActiveTab('settings') },
-                  { icon: Camera, label: 'Update Photo', color: 'from-purple-500 to-pink-600', onClick: () => toast.info('Coming soon') },
+                  { icon: Camera, label: 'Update Photo', color: 'from-purple-500 to-pink-600', onClick: () => setShowUpdatePhotoDialog(true) },
                   { icon: Share2, label: 'Share Profile', color: 'from-green-500 to-emerald-600', onClick: handleShareProfile },
                   { icon: Download, label: 'Export PDF', color: 'from-orange-500 to-amber-600', onClick: handleDownloadPDF },
                   { icon: UserPlus, label: 'Grow Network', color: 'from-cyan-500 to-blue-600', onClick: () => setActiveTab('network') },
                   { icon: FileText, label: 'Add Post', color: 'from-pink-500 to-rose-600', onClick: () => setActiveTab('activity') },
-                  { icon: Briefcase, label: 'Update Jobs', color: 'from-indigo-500 to-purple-600', onClick: () => toast.info('Coming soon') },
+                  { icon: Briefcase, label: 'Update Jobs', color: 'from-indigo-500 to-purple-600', onClick: () => setShowUpdateJobsDialog(true) },
                   { icon: BarChart3, label: 'Analytics', color: 'from-yellow-500 to-orange-600', onClick: () => setShowAnalytics(true) },
                 ].map((action, i) => (
                   <Button
@@ -1264,14 +1357,14 @@ export default function ProfileClient() {
               {/* Quick Actions */}
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
                 {[
-                  { icon: Plus, label: 'Add Position', color: 'from-blue-500 to-indigo-600', action: () => toast.info('Coming soon') },
-                  { icon: Award, label: 'Add Cert', color: 'from-purple-500 to-pink-600', action: () => toast.info('Coming soon') },
-                  { icon: GraduationCap, label: 'Add Education', color: 'from-green-500 to-emerald-600', action: () => toast.info('Coming soon') },
-                  { icon: Trophy, label: 'Add Award', color: 'from-orange-500 to-amber-600', action: () => toast.info('Coming soon') },
-                  { icon: BookOpen, label: 'Add Project', color: 'from-cyan-500 to-blue-600', action: () => toast.info('Coming soon') },
-                  { icon: Heart, label: 'Volunteer', color: 'from-pink-500 to-rose-600', action: () => toast.info('Coming soon') },
-                  { icon: FileText, label: 'Publication', color: 'from-indigo-500 to-purple-600', action: () => toast.info('Coming soon') },
-                  { icon: Languages, label: 'Languages', color: 'from-yellow-500 to-orange-600', action: () => toast.info('Coming soon') },
+                  { icon: Plus, label: 'Add Position', color: 'from-blue-500 to-indigo-600', action: () => setShowAddExperienceDialog(true) },
+                  { icon: Award, label: 'Add Cert', color: 'from-purple-500 to-pink-600', action: () => setShowAddCertificationDialog(true) },
+                  { icon: GraduationCap, label: 'Add Education', color: 'from-green-500 to-emerald-600', action: () => setShowAddEducationDialog(true) },
+                  { icon: Trophy, label: 'Add Award', color: 'from-orange-500 to-amber-600', action: () => setShowAddAwardDialog(true) },
+                  { icon: BookOpen, label: 'Add Project', color: 'from-cyan-500 to-blue-600', action: () => setShowAddProjectDialog(true) },
+                  { icon: Heart, label: 'Volunteer', color: 'from-pink-500 to-rose-600', action: () => setShowAddVolunteerDialog(true) },
+                  { icon: FileText, label: 'Publication', color: 'from-indigo-500 to-purple-600', action: () => setShowAddPublicationDialog(true) },
+                  { icon: Languages, label: 'Languages', color: 'from-yellow-500 to-orange-600', action: () => setShowAddLanguagesDialog(true) },
                 ].map((action, i) => (
                   <Button
                     key={i}
@@ -1291,7 +1384,7 @@ export default function ProfileClient() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle className="flex items-center gap-2"><Briefcase className="w-5 h-5 text-blue-600" />Experience</CardTitle>
-                    <Button size="sm" className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white" onClick={() => toast.info('Coming soon')}><Plus className="w-4 h-4 mr-1" />Add</Button>
+                    <Button size="sm" className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white" onClick={() => setShowAddExperienceDialog(true)}><Plus className="w-4 h-4 mr-1" />Add</Button>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -1427,7 +1520,7 @@ export default function ProfileClient() {
                   { icon: Award, label: 'Add Badge', color: 'from-cyan-500 to-blue-600', action: () => setShowAddBadgeDialog(true) },
                   { icon: Target, label: 'Skill Goals', color: 'from-orange-500 to-red-600', action: () => setShowSkillGoalsDialog(true) },
                   { icon: TrendingUp, label: 'Skill Trends', color: 'from-indigo-500 to-purple-600', action: () => setShowSkillTrendsDialog(true) },
-                  { icon: RefreshCw, label: 'Reorder', color: 'from-pink-500 to-rose-600', action: () => toast.info('Coming soon') },
+                  { icon: RefreshCw, label: 'Reorder', color: 'from-pink-500 to-rose-600', action: () => setShowReorderSkillsDialog(true) },
                 ].map((action, i) => (
                   <Button
                     key={i}
@@ -1561,14 +1654,14 @@ export default function ProfileClient() {
               {/* Quick Actions */}
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
                 {[
-                  { icon: Plus, label: 'Add Featured', color: 'from-yellow-500 to-orange-600', action: () => toast.info('Coming soon') },
-                  { icon: FileText, label: 'New Article', color: 'from-blue-500 to-indigo-600', action: () => toast.info('Coming soon') },
-                  { icon: Link2, label: 'Add Link', color: 'from-purple-500 to-pink-600', action: () => toast.info('Coming soon') },
-                  { icon: Newspaper, label: 'Newsletter', color: 'from-green-500 to-emerald-600', action: () => toast.info('Coming soon') },
-                  { icon: Image, label: 'Add Media', color: 'from-cyan-500 to-blue-600', action: () => toast.info('Coming soon') },
-                  { icon: Podcast, label: 'Podcast', color: 'from-orange-500 to-red-600', action: () => toast.info('Coming soon') },
-                  { icon: Video, label: 'Add Video', color: 'from-pink-500 to-rose-600', action: () => toast.info('Coming soon') },
-                  { icon: RefreshCw, label: 'Reorder', color: 'from-indigo-500 to-purple-600', action: () => toast.info('Coming soon') },
+                  { icon: Plus, label: 'Add Featured', color: 'from-yellow-500 to-orange-600', action: () => setShowAddFeaturedDialog(true) },
+                  { icon: FileText, label: 'New Article', color: 'from-blue-500 to-indigo-600', action: () => { setPostFormData(p => ({ ...p, type: 'article' })); setShowNewPostDialog(true) } },
+                  { icon: Link2, label: 'Add Link', color: 'from-purple-500 to-pink-600', action: () => { setFeaturedFormData(p => ({ ...p, type: 'link' })); setShowAddFeaturedDialog(true) } },
+                  { icon: Newspaper, label: 'Newsletter', color: 'from-green-500 to-emerald-600', action: () => { setPostFormData(p => ({ ...p, type: 'article' })); setShowNewPostDialog(true) } },
+                  { icon: Image, label: 'Add Media', color: 'from-cyan-500 to-blue-600', action: () => { setFeaturedFormData(p => ({ ...p, type: 'media' })); setShowAddFeaturedDialog(true) } },
+                  { icon: Podcast, label: 'Podcast', color: 'from-orange-500 to-red-600', action: () => { setFeaturedFormData(p => ({ ...p, type: 'media' })); setShowAddFeaturedDialog(true) } },
+                  { icon: Video, label: 'Add Video', color: 'from-pink-500 to-rose-600', action: () => { setPostFormData(p => ({ ...p, type: 'video' })); setShowNewPostDialog(true) } },
+                  { icon: RefreshCw, label: 'Reorder', color: 'from-indigo-500 to-purple-600', action: () => setShowReorderSkillsDialog(true) },
                 ].map((action, i) => (
                   <Button
                     key={i}
@@ -1588,7 +1681,7 @@ export default function ProfileClient() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle className="flex items-center gap-2"><Star className="w-5 h-5 text-blue-600" />Featured</CardTitle>
-                    <Button size="sm" onClick={() => toast.info('Coming soon')}><Plus className="w-4 h-4 mr-1" />Add Featured</Button>
+                    <Button size="sm" onClick={() => setShowAddFeaturedDialog(true)}><Plus className="w-4 h-4 mr-1" />Add Featured</Button>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -1643,8 +1736,8 @@ export default function ProfileClient() {
               {/* Quick Actions */}
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
                 {[
-                  { icon: UserPlus, label: 'Add Contacts', color: 'from-cyan-500 to-blue-600', action: () => toast.info('Coming soon') },
-                  { icon: Search, label: 'Find People', color: 'from-blue-500 to-indigo-600', action: () => toast.info('Coming soon') },
+                  { icon: UserPlus, label: 'Add Contacts', color: 'from-cyan-500 to-blue-600', action: () => setShowAddContactsDialog(true) },
+                  { icon: Search, label: 'Find People', color: 'from-blue-500 to-indigo-600', action: () => setShowFindPeopleDialog(true) },
                   { icon: Users, label: 'My Network', color: 'from-purple-500 to-pink-600', action: () => setActiveTab('network') },
                   { icon: MessageSquare, label: 'Messages', color: 'from-green-500 to-emerald-600', action: () => setShowMessageDialog(true) },
                   { icon: Mail, label: 'Invitations', color: 'from-orange-500 to-amber-600', action: () => setActiveTab('network') },
@@ -1722,7 +1815,7 @@ export default function ProfileClient() {
               {/* Quick Actions */}
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
                 {[
-                  { icon: Search, label: 'Search Jobs', color: 'from-indigo-500 to-purple-600', action: () => toast.info('Coming soon') },
+                  { icon: Search, label: 'Search Jobs', color: 'from-indigo-500 to-purple-600', action: () => setShowSearchJobsDialog(true) },
                   { icon: Bookmark, label: 'Saved Jobs', color: 'from-blue-500 to-indigo-600', action: () => setActiveTab('jobs') },
                   { icon: Bell, label: 'Job Alerts', color: 'from-purple-500 to-pink-600', action: () => setActiveTab('jobs') },
                   { icon: Target, label: 'Preferences', color: 'from-green-500 to-emerald-600', action: () => setActiveTab('settings') },
@@ -1801,10 +1894,10 @@ export default function ProfileClient() {
               {/* Quick Actions */}
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
                 {[
-                  { icon: Plus, label: 'New Post', color: 'from-pink-500 to-rose-600', action: () => toast.info('Coming soon') },
-                  { icon: FileText, label: 'Write Article', color: 'from-blue-500 to-indigo-600', action: () => toast.info('Coming soon') },
-                  { icon: Image, label: 'Share Photo', color: 'from-purple-500 to-pink-600', action: () => toast.info('Coming soon') },
-                  { icon: Video, label: 'Post Video', color: 'from-green-500 to-emerald-600', action: () => toast.info('Coming soon') },
+                  { icon: Plus, label: 'New Post', color: 'from-pink-500 to-rose-600', action: () => { setPostFormData(p => ({ ...p, type: 'text' })); setShowNewPostDialog(true) } },
+                  { icon: FileText, label: 'Write Article', color: 'from-blue-500 to-indigo-600', action: () => { setPostFormData(p => ({ ...p, type: 'article' })); setShowNewPostDialog(true) } },
+                  { icon: Image, label: 'Share Photo', color: 'from-purple-500 to-pink-600', action: () => { setPostFormData(p => ({ ...p, type: 'photo' })); setShowNewPostDialog(true) } },
+                  { icon: Video, label: 'Post Video', color: 'from-green-500 to-emerald-600', action: () => { setPostFormData(p => ({ ...p, type: 'video' })); setShowNewPostDialog(true) } },
                   { icon: Calendar, label: 'Create Event', color: 'from-orange-500 to-amber-600', action: () => setShowCreateEventDialog(true) },
                   { icon: BarChart3, label: 'Analytics', color: 'from-cyan-500 to-blue-600', action: () => setShowAnalytics(true) },
                   { icon: Hash, label: 'Hashtags', color: 'from-indigo-500 to-purple-600', action: () => setShowHashtagsDialog(true) },
@@ -3409,6 +3502,1334 @@ export default function ProfileClient() {
                   }}
                 >
                   Connect Google
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Add Experience Dialog */}
+          <Dialog open={showAddExperienceDialog} onOpenChange={setShowAddExperienceDialog}>
+            <DialogContent className="max-w-lg">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2"><Briefcase className="w-5 h-5 text-blue-600" />Add Work Experience</DialogTitle>
+                <DialogDescription>Add a new position to your profile</DialogDescription>
+              </DialogHeader>
+              <ScrollArea className="max-h-[60vh]">
+                <div className="space-y-4 py-4 pr-4">
+                  <div>
+                    <Label htmlFor="expTitle">Title *</Label>
+                    <Input
+                      id="expTitle"
+                      placeholder="e.g., Senior Software Engineer"
+                      value={experienceFormData.title}
+                      onChange={(e) => setExperienceFormData(prev => ({ ...prev, title: e.target.value }))}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="expCompany">Company *</Label>
+                    <Input
+                      id="expCompany"
+                      placeholder="e.g., Google"
+                      value={experienceFormData.company}
+                      onChange={(e) => setExperienceFormData(prev => ({ ...prev, company: e.target.value }))}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="expLocation">Location</Label>
+                    <Input
+                      id="expLocation"
+                      placeholder="e.g., San Francisco, CA"
+                      value={experienceFormData.location}
+                      onChange={(e) => setExperienceFormData(prev => ({ ...prev, location: e.target.value }))}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <Switch
+                      checked={experienceFormData.current}
+                      onCheckedChange={(checked) => setExperienceFormData(prev => ({ ...prev, current: checked, endDate: checked ? '' : prev.endDate }))}
+                    />
+                    <span className="text-sm">I currently work here</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="expStartDate">Start Date *</Label>
+                      <Input
+                        id="expStartDate"
+                        type="month"
+                        value={experienceFormData.startDate}
+                        onChange={(e) => setExperienceFormData(prev => ({ ...prev, startDate: e.target.value }))}
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="expEndDate">End Date</Label>
+                      <Input
+                        id="expEndDate"
+                        type="month"
+                        value={experienceFormData.endDate}
+                        onChange={(e) => setExperienceFormData(prev => ({ ...prev, endDate: e.target.value }))}
+                        className="mt-1"
+                        disabled={experienceFormData.current}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="expDescription">Description</Label>
+                    <textarea
+                      id="expDescription"
+                      className="w-full mt-1 p-3 border rounded-lg resize-none h-24 dark:bg-gray-800 dark:border-gray-700"
+                      placeholder="Describe your responsibilities and achievements..."
+                      value={experienceFormData.description}
+                      onChange={(e) => setExperienceFormData(prev => ({ ...prev, description: e.target.value }))}
+                    />
+                  </div>
+                </div>
+              </ScrollArea>
+              <div className="flex justify-end gap-3 pt-4 border-t">
+                <Button variant="outline" onClick={() => setShowAddExperienceDialog(false)}>Cancel</Button>
+                <Button
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
+                  disabled={!experienceFormData.title || !experienceFormData.company || !experienceFormData.startDate}
+                  onClick={async () => {
+                    if (!user?.id) return
+                    try {
+                      const { error } = await supabase.from('experience').insert({
+                        user_id: user.id,
+                        title: experienceFormData.title,
+                        company: experienceFormData.company,
+                        location: experienceFormData.location || null,
+                        start_date: experienceFormData.startDate + '-01',
+                        end_date: experienceFormData.current ? null : (experienceFormData.endDate ? experienceFormData.endDate + '-01' : null),
+                        current: experienceFormData.current,
+                        description: experienceFormData.description || null,
+                        achievements: []
+                      })
+                      if (error) throw error
+                      toast.success('Experience added successfully')
+                      setExperienceFormData({ company: '', title: '', location: '', startDate: '', endDate: '', current: false, description: '' })
+                      setShowAddExperienceDialog(false)
+                      fetchProfileData()
+                    } catch (error) {
+                      toast.error('Failed to add experience')
+                    }
+                  }}
+                >
+                  Save Experience
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Add Certification Dialog */}
+          <Dialog open={showAddCertificationDialog} onOpenChange={setShowAddCertificationDialog}>
+            <DialogContent className="max-w-lg">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2"><Award className="w-5 h-5 text-purple-600" />Add Certification</DialogTitle>
+                <DialogDescription>Add a professional certification or license</DialogDescription>
+              </DialogHeader>
+              <ScrollArea className="max-h-[60vh]">
+                <div className="space-y-4 py-4 pr-4">
+                  <div>
+                    <Label htmlFor="certName">Certification Name *</Label>
+                    <Input
+                      id="certName"
+                      placeholder="e.g., AWS Solutions Architect"
+                      value={certificationFormData.name}
+                      onChange={(e) => setCertificationFormData(prev => ({ ...prev, name: e.target.value }))}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="certIssuer">Issuing Organization *</Label>
+                    <Input
+                      id="certIssuer"
+                      placeholder="e.g., Amazon Web Services"
+                      value={certificationFormData.issuer}
+                      onChange={(e) => setCertificationFormData(prev => ({ ...prev, issuer: e.target.value }))}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="certIssueDate">Issue Date *</Label>
+                      <Input
+                        id="certIssueDate"
+                        type="month"
+                        value={certificationFormData.issueDate}
+                        onChange={(e) => setCertificationFormData(prev => ({ ...prev, issueDate: e.target.value }))}
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="certExpiryDate">Expiry Date</Label>
+                      <Input
+                        id="certExpiryDate"
+                        type="month"
+                        value={certificationFormData.expiryDate}
+                        onChange={(e) => setCertificationFormData(prev => ({ ...prev, expiryDate: e.target.value }))}
+                        className="mt-1"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="certCredentialId">Credential ID</Label>
+                    <Input
+                      id="certCredentialId"
+                      placeholder="e.g., ABC123XYZ"
+                      value={certificationFormData.credentialId}
+                      onChange={(e) => setCertificationFormData(prev => ({ ...prev, credentialId: e.target.value }))}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="certCredentialUrl">Credential URL</Label>
+                    <Input
+                      id="certCredentialUrl"
+                      placeholder="https://..."
+                      value={certificationFormData.credentialUrl}
+                      onChange={(e) => setCertificationFormData(prev => ({ ...prev, credentialUrl: e.target.value }))}
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+              </ScrollArea>
+              <div className="flex justify-end gap-3 pt-4 border-t">
+                <Button variant="outline" onClick={() => setShowAddCertificationDialog(false)}>Cancel</Button>
+                <Button
+                  className="bg-gradient-to-r from-purple-600 to-pink-600 text-white"
+                  disabled={!certificationFormData.name || !certificationFormData.issuer || !certificationFormData.issueDate}
+                  onClick={async () => {
+                    if (!user?.id) return
+                    try {
+                      const { error } = await supabase.from('certifications').insert({
+                        user_id: user.id,
+                        name: certificationFormData.name,
+                        issuer: certificationFormData.issuer,
+                        issue_date: certificationFormData.issueDate + '-01',
+                        expiry_date: certificationFormData.expiryDate ? certificationFormData.expiryDate + '-01' : null,
+                        credential_id: certificationFormData.credentialId || null,
+                        credential_url: certificationFormData.credentialUrl || null
+                      })
+                      if (error) throw error
+                      toast.success('Certification added successfully')
+                      setCertificationFormData({ name: '', issuer: '', issueDate: '', expiryDate: '', credentialId: '', credentialUrl: '' })
+                      setShowAddCertificationDialog(false)
+                    } catch (error) {
+                      toast.error('Failed to add certification')
+                    }
+                  }}
+                >
+                  Save Certification
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Add Education Dialog */}
+          <Dialog open={showAddEducationDialog} onOpenChange={setShowAddEducationDialog}>
+            <DialogContent className="max-w-lg">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2"><GraduationCap className="w-5 h-5 text-green-600" />Add Education</DialogTitle>
+                <DialogDescription>Add your educational background</DialogDescription>
+              </DialogHeader>
+              <ScrollArea className="max-h-[60vh]">
+                <div className="space-y-4 py-4 pr-4">
+                  <div>
+                    <Label htmlFor="eduSchool">School *</Label>
+                    <Input
+                      id="eduSchool"
+                      placeholder="e.g., Stanford University"
+                      value={educationFormData.school}
+                      onChange={(e) => setEducationFormData(prev => ({ ...prev, school: e.target.value }))}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="eduDegree">Degree *</Label>
+                    <Input
+                      id="eduDegree"
+                      placeholder="e.g., Bachelor of Science"
+                      value={educationFormData.degree}
+                      onChange={(e) => setEducationFormData(prev => ({ ...prev, degree: e.target.value }))}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="eduField">Field of Study *</Label>
+                    <Input
+                      id="eduField"
+                      placeholder="e.g., Computer Science"
+                      value={educationFormData.field}
+                      onChange={(e) => setEducationFormData(prev => ({ ...prev, field: e.target.value }))}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <Switch
+                      checked={educationFormData.current}
+                      onCheckedChange={(checked) => setEducationFormData(prev => ({ ...prev, current: checked, endDate: checked ? '' : prev.endDate }))}
+                    />
+                    <span className="text-sm">I am currently studying here</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="eduStartDate">Start Year *</Label>
+                      <Input
+                        id="eduStartDate"
+                        type="month"
+                        value={educationFormData.startDate}
+                        onChange={(e) => setEducationFormData(prev => ({ ...prev, startDate: e.target.value }))}
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="eduEndDate">End Year</Label>
+                      <Input
+                        id="eduEndDate"
+                        type="month"
+                        value={educationFormData.endDate}
+                        onChange={(e) => setEducationFormData(prev => ({ ...prev, endDate: e.target.value }))}
+                        className="mt-1"
+                        disabled={educationFormData.current}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="eduGrade">Grade/GPA</Label>
+                    <Input
+                      id="eduGrade"
+                      placeholder="e.g., 3.8/4.0"
+                      value={educationFormData.grade}
+                      onChange={(e) => setEducationFormData(prev => ({ ...prev, grade: e.target.value }))}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="eduActivities">Activities & Societies</Label>
+                    <textarea
+                      id="eduActivities"
+                      className="w-full mt-1 p-3 border rounded-lg resize-none h-20 dark:bg-gray-800 dark:border-gray-700"
+                      placeholder="e.g., Computer Science Club, Debate Team"
+                      value={educationFormData.activities}
+                      onChange={(e) => setEducationFormData(prev => ({ ...prev, activities: e.target.value }))}
+                    />
+                  </div>
+                </div>
+              </ScrollArea>
+              <div className="flex justify-end gap-3 pt-4 border-t">
+                <Button variant="outline" onClick={() => setShowAddEducationDialog(false)}>Cancel</Button>
+                <Button
+                  className="bg-gradient-to-r from-green-600 to-emerald-600 text-white"
+                  disabled={!educationFormData.school || !educationFormData.degree || !educationFormData.field || !educationFormData.startDate}
+                  onClick={async () => {
+                    if (!user?.id) return
+                    try {
+                      const { error } = await supabase.from('education').insert({
+                        user_id: user.id,
+                        school: educationFormData.school,
+                        degree: educationFormData.degree,
+                        field: educationFormData.field,
+                        start_date: educationFormData.startDate + '-01',
+                        end_date: educationFormData.current ? null : (educationFormData.endDate ? educationFormData.endDate + '-01' : null),
+                        current: educationFormData.current,
+                        grade: educationFormData.grade || null,
+                        activities: educationFormData.activities ? educationFormData.activities.split(',').map(a => a.trim()) : []
+                      })
+                      if (error) throw error
+                      toast.success('Education added successfully')
+                      setEducationFormData({ school: '', degree: '', field: '', startDate: '', endDate: '', current: false, grade: '', activities: '' })
+                      setShowAddEducationDialog(false)
+                      fetchProfileData()
+                    } catch (error) {
+                      toast.error('Failed to add education')
+                    }
+                  }}
+                >
+                  Save Education
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Add Award Dialog */}
+          <Dialog open={showAddAwardDialog} onOpenChange={setShowAddAwardDialog}>
+            <DialogContent className="max-w-lg">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2"><Trophy className="w-5 h-5 text-orange-600" />Add Honor or Award</DialogTitle>
+                <DialogDescription>Add an honor, award, or recognition</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div>
+                  <Label htmlFor="awardTitle">Title *</Label>
+                  <Input
+                    id="awardTitle"
+                    placeholder="e.g., Employee of the Year"
+                    value={awardFormData.title}
+                    onChange={(e) => setAwardFormData(prev => ({ ...prev, title: e.target.value }))}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="awardIssuer">Issuer *</Label>
+                  <Input
+                    id="awardIssuer"
+                    placeholder="e.g., Company Name or Organization"
+                    value={awardFormData.issuer}
+                    onChange={(e) => setAwardFormData(prev => ({ ...prev, issuer: e.target.value }))}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="awardDate">Date</Label>
+                  <Input
+                    id="awardDate"
+                    type="month"
+                    value={awardFormData.date}
+                    onChange={(e) => setAwardFormData(prev => ({ ...prev, date: e.target.value }))}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="awardDescription">Description</Label>
+                  <textarea
+                    id="awardDescription"
+                    className="w-full mt-1 p-3 border rounded-lg resize-none h-20 dark:bg-gray-800 dark:border-gray-700"
+                    placeholder="Describe the award and why you received it..."
+                    value={awardFormData.description}
+                    onChange={(e) => setAwardFormData(prev => ({ ...prev, description: e.target.value }))}
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end gap-3">
+                <Button variant="outline" onClick={() => setShowAddAwardDialog(false)}>Cancel</Button>
+                <Button
+                  className="bg-gradient-to-r from-orange-500 to-amber-500 text-white"
+                  disabled={!awardFormData.title || !awardFormData.issuer}
+                  onClick={async () => {
+                    if (!user?.id) return
+                    try {
+                      const { error } = await supabase.from('honors_awards').insert({
+                        user_id: user.id,
+                        title: awardFormData.title,
+                        issuer: awardFormData.issuer,
+                        issue_date: awardFormData.date ? awardFormData.date + '-01' : null,
+                        description: awardFormData.description || null
+                      })
+                      if (error) throw error
+                      toast.success('Award added successfully')
+                      setAwardFormData({ title: '', issuer: '', date: '', description: '' })
+                      setShowAddAwardDialog(false)
+                    } catch (error) {
+                      toast.error('Failed to add award')
+                    }
+                  }}
+                >
+                  Save Award
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Add Project Dialog */}
+          <Dialog open={showAddProjectDialog} onOpenChange={setShowAddProjectDialog}>
+            <DialogContent className="max-w-lg">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2"><BookOpen className="w-5 h-5 text-cyan-600" />Add Project</DialogTitle>
+                <DialogDescription>Showcase a project you have worked on</DialogDescription>
+              </DialogHeader>
+              <ScrollArea className="max-h-[60vh]">
+                <div className="space-y-4 py-4 pr-4">
+                  <div>
+                    <Label htmlFor="projectName">Project Name *</Label>
+                    <Input
+                      id="projectName"
+                      placeholder="e.g., E-commerce Platform"
+                      value={projectFormData.name}
+                      onChange={(e) => setProjectFormData(prev => ({ ...prev, name: e.target.value }))}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="projectDescription">Description *</Label>
+                    <textarea
+                      id="projectDescription"
+                      className="w-full mt-1 p-3 border rounded-lg resize-none h-24 dark:bg-gray-800 dark:border-gray-700"
+                      placeholder="Describe the project, your role, and technologies used..."
+                      value={projectFormData.description}
+                      onChange={(e) => setProjectFormData(prev => ({ ...prev, description: e.target.value }))}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="projectUrl">Project URL</Label>
+                    <Input
+                      id="projectUrl"
+                      placeholder="https://..."
+                      value={projectFormData.url}
+                      onChange={(e) => setProjectFormData(prev => ({ ...prev, url: e.target.value }))}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <Switch
+                      checked={projectFormData.current}
+                      onCheckedChange={(checked) => setProjectFormData(prev => ({ ...prev, current: checked, endDate: checked ? '' : prev.endDate }))}
+                    />
+                    <span className="text-sm">I am currently working on this</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="projectStartDate">Start Date</Label>
+                      <Input
+                        id="projectStartDate"
+                        type="month"
+                        value={projectFormData.startDate}
+                        onChange={(e) => setProjectFormData(prev => ({ ...prev, startDate: e.target.value }))}
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="projectEndDate">End Date</Label>
+                      <Input
+                        id="projectEndDate"
+                        type="month"
+                        value={projectFormData.endDate}
+                        onChange={(e) => setProjectFormData(prev => ({ ...prev, endDate: e.target.value }))}
+                        className="mt-1"
+                        disabled={projectFormData.current}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </ScrollArea>
+              <div className="flex justify-end gap-3 pt-4 border-t">
+                <Button variant="outline" onClick={() => setShowAddProjectDialog(false)}>Cancel</Button>
+                <Button
+                  className="bg-gradient-to-r from-cyan-600 to-blue-600 text-white"
+                  disabled={!projectFormData.name || !projectFormData.description}
+                  onClick={async () => {
+                    if (!user?.id) return
+                    try {
+                      const { error } = await supabase.from('projects').insert({
+                        user_id: user.id,
+                        name: projectFormData.name,
+                        description: projectFormData.description,
+                        url: projectFormData.url || null,
+                        start_date: projectFormData.startDate ? projectFormData.startDate + '-01' : null,
+                        end_date: projectFormData.current ? null : (projectFormData.endDate ? projectFormData.endDate + '-01' : null),
+                        current: projectFormData.current
+                      })
+                      if (error) throw error
+                      toast.success('Project added successfully')
+                      setProjectFormData({ name: '', description: '', url: '', startDate: '', endDate: '', current: false })
+                      setShowAddProjectDialog(false)
+                    } catch (error) {
+                      toast.error('Failed to add project')
+                    }
+                  }}
+                >
+                  Save Project
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Add Volunteer Dialog */}
+          <Dialog open={showAddVolunteerDialog} onOpenChange={setShowAddVolunteerDialog}>
+            <DialogContent className="max-w-lg">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2"><Heart className="w-5 h-5 text-pink-600" />Add Volunteer Experience</DialogTitle>
+                <DialogDescription>Add your volunteer work and community involvement</DialogDescription>
+              </DialogHeader>
+              <ScrollArea className="max-h-[60vh]">
+                <div className="space-y-4 py-4 pr-4">
+                  <div>
+                    <Label htmlFor="volOrganization">Organization *</Label>
+                    <Input
+                      id="volOrganization"
+                      placeholder="e.g., Red Cross"
+                      value={volunteerFormData.organization}
+                      onChange={(e) => setVolunteerFormData(prev => ({ ...prev, organization: e.target.value }))}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="volRole">Role *</Label>
+                    <Input
+                      id="volRole"
+                      placeholder="e.g., Volunteer Coordinator"
+                      value={volunteerFormData.role}
+                      onChange={(e) => setVolunteerFormData(prev => ({ ...prev, role: e.target.value }))}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="volCause">Cause</Label>
+                    <Input
+                      id="volCause"
+                      placeholder="e.g., Disaster Relief, Education"
+                      value={volunteerFormData.cause}
+                      onChange={(e) => setVolunteerFormData(prev => ({ ...prev, cause: e.target.value }))}
+                      className="mt-1"
+                    />
+                  </div>
+                  <div className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <Switch
+                      checked={volunteerFormData.current}
+                      onCheckedChange={(checked) => setVolunteerFormData(prev => ({ ...prev, current: checked, endDate: checked ? '' : prev.endDate }))}
+                    />
+                    <span className="text-sm">I am currently volunteering here</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="volStartDate">Start Date</Label>
+                      <Input
+                        id="volStartDate"
+                        type="month"
+                        value={volunteerFormData.startDate}
+                        onChange={(e) => setVolunteerFormData(prev => ({ ...prev, startDate: e.target.value }))}
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="volEndDate">End Date</Label>
+                      <Input
+                        id="volEndDate"
+                        type="month"
+                        value={volunteerFormData.endDate}
+                        onChange={(e) => setVolunteerFormData(prev => ({ ...prev, endDate: e.target.value }))}
+                        className="mt-1"
+                        disabled={volunteerFormData.current}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="volDescription">Description</Label>
+                    <textarea
+                      id="volDescription"
+                      className="w-full mt-1 p-3 border rounded-lg resize-none h-20 dark:bg-gray-800 dark:border-gray-700"
+                      placeholder="Describe your volunteer activities..."
+                      value={volunteerFormData.description}
+                      onChange={(e) => setVolunteerFormData(prev => ({ ...prev, description: e.target.value }))}
+                    />
+                  </div>
+                </div>
+              </ScrollArea>
+              <div className="flex justify-end gap-3 pt-4 border-t">
+                <Button variant="outline" onClick={() => setShowAddVolunteerDialog(false)}>Cancel</Button>
+                <Button
+                  className="bg-gradient-to-r from-pink-600 to-rose-600 text-white"
+                  disabled={!volunteerFormData.organization || !volunteerFormData.role}
+                  onClick={async () => {
+                    if (!user?.id) return
+                    try {
+                      const { error } = await supabase.from('volunteer_experience').insert({
+                        user_id: user.id,
+                        organization: volunteerFormData.organization,
+                        role: volunteerFormData.role,
+                        cause: volunteerFormData.cause || null,
+                        start_date: volunteerFormData.startDate ? volunteerFormData.startDate + '-01' : null,
+                        end_date: volunteerFormData.current ? null : (volunteerFormData.endDate ? volunteerFormData.endDate + '-01' : null),
+                        current: volunteerFormData.current,
+                        description: volunteerFormData.description || null
+                      })
+                      if (error) throw error
+                      toast.success('Volunteer experience added successfully')
+                      setVolunteerFormData({ organization: '', role: '', cause: '', startDate: '', endDate: '', current: false, description: '' })
+                      setShowAddVolunteerDialog(false)
+                    } catch (error) {
+                      toast.error('Failed to add volunteer experience')
+                    }
+                  }}
+                >
+                  Save Volunteer Experience
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Add Publication Dialog */}
+          <Dialog open={showAddPublicationDialog} onOpenChange={setShowAddPublicationDialog}>
+            <DialogContent className="max-w-lg">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2"><FileText className="w-5 h-5 text-indigo-600" />Add Publication</DialogTitle>
+                <DialogDescription>Add an article, paper, or other publication</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div>
+                  <Label htmlFor="pubTitle">Title *</Label>
+                  <Input
+                    id="pubTitle"
+                    placeholder="e.g., Machine Learning in Healthcare"
+                    value={publicationFormData.title}
+                    onChange={(e) => setPublicationFormData(prev => ({ ...prev, title: e.target.value }))}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="pubPublisher">Publisher/Publication *</Label>
+                  <Input
+                    id="pubPublisher"
+                    placeholder="e.g., IEEE, Medium, Journal Name"
+                    value={publicationFormData.publisher}
+                    onChange={(e) => setPublicationFormData(prev => ({ ...prev, publisher: e.target.value }))}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="pubDate">Publication Date</Label>
+                  <Input
+                    id="pubDate"
+                    type="month"
+                    value={publicationFormData.date}
+                    onChange={(e) => setPublicationFormData(prev => ({ ...prev, date: e.target.value }))}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="pubUrl">Publication URL</Label>
+                  <Input
+                    id="pubUrl"
+                    placeholder="https://..."
+                    value={publicationFormData.url}
+                    onChange={(e) => setPublicationFormData(prev => ({ ...prev, url: e.target.value }))}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="pubDescription">Description</Label>
+                  <textarea
+                    id="pubDescription"
+                    className="w-full mt-1 p-3 border rounded-lg resize-none h-20 dark:bg-gray-800 dark:border-gray-700"
+                    placeholder="Brief summary of the publication..."
+                    value={publicationFormData.description}
+                    onChange={(e) => setPublicationFormData(prev => ({ ...prev, description: e.target.value }))}
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end gap-3">
+                <Button variant="outline" onClick={() => setShowAddPublicationDialog(false)}>Cancel</Button>
+                <Button
+                  className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white"
+                  disabled={!publicationFormData.title || !publicationFormData.publisher}
+                  onClick={async () => {
+                    if (!user?.id) return
+                    try {
+                      const { error } = await supabase.from('publications').insert({
+                        user_id: user.id,
+                        title: publicationFormData.title,
+                        publisher: publicationFormData.publisher,
+                        publication_date: publicationFormData.date ? publicationFormData.date + '-01' : null,
+                        url: publicationFormData.url || null,
+                        description: publicationFormData.description || null
+                      })
+                      if (error) throw error
+                      toast.success('Publication added successfully')
+                      setPublicationFormData({ title: '', publisher: '', date: '', url: '', description: '' })
+                      setShowAddPublicationDialog(false)
+                    } catch (error) {
+                      toast.error('Failed to add publication')
+                    }
+                  }}
+                >
+                  Save Publication
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Add Languages Dialog */}
+          <Dialog open={showAddLanguagesDialog} onOpenChange={setShowAddLanguagesDialog}>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2"><Languages className="w-5 h-5 text-yellow-600" />Add Language</DialogTitle>
+                <DialogDescription>Add a language you speak</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div>
+                  <Label htmlFor="langName">Language *</Label>
+                  <Input
+                    id="langName"
+                    placeholder="e.g., Spanish, Mandarin, French"
+                    value={languageFormData.language}
+                    onChange={(e) => setLanguageFormData(prev => ({ ...prev, language: e.target.value }))}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label>Proficiency Level</Label>
+                  <div className="grid grid-cols-2 gap-2 mt-2">
+                    {[
+                      { value: 'elementary', label: 'Elementary' },
+                      { value: 'limited_working', label: 'Limited Working' },
+                      { value: 'professional', label: 'Professional Working' },
+                      { value: 'full_professional', label: 'Full Professional' },
+                      { value: 'native', label: 'Native/Bilingual' }
+                    ].map((level) => (
+                      <Button
+                        key={level.value}
+                        variant={languageFormData.proficiency === level.value ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setLanguageFormData(prev => ({ ...prev, proficiency: level.value }))}
+                        className="text-xs"
+                      >
+                        {level.label}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="flex justify-end gap-3">
+                <Button variant="outline" onClick={() => setShowAddLanguagesDialog(false)}>Cancel</Button>
+                <Button
+                  className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white"
+                  disabled={!languageFormData.language}
+                  onClick={async () => {
+                    if (!user?.id) return
+                    try {
+                      const { error } = await supabase.from('languages').insert({
+                        user_id: user.id,
+                        language: languageFormData.language,
+                        proficiency: languageFormData.proficiency
+                      })
+                      if (error) throw error
+                      toast.success('Language added successfully')
+                      setLanguageFormData({ language: '', proficiency: 'intermediate' })
+                      setShowAddLanguagesDialog(false)
+                    } catch (error) {
+                      toast.error('Failed to add language')
+                    }
+                  }}
+                >
+                  Save Language
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Add Contacts Dialog */}
+          <Dialog open={showAddContactsDialog} onOpenChange={setShowAddContactsDialog}>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2"><UserPlus className="w-5 h-5 text-cyan-600" />Add Contacts</DialogTitle>
+                <DialogDescription>Import contacts or invite people to connect</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <Button
+                    variant="outline"
+                    className="h-auto py-4 flex flex-col gap-2"
+                    onClick={() => {
+                      toast.info('Google Contacts import coming soon')
+                    }}
+                  >
+                    <Globe className="w-6 h-6 text-blue-500" />
+                    <span className="text-sm font-medium">Import from Google</span>
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="h-auto py-4 flex flex-col gap-2"
+                    onClick={() => {
+                      toast.info('Outlook Contacts import coming soon')
+                    }}
+                  >
+                    <Mail className="w-6 h-6 text-blue-700" />
+                    <span className="text-sm font-medium">Import from Outlook</span>
+                  </Button>
+                </div>
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-white dark:bg-gray-900 px-2 text-gray-500">Or invite by email</span>
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="inviteEmail">Email Address</Label>
+                  <div className="flex gap-2 mt-1">
+                    <Input
+                      id="inviteEmail"
+                      type="email"
+                      placeholder="colleague@company.com"
+                      className="flex-1"
+                    />
+                    <Button
+                      className="bg-gradient-to-r from-cyan-600 to-blue-600 text-white"
+                      onClick={() => toast.success('Invitation sent')}
+                    >
+                      Invite
+                    </Button>
+                  </div>
+                </div>
+              </div>
+              <div className="flex justify-end">
+                <Button variant="outline" onClick={() => setShowAddContactsDialog(false)}>Done</Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Find People Dialog */}
+          <Dialog open={showFindPeopleDialog} onOpenChange={setShowFindPeopleDialog}>
+            <DialogContent className="max-w-lg">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2"><Search className="w-5 h-5 text-blue-600" />Find People</DialogTitle>
+                <DialogDescription>Search for professionals to connect with</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Input
+                    placeholder="Search by name, company, or title..."
+                    value={peopleSearchQuery}
+                    onChange={(e) => setPeopleSearchQuery(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs text-gray-500 uppercase">Quick Filters</Label>
+                  <div className="flex flex-wrap gap-2">
+                    <Badge className="cursor-pointer hover:bg-blue-100">People you may know</Badge>
+                    <Badge className="cursor-pointer hover:bg-blue-100">Alumni</Badge>
+                    <Badge className="cursor-pointer hover:bg-blue-100">Same industry</Badge>
+                    <Badge className="cursor-pointer hover:bg-blue-100">Same location</Badge>
+                  </div>
+                </div>
+                <div className="h-64 flex items-center justify-center text-gray-500">
+                  <div className="text-center">
+                    <Users className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                    <p>Search for people to see results</p>
+                    <p className="text-sm text-gray-400 mt-1">Try searching by name or company</p>
+                  </div>
+                </div>
+              </div>
+              <div className="flex justify-end">
+                <Button variant="outline" onClick={() => setShowFindPeopleDialog(false)}>Close</Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Search Jobs Dialog */}
+          <Dialog open={showSearchJobsDialog} onOpenChange={setShowSearchJobsDialog}>
+            <DialogContent className="max-w-lg">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2"><Briefcase className="w-5 h-5 text-indigo-600" />Search Jobs</DialogTitle>
+                <DialogDescription>Find your next opportunity</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Input
+                    placeholder="Job title, keywords, or company..."
+                    value={jobSearchQuery}
+                    onChange={(e) => setJobSearchQuery(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-xs text-gray-500">Location</Label>
+                    <Input placeholder="City, state, or remote" className="mt-1" />
+                  </div>
+                  <div>
+                    <Label className="text-xs text-gray-500">Job Type</Label>
+                    <Input placeholder="Full-time, Part-time..." className="mt-1" />
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Badge className="cursor-pointer hover:bg-indigo-100">Remote</Badge>
+                  <Badge className="cursor-pointer hover:bg-indigo-100">Easy Apply</Badge>
+                  <Badge className="cursor-pointer hover:bg-indigo-100">Entry Level</Badge>
+                  <Badge className="cursor-pointer hover:bg-indigo-100">Senior Level</Badge>
+                </div>
+                <div className="h-48 flex items-center justify-center text-gray-500">
+                  <div className="text-center">
+                    <Briefcase className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                    <p>Search for jobs to see results</p>
+                    <p className="text-sm text-gray-400 mt-1">Try searching by job title or company</p>
+                  </div>
+                </div>
+              </div>
+              <div className="flex justify-between">
+                <Button variant="link" onClick={() => { setShowSearchJobsDialog(false); setActiveTab('jobs'); }}>
+                  Browse all jobs
+                </Button>
+                <Button variant="outline" onClick={() => setShowSearchJobsDialog(false)}>Close</Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* New Post Dialog */}
+          <Dialog open={showNewPostDialog} onOpenChange={setShowNewPostDialog}>
+            <DialogContent className="max-w-lg">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  {postFormData.type === 'article' && <FileText className="w-5 h-5 text-blue-600" />}
+                  {postFormData.type === 'photo' && <Image className="w-5 h-5 text-purple-600" />}
+                  {postFormData.type === 'video' && <Video className="w-5 h-5 text-green-600" />}
+                  {postFormData.type === 'text' && <Plus className="w-5 h-5 text-pink-600" />}
+                  {postFormData.type === 'article' ? 'Write Article' : postFormData.type === 'photo' ? 'Share Photo' : postFormData.type === 'video' ? 'Post Video' : 'Create Post'}
+                </DialogTitle>
+                <DialogDescription>Share your thoughts with your network</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="flex items-center gap-3">
+                  <Avatar>
+                    <AvatarImage src={displayProfile.avatar} alt="User avatar" />
+                    <AvatarFallback>{displayProfile.firstName?.[0]}{displayProfile.lastName?.[0]}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="font-medium">{displayProfile.firstName} {displayProfile.lastName}</p>
+                    <p className="text-sm text-gray-500">{displayProfile.headline}</p>
+                  </div>
+                </div>
+                {postFormData.type === 'article' && (
+                  <div>
+                    <Input placeholder="Article title..." className="text-lg font-medium" />
+                  </div>
+                )}
+                <textarea
+                  className="w-full p-3 border rounded-lg resize-none min-h-[150px] dark:bg-gray-800 dark:border-gray-700"
+                  placeholder={postFormData.type === 'article' ? 'Write your article content...' : 'What do you want to talk about?'}
+                  value={postFormData.content}
+                  onChange={(e) => setPostFormData(prev => ({ ...prev, content: e.target.value }))}
+                />
+                {(postFormData.type === 'photo' || postFormData.type === 'video') && (
+                  <div className="p-8 border-2 border-dashed rounded-lg text-center">
+                    {postFormData.type === 'photo' ? (
+                      <>
+                        <Image className="w-10 h-10 mx-auto text-gray-400 mb-2" />
+                        <p className="text-sm text-gray-500">Click to upload a photo</p>
+                      </>
+                    ) : (
+                      <>
+                        <Video className="w-10 h-10 mx-auto text-gray-400 mb-2" />
+                        <p className="text-sm text-gray-500">Click to upload a video</p>
+                      </>
+                    )}
+                    <Button variant="outline" size="sm" className="mt-2">Choose File</Button>
+                  </div>
+                )}
+                <div className="flex items-center gap-2 pt-2 border-t">
+                  <Button variant="ghost" size="sm" onClick={() => setPostFormData(p => ({ ...p, type: 'photo' }))}>
+                    <Image className="w-4 h-4 mr-1 text-blue-600" />Photo
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => setPostFormData(p => ({ ...p, type: 'video' }))}>
+                    <Video className="w-4 h-4 mr-1 text-green-600" />Video
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => setShowSchedulePostDialog(true)}>
+                    <Clock className="w-4 h-4 mr-1 text-orange-600" />Schedule
+                  </Button>
+                </div>
+              </div>
+              <div className="flex justify-end gap-3">
+                <Button variant="outline" onClick={() => { setShowNewPostDialog(false); setPostFormData({ content: '', type: 'text' }); }}>Cancel</Button>
+                <Button
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
+                  disabled={!postFormData.content}
+                  onClick={() => {
+                    toast.success(postFormData.type === 'article' ? 'Article published' : 'Post shared')
+                    setPostFormData({ content: '', type: 'text' })
+                    setShowNewPostDialog(false)
+                  }}
+                >
+                  {postFormData.type === 'article' ? 'Publish' : 'Post'}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Update Photo Dialog */}
+          <Dialog open={showUpdatePhotoDialog} onOpenChange={setShowUpdatePhotoDialog}>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2"><Camera className="w-5 h-5 text-purple-600" />Update Profile Photo</DialogTitle>
+                <DialogDescription>Choose a new profile picture</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="flex justify-center">
+                  <div className="relative">
+                    <Avatar className="w-32 h-32 border-4 border-gray-200">
+                      <AvatarImage src={displayProfile.avatar} alt="User avatar" />
+                      <AvatarFallback className="text-3xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white">
+                        {displayProfile.firstName?.[0]}{displayProfile.lastName?.[0]}
+                      </AvatarFallback>
+                    </Avatar>
+                    <Button
+                      size="sm"
+                      className="absolute bottom-0 right-0 rounded-full w-10 h-10 p-0 bg-gradient-to-r from-purple-600 to-pink-600"
+                    >
+                      <Camera className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+                <div className="p-6 border-2 border-dashed rounded-lg text-center">
+                  <Camera className="w-10 h-10 mx-auto text-gray-400 mb-2" />
+                  <p className="text-sm text-gray-500 mb-2">Drag and drop or click to upload</p>
+                  <p className="text-xs text-gray-400">PNG, JPG up to 5MB</p>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    id="photoUpload"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0]
+                      if (!file || !user?.id || !profile?.id) return
+                      try {
+                        const fileExt = file.name.split('.').pop()
+                        const fileName = `${user.id}-${Date.now()}.${fileExt}`
+                        const { error: uploadError } = await supabase.storage.from('avatars').upload(fileName, file)
+                        if (uploadError) throw uploadError
+                        const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(fileName)
+                        const { error: updateError } = await supabase.from('user_profiles').update({ avatar: urlData.publicUrl }).eq('id', profile.id)
+                        if (updateError) throw updateError
+                        toast.success('Profile photo updated')
+                        fetchProfileData()
+                        setShowUpdatePhotoDialog(false)
+                      } catch (error) {
+                        toast.error('Failed to update photo')
+                      }
+                    }}
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="mt-3"
+                    onClick={() => document.getElementById('photoUpload')?.click()}
+                  >
+                    Choose File
+                  </Button>
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="outline" className="flex-1" onClick={() => toast.info('Take photo feature coming soon')}>
+                    <Camera className="w-4 h-4 mr-2" />Take Photo
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="flex-1 text-red-600 hover:text-red-700"
+                    onClick={async () => {
+                      if (!profile?.id) return
+                      try {
+                        const { error } = await supabase.from('user_profiles').update({ avatar: null }).eq('id', profile.id)
+                        if (error) throw error
+                        toast.success('Profile photo removed')
+                        fetchProfileData()
+                        setShowUpdatePhotoDialog(false)
+                      } catch (error) {
+                        toast.error('Failed to remove photo')
+                      }
+                    }}
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />Remove
+                  </Button>
+                </div>
+              </div>
+              <div className="flex justify-end">
+                <Button variant="outline" onClick={() => setShowUpdatePhotoDialog(false)}>Done</Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Update Jobs Dialog */}
+          <Dialog open={showUpdateJobsDialog} onOpenChange={setShowUpdateJobsDialog}>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2"><Briefcase className="w-5 h-5 text-indigo-600" />Job Preferences</DialogTitle>
+                <DialogDescription>Update your job search preferences</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="flex items-center justify-between p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-full">
+                      <Target className="w-5 h-5 text-green-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-green-700 dark:text-green-400">Open to Work</p>
+                      <p className="text-sm text-green-600 dark:text-green-500">Let recruiters know you are looking</p>
+                    </div>
+                  </div>
+                  <Switch />
+                </div>
+                <div>
+                  <Label>Job Titles I'm Interested In</Label>
+                  <Input placeholder="e.g., Software Engineer, Product Manager" className="mt-1" />
+                </div>
+                <div>
+                  <Label>Preferred Locations</Label>
+                  <Input placeholder="e.g., San Francisco, Remote" className="mt-1" />
+                </div>
+                <div>
+                  <Label>Job Types</Label>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {['Full-time', 'Part-time', 'Contract', 'Internship', 'Remote'].map((type) => (
+                      <Badge key={type} className="cursor-pointer hover:bg-indigo-100">{type}</Badge>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div>
+                    <p className="font-medium">Hiring?</p>
+                    <p className="text-sm text-gray-500">Show hiring badge on profile</p>
+                  </div>
+                  <Switch />
+                </div>
+              </div>
+              <div className="flex justify-end gap-3">
+                <Button variant="outline" onClick={() => setShowUpdateJobsDialog(false)}>Cancel</Button>
+                <Button
+                  className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white"
+                  onClick={() => {
+                    toast.success('Job preferences updated')
+                    setShowUpdateJobsDialog(false)
+                  }}
+                >
+                  Save Preferences
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Add Featured Dialog */}
+          <Dialog open={showAddFeaturedDialog} onOpenChange={setShowAddFeaturedDialog}>
+            <DialogContent className="max-w-lg">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2"><Star className="w-5 h-5 text-yellow-600" />Add Featured Item</DialogTitle>
+                <DialogDescription>Highlight content on your profile</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div>
+                  <Label>Type</Label>
+                  <div className="grid grid-cols-4 gap-2 mt-2">
+                    {[
+                      { value: 'post', label: 'Post', icon: FileText },
+                      { value: 'article', label: 'Article', icon: Newspaper },
+                      { value: 'link', label: 'Link', icon: Link2 },
+                      { value: 'media', label: 'Media', icon: Image }
+                    ].map((type) => (
+                      <Button
+                        key={type.value}
+                        variant={featuredFormData.type === type.value ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setFeaturedFormData(prev => ({ ...prev, type: type.value as 'post' | 'article' | 'link' | 'media' }))}
+                        className="flex flex-col h-auto py-3 gap-1"
+                      >
+                        <type.icon className="w-4 h-4" />
+                        <span className="text-xs">{type.label}</span>
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="featuredTitle">Title *</Label>
+                  <Input
+                    id="featuredTitle"
+                    placeholder="Give your featured item a title"
+                    value={featuredFormData.title}
+                    onChange={(e) => setFeaturedFormData(prev => ({ ...prev, title: e.target.value }))}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="featuredDescription">Description</Label>
+                  <textarea
+                    id="featuredDescription"
+                    className="w-full mt-1 p-3 border rounded-lg resize-none h-20 dark:bg-gray-800 dark:border-gray-700"
+                    placeholder="Add a brief description..."
+                    value={featuredFormData.description}
+                    onChange={(e) => setFeaturedFormData(prev => ({ ...prev, description: e.target.value }))}
+                  />
+                </div>
+                {(featuredFormData.type === 'link' || featuredFormData.type === 'media') && (
+                  <div>
+                    <Label htmlFor="featuredUrl">URL *</Label>
+                    <Input
+                      id="featuredUrl"
+                      placeholder="https://..."
+                      value={featuredFormData.url}
+                      onChange={(e) => setFeaturedFormData(prev => ({ ...prev, url: e.target.value }))}
+                      className="mt-1"
+                    />
+                  </div>
+                )}
+                {featuredFormData.type === 'media' && (
+                  <div className="p-6 border-2 border-dashed rounded-lg text-center">
+                    <Image className="w-8 h-8 mx-auto text-gray-400 mb-2" />
+                    <p className="text-sm text-gray-500">Upload an image or video</p>
+                    <Button variant="outline" size="sm" className="mt-2">Choose File</Button>
+                  </div>
+                )}
+              </div>
+              <div className="flex justify-end gap-3">
+                <Button variant="outline" onClick={() => setShowAddFeaturedDialog(false)}>Cancel</Button>
+                <Button
+                  className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white"
+                  disabled={!featuredFormData.title || ((featuredFormData.type === 'link' || featuredFormData.type === 'media') && !featuredFormData.url)}
+                  onClick={async () => {
+                    if (!user?.id) return
+                    try {
+                      const { error } = await supabase.from('featured_items').insert({
+                        user_id: user.id,
+                        type: featuredFormData.type,
+                        title: featuredFormData.title,
+                        description: featuredFormData.description || null,
+                        url: featuredFormData.url || null
+                      })
+                      if (error) throw error
+                      toast.success('Featured item added')
+                      setFeaturedFormData({ type: 'post', title: '', description: '', url: '' })
+                      setShowAddFeaturedDialog(false)
+                    } catch (error) {
+                      toast.error('Failed to add featured item')
+                    }
+                  }}
+                >
+                  Add to Featured
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Reorder Skills Dialog */}
+          <Dialog open={showReorderSkillsDialog} onOpenChange={setShowReorderSkillsDialog}>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2"><RefreshCw className="w-5 h-5 text-pink-600" />Reorder Items</DialogTitle>
+                <DialogDescription>Drag and drop to reorder your skills and featured items</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-2 py-4">
+                {displaySkills.length > 0 ? displaySkills.map((skill, index) => (
+                  <div
+                    key={skill.id}
+                    className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg cursor-move hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                  >
+                    <div className="text-gray-400">
+                      <MoreHorizontal className="w-4 h-4" />
+                    </div>
+                    <span className="text-sm font-medium text-gray-500 w-6">{index + 1}.</span>
+                    <Zap className="w-4 h-4 text-blue-600" />
+                    <span className="flex-1 font-medium">{skill.name}</span>
+                    <Badge className={getSkillLevelColor(skill.level)}>{skill.level}</Badge>
+                  </div>
+                )) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <RefreshCw className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                    <p>No skills to reorder</p>
+                    <p className="text-sm">Add skills first to reorder them</p>
+                  </div>
+                )}
+              </div>
+              <div className="flex justify-end gap-3">
+                <Button variant="outline" onClick={() => setShowReorderSkillsDialog(false)}>Cancel</Button>
+                <Button
+                  className="bg-gradient-to-r from-pink-600 to-rose-600 text-white"
+                  onClick={() => {
+                    toast.success('Order saved')
+                    setShowReorderSkillsDialog(false)
+                  }}
+                >
+                  Save Order
                 </Button>
               </div>
             </DialogContent>

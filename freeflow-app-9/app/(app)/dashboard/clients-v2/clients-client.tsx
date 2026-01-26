@@ -4,6 +4,7 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 // Production-ready API hooks with TanStack Query
@@ -74,7 +75,9 @@ import {
   Download,
   Upload,
   RefreshCw,
-  Loader2
+  Loader2,
+  Folder,
+  Receipt
 } from 'lucide-react'
 
 // World-class TanStack Table integration
@@ -298,6 +301,7 @@ interface ClientsClientProps {
 // Production API hooks are used below
 
 export default function ClientsClient({ initialClients, initialStats }: ClientsClientProps) {
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState('clients')
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<ClientStatus | 'all'>('all')
@@ -2684,6 +2688,27 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                   {selectedClient.tags.map(tag => (
                     <Badge key={tag} variant="secondary">{tag}</Badge>
                   ))}
+                </div>
+
+                {/* Inter-feature Navigation */}
+                <div className="flex flex-wrap gap-2 mt-6 p-4 rounded-lg bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/20 dark:to-purple-950/20 border border-indigo-100 dark:border-indigo-900">
+                  <h4 className="w-full text-sm font-medium text-indigo-700 dark:text-indigo-300 mb-2">Quick Navigation</h4>
+                  <Button
+                    variant="outline"
+                    className="flex-1 border-indigo-200 hover:bg-indigo-100 dark:border-indigo-800 dark:hover:bg-indigo-900"
+                    onClick={() => router.push(`/dashboard/projects-hub-v2?client=${selectedClient.id}`)}
+                  >
+                    <Folder className="w-4 h-4 mr-2" />
+                    View Projects ({selectedClient.projects})
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="flex-1 border-indigo-200 hover:bg-indigo-100 dark:border-indigo-800 dark:hover:bg-indigo-900"
+                    onClick={() => router.push(`/dashboard/invoicing-v2?client=${selectedClient.id}`)}
+                  >
+                    <Receipt className="w-4 h-4 mr-2" />
+                    View Invoices
+                  </Button>
                 </div>
 
                 <div className="flex flex-wrap gap-2 mt-6">

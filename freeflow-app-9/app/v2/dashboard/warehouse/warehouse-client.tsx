@@ -3077,7 +3077,21 @@ export default function WarehouseClient() {
             </div>
             <div className="flex items-center gap-2 text-sm text-gray-500">
               <FileText className="w-4 h-4" />
-              <a href="#" className="text-cyan-600 hover:underline">Download template</a>
+              <button
+                onClick={() => {
+                  const template = 'sku,name,category,quantity,bin_location,zone,unit_cost,reorder_point,description\nSKU001,Sample Item,Electronics,100,A1-01,Zone A,25.99,10,Sample product description'
+                  const blob = new Blob([template], { type: 'text/csv' })
+                  const url = URL.createObjectURL(blob)
+                  const a = document.createElement('a')
+                  a.href = url
+                  a.download = 'warehouse_import_template.csv'
+                  a.click()
+                  URL.revokeObjectURL(url)
+                }}
+                className="text-cyan-600 hover:underline"
+              >
+                Download template
+              </button>
             </div>
           </div>
           <DialogFooter>

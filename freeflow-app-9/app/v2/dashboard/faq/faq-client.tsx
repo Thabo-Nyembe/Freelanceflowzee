@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo, useCallback } from 'react'
+import Link from 'next/link'
 import { toast } from 'sonner'
 import { useFAQs, FAQ } from '@/lib/hooks/use-faqs'
 import {
@@ -48,7 +49,7 @@ import {
   MessageCircle,
   Headphones,
   Mail,
-  Link,
+  Link as LinkIcon,
   Image
 } from 'lucide-react'
 
@@ -1842,7 +1843,7 @@ export default function FAQClient() {
                         </div>
                         <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
                           <p className="text-sm text-blue-900 dark:text-blue-100">
-                            <strong>Rate Limits:</strong> 1000 requests/minute • <strong>Docs:</strong> <a href="#" className="underline">API Documentation</a>
+                            <strong>Rate Limits:</strong> 1000 requests/minute • <strong>Docs:</strong> <Link href="/dashboard/api-keys-v2" className="underline">API Documentation</Link>
                           </p>
                         </div>
                       </div>

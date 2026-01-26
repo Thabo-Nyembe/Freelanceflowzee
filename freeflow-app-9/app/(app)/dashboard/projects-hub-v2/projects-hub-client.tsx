@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { ColumnDef } from '@tanstack/react-table'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -121,6 +122,8 @@ interface Project {
   tags: string[]
   tasksTotal: number
   tasksCompleted: number
+  clientId?: string
+  clientName?: string
 }
 
 interface Sprint {
@@ -291,6 +294,11 @@ const getActivityIcon = (type: Activity['type']) => {
 }
 
 export default function ProjectsHubClient() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const clientIdFilter = searchParams.get('client')
+  const assigneeFilter = searchParams.get('assignee')
+
   const [activeTab, setActiveTab] = useState('projects')
   const [viewType, setViewType] = useState<'board' | 'list' | 'timeline'>('board')
   const [searchQuery, setSearchQuery] = useState('')
@@ -844,9 +852,13 @@ export default function ProjectsHubClient() {
       const matchesSearch = project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         project.projectCode.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesFilter = selectedFilter === 'all' || project.status === selectedFilter || project.priority === selectedFilter
-      return matchesSearch && matchesFilter
+      // Filter by client if clientIdFilter is present from URL params
+      const matchesClient = !clientIdFilter || project.clientId === clientIdFilter
+      // Filter by assignee if assigneeFilter is present from URL params
+      const matchesAssignee = !assigneeFilter || project.teamMembers.includes(assigneeFilter)
+      return matchesSearch && matchesFilter && matchesClient && matchesAssignee
     })
-  }, [searchQuery, selectedFilter, allProjects])
+  }, [searchQuery, selectedFilter, allProjects, clientIdFilter, assigneeFilter])
 
   const projectsByStatus = useMemo(() => {
     const grouped: Record<string, Project[]> = {}
@@ -947,6 +959,66 @@ export default function ProjectsHubClient() {
             <Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={() => setShowNewProjectDialog(true)}><Plus className="h-4 w-4 mr-2" />New Project</Button>
           </div>
         </div>
+
+        {/* Client Filter Banner */}
+        {clientIdFilter && (
+          <div className="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-indigo-100 to-purple-100 dark:from-indigo-950/40 dark:to-purple-950/40 border border-indigo-200 dark:border-indigo-800">
+            <div className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+              <span className="text-sm font-medium text-indigo-700 dark:text-indigo-300">
+                Showing projects for client: <span className="font-bold">{clientIdFilter}</span>
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-indigo-300 hover:bg-indigo-200 dark:border-indigo-700 dark:hover:bg-indigo-900"
+                onClick={() => router.push(`/dashboard/clients-v2`)}
+              >
+                <Users className="h-4 w-4 mr-2" />
+                Back to Clients
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => router.push('/dashboard/projects-hub-v2')}
+              >
+                Clear Filter
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Assignee Filter Banner */}
+        {assigneeFilter && (
+          <div className="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-blue-100 to-cyan-100 dark:from-blue-950/40 dark:to-cyan-950/40 border border-blue-200 dark:border-blue-800">
+            <div className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+              <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
+                Showing projects assigned to: <span className="font-bold">{assigneeFilter}</span>
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-blue-300 hover:bg-blue-200 dark:border-blue-700 dark:hover:bg-blue-900"
+                onClick={() => router.push(`/dashboard/team-hub-v2`)}
+              >
+                <Users className="h-4 w-4 mr-2" />
+                Back to Team
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => router.push('/dashboard/projects-hub-v2')}
+              >
+                Clear Filter
+              </Button>
+            </div>
+          </div>
+        )}
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
@@ -2621,6 +2693,30 @@ export default function ProjectsHubClient() {
                   </div>
                   {selectedProject.description && <Card><CardContent className="p-4"><p className="text-sm text-gray-500 mb-2">Description</p><p>{selectedProject.description}</p></CardContent></Card>}
                   <Card><CardContent className="p-4"><p className="text-sm text-gray-500 mb-2">Team Members</p><div className="flex gap-2">{selectedProject.teamMembers.map((m, i) => <Avatar key={i}><AvatarFallback>{m.slice(0, 2)}</AvatarFallback></Avatar>)}</div></CardContent></Card>
+
+                  {/* Client Navigation */}
+                  {selectedProject.clientId && (
+                    <Card className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/20 dark:to-purple-950/20 border-indigo-100 dark:border-indigo-900">
+                      <CardContent className="p-4">
+                        <p className="text-sm text-indigo-600 dark:text-indigo-400 mb-2 font-medium">Associated Client</p>
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium text-gray-900 dark:text-white">{selectedProject.clientName || selectedProject.clientId}</span>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="border-indigo-200 hover:bg-indigo-100 dark:border-indigo-800 dark:hover:bg-indigo-900"
+                            onClick={() => {
+                              setShowProjectDialog(false)
+                              router.push(`/dashboard/clients-v2?highlight=${selectedProject.clientId}`)
+                            }}
+                          >
+                            <Users className="h-4 w-4 mr-2" />
+                            View Client
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
                 </div>
                 <DialogFooter className="flex items-center justify-between">
                   <div className="flex gap-2">

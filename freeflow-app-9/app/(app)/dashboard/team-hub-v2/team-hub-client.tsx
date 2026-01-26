@@ -2,6 +2,7 @@
 
 
 import React, { useState, useMemo, useEffect, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 
 // Auth hooks
@@ -390,6 +391,8 @@ interface DbTeamMember {
 }
 
 export default function TeamHubClient() {
+  const router = useRouter()
+
   // Define adapter variables locally (removed mock data imports)
   const teamHubAIInsights: any[] = []
   const teamHubPredictions: any[] = []
@@ -2406,6 +2409,34 @@ export default function TeamHubClient() {
                             <span>{field.value}</span>
                           </div>
                         ))}
+                      </div>
+                    )}
+
+                    {/* Projects Navigation */}
+                    {selectedMember.projectsCount > 0 && (
+                      <div className="pt-3 border-t">
+                        <div className="p-3 rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 border border-blue-100 dark:border-blue-900">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <Folder className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                              <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
+                                {selectedMember.projectsCount} Project{selectedMember.projectsCount !== 1 ? 's' : ''} Assigned
+                              </span>
+                            </div>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="border-blue-200 hover:bg-blue-100 dark:border-blue-800 dark:hover:bg-blue-900"
+                              onClick={() => {
+                                setSelectedMember(null)
+                                router.push(`/dashboard/projects-hub-v2?assignee=${selectedMember.id}`)
+                              }}
+                            >
+                              <Folder className="w-3 h-3 mr-1" />
+                              View Projects
+                            </Button>
+                          </div>
+                        </div>
                       </div>
                     )}
                   </div>
